@@ -1,0 +1,3 @@
+GIMP:
+normal: einfärben: 128, 89, 66
+active: Helligkeit/Kontrast: 86,52
