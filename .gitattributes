@@ -1,0 +1,2 @@
+*.sim filter=lfs diff=lfs merge=lfs -text
+*.sim2 filter=lfs diff=lfs merge=lfs -text
