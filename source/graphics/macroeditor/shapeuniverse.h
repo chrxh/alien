@@ -17,15 +17,12 @@ class AlienEnergy;
 class AlienEnergyGraphicsItem;
 class AlienGrid;
 class MarkerGraphicsItem;
-class MetaDataManager;
 class QGraphicsSceneMouseEvent;
 class ShapeUniverse : public QGraphicsScene
 {
     Q_OBJECT
 public:
     ShapeUniverse (QObject *parent = 0);
-
-    void init (MetaDataManager* meta);
 
     void universeUpdated (AlienGrid* grid);
     void cellCreated (AlienCell* cell);
@@ -35,7 +32,7 @@ public:
     void getExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es);
     void delSelection (QList< AlienCell* >& cells, QList< AlienEnergy* >& es);
     void delExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es);
-    void metaDataUpdated ();
+    void metadataUpdated ();
     QGraphicsItem* getFocusCenterCell ();
 
 public slots:
@@ -70,9 +67,7 @@ private:
     void unhighlight ();
     void highlightCell (AlienCell* cell);
     void highlightEnergyParticle (AlienEnergyGraphicsItem* e);
-    void setCellColorFromMetaData ();
-
-    MetaDataManager* _meta;
+    void setCellColorFromMetadata ();
 
     //internal data for display and editing
     AlienGrid* _grid;

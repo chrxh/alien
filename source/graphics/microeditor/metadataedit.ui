@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MetaDataEdit</class>
- <widget class="QWidget" name="MetaDataEdit">
+ <class>MetadataEdit</class>
+ <widget class="QWidget" name="MetadataEdit">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="MetaDataPropertiesEdit" name="metaDataPropertiesEdit">
+    <widget class="MetadataPropertiesEdit" name="metadataPropertiesEdit">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -186,7 +186,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="metaDataDescriptionEdit">
+    <widget class="QTextEdit" name="metadataDescriptionEdit">
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -202,7 +202,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MetaDataPropertiesEdit</class>
+   <class>MetadataPropertiesEdit</class>
    <extends>QTextEdit</extends>
    <header>graphics/microeditor/metadatapropertiesedit.h</header>
   </customwidget>

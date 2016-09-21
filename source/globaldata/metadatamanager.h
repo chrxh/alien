@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QString>
 
-struct AlienCellMetaData
+struct AlienCellMetadata
 {
     QString computerCode;
 //    quint8 colorNumber;
@@ -13,11 +13,13 @@ struct AlienCellMetaData
     QString clusterName;
 };
 
-class MetaDataManager
+class MetadataManager
 {
 public:
-    MetaDataManager ();
-    ~MetaDataManager ();
+    static MetadataManager& getGlobalInstance ();
+
+    MetadataManager ();
+    ~MetadataManager ();
 
     void setCellCode (quint64 id, QString code);
     QString getCellCode (quint64 id);
@@ -34,7 +36,7 @@ public:
 
     void cleanUp (const QSet< quint64 >& ids);          //preserve metadata for the cells specified in ids
 
-    const QMap< quint64, AlienCellMetaData >& getCellMetaData ();
+    const QMap< quint64, AlienCellMetadata >& getCellMetadata ();
 
     void loadDefaultSymbolTable ();
     void addSymbolEntry (QString key, QString value);
@@ -44,17 +46,17 @@ public:
     const QMap< QString, QString >& getSymbolTable ();
     void setSymbolTable (const QMap< QString, QString >& table);
 
-    void serializeMetaDataCell (QDataStream& stream, quint64 clusterId, quint64 cellId);
-    void serializeMetaDataEnsemble (QDataStream& stream, const QList< quint64 >& clusterIds, const QList< quint64 >& cellIds);
-    void readMetaData (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap);
-    void serializeMetaDataUniverse (QDataStream& stream);
-    void readMetaDataUniverse (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap);
+    void serializeMetadataCell (QDataStream& stream, quint64 clusterId, quint64 cellId);
+    void serializeMetadataEnsemble (QDataStream& stream, const QList< quint64 >& clusterIds, const QList< quint64 >& cellIds);
+    void readMetadata (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap);
+    void serializeMetadataUniverse (QDataStream& stream);
+    void readMetadataUniverse (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap);
 
     void serializeSymbolTable (QDataStream& stream);
     void readSymbolTable (QDataStream& stream, bool merge = false);
 
 private:
-    QMap< quint64, AlienCellMetaData > _idCellMetaDataMap;
+    QMap< quint64, AlienCellMetadata > _idCellMetadataMap;
     QMap< QString, QString > _symbolTable;
 };
 

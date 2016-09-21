@@ -1,5 +1,6 @@
 #include "aliencellfunctioncomputer.h"
 #include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/metadatamanager.h"
 #include "../entities/aliencell.h"
 
 #include <QString>
@@ -247,7 +248,7 @@ QString AlienCellFunctionComputer::getCode ()
     return text;
 }
 
-bool AlienCellFunctionComputer::compileCode (QString code, MetaDataManager* meta, int& errorLine)
+bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
 {
     enum State {
         LOOKING_FOR_INSTR_START,
@@ -358,8 +359,8 @@ bool AlienCellFunctionComputer::compileCode (QString code, MetaDataManager* meta
         if( (c == '\n') || ((i+1) == code.length()) )
             instructionRead = true;
         if( instructionRead ) {
-            op1 = meta->applySymbolTableToCode(op1);
-            op2 = meta->applySymbolTableToCode(op2);
+            op1 = MetadataManager::getGlobalInstance().applySymbolTableToCode(op1);
+            op2 = MetadataManager::getGlobalInstance().applySymbolTableToCode(op2);
 //            qDebug("INSTR: %s, OP1: %s, COMP: %s OP2: %s", qPrintable(instr), qPrintable(op1),qPrintable(comp), qPrintable(op2));
 
             //prepare data for instruction coding
