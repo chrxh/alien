@@ -7,7 +7,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-SymbolTableDialog::SymbolTableDialog(MetaDataManager* meta, QWidget *parent) :
+SymbolTableDialog::SymbolTableDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SymbolTableDialog)
 {
@@ -24,7 +24,7 @@ SymbolTableDialog::SymbolTableDialog(MetaDataManager* meta, QWidget *parent) :
     ui->tableWidget->horizontalHeaderItem(1)->setFont(GlobalFunctions::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(1)->setTextAlignment(Qt::AlignLeft);
 
-    setSymbolTableToWidget(meta);
+    setSymbolTableToWidget(&MetadataManager::getGlobalInstance());
 
     //connections
     connect(ui->tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()));
@@ -42,7 +42,7 @@ SymbolTableDialog::~SymbolTableDialog()
     delete ui;
 }
 
-void SymbolTableDialog::updateSymbolTable (MetaDataManager* meta)
+void SymbolTableDialog::updateSymbolTable (MetadataManager* meta)
 {
     meta->clearSymbolTable();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
@@ -52,7 +52,7 @@ void SymbolTableDialog::updateSymbolTable (MetaDataManager* meta)
     }
 }
 
-void SymbolTableDialog::setSymbolTableToWidget (MetaDataManager* meta)
+void SymbolTableDialog::setSymbolTableToWidget (MetadataManager* meta)
 {
     int row = ui->tableWidget->rowCount();
     for(int i = 0; i < row; ++i)
@@ -117,13 +117,14 @@ void SymbolTableDialog::delButtonClicked ()
 
 void SymbolTableDialog::defaultButtonClicked ()
 {
-    MetaDataManager localMeta;
-    setSymbolTableToWidget(&localMeta);
+    MetadataManager* localMeta = new MetadataManager();
+    setSymbolTableToWidget(localMeta);
+    delete localMeta;
 }
 
 void SymbolTableDialog::loadButtonClicked ()
 {
-    MetaDataManager localMeta;
+    MetadataManager* localMeta = new MetadataManager();
     QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -131,8 +132,8 @@ void SymbolTableDialog::loadButtonClicked ()
 
             //read simulation data
             QDataStream in(&file);
-            localMeta.readSymbolTable(in, false);
-            setSymbolTableToWidget(&localMeta);
+            localMeta->readSymbolTable(in, false);
+            setSymbolTableToWidget(localMeta);
             file.close();
         }
         else {
@@ -140,6 +141,7 @@ void SymbolTableDialog::loadButtonClicked ()
             msgBox.exec();
         }
     }
+    delete localMeta;
 }
 
 void SymbolTableDialog::saveButtonClicked ()
@@ -149,13 +151,14 @@ void SymbolTableDialog::saveButtonClicked ()
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
 
-            MetaDataManager localMeta;
-            updateSymbolTable(&localMeta);
+            MetadataManager* localMeta = new MetadataManager();
+            updateSymbolTable(localMeta);
 
             //serialize symbol table
             QDataStream out(&file);
-            localMeta.serializeSymbolTable(out);
+            localMeta->serializeSymbolTable(out);
             file.close();
+            delete localMeta;
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The symbol table could not saved.");
@@ -172,11 +175,11 @@ void SymbolTableDialog::mergeWithButtonClicked ()
         if( file.open(QIODevice::ReadOnly) ) {
 
             //read simulation data
-            MetaDataManager localMeta;
-            updateSymbolTable(&localMeta);
+            MetadataManager* localMeta = new MetadataManager();
+            updateSymbolTable(localMeta);
             QDataStream in(&file);
-            localMeta.readSymbolTable(in, true);
-            setSymbolTableToWidget(&localMeta);
+            localMeta->readSymbolTable(in, true);
+            setSymbolTableToWidget(localMeta);
             file.close();
         }
         else {

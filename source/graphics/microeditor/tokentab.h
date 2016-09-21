@@ -9,7 +9,6 @@ namespace Ui {
 }
 
 class HexEdit;
-class MetaDataManager;
 class QSignalMapper;
 class TokenTab : public QWidget
 {
@@ -19,7 +18,7 @@ public:
     explicit TokenTab(QWidget *parent = 0);
     ~TokenTab();
 
-    void update (qreal tokenEnergy, const QVector< quint8 >& tokenData, MetaDataManager* meta);
+    void update (qreal tokenEnergy, const QVector< quint8 >& tokenData);
     void requestUpdate ();
 
 signals:

@@ -5,8 +5,6 @@
 #include <QByteArray>
 #include <QStack>
 
-#include "../globaldata/metadatamanager.h"
-
 class AlienCell;
 class AlienEnergy;
 class AlienSimulator;
@@ -24,7 +22,7 @@ namespace Ui {
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
-    MainWindow (AlienSimulator* simulator, MetaDataManager* meta, QWidget *parent = 0);
+    MainWindow (AlienSimulator* simulator, QWidget *parent = 0);
     ~MainWindow ();
 
 protected slots:
@@ -97,7 +95,6 @@ protected:
     void changeEvent(QEvent *e);
 
     AlienSimulator* _simulator;
-    MetaDataManager* _meta;
     MicroEditor* _microEditor;
 
     QTimer* _timer;
