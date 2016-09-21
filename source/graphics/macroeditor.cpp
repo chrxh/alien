@@ -22,7 +22,6 @@ MacroEditor::MacroEditor(QWidget *parent) :
     _activeScene(PIXEL_SCENE),
     _pixelUniverse(new PixelUniverse(this)),
     _shapeUniverse(new ShapeUniverse(this)),
-    _meta(0),
     _pixelUniverseInit(false),
     _shapeUniverseInit(false),
     _posIncrement(0),
@@ -56,12 +55,6 @@ MacroEditor::MacroEditor(QWidget *parent) :
 MacroEditor::~MacroEditor()
 {
     delete ui;
-}
-
-void MacroEditor::init (MetaDataManager* meta)
-{
-    _meta = meta;
-    _shapeUniverse->init(meta);
 }
 
 void MacroEditor::reset ()
@@ -342,10 +335,10 @@ void MacroEditor::universeUpdated (AlienGrid* grid, bool force)
     }
 }
 
-void MacroEditor::metaDataUpdated ()
+void MacroEditor::metadataUpdated ()
 {
     if( _activeScene == SHAPE_SCENE )
-        _shapeUniverse->metaDataUpdated();
+        _shapeUniverse->metadataUpdated();
 }
 /*
 void MacroEditor::mousePressEvent (QMouseEvent* event)

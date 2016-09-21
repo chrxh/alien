@@ -15,7 +15,7 @@ class AlienCell;
 class AlienCellCluster;
 class AlienEnergy;
 class AlienGrid;
-class MetaDataManager;
+class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
 class MacroEditor : public QWidget
@@ -31,7 +31,6 @@ public:
     explicit MacroEditor(QWidget *parent = 0);
     ~MacroEditor();
 
-    void init (MetaDataManager* meta);
     void reset ();
 
     void setActiveScene (ActiveScene activeScene);
@@ -75,7 +74,7 @@ public slots:
     void energyParticleUpdated_Slot (AlienEnergy* e);
     void reclustered (QList< AlienCellCluster* > clusters);
     void universeUpdated (AlienGrid* grid, bool force);
-    void metaDataUpdated ();
+    void metadataUpdated ();
 
 private slots:
     void updateTimerTimeout ();
@@ -89,7 +88,6 @@ private:
     ActiveScene _activeScene;
     PixelUniverse* _pixelUniverse;
     ShapeUniverse* _shapeUniverse;
-    MetaDataManager* _meta;
 
     bool _pixelUniverseInit;
     bool _shapeUniverseInit;

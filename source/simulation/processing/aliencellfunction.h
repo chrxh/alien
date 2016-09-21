@@ -2,7 +2,6 @@
 #define ALIENCELLFUNCTION_H
 
 #include "../entities/alientoken.h"
-#include "../../globaldata/metadatamanager.h"
 
 class AlienCellCluster;
 class AlienGrid;
@@ -16,7 +15,7 @@ public:
     virtual void runEnergyGuidanceSystem (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space);
     virtual void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose) = 0;
     virtual QString getCode ();
-    virtual bool compileCode (QString code, MetaDataManager* meta, int& errorLine);
+    virtual bool compileCode (QString code, int& errorLine);
     virtual QString getCellFunctionName () = 0;
 
     virtual void serialize (QDataStream& stream);

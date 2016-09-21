@@ -3,8 +3,6 @@
 
 #include "aliencellreduced.h"
 
-#include "../globaldata/metadatamanager.h"
-
 #include <QObject>
 #include <QVector3D>
 
@@ -19,7 +17,7 @@ class AlienSimulator  : public QObject
 {
     Q_OBJECT
 public:
-    AlienSimulator (MetaDataManager* meta, int sizeX, int sizeY, QObject* parent = 0);
+    AlienSimulator (int sizeX, int sizeY, QObject* parent = 0);
     ~AlienSimulator ();
 
     QMap< QString, qreal > getMonitorData ();
@@ -107,7 +105,6 @@ protected:
 
     AlienGrid* _grid;
     AlienThread* _thread;
-    MetaDataManager* _meta;
 };
 
 #endif // ALIENSIMULATOR_H

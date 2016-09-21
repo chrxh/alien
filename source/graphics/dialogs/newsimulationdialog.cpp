@@ -6,19 +6,19 @@
 
 #include "../../globaldata/guisettings.h"
 #include "../../globaldata/globalfunctions.h"
+#include "../../globaldata/metadatamanager.h"
 
 #include <QDebug>
 
-NewSimulationDialog::NewSimulationDialog(MetaDataManager* meta, QWidget *parent) :
+NewSimulationDialog::NewSimulationDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::NewSimulationDialog),
-    _meta(meta)
+    ui(new Ui::NewSimulationDialog)
 {
     ui->setupUi(this);
     setFont(GlobalFunctions::getGlobalFont());
 
     _simParaDialog = new SimulationParametersDialog();
-    _symTblDialog = new SymbolTableDialog(meta);
+    _symTblDialog = new SymbolTableDialog();
 
     //connections
     connect(ui->simulationParametersButton, SIGNAL(clicked()), this, SLOT(simulationParametersButtonClicked()));
@@ -64,7 +64,7 @@ void NewSimulationDialog::symbolTableButtonClicked ()
 void NewSimulationDialog::okButtonClicked ()
 {
     _simParaDialog->updateSimulationParameters();
-    _symTblDialog->updateSymbolTable(_meta);
+    _symTblDialog->updateSymbolTable(&MetadataManager::getGlobalInstance());
 }
 
 

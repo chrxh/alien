@@ -85,7 +85,7 @@ QString AlienCellFunction::getCode ()
     return QString();
 }
 
-bool AlienCellFunction::compileCode (QString code, MetaDataManager* meta, int& errorLine)
+bool AlienCellFunction::compileCode (QString code, int& errorLine)
 {
     return true;
 }

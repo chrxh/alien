@@ -7,7 +7,6 @@ namespace Ui {
 class NewSimulationDialog;
 }
 
-class MetaDataManager;
 class SimulationParametersDialog;
 class SymbolTableDialog;
 class NewSimulationDialog : public QDialog
@@ -15,7 +14,7 @@ class NewSimulationDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit NewSimulationDialog(MetaDataManager* meta, QWidget *parent = 0);
+    explicit NewSimulationDialog(QWidget *parent = 0);
     ~NewSimulationDialog();
 
     int getSizeX ();
@@ -31,7 +30,6 @@ private:
     Ui::NewSimulationDialog *ui;
     SimulationParametersDialog* _simParaDialog;
     SymbolTableDialog* _symTblDialog;
-    MetaDataManager* _meta;
 };
 
 #endif // NEWSIMULATIONDIALOG_H
