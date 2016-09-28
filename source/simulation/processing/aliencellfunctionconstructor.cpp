@@ -679,7 +679,7 @@ void AlienCellFunctionConstructor::separateConstruction (AlienCell* constructedC
 
 QString AlienCellFunctionConstructor::convertCellTypeNumberToName (int type)
 {
-    type = type%6;
+    type = type%7;
     if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::COMPUTER) )
         return "COMPUTER";
     if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::PROP) )
@@ -692,6 +692,8 @@ QString AlienCellFunctionConstructor::convertCellTypeNumberToName (int type)
         return "CONSTRUCTOR";
     if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::SENSOR) )
         return "SENSOR";
+    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::COMMUNICATOR) )
+        return "COMMUNICATOR";
     return 0;
 }
 

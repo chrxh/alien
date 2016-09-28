@@ -59,7 +59,8 @@ SOURCES += main.cpp \
     graphics/dialogs/addhexagonstructuredialog.cpp \
     graphics/assistance/tutorialwindow.cpp \
     simulation/entities/testaliencellcluster.cpp \
-    simulation/entities/testalientoken.cpp
+    simulation/entities/testalientoken.cpp \
+    simulation/processing/aliencellfunctioncommunicator.cpp
 HEADERS += \
     simulation/entities/aliencell.h \
     simulation/entities/aliencellcluster.h \
@@ -112,7 +113,8 @@ HEADERS += \
     simulation/processing/aliencellfunctionpropulsion.h \
     graphics/dialogs/addrectstructuredialog.h \
     graphics/dialogs/addhexagonstructuredialog.h \
-    graphics/assistance/tutorialwindow.h
+    graphics/assistance/tutorialwindow.h \
+    simulation/processing/aliencellfunctioncommunicator.h
 FORMS += graphics/monitoring/simulationmonitor.ui \
     graphics/macroeditor.ui \
     graphics/mainwindow.ui \

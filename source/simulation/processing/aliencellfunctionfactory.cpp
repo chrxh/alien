@@ -5,6 +5,7 @@
 #include "aliencellfunctionscanner.h"
 #include "aliencellfunctionweapon.h"
 #include "aliencellfunctionsensor.h"
+#include "aliencellfunctioncommunicator.h"
 
 AlienCellFunction* AlienCellFunctionFactory::build (QString type, bool randomData)
 {
@@ -20,6 +21,8 @@ AlienCellFunction* AlienCellFunctionFactory::build (QString type, bool randomDat
         return new AlienCellFunctionConstructor();
     if( type == "SENSOR" )
         return new AlienCellFunctionSensor();
+    if( type == "COMMUNICATOR" )
+        return new AlienCellFunctionCommunicator();
     return 0;
 }
 
@@ -39,6 +42,8 @@ AlienCellFunction* AlienCellFunctionFactory::build (QDataStream& stream)
         return new AlienCellFunctionConstructor(stream);
     if( type == "SENSOR" )
         return new AlienCellFunctionSensor(stream);
+    if( type == "COMMUNICATOR" )
+        return new AlienCellFunctionCommunicator(stream);
     return 0;
 }
 
@@ -56,12 +61,14 @@ AlienCellFunction* AlienCellFunctionFactory::build (QString type, quint8* cellTy
         return new AlienCellFunctionConstructor(cellTypeData);
     if( type == "SENSOR" )
         return new AlienCellFunctionSensor(cellTypeData);
+    if( type == "COMMUNICATOR" )
+        return new AlienCellFunctionCommunicator(cellTypeData);
     return 0;
 }
 
 AlienCellFunction* AlienCellFunctionFactory::buildRandom (bool randomData)
 {
-    int type(qrand()%6);
+    int type(qrand()%7);
     if( type == 0 )
         return build("COMPUTER", randomData);
     if( type == 1 )
@@ -73,6 +80,8 @@ AlienCellFunction* AlienCellFunctionFactory::buildRandom (bool randomData)
     if( type == 4 )
         return build("CONSTRUCTOR", randomData);
     if( type == 5 )
+        return build("SENSOR", randomData);
+    if( type == 7 )
         return build("SENSOR", randomData);
     return 0;
 }

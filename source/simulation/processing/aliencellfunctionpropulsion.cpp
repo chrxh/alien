@@ -120,12 +120,6 @@ QString AlienCellFunctionPropulsion::getCellFunctionName ()
     return "PROPULSION";
 }
 
-void AlienCellFunctionPropulsion::serialize (QDataStream& stream)
-{
-    AlienCellFunction::serialize(stream);
-
-}
-
 qreal AlienCellFunctionPropulsion::convertDataToThrustPower (quint8 b)
 {
     return 1/10000.0*((qreal)b+10.0);

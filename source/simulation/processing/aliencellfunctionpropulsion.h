@@ -13,8 +13,6 @@ public:
     void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName ();
 
-    void serialize (QDataStream& stream);
-
 private:
     qreal convertDataToThrustPower (quint8 b);
 };
