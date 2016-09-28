@@ -96,7 +96,8 @@ protected:
         SCANNER,
         WEAPON,
         CONSTR,
-        SENSOR
+        SENSOR,
+        COMMUNICATOR
     };
 
     //------- PROPULSION -----------
@@ -146,7 +147,8 @@ protected:
         SCANNER,
         WEAPON,
         CONSTR,
-        SENSOR
+        SENSOR,
+        COMMUNICATOR
     };
 
     //------- WEAPON -----------

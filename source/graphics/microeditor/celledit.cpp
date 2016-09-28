@@ -303,6 +303,8 @@ void CellEdit::mousePressEvent(QMouseEvent* e)
             _cell.cellFunctionName = "CONSTRUCTOR";
         if( row == 12 )
             _cell.cellFunctionName = "SENSOR";
+        if( row == 13 )
+            _cell.cellFunctionName = "COMMUNICATOR";
         updateDisplay();
 
         //inform other instances
@@ -462,6 +464,10 @@ QString CellEdit::generateFormattedCellFunctionString (QString f)
         text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; sensor &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sensor"+colorEnd+parEnd;
+    if( f == "COMMUNICATOR" )
+        text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; communicator &#9001;&nbsp;"+colorEnd+parEnd;
+    else
+        text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;communicator"+colorEnd+parEnd;
     return text;
 }
 

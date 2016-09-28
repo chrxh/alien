@@ -13,8 +13,8 @@ public:
     AlienCellFunctionComputer (QDataStream& stream);
 
     void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
-    virtual QString getCode ();
-    virtual bool compileCode (QString code, int& errorLine);
+    QString getCode ();
+    bool compileCode (QString code, int& errorLine);
     QString getCellFunctionName ();
 
     void serialize (QDataStream& stream);
