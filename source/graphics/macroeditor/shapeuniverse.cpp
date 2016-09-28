@@ -17,16 +17,11 @@
 #include <QGraphicsSceneMouseEvent>
 
 ShapeUniverse::ShapeUniverse(QObject *parent) :
-    QGraphicsScene(parent), _meta(0), _grid(0), _marker(0), _focusCenterCellItem(0)
+    QGraphicsScene(parent), _grid(0), _marker(0), _focusCenterCellItem(0)
 {
     setBackgroundBrush(QBrush(QColor(0,0,0x30)));
 }
 
-
-void ShapeUniverse::init (MetaDataManager* meta)
-{
-    _meta = meta;
-}
 
 void ShapeUniverse::universeUpdated (AlienGrid* grid)
 {
@@ -87,7 +82,7 @@ void ShapeUniverse::universeUpdated (AlienGrid* grid)
     }
 
     //set cell color according to the meta data
-    setCellColorFromMetaData();
+    setCellColorFromMetadata();
 
     grid->unlockData();
     update();
@@ -268,11 +263,11 @@ void ShapeUniverse::delExtendedSelection (QList< AlienCellCluster* >& clusters, 
     QGraphicsScene::update();
 }
 
-void ShapeUniverse::metaDataUpdated ()
+void ShapeUniverse::metadataUpdated ()
 {
     //set cell colors
     _grid->lockData();
-    setCellColorFromMetaData();
+    setCellColorFromMetadata();
     _grid->unlockData();
 
     QGraphicsScene::update();
@@ -711,7 +706,7 @@ void ShapeUniverse::highlightEnergyParticle (AlienEnergyGraphicsItem* e)
     _highlightedEnergyParticles[e->getEnergyParticle()->id] = e;
 }
 
-void ShapeUniverse::setCellColorFromMetaData ()
+void ShapeUniverse::setCellColorFromMetadata ()
 {
     //set cell colors
     QMapIterator< quint64, AlienCellGraphicsItem* > it(_cellItems);

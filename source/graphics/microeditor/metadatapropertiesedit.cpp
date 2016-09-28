@@ -6,13 +6,13 @@
 #include <QMouseEvent>
 #include <QTextBlock>
 
-MetaDataPropertiesEdit::MetaDataPropertiesEdit (QWidget *parent) :
+MetadataPropertiesEdit::MetadataPropertiesEdit (QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void MetaDataPropertiesEdit::updateMetaData (QString clusterName, QString cellName, quint8 cellColor)
+void MetadataPropertiesEdit::updateMetadata (QString clusterName, QString cellName, quint8 cellColor)
 {
     _clusterName = clusterName;
     _cellName = cellName;
@@ -20,7 +20,7 @@ void MetaDataPropertiesEdit::updateMetaData (QString clusterName, QString cellNa
     updateDisplay();
 }
 
-void MetaDataPropertiesEdit::requestUpdate ()
+void MetadataPropertiesEdit::requestUpdate ()
 {
     int row = QTextEdit::textCursor().blockNumber();
 
@@ -33,10 +33,10 @@ void MetaDataPropertiesEdit::requestUpdate ()
         _cellName = currentText;
 
     //inform other instances
-    emit metaDataPropertiesChanged(_clusterName, _cellName, _cellColor);
+    emit metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
 }
 
-void MetaDataPropertiesEdit::updateDisplay ()
+void MetadataPropertiesEdit::updateDisplay ()
 {
     //define auxilliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
@@ -119,7 +119,7 @@ void MetaDataPropertiesEdit::updateDisplay ()
     QTextEdit::setText(text);
 }
 
-void MetaDataPropertiesEdit::keyPressEvent (QKeyEvent* e)
+void MetadataPropertiesEdit::keyPressEvent (QKeyEvent* e)
 {
     //notify other instances about update?
     if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
@@ -164,7 +164,7 @@ void MetaDataPropertiesEdit::keyPressEvent (QKeyEvent* e)
         QTextEdit::keyPressEvent(e);
 }
 
-void MetaDataPropertiesEdit::mousePressEvent (QMouseEvent* e)
+void MetadataPropertiesEdit::mousePressEvent (QMouseEvent* e)
 {
     requestUpdate();
     QTextEdit::mousePressEvent(e);
@@ -199,7 +199,7 @@ void MetaDataPropertiesEdit::mousePressEvent (QMouseEvent* e)
             _cellColor = 6;
         updateDisplay();
         QTextEdit::clearFocus();
-        emit metaDataPropertiesChanged(_clusterName, _cellName, _cellColor);
+        emit metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
     }
 
 /*    if( e->y() < 30 )
@@ -208,7 +208,7 @@ void MetaDataPropertiesEdit::mousePressEvent (QMouseEvent* e)
         QTextEdit::clearFocus();*/
 }
 
-void MetaDataPropertiesEdit::mouseDoubleClickEvent (QMouseEvent* e)
+void MetadataPropertiesEdit::mouseDoubleClickEvent (QMouseEvent* e)
 {
     /*if( e->y() < 30 )
         QTextEdit::mouseDoubleClickEvent(e);

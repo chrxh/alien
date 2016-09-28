@@ -18,7 +18,7 @@ public:
     explicit SymbolEdit(QWidget *parent = 0);
     ~SymbolEdit();
 
-    void loadSymbols (MetaDataManager* meta);
+    void loadSymbols (MetadataManager* meta);
 
 signals:
     void symbolTableChanged (); //current symbol table can be obtained from MetadataManager
@@ -32,7 +32,7 @@ private slots:
 private:
     Ui::SymbolEdit *ui;
 
-    MetaDataManager* _meta;
+    MetadataManager* _meta;
 };
 
 #endif // SYMBOLEDIT_H

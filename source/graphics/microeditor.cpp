@@ -13,6 +13,7 @@
 #include "../globaldata/editorsettings.h"
 #include "../globaldata/guisettings.h"
 #include "../globaldata/simulationparameters.h"
+#include "../globaldata/metadatamanager.h"
 #include "../simulation/entities/aliencell.h"
 #include "../simulation/entities/aliencellcluster.h"
 #include "../simulation/entities/aliengrid.h"
@@ -55,7 +56,7 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
                         ClusterEdit* clusterEditor,
                         EnergyEdit* energyEditor,
 //                        HexEdit* computerMemoryEditor,
-                        MetaDataEdit* metaDataEditor,
+                        MetadataEdit* metadataEditor,
                         CellComputerEdit* cellComputerEdit,
                         SymbolEdit* symbolEdit,
 //                        ComputerCodeEdit* computerCodeEditor,
@@ -66,9 +67,9 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
                         QToolButton* delEntityButton,
                         QToolButton* delClusterButton,
                         QToolButton* addTokenButton,
-                        QToolButton* delTokenButton,
-//                        QToolButton* compileButton,
-                        MetaDataManager* meta)
+                        QToolButton* delTokenButton
+//                        QToolButton* compileButton
+                        )
 {
     _tabClusterWidget = tabClusterWidget;
     _tabComputerWidget = tabComputerWidget;
@@ -78,7 +79,7 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     _clusterEditor = clusterEditor;
     _energyEditor = energyEditor;
 //    _computerMemoryEditor = computerMemoryEditor;
-    _metaDataEditor = metaDataEditor;
+    _metadataEditor = metadataEditor;
     _cellComputerEdit = cellComputerEdit;
     _symbolEdit = symbolEdit;
 //    _computerCodeEditor = computerCodeEditor;
@@ -91,7 +92,6 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     _addTokenButton = addTokenButton;
     _delTokenButton = delTokenButton;
 //    _compileButton = compileButton;
-    _meta = meta;
 
     //save tab widgets
     _tabCluster = _tabClusterWidget->widget(0);
@@ -131,16 +131,16 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     connect(_addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
     connect(_delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
     connect(_tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
-    connect(_metaDataEditor, SIGNAL(metaDataChanged(QString,QString,quint8,QString)), this, SLOT(changesFromMetaDataEditor(QString,QString,quint8,QString)));
+    connect(_metadataEditor, SIGNAL(metadataChanged(QString,QString,quint8,QString)), this, SLOT(changesFromMetadataEditor(QString,QString,quint8,QString)));
     connect(_symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
 
-    _symbolEdit->loadSymbols(meta);
+    _symbolEdit->loadSymbols(&MetadataManager::getGlobalInstance());
 }
 
 
 void MicroEditor::updateSymbolTable ()
 {
-    _symbolEdit->loadSymbols(_meta);
+    _symbolEdit->loadSymbols(&MetadataManager::getGlobalInstance());
 }
 
 void MicroEditor::updateTokenTab ()
@@ -247,7 +247,10 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
     _grid->unlockData();
     _clusterEditor->updateCluster(_focusCellReduced);
     _cellEditor->updateCell(_focusCellReduced);
-    _metaDataEditor->updateMetaData(_meta->getAndUniteClusterName(ids), _meta->getCellName(id), color, _meta->getCellDescription(id));
+    _metadataEditor->updateMetadata(MetadataManager::getGlobalInstance().getAndUniteClusterName(ids),
+                                    MetadataManager::getGlobalInstance().getCellName(id),
+                                    color,
+                                    MetadataManager::getGlobalInstance().getCellDescription(id));
 
     //update data for cell function: computer
     if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
@@ -262,7 +265,7 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
         _cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
 
         //load computer code from meta data if available
-        QString code = _meta->getCellCode(id);
+        QString code = MetadataManager::getGlobalInstance().getCellCode(id);
         if( !code.isEmpty() ) {
             _cellComputerEdit->updateComputerCode(code);
         }
@@ -293,7 +296,7 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
             connect(tokenTab, SIGNAL(tokenMemoryChanged(QVector< quint8 >)), this, SLOT(changesFromTokenMemoryEditor(QVector< quint8 >)));
             connect(tokenTab, SIGNAL(tokenPropChanged(qreal)), this, SLOT(changesFromTokenEditor(qreal)));
             _tabTokenWidget->addTab(tokenTab, QString("token %1").arg(i+1));
-            tokenTab->update(_focusCellReduced.tokenEnergies[i], _focusCellReduced.tokenData[i], _meta);
+            tokenTab->update(_focusCellReduced.tokenEnergies[i], _focusCellReduced.tokenData[i]);
         }
         connect(_tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
 
@@ -378,7 +381,10 @@ void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
             _grid->unlockData();
             _clusterEditor->updateCluster(_focusCellReduced);
             _cellEditor->updateCell(_focusCellReduced);
-            _metaDataEditor->updateMetaData(_meta->getAndUniteClusterName(ids), _meta->getCellName(id), color, _meta->getCellDescription(id));
+            _metadataEditor->updateMetadata(MetadataManager::getGlobalInstance().getAndUniteClusterName(ids),
+                                            MetadataManager::getGlobalInstance().getCellName(id),
+                                            color,
+                                            MetadataManager::getGlobalInstance().getCellDescription(id));
 
             //update computer code editor
             if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
@@ -405,7 +411,7 @@ void MicroEditor::requestUpdate ()
             quint64 id = _focusCell->getId();
             _grid->unlockData();
             QString code = _cellComputerEdit->getComputerCode();
-            _meta->setCellCode(id, code);
+            MetadataManager::getGlobalInstance().setCellCode(id, code);
         }
 
         //save edited code from cluster editor
@@ -414,7 +420,7 @@ void MicroEditor::requestUpdate ()
         if( _currentClusterTab == 1 )
             _clusterEditor->requestUpdate();
         if( _currentClusterTab == 2 )
-            _metaDataEditor->requestUpdate();
+            _metadataEditor->requestUpdate();
 
         //save token data => see
         if( _tabTokenWidget->count() > 0 ) {
@@ -654,7 +660,7 @@ void MicroEditor::changesFromCellEditor (AlienCellReduced newCellProperties)
         _grid->lockData();
         quint64 id = _focusCell->getId();
         _grid->unlockData();
-        QString code = _meta->getCellCode(id);
+        QString code = MetadataManager::getGlobalInstance().getCellCode(id);
         if( !code.isEmpty() ) {
             _cellComputerEdit->updateComputerCode(code);
         }
@@ -727,7 +733,7 @@ void MicroEditor::changesFromTokenMemoryEditor (QVector< quint8 > data)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromMetaDataEditor (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
+void MicroEditor::changesFromMetadataEditor (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
 {
     //get cell id
     _grid->lockData();
@@ -737,13 +743,13 @@ void MicroEditor::changesFromMetaDataEditor (QString clusterName, QString cellNa
     _grid->unlockData();
 
     //set meta data
-    _meta->setAndUniteClusterName(ids, clusterName);
-    _meta->setCellName(id, cellName);
+    MetadataManager::getGlobalInstance().setAndUniteClusterName(ids, clusterName);
+    MetadataManager::getGlobalInstance().setCellName(id, cellName);
 //    _meta->setCellColorNumber(id, cellColor);
-    _meta->setCellDescription(id, cellDescription);
+    MetadataManager::getGlobalInstance().setCellDescription(id, cellDescription);
 
     //emit signal to notify macro editor
-    emit metaDataUpdated();
+    emit metadataUpdated();
 }
 
 void MicroEditor::changesFromSymbolTableEditor ()
@@ -751,7 +757,7 @@ void MicroEditor::changesFromSymbolTableEditor ()
     QWidget* widget = _tabTokenWidget->currentWidget();
     TokenTab* tokenTab= qobject_cast<TokenTab*>(widget);
     if( tokenTab ) {
-        tokenTab->update(_focusCellReduced.tokenEnergies[_currentTokenTab], _focusCellReduced.tokenData[_currentTokenTab], _meta);
+        tokenTab->update(_focusCellReduced.tokenEnergies[_currentTokenTab], _focusCellReduced.tokenData[_currentTokenTab]);
     }
 //    _focusCellReduced.tokenData[_currentTokenTab] = data;
 }
@@ -781,7 +787,7 @@ void MicroEditor::compileButtonClicked (QString code)
     _grid->lockData();
     quint64 id = _focusCell->getId();
     _grid->unlockData();
-    _meta->setCellCode(id, code);
+    MetadataManager::getGlobalInstance().setCellCode(id, code);
 
     //translate code via symbol table
 //    _meta->applySymbolTableToCode(code);

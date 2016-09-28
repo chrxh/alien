@@ -1,27 +1,25 @@
 #ifndef SYMBOLTABLEDIALOG_H
 #define SYMBOLTABLEDIALOG_H
 
-//#include "../../globaldata/metadatamanager.h"
-
 #include <QDialog>
 
 namespace Ui {
 class SymbolTableDialog;
 }
 
-class MetaDataManager;
+class MetadataManager;
 class SymbolTableDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit SymbolTableDialog(MetaDataManager* meta, QWidget *parent = 0);
+    explicit SymbolTableDialog (QWidget *parent = 0);
     ~SymbolTableDialog();
 
-    void updateSymbolTable (MetaDataManager* meta);
+    void updateSymbolTable (MetadataManager* meta);
 
 private slots:
-    void setSymbolTableToWidget (MetaDataManager* meta);
+    void setSymbolTableToWidget (MetadataManager* meta);
     void itemSelectionChanged ();
     void addButtonClicked ();
     void delButtonClicked ();

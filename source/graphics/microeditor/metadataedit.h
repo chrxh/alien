@@ -4,29 +4,29 @@
 #include <QWidget>
 
 namespace Ui {
-class MetaDataEdit;
+class MetadataEdit;
 }
 
-class MetaDataEdit : public QWidget
+class MetadataEdit : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MetaDataEdit(QWidget *parent = 0);
-    ~MetaDataEdit();
+    explicit MetadataEdit(QWidget *parent = 0);
+    ~MetadataEdit();
 
-    void updateMetaData (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
+    void updateMetadata (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
     void requestUpdate ();
 
 signals:
-    void metaDataChanged (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
+    void metadataChanged (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
 
 private slots:
-    void changesFromMetaDataPropertiesEditor (QString clusterName, QString cellName, quint8 cellColor);
-    void changesFromMetaDataDescriptionEditor ();
+    void changesFromMetadataPropertiesEditor (QString clusterName, QString cellName, quint8 cellColor);
+    void changesFromMetadataDescriptionEditor ();
 
 private:
-    Ui::MetaDataEdit *ui;
+    Ui::MetadataEdit *ui;
 
     QString _clusterName;
     QString _cellName;

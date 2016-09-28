@@ -8,12 +8,13 @@
 #include "physics/physics.h"
 #include "../globaldata/simulationparameters.h"
 #include "../globaldata/globalfunctions.h"
+#include "../globaldata/metadatamanager.h"
 
 #include <QTimer>
 #include <QtCore/qmath.h>
 
-AlienSimulator::AlienSimulator(MetaDataManager* meta, int sizeX, int sizeY, QObject* parent)
-    : QObject(parent), _run(false), _fps(0), _calculating(false), _frame(0), _newCellTokenAccessNumber(0), _meta(meta)
+AlienSimulator::AlienSimulator(int sizeX, int sizeY, QObject* parent)
+    : QObject(parent), _run(false), _fps(0), _calculating(false), _frame(0), _newCellTokenAccessNumber(0)
 {
     _forceFpsTimer = new QTimer(this);
     _grid = new AlienGrid(this);
@@ -77,7 +78,7 @@ void AlienSimulator::newUniverse (qint32 sizeX, qint32 sizeY)
 
     //clean up metadata
     QSet< quint64 > ids = _grid->getAllCellIds();
-    _meta->cleanUp(ids);
+    MetadataManager::getGlobalInstance().cleanUp(ids);
 
     //set up new grid
     _grid->reinit(sizeX, sizeY);
@@ -95,7 +96,7 @@ void AlienSimulator::serializeUniverse (QDataStream& stream)
 
     //clean up metadata
     QSet< quint64 > ids = _grid->getAllCellIds();
-    _meta->cleanUp(ids);
+    MetadataManager::getGlobalInstance().cleanUp(ids);
 
     //serialize grid size
     _grid->serializeSize(stream);
@@ -641,7 +642,7 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellRedu
             for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
                 cell->getMemory()[i] = newCellData.computerMemory[i];
             int errorLine = 0;
-            if( cell->getCellFunction()->compileCode(newCellData.computerCode, _meta, errorLine) == false )
+            if( cell->getCellFunction()->compileCode(newCellData.computerCode, errorLine) == false )
                 emit computerCompilationReturn(true, errorLine);
             else
                 emit computerCompilationReturn(false, 0);

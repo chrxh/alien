@@ -58,7 +58,7 @@ TokenTab::~TokenTab()
     delete ui;
 }
 
-void TokenTab::update (qreal tokenEnergy, const QVector< quint8 >& tokenMemory, MetaDataManager* meta)
+void TokenTab::update (qreal tokenEnergy, const QVector< quint8 >& tokenMemory)
 {
 //    ui->tokenMemoryEditor->update(tokenMemory);
     ui->tokenEditor->update(tokenEnergy);
@@ -71,7 +71,7 @@ void TokenTab::update (qreal tokenEnergy, const QVector< quint8 >& tokenMemory, 
     //find all addresses from variables
     _hexEditList.clear();
     QMap< quint8, QStringList > addressVarMap;
-    QMapIterator< QString, QString > symTblIt(meta->getSymbolTable());
+    QMapIterator< QString, QString > symTblIt(MetadataManager::getGlobalInstance().getSymbolTable());
     while(symTblIt.hasNext()) {
         symTblIt.next();
         QString k = symTblIt.key();
