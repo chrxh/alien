@@ -15,6 +15,7 @@
 #include "../globaldata/editorsettings.h"
 #include "../globaldata/globalfunctions.h"
 #include "../globaldata/simulationparameters.h"
+#include "../globaldata/metadatamanager.h"
 #include "../simulation/aliensimulator.h"
 #include "../simulation/entities/aliencell.h"
 #include "../simulation/entities/aliencellcluster.h"
@@ -29,11 +30,10 @@
 #include <QMessageBox>
 #include <QFont>
 
-MainWindow::MainWindow(AlienSimulator* simulator, MetaDataManager* meta, QWidget *parent) :
+MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _simulator(simulator),
-    _meta(meta),
     _microEditor(new MicroEditor(this)),
     _timer(0),
     _monitor(new SimulationMonitor(this)),
@@ -52,7 +52,7 @@ MainWindow::MainWindow(AlienSimulator* simulator, MetaDataManager* meta, QWidget
                        ui->cellEditor2,
                        ui->clusterEditor2,
                        ui->energyEditor2,
-                       ui->metaDataEditor2,
+                       ui->metadataEditor2,
                        ui->cellComputerEdit,
                        ui->symbolEdit2,
                        ui->selectionEditor2,
@@ -61,9 +61,7 @@ MainWindow::MainWindow(AlienSimulator* simulator, MetaDataManager* meta, QWidget
                        ui->delEntityButton2,
                        ui->delClusterButton2,
                        ui->addTokenButton2,
-                       ui->delTokenButton2,
-                       _meta);
-    ui->macroEditor->init(_meta);
+                       ui->delTokenButton2);
 
     //set font
     setFont(GlobalFunctions::getGlobalFont());
@@ -131,7 +129,7 @@ MainWindow::MainWindow(AlienSimulator* simulator, MetaDataManager* meta, QWidget
     connect(_microEditor, SIGNAL(delExtendedSelection()), ui->macroEditor, SLOT(delExtendedSelection_Slot()));
     connect(_microEditor, SIGNAL(defocus()), ui->macroEditor, SLOT(defocused()));
     connect(_microEditor, SIGNAL(defocus()), this, SLOT(cellDefocused()));
-    connect(_microEditor, SIGNAL(metaDataUpdated()), ui->macroEditor, SLOT(metaDataUpdated()));
+    connect(_microEditor, SIGNAL(metadataUpdated()), ui->macroEditor, SLOT(metadataUpdated()));
     connect(_microEditor, SIGNAL(numTokenUpdate(int,int,bool)), this, SLOT(numTokenChanged(int,int,bool)));
 
     //connect signals/slots for actions
@@ -215,7 +213,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::newSimulation ()
 {
-    NewSimulationDialog d(_meta);
+    NewSimulationDialog d;
     if( d.exec() ) {
         _frame = 0;
 
@@ -263,8 +261,8 @@ void MainWindow::loadSimulation ()
             QMap< quint64, quint64 > oldNewClusterIdMap;
             _simulator->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
             simulationParameters.readData(in);
-            _meta->readMetaDataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-            _meta->readSymbolTable(in);
+            MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
+            MetadataManager::getGlobalInstance().readSymbolTable(in);
             readFrame(in);
             file.close();
 
@@ -298,8 +296,8 @@ void MainWindow::saveSimulation ()
             QDataStream out(&file);
             _simulator->serializeUniverse(out);
             simulationParameters.serializeData(out);
-            _meta->serializeMetaDataUniverse(out);
-            _meta->serializeSymbolTable(out);
+            MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
+            MetadataManager::getGlobalInstance().serializeSymbolTable(out);
             out << _frame;
             file.close();
         }
@@ -349,7 +347,7 @@ void MainWindow::stepForwardClicked ()
     QByteArray b;
     QDataStream out(&b, QIODevice::WriteOnly);
     _simulator->serializeUniverse(out);
-    _meta->serializeMetaDataUniverse(out);
+    MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
     _undoUniverserses.push(b);
 
     //calc next time step
@@ -373,7 +371,7 @@ void MainWindow::stepBackClicked ()
     QMap< quint64, quint64 > oldNewCellIdMap;
     QMap< quint64, quint64 > oldNewClusterIdMap;
     _simulator->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-    _meta->readMetaDataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
+    MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //reset coordinators
 //    ui->macroEditor->reset();
@@ -398,7 +396,7 @@ void MainWindow::snapshotUniverse ()
     _snapshot.clear();
     QDataStream out(&_snapshot, QIODevice::WriteOnly);
     _simulator->serializeUniverse(out);
-    _meta->serializeMetaDataUniverse(out);
+    MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
     ui->macroEditor->serializeViewMatrix(out);
     out << _frame;
 }
@@ -414,7 +412,7 @@ void MainWindow::restoreUniverse ()
     QMap< quint64, quint64 > oldNewCellIdMap;
     QMap< quint64, quint64 > oldNewClusterIdMap;
     _simulator->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-    _meta->readMetaDataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
+    MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
 //    _snapshot.clear();
 
     //reset editors
@@ -564,7 +562,7 @@ void MainWindow::copyCell ()
     quint64 clusterId;
     quint64 cellId;
     _simulator->serializeCell(out, focusCell, clusterId, cellId);
-    _meta->serializeMetaDataCell(out, clusterId, cellId);
+    MetadataManager::getGlobalInstance().serializeMetadataCell(out, clusterId, cellId);
 
     //set actions
     ui->actionPasteCell->setEnabled(true);
@@ -577,7 +575,7 @@ void MainWindow::pasteCell ()
     QMap< quint64, quint64 > oldNewClusterIdMap;
     AlienCellCluster* newCluster;
     _simulator->buildCell(in, ui->macroEditor->getViewCenterPosWithInc(), newCluster, oldNewClusterIdMap, oldNewCellIdMap);
-    _meta->readMetaData(in, oldNewClusterIdMap, oldNewCellIdMap);
+    MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //force simulator to update other coordinators
     _simulator->updateUniverse();
@@ -588,11 +586,11 @@ void MainWindow::pasteCell ()
 
 void MainWindow::editSymbolTable ()
 {
-    SymbolTableDialog d(_meta);
+    SymbolTableDialog d;
     if( d.exec() ) {
 
         //update symbol table
-        d.updateSymbolTable(_meta);
+        d.updateSymbolTable(&MetadataManager::getGlobalInstance());
 
         //update editor
         _microEditor->updateSymbolTable();
@@ -609,7 +607,7 @@ void MainWindow::loadSymbols ()
 
             //read simulation data
             QDataStream in(&file);
-            _meta->readSymbolTable(in);
+            MetadataManager::getGlobalInstance().readSymbolTable(in);
             file.close();
 
             //update editor
@@ -631,7 +629,7 @@ void MainWindow::saveSymbols ()
 
             //serialize symbol table
             QDataStream out(&file);
-            _meta->serializeSymbolTable(out);
+            MetadataManager::getGlobalInstance().serializeSymbolTable(out);
             file.close();
         }
         else {
@@ -650,7 +648,7 @@ void MainWindow::loadSymbolsWithMerging ()
 
             //read simulation data
             QDataStream in(&file);
-            _meta->readSymbolTable(in, true);
+            MetadataManager::getGlobalInstance().readSymbolTable(in, true);
             file.close();
 
             //update editor
@@ -699,7 +697,7 @@ void MainWindow::loadExtendedSelection ()
             QList< AlienCellCluster* > newClusters;
             QList< AlienEnergy* > newEnergyParticles;
             _simulator->buildExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters,  newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
-            _meta->readMetaData(in, oldNewClusterIdMap, oldNewCellIdMap);
+            MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
             file.close();
 
             //force simulator to update other coordinators
@@ -732,7 +730,7 @@ void MainWindow::saveExtendedSelection ()
             QList< quint64 > clusterIds;
             QList< quint64 > cellIds;
             _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
-            _meta->serializeMetaDataEnsemble(out, clusterIds, cellIds);
+            MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
             file.close();
         }
         else {
@@ -754,7 +752,7 @@ void MainWindow::copyExtendedSelection ()
     QList< quint64 > clusterIds;
     QList< quint64 > cellIds;
     _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
-    _meta->serializeMetaDataEnsemble(out, clusterIds, cellIds);
+    MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
     //set actions
     ui->actionPaste_cell_extension->setEnabled(true);
@@ -768,7 +766,7 @@ void MainWindow::pasteExtendedSelection ()
     QList< AlienCellCluster* > newClusters;
     QList< AlienEnergy* > newEnergyParticles;
     _simulator->buildExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
-    _meta->readMetaData(in, oldNewClusterIdMap, oldNewCellIdMap);
+    MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //force simulator to update other coordinators
     _simulator->updateUniverse();
@@ -793,7 +791,7 @@ void MainWindow::multiplyRandomExtendedSelection ()
         QList< quint64 > clusterIds;
         QList< quint64 > cellIds;
         _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
-        _meta->serializeMetaDataEnsemble(out, clusterIds, cellIds);
+        MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
         //read list and rebuild structure n times
         for(int i = 0; i < d.getNumber(); ++i) {
@@ -804,7 +802,7 @@ void MainWindow::multiplyRandomExtendedSelection ()
             QList< AlienEnergy* > newEnergyParticles;
             QVector3D pos(GlobalFunctions::random(0.0, _simulator->getUniverseSizeX()), GlobalFunctions::random(0.0, _simulator->getUniverseSizeY()), 0.0);
             _simulator->buildExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
-            _meta->readMetaData(in, oldNewClusterIdMap, oldNewCellIdMap);
+            MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
             //randomize angles and velocities if desired
             if( d.randomizeAngle() )
@@ -847,7 +845,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
         QList< quint64 > clusterIds;
         QList< quint64 > cellIds;
         _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
-        _meta->serializeMetaDataEnsemble(out, clusterIds, cellIds);
+        MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
         //read list and rebuild structure n x m times
         for(int i = 0; i < d.getHorizontalNumber(); ++i) {
@@ -860,7 +858,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
                 QVector3D pos(d.getInitialPosX() + (qreal)i*d.getHorizontalInterval(),
                               d.getInitialPosY() + (qreal)j*d.getVerticalInterval(), 0.0);
                 _simulator->buildExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
-                _meta->readMetaData(in, oldNewClusterIdMap, oldNewCellIdMap);
+                MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
                 //set angles and velocities
                 if( d.changeAngle() ) {
@@ -968,31 +966,6 @@ void MainWindow::incFrame ()
 {
     ++_frame;
     updateFrameLabel();
-//DEBUG!!!!
-    /*if( (_frame %2) == 0 ) {
-        QFile file("debug0.sim");
-        if( file.open(QIODevice::WriteOnly) ) {
-            QDataStream out(&file);
-            _simulator->serializeUniverse(out);
-            simulationParameters.serializeData(out);
-            _meta->serializeMetaDataUniverse(out);
-            _meta->serializeSymbolTable(out);
-            out << _frame;
-            file.close();
-        }
-    }
-    else {
-        QFile file("debug1.sim");
-        if( file.open(QIODevice::WriteOnly) ) {
-            QDataStream out(&file);
-            _simulator->serializeUniverse(out);
-            simulationParameters.serializeData(out);
-            _meta->serializeMetaDataUniverse(out);
-            _meta->serializeSymbolTable(out);
-            out << _frame;
-            file.close();
-        }
-    }*/
 }
 
 void MainWindow::decFrame ()

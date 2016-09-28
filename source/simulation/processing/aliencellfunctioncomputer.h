@@ -14,7 +14,7 @@ public:
 
     void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
     virtual QString getCode ();
-    virtual bool compileCode (QString code, MetaDataManager* meta, int& errorLine);
+    virtual bool compileCode (QString code, int& errorLine);
     QString getCellFunctionName ();
 
     void serialize (QDataStream& stream);

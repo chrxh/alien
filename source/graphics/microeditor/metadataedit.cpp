@@ -6,9 +6,9 @@
 
 #include <QScrollBar>
 
-MetaDataEdit::MetaDataEdit(QWidget *parent) :
+MetadataEdit::MetadataEdit(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MetaDataEdit)
+    ui(new Ui::MetadataEdit)
 {
     ui->setupUi(this);
 
@@ -16,49 +16,49 @@ MetaDataEdit::MetaDataEdit(QWidget *parent) :
     p.setColor(QPalette::WindowText, CELL_EDIT_CAPTION_COLOR1);
     ui->cellDescriptionLabel->setPalette(p);
 
-    p = ui->metaDataDescriptionEdit->palette();
+    p = ui->metadataDescriptionEdit->palette();
     p.setColor(QPalette::Text, CELL_EDIT_METADATA_CURSOR_COLOR);
-    ui->metaDataDescriptionEdit->setPalette(p);
+    ui->metadataDescriptionEdit->setPalette(p);
 
-    connect(ui->metaDataPropertiesEdit, SIGNAL(metaDataPropertiesChanged(QString,QString,quint8)), this, SLOT(changesFromMetaDataPropertiesEditor(QString,QString,quint8)));
-    connect(ui->metaDataDescriptionEdit, SIGNAL(textChanged()), this, SLOT(changesFromMetaDataDescriptionEditor()));
+    connect(ui->metadataPropertiesEdit, SIGNAL(metadataPropertiesChanged(QString,QString,quint8)), this, SLOT(changesFromMetadataPropertiesEditor(QString,QString,quint8)));
+    connect(ui->metadataDescriptionEdit, SIGNAL(textChanged()), this, SLOT(changesFromMetadataDescriptionEditor()));
 }
 
-MetaDataEdit::~MetaDataEdit()
+MetadataEdit::~MetadataEdit()
 {
     delete ui;
 }
 
-void MetaDataEdit::updateMetaData (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
+void MetadataEdit::updateMetadata (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
 {
     _clusterName = clusterName;
     _cellName = cellName;
     _cellColor= cellColor;
     _cellDescription = cellDescription;
-    ui->metaDataPropertiesEdit->updateMetaData(clusterName, cellName, cellColor);
-    ui->metaDataDescriptionEdit->setText(cellDescription);
-    if( ui->metaDataDescriptionEdit->verticalScrollBar() )
-        ui->metaDataDescriptionEdit->verticalScrollBar()->setValue(0);
+    ui->metadataPropertiesEdit->updateMetadata(clusterName, cellName, cellColor);
+    ui->metadataDescriptionEdit->setText(cellDescription);
+    if( ui->metadataDescriptionEdit->verticalScrollBar() )
+        ui->metadataDescriptionEdit->verticalScrollBar()->setValue(0);
 }
 
-void MetaDataEdit::requestUpdate ()
+void MetadataEdit::requestUpdate ()
 {
-    _cellDescription = ui->metaDataDescriptionEdit->toPlainText();
-    ui->metaDataPropertiesEdit->requestUpdate();
+    _cellDescription = ui->metadataDescriptionEdit->toPlainText();
+    ui->metadataPropertiesEdit->requestUpdate();
 }
 
-void MetaDataEdit::changesFromMetaDataPropertiesEditor (QString clusterName, QString cellName, quint8 cellColor)
+void MetadataEdit::changesFromMetadataPropertiesEditor (QString clusterName, QString cellName, quint8 cellColor)
 {
     _clusterName = clusterName;
     _cellName = cellName;
     _cellColor= cellColor;
-    emit metaDataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
+    emit metadataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
 }
 
-void MetaDataEdit::changesFromMetaDataDescriptionEditor ()
+void MetadataEdit::changesFromMetadataDescriptionEditor ()
 {
-    _cellDescription = ui->metaDataDescriptionEdit->toPlainText();
-    emit metaDataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
+    _cellDescription = ui->metadataDescriptionEdit->toPlainText();
+    emit metadataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
 }
 
 /*
