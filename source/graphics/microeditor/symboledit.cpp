@@ -60,7 +60,7 @@ SymbolEdit::~SymbolEdit()
     delete ui;
 }
 
-void SymbolEdit::loadSymbols (MetaDataManager* meta)
+void SymbolEdit::loadSymbols (MetadataManager* meta)
 {
     _meta = meta;
 

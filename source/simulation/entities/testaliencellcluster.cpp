@@ -21,9 +21,7 @@ private:
 };
 
 
-/*
- * Implementation
- */
+//implementation
 void TestAlienCellCluster::initTestCase()
 {
     grid = new AlienGrid();

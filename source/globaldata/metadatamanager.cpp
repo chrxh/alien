@@ -3,96 +3,88 @@
 #include <QDebug>
 #include <QDataStream>
 
-MetaDataManager::MetaDataManager()
+MetadataManager& MetadataManager::getGlobalInstance ()
+{
+    static MetadataManager instance;
+    return instance;
+}
+
+MetadataManager::MetadataManager()
 {
     loadDefaultSymbolTable();
 }
 
-MetaDataManager::~MetaDataManager()
+MetadataManager::~MetadataManager()
 {
 
 }
 
-void MetaDataManager::setCellCode (quint64 id, QString code)
+void MetadataManager::setCellCode (quint64 id, QString code)
 {
-    _idCellMetaDataMap[id].computerCode = code;
+    _idCellMetadataMap[id].computerCode = code;
 }
 
-QString MetaDataManager::getCellCode (quint64 id)
+QString MetadataManager::getCellCode (quint64 id)
 {
-    if( _idCellMetaDataMap.contains(id) )
-        return _idCellMetaDataMap[id].computerCode;
+    if( _idCellMetadataMap.contains(id) )
+        return _idCellMetadataMap[id].computerCode;
     else
         return "";
 }
 
-/*void MetaDataManager::setCellColorNumber (quint64 id, quint8 color)
+void MetadataManager::setCellName (quint64 id, QString name)
 {
-    _idCellMetaDataMap[id].colorNumber = color;
+    _idCellMetadataMap[id].name = name;
 }
 
-quint8 MetaDataManager::getCellColorNumber (quint64 id)
+QString MetadataManager::getCellName (quint64 id)
 {
-    if( _idCellMetaDataMap.contains(id) )
-        return _idCellMetaDataMap[id].colorNumber;
-    else
-        return 0;
-}
-*/
-
-void MetaDataManager::setCellName (quint64 id, QString name)
-{
-    _idCellMetaDataMap[id].name = name;
-}
-
-QString MetaDataManager::getCellName (quint64 id)
-{
-    if( _idCellMetaDataMap.contains(id) )
-        return _idCellMetaDataMap[id].name;
+    if( _idCellMetadataMap.contains(id) )
+        return _idCellMetadataMap[id].name;
     else
         return "";
 }
 
-void MetaDataManager::setCellDescription (quint64 id, QString descr)
+void MetadataManager::setCellDescription (quint64 id, QString descr)
 {
-    _idCellMetaDataMap[id].description = descr;
+    _idCellMetadataMap[id].description = descr;
 }
 
-QString MetaDataManager::getCellDescription (quint64 id)
+QString MetadataManager::getCellDescription (quint64 id)
 {
-    if( _idCellMetaDataMap.contains(id) )
-        return _idCellMetaDataMap[id].description;
+    if( _idCellMetadataMap.contains(id) )
+        return _idCellMetadataMap[id].description;
     else
         return "";
 }
 
-void MetaDataManager::setClusterName (quint64 id, QString name)
+void MetadataManager::setClusterName (quint64 id, QString name)
 {
-    _idCellMetaDataMap[id].clusterName = name;
+    _idCellMetadataMap[id].clusterName = name;
 }
 
-QString MetaDataManager::getClusterName (quint64 id)
+QString MetadataManager::getClusterName (quint64 id)
 {
-    if( _idCellMetaDataMap.contains(id) )
-        return _idCellMetaDataMap[id].clusterName;
+    if( _idCellMetadataMap.contains(id) )
+        return _idCellMetadataMap[id].clusterName;
     else
         return "";
 }
 
-void MetaDataManager::setAndUniteClusterName (const QList< quint64 >& ids, QString clusterName)
+void MetadataManager::setAndUniteClusterName (const QList< quint64 >& ids, QString clusterName)
 {
     foreach(quint64 id, ids) {
         setClusterName(id, clusterName);
     }
 }
 
-QString MetaDataManager::getAndUniteClusterName (const QList< quint64 >& ids)
+QString MetadataManager::getAndUniteClusterName (const QList< quint64 >& ids)
 {
     //count the names
     QMap< QString, int > namesCount;
     foreach(quint64 id, ids) {
-        if( _idCellMetaDataMap.contains(id) ) {
-            QString clusterName = _idCellMetaDataMap[id].clusterName;
+        if( _idCellMetadataMap.contains(id) ) {
+            QString clusterName = _idCellMetadataMap[id].clusterName;
             namesCount[clusterName] = namesCount[clusterName]+1;
         }
         else {
@@ -121,9 +113,9 @@ QString MetaDataManager::getAndUniteClusterName (const QList< quint64 >& ids)
     return mostCountedName;
 }
 
-void MetaDataManager::cleanUp (const QSet< quint64 >& ids)
+void MetadataManager::cleanUp (const QSet< quint64 >& ids)
 {
-    QMutableMapIterator< quint64, AlienCellMetaData > it(_idCellMetaDataMap);
+    QMutableMapIterator< quint64, AlienCellMetadata > it(_idCellMetadataMap);
     while(it.hasNext()) {
         it.next();
         quint64 id = it.key();
@@ -133,12 +125,12 @@ void MetaDataManager::cleanUp (const QSet< quint64 >& ids)
     }
 }
 
-const QMap< quint64, AlienCellMetaData >& MetaDataManager::getCellMetaData ()
+const QMap< quint64, AlienCellMetadata >& MetadataManager::getCellMetadata ()
 {
-    return _idCellMetaDataMap;
+    return _idCellMetadataMap;
 }
 
-void MetaDataManager::loadDefaultSymbolTable ()
+void MetadataManager::loadDefaultSymbolTable ()
 {
     clearSymbolTable();
 
@@ -257,17 +249,17 @@ void MetaDataManager::loadDefaultSymbolTable ()
     addSymbolEntry("SENSOR_OUT_DIST", "[25]");
 }
 
-void MetaDataManager::addSymbolEntry (QString key, QString value)
+void MetadataManager::addSymbolEntry (QString key, QString value)
 {
     _symbolTable[key] = value;
 }
 
-void MetaDataManager::delSymbolEntry (QString key)
+void MetadataManager::delSymbolEntry (QString key)
 {
     _symbolTable.remove(key);
 }
 
-QString MetaDataManager::applySymbolTableToCode (QString input)
+QString MetadataManager::applySymbolTableToCode (QString input)
 {
     if( _symbolTable.contains(input) ) {
         return _symbolTable[input];
@@ -275,22 +267,22 @@ QString MetaDataManager::applySymbolTableToCode (QString input)
     return input;
 }
 
-void MetaDataManager::clearSymbolTable ()
+void MetadataManager::clearSymbolTable ()
 {
     _symbolTable.clear();
 }
 
-const QMap< QString, QString >& MetaDataManager::getSymbolTable ()
+const QMap< QString, QString >& MetadataManager::getSymbolTable ()
 {
     return _symbolTable;
 }
 
-void MetaDataManager::setSymbolTable (const QMap< QString, QString >& table)
+void MetadataManager::setSymbolTable (const QMap< QString, QString >& table)
 {
     _symbolTable = table;
 }
 
-void MetaDataManager::serializeMetaDataCell (QDataStream& stream, quint64 clusterId, quint64 cellId)
+void MetadataManager::serializeMetadataCell (QDataStream& stream, quint64 clusterId, quint64 cellId)
 {
     //cell data
     quint32 size = 1;
@@ -303,7 +295,7 @@ void MetaDataManager::serializeMetaDataCell (QDataStream& stream, quint64 cluste
     stream << cellId << code << name << descr << clusterName;
 }
 
-void MetaDataManager::serializeMetaDataEnsemble (QDataStream& stream, const QList< quint64 >& clusterIds, const QList< quint64 >& cellIds)
+void MetadataManager::serializeMetadataEnsemble (QDataStream& stream, const QList< quint64 >& clusterIds, const QList< quint64 >& cellIds)
 {
     //cell data
     quint32 size = cellIds.size();
@@ -325,7 +317,7 @@ void MetaDataManager::serializeMetaDataEnsemble (QDataStream& stream, const QLis
     }*/
 }
 
-void MetaDataManager::readMetaData (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap)
+void MetadataManager::readMetadata (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap)
 {
     //cell data
     quint32 size = 0;
@@ -357,43 +349,43 @@ void MetaDataManager::readMetaData (QDataStream& stream, const QMap< quint64, qu
     }*/
 }
 
-void MetaDataManager::serializeMetaDataUniverse (QDataStream& stream)
+void MetadataManager::serializeMetadataUniverse (QDataStream& stream)
 {
     //cell data
-    quint32 size = _idCellMetaDataMap.size();
+    quint32 size = _idCellMetadataMap.size();
     stream << size;
-    QMapIterator< quint64, AlienCellMetaData > it(_idCellMetaDataMap);
+    QMapIterator< quint64, AlienCellMetadata > it(_idCellMetadataMap);
     while(it.hasNext()) {
         it.next();
         quint64 cellId = it.key();
-        AlienCellMetaData cellMeta = it.value();
+        AlienCellMetadata cellMeta = it.value();
         stream << cellId << cellMeta.computerCode << cellMeta.name << cellMeta.description << cellMeta.clusterName;
     }
 
     //cluster data
-/*    size = _idClusterMetaDataMap.size();
+/*    size = _idClusterMetadataMap.size();
     stream << size;
-    QMapIterator< quint64, AlienCellClusterMetaData > it2(_idClusterMetaDataMap);
+    QMapIterator< quint64, AlienCellClusterMetadata > it2(_idClusterMetadataMap);
     while(it2.hasNext()) {
         it2.next();
         quint64 clusterId = it2.key();
-        AlienCellClusterMetaData clusterMeta = it2.value();
+        AlienCellClusterMetadata clusterMeta = it2.value();
         stream << clusterId << clusterMeta.clusterName;
     }*/
 }
 
-void MetaDataManager::readMetaDataUniverse (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap)
+void MetadataManager::readMetadataUniverse (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap)
 {
-    _idCellMetaDataMap.clear();
-    readMetaData(stream, oldNewClusterIdMap, oldNewCellIdMap);
+    _idCellMetadataMap.clear();
+    readMetadata(stream, oldNewClusterIdMap, oldNewCellIdMap);
 }
 
-void MetaDataManager::serializeSymbolTable (QDataStream& stream)
+void MetadataManager::serializeSymbolTable (QDataStream& stream)
 {
     stream << _symbolTable;
 }
 
-void MetaDataManager::readSymbolTable (QDataStream& stream, bool merge)
+void MetadataManager::readSymbolTable (QDataStream& stream, bool merge)
 {
     if( !merge )
         _symbolTable.clear();

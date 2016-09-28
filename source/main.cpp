@@ -66,9 +66,8 @@ int main(int argc, char *argv[])
 
     //init main objects
     QApplication a(argc, argv);
-    MetaDataManager meta;
-    AlienSimulator simulator(&meta, 400, 200);
-    MainWindow w(&simulator, &meta);
+    AlienSimulator simulator(400, 200);
+    MainWindow w(&simulator);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();

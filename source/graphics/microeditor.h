@@ -2,7 +2,6 @@
 #define MICROEDITOR_H
 
 #include "../simulation/aliencellreduced.h"
-#include "../globaldata/metadatamanager.h"
 
 #include <QWidget>
 #include <QTimer>
@@ -19,7 +18,7 @@ class CellEdit;
 class ClusterEdit;
 class CellComputerEdit;
 class EnergyEdit;
-class MetaDataEdit;
+class MetadataEdit;
 class SymbolEdit;
 class QTextEdit;
 class QLabel;
@@ -41,7 +40,7 @@ public:
                CellEdit* cellEditor,
                ClusterEdit* clusterEditor,
                EnergyEdit* energyEditor,
-               MetaDataEdit* metaDataEditor,
+               MetadataEdit* metadataEditor,
                CellComputerEdit* cellComputerEdit,
                SymbolEdit* symbolEdit,
                QTextEdit* selectionEditor,
@@ -50,8 +49,7 @@ public:
                QToolButton* delEntityButton,
                QToolButton* delClusterButton,
                QToolButton* addTokenButton,
-               QToolButton* delTokenButton,
-               MetaDataManager* meta);
+               QToolButton* delTokenButton);
     void updateSymbolTable ();
     void updateTokenTab ();
 
@@ -71,7 +69,7 @@ signals:
     void delExtendedSelection ();                                //to macro editor
     void defocus ();                                            //to macro editor
     void energyParticleUpdated (AlienEnergy* e);                //to macro editor
-    void metaDataUpdated ();                                    //to macro editor
+    void metadataUpdated ();                                    //to macro editor
     void numTokenUpdate (int numToken, int maxToken, bool pasteTokenPossible);  //to main windows
 
 public slots:
@@ -101,7 +99,7 @@ private slots:
     void changesFromTokenEditor (qreal energy);
     void changesFromComputerMemoryEditor (QVector< quint8 > data);
     void changesFromTokenMemoryEditor (QVector< quint8 > data);
-    void changesFromMetaDataEditor (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
+    void changesFromMetadataEditor (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
     void changesFromSymbolTableEditor ();
 
     void clusterTabChanged (int index);
@@ -120,7 +118,7 @@ private:
     CellEdit* _cellEditor;
     ClusterEdit* _clusterEditor;
     EnergyEdit* _energyEditor;
-    MetaDataEdit* _metaDataEditor;
+    MetadataEdit* _metadataEditor;
     CellComputerEdit* _cellComputerEdit;
     SymbolEdit* _symbolEdit;
     QTextEdit* _selectionEditor;
@@ -136,7 +134,6 @@ private:
     AlienCellReduced _focusCellReduced;
     AlienEnergy* _focusEnergyParticle;
     AlienGrid* _grid;
-    MetaDataManager* _meta;
     QWidget* _tabCluster;
     QWidget* _tabCell;
     QWidget* _tabParticle;
