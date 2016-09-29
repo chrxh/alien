@@ -81,8 +81,8 @@ AlienCellFunction* AlienCellFunctionFactory::buildRandom (bool randomData)
         return build("CONSTRUCTOR", randomData);
     if( type == 5 )
         return build("SENSOR", randomData);
-    if( type == 7 )
-        return build("SENSOR", randomData);
+    if( type == 6 )
+        return build("COMMUNICATOR", randomData);
     return 0;
 }
 
