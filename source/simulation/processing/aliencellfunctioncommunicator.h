@@ -13,6 +13,27 @@ public:
     void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName ();
 
+    //constants for cell function programming
+    enum class COMMUNICATOR {
+        IN = 26,
+        IN_CHANNEL = 27,
+        IN_MESSAGE = 28,
+        OUT_NUMBER_MESSAGE_SENT = 29,
+        OUT_RECEIVED_BYTE = 30,
+        OUT_SENDER_DIRECTION = 31,
+        OUT_SENDER_DISTANCE = 32,
+    };
+    enum class COMMUNICATOR_IN {
+        DO_NOTHING,
+        SET_LISTENING_CHANNEL,
+        SEND_MESSAGE
+    };
+
+private:
+    quint8 _listeningChannel;
+    quint8 _receivedByte;
+    quint8 _senderDirection;
+    quint8 _senderDistance;
 };
 
 #endif // ALIENCELLFUNCTIONCOMMUNICATOR_H

@@ -19,6 +19,14 @@ public:
 
     void serialize (QDataStream& stream);
 
+    //constants for cell function programming
+    enum class COMPUTER_OPERATION {
+        MOV, ADD, SUB, MUL, DIV, XOR, OR, AND, IFG, IFGE, IFE, IFNE, IFLE, IFL, ELSE, ENDIF
+    };
+    enum class COMPUTER_OPTYPE {
+        MEM, MEMMEM, CMEM, CONST
+    };
+
 protected:
     void getInternalData (quint8* data);
 
