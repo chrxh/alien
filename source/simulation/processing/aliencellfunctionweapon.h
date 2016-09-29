@@ -14,6 +14,15 @@ public:
     QString getCellFunctionName ();
 
     void serialize (QDataStream& stream);
+
+    //constants for cell function programming
+    enum class WEAPON {
+        OUT = 5,
+    };
+    enum class WEAPON_OUT {
+        NO_TARGET,
+        STRIKE_SUCCESSFUL
+    };
 };
 
 #endif // ALIENCELLFUNCTIONWEAPON_H
