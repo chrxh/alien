@@ -188,7 +188,7 @@ void MetadataManager::loadDefaultSymbolTable ()
     addSymbolEntry("CONSTR_IN_CELL_FUNCTION::CONSTR","4");
     addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SENSOR","5");
     addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMMUNICATOR","6");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION_DATA","[30]");
+    addSymbolEntry("CONSTR_IN_CELL_FUNCTION_DATA","[35]");
 
     //propulsion
     addSymbolEntry("PROP_OUT","[5]");
@@ -227,7 +227,7 @@ void MetadataManager::loadDefaultSymbolTable ()
     addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::CONSTR","4");
     addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SENSOR","5");
     addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR","6");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION_DATA","[30]");
+    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION_DATA","[35]");
 
     //weapon
     addSymbolEntry("WEAPON_OUT","[5]");
