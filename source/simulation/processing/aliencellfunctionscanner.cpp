@@ -177,19 +177,19 @@ void AlienCellFunctionScanner::spiralLookupAlgorithm (AlienCell*& cell, AlienCel
 int AlienCellFunctionScanner::convertCellTypeNameToNumber (QString type)
 {
     if( type == "COMPUTER" )
-        return static_cast<int>(SCANNER_OUT_CELL_TYPE::COMPUTER);
+        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::COMPUTER);
     if( type == "PROPULSION" )
-        return static_cast<int>(SCANNER_OUT_CELL_TYPE::PROP);
+        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::PROP);
     if( type == "SCANNER" )
-        return static_cast<int>(SCANNER_OUT_CELL_TYPE::SCANNER);
+        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::SCANNER);
     if( type == "WEAPON" )
-        return static_cast<int>(SCANNER_OUT_CELL_TYPE::WEAPON);
+        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::WEAPON);
     if( type == "CONSTRUCTOR" )
-        return static_cast<int>(SCANNER_OUT_CELL_TYPE::CONSTR);
+        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::CONSTR);
     if( type == "SENSOR" )
-        return static_cast<int>(SCANNER_OUT_CELL_TYPE::SENSOR);
+        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::SENSOR);
     if( type == "COMMUNICATOR" )
-        return static_cast<int>(SCANNER_OUT_CELL_TYPE::COMMUNICATOR);
+        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR);
     return 0;
 }
 
