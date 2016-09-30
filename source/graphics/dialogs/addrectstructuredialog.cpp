@@ -2,7 +2,7 @@
 #include "ui_addrectstructuredialog.h"
 
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 AddRectStructureDialog::AddRectStructureDialog(QWidget *parent) :
     QDialog(parent),

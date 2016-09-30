@@ -1,13 +1,19 @@
-#ifndef SIMULATIONPARAMETERS_H
-#define SIMULATIONPARAMETERS_H
+#ifndef SIMULATIONSETTINGS_H
+#define SIMULATIONSETTINGS_H
 
 #include<QColor>
 #include<QDataStream>
 
-//internal alien data
 const qreal ALIEN_PRECISION = 0.0000001;
 
-struct SimulationParameters
+class MetadataManager;
+class AlienMetadata
+{
+public:
+    static void loadDefaultMetadata (MetadataManager* meta);
+};
+
+struct AlienParameters
 {
     //simulation constants
     qreal CRIT_CELL_DIST_MIN;
@@ -42,12 +48,12 @@ struct SimulationParameters
     qreal CELL_RAD_ENERGY_VEL_MULT;
     qreal CELL_RAD_ENERGY_VEL_PERTURB;
 
-    SimulationParameters ();
+    AlienParameters ();
 
     void serializeData (QDataStream& stream);
     void readData (QDataStream& stream);
 };
 
-extern SimulationParameters simulationParameters;
+extern AlienParameters simulationParameters;
 
-#endif // SIMULATIONPARAMETERS_H
+#endif // SIMULATIONSETTINGS_H

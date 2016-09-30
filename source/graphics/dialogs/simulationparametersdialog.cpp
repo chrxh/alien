@@ -5,7 +5,7 @@
 #include <QMessageBox>
 
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 SimulationParametersDialog::SimulationParametersDialog(QWidget *parent) :
     QDialog(parent),
@@ -105,7 +105,7 @@ void SimulationParametersDialog::getLocalSimulationParametersFromWidgets ()
 
 void SimulationParametersDialog::defaultButtonClicked ()
 {
-    localSimulationParameters = SimulationParameters();
+    localSimulationParameters = AlienParameters();
     setLocalSimulationParametersToWidgets();
 }
 

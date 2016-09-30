@@ -1,7 +1,7 @@
 #include "aliencellfunction.h"
 #include "../entities/aliencell.h"
 
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QString>
 #include <QtCore/qmath.h>

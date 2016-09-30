@@ -1,5 +1,5 @@
 #include "physics.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <qmath.h>
 

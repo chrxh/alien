@@ -2,7 +2,7 @@
 
 #include <QtTest/QtTest>
 #include "aliencellcluster.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 class TestAlienCellCluster : public QObject
 {
