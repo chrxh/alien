@@ -51,9 +51,9 @@ public:
         FINISH_NO_SEP,
         FINISH_WITH_SEP,
         FINISH_WITH_SEP_RED,
-        FINISH_TOKEN_WITH_SEP_RED
+        FINISH_WITH_TOKEN_SEP_RED
     };
-    enum class CONSTR_IN_CELL_TYPE {
+    enum class CONSTR_IN_CELL_FUNCTION {
         COMPUTER,
         PROP,
         SCANNER,

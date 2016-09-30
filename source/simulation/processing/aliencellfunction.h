@@ -22,13 +22,6 @@ public:
 
     virtual void getInternalData (quint8* data);
 
-protected:
-    qreal convertDataToAngle (quint8 b);
-    quint8 convertAngleToData (qreal a);
-    qreal convertDataToShiftLen (quint8 b);
-    quint8 convertShiftLenToData (qreal len);
-    quint8 convertURealToData (qreal r);
-
     //constants for cell function programming
     enum class ENERGY_GUIDANCE {
         IN = 1,
@@ -43,6 +36,13 @@ protected:
         HARVEST_CELL,
         HARVEST_TOKEN
     };
+
+protected:
+    qreal convertDataToAngle (quint8 b);
+    quint8 convertAngleToData (qreal a);
+    qreal convertDataToShiftLen (quint8 b);
+    quint8 convertShiftLenToData (qreal len);
+    quint8 convertURealToData (qreal r);
 };
 
 #endif // ALIENCELLFUNCTION_H
