@@ -25,7 +25,6 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("BRANCH_NUMBER","[0]");
 
     //energy guidance system
-//    meta->addSymbolEntry("ENERGY_GUIDANCE_IN","[1]");
     meta->addSymbolEntry("ENERGY_GUIDANCE_IN","["+QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE::IN))+"]");
     meta->addSymbolEntry("ENERGY_GUIDANCE_IN::DEACTIVATED",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::DEACTIVATED)));
     meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_CELL",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::BALANCE_CELL)));
@@ -60,7 +59,7 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("CONSTR_INOUT_ANGLE","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::INOUT_ANGLE))+"]");
     meta->addSymbolEntry("CONSTR_IN_DIST","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_DIST))+"]");
     meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_CELL_MAX_CONNECTIONS))+"]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO","0");
+    meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO","0");       //artificial entry (has no symbol in enum class)
     meta->addSymbolEntry("CONSTR_IN_CELL_BRANCH_NO","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_CELL_BRANCH_NO))+"]");
     meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_CELL_FUNCTION))+"]");
     meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMPUTER",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::COMPUTER)));
