@@ -3,7 +3,7 @@
 #include "aliencellcluster.h"
 #include "alienenergy.h"
 
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QMutex>
 #include <cmath>

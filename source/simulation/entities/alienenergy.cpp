@@ -5,7 +5,7 @@
 #include "../physics/physics.h"
 
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 #include <qmath.h>
 
 AlienEnergy::AlienEnergy(qreal amount_, QVector3D pos_, QVector3D vel_)

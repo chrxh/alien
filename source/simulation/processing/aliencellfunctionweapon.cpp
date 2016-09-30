@@ -3,7 +3,7 @@
 #include "../entities/aliencell.h"
 #include "../entities/aliencellcluster.h"
 
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 AlienCellFunctionWeapon::AlienCellFunctionWeapon()
 {

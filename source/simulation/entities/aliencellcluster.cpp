@@ -2,7 +2,7 @@
 
 #include "../physics/physics.h"
 #include "../processing/aliencellfunction.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 #include "../../globaldata/globalfunctions.h"
 
 #include <QMatrix4x4>

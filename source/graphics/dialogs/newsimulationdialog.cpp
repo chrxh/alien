@@ -6,7 +6,7 @@
 
 #include "../../globaldata/guisettings.h"
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/metadatamanager.h"
+#include "../../simulation/metadatamanager.h"
 
 #include <QDebug>
 
