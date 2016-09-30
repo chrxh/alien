@@ -2,7 +2,7 @@
 #define ALIENSPACE_H
 
 #include "aliencell.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QObject>
 #include <QVector3D>

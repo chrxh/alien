@@ -6,9 +6,9 @@
 #include "processing/aliencellfunction.h"
 #include "processing/aliencellfunctionfactory.h"
 #include "physics/physics.h"
-#include "../globaldata/simulationparameters.h"
+#include "../globaldata/simulationsettings.h"
 #include "../globaldata/globalfunctions.h"
-#include "../globaldata/metadatamanager.h"
+#include "metadatamanager.h"
 
 #include <QTimer>
 #include <QtCore/qmath.h>

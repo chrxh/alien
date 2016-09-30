@@ -2,7 +2,7 @@
 #include "ui_tokentab.h"
 
 #include "hexedit.h"
-#include "../../globaldata/metadatamanager.h"
+#include "../../simulation/metadatamanager.h"
 
 #include "../../globaldata/editorsettings.h"
 #include "../../globaldata/guisettings.h"

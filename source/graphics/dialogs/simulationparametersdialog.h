@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 namespace Ui {
 class SimulationParametersDialog;
@@ -31,7 +31,7 @@ private:
     Ui::SimulationParametersDialog *ui;
 
     //simulation parameters (not the global ones)
-    SimulationParameters localSimulationParameters;
+    AlienParameters localSimulationParameters;
 };
 
 #endif // SIMULATIONPARAMETERSDIALOG_H

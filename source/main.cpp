@@ -3,6 +3,8 @@
 #include "graphics/mainwindow.h"
 #include "simulation/aliensimulator.h"
 #include "simulation/aliencellreduced.h"
+#include "simulation/metadatamanager.h"
+#include "globaldata/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 
@@ -63,6 +65,9 @@ int main(int argc, char *argv[])
 {
     //register types
     qRegisterMetaType<AlienCellReduced>("AlienCellReduced");
+
+    //load default metadata
+    AlienMetadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());
 
     //init main objects
     QApplication a(argc, argv);
