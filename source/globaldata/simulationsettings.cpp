@@ -1,5 +1,13 @@
 #include "simulationsettings.h"
 #include "../simulation/metadatamanager.h"
+#include "../simulation/processing/aliencellfunction.h"
+#include "../simulation/processing/aliencellfunctionconstructor.h"
+#include "../simulation/processing/aliencellfunctionpropulsion.h"
+#include "../simulation/processing/aliencellfunctionscanner.h"
+#include "../simulation/processing/aliencellfunctionweapon.h"
+#include "../simulation/processing/aliencellfunctionsensor.h"
+#include "../simulation/processing/aliencellfunctioncommunicator.h"
+
 
 #include <QtGlobal>
 
@@ -17,112 +25,112 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("BRANCH_NUMBER","[0]");
 
     //energy guidance system
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN","[1]");
-//    meta->addSymbolEntry("ENERGY_GUIDANCE_IN","["+QString::number(AlienCellFunction::ENERGY_GUIDANCE::IN)+"]");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::DEACTIVATED","0");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_CELL","1");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_TOKEN","2");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_BOTH","3");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_CELL","4");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_TOKEN","5");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_CELL","[2]");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_TOKEN","[3]");
+//    meta->addSymbolEntry("ENERGY_GUIDANCE_IN","[1]");
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN","["+QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE::IN))+"]");
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::DEACTIVATED",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::DEACTIVATED)));
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_CELL",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::BALANCE_CELL)));
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_TOKEN",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::BALANCE_TOKEN)));
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_BOTH",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::BALANCE_BOTH)));
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_CELL",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::HARVEST_CELL)));
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_TOKEN",QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE_IN::HARVEST_TOKEN)));
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_CELL","["+QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE::IN_VALUE_CELL))+"]");
+    meta->addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_TOKEN","["+QString::number(static_cast<int>(AlienCellFunction::ENERGY_GUIDANCE::IN_VALUE_TOKEN))+"]");
 
     //constructor
-    meta->addSymbolEntry("CONSTR_OUT","[5]");
-    meta->addSymbolEntry("CONSTR_OUT::SUCCESS","0");
-    meta->addSymbolEntry("CONSTR_OUT::SUCCESS_ROT","1");
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_NO_ENERGY","2");
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_OBSTACLE","3");
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_CONNECTION","4");
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_DIST","5");
-    meta->addSymbolEntry("CONSTR_IN","[6]");
-    meta->addSymbolEntry("CONSTR_IN::DO_NOTHING","0");
-    meta->addSymbolEntry("CONSTR_IN::SAFE","1");
-    meta->addSymbolEntry("CONSTR_IN::UNSAFE","2");
-    meta->addSymbolEntry("CONSTR_IN::BRUTEFORCE","3");
-    meta->addSymbolEntry("CONSTR_IN_OPTION","[7]");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::STANDARD","0");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN","1");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::CREATE_DUP_TOKEN","2");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_NO_SEP","3");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP","4");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP_RED","5");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED","6");
-    meta->addSymbolEntry("CONSTR_INOUT_ANGLE","[15]");
-    meta->addSymbolEntry("CONSTR_IN_DIST","[16]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","[17]");
+    meta->addSymbolEntry("CONSTR_OUT","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::OUT))+"]");
+    meta->addSymbolEntry("CONSTR_OUT::SUCCESS",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_OUT::SUCCESS)));
+    meta->addSymbolEntry("CONSTR_OUT::SUCCESS_ROT",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_OUT::SUCCESS_ROT)));
+    meta->addSymbolEntry("CONSTR_OUT::ERROR_NO_ENERGY",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_OUT::ERROR_NO_ENERGY)));
+    meta->addSymbolEntry("CONSTR_OUT::ERROR_OBSTACLE",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_OUT::ERROR_OBSTACLE)));
+    meta->addSymbolEntry("CONSTR_OUT::ERROR_CONNECTION",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_OUT::ERROR_CONNECTION)));
+    meta->addSymbolEntry("CONSTR_OUT::ERROR_DIST",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_OUT::ERROR_DIST)));
+    meta->addSymbolEntry("CONSTR_IN","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN))+"]");
+    meta->addSymbolEntry("CONSTR_IN::DO_NOTHING",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN::DO_NOTHING)));
+    meta->addSymbolEntry("CONSTR_IN::SAFE",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN::SAFE)));
+    meta->addSymbolEntry("CONSTR_IN::UNSAFE",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN::UNSAFE)));
+    meta->addSymbolEntry("CONSTR_IN::BRUTEFORCE",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN::BRUTEFORCE)));
+    meta->addSymbolEntry("CONSTR_IN_OPTION","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_OPTION))+"]");
+    meta->addSymbolEntry("CONSTR_IN_OPTION::STANDARD",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_OPTION::STANDARD)));
+    meta->addSymbolEntry("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN)));
+    meta->addSymbolEntry("CONSTR_IN_OPTION::CREATE_DUP_TOKEN",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_OPTION::CREATE_DUP_TOKEN)));
+    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_NO_SEP",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_OPTION::FINISH_NO_SEP)));
+    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_OPTION::FINISH_WITH_SEP)));
+    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP_RED",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_OPTION::FINISH_WITH_SEP_RED)));
+    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)));
+    meta->addSymbolEntry("CONSTR_INOUT_ANGLE","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::INOUT_ANGLE))+"]");
+    meta->addSymbolEntry("CONSTR_IN_DIST","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_DIST))+"]");
+    meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_CELL_MAX_CONNECTIONS))+"]");
     meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO","0");
-    meta->addSymbolEntry("CONSTR_IN_CELL_BRANCH_NO","[18]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION","[19]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMPUTER","0");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::PROP","1");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SCANNER","2");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::WEAPON","3");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::CONSTR","4");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SENSOR","5");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMMUNICATOR","6");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION_DATA","[35]");
+    meta->addSymbolEntry("CONSTR_IN_CELL_BRANCH_NO","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_CELL_BRANCH_NO))+"]");
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_CELL_FUNCTION))+"]");
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMPUTER",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::COMPUTER)));
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::PROP",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::PROP)));
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SCANNER",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::SCANNER)));
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::WEAPON",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::WEAPON)));
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::CONSTR",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::CONSTR)));
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SENSOR",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::SENSOR)));
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMMUNICATOR",QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR_IN_CELL_FUNCTION::COMMUNICATOR)));
+    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION_DATA","["+QString::number(static_cast<int>(AlienCellFunctionConstructor::CONSTR::IN_CELL_FUNCTION_DATA))+"]");
 
     //propulsion
-    meta->addSymbolEntry("PROP_OUT","[5]");
-    meta->addSymbolEntry("PROP_OUT::SUCCESS","0");
-    meta->addSymbolEntry("PROP_OUT::SUCCESS_FINISHED","1");
-    meta->addSymbolEntry("PROP_OUT::ERROR_NO_ENERGY","2");
-    meta->addSymbolEntry("PROP_IN","[8]");
-    meta->addSymbolEntry("PROP_IN::DO_NOTHING","0");
-    meta->addSymbolEntry("PROP_IN::BY_ANGLE","1");
-    meta->addSymbolEntry("PROP_IN::FROM_CENTER","2");
-    meta->addSymbolEntry("PROP_IN::TOWARD_CENTER","3");
-    meta->addSymbolEntry("PROP_IN::ROTATION_CLOCKWISE","4");
-    meta->addSymbolEntry("PROP_IN::ROTATION_COUNTERCLOCKWISE","5");
-    meta->addSymbolEntry("PROP_IN::DAMP_ROTATION","6");
-    meta->addSymbolEntry("PROP_IN_ANGLE","[9]");
-    meta->addSymbolEntry("PROP_IN_POWER","[10]");
+    meta->addSymbolEntry("PROP_OUT","["+QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP::OUT))+"]");
+    meta->addSymbolEntry("PROP_OUT::SUCCESS",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_OUT::SUCCESS)));
+    meta->addSymbolEntry("PROP_OUT::SUCCESS_DAMPING_FINISHED",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_OUT::SUCCESS_DAMPING_FINISHED)));
+    meta->addSymbolEntry("PROP_OUT::ERROR_NO_ENERGY",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_OUT::ERROR_NO_ENERGY)));
+    meta->addSymbolEntry("PROP_IN","["+QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP::IN))+"]");
+    meta->addSymbolEntry("PROP_IN::DO_NOTHING",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_IN::DO_NOTHING)));
+    meta->addSymbolEntry("PROP_IN::BY_ANGLE",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_IN::BY_ANGLE)));
+    meta->addSymbolEntry("PROP_IN::FROM_CENTER",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_IN::FROM_CENTER)));
+    meta->addSymbolEntry("PROP_IN::TOWARD_CENTER",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_IN::TOWARD_CENTER)));
+    meta->addSymbolEntry("PROP_IN::ROTATION_CLOCKWISE",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_IN::ROTATION_CLOCKWISE)));
+    meta->addSymbolEntry("PROP_IN::ROTATION_COUNTERCLOCKWISE",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_IN::ROTATION_COUNTERCLOCKWISE)));
+    meta->addSymbolEntry("PROP_IN::DAMP_ROTATION",QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP_IN::DAMP_ROTATION)));
+    meta->addSymbolEntry("PROP_IN_ANGLE","["+QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP::IN_ANGLE))+"]");
+    meta->addSymbolEntry("PROP_IN_POWER","["+QString::number(static_cast<int>(AlienCellFunctionPropulsion::PROP::IN_POWER))+"]");
 
     //scanner
-    meta->addSymbolEntry("SCANNER_OUT","[5]");
-    meta->addSymbolEntry("SCANNER_OUT::SUCCESS","0");
-    meta->addSymbolEntry("SCANNER_OUT::FINISHED","1");
-    meta->addSymbolEntry("SCANNER_OUT::RESTART","2");
+    meta->addSymbolEntry("SCANNER_OUT","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT))+"]");
+    meta->addSymbolEntry("SCANNER_OUT::SUCCESS",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT::SUCCESS)));
+    meta->addSymbolEntry("SCANNER_OUT::FINISHED",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT::FINISHED)));
+    meta->addSymbolEntry("SCANNER_OUT::RESTART",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT::RESTART)));
 //    meta->addSymbolEntry("SCANNER_IN","[11]");
-    meta->addSymbolEntry("SCANNER_INOUT_CELL_NUMBER","[12]");
-    meta->addSymbolEntry("SCANNER_OUT_MASS","[13]");
-    meta->addSymbolEntry("SCANNER_OUT_ENERGY","[14]");
-    meta->addSymbolEntry("SCANNER_OUT_ANGLE","[15]");
-    meta->addSymbolEntry("SCANNER_OUT_DIST","[16]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_MAX_CONNECTIONS","[17]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_BRANCH_NO","[18]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION","[19]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMPUTER","0");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::PROP","1");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SCANNER","2");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::WEAPON","3");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::CONSTR","4");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SENSOR","5");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR","6");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION_DATA","[35]");
+    meta->addSymbolEntry("SCANNER_INOUT_CELL_NUMBER","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::INOUT_CELL_NUMBER))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_MASS","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_MASS))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_ENERGY","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_ENERGY))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_ANGLE","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_ANGLE))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_DIST","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_DIST))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_CELL_MAX_CONNECTIONS))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_CELL_BRANCH_NO","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_CELL_BRANCH_NO))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_CELL_FUNCTION))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMPUTER",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT_CELL_FUNCTION::COMPUTER)));
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::PROP",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT_CELL_FUNCTION::PROP)));
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SCANNER",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT_CELL_FUNCTION::SCANNER)));
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::WEAPON",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT_CELL_FUNCTION::WEAPON)));
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::CONSTR",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT_CELL_FUNCTION::CONSTR)));
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SENSOR",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT_CELL_FUNCTION::SENSOR)));
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR",QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR)));
+    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION_DATA","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_CELL_FUNCTION_DATA))+"]");
 
     //weapon
-    meta->addSymbolEntry("WEAPON_OUT","[5]");
-    meta->addSymbolEntry("WEAPON_OUT::NO_TARGET","0");
-    meta->addSymbolEntry("WEAPON_OUT::STRIKE_SUCCESSFUL","1");
+    meta->addSymbolEntry("WEAPON_OUT","["+QString::number(static_cast<int>(AlienCellFunctionWeapon::WEAPON::OUT))+"]");
+    meta->addSymbolEntry("WEAPON_OUT::NO_TARGET",QString::number(static_cast<int>(AlienCellFunctionWeapon::WEAPON_OUT::NO_TARGET)));
+    meta->addSymbolEntry("WEAPON_OUT::STRIKE_SUCCESSFUL",QString::number(static_cast<int>(AlienCellFunctionWeapon::WEAPON_OUT::STRIKE_SUCCESSFUL)));
 
     //sensor
-    meta->addSymbolEntry("SENSOR_OUT", "[5]");
-    meta->addSymbolEntry("SENSOR_OUT::NOTHING_FOUND", "0");
-    meta->addSymbolEntry("SENSOR_OUT::CLUSTER_FOUND", "1");
-    meta->addSymbolEntry("SENSOR_IN", "[20]");
-    meta->addSymbolEntry("SENSOR_IN::DO_NOTHING", "0");
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_VICINITY", "1");
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_BY_ANGLE", "2");
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_FROM_CENTER", "3");
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_TOWARD_CENTER", "4");
-    meta->addSymbolEntry("SENSOR_INOUT_ANGLE", "[21]");
-    meta->addSymbolEntry("SENSOR_IN_MIN_MASS", "[22]");
-    meta->addSymbolEntry("SENSOR_IN_MAX_MASS", "[23]");
-    meta->addSymbolEntry("SENSOR_OUT_MASS", "[24]");
-    meta->addSymbolEntry("SENSOR_OUT_DIST", "[25]");
+    meta->addSymbolEntry("SENSOR_OUT", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::OUT))+"]");
+    meta->addSymbolEntry("SENSOR_OUT::NOTHING_FOUND", QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR_OUT::NOTHING_FOUND)));
+    meta->addSymbolEntry("SENSOR_OUT::CLUSTER_FOUND", QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR_OUT::CLUSTER_FOUND)));
+    meta->addSymbolEntry("SENSOR_IN", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::IN))+"]");
+    meta->addSymbolEntry("SENSOR_IN::DO_NOTHING", QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR_IN::DO_NOTHING)));
+    meta->addSymbolEntry("SENSOR_IN::SEARCH_VICINITY", QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR_IN::SEARCH_VICINITY)));
+    meta->addSymbolEntry("SENSOR_IN::SEARCH_BY_ANGLE", QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR_IN::SEARCH_BY_ANGLE)));
+    meta->addSymbolEntry("SENSOR_IN::SEARCH_FROM_CENTER", QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR_IN::SEARCH_FROM_CENTER)));
+    meta->addSymbolEntry("SENSOR_IN::SEARCH_TOWARD_CENTER", QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR_IN::SEARCH_TOWARD_CENTER)));
+    meta->addSymbolEntry("SENSOR_INOUT_ANGLE", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::INOUT_ANGLE))+"]");
+    meta->addSymbolEntry("SENSOR_IN_MIN_MASS", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::IN_MIN_MASS))+"]");
+    meta->addSymbolEntry("SENSOR_IN_MAX_MASS", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::IN_MAX_MASS))+"]");
+    meta->addSymbolEntry("SENSOR_OUT_MASS", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::OUT_MASS))+"]");
+    meta->addSymbolEntry("SENSOR_OUT_DIST", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::OUT_DIST))+"]");
 }
 
 AlienParameters simulationParameters;

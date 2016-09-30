@@ -230,7 +230,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 QVector3D transFinish(0.0, 0.0, 0.0);
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) )
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) )
                     transFinish = trans;
 
 
@@ -252,7 +252,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 qreal tokenEnergy = 0;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED) ))
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED) ))
                     tokenEnergy = simulationParameters.NEW_TOKEN_ENERGY;
 
                 //not enough energy?
@@ -343,7 +343,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 //average cell energy if token is created
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) ) {
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     qreal av = averageEnergy(cell->getEnergy(), newCell->getEnergy());
                     cell->setEnergy(av);
                     newCell->setEnergy(av);
@@ -359,7 +359,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_NO_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) )
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) )
                     newCell->setBlockToken(false);
 
                 //separate construction site?
@@ -368,7 +368,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                     separateConstruction(newCell, cell, false);
                 }
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) ) {
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     decompose = true;
                     separateConstruction(newCell, cell, true);
                 }
@@ -380,7 +380,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
 
                 //create new token if desired
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) ) {
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     if( newCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) {
                         newCell->addToken(new AlienToken(simulationParameters.NEW_TOKEN_ENERGY), false);
                         token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
@@ -445,7 +445,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 QVector3D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) )
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) )
                     pos = pos + angleGapPos;
 
 
@@ -460,7 +460,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 qreal tokenEnergy = 0;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN) )
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) )
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) )
                     tokenEnergy = simulationParameters.NEW_TOKEN_ENERGY;
 
                 //not enough energy?
@@ -512,7 +512,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 //average cell energy if token is created
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) ) {
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     qreal av = averageEnergy(cell->getEnergy(), newCell->getEnergy());
                     cell->setEnergy(av);
                     newCell->setEnergy(av);
@@ -525,7 +525,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_NO_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) )
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) )
                     newCell->setBlockToken(false);
 
                 //separate construction site?
@@ -534,7 +534,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                     separateConstruction(newCell, cell, false);
                 }
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) ) {
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     decompose = true;
                     separateConstruction(newCell, cell, true);
                 }
@@ -546,7 +546,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
 
                 //create new token if desired
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED)) ) {
+                        || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     newCell->addToken(new AlienToken(simulationParameters.NEW_TOKEN_ENERGY), false);
                     token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
                 }
@@ -680,19 +680,19 @@ void AlienCellFunctionConstructor::separateConstruction (AlienCell* constructedC
 QString AlienCellFunctionConstructor::convertCellTypeNumberToName (int type)
 {
     type = type%7;
-    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::COMPUTER) )
+    if( type == static_cast<int>(CONSTR_IN_CELL_FUNCTION::COMPUTER) )
         return "COMPUTER";
-    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::PROP) )
+    if( type == static_cast<int>(CONSTR_IN_CELL_FUNCTION::PROP) )
         return "PROPULSION";
-    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::SCANNER) )
+    if( type == static_cast<int>(CONSTR_IN_CELL_FUNCTION::SCANNER) )
         return "SCANNER";
-    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::WEAPON) )
+    if( type == static_cast<int>(CONSTR_IN_CELL_FUNCTION::WEAPON) )
         return "WEAPON";
-    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::CONSTR) )
+    if( type == static_cast<int>(CONSTR_IN_CELL_FUNCTION::CONSTR) )
         return "CONSTRUCTOR";
-    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::SENSOR) )
+    if( type == static_cast<int>(CONSTR_IN_CELL_FUNCTION::SENSOR) )
         return "SENSOR";
-    if( type == static_cast<int>(CONSTR_IN_CELL_TYPE::COMMUNICATOR) )
+    if( type == static_cast<int>(CONSTR_IN_CELL_FUNCTION::COMMUNICATOR) )
         return "COMMUNICATOR";
     return 0;
 }

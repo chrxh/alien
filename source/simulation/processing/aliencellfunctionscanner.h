@@ -33,7 +33,7 @@ public:
         FINISHED,
         RESTART
     };
-    enum class SCANNER_OUT_CELL_TYPE {
+    enum class SCANNER_OUT_CELL_FUNCTION {
         COMPUTER,
         PROP,
         SCANNER,
