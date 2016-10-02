@@ -12,7 +12,7 @@ class TutorialWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit TutorialWindow(QWidget *parent = 0);
+     TutorialWindow(QWidget *parent = 0);
     ~TutorialWindow();
     
 signals:
