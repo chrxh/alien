@@ -38,6 +38,8 @@ public:
     AlienCell* getCellFast (const int& x, const int& y) const;
     QSet< AlienCellCluster* > getNearbyClusters (const QVector3D& pos, qreal r) const;
     AlienCellCluster* getNearbyClusterFast (const QVector3D& pos, qreal r, qreal minMass, qreal maxMass, AlienCellCluster* exclude) const;
+    using CellSelectFunction = bool(*)(AlienCell*);
+    QList< AlienCell* > getNearbySpecificCells (const QVector3D& pos, qreal r, CellSelectFunction selection) const;
 
     //energy grid access functions
     void removeEnergy (QVector3D pos, AlienEnergy* energy);
@@ -130,6 +132,23 @@ inline QSet< AlienCellCluster* > AlienGrid::getNearbyClusters (const QVector3D& 
             }
         }
     return clusters;
+}
+
+inline QList< AlienCell* > AlienGrid::getNearbySpecificCells (const QVector3D& pos, qreal r, CellSelectFunction selection) const
+{
+    QList< AlienCell* > cells;
+    int rCeil = qCeil(r);
+    for(int scanX = pos.x()-rCeil; scanX < pos.x()+rCeil+1; ++scanX)
+        for(int scanY = pos.y()-rCeil; scanY < pos.y()+rCeil+1; ++scanY) {
+            if( QVector3D(static_cast<float>(scanX)-pos.x(),static_cast<float>(scanY)-pos.y(),0).length() < r+ALIEN_PRECISION ) {
+                AlienCell* cell(getCell(QVector3D(scanX, scanY,0)));
+                if( cell ) {
+                    if( selection(cell) )
+                        cells << cell;
+                }
+            }
+        }
+    return cells;
 }
 
 inline void AlienGrid::removeEnergy (QVector3D pos, AlienEnergy* energy)
