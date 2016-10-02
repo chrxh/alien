@@ -22,11 +22,17 @@ AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (QDataStream& strea
 void AlienCellFunctionCommunicator::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
 {
     quint8 cmd = token->memory[static_cast<int>(COMMUNICATOR::IN)] % 4;
+    quint8 channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
+    quint8 msg = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
 
     if( cmd == static_cast<int>(COMMUNICATOR_IN::SET_LISTENING_CHANNEL) )
-        setListeningChannelFromToken(token);
-    if( cmd == static_cast<int>(COMMUNICATOR_IN::SEND_MESSAGE) )
-        sendMessageFromTokenToNearbyCells(token, cell, grid);
+        _listeningChannel = channel;
+    if( cmd == static_cast<int>(COMMUNICATOR_IN::SEND_MESSAGE) ) {
+        int numMsg = sendMessageToNearbyCellsAndReturnNumber(channel, msg, cell, grid);
+        if( numMsg > 127)
+            numMsg = 127;
+        token->memory[static_cast<int>(COMMUNICATOR::OUT_NUM_MESSAGE_SENT)] = numMsg;
+    }
     if( cmd == static_cast<int>(COMMUNICATOR_IN::RECEIVE_MESSAGE) )
         receiveMessage();
 }
@@ -41,13 +47,35 @@ void AlienCellFunctionCommunicator::setListeningChannelFromToken (AlienToken* to
     _listeningChannel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
 }
 
-void AlienCellFunctionCommunicator::sendMessageFromTokenToNearbyCells (AlienToken* token, AlienCell* cell, AlienGrid* grid)
+bool cellSelectCommunicatorFunction (AlienCell* cell)
 {
-    QVector3D cellPos = cell->calcPosition();
-    QSet< AlienCellCluster* > nearbyClusters = grid->getNearbyClusters(cellPos, 100.0);
+    return cell->getCellFunction()->getCellFunctionName() == "COMMUNICATOR";
 }
 
-void AlienCellFunctionCommunicator::receiveMessage ()
+int AlienCellFunctionCommunicator::sendMessageToNearbyCellsAndReturnNumber (const quint8& channel, const quint8& msg, AlienCell* cell, AlienGrid* grid) const
+{
+    //find nearby communicator cells
+    QVector3D cellPos = cell->calcPosition();
+    qreal r = simulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE;
+    QList< AlienCell* > nearbyCommunicatorCells = grid->getNearbySpecificCells(cellPos, r, cellSelectCommunicatorFunction);
+
+    //send data to communicator cells
+    int numMsg = 0;
+    foreach(AlienCell* nearbyCell, nearbyCommunicatorCells) {
+        if( nearbyCell != cell ) {
+            if( sendMessageToCellAndReturnSuccess(channel, msg, nearbyCell) )
+                ++numMsg;
+        }
+    }
+    return numMsg;
+}
+
+bool AlienCellFunctionCommunicator::sendMessageToCellAndReturnSuccess (const quint8& channel, const quint8& msg, AlienCell* cell) const
+{
+    return true;
+}
+
+void AlienCellFunctionCommunicator::receiveMessage () const
 {
 
 }

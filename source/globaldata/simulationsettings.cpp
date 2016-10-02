@@ -132,9 +132,9 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("SENSOR_OUT_DIST", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::OUT_DIST))+"]");
 }
 
-AlienParameters simulationParameters;
+SimulationParameters simulationParameters;
 
-AlienParameters::AlienParameters ()
+SimulationParameters::SimulationParameters ()
     : CRIT_CELL_DIST_MIN(0.3),
       CRIT_CELL_DIST_MAX(1.3),
       INTERNAL_TO_KINETIC_ENERGY(1),   //related to 1/mass
@@ -170,7 +170,7 @@ AlienParameters::AlienParameters ()
 
 }
 
-void AlienParameters::serializeData (QDataStream& stream)
+void SimulationParameters::serializeData (QDataStream& stream)
 {
     stream << CRIT_CELL_DIST_MIN;
     stream << CRIT_CELL_DIST_MAX;
@@ -202,7 +202,7 @@ void AlienParameters::serializeData (QDataStream& stream)
     stream << CELL_RAD_ENERGY_VEL_PERTURB;
 }
 
-void AlienParameters::readData (QDataStream& stream)
+void SimulationParameters::readData (QDataStream& stream)
 {
     stream >> CRIT_CELL_DIST_MIN;
     stream >> CRIT_CELL_DIST_MAX;

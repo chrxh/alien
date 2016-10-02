@@ -31,7 +31,7 @@ private:
     Ui::SimulationParametersDialog *ui;
 
     //simulation parameters (not the global ones)
-    AlienParameters localSimulationParameters;
+    SimulationParameters localSimulationParameters;
 };
 
 #endif // SIMULATIONPARAMETERSDIALOG_H
