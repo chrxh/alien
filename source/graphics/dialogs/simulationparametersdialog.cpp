@@ -107,7 +107,7 @@ void SimulationParametersDialog::getLocalSimulationParametersFromWidgets ()
 
 void SimulationParametersDialog::defaultButtonClicked ()
 {
-    localSimulationParameters = AlienParameters();
+    localSimulationParameters = SimulationParameters();
     setLocalSimulationParametersToWidgets();
 }
 

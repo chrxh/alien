@@ -13,7 +13,7 @@ public:
     static void loadDefaultMetadata (MetadataManager* meta);
 };
 
-struct AlienParameters
+struct SimulationParameters
 {
     //simulation constants
     qreal CRIT_CELL_DIST_MIN;
@@ -49,12 +49,12 @@ struct AlienParameters
     qreal CELL_RAD_ENERGY_VEL_MULT;
     qreal CELL_RAD_ENERGY_VEL_PERTURB;
 
-    AlienParameters ();
+    SimulationParameters ();
 
     void serializeData (QDataStream& stream);
     void readData (QDataStream& stream);
 };
 
-extern AlienParameters simulationParameters;
+extern SimulationParameters simulationParameters;
 
 #endif // SIMULATIONSETTINGS_H

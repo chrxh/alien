@@ -37,8 +37,9 @@ private:
     quint8 _senderDistance;
 
     void setListeningChannelFromToken (AlienToken* token);
-    void sendMessageFromTokenToNearbyCells (AlienToken* token, AlienCell* cell, AlienGrid* grid);
-    void receiveMessage ();
+    int sendMessageToNearbyCellsAndReturnNumber (const quint8& channel, const quint8& msg, AlienCell* cell, AlienGrid* grid) const;
+    bool sendMessageToCellAndReturnSuccess (const quint8& channel, const quint8& msg, AlienCell* cell) const;
+    void receiveMessage () const;
 
 };
 
