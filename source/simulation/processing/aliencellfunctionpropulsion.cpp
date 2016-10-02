@@ -23,7 +23,7 @@ AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (QDataStream& stream)
 }
 
 
-void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
 {
     AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(PROP::IN)]%7;
@@ -98,7 +98,7 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previou
     if( token->energy >= (energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
-        newParticle = new AlienEnergy(qAbs(energyDiff), cluster->calcPosition(cell, space)-impulse.normalized(), tangVel-impulse.normalized()/4.0);
+        newParticle = new AlienEnergy(qAbs(energyDiff), cluster->calcPosition(cell, grid)-impulse.normalized(), tangVel-impulse.normalized()/4.0);
 
         //update velocities
         cluster->setVel(newVel);

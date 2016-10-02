@@ -10,7 +10,7 @@ public:
     AlienCellFunctionScanner (quint8* cellTypeData);
     AlienCellFunctionScanner (QDataStream& stream);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName ();
 
     void serialize (QDataStream& stream);
