@@ -13,7 +13,7 @@ public:
     AlienCellFunctionConstructor (quint8* cellTypeData);
     AlienCellFunctionConstructor (QDataStream& stream);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName ();
 
     void serialize (QDataStream& stream);

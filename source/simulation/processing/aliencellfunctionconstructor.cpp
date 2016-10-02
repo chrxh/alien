@@ -30,7 +30,7 @@ AlienCellFunctionConstructor::AlienCellFunctionConstructor (QDataStream& stream)
 void AlienCellFunctionConstructor::execute (AlienToken* token,
                                             AlienCell* previousCell,
                                             AlienCell* cell,
-                                            AlienGrid*& grid,
+                                            AlienGrid* grid,
                                             AlienEnergy*& newParticle,
                                             bool& decompose)
 {

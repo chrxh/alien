@@ -10,7 +10,7 @@ public:
     AlienCellFunctionCommunicator (quint8* cellTypeData);
     AlienCellFunctionCommunicator (QDataStream& stream);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName ();
 
     //constants for cell function programming
@@ -18,7 +18,7 @@ public:
         IN = 26,
         IN_CHANNEL = 27,
         IN_MESSAGE = 28,
-        OUT_NUMBER_MESSAGE_SENT = 29,
+        OUT_NUM_MESSAGE_SENT = 29,
         OUT_RECEIVED_BYTE = 30,
         OUT_SENDER_DIRECTION = 31,
         OUT_SENDER_DISTANCE = 32,
@@ -26,7 +26,8 @@ public:
     enum class COMMUNICATOR_IN {
         DO_NOTHING,
         SET_LISTENING_CHANNEL,
-        SEND_MESSAGE
+        SEND_MESSAGE,
+        RECEIVE_MESSAGE
     };
 
 private:
@@ -34,6 +35,11 @@ private:
     quint8 _receivedByte;
     quint8 _senderDirection;
     quint8 _senderDistance;
+
+    void setListeningChannelFromToken (AlienToken* token);
+    void sendMessageFromTokenToNearbyCells (AlienToken* token, AlienCell* cell, AlienGrid* grid);
+    void receiveMessage ();
+
 };
 
 #endif // ALIENCELLFUNCTIONCOMMUNICATOR_H
