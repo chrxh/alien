@@ -202,6 +202,9 @@
         <property name="text">
          <string>offspring distance</string>
         </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+        </property>
        </item>
       </item>
       <item>
@@ -212,6 +215,9 @@
         <property name="text">
          <string>range</string>
         </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+        </property>
        </item>
       </item>
       <item>
@@ -221,6 +227,19 @@
        <item>
         <property name="text">
          <string>strength</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+        </property>
+       </item>
+      </item>
+      <item>
+       <property name="text">
+        <string>communicator</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>range</string>
         </property>
         <property name="flags">
          <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
