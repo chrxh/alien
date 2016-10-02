@@ -155,7 +155,8 @@ AlienParameters::AlienParameters ()
       CELL_MEMSIZE(8),
       TOKEN_MEMSIZE(256),
       CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST(1.0),
-      CELL_FUNCTION_SENSOR_RANGE(100),
+      CELL_FUNCTION_SENSOR_RANGE(100.0),
+      CELL_FUNCTION_COMMUNICATOR_RANGE(30.0),
 
       NEW_TOKEN_ENERGY(60.0),
       MIN_TOKEN_ENERGY(3.0),
@@ -191,6 +192,7 @@ void AlienParameters::serializeData (QDataStream& stream)
     stream << TOKEN_MEMSIZE;
     stream << CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
     stream << CELL_FUNCTION_SENSOR_RANGE;
+    stream << CELL_FUNCTION_COMMUNICATOR_RANGE;
     stream << NEW_TOKEN_ENERGY;
     stream << MIN_TOKEN_ENERGY;
     stream << RAD_EXPONENT;

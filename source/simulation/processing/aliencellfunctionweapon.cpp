@@ -19,7 +19,7 @@ AlienCellFunctionWeapon::AlienCellFunctionWeapon (QDataStream& stream)
 
 }
 
-void AlienCellFunctionWeapon::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& grid, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionWeapon::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
 {
     token->memory[static_cast<int>(WEAPON::OUT)] = static_cast<int>(WEAPON_OUT::NO_TARGET);
     QVector3D pos = cell->getCluster()->calcPosition(cell);

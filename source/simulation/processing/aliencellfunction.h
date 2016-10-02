@@ -13,7 +13,7 @@ public:
     virtual ~AlienCellFunction();
 
     virtual void runEnergyGuidanceSystem (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space);
-    virtual void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose) = 0;
+    virtual void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose) = 0;
     virtual QString getCode ();
     virtual bool compileCode (QString code, int& errorLine);
     virtual QString getCellFunctionName () = 0;
