@@ -115,7 +115,7 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previou
     }
 }
 
-QString AlienCellFunctionPropulsion::getCellFunctionName ()
+QString AlienCellFunctionPropulsion::getCellFunctionName () const
 {
     return "PROPULSION";
 }

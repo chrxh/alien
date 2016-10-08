@@ -151,7 +151,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
     token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::NOTHING_FOUND);
 }
 
-QString AlienCellFunctionSensor::getCellFunctionName ()
+QString AlienCellFunctionSensor::getCellFunctionName () const
 {
     return "SENSOR";
 }

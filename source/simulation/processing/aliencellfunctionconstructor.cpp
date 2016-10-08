@@ -418,9 +418,9 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 //find biggest angle gap for new cell
                 QVector< qreal > angles(numCon);
                 for(int i = 0; i < numCon; ++i) {
-                    QVector3D dist = cluster->calcPosition(cell->getConnection(i),grid)-cluster->calcPosition(cell, grid);
-                    grid->correctDistance(dist);
-                    angles[i] = Physics::calcAngle(dist);
+                    QVector3D displacement = cluster->calcPosition(cell->getConnection(i),grid)-cluster->calcPosition(cell, grid);
+                    grid->correctDisplacement(displacement);
+                    angles[i] = Physics::calcAngle(displacement);
                 }
                 qSort(angles);
                 qreal largestAnglesDiff = 0.0;
@@ -574,7 +574,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
     }
 }
 
-QString AlienCellFunctionConstructor::getCellFunctionName ()
+QString AlienCellFunctionConstructor::getCellFunctionName () const
 {
     return "CONSTRUCTOR";
 }

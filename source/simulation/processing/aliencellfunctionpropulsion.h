@@ -11,7 +11,7 @@ public:
     AlienCellFunctionPropulsion (QDataStream& stream);
 
     void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
-    QString getCellFunctionName ();
+    QString getCellFunctionName () const;
 
     //constants for cell function programming
     enum class PROP {

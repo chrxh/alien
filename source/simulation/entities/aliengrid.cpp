@@ -90,6 +90,35 @@ void AlienGrid::unlockData ()
     _mutex.unlock();
 }
 
+QSet< quint64 > AlienGrid::getAllCellIds () const
+{
+    QList< quint64 > cellIds;
+    foreach(AlienCellCluster* cluster, _clusters) {
+        cellIds << cluster->getCellIds();
+    }
+    return cellIds.toSet();
+}
+
+void AlienGrid::clearGrids ()
+{
+    for(qint32 x=0; x < _sizeX; ++x)
+        for(qint32 y=0; y < _sizeY; ++y) {
+            _cellGrid[x][y] = 0;
+            _energyGrid[x][y] = 0;
+        }
+}
+
+qint32 AlienGrid::getSizeX() const
+{
+    return _sizeX;
+}
+
+qint32 AlienGrid::getSizeY() const
+{
+    return _sizeY;
+}
+
+
 void AlienGrid::removeCell (QVector3D pos)
 {
     qint32 x = qFloor(pos.x());
@@ -167,35 +196,6 @@ AlienCellCluster* AlienGrid::getNearbyClusterFast (const QVector3D& pos, qreal r
     return closestCluster;
 }
 
-QSet< quint64 > AlienGrid::getAllCellIds () const
-{
-    QList< quint64 > cellIds;
-    foreach(AlienCellCluster* cluster, _clusters) {
-        cellIds << cluster->getCellIds();
-    }
-    return cellIds.toSet();
-}
-
-void AlienGrid::clearGrids ()
-{
-    for(qint32 x=0; x < _sizeX; ++x)
-        for(qint32 y=0; y < _sizeY; ++y) {
-            _cellGrid[x][y] = 0;
-            _energyGrid[x][y] = 0;
-        }
-}
-
-qint32 AlienGrid::getSizeX() const
-{
-    return _sizeX;
-}
-
-qint32 AlienGrid::getSizeY() const
-{
-    return _sizeY;
-}
-
-
 void AlienGrid::correctPosition (QVector3D& pos) const
 {
     qint32 intPart(0.0);
@@ -208,38 +208,34 @@ void AlienGrid::correctPosition (QVector3D& pos) const
     pos.setY((qreal)(((intPart%_sizeY)+_sizeY)%_sizeY)+fracPart);
 }
 
-void AlienGrid::correctDistance (QVector3D& distance) const
+void AlienGrid::correctDisplacement (QVector3D& displacement) const
 {
-    qint32 x = qFloor(distance.x());
-    qint32 y = qFloor(distance.y());
-    qreal rx = distance.x()-(qreal)x;
-    qreal ry = distance.y()-(qreal)y;
+    qint32 x = qFloor(displacement.x());
+    qint32 y = qFloor(displacement.y());
+    qreal rx = displacement.x()-(qreal)x;
+    qreal ry = displacement.y()-(qreal)y;
     x += _sizeX/2;
     y += _sizeY/2;
     x = ((x%_sizeX)+_sizeX)%_sizeX;
     y = ((y%_sizeY)+_sizeY)%_sizeY;
     x -= _sizeX/2;
     y -= _sizeY/2;
-    distance.setX((qreal)x+rx);
-    distance.setY((qreal)y+ry);
-/*
-    qreal sizeX(_sizeX);
-    qreal sizeY(_sizeY);
-    if( distance.x() > (sizeX/2.0) )
-        distance.setX(distance.x()-sizeX);
-    if( distance.x() <= -(sizeX/2.0) )
-        distance.setX(distance.x()+sizeX);
-    if( distance.y() > (sizeY/2.0) )
-        distance.setY(distance.y()-sizeY);
-    if( distance.y() <= -(sizeY/2.0) )
-        distance.setY(distance.y()+sizeY);*/
+    displacement.setX((qreal)x+rx);
+    displacement.setY((qreal)y+ry);
 }
 
 QVector3D AlienGrid::displacement (QVector3D p1, QVector3D p2) const
 {
     QVector3D d = p1-p2;
-    correctDistance(d);
+    correctDisplacement(d);
     return d;
+}
+
+qreal AlienGrid::calcDistance (AlienCell* cell1, AlienCell* cell2) const
+{
+    QVector3D displacement = cell1->calcPosition()-cell2->calcPosition();
+    correctDisplacement(displacement);
+    return displacement.length();
 }
 
 void AlienGrid::serializeSize (QDataStream& stream) const
