@@ -502,7 +502,7 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
 }
 
 
-QString AlienCellFunctionComputer::getCellFunctionName ()
+QString AlienCellFunctionComputer::getCellFunctionName () const
 {
     return "COMPUTER";
 }

@@ -26,9 +26,13 @@ public:
     void lockData ();
     void unlockData ();
 
-    //universe access functions
+    //access functions to all entities
     QList< AlienCellCluster* >& getClusters ();
     QList< AlienEnergy* >& getEnergyParticles ();
+    QSet< quint64 > getAllCellIds () const;
+    void clearGrids ();
+    qint32 getSizeX() const;
+    qint32 getSizeY() const;
 
     //cell grid access functions
     void setCell (QVector3D pos, AlienCell* cell);
@@ -36,6 +40,8 @@ public:
     void removeCellIfPresent (QVector3D pos, AlienCell* cell);
     AlienCell* getCell (QVector3D pos) const;
     AlienCell* getCellFast (const int& x, const int& y) const;
+
+    //location functions
     QSet< AlienCellCluster* > getNearbyClusters (const QVector3D& pos, qreal r) const;
     AlienCellCluster* getNearbyClusterFast (const QVector3D& pos, qreal r, qreal minMass, qreal maxMass, AlienCellCluster* exclude) const;
     using CellSelectFunction = bool(*)(AlienCell*);
@@ -47,25 +53,18 @@ public:
     void setEnergy(QVector3D pos, AlienEnergy* energy);
     AlienEnergy* getEnergy (QVector3D pos) const;
 
-    //access functions
-    QSet< quint64 > getAllCellIds () const;
-    void clearGrids ();
-    qint32 getSizeX() const;
-    qint32 getSizeY() const;
-
     //auxiliary functions
     void correctPosition (QVector3D& pos) const;
-    void correctDistance (QVector3D& distance) const;
+    void correctDisplacement (QVector3D& displacement) const;
     QVector3D displacement (QVector3D p1, QVector3D p2) const;
+    qreal calcDistance (AlienCell* cell1, AlienCell* cell2) const;
 
+    //(de)serialisation functions
     void serializeSize (QDataStream& stream) const;
     void serializeMap (QDataStream& stream) const;
     void buildEmptyMap (QDataStream& stream);
     void buildMap (QDataStream& stream, const QMap< quint64, AlienCell* >& oldIdCellMap, const QMap< quint64, AlienEnergy* >& oldIdEnergyMap);
 
-//    qreal _cellRadiationProb;
-
-//    QMap< quint64, QMap< quint64, int > > collisionMemory;
 private:
     QMutex _mutex;
     qint32 _sizeX;

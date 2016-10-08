@@ -100,7 +100,7 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* previousCe
     token->memory[static_cast<int>(SCANNER::OUT_MASS)] = mass;
 }
 
-QString AlienCellFunctionScanner::getCellFunctionName ()
+QString AlienCellFunctionScanner::getCellFunctionName () const
 {
     return "SCANNER";
 }

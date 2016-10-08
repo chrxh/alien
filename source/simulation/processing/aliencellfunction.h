@@ -16,7 +16,7 @@ public:
     virtual void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose) = 0;
     virtual QString getCode ();
     virtual bool compileCode (QString code, int& errorLine);
-    virtual QString getCellFunctionName () = 0;
+    virtual QString getCellFunctionName () const = 0;
 
     virtual void serialize (QDataStream& stream);
 
@@ -38,11 +38,12 @@ public:
     };
 
 protected:
-    qreal convertDataToAngle (quint8 b);
-    quint8 convertAngleToData (qreal a);
-    qreal convertDataToShiftLen (quint8 b);
-    quint8 convertShiftLenToData (qreal len);
-    quint8 convertURealToData (qreal r);
+    qreal convertDataToAngle (quint8 b) const;
+    quint8 convertAngleToData (qreal a) const;
+    qreal convertDataToShiftLen (quint8 b) const;
+    quint8 convertShiftLenToData (qreal len) const;
+    quint8 convertURealToData (qreal r) const;
+    quint8 convertIntToData (int i) const;
 };
 
 #endif // ALIENCELLFUNCTION_H
