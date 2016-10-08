@@ -43,13 +43,14 @@ private:
     quint8 _receivedDistance;
 
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
-    void sendMessageToNearbyCellsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
-    quint8 readListeningChannelFrom (AlienToken* token) const;
-    int sendMessageToNearbyCellsAndReturnNumber (const quint8& channel, const quint8& msg, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
-    QList< AlienCell* > findNearbyCommunicatorCells (AlienCell* cell, AlienGrid* grid) const;
-    bool sendMessageToCellAndReturnSuccess (const quint8& channel, const quint8& msg, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienCell* receiverCell, AlienGrid* grid) const;
-    AlienCellFunctionCommunicator* getCommunicator (AlienCell* cell) const;
+    void readListeningChannel (AlienToken* token);
+    void sendMessageToNearbyCommunicatorsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
     void receiveMessage () const;
+
+    int sendMessageToNearbyCommunicatorsAndReturnNumber (const quint8& channel, const quint8& msg, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
+    QList< AlienCell* > findNearbyCommunicator (AlienCell* cell, AlienGrid* grid) const;
+    bool sendMessageToCommunicatorAndReturnSuccess (const quint8& channel, const quint8& msg, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienCell* receiverCell, AlienGrid* grid) const;
+    AlienCellFunctionCommunicator* getCommunicator (AlienCell* cell) const;
 
 };
 
