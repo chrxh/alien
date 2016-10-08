@@ -18,21 +18,27 @@ public:
         IN = 26,
         IN_CHANNEL = 27,
         IN_MESSAGE = 28,
-        OUT_NUM_MESSAGE_SENT = 29,
-        OUT_RECEIVED_MESSAGE = 30,
-        OUT_RECEIVED_ANGLE = 31,
-        OUT_RECEIVED_DISTANCE = 32,
+        OUT_SENT_NUM_MESSAGE = 29,
+        OUT_RECEIVED_NEW_MESSAGE = 30,
+        OUT_RECEIVED_MESSAGE = 31,
+        OUT_RECEIVED_ANGLE = 32,
+        OUT_RECEIVED_DISTANCE = 33,
     };
     enum class COMMUNICATOR_IN {
-        DO_NOTHING = 0,
-        SET_LISTENING_CHANNEL = 1,
-        SEND_MESSAGE = 2,
-        RECEIVE_MESSAGE = 3
+        DO_NOTHING,
+        SET_LISTENING_CHANNEL,
+        SEND_MESSAGE,
+        RECEIVE_MESSAGE
+    };
+    enum class COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE {
+        NO_NEW_MESSAGE,
+        NEW_MESSAGE
     };
 
 private:
     quint8 _listeningChannel;
-    quint8 _receivedMsg;
+    bool _receivedNewMessage;
+    quint8 _receivedMessage;
     quint8 _receivedAngle;
     quint8 _receivedDistance;
 
