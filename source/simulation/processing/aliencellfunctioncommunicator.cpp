@@ -5,7 +5,11 @@
 #include <QString>
 
 AlienCellFunctionCommunicator::AlienCellFunctionCommunicator()
-    : _listeningChannel(0), _receivedMsg(0), _receivedAngle(0), _receivedDistance(0)
+    : _listeningChannel(0),
+      _receivedNewMessage(false),
+      _receivedMessage(0),
+      _receivedAngle(0),
+      _receivedDistance(0)
 {
 
 }
@@ -55,7 +59,7 @@ void AlienCellFunctionCommunicator::sendMessageToNearbyCellsAndUpdateToken (Alie
     quint8 channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
     quint8 msg = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
     int numMsg = sendMessageToNearbyCellsAndReturnNumber(channel, msg, cell, grid);
-    token->memory[static_cast<int>(COMMUNICATOR::OUT_NUM_MESSAGE_SENT)] = convertIntToData(numMsg);
+    token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = convertIntToData(numMsg);
 }
 
 quint8 AlienCellFunctionCommunicator::readListeningChannelFrom (AlienToken* token) const
@@ -100,7 +104,7 @@ bool AlienCellFunctionCommunicator::sendMessageToCellAndReturnSuccess (const qui
     AlienCellFunctionCommunicator* communicator = getCommunicator(receiverCell);
     if( communicator ) {
         if( communicator->_listeningChannel == channel ) {
-            communicator->_receivedMsg = msg;
+            communicator->_receivedMessage = msg;
             communicator->_receivedAngle = 0; //mock
             communicator->_receivedDistance = convertURealToData(grid->calcDistance(senderCell, receiverCell));
             return true;
