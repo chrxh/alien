@@ -74,8 +74,8 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, Alie
         //calc angle from cell n to cell n-1
         qreal a1 = Physics::calcAngle(scanCellPre2->getRelPos() - scanCellPre1->getRelPos());
         qreal a2 = Physics::calcAngle(-scanCell->getRelPos() + scanCellPre1->getRelPos());
-        qreal angle = a2 - a1;
-        token->memory[static_cast<int>(SCANNER::OUT_ANGLE)] = convertAngleToData(-angle);
+        qreal angle = a1 - a2;
+        token->memory[static_cast<int>(SCANNER::OUT_ANGLE)] = convertAngleToData(angle);
 //        qDebug("-> v: %f, n: %f", -angle, convertDataToAngle(convertAngleToData(-angle)));
 
         //calc dist from cell n to cell n-1
