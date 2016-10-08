@@ -670,15 +670,15 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellRedu
             QList< QVector3D > neighborCellsRelPos;
             foreach(AlienCellCluster* cluster, clusters)
                 foreach(AlienCell* otherCell, cluster->getCells()) {
-                    QVector3D diff(otherCell->calcPosition()-pos);
-                    _grid->correctDistance(diff);
-                    qreal dist = diff.length();
+                    QVector3D displacement = otherCell->calcPosition()-pos;
+                    _grid->correctDisplacement(displacement);
+                    qreal dist = displacement.length();
                     if( (cell != otherCell) && (dist < simulationParameters.CRIT_CELL_DIST_MAX) ) {
 
                         //cells connectable?
                         if( cell->connectable(otherCell)) {
                             neighborCells << otherCell;
-                            neighborCellsRelPos << diff;
+                            neighborCellsRelPos << displacement;
                         }
                     }
                 }

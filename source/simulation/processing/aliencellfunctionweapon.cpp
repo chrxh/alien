@@ -43,7 +43,7 @@ void AlienCellFunctionWeapon::execute (AlienToken* token, AlienCell* previousCel
         }
 }
 
-QString AlienCellFunctionWeapon::getCellFunctionName ()
+QString AlienCellFunctionWeapon::getCellFunctionName () const
 {
     return "WEAPON";
 }

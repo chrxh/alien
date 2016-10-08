@@ -324,9 +324,9 @@ void AlienCellCluster::movementProcessingStep3 (AlienGrid*& space)
                     if( tempCell->_cluster != this ) {
 
                         //cell close enough?
-                        QVector3D distance(tempCell->_cluster->calcPosition(tempCell, space)-pos);
-                        space->correctDistance(distance);
-                        if( distance.length() < simulationParameters.CRIT_CELL_DIST_MAX ) {
+                        QVector3D displacement(tempCell->_cluster->calcPosition(tempCell, space)-pos);
+                        space->correctDisplacement(displacement);
+                        if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MAX ) {
                             quint64 clusterId = tempCell->_cluster->_id;
 
                             //read collision data for the colliding cluster
@@ -426,10 +426,10 @@ void AlienCellCluster::movementProcessingStep3 (AlienGrid*& space)
 
             //calc negative velocity at the center position (later used as outerSpace vector)
             QVector3D rAPp = centerPos-_pos;
-            space->correctDistance(rAPp);
+            space->correctDisplacement(rAPp);
             rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
             QVector3D rBPp = centerPos-otherCluster->_pos;
-            space->correctDistance(rBPp);
+            space->correctDisplacement(rBPp);
             rBPp = Physics::rotateQuarterCounterClockwise(rBPp);
             QVector3D outerSpace = (otherCluster->_vel-rBPp*otherCluster->_angularVel*degToRad)-(_vel-rAPp*_angularVel*degToRad);
 
@@ -480,11 +480,11 @@ void AlienCellCluster::movementProcessingStep3 (AlienGrid*& space)
                 QPair< AlienCell*, AlienCell* > item(it2.next());
                 AlienCell* cell(item.first);
                 AlienCell* otherCell(item.second);
-                QVector3D distance(otherCell->_cluster->calcPosition(otherCell, space)-calcPosition(cell, space));
-                space->correctDistance(distance);
+                QVector3D displacement(otherCell->_cluster->calcPosition(otherCell, space)-calcPosition(cell, space));
+                space->correctDisplacement(displacement);
 
                 //kill cell if too close
-                if( distance.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
+                if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
                     if( _cells.size() > otherCell->_cluster->_cells.size()) {
     //                    if( otherCell->_protectionCounter == 0 ) {
                             otherCell->_toBeKilled = true;
@@ -737,9 +737,9 @@ void AlienCellCluster::movementProcessingStep5 (AlienGrid*& space)
                         AlienCellCluster* otherCluster = otherCell->_cluster;
 //                        foreach(AlienCell* otherCell2, otherCluster->getCells()) {
 //                            if( otherCell2 != cell ) {
-                                QVector3D distance(otherCluster->calcPosition(otherCell, space)-calcPosition(cell, space));
-                                space->correctDistance(distance);
-                                if( distance.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
+                                QVector3D displacement = otherCluster->calcPosition(otherCell, space)-calcPosition(cell, space);
+                                space->correctDisplacement(displacement);
+                                if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
                                     if( _cells.size() > otherCluster->_cells.size()) {
 //                                        if( otherCell->_protectionCounter == 0 ) {
                                             otherCell->_toBeKilled = true;
@@ -960,11 +960,11 @@ qreal AlienCellCluster::calcAngularMassWithNewParticle (QVector3D particlePos, A
 
     //calc new angular mass
     QVector3D diff = particleRelPos - center;
-    grid->correctDistance(diff);
+    grid->correctDisplacement(diff);
     qreal aMass = diff.lengthSquared();
     foreach(AlienCell* cell, _cells) {
         diff = cell->_relPos - center;
-        grid->correctDistance(diff);
+        grid->correctDisplacement(diff);
         aMass = aMass + diff.lengthSquared();
     }
     return aMass;
@@ -983,9 +983,9 @@ qreal AlienCellCluster::calcAngularMassWithoutUpdate (AlienGrid*& grid)
     //calc new angular mass
     qreal aMass = 0.0;
     foreach(AlienCell* cell, _cells) {
-        QVector3D diff = cell->_relPos - center;
-        grid->correctDistance(diff);
-        aMass = aMass + diff.lengthSquared();
+        QVector3D displacement = cell->_relPos - center;
+        grid->correctDisplacement(displacement);
+        aMass = aMass + displacement.lengthSquared();
     }
     return aMass;
 }
