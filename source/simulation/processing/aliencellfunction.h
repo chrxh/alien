@@ -38,6 +38,8 @@ public:
     };
 
 protected:
+    qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2, AlienGrid* grid) const;
+
     qreal convertDataToAngle (quint8 b) const;
     quint8 convertAngleToData (qreal a) const;
     qreal convertDataToShiftLen (quint8 b) const;
