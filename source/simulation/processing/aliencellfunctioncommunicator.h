@@ -10,7 +10,7 @@ public:
     AlienCellFunctionCommunicator (quint8* cellTypeData);
     AlienCellFunctionCommunicator (QDataStream& stream);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName () const;
 
     //constants for cell function programming
@@ -43,11 +43,11 @@ private:
     quint8 _receivedDistance;
 
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
-    void sendMessageToNearbyCellsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienGrid* grid) const;
+    void sendMessageToNearbyCellsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
     quint8 readListeningChannelFrom (AlienToken* token) const;
-    int sendMessageToNearbyCellsAndReturnNumber (const quint8& channel, const quint8& msg, AlienCell* cell, AlienGrid* grid) const;
+    int sendMessageToNearbyCellsAndReturnNumber (const quint8& channel, const quint8& msg, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
     QList< AlienCell* > findNearbyCommunicatorCells (AlienCell* cell, AlienGrid* grid) const;
-    bool sendMessageToCellAndReturnSuccess (const quint8& channel, const quint8& msg, AlienCell* senderCell, AlienCell* receiverCell, AlienGrid* grid) const;
+    bool sendMessageToCellAndReturnSuccess (const quint8& channel, const quint8& msg, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienCell* receiverCell, AlienGrid* grid) const;
     AlienCellFunctionCommunicator* getCommunicator (AlienCell* cell) const;
     void receiveMessage () const;
 

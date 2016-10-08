@@ -679,12 +679,12 @@ void AlienCellCluster::movementProcessingStep4 (AlienGrid*& space, QList< AlienE
                         //execute cell function
                         spreadToken[i]->setTokenAccessNumber(spreadTokenCells[i]->_tokenAccessNumber);
                         AlienEnergy* newParticle = 0;
-                        spreadTokenCells[i]->_cellFunction->execute(spreadToken[i], cell, spreadTokenCells[i], space, newParticle, decompose);
+                        spreadTokenCells[i]->_cellFunction->execute(spreadToken[i], spreadTokenCells[i], cell, space, newParticle, decompose);
                         if( newParticle )
                             energyParticles << newParticle;
 
                         //execute energy guidance system
-                        spreadTokenCells[i]->_cellFunction->runEnergyGuidanceSystem(spreadToken[i], cell, spreadTokenCells[i], space);
+                        spreadTokenCells[i]->_cellFunction->runEnergyGuidanceSystem(spreadToken[i], spreadTokenCells[i], cell, space);
 
                         //average internal energies
 /*                        qreal av((cell->_energy + spreadTokenCells[i]->_energy)/2.0);

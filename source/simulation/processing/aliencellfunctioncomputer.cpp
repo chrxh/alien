@@ -39,7 +39,7 @@ AlienCellFunctionComputer::AlienCellFunctionComputer (QDataStream& stream)
 }
 
 
-void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
 {
     bool condTable[simulationParameters.CELL_CODESIZE];
     int condPointer(0);
