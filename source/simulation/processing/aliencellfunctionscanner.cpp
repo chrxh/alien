@@ -22,7 +22,7 @@ AlienCellFunctionScanner::AlienCellFunctionScanner (QDataStream& stream)
 
 }
 
-void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
 {
     int n = token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)];
     quint64 tag(GlobalFunctions::getTag());

@@ -14,7 +14,7 @@ AlienCellFunction::~AlienCellFunction()
 {
 }
 
-void AlienCellFunction::runEnergyGuidanceSystem (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space)
+void AlienCellFunction::runEnergyGuidanceSystem (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid*& space)
 {
     quint8 cmd = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN)] % 6;
     qreal valueCell = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_CELL)];

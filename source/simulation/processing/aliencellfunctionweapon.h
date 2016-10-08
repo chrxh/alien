@@ -10,7 +10,7 @@ public:
     AlienCellFunctionWeapon (quint8* cellTypeData);
     AlienCellFunctionWeapon (QDataStream& stream);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName () const;
 
     void serialize (QDataStream& stream);

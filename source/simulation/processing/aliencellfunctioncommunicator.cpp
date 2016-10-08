@@ -27,8 +27,8 @@ AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (QDataStream& strea
 }
 
 void AlienCellFunctionCommunicator::execute (AlienToken* token,
-                                             AlienCell* previousCell,
                                              AlienCell* cell,
+                                             AlienCell* previousCell,
                                              AlienGrid* grid,
                                              AlienEnergy*& newParticle,
                                              bool& decompose)
@@ -37,7 +37,7 @@ void AlienCellFunctionCommunicator::execute (AlienToken* token,
     if( cmd == COMMUNICATOR_IN::SET_LISTENING_CHANNEL )
         _listeningChannel = readListeningChannelFrom(token);
     if( cmd == COMMUNICATOR_IN::SEND_MESSAGE )
-        sendMessageToNearbyCellsAndUpdateToken(token, cell, grid);
+        sendMessageToNearbyCellsAndUpdateToken(token, cell, previousCell, grid);
     if( cmd == COMMUNICATOR_IN::RECEIVE_MESSAGE )
         receiveMessage();
 }
@@ -54,11 +54,12 @@ AlienCellFunctionCommunicator::COMMUNICATOR_IN AlienCellFunctionCommunicator::re
 
 void AlienCellFunctionCommunicator::sendMessageToNearbyCellsAndUpdateToken (AlienToken* token,
                                                                             AlienCell* cell,
+                                                                            AlienCell* previousCell,
                                                                             AlienGrid* grid) const
 {
     quint8 channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
     quint8 msg = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
-    int numMsg = sendMessageToNearbyCellsAndReturnNumber(channel, msg, cell, grid);
+    int numMsg = sendMessageToNearbyCellsAndReturnNumber(channel, msg, cell, previousCell, grid);
     token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = convertIntToData(numMsg);
 }
 
@@ -71,13 +72,14 @@ quint8 AlienCellFunctionCommunicator::readListeningChannelFrom (AlienToken* toke
 int AlienCellFunctionCommunicator::sendMessageToNearbyCellsAndReturnNumber (const quint8& channel,
                                                                             const quint8& msg,
                                                                             AlienCell* cell,
+                                                                            AlienCell* previousCell,
                                                                             AlienGrid* grid) const
 {
     int numMsg = 0;
     QList< AlienCell* > nearbyCommunicatorCells = findNearbyCommunicatorCells(cell, grid);
     foreach(AlienCell* nearbyCell, nearbyCommunicatorCells)
         if( nearbyCell != cell )
-            if( sendMessageToCellAndReturnSuccess(channel, msg, cell, nearbyCell, grid) )
+            if( sendMessageToCellAndReturnSuccess(channel, msg, cell, previousCell, nearbyCell, grid) )
                 ++numMsg;
     return numMsg;
 }
@@ -98,6 +100,7 @@ QList< AlienCell* > AlienCellFunctionCommunicator::findNearbyCommunicatorCells (
 bool AlienCellFunctionCommunicator::sendMessageToCellAndReturnSuccess (const quint8& channel,
                                                                        const quint8& msg,
                                                                        AlienCell* senderCell,
+                                                                       AlienCell* senderPreviousCell,
                                                                        AlienCell* receiverCell,
                                                                        AlienGrid* grid) const
 {
