@@ -26,7 +26,7 @@ AlienCellFunctionSensor::AlienCellFunctionSensor (QDataStream& stream)
 
 }
 
-void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
 {
     AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(SENSOR::IN)]%5;

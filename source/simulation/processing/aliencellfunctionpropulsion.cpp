@@ -23,7 +23,7 @@ AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (QDataStream& stream)
 }
 
 
-void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
 {
     AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(PROP::IN)]%7;

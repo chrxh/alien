@@ -13,7 +13,7 @@ public:
     AlienCellFunctionComputer (quint8* cellTypeData);
     AlienCellFunctionComputer (QDataStream& stream);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
     QString getCode ();
     bool compileCode (QString code, int& errorLine);
     QString getCellFunctionName () const;
