@@ -1,0 +1,6 @@
+#ifndef TESTSETTINGS_H
+#define TESTSETTINGS_H
+
+const qreal TEST_REAL_PRECISION = 1.0e-3;
+
+#endif // TESTSETTINGS_H

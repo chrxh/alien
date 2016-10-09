@@ -3,10 +3,6 @@
 
 #include <qmath.h>
 
-//-----------------------
-//all angles are in deg!
-//-----------------------
-
 //calculate collision of two moving and rotating rigid bodies
 void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp,
                          /*QVector3D posA, QVector3D posB, QVector3D posP, */qreal angularVelA1,
@@ -178,14 +174,14 @@ void Physics::applyImpulse (QVector3D impulse, QVector3D rAPp, qreal mass, QVect
 QVector3D Physics::rotateQuarterCounterClockwise (QVector3D v)
 {
 
-    //90 degree rotation of vector r
+    //90 degree counterclockwise rotation of vector r
     qreal temp(v.x());
     v.setX(v.y());
     v.setY(-temp);
     return v;
 }
 
-qreal Physics::calcAngle (QVector3D v)
+qreal Physics::angleOfVector (QVector3D v)
 {
     qreal angle(0.0);
     qreal angleSin(qAsin(-v.y()/v.length())*radToDeg);
@@ -196,7 +192,12 @@ qreal Physics::calcAngle (QVector3D v)
     return angle;
 }
 
-QVector3D Physics::calcVector (qreal angle)
+qreal Physics::clockwiseAngleBetweenVectors (QVector3D v1, QVector3D v2)
+{
+    return 0.0;
+}
+
+QVector3D Physics::unitVectorOfAngle (qreal angle)
 {
     return QVector3D(qSin(angle*degToRad),-qCos(angle*degToRad), 0.0);
 }

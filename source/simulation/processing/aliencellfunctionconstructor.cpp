@@ -420,7 +420,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 for(int i = 0; i < numCon; ++i) {
                     QVector3D displacement = cluster->calcPosition(cell->getConnection(i),grid)-cluster->calcPosition(cell, grid);
                     grid->correctDisplacement(displacement);
-                    angles[i] = Physics::calcAngle(displacement);
+                    angles[i] = Physics::angleOfVector(displacement);
                 }
                 qSort(angles);
                 qreal largestAnglesDiff = 0.0;
@@ -441,7 +441,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 angleGap = angleGap + convertDataToAngle(token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)]);
 
                 //calc coordinates for new cell from angle gap and construct cell
-                QVector3D angleGapPos = Physics::calcVector(angleGap)*simulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
+                QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*simulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
                 QVector3D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))

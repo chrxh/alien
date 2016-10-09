@@ -12,7 +12,7 @@ private slots:
     {
     }
 
-    void create()
+    void testCreation()
     {
         t = new AlienToken(100.0);
         QCOMPARE(t->energy, 100.0);
@@ -23,5 +23,5 @@ private slots:
     }
 };
 
-//QTEST_MAIN(AlienTokenTest)
-//#include "alientokentest.moc"
+//QTEST_MAIN(TestAlienToken)
+//#include "testalientoken.moc"

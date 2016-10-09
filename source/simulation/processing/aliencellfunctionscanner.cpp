@@ -72,8 +72,8 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, Alie
     if( n > 1 ) {
 
         //calc angle from cell n to cell n-1
-        qreal a1 = Physics::calcAngle(scanCellPre2->getRelPos() - scanCellPre1->getRelPos());
-        qreal a2 = Physics::calcAngle(-scanCell->getRelPos() + scanCellPre1->getRelPos());
+        qreal a1 = Physics::angleOfVector(scanCellPre2->getRelPos() - scanCellPre1->getRelPos());
+        qreal a2 = Physics::angleOfVector(-scanCell->getRelPos() + scanCellPre1->getRelPos());
         qreal angle = a1 - a2;
         token->memory[static_cast<int>(SCANNER::OUT_ANGLE)] = convertAngleToData(angle);
 //        qDebug("-> v: %f, n: %f", -angle, convertDataToAngle(convertAngleToData(-angle)));
@@ -120,7 +120,7 @@ void AlienCellFunctionScanner::spiralLookupAlgorithm (AlienCell*& cell, AlienCel
         return;
 
     //calc angle from previousCell to baseCell
-    qreal originAngle = Physics::calcAngle(previousCell1->getRelPos() - cell->getRelPos());
+    qreal originAngle = Physics::angleOfVector(previousCell1->getRelPos() - cell->getRelPos());
 
     //iterate over all connected base cells
     bool nextCellFound = false;
@@ -134,7 +134,7 @@ void AlienCellFunctionScanner::spiralLookupAlgorithm (AlienCell*& cell, AlienCel
 //         && nextCandCell->isConnectedTo(previousCell1) ) {
 
             //calc angle from "nextCandCell"
-            qreal angle = Physics::calcAngle(nextCandCell->getRelPos() - cell->getRelPos());
+            qreal angle = Physics::angleOfVector(nextCandCell->getRelPos() - cell->getRelPos());
 
             //another cell already found? => compare angles
             if( nextCellFound ) {

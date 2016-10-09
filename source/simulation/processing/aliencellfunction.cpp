@@ -95,8 +95,8 @@ void AlienCellFunction::getInternalData (quint8* data)
 
 qreal AlienCellFunction::calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2, AlienGrid* grid) const
 {
-    qreal a1 = Physics::calcAngle(ref1->calcPosition() - origin->calcPosition());
-    qreal a2 = Physics::calcAngle(-ref2->calcPosition() + origin->calcPosition());
+    qreal a1 = Physics::angleOfVector(ref1->calcPosition() - origin->calcPosition());
+    qreal a2 = Physics::angleOfVector(-ref2->calcPosition() + origin->calcPosition());
     qreal angle = a1 - a2;
     return angle;   //not correct in every case
 }
