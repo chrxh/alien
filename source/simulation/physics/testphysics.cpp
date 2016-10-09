@@ -16,13 +16,13 @@ private slots:
     void testAngleOfVector()
     {
         qreal a = Physics::angleOfVector(QVector3D(0.0, -1.0, 0.0));
-        QVERIFY(qAbs(a) < TEST_REAL_PRECISION);
+        QVERIFY(qAbs(a) < TEST_LOW_REAL_PRECISION);
         a = Physics::angleOfVector(QVector3D(1.0, 0.0, 0.0));
-        QVERIFY(qAbs(a-90.0) < TEST_REAL_PRECISION);
+        QVERIFY(qAbs(a-90.0) < TEST_LOW_REAL_PRECISION);
         a = Physics::angleOfVector(QVector3D(0.0, 1.0, 0.0));
-        QVERIFY(qAbs(a-180.0) < TEST_REAL_PRECISION);
+        QVERIFY(qAbs(a-180.0) < TEST_LOW_REAL_PRECISION);
         a = Physics::angleOfVector(QVector3D(-1.0, 0.0, 0.0));
-        QVERIFY(qAbs(a-270.0) < TEST_REAL_PRECISION);
+        QVERIFY(qAbs(a-270.0) < TEST_LOW_REAL_PRECISION);
     }
 
     void testUnitVectorOfAngle ()
@@ -33,7 +33,7 @@ private slots:
             QVector3D v = Physics::unitVectorOfAngle(angleBefore);
             qreal angleAfter = Physics::angleOfVector(v);
             QString s = QString("angle before: %1, vector: (%2, %3), angle after: %4").arg(angleBefore).arg(v.x()).arg(v.y()).arg(angleAfter);
-            QVERIFY2(qAbs(angleBefore-angleAfter) < TEST_REAL_PRECISION, s.toLatin1().data());
+            QVERIFY2(qAbs(angleBefore-angleAfter) < TEST_LOW_REAL_PRECISION, s.toLatin1().data());
         }
 
         //test overrun
@@ -48,16 +48,16 @@ private slots:
         }
     }
 
-    void testClockwiseAngleBetweenVectors ()
+    void testClockwiseAngleFromFirstToSecondVector ()
     {
         for(int i = 0; i < 100; ++i) {
             qreal angle = GlobalFunctions::random(0.0, 360.0);
-            qreal angleIncrement = GlobalFunctions::random(0.0, 360.0);
+            qreal angleIncrement = GlobalFunctions::random(-180.0, 180.0);
             QVector3D v1 = Physics::unitVectorOfAngle(angle);
             QVector3D v2 = Physics::unitVectorOfAngle(angle+angleIncrement);
-            qreal returnedAngle = Physics::clockwiseAngleBetweenVectors(v1, v2);
-            QString s = QString("vector1: (%1, %2), vector2: (%3, %4), angle: %5").arg(v1.x()).arg(v1.y()).arg(v2.x()).arg(v2.y()).arg(returnedAngle);
-            QVERIFY2(qAbs(returnedAngle-angleIncrement) < TEST_REAL_PRECISION, s.toLatin1().data());
+            qreal returnedAngle = Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);
+            QString s = QString("vector1: (%1, %2), vector2: (%3, %4), angle increment: %5, returned angle: %6").arg(v1.x()).arg(v1.y()).arg(v2.x()).arg(v2.y()).arg(angleIncrement).arg(returnedAngle);
+            QVERIFY2(qAbs(returnedAngle-angleIncrement) < TEST_LOW_REAL_PRECISION, s.toLatin1().data());
         }
     }
 
@@ -66,5 +66,5 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestPhysics)
-#include "testphysics.moc"
+//QTEST_MAIN(TestPhysics)
+//#include "testphysics.moc"

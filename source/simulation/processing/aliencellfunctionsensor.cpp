@@ -58,7 +58,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = convertURealToData(otherCluster->getMass());
 
             //calc relative angle
-            QVector3D dir  = grid->displacement(otherCluster->getPosition(), cell->calcPosition()).normalized();
+            QVector3D dir  = grid->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
             qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertAngleToData(relAngle);
@@ -76,7 +76,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
                         AlienCell* scanCell = grid->getCell(scanPos);
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
-                                qreal dist = grid->displacement(cell->calcPosition(), scanCell->calcPosition()).length();
+                                qreal dist = grid->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
                                 token->memory[static_cast<int>(SENSOR::OUT_DIST)] = convertURealToData(dist);
                                 return;
                             }
@@ -141,7 +141,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
                 }
             }
             token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
-            qreal dist = grid->displacement(cell->calcPosition(), largestClusterCell->calcPosition()).length();
+            qreal dist = grid->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
             token->memory[static_cast<int>(SENSOR::OUT_DIST)] = convertURealToData(dist);
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = convertURealToData(largestClusterCell->getCluster()->getMass());
 //            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);

@@ -170,10 +170,10 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 cell->newConnection(constructionCell);
 
                 //estimate expended energy for new cell
-                qreal kinEnergyOld = Physics::calcKineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
+                qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithoutUpdate(grid);
-                qreal angularVelNew = Physics::calcNewAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
-                qreal kinEnergyNew = Physics::calcKineticEnergy(cluster->getMass(), cluster->getVel(), angularMassNew, angularVelNew);
+                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
 
                 //not enough energy?
@@ -242,10 +242,10 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                 QVector3D pos = cluster->relToAbsPos(cell->getRelPos() + transOld + transFinish);
 
                 //estimate expended energy for new cell
-                qreal kinEnergyOld = Physics::calcKineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
+                qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos, grid);
-                qreal angularVelNew = Physics::calcNewAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
-                qreal kinEnergyNew = Physics::calcKineticEnergy(cluster->getMass()+1.0, cluster->getVel(), angularMassNew, angularVelNew);
+                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVel(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
 
                 //energy for possible new token
@@ -316,7 +316,7 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
                     if( (otherCell->getNumConnections() < simulationParameters.MAX_CELL_CONNECTIONS)
                             && (newCell->getNumConnections() < simulationParameters.MAX_CELL_CONNECTIONS)
                             && (otherCell !=constructionCell ) ) {
-                        if( grid->displacement(otherCell->getRelPos(), newCell->getRelPos()).length() <= (simulationParameters.CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
+                        if( grid->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (simulationParameters.CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( token->memory[static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS)] == 0 ) {
@@ -450,10 +450,10 @@ void AlienCellFunctionConstructor::execute (AlienToken* token,
 
 
                 //estimate expended energy for new cell
-                qreal kinEnergyOld = Physics::calcKineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
+                qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos, grid);
-                qreal angularVelNew = Physics::calcNewAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
-                qreal kinEnergyNew = Physics::calcKineticEnergy(cluster->getMass()+1.0, cluster->getVel(), angularMassNew, angularVelNew);
+                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVel(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
 
                 //energy for possible new token
@@ -615,7 +615,7 @@ AlienCell* AlienCellFunctionConstructor::obstacleCheck (AlienCellCluster* cluste
 
                 //obstacle found?
                 if( obstacleCell ) {
-                    if( grid->displacement(pos, obstacleCell->getCluster()->calcPosition(obstacleCell)).length() < simulationParameters.CRIT_CELL_DIST_MIN ) {
+                    if( grid->displacement(obstacleCell->getCluster()->calcPosition(obstacleCell), pos).length() < simulationParameters.CRIT_CELL_DIST_MIN ) {
                         if( safeMode ) {
                             if( obstacleCell != cell ) {
                                 cluster->clearCellsFromMap(grid);
@@ -632,7 +632,7 @@ AlienCell* AlienCellFunctionConstructor::obstacleCheck (AlienCellCluster* cluste
                     //check also connected cells
                     for(int i = 0; i < obstacleCell->getNumConnections(); ++i) {
                         AlienCell* connectedObstacleCell = obstacleCell->getConnection(i);
-                        if( grid->displacement(pos, connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell)).length() < simulationParameters.CRIT_CELL_DIST_MIN ) {
+                        if( grid->displacement(connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell), pos).length() < simulationParameters.CRIT_CELL_DIST_MIN ) {
                             if( safeMode ) {
                                 if( connectedObstacleCell != cell ) {
                                     cluster->clearCellsFromMap(grid);

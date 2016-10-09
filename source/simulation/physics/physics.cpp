@@ -10,15 +10,6 @@ void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D
                          qreal massA, qreal massB,
                          QVector3D& vA2, QVector3D& vB2, qreal& angularVelA2, qreal& angularVelB2)
 {
-    /*QVector3D rAPp = posP-posA;
-    qreal temp = rAPp.x();
-    rAPp.setX(rAPp.y());
-    rAPp.setY(-temp);
-    QVector3D rBPp = posP-posB;
-    temp = rBPp.x();
-    rBPp.setX(rBPp.y());
-    rBPp.setY(-temp);*/
-
     angularVelA1 *= degToRad;
     angularVelB1 *= degToRad;
 
@@ -107,7 +98,7 @@ void Physics::changeCenterOfMass (qreal mass, QVector3D vel, qreal angularVel, q
                               QVector3D& newVel, qreal& newAngularVel)
 {
     newAngularVel = angularVel;
-    newVel = calcTangentialVelocity(centerDiff, vel, angularVel);
+    newVel = tangentialVelocity(centerDiff, vel, angularVel);
     angularVel *= degToRad;
     qreal kinEnergy = vel.lengthSquared()*mass+(oldAngularMass-newAngularMass)*angularVel*angularVel;
     if( kinEnergy >= ALIEN_PRECISION ) {
@@ -116,20 +107,20 @@ void Physics::changeCenterOfMass (qreal mass, QVector3D vel, qreal angularVel, q
     }
 }
 
-//remember that the coordinate system is mirrored ...
-QVector3D Physics::calcTangentialVelocity (QVector3D r, QVector3D vel, qreal angularVel)
+//remember that the coordinate system in a computer system is mirrored at the x-axis...
+QVector3D Physics::tangentialVelocity (QVector3D r, QVector3D vel, qreal angularVel)
 {
     return vel - angularVel*rotateQuarterCounterClockwise(r)*degToRad;
 }
 
 
-qreal Physics::calcKineticEnergy (qreal mass, QVector3D vel, qreal angularMass, qreal angularVel)
+qreal Physics::kineticEnergy (qreal mass, QVector3D vel, qreal angularMass, qreal angularVel)
 {
     angularVel *= degToRad;
     return 0.5*angularMass*angularVel*angularVel+0.5*mass*vel.lengthSquared();
 }
 
-qreal Physics::calcNewAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld)
+qreal Physics::newAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld)
 {
     angularVelOld = angularVelOld*degToRad;
     qreal rotEnergyDouble = angularMassOld*angularVelOld*angularVelOld;
@@ -137,7 +128,7 @@ qreal Physics::calcNewAngularVelocity (qreal angularMassOld, qreal angularMassNe
     return angularVelNew*radToDeg;
 }
 
-qreal Physics::calcNewAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld)
+qreal Physics::newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld)
 {
     qreal Erot = Ekin - Etrans;
     if( Erot > 0.0 ) {
@@ -152,12 +143,12 @@ qreal Physics::calcNewAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularM
     }
 }
 
-qreal Physics::calcAngularMomentum (QVector3D r, QVector3D v)
+qreal Physics::angularMomentum (QVector3D r, QVector3D v)
 {
     return r.x()*v.y()-r.y()*v.x();     //we only calc the 3rd component of the 3D cross product
 }
 
-qreal Physics::calcAngularVelocity (qreal angularMomentum, qreal angularMass)
+qreal Physics::angularVelocity (qreal angularMomentum, qreal angularMass)
 {
     if( qAbs(angularMass) < ALIEN_PRECISION )
         return 0;
@@ -192,9 +183,16 @@ qreal Physics::angleOfVector (QVector3D v)
     return angle;
 }
 
-qreal Physics::clockwiseAngleBetweenVectors (QVector3D v1, QVector3D v2)
+qreal Physics::clockwiseAngleFromFirstToSecondVector (QVector3D v1, QVector3D v2)
 {
-    return 0.0;
+    qreal a1 = Physics::angleOfVector(v1);
+    qreal a2 = Physics::angleOfVector(v2);
+    qreal angle = a2 - a1;
+    if( angle > 180.0 )
+        angle -= 360.0;
+    if( angle < -180.0 )
+        angle += 360.0;
+    return angle;
 }
 
 QVector3D Physics::unitVectorOfAngle (qreal angle)

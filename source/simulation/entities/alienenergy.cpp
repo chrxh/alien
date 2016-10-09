@@ -80,7 +80,7 @@ bool AlienEnergy::movement (AlienGrid* grid, AlienCellCluster*& cluster)
 
             //enough energy for cell transformation?
             qreal p((qreal)qrand()/RAND_MAX);
-            qreal eKin = Physics::calcKineticEnergy(1, vel, 0, 0);
+            qreal eKin = Physics::kineticEnergy(1, vel, 0, 0);
             qreal eNew = amount - (eKin/simulationParameters.INTERNAL_TO_KINETIC_ENERGY);
             if( (eNew >= simulationParameters.CRIT_CELL_TRANSFORM_ENERGY) && ( p < simulationParameters.CELL_TRANSFORM_PROB) ) {
 
