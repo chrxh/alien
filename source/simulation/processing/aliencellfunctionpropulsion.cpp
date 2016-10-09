@@ -45,7 +45,7 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
     //calc impulse angle
     QVector3D impulse(0.0, 0.0, 0.0);
     if( cmd == static_cast<int>(PROP_IN::BY_ANGLE) ) {
-        qreal thrustAngle = (Physics::calcAngle(-cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
+        qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
         impulse = QVector3D(qSin(thrustAngle), -qCos(thrustAngle), 0.0)*power;
     }
     if( cmd == static_cast<int>(PROP_IN::FROM_CENTER) ) {
