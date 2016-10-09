@@ -39,7 +39,7 @@ qreal AlienThread::calcTransEnergy ()
     qreal transEnergy(0.0);
     foreach( AlienCellCluster* cluster, _space->getClusters() ) {
         if( !cluster->isEmpty() )
-            transEnergy += Physics::calcKineticEnergy(cluster->getCells().size(),
+            transEnergy += Physics::kineticEnergy(cluster->getCells().size(),
                                                   cluster->getVel(),
                                                   0.0,
                                                   0.0);
@@ -52,7 +52,7 @@ qreal AlienThread::calcRotEnergy ()
     qreal rotEnergy(0.0);
     foreach( AlienCellCluster* cluster, _space->getClusters() ) {
         if( cluster->getMass() > 1.0 )
-            rotEnergy += Physics::calcKineticEnergy(0.0,
+            rotEnergy += Physics::kineticEnergy(0.0,
                                                 QVector3D(0.0, 0.0, 0.0),
                                                 cluster->getAngularMass(),
                                                 cluster->getAngularVel());

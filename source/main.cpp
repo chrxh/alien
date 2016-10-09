@@ -61,7 +61,7 @@
 //Optional:
 //- Cell-memory im Scanner auslesen und im Constructor erstellen
 
-/*
+
 int main(int argc, char *argv[])
 {
     //register types
@@ -79,4 +79,3 @@ int main(int argc, char *argv[])
     w.show();
     return a.exec();
 }
-*/

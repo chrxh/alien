@@ -164,7 +164,7 @@ void AlienCellCluster::movementProcessingStep2 (AlienGrid*& space, QList< AlienC
     updateCellVel();
 
     //determine energies (the new kinetic energy will be calculated later)
-    qreal oldEnergy = Physics::calcKineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
+    qreal oldEnergy = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
     qreal newEnergy = 0.0;
 
     //dissipation
@@ -191,7 +191,7 @@ void AlienCellCluster::movementProcessingStep2 (AlienGrid*& space, QList< AlienC
 
         //kill cell?
         if( (cell->_toBeKilled || (cell->_energy < simulationParameters.CRIT_CELL_TRANSFORM_ENERGY)) ) {
-            qreal kinEnergy = Physics::calcKineticEnergy(1.0, cell->_vel, 0.0, 0.0);
+            qreal kinEnergy = Physics::kineticEnergy(1.0, cell->_vel, 0.0, 0.0);
             qreal internalEnergy = cell->getEnergyIncludingTokens();
             energyParticle =  new AlienEnergy(internalEnergy + kinEnergy / simulationParameters.INTERNAL_TO_KINETIC_ENERGY, calcPosition(cell, space),//+posPerturbation,
                                               cell->_vel);
@@ -240,7 +240,7 @@ void AlienCellCluster::movementProcessingStep2 (AlienGrid*& space, QList< AlienC
                 updateVel_angularVel_via_cellVelocities();
 
                 //calc energy difference
-                newEnergy += Physics::calcKineticEnergy(size, _vel, _angularMass, _angularVel);
+                newEnergy += Physics::kineticEnergy(size, _vel, _angularMass, _angularVel);
                 qreal diffEnergy = oldEnergy-newEnergy;
 //                if( qAbs(diffEnergy) > 10.0 )
 //                    qDebug("ups1 %f, size: %d, pos x: %f, pos y: %f, , oldpos x: %f, oldpos y: %f",diffEnergy,  _cells.size(), _pos.x(), _pos.y(), oldPos.x(), oldPos.y());
@@ -258,7 +258,7 @@ void AlienCellCluster::movementProcessingStep2 (AlienGrid*& space, QList< AlienC
 
         //calc energy difference
         foreach(AlienCellCluster* cluster, fragments) {
-            newEnergy += Physics::calcKineticEnergy(cluster->_cells.size(), cluster->_vel, cluster->_angularMass, cluster->_angularVel);
+            newEnergy += Physics::kineticEnergy(cluster->_cells.size(), cluster->_vel, cluster->_angularMass, cluster->_angularVel);
         }
         qreal diffEnergy = oldEnergy-newEnergy;
 //        if( qAbs(diffEnergy) > 10.0 ) {
@@ -515,8 +515,8 @@ void AlienCellCluster::movementProcessingStep3 (AlienGrid*& space)
                 //calc old kinetic energy of both clusters
                 qreal mA = _cells.size();
                 qreal mB = otherCluster->_cells.size();
-                qreal eKinOld1 = Physics::calcKineticEnergy(mA, _vel, _angularMass, _angularVel);
-                qreal eKinOld2 = Physics::calcKineticEnergy(mB, otherCluster->_vel, otherCluster->_angularMass, otherCluster->_angularVel);
+                qreal eKinOld1 = Physics::kineticEnergy(mA, _vel, _angularMass, _angularVel);
+                qreal eKinOld2 = Physics::kineticEnergy(mB, otherCluster->_vel, otherCluster->_angularMass, otherCluster->_angularVel);
 
                 if( otherCluster->_cells.size() > _cells.size() )
                     _color = otherCluster->_color;
@@ -558,7 +558,7 @@ void AlienCellCluster::movementProcessingStep3 (AlienGrid*& space)
                 updateVel_angularVel_via_cellVelocities();
 
                 //calc newkinetic energy of united cluster
-                qreal eKinNew = Physics::calcKineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
+                qreal eKinNew = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
                 qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew)/(qreal)fusedCells.size())/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
@@ -787,7 +787,7 @@ void AlienCellCluster::updateCellVel (bool forceCheck)
 
         //calc cell velocities
         foreach( AlienCell* cell, _cells) {
-            QVector3D vel = Physics::calcTangentialVelocity(calcCellDistWithoutTorusCorrection(cell), _vel, _angularVel);
+            QVector3D vel = Physics::tangentialVelocity(calcCellDistWithoutTorusCorrection(cell), _vel, _angularVel);
             if( cell->_vel.isNull() ) {
                 cell->_vel = vel;
             }
@@ -872,11 +872,11 @@ void AlienCellCluster::updateVel_angularVel_via_cellVelocities ()
         foreach( AlienCell* cell, _cells ) {
             QVector3D r = calcPosition(cell)-_pos;
             QVector3D v = cell->_vel - _vel;
-            angularMomentum += Physics::calcAngularMomentum(r, v);     //we only need the 3rd component of the 3D cross product
+            angularMomentum += Physics::angularMomentum(r, v);     //we only need the 3rd component of the 3D cross product
         }
 
         //third step: calc angular velocity via the third component of the angular momentum
-        _angularVel = Physics::calcAngularVelocity(angularMomentum, _angularMass);
+        _angularVel = Physics::angularVelocity(angularMomentum, _angularMass);
 
     }
     else if( _cells.size() == 1 ) {

@@ -25,19 +25,19 @@ public:
                                          qreal newAngularMass, QVector3D centerDiff,
                                          QVector3D& newVel, qreal& newAngularVel);
 
-    static QVector3D calcTangentialVelocity (QVector3D r, QVector3D vel, qreal angularVel);
+    static QVector3D tangentialVelocity (QVector3D r, QVector3D vel, qreal angularVel);
 
-    static qreal calcKineticEnergy (qreal mass, QVector3D vel, qreal angularMass, qreal angularVel);
-    static qreal calcNewAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld);
-    static qreal calcNewAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld);
-    static qreal calcAngularMomentum (QVector3D r, QVector3D v);
-    static qreal calcAngularVelocity (qreal angularMomentum, qreal angularMass);
+    static qreal kineticEnergy (qreal mass, QVector3D vel, qreal angularMass, qreal angularVel);
+    static qreal newAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld);
+    static qreal newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld);
+    static qreal angularMomentum (QVector3D r, QVector3D v);
+    static qreal angularVelocity (qreal angularMomentum, qreal angularMass);
 
     static void applyImpulse (QVector3D impulse, QVector3D rAPp, qreal mass, QVector3D vel, qreal angularMass, qreal angularVel, QVector3D& newVel, qreal& newAngularVel);
 
     static QVector3D rotateQuarterCounterClockwise (QVector3D v);
-    static qreal angleOfVector (QVector3D v);
-    static qreal clockwiseAngleBetweenVectors (QVector3D v1, QVector3D v2);
+    static qreal angleOfVector (QVector3D v);   //from 0 to 360 DEG
+    static qreal clockwiseAngleFromFirstToSecondVector (QVector3D v1, QVector3D v2); //from -180 to 180 DEG
     static QVector3D unitVectorOfAngle (qreal angle);
 };
 
