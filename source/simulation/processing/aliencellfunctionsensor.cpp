@@ -59,8 +59,8 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
 
             //calc relative angle
             QVector3D dir  = grid->displacement(otherCluster->getPosition(), cell->calcPosition()).normalized();
-            qreal cellOrientationAngle = Physics::calcAngle(-cell->getRelPos() + previousCell->getRelPos());
-            qreal relAngle = Physics::calcAngle(dir) - cellOrientationAngle - cluster->getAngle();
+            qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
+            qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertAngleToData(relAngle);
 
             //calc distance by scanning along beam
@@ -95,8 +95,8 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
     QVector3D dir(0.0, 0.0, 0.0);
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_BY_ANGLE) ) {
         qreal relAngle = convertDataToAngle(token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)]);
-        qreal angle = Physics::calcAngle(-cell->getRelPos() + previousCell->getRelPos()) + cluster->getAngle() + relAngle;
-        dir = Physics::calcVector(angle);
+        qreal angle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos()) + cluster->getAngle() + relAngle;
+        dir = Physics::unitVectorOfAngle(angle);
     }
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_FROM_CENTER) ) {
         dir = cellRelPos.normalized();
