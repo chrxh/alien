@@ -56,8 +56,9 @@ public:
     //auxiliary functions
     void correctPosition (QVector3D& pos) const;
     void correctDisplacement (QVector3D& displacement) const;
-    QVector3D displacement (QVector3D p1, QVector3D p2) const;
-    qreal calcDistance (AlienCell* cell1, AlienCell* cell2) const;
+    QVector3D displacement (QVector3D fromPoint, QVector3D toPoint) const;
+    QVector3D displacement (AlienCell* fromCell, AlienCell* toCell) const;
+    qreal distance (AlienCell* fromCell, AlienCell* toCell) const;
 
     //(de)serialisation functions
     void serializeSize (QDataStream& stream) const;

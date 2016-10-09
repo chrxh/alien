@@ -183,7 +183,7 @@ AlienCellCluster* AlienGrid::getNearbyClusterFast (const QVector3D& pos, qreal r
                         if( mass >= (minMass-ALIEN_PRECISION) && mass <= (maxMass+ALIEN_PRECISION) ) {
 
                             //calc and compare dist
-                            qreal dist = displacement(pos, cell->calcPosition()).length();
+                            qreal dist = displacement(cell->calcPosition(), pos).length();
                             if( !closestCluster || (dist < closestClusterDist) ) {
                                 closestCluster = cluster;
                                 closestClusterDist = dist;
@@ -224,19 +224,23 @@ void AlienGrid::correctDisplacement (QVector3D& displacement) const
     displacement.setY((qreal)y+ry);
 }
 
-QVector3D AlienGrid::displacement (QVector3D p1, QVector3D p2) const
+QVector3D AlienGrid::displacement (QVector3D fromPoint, QVector3D toPoint) const
 {
-    QVector3D d = p1-p2;
+    QVector3D d = toPoint-fromPoint;
     correctDisplacement(d);
     return d;
 }
 
-qreal AlienGrid::calcDistance (AlienCell* cell1, AlienCell* cell2) const
+QVector3D AlienGrid::displacement (AlienCell* fromCell, AlienCell* toCell) const
 {
-    QVector3D displacement = cell1->calcPosition()-cell2->calcPosition();
-    correctDisplacement(displacement);
-    return displacement.length();
+    return displacement(fromCell->calcPosition(), toCell->calcPosition());
 }
+
+qreal AlienGrid::distance (AlienCell* fromCell, AlienCell* toCell) const
+{
+    return displacement(fromCell, toCell).length();
+}
+
 
 void AlienGrid::serializeSize (QDataStream& stream) const
 {

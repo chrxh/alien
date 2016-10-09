@@ -36,11 +36,11 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
     }
 
     //calc old kinetic energy
-    qreal eKinOld(Physics::calcKineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel()));
+    qreal eKinOld(Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel()));
 
     //calc old tangential velocity
     QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector3D tangVel(Physics::calcTangentialVelocity(cellRelPos, cluster->getVel(), cluster->getAngularVel()));
+    QVector3D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVel(), cluster->getAngularVel()));
 
     //calc impulse angle
     QVector3D impulse(0.0, 0.0, 0.0);
@@ -90,7 +90,7 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
     }
 
     //calc new kinetic energy
-    qreal eKinNew(Physics::calcKineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
+    qreal eKinNew(Physics::kineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
     qreal energyDiff((eKinNew-eKinOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY);
 
     //has token enough energy?
