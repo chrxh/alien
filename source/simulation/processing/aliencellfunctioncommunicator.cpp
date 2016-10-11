@@ -71,7 +71,20 @@ void AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndUpdateTok
 
 void AlienCellFunctionCommunicator::receiveMessage () const
 {
-
+    if( _receivedNewMessage ) {
+        _receivedNewMessage = false;
+        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
+                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NEW_MESSAGE);
+        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_MESSAGE)]
+                = _receivedMessage;
+        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_ANGLE)]
+                = _receivedAngle;
+        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_DISTANCE)]
+                = _receivedDistance;
+    }
+    else
+        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
+                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO_NEW_MESSAGE);
 }
 
 int AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumber (const quint8& channel,
