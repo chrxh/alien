@@ -45,7 +45,7 @@ private:
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
     void readListeningChannel (AlienToken* token);
     void sendMessageToNearbyCommunicatorsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
-    void receiveMessage () const;
+    void receiveMessage (AlienToken* token);
 
     int sendMessageToNearbyCommunicatorsAndReturnNumber (const quint8& channel, const quint8& msg, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
     QList< AlienCell* > findNearbyCommunicator (AlienCell* cell, AlienGrid* grid) const;

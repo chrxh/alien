@@ -39,7 +39,7 @@ void AlienCellFunctionCommunicator::execute (AlienToken* token,
     if( cmd == COMMUNICATOR_IN::SEND_MESSAGE )
         sendMessageToNearbyCommunicatorsAndUpdateToken(token, cell, previousCell, grid);
     if( cmd == COMMUNICATOR_IN::RECEIVE_MESSAGE )
-        receiveMessage();
+        receiveMessage(token);
 }
 
 QString AlienCellFunctionCommunicator::getCellFunctionName () const
@@ -69,7 +69,7 @@ void AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndUpdateTok
     token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = convertIntToData(numMsg);
 }
 
-void AlienCellFunctionCommunicator::receiveMessage () const
+void AlienCellFunctionCommunicator::receiveMessage (AlienToken* token)
 {
     if( _receivedNewMessage ) {
         _receivedNewMessage = false;
