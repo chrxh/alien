@@ -43,7 +43,7 @@ private:
     quint8 _receivedDistance;
 
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
-    void readListeningChannel (AlienToken* token);
+    void setListeningChannel (AlienToken* token);
     void sendMessageToNearbyCommunicatorsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
     void receiveMessage (AlienToken* token);
 
