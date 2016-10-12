@@ -35,7 +35,7 @@ void AlienCellFunctionCommunicator::execute (AlienToken* token,
 {
     COMMUNICATOR_IN cmd = readCommandFromToken(token);
     if( cmd == COMMUNICATOR_IN::SET_LISTENING_CHANNEL )
-        readListeningChannel(token);
+        setListeningChannel(token);
     if( cmd == COMMUNICATOR_IN::SEND_MESSAGE )
         sendMessageToNearbyCommunicatorsAndUpdateToken(token, cell, previousCell, grid);
     if( cmd == COMMUNICATOR_IN::RECEIVE_MESSAGE )
@@ -52,7 +52,7 @@ AlienCellFunctionCommunicator::COMMUNICATOR_IN AlienCellFunctionCommunicator::re
     return static_cast<COMMUNICATOR_IN>(token->memory[static_cast<int>(COMMUNICATOR::IN)] % 4);
 }
 
-void AlienCellFunctionCommunicator::readListeningChannel (AlienToken* token)
+void AlienCellFunctionCommunicator::setListeningChannel (AlienToken* token)
 {
     _listeningChannel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
 }
@@ -125,6 +125,7 @@ bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (c
     AlienCellFunctionCommunicator* communicator = getCommunicator(receiverCell);
     if( communicator ) {
         if( communicator->_listeningChannel == channel ) {
+            communicator->_receivedNewMessage = true;
             communicator->_receivedMessage = msg;
             communicator->_receivedAngle = calcAngle(senderCell, senderPreviousCell, receiverCell, grid);
             communicator->_receivedDistance = convertURealToData(grid->distance(receiverCell, senderCell));
