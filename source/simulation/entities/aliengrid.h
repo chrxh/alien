@@ -143,8 +143,9 @@ inline QList< AlienCell* > AlienGrid::getNearbySpecificCells (const QVector3D& p
             if( QVector3D(static_cast<float>(scanX)-pos.x(),static_cast<float>(scanY)-pos.y(),0).length() < r+ALIEN_PRECISION ) {
                 AlienCell* cell(getCell(QVector3D(scanX, scanY,0)));
                 if( cell ) {
-                    if( selection(cell) )
+                    if( selection(cell) ) {
                         cells << cell;
+                    }
                 }
             }
         }
