@@ -28,7 +28,7 @@ public:
         IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
         IN_CELL_BRANCH_NO = 18,
         IN_CELL_FUNCTION = 19,
-        IN_CELL_FUNCTION_DATA = 35
+        IN_CELL_FUNCTION_DATA = 40
     };
     enum class CONSTR_OUT {
         SUCCESS,

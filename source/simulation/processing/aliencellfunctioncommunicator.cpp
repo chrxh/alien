@@ -5,11 +5,7 @@
 #include <QString>
 
 AlienCellFunctionCommunicator::AlienCellFunctionCommunicator()
-    : _listeningChannel(0),
-      _receivedNewMessage(false),
-      _receivedMessage(0),
-      _receivedAngle(0),
-      _receivedDistance(0)
+    : _newMessageReceived(false)
 {
 
 }
@@ -23,7 +19,7 @@ AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (quint8* cellTypeDa
 AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (QDataStream& stream)
     : AlienCellFunctionCommunicator()
 {
-
+    stream >> _newMessageReceived >> _receivedMessage.channel >> _receivedMessage.message >> _receivedMessage.angle >> _receivedMessage.distance;
 }
 
 void AlienCellFunctionCommunicator::execute (AlienToken* token,
@@ -47,6 +43,13 @@ QString AlienCellFunctionCommunicator::getCellFunctionName () const
     return "COMMUNICATOR";
 }
 
+void AlienCellFunctionCommunicator::serialize (QDataStream& stream)
+{
+    AlienCellFunction::serialize(stream);
+    stream << _newMessageReceived << _receivedMessage.channel << _receivedMessage.message << _receivedMessage.angle << _receivedMessage.distance;
+}
+
+
 AlienCellFunctionCommunicator::COMMUNICATOR_IN AlienCellFunctionCommunicator::readCommandFromToken (AlienToken* token) const
 {
     return static_cast<COMMUNICATOR_IN>(token->memory[static_cast<int>(COMMUNICATOR::IN)] % 4);
@@ -54,7 +57,7 @@ AlienCellFunctionCommunicator::COMMUNICATOR_IN AlienCellFunctionCommunicator::re
 
 void AlienCellFunctionCommunicator::setListeningChannel (AlienToken* token)
 {
-    _listeningChannel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
+    _receivedMessage.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
 }
 
 
@@ -63,41 +66,43 @@ void AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndUpdateTok
                                                                             AlienCell* previousCell,
                                                                             AlienGrid* grid) const
 {
-    quint8 channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
-    quint8 msg = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
-    int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(channel, msg, cell, previousCell, grid);
+    MessageData messageToSend;
+    messageToSend.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
+    messageToSend.message = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
+    messageToSend.angle = token->memory[static_cast<int>(COMMUNICATOR::IN_ANGLE)];
+    messageToSend.distance = token->memory[static_cast<int>(COMMUNICATOR::IN_DISTANCE)];
+    int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageToSend, cell, previousCell, grid);
     token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = convertIntToData(numMsg);
 }
 
 void AlienCellFunctionCommunicator::receiveMessage (AlienToken* token)
 {
-    if( _receivedNewMessage ) {
-        _receivedNewMessage = false;
+    if( _newMessageReceived ) {
+        _newMessageReceived = false;
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
                 = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NEW_MESSAGE);
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_MESSAGE)]
-                = _receivedMessage;
+                = _receivedMessage.message;
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_ANGLE)]
-                = _receivedAngle;
+                = _receivedMessage.angle;
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_DISTANCE)]
-                = _receivedDistance;
+                = _receivedMessage.distance;
     }
     else
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
                 = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO_NEW_MESSAGE);
 }
 
-int AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumber (const quint8& channel,
-                                                                            const quint8& msg,
-                                                                            AlienCell* cell,
-                                                                            AlienCell* previousCell,
+int AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageToSend,
+                                                                            AlienCell* senderCell,
+                                                                            AlienCell* senderPreviousCell,
                                                                             AlienGrid* grid) const
 {
     int numMsg = 0;
-    QList< AlienCell* > nearbyCommunicatorCells = findNearbyCommunicator (cell, grid);
+    QList< AlienCell* > nearbyCommunicatorCells = findNearbyCommunicator (senderCell, grid);
     foreach(AlienCell* nearbyCell, nearbyCommunicatorCells)
-        if( nearbyCell != cell )
-            if( sendMessageToCommunicatorAndReturnSuccess(channel, msg, cell, previousCell, nearbyCell, grid) )
+        if( nearbyCell != senderCell )
+            if( sendMessageToCommunicatorAndReturnSuccess(messageToSend, senderCell, senderPreviousCell, nearbyCell, grid) )
                 ++numMsg;
     return numMsg;
 }
@@ -115,8 +120,7 @@ QList< AlienCell* > AlienCellFunctionCommunicator::findNearbyCommunicator(AlienC
     return grid->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 
-bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const quint8& channel,
-                                                                       const quint8& msg,
+bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageToSend,
                                                                        AlienCell* senderCell,
                                                                        AlienCell* senderPreviousCell,
                                                                        AlienCell* receiverCell,
@@ -124,11 +128,11 @@ bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (c
 {
     AlienCellFunctionCommunicator* communicator = getCommunicator(receiverCell);
     if( communicator ) {
-        if( communicator->_listeningChannel == channel ) {
-            communicator->_receivedNewMessage = true;
-            communicator->_receivedMessage = msg;
-            communicator->_receivedAngle = calcAngle(senderCell, senderPreviousCell, receiverCell, grid);
-            communicator->_receivedDistance = convertURealToData(grid->distance(receiverCell, senderCell));
+        if( communicator->_receivedMessage.channel == messageToSend.channel ) {
+            communicator->_newMessageReceived = true;
+            communicator->_receivedMessage.message = messageToSend.message;
+            communicator->_receivedMessage.angle = calcAngle(senderCell, senderPreviousCell, receiverCell, grid);
+            communicator->_receivedMessage.distance = convertURealToData(grid->distance(receiverCell, senderCell));
             return true;
         }
     }

@@ -139,6 +139,8 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("COMMUNICATOR_IN::RECEIVE_MESSAGE", QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR_IN::RECEIVE_MESSAGE)));
     meta->addSymbolEntry("COMMUNICATOR_IN_CHANNEL", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_CHANNEL))+"]");
     meta->addSymbolEntry("COMMUNICATOR_IN_MESSAGE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_MESSAGE))+"]");
+    meta->addSymbolEntry("COMMUNICATOR_IN_ANGLE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_ANGLE))+"]");
+    meta->addSymbolEntry("COMMUNICATOR_IN_DISTANCE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_DISTANCE))+"]");
     meta->addSymbolEntry("COMMUNICATOR_OUT_SENT_NUM_MESSAGE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_SENT_NUM_MESSAGE))+"]");
     meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE))+"]");
     meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_RECEIVED_MESSAGE))+"]");
