@@ -8,113 +8,35 @@
 #include <QMatrix4x4>
 #include <qmath.h>
 
-AlienCellCluster::AlienCellCluster (AlienGrid*& grid)
-    : _grid(grid),
-      _angle(0.0),
-      _pos(0.0, 0.0, 0.0),
-      _angularVel(0.0),
-      _vel(0.0, 0.0, 0.0),
-      _angularMass(0.0),
-      _id(GlobalFunctions::getTag()),
-      _color(GlobalFunctions::getTag())
+AlienCellCluster* AlienCellCluster::buildEmptyCellCluster (AlienGrid*& grid)
 {
-    calcTransform();
+    return new AlienCellCluster(grid);
 }
 
-AlienCellCluster::AlienCellCluster(QList< AlienCell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, AlienGrid*& grid)
-    : _grid(grid),
-      _angle(angle),
-      _pos(pos),
-      _angularVel(angularVel),
-      _vel(vel),
-      _cells(cells),
-      _id(GlobalFunctions::getTag()),
-      _color(GlobalFunctions::getTag())
+AlienCellCluster* AlienCellCluster::buildCellCluster (QList< AlienCell* > cells,
+                                           qreal angle,
+                                           QVector3D pos,
+                                           qreal angularVel,
+                                           QVector3D vel,
+                                           AlienGrid*& grid)
 {
-    grid->correctPosition(_pos);
-    foreach(AlienCell* cell, _cells) {
-        cell->_cluster = this;
-    }
-    calcTransform();
-    updateRelCoordinates();
-    updateAngularMass();
+    return new AlienCellCluster(cells, angle, pos, angularVel, vel, grid);
 }
 
-AlienCellCluster::AlienCellCluster(QList< AlienCell* > cells, qreal angle, AlienGrid*& grid)
-    : _grid(grid),
-      _angle(angle),
-      _cells(cells),
-      _id(GlobalFunctions::getTag()),
-      _color(GlobalFunctions::getTag())
+AlienCellCluster* AlienCellCluster::buildCellCluster (QDataStream& stream,
+                                           QMap< quint64, quint64 >& oldNewClusterIdMap,
+                                           QMap< quint64, quint64 >& oldNewCellIdMap,
+                                           QMap< quint64, AlienCell* >& oldIdCellMap,
+                                           AlienGrid*& grid)
 {
-    //calc new center
-    QVector3D center(0.0,0.0,0.0);
-    foreach( AlienCell* cell, _cells) {
-        center += cell->_cluster->calcPosition(cell);
-    }
-    center /= _cells.size();
-    setPosition(center);
-
-    //set rel coordinated with respect to the new center
-    foreach(AlienCell* cell, _cells) {
-
-        //adjust relative position of the cells
-        QVector3D pos(cell->_cluster->calcPosition(cell));
-        cell->_cluster = this;
-        cell->setAbsPosition(pos);
-    }
-
-    updateAngularMass();
-    updateVel_angularVel_via_cellVelocities();
+    return new AlienCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, grid);
 }
 
-AlienCellCluster::AlienCellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, AlienCell* >& oldIdCellMap, AlienGrid*& grid)
-    : _grid(grid)
+AlienCellCluster* AlienCellCluster::buildCellClusterFromForeignCells (QList< AlienCell* > cells,
+                                                           qreal angle,
+                                                           AlienGrid*& grid)
 {
-    //read data and reconstructing structures
-    QMap< quint64, QList< quint64 > > connectingCells;
-    QMap< quint64, AlienCell* > idCellMap;
-    qreal angle(0);
-    QVector3D pos;
-    stream >> angle >> pos >> _angularVel >> _vel;
-    setPosition(pos);
-    setAngle(angle);
-    int numCells(0);
-    stream >> numCells;
-    for(int i = 0; i < numCells; ++i ) {
-        AlienCell* cell(new AlienCell(stream, connectingCells, _grid));
-        cell->_cluster = this;
-        _cells << cell;
-        idCellMap[cell->_id] = cell;
-
-        //assigning new cell id
-        quint64 newId = GlobalFunctions::getTag();
-        oldNewCellIdMap[cell->_id] = newId;
-        oldIdCellMap[cell->_id] = cell;
-        cell->_id = newId;
-    }
-    quint64 oldClusterId(0);
-    stream >> oldClusterId;
-    stream >> _color;
-
-    //assigning new cluster id
-    _id = GlobalFunctions::getTag();
-    oldNewClusterIdMap[oldClusterId] = _id;
-
-    QMapIterator< quint64, QList< quint64 > > it(connectingCells);
-    while (it.hasNext()) {
-        it.next();
-        AlienCell* cell(idCellMap[it.key()]);
-        QList< quint64 > cellIdList(it.value());
-        int i(0);
-        foreach(quint64 cellId, cellIdList) {
-            cell->_connectingCells[i] = idCellMap[cellId];
-            ++i;
-        }
-    }
-
-    updateRelCoordinates();
-    updateAngularMass();
+    return new AlienCellCluster(cells, angle, grid);
 }
 
 AlienCellCluster::~AlienCellCluster ()
@@ -1162,6 +1084,115 @@ void AlienCellCluster::getConnectedComponent(AlienCell* cell, const quint64& tag
             getConnectedComponent(cell->_connectingCells[i], tag, component);
         }
     }
+}
+
+AlienCellCluster::AlienCellCluster (AlienGrid*& grid)
+    : _grid(grid),
+      _angle(0.0),
+      _pos(0.0, 0.0, 0.0),
+      _angularVel(0.0),
+      _vel(0.0, 0.0, 0.0),
+      _angularMass(0.0),
+      _id(GlobalFunctions::getTag()),
+      _color(GlobalFunctions::getTag())
+{
+    calcTransform();
+}
+
+AlienCellCluster::AlienCellCluster(QList< AlienCell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, AlienGrid*& grid)
+    : _grid(grid),
+      _angle(angle),
+      _pos(pos),
+      _angularVel(angularVel),
+      _vel(vel),
+      _cells(cells),
+      _id(GlobalFunctions::getTag()),
+      _color(GlobalFunctions::getTag())
+{
+    grid->correctPosition(_pos);
+    foreach(AlienCell* cell, _cells) {
+        cell->_cluster = this;
+    }
+    calcTransform();
+    updateRelCoordinates();
+    updateAngularMass();
+}
+
+AlienCellCluster::AlienCellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, AlienCell* >& oldIdCellMap, AlienGrid*& grid)
+    : _grid(grid)
+{
+    //read data and reconstructing structures
+    QMap< quint64, QList< quint64 > > connectingCells;
+    QMap< quint64, AlienCell* > idCellMap;
+    qreal angle(0);
+    QVector3D pos;
+    stream >> angle >> pos >> _angularVel >> _vel;
+    setPosition(pos);
+    setAngle(angle);
+    int numCells(0);
+    stream >> numCells;
+    for(int i = 0; i < numCells; ++i ) {
+        AlienCell* cell(new AlienCell(stream, connectingCells, _grid));
+        cell->_cluster = this;
+        _cells << cell;
+        idCellMap[cell->_id] = cell;
+
+        //assigning new cell id
+        quint64 newId = GlobalFunctions::getTag();
+        oldNewCellIdMap[cell->_id] = newId;
+        oldIdCellMap[cell->_id] = cell;
+        cell->_id = newId;
+    }
+    quint64 oldClusterId(0);
+    stream >> oldClusterId;
+    stream >> _color;
+
+    //assigning new cluster id
+    _id = GlobalFunctions::getTag();
+    oldNewClusterIdMap[oldClusterId] = _id;
+
+    QMapIterator< quint64, QList< quint64 > > it(connectingCells);
+    while (it.hasNext()) {
+        it.next();
+        AlienCell* cell(idCellMap[it.key()]);
+        QList< quint64 > cellIdList(it.value());
+        int i(0);
+        foreach(quint64 cellId, cellIdList) {
+            cell->_connectingCells[i] = idCellMap[cellId];
+            ++i;
+        }
+    }
+
+    updateRelCoordinates();
+    updateAngularMass();
+}
+
+AlienCellCluster::AlienCellCluster(QList< AlienCell* > cells, qreal angle, AlienGrid*& grid)
+    : _grid(grid),
+      _angle(angle),
+      _cells(cells),
+      _id(GlobalFunctions::getTag()),
+      _color(GlobalFunctions::getTag())
+{
+    //calc new center
+    QVector3D center(0.0,0.0,0.0);
+    foreach( AlienCell* cell, _cells) {
+        center += cell->_cluster->calcPosition(cell);
+    }
+    center /= _cells.size();
+    setPosition(center);
+
+    //set rel coordinated with respect to the new center
+    foreach(AlienCell* cell, _cells) {
+
+        //adjust relative position of the cells
+        QVector3D pos(cell->_cluster->calcPosition(cell));
+        cell->_cluster = this;
+        cell->setAbsPosition(pos);
+    }
+
+    updateAngularMass();
+    updateVel_angularVel_via_cellVelocities();
 }
 
 void AlienCellCluster::radiation (qreal& energy, AlienCell* originCell, AlienEnergy*& energyParticle)
