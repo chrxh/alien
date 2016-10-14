@@ -14,21 +14,22 @@
 class AlienCellCluster
 {
 public:
-    AlienCellCluster (AlienGrid*& grid);
-    AlienCellCluster (QList< AlienCell* > cells,
-                      qreal angle,
-                      QVector3D pos,
-                      qreal angularVel,
-                      QVector3D vel,
-                      AlienGrid*& grid);   //create cluster with new cells
-    AlienCellCluster (QList< AlienCell* > cells,
-                      qreal angle,
-                      AlienGrid*& grid);   //new cluster takes ownership of cells
-    AlienCellCluster (QDataStream& stream,
-                      QMap< quint64, quint64 >& oldNewClusterIdMap,
-                      QMap< quint64, quint64 >& oldNewCellIdMap,
-                      QMap< quint64, AlienCell* >& oldIdCellMap,
-                      AlienGrid*& grid);
+    static AlienCellCluster* buildEmptyCellCluster (AlienGrid*& grid);
+    static AlienCellCluster* buildCellCluster (QList< AlienCell* > cells,
+                                               qreal angle,
+                                               QVector3D pos,
+                                               qreal angularVel,
+                                               QVector3D vel,
+                                               AlienGrid*& grid);
+    static AlienCellCluster* buildCellCluster (QDataStream& stream,
+                                               QMap< quint64, quint64 >& oldNewClusterIdMap,
+                                               QMap< quint64, quint64 >& oldNewCellIdMap,
+                                               QMap< quint64, AlienCell* >& oldIdCellMap,
+                                               AlienGrid*& grid);
+    static AlienCellCluster* buildCellClusterFromForeignCells (QList< AlienCell* > cells,
+                                                               qreal angle,
+                                                               AlienGrid*& grid);
+
     ~AlienCellCluster ();
 
     void clearCellsFromMap ();
@@ -83,6 +84,22 @@ public:
     void getConnectedComponent(AlienCell* cell, const quint64& tag, QList< AlienCell* >& component);
 
 private:
+    AlienCellCluster (AlienGrid*& grid);
+    AlienCellCluster (QList< AlienCell* > cells,
+                      qreal angle,
+                      QVector3D pos,
+                      qreal angularVel,
+                      QVector3D vel,
+                      AlienGrid*& grid);
+    AlienCellCluster (QDataStream& stream,
+                      QMap< quint64, quint64 >& oldNewClusterIdMap,
+                      QMap< quint64, quint64 >& oldNewCellIdMap,
+                      QMap< quint64, AlienCell* >& oldIdCellMap,
+                      AlienGrid*& grid);
+    AlienCellCluster (QList< AlienCell* > cells,
+                      qreal angle,
+                      AlienGrid*& grid);
+
     void radiation (qreal& energy, AlienCell* originCell, AlienEnergy*& energyParticle);
 
     AlienGrid*& _grid;
