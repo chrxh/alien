@@ -6,11 +6,11 @@
 class AlienCellFunctionCommunicator : public AlienCellFunction
 {
 public:
-    AlienCellFunctionCommunicator ();
-    AlienCellFunctionCommunicator (quint8* cellTypeData);
-    AlienCellFunctionCommunicator (QDataStream& stream);
+    AlienCellFunctionCommunicator (AlienGrid*& grid);
+    AlienCellFunctionCommunicator (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionCommunicator (QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName () const;
     void serialize (QDataStream& stream);
 
@@ -51,12 +51,12 @@ private:
 
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
     void setListeningChannel (AlienToken* token);
-    void sendMessageToNearbyCommunicatorsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid) const;
+    void sendMessageToNearbyCommunicatorsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell) const;
     void receiveMessage (AlienToken* token);
 
-    int sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageToSend, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienGrid* grid) const;
-    QList< AlienCell* > findNearbyCommunicator (AlienCell* cell, AlienGrid* grid) const;
-    bool sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageToSend, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienCell* receiverCell, AlienGrid* grid) const;
+    int sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageToSend, AlienCell* senderCell, AlienCell* senderPreviousCell) const;
+    QList< AlienCell* > findNearbyCommunicator (AlienCell* cell) const;
+    bool sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageToSend, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienCell* receiverCell) const;
     AlienCellFunctionCommunicator* getCommunicator (AlienCell* cell) const;
 
 };

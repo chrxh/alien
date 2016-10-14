@@ -9,11 +9,11 @@ class AlienEnergy;
 class AlienCellFunction
 {
 public:
-    AlienCellFunction();
+    AlienCellFunction(AlienGrid*& grid);
     virtual ~AlienCellFunction();
 
-    virtual void runEnergyGuidanceSystem (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid*& space);
-    virtual void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose) = 0;
+    virtual void runEnergyGuidanceSystem (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
+    virtual void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose) = 0;
     virtual QString getCode ();
     virtual bool compileCode (QString code, int& errorLine);
     virtual QString getCellFunctionName () const = 0;
@@ -38,6 +38,7 @@ public:
     };
 
 protected:
+    AlienGrid*& _grid;
     qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2, AlienGrid* grid) const;
 
     qreal convertDataToAngle (quint8 b) const;

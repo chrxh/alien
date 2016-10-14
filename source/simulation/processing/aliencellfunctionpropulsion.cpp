@@ -8,22 +8,25 @@
 #include <QtCore/qmath.h>
 
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion()
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion(AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (quint8* cellTypeData)
-{
-
-}
-
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (QDataStream& stream)
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (quint8* cellTypeData, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(grid)
+{
 
-void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+}
+
+
+void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
 {
     AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(PROP::IN)]%7;
@@ -98,7 +101,7 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
     if( token->energy >= (energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
-        newParticle = new AlienEnergy(qAbs(energyDiff), cluster->calcPosition(cell, grid)-impulse.normalized(), tangVel-impulse.normalized()/4.0);
+        newParticle = new AlienEnergy(qAbs(energyDiff), cluster->calcPosition(cell, _grid)-impulse.normalized(), tangVel-impulse.normalized()/4.0);
 
         //update velocities
         cluster->setVel(newVel);
