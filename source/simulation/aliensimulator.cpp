@@ -135,7 +135,7 @@ void AlienSimulator::buildUniverse (QDataStream& stream, QMap< quint64, quint64 
     quint32 numCluster;
     stream >> numCluster;
     for(auto i = 0; i < numCluster; ++i) {
-        AlienCellCluster* cluster(new AlienCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap));
+        AlienCellCluster* cluster(new AlienCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid));
         _grid->getClusters() << cluster;
     }
 
@@ -143,7 +143,7 @@ void AlienSimulator::buildUniverse (QDataStream& stream, QMap< quint64, quint64 
     quint32 numEnergyParticles;
     stream >> numEnergyParticles;
     for(auto i = 0; i < numEnergyParticles; ++i) {
-        AlienEnergy* e(new AlienEnergy(stream, oldIdEnergyMap));
+        AlienEnergy* e(new AlienEnergy(stream, oldIdEnergyMap, _grid));
         _grid->getEnergyParticles() << e;
     }
 
@@ -185,7 +185,7 @@ void AlienSimulator::addBlockStructure (QVector3D center, int numCellX, int numC
                 maxCon = 3;
             if( ((i == 0) || (i == (numCellX-1))) && ((j == 0) || (j == (numCellY-1))) )
                 maxCon = 2;
-            AlienCell* cell = new AlienCell(energy, false, maxCon, 0, 0, QVector3D(x, y, 0.0));
+            AlienCell* cell = new AlienCell(energy, _grid, false, maxCon, 0, 0, QVector3D(x, y, 0.0));
 
             cellGrid[i][j] = cell;
         }
@@ -201,8 +201,8 @@ void AlienSimulator::addBlockStructure (QVector3D center, int numCellX, int numC
 
     //create cluster
     _grid->lockData();
-    AlienCellCluster* cluster = new AlienCellCluster(_grid, cells, 0.0, center, 0.0, QVector3D());
-    cluster->drawCellsToMap(_grid);
+    AlienCellCluster* cluster = new AlienCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
+    cluster->drawCellsToMap();
     _thread->getClusters() << cluster;
     _grid->unlockData();
     QList< AlienCellCluster* > newCluster;
@@ -229,7 +229,7 @@ void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal
                 maxCon = 6;
 
             //create cell: upper layer
-            cellGrid[numLayers-1+i][numLayers-1-j] = new AlienCell(energy, false, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
+            cellGrid[numLayers-1+i][numLayers-1-j] = new AlienCell(energy, _grid, false, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
             cells << cellGrid[numLayers-1+i][numLayers-1-j];
             if( numLayers-1+i > 0 )
                 cellGrid[numLayers-1+i][numLayers-1-j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1-j]);
@@ -240,7 +240,7 @@ void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal
 
             //create cell: under layer (except for 0-layer)
             if( j > 0 ) {
-                cellGrid[numLayers-1+i][numLayers-1+j] = new AlienCell(energy, false, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
+                cellGrid[numLayers-1+i][numLayers-1+j] = new AlienCell(energy, _grid, false, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
                 cells << cellGrid[numLayers-1+i][numLayers-1+j];
                 if( numLayers-1+i > 0 )
                     cellGrid[numLayers-1+i][numLayers-1+j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1+j]);
@@ -252,8 +252,8 @@ void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal
 
     //create cluster
     _grid->lockData();
-    AlienCellCluster* cluster = new AlienCellCluster(_grid, cells, 0.0, center, 0.0, QVector3D());
-    cluster->drawCellsToMap(_grid);
+    AlienCellCluster* cluster = new AlienCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
+    cluster->drawCellsToMap();
     _thread->getClusters() << cluster;
     _grid->unlockData();
     QList< AlienCellCluster* > newCluster;
@@ -274,7 +274,7 @@ void AlienSimulator::addRandomEnergy (qreal energy, qreal maxEnergyPerParticle)
         qreal velX = GlobalFunctions::random(-1.0, 1.0);
         qreal velY = GlobalFunctions::random(-1.0, 1.0);
 
-        AlienEnergy* e = new AlienEnergy(rEnergy, QVector3D(posX, posY, 0.0), QVector3D(velX, velY, 0.0));
+        AlienEnergy* e = new AlienEnergy(rEnergy, QVector3D(posX, posY, 0.0), QVector3D(velX, velY, 0.0), _grid);
         _grid->getEnergyParticles() << e;
         _grid->setEnergy(e->pos, e);
         energy -= rEnergy;
@@ -337,10 +337,10 @@ void AlienSimulator::buildCell (QDataStream& stream,
 
     //read cell data
     QList< AlienCell* > newCells;
-    AlienCell* newCell = new AlienCell(stream);
+    AlienCell* newCell = new AlienCell(stream, _grid);
     newCells << newCell;
     newCells[0]->setRelPos(QVector3D());
-    newCluster = new AlienCellCluster(_grid, newCells, 0, pos, 0, newCell->getVel());
+    newCluster = new AlienCellCluster(newCells, 0, pos, 0, newCell->getVel(), _grid);
     _thread->getClusters() << newCluster;
 
     //read old cluster id
@@ -356,7 +356,7 @@ void AlienSimulator::buildCell (QDataStream& stream,
 
     //draw cluster
     if( drawToMap )
-        newCluster->drawCellsToMap(_grid);
+        newCluster->drawCellsToMap();
 
     _grid->unlockData();
 }
@@ -383,7 +383,7 @@ void AlienSimulator::buildExtendedSelection (QDataStream& stream,
     QVector3D center(0.0, 0.0, 0.0);
     quint32 numCells = 0;
     for(int i = 0; i < numClusters; ++i) {
-        AlienCellCluster* cluster(new AlienCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap));
+        AlienCellCluster* cluster(new AlienCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid));
         newClusters << cluster;
         foreach(AlienCell* cell, cluster->getCells())
             center += cell->calcPosition();
@@ -397,7 +397,7 @@ void AlienSimulator::buildExtendedSelection (QDataStream& stream,
 
     //read energy particle data
     for(int i = 0; i < numEnergyParticles; ++i) {
-        AlienEnergy* e(new AlienEnergy(stream, oldIdEnergyMap));
+        AlienEnergy* e(new AlienEnergy(stream, oldIdEnergyMap, _grid));
         center += e->pos;
         newEnergyParticles << e;
     }
@@ -409,7 +409,7 @@ void AlienSimulator::buildExtendedSelection (QDataStream& stream,
         cluster->setPosition(cluster->getPosition()-center+pos);
         cluster->calcTransform();
         if( drawToMap )
-            cluster->drawCellsToMap(_grid);
+            cluster->drawCellsToMap();
     }
     foreach(AlienEnergy* e, newEnergyParticles) {
         e->pos = e->pos-center+pos;
@@ -466,7 +466,7 @@ void AlienSimulator::delExtendedSelection (QList< AlienCellCluster* > clusters, 
 
     //remove cell clusters
     foreach(AlienCellCluster* cluster, clusters) {
-        cluster->clearCellsFromMap(_grid);
+        cluster->clearCellsFromMap();
         _thread->getClusters().removeAll(cluster);
         delete cluster;
     }
@@ -575,7 +575,7 @@ void AlienSimulator::drawToMapExtendedSelection (const QList< AlienCellCluster* 
 {
     _grid->lockData();
     foreach(AlienCellCluster* cluster, clusters) {
-        cluster->drawCellsToMap(_grid);
+        cluster->drawCellsToMap();
     }
     foreach(AlienEnergy* e, es) {
         _grid->setEnergy(e->pos, e);
@@ -587,11 +587,15 @@ void AlienSimulator::newCell (QVector3D pos)
 {
     //create cluster with single cell
     _grid->lockData();
-    AlienCell* cell(new AlienCell(simulationParameters.NEW_CELL_ENERGY, false, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER));
+    AlienCell* cell = new AlienCell(simulationParameters.NEW_CELL_ENERGY,
+                                    _grid,
+                                    false,
+                                    simulationParameters.NEW_CELL_MAX_CONNECTION,
+                                    simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< AlienCell* > cells;
     cells << cell;
-    AlienCellCluster* cluster = new AlienCellCluster(_grid, cells, 0.0, pos, 0, QVector3D(0.0, 0.0, 0.0));
+    AlienCellCluster* cluster = new AlienCellCluster(cells, 0.0, pos, 0, QVector3D(), _grid);
     _grid->setCell(pos, cell);
     _thread->getClusters() << cluster;
     _grid->unlockData();
@@ -603,7 +607,7 @@ void AlienSimulator::newEnergyParticle (QVector3D pos)
 {
     //create energy particle
     _grid->lockData();
-    AlienEnergy* energy = new AlienEnergy(simulationParameters.CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(0.0, 0.0, 0.0));
+    AlienEnergy* energy = new AlienEnergy(simulationParameters.CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _grid);
     _grid->setEnergy(pos, energy);
     _thread->getEnergyParticles() << energy;
     _grid->unlockData();
@@ -628,7 +632,7 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellRedu
 
             //update cell properties
             cell->getCluster()->calcTransform();
-            cell->setAbsPositionAndUpdateMap(newCellData.cellPos, _grid);
+            cell->setAbsPositionAndUpdateMap(newCellData.cellPos);
             cell->setEnergy(newCellData.cellEnergy);
             cell->delAllConnection();
             if( newCellData.cellMaxCon > simulationParameters.MAX_CELL_CONNECTIONS )
@@ -636,7 +640,7 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellRedu
             cell->setMaxConnections(newCellData.cellMaxCon);
             cell->setBlockToken(!newCellData.cellAllowToken);
             cell->setTokenAccessNumber(newCellData.cellTokenAccessNum);
-            cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false));
+            cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 
             //update cell computer
             for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
@@ -746,13 +750,13 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellRedu
             AlienCell* cell = iCells.next();
             AlienCellReduced newCellData = iNewCellsData.next();
             AlienCellCluster* cluster = cell->getCluster();
-            cluster->clearCellsFromMap(_grid);
+            cluster->clearCellsFromMap();
             cluster->setPosition(newCellData.clusterPos);
             cluster->setAngle(newCellData.clusterAngle);
             cluster->setVel(newCellData.clusterVel);
             cluster->setAngularVel(newCellData.clusterAngVel);
             cluster->calcTransform();
-            cluster->drawCellsToMap(_grid);
+            cluster->drawCellsToMap();
             cluster->updateCellVel();
 /*            foreach (AlienCell* otherCell, cluster->getCells() ) {
                 otherCell->setVel(QVector3D());
@@ -802,49 +806,6 @@ void AlienSimulator::updateUniverse ()
 {
     emit universeUpdated(_grid, true);
 }
-
-/*
-void AlienSimulator::delCell (AlienCell* cell)
-{
-    _grid->lockData();
-
-    //remove cell from cluster structure
-    AlienCellCluster* cluster = cell->getCluster();
-    _grid->removeCellIfPresent(cluster->calcPosition(cell, _grid), cell);
-    cluster->removeCell(cell, false);
-    delete cell;
-
-    //calculate new cluster structure
-    QList< AlienCellCluster* > newClusters;
-    newClusters = cluster->decompose();
-    _thread->getClusters() << newClusters;
-    _thread->getClusters().removeAll(cluster);
-    delete cluster;
-    _grid->unlockData();
-
-    if( !newClusters.isEmpty() )
-        emit reclustered(newClusters);
-}
-
-void AlienSimulator::delEnergyParticle (AlienEnergy* e)
-{
-    _grid->lockData();
-    _thread->getEnergyParticles().removeAll(e);
-    _grid->removeEnergy(e->pos, e);
-    delete e;
-    _grid->unlockData();
-}
-
-
-void AlienSimulator::delCluster (AlienCellCluster* cluster)
-{
-    _grid->lockData();
-    cluster->clearCellsFromMap(_grid);
-    _thread->getClusters().removeAll(cluster);
-    delete cluster;
-    _grid->unlockData();
-}
-*/
 
 void AlienSimulator::forceFpsTimerSlot ()
 {

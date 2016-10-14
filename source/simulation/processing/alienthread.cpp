@@ -88,7 +88,7 @@ void AlienThread::calcNextTimestep ()
 
     //cell movement: step 1
     foreach( AlienCellCluster* cluster, _space->getClusters()) {
-        cluster->movementProcessingStep1(_space);
+        cluster->movementProcessingStep1();
     }
 
     //cell movement: step 2
@@ -102,7 +102,7 @@ void AlienThread::calcNextTimestep ()
         QList< AlienCellCluster* > fragments;
         AlienCellCluster* cluster(i.next());
         energyParticles.clear();
-        cluster->movementProcessingStep2(_space, fragments, energyParticles);
+        cluster->movementProcessingStep2(fragments, energyParticles);
         _space->getEnergyParticles() << energyParticles;
 
         debugCluster(cluster, 2);
@@ -126,7 +126,7 @@ void AlienThread::calcNextTimestep ()
 
     //cell movement: step 3
     foreach( AlienCellCluster* cluster, _space->getClusters()) {
-        cluster->movementProcessingStep3(_space);
+        cluster->movementProcessingStep3();
         debugCluster(cluster, 3);
     }
 
@@ -141,7 +141,7 @@ void AlienThread::calcNextTimestep ()
         else {
             energyParticles.clear();
             bool decompose = false;
-            cluster->movementProcessingStep4(_space, energyParticles, decompose);
+            cluster->movementProcessingStep4(energyParticles, decompose);
             _space->getEnergyParticles() << energyParticles;
             debugCluster(cluster, 4);
 
@@ -159,7 +159,7 @@ void AlienThread::calcNextTimestep ()
 
     //cell movement: step 5
     foreach( AlienCellCluster* cluster, _space->getClusters()) {
-        cluster->movementProcessingStep5(_space);
+        cluster->movementProcessingStep5();
         debugCluster(cluster, 5);
     }
 
@@ -168,7 +168,7 @@ void AlienThread::calcNextTimestep ()
     while (p.hasNext()) {
         AlienEnergy* e(p.next());
         AlienCellCluster* cluster(0);
-        if( e->movement(_space, cluster) ) {
+        if( e->movement(cluster) ) {
 
             //transform into cell?
             if( cluster ) {

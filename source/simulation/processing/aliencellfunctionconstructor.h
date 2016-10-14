@@ -9,11 +9,11 @@ class AlienCellCluster;
 class AlienCellFunctionConstructor : public AlienCellFunction
 {
 public:
-    AlienCellFunctionConstructor ();
-    AlienCellFunctionConstructor (quint8* cellTypeData);
-    AlienCellFunctionConstructor (QDataStream& stream);
+    AlienCellFunctionConstructor (AlienGrid*& grid);
+    AlienCellFunctionConstructor (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionConstructor (QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName () const;
 
     void serialize (QDataStream& stream);
@@ -64,10 +64,17 @@ public:
     };
 
 private:
-    AlienCell* constructNewCell (AlienCell* baseCell, QVector3D posOfNewCell, int maxConnections, int tokenAccessNumber, int cellType, quint8* cellTypeData, AlienGrid*& grid);
-    AlienCell* obstacleCheck (AlienCellCluster* cluster, bool safeMode, AlienGrid*& grid);
+    AlienCell* constructNewCell (AlienCell* baseCell,
+                                 QVector3D posOfNewCell,
+                                 int maxConnections,
+                                 int tokenAccessNumber,
+                                 int cellType,
+                                 quint8* cellTypeData);
+    AlienCell* obstacleCheck (AlienCellCluster* cluster, bool safeMode);
     qreal averageEnergy (qreal e1, qreal e2);
-    void separateConstruction (AlienCell* constructedCell, AlienCell* constructorCell, bool reduceConnection);
+    void separateConstruction (AlienCell* constructedCell,
+                               AlienCell* constructorCell,
+                               bool reduceConnection);
     QString convertCellTypeNumberToName (int type);
 
 };
