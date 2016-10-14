@@ -12,9 +12,17 @@ class AlienGrid;
 class AlienCell
 {
 public:
-    AlienCell (qreal energy, bool random = true, int maxConnections = 0, int tokenAccessNumber = 0, AlienCellFunction* cellFunction = 0, QVector3D relPos = QVector3D(0.0, 0.0, 0.0));
-    AlienCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells);
-    AlienCell (QDataStream& stream);     //build without connecting cells
+    AlienCell (qreal energy,
+               AlienGrid*& grid,
+               bool random = true,
+               int maxConnections = 0,
+               int tokenAccessNumber = 0,
+               AlienCellFunction* cellFunction = 0,
+               QVector3D relPos = QVector3D());
+    AlienCell (QDataStream& stream,
+               QMap< quint64, QList< quint64 > >& connectingCells,
+               AlienGrid*& grid);
+    AlienCell (QDataStream& stream, AlienGrid*& grid);     //build without connecting cells
     ~AlienCell();
 
     bool connectable (AlienCell* otherCell);
@@ -41,9 +49,9 @@ public:
 
     void setCluster (AlienCellCluster* cluster);
     AlienCellCluster* getCluster ();
-    QVector3D calcPosition (AlienGrid* space = 0);
+    QVector3D calcPosition (bool topologyCorrection = false);
     void setAbsPosition (QVector3D pos);
-    void setAbsPositionAndUpdateMap (QVector3D pos, AlienGrid* grid);
+    void setAbsPositionAndUpdateMap (QVector3D pos);
     QVector3D getRelPos ();
     void setRelPos (QVector3D relPos);
     AlienCellFunction* getCellFunction ();
@@ -67,7 +75,8 @@ public:
 
 private:
     friend class AlienCellCluster;
-//    friend class AlienTokenProcessing;
+
+    AlienGrid*& _grid;
 
     AlienCellFunction* _cellFunction;
     QVector< AlienToken* > _tokenStack;

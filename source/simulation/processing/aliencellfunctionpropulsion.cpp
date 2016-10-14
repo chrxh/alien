@@ -97,11 +97,13 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
     qreal energyDiff((eKinNew-eKinOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY);
 
     //has token enough energy?
-//    qDebug("%f",energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY);
     if( token->energy >= (energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
-        newParticle = new AlienEnergy(qAbs(energyDiff), cluster->calcPosition(cell, _grid)-impulse.normalized(), tangVel-impulse.normalized()/4.0);
+        newParticle = new AlienEnergy(qAbs(energyDiff),
+                                      cluster->calcPosition(cell, _grid)-impulse.normalized(),
+                                      tangVel-impulse.normalized()/4.0,
+                                      _grid);
 
         //update velocities
         cluster->setVel(newVel);

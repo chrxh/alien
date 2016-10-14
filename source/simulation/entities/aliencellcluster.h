@@ -14,24 +14,32 @@
 class AlienCellCluster
 {
 public:
-    AlienCellCluster ();
-    AlienCellCluster (AlienGrid*& grid, QList< AlienCell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel);   //cluster with new cells
-    AlienCellCluster (QList< AlienCell* > cells, qreal angle);      //take ownership of cells from foreign clustes
+    AlienCellCluster (AlienGrid*& grid);
+    AlienCellCluster (QList< AlienCell* > cells,
+                      qreal angle,
+                      QVector3D pos,
+                      qreal angularVel,
+                      QVector3D vel,
+                      AlienGrid*& grid);   //create cluster with new cells
+    AlienCellCluster (QList< AlienCell* > cells,
+                      qreal angle,
+                      AlienGrid*& grid);   //new cluster takes ownership of cells
     AlienCellCluster (QDataStream& stream,
                       QMap< quint64, quint64 >& oldNewClusterIdMap,
                       QMap< quint64, quint64 >& oldNewCellIdMap,
-                      QMap< quint64, AlienCell* >& oldIdCellMap);
+                      QMap< quint64, AlienCell* >& oldIdCellMap,
+                      AlienGrid*& grid);
     ~AlienCellCluster ();
 
-    void clearCellsFromMap (AlienGrid*& space);
-    void clearCellFromMap (AlienGrid*& space, AlienCell* cell);
-    void drawCellsToMap (AlienGrid*& space);
+    void clearCellsFromMap ();
+    void clearCellFromMap (AlienCell* cell);
+    void drawCellsToMap ();
 
-    void movementProcessingStep1 (AlienGrid*& space);
-    void movementProcessingStep2 (AlienGrid*& space, QList< AlienCellCluster* >& fragments, QList< AlienEnergy* >& energyParticles);
-    void movementProcessingStep3 (AlienGrid*& space);
-    void movementProcessingStep4 (AlienGrid*& space, QList< AlienEnergy* >& energyParticles, bool& decompose);
-    void movementProcessingStep5 (AlienGrid*& space);
+    void movementProcessingStep1 ();
+    void movementProcessingStep2 (QList< AlienCellCluster* >& fragments, QList< AlienEnergy* >& energyParticles);
+    void movementProcessingStep3 ();
+    void movementProcessingStep4 (QList< AlienEnergy* >& energyParticles, bool& decompose);
+    void movementProcessingStep5 ();
 
     void addCell (AlienCell* cell, QVector3D absPos);
     void removeCell (AlienCell* cell, bool maintainCenter = true);
@@ -39,12 +47,12 @@ public:
     void updateAngularMass ();
     void updateRelCoordinates (bool maintainCenter = false);
     void updateVel_angularVel_via_cellVelocities ();
-    QVector3D calcPosition (AlienCell* cell, AlienGrid* space = 0);
-    QVector3D calcTorusCorrection (AlienCellCluster* cluster, AlienGrid*& space);
+    QVector3D calcPosition (AlienCell* cell, bool topologyCorrection = false);
+    QVector3D calcTorusCorrection (AlienCellCluster* cluster);
     QVector3D calcCellDistWithoutTorusCorrection (AlienCell* cell);
     QList< AlienCellCluster* > decompose ();
-    qreal calcAngularMassWithNewParticle (QVector3D particlePos, AlienGrid*& grid);
-    qreal calcAngularMassWithoutUpdate (AlienGrid*& grid);
+    qreal calcAngularMassWithNewParticle (QVector3D particlePos);
+    qreal calcAngularMassWithoutUpdate ();
 
     bool isEmpty();
 
@@ -69,13 +77,15 @@ public:
 
     void serialize (QDataStream& stream);
 
-    void findNearestCells (QVector3D pos, AlienCell*& cell1, AlienCell*& cell2, AlienGrid*& space);
-    AlienCell* findNearestCell (QVector3D pos, AlienGrid*& space);
+    void findNearestCells (QVector3D pos, AlienCell*& cell1, AlienCell*& cell2);
+    AlienCell* findNearestCell (QVector3D pos);
     void getConnectedComponent(AlienCell* cell, QList< AlienCell* >& component);
     void getConnectedComponent(AlienCell* cell, const quint64& tag, QList< AlienCell* >& component);
 
 private:
-    void radiation (qreal& energy, AlienCell* originCell, AlienEnergy*& energyParticle, AlienGrid*& grid);
+    void radiation (qreal& energy, AlienCell* originCell, AlienEnergy*& energyParticle);
+
+    AlienGrid*& _grid;
 
     //physics data
     qreal _angle;       //in deg

@@ -3,6 +3,7 @@
 
 #include <QString>
 
+class AlienGrid;
 class AlienCellFunction;
 class AlienCellFunctionFactory
 {
