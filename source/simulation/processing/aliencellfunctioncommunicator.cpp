@@ -126,7 +126,7 @@ bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (c
         if( communicator->_receivedMessage.channel == messageToSend.channel ) {
             communicator->_newMessageReceived = true;
             communicator->_receivedMessage.message = messageToSend.message;
-            communicator->_receivedMessage.angle = calcAngle(senderCell, senderPreviousCell, receiverCell, grid);
+            communicator->_receivedMessage.angle = calcAngle(senderCell, senderPreviousCell, receiverCell);
             communicator->_receivedMessage.distance = convertURealToData(_grid->distance(receiverCell, senderCell));
             return true;
         }

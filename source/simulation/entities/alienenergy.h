@@ -8,12 +8,15 @@ class AlienGrid;
 class AlienEnergy
 {
 public:
-    AlienEnergy (qreal amount_, QVector3D pos_, QVector3D vel_);
-    AlienEnergy (QDataStream& stream, QMap< quint64, AlienEnergy* >& oldIdEnergyMap);
+    AlienEnergy (qreal amount_, QVector3D pos_, QVector3D vel_, AlienGrid*& grid);
+    AlienEnergy (QDataStream& stream, QMap< quint64, AlienEnergy* >& oldIdEnergyMap, AlienGrid*& grid);
 
-    bool movement (AlienGrid* grid, AlienCellCluster*& cluster);
+    bool movement (AlienCellCluster*& cluster);
 
     void serialize (QDataStream& stream);
+
+private:
+    AlienGrid*& _grid;
 
 public:
     qreal amount;

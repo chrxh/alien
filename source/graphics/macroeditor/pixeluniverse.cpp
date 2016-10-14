@@ -182,7 +182,7 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         //remove clusters from simulation (temporarily)
         foreach(AlienCellCluster* cluster, clusters) {
             _grid->getClusters().removeOne(cluster);
-            cluster->clearCellsFromMap(_grid);
+            cluster->clearCellsFromMap();
         }
 
         //calc center
@@ -208,7 +208,7 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
 
         //move selected clusters to simulation
         foreach(AlienCellCluster* cluster, _selectedClusters) {
-            cluster->drawCellsToMap(_grid);
+            cluster->drawCellsToMap();
         }
         _grid->getClusters() << _selectedClusters;
         _selectedClusters.clear();
@@ -229,7 +229,7 @@ void PixelUniverse::mouseReleaseEvent (QGraphicsSceneMouseEvent* e)
 
     //move selected clusters to simulation
     foreach(AlienCellCluster* cluster, _selectedClusters) {
-        cluster->drawCellsToMap(_grid);
+        cluster->drawCellsToMap();
     }
     _grid->getClusters() << _selectedClusters;
     _selectedClusters.clear();

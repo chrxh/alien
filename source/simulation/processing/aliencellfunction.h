@@ -39,7 +39,7 @@ public:
 
 protected:
     AlienGrid*& _grid;
-    qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2, AlienGrid* grid) const;
+    qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const;
 
     qreal convertDataToAngle (quint8 b) const;
     quint8 convertAngleToData (qreal a) const;
