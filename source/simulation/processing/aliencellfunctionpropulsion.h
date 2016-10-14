@@ -6,11 +6,11 @@
 class AlienCellFunctionPropulsion : public AlienCellFunction
 {
 public:
-    AlienCellFunctionPropulsion ();
-    AlienCellFunctionPropulsion (quint8* cellTypeData);
-    AlienCellFunctionPropulsion (QDataStream& stream);
+    AlienCellFunctionPropulsion (AlienGrid*& grid);
+    AlienCellFunctionPropulsion (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionPropulsion (QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
     QString getCellFunctionName () const;
 
     //constants for cell function programming

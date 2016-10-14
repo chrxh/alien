@@ -8,21 +8,24 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-AlienCellFunctionScanner::AlienCellFunctionScanner()
+AlienCellFunctionScanner::AlienCellFunctionScanner(AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
-AlienCellFunctionScanner::AlienCellFunctionScanner (quint8* cellTypeData)
-{
-
-}
-
-AlienCellFunctionScanner::AlienCellFunctionScanner (QDataStream& stream)
+AlienCellFunctionScanner::AlienCellFunctionScanner (quint8* cellTypeData, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
-void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+AlienCellFunctionScanner::AlienCellFunctionScanner (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(grid)
+{
+
+}
+
+void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
 {
     int n = token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)];
     quint64 tag(GlobalFunctions::getTag());

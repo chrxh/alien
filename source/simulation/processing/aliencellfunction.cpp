@@ -8,7 +8,8 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-AlienCellFunction::AlienCellFunction()
+AlienCellFunction::AlienCellFunction(AlienGrid*& grid)
+    : _grid(grid)
 {
 }
 
@@ -16,7 +17,7 @@ AlienCellFunction::~AlienCellFunction()
 {
 }
 
-void AlienCellFunction::runEnergyGuidanceSystem (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid*& space)
+void AlienCellFunction::runEnergyGuidanceSystem (AlienToken* token, AlienCell* cell, AlienCell* previousCell)
 {
     quint8 cmd = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN)] % 6;
     qreal valueCell = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_CELL)];

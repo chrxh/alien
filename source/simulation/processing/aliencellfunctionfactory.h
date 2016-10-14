@@ -7,10 +7,10 @@ class AlienCellFunction;
 class AlienCellFunctionFactory
 {
 public:
-    static AlienCellFunction* build (QString type, bool randomData);
-    static AlienCellFunction* build (QDataStream& stream);
-    static AlienCellFunction* build (QString type, quint8* cellTypeData);
-    static AlienCellFunction* buildRandom (bool randomData);
+    static AlienCellFunction* build (QString type, bool randomData, AlienGrid*& grid);
+    static AlienCellFunction* build (QDataStream& stream, AlienGrid*& grid);
+    static AlienCellFunction* build (QString type, quint8* cellTypeData, AlienGrid*& grid);
+    static AlienCellFunction* buildRandom (bool randomData, AlienGrid*& grid);
 //    static int convertFunctionNameToCellType (QString name);
 };
 

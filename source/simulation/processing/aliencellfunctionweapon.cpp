@@ -5,28 +5,31 @@
 
 #include "../../globaldata/simulationsettings.h"
 
-AlienCellFunctionWeapon::AlienCellFunctionWeapon()
+AlienCellFunctionWeapon::AlienCellFunctionWeapon(AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
-AlienCellFunctionWeapon::AlienCellFunctionWeapon (quint8* cellTypeData)
-{
-
-}
-
-AlienCellFunctionWeapon::AlienCellFunctionWeapon (QDataStream& stream)
+AlienCellFunctionWeapon::AlienCellFunctionWeapon (quint8* cellTypeData, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
-void AlienCellFunctionWeapon::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+AlienCellFunctionWeapon::AlienCellFunctionWeapon (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(grid)
+{
+
+}
+
+void AlienCellFunctionWeapon::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
 {
     token->memory[static_cast<int>(WEAPON::OUT)] = static_cast<int>(WEAPON_OUT::NO_TARGET);
     QVector3D pos = cell->getCluster()->calcPosition(cell);
     for(int x = -2; x < 3; ++x)
         for(int y = -2; y < 3; ++y) {
             QVector3D searchPos(pos.x()+x, pos.y()+y, 0.0);
-            AlienCell* otherCell = grid->getCell(searchPos);
+            AlienCell* otherCell = _grid->getCell(searchPos);
 
             //other cell found?
             if( otherCell ) {
