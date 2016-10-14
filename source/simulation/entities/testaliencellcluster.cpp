@@ -37,7 +37,7 @@ void TestAlienCellCluster::testCreation()
         cells << cell;
     }
     QVector3D pos(200.0, 100.0, 0.0);
-    _cluster = new AlienCellCluster(cells, 0.0, pos, 0.0, QVector3D(), _grid);
+    _cluster = AlienCellCluster::buildCellCluster(cells, 0.0, pos, 0.0, QVector3D(), _grid);
     QCOMPARE(_cluster->getPosition().x(), 250.0);
     QCOMPARE(_cluster->getPosition().y(), 100.0);
 }

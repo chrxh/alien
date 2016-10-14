@@ -95,11 +95,11 @@ bool AlienEnergy::movement (AlienCellCluster*& cluster)
                     }
                 }
 
-                //create cell
+                //create cell and cluster
                 QList< AlienCell* > cells;
                 AlienCell* c(new AlienCell(eNew, _grid, true));
                 cells << c;
-                cluster = new AlienCellCluster(cells, 0.0, pos, 0, vel, _grid);
+                cluster = AlienCellCluster::buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
                 amount = 0;
                 _grid->setCell(pos, c);
                 c->setColor(color);
