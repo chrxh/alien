@@ -9,11 +9,11 @@
 class AlienCellFunctionComputer: public AlienCellFunction
 {
 public:
-    AlienCellFunctionComputer (bool randomData);
-    AlienCellFunctionComputer (quint8* cellTypeData);
-    AlienCellFunctionComputer (QDataStream& stream);
+    AlienCellFunctionComputer (bool randomData, AlienGrid*& grid);
+    AlienCellFunctionComputer (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionComputer (QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose);
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
     QString getCode ();
     bool compileCode (QString code, int& errorLine);
     QString getCellFunctionName () const;

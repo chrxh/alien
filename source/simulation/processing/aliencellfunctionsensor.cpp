@@ -6,27 +6,25 @@
 #include "../../globaldata/simulationsettings.h"
 
 #include <QtCore/qmath.h>
-/*
-#include <chrono>
-#include <iostream>
-using namespace std;
-using namespace std::chrono;
-*/
-AlienCellFunctionSensor::AlienCellFunctionSensor()
+
+AlienCellFunctionSensor::AlienCellFunctionSensor(AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
-AlienCellFunctionSensor::AlienCellFunctionSensor (quint8* cellTypeData)
+AlienCellFunctionSensor::AlienCellFunctionSensor (quint8* cellTypeData, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
-AlienCellFunctionSensor::AlienCellFunctionSensor (QDataStream& stream)
+AlienCellFunctionSensor::AlienCellFunctionSensor (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
-void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienGrid* grid, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
 {
     AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(SENSOR::IN)]%5;
@@ -44,9 +42,9 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
 
     //scanning vicinity?
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_VICINITY) ) {
-        QVector3D cellPos = cell->calcPosition(grid);
+        QVector3D cellPos = cell->calcPosition(_grid);
 //        auto time1 = high_resolution_clock::now();
-        AlienCellCluster* otherCluster = grid->getNearbyClusterFast(cellPos,
+        AlienCellCluster* otherCluster = _grid->getNearbyClusterFast(cellPos,
                                                                     simulationParameters.CELL_FUNCTION_SENSOR_RANGE,
                                                                     minMassReal,
                                                                     maxMassReal,
