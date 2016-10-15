@@ -1,12 +1,15 @@
 #include "aliencellfunction.h"
 #include "../entities/aliencell.h"
+#include "../entities/aliengrid.h"
+#include "../physics/physics.h"
 
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QString>
 #include <QtCore/qmath.h>
 
-AlienCellFunction::AlienCellFunction()
+AlienCellFunction::AlienCellFunction(AlienGrid*& grid)
+    : _grid(grid)
 {
 }
 
@@ -14,7 +17,7 @@ AlienCellFunction::~AlienCellFunction()
 {
 }
 
-void AlienCellFunction::runEnergyGuidanceSystem (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space)
+void AlienCellFunction::runEnergyGuidanceSystem (AlienToken* token, AlienCell* cell, AlienCell* previousCell)
 {
     quint8 cmd = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN)] % 6;
     qreal valueCell = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_CELL)];
@@ -69,15 +72,6 @@ void AlienCellFunction::runEnergyGuidanceSystem (AlienToken* token, AlienCell* p
             token->energy -= amount;
         }
     }
-/*    for(qreal i = 0.0; i < 2.0; i = i + 0.123) {
-        qreal t = convertDataToShiftLen(convertShiftLenToData(i));
-        qDebug("v: %f, n: %f", t, convertDataToShiftLen(convertShiftLenToData(t)));
-    }
-    for(qreal i = 0.0; i < 360.0; i = i + 3.34) {
-        qreal t = convertDataToAngle(convertAngleToData(i));
-        qDebug("v: %f, n: %f", t, convertDataToAngle(convertAngleToData(t)));
-    }*/
-//    qDebug("%d, %d", convertAngleToData(60.468750), convertAngleToData(60.465));
 }
 
 QString AlienCellFunction::getCode ()
@@ -100,7 +94,14 @@ void AlienCellFunction::getInternalData (quint8* data)
 
 }
 
-qreal AlienCellFunction::convertDataToAngle (quint8 b)
+qreal AlienCellFunction::calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const
+{
+    QVector3D v1 = _grid->displacement(origin, ref1);
+    QVector3D v2 = _grid->displacement(origin, ref2);
+    return Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);
+}
+
+qreal AlienCellFunction::convertDataToAngle (quint8 b) const
 {
     //0 to 127 => 0 to 179 degree
     //128 to 255 => -179 to 0 degree
@@ -110,7 +111,7 @@ qreal AlienCellFunction::convertDataToAngle (quint8 b)
         return (-256.0-0.5+static_cast<qreal>(b))*(180.0/128.0);
 }
 
-quint8 AlienCellFunction::convertAngleToData (qreal a)
+quint8 AlienCellFunction::convertAngleToData (qreal a) const
 {
     //0 to 180 degree => 0 to 128
     //-180 to 0 degree => 128 to 256 (= 0)
@@ -119,27 +120,23 @@ quint8 AlienCellFunction::convertAngleToData (qreal a)
     if( a <= -180.0 )
         a = a + 360.0;
     int intA = static_cast<int>(a*128.0/180.0);
-//    if( intA >= 0 )
     return static_cast<quint8>(intA);
-//    else
-//        return 127-(int)(a*128.0/180.0);
 }
 
-qreal AlienCellFunction::convertDataToShiftLen (quint8 b)
+qreal AlienCellFunction::convertDataToShiftLen (quint8 b) const
 {
-//    return simulationParameters.CRIT_CELL_DIST_MIN + (simulationParameters.CRIT_CELL_DIST_MAX-simulationParameters.CRIT_CELL_DIST_MIN)*((qreal)b)/255.0;
     return (0.5+(qreal)b)/100.0;                    //add 0.5 to prevent discretization errors
 }
 
-quint8 AlienCellFunction::convertShiftLenToData (qreal len)
+quint8 AlienCellFunction::convertShiftLenToData (qreal len) const
 {
-//    return (quint8)((len - simulationParameters.CRIT_CELL_DIST_MIN)/(simulationParameters.CRIT_CELL_DIST_MAX-simulationParameters.CRIT_CELL_DIST_MIN)*255.0);
     if( static_cast< quint32 >(len*100.0) >= 256 )
         return 255;
     return static_cast< quint8 >(len*100.0);
 }
 
-quint8 AlienCellFunction::convertURealToData (qreal r) {
+quint8 AlienCellFunction::convertURealToData (qreal r) const
+{
     if( r < 0.0 )
         return 0;
     if( r > 127.0)
@@ -147,15 +144,17 @@ quint8 AlienCellFunction::convertURealToData (qreal r) {
     return qFloor(r);
 }
 
-/*
-qreal AlienCellFunction::convertDataToAngle (quint8 b)
+qreal AlienCellFunction::convertDataToUReal (quint8 d) const
 {
-    //0-127 => 0-179 degree
-    //128-255 => 0-(-179) degree
-    if( b < 128 )
-        return ((qreal)b)*(180.0/128.0);
-    else
-        return (127.0-(qreal)b)*(180.0/128.0);
+    return static_cast< qreal >(d);
 }
-*/
+
+quint8 AlienCellFunction::convertIntToData (int i) const
+{
+    if( i > 127 )
+        return i;
+    if( i < -128)
+        return -128;
+    return i;
+}
 

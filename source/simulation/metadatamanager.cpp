@@ -11,7 +11,7 @@ MetadataManager& MetadataManager::getGlobalInstance ()
 
 MetadataManager::MetadataManager()
 {
-    loadDefaultSymbolTable();
+
 }
 
 MetadataManager::~MetadataManager()
@@ -128,125 +128,6 @@ void MetadataManager::cleanUp (const QSet< quint64 >& ids)
 const QMap< quint64, AlienCellMetadata >& MetadataManager::getCellMetadata ()
 {
     return _idCellMetadataMap;
-}
-
-void MetadataManager::loadDefaultSymbolTable ()
-{
-    clearSymbolTable();
-
-    //general variables
-    addSymbolEntry("i","[255]");
-    addSymbolEntry("j","[254]");
-    addSymbolEntry("k","[253]");
-    addSymbolEntry("l","[252]");
-
-    //token branch number
-    addSymbolEntry("BRANCH_NUMBER","[0]");
-
-    //energy guidance system
-    addSymbolEntry("ENERGY_GUIDANCE_IN","[1]");
-    addSymbolEntry("ENERGY_GUIDANCE_IN::DEACTIVATED","0");
-    addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_CELL","1");
-    addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_TOKEN","2");
-    addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_BOTH","3");
-    addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_CELL","4");
-    addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_TOKEN","5");
-    addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_CELL","[2]");
-    addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_TOKEN","[3]");
-
-    //constructor
-    addSymbolEntry("CONSTR_OUT","[5]");
-    addSymbolEntry("CONSTR_OUT::SUCCESS","0");
-    addSymbolEntry("CONSTR_OUT::SUCCESS_ROT","1");
-    addSymbolEntry("CONSTR_OUT::ERROR_NO_ENERGY","2");
-    addSymbolEntry("CONSTR_OUT::ERROR_OBSTACLE","3");
-    addSymbolEntry("CONSTR_OUT::ERROR_CONNECTION","4");
-    addSymbolEntry("CONSTR_OUT::ERROR_DIST","5");
-    addSymbolEntry("CONSTR_IN","[6]");
-    addSymbolEntry("CONSTR_IN::DO_NOTHING","0");
-    addSymbolEntry("CONSTR_IN::SAFE","1");
-    addSymbolEntry("CONSTR_IN::UNSAFE","2");
-    addSymbolEntry("CONSTR_IN::BRUTEFORCE","3");
-    addSymbolEntry("CONSTR_IN_OPTION","[7]");
-    addSymbolEntry("CONSTR_IN_OPTION::STANDARD","0");
-    addSymbolEntry("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN","1");
-    addSymbolEntry("CONSTR_IN_OPTION::CREATE_DUP_TOKEN","2");
-    addSymbolEntry("CONSTR_IN_OPTION::FINISH_NO_SEP","3");
-    addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP","4");
-    addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP_RED","5");
-    addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED","6");
-    addSymbolEntry("CONSTR_INOUT_ANGLE","[15]");
-    addSymbolEntry("CONSTR_IN_DIST","[16]");
-    addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","[17]");
-    addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO","0");
-    addSymbolEntry("CONSTR_IN_CELL_BRANCH_NO","[18]");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION","[19]");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMPUTER","0");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION::PROP","1");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SCANNER","2");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION::WEAPON","3");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION::CONSTR","4");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SENSOR","5");
-    addSymbolEntry("CONSTR_IN_CELL_FUNCTION_DATA","[30]");
-
-    //propulsion
-    addSymbolEntry("PROP_OUT","[5]");
-    addSymbolEntry("PROP_OUT::SUCCESS","0");
-    addSymbolEntry("PROP_OUT::SUCCESS_FINISHED","1");
-    addSymbolEntry("PROP_OUT::ERROR_NO_ENERGY","2");
-    addSymbolEntry("PROP_IN","[8]");
-    addSymbolEntry("PROP_IN::DO_NOTHING","0");
-    addSymbolEntry("PROP_IN::BY_ANGLE","1");
-    addSymbolEntry("PROP_IN::FROM_CENTER","2");
-    addSymbolEntry("PROP_IN::TOWARD_CENTER","3");
-    addSymbolEntry("PROP_IN::ROTATION_CLOCKWISE","4");
-    addSymbolEntry("PROP_IN::ROTATION_COUNTERCLOCKWISE","5");
-    addSymbolEntry("PROP_IN::DAMP_ROTATION","6");
-    addSymbolEntry("PROP_IN_ANGLE","[9]");
-    addSymbolEntry("PROP_IN_POWER","[10]");
-
-    //scanner
-    addSymbolEntry("SCANNER_OUT","[5]");
-    addSymbolEntry("SCANNER_OUT::SUCCESS","0");
-    addSymbolEntry("SCANNER_OUT::FINISHED","1");
-    addSymbolEntry("SCANNER_OUT::RESTART","2");
-//    addSymbolEntry("SCANNER_IN","[11]");
-    addSymbolEntry("SCANNER_INOUT_CELL_NUMBER","[12]");
-    addSymbolEntry("SCANNER_OUT_MASS","[13]");
-    addSymbolEntry("SCANNER_OUT_ENERGY","[14]");
-    addSymbolEntry("SCANNER_OUT_ANGLE","[15]");
-    addSymbolEntry("SCANNER_OUT_DIST","[16]");
-    addSymbolEntry("SCANNER_OUT_CELL_MAX_CONNECTIONS","[17]");
-    addSymbolEntry("SCANNER_OUT_CELL_BRANCH_NO","[18]");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION","[19]");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMPUTER","0");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::PROP","1");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SCANNER","2");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::WEAPON","3");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::CONSTR","4");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SENSOR","5");
-    addSymbolEntry("SCANNER_OUT_CELL_FUNCTION_DATA","[30]");
-
-    //weapon
-    addSymbolEntry("WEAPON_OUT","[5]");
-    addSymbolEntry("WEAPON_OUT::NO_TARGET","0");
-    addSymbolEntry("WEAPON_OUT::STRIKE_SUCCESSFUL","1");
-
-    //sensor
-    addSymbolEntry("SENSOR_OUT", "[5]");
-    addSymbolEntry("SENSOR_OUT::NOTHING_FOUND", "0");
-    addSymbolEntry("SENSOR_OUT::CLUSTER_FOUND", "1");
-    addSymbolEntry("SENSOR_IN", "[20]");
-    addSymbolEntry("SENSOR_IN::DO_NOTHING", "0");
-    addSymbolEntry("SENSOR_IN::SEARCH_VICINITY", "1");
-    addSymbolEntry("SENSOR_IN::SEARCH_BY_ANGLE", "2");
-    addSymbolEntry("SENSOR_IN::SEARCH_FROM_CENTER", "3");
-    addSymbolEntry("SENSOR_IN::SEARCH_TOWARD_CENTER", "4");
-    addSymbolEntry("SENSOR_INOUT_ANGLE", "[21]");
-    addSymbolEntry("SENSOR_IN_MIN_MASS", "[22]");
-    addSymbolEntry("SENSOR_IN_MAX_MASS", "[23]");
-    addSymbolEntry("SENSOR_OUT_MASS", "[24]");
-    addSymbolEntry("SENSOR_OUT_DIST", "[25]");
 }
 
 void MetadataManager::addSymbolEntry (QString key, QString value)

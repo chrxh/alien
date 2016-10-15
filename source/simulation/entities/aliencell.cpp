@@ -4,13 +4,14 @@
 #include "../processing/aliencellfunctionfactory.h"
 #include "../physics/physics.h"
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 
 
-AlienCell::AlienCell(qreal energy, bool random, int maxConnections, int tokenAccessNumber, AlienCellFunction* cellFunction, QVector3D relPos)
-    : _cellFunction(cellFunction),
+AlienCell::AlienCell(qreal energy, AlienGrid*& grid, bool random, int maxConnections, int tokenAccessNumber, AlienCellFunction* cellFunction, QVector3D relPos)
+    : _grid(grid),
+      _cellFunction(cellFunction),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _tokenStackPointer(0),
@@ -35,27 +36,28 @@ AlienCell::AlienCell(qreal energy, bool random, int maxConnections, int tokenAcc
     if( random ) {
         resetConnections(qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1));
         _tokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-        _cellFunction = AlienCellFunctionFactory::buildRandom(random);
+        _cellFunction = AlienCellFunctionFactory::buildRandom(random, _grid);
         for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
             _memory[i] = qrand()%256;
     }
     else {
         resetConnections(maxConnections);
         if( !cellFunction )
-            _cellFunction = AlienCellFunctionFactory::build("COMPUTER", false);     //standard cell function
+            _cellFunction = AlienCellFunctionFactory::build("COMPUTER", false, _grid);     //standard cell function
         for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
             _memory[i] = 0;
     }
 }
 
-AlienCell::AlienCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells)
-    : _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+AlienCell::AlienCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, AlienGrid*& grid)
+    : _grid(grid),
+      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _memory(simulationParameters.CELL_MEMSIZE)
 {
 
     //cell function
-    _cellFunction = AlienCellFunctionFactory::build(stream);
+    _cellFunction = AlienCellFunctionFactory::build(stream, _grid);
 
     //token stack
     stream >> _tokenStackPointer;
@@ -107,14 +109,15 @@ AlienCell::AlienCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& co
         _memory[i] = 0;
 }
 
-AlienCell::AlienCell (QDataStream& stream)
-    : _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+AlienCell::AlienCell (QDataStream& stream, AlienGrid*& grid)
+    : _grid(grid),
+      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _memory(simulationParameters.CELL_MEMSIZE)
 {
 
     //cell function
-    _cellFunction = AlienCellFunctionFactory::build(stream);
+    _cellFunction = AlienCellFunctionFactory::build(stream, _grid);
 
     //token stack
     stream >> _tokenStackPointer;
@@ -285,63 +288,6 @@ AlienCell* AlienCell::getConnection (int i)
     return _connectingCells[i];
 }
 
-/*
-bool AlienCell::connectable(AlienCell* cell, QVector3D relPos, int& slot1, int& slot2)
-{
-    //calc relative angle
-    qreal relAngle(0.0);
-    qreal relASin(qAsin(-relPos.y()/relPos.length())*radToDeg);
-    if( relPos.x() >= 0.0 )
-        relAngle = 90.0-relASin;
-    else
-        relAngle = relASin+270.0;
-
-    //check stickyness of first cell
-    bool stickyness1(false);
-    qint64 angle1 = (qint64)(relAngle - (_axis+_cluster->_angle));
-    angle1 = ((angle1%360)+360)%360;
-    if( ((angle1 > 294) || (angle1 < 65)) && _stickyBoundary[0] && (!(_stickyBoundaryCell[0])) ) {
-        stickyness1 = true;
-        slot1 = 0;
-    }
-    if( (angle1 > 24) && (angle1 < 155) && _stickyBoundary[1] && (!(_stickyBoundaryCell[1])) ) {
-        stickyness1 = true;
-        slot1 = 1;
-    }
-    if( (angle1 > 114) && (angle1 < 245) && _stickyBoundary[2] && (!(_stickyBoundaryCell[2])) ) {
-        stickyness1 = true;
-        slot1 = 2;
-    }
-    if( (angle1 > 204) && (angle1 < 335) && _stickyBoundary[3] && (!(_stickyBoundaryCell[3])) ) {
-        stickyness1 = true;
-        slot1 = 3;
-    }
-
-    //check stickyness of first cell
-    bool stickyness2(false);
-    qint64 angle2 = (qint64)(180.0+relAngle - (cell->_axis+cell->_cluster->_angle));
-    angle2 = ((angle2%360)+360)%360;
-    if( ((angle2 > 294) || (angle2 < 65)) && cell->_stickyBoundary[0] && (cell->_stickyBoundaryCell[0]==0) ) {
-        stickyness2 = true;
-        slot2 = 0;
-    }
-    if( (angle2 > 24) && (angle2 < 155) && cell->_stickyBoundary[1] && (cell->_stickyBoundaryCell[1]==0) ) {
-        stickyness2 = true;
-        slot2 = 1;
-    }
-    if( (angle2 > 114) && (angle2 < 245) && cell->_stickyBoundary[2] && (cell->_stickyBoundaryCell[2]==0) ) {
-        stickyness2 = true;
-        slot2 = 2;
-    }
-    if( (angle2 > 204) && (angle2 < 335) && cell->_stickyBoundary[3] && (cell->_stickyBoundaryCell[3]==0) ) {
-        stickyness2 = true;
-        slot2 = 3;
-    }
-    if( stickyness1 && stickyness2 )
-        return true;
-    return false;
-}
-*/
 QVector3D AlienCell::calcNormal (QVector3D outerSpace, QMatrix4x4& transform)
 {
     if( _numConnections < 2 ) {
@@ -478,9 +424,9 @@ AlienCellCluster* AlienCell::getCluster()
     return _cluster;
 }
 
-QVector3D AlienCell::calcPosition (AlienGrid* space)
+QVector3D AlienCell::calcPosition (bool topologyCorrection)
 {
-    return _cluster->calcPosition(this, space);
+    return _cluster->calcPosition(this, topologyCorrection);
 }
 
 void AlienCell::setAbsPosition (QVector3D pos)
@@ -490,14 +436,14 @@ void AlienCell::setAbsPosition (QVector3D pos)
 //    _relPos = clusterTransform.map(pos);
 }
 
-void AlienCell::setAbsPositionAndUpdateMap (QVector3D pos, AlienGrid* grid)
+void AlienCell::setAbsPositionAndUpdateMap (QVector3D pos)
 {
     QVector3D oldPos(calcPosition());
-    if( grid->getCell(oldPos) == this )
-        grid->setCell(oldPos, 0);
+    if( _grid->getCell(oldPos) == this )
+        _grid->setCell(oldPos, 0);
     _relPos = _cluster->absToRelPos(pos);
-    if( grid->getCell(pos) == 0 )
-        grid->setCell(pos, this);
+    if( _grid->getCell(pos) == 0 )
+        _grid->setCell(pos, this);
 }
 
 QVector3D AlienCell::getRelPos ()

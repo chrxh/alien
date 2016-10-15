@@ -2,7 +2,7 @@
 #define ALIENSPACE_H
 
 #include "aliencell.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QObject>
 #include <QVector3D>
@@ -26,9 +26,13 @@ public:
     void lockData ();
     void unlockData ();
 
-    //universe access functions
+    //access functions to all entities
     QList< AlienCellCluster* >& getClusters ();
     QList< AlienEnergy* >& getEnergyParticles ();
+    QSet< quint64 > getAllCellIds () const;
+    void clearGrids ();
+    qint32 getSizeX() const;
+    qint32 getSizeY() const;
 
     //cell grid access functions
     void setCell (QVector3D pos, AlienCell* cell);
@@ -36,8 +40,12 @@ public:
     void removeCellIfPresent (QVector3D pos, AlienCell* cell);
     AlienCell* getCell (QVector3D pos) const;
     AlienCell* getCellFast (const int& x, const int& y) const;
+
+    //location functions
     QSet< AlienCellCluster* > getNearbyClusters (const QVector3D& pos, qreal r) const;
     AlienCellCluster* getNearbyClusterFast (const QVector3D& pos, qreal r, qreal minMass, qreal maxMass, AlienCellCluster* exclude) const;
+    using CellSelectFunction = bool(*)(AlienCell*);
+    QList< AlienCell* > getNearbySpecificCells (const QVector3D& pos, qreal r, CellSelectFunction selection) const;
 
     //energy grid access functions
     void removeEnergy (QVector3D pos, AlienEnergy* energy);
@@ -45,25 +53,19 @@ public:
     void setEnergy(QVector3D pos, AlienEnergy* energy);
     AlienEnergy* getEnergy (QVector3D pos) const;
 
-    //access functions
-    QSet< quint64 > getAllCellIds () const;
-    void clearGrids ();
-    qint32 getSizeX() const;
-    qint32 getSizeY() const;
-
     //auxiliary functions
     void correctPosition (QVector3D& pos) const;
-    void correctDistance (QVector3D& distance) const;
-    QVector3D displacement (QVector3D p1, QVector3D p2) const;
+    void correctDisplacement (QVector3D& displacement) const;
+    QVector3D displacement (QVector3D fromPoint, QVector3D toPoint) const;
+    QVector3D displacement (AlienCell* fromCell, AlienCell* toCell) const;
+    qreal distance (AlienCell* fromCell, AlienCell* toCell) const;
 
+    //(de)serialisation functions
     void serializeSize (QDataStream& stream) const;
     void serializeMap (QDataStream& stream) const;
     void buildEmptyMap (QDataStream& stream);
     void buildMap (QDataStream& stream, const QMap< quint64, AlienCell* >& oldIdCellMap, const QMap< quint64, AlienEnergy* >& oldIdEnergyMap);
 
-//    qreal _cellRadiationProb;
-
-//    QMap< quint64, QMap< quint64, int > > collisionMemory;
 private:
     QMutex _mutex;
     qint32 _sizeX;
@@ -130,6 +132,24 @@ inline QSet< AlienCellCluster* > AlienGrid::getNearbyClusters (const QVector3D& 
             }
         }
     return clusters;
+}
+
+inline QList< AlienCell* > AlienGrid::getNearbySpecificCells (const QVector3D& pos, qreal r, CellSelectFunction selection) const
+{
+    QList< AlienCell* > cells;
+    int rCeil = qCeil(r);
+    for(int scanX = pos.x()-rCeil; scanX < pos.x()+rCeil+1; ++scanX)
+        for(int scanY = pos.y()-rCeil; scanY < pos.y()+rCeil+1; ++scanY) {
+            if( QVector3D(static_cast<float>(scanX)-pos.x(),static_cast<float>(scanY)-pos.y(),0).length() < r+ALIEN_PRECISION ) {
+                AlienCell* cell(getCell(QVector3D(scanX, scanY,0)));
+                if( cell ) {
+                    if( selection(cell) ) {
+                        cells << cell;
+                    }
+                }
+            }
+        }
+    return cells;
 }
 
 inline void AlienGrid::removeEnergy (QVector3D pos, AlienEnergy* energy)

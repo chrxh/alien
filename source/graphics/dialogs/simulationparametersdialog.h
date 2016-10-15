@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 namespace Ui {
 class SimulationParametersDialog;
