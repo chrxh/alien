@@ -2,7 +2,8 @@
 #include "ui_symboltabledialog.h"
 
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/metadatamanager.h"
+#include "../../globaldata/simulationsettings.h"
+#include "../../simulation/metadatamanager.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -118,6 +119,7 @@ void SymbolTableDialog::delButtonClicked ()
 void SymbolTableDialog::defaultButtonClicked ()
 {
     MetadataManager* localMeta = new MetadataManager();
+    AlienMetadata::loadDefaultMetadata(localMeta);
     setSymbolTableToWidget(localMeta);
     delete localMeta;
 }
@@ -125,6 +127,7 @@ void SymbolTableDialog::defaultButtonClicked ()
 void SymbolTableDialog::loadButtonClicked ()
 {
     MetadataManager* localMeta = new MetadataManager();
+    AlienMetadata::loadDefaultMetadata(localMeta);
     QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -152,6 +155,7 @@ void SymbolTableDialog::saveButtonClicked ()
         if( file.open(QIODevice::WriteOnly) ) {
 
             MetadataManager* localMeta = new MetadataManager();
+            AlienMetadata::loadDefaultMetadata(localMeta);
             updateSymbolTable(localMeta);
 
             //serialize symbol table
@@ -176,6 +180,7 @@ void SymbolTableDialog::mergeWithButtonClicked ()
 
             //read simulation data
             MetadataManager* localMeta = new MetadataManager();
+            AlienMetadata::loadDefaultMetadata(localMeta);
             updateSymbolTable(localMeta);
             QDataStream in(&file);
             localMeta->readSymbolTable(in, true);

@@ -6,14 +6,34 @@
 class AlienCellFunctionPropulsion : public AlienCellFunction
 {
 public:
-    AlienCellFunctionPropulsion ();
-    AlienCellFunctionPropulsion (quint8* cellTypeData);
-    AlienCellFunctionPropulsion (QDataStream& stream);
+    AlienCellFunctionPropulsion (AlienGrid*& grid);
+    AlienCellFunctionPropulsion (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionPropulsion (QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
-    QString getCellFunctionName ();
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
+    QString getCellFunctionName () const;
 
-    void serialize (QDataStream& stream);
+    //constants for cell function programming
+    enum class PROP {
+        OUT = 5,
+        IN = 8,
+        IN_ANGLE = 9,
+        IN_POWER = 10
+    };
+    enum class PROP_OUT {
+        SUCCESS,
+        SUCCESS_DAMPING_FINISHED,
+        ERROR_NO_ENERGY
+    };
+    enum class PROP_IN {
+        DO_NOTHING,
+        BY_ANGLE,
+        FROM_CENTER,
+        TOWARD_CENTER,
+        ROTATION_CLOCKWISE,
+        ROTATION_COUNTERCLOCKWISE,
+        DAMP_ROTATION
+    };
 
 private:
     qreal convertDataToThrustPower (quint8 b);

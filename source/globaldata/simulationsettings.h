@@ -1,11 +1,17 @@
-#ifndef SIMULATIONPARAMETERS_H
-#define SIMULATIONPARAMETERS_H
+#ifndef SIMULATIONSETTINGS_H
+#define SIMULATIONSETTINGS_H
 
 #include<QColor>
 #include<QDataStream>
 
-//internal alien data
 const qreal ALIEN_PRECISION = 0.0000001;
+
+class MetadataManager;
+class AlienMetadata
+{
+public:
+    static void loadDefaultMetadata (MetadataManager* meta);
+};
 
 struct SimulationParameters
 {
@@ -31,6 +37,7 @@ struct SimulationParameters
     int TOKEN_MEMSIZE;
     qreal CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
     qreal CELL_FUNCTION_SENSOR_RANGE;
+    qreal CELL_FUNCTION_COMMUNICATOR_RANGE;
 
     qreal NEW_TOKEN_ENERGY;
     qreal MIN_TOKEN_ENERGY;
@@ -50,4 +57,4 @@ struct SimulationParameters
 
 extern SimulationParameters simulationParameters;
 
-#endif // SIMULATIONPARAMETERS_H
+#endif // SIMULATIONSETTINGS_H

@@ -2,22 +2,31 @@
 #define ALIENTOKENFUNCTIONCOMPUTER_H
 
 #include <QByteArray>
+#include <QChar>
 
 #include "aliencellfunction.h"
 
 class AlienCellFunctionComputer: public AlienCellFunction
 {
 public:
-    AlienCellFunctionComputer (bool randomData);
-    AlienCellFunctionComputer (quint8* cellTypeData);
-    AlienCellFunctionComputer (QDataStream& stream);
+    AlienCellFunctionComputer (bool randomData, AlienGrid*& grid);
+    AlienCellFunctionComputer (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionComputer (QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose);
-    virtual QString getCode ();
-    virtual bool compileCode (QString code, int& errorLine);
-    QString getCellFunctionName ();
+    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
+    QString getCode ();
+    bool compileCode (QString code, int& errorLine);
+    QString getCellFunctionName () const;
 
     void serialize (QDataStream& stream);
+
+    //constants for cell function programming
+    enum class COMPUTER_OPERATION {
+        MOV, ADD, SUB, MUL, DIV, XOR, OR, AND, IFG, IFGE, IFE, IFNE, IFLE, IFL, ELSE, ENDIF
+    };
+    enum class COMPUTER_OPTYPE {
+        MEM, MEMMEM, CMEM, CONST
+    };
 
 protected:
     void getInternalData (quint8* data);
