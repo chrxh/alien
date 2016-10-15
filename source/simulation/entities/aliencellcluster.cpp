@@ -218,6 +218,12 @@ void AlienCellCluster::movementProcessingStep2 (QList< AlienCellCluster* >& frag
 //set cells to space map
 void AlienCellCluster::movementProcessingStep3 ()
 {
+    struct CollisionData {
+        int movementState;  //0: will do nothing, 1: collision, 2: fusion
+        QSet< quint64 > overlappingCells;
+        QList< QPair< AlienCell*, AlienCell* > > overlappingCellPairs;
+    };
+
     //(gravitational force)
 //    QVector3D f = QVector3D(300.0, 300.0, 0.0)-_pos;
 //    _vel += f/(1.0+f.lengthSquared())*0.05;
@@ -449,7 +455,7 @@ void AlienCellCluster::movementProcessingStep3 ()
 
                 //calculate new center
                 QVector3D centre(0.0,0.0,0.0);
-                QVector3D correction(calcTorusCorrection(otherCluster));
+                QVector3D correction(calcTopologyCorrection(otherCluster));
                 foreach( AlienCell* cell, _cells) {
                     cell->_relPos = calcPosition(cell);     //store absolute position only temporarily
                     centre += cell->_relPos;
@@ -819,7 +825,7 @@ QVector3D AlienCellCluster::calcPosition (AlienCell* cell, bool topologyCorrecti
 }
 
 //calc correction for torus topology
-QVector3D AlienCellCluster::calcTorusCorrection (AlienCellCluster* cluster)
+QVector3D AlienCellCluster::calcTopologyCorrection (AlienCellCluster* cluster)
 {
     QVector3D correction;
     if( (cluster->_pos.x()-_pos.x()) > (_grid->getSizeX()/2.0) )
