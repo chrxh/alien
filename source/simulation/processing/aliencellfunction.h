@@ -46,6 +46,7 @@ protected:
     qreal convertDataToShiftLen (quint8 b) const;
     quint8 convertShiftLenToData (qreal len) const;
     quint8 convertURealToData (qreal r) const;
+    qreal convertDataToUReal (quint8 d) const;
     quint8 convertIntToData (int i) const;
 };
 

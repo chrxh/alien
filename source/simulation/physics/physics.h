@@ -1,6 +1,8 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#include "../../globaldata/simulationsettings.h"
+
 #include <QVector3D>
 #include <cmath>
 
@@ -35,10 +37,14 @@ public:
 
     static void applyImpulse (QVector3D impulse, QVector3D rAPp, qreal mass, QVector3D vel, qreal angularMass, qreal angularVel, QVector3D& newVel, qreal& newAngularVel);
 
+    //angles are returned in [0,360]
+    static QVector3D rotateClockwise (QVector3D v, qreal angle);
     static QVector3D rotateQuarterCounterClockwise (QVector3D v);
-    static qreal angleOfVector (QVector3D v);   //from 0 to 360 DEG
-    static qreal clockwiseAngleFromFirstToSecondVector (QVector3D v1, QVector3D v2); //from -180 to 180 DEG
+    static qreal angleOfVector (QVector3D v);   //0 DEG corresponds to (0,-1)
     static QVector3D unitVectorOfAngle (qreal angle);
+    static bool compareEqualAngle (qreal angle1, qreal angle2, qreal precision = ALIEN_PRECISION);
+    static qreal subtractAngle (qreal angleMinuend, qreal angleSubtrahend);
+    static qreal clockwiseAngleFromFirstToSecondVector (QVector3D v1, QVector3D v2);
 };
 
 #endif // PHYSICS_H

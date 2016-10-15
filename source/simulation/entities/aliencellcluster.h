@@ -9,8 +9,6 @@
 #include <QMatrix4x4>
 
 
-//QVector3D calcDistance (AlienCell* cell1, AlienCell* cell2);
-
 class AlienCellCluster
 {
 public:
@@ -49,7 +47,7 @@ public:
     void updateRelCoordinates (bool maintainCenter = false);
     void updateVel_angularVel_via_cellVelocities ();
     QVector3D calcPosition (AlienCell* cell, bool topologyCorrection = false);
-    QVector3D calcTorusCorrection (AlienCellCluster* cluster);
+    QVector3D calcTopologyCorrection (AlienCellCluster* cluster);
     QVector3D calcCellDistWithoutTorusCorrection (AlienCell* cell);
     QList< AlienCellCluster* > decompose ();
     qreal calcAngularMassWithNewParticle (QVector3D particlePos);
@@ -104,29 +102,17 @@ private:
 
     AlienGrid*& _grid;
 
-    //physics data
     qreal _angle;       //in deg
     QVector3D _pos;
-
     qreal _angularVel;  //in deg
     QVector3D _vel;
     QMatrix4x4 _transform;
-
     qreal _angularMass;
 
-    //cells
     QList< AlienCell* > _cells;
 
     quint64 _id;
     quint64 _color;
-//    int _counter;
-//    int debug;
-
-    struct CollisionData {
-        int movementState;  //0: will do nothing, 1: collision, 2: fusion
-        QSet< quint64 > overlappingCells;
-        QList< QPair< AlienCell*, AlienCell* > > overlappingCellPairs;
-    };
 };
 
 
