@@ -38,7 +38,6 @@ public:
 
     const QMap< quint64, AlienCellMetadata >& getCellMetadata ();
 
-    void loadDefaultSymbolTable ();
     void addSymbolEntry (QString key, QString value);
     void delSymbolEntry (QString key);
     QString applySymbolTableToCode (QString input);

@@ -9,29 +9,36 @@
 #include <QMatrix4x4>
 
 
-//QVector3D calcDistance (AlienCell* cell1, AlienCell* cell2);
-
 class AlienCellCluster
 {
 public:
-    AlienCellCluster ();
-    AlienCellCluster (AlienGrid*& grid, QList< AlienCell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel);   //cluster with new cells
-    AlienCellCluster (QList< AlienCell* > cells, qreal angle);      //take ownership of cells from foreign clustes
-    AlienCellCluster (QDataStream& stream,
-                      QMap< quint64, quint64 >& oldNewClusterIdMap,
-                      QMap< quint64, quint64 >& oldNewCellIdMap,
-                      QMap< quint64, AlienCell* >& oldIdCellMap);
+    static AlienCellCluster* buildEmptyCellCluster (AlienGrid*& grid);
+    static AlienCellCluster* buildCellCluster (QList< AlienCell* > cells,
+                                               qreal angle,
+                                               QVector3D pos,
+                                               qreal angularVel,
+                                               QVector3D vel,
+                                               AlienGrid*& grid);
+    static AlienCellCluster* buildCellCluster (QDataStream& stream,
+                                               QMap< quint64, quint64 >& oldNewClusterIdMap,
+                                               QMap< quint64, quint64 >& oldNewCellIdMap,
+                                               QMap< quint64, AlienCell* >& oldIdCellMap,
+                                               AlienGrid*& grid);
+    static AlienCellCluster* buildCellClusterFromForeignCells (QList< AlienCell* > cells,
+                                                               qreal angle,
+                                                               AlienGrid*& grid);
+
     ~AlienCellCluster ();
 
-    void clearCellsFromMap (AlienGrid*& space);
-    void clearCellFromMap (AlienGrid*& space, AlienCell* cell);
-    void drawCellsToMap (AlienGrid*& space);
+    void clearCellsFromMap ();
+    void clearCellFromMap (AlienCell* cell);
+    void drawCellsToMap ();
 
-    void movementProcessingStep1 (AlienGrid*& space);
-    void movementProcessingStep2 (AlienGrid*& space, QList< AlienCellCluster* >& fragments, QList< AlienEnergy* >& energyParticles);
-    void movementProcessingStep3 (AlienGrid*& space);
-    void movementProcessingStep4 (AlienGrid*& space, QList< AlienEnergy* >& energyParticles, bool& decompose);
-    void movementProcessingStep5 (AlienGrid*& space);
+    void movementProcessingStep1 ();
+    void movementProcessingStep2 (QList< AlienCellCluster* >& fragments, QList< AlienEnergy* >& energyParticles);
+    void movementProcessingStep3 ();
+    void movementProcessingStep4 (QList< AlienEnergy* >& energyParticles, bool& decompose);
+    void movementProcessingStep5 ();
 
     void addCell (AlienCell* cell, QVector3D absPos);
     void removeCell (AlienCell* cell, bool maintainCenter = true);
@@ -39,12 +46,12 @@ public:
     void updateAngularMass ();
     void updateRelCoordinates (bool maintainCenter = false);
     void updateVel_angularVel_via_cellVelocities ();
-    QVector3D calcPosition (AlienCell* cell, AlienGrid* space = 0);
-    QVector3D calcTorusCorrection (AlienCellCluster* cluster, AlienGrid*& space);
+    QVector3D calcPosition (AlienCell* cell, bool topologyCorrection = false);
+    QVector3D calcTopologyCorrection (AlienCellCluster* cluster);
     QVector3D calcCellDistWithoutTorusCorrection (AlienCell* cell);
     QList< AlienCellCluster* > decompose ();
-    qreal calcAngularMassWithNewParticle (QVector3D particlePos, AlienGrid*& grid);
-    qreal calcAngularMassWithoutUpdate (AlienGrid*& grid);
+    qreal calcAngularMassWithNewParticle (QVector3D particlePos);
+    qreal calcAngularMassWithoutUpdate ();
 
     bool isEmpty();
 
@@ -69,37 +76,43 @@ public:
 
     void serialize (QDataStream& stream);
 
-    void findNearestCells (QVector3D pos, AlienCell*& cell1, AlienCell*& cell2, AlienGrid*& space);
-    AlienCell* findNearestCell (QVector3D pos, AlienGrid*& space);
+    void findNearestCells (QVector3D pos, AlienCell*& cell1, AlienCell*& cell2);
+    AlienCell* findNearestCell (QVector3D pos);
     void getConnectedComponent(AlienCell* cell, QList< AlienCell* >& component);
     void getConnectedComponent(AlienCell* cell, const quint64& tag, QList< AlienCell* >& component);
 
 private:
-    void radiation (qreal& energy, AlienCell* originCell, AlienEnergy*& energyParticle, AlienGrid*& grid);
+    AlienCellCluster (AlienGrid*& grid);
+    AlienCellCluster (QList< AlienCell* > cells,
+                      qreal angle,
+                      QVector3D pos,
+                      qreal angularVel,
+                      QVector3D vel,
+                      AlienGrid*& grid);
+    AlienCellCluster (QDataStream& stream,
+                      QMap< quint64, quint64 >& oldNewClusterIdMap,
+                      QMap< quint64, quint64 >& oldNewCellIdMap,
+                      QMap< quint64, AlienCell* >& oldIdCellMap,
+                      AlienGrid*& grid);
+    AlienCellCluster (QList< AlienCell* > cells,
+                      qreal angle,
+                      AlienGrid*& grid);
 
-    //physics data
+    void radiation (qreal& energy, AlienCell* originCell, AlienEnergy*& energyParticle);
+
+    AlienGrid*& _grid;
+
     qreal _angle;       //in deg
     QVector3D _pos;
-
     qreal _angularVel;  //in deg
     QVector3D _vel;
     QMatrix4x4 _transform;
-
     qreal _angularMass;
 
-    //cells
     QList< AlienCell* > _cells;
 
     quint64 _id;
     quint64 _color;
-//    int _counter;
-//    int debug;
-
-    struct CollisionData {
-        int movementState;  //0: will do nothing, 1: collision, 2: fusion
-        QSet< quint64 > overlappingCells;
-        QList< QPair< AlienCell*, AlienCell* > > overlappingCellPairs;
-    };
 };
 
 

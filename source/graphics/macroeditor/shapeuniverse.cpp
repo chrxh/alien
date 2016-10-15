@@ -6,8 +6,8 @@
 #include "markergraphicsitem.h"
 
 #include "../../globaldata/editorsettings.h"
-#include "../../globaldata/metadatamanager.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../simulation/metadatamanager.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include "../../simulation/entities/aliencellcluster.h"
 #include "../../simulation/entities/alienenergy.h"

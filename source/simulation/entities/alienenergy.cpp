@@ -5,15 +5,16 @@
 #include "../physics/physics.h"
 
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 #include <qmath.h>
 
-AlienEnergy::AlienEnergy(qreal amount_, QVector3D pos_, QVector3D vel_)
-    : amount(amount_), pos(pos_), vel(vel_), id(GlobalFunctions::getTag()), color(0)
+AlienEnergy::AlienEnergy(qreal amount_, QVector3D pos_, QVector3D vel_, AlienGrid*& grid)
+    : _grid(grid), amount(amount_), pos(pos_), vel(vel_), id(GlobalFunctions::getTag()), color(0)
 {
 }
 
-AlienEnergy::AlienEnergy (QDataStream& stream, QMap< quint64, AlienEnergy* >& oldIdEnergyMap)
+AlienEnergy::AlienEnergy (QDataStream& stream, QMap< quint64, AlienEnergy* >& oldIdEnergyMap, AlienGrid*& grid)
+    : _grid(grid)
 {
     stream >> amount >> pos >> vel >> id >> color;
     oldIdEnergyMap[id] = this;
@@ -21,14 +22,14 @@ AlienEnergy::AlienEnergy (QDataStream& stream, QMap< quint64, AlienEnergy* >& ol
 
 //return: true = energy is zero
 //        cluster is nonzero if particle transforms into cell
-bool AlienEnergy::movement (AlienGrid* grid, AlienCellCluster*& cluster)
+bool AlienEnergy::movement (AlienCellCluster*& cluster)
 {
     //remove old position from map
-    grid->removeEnergy(pos, this);
+    _grid->removeEnergy(pos, this);
 
     //update position
     pos += vel;
-    grid->correctPosition(pos);
+    _grid->correctPosition(pos);
 
     //apply gravitational force
 /*    QVector3D gSource1(200.0+qSin(0.5*degToRad*(qreal)time)*50, 200.0+qCos(0.5*degToRad*(qreal)time)*50, 0.0);
@@ -47,7 +48,7 @@ bool AlienEnergy::movement (AlienGrid* grid, AlienCellCluster*& cluster)
     vel += (distance2.normalized()/(distance2.lengthSquared()+4.0));
 */
     //is there energy at new position?
-    AlienEnergy* otherEnergy(grid->getEnergy(pos));
+    AlienEnergy* otherEnergy(_grid->getEnergy(pos));
     if( otherEnergy ) {
 
         //particle with most energy inherits color
@@ -62,7 +63,7 @@ bool AlienEnergy::movement (AlienGrid* grid, AlienCellCluster*& cluster)
     }
     else {
         //is there a cell at new position?
-        AlienCell* cell(grid->getCell(pos));
+        AlienCell* cell(_grid->getCell(pos));
         if( cell ) {
             cell->setEnergy(cell->getEnergy() + amount);
             //create token?
@@ -80,32 +81,32 @@ bool AlienEnergy::movement (AlienGrid* grid, AlienCellCluster*& cluster)
 
             //enough energy for cell transformation?
             qreal p((qreal)qrand()/RAND_MAX);
-            qreal eKin = Physics::calcKineticEnergy(1, vel, 0, 0);
+            qreal eKin = Physics::kineticEnergy(1, vel, 0, 0);
             qreal eNew = amount - (eKin/simulationParameters.INTERNAL_TO_KINETIC_ENERGY);
             if( (eNew >= simulationParameters.CRIT_CELL_TRANSFORM_ENERGY) && ( p < simulationParameters.CELL_TRANSFORM_PROB) ) {
 
                 //look for neighbor cell
                 for(int dx = -2; dx < 3; ++dx ) {
                     for(int dy = -2; dy < 3; ++dy ) {
-                        if( grid->getCell(pos+QVector3D(dx,dy,0.0)) ) {
-                            grid->setEnergy(pos, this);
+                        if( _grid->getCell(pos+QVector3D(dx,dy,0.0)) ) {
+                            _grid->setEnergy(pos, this);
                             return false;
                         }
                     }
                 }
 
-                //create cell
+                //create cell and cluster
                 QList< AlienCell* > cells;
-                AlienCell* c(new AlienCell(eNew, true));
+                AlienCell* c(new AlienCell(eNew, _grid, true));
                 cells << c;
-                cluster = new AlienCellCluster(grid, cells, 0.0, pos, 0, vel);
+                cluster = AlienCellCluster::buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
                 amount = 0;
-                grid->setCell(pos, c);
+                _grid->setCell(pos, c);
                 c->setColor(color);
                 return true;
             }
             else {
-                grid->setEnergy(pos, this);
+                _grid->setEnergy(pos, this);
                 return false;
             }
 

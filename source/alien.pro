@@ -35,7 +35,6 @@ SOURCES += main.cpp \
     simulation/aliensimulator.cpp \
     graphics/microeditor/clusteredit.cpp \
     graphics/microeditor/tokenedit.cpp \
-    globaldata/metadatamanager.cpp \
     graphics/macroeditor/markergraphicsitem.cpp \
     simulation/processing/aliencellfunctioncomputer.cpp \
     simulation/processing/aliencellfunctionweapon.cpp \
@@ -46,7 +45,6 @@ SOURCES += main.cpp \
     graphics/microeditor/metadatapropertiesedit.cpp \
     graphics/microeditor/metadataedit.cpp \
     graphics/dialogs/newsimulationdialog.cpp \
-    globaldata/simulationparameters.cpp \
     graphics/dialogs/simulationparametersdialog.cpp \
     graphics/dialogs/addenergydialog.cpp \
     graphics/dialogs/symboltabledialog.cpp \
@@ -59,7 +57,11 @@ SOURCES += main.cpp \
     graphics/dialogs/addhexagonstructuredialog.cpp \
     graphics/assistance/tutorialwindow.cpp \
     simulation/entities/testaliencellcluster.cpp \
-    simulation/entities/testalientoken.cpp
+    simulation/entities/testalientoken.cpp \
+    simulation/processing/aliencellfunctioncommunicator.cpp \
+    globaldata/simulationsettings.cpp \
+    simulation/metadatamanager.cpp \
+    simulation/physics/testphysics.cpp
 HEADERS += \
     simulation/entities/aliencell.h \
     simulation/entities/aliencellcluster.h \
@@ -82,7 +84,6 @@ HEADERS += \
     graphics/macroeditor/alienenergygraphicsitem.h \
     graphics/microeditor/computercodeedit.h \
     globaldata/editorsettings.h \
-    globaldata/simulationparameters.h \
     graphics/macroeditor.h \
     graphics/mainwindow.h \
     graphics/microeditor.h \
@@ -90,7 +91,6 @@ HEADERS += \
     simulation/aliensimulator.h \
     graphics/microeditor/clusteredit.h \
     graphics/microeditor/tokenedit.h \
-    globaldata/metadatamanager.h \
     graphics/macroeditor/markergraphicsitem.h \
     simulation/processing/aliencellfunctioncomputer.h \
     simulation/processing/aliencellfunctionweapon.h \
@@ -112,7 +112,11 @@ HEADERS += \
     simulation/processing/aliencellfunctionpropulsion.h \
     graphics/dialogs/addrectstructuredialog.h \
     graphics/dialogs/addhexagonstructuredialog.h \
-    graphics/assistance/tutorialwindow.h
+    graphics/assistance/tutorialwindow.h \
+    simulation/processing/aliencellfunctioncommunicator.h \
+    globaldata/simulationsettings.h \
+    simulation/metadatamanager.h \
+    globaldata/testsettings.h
 FORMS += graphics/monitoring/simulationmonitor.ui \
     graphics/macroeditor.ui \
     graphics/mainwindow.ui \

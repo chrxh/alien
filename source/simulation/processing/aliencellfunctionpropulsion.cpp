@@ -3,27 +3,30 @@
 #include "../entities/aliencellcluster.h"
 #include "../physics/physics.h"
 
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion()
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion(AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (quint8* cellTypeData)
-{
-
-}
-
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (QDataStream& stream)
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (quint8* cellTypeData, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(grid)
+{
 
-void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose)
+}
+
+
+void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
 {
     AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(PROP::IN)]%7;
@@ -36,16 +39,16 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previou
     }
 
     //calc old kinetic energy
-    qreal eKinOld(Physics::calcKineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel()));
+    qreal eKinOld(Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel()));
 
     //calc old tangential velocity
     QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector3D tangVel(Physics::calcTangentialVelocity(cellRelPos, cluster->getVel(), cluster->getAngularVel()));
+    QVector3D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVel(), cluster->getAngularVel()));
 
     //calc impulse angle
     QVector3D impulse(0.0, 0.0, 0.0);
     if( cmd == static_cast<int>(PROP_IN::BY_ANGLE) ) {
-        qreal thrustAngle = (Physics::calcAngle(-cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
+        qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
         impulse = QVector3D(qSin(thrustAngle), -qCos(thrustAngle), 0.0)*power;
     }
     if( cmd == static_cast<int>(PROP_IN::FROM_CENTER) ) {
@@ -90,15 +93,17 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previou
     }
 
     //calc new kinetic energy
-    qreal eKinNew(Physics::calcKineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
+    qreal eKinNew(Physics::kineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
     qreal energyDiff((eKinNew-eKinOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY);
 
     //has token enough energy?
-//    qDebug("%f",energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY);
     if( token->energy >= (energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
-        newParticle = new AlienEnergy(qAbs(energyDiff), cluster->calcPosition(cell, space)-impulse.normalized(), tangVel-impulse.normalized()/4.0);
+        newParticle = new AlienEnergy(qAbs(energyDiff),
+                                      cluster->calcPosition(cell, _grid)-impulse.normalized(),
+                                      tangVel-impulse.normalized()/4.0,
+                                      _grid);
 
         //update velocities
         cluster->setVel(newVel);
@@ -115,15 +120,9 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* previou
     }
 }
 
-QString AlienCellFunctionPropulsion::getCellFunctionName ()
+QString AlienCellFunctionPropulsion::getCellFunctionName () const
 {
     return "PROPULSION";
-}
-
-void AlienCellFunctionPropulsion::serialize (QDataStream& stream)
-{
-    AlienCellFunction::serialize(stream);
-
 }
 
 qreal AlienCellFunctionPropulsion::convertDataToThrustPower (quint8 b)

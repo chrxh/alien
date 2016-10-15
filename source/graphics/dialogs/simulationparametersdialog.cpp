@@ -5,7 +5,7 @@
 #include <QMessageBox>
 
 #include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 SimulationParametersDialog::SimulationParametersDialog(QWidget *parent) :
     QDialog(parent),
@@ -57,6 +57,7 @@ void SimulationParametersDialog::setLocalSimulationParametersToWidgets ()
     ui->treeWidget->findItems("offspring distance", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST));
     ui->treeWidget->findItems("strength", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_WEAPON_STRENGTH));
     ui->treeWidget->findItems("range", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_FUNCTION_SENSOR_RANGE));
+    ui->treeWidget->findItems("range", Qt::MatchExactly | Qt::MatchRecursive).at(1)->setText(1, QString("%1").arg(localSimulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE));
 
     ui->treeWidget->findItems("creation energy", Qt::MatchExactly | Qt::MatchRecursive).at(1)->setText(1, QString("%1").arg(localSimulationParameters.NEW_TOKEN_ENERGY));
     ui->treeWidget->findItems("min energy", Qt::MatchExactly | Qt::MatchRecursive).at(1)->setText(1, QString("%1").arg(localSimulationParameters.MIN_TOKEN_ENERGY));
@@ -92,6 +93,7 @@ void SimulationParametersDialog::getLocalSimulationParametersFromWidgets ()
     localSimulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST = ui->treeWidget->findItems("offspring distance", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toInt(&ok);
     localSimulationParameters.CELL_WEAPON_STRENGTH = ui->treeWidget->findItems("strength", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toDouble(&ok);
     localSimulationParameters.CELL_FUNCTION_SENSOR_RANGE = ui->treeWidget->findItems("range", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toDouble(&ok);
+    localSimulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE = ui->treeWidget->findItems("range", Qt::MatchExactly | Qt::MatchRecursive).at(1)->text(1).toDouble(&ok);
 
     localSimulationParameters.NEW_TOKEN_ENERGY = ui->treeWidget->findItems("creation energy", Qt::MatchExactly | Qt::MatchRecursive).at(1)->text(1).toDouble(&ok);
     localSimulationParameters.MIN_TOKEN_ENERGY = ui->treeWidget->findItems("min energy", Qt::MatchExactly | Qt::MatchRecursive).at(1)->text(1).toDouble(&ok);

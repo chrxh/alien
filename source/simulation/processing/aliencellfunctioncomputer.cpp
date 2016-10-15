@@ -1,13 +1,13 @@
 #include "aliencellfunctioncomputer.h"
-#include "../../globaldata/simulationparameters.h"
-#include "../../globaldata/metadatamanager.h"
+#include "../metadatamanager.h"
 #include "../entities/aliencell.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QString>
 #include <qdebug.h>
 
-AlienCellFunctionComputer::AlienCellFunctionComputer(bool randomData)
-    : _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
+AlienCellFunctionComputer::AlienCellFunctionComputer(bool randomData, AlienGrid*& grid)
+    : AlienCellFunction(grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
 {
     if( randomData ) {
 
@@ -24,8 +24,8 @@ AlienCellFunctionComputer::AlienCellFunctionComputer(bool randomData)
     }
 }
 
-AlienCellFunctionComputer::AlienCellFunctionComputer (quint8* cellTypeData)
-    : _code(), _numInstr(0)
+AlienCellFunctionComputer::AlienCellFunctionComputer (quint8* cellTypeData, AlienGrid*& grid)
+    : AlienCellFunction(grid), _code(), _numInstr(0)
 {
     _numInstr = cellTypeData[0];
     for( int i = 0; i < 3*_numInstr; ++i ) {
@@ -33,13 +33,14 @@ AlienCellFunctionComputer::AlienCellFunctionComputer (quint8* cellTypeData)
     }
 }
 
-AlienCellFunctionComputer::AlienCellFunctionComputer (QDataStream& stream)
+AlienCellFunctionComputer::AlienCellFunctionComputer (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
     stream >> _code >> _numInstr;
 }
 
 
-void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& space, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
 {
     bool condTable[simulationParameters.CELL_CODESIZE];
     int condPointer(0);
@@ -502,7 +503,7 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
 }
 
 
-QString AlienCellFunctionComputer::getCellFunctionName ()
+QString AlienCellFunctionComputer::getCellFunctionName () const
 {
     return "COMPUTER";
 }

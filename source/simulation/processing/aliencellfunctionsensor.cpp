@@ -3,30 +3,28 @@
 #include "../entities/aliencellcluster.h"
 
 #include "../physics/physics.h"
-#include "../../globaldata/simulationparameters.h"
+#include "../../globaldata/simulationsettings.h"
 
 #include <QtCore/qmath.h>
-/*
-#include <chrono>
-#include <iostream>
-using namespace std;
-using namespace std::chrono;
-*/
-AlienCellFunctionSensor::AlienCellFunctionSensor()
+
+AlienCellFunctionSensor::AlienCellFunctionSensor(AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
-AlienCellFunctionSensor::AlienCellFunctionSensor (quint8* cellTypeData)
+AlienCellFunctionSensor::AlienCellFunctionSensor (quint8* cellTypeData, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
-AlienCellFunctionSensor::AlienCellFunctionSensor (QDataStream& stream)
+AlienCellFunctionSensor::AlienCellFunctionSensor (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 
 }
 
-void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCell, AlienCell* cell, AlienGrid*& grid, AlienEnergy*& newParticle, bool& decompose)
+void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
 {
     AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(SENSOR::IN)]%5;
@@ -44,9 +42,9 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
 
     //scanning vicinity?
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_VICINITY) ) {
-        QVector3D cellPos = cell->calcPosition(grid);
+        QVector3D cellPos = cell->calcPosition(_grid);
 //        auto time1 = high_resolution_clock::now();
-        AlienCellCluster* otherCluster = grid->getNearbyClusterFast(cellPos,
+        AlienCellCluster* otherCluster = _grid->getNearbyClusterFast(cellPos,
                                                                     simulationParameters.CELL_FUNCTION_SENSOR_RANGE,
                                                                     minMassReal,
                                                                     maxMassReal,
@@ -58,13 +56,13 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = convertURealToData(otherCluster->getMass());
 
             //calc relative angle
-            QVector3D dir  = grid->displacement(otherCluster->getPosition(), cell->calcPosition()).normalized();
-            qreal cellOrientationAngle = Physics::calcAngle(-cell->getRelPos() + previousCell->getRelPos());
-            qreal relAngle = Physics::calcAngle(dir) - cellOrientationAngle - cluster->getAngle();
+            QVector3D dir  = _grid->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
+            qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
+            qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertAngleToData(relAngle);
 
             //calc distance by scanning along beam
-            QVector3D beamPos = cell->calcPosition(grid);
+            QVector3D beamPos = cell->calcPosition(true);
             QVector3D scanPos;
             for(int d = 1; d < simulationParameters.CELL_FUNCTION_SENSOR_RANGE; d += 2) {
                 beamPos += 2.0*dir;
@@ -73,10 +71,10 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
                         scanPos = beamPos;
                         scanPos.setX(scanPos.x()+rx);
                         scanPos.setY(scanPos.y()+ry);
-                        AlienCell* scanCell = grid->getCell(scanPos);
+                        AlienCell* scanCell = _grid->getCell(scanPos);
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
-                                qreal dist = grid->displacement(cell->calcPosition(), scanCell->calcPosition()).length();
+                                qreal dist = _grid->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
                                 token->memory[static_cast<int>(SENSOR::OUT_DIST)] = convertURealToData(dist);
                                 return;
                             }
@@ -95,8 +93,8 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
     QVector3D dir(0.0, 0.0, 0.0);
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_BY_ANGLE) ) {
         qreal relAngle = convertDataToAngle(token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)]);
-        qreal angle = Physics::calcAngle(-cell->getRelPos() + previousCell->getRelPos()) + cluster->getAngle() + relAngle;
-        dir = Physics::calcVector(angle);
+        qreal angle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos()) + cluster->getAngle() + relAngle;
+        dir = Physics::unitVectorOfAngle(angle);
     }
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_FROM_CENTER) ) {
         dir = cellRelPos.normalized();
@@ -107,7 +105,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
 
     //scan along beam
     QList< AlienCell* > hitListCell;
-    QVector3D beamPos = cell->calcPosition(grid);
+    QVector3D beamPos = cell->calcPosition(true);
     QVector3D scanPos;
     for(int d = 1; d < simulationParameters.CELL_FUNCTION_SENSOR_RANGE; d += 2) {
         beamPos += 2.0*dir;
@@ -116,7 +114,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
                 scanPos = beamPos;
                 scanPos.setX(scanPos.x()+rx);
                 scanPos.setY(scanPos.y()+ry);
-                AlienCell* scanCell = grid->getCell(scanPos);
+                AlienCell* scanCell = _grid->getCell(scanPos);
                 if( scanCell ) {
                     if( scanCell->getCluster() != cell->getCluster() ) {
 
@@ -141,7 +139,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
                 }
             }
             token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
-            qreal dist = grid->displacement(cell->calcPosition(), largestClusterCell->calcPosition()).length();
+            qreal dist = _grid->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
             token->memory[static_cast<int>(SENSOR::OUT_DIST)] = convertURealToData(dist);
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = convertURealToData(largestClusterCell->getCluster()->getMass());
 //            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);
@@ -151,7 +149,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* previousCel
     token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::NOTHING_FOUND);
 }
 
-QString AlienCellFunctionSensor::getCellFunctionName ()
+QString AlienCellFunctionSensor::getCellFunctionName () const
 {
     return "SENSOR";
 }
