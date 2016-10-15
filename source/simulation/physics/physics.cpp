@@ -1,7 +1,7 @@
 #include "physics.h"
-#include "../../globaldata/simulationsettings.h"
 
 #include <qmath.h>
+#include <QMatrix4x4>
 
 //calculate collision of two moving and rotating rigid bodies
 void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp,
@@ -69,12 +69,8 @@ void Physics::fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rB
                       qreal massA, qreal massB,
                       QVector3D& v2, qreal& angularVel2)
 {
-    QVector3D vA2;
-    QVector3D vB2;
-    qreal angularVelA2(0.0);
-    qreal angularVelB2(0.0);
-
-/*    QVector3D rAPp = posP-posA;
+    //calculation of rAPp
+    /*QVector3D rAPp = posP-posA;
     qreal temp = rAPp.x();
     rAPp.setX(rAPp.y());
     rAPp.setY(-temp);
@@ -82,13 +78,18 @@ void Physics::fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rB
     temp = rBPp.x();
     rBPp.setX(rBPp.y());
     rBPp.setY(-temp);*/
+
+    QVector3D vA2;
+    QVector3D vB2;
+    qreal angularVelA2(0.0);
+    qreal angularVelB2(0.0);
+
     Physics::collision(vA1, vB1, rAPp, rBPp, angularVelA1,
                        angularVelB1, n, angularMassA, angularMassB,
                        massA, massB,
                        vA2, vB2, angularVelA2, angularVelB2);
     v2 = (vA2*massA+vB2*massB)/(massA+massB);
     angularVel2 = (angularVelA2*angularMassA+angularVelB2*angularMassB)/angularMassAB;
-//    angularVel2 *= radToDeg;
 }
 
 
@@ -162,6 +163,13 @@ void Physics::applyImpulse (QVector3D impulse, QVector3D rAPp, qreal mass, QVect
     newAngularVel = angularVel - QVector3D::dotProduct(rAPp, impulse)/angularMass*radToDeg;
 }
 
+QVector3D Physics::rotateClockwise (QVector3D v, qreal angle)
+{
+    QMatrix4x4 transform;
+    transform.rotate(angle, 0.0, 0.0, 1.0);
+    return transform.map(v);
+}
+
 QVector3D Physics::rotateQuarterCounterClockwise (QVector3D v)
 {
 
@@ -183,20 +191,35 @@ qreal Physics::angleOfVector (QVector3D v)
     return angle;
 }
 
-qreal Physics::clockwiseAngleFromFirstToSecondVector (QVector3D v1, QVector3D v2)
-{
-    qreal a1 = Physics::angleOfVector(v1);
-    qreal a2 = Physics::angleOfVector(v2);
-    qreal angle = a2 - a1;
-    if( angle > 180.0 )
-        angle -= 360.0;
-    if( angle < -180.0 )
-        angle += 360.0;
-    return angle;
-}
-
 QVector3D Physics::unitVectorOfAngle (qreal angle)
 {
     return QVector3D(qSin(angle*degToRad),-qCos(angle*degToRad), 0.0);
 }
 
+bool Physics::compareEqualAngle (qreal angle1, qreal angle2, qreal precision)
+{
+    if( qAbs(angle1-angle2) < precision )
+        return true;
+    if( qAbs(angle1-angle2-360.0) < precision )
+        return true;
+    if( qAbs(angle1-angle2+360.0) < precision )
+        return true;
+    return false;
+}
+
+qreal Physics::subtractAngle (qreal angleMinuend, qreal angleSubtrahend)
+{
+    qreal angleDiff = angleMinuend- angleSubtrahend;
+    if( angleDiff > 360.0 )
+        angleDiff -= 360.0;
+    if( angleDiff < 0.0 )
+        angleDiff += 360.0;
+    return angleDiff;
+}
+
+qreal Physics::clockwiseAngleFromFirstToSecondVector (QVector3D v1, QVector3D v2)
+{
+    qreal a1 = Physics::angleOfVector(v1);
+    qreal a2 = Physics::angleOfVector(v2);
+    return subtractAngle(a2, a1);
+}

@@ -144,6 +144,11 @@ quint8 AlienCellFunction::convertURealToData (qreal r) const
     return qFloor(r);
 }
 
+qreal AlienCellFunction::convertDataToUReal (quint8 d) const
+{
+    return static_cast< qreal >(d);
+}
+
 quint8 AlienCellFunction::convertIntToData (int i) const
 {
     if( i > 127 )
