@@ -1,7 +1,11 @@
+#ifndef TESTPHYSICS_H
+#define TESTPHYSICS_H
+
 #include <QtTest/QtTest>
-#include "physics.h"
-#include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/testsettings.h"
+#include "testsettings.h"
+
+#include "simulation/physics/physics.h"
+#include "globaldata/globalfunctions.h"
 
 class TestPhysics: public QObject
 {
@@ -88,3 +92,5 @@ private slots:
 
 //QTEST_MAIN(TestPhysics)
 //#include "testphysics.moc"
+
+#endif
