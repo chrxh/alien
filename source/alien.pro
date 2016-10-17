@@ -145,7 +145,8 @@ test {
     HEADERS += tests/testphysics.h \
         tests/testaliencellcluster.h \
         tests/testalientoken.h \
-        tests/testsettings.h
+        tests/testsettings.h \
+        tests/testaliencellfunctioncommunicator.h
 
 
     SOURCES += tests/testsuite.cpp
