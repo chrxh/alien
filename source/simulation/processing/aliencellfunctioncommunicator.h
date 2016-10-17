@@ -5,6 +5,7 @@
 
 #include <QVector3D>
 
+class TestAlienCellFunctionCommunicator;
 class AlienCellFunctionCommunicator : public AlienCellFunction
 {
 public:
@@ -44,6 +45,8 @@ public:
         NO_NEW_MESSAGE,
         NEW_MESSAGE
     };
+
+    friend TestAlienCellFunctionCommunicator;
 
 private:
     bool _newMessageReceived;

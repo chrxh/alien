@@ -3,7 +3,7 @@
 
 #include <QtTest/QtTest>
 #include "simulation/entities/aliencellcluster.h"
-#include "globaldata/simulationsettings.h"
+#include "testsettings.h"
 
 class TestAlienCellCluster : public QObject
 {
@@ -38,9 +38,9 @@ private slots:
         _cluster->setVel(QVector3D(1.0, -0.5, 0.0));
         _cluster->updateCellVel(false);
         _cluster->updateVel_angularVel_via_cellVelocities();
-        QVERIFY(qAbs(_cluster->getAngularVel() - 2.0) < ALIEN_PRECISION);
-        QVERIFY(qAbs(_cluster->getVel().x() - 1.0) < ALIEN_PRECISION);
-        QVERIFY(qAbs(_cluster->getVel().y() - (-0.5)) < ALIEN_PRECISION);
+        QVERIFY(qAbs(_cluster->getAngularVel() - 2.0) < TEST_REAL_PRECISION);
+        QVERIFY(qAbs(_cluster->getVel().x() - 1.0) < TEST_REAL_PRECISION);
+        QVERIFY(qAbs(_cluster->getVel().y() - (-0.5)) < TEST_REAL_PRECISION);
     }
 
     void cleanupTestCase()
