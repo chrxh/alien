@@ -12,17 +12,19 @@ class AlienGrid;
 class AlienCell
 {
 public:
-    AlienCell (qreal energy,
-               AlienGrid*& grid,
-               bool random = true,
-               int maxConnections = 0,
-               int tokenAccessNumber = 0,
-               AlienCellFunction* cellFunction = 0,
-               QVector3D relPos = QVector3D());
-    AlienCell (QDataStream& stream,
-               QMap< quint64, QList< quint64 > >& connectingCells,
-               AlienGrid*& grid);
-    AlienCell (QDataStream& stream, AlienGrid*& grid);     //build without connecting cells
+
+    static AlienCell* buildCellWithRandomData (qreal energy, AlienGrid*& grid);
+    static AlienCell* buildCell (qreal energy,
+                                 AlienGrid*& grid,
+                                 int maxConnections = 0,
+                                 int tokenAccessNumber = 0,
+                                 AlienCellFunction* cellFunction = 0,
+                                 QVector3D relPos = QVector3D());
+    static AlienCell* buildCell (QDataStream& stream,
+                                 QMap< quint64, QList< quint64 > >& connectingCells,
+                                 AlienGrid*& grid);
+    static AlienCell* buildCellWithoutConnectingCells (QDataStream& stream,
+                                 AlienGrid*& grid);
     ~AlienCell();
 
     bool connectable (AlienCell* otherCell);
@@ -75,6 +77,18 @@ public:
 
 private:
     friend class AlienCellCluster;
+
+    AlienCell (qreal energy,
+               AlienGrid*& grid,
+               bool random = true,
+               int maxConnections = 0,
+               int tokenAccessNumber = 0,
+               AlienCellFunction* cellFunction = 0,
+               QVector3D relPos = QVector3D());
+    AlienCell (QDataStream& stream,
+               QMap< quint64, QList< quint64 > >& connectingCells,
+               AlienGrid*& grid);
+    AlienCell (QDataStream& stream, AlienGrid*& grid);     //build without connecting cells
 
     AlienGrid*& _grid;
 

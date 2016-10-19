@@ -20,7 +20,7 @@ private slots:
     {
         QList< AlienCell* > cells;
         for(int i = 0; i <= 100; ++i) {
-            AlienCell* cell = new AlienCell(100.0, _grid);
+            AlienCell* cell = AlienCell::buildCell(100.0, _grid);
             cell->setRelPos(QVector3D(i, 0.0, 0.0));
             cells << cell;
         }
