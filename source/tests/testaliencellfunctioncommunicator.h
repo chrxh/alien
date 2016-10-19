@@ -94,7 +94,7 @@ private slots:
 
         //program token
         quint8 message = 100;
-        quint8 angle = 0;
+        quint8 angle = AlienCellFunction::convertAngleToData(180.0);
         quint8 distance = simulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE/2;
         _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN)] = static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR_IN::SEND_MESSAGE);
         _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_CHANNEL)] = channel;
@@ -112,8 +112,17 @@ private slots:
 
         //correct angle received?
         qreal receivedAngle = AlienCellFunction::convertDataToAngle(_communicator2->_receivedMessage.angle);
-        QString s = QString("Message from wrong angle received; received angle: %1, expected angle: %2").arg(receivedAngle).arg(-45.0);
+        QString s = QString("Message received with wrong angle; received angle: %1, expected angle: %2").arg(receivedAngle).arg(-45.0);
         QVERIFY2(qAbs(receivedAngle - (-45.0)) < 2.0, s.toLatin1().data());
+
+        //sending again in other direction
+        angle = AlienCellFunction::convertAngleToData(0.0);
+        _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_ANGLE)] = angle;
+        _communicator1->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
+        receivedAngle = AlienCellFunction::convertDataToAngle(_communicator2->_receivedMessage.angle);
+        s = QString("Message received with wrong angle; received angle: %1, expected angle: %2").arg(receivedAngle).arg(-135.0);
+        QVERIFY2(qAbs(receivedAngle - (-135.0)) < 2.0, s.toLatin1().data());
+
 
         //further evaluation, e.g. numMsg...
     }
