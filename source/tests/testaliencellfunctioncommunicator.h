@@ -26,10 +26,10 @@ private slots:
             int tokenAccessNumber = 0;
             _communicator1 = new AlienCellFunctionCommunicator(_grid);
             QVector3D relPos = QVector3D();
-            _cellWithToken = new AlienCell(cellEnergy, _grid, false, maxConnections, tokenAccessNumber, _communicator1, relPos);
+            _cellWithToken = AlienCell::buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, _communicator1, relPos);
             AlienCellFunctionCommunicator* someOtherCellFunction = new AlienCellFunctionCommunicator(_grid);
             relPos = QVector3D(0.0, 1.0, 0.0);
-            _cellWithoutToken = new AlienCell(cellEnergy, _grid, false, maxConnections, tokenAccessNumber, someOtherCellFunction, relPos);
+            _cellWithoutToken = AlienCell::buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, someOtherCellFunction, relPos);
             qreal tokenEnergy = 0.0;
             _token = new AlienToken(tokenEnergy);
             _cellWithToken->addToken(_token);
@@ -52,7 +52,7 @@ private slots:
             int tokenAccessNumber = 0;
             _communicator2 = new AlienCellFunctionCommunicator(_grid);
             QVector3D relPos = QVector3D();
-            AlienCell* cell = new AlienCell(cellEnergy, _grid, false, maxConnections, tokenAccessNumber, _communicator2, relPos);
+            AlienCell* cell = AlienCell::buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, _communicator2, relPos);
 
             //create cluster2 within communication range
             QList< AlienCell* > cells;

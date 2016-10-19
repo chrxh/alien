@@ -97,7 +97,7 @@ bool AlienEnergy::movement (AlienCellCluster*& cluster)
 
                 //create cell and cluster
                 QList< AlienCell* > cells;
-                AlienCell* c(new AlienCell(eNew, _grid, true));
+                AlienCell* c = AlienCell::buildCellWithRandomData(eNew, _grid);
                 cells << c;
                 cluster = AlienCellCluster::buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
                 amount = 0;

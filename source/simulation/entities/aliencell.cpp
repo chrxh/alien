@@ -9,163 +9,32 @@
 #include <QtCore/qmath.h>
 
 
-AlienCell::AlienCell(qreal energy, AlienGrid*& grid, bool random, int maxConnections, int tokenAccessNumber, AlienCellFunction* cellFunction, QVector3D relPos)
-    : _grid(grid),
-      _cellFunction(cellFunction),
-      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _tokenStackPointer(0),
-      _newTokenStackPointer(0),
-      _toBeKilled(false),
-      _tag(0),
-      _id(GlobalFunctions::getTag()),
-      _protectionCounter(0),
-      _relPos(relPos),
-      _cluster(0),
-      _energy(energy),
-      _maxConnections(0),
-      _numConnections(0),
-      _connectingCells(0),
-      _tokenAccessNumber(tokenAccessNumber),
-      _blockToken(false),
-      _memory(simulationParameters.CELL_MEMSIZE),
-      _vel(0.0, 0.0, 0.0),
-      _color(0)
+AlienCell* AlienCell::buildCellWithRandomData (qreal energy, AlienGrid*& grid)
 {
-    //set initial values
-    if( random ) {
-        resetConnections(qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1));
-        _tokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-        _cellFunction = AlienCellFunctionFactory::buildRandom(random, _grid);
-        for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
-            _memory[i] = qrand()%256;
-    }
-    else {
-        resetConnections(maxConnections);
-        if( !cellFunction )
-            _cellFunction = AlienCellFunctionFactory::build("COMPUTER", false, _grid);     //standard cell function
-        for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
-            _memory[i] = 0;
-    }
+    return new AlienCell(energy, grid, true);
 }
 
-AlienCell::AlienCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, AlienGrid*& grid)
-    : _grid(grid),
-      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _memory(simulationParameters.CELL_MEMSIZE)
+AlienCell* AlienCell::buildCell (qreal energy,
+                      AlienGrid*& grid,
+                      int maxConnections,
+                      int tokenAccessNumber,
+                      AlienCellFunction* cellFunction,
+                      QVector3D relPos)
 {
-
-    //cell function
-    _cellFunction = AlienCellFunctionFactory::build(stream, _grid);
-
-    //token stack
-    stream >> _tokenStackPointer;
-    for( int i = 0; i < _tokenStackPointer; ++i ) {
-        if( i < simulationParameters.CELL_TOKENSTACKSIZE )
-            _tokenStack[i] = new AlienToken(stream);
-        else{
-            //dummy token
-            AlienToken* temp = new AlienToken(stream);
-            delete temp;
-        }
-    }
-    if( _tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE )
-        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
-    _newTokenStackPointer = 0;
-
-    //remaining data
-    int numConnections(0);
-    stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
-           >> _energy >> _maxConnections >> numConnections;
-
-    //connecting cells
-    _connectingCells = 0;
-    resetConnections(_maxConnections);
-    _numConnections = numConnections;
-    for( int i = 0; i < _numConnections; ++i) {
-        quint64 id;
-        stream >> id;
-        connectingCells[_id] << id;
-    }
-
-    //remaining data
-    stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
-
-    //cell memory
-    int memSize;
-    stream >> memSize;
-    quint8 data;
-    for(int i = 0; i < memSize; ++i ) {
-        if( i < simulationParameters.CELL_MEMSIZE ) {
-            stream >> data;
-            _memory[i] = data;
-        }
-        else {
-            stream >> data;
-        }
-    }
-    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
-        _memory[i] = 0;
+    return new AlienCell(energy, grid, false, maxConnections, tokenAccessNumber, cellFunction, relPos);
 }
 
-AlienCell::AlienCell (QDataStream& stream, AlienGrid*& grid)
-    : _grid(grid),
-      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _memory(simulationParameters.CELL_MEMSIZE)
+AlienCell* AlienCell::buildCell (QDataStream& stream,
+                      QMap< quint64, QList< quint64 > >& connectingCells,
+                      AlienGrid*& grid)
 {
+    return new AlienCell(stream, connectingCells, grid);
+}
 
-    //cell function
-    _cellFunction = AlienCellFunctionFactory::build(stream, _grid);
-
-    //token stack
-    stream >> _tokenStackPointer;
-    for( int i = 0; i < _tokenStackPointer; ++i ) {
-        if( i < simulationParameters.CELL_TOKENSTACKSIZE )
-            _tokenStack[i] = new AlienToken(stream);
-        else{
-            //dummy token
-            AlienToken* temp = new AlienToken(stream);
-            delete temp;
-        }
-    }
-    if( _tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE )
-        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
-    _newTokenStackPointer = 0;
-
-    //remaining data
-    _numConnections = 0;
-    int numConnections = 0;
-    stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
-           >> _energy >> _maxConnections >> numConnections;
-
-    //connecting cells (NOTE: here they are just read but not established)
-    _connectingCells = 0;
-    resetConnections(_maxConnections);
-    for( int i = 0; i < numConnections; ++i) {
-        quint64 id;
-        stream >> id;
-    }
-
-    //remaining data
-    stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
-
-    //cell memory
-    int memSize;
-    stream >> memSize;
-    quint8 data;
-    for(int i = 0; i < memSize; ++i ) {
-        if( i < simulationParameters.CELL_MEMSIZE ) {
-            stream >> data;
-            _memory[i] = data;
-        }
-        else {
-            stream >> data;
-        }
-    }
-    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
-        _memory[i] = 0;
+AlienCell* AlienCell::buildCellWithoutConnectingCells (QDataStream& stream,
+                      AlienGrid*& grid)
+{
+    return new AlienCell(stream, grid);
 }
 
 AlienCell::~AlienCell()
@@ -560,5 +429,171 @@ void AlienCell::setColor (quint8 color)
 {
     _color = color;
 }
+
+AlienCell::AlienCell (qreal energy,
+                      AlienGrid*& grid,
+                      bool random,
+                      int maxConnections,
+                      int tokenAccessNumber,
+                      AlienCellFunction* cellFunction,
+                      QVector3D relPos)
+    : _grid(grid),
+      _cellFunction(cellFunction),
+      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _tokenStackPointer(0),
+      _newTokenStackPointer(0),
+      _toBeKilled(false),
+      _tag(0),
+      _id(GlobalFunctions::getTag()),
+      _protectionCounter(0),
+      _relPos(relPos),
+      _cluster(0),
+      _energy(energy),
+      _maxConnections(0),
+      _numConnections(0),
+      _connectingCells(0),
+      _tokenAccessNumber(tokenAccessNumber),
+      _blockToken(false),
+      _memory(simulationParameters.CELL_MEMSIZE),
+      _vel(0.0, 0.0, 0.0),
+      _color(0)
+{
+    //set initial values
+    if( random ) {
+        resetConnections(qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1));
+        _tokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
+        _cellFunction = AlienCellFunctionFactory::buildRandom(random, _grid);
+        for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
+            _memory[i] = qrand()%256;
+    }
+    else {
+        resetConnections(maxConnections);
+        if( !cellFunction )
+            _cellFunction = AlienCellFunctionFactory::build("COMPUTER", false, _grid);     //standard cell function
+        for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
+            _memory[i] = 0;
+    }
+}
+
+AlienCell::AlienCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, AlienGrid*& grid)
+    : _grid(grid),
+      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _memory(simulationParameters.CELL_MEMSIZE)
+{
+
+    //cell function
+    _cellFunction = AlienCellFunctionFactory::build(stream, _grid);
+
+    //token stack
+    stream >> _tokenStackPointer;
+    for( int i = 0; i < _tokenStackPointer; ++i ) {
+        if( i < simulationParameters.CELL_TOKENSTACKSIZE )
+            _tokenStack[i] = new AlienToken(stream);
+        else{
+            //dummy token
+            AlienToken* temp = new AlienToken(stream);
+            delete temp;
+        }
+    }
+    if( _tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE )
+        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
+    _newTokenStackPointer = 0;
+
+    //remaining data
+    int numConnections(0);
+    stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
+           >> _energy >> _maxConnections >> numConnections;
+
+    //connecting cells
+    _connectingCells = 0;
+    resetConnections(_maxConnections);
+    _numConnections = numConnections;
+    for( int i = 0; i < _numConnections; ++i) {
+        quint64 id;
+        stream >> id;
+        connectingCells[_id] << id;
+    }
+
+    //remaining data
+    stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
+
+    //cell memory
+    int memSize;
+    stream >> memSize;
+    quint8 data;
+    for(int i = 0; i < memSize; ++i ) {
+        if( i < simulationParameters.CELL_MEMSIZE ) {
+            stream >> data;
+            _memory[i] = data;
+        }
+        else {
+            stream >> data;
+        }
+    }
+    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
+        _memory[i] = 0;
+}
+
+AlienCell::AlienCell (QDataStream& stream, AlienGrid*& grid)
+    : _grid(grid),
+      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _memory(simulationParameters.CELL_MEMSIZE)
+{
+
+    //cell function
+    _cellFunction = AlienCellFunctionFactory::build(stream, _grid);
+
+    //token stack
+    stream >> _tokenStackPointer;
+    for( int i = 0; i < _tokenStackPointer; ++i ) {
+        if( i < simulationParameters.CELL_TOKENSTACKSIZE )
+            _tokenStack[i] = new AlienToken(stream);
+        else{
+            //dummy token
+            AlienToken* temp = new AlienToken(stream);
+            delete temp;
+        }
+    }
+    if( _tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE )
+        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
+    _newTokenStackPointer = 0;
+
+    //remaining data
+    _numConnections = 0;
+    int numConnections = 0;
+    stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
+           >> _energy >> _maxConnections >> numConnections;
+
+    //connecting cells (NOTE: here they are just read but not established)
+    _connectingCells = 0;
+    resetConnections(_maxConnections);
+    for( int i = 0; i < numConnections; ++i) {
+        quint64 id;
+        stream >> id;
+    }
+
+    //remaining data
+    stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
+
+    //cell memory
+    int memSize;
+    stream >> memSize;
+    quint8 data;
+    for(int i = 0; i < memSize; ++i ) {
+        if( i < simulationParameters.CELL_MEMSIZE ) {
+            stream >> data;
+            _memory[i] = data;
+        }
+        else {
+            stream >> data;
+        }
+    }
+    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
+        _memory[i] = 0;
+}
+
 
 
