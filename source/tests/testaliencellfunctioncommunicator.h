@@ -24,12 +24,12 @@ private slots:
             qreal cellEnergy = 0.0;
             int maxConnections = 0;
             int tokenAccessNumber = 0;
-            _communicator1 = new AlienCellFunctionCommunicator(_grid);
+            _communicator1a = new AlienCellFunctionCommunicator(_grid);
             QVector3D relPos = QVector3D();
-            _cellWithToken = AlienCell::buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, _communicator1, relPos);
-            AlienCellFunctionCommunicator* someOtherCellFunction = new AlienCellFunctionCommunicator(_grid);
+            _cellWithToken = AlienCell::buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, _communicator1a, relPos);
+            _communicator1b = new AlienCellFunctionCommunicator(_grid);
             relPos = QVector3D(0.0, 1.0, 0.0);
-            _cellWithoutToken = AlienCell::buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, someOtherCellFunction, relPos);
+            _cellWithoutToken = AlienCell::buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, _communicator1b, relPos);
             qreal tokenEnergy = 0.0;
             _token = new AlienToken(tokenEnergy);
             _cellWithToken->addToken(_token);
@@ -72,11 +72,16 @@ private slots:
 
     void init ()
     {
-        _communicator1->_receivedMessage.channel = 0;
-        _communicator1->_receivedMessage.message = 0;
-        _communicator1->_receivedMessage.angle = 0;
-        _communicator1->_receivedMessage.distance = 0;
-        _communicator1->_newMessageReceived = false;
+        _communicator1a->_receivedMessage.channel = 0;
+        _communicator1a->_receivedMessage.message = 0;
+        _communicator1a->_receivedMessage.angle = 0;
+        _communicator1a->_receivedMessage.distance = 0;
+        _communicator1a->_newMessageReceived = false;
+        _communicator1b->_receivedMessage.channel = 0;
+        _communicator1b->_receivedMessage.message = 0;
+        _communicator1b->_receivedMessage.angle = 0;
+        _communicator1b->_receivedMessage.distance = 0;
+        _communicator1b->_newMessageReceived = false;
         _communicator2->_receivedMessage.channel = 0;
         _communicator2->_receivedMessage.message = 0;
         _communicator2->_receivedMessage.angle = 0;
@@ -86,10 +91,12 @@ private slots:
             _token->memory[i] = 0;
     }
 
-    void testSendMessageToSameChannel ()
+    void testSendMessage ()
     {
         //setup channel
         quint8 channel = 1;
+        quint8 differentChannel = 2;
+        _communicator1b->_receivedMessage.channel = channel;
         _communicator2->_receivedMessage.channel = channel;
 
         //program token
@@ -102,29 +109,36 @@ private slots:
         _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_ANGLE)] = angle;
         _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_DISTANCE)] = distance;
 
-        //send message
+        //1. test: message received?
         AlienEnergy* energy = 0;
         bool decompose = false;
-        _communicator1->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
-
-        //message received?
+        _communicator1a->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
         QVERIFY2(_communicator2->_newMessageReceived, "No message received.");
 
-        //correct angle received?
+        //2. test: correct angle received?
         qreal receivedAngle = AlienCellFunction::convertDataToAngle(_communicator2->_receivedMessage.angle);
         QString s = QString("Message received with wrong angle; received angle: %1, expected angle: %2").arg(receivedAngle).arg(-45.0);
         QVERIFY2(qAbs(receivedAngle - (-45.0)) < 2.0, s.toLatin1().data());
 
-        //sending again in other direction
+        //3. test: correct angle received for an other direction?
         angle = AlienCellFunction::convertAngleToData(0.0);
         _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_ANGLE)] = angle;
-        _communicator1->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
+        _communicator1a->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
         receivedAngle = AlienCellFunction::convertDataToAngle(_communicator2->_receivedMessage.angle);
         s = QString("Message received with wrong angle; received angle: %1, expected angle: %2").arg(receivedAngle).arg(-135.0);
         QVERIFY2(qAbs(receivedAngle - (-135.0)) < 2.0, s.toLatin1().data());
 
+        //4. test: two messages sent?
+        quint8 numMsg = _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_SENT_NUM_MESSAGE)];
+        s = QString("Wrong number messages sent. Messages sent: %1, should be 2.").arg(numMsg);
+        QVERIFY2(numMsg == 2, s.toLatin1().data());
 
-        //further evaluation, e.g. numMsg...
+        //5. test: one receiver has different channel => only one message sent?
+        _communicator2->_receivedMessage.channel = differentChannel;
+        _communicator1a->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
+        numMsg = _token->memory[static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_SENT_NUM_MESSAGE)];
+        s = QString("Wrong number messages sent. Messages sent: %1, should be 1.").arg(numMsg);
+        QVERIFY2(numMsg == 1, s.toLatin1().data());
     }
 
     void cleanupTestCase()
@@ -141,7 +155,8 @@ private:
     AlienCellCluster* _cluster1;
     AlienCell* _cellWithToken;
     AlienCell* _cellWithoutToken;
-    AlienCellFunctionCommunicator* _communicator1;
+    AlienCellFunctionCommunicator* _communicator1a;
+    AlienCellFunctionCommunicator* _communicator1b;
     AlienToken* _token;
 
     //data for cluster2
