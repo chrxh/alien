@@ -185,7 +185,7 @@ void AlienSimulator::addBlockStructure (QVector3D center, int numCellX, int numC
                 maxCon = 3;
             if( ((i == 0) || (i == (numCellX-1))) && ((j == 0) || (j == (numCellY-1))) )
                 maxCon = 2;
-            AlienCell* cell = new AlienCell(energy, _grid, false, maxCon, 0, 0, QVector3D(x, y, 0.0));
+            AlienCell* cell = AlienCell::buildCell(energy, _grid, maxCon, 0, 0, QVector3D(x, y, 0.0));
 
             cellGrid[i][j] = cell;
         }
@@ -229,7 +229,7 @@ void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal
                 maxCon = 6;
 
             //create cell: upper layer
-            cellGrid[numLayers-1+i][numLayers-1-j] = new AlienCell(energy, _grid, false, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
+            cellGrid[numLayers-1+i][numLayers-1-j] = AlienCell::buildCell(energy, _grid, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
             cells << cellGrid[numLayers-1+i][numLayers-1-j];
             if( numLayers-1+i > 0 )
                 cellGrid[numLayers-1+i][numLayers-1-j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1-j]);
@@ -240,7 +240,7 @@ void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal
 
             //create cell: under layer (except for 0-layer)
             if( j > 0 ) {
-                cellGrid[numLayers-1+i][numLayers-1+j] = new AlienCell(energy, _grid, false, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
+                cellGrid[numLayers-1+i][numLayers-1+j] = AlienCell::buildCell(energy, _grid, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
                 cells << cellGrid[numLayers-1+i][numLayers-1+j];
                 if( numLayers-1+i > 0 )
                     cellGrid[numLayers-1+i][numLayers-1+j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1+j]);
@@ -337,7 +337,7 @@ void AlienSimulator::buildCell (QDataStream& stream,
 
     //read cell data
     QList< AlienCell* > newCells;
-    AlienCell* newCell = new AlienCell(stream, _grid);
+    AlienCell* newCell = AlienCell::buildCellWithoutConnectingCells(stream, _grid);
     newCells << newCell;
     newCells[0]->setRelPos(QVector3D());
     newCluster = AlienCellCluster::buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _grid);
@@ -587,11 +587,10 @@ void AlienSimulator::newCell (QVector3D pos)
 {
     //create cluster with single cell
     _grid->lockData();
-    AlienCell* cell = new AlienCell(simulationParameters.NEW_CELL_ENERGY,
-                                    _grid,
-                                    false,
-                                    simulationParameters.NEW_CELL_MAX_CONNECTION,
-                                    simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
+    AlienCell* cell = AlienCell::buildCell(simulationParameters.NEW_CELL_ENERGY,
+                                           _grid,
+                                           simulationParameters.NEW_CELL_MAX_CONNECTION,
+                                           simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< AlienCell* > cells;
     cells << cell;

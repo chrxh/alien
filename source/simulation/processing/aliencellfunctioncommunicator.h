@@ -5,6 +5,7 @@
 
 #include <QVector3D>
 
+class TestAlienCellFunctionCommunicator;
 class AlienCellFunctionCommunicator : public AlienCellFunction
 {
 public:
@@ -45,6 +46,8 @@ public:
         NEW_MESSAGE
     };
 
+    friend TestAlienCellFunctionCommunicator;
+
 private:
     bool _newMessageReceived;
     struct MessageData {
@@ -59,11 +62,11 @@ private:
     void setListeningChannel (AlienToken* token);
 
     void sendMessageToNearbyCommunicatorsAndUpdateToken (AlienToken* token, AlienCell* cell, AlienCell* previousCell) const;
-    int sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageToSend, AlienCell* senderCell, AlienCell* senderPreviousCell) const;
+    int sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend, AlienCell* senderCell, AlienCell* senderPreviousCell) const;
     QList< AlienCell* > findNearbyCommunicator (AlienCell* cell) const;
-    bool sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageToSend, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienCell* receiverCell) const;
+    bool sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend, AlienCell* senderCell, AlienCell* senderPreviousCell, AlienCell* receiverCell) const;
     AlienCellFunctionCommunicator* getCommunicator (AlienCell* cell) const;
-    QVector3D calcDisplacementOfObjectFromSender (const MessageData& messageToSend, AlienCell* senderCell, AlienCell* senderPreviousCell) const;
+    QVector3D calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend, AlienCell* senderCell, AlienCell* senderPreviousCell) const;
 
     void receiveMessage (AlienToken* token,AlienCell* receiverCell, AlienCell* receiverPreviousCell);
     void calcReceivedMessageAngle (AlienCell* receiverCell, AlienCell* receiverPreviousCell);

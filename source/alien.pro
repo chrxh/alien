@@ -56,12 +56,9 @@ SOURCES += main.cpp \
     graphics/dialogs/addrectstructuredialog.cpp \
     graphics/dialogs/addhexagonstructuredialog.cpp \
     graphics/assistance/tutorialwindow.cpp \
-    simulation/entities/testaliencellcluster.cpp \
-    simulation/entities/testalientoken.cpp \
     simulation/processing/aliencellfunctioncommunicator.cpp \
     globaldata/simulationsettings.cpp \
-    simulation/metadatamanager.cpp \
-    simulation/physics/testphysics.cpp
+    simulation/metadatamanager.cpp
 HEADERS += \
     simulation/entities/aliencell.h \
     simulation/entities/aliencellcluster.h \
@@ -115,8 +112,7 @@ HEADERS += \
     graphics/assistance/tutorialwindow.h \
     simulation/processing/aliencellfunctioncommunicator.h \
     globaldata/simulationsettings.h \
-    simulation/metadatamanager.h \
-    globaldata/testsettings.h
+    simulation/metadatamanager.h
 FORMS += graphics/monitoring/simulationmonitor.ui \
     graphics/macroeditor.ui \
     graphics/mainwindow.ui \
@@ -138,3 +134,23 @@ RESOURCES += \
     graphics/resources/ressources.qrc
 
 OTHER_FILES +=
+
+test {
+    message(Tests build)
+    QT += testlib
+    TARGET = UnitTests
+
+    SOURCES -= main.cpp
+
+    HEADERS += tests/testphysics.h \
+        tests/testaliencellcluster.h \
+        tests/testalientoken.h \
+        tests/testsettings.h \
+        tests/testaliencellfunctioncommunicator.h
+
+
+    SOURCES += tests/testsuite.cpp
+
+} else {
+    message(Normal build)
+}
