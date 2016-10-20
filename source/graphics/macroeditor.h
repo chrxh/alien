@@ -18,6 +18,7 @@ class AlienGrid;
 class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
+class QGraphicsView;
 class MacroEditor : public QWidget
 {
     Q_OBJECT
@@ -39,6 +40,8 @@ public:
 
     void serializeViewMatrix (QDataStream& stream);
     void loadViewMatrix (QDataStream& stream);
+
+    QGraphicsView* getGraphicsView ();
 
     qreal getZoomFactor ();
 
