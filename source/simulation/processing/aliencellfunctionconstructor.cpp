@@ -593,7 +593,7 @@ AlienCell* AlienCellFunctionConstructor::constructNewCell (AlienCell* baseCell,
                                                            int cellType,
                                                            quint8* cellTypeData)
 {
-    AlienCell* newCell = new AlienCell(simulationParameters.NEW_CELL_ENERGY, _grid, false);
+    AlienCell* newCell = AlienCell::buildCell(simulationParameters.NEW_CELL_ENERGY, _grid);
     AlienCellCluster* cluster = baseCell->getCluster();
     newCell->setMaxConnections(maxConnections);
     newCell->setBlockToken(true);

@@ -73,16 +73,16 @@ void AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndUpdateTok
                                                                             AlienCell* cell,
                                                                             AlienCell* previousCell) const
 {
-    MessageData messageToSend;
-    messageToSend.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
-    messageToSend.message = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
-    messageToSend.angle = token->memory[static_cast<int>(COMMUNICATOR::IN_ANGLE)];
-    messageToSend.distance = token->memory[static_cast<int>(COMMUNICATOR::IN_DISTANCE)];
-    int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageToSend, cell, previousCell);
+    MessageData messageDataToSend;
+    messageDataToSend.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
+    messageDataToSend.message = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
+    messageDataToSend.angle = token->memory[static_cast<int>(COMMUNICATOR::IN_ANGLE)];
+    messageDataToSend.distance = token->memory[static_cast<int>(COMMUNICATOR::IN_DISTANCE)];
+    int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageDataToSend, cell, previousCell);
     token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = convertIntToData(numMsg);
 }
 
-int AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageToSend,
+int AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
                                                                             AlienCell* senderCell,
                                                                             AlienCell* senderPreviousCell) const
 {
@@ -90,7 +90,7 @@ int AlienCellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumb
     QList< AlienCell* > nearbyCommunicatorCells = findNearbyCommunicator (senderCell);
     foreach(AlienCell* nearbyCell, nearbyCommunicatorCells)
         if( nearbyCell != senderCell )
-            if( sendMessageToCommunicatorAndReturnSuccess(messageToSend, senderCell, senderPreviousCell, nearbyCell) )
+            if( sendMessageToCommunicatorAndReturnSuccess(messageDataToSend, senderCell, senderPreviousCell, nearbyCell) )
                 ++numMsg;
     return numMsg;
 }
@@ -107,21 +107,21 @@ QList< AlienCell* > AlienCellFunctionCommunicator::findNearbyCommunicator(AlienC
     return _grid->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 
-bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageToSend,
+bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
                                                                        AlienCell* senderCell,
                                                                        AlienCell* senderPreviousCell,
                                                                        AlienCell* receiverCell) const
 {
     AlienCellFunctionCommunicator* communicator = getCommunicator(receiverCell);
     if( communicator ) {
-        if( communicator->_receivedMessage.channel == messageToSend.channel ) {
-            QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageToSend, senderCell, senderPreviousCell);
-            QVector3D displacementOfObjectFromReceiver = _grid->displacement(senderCell->calcPosition() + displacementOfObjectFromSender, receiverCell->calcPosition());
+        if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
+            QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
+            QVector3D displacementOfObjectFromReceiver = _grid->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
             communicator->_receivedMessage.angle = convertAngleToData(angleSeenFromReceiver);
             communicator->_receivedMessage.distance = convertURealToData(distanceSeenFromReceiver);
-            communicator->_receivedMessage.message = messageToSend.message;
+            communicator->_receivedMessage.message = messageDataToSend.message;
             communicator->_newMessageReceived = true;
             return true;
         }
@@ -137,14 +137,14 @@ AlienCellFunctionCommunicator* AlienCellFunctionCommunicator::getCommunicator (A
     return 0;
 }
 
-QVector3D AlienCellFunctionCommunicator::calcDisplacementOfObjectFromSender (const MessageData& messageToSend,
+QVector3D AlienCellFunctionCommunicator::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend,
                                                                              AlienCell* senderCell,
                                                                              AlienCell* senderPreviousCell) const
 {
-    QVector3D displacementFromSender = senderCell->calcPosition() - senderPreviousCell->calcPosition();
+    QVector3D displacementFromSender = senderPreviousCell->calcPosition() - senderCell->calcPosition();
     displacementFromSender.normalize();
-    Physics::rotateClockwise(displacementFromSender, convertDataToAngle(messageToSend.angle));
-    displacementFromSender = displacementFromSender*convertDataToUReal(messageToSend.distance);
+    displacementFromSender = Physics::rotateClockwise(displacementFromSender, convertDataToAngle(messageDataToSend.angle));
+    displacementFromSender = displacementFromSender*convertDataToUReal(messageDataToSend.distance);
     return displacementFromSender;
 }
 
