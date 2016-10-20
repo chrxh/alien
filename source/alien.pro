@@ -58,7 +58,8 @@ SOURCES += main.cpp \
     graphics/assistance/tutorialwindow.cpp \
     simulation/processing/aliencellfunctioncommunicator.cpp \
     globaldata/simulationsettings.cpp \
-    simulation/metadatamanager.cpp
+    simulation/metadatamanager.cpp \
+    graphics/misc/startscreencontroller.cpp
 HEADERS += \
     simulation/entities/aliencell.h \
     simulation/entities/aliencellcluster.h \
@@ -112,7 +113,8 @@ HEADERS += \
     graphics/assistance/tutorialwindow.h \
     simulation/processing/aliencellfunctioncommunicator.h \
     globaldata/simulationsettings.h \
-    simulation/metadatamanager.h
+    simulation/metadatamanager.h \
+    graphics/misc/startscreencontroller.h
 FORMS += graphics/monitoring/simulationmonitor.ui \
     graphics/macroeditor.ui \
     graphics/mainwindow.ui \
