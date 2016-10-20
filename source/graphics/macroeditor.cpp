@@ -178,6 +178,11 @@ void MacroEditor::loadViewMatrix (QDataStream& stream)
     }
 }
 
+QGraphicsView* MacroEditor::getGraphicsView ()
+{
+    return ui->simulationView;
+}
+
 qreal MacroEditor::getZoomFactor ()
 {
     return  ui->simulationView->matrix().m11();

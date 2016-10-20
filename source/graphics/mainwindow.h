@@ -15,11 +15,13 @@ class SimulationMonitor;
 class QGraphicsScene;
 class QTimer;
 class TutorialWindow;
+class StartScreenController;
 namespace Ui {
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 public:
     MainWindow (AlienSimulator* simulator, QWidget *parent = 0);
@@ -100,6 +102,7 @@ protected:
     QTimer* _timer;
     SimulationMonitor* _monitor;
     TutorialWindow* _tutorialWindow;
+    StartScreenController* _startScreen;
 
     int _oldFrame;
     int _frame;
