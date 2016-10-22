@@ -14,16 +14,27 @@ public:
     void runStartScreen (QGraphicsView* view);
 
 private:
-    void setupStartScreen (QGraphicsView* view);
+    void setupStartScene (QGraphicsView* view);
     void setupTimer ();
+
+    void saveSceneAndView (QGraphicsView* view);
+    void createSceneWithLogo ();
 
 private slots:
     void timeout ();
 
 private:
+    void decreaseOpacityOfLogo ();
+    bool isLogoTransparent () const;
+    void restoreScene ();
+
+
+private:
     QGraphicsView* _view = 0;
-    QGraphicsScene* _scene = 0;
-    QGraphicsScene* _startScene;
+    QGraphicsScene* _savedScene = 0;
+    QGraphicsScene* _startScene = 0;
+    QGraphicsPixmapItem* _logoItem = 0;
+    QMatrix _savedViewMatrix;
     QTimer* _timer = 0;
 
 };
