@@ -18,7 +18,7 @@ AlienCellFunctionConstructor::AlienCellFunctionConstructor(AlienGrid*& grid)
 {
 }
 
-AlienCellFunctionConstructor::AlienCellFunctionConstructor (quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunctionConstructor::AlienCellFunctionConstructor (quint8* cellFunctionData, AlienGrid*& grid)
     : AlienCellFunction(grid)
 {
 
@@ -591,14 +591,14 @@ AlienCell* AlienCellFunctionConstructor::constructNewCell (AlienCell* baseCell,
                                                            int maxConnections,
                                                            int tokenAccessNumber,
                                                            int cellType,
-                                                           quint8* cellTypeData)
+                                                           quint8* cellFunctionData)
 {
     AlienCell* newCell = AlienCell::buildCell(simulationParameters.NEW_CELL_ENERGY, _grid);
     AlienCellCluster* cluster = baseCell->getCluster();
     newCell->setMaxConnections(maxConnections);
     newCell->setBlockToken(true);
     newCell->setTokenAccessNumber(tokenAccessNumber);
-    newCell->setCellFunction(AlienCellFunctionFactory::build(convertCellTypeNumberToName(cellType), cellTypeData, _grid));
+    newCell->setCellFunction(AlienCellFunctionFactory::build(convertCellTypeNumberToName(cellType), cellFunctionData, _grid));
     newCell->setColor(baseCell->getColor());
     cluster->addCell(newCell, posOfNewCell);
     return newCell;

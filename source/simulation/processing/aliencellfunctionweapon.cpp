@@ -10,7 +10,7 @@ AlienCellFunctionWeapon::AlienCellFunctionWeapon(AlienGrid*& grid)
 {
 }
 
-AlienCellFunctionWeapon::AlienCellFunctionWeapon (quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunctionWeapon::AlienCellFunctionWeapon (quint8* cellFunctionData, AlienGrid*& grid)
     : AlienCellFunction(grid)
 {
 

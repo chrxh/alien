@@ -47,22 +47,22 @@ AlienCellFunction* AlienCellFunctionFactory::build (QDataStream& stream, AlienGr
     return 0;
 }
 
-AlienCellFunction* AlienCellFunctionFactory::build (QString type, quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunction* AlienCellFunctionFactory::build (QString type, quint8* cellFunctionData, AlienGrid*& grid)
 {
     if( type == "COMPUTER" )
-        return new AlienCellFunctionComputer(cellTypeData, grid);
+        return new AlienCellFunctionComputer(cellFunctionData, grid);
     if( type == "PROPULSION" )
-        return new AlienCellFunctionPropulsion(cellTypeData, grid);
+        return new AlienCellFunctionPropulsion(cellFunctionData, grid);
     if( type == "SCANNER" )
-        return new AlienCellFunctionScanner(cellTypeData, grid);
+        return new AlienCellFunctionScanner(cellFunctionData, grid);
     if( type == "WEAPON" )
-        return new AlienCellFunctionWeapon(cellTypeData, grid);
+        return new AlienCellFunctionWeapon(cellFunctionData, grid);
     if( type == "CONSTRUCTOR" )
-        return new AlienCellFunctionConstructor(cellTypeData, grid);
+        return new AlienCellFunctionConstructor(cellFunctionData, grid);
     if( type == "SENSOR" )
-        return new AlienCellFunctionSensor(cellTypeData, grid);
+        return new AlienCellFunctionSensor(cellFunctionData, grid);
     if( type == "COMMUNICATOR" )
-        return new AlienCellFunctionCommunicator(cellTypeData, grid);
+        return new AlienCellFunctionCommunicator(cellFunctionData, grid);
     return 0;
 }
 

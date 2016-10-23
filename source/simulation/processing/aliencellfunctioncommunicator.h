@@ -10,7 +10,7 @@ class AlienCellFunctionCommunicator : public AlienCellFunction
 {
 public:
     AlienCellFunctionCommunicator (AlienGrid*& grid);
-    AlienCellFunctionCommunicator (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionCommunicator (quint8* cellFunctionData, AlienGrid*& grid);
     AlienCellFunctionCommunicator (QDataStream& stream, AlienGrid*& grid);
 
     void execute (AlienToken* token,
@@ -57,6 +57,7 @@ private:
         quint8 distance = 0;
     } _receivedMessage;
 
+    void getInternalData (quint8* data);
 
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
     void setListeningChannel (AlienToken* token);

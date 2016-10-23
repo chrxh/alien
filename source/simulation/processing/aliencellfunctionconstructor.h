@@ -10,7 +10,7 @@ class AlienCellFunctionConstructor : public AlienCellFunction
 {
 public:
     AlienCellFunctionConstructor (AlienGrid*& grid);
-    AlienCellFunctionConstructor (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionConstructor (quint8* cellFunctionData, AlienGrid*& grid);
     AlienCellFunctionConstructor (QDataStream& stream, AlienGrid*& grid);
 
     void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
@@ -69,7 +69,7 @@ private:
                                  int maxConnections,
                                  int tokenAccessNumber,
                                  int cellType,
-                                 quint8* cellTypeData);
+                                 quint8* cellFunctionData);
     AlienCell* obstacleCheck (AlienCellCluster* cluster, bool safeMode);
     qreal averageEnergy (qreal e1, qreal e2);
     void separateConstruction (AlienCell* constructedCell,

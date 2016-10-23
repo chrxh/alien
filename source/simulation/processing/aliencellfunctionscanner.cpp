@@ -13,7 +13,7 @@ AlienCellFunctionScanner::AlienCellFunctionScanner(AlienGrid*& grid)
 {
 }
 
-AlienCellFunctionScanner::AlienCellFunctionScanner (quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunctionScanner::AlienCellFunctionScanner (quint8* cellFunctionData, AlienGrid*& grid)
     : AlienCellFunction(grid)
 {
 

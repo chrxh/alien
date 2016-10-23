@@ -13,7 +13,7 @@ AlienCellFunctionPropulsion::AlienCellFunctionPropulsion(AlienGrid*& grid)
 {
 }
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (quint8* cellFunctionData, AlienGrid*& grid)
     : AlienCellFunction(grid)
 {
 

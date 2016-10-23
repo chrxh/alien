@@ -7,7 +7,7 @@ class AlienCellFunctionPropulsion : public AlienCellFunction
 {
 public:
     AlienCellFunctionPropulsion (AlienGrid*& grid);
-    AlienCellFunctionPropulsion (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionPropulsion (quint8* cellFunctionData, AlienGrid*& grid);
     AlienCellFunctionPropulsion (QDataStream& stream, AlienGrid*& grid);
 
     void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
