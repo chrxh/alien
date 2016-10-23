@@ -5,7 +5,7 @@
 #include "testsettings.h"
 
 #include "simulation/physics/physics.h"
-#include "globaldata/globalfunctions.h"
+#include "global/globalfunctions.h"
 
 class TestPhysics: public QObject
 {

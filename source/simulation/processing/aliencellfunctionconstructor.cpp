@@ -4,7 +4,7 @@
 #include "../entities/aliencellcluster.h"
 #include "../physics/physics.h"
 
-#include "../../globaldata/simulationsettings.h"
+#include "../../global/simulationsettings.h"
 
 #include <qmath.h>
 #include <QString>

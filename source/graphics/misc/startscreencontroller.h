@@ -29,6 +29,7 @@ private:
     bool isLogoTransparent () const;
     void scaleAndDecreaseOpacityOfLogo ();
     void restoreScene ();
+    bool isStartSceneActive ();
     void turnOnScrollbarAsNeeded ();
 
 

@@ -4,8 +4,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationsettings.h"
+#include "../../global/globalfunctions.h"
+#include "../../global/simulationsettings.h"
 
 SimulationParametersDialog::SimulationParametersDialog(QWidget *parent) :
     QDialog(parent),

@@ -3,7 +3,7 @@
 #include "../entities/aliengrid.h"
 #include "../physics/physics.h"
 
-#include "../../globaldata/simulationsettings.h"
+#include "../../global/simulationsettings.h"
 
 #include <QString>
 #include <QtCore/qmath.h>

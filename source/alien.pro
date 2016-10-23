@@ -11,7 +11,7 @@ SOURCES += main.cpp \
     simulation/entities/aliencell.cpp \
     simulation/entities/aliencellcluster.cpp \
     simulation/physics/physics.cpp \
-    globaldata/globalfunctions.cpp \
+    global/globalfunctions.cpp \
     simulation/entities/alientoken.cpp \
     simulation/entities/aliengrid.cpp \
     simulation/processing/aliencellfunction.cpp \
@@ -57,14 +57,14 @@ SOURCES += main.cpp \
     graphics/dialogs/addhexagonstructuredialog.cpp \
     graphics/assistance/tutorialwindow.cpp \
     simulation/processing/aliencellfunctioncommunicator.cpp \
-    globaldata/simulationsettings.cpp \
+    global/simulationsettings.cpp \
     simulation/metadatamanager.cpp \
     graphics/misc/startscreencontroller.cpp
 HEADERS += \
     simulation/entities/aliencell.h \
     simulation/entities/aliencellcluster.h \
     simulation/physics/physics.h \
-    globaldata/globalfunctions.h \
+    global/globalfunctions.h \
     simulation/entities/alientoken.h \
     simulation/entities/aliengrid.h \
     simulation/processing/aliencellfunction.h \
@@ -81,7 +81,7 @@ HEADERS += \
     graphics/macroeditor/aliencellconnectiongraphicsitem.h \
     graphics/macroeditor/alienenergygraphicsitem.h \
     graphics/microeditor/computercodeedit.h \
-    globaldata/editorsettings.h \
+    global/editorsettings.h \
     graphics/macroeditor.h \
     graphics/mainwindow.h \
     graphics/microeditor.h \
@@ -96,7 +96,7 @@ HEADERS += \
     graphics/microeditor/energyedit.h \
     graphics/microeditor/tokentab.h \
     graphics/microeditor/symboledit.h \
-    globaldata/guisettings.h \
+    global/guisettings.h \
     graphics/microeditor/metadatapropertiesedit.h \
     graphics/microeditor/metadataedit.h \
     graphics/dialogs/newsimulationdialog.h \
@@ -112,7 +112,7 @@ HEADERS += \
     graphics/dialogs/addhexagonstructuredialog.h \
     graphics/assistance/tutorialwindow.h \
     simulation/processing/aliencellfunctioncommunicator.h \
-    globaldata/simulationsettings.h \
+    global/simulationsettings.h \
     simulation/metadatamanager.h \
     graphics/misc/startscreencontroller.h
 FORMS += graphics/monitoring/simulationmonitor.ui \

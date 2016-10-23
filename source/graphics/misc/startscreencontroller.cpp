@@ -1,10 +1,10 @@
 #include "startscreencontroller.h"
-#include "globaldata/editorsettings.h"
+#include "global/editorsettings.h"
 
 #include <QTimer>
 #include <QGraphicsItem>
 
-const int LOGO_DURATION_MS = 3000;
+const int LOGO_DURATION_MS = 5000;
 const int LOGO_OPACITY_STEPS = 100;
 
 StartScreenController::StartScreenController(QObject *parent)
@@ -80,18 +80,25 @@ bool StartScreenController::isLogoTransparent () const
 
 void StartScreenController::scaleAndDecreaseOpacityOfLogo ()
 {
-    qreal scale = 1.0 + 1.0/LOGO_OPACITY_STEPS;
-    _view->scale(scale, scale);
-    qreal opacity = _logoItem->opacity();
-    _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
+    if( isStartSceneActive() ) {
+        qreal scale = 1.0 + 1.0/LOGO_OPACITY_STEPS;
+        _view->scale(scale, scale);
+        qreal opacity = _logoItem->opacity();
+        _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
+    }
 }
 
 void StartScreenController::restoreScene ()
 {
-    if( _view->scene() == _startScene ) {
+    if( isStartSceneActive() ) {
         _view->setScene(_savedScene);
         _view->setMatrix(_savedViewMatrix);
     }
+}
+
+bool StartScreenController::isStartSceneActive ()
+{
+    return _view->scene() == _startScene;
 }
 
 void StartScreenController::turnOnScrollbarAsNeeded ()

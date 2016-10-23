@@ -1,8 +1,8 @@
 #include "symboltabledialog.h"
 #include "ui_symboltabledialog.h"
 
-#include "../../globaldata/globalfunctions.h"
-#include "../../globaldata/simulationsettings.h"
+#include "../../global/globalfunctions.h"
+#include "../../global/simulationsettings.h"
 #include "../../simulation/metadatamanager.h"
 
 #include <QFileDialog>
