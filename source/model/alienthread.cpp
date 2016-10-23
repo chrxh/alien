@@ -1,16 +1,19 @@
 #include "alienthread.h"
-#include "../entities/aliencell.h"
-#include "../entities/aliencellcluster.h"
-#include "../entities/aliengrid.h"
-#include "../entities/alientoken.h"
+
+#include "entities/aliencell.h"
+#include "entities/aliencellcluster.h"
+#include "entities/alienenergy.h"
+#include "entities/aliengrid.h"
+#include "entities/alientoken.h"
+#include "physics/physics.h"
+
 #include "global/globalfunctions.h"
-#include "../physics/physics.h"
 
 #include<QThread>
 
 
 AlienThread::AlienThread (QObject* parent)
-    : QThread(parent), _space(0)
+    : QThread(parent), _grid(0)
 {
 
 }
@@ -19,25 +22,25 @@ AlienThread::~AlienThread ()
 {
 }
 
-void AlienThread::init (AlienGrid* space)
+void AlienThread::init (AlienGrid* grid)
 {
-    _space = space;
+    _grid = grid;
 }
 
 QList< AlienCellCluster* >& AlienThread::getClusters ()
 {
-    return _space->getClusters();
+    return _grid->getClusters();
 }
 
 QList< AlienEnergy* >& AlienThread::getEnergyParticles ()
 {
-    return _space->getEnergyParticles();
+    return _grid->getEnergyParticles();
 }
 
 qreal AlienThread::calcTransEnergy ()
 {
     qreal transEnergy(0.0);
-    foreach( AlienCellCluster* cluster, _space->getClusters() ) {
+    foreach( AlienCellCluster* cluster, _grid->getClusters() ) {
         if( !cluster->isEmpty() )
             transEnergy += Physics::kineticEnergy(cluster->getCells().size(),
                                                   cluster->getVel(),
@@ -50,7 +53,7 @@ qreal AlienThread::calcTransEnergy ()
 qreal AlienThread::calcRotEnergy ()
 {
     qreal rotEnergy(0.0);
-    foreach( AlienCellCluster* cluster, _space->getClusters() ) {
+    foreach( AlienCellCluster* cluster, _grid->getClusters() ) {
         if( cluster->getMass() > 1.0 )
             rotEnergy += Physics::kineticEnergy(0.0,
                                                 QVector3D(0.0, 0.0, 0.0),
@@ -63,14 +66,14 @@ qreal AlienThread::calcRotEnergy ()
 qreal AlienThread::calcInternalEnergy ()
 {
     qreal internalEnergy(0.0);
-    foreach( AlienCellCluster* cluster, _space->getClusters() ) {
+    foreach( AlienCellCluster* cluster, _grid->getClusters() ) {
         if( !cluster->isEmpty() ) {
             foreach( AlienCell* cell, cluster->getCells() ) {
                 internalEnergy += cell->getEnergyIncludingTokens();
             }
         }
     }
-    foreach( AlienEnergy* energyParticle, _space->getEnergyParticles() ) {
+    foreach( AlienEnergy* energyParticle, _grid->getEnergyParticles() ) {
         internalEnergy += energyParticle->amount;
     }
     return internalEnergy;
@@ -84,10 +87,10 @@ void AlienThread::setRandomSeed (uint seed)
 
 void AlienThread::calcNextTimestep ()
 {
-    _space->lockData();
+    _grid->lockData();
 
     //cell movement: step 1
-    foreach( AlienCellCluster* cluster, _space->getClusters()) {
+    foreach( AlienCellCluster* cluster, _grid->getClusters()) {
         cluster->movementProcessingStep1();
     }
 
@@ -95,7 +98,7 @@ void AlienThread::calcNextTimestep ()
     //----
 //    qreal eOld(calcInternalEnergy()+(calcTransEnergy()+calcRotEnergy())/INTERNAL_TO_KINETIC_ENERGY);
     //----
-    QMutableListIterator<AlienCellCluster*> i(_space->getClusters());
+    QMutableListIterator<AlienCellCluster*> i(_grid->getClusters());
     QList< AlienEnergy* > energyParticles;
     while (i.hasNext()) {
 
@@ -103,7 +106,7 @@ void AlienThread::calcNextTimestep ()
         AlienCellCluster* cluster(i.next());
         energyParticles.clear();
         cluster->movementProcessingStep2(fragments, energyParticles);
-        _space->getEnergyParticles() << energyParticles;
+        _grid->getEnergyParticles() << energyParticles;
 
         debugCluster(cluster, 2);
         //new cell cluster fragments?
@@ -125,13 +128,13 @@ void AlienThread::calcNextTimestep ()
     //----
 
     //cell movement: step 3
-    foreach( AlienCellCluster* cluster, _space->getClusters()) {
+    foreach( AlienCellCluster* cluster, _grid->getClusters()) {
         cluster->movementProcessingStep3();
         debugCluster(cluster, 3);
     }
 
     //cell movement: step 4
-    QMutableListIterator<AlienCellCluster*> j(_space->getClusters());
+    QMutableListIterator<AlienCellCluster*> j(_grid->getClusters());
     while (j.hasNext()) {
         AlienCellCluster* cluster(j.next());
         if( cluster->isEmpty()) {
@@ -142,7 +145,7 @@ void AlienThread::calcNextTimestep ()
             energyParticles.clear();
             bool decompose = false;
             cluster->movementProcessingStep4(energyParticles, decompose);
-            _space->getEnergyParticles() << energyParticles;
+            _grid->getEnergyParticles() << energyParticles;
             debugCluster(cluster, 4);
 
             //decompose cluster?
@@ -158,13 +161,13 @@ void AlienThread::calcNextTimestep ()
     }
 
     //cell movement: step 5
-    foreach( AlienCellCluster* cluster, _space->getClusters()) {
+    foreach( AlienCellCluster* cluster, _grid->getClusters()) {
         cluster->movementProcessingStep5();
         debugCluster(cluster, 5);
     }
 
     //energy particle movement
-    QMutableListIterator<AlienEnergy*> p(_space->getEnergyParticles());
+    QMutableListIterator<AlienEnergy*> p(_grid->getEnergyParticles());
     while (p.hasNext()) {
         AlienEnergy* e(p.next());
         AlienCellCluster* cluster(0);
@@ -172,14 +175,14 @@ void AlienThread::calcNextTimestep ()
 
             //transform into cell?
             if( cluster ) {
-                _space->getClusters() << cluster;
+                _grid->getClusters() << cluster;
             }
             delete e;
             p.remove();
         }
     }
 
-    _space->unlockData();
+    _grid->unlockData();
 
     emit nextTimestepCalculated();
 }
