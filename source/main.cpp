@@ -1,6 +1,6 @@
 #include <QApplication>
 
-#include "graphics/mainwindow.h"
+#include "gui/mainwindow.h"
 #include "simulation/aliensimulator.h"
 #include "simulation/aliencellreduced.h"
 #include "simulation/metadatamanager.h"
