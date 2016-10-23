@@ -4,12 +4,12 @@
 #include "microeditor.h"
 #include "macroeditor/pixeluniverse.h"
 #include "macroeditor/shapeuniverse.h"
-#include "../global/editorsettings.h"
-#include "../global/guisettings.h"
+#include "global/editorsettings.h"
+#include "global/guisettings.h"
 
-#include "../model/entities/aliengrid.h"
-#include "../model/entities/aliencellcluster.h"
-#include "../model/entities/aliencell.h"
+#include "model/entities/aliengrid.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/aliencell.h"
 
 #include <QScrollBar>
 #include <QTimer>
@@ -38,7 +38,7 @@ MacroEditor::MacroEditor(QWidget *parent) :
     ui->simulationView->setScene(_pixelUniverse);
 
     //connect signals
-    connect(_shapeUniverse, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellReduced>,bool)), this, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellReduced>,bool)));
+    connect(_shapeUniverse, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)), this, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)));
     connect(_shapeUniverse, SIGNAL(defocus()), this, SIGNAL(defocus()), Qt::QueuedConnection);
     connect(_shapeUniverse, SIGNAL(focusCell(AlienCell*)), this, SIGNAL(focusCell(AlienCell*)), Qt::QueuedConnection);
     connect(_shapeUniverse, SIGNAL(focusEnergyParticle(AlienEnergy*)), this, SIGNAL(focusEnergyParticle(AlienEnergy*)), Qt::QueuedConnection);

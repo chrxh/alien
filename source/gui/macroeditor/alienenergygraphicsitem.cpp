@@ -1,6 +1,6 @@
 #include "alienenergygraphicsitem.h"
 
-#include "../../global/editorsettings.h"
+#include "global/editorsettings.h"
 
 #include <QPainter>
 

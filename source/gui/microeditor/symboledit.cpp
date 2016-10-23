@@ -1,9 +1,9 @@
 #include "symboledit.h"
 #include "ui_symboledit.h"
 
-#include "../../global/editorsettings.h"
-#include "../../global/guisettings.h"
-#include "../../global/globalfunctions.h"
+#include "global/editorsettings.h"
+#include "global/guisettings.h"
+#include "global/globalfunctions.h"
 
 #include <QScrollBar>
 
