@@ -215,7 +215,7 @@ void AlienCellCluster::movementProcessingStep2 (QList< AlienCellCluster* >& frag
 
 //step 3:
 //actual movement, fusion and collision
-//set cells to space map
+//set cells to grid map
 void AlienCellCluster::movementProcessingStep3 ()
 {
     struct CollisionData {
@@ -396,7 +396,7 @@ void AlienCellCluster::movementProcessingStep3 ()
             //add new velocities to the old positions
 //            _angle = oldAngle+_angularVel;
 //            _pos = oldPos+_vel;
-//            space->correctPosition(_pos);
+//            grid->correctPosition(_pos);
 //            calcTransform();
         }
 
@@ -1268,14 +1268,14 @@ void AlienCellCluster::radiation (qreal& energy, AlienCell* originCell, AlienEne
     foreach( AlienCell* cell, _cells) {
         QVector3D distance1 = gSource1-calcPosition(cell);
         QVector3D distance2 = gSource1-(calcPosition(cell)+cell->_vel);
-        space->correctDistance(distance1);
-        space->correctDistance(distance2);
+        grid->correctDistance(distance1);
+        grid->correctDistance(distance2);
         cell->_vel += (distance1.normalized()/(distance1.lengthSquared()+4.0));
         cell->_vel += (distance2.normalized()/(distance2.lengthSquared()+4.0));
         distance1 = gSource2-calcPosition(cell);
         distance2 = gSource2-(calcPosition(cell)+cell->_vel);
-        space->correctDistance(distance1);
-        space->correctDistance(distance2);
+        grid->correctDistance(distance1);
+        grid->correctDistance(distance2);
         cell->_vel += (distance1.normalized()/(distance1.lengthSquared()+4.0));
         cell->_vel += (distance2.normalized()/(distance2.lengthSquared()+4.0));
     }

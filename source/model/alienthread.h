@@ -2,9 +2,9 @@
 #define ALIENTHREAD_H
 
 #include <QThread>
-#include "../entities/alienenergy.h"
 
 class AlienCellCluster;
+class AlienEnergy;
 class AlienGrid;
 class AlienThread : public QThread
 {
@@ -13,7 +13,7 @@ public:
     AlienThread (QObject* parent = 0);
     ~AlienThread ();
 
-    void init (AlienGrid* space);
+    void init (AlienGrid* grid);
     QList< AlienCellCluster* >& getClusters ();
     QList< AlienEnergy* >& getEnergyParticles ();
 //    void updateCluster (AlienCellCluster* cluster);
@@ -32,7 +32,7 @@ signals:
 protected:
     void debugCluster (AlienCellCluster* c, int s);
 
-    AlienGrid* _space;
+    AlienGrid* _grid;
     int _time;
 };
 

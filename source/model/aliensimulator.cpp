@@ -1,6 +1,6 @@
 #include "aliensimulator.h"
 
-#include "processing/alienthread.h"
+#include "alienthread.h"
 #include "entities/aliengrid.h"
 #include "entities/aliencellcluster.h"
 #include "processing/aliencellfunction.h"

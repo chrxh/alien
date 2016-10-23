@@ -59,7 +59,7 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
     }
 
     QVector3D rAPp = cellRelPos;
-//    space->correctDistance(rAPp);
+//    grid->correctDistance(rAPp);
     rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
     if( cmd == static_cast<int>(PROP_IN::ROTATION_CLOCKWISE) ) {
         impulse = -rAPp.normalized()*power;
