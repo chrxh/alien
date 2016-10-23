@@ -204,7 +204,7 @@
   <customwidget>
    <class>MetadataPropertiesEdit</class>
    <extends>QTextEdit</extends>
-   <header>graphics/microeditor/metadatapropertiesedit.h</header>
+   <header>gui/microeditor/metadatapropertiesedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -18,48 +18,48 @@ SOURCES += main.cpp \
     simulation/processing/aliencellfunctionfactory.cpp \
     simulation/processing/aliencellfunctionscanner.cpp \
     simulation/entities/alienenergy.cpp \
-    graphics/monitoring/simulationmonitor.cpp \
-    graphics/microeditor/hexedit.cpp \
+    gui/monitoring/simulationmonitor.cpp \
+    gui/microeditor/hexedit.cpp \
     simulation/processing/alienthread.cpp \
     simulation/processing/aliencellfunctionconstructor.cpp \
-    graphics/macroeditor/pixeluniverse.cpp \
-    graphics/macroeditor/shapeuniverse.cpp \
-    graphics/macroeditor/aliencellgraphicsitem.cpp \
-    graphics/macroeditor/aliencellconnectiongraphicsitem.cpp \
-    graphics/macroeditor/alienenergygraphicsitem.cpp \
-    graphics/microeditor/computercodeedit.cpp \
-    graphics/macroeditor.cpp \
-    graphics/mainwindow.cpp \
-    graphics/microeditor.cpp \
+    gui/macroeditor/pixeluniverse.cpp \
+    gui/macroeditor/shapeuniverse.cpp \
+    gui/macroeditor/aliencellgraphicsitem.cpp \
+    gui/macroeditor/aliencellconnectiongraphicsitem.cpp \
+    gui/macroeditor/alienenergygraphicsitem.cpp \
+    gui/microeditor/computercodeedit.cpp \
+    gui/macroeditor.cpp \
+    gui/mainwindow.cpp \
+    gui/microeditor.cpp \
     simulation/aliencellreduced.cpp \
     simulation/aliensimulator.cpp \
-    graphics/microeditor/clusteredit.cpp \
-    graphics/microeditor/tokenedit.cpp \
-    graphics/macroeditor/markergraphicsitem.cpp \
+    gui/microeditor/clusteredit.cpp \
+    gui/microeditor/tokenedit.cpp \
+    gui/macroeditor/markergraphicsitem.cpp \
     simulation/processing/aliencellfunctioncomputer.cpp \
     simulation/processing/aliencellfunctionweapon.cpp \
-    graphics/microeditor/celledit.cpp \
-    graphics/microeditor/energyedit.cpp \
-    graphics/microeditor/tokentab.cpp \
-    graphics/microeditor/symboledit.cpp \
-    graphics/microeditor/metadatapropertiesedit.cpp \
-    graphics/microeditor/metadataedit.cpp \
-    graphics/dialogs/newsimulationdialog.cpp \
-    graphics/dialogs/simulationparametersdialog.cpp \
-    graphics/dialogs/addenergydialog.cpp \
-    graphics/dialogs/symboltabledialog.cpp \
-    graphics/dialogs/selectionmultiplyrandomdialog.cpp \
-    graphics/dialogs/selectionmultiplyarrangementdialog.cpp \
-    graphics/microeditor/cellcomputeredit.cpp \
+    gui/microeditor/celledit.cpp \
+    gui/microeditor/energyedit.cpp \
+    gui/microeditor/tokentab.cpp \
+    gui/microeditor/symboledit.cpp \
+    gui/microeditor/metadatapropertiesedit.cpp \
+    gui/microeditor/metadataedit.cpp \
+    gui/dialogs/newsimulationdialog.cpp \
+    gui/dialogs/simulationparametersdialog.cpp \
+    gui/dialogs/addenergydialog.cpp \
+    gui/dialogs/symboltabledialog.cpp \
+    gui/dialogs/selectionmultiplyrandomdialog.cpp \
+    gui/dialogs/selectionmultiplyarrangementdialog.cpp \
+    gui/microeditor/cellcomputeredit.cpp \
     simulation/processing/aliencellfunctionsensor.cpp \
     simulation/processing/aliencellfunctionpropulsion.cpp \
-    graphics/dialogs/addrectstructuredialog.cpp \
-    graphics/dialogs/addhexagonstructuredialog.cpp \
-    graphics/assistance/tutorialwindow.cpp \
+    gui/dialogs/addrectstructuredialog.cpp \
+    gui/dialogs/addhexagonstructuredialog.cpp \
+    gui/assistance/tutorialwindow.cpp \
     simulation/processing/aliencellfunctioncommunicator.cpp \
     global/simulationsettings.cpp \
     simulation/metadatamanager.cpp \
-    graphics/misc/startscreencontroller.cpp
+    gui/misc/startscreencontroller.cpp
 HEADERS += \
     simulation/entities/aliencell.h \
     simulation/entities/aliencellcluster.h \
@@ -71,69 +71,69 @@ HEADERS += \
     simulation/processing/aliencellfunctionfactory.h \
     simulation/processing/aliencellfunctionscanner.h \
     simulation/entities/alienenergy.h \
-    graphics/monitoring/simulationmonitor.h \
+    gui/monitoring/simulationmonitor.h \
     simulation/processing/alienthread.h \
     simulation/processing/aliencellfunctionconstructor.h \
-    graphics/microeditor/hexedit.h \
-    graphics/macroeditor/pixeluniverse.h \
-    graphics/macroeditor/shapeuniverse.h \
-    graphics/macroeditor/aliencellgraphicsitem.h \
-    graphics/macroeditor/aliencellconnectiongraphicsitem.h \
-    graphics/macroeditor/alienenergygraphicsitem.h \
-    graphics/microeditor/computercodeedit.h \
+    gui/microeditor/hexedit.h \
+    gui/macroeditor/pixeluniverse.h \
+    gui/macroeditor/shapeuniverse.h \
+    gui/macroeditor/aliencellgraphicsitem.h \
+    gui/macroeditor/aliencellconnectiongraphicsitem.h \
+    gui/macroeditor/alienenergygraphicsitem.h \
+    gui/microeditor/computercodeedit.h \
     global/editorsettings.h \
-    graphics/macroeditor.h \
-    graphics/mainwindow.h \
-    graphics/microeditor.h \
+    gui/macroeditor.h \
+    gui/mainwindow.h \
+    gui/microeditor.h \
     simulation/aliencellreduced.h \
     simulation/aliensimulator.h \
-    graphics/microeditor/clusteredit.h \
-    graphics/microeditor/tokenedit.h \
-    graphics/macroeditor/markergraphicsitem.h \
+    gui/microeditor/clusteredit.h \
+    gui/microeditor/tokenedit.h \
+    gui/macroeditor/markergraphicsitem.h \
     simulation/processing/aliencellfunctioncomputer.h \
     simulation/processing/aliencellfunctionweapon.h \
-    graphics/microeditor/celledit.h \
-    graphics/microeditor/energyedit.h \
-    graphics/microeditor/tokentab.h \
-    graphics/microeditor/symboledit.h \
+    gui/microeditor/celledit.h \
+    gui/microeditor/energyedit.h \
+    gui/microeditor/tokentab.h \
+    gui/microeditor/symboledit.h \
     global/guisettings.h \
-    graphics/microeditor/metadatapropertiesedit.h \
-    graphics/microeditor/metadataedit.h \
-    graphics/dialogs/newsimulationdialog.h \
-    graphics/dialogs/simulationparametersdialog.h \
-    graphics/dialogs/addenergydialog.h \
-    graphics/dialogs/symboltabledialog.h \
-    graphics/dialogs/selectionmultiplyrandomdialog.h \
-    graphics/dialogs/selectionmultiplyarrangementdialog.h \
-    graphics/microeditor/cellcomputeredit.h \
+    gui/microeditor/metadatapropertiesedit.h \
+    gui/microeditor/metadataedit.h \
+    gui/dialogs/newsimulationdialog.h \
+    gui/dialogs/simulationparametersdialog.h \
+    gui/dialogs/addenergydialog.h \
+    gui/dialogs/symboltabledialog.h \
+    gui/dialogs/selectionmultiplyrandomdialog.h \
+    gui/dialogs/selectionmultiplyarrangementdialog.h \
+    gui/microeditor/cellcomputeredit.h \
     simulation/processing/aliencellfunctionsensor.h \
     simulation/processing/aliencellfunctionpropulsion.h \
-    graphics/dialogs/addrectstructuredialog.h \
-    graphics/dialogs/addhexagonstructuredialog.h \
-    graphics/assistance/tutorialwindow.h \
+    gui/dialogs/addrectstructuredialog.h \
+    gui/dialogs/addhexagonstructuredialog.h \
+    gui/assistance/tutorialwindow.h \
     simulation/processing/aliencellfunctioncommunicator.h \
     global/simulationsettings.h \
     simulation/metadatamanager.h \
-    graphics/misc/startscreencontroller.h
-FORMS += graphics/monitoring/simulationmonitor.ui \
-    graphics/macroeditor.ui \
-    graphics/mainwindow.ui \
-    graphics/microeditor/tokentab.ui \
-    graphics/microeditor/symboledit.ui \
-    graphics/microeditor/metadataedit.ui \
-    graphics/dialogs/newsimulationdialog.ui \
-    graphics/dialogs/simulationparametersdialog.ui \
-    graphics/dialogs/addenergydialog.ui \
-    graphics/dialogs/symboltabledialog.ui \
-    graphics/dialogs/selectionmultiplyrandomdialog.ui \
-    graphics/dialogs/selectionmultiplyarrangementdialog.ui \
-    graphics/microeditor/cellcomputeredit.ui \
-    graphics/dialogs/addrectstructuredialog.ui \
-    graphics/dialogs/addhexagonstructuredialog.ui \
-    graphics/assistance/tutorialwindow.ui
+    gui/misc/startscreencontroller.h
+FORMS += gui/monitoring/simulationmonitor.ui \
+    gui/macroeditor.ui \
+    gui/mainwindow.ui \
+    gui/microeditor/tokentab.ui \
+    gui/microeditor/symboledit.ui \
+    gui/microeditor/metadataedit.ui \
+    gui/dialogs/newsimulationdialog.ui \
+    gui/dialogs/simulationparametersdialog.ui \
+    gui/dialogs/addenergydialog.ui \
+    gui/dialogs/symboltabledialog.ui \
+    gui/dialogs/selectionmultiplyrandomdialog.ui \
+    gui/dialogs/selectionmultiplyarrangementdialog.ui \
+    gui/microeditor/cellcomputeredit.ui \
+    gui/dialogs/addrectstructuredialog.ui \
+    gui/dialogs/addhexagonstructuredialog.ui \
+    gui/assistance/tutorialwindow.ui
 
 RESOURCES += \
-    graphics/resources/ressources.qrc
+    gui/resources/ressources.qrc
 
 OTHER_FILES +=
 
