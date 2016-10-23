@@ -13,6 +13,9 @@ public:
 
     void runStartScreen (QGraphicsView* view);
 
+signals:
+    void startScreenFinished ();
+
 private:
     void setupStartScene (QGraphicsView* view);
     void setupTimer ();
@@ -21,7 +24,6 @@ private:
     void createSceneWithLogo ();
     void turnOffScrollbar ();
 
-
 private slots:
     void timeout ();
 
@@ -29,7 +31,6 @@ private:
     bool isLogoTransparent () const;
     void scaleAndDecreaseOpacityOfLogo ();
     void restoreScene ();
-    bool isStartSceneActive ();
     void turnOnScrollbarAsNeeded ();
 
 
