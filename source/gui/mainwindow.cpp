@@ -207,6 +207,9 @@ MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
     connect(_timer, SIGNAL(timeout()), this, SLOT(timeout()));
     _timer->start(1000);
 
+    //connect and run start screen
+//    connect(_startScreen, SIGNAL(startScreenFinished()), ui->actionEditor, SLOT(setEnabled(bool)));
+    connect(_startScreen, SIGNAL(startScreenFinished()), SLOT(startScreenFinished()));
     _startScreen->runStartScreen(ui->macroEditor->getGraphicsView());
 }
 
@@ -1042,6 +1045,12 @@ void MainWindow::updateFrameLabel ()
     ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x").arg(_frame, 9, 10, QLatin1Char('0')).arg(_frameSec, 5, 10, QLatin1Char('0')).arg(ui->macroEditor->getZoomFactor()));
 }
 
+void MainWindow::startScreenFinished ()
+{
+    ui->actionEditor->setEnabled(true);
+    ui->actionZoomIn->setEnabled(true);
+    ui->actionZoomOut->setEnabled(true);
+}
 
 void MainWindow::changeEvent(QEvent *e)
 {
