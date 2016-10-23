@@ -5,7 +5,7 @@
 #include <QMessageBox>
 
 #include "global/globalfunctions.h"
-#include "global/simulationsettings.h"
+#include "model/simulationsettings.h"
 
 SimulationParametersDialog::SimulationParametersDialog(QWidget *parent) :
     QDialog(parent),

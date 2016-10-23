@@ -6,7 +6,7 @@
 #include "processing/aliencellfunction.h"
 #include "processing/aliencellfunctionfactory.h"
 #include "physics/physics.h"
-#include "global/simulationsettings.h"
+#include "model/simulationsettings.h"
 #include "global/globalfunctions.h"
 #include "metadatamanager.h"
 

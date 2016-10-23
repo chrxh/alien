@@ -7,7 +7,7 @@
 
 #include "global/editorsettings.h"
 #include "model/metadatamanager.h"
-#include "global/simulationsettings.h"
+#include "model/simulationsettings.h"
 
 #include "model/entities/aliencellcluster.h"
 #include "model/entities/alienenergy.h"

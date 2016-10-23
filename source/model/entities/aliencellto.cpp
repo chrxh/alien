@@ -4,7 +4,7 @@
 #include "aliencellcluster.h"
 #include "model/processing/aliencellfunction.h"
 
-#include "global/simulationsettings.h"
+#include "model/simulationsettings.h"
 
 AlienCellTO::AlienCellTO ()
     : numCells(0), clusterPos(0.0, 0.0, 0.0), clusterVel(0.0, 0.0, 0.0),

@@ -12,7 +12,7 @@
 #include "microeditor/cellcomputeredit.h"
 #include "global/editorsettings.h"
 #include "global/guisettings.h"
-#include "global/simulationsettings.h"
+#include "model/simulationsettings.h"
 #include "model/metadatamanager.h"
 #include "model/entities/aliencell.h"
 #include "model/entities/aliencellcluster.h"

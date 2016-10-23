@@ -1,6 +1,6 @@
 #include "alientoken.h"
 
-#include "global/simulationsettings.h"
+#include "model/simulationsettings.h"
 
 AlienToken::AlienToken(qreal energy_, bool randomData)
     : memory(simulationParameters.TOKEN_MEMSIZE), energy(energy_)

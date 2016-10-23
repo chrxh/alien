@@ -57,7 +57,7 @@ SOURCES += main.cpp \
     gui/dialogs/addhexagonstructuredialog.cpp \
     gui/assistance/tutorialwindow.cpp \
     model/processing/aliencellfunctioncommunicator.cpp \
-    global/simulationsettings.cpp \
+    model/simulationsettings.cpp \
     model/metadatamanager.cpp \
     gui/misc/startscreencontroller.cpp
 HEADERS += \
@@ -112,7 +112,7 @@ HEADERS += \
     gui/dialogs/addhexagonstructuredialog.h \
     gui/assistance/tutorialwindow.h \
     model/processing/aliencellfunctioncommunicator.h \
-    global/simulationsettings.h \
+    model/simulationsettings.h \
     model/metadatamanager.h \
     gui/misc/startscreencontroller.h
 FORMS += gui/monitoring/simulationmonitor.ui \
