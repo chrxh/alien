@@ -11,10 +11,14 @@ AlienCellFunctionCommunicator::AlienCellFunctionCommunicator(AlienGrid*& grid)
 
 }
 
-AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (quint8* cellFunctionData, AlienGrid*& grid)
     : AlienCellFunctionCommunicator(grid)
 {
-
+    _newMessageReceived = static_cast<bool>(cellFunctionData[0]);
+    _receivedMessage.channel = cellFunctionData[1];
+    _receivedMessage.message = cellFunctionData[2];
+    _receivedMessage.angle = cellFunctionData[3];
+    _receivedMessage.distance = cellFunctionData[4];
 }
 
 AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (QDataStream& stream, AlienGrid*& grid)
@@ -57,6 +61,15 @@ void AlienCellFunctionCommunicator::serialize (QDataStream& stream)
            << _receivedMessage.distance;
 }
 
+
+void AlienCellFunctionCommunicator::getInternalData (quint8* data)
+{
+    data[0] = static_cast<quint8>(_newMessageReceived);
+    data[1] = _receivedMessage.channel;
+    data[2] = _receivedMessage.message;
+    data[3] = _receivedMessage.angle;
+    data[4] = _receivedMessage.distance;
+}
 
 AlienCellFunctionCommunicator::COMMUNICATOR_IN AlienCellFunctionCommunicator::readCommandFromToken (AlienToken* token) const
 {

@@ -10,7 +10,7 @@ class AlienCellFunctionComputer: public AlienCellFunction
 {
 public:
     AlienCellFunctionComputer (bool randomData, AlienGrid*& grid);
-    AlienCellFunctionComputer (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionComputer (quint8* cellFunctionData, AlienGrid*& grid);
     AlienCellFunctionComputer (QDataStream& stream, AlienGrid*& grid);
 
     void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
@@ -28,10 +28,9 @@ public:
         MEM, MEMMEM, CMEM, CONST
     };
 
-protected:
+private:
     void getInternalData (quint8* data);
 
-private:
     QByteArray _code;
     int _numInstr;
 
