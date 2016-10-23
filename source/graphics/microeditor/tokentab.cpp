@@ -4,9 +4,9 @@
 #include "hexedit.h"
 #include "../../simulation/metadatamanager.h"
 
-#include "../../globaldata/editorsettings.h"
-#include "../../globaldata/guisettings.h"
-#include "../../globaldata/globalfunctions.h"
+#include "../../global/editorsettings.h"
+#include "../../global/guisettings.h"
+#include "../../global/globalfunctions.h"
 
 #include <QScrollBar>
 #include <QSignalMapper>

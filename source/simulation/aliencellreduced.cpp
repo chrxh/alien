@@ -4,7 +4,7 @@
 #include "entities/aliencellcluster.h"
 #include "processing/aliencellfunction.h"
 
-#include "../globaldata/simulationsettings.h"
+#include "../global/simulationsettings.h"
 
 AlienCellReduced::AlienCellReduced ()
     : numCells(0), clusterPos(0.0, 0.0, 0.0), clusterVel(0.0, 0.0, 0.0),
