@@ -1,6 +1,6 @@
 #include "aliencellconnectiongraphicsitem.h"
 
-#include "../../global/editorsettings.h"
+#include "global/editorsettings.h"
 
 #include <QPainter>
 #include <qmath.h>

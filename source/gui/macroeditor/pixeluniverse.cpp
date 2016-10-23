@@ -1,11 +1,11 @@
 #include "pixeluniverse.h"
 
-#include "../../global/guisettings.h"
+#include "global/guisettings.h"
 
-#include "../../model/entities/aliengrid.h"
-#include "../../model/entities/aliencell.h"
-#include "../../model/entities/aliencellcluster.h"
-#include "../../model/entities/alienenergy.h"
+#include "model/entities/aliengrid.h"
+#include "model/entities/aliencell.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/alienenergy.h"
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>

@@ -4,7 +4,7 @@
 #include <QTextEdit>
 #include <QVector3D>
 
-#include "../../model/aliencellreduced.h"
+#include "model/entities/aliencellto.h"
 
 class AlienCell;
 class ClusterEdit : public QTextEdit
@@ -13,11 +13,11 @@ class ClusterEdit : public QTextEdit
 public:
     explicit ClusterEdit(QWidget *parent = 0);
 
-    void updateCluster (AlienCellReduced cell);
+    void updateCluster (AlienCellTO cell);
     void requestUpdate ();
 
 signals:
-    void clusterDataChanged (AlienCellReduced cell);
+    void clusterDataChanged (AlienCellTO cell);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -33,7 +33,7 @@ private:
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 
-    AlienCellReduced _cell;
+    AlienCellTO _cell;
 };
 
 #endif // CLUSTEREDIT_H

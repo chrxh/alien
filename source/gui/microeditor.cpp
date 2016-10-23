@@ -10,15 +10,15 @@
 #include "microeditor/symboledit.h"
 //#include "microeditor/computercodeedit.h"
 #include "microeditor/cellcomputeredit.h"
-#include "../global/editorsettings.h"
-#include "../global/guisettings.h"
-#include "../global/simulationsettings.h"
-#include "../model/metadatamanager.h"
-#include "../model/entities/aliencell.h"
-#include "../model/entities/aliencellcluster.h"
-#include "../model/entities/aliengrid.h"
-#include "../model/processing/aliencellfunction.h"
-#include "../model/processing/aliencellfunctionfactory.h"
+#include "global/editorsettings.h"
+#include "global/guisettings.h"
+#include "global/simulationsettings.h"
+#include "model/metadatamanager.h"
+#include "model/entities/aliencell.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/aliengrid.h"
+#include "model/processing/aliencellfunction.h"
+#include "model/processing/aliencellfunctionfactory.h"
 
 #include <QTabWidget>
 #include <QToolButton>
@@ -119,8 +119,8 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     _tabSymbolsWidget->parent()->installEventFilter(this);
 
     //establish connections
-    connect(_cellEditor, SIGNAL(cellDataChanged(AlienCellReduced)), this, SLOT(changesFromCellEditor(AlienCellReduced)));
-    connect(_clusterEditor, SIGNAL(clusterDataChanged(AlienCellReduced)), this, SLOT(changesFromClusterEditor(AlienCellReduced)));
+    connect(_cellEditor, SIGNAL(cellDataChanged(AlienCellTO)), this, SLOT(changesFromCellEditor(AlienCellTO)));
+    connect(_clusterEditor, SIGNAL(clusterDataChanged(AlienCellTO)), this, SLOT(changesFromClusterEditor(AlienCellTO)));
     connect(_energyEditor, SIGNAL(energyParticleDataChanged(QVector3D,QVector3D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector3D,QVector3D,qreal)));
     connect(_requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
     connect(_requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
@@ -240,7 +240,7 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
 
     //update data for cluster editor
     _grid->lockData();
-    _focusCellReduced = AlienCellReduced(cell);
+    _focusCellReduced = AlienCellTO(cell);
     quint64 id = cell->getId();
     QList< quint64 > ids = cell->getCluster()->getCellIds();
     quint8 color = cell->getColor();
@@ -374,7 +374,7 @@ void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
 
             //update data for cluster editor
             _grid->lockData();
-            _focusCellReduced = AlienCellReduced(_focusCell);
+            _focusCellReduced = AlienCellTO(_focusCell);
             quint64 id = _focusCell->getId();
             QList< quint64 > ids = _focusCell->getCluster()->getCellIds();
             quint8 color = _focusCell->getColor();
@@ -634,7 +634,7 @@ void MicroEditor::mousePressEvent(QMouseEvent * event)
     return;
 }
 */
-void MicroEditor::changesFromCellEditor (AlienCellReduced newCellProperties)
+void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyCellProperties(newCellProperties);
@@ -680,7 +680,7 @@ void MicroEditor::changesFromCellEditor (AlienCellReduced newCellProperties)
 
 }
 
-void MicroEditor::changesFromClusterEditor (AlienCellReduced newClusterProperties)
+void MicroEditor::changesFromClusterEditor (AlienCellTO newClusterProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyClusterProperties(newClusterProperties);
@@ -805,7 +805,7 @@ void MicroEditor::compileButtonClicked (QString code)
 void MicroEditor::invokeUpdateCell (bool clusterDataChanged)
 {
     QList< AlienCell* > cells;
-    QList< AlienCellReduced > newCellsData;
+    QList< AlienCellTO > newCellsData;
     cells << _focusCell;
     newCellsData << _focusCellReduced;
     emit updateCell(cells, newCellsData, clusterDataChanged);

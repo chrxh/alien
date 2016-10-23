@@ -1,7 +1,7 @@
 #include "selectionmultiplyarrangementdialog.h"
 #include "ui_selectionmultiplyarrangementdialog.h"
 
-#include "../../global/globalfunctions.h"
+#include "global/globalfunctions.h"
 
 SelectionMultiplyArrangementDialog::SelectionMultiplyArrangementDialog(QVector3D centerPos, QWidget *parent) :
     QDialog(parent),

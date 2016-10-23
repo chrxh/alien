@@ -1,7 +1,7 @@
 #ifndef ALIENSIMULATOR_H
 #define ALIENSIMULATOR_H
 
-#include "aliencellreduced.h"
+#include "entities/aliencellto.h"
 
 #include <QObject>
 #include <QVector3D>
@@ -70,7 +70,7 @@ public slots:
     void newCell (QVector3D pos);
     void newEnergyParticle (QVector3D pos);
     void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellReduced > newCellsData,
+                     QList< AlienCellTO > newCellsData,
                      bool clusterDataChanged);
 
     //misc

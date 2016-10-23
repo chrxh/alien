@@ -6,8 +6,8 @@
 #include "processing/aliencellfunction.h"
 #include "processing/aliencellfunctionfactory.h"
 #include "physics/physics.h"
-#include "../global/simulationsettings.h"
-#include "../global/globalfunctions.h"
+#include "global/simulationsettings.h"
+#include "global/globalfunctions.h"
 #include "metadatamanager.h"
 
 #include <QTimer>
@@ -615,19 +615,19 @@ void AlienSimulator::newEnergyParticle (QVector3D pos)
 }
 
 
-void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellReduced > newCellsData, bool clusterDataChanged)
+void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellTO > newCellsData, bool clusterDataChanged)
 {
     //update purely cell data and no cluster data?
     if( !clusterDataChanged ) {
         _grid->lockData();
 
         QListIterator< AlienCell* > iCells(cells);
-        QListIterator< AlienCellReduced > iNewCellsData(newCellsData);
+        QListIterator< AlienCellTO > iNewCellsData(newCellsData);
         QSet< AlienCellCluster* > sumNewClusters;
         while (iCells.hasNext()) {
 
             AlienCell* cell = iCells.next();
-            AlienCellReduced newCellData = iNewCellsData.next();
+            AlienCellTO newCellData = iNewCellsData.next();
 
             //update cell properties
             cell->getCluster()->calcTransform();
@@ -743,11 +743,11 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellRedu
         _grid->lockData();
 
         QListIterator< AlienCell* > iCells(cells);
-        QListIterator< AlienCellReduced > iNewCellsData(newCellsData);
+        QListIterator< AlienCellTO > iNewCellsData(newCellsData);
         QList< AlienCellCluster* > sumNewClusters;
         while (iCells.hasNext()) {
             AlienCell* cell = iCells.next();
-            AlienCellReduced newCellData = iNewCellsData.next();
+            AlienCellTO newCellData = iNewCellsData.next();
             AlienCellCluster* cluster = cell->getCluster();
             cluster->clearCellsFromMap();
             cluster->setPosition(newCellData.clusterPos);

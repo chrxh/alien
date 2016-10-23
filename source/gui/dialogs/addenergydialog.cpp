@@ -1,7 +1,7 @@
 #include "addenergydialog.h"
 #include "ui_addenergydialog.h"
 
-#include "../../global/globalfunctions.h"
+#include "global/globalfunctions.h"
 
 AddEnergyDialog::AddEnergyDialog(QWidget *parent) :
     QDialog(parent),

@@ -1,9 +1,9 @@
 #include "celledit.h"
 
-#include "../../global/editorsettings.h"
-#include "../../model/processing/aliencellfunction.h"
-#include "../../model/entities/aliencell.h"
-#include "../../model/entities/aliencellcluster.h"
+#include "global/editorsettings.h"
+#include "model/processing/aliencellfunction.h"
+#include "model/entities/aliencell.h"
+#include "model/entities/aliencellcluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>
@@ -16,7 +16,7 @@ CellEdit::CellEdit(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void CellEdit::updateCell (AlienCellReduced cell)
+void CellEdit::updateCell (AlienCellTO cell)
 {
     _cell = cell;
     updateDisplay();

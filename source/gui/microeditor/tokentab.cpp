@@ -2,11 +2,11 @@
 #include "ui_tokentab.h"
 
 #include "hexedit.h"
-#include "../../model/metadatamanager.h"
+#include "model/metadatamanager.h"
 
-#include "../../global/editorsettings.h"
-#include "../../global/guisettings.h"
-#include "../../global/globalfunctions.h"
+#include "global/editorsettings.h"
+#include "global/guisettings.h"
+#include "global/globalfunctions.h"
 
 #include <QScrollBar>
 #include <QSignalMapper>

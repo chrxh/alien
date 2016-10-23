@@ -5,13 +5,13 @@
 #include "alienenergygraphicsitem.h"
 #include "markergraphicsitem.h"
 
-#include "../../global/editorsettings.h"
-#include "../../model/metadatamanager.h"
-#include "../../global/simulationsettings.h"
+#include "global/editorsettings.h"
+#include "model/metadatamanager.h"
+#include "global/simulationsettings.h"
 
-#include "../../model/entities/aliencellcluster.h"
-#include "../../model/entities/alienenergy.h"
-#include "../../model/entities/aliengrid.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/alienenergy.h"
+#include "model/entities/aliengrid.h"
 
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
@@ -536,7 +536,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             }
 
             QList< AlienCell* > cells;
-            QList< AlienCellReduced > newCellsData;
+            QList< AlienCellTO > newCellsData;
 
             //update focused cells
             foreach( AlienCellGraphicsItem* cellItem, _focusCells ) {
@@ -544,7 +544,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 //retrieve cell information
                 AlienCell* cell = cellItem->getCell();
                 _grid->lockData();
-                AlienCellReduced newCellData(cell);
+                AlienCellTO newCellData(cell);
                 _grid->unlockData();
 
                 //only left mouse button pressed?

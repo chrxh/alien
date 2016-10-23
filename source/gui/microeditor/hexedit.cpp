@@ -1,6 +1,6 @@
 #include "hexedit.h"
 
-#include"../../global/editorsettings.h"
+#include"global/editorsettings.h"
 
 #include <QTextDocument>
 #include <QTextBlock>

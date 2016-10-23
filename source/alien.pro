@@ -31,7 +31,7 @@ SOURCES += main.cpp \
     gui/macroeditor.cpp \
     gui/mainwindow.cpp \
     gui/microeditor.cpp \
-    model/aliencellreduced.cpp \
+    model/entities/aliencellto.cpp \
     model/aliensimulator.cpp \
     gui/microeditor/clusteredit.cpp \
     gui/microeditor/tokenedit.cpp \
@@ -85,7 +85,7 @@ HEADERS += \
     gui/macroeditor.h \
     gui/mainwindow.h \
     gui/microeditor.h \
-    model/aliencellreduced.h \
+    model/entities/aliencellto.h \
     model/aliensimulator.h \
     gui/microeditor/clusteredit.h \
     gui/microeditor/tokenedit.h \
