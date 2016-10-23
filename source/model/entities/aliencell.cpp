@@ -4,7 +4,7 @@
 #include "../processing/aliencellfunctionfactory.h"
 #include "../physics/physics.h"
 #include "global/globalfunctions.h"
-#include "global/simulationsettings.h"
+#include "model/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 

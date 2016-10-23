@@ -1,5 +1,5 @@
-#ifndef ALIENCELLREDUCED
-#define ALIENCELLREDUCED
+#ifndef ALIENCELLTO
+#define ALIENCELLTO
 
 #include <QVector>
 #include <QList>
@@ -40,5 +40,5 @@ struct AlienCellTO  //TO = Transfer Object
     QList< QVector< quint8 > > tokenData;
 };
 
-#endif // ALIENCELLREDUCED
+#endif // ALIENCELLTO
 
