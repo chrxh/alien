@@ -1,7 +1,7 @@
 #ifndef SHAPEUNIVERSE_H
 #define SHAPEUNIVERSE_H
 
-#include "../../simulation/aliencellreduced.h"
+#include "model/aliencellreduced.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsEllipseItem>

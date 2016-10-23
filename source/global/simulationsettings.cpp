@@ -1,12 +1,12 @@
 #include "simulationsettings.h"
-#include "../simulation/metadatamanager.h"
-#include "../simulation/processing/aliencellfunction.h"
-#include "../simulation/processing/aliencellfunctionconstructor.h"
-#include "../simulation/processing/aliencellfunctionpropulsion.h"
-#include "../simulation/processing/aliencellfunctionscanner.h"
-#include "../simulation/processing/aliencellfunctionweapon.h"
-#include "../simulation/processing/aliencellfunctionsensor.h"
-#include "../simulation/processing/aliencellfunctioncommunicator.h"
+#include "../model/metadatamanager.h"
+#include "../model/processing/aliencellfunction.h"
+#include "../model/processing/aliencellfunctionconstructor.h"
+#include "../model/processing/aliencellfunctionpropulsion.h"
+#include "../model/processing/aliencellfunctionscanner.h"
+#include "../model/processing/aliencellfunctionweapon.h"
+#include "../model/processing/aliencellfunctionsensor.h"
+#include "../model/processing/aliencellfunctioncommunicator.h"
 
 
 #include <QtGlobal>

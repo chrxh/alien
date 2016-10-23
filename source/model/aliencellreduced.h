@@ -1,11 +1,12 @@
 #ifndef ALIENCELLREDUCED
 #define ALIENCELLREDUCED
 
-#include "entities/aliencell.h"
-
+#include <QVector>
+#include <QList>
 #include <QVector3D>
 #include <QString>
 
+class AlienCell;
 struct AlienCellReduced {
 
     AlienCellReduced ();

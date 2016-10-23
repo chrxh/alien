@@ -1,7 +1,7 @@
 #ifndef MACROEDITOR_H
 #define MACROEDITOR_H
 
-#include "../simulation/aliencellreduced.h"
+#include "../model/aliencellreduced.h"
 
 #include <QWidget>
 #include <QVector3D>

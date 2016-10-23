@@ -2,11 +2,11 @@
 #define TESTALIENCELLFUNCTIONCOMMUNICATOR_H
 
 #include "testsettings.h"
-#include "simulation/processing/aliencellfunctioncommunicator.h"
-#include "simulation/entities/aliengrid.h"
-#include "simulation/entities/aliencellcluster.h"
-#include "simulation/entities/aliencell.h"
-#include "simulation/entities/alientoken.h"
+#include "model/processing/aliencellfunctioncommunicator.h"
+#include "model/entities/aliengrid.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/aliencell.h"
+#include "model/entities/alientoken.h"
 
 #include <QtTest/QtTest>
 

@@ -2,7 +2,7 @@
 #define TESTALIENCELLCLUSTER_H
 
 #include <QtTest/QtTest>
-#include "simulation/entities/aliencellcluster.h"
+#include "model/entities/aliencellcluster.h"
 #include "testsettings.h"
 
 class TestAlienCellCluster : public QObject
