@@ -1,9 +1,9 @@
 #include "symboltabledialog.h"
 #include "ui_symboltabledialog.h"
 
-#include "../../global/globalfunctions.h"
-#include "../../global/simulationsettings.h"
-#include "../../model/metadatamanager.h"
+#include "global/globalfunctions.h"
+#include "global/simulationsettings.h"
+#include "model/metadatamanager.h"
 
 #include <QFileDialog>
 #include <QMessageBox>

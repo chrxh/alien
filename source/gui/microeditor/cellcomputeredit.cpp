@@ -1,8 +1,8 @@
 #include "cellcomputeredit.h"
 #include "ui_cellcomputeredit.h"
 
-#include "../../global/guisettings.h"
-#include "../../global/editorsettings.h"
+#include "global/guisettings.h"
+#include "global/editorsettings.h"
 
 #include <QTimer>
 

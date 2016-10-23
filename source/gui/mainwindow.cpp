@@ -12,15 +12,15 @@
 #include "monitoring/simulationmonitor.h"
 #include "assistance/tutorialwindow.h"
 #include "misc/startscreencontroller.h"
-#include "../global/guisettings.h"
-#include "../global/editorsettings.h"
-#include "../global/globalfunctions.h"
-#include "../global/simulationsettings.h"
-#include "../model/metadatamanager.h"
-#include "../model/aliensimulator.h"
-#include "../model/entities/aliencell.h"
-#include "../model/entities/aliencellcluster.h"
-#include "../model/processing/aliencellfunction.h"
+#include "global/guisettings.h"
+#include "global/editorsettings.h"
+#include "global/globalfunctions.h"
+#include "global/simulationsettings.h"
+#include "model/metadatamanager.h"
+#include "model/aliensimulator.h"
+#include "model/entities/aliencell.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/processing/aliencellfunction.h"
 
 #include <QGraphicsScene>
 #include <QGLWidget>
@@ -117,7 +117,7 @@ MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
     connect(ui->macroEditor, SIGNAL(focusCell(AlienCell*)), _microEditor, SLOT(cellFocused(AlienCell*)));
     connect(ui->macroEditor, SIGNAL(focusCell(AlienCell*)), this, SLOT(cellFocused(AlienCell*)));
     connect(ui->macroEditor, SIGNAL(focusEnergyParticle(AlienEnergy*)), _microEditor, SLOT(energyParticleFocused(AlienEnergy*)));
-    connect(ui->macroEditor, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellReduced>,bool)), _simulator, SLOT(updateCell(QList<AlienCell*>,QList<AlienCellReduced>,bool)));
+    connect(ui->macroEditor, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)), _simulator, SLOT(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)));
     connect(ui->macroEditor, SIGNAL(energyParticleUpdated(AlienEnergy*)), _microEditor, SLOT(energyParticleUpdated_Slot(AlienEnergy*)));
     connect(ui->macroEditor, SIGNAL(entitiesSelected(int,int)), _microEditor, SLOT(entitiesSelected(int,int)));
     connect(ui->macroEditor, SIGNAL(entitiesSelected(int,int)), this, SLOT(entitiesSelected(int,int)));
@@ -125,7 +125,7 @@ MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
     connect(ui->macroEditor, SIGNAL(delExtendedSelection(QList<AlienCellCluster*>,QList<AlienEnergy*>)), _simulator, SLOT(delExtendedSelection(QList<AlienCellCluster*>,QList<AlienEnergy*>)));
     connect(_microEditor, SIGNAL(requestNewCell()), ui->macroEditor, SLOT(newCellRequested()));
     connect(_microEditor, SIGNAL(requestNewEnergyParticle()), ui->macroEditor, SLOT(newEnergyParticleRequested()));
-    connect(_microEditor, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellReduced>,bool)), _simulator, SLOT(updateCell(QList<AlienCell*>,QList<AlienCellReduced>,bool)));
+    connect(_microEditor, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)), _simulator, SLOT(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)));
     connect(_microEditor, SIGNAL(energyParticleUpdated(AlienEnergy*)), ui->macroEditor, SLOT(energyParticleUpdated_Slot(AlienEnergy*)));
     connect(_microEditor, SIGNAL(delSelection()), ui->macroEditor, SLOT(delSelection_Slot()));
     connect(_microEditor, SIGNAL(delExtendedSelection()), ui->macroEditor, SLOT(delExtendedSelection_Slot()));

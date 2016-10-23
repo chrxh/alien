@@ -3,7 +3,7 @@
 #include "../entities/aliencellcluster.h"
 #include "../physics/physics.h"
 
-#include "../../global/simulationsettings.h"
+#include "global/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 

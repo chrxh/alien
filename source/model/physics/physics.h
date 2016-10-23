@@ -1,7 +1,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include "../../global/simulationsettings.h"
+#include "global/simulationsettings.h"
 
 #include <QVector3D>
 #include <cmath>

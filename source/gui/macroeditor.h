@@ -1,7 +1,7 @@
 #ifndef MACROEDITOR_H
 #define MACROEDITOR_H
 
-#include "../model/aliencellreduced.h"
+#include "model/entities/aliencellto.h"
 
 #include <QWidget>
 #include <QVector3D>
@@ -52,7 +52,7 @@ signals:
     void focusCell (AlienCell* cell);       //for microeditor
     void focusEnergyParticle (AlienEnergy* e);       //for microeditor
     void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellReduced > newCellsData,
+                     QList< AlienCellTO > newCellsData,
                      bool clusterDataChanged);      //for simulator
     void energyParticleUpdated (AlienEnergy* e); //for microeditor
     void entitiesSelected (int numCells, int numEnergyParticles);   //for microeditor

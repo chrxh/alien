@@ -4,7 +4,7 @@
 #include <QTextEdit>
 #include <QVector3D>
 
-#include "../../model/aliencellreduced.h"
+#include "model/entities/aliencellto.h"
 
 class AlienCell;
 class EnergyEdit : public QTextEdit

@@ -3,7 +3,7 @@
 #include "../entities/aliencellcluster.h"
 #include "../entities/aliengrid.h"
 #include "../entities/alientoken.h"
-#include "../../global/globalfunctions.h"
+#include "global/globalfunctions.h"
 #include "../physics/physics.h"
 
 #include<QThread>

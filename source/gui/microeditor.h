@@ -1,7 +1,7 @@
 #ifndef MICROEDITOR_H
 #define MICROEDITOR_H
 
-#include "../model/aliencellreduced.h"
+#include "model/entities/aliencellto.h"
 
 #include <QWidget>
 #include <QTimer>
@@ -63,7 +63,7 @@ signals:
     void requestNewCell ();                                     //to macro editor
     void requestNewEnergyParticle ();                           //to macro editor
     void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellReduced > newCellsData,
+                     QList< AlienCellTO > newCellsData,
                      bool clusterDataChanged);                  //to simulator
     void delSelection ();                                       //to macro editor
     void delExtendedSelection ();                                //to macro editor
@@ -93,8 +93,8 @@ public slots:
 //    void mousePressEvent(QMouseEvent * event);
 
 private slots:
-    void changesFromCellEditor (AlienCellReduced newCellProperties);
-    void changesFromClusterEditor (AlienCellReduced newClusterProperties);
+    void changesFromCellEditor (AlienCellTO newCellProperties);
+    void changesFromClusterEditor (AlienCellTO newClusterProperties);
     void changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue);
     void changesFromTokenEditor (qreal energy);
     void changesFromComputerMemoryEditor (QVector< quint8 > data);
@@ -131,7 +131,7 @@ private:
 
 //    Ui::MicroEditor *ui;
     AlienCell* _focusCell;
-    AlienCellReduced _focusCellReduced;
+    AlienCellTO _focusCellReduced;
     AlienEnergy* _focusEnergyParticle;
     AlienGrid* _grid;
     QWidget* _tabCluster;

@@ -2,7 +2,7 @@
 
 #include "gui/mainwindow.h"
 #include "model/aliensimulator.h"
-#include "model/aliencellreduced.h"
+#include "model/entities/aliencellto.h"
 #include "model/metadatamanager.h"
 #include "global/simulationsettings.h"
 
@@ -65,7 +65,7 @@
 int main(int argc, char *argv[])
 {
     //register types
-    qRegisterMetaType<AlienCellReduced>("AlienCellReduced");
+    qRegisterMetaType<AlienCellTO>("AlienCellReduced");
 
     //load default metadata
     AlienMetadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());

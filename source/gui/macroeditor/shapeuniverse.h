@@ -1,7 +1,7 @@
 #ifndef SHAPEUNIVERSE_H
 #define SHAPEUNIVERSE_H
 
-#include "model/aliencellreduced.h"
+#include "model/entities/aliencellto.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsEllipseItem>
@@ -44,7 +44,7 @@ signals:
     void focusEnergyParticle (AlienEnergy* e);                      //to microeditor
     void focusEnsemble (int numCells, int numEnergyParticles);      //to microeditor
     void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellReduced > newCellsData,
+                     QList< AlienCellTO > newCellsData,
                      bool clusterDataChanged);                      //to simulator
     void energyParticleUpdated (AlienEnergy* e);                    //to microeditor
     void entitiesSelected (int numCells, int numEnergyParticles);   //to microeditor
