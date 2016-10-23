@@ -4,8 +4,8 @@
 #include "microeditor.h"
 #include "macroeditor/pixeluniverse.h"
 #include "macroeditor/shapeuniverse.h"
-#include "../globaldata/editorsettings.h"
-#include "../globaldata/guisettings.h"
+#include "../global/editorsettings.h"
+#include "../global/guisettings.h"
 
 #include "../simulation/entities/aliengrid.h"
 #include "../simulation/entities/aliencellcluster.h"
@@ -176,6 +176,11 @@ void MacroEditor::loadViewMatrix (QDataStream& stream)
         ui->simulationView->horizontalScrollBar()->setValue(_shapeUniversePosX);
         ui->simulationView->verticalScrollBar()->setValue(_shapeUniversePosY);
     }
+}
+
+QGraphicsView* MacroEditor::getGraphicsView ()
+{
+    return ui->simulationView;
 }
 
 qreal MacroEditor::getZoomFactor ()

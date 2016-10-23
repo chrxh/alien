@@ -1,6 +1,6 @@
 #include "pixeluniverse.h"
 
-#include "../../globaldata/guisettings.h"
+#include "../../global/guisettings.h"
 
 #include "../../simulation/entities/aliengrid.h"
 #include "../../simulation/entities/aliencell.h"

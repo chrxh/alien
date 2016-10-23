@@ -1,7 +1,7 @@
 #include "aliencellfunctioncomputer.h"
 #include "../metadatamanager.h"
 #include "../entities/aliencell.h"
-#include "../../globaldata/simulationsettings.h"
+#include "../../global/simulationsettings.h"
 
 #include <QString>
 #include <qdebug.h>

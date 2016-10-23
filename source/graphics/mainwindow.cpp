@@ -11,10 +11,11 @@
 #include "dialogs/selectionmultiplyarrangementdialog.h"
 #include "monitoring/simulationmonitor.h"
 #include "assistance/tutorialwindow.h"
-#include "../globaldata/guisettings.h"
-#include "../globaldata/editorsettings.h"
-#include "../globaldata/globalfunctions.h"
-#include "../globaldata/simulationsettings.h"
+#include "misc/startscreencontroller.h"
+#include "../global/guisettings.h"
+#include "../global/editorsettings.h"
+#include "../global/globalfunctions.h"
+#include "../global/simulationsettings.h"
 #include "../simulation/metadatamanager.h"
 #include "../simulation/aliensimulator.h"
 #include "../simulation/entities/aliencell.h"
@@ -38,6 +39,7 @@ MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
     _timer(0),
     _monitor(new SimulationMonitor(this)),
     _tutorialWindow(new TutorialWindow(this)),
+    _startScreen(new StartScreenController(this)),
     _oldFrame(0),
     _frame(0),
     _frameSec(0)
@@ -204,6 +206,8 @@ MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
     _timer = new QTimer(this);
     connect(_timer, SIGNAL(timeout()), this, SLOT(timeout()));
     _timer->start(1000);
+
+    _startScreen->runStartScreen(ui->macroEditor->getGraphicsView());
 }
 
 MainWindow::~MainWindow()

@@ -1,7 +1,7 @@
 #include "computercodeedit.h"
 
-#include "../../globaldata/editorsettings.h"
-#include "../../globaldata/guisettings.h"
+#include "../../global/editorsettings.h"
+#include "../../global/guisettings.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>

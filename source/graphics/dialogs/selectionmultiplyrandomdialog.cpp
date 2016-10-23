@@ -1,7 +1,7 @@
 #include "selectionmultiplyrandomdialog.h"
 #include "ui_selectionmultiplyrandomdialog.h"
 
-#include "../../globaldata/globalfunctions.h"
+#include "../../global/globalfunctions.h"
 
 SelectionMultiplyRandomDialog::SelectionMultiplyRandomDialog(QWidget *parent) :
     QDialog(parent),

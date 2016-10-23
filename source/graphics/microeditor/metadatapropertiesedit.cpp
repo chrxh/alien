@@ -1,7 +1,7 @@
 #include "metadatapropertiesedit.h"
 
-#include "../../globaldata/editorsettings.h"
-#include "../../globaldata/guisettings.h"
+#include "../../global/editorsettings.h"
+#include "../../global/guisettings.h"
 
 #include <QMouseEvent>
 #include <QTextBlock>
