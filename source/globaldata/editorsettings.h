@@ -2,6 +2,7 @@
 #define EDITORSETTINGS_H
 
 //macro editor
+const QColor BACKGROUND_COLOR(0x00, 0x00, 0x1b);
 const QColor CELL_COLOR(0x6F,0x90,0xFF,0xA0);
 //const QColor CELL_CONNECTABLE_COLOR(0x0,0xD0*7/10,0x80*7/10,0xB0);
 
