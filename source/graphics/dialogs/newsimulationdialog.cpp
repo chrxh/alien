@@ -4,8 +4,8 @@
 #include "simulationparametersdialog.h"
 #include "symboltabledialog.h"
 
-#include "../../globaldata/guisettings.h"
-#include "../../globaldata/globalfunctions.h"
+#include "../../global/guisettings.h"
+#include "../../global/globalfunctions.h"
 #include "../../simulation/metadatamanager.h"
 
 #include <QDebug>

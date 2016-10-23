@@ -4,7 +4,7 @@
 #include "simulation/aliensimulator.h"
 #include "simulation/aliencellreduced.h"
 #include "simulation/metadatamanager.h"
-#include "globaldata/simulationsettings.h"
+#include "global/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 
