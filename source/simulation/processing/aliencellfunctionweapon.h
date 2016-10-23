@@ -7,7 +7,7 @@ class AlienCellFunctionWeapon : public AlienCellFunction
 {
 public:
     AlienCellFunctionWeapon(AlienGrid*& grid);
-    AlienCellFunctionWeapon (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionWeapon (quint8* cellFunctionData, AlienGrid*& grid);
     AlienCellFunctionWeapon (QDataStream& stream, AlienGrid*& grid);
 
     void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);

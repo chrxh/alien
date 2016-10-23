@@ -24,12 +24,12 @@ AlienCellFunctionComputer::AlienCellFunctionComputer(bool randomData, AlienGrid*
     }
 }
 
-AlienCellFunctionComputer::AlienCellFunctionComputer (quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunctionComputer::AlienCellFunctionComputer (quint8* cellFunctionData, AlienGrid*& grid)
     : AlienCellFunction(grid), _code(), _numInstr(0)
 {
-    _numInstr = cellTypeData[0];
+    _numInstr = cellFunctionData[0];
     for( int i = 0; i < 3*_numInstr; ++i ) {
-        _code[i] = cellTypeData[i+1];
+        _code[i] = cellFunctionData[i+1];
     }
 }
 

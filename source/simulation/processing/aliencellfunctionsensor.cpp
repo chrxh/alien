@@ -12,7 +12,7 @@ AlienCellFunctionSensor::AlienCellFunctionSensor(AlienGrid*& grid)
 {
 }
 
-AlienCellFunctionSensor::AlienCellFunctionSensor (quint8* cellTypeData, AlienGrid*& grid)
+AlienCellFunctionSensor::AlienCellFunctionSensor (quint8* cellFunctionData, AlienGrid*& grid)
     : AlienCellFunction(grid)
 {
 

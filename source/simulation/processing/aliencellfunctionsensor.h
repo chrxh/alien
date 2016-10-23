@@ -7,7 +7,7 @@ class AlienCellFunctionSensor : public AlienCellFunction
 {
 public:
     AlienCellFunctionSensor (AlienGrid*& grid);
-    AlienCellFunctionSensor (quint8* cellTypeData, AlienGrid*& grid);
+    AlienCellFunctionSensor (quint8* cellFunctionData, AlienGrid*& grid);
     AlienCellFunctionSensor (QDataStream& stream, AlienGrid*& grid);
 
     void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
