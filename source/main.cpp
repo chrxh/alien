@@ -1,9 +1,9 @@
 #include <QApplication>
 
 #include "gui/mainwindow.h"
-#include "simulation/aliensimulator.h"
-#include "simulation/aliencellreduced.h"
-#include "simulation/metadatamanager.h"
+#include "model/aliensimulator.h"
+#include "model/aliencellreduced.h"
+#include "model/metadatamanager.h"
 #include "global/simulationsettings.h"
 
 #include <QtCore/qmath.h>

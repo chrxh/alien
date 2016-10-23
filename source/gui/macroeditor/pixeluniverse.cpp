@@ -2,10 +2,10 @@
 
 #include "../../global/guisettings.h"
 
-#include "../../simulation/entities/aliengrid.h"
-#include "../../simulation/entities/aliencell.h"
-#include "../../simulation/entities/aliencellcluster.h"
-#include "../../simulation/entities/alienenergy.h"
+#include "../../model/entities/aliengrid.h"
+#include "../../model/entities/aliencell.h"
+#include "../../model/entities/aliencellcluster.h"
+#include "../../model/entities/alienenergy.h"
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>

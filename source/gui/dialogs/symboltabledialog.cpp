@@ -3,7 +3,7 @@
 
 #include "../../global/globalfunctions.h"
 #include "../../global/simulationsettings.h"
-#include "../../simulation/metadatamanager.h"
+#include "../../model/metadatamanager.h"
 
 #include <QFileDialog>
 #include <QMessageBox>

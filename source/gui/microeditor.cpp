@@ -13,12 +13,12 @@
 #include "../global/editorsettings.h"
 #include "../global/guisettings.h"
 #include "../global/simulationsettings.h"
-#include "../simulation/metadatamanager.h"
-#include "../simulation/entities/aliencell.h"
-#include "../simulation/entities/aliencellcluster.h"
-#include "../simulation/entities/aliengrid.h"
-#include "../simulation/processing/aliencellfunction.h"
-#include "../simulation/processing/aliencellfunctionfactory.h"
+#include "../model/metadatamanager.h"
+#include "../model/entities/aliencell.h"
+#include "../model/entities/aliencellcluster.h"
+#include "../model/entities/aliengrid.h"
+#include "../model/processing/aliencellfunction.h"
+#include "../model/processing/aliencellfunctionfactory.h"
 
 #include <QTabWidget>
 #include <QToolButton>

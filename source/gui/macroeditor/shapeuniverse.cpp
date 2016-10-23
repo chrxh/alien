@@ -6,12 +6,12 @@
 #include "markergraphicsitem.h"
 
 #include "../../global/editorsettings.h"
-#include "../../simulation/metadatamanager.h"
+#include "../../model/metadatamanager.h"
 #include "../../global/simulationsettings.h"
 
-#include "../../simulation/entities/aliencellcluster.h"
-#include "../../simulation/entities/alienenergy.h"
-#include "../../simulation/entities/aliengrid.h"
+#include "../../model/entities/aliencellcluster.h"
+#include "../../model/entities/alienenergy.h"
+#include "../../model/entities/aliengrid.h"
 
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>

@@ -7,9 +7,9 @@
 #include "../global/editorsettings.h"
 #include "../global/guisettings.h"
 
-#include "../simulation/entities/aliengrid.h"
-#include "../simulation/entities/aliencellcluster.h"
-#include "../simulation/entities/aliencell.h"
+#include "../model/entities/aliengrid.h"
+#include "../model/entities/aliencellcluster.h"
+#include "../model/entities/aliencell.h"
 
 #include <QScrollBar>
 #include <QTimer>
