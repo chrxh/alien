@@ -70,6 +70,7 @@ void StartScreenController::timeout ()
         restoreScene();
         turnOnScrollbarAsNeeded();
         _timer->stop();
+        emit startScreenFinished();
     }
 }
 
@@ -80,25 +81,16 @@ bool StartScreenController::isLogoTransparent () const
 
 void StartScreenController::scaleAndDecreaseOpacityOfLogo ()
 {
-    if( isStartSceneActive() ) {
-        qreal scale = 1.0 + 1.0/LOGO_OPACITY_STEPS;
-        _view->scale(scale, scale);
-        qreal opacity = _logoItem->opacity();
-        _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
-    }
+    qreal scale = 1.0 + 1.0/LOGO_OPACITY_STEPS;
+    _view->scale(scale, scale);
+    qreal opacity = _logoItem->opacity();
+    _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
 }
 
 void StartScreenController::restoreScene ()
 {
-    if( isStartSceneActive() ) {
-        _view->setScene(_savedScene);
-        _view->setMatrix(_savedViewMatrix);
-    }
-}
-
-bool StartScreenController::isStartSceneActive ()
-{
-    return _view->scene() == _startScene;
+    _view->setScene(_savedScene);
+    _view->setMatrix(_savedViewMatrix);
 }
 
 void StartScreenController::turnOnScrollbarAsNeeded ()

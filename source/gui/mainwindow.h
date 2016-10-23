@@ -27,7 +27,7 @@ public:
     MainWindow (AlienSimulator* simulator, QWidget *parent = 0);
     ~MainWindow ();
 
-protected slots:
+private slots:
 
     //menu: simulation
     void newSimulation ();
@@ -89,11 +89,11 @@ protected slots:
     void entitiesSelected(int numCells, int numEnergyParticles);
 
     void updateFrameLabel ();
+    void startScreenFinished ();
 
 private:
     Ui::MainWindow *ui;
 
-protected:
     void changeEvent(QEvent *e);
 
     AlienSimulator* _simulator;
