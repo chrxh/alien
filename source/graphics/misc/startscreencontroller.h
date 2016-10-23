@@ -19,14 +19,17 @@ private:
 
     void saveSceneAndView (QGraphicsView* view);
     void createSceneWithLogo ();
+    void turnOffScrollbar ();
+
 
 private slots:
     void timeout ();
 
 private:
-    void scaleAndDecreaseOpacityOfLogo ();
     bool isLogoTransparent () const;
+    void scaleAndDecreaseOpacityOfLogo ();
     void restoreScene ();
+    void turnOnScrollbarAsNeeded ();
 
 
 private:

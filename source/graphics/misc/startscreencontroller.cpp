@@ -1,4 +1,5 @@
 #include "startscreencontroller.h"
+#include "globaldata/editorsettings.h"
 
 #include <QTimer>
 #include <QGraphicsItem>
@@ -27,6 +28,7 @@ void StartScreenController::setupStartScene (QGraphicsView* view)
 {
     saveSceneAndView(view);
     createSceneWithLogo();
+    turnOffScrollbar();
 }
 
 void StartScreenController::setupTimer ()
@@ -45,35 +47,43 @@ void StartScreenController::saveSceneAndView (QGraphicsView* view)
 
 void StartScreenController::createSceneWithLogo ()
 {
-    _startScene->setBackgroundBrush(QBrush(QColor(0,0,0)));
+    _startScene->setBackgroundBrush(QBrush(BACKGROUND_COLOR));
     QPixmap logo("://tutorial/logo.png");
     _logoItem =_startScene->addPixmap(logo);
     _view->setMatrix(QMatrix());
-    _view->scale(0.4, 0.4);
+    _view->scale(0.5, 0.5);
     _view->setScene(_startScene);
+}
+
+void StartScreenController::turnOffScrollbar ()
+{
+    _view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void StartScreenController::timeout ()
 {
-    if( isLogoTransparent() ) {
-        restoreScene();
-        _timer->stop();
-    }
-    else {
+    if( !isLogoTransparent() ) {
         scaleAndDecreaseOpacityOfLogo();
     }
-}
-
-void StartScreenController::scaleAndDecreaseOpacityOfLogo ()
-{
-    qreal opacity = _logoItem->opacity();
-    _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
-    _view->scale(1.01, 1.01);
+    else {
+        restoreScene();
+        turnOnScrollbarAsNeeded();
+        _timer->stop();
+    }
 }
 
 bool StartScreenController::isLogoTransparent () const
 {
     return _logoItem->opacity() < 0.001;
+}
+
+void StartScreenController::scaleAndDecreaseOpacityOfLogo ()
+{
+    qreal scale = 1.0 + 1.0/LOGO_OPACITY_STEPS;
+    _view->scale(scale, scale);
+    qreal opacity = _logoItem->opacity();
+    _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
 }
 
 void StartScreenController::restoreScene ()
@@ -82,4 +92,10 @@ void StartScreenController::restoreScene ()
         _view->setScene(_savedScene);
         _view->setMatrix(_savedViewMatrix);
     }
+}
+
+void StartScreenController::turnOnScrollbarAsNeeded ()
+{
+    _view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
