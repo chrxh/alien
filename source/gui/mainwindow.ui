@@ -3921,37 +3921,37 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>MacroEditor</class>
    <extends>QWidget</extends>
-   <header>graphics/macroeditor.h</header>
+   <header>gui/macroeditor.h</header>
   </customwidget>
   <customwidget>
    <class>ClusterEdit</class>
    <extends>QTextEdit</extends>
-   <header>graphics/microeditor/clusteredit.h</header>
+   <header>gui/microeditor/clusteredit.h</header>
   </customwidget>
   <customwidget>
    <class>CellEdit</class>
    <extends>QTextEdit</extends>
-   <header>graphics/microeditor/celledit.h</header>
+   <header>gui/microeditor/celledit.h</header>
   </customwidget>
   <customwidget>
    <class>EnergyEdit</class>
    <extends>QWidget</extends>
-   <header>graphics/microeditor/energyedit.h</header>
+   <header>gui/microeditor/energyedit.h</header>
   </customwidget>
   <customwidget>
    <class>SymbolEdit</class>
    <extends>QWidget</extends>
-   <header>graphics/microeditor/symboledit.h</header>
+   <header>gui/microeditor/symboledit.h</header>
   </customwidget>
   <customwidget>
    <class>MetadataEdit</class>
    <extends>QWidget</extends>
-   <header>graphics/microeditor/metadataedit.h</header>
+   <header>gui/microeditor/metadataedit.h</header>
   </customwidget>
   <customwidget>
    <class>CellComputerEdit</class>
    <extends>QWidget</extends>
-   <header>graphics/microeditor/cellcomputeredit.h</header>
+   <header>gui/microeditor/cellcomputeredit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

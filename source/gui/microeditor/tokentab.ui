@@ -341,7 +341,7 @@
   <customwidget>
    <class>TokenEdit</class>
    <extends>QTextEdit</extends>
-   <header>graphics/microeditor/tokenedit.h</header>
+   <header>gui/microeditor/tokenedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
