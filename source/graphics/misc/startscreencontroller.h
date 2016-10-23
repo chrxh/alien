@@ -24,7 +24,7 @@ private slots:
     void timeout ();
 
 private:
-    void decreaseOpacityOfLogo ();
+    void scaleAndDecreaseOpacityOfLogo ();
     bool isLogoTransparent () const;
     void restoreScene ();
 

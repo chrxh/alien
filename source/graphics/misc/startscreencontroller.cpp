@@ -49,25 +49,26 @@ void StartScreenController::createSceneWithLogo ()
     QPixmap logo("://tutorial/logo.png");
     _logoItem =_startScene->addPixmap(logo);
     _view->setMatrix(QMatrix());
-    _view->scale(0.75, 0.75);
+    _view->scale(0.4, 0.4);
     _view->setScene(_startScene);
 }
 
 void StartScreenController::timeout ()
 {
-    decreaseOpacityOfLogo();
     if( isLogoTransparent() ) {
         restoreScene();
         _timer->stop();
     }
+    else {
+        scaleAndDecreaseOpacityOfLogo();
+    }
 }
 
-void StartScreenController::decreaseOpacityOfLogo ()
+void StartScreenController::scaleAndDecreaseOpacityOfLogo ()
 {
     qreal opacity = _logoItem->opacity();
-    if( !isLogoTransparent() ) {
-        _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
-    }
+    _logoItem->setOpacity(opacity - 1.0/LOGO_OPACITY_STEPS);
+    _view->scale(1.01, 1.01);
 }
 
 bool StartScreenController::isLogoTransparent () const
