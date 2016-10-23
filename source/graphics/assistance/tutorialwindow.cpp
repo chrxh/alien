@@ -1,7 +1,7 @@
 #include "tutorialwindow.h"
 #include "ui_tutorialwindow.h"
 
-#include "../../globaldata/globalfunctions.h"
+#include "../../global/globalfunctions.h"
 
 
 TutorialWindow::TutorialWindow(QWidget *parent) :

@@ -4,8 +4,8 @@
 #include "microeditor.h"
 #include "macroeditor/pixeluniverse.h"
 #include "macroeditor/shapeuniverse.h"
-#include "../globaldata/editorsettings.h"
-#include "../globaldata/guisettings.h"
+#include "../global/editorsettings.h"
+#include "../global/guisettings.h"
 
 #include "../simulation/entities/aliengrid.h"
 #include "../simulation/entities/aliencellcluster.h"

@@ -1,6 +1,6 @@
 #include "clusteredit.h"
 
-#include "../../globaldata/editorsettings.h"
+#include "../../global/editorsettings.h"
 #include "../../simulation/processing/aliencellfunction.h"
 #include "../../simulation/entities/aliencell.h"
 #include "../../simulation/entities/aliencellcluster.h"

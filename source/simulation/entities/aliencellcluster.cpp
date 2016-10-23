@@ -2,8 +2,8 @@
 
 #include "../physics/physics.h"
 #include "../processing/aliencellfunction.h"
-#include "../../globaldata/simulationsettings.h"
-#include "../../globaldata/globalfunctions.h"
+#include "../../global/simulationsettings.h"
+#include "../../global/globalfunctions.h"
 
 #include <QMatrix4x4>
 #include <qmath.h>

@@ -3,7 +3,7 @@
 #include "../entities/aliencell.h"
 #include "../entities/aliencellcluster.h"
 
-#include "../../globaldata/simulationsettings.h"
+#include "../../global/simulationsettings.h"
 
 AlienCellFunctionWeapon::AlienCellFunctionWeapon(AlienGrid*& grid)
     : AlienCellFunction(grid)
