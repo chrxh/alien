@@ -20,7 +20,7 @@ SOURCES += main.cpp \
     model/entities/alienenergy.cpp \
     gui/monitoring/simulationmonitor.cpp \
     gui/microeditor/hexedit.cpp \
-    model/processing/alienthread.cpp \
+    model/alienthread.cpp \
     model/processing/aliencellfunctionconstructor.cpp \
     gui/macroeditor/pixeluniverse.cpp \
     gui/macroeditor/shapeuniverse.cpp \
@@ -72,7 +72,7 @@ HEADERS += \
     model/processing/aliencellfunctionscanner.h \
     model/entities/alienenergy.h \
     gui/monitoring/simulationmonitor.h \
-    model/processing/alienthread.h \
+    model/alienthread.h \
     model/processing/aliencellfunctionconstructor.h \
     gui/microeditor/hexedit.h \
     gui/macroeditor/pixeluniverse.h \
