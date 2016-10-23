@@ -16,11 +16,11 @@
 #include "../global/editorsettings.h"
 #include "../global/globalfunctions.h"
 #include "../global/simulationsettings.h"
-#include "../simulation/metadatamanager.h"
-#include "../simulation/aliensimulator.h"
-#include "../simulation/entities/aliencell.h"
-#include "../simulation/entities/aliencellcluster.h"
-#include "../simulation/processing/aliencellfunction.h"
+#include "../model/metadatamanager.h"
+#include "../model/aliensimulator.h"
+#include "../model/entities/aliencell.h"
+#include "../model/entities/aliencellcluster.h"
+#include "../model/processing/aliencellfunction.h"
 
 #include <QGraphicsScene>
 #include <QGLWidget>

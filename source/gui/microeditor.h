@@ -1,7 +1,7 @@
 #ifndef MICROEDITOR_H
 #define MICROEDITOR_H
 
-#include "../simulation/aliencellreduced.h"
+#include "../model/aliencellreduced.h"
 
 #include <QWidget>
 #include <QTimer>

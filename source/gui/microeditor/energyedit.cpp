@@ -1,9 +1,9 @@
 #include "energyedit.h"
 
 #include "../../global/editorsettings.h"
-#include "../../simulation/processing/aliencellfunction.h"
-#include "../../simulation/entities/aliencell.h"
-#include "../../simulation/entities/aliencellcluster.h"
+#include "../../model/processing/aliencellfunction.h"
+#include "../../model/entities/aliencell.h"
+#include "../../model/entities/aliencellcluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>

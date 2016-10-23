@@ -1,7 +1,7 @@
 #ifndef SYMBOLEDIT_H
 #define SYMBOLEDIT_H
 
-#include "../../simulation/metadatamanager.h"
+#include "../../model/metadatamanager.h"
 
 #include <QWidget>
 

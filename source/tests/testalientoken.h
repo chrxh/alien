@@ -2,7 +2,7 @@
 #define TESTALIENTOKEN_H
 
 #include <QtTest/QtTest>
-#include "simulation/entities/alientoken.h"
+#include "model/entities/alientoken.h"
 
 class TestAlienToken: public QObject
 {

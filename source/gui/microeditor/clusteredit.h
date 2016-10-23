@@ -4,7 +4,7 @@
 #include <QTextEdit>
 #include <QVector3D>
 
-#include "../../simulation/aliencellreduced.h"
+#include "../../model/aliencellreduced.h"
 
 class AlienCell;
 class ClusterEdit : public QTextEdit
