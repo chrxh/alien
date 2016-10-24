@@ -95,6 +95,6 @@ void StartScreenController::restoreScene ()
 
 void StartScreenController::turnOnScrollbarAsNeeded ()
 {
-    _view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _view->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    _view->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 }
