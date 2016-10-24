@@ -59,7 +59,7 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, Alie
 
     //start cell
     if( n == 0 ) {
-        token->memory[static_cast<int>(SCANNER::OUT_DIST)] = 0;
+        token->memory[static_cast<int>(SCANNER::OUT_DISTANCE)] = 0;
     }
 
     //second cell
@@ -68,7 +68,7 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, Alie
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPos() - scanCellPre1->getRelPos()).length();
-        token->memory[static_cast<int>(SCANNER::OUT_DIST)] = convertShiftLenToData(len);
+        token->memory[static_cast<int>(SCANNER::OUT_DISTANCE)] = convertShiftLenToData(len);
     }
 
     //further cell
@@ -83,7 +83,7 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, Alie
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPos() - scanCellPre1->getRelPos()).length();
-        token->memory[static_cast<int>(SCANNER::OUT_DIST)] = convertShiftLenToData(len);
+        token->memory[static_cast<int>(SCANNER::OUT_DISTANCE)] = convertShiftLenToData(len);
     }
 
     //scan cell

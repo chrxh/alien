@@ -23,7 +23,7 @@ public:
         IN_MIN_MASS = 22,
         IN_MAX_MASS = 23,
         OUT_MASS = 24,
-        OUT_DIST = 25
+        OUT_DISTANCE = 25
     };
     enum class SENSOR_IN {
         DO_NOTHING,
