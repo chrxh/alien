@@ -55,20 +55,16 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
                         CellEdit* cellEditor,
                         ClusterEdit* clusterEditor,
                         EnergyEdit* energyEditor,
-//                        HexEdit* computerMemoryEditor,
                         MetadataEdit* metadataEditor,
                         CellComputerEdit* cellComputerEdit,
                         SymbolEdit* symbolEdit,
-//                        ComputerCodeEdit* computerCodeEditor,
                         QTextEdit* selectionEditor,
-//                        QLabel* compilationStateLabel,
                         QToolButton* requestCellButton,
                         QToolButton* requestEnergyParticleButton,
                         QToolButton* delEntityButton,
                         QToolButton* delClusterButton,
                         QToolButton* addTokenButton,
                         QToolButton* delTokenButton
-//                        QToolButton* compileButton
                         )
 {
     _tabClusterWidget = tabClusterWidget;
@@ -78,20 +74,16 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     _cellEditor = cellEditor;
     _clusterEditor = clusterEditor;
     _energyEditor = energyEditor;
-//    _computerMemoryEditor = computerMemoryEditor;
     _metadataEditor = metadataEditor;
     _cellComputerEdit = cellComputerEdit;
     _symbolEdit = symbolEdit;
-//    _computerCodeEditor = computerCodeEditor;
     _selectionEditor = selectionEditor;
-//    _compilationStateLabel = compilationStateLabel;
     _requestCellButton = requestCellButton;
     _requestEnergyParticleButton = requestEnergyParticleButton;
     _delEntityButton = delEntityButton;
     _delClusterButton = delClusterButton;
     _addTokenButton = addTokenButton;
     _delTokenButton = delTokenButton;
-//    _compileButton = compileButton;
 
     //save tab widgets
     _tabCluster = _tabClusterWidget->widget(0);
@@ -114,6 +106,14 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     _delClusterButton->setStyleSheet(BUTTON_STYLESHEET);
     _addTokenButton->setStyleSheet(BUTTON_STYLESHEET);
     _delTokenButton->setStyleSheet(BUTTON_STYLESHEET);
+
+    //set tooltip
+    _requestCellButton->setToolTip("add cell");
+    _requestEnergyParticleButton->setToolTip("add energy particle");
+    _delEntityButton->setToolTip("delete cell/energy particle");
+    _delClusterButton->setToolTip("delete cell cluster");
+    _addTokenButton->setToolTip("add token");
+    _delTokenButton->setToolTip("del token");
 
     //install event filter for parent widget
     _tabSymbolsWidget->parent()->installEventFilter(this);
