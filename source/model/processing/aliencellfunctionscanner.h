@@ -22,7 +22,7 @@ public:
         OUT_MASS = 13,
         OUT_ENERGY = 14,
         OUT_ANGLE = 15,
-        OUT_DIST = 16,
+        OUT_DISTANCE = 16,
         OUT_CELL_MAX_CONNECTIONS = 17,
         OUT_CELL_BRANCH_NO = 18,
         OUT_CELL_FUNCTION = 19,

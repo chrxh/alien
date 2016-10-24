@@ -875,7 +875,7 @@
                  </tr>
                  <tr>
                   <td>
-                   SCANNER_OUT_DIST
+                   SCANNER_OUT_DISTANCE
                   </td>
                   <td>
                    output byte
@@ -1218,7 +1218,7 @@
              <tr>
               <td>
                CONSTR_IN_DIST
-               (address coincides with SCANNER_OUT_DIST)
+               (address coincides with SCANNER_OUT_DISTANCE)
               </td>
               <td>
                input byte
@@ -1662,7 +1662,7 @@
              </tr>
              <tr>
               <td>
-               SENSOR_OUT_DIST
+               SENSOR_OUT_DISTANCE
               </td>
               <td>
                output byte;
@@ -1710,7 +1710,7 @@
              <td>
               sensor has detected an other cell cluster;
               its mass is stored in SENSOR::OUT_MASS,
-              its distance in SENSOR::OUT_DIST
+              its distance in SENSOR::OUT_DISTANCE
               and its angle in SENSOR::INOUT_ANGLE
              </td>
             </tr>
@@ -1756,7 +1756,7 @@
                with radius specified in <i>[cell function properties]->[sensor]->[range]</i>.
                If a cell cluster is found with mass between SENSOR_IN_MIN_MASS and SENSOR_IN_MAX_MASS
                (then SENSOR_OUT is set to SENSOR_OUT::CLUSTER_FOUND) its
-               angle is returned in SENSOR_INOUT_ANGLE, its distance in SENSOR_OUT_DIST
+               angle is returned in SENSOR_INOUT_ANGLE, its distance in SENSOR_OUT_DISTANCE
                and its mass in SENSOR_OUT_MASS.
                Note that it is not guaranteed that all clusters can be detected in this way since the sensor
                uses a certain raster. The raster length is given by sqrt(SENSOR_IN_MIN_MASS)+3.

@@ -75,7 +75,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
                                 qreal dist = _grid->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
-                                token->memory[static_cast<int>(SENSOR::OUT_DIST)] = convertURealToData(dist);
+                                token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = convertURealToData(dist);
                                 return;
                             }
                         }
@@ -140,7 +140,7 @@ void AlienCellFunctionSensor::execute (AlienToken* token, AlienCell* cell, Alien
             }
             token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
             qreal dist = _grid->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
-            token->memory[static_cast<int>(SENSOR::OUT_DIST)] = convertURealToData(dist);
+            token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = convertURealToData(dist);
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = convertURealToData(largestClusterCell->getCluster()->getMass());
 //            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);
             return;
