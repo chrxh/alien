@@ -97,7 +97,7 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("SCANNER_OUT_MASS","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_MASS))+"]");
     meta->addSymbolEntry("SCANNER_OUT_ENERGY","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_ENERGY))+"]");
     meta->addSymbolEntry("SCANNER_OUT_ANGLE","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_ANGLE))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_DIST","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_DIST))+"]");
+    meta->addSymbolEntry("SCANNER_OUT_DISTANCE","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_DISTANCE))+"]");
     meta->addSymbolEntry("SCANNER_OUT_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_CELL_MAX_CONNECTIONS))+"]");
     meta->addSymbolEntry("SCANNER_OUT_CELL_BRANCH_NO","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_CELL_BRANCH_NO))+"]");
     meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION","["+QString::number(static_cast<int>(AlienCellFunctionScanner::SCANNER::OUT_CELL_FUNCTION))+"]");
@@ -129,7 +129,7 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("SENSOR_IN_MIN_MASS", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::IN_MIN_MASS))+"]");
     meta->addSymbolEntry("SENSOR_IN_MAX_MASS", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::IN_MAX_MASS))+"]");
     meta->addSymbolEntry("SENSOR_OUT_MASS", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::OUT_MASS))+"]");
-    meta->addSymbolEntry("SENSOR_OUT_DIST", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::OUT_DIST))+"]");
+    meta->addSymbolEntry("SENSOR_OUT_DISTANCE", "["+QString::number(static_cast<int>(AlienCellFunctionSensor::SENSOR::OUT_DISTANCE))+"]");
 
     //communicator
     meta->addSymbolEntry("COMMUNICATOR_IN", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN))+"]");
