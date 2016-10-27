@@ -4,7 +4,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "global/globalfunctions.h"
+#include "global/global.h"
+#include "gui/guisettings.h"
 #include "model/simulationsettings.h"
 
 SimulationParametersDialog::SimulationParametersDialog(QWidget *parent) :
@@ -12,7 +13,7 @@ SimulationParametersDialog::SimulationParametersDialog(QWidget *parent) :
     ui(new Ui::SimulationParametersDialog)
 {
     ui->setupUi(this);
-    setFont(GlobalFunctions::getGlobalFont());
+    setFont(GuiFunctions::getGlobalFont());
     ui->treeWidget->expandAll();
 
     localSimulationParameters = simulationParameters;

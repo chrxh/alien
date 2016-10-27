@@ -5,7 +5,7 @@
 #include "alienenergygraphicsitem.h"
 #include "markergraphicsitem.h"
 
-#include "global/editorsettings.h"
+#include "gui/editorsettings.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
 
