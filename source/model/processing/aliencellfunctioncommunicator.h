@@ -42,8 +42,8 @@ public:
         RECEIVE_MESSAGE
     };
     enum class COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE {
-        NO_NEW_MESSAGE,
-        NEW_MESSAGE
+        NO,
+        YES
     };
 
     friend TestAlienCellFunctionCommunicator;

@@ -7,7 +7,7 @@
 #include "entities/alientoken.h"
 #include "physics/physics.h"
 
-#include "global/globalfunctions.h"
+#include "global/global.h"
 
 #include<QThread>
 

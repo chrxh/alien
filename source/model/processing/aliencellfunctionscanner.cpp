@@ -3,7 +3,7 @@
 #include "../entities/aliencell.h"
 #include "../entities/aliencellcluster.h"
 #include "../physics/physics.h"
-#include "global/globalfunctions.h"
+#include "global/global.h"
 
 #include <QString>
 #include <QtCore/qmath.h>

@@ -1,14 +1,14 @@
 #include "selectionmultiplyrandomdialog.h"
 #include "ui_selectionmultiplyrandomdialog.h"
 
-#include "global/globalfunctions.h"
+#include "gui/guisettings.h"
 
 SelectionMultiplyRandomDialog::SelectionMultiplyRandomDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SelectionMultiplyRandomDialog)
 {
     ui->setupUi(this);
-    setFont(GlobalFunctions::getGlobalFont());
+    setFont(GuiFunctions::getGlobalFont());
 }
 
 SelectionMultiplyRandomDialog::~SelectionMultiplyRandomDialog()

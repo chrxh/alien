@@ -7,7 +7,7 @@
 #include "processing/aliencellfunctionfactory.h"
 #include "physics/physics.h"
 #include "model/simulationsettings.h"
-#include "global/globalfunctions.h"
+#include "global/global.h"
 #include "metadatamanager.h"
 
 #include <QTimer>

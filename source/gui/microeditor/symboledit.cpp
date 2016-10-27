@@ -1,9 +1,9 @@
 #include "symboledit.h"
 #include "ui_symboledit.h"
 
-#include "global/editorsettings.h"
-#include "global/guisettings.h"
-#include "global/globalfunctions.h"
+#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
+#include "global/global.h"
 
 #include <QScrollBar>
 
@@ -42,8 +42,8 @@ SymbolEdit::SymbolEdit(QWidget *parent) :
     ui->tableWidget->horizontalHeader()->setStyleSheet(styleSheet);
 */
     //set font
-//    ui->tableWidget->horizontalHeader()->setFont(GlobalFunctions::getGlobalFont());
-    ui->tableWidget->setFont(GlobalFunctions::getGlobalFont());
+//    ui->tableWidget->horizontalHeader()->setFont(GuiFunctions::getGlobalFont());
+    ui->tableWidget->setFont(GuiFunctions::getGlobalFont());
 
     //set section length
     ui->tableWidget->horizontalHeader()->resizeSection(0, 285);
