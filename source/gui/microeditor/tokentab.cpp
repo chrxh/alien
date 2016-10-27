@@ -4,9 +4,9 @@
 #include "hexedit.h"
 #include "model/metadatamanager.h"
 
-#include "global/editorsettings.h"
-#include "global/guisettings.h"
-#include "global/globalfunctions.h"
+#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
+#include "global/global.h"
 
 #include <QScrollBar>
 #include <QSignalMapper>
@@ -38,7 +38,7 @@ TokenTab::TokenTab(QWidget *parent) :
     ui->tableWidget->verticalHeader()->setStyleSheet(s);*/
 
     //set font
-    ui->tableWidget->setFont(GlobalFunctions::getGlobalFont());
+    ui->tableWidget->setFont(GuiFunctions::getGlobalFont());
 
     //set section length
     ui->tableWidget->horizontalHeader()->resizeSection(0, 60);

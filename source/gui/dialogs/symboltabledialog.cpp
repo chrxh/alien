@@ -1,7 +1,7 @@
 #include "symboltabledialog.h"
 #include "ui_symboltabledialog.h"
 
-#include "global/globalfunctions.h"
+#include "gui/guisettings.h"
 #include "model/simulationsettings.h"
 #include "model/metadatamanager.h"
 
@@ -13,16 +13,16 @@ SymbolTableDialog::SymbolTableDialog(QWidget *parent) :
     ui(new Ui::SymbolTableDialog)
 {
     ui->setupUi(this);
-    setFont(GlobalFunctions::getGlobalFont());
+    setFont(GuiFunctions::getGlobalFont());
 
 //    _localMeta.setSymbolTable(meta->getSymbolTable());
 
     //create headers
     ui->tableWidget->horizontalHeader()->resizeSection(0, 400);
-    ui->tableWidget->horizontalHeaderItem(0)->setFont(GlobalFunctions::getGlobalFont());
+    ui->tableWidget->horizontalHeaderItem(0)->setFont(GuiFunctions::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft);
     ui->tableWidget->horizontalHeader()->resizeSection(1, 100);
-    ui->tableWidget->horizontalHeaderItem(1)->setFont(GlobalFunctions::getGlobalFont());
+    ui->tableWidget->horizontalHeaderItem(1)->setFont(GuiFunctions::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(1)->setTextAlignment(Qt::AlignLeft);
 
     setSymbolTableToWidget(&MetadataManager::getGlobalInstance());

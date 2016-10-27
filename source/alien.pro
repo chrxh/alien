@@ -11,7 +11,7 @@ SOURCES += main.cpp \
     model/entities/aliencell.cpp \
     model/entities/aliencellcluster.cpp \
     model/physics/physics.cpp \
-    global/globalfunctions.cpp \
+    global/global.cpp \
     model/entities/alientoken.cpp \
     model/entities/aliengrid.cpp \
     model/processing/aliencellfunction.cpp \
@@ -59,12 +59,13 @@ SOURCES += main.cpp \
     model/processing/aliencellfunctioncommunicator.cpp \
     model/simulationsettings.cpp \
     model/metadatamanager.cpp \
-    gui/misc/startscreencontroller.cpp
+    gui/misc/startscreencontroller.cpp \
+    gui/guisettings.cpp
 HEADERS += \
     model/entities/aliencell.h \
     model/entities/aliencellcluster.h \
     model/physics/physics.h \
-    global/globalfunctions.h \
+    global/global.h \
     model/entities/alientoken.h \
     model/entities/aliengrid.h \
     model/processing/aliencellfunction.h \
@@ -81,7 +82,7 @@ HEADERS += \
     gui/macroeditor/aliencellconnectiongraphicsitem.h \
     gui/macroeditor/alienenergygraphicsitem.h \
     gui/microeditor/computercodeedit.h \
-    global/editorsettings.h \
+    gui/editorsettings.h \
     gui/macroeditor.h \
     gui/mainwindow.h \
     gui/microeditor.h \
@@ -96,7 +97,7 @@ HEADERS += \
     gui/microeditor/energyedit.h \
     gui/microeditor/tokentab.h \
     gui/microeditor/symboledit.h \
-    global/guisettings.h \
+    gui/guisettings.h \
     gui/microeditor/metadatapropertiesedit.h \
     gui/microeditor/metadataedit.h \
     gui/dialogs/newsimulationdialog.h \

@@ -1,6 +1,6 @@
 #include "tokenedit.h"
 
-#include "global/editorsettings.h"
+#include "gui/editorsettings.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>

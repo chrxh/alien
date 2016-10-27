@@ -1,7 +1,7 @@
 #include "addhexagonstructuredialog.h"
 #include "ui_addhexagonstructuredialog.h"
 
-#include "global/globalfunctions.h"
+#include "gui/guisettings.h"
 #include "model/simulationsettings.h"
 
 AddHexagonStructureDialog::AddHexagonStructureDialog(QWidget *parent) :
@@ -9,7 +9,7 @@ AddHexagonStructureDialog::AddHexagonStructureDialog(QWidget *parent) :
     ui(new Ui::AddHexagonStructureDialog)
 {
     ui->setupUi(this);
-    setFont(GlobalFunctions::getGlobalFont());
+    setFont(GuiFunctions::getGlobalFont());
     ui->energyEdit->setText(QString("%1").arg(simulationParameters.NEW_CELL_ENERGY));
 }
 

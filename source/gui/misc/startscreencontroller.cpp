@@ -1,5 +1,5 @@
 #include "startscreencontroller.h"
-#include "global/editorsettings.h"
+#include "gui/editorsettings.h"
 
 #include <QTimer>
 #include <QGraphicsItem>

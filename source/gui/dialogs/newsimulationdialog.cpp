@@ -4,8 +4,8 @@
 #include "simulationparametersdialog.h"
 #include "symboltabledialog.h"
 
-#include "global/guisettings.h"
-#include "global/globalfunctions.h"
+#include "gui/guisettings.h"
+#include "global/global.h"
 #include "model/metadatamanager.h"
 
 #include <QDebug>
@@ -15,7 +15,7 @@ NewSimulationDialog::NewSimulationDialog(QWidget *parent) :
     ui(new Ui::NewSimulationDialog)
 {
     ui->setupUi(this);
-    setFont(GlobalFunctions::getGlobalFont());
+    setFont(GuiFunctions::getGlobalFont());
 
     _simParaDialog = new SimulationParametersDialog();
     _symTblDialog = new SymbolTableDialog();

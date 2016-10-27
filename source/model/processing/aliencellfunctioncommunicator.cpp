@@ -175,11 +175,11 @@ void AlienCellFunctionCommunicator::receiveMessage (AlienToken* token,
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_MESSAGE)]
                 = _receivedMessage.message;
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
-                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NEW_MESSAGE);
+                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES);
     }
     else
         token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
-                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO_NEW_MESSAGE);
+                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO);
 }
 
 void AlienCellFunctionCommunicator::calcReceivedMessageAngle (AlienCell* receiverCell,

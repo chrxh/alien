@@ -1,6 +1,6 @@
 #include "energyedit.h"
 
-#include "global/editorsettings.h"
+#include "gui/editorsettings.h"
 #include "model/processing/aliencellfunction.h"
 #include "model/entities/aliencell.h"
 #include "model/entities/aliencellcluster.h"

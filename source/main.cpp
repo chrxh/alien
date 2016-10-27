@@ -20,6 +20,10 @@
 //- bei AlienCellFunctionConstructor: Energie im Vorfeld checken
 //- bessere Datenstrukturen für _highlightedCells in ShapeUniverse (nur Cluster abspeichern?)
 
+//Issues:
+//- bei Pfeile zwischen Zellen im Microeditor berücksichtigen, wenn Branchnumber anders gesetzt wird
+//- Anzeigen, ob schon compiliert ist
+
 //Bugs:
 //- Farben bei neuen Einträgen in SymbolTable stimmt nicht
 //- Computer-Code-Editor-Bug (wenn man viele Zeilen schreibt, verschwindet der Cursor am unteren Rand)

@@ -1,7 +1,7 @@
 #include "addrectstructuredialog.h"
 #include "ui_addrectstructuredialog.h"
 
-#include "global/globalfunctions.h"
+#include "gui/guisettings.h"
 #include "model/simulationsettings.h"
 
 AddRectStructureDialog::AddRectStructureDialog(QWidget *parent) :
@@ -9,7 +9,7 @@ AddRectStructureDialog::AddRectStructureDialog(QWidget *parent) :
     ui(new Ui::AddRectStructureDialog)
 {
     ui->setupUi(this);
-    setFont(GlobalFunctions::getGlobalFont());
+    setFont(GuiFunctions::getGlobalFont());
     ui->energyEdit->setText(QString("%1").arg(simulationParameters.NEW_CELL_ENERGY));
 }
 

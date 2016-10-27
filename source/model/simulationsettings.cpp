@@ -143,11 +143,11 @@ void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
     meta->addSymbolEntry("COMMUNICATOR_IN_DISTANCE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::IN_DISTANCE))+"]");
     meta->addSymbolEntry("COMMUNICATOR_OUT_SENT_NUM_MESSAGE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_SENT_NUM_MESSAGE))+"]");
     meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE))+"]");
+    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO", QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO)));
+    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES", QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES)));
     meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_RECEIVED_MESSAGE))+"]");
     meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_ANGLE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_RECEIVED_ANGLE))+"]");
     meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "["+QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR::OUT_RECEIVED_DISTANCE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO_NEW_MESSAGE", QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO_NEW_MESSAGE)));
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NEW_MESSAGE", QString::number(static_cast<int>(AlienCellFunctionCommunicator::COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NEW_MESSAGE)));
 }
 
 SimulationParameters simulationParameters;
