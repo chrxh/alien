@@ -6,7 +6,7 @@
 #include <QString>
 
 AlienCellFunctionCommunicator::AlienCellFunctionCommunicator(AlienGrid*& grid)
-    : AlienCellFunction(grid), _newMessageReceived(false)
+    : AlienCellFunction(grid)
 {
 
 }
