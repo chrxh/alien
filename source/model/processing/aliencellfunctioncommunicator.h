@@ -49,7 +49,7 @@ public:
     friend TestAlienCellFunctionCommunicator;
 
 private:
-    bool _newMessageReceived;
+    bool _newMessageReceived = false;
     struct MessageData {
         quint8 channel = 0;
         quint8 message = 0;
