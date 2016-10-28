@@ -463,14 +463,14 @@ AlienCell::AlienCell (qreal energy,
     if( random ) {
         resetConnections(qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1));
         _tokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-        _cellFunction = AlienCellFunctionFactory::buildRandom(random, _grid);
+        _cellFunction = AlienCellFunctionFactory::buildRandomCellFunction(_grid);
         for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
             _memory[i] = qrand()%256;
     }
     else {
         resetConnections(maxConnections);
         if( !cellFunction )
-            _cellFunction = AlienCellFunctionFactory::build("COMPUTER", false, _grid);     //standard cell function
+            _cellFunction = AlienCellFunctionFactory::build("COMPUTER", _grid);     //standard cell function
         for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
             _memory[i] = 0;
     }
