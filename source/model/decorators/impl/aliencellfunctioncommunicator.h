@@ -18,7 +18,6 @@ public:
                   AlienCell* previousCell,
                   AlienEnergy*& newParticle,
                   bool& decompose);
-    QString getCellFunctionName () const;
     void serialize (QDataStream& stream);
 
 
