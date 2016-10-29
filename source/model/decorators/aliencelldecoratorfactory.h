@@ -1,19 +1,24 @@
-#ifndef ALIENTOKENPROCESSINGFACTORY_H
-#define ALIENTOKENPROCESSINGFACTORY_H
+#ifndef ALIENCELLDECORATORFACTORY_H
+#define ALIENCELLDECORATORFACTORY_H
 
 #include <QString>
 
 class AlienGrid;
-class AlienCellFunction;
-class AlienCellFunctionFactory
+class AlienCell;
+class AlienCellFunctionDecorator;
+class AlienEnergyGuidanceDecorator;
+
+class AlienCellDecoratorFactory
 {
 public:
-    static AlienCellFunction* build (Type type, quint8* cellFunctionData, AlienGrid*& grid);
-    static AlienCellFunction* build (Type type, AlienGrid*& grid);
-    static AlienCellFunction* build (QDataStream& stream, AlienGrid*& grid);
-    static AlienCellFunction* buildRandomCellFunction (AlienGrid*& grid);
+    virtual ~AlienCellDecoratorFactory () {}
 
-    static Type getCellFunctionType ();
+    virtual AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, Type type, quint8* data, AlienGrid*& grid) = 0;
+    virtual AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, Type type, AlienGrid*& grid) = 0;
+    virtual AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, QDataStream& stream, AlienGrid*& grid) = 0;
+    virtual AlienCellFunctionDecorator* addRandomCellFunction (AlienCell* cell, AlienGrid*& grid) = 0;
+
+    virtual AlienEnergyGuidanceDecorator* addEnergyGuidance (AlienCell* cell, AlienGrid*& grid) = 0;
 
     enum class Type {
         COMPUTER,
@@ -23,8 +28,8 @@ public:
         CONSTRUCTOR,
         SENSOR,
         COMMUNICATOR,
-        _COUNTER
+        _COUNT
     };
 };
 
-#endif // ALIENTOKENPROCESSINGFACTORY_H
+#endif // ALIENCELLDECORATORFACTORY_H

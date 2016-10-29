@@ -1,12 +1,13 @@
 #ifndef ALIENCELLFUNCTIONCOMMUNICATOR_H
 #define ALIENCELLFUNCTIONCOMMUNICATOR_H
 
-#include "aliencellfunction.h"
+#include "aliencellfunctiondecoratorimpl.h"
 
 #include <QVector3D>
 
 class TestAlienCellFunctionCommunicator;
-class AlienCellFunctionCommunicator : public AlienCellFunction
+
+class AlienCellFunctionCommunicator : public AlienCellFunctionDecoratorImpl
 {
 public:
     AlienCellFunctionCommunicator (AlienGrid*& grid);
