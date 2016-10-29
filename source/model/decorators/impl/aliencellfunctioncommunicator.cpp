@@ -46,11 +46,6 @@ void AlienCellFunctionCommunicator::execute (AlienToken* token,
         receiveMessage(token, cell, previousCell);
 }
 
-QString AlienCellFunctionCommunicator::getCellFunctionName () const
-{
-    return "COMMUNICATOR";
-}
-
 void AlienCellFunctionCommunicator::serialize (QDataStream& stream)
 {
     AlienCellFunction::serialize(stream);
