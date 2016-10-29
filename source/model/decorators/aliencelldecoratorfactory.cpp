@@ -7,40 +7,40 @@
 #include "aliencellfunctionsensor.h"
 #include "aliencellfunctioncommunicator.h"
 
-AlienCellFunction* AlienCellFunctionFactory::build (QString name, quint8* cellFunctionData, AlienGrid*& grid)
+AlienCellFunction* AlienCellFunctionFactory::build (Type type, quint8* cellFunctionData, AlienGrid*& grid)
 {
-    if( name == "COMPUTER" )
+    if( type == Type::COMPUTER )
         return new AlienCellFunctionComputer(cellFunctionData, grid);
-    if( name == "PROPULSION" )
+    if( type == Type::PROPULSION )
         return new AlienCellFunctionPropulsion(cellFunctionData, grid);
-    if( name == "SCANNER" )
+    if( type == Type::SCANNER )
         return new AlienCellFunctionScanner(cellFunctionData, grid);
-    if( name == "WEAPON" )
+    if( type == Type::WEAPON )
         return new AlienCellFunctionWeapon(cellFunctionData, grid);
-    if( name == "CONSTRUCTOR" )
+    if( type == Type::CONSTRUCTOR )
         return new AlienCellFunctionConstructor(cellFunctionData, grid);
-    if( name == "SENSOR" )
+    if( type == Type::SENSOR )
         return new AlienCellFunctionSensor(cellFunctionData, grid);
-    if( name == "COMMUNICATOR" )
+    if( type == Type::COMMUNICATOR )
         return new AlienCellFunctionCommunicator(cellFunctionData, grid);
     return 0;
 }
 
-AlienCellFunction* AlienCellFunctionFactory::build (QString name, AlienGrid*& grid)
+AlienCellFunction* AlienCellFunctionFactory::build (Type type, AlienGrid*& grid)
 {
-    if( name == "COMPUTER" )
+    if( type == Type::COMPUTER )
         return new AlienCellFunctionComputer(false, grid);
-    if( name == "PROPULSION" )
+    if( type == Type::PROPULSION )
         return new AlienCellFunctionPropulsion(grid);
-    if( name == "SCANNER" )
+    if( type == Type::SCANNER )
         return new AlienCellFunctionScanner(grid);
-    if( name == "WEAPON" )
+    if( type == Type::WEAPON )
         return new AlienCellFunctionWeapon(grid);
-    if( name == "CONSTRUCTOR" )
+    if( type == Type::CONSTRUCTOR )
         return new AlienCellFunctionConstructor(grid);
-    if( name == "SENSOR" )
+    if( type == Type::SENSOR )
         return new AlienCellFunctionSensor(grid);
-    if( name == "COMMUNICATOR" )
+    if( type == Type::COMMUNICATOR )
         return new AlienCellFunctionCommunicator(grid);
     return 0;
 }
@@ -68,21 +68,26 @@ AlienCellFunction* AlienCellFunctionFactory::build (QDataStream& stream, AlienGr
 
 AlienCellFunction* AlienCellFunctionFactory::buildRandomCellFunction (AlienGrid*& grid)
 {
-    int name(qrand()%7);
-    if( name == 0 )
+    Type type =  static_cast<Type>(qrand()%Type::_COUNTER);
+    if( type == Type::COMPUTER )
         return new AlienCellFunctionComputer(true, grid);
-    if( name == 1 )
+    if( type == Type::PROPULSION )
         return build("PROPULSION", grid);
-    if( name == 2 )
+    if( type == Type::SCANNER )
         return build("SCANNER", grid);
-    if( name == 3 )
+    if( type == Type::WEAPON )
         return build("WEAPON", grid);
-    if( name == 4 )
+    if( type == Type::CONSTRUCTOR )
         return build("CONSTRUCTOR", grid);
-    if( name == 5 )
+    if( type == Type::SENSOR )
         return build("SENSOR", grid);
-    if( name == 6 )
+    if( type == Type::COMMUNICATOR )
         return build("COMMUNICATOR", grid);
     return 0;
+}
+
+static AlienCellFunctionFactory::Type AlienCellFunctionFactory::getCellFunctionType ()
+{
+
 }
 
