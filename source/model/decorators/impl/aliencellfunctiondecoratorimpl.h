@@ -1,42 +1,16 @@
-#ifndef ALIENCELLFUNCTIONDECORATOR_H
-#define ALIENCELLFUNCTIONDECORATOR_H
+#ifndef ALIENCELLFUNCTIONDECORATORIMPL_H
+#define ALIENCELLFUNCTIONDECORATORIMPL_H
 
-#include "model/entities/alientoken.h"
+#include "model/decorators/aliencellfunctiondecorator.h"
 
-class AlienCellCluster;
-class AlienGrid;
-class AlienEnergy;
-class TestAlienCellFunctionCommunicator;
-class AlienCellFunctionDecorator
+class AlienCellFunctionDecoratorImpl : AlienCellFunctionDecorator
 {
 public:
-    AlienCellFunctionDecorator(AlienGrid*& grid);
-    virtual ~AlienCellFunctionDecorator();
+    AlienCellFunctionDecoratorImpl (AlienCell* cell, AlienGrid*& grid);
+    virtual ~AlienCellFunctionDecoratorImpl () {}
 
-    virtual void runEnergyGuidanceSystem (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
-    virtual void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose) = 0;
-    virtual QString getCode ();
-    virtual bool compileCode (QString code, int& errorLine);
-    virtual AlienCellFunctionType getCellFunctionType () const = 0;
-
-    virtual void serialize (QDataStream& stream);
-
-    virtual void getInternalData (quint8* data);
-
-    //constants for cell function programming
-    enum class ENERGY_GUIDANCE {
-        IN = 1,
-        IN_VALUE_CELL = 2,
-        IN_VALUE_TOKEN = 3
-    };
-    enum class ENERGY_GUIDANCE_IN {
-        DEACTIVATED,
-        BALANCE_CELL,
-        BALANCE_TOKEN,
-        BALANCE_BOTH,
-        HARVEST_CELL,
-        HARVEST_TOKEN
-    };
+    virtual QString decompileInstructionCode () const { return QString(); }
+    virtual CompilationState injectAndCompileInstructionCode (QString code) { return CompilationState(); }
 
 protected:
     AlienGrid*& _grid;
@@ -51,4 +25,4 @@ protected:
     static quint8 convertIntToData (int i);
 };
 
-#endif // ALIENCELLFUNCTIONDECORATOR_H
+#endif // ALIENCELLFUNCTIONDECORATORIMPL_H

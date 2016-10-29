@@ -1,31 +1,23 @@
-#ifndef ALIENCELL_H
-#define ALIENCELL_H
+#ifndef ALIENCELLIMPL_H
+#define ALIENCELLIMPL_H
+
+#include "model/entities/aliencell.h"
 
 #include <QtGlobal>
 #include <QVector3D>
 
-#include "alientoken.h"
-
-class AlienCellCluster;
-class AlienCellFunction;
-class AlienGrid;
-class AlienCell
+class AlienCellImpl : public AlienCell
 {
 public:
 
-    static AlienCell* buildCellWithRandomData (qreal energy, AlienGrid*& grid);
-    static AlienCell* buildCell (qreal energy,
-                                 AlienGrid*& grid,
-                                 int maxConnections = 0,
-                                 int tokenAccessNumber = 0,
-                                 AlienCellFunction* cellFunction = 0,
-                                 QVector3D relPos = QVector3D());
-    static AlienCell* buildCell (QDataStream& stream,
-                                 QMap< quint64, QList< quint64 > >& connectingCells,
-                                 AlienGrid*& grid);
-    static AlienCell* buildCellWithoutConnectingCells (QDataStream& stream,
-                                 AlienGrid*& grid);
-    ~AlienCell();
+    AlienCellImpl (qreal energy, AlienGrid*& grid, bool random = true, int maxConnections = 0,
+                   int tokenAccessNumber = 0, QVector3D relPos = QVector3D());
+    AlienCellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells,
+                   AlienGrid*& grid);
+    AlienCellImpl (QDataStream& stream, AlienGrid*& grid);     //build without connecting cells
+    ~AlienCellImpl();
+
+    ProcessingResult process (AlienToken* token, AlienCell* cell, AlienCell* previousCell) {}
 
     bool connectable (AlienCell* otherCell);
     bool isConnectedTo (AlienCell* otherCell);
@@ -56,8 +48,6 @@ public:
     void setAbsPositionAndUpdateMap (QVector3D pos);
     QVector3D getRelPos ();
     void setRelPos (QVector3D relPos);
-    AlienCellFunction* getCellFunction ();
-    void setCellFunction (AlienCellFunction* cellFunction);
 
     int getTokenAccessNumber ();
     void setTokenAccessNumber (int i);
@@ -78,21 +68,8 @@ public:
 private:
     friend class AlienCellCluster;
 
-    AlienCell (qreal energy,
-               AlienGrid*& grid,
-               bool random = true,
-               int maxConnections = 0,
-               int tokenAccessNumber = 0,
-               AlienCellFunction* cellFunction = 0,
-               QVector3D relPos = QVector3D());
-    AlienCell (QDataStream& stream,
-               QMap< quint64, QList< quint64 > >& connectingCells,
-               AlienGrid*& grid);
-    AlienCell (QDataStream& stream, AlienGrid*& grid);     //build without connecting cells
-
     AlienGrid*& _grid;
 
-    AlienCellFunction* _cellFunction;
     QVector< AlienToken* > _tokenStack;
     QVector< AlienToken* > _newTokenStack;
     int _tokenStackPointer;
@@ -118,6 +95,6 @@ private:
     quint8 _color;      //metadata
 };
 
-#endif // ALIENCELL_H
+#endif // ALIENCELLIMPL_H
 
 
