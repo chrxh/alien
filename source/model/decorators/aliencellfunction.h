@@ -3,25 +3,16 @@
 
 #include "aliencelldecorator.h"
 
+#include "constants.h"
+
 class AlienCellFunction: public AlienCellDecorator
 {
 public:
-    AlienCellFunction (AlienCell* cell) : AlienCellDecorator(cell) {}
+    AlienCellFunction (AlienCell* cell, AlienGrid*& grid) : AlienCellDecorator(cell) {}
     virtual ~AlienCellFunction() {}
 
-    virtual Type getType () const = 0;
+    virtual CellFunctionType getType () const = 0;
     virtual void getInternalData (quint8* data) const = 0;
-
-    enum class Type {
-        COMPUTER,
-        PROPULSION,
-        SCANNER,
-        WEAPON,
-        CONSTRUCTOR,
-        SENSOR,
-        COMMUNICATOR,
-        _COUNT
-    };
 
 protected:
     qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const;
@@ -34,6 +25,7 @@ protected:
     static qreal convertDataToUReal (quint8 d);
     static quint8 convertIntToData (int i);
 
+    AlienGrid*& _grid;
 };
 
 #endif // ALIENCELLFUNCTION_H
