@@ -1,6 +1,7 @@
+
 #include "aliencelldecoratorfactoryimpl.h"
 
-#include "aliencellfunctioncomputer.h"
+#include "aliencellfunctioncomputerimpl.h"
 #include "aliencellfunctionconstructor.h"
 #include "aliencellfunctionpropulsion.h"
 #include "aliencellfunctionscanner.h"
@@ -8,11 +9,11 @@
 #include "aliencellfunctionsensor.h"
 #include "aliencellfunctioncommunicator.h"
 
-AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, Type type, quint8* data, AlienGrid*& grid)
+AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid)
 {
     switch( type ) {
         case Type::COMPUTER :
-            return new AlienCellFunctionComputer(cell, data, grid);
+            return new AlienCellFunctionComputerImpl(cell, data, grid);
         case Type::PROPULSION :
             return new AlienCellFunctionPropulsion(cell, data, grid);
         case Type::SCANNER :
@@ -25,15 +26,16 @@ AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addCellFunction (Alie
             return new AlienCellFunctionSensor(cell, data, grid);
         case Type::COMMUNICATOR :
             return new AlienCellFunctionCommunicator(cell, data, grid);
+        default:
+            return 0;
     }
-    return 0;
 }
 
-AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addCellFunction (Type type, AlienCell* cell, AlienGrid*& grid)
+AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (CellFunctionType type, AlienCell* cell, AlienGrid*& grid)
 {
     switch( type ) {
         case Type::COMPUTER :
-            return new AlienCellFunctionComputer(cell, false, grid);
+            return new AlienCellFunctionComputerImpl(cell, false, grid);
         case Type::PROPULSION :
             return new AlienCellFunctionPropulsion(cell, grid);
         case Type::SCANNER :
@@ -46,15 +48,16 @@ AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addCellFunction (Type
             return new AlienCellFunctionSensor(cell, grid);
         case Type::COMMUNICATOR :
             return new AlienCellFunctionCommunicator(cell, grid);
+        default:
+            return 0;
     }
-    return 0;
 }
 
-AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addCellFunction (QDataStream& stream, AlienGrid*& grid)
+AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (QDataStream& stream, AlienGrid*& grid)
 {
     QString name;
     stream >> name;
-    Type type;
+    CellFunctionType type;
 
     //>>>>>>>>>>>> temp: only for converting
     if( name == "COMPUTER" )
@@ -75,7 +78,7 @@ AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addCellFunction (QDat
 
     switch( type ) {
         case Type::COMPUTER :
-            return new AlienCellFunctionComputer(cell, stream, grid);
+            return new AlienCellFunctionComputerImpl(cell, stream, grid);
         case Type::PROPULSION :
             return new AlienCellFunctionPropulsion(cell, stream, grid);
         case Type::SCANNER :
@@ -88,17 +91,18 @@ AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addCellFunction (QDat
             return new AlienCellFunctionSensor(cell, stream, grid);
         case Type::COMMUNICATOR :
             return new AlienCellFunctionCommunicator(cell, stream, grid);
+        default:
+            return 0;
     }
-    return 0;
 }
 
-AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addRandomCellFunction (AlienCell* cell, AlienGrid*& grid)
+AlienCellFunction* AlienCellDecoratorFactoryImpl::addRandomCellFunction (AlienCell* cell, AlienGrid*& grid)
 {
-    Type type =  static_cast<Type>(qrand()%Type::_COUNTER);
+    CellFunctionType type =  static_cast<CellFunctionType>(qrand()%Type::_COUNTER);
 
     switch( type ) {
         case Type::COMPUTER :
-            return new AlienCellFunctionComputer(cell, true, grid);
+            return new AlienCellFunctionComputerImpl(cell, true, grid);
         case Type::PROPULSION :
             return build(cell, "PROPULSION", grid);
         case Type::SCANNER :
@@ -111,7 +115,8 @@ AlienCellFunctionDecorator* AlienCellDecoratorFactoryImpl::addRandomCellFunction
             return build(cell, "SENSOR", grid);
         case Type::COMMUNICATOR :
             return build(cell, "COMMUNICATOR", grid);
+        default:
+            return 0;
     }
-    return 0;
 }
 

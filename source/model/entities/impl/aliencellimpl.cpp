@@ -172,12 +172,12 @@ AlienCellImpl::~AlienCellImpl()
         delete _connectingCells;
 }
 
-bool AlienCellImpl::connectable (AlienCell* otherCell)
+bool AlienCellImpl::connectable (AlienCell* otherCell) const
 {
     return (_numConnections < _maxConnections) && (otherCell->_numConnections < otherCell->_maxConnections);
 }
 
-bool AlienCellImpl::isConnectedTo (AlienCell* otherCell)
+bool AlienCellImpl::isConnectedTo (AlienCell* otherCell) const
 {
     for( int i = 0; i < _numConnections; ++i )
         if( _connectingCells[i] == otherCell )
@@ -244,12 +244,12 @@ void AlienCellImpl::delAllConnection ()
     _numConnections = 0;
 }
 
-int AlienCellImpl::getNumConnections ()
+int AlienCellImpl::getNumConnections () const
 {
     return _numConnections;
 }
 
-int AlienCellImpl::getMaxConnections ()
+int AlienCellImpl::getMaxConnections () const
 {
     return _maxConnections;
 }
@@ -276,12 +276,12 @@ void AlienCellImpl::setMaxConnections (int maxConnections)
 }
 
 
-AlienCellImpl* AlienCellImpl::getConnection (int i)
+AlienCellImpl* AlienCellImpl::getConnection (int i) const
 {
     return _connectingCells[i];
 }
 
-QVector3D AlienCellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform)
+QVector3D AlienCellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const
 {
     if( _numConnections < 2 ) {
         return outerSpace.normalized();
@@ -347,7 +347,7 @@ void AlienCellImpl::activatingNewTokens ()
     _newTokenStackPointer = 0;
 }
 
-const quint64& AlienCellImpl::getId ()
+const quint64& AlienCellImpl::getId () const
 {
     return _id;
 }
@@ -357,7 +357,7 @@ void AlienCellImpl::setId (quint64 id)
     _id = id;
 }
 
-const quint64& AlienCellImpl::getTag ()
+const quint64& AlienCellImpl::getTag () const
 {
     return _tag;
 }
@@ -367,7 +367,7 @@ void AlienCellImpl::setTag (quint64 tag)
     _tag = tag;
 }
 
-int AlienCellImpl::getNumToken (bool newTokenStackPointer)
+int AlienCellImpl::getNumToken (bool newTokenStackPointer) const
 {
     if( newTokenStackPointer )
         return _newTokenStackPointer;
@@ -375,7 +375,7 @@ int AlienCellImpl::getNumToken (bool newTokenStackPointer)
         return _tokenStackPointer;
 }
 
-AlienToken* AlienCellImpl::getToken (int i)
+AlienToken* AlienCellImpl::getToken (int i) const
 {
     return _tokenStack[i];
 }
@@ -412,12 +412,12 @@ void AlienCellImpl::setCluster (AlienCellCluster* cluster)
     _cluster = cluster;
 }
 
-AlienCellCluster* AlienCellImpl::getCluster()
+AlienCellCluster* AlienCellImpl::getCluster() const
 {
     return _cluster;
 }
 
-QVector3D AlienCellImpl::calcPosition (bool topologyCorrection)
+QVector3D AlienCellImpl::calcPosition (bool topologyCorrection) const
 {
     return _cluster->calcPosition(this, topologyCorrection);
 }
@@ -437,7 +437,7 @@ void AlienCellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
         _grid->setCell(pos, this);
 }
 
-QVector3D AlienCellImpl::getRelPos ()
+QVector3D AlienCellImpl::getRelPos () const
 {
     return _relPos;
 }
@@ -448,7 +448,7 @@ void AlienCellImpl::setRelPos (QVector3D relPos)
 }
 
 
-int AlienCellImpl::getTokenAccessNumber ()
+int AlienCellImpl::getTokenAccessNumber () const
 {
     return _tokenAccessNumber;
 }
@@ -458,22 +458,22 @@ void AlienCellImpl::setTokenAccessNumber (int i)
     _tokenAccessNumber = i % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
 }
 
-bool AlienCellImpl::blockToken ()
+bool AlienCellImpl::isTokenBlocked () const
 {
     return _blockToken;
 }
 
-void AlienCellImpl::setBlockToken (bool block)
+void AlienCellImpl::setTokenBlocked (bool block)
 {
     _blockToken = block;
 }
 
-qreal AlienCellImpl::getEnergy()
+qreal AlienCellImpl::getEnergy() const
 {
     return _energy;
 }
 
-qreal AlienCellImpl::getEnergyIncludingTokens()
+qreal AlienCellImpl::getEnergyIncludingTokens() const
 {
     qreal energy = _energy;
     for(int i = 0; i < _tokenStackPointer; ++i)
@@ -488,7 +488,7 @@ void AlienCellImpl::setEnergy (qreal i)
     _energy = i;
 }
 
-QVector< quint8 >& AlienCellImpl::getMemory ()
+QVector< quint8 >& AlienCellImpl::getMemory () const
 {
     return _memory;
 }
@@ -520,7 +520,7 @@ void AlienCellImpl::serialize (QDataStream& stream)
         stream << _memory[i];
 }
 
-QVector3D AlienCellImpl::getVel ()
+QVector3D AlienCellImpl::getVel () const
 {
     return _vel;
 }
@@ -530,7 +530,7 @@ void AlienCellImpl::setVel (QVector3D vel)
     _vel = vel;
 }
 
-quint8 AlienCellImpl::getColor ()
+quint8 AlienCellImpl::getColor () const
 {
     return _color;
 }

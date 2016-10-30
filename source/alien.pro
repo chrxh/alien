@@ -64,7 +64,8 @@ SOURCES += main.cpp \
     global/servicelocator.cpp \
     model/decorators/impl/alienenergyguidancedecoratorimpl.cpp \
     model/decorators/impl/aliencellfunctioncomputerimpl.cpp \
-    model/decorators/aliencellfunctioncomputer.cpp
+    model/decorators/aliencellfunctioncomputer.cpp \
+    model/decorators/aliencelldecorator.cpp
 HEADERS += \
     model/entities/impl/aliencellimpl.h \
     model/entities/aliencellcluster.h \
@@ -128,7 +129,8 @@ HEADERS += \
     model/decorators/aliencellfunction.h \
     model/decorators/alienenergyguidance.h \
     model/decorators/impl/alienenergyguidanceimpl.h \
-    model/decorators/impl/aliencellfunctioncomputerimpl.h
+    model/decorators/impl/aliencellfunctioncomputerimpl.h \
+    model/decorators/constants.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
