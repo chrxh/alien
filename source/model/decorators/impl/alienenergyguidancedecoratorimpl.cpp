@@ -1,4 +1,4 @@
-#include "alienenergyguidancedecoratorimpl.h"
+#include "alienenergyguidanceimpl.h"
 
 AlienEnergyGuidanceDecoratorImpl::AlienEnergyGuidanceDecoratorImpl ()
 {
