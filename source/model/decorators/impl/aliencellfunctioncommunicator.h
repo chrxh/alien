@@ -1,7 +1,7 @@
 #ifndef ALIENCELLFUNCTIONCOMMUNICATOR_H
 #define ALIENCELLFUNCTIONCOMMUNICATOR_H
 
-#include "aliencellfunctiondecoratorimpl.h"
+#include "aliencellfunctionimpl.h"
 
 #include <QVector3D>
 
@@ -20,6 +20,7 @@ public:
                   AlienEnergy*& newParticle,
                   bool& decompose);
     void serialize (QDataStream& stream);
+    void getInternalData (quint8* data);
 
 
     //constants for cell function programming
@@ -56,8 +57,6 @@ private:
         quint8 angle = 0;
         quint8 distance = 0;
     } _receivedMessage;
-
-    void getInternalData (quint8* data);
 
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
     void setListeningChannel (AlienToken* token);
