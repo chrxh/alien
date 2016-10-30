@@ -6,10 +6,10 @@
 class AlienCellDecoratorFactoryImpl : public AlienCellDecoratorFactory
 {
 public:
-    ~AlienCellDecoratorFactory () {}
+    ~AlienCellDecoratorFactoryImpl () {}
 
-    AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, Type type, quint8* data, AlienGrid*& grid);
-    AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, Type type, AlienGrid*& grid);
+    AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, AlienCellFunction::Type type, quint8* data, AlienGrid*& grid);
+    AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, AlienCellFunction::Type type, AlienGrid*& grid);
     AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, QDataStream& stream, AlienGrid*& grid);
     AlienCellFunctionDecorator* addRandomCellFunction (AlienCell* cell, AlienGrid*& grid);
 

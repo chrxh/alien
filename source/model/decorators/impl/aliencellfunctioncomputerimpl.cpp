@@ -1,4 +1,4 @@
-#include "aliencellfunctioncomputer.h"
+#include "aliencellfunctioncomputerimpl.h"
 #include "../metadatamanager.h"
 #include "../entities/aliencell.h"
 #include "model/simulationsettings.h"

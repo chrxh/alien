@@ -14,7 +14,7 @@ SOURCES += main.cpp \
     global/global.cpp \
     model/entities/alientoken.cpp \
     model/entities/aliengrid.cpp \
-    model/decorators/impl/aliencellfunctiondecoratorimpl.cpp \
+    model/decorators/aliencellfunction.cpp \
     model/decorators/impl/aliencellfunctionscanner.cpp \
     model/entities/alienenergy.cpp \
     gui/monitoring/simulationmonitor.cpp \
@@ -35,7 +35,6 @@ SOURCES += main.cpp \
     gui/microeditor/clusteredit.cpp \
     gui/microeditor/tokenedit.cpp \
     gui/macroeditor/markergraphicsitem.cpp \
-    model/decorators/impl/aliencellfunctioncomputer.cpp \
     model/decorators/impl/aliencellfunctionweapon.cpp \
     gui/microeditor/celledit.cpp \
     gui/microeditor/energyedit.cpp \
@@ -63,7 +62,9 @@ SOURCES += main.cpp \
     model/entities/impl/aliencellfactoryimpl.cpp \
     model/decorators/impl/aliencelldecoratorfactoryimpl.cpp \
     global/servicelocator.cpp \
-    model/decorators/impl/alienenergyguidancedecoratorimpl.cpp
+    model/decorators/impl/alienenergyguidancedecoratorimpl.cpp \
+    model/decorators/impl/aliencellfunctioncomputerimpl.cpp \
+    model/decorators/aliencellfunctioncomputer.cpp
 HEADERS += \
     model/entities/impl/aliencellimpl.h \
     model/entities/aliencellcluster.h \
@@ -71,7 +72,6 @@ HEADERS += \
     global/global.h \
     model/entities/alientoken.h \
     model/entities/aliengrid.h \
-    model/decorators/impl/aliencellfunctiondecoratorimpl.h \
     model/decorators/aliencelldecoratorfactory.h \
     model/decorators/aliencellfunctionscanner.h \
     model/entities/alienenergy.h \
@@ -94,7 +94,6 @@ HEADERS += \
     gui/microeditor/clusteredit.h \
     gui/microeditor/tokenedit.h \
     gui/macroeditor/markergraphicsitem.h \
-    model/decorators/impl/aliencellfunctioncomputer.h \
     model/decorators/impl/aliencellfunctionweapon.h \
     gui/microeditor/celledit.h \
     gui/microeditor/energyedit.h \
@@ -119,14 +118,17 @@ HEADERS += \
     model/simulationsettings.h \
     model/metadatamanager.h \
     gui/misc/startscreencontroller.h \
-    model/decorators/aliencellfunctiondecorator.h \
     model/entities/aliencell.h \
     model/entities/aliencellfactory.h \
     model/entities/impl/aliencellfactoryimpl.h \
     model/decorators/impl/aliencelldecoratorfactoryimpl.h \
     global/servicelocator.h \
-    model/decorators/impl/alienenergyguidancedecoratorimpl.h \
-    model/decorators/alienenergyguidancedecorator.h
+    model/decorators/aliencelldecorator.h \
+    model/decorators/aliencellfunctioncomputer.h \
+    model/decorators/aliencellfunction.h \
+    model/decorators/alienenergyguidance.h \
+    model/decorators/impl/alienenergyguidanceimpl.h \
+    model/decorators/impl/aliencellfunctioncomputerimpl.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
