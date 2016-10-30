@@ -11,6 +11,8 @@ public:
 
     virtual QString decompileInstructionCode () const = 0;
     virtual CompilationState injectAndCompileInstructionCode (QString code) = 0;
+
+    CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
     virtual void getInternalData (quint8* data) const = 0;
 
     struct CompilationState {

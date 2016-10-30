@@ -31,11 +31,7 @@ AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (QDataStream& strea
            >> _receivedMessage.distance;
 }
 
-void AlienCellFunctionCommunicator::execute (AlienToken* token,
-                                             AlienCell* cell,
-                                             AlienCell* previousCell,
-                                             AlienEnergy*& newParticle,
-                                             bool& decompose)
+AlienCell::ProcessingResult AlienCellFunctionCommunicator::process (AlienToken* token, AlienCell* previousCell)
 {
     COMMUNICATOR_IN cmd = readCommandFromToken(token);
     if( cmd == COMMUNICATOR_IN::SET_LISTENING_CHANNEL )

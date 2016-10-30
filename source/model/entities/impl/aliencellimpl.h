@@ -19,56 +19,54 @@ public:
 
     ProcessingResult process (AlienToken* token, AlienCell* cell, AlienCell* previousCell) {}
 
-    bool connectable (AlienCell* otherCell);
-    bool isConnectedTo (AlienCell* otherCell);
+    bool connectable (AlienCell* otherCell) const;
+    bool isConnectedTo (AlienCell* otherCell) const;
     void resetConnections (int maxConnections);
     void newConnection (AlienCell* otherCell);
     void delConnection (AlienCell* otherCell);
     void delAllConnection ();
-    int getNumConnections ();
-    int getMaxConnections ();
+    int getNumConnections () const;
+    int getMaxConnections () const;
     void setMaxConnections (int maxConnections);
-    AlienCell* getConnection (int i);
-    QVector3D calcNormal (QVector3D outerSpace, QMatrix4x4& transform);
+    AlienCell* getConnection (int i) const;
+    QVector3D calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const;
 
     void activatingNewTokens ();
-    const quint64& getId ();
+    const quint64& getId () const;
     void setId (quint64 id);
-    const quint64& getTag ();
+    const quint64& getTag () const;
     void setTag (quint64 tag);
-    int getNumToken (bool newTokenStackPointer = false);
-    AlienToken* getToken (int i);
+    int getNumToken (bool newTokenStackPointer = false) const;
+    AlienToken* getToken (int i) const;
     void addToken (AlienToken* token, bool activateNow = true, bool setAccessNumber = true);
     void delAllTokens ();
 
     void setCluster (AlienCellCluster* cluster);
-    AlienCellCluster* getCluster ();
-    QVector3D calcPosition (bool topologyCorrection = false);
+    AlienCellCluster* getCluster () const;
+    QVector3D calcPosition (bool topologyCorrection = false) const;
     void setAbsPosition (QVector3D pos);
     void setAbsPositionAndUpdateMap (QVector3D pos);
-    QVector3D getRelPos ();
+    QVector3D getRelPos () const;
     void setRelPos (QVector3D relPos);
 
-    int getTokenAccessNumber ();
+    int getTokenAccessNumber () const;
     void setTokenAccessNumber (int i);
-    bool blockToken ();
-    void setBlockToken (bool block);
-    qreal getEnergy();
-    qreal getEnergyIncludingTokens();
+    bool isTokenBlocked () const;
+    void setTokenBlocked (bool block);
+    qreal getEnergy() const;
+    qreal getEnergyIncludingTokens() const;
     void setEnergy (qreal i);
-    QVector< quint8 >& getMemory ();
+    QVector< quint8 >& getMemory () const;
 
     void serialize (QDataStream& stream);
 
-    QVector3D getVel ();
+    QVector3D getVel () const;
     void setVel (QVector3D vel);
-    quint8 getColor ();
+    quint8 getColor () const;
     void setColor (quint8 color);
 
 private:
     friend class AlienCellCluster;
-
-    AlienGrid*& _grid;
 
     QVector< AlienToken* > _tokenStack;
     QVector< AlienToken* > _newTokenStack;

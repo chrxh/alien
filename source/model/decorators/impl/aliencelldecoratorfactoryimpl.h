@@ -8,12 +8,12 @@ class AlienCellDecoratorFactoryImpl : public AlienCellDecoratorFactory
 public:
     ~AlienCellDecoratorFactoryImpl () {}
 
-    AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, AlienCellFunction::Type type, quint8* data, AlienGrid*& grid);
-    AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, AlienCellFunction::Type type, AlienGrid*& grid);
-    AlienCellFunctionDecorator* addCellFunction (AlienCell* cell, QDataStream& stream, AlienGrid*& grid);
-    AlienCellFunctionDecorator* addRandomCellFunction (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid);
+    AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, AlienGrid*& grid);
+    AlienCellFunction* addCellFunction (AlienCell* cell, QDataStream& stream, AlienGrid*& grid);
+    AlienCellFunction* addRandomCellFunction (AlienCell* cell, AlienGrid*& grid);
 
-    AlienEnergyGuidanceDecorator* addEnergyGuidance (AlienCell* cell, AlienGrid*& grid);
+    AlienEnergyGuidance* addEnergyGuidance (AlienCell* cell, AlienGrid*& grid);
 };
 
 #endif // ALIENCELLDECORATORFACTORYIMPL_H
