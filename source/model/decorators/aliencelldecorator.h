@@ -6,11 +6,11 @@
 class AlienCellDecorator : public AlienCell
 {
 public:
-    AlienCellDecorator (AlienCell* cell) : _cell(cell) {}
+    AlienCellDecorator (AlienCell* cell, AlienGrid*& grid) : AlienCell(grid), _cell(cell) {}
     virtual ~AlienCellDecorator () {}
 
     template< typename T >
-    T* extractObject (AlienCell* cell);
+    static T* findObject (AlienCell* cell);
 
 protected:
     AlienCell* _cell;
@@ -67,7 +67,7 @@ public: //redirect following methods to AlienCell
 
 
 template< typename T >
-T* AlienCellDecorator::extractObject (AlienCell* cell)
+T* AlienCellDecorator::findObject (AlienCell* cell)
 {
     T* object = dynamic_cast< T* >(cell);
     if( object )
@@ -75,7 +75,7 @@ T* AlienCellDecorator::extractObject (AlienCell* cell)
     else {
         AlienCellDecorator* decorator = dynamic_cast< AlienCellDecorator* >(cell);
         if( decorator )
-            return AlienCellDecorator::extractObject<T>(decorator->_cell);
+            return AlienCellDecorator::findObject<T>(decorator->_cell);
         else
             return 0;
     }

@@ -1,13 +1,14 @@
-#include "aliencellfunctioncomputerimpl.h"
-#include "../metadatamanager.h"
-#include "../entities/aliencell.h"
+#include "AlienCellFunctionComputerimpl.h"
+#include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
+#include "model/entities/aliencell.h"
+#include "model/entities/alientoken.h"
 
 #include <QString>
 #include <qdebug.h>
 
-AlienCellFunctionComputer::AlienCellFunctionComputer(bool randomData, AlienGrid*& grid)
-    : AlienCellFunction(grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
+AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, bool randomData, AlienGrid*& grid)
+    : AlienCellFunctionComputer(cell, grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
 {
     if( randomData ) {
 
@@ -24,8 +25,8 @@ AlienCellFunctionComputer::AlienCellFunctionComputer(bool randomData, AlienGrid*
     }
 }
 
-AlienCellFunctionComputer::AlienCellFunctionComputer (quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(grid), _code(), _numInstr(0)
+AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
+    : AlienCellFunctionComputer(cell, grid), _code(), _numInstr(0)
 {
     _numInstr = cellFunctionData[0];
     for( int i = 0; i < 3*_numInstr; ++i ) {
@@ -33,15 +34,30 @@ AlienCellFunctionComputer::AlienCellFunctionComputer (quint8* cellFunctionData, 
     }
 }
 
-AlienCellFunctionComputer::AlienCellFunctionComputer (QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(grid)
+AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunctionComputer(cell, grid)
 {
     stream >> _code >> _numInstr;
 }
 
 
-void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
+namespace {
+    quint8 convertToAddress (qint8 addr, quint32 size)
+    {
+        quint32 t((quint32)((quint8)addr));
+        return ((t % size) + size) % size;
+    }
+
+    bool isNameChar (const QChar& c)
+    {
+        return c.isLetterOrNumber() || (c == ':');
+    }
+}
+
+AlienCell::ProcessingResult AlienCellFunctionComputerImpl::process (AlienToken* token, AlienCell* previousCell)
 {
+    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
+
     bool condTable[simulationParameters.CELL_CODESIZE];
     int condPointer(0);
     int i(0);
@@ -61,7 +77,7 @@ void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* cell, Ali
             op1Pointer = (qint8*)&(token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)]);
         }
         if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
-            op1Pointer = (qint8*)&(cell->getMemory()[convertToAddress(op1, simulationParameters.CELL_MEMSIZE)]);
+            op1Pointer = (qint8*)&(_cell->getMemory()[convertToAddress(op1, simulationParameters.CELL_MEMSIZE)]);
 
         //operand 2: loading value
         if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::MEM) )
@@ -71,7 +87,7 @@ void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* cell, Ali
             op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
         }
         if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
-            op2 = cell->getMemory()[convertToAddress(op2, simulationParameters.CELL_MEMSIZE)];
+            op2 = _cell->getMemory()[convertToAddress(op2, simulationParameters.CELL_MEMSIZE)];
 
         //execute instruction
         bool execute = true;
@@ -158,9 +174,10 @@ void AlienCellFunctionComputer::execute (AlienToken* token, AlienCell* cell, Ali
                 condPointer--;
         }
     }
+    return processingResult;
 }
 
-QString AlienCellFunctionComputer::getCode ()
+QString AlienCellFunctionComputerImpl::decompileInstructionCode () const
 {
     QString text;
     QString textOp1, textOp2;
@@ -249,7 +266,7 @@ QString AlienCellFunctionComputer::getCode ()
     return text;
 }
 
-bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
+AlienCellFunctionComputer::CompilationState AlienCellFunctionComputerImpl::injectAndCompileInstructionCode (QString code)
 {
     enum State {
         LOOKING_FOR_INSTR_START,
@@ -263,6 +280,8 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
     };
     State state(LOOKING_FOR_INSTR_START);
     bool instructionRead(false);
+
+    int errorLine = 0;
 
     QString instr, op1, comp, op2;
     int instructionPointer(0);
@@ -323,7 +342,7 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
                 comp = c;
             }
             else if( isNameChar(c) || (c == '-') || (c == '_') || (c == '[') || (c == ']') || (c == '(') || (c == ')') )
-                return false;
+                return { false, errorLine };
         }
         break;
         case LOOKING_FOR_COMPARATOR : {
@@ -397,7 +416,7 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
                 else if( comp.toLower() == "<" )
                     instrN = static_cast<int>(COMPUTER_OPERATION::IFL);
                 else {
-                    return false;
+                    return {false, errorLine};
                 }
             }
             else if ( instr.toLower() == "else" )
@@ -405,7 +424,7 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
             else if ( instr.toLower() == "endif" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::ENDIF);
             else {
-                return false;
+                return {false, errorLine};
             }
 
             if( (instrN != static_cast<int>(COMPUTER_OPERATION::ELSE)) && (instrN != static_cast<int>(COMPUTER_OPERATION::ENDIF)) ) {
@@ -425,7 +444,7 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
                     op1.chop(1);
                 }
                 else {
-                    return false;
+                    return {false, errorLine};
                 }
 
                 if( (op2.left(2) == "[[") && (op2.right(2) == "]]") ) {
@@ -451,27 +470,27 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
                     bool ok(true);
                     op1N = op1.remove(0,2).toInt(&ok, 16);
                     if( !ok ) {
-                        return false;
+                        return {false, errorLine};
                     }
                 }
                 else {
                     bool ok(true);
                     op1N = op1.toInt(&ok, 10);
                     if( !ok )
-                        return false;
+                        return {false, errorLine};
                 }
                 if( op2.left(2) == "0x" ) {
                     bool ok(true);
                     op2N = op2.remove(0,2).toInt(&ok, 16);
                     if( !ok ) {
-                        return false;
+                        return {false, errorLine};
                     }
                 }
                 else {
                     bool ok(true);
                     op2N = op2.toInt(&ok, 10);
                     if( !ok ) {
-                        return false;
+                        return {false, errorLine};
                     }
                 }
             }
@@ -488,7 +507,7 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
             _numInstr++;
             errorLine++;
             if( instructionPointer == (3*simulationParameters.CELL_CODESIZE) )
-                return true;
+                return {true, errorLine};
 /*            instr.clear();
             op1.clear();
             op2.clear();
@@ -496,28 +515,27 @@ bool AlienCellFunctionComputer::compileCode (QString code, int& errorLine)
         }
     }
     if( state == LOOKING_FOR_INSTR_START )
-        return true;
+        return {true, errorLine};
     else {
-        return false;
+        return {false, errorLine};
     }
 }
 
-void AlienCellFunctionComputer::serialize (QDataStream& stream)
+void AlienCellFunctionComputerImpl::serialize (QDataStream& stream)
 {
     AlienCellFunction::serialize(stream);
     stream << _code << _numInstr;
 }
 
-void AlienCellFunctionComputer::getInternalData (quint8* data)
+void AlienCellFunctionComputerImpl::getInternalData (quint8* data)
 {
     data[0] = _numInstr;
     for( int i = 0; i < 3*_numInstr; ++i ) {
         data[i+1] = _code[i];
     }
-
 }
 
-void AlienCellFunctionComputer::codeInstruction (int& instructionPointer,
+void AlienCellFunctionComputerImpl::codeInstruction (int& instructionPointer,
                                                    quint8 instr,
                                                    quint8 opTyp1,
                                                    quint8 opTyp2,
@@ -533,12 +551,12 @@ void AlienCellFunctionComputer::codeInstruction (int& instructionPointer,
     instructionPointer += 3;
 }
 
-void AlienCellFunctionComputer::decodeInstruction (int& instructionPointer,
+void AlienCellFunctionComputerImpl::decodeInstruction (int& instructionPointer,
                                                         quint8& instr,
                                                         quint8& opTyp1,
                                                         quint8& opTyp2,
                                                         qint8& op1,
-                                                        qint8& op2)
+                                                        qint8& op2) const
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
     instr = (_code[instructionPointer] >> 4) & 0xF;
@@ -549,15 +567,4 @@ void AlienCellFunctionComputer::decodeInstruction (int& instructionPointer,
 
     //increment instruction pointer
     instructionPointer += 3;
-}
-
-quint8 AlienCellFunctionComputer::convertToAddress (qint8 addr, quint32 size)
-{
-    quint32 t((quint32)((quint8)addr));
-    return ((t % size) + size) % size;
-}
-
-bool AlienCellFunctionComputer::isNameChar (const QChar& c)
-{
-    return c.isLetterOrNumber() || (c == ':');
 }

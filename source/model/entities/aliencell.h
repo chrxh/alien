@@ -11,14 +11,15 @@ class AlienToken;
 class AlienCell
 {
 public:
-    AlienCell (AlienGrid*& _grid) : _grid(grid) {}
+    AlienCell (AlienGrid*& grid) : _grid(grid) {}
     virtual ~AlienCell() {}
 
-    virtual ProcessingResult process (AlienToken* token, AlienCell* previousCell) = 0;
     struct ProcessingResult {
         bool decompose;
         AlienEnergy* newEnergyParticle;
     };
+
+    virtual ProcessingResult process (AlienToken* token, AlienCell* previousCell) = 0;
 
     virtual bool connectable (AlienCell* otherCell) const = 0;
     virtual bool isConnectedTo (AlienCell* otherCell) const = 0;

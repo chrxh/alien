@@ -1,18 +1,19 @@
 #include "aliencellfunctioncommunicator.h"
-#include "../entities/aliencell.h"
-#include "../entities/aliencellcluster.h"
-#include "../physics/physics.h"
+#include "model/entities/aliencell.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/alientoken.h"
+#include "model/physics/physics.h"
 
 #include <QString>
 
-AlienCellFunctionCommunicator::AlienCellFunctionCommunicator(AlienGrid*& grid)
-    : AlienCellFunction(grid)
+AlienCellFunctionCommunicator::AlienCellFunctionCommunicator(AlienCell* cell, AlienGrid*& grid)
+    : AlienCellFunction(cell, grid)
 {
 
 }
 
-AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunctionCommunicator(grid)
+AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
+    : AlienCellFunctionCommunicator(cell, grid)
 {
     _newMessageReceived = static_cast<bool>(cellFunctionData[0]);
     _receivedMessage.channel = cellFunctionData[1];
@@ -21,8 +22,8 @@ AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (quint8* cellFuncti
     _receivedMessage.distance = cellFunctionData[4];
 }
 
-AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunctionCommunicator(grid)
+AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunctionCommunicator(cell, grid)
 {
     stream >> _newMessageReceived
            >> _receivedMessage.channel
@@ -33,13 +34,15 @@ AlienCellFunctionCommunicator::AlienCellFunctionCommunicator (QDataStream& strea
 
 AlienCell::ProcessingResult AlienCellFunctionCommunicator::process (AlienToken* token, AlienCell* previousCell)
 {
+    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
     COMMUNICATOR_IN cmd = readCommandFromToken(token);
     if( cmd == COMMUNICATOR_IN::SET_LISTENING_CHANNEL )
         setListeningChannel(token);
     if( cmd == COMMUNICATOR_IN::SEND_MESSAGE )
-        sendMessageToNearbyCommunicatorsAndUpdateToken(token, cell, previousCell);
+        sendMessageToNearbyCommunicatorsAndUpdateToken(token, _cell, previousCell);
     if( cmd == COMMUNICATOR_IN::RECEIVE_MESSAGE )
-        receiveMessage(token, cell, previousCell);
+        receiveMessage(token, _cell, previousCell);
+    return processingResult;
 }
 
 void AlienCellFunctionCommunicator::serialize (QDataStream& stream)
@@ -62,7 +65,7 @@ void AlienCellFunctionCommunicator::getInternalData (quint8* data)
     data[4] = _receivedMessage.distance;
 }
 
-AlienCellFunctionCommunicator::COMMUNICATOR_IN AlienCellFunctionCommunicator::readCommandFromToken (AlienToken* token) const
+COMMUNICATOR_IN AlienCellFunctionCommunicator::readCommandFromToken (AlienToken* token) const
 {
     return static_cast<COMMUNICATOR_IN>(token->memory[static_cast<int>(COMMUNICATOR::IN)] % 4);
 }
@@ -104,7 +107,8 @@ QList< AlienCell* > AlienCellFunctionCommunicator::findNearbyCommunicator(AlienC
     AlienGrid::CellSelectFunction cellSelectCommunicatorFunction =
         [](AlienCell* cell)
         {
-            return cell->getCellFunction()->getCellFunctionName() == "COMMUNICATOR";
+            AlienCellFunction* cellFunction = AlienCellDecorator::findObject<AlienCellFunction>(cell);
+            return cellFunction && (cellFunction->getType() == CellFunctionType::COMMUNICATOR);
         };
     QVector3D cellPos = cell->calcPosition();
     qreal range = simulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE;
@@ -116,7 +120,7 @@ bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (c
                                                                        AlienCell* senderPreviousCell,
                                                                        AlienCell* receiverCell) const
 {
-    AlienCellFunctionCommunicator* communicator = getCommunicator(receiverCell);
+    AlienCellFunctionCommunicator* communicator = AlienCellDecorator::findObject<AlienCellFunctionCommunicator>(receiverCell);
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
@@ -131,14 +135,6 @@ bool AlienCellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (c
         }
     }
     return false;
-}
-
-AlienCellFunctionCommunicator* AlienCellFunctionCommunicator::getCommunicator (AlienCell* cell) const
-{
-    AlienCellFunction* cellFunction = cell->getCellFunction();
-    if( cellFunction->getCellFunctionName() == "COMMUNICATOR" )
-        return static_cast< AlienCellFunctionCommunicator* >(cellFunction);
-    return 0;
 }
 
 QVector3D AlienCellFunctionCommunicator::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend,
