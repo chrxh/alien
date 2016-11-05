@@ -42,13 +42,13 @@ namespace {
     AlienCell* constructNewCell (AlienCell* baseCell, QVector3D posOfNewCell, int maxConnections
         , int tokenAccessNumber, int cellType, quint8* cellFunctionData, AlienGrid*& grid)
     {
-        EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>("EntityFactory");
+        EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
         AlienCell* newCell = entityFactory->buildCell(simulationParameters.NEW_CELL_ENERGY, grid);
         AlienCellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
         newCell->setTokenAccessNumber(tokenAccessNumber);
-        AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>("AlienCellDecoratorFactory");
+        AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
         decoratorFactory->addCellFunction(newCell, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
         decoratorFactory->addEnergyGuidance(newCell, grid);
         newCell->setColor(baseCell->getColor());
