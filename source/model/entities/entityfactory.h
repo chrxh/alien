@@ -1,15 +1,16 @@
-#ifndef ALIENCELLFACTORY_H
-#define ALIENCELLFACTORY_H
+#ifndef ENTITYFACTORY_H
+#define ENTITYFACTORY_H
 
 #include <QtGlobal>
 #include <QVector3D>
 
 class AlienCell;
 class AlienGrid;
-class AlienCellFactory
+
+class EntityFactory
 {
 public:
-    virtual ~AlienCellFactory () {}
+    virtual ~EntityFactory () {}
     virtual AlienCell* buildCellWithRandomData (qreal energy, AlienGrid*& grid) = 0;
     virtual AlienCell* buildCell (qreal energy,
                              AlienGrid*& grid,
@@ -23,4 +24,4 @@ public:
     virtual AlienCell* buildCellWithoutConnectingCells (QDataStream& stream,
                              AlienGrid*& grid) = 0;
 };
-#endif // ALIENCELLFACTORY_H
+#endif // ENTITYFACTORY_H

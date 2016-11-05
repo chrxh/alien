@@ -7,7 +7,7 @@ class AlienCellDecorator : public AlienCell
 {
 public:
     AlienCellDecorator (AlienCell* cell, AlienGrid*& grid) : AlienCell(grid), _cell(cell) {}
-    virtual ~AlienCellDecorator () {}
+    virtual ~AlienCellDecorator ();
 
     template< typename T >
     static T* findObject (AlienCell* cell);

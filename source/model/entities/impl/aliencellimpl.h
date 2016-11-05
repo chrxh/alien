@@ -5,6 +5,7 @@
 
 #include <QtGlobal>
 #include <QVector3D>
+#include <QVector>
 
 class AlienCellImpl : public AlienCell
 {
@@ -17,7 +18,7 @@ public:
     AlienCellImpl (QDataStream& stream, AlienGrid*& grid);     //build without connecting cells
     ~AlienCellImpl();
 
-    ProcessingResult process (AlienToken* token, AlienCell* cell, AlienCell* previousCell) {}
+    ProcessingResult process (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
 
     bool connectable (AlienCell* otherCell) const;
     bool isConnectedTo (AlienCell* otherCell) const;
