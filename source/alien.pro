@@ -59,13 +59,13 @@ SOURCES += main.cpp \
     model/metadatamanager.cpp \
     gui/misc/startscreencontroller.cpp \
     gui/guisettings.cpp \
-    model/entities/impl/aliencellfactoryimpl.cpp \
     model/decorators/impl/aliencelldecoratorfactoryimpl.cpp \
     global/servicelocator.cpp \
     model/decorators/impl/alienenergyguidancedecoratorimpl.cpp \
     model/decorators/impl/aliencellfunctioncomputerimpl.cpp \
     model/decorators/aliencellfunctioncomputer.cpp \
-    model/decorators/aliencelldecorator.cpp
+    model/decorators/aliencelldecorator.cpp \
+    model/entities/impl/entityfactoryimpl.cpp
 HEADERS += \
     model/entities/impl/aliencellimpl.h \
     model/entities/aliencellcluster.h \
@@ -120,8 +120,6 @@ HEADERS += \
     model/metadatamanager.h \
     gui/misc/startscreencontroller.h \
     model/entities/aliencell.h \
-    model/entities/aliencellfactory.h \
-    model/entities/impl/aliencellfactoryimpl.h \
     model/decorators/impl/aliencelldecoratorfactoryimpl.h \
     global/servicelocator.h \
     model/decorators/aliencelldecorator.h \
@@ -130,7 +128,9 @@ HEADERS += \
     model/decorators/alienenergyguidance.h \
     model/decorators/impl/alienenergyguidanceimpl.h \
     model/decorators/impl/aliencellfunctioncomputerimpl.h \
-    model/decorators/constants.h
+    model/decorators/constants.h \
+    model/entities/entityfactory.h \
+    model/entities/impl/entityfactoryimpl.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \

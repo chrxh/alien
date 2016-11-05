@@ -1,13 +1,13 @@
 #ifndef ALIENCELLFACTORYIMPL_H
 #define ALIENCELLFACTORYIMPL_H
 
-#include "model/entities/aliencellfactory.h"
+#include "model/entities/entityfactory.h"
 
-class AlienCellFactoryImpl : public AlienCellFactory
+class EntityFactoryImpl : public EntityFactory
 {
 public:
 
-    ~AlienCellFactoryImpl () {}
+    ~EntityFactoryImpl () {}
 
     AlienCell* buildCellWithRandomData (qreal energy, AlienGrid*& grid) = 0;
     AlienCell* buildCell (qreal energy, AlienGrid*& grid, int maxConnections = 0

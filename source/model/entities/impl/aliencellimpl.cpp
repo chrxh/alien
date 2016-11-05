@@ -165,11 +165,15 @@ AlienCellImpl::~AlienCellImpl()
 {
     for(int i = 0; i < _tokenStackPointer; ++i )
         delete _tokenStack[i];
-    delete _cellFunction;
     for(int i = 0; i < _newTokenStackPointer; ++i )
         delete _newTokenStack[i];
     if( _maxConnections > 0 )
         delete _connectingCells;
+}
+
+AlienCell::ProcessingResult AlienCellImpl::process (AlienToken* token, AlienCell* cell, AlienCell* previousCell)
+{
+    return {false, 0};
 }
 
 bool AlienCellImpl::connectable (AlienCell* otherCell) const

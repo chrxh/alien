@@ -1,5 +1,10 @@
 #include "aliencelldecorator.h"
 
+AlienCellDecorator::~AlienCellDecorator ()
+{
+    delete _cell;
+}
+
 AlienCell::ProcessingResult AlienCellDecorator::process (AlienToken* token, AlienCell* previousCell)
 {
     return _cell->process(token, previousCell);
