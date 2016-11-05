@@ -171,7 +171,7 @@ AlienCellImpl::~AlienCellImpl()
         delete _connectingCells;
 }
 
-AlienCell::ProcessingResult AlienCellImpl::process (AlienToken* token, AlienCell* cell, AlienCell* previousCell)
+AlienCell::ProcessingResult AlienCellImpl::process (AlienToken* token, AlienCell* previousCell)
 {
     return {false, 0};
 }

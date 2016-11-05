@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QMap>
+#include <typeinfo>
 
 class ServiceLocator
 {
@@ -10,10 +11,10 @@ public:
     static ServiceLocator& getInstance ();
 
     template< typename T >
-    void registerService (const QString& name, T* service);
+    void registerService (T* service);
 
     template< typename T >
-    T* getService (const QString& name);
+    T* getService ();
 
 private:
     ServiceLocator () {}
@@ -23,22 +24,23 @@ public:
     void operator= (ServiceLocator const&) = delete;
 
 private:
-    QMap< QString, void* > _services;
+    QMap< size_t, void* > _services;
 };
 
 
 //implementations
 template< typename T >
-void ServiceLocator::registerService (const QString& name, T* service)
+void ServiceLocator::registerService (T* service)
 {
-    _services[name] = service;
+    _services[typeid(T).hash_code()] = service;
 }
 
 template< typename T >
-T* ServiceLocator::getService (const QString& name)
+T* ServiceLocator::getService ()
 {
-    if( _services.contains(name) )
-        return static_cast< T* >(_services[name]);
+    size_t hashCode = typeid(T).hash_code();
+    if( _services.contains(hashCode) )
+        return static_cast< T* >(_services[hashCode]);
     else
         return static_cast< T* >(0);
 }
