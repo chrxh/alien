@@ -6,10 +6,9 @@
 class AlienEnergyGuidance: public AlienCellDecorator
 {
 public:
+    AlienEnergyGuidance (AlienCell* cell, AlienGrid*& grid) : AlienCellDecorator(cell, grid) {}
 
-    AlienEnergyGuidance (AlienCell* cell) : AlienCellDecorator(cell) {}
-
-    virtual ~AlienEnergyGuidance ();
+    virtual ~AlienEnergyGuidance () {}
 };
 
 #endif // ALIENENERGYGUIDANCE_H

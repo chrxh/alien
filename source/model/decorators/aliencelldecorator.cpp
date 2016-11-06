@@ -5,6 +5,12 @@ AlienCellDecorator::~AlienCellDecorator ()
     delete _cell;
 }
 
+void AlienCellDecorator::serialize (QDataStream& stream) const
+{
+    _cell->serialize(stream);
+}
+
+
 AlienCell::ProcessingResult AlienCellDecorator::process (AlienToken* token, AlienCell* previousCell)
 {
     return _cell->process(token, previousCell);
