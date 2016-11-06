@@ -91,4 +91,54 @@ enum class CONSTR_IN_OPTION {
     FINISH_WITH_TOKEN_SEP_RED
 };
 
+enum class PROP {
+    OUT = 5,
+    IN = 8,
+    IN_ANGLE = 9,
+    IN_POWER = 10
+};
+enum class PROP_OUT {
+    SUCCESS,
+    SUCCESS_DAMPING_FINISHED,
+    ERROR_NO_ENERGY
+};
+enum class PROP_IN {
+    DO_NOTHING,
+    BY_ANGLE,
+    FROM_CENTER,
+    TOWARD_CENTER,
+    ROTATION_CLOCKWISE,
+    ROTATION_COUNTERCLOCKWISE,
+    DAMP_ROTATION
+};
+
+enum class SENSOR {
+    OUT = 5,
+    IN = 20,
+    INOUT_ANGLE = 21,
+    IN_MIN_MASS = 22,
+    IN_MAX_MASS = 23,
+    OUT_MASS = 24,
+    OUT_DISTANCE = 25
+};
+enum class SENSOR_IN {
+    DO_NOTHING,
+    SEARCH_VICINITY,
+    SEARCH_BY_ANGLE,
+    SEARCH_FROM_CENTER,
+    SEARCH_TOWARD_CENTER
+};
+enum class SENSOR_OUT {
+    NOTHING_FOUND,
+    CLUSTER_FOUND
+};
+
+enum class WEAPON {
+    OUT = 5,
+};
+enum class WEAPON_OUT {
+    NO_TARGET,
+    STRIKE_SUCCESSFUL
+};
+
 #endif // CONSTANTS_H

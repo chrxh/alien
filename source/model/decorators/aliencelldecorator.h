@@ -12,6 +12,8 @@ public:
     template< typename T >
     static T* findObject (AlienCell* cell);
 
+    virtual void serialize (QDataStream& stream) const;
+
 protected:
     AlienCell* _cell;
 

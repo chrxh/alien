@@ -1,11 +1,17 @@
 #include "alienenergyguidanceimpl.h"
 
-AlienEnergyGuidanceDecoratorImpl::AlienEnergyGuidanceDecoratorImpl ()
+#include "model/entities/alientoken.h"
+#include "model/decorators/constants.h"
+#include "model/simulationsettings.h"
+
+
+AlienEnergyGuidanceImpl::AlienEnergyGuidanceImpl (AlienCell* cell, AlienGrid*& grid)
+    : AlienEnergyGuidance(cell, grid)
 {
 
 }
 
-AlienCell::ProcessingResult AlienEnergyGuidanceDecoratorImpl::process (AlienToken* token, AlienCell* previousCell)
+AlienCell::ProcessingResult AlienEnergyGuidanceImpl::process (AlienToken* token, AlienCell* previousCell)
 {
     quint8 cmd = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN)] % 6;
     qreal valueCell = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_CELL)];
@@ -13,50 +19,50 @@ AlienCell::ProcessingResult AlienEnergyGuidanceDecoratorImpl::process (AlienToke
     qreal amount = 10.0;
 
     if( cmd == static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_CELL) ) {
-        if( cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell) ) {
-            cell->setEnergy(cell->getEnergy()-amount);
+        if( _cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell) ) {
+            _cell->setEnergy(_cell->getEnergy()-amount);
             token->energy += amount;
         }
-        if( cell->getEnergy() < (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell) ) {
+        if( _cell->getEnergy() < (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell) ) {
             if( token->energy > (simulationParameters.MIN_TOKEN_ENERGY+valueToken+amount) ) {
-                cell->setEnergy(cell->getEnergy()+amount);
+                _cell->setEnergy(_cell->getEnergy()+amount);
                 token->energy -= amount;
             }
         }
     }
     if( cmd == static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_TOKEN) ) {
         if( token->energy > (simulationParameters.MIN_TOKEN_ENERGY+valueToken) ) {
-            cell->setEnergy(cell->getEnergy()+amount);
+            _cell->setEnergy(_cell->getEnergy()+amount);
             token->energy -= amount;
         }
         if( token->energy < (simulationParameters.MIN_TOKEN_ENERGY+valueToken) ) {
-            if( cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount) ) {
-                cell->setEnergy(cell->getEnergy()-amount);
+            if( _cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount) ) {
+                _cell->setEnergy(_cell->getEnergy()-amount);
                 token->energy += amount;
             }
         }
     }
     if( cmd == static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_BOTH) ) {
         if( (token->energy > (simulationParameters.MIN_TOKEN_ENERGY+valueToken+amount))
-                && (cell->getEnergy() < (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell)) ) {
-            cell->setEnergy(cell->getEnergy()+amount);
+                && (_cell->getEnergy() < (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell)) ) {
+            _cell->setEnergy(_cell->getEnergy()+amount);
             token->energy -= amount;
         }
         if( (token->energy < (simulationParameters.MIN_TOKEN_ENERGY+valueToken))
-                && (cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount)) ) {
-            cell->setEnergy(cell->getEnergy()-amount);
+                && (_cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount)) ) {
+            _cell->setEnergy(_cell->getEnergy()-amount);
             token->energy += amount;
         }
     }
     if( cmd == static_cast<int>(ENERGY_GUIDANCE_IN::HARVEST_CELL) ) {
-        if( cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount) ) {
-            cell->setEnergy(cell->getEnergy()-amount);
+        if( _cell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount) ) {
+            _cell->setEnergy(_cell->getEnergy()-amount);
             token->energy += amount;
         }
     }
     if( cmd == static_cast<int>(ENERGY_GUIDANCE_IN::HARVEST_TOKEN) ) {
         if( token->energy > (simulationParameters.MIN_TOKEN_ENERGY+valueToken+amount) ) {
-            cell->setEnergy(cell->getEnergy()+amount);
+            _cell->setEnergy(_cell->getEnergy()+amount);
             token->energy -= amount;
         }
     }

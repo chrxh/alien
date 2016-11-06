@@ -61,11 +61,11 @@ SOURCES += main.cpp \
     gui/guisettings.cpp \
     model/decorators/impl/aliencelldecoratorfactoryimpl.cpp \
     global/servicelocator.cpp \
-    model/decorators/impl/alienenergyguidancedecoratorimpl.cpp \
     model/decorators/impl/aliencellfunctioncomputerimpl.cpp \
     model/decorators/aliencellfunctioncomputer.cpp \
     model/decorators/aliencelldecorator.cpp \
-    model/entities/impl/entityfactoryimpl.cpp
+    model/entities/impl/entityfactoryimpl.cpp \
+    model/decorators/impl/alienenergyguidanceimpl.cpp
 HEADERS += \
     model/entities/impl/aliencellimpl.h \
     model/entities/aliencellcluster.h \

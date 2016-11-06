@@ -59,7 +59,7 @@ public:
     void setEnergy (qreal i);
     QVector< quint8 >& getMemory () const;
 
-    void serialize (QDataStream& stream);
+    void serialize (QDataStream& stream) const;
 
     QVector3D getVel () const;
     void setVel (QVector3D vel);

@@ -523,7 +523,7 @@ AlienCellFunctionComputer::CompilationState AlienCellFunctionComputerImpl::injec
 
 void AlienCellFunctionComputerImpl::serialize (QDataStream& stream)
 {
-    AlienCellFunction::serialize(stream);
+    AlienCellDecorator::serialize(stream);
     stream << _code << _numInstr;
 }
 
