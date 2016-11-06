@@ -1,5 +1,7 @@
 #include "aliencellimpl.h"
+
 #include "model/entities/aliencellcluster.h"
+#include "model/entities/alientoken.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 
@@ -9,7 +11,7 @@
 
 AlienCellImpl::AlienCellImpl (qreal energy, AlienGrid*& grid, bool random,
                               int maxConnections, int tokenAccessNumber, QVector3D relPos)
-    : _grid(grid),
+    : AlienCell(grid),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _tokenStackPointer(0),
@@ -46,7 +48,7 @@ AlienCellImpl::AlienCellImpl (qreal energy, AlienGrid*& grid, bool random,
 
 AlienCellImpl::AlienCellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells,
                               AlienGrid*& grid)
-    : _grid(grid),
+    : AlienCell(grid),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _memory(simulationParameters.CELL_MEMSIZE)
@@ -103,14 +105,11 @@ AlienCellImpl::AlienCellImpl (QDataStream& stream, QMap< quint64, QList< quint64
 }
 
 AlienCellImpl::AlienCellImpl (QDataStream& stream, AlienGrid*& grid)
-    : _grid(grid),
+    : AlienCell(grid),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _memory(simulationParameters.CELL_MEMSIZE)
 {
-
-    //cell function
-    _cellFunction = AlienCellImplFunctionFactory::build(stream, _grid);
 
     //token stack
     stream >> _tokenStackPointer;
@@ -178,7 +177,7 @@ AlienCell::ProcessingResult AlienCellImpl::process (AlienToken* token, AlienCell
 
 bool AlienCellImpl::connectable (AlienCell* otherCell) const
 {
-    return (_numConnections < _maxConnections) && (otherCell->_numConnections < otherCell->_maxConnections);
+    return (_numConnections < _maxConnections) && (otherCell->getNumConnections() < otherCell->getMaxConnections());
 }
 
 bool AlienCellImpl::isConnectedTo (AlienCell* otherCell) const
@@ -198,15 +197,15 @@ void AlienCellImpl::resetConnections (int maxConnections)
     //set up new array
     _maxConnections = maxConnections;
     _numConnections = 0;
-    _connectingCells = new AlienCellImpl*[maxConnections];
+    _connectingCells = new AlienCell*[maxConnections];
 }
 
 void AlienCellImpl::newConnection (AlienCell* otherCell)
 {
     _connectingCells[_numConnections] = otherCell;
     _numConnections++;
-    otherCell->_connectingCells[otherCell->_numConnections] = this;
-    otherCell->_numConnections++;
+    otherCell->setConnection(otherCell->getNumConnections(), this);
+    otherCell->setNumConnections(otherCell->getNumConnections()+1);
 }
 
 void AlienCellImpl::delConnection (AlienCell* otherCell)
@@ -220,12 +219,12 @@ void AlienCellImpl::delConnection (AlienCell* otherCell)
             break;
         }
     }
-    for( int i = 0; i < otherCell->_numConnections; ++i ) {
-        if( otherCell->_connectingCells[i] == this ) {
-            for( int j = i+1; j < otherCell->_numConnections; ++j ) {
-                otherCell->_connectingCells[j-1] = otherCell->_connectingCells[j];
+    for( int i = 0; i < otherCell->getNumConnections(); ++i ) {
+        if( otherCell->getConnection(i) == this ) {
+            for( int j = i+1; j < otherCell->getNumConnections(); ++j ) {
+                otherCell->setConnection(j-1, otherCell->getConnection(j));
             }
-            otherCell->_numConnections--;
+            otherCell->setNumConnections(otherCell->getNumConnections()-1);
             break;
         }
     }
@@ -234,13 +233,13 @@ void AlienCellImpl::delConnection (AlienCell* otherCell)
 void AlienCellImpl::delAllConnection ()
 {
     for( int i = 0; i < _numConnections; ++i ) {
-        AlienCellImpl* otherCell(_connectingCells[i]);
-        for( int j = 0; j < otherCell->_numConnections; ++j ) {
-            if( otherCell->_connectingCells[j] == this ) {
-                for( int k = j+1; k < otherCell->_numConnections; ++k ) {
-                    otherCell->_connectingCells[k-1] = otherCell->_connectingCells[k];
+        AlienCell* otherCell(_connectingCells[i]);
+        for( int j = 0; j < otherCell->getNumConnections(); ++j ) {
+            if( otherCell->getConnection(j) == this ) {
+                for( int k = j+1; k < otherCell->getNumConnections(); ++k ) {
+                    otherCell->setConnection(k-1, otherCell->getConnection(k));
                 }
-                otherCell->_numConnections--;
+                otherCell->setNumConnections(otherCell->getNumConnections()-1);
                 break;
             }
         }
@@ -253,6 +252,11 @@ int AlienCellImpl::getNumConnections () const
     return _numConnections;
 }
 
+void AlienCellImpl::setNumConnections (int num)
+{
+    _numConnections = num;
+}
+
 int AlienCellImpl::getMaxConnections () const
 {
     return _maxConnections;
@@ -262,7 +266,7 @@ void AlienCellImpl::setMaxConnections (int maxConnections)
 {
 
     //new array
-    AlienCellImpl** newArray = new AlienCellImpl*[maxConnections];
+    AlienCell** newArray = new AlienCell*[maxConnections];
     if( _connectingCells ) {
 
         //copy old array
@@ -280,9 +284,14 @@ void AlienCellImpl::setMaxConnections (int maxConnections)
 }
 
 
-AlienCellImpl* AlienCellImpl::getConnection (int i) const
+AlienCell* AlienCellImpl::getConnection (int i) const
 {
     return _connectingCells[i];
+}
+
+void AlienCellImpl::setConnection (int i, AlienCell* cell)
+{
+    _connectingCells[i] = cell;
 }
 
 QVector3D AlienCellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const
@@ -293,8 +302,8 @@ QVector3D AlienCellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform
 
     //find adjacent cells to the outerSpace vector
     outerSpace.normalize();
-    AlienCellImpl* minCell(0);
-    AlienCellImpl* maxCell(0);
+    AlienCell* minCell(0);
+    AlienCell* maxCell(0);
     QVector3D minVector(0.0, 0.0, 0.0);
     QVector3D maxVector(0.0, 0.0, 0.0);
     qreal minH(0.0);
@@ -303,7 +312,7 @@ QVector3D AlienCellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform
     for(int i = 0; i < _numConnections; ++i) {
 
         //calculate h (angular distance from outerSpace vector)
-        QVector3D u = (transform.map(_connectingCells[i]->_relPos)-transform.map(_relPos)).normalized();
+        QVector3D u = (transform.map(_connectingCells[i]->getRelPos())-transform.map(_relPos)).normalized();
         qreal h = QVector3D::dotProduct(outerSpace, u);
         if( (outerSpace.x()*u.y()-outerSpace.y()*u.x()) < 0.0 )
             h = -2 - h;
@@ -328,7 +337,7 @@ QVector3D AlienCellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform
 
     //one adjacent cells?
     if( minCell == maxCell ) {
-        return transform.map(_relPos)-transform.map(minCell->_relPos);
+        return transform.map(_relPos)-transform.map(minCell->getRelPos());
     }
 
     //calc normal vectors
@@ -492,7 +501,7 @@ void AlienCellImpl::setEnergy (qreal i)
     _energy = i;
 }
 
-QVector< quint8 >& AlienCellImpl::getMemory () const
+QVector< quint8 >& AlienCellImpl::getMemoryReference ()
 {
     return _memory;
 }
@@ -511,7 +520,7 @@ void AlienCellImpl::serialize (QDataStream& stream) const
 
     //connecting cells
     for( int i = 0; i < _numConnections; ++i) {
-        stream << _connectingCells[i]->_id;
+        stream << _connectingCells[i]->getId();
     }
 
     //remaining data
