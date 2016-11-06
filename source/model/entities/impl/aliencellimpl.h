@@ -67,6 +67,11 @@ public:
     void setVel (QVector3D vel);
     quint8 getColor () const;
     void setColor (quint8 color);
+    int getProtectionCounter () const;
+    void setProtectionCounter (int counter);
+    bool isToBeKilled() const;
+    void setToBeKilled (bool toBeKilled);
+    AlienToken* takeTokenFromStack ();
 
 private:
     friend class AlienCellCluster;

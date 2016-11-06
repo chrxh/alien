@@ -549,3 +549,33 @@ void AlienCellImpl::setColor (quint8 color)
 {
     _color = color;
 }
+
+int AlienCellImpl::getProtectionCounter () const
+{
+    return _protectionCounter;
+}
+
+void AlienCellImpl::setProtectionCounter (int counter)
+{
+    _protectionCounter = counter;
+}
+
+bool AlienCellImpl::isToBeKilled() const
+{
+    return _toBeKilled;
+}
+
+void AlienCellImpl::setToBeKilled (bool toBeKilled)
+{
+    _toBeKilled = toBeKilled;
+}
+
+AlienToken* AlienCellImpl::takeTokenFromStack ()
+{
+    if( _newTokenStackPointer == 0 )
+        return 0;
+    else {
+        return _tokenStack[--_tokenStackPointer];
+    }
+}
+

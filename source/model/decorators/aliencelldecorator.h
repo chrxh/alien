@@ -66,6 +66,11 @@ public: //redirect following methods to AlienCell
     virtual void setVel (QVector3D vel);
     virtual quint8 getColor () const;
     virtual void setColor (quint8 color);
+    virtual int getProtectionCounter () const;
+    virtual void setProtectionCounter (int counter);
+    virtual bool isToBeKilled() const;
+    virtual void setToBeKilled (bool toBeKilled);
+    virtual AlienToken* takeTokenFromStack ();
 };
 
 

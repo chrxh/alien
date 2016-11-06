@@ -68,6 +68,12 @@ public:
     virtual void setVel (QVector3D vel) = 0;
     virtual quint8 getColor () const = 0;
     virtual void setColor (quint8 color) = 0;
+    virtual int getProtectionCounter () const = 0;
+    virtual void setProtectionCounter (int counter) = 0;
+    virtual bool isToBeKilled() const = 0;
+    virtual void setToBeKilled (bool toBeKilled) = 0;
+    virtual AlienToken* takeTokenFromStack () = 0;
+
 
 protected:
     AlienGrid*& _grid;

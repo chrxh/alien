@@ -1,12 +1,14 @@
 #include "aliencellcluster.h"
 
-#include "../physics/physics.h"
-#include "../processing/aliencellfunction.h"
+#include "model/entities/alientoken.h"
+#include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 #include "global/global.h"
 
 #include <QMatrix4x4>
 #include <qmath.h>
+
+const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
 AlienCellCluster* AlienCellCluster::buildEmptyCellCluster (AlienGrid*& grid)
 {
@@ -49,13 +51,13 @@ AlienCellCluster::~AlienCellCluster ()
 void AlienCellCluster::clearCellsFromMap ()
 {
     foreach( AlienCell* cell, _cells) {
-        _grid->removeCellIfPresent(_transform.map(cell->_relPos), cell);
+        _grid->removeCellIfPresent(_transform.map(cell->getRelPos()), cell);
     }
 }
 
 void AlienCellCluster::clearCellFromMap (AlienCell* cell)
 {
-    _grid->removeCellIfPresent(_transform.map(cell->_relPos), cell);
+    _grid->removeCellIfPresent(_transform.map(cell->getRelPos()), cell);
 }
 
 void AlienCellCluster::drawCellsToMap ()
@@ -75,9 +77,9 @@ void AlienCellCluster::movementProcessingStep1 ()
 
         //remove particle from old position
         //-> note that due to numerical effect during fusion position can be slightly changed
-        _grid->removeCell(_transform.map(cell->_relPos));
-        if( cell->_protectionCounter > 0 )
-            cell->_protectionCounter--;
+        _grid->removeCell(_transform.map(cell->getRelPos()));
+        if( cell->getProtectionCounter() > 0 )
+            cell->setProtectionCounter(cell->getProtectionCounter()-1);
     }
 }
 
@@ -98,7 +100,9 @@ void AlienCellCluster::movementProcessingStep2 (QList< AlienCellCluster* >& frag
         AlienEnergy* energyParticle(0);
 
         //radiation of cell
-        radiation(cell->_energy, cell, energyParticle);
+        qreal cellEnergy = cell->getEnergy();
+        radiation(cellEnergy, cell, energyParticle);
+        cell->setEnergy(cellEnergy);
         if( energyParticle )
             energyParticles << energyParticle;
 
@@ -113,15 +117,15 @@ void AlienCellCluster::movementProcessingStep2 (QList< AlienCellCluster* >& frag
         }
 
         //kill cell?
-        if( (cell->_toBeKilled || (cell->_energy < simulationParameters.CRIT_CELL_TRANSFORM_ENERGY)) ) {
-            qreal kinEnergy = Physics::kineticEnergy(1.0, cell->_vel, 0.0, 0.0);
+        if( (cell->isToBeKilled() || (cell->getEnergy() < simulationParameters.CRIT_CELL_TRANSFORM_ENERGY)) ) {
+            qreal kinEnergy = Physics::kineticEnergy(1.0, cell->getVel(), 0.0, 0.0);
             qreal internalEnergy = cell->getEnergyIncludingTokens();
             energyParticle =  new AlienEnergy(internalEnergy + kinEnergy / simulationParameters.INTERNAL_TO_KINETIC_ENERGY,
                                               calcPosition(cell, true),
-                                              cell->_vel, _grid);
+                                              cell->getVel(), _grid);
             energyParticle->color = cell->getColor();
             energyParticles << energyParticle;
-            cell->_energy = 0;
+            cell->setEnergy(0.0);
 
             //remove cell and all references
             cell->delAllConnection();
@@ -154,7 +158,7 @@ void AlienCellCluster::movementProcessingStep2 (QList< AlienCellCluster* >& frag
                 //remove fragment from cluster
                 QMutableListIterator<AlienCell*> i(_cells);
                 while (i.hasNext()) {
-                    if( i.next()->_tag == tag )
+                    if( i.next()->getTag() == tag )
                         i.remove();
                 }
             }
@@ -172,8 +176,8 @@ void AlienCellCluster::movementProcessingStep2 (QList< AlienCellCluster* >& frag
                 //spread energy difference on cells
                 qreal diffEnergyCell = (diffEnergy/(qreal)size)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
                 foreach(AlienCell* cell, _cells) {
-                    if( cell->_energy > (-diffEnergyCell) )
-                        cell->_energy += diffEnergyCell;
+                    if( cell->getEnergy() > (-diffEnergyCell) )
+                        cell->setEnergy(cell->getEnergy() + diffEnergyCell);
                 }
                 return;
             }
@@ -196,8 +200,8 @@ void AlienCellCluster::movementProcessingStep2 (QList< AlienCellCluster* >& frag
         qreal diffEnergyCell = (diffEnergy/(qreal)size)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
         foreach(AlienCellCluster* cluster, fragments)
             foreach(AlienCell* cell, cluster->_cells) {
-                if( cell->_energy > (-diffEnergyCell) )
-                    cell->_energy += diffEnergyCell;
+                if( cell->getEnergy() > (-diffEnergyCell) )
+                    cell->setEnergy(cell->getEnergy() + diffEnergyCell);
             }
 
         //largest cellcluster inherits the color
@@ -251,13 +255,13 @@ void AlienCellCluster::movementProcessingStep3 ()
             for(int y = -1; y < 2; ++y) {
                 AlienCell* tempCell = _grid->getCell(pos+QVector3D(x, y, 0.0));
                 if( tempCell )
-                    if( tempCell->_cluster != this ) {
+                    if( tempCell->getCluster() != this ) {
 
                         //cell close enough?
-                        QVector3D displacement(tempCell->_cluster->calcPosition(tempCell, true)-pos);
+                        QVector3D displacement(tempCell->getCluster()->calcPosition(tempCell, true)-pos);
                         _grid->correctDisplacement(displacement);
                         if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MAX ) {
-                            quint64 clusterId = tempCell->_cluster->_id;
+                            quint64 clusterId = tempCell->getCluster()->_id;
 
                             //read collision data for the colliding cluster
                             CollisionData colData;
@@ -267,51 +271,31 @@ void AlienCellCluster::movementProcessingStep3 ()
                                 colData.movementState = 0;
 
                             //remember cell
-                            idCellMap[tempCell->_id] = tempCell;
-                            idClusterMap[clusterId] = tempCell->_cluster;
-                            colData.overlappingCells << tempCell->_id;
+                            idCellMap[tempCell->getId()] = tempCell;
+                            idClusterMap[clusterId] = tempCell->getCluster();
+                            colData.overlappingCells << tempCell->getId();
                             colData.overlappingCellPairs << QPair< AlienCell*, AlienCell* >(cell, tempCell);
 
                             //first time check?
                             if( colData.movementState == 0 ) {
 
                                 //fusion possible? (velocities high enough?)
-                                if( cell->connectable(tempCell) && ((cell->_vel-tempCell->_vel).length() >= simulationParameters.CLUSTER_FUSION_VEL) )
+                                if( cell->connectable(tempCell) && ((cell->getVel()-tempCell->getVel()).length() >= simulationParameters.CLUSTER_FUSION_VEL) )
                                     colData.movementState = 2;
 
                                 //collision possible?
-                                else if( cell->_protectionCounter == 0 && tempCell->_protectionCounter == 0 )
+                                else if( cell->getProtectionCounter() == 0 && tempCell->getProtectionCounter() == 0 )
                                     colData.movementState = 1;
 
-                                //collision possible?
-/*                                if( (!cell->connectable(tempCell)) && (cell->_protectionCounter == 0) && (tempCell->_protectionCounter == 0)) {
-                                    colData.movementState = 1;
-                                }
-
-                                qDebug() << "col:" << colData.movementState;*/
                             }
 
                             //cluster already set for collision?
                             if( colData.movementState == 1 ) {
 
                                 //fusion possible?
-                                if( cell->connectable(tempCell) && ((cell->_vel-tempCell->_vel).length() >= simulationParameters.CLUSTER_FUSION_VEL) )
+                                if( cell->connectable(tempCell) && ((cell->getVel()-tempCell->getVel()).length() >= simulationParameters.CLUSTER_FUSION_VEL) )
                                     colData.movementState = 2;
                             }
-                            /*
-                            if( cell->connectable(tempCell) ) {
-
-                                //velocities high enough?
-                                if( (colData.movementState == 0) && ((cell->_vel-tempCell->_vel).length() > 0.1) )
-                                    colData.movementState = 2;
-                                else
-                                    colData.movementState = 1;
-                            }
-
-                            //collision possible?
-                            if( (colData.movementState == 0) && (!cell->connectable(tempCell)) && (cell->_protectionCounter == 0) && (tempCell->_protectionCounter == 0)) {
-                                colData.movementState = 1;
-                            }*/
 
                             //update collision data
                             clusterCollisionDataMap[clusterId] = colData;
@@ -340,8 +324,8 @@ void AlienCellCluster::movementProcessingStep3 ()
             QListIterator< QPair< AlienCell*, AlienCell* > > it2(colData.overlappingCellPairs);
             while( it2.hasNext() ) {
                 QPair< AlienCell*, AlienCell* > cellPair(it2.next());
-                cellPair.first->_protectionCounter = 14;
-                cellPair.second->_protectionCounter = 14;
+                cellPair.first->setProtectionCounter(PROTECTION_COUNTER_AFTER_COLLISION);
+                cellPair.second->setProtectionCounter(PROTECTION_COUNTER_AFTER_COLLISION);
             }
 
             //performing collisions:
@@ -350,7 +334,7 @@ void AlienCellCluster::movementProcessingStep3 ()
             QSetIterator< quint64 > it3(colData.overlappingCells);
             while( it3.hasNext() ) {
                 AlienCell* otherCell(idCellMap[it3.next()]);
-                centerPos = centerPos + otherCluster->_transform.map(otherCell->_relPos);
+                centerPos = centerPos + otherCluster->_transform.map(otherCell->getRelPos());
             }
             centerPos = centerPos/colData.overlappingCells.size();
 
@@ -410,19 +394,19 @@ void AlienCellCluster::movementProcessingStep3 ()
                 QPair< AlienCell*, AlienCell* > item(it2.next());
                 AlienCell* cell(item.first);
                 AlienCell* otherCell(item.second);
-                QVector3D displacement(otherCell->_cluster->calcPosition(otherCell, true)-calcPosition(cell, true));
+                QVector3D displacement(otherCell->getCluster()->calcPosition(otherCell, true)-calcPosition(cell, true));
                 _grid->correctDisplacement(displacement);
 
                 //kill cell if too close
                 if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
-                    if( _cells.size() > otherCell->_cluster->_cells.size()) {
+                    if( _cells.size() > otherCell->getCluster()->_cells.size()) {
     //                    if( otherCell->_protectionCounter == 0 ) {
-                            otherCell->_toBeKilled = true;
+                            otherCell->setToBeKilled(true);
     //                    }
                     }
                     else {
     //                    if( cell->_protectionCounter == 0 ) {
-                            cell->_toBeKilled = true;
+                        otherCell->setToBeKilled(true);
     //                    }
                     }
                 }
@@ -430,9 +414,9 @@ void AlienCellCluster::movementProcessingStep3 ()
                 //connecting cells
                 if( cell->connectable(otherCell) ) {
                     cell->newConnection(otherCell);
-                    fusedCells << cell->_id;
-                    fusedCells << otherCell->_id;
-                    idCellMap[cell->_id] = cell;
+                    fusedCells << cell->getId();
+                    fusedCells << otherCell->getId();
+                    idCellMap[cell->getId()] = cell;
                 }
                 otherCluster = otherCell->getCluster();
             }
@@ -457,12 +441,12 @@ void AlienCellCluster::movementProcessingStep3 ()
                 QVector3D centre(0.0,0.0,0.0);
                 QVector3D correction(calcTopologyCorrection(otherCluster));
                 foreach( AlienCell* cell, _cells) {
-                    cell->_relPos = calcPosition(cell);     //store absolute position only temporarily
-                    centre += cell->_relPos;
+                    cell->setRelPos(calcPosition(cell));     //store absolute position only temporarily
+                    centre += cell->getRelPos();
                 }
                 foreach( AlienCell* cell, otherCluster->_cells) {
-                    cell->_relPos = otherCluster->calcPosition(cell)+correction;
-                    centre += cell->_relPos;
+                    cell->setRelPos(otherCluster->calcPosition(cell)+correction);
+                    centre += cell->getRelPos();
                 }
                 centre /= (_cells.size()+otherCluster->_cells.size());
                 _pos = centre;
@@ -473,12 +457,12 @@ void AlienCellCluster::movementProcessingStep3 ()
                 _cells << cells;
                 otherCluster->_cells.clear();
                 foreach( AlienCell* cell, cells) {
-                    cell->_cluster = this;
+                    cell->setCluster(this);
                 }
 
                 //set relative coordinates
                 foreach( AlienCell* cell, _cells) {
-                    cell->_relPos = absToRelPos(cell->_relPos);
+                    cell->setRelPos(absToRelPos(cell->getRelPos()));
                 }
                 _grid->correctPosition(_pos);
                 calcTransform();
@@ -503,7 +487,7 @@ void AlienCellCluster::movementProcessingStep3 ()
                         }
                         //if not add to internal cell energy
                         else
-                            cell->_energy += eDiff;
+                            cell->setEnergy(cell->getEnergy() + eDiff);
                     }
                 }
             }
@@ -512,7 +496,7 @@ void AlienCellCluster::movementProcessingStep3 ()
 
     //draw new cells
     foreach( AlienCell* cell, _cells) {
-        QVector3D pos = _transform.map(cell->_relPos);
+        QVector3D pos = _transform.map(cell->getRelPos());
         _grid->setCell(pos, cell);
     }
 }
@@ -521,23 +505,19 @@ void AlienCellCluster::movementProcessingStep3 ()
 //token processing
 void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyParticles, bool& decompose)
 {
-    AlienToken* token = 0;
     AlienToken* spreadToken[simulationParameters.MAX_CELL_CONNECTIONS];
     AlienCell* spreadTokenCells[simulationParameters.MAX_CELL_CONNECTIONS];
 
     //placing new tokens
     foreach( AlienCell* cell, _cells) {
-        while(cell->_tokenStackPointer > 0) {
-
-            //take token from cell
-            cell->_tokenStackPointer--;
-            token = cell->_tokenStack[cell->_tokenStackPointer];
+        AlienToken* token = cell->takeTokenFromStack();
+        while(token) {
             int tokenAccessNumber = token->getTokenAccessNumber();
 
             //determine number of places for tokens
             int numPlaces = 0;
-            for(int j = 0; j < cell->_numConnections; ++j) {
-                AlienCell* otherCell(cell->_connectingCells[j]);
+            for(int j = 0; j < cell->getNumConnections(); ++j) {
+                AlienCell* otherCell = cell->getConnection(j);
                 if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->_tokenAccessNumber) && (!otherCell->blockToken())
                     && (otherCell->_newTokenStackPointer < simulationParameters.CELL_TOKENSTACKSIZE ) ) {
                     ++numPlaces;
@@ -608,13 +588,11 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
 
                         //execute cell function
                         spreadToken[i]->setTokenAccessNumber(spreadTokenCells[i]->_tokenAccessNumber);
-                        AlienEnergy* newParticle = 0;
-                        spreadTokenCells[i]->_cellFunction->execute(spreadToken[i], spreadTokenCells[i], cell, newParticle, decompose);
-                        if( newParticle )
-                            energyParticles << newParticle;
-
-                        //execute energy guidance system
-                        spreadTokenCells[i]->_cellFunction->runEnergyGuidanceSystem(spreadToken[i], spreadTokenCells[i], cell);
+                        AlienCell::ProcessingResult processingResult = spreadTokenCells[i]->process(spreadToken[i], cell);
+                        if( processingResult.decompose )
+                            decompose = true;
+                        if( processingResult.newEnergyParticle )
+                            energyParticles << processingResult.newEnergyParticle;
 
                         //average internal energies
 /*                        qreal av((cell->_energy + spreadTokenCells[i]->_energy)/2.0);
@@ -634,12 +612,6 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
             }
         }
     }
-
-
-    //activating new tokens
-//    foreach( AlienCell* cell, _cells) {
-//        cell->activatingNewTokens();
-//    }
 }
 
 //step 5:
@@ -653,7 +625,7 @@ void AlienCellCluster::movementProcessingStep5 ()
         cell->activatingNewTokens();
 
         //kill cells which are too far from cluster center
-        if(cell->_relPos.length() > (maxClusterRadius-1.0) )
+        if(cell->getRelPos().length() > (maxClusterRadius-1.0) )
             cell->_toBeKilled = true;
 
         //find nearby cells and kill if they are too close
@@ -691,7 +663,7 @@ void AlienCellCluster::movementProcessingStep5 ()
 
 void AlienCellCluster::addCell (AlienCell* cell, QVector3D absPos)
 {
-    cell->_relPos = absToRelPos(absPos);
+    cell->setRelPos(absToRelPos(absPos));
     cell->_cluster = this;
     _cells << cell;
 
@@ -742,7 +714,7 @@ void AlienCellCluster::updateAngularMass () {
     //calc angular mass
     _angularMass = 0.0;
     foreach( AlienCell* cell, _cells)
-        _angularMass += (cell->_relPos.lengthSquared());
+        _angularMass += (cell->getRelPos().lengthSquared());
 }
 
 void AlienCellCluster::updateRelCoordinates (bool maintainCenter)
@@ -753,13 +725,13 @@ void AlienCellCluster::updateRelCoordinates (bool maintainCenter)
 //        calcTransform();
         QVector3D center(0.0,0.0,0.0);
         foreach( AlienCell* cell, _cells) {
-            center += cell->_relPos;
+            center += cell->getRelPos();
         }
         center /= _cells.size();
 
         //set rel coordinated with respect to the new center
         foreach( AlienCell* cell, _cells) {
-            cell->_relPos = cell->_relPos - center;
+            cell->setRelPos(cell->getRelPos() - center);
         }
     }
     else {
@@ -768,7 +740,7 @@ void AlienCellCluster::updateRelCoordinates (bool maintainCenter)
 //        calcTransform();
         QVector3D centre(0.0,0.0,0.0);
         foreach( AlienCell* cell, _cells) {
-            centre += _transform.map(cell->_relPos);
+            centre += _transform.map(cell->getRelPos());
         }
         centre /= _cells.size();
 
@@ -780,7 +752,7 @@ void AlienCellCluster::updateRelCoordinates (bool maintainCenter)
 
         //set rel coordinated with respect to the new center
         foreach( AlienCell* cell, _cells) {
-            cell->_relPos = newTransformInv.map(oldTransform.map(cell->_relPos));
+            cell->setRelPos(newTransformInv.map(oldTransform.map(cell->getRelPos())));
         }
     }
 }
@@ -818,7 +790,7 @@ void AlienCellCluster::updateVel_angularVel_via_cellVelocities ()
 
 QVector3D AlienCellCluster::calcPosition (const AlienCell* cell, bool topologyCorrection) const
 {
-    QVector3D cellPos(_transform.map(cell->_relPos));
+    QVector3D cellPos(_transform.map(cell->getRelPos()));
     if(  topologyCorrection )
         _grid->correctPosition(cellPos);
     return cellPos;
@@ -884,7 +856,7 @@ qreal AlienCellCluster::calcAngularMassWithNewParticle (QVector3D particlePos)
     QVector3D particleRelPos = absToRelPos(particlePos);
     QVector3D center = particleRelPos;
     foreach(AlienCell* cell, _cells) {
-        center = center + cell->_relPos;
+        center = center + cell->getRelPos();
     }
     center = center / (_cells.size()+1);
 
@@ -893,7 +865,7 @@ qreal AlienCellCluster::calcAngularMassWithNewParticle (QVector3D particlePos)
     _grid->correctDisplacement(diff);
     qreal aMass = diff.lengthSquared();
     foreach(AlienCell* cell, _cells) {
-        diff = cell->_relPos - center;
+        diff = cell->getRelPos() - center;
         _grid->correctDisplacement(diff);
         aMass = aMass + diff.lengthSquared();
     }
@@ -906,14 +878,14 @@ qreal AlienCellCluster::calcAngularMassWithoutUpdate ()
     //calc new center
     QVector3D center(0.0, 0.0, 0.0);
     foreach(AlienCell* cell, _cells) {
-        center = center + cell->_relPos;
+        center = center + cell->getRelPos();
     }
     center = center / (_cells.size());
 
     //calc new angular mass
     qreal aMass = 0.0;
     foreach(AlienCell* cell, _cells) {
-        QVector3D displacement = cell->_relPos - center;
+        QVector3D displacement = cell->getRelPos() - center;
         _grid->correctDisplacement(displacement);
         aMass = aMass + displacement.lengthSquared();
     }
@@ -932,7 +904,7 @@ QList< AlienCell* >& AlienCellCluster::getCells ()
 
 /*QVector3D AlienCellCluster::getCoordinate (AlienCell* cell)
 {
-    return _transform.map(cell->_relPos);
+    return _transform.map(cell->getRelPos());
 }
 */
 
@@ -1141,13 +1113,13 @@ AlienCellCluster::AlienCellCluster (QDataStream& stream, QMap< quint64, quint64 
         AlienCell* cell(new AlienCell(stream, connectingCells, _grid));
         cell->_cluster = this;
         _cells << cell;
-        idCellMap[cell->_id] = cell;
+        idCellMap[cell->getId()] = cell;
 
         //assigning new cell id
         quint64 newId = GlobalFunctions::getTag();
-        oldNewCellIdMap[cell->_id] = newId;
-        oldIdCellMap[cell->_id] = cell;
-        cell->_id = newId;
+        oldNewCellIdMap[cell->getId()] = newId;
+        oldIdCellMap[cell->getId()] = cell;
+        cell->setId(newId);
     }
     quint64 oldClusterId(0);
     stream >> oldClusterId;
