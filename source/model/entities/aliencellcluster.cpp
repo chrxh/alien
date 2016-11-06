@@ -816,7 +816,7 @@ void AlienCellCluster::updateVel_angularVel_via_cellVelocities ()
 }
 
 
-QVector3D AlienCellCluster::calcPosition (AlienCell* cell, bool topologyCorrection)
+QVector3D AlienCellCluster::calcPosition (const AlienCell* cell, bool topologyCorrection) const
 {
     QVector3D cellPos(_transform.map(cell->_relPos));
     if(  topologyCorrection )

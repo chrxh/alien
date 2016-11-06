@@ -46,7 +46,7 @@ public:
     void updateAngularMass ();
     void updateRelCoordinates (bool maintainCenter = false);
     void updateVel_angularVel_via_cellVelocities ();
-    QVector3D calcPosition (AlienCell* cell, bool topologyCorrection = false);
+    QVector3D calcPosition (const AlienCell *cell, bool topologyCorrection = false) const;
     QVector3D calcTopologyCorrection (AlienCellCluster* cluster);
     QVector3D calcCellDistWithoutTorusCorrection (AlienCell* cell);
     QList< AlienCellCluster* > decompose ();

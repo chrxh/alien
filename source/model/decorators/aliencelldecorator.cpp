@@ -66,6 +66,11 @@ AlienCell* AlienCellDecorator::getConnection (int i) const
     return _cell->getConnection(i);
 }
 
+void AlienCellDecorator::setConnection (int i, AlienCell* cell)
+{
+    _cell->setConnection(i, cell);
+}
+
 QVector3D AlienCellDecorator::calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const
 {
     return _cell->calcNormal(outerSpace, transform);
@@ -186,7 +191,7 @@ void AlienCellDecorator::setEnergy (qreal i)
     _cell->setEnergy(i);
 }
 
-QVector< quint8 >& AlienCellDecorator::getMemory () const
+QVector< quint8 >& AlienCellDecorator::getMemoryReference ()
 {
     return _cell->getMemory();
 }

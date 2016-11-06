@@ -30,6 +30,7 @@ public: //redirect following methods to AlienCell
     virtual int getMaxConnections () const;
     virtual void setMaxConnections (int maxConnections);
     virtual AlienCell* getConnection (int i) const;
+    virtual void setConnection (int i, AlienCell* cell);
     virtual QVector3D calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const;
 
     virtual void activatingNewTokens ();
@@ -57,7 +58,7 @@ public: //redirect following methods to AlienCell
     virtual qreal getEnergy() const;
     virtual qreal getEnergyIncludingTokens() const;
     virtual void setEnergy (qreal i);
-    virtual QVector< quint8 >& getMemory () const;
+    virtual QVector< quint8 >& getMemoryReference ();
 
     virtual void serialize (QDataStream& stream);
 
