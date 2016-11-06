@@ -673,6 +673,6 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
 
 void AlienCellFunctionConstructor::serialize (QDataStream& stream)
 {
-    AlienCellFunction::serialize(stream);
+    AlienCellDecorator::serialize(stream);
 }
 

@@ -60,7 +60,7 @@ public:
     virtual void setEnergy (qreal i) = 0;
     virtual QVector< quint8 >& getMemory () const = 0;
 
-    virtual void serialize (QDataStream& stream) = 0;
+    virtual void serialize (QDataStream& stream) const = 0;
 
     virtual QVector3D getVel () const = 0;
     virtual void setVel (QVector3D vel) = 0;

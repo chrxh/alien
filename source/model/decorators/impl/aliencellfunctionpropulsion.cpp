@@ -1,54 +1,61 @@
 #include "aliencellfunctionpropulsion.h"
-#include "../entities/aliencell.h"
-#include "../entities/aliencellcluster.h"
-#include "../physics/physics.h"
 
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/alientoken.h"
+#include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion(AlienGrid*& grid)
-    : AlienCellFunction(grid)
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion(AlienCell* cell, AlienGrid*& grid)
+    : AlienCellFunction(cell, grid)
 {
 }
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(grid)
-{
-
-}
-
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(grid)
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
+    : AlienCellFunction(cell, grid)
 {
 
 }
 
-
-void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
+AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(cell, grid)
 {
-    AlienCellCluster* cluster(cell->getCluster());
+
+}
+
+namespace {
+    qreal convertDataToThrustPower (quint8 b)
+    {
+        return 1/10000.0*((qreal)b+10.0);
+    }
+}
+
+AlienCellDecorator::ProcessingResult AlienCellFunctionPropulsion::process (AlienToken* token, AlienCell* previousCell)
+{
+    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
+    AlienCellCluster* cluster(_cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(PROP::IN)]%7;
     qreal angle = convertDataToAngle(token->memory[static_cast<int>(PROP::IN_ANGLE)]);
     qreal power = convertDataToThrustPower(token->memory[static_cast<int>(PROP::IN_POWER)]);
 
     if( cmd == static_cast<int>(PROP_IN::DO_NOTHING) ) {
         token->memory[static_cast<int>(PROP::OUT)] = static_cast<int>(PROP_OUT::SUCCESS);
-        return;
+        return processingResult;
     }
 
     //calc old kinetic energy
     qreal eKinOld(Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel()));
 
     //calc old tangential velocity
-    QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
+    QVector3D cellRelPos(cluster->calcPosition(_cell)-cluster->getPosition());
     QVector3D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVel(), cluster->getAngularVel()));
 
     //calc impulse angle
     QVector3D impulse(0.0, 0.0, 0.0);
     if( cmd == static_cast<int>(PROP_IN::BY_ANGLE) ) {
-        qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
+        qreal thrustAngle = (Physics::angleOfVector(-_cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
         impulse = QVector3D(qSin(thrustAngle), -qCos(thrustAngle), 0.0)*power;
     }
     if( cmd == static_cast<int>(PROP_IN::FROM_CENTER) ) {
@@ -88,7 +95,7 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
 
             //update return value
             token->memory[static_cast<int>(PROP::OUT)] = static_cast<int>(PROP_OUT::SUCCESS_DAMPING_FINISHED);
-            return;
+            return processingResult;
         }
     }
 
@@ -100,10 +107,8 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
     if( token->energy >= (energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
-        newParticle = new AlienEnergy(qAbs(energyDiff),
-                                      cluster->calcPosition(cell, _grid)-impulse.normalized(),
-                                      tangVel-impulse.normalized()/4.0,
-                                      _grid);
+        processingResult.newEnergyParticle = new AlienEnergy(qAbs(energyDiff), cluster->calcPosition(_cell, _grid)-impulse.normalized()
+            , tangVel-impulse.normalized()/4.0, _grid);
 
         //update velocities
         cluster->setVel(newVel);
@@ -118,10 +123,6 @@ void AlienCellFunctionPropulsion::execute (AlienToken* token, AlienCell* cell, A
         //update return value
         token->memory[static_cast<int>(PROP::OUT)] = static_cast<int>(PROP_OUT::ERROR_NO_ENERGY);
     }
-}
-
-qreal AlienCellFunctionPropulsion::convertDataToThrustPower (quint8 b)
-{
-    return 1/10000.0*((qreal)b+10.0);
+    return processingResult;
 }
 

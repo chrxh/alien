@@ -1,41 +1,17 @@
-#ifndef ALIENTOKENPROCESSINGPROPULSION_H
-#define ALIENTOKENPROCESSINGPROPULSION_H
+#ifndef ALIENCELLFUNCTIONPROPULSION_H
+#define ALIENCELLFUNCTIONPROPULSION_H
 
-#include "aliencellfunction.h"
+#include "model/decorators/aliencellfunction.h"
 
 class AlienCellFunctionPropulsion : public AlienCellFunction
 {
 public:
-    AlienCellFunctionPropulsion (AlienGrid*& grid);
-    AlienCellFunctionPropulsion (quint8* cellFunctionData, AlienGrid*& grid);
-    AlienCellFunctionPropulsion (QDataStream& stream, AlienGrid*& grid);
+    AlienCellFunctionPropulsion (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunctionPropulsion (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid);
+    AlienCellFunctionPropulsion (AlienCell* cell, QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
-
-    //constants for cell function programming
-    enum class PROP {
-        OUT = 5,
-        IN = 8,
-        IN_ANGLE = 9,
-        IN_POWER = 10
-    };
-    enum class PROP_OUT {
-        SUCCESS,
-        SUCCESS_DAMPING_FINISHED,
-        ERROR_NO_ENERGY
-    };
-    enum class PROP_IN {
-        DO_NOTHING,
-        BY_ANGLE,
-        FROM_CENTER,
-        TOWARD_CENTER,
-        ROTATION_CLOCKWISE,
-        ROTATION_COUNTERCLOCKWISE,
-        DAMP_ROTATION
-    };
-
-private:
-    qreal convertDataToThrustPower (quint8 b);
+    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
+    CellFunctionType getType () const { return CellFunctionType::PROPULSION; }
 };
 
-#endif // ALIENTOKENPROCESSINGPROPULSION_H
+#endif // ALIENCELLFUNCTIONPROPULSION_H

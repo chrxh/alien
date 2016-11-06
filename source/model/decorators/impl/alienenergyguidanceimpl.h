@@ -3,11 +3,10 @@
 
 #include "model/decorators/alienenergyguidance.h"
 
-class AlienEnergyGuidanceDecoratorImpl : public AlienEnergyGuidanceDecorator
+class AlienEnergyGuidanceImpl : public AlienEnergyGuidance
 {
 public:
-    AlienEnergyGuidanceDecoratorImpl ();
-    ~AlienEnergyGuidanceDecoratorImpl () {}
+    AlienEnergyGuidanceImpl (AlienCell* cell, AlienGrid*& grid);
 
     ProcessingResult process (AlienToken* token, AlienCell* previousCell);
 };

@@ -497,11 +497,8 @@ QVector< quint8 >& AlienCellImpl::getMemory () const
     return _memory;
 }
 
-void AlienCellImpl::serialize (QDataStream& stream)
+void AlienCellImpl::serialize (QDataStream& stream) const
 {
-    //cell function
-    _cellFunction->serialize(stream);
-
     //token
     stream << _tokenStackPointer;
     for( int i = 0; i < _tokenStackPointer; ++i) {
