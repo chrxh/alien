@@ -27,9 +27,11 @@ public:
     void delConnection (AlienCell* otherCell);
     void delAllConnection ();
     int getNumConnections () const;
+    void setNumConnections (int num);
     int getMaxConnections () const;
     void setMaxConnections (int maxConnections);
     AlienCell* getConnection (int i) const;
+    void setConnection (int i, AlienCell* cell);
     QVector3D calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const;
 
     void activatingNewTokens ();
@@ -57,7 +59,7 @@ public:
     qreal getEnergy() const;
     qreal getEnergyIncludingTokens() const;
     void setEnergy (qreal i);
-    QVector< quint8 >& getMemory () const;
+    QVector< quint8 >& getMemoryReference ();
 
     void serialize (QDataStream& stream) const;
 
