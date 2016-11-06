@@ -13,6 +13,7 @@ AlienEnergyGuidanceImpl::AlienEnergyGuidanceImpl (AlienCell* cell, AlienGrid*& g
 
 AlienCell::ProcessingResult AlienEnergyGuidanceImpl::process (AlienToken* token, AlienCell* previousCell)
 {
+    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
     quint8 cmd = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN)] % 6;
     qreal valueCell = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_CELL)];
     qreal valueToken = token->memory[static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_TOKEN)];
@@ -66,4 +67,5 @@ AlienCell::ProcessingResult AlienEnergyGuidanceImpl::process (AlienToken* token,
             token->energy -= amount;
         }
     }
+    return processingResult;
 }

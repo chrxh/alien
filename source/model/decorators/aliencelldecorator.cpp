@@ -220,3 +220,30 @@ void AlienCellDecorator::setColor (quint8 color)
 {
     _cell->setColor(color);
 }
+
+int AlienCellDecorator::getProtectionCounter () const
+{
+    return _cell->getProtectionCounter();
+}
+
+void AlienCellDecorator::setProtectionCounter (int counter)
+{
+    _cell->setProtectionCounter(counter);
+}
+
+bool AlienCellDecorator::isToBeKilled() const
+{
+    return _cell->isToBeKilled();
+}
+
+void AlienCellDecorator::setToBeKilled (bool toBeKilled)
+{
+    _cell->setToBeKilled(toBeKilled);
+}
+
+AlienToken* AlienCellDecorator::takeTokenFromStack ()
+{
+    return _cell->takeTokenFromStack();
+}
+
+
