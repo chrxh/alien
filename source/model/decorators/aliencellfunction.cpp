@@ -1,5 +1,6 @@
 #include "aliencellfunction.h"
 
+#include "model/entities/aliengrid.h"
 #include "model/physics/physics.h"
 
 #include <QString>
