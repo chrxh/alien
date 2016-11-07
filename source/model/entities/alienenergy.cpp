@@ -2,10 +2,14 @@
 #include "aliengrid.h"
 #include "aliencell.h"
 #include "aliencellcluster.h"
-#include "../physics/physics.h"
 
-#include "global/global.h"
+#include "model/modelfactory.h"
+#include "model/physics/physics.h"
 #include "model/simulationsettings.h"
+
+#include "global/servicelocator.h"
+#include "global/global.h"
+
 #include <qmath.h>
 
 AlienEnergy::AlienEnergy(qreal amount_, QVector3D pos_, QVector3D vel_, AlienGrid*& grid)
@@ -97,7 +101,8 @@ bool AlienEnergy::movement (AlienCellCluster*& cluster)
 
                 //create cell and cluster
                 QList< AlienCell* > cells;
-                AlienCell* c = AlienCell::buildCellWithRandomData(eNew, _grid);
+                ModelFactory* factory = ServiceLocator::getInstance().getService<ModelFactory>();
+                AlienCell* c = factory->buildDecoratedCellWithRandomData(eNew, _grid);
                 cells << c;
                 cluster = AlienCellCluster::buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
                 amount = 0;

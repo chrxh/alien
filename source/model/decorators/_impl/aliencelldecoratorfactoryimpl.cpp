@@ -1,4 +1,3 @@
-
 #include "aliencelldecoratorfactoryimpl.h"
 
 #include "aliencellfunctioncomputerimpl.h"
@@ -8,6 +7,13 @@
 #include "aliencellfunctionweapon.h"
 #include "aliencellfunctionsensor.h"
 #include "aliencellfunctioncommunicator.h"
+
+#include "global/servicelocator.h"
+
+AlienCellDecoratorFactoryImpl::AlienCellDecoratorFactoryImpl ()
+{
+    ServiceLocator::getInstance().registerService<AlienCellDecoratorFactory>(this);
+}
 
 AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid)
 {
@@ -91,30 +97,6 @@ AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (QDataStream& 
             return new AlienCellFunctionSensor(cell, stream, grid);
         case Type::COMMUNICATOR :
             return new AlienCellFunctionCommunicator(cell, stream, grid);
-        default:
-            return 0;
-    }
-}
-
-AlienCellFunction* AlienCellDecoratorFactoryImpl::addRandomCellFunction (AlienCell* cell, AlienGrid*& grid)
-{
-    CellFunctionType type =  static_cast<CellFunctionType>(qrand()%Type::_COUNTER);
-
-    switch( type ) {
-        case Type::COMPUTER :
-            return new AlienCellFunctionComputerImpl(cell, true, grid);
-        case Type::PROPULSION :
-            return build(cell, "PROPULSION", grid);
-        case Type::SCANNER :
-            return build(cell, "SCANNER", grid);
-        case Type::WEAPON :
-            return build(cell, "WEAPON", grid);
-        case Type::CONSTRUCTOR :
-            return build(cell, "CONSTRUCTOR", grid);
-        case Type::SENSOR :
-            return build(cell, "SENSOR", grid);
-        case Type::COMMUNICATOR :
-            return build(cell, "COMMUNICATOR", grid);
         default:
             return 0;
     }

@@ -10,6 +10,9 @@
 
 //QT += webkitwidgets
 
+//Model-Refactoring:
+//- random AlienCell-build wird in Modelfactory gemacht
+//- Prefix Alien in Klassen entfernen
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)
