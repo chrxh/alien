@@ -112,6 +112,24 @@ enum class PROP_IN {
     DAMP_ROTATION
 };
 
+enum class SCANNER {
+    OUT = 5,
+    INOUT_CELL_NUMBER = 12,
+    OUT_MASS = 13,
+    OUT_ENERGY = 14,
+    OUT_ANGLE = 15,
+    OUT_DISTANCE = 16,
+    OUT_CELL_MAX_CONNECTIONS = 17,
+    OUT_CELL_BRANCH_NO = 18,
+    OUT_CELL_FUNCTION = 19,
+    OUT_CELL_FUNCTION_DATA = 40
+};
+enum class SCANNER_OUT {
+    SUCCESS,
+    FINISHED,
+    RESTART
+};
+
 enum class SENSOR {
     OUT = 5,
     IN = 20,
