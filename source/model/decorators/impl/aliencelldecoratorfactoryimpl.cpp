@@ -120,3 +120,4 @@ AlienCellFunction* AlienCellDecoratorFactoryImpl::addRandomCellFunction (AlienCe
     }
 }
 
+AlienCellDecoratorFactoryImpl cellDecoratorFactoryImpl;
