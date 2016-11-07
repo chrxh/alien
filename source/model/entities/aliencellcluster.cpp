@@ -1,9 +1,12 @@
 #include "aliencellcluster.h"
 
+#include "model/decorators/aliencelldecoratorfactory.h"
+#include "model/entities/entityfactory.h"
 #include "model/entities/alientoken.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 #include "global/global.h"
+#include "global/servicelocator.h"
 
 #include <QMatrix4x4>
 #include <qmath.h>
@@ -518,15 +521,15 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
             int numPlaces = 0;
             for(int j = 0; j < cell->getNumConnections(); ++j) {
                 AlienCell* otherCell = cell->getConnection(j);
-                if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->_tokenAccessNumber) && (!otherCell->blockToken())
-                    && (otherCell->_newTokenStackPointer < simulationParameters.CELL_TOKENSTACKSIZE ) ) {
+                if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
+                    && (otherCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) ) {
                     ++numPlaces;
                 }
             }
 
             //no free places for token?
             if( numPlaces == 0 ) {
-                cell->_energy += token->energy;
+                cell->setEnergy(cell->getEnergy() + token->energy);
                 delete token;
             }
 
@@ -536,7 +539,7 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
                 //not enough cell energy available?
                 if( //(cell->_energy < ((qreal)numPlaces-1.0)*token->energy) ||
                     token->energy < simulationParameters.MIN_TOKEN_ENERGY) {
-                    cell->_energy += token->energy;
+                    cell->setEnergy(cell->getEnergy() + token->energy);
                     delete token;
                 }
                 else {
@@ -549,33 +552,31 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
                     //spread token to free places on adjacent cells and duplicate token if necessary
                     int spreadTokenCounter = 0;
 //                    token->energy = tokenEnergy;
-                    for(int j = 0; j < cell->_numConnections; ++j) {
-                        AlienCell* otherCell(cell->_connectingCells[j]);
-                        if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->_tokenAccessNumber) && (!otherCell->blockToken())
-                            && (otherCell->_newTokenStackPointer < simulationParameters.CELL_TOKENSTACKSIZE ) ) {
+                    for(int j = 0; j < cell->getNumConnections(); ++j) {
+                        AlienCell* otherCell = cell->getConnection(j);
+                        if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
+                            && (otherCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) ) {
                             if( spreadTokenCounter > 0 ) {
                                 spreadTokenCells[spreadTokenCounter] = otherCell;
                                 spreadToken[spreadTokenCounter] = token->duplicate();
-                                otherCell->_newTokenStack[otherCell->_newTokenStackPointer] = spreadToken[spreadTokenCounter];
-                                otherCell->_newTokenStackPointer++;
+                                otherCell->addToken(spreadToken[spreadTokenCounter], false, true);
                             }
                             if( spreadTokenCounter == 0 ) {
                                 spreadTokenCells[0] = otherCell;
                                 spreadToken[0] = token;
-                                otherCell->_newTokenStack[otherCell->_newTokenStackPointer] = token;
-                                otherCell->_newTokenStackPointer++;
+                                otherCell->addToken(token, false, true);
                             }
                             if( numPlaces > 1 ) {
                                 spreadToken[spreadTokenCounter]->energy = availableTokenEnergy;
 
                                 //transfer remaining energy from cell to token if possible
-                                if( otherCell->_energy > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+tokenEnergy-availableTokenEnergy) ) {
+                                if( otherCell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+tokenEnergy-availableTokenEnergy) ) {
                                     spreadToken[spreadTokenCounter]->energy = tokenEnergy;
-                                    otherCell->_energy -= tokenEnergy-availableTokenEnergy;
+                                    otherCell->setEnergy(otherCell->getEnergy() - tokenEnergy-availableTokenEnergy);
                                 }
-                                else if( otherCell->_energy > simulationParameters.CRIT_CELL_TRANSFORM_ENERGY ) {
-                                    spreadToken[spreadTokenCounter]->energy += otherCell->_energy - simulationParameters.CRIT_CELL_TRANSFORM_ENERGY;
-                                    otherCell->_energy = simulationParameters.CRIT_CELL_TRANSFORM_ENERGY;
+                                else if( otherCell->getEnergy() > simulationParameters.CRIT_CELL_TRANSFORM_ENERGY ) {
+                                    spreadToken[spreadTokenCounter]->energy += otherCell->getEnergy() - simulationParameters.CRIT_CELL_TRANSFORM_ENERGY;
+                                    otherCell->setEnergy(simulationParameters.CRIT_CELL_TRANSFORM_ENERGY);
                                 }
                             }
                             spreadTokenCounter++;
@@ -587,7 +588,7 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
                     for( int i = 0; i < spreadTokenCounter; ++i ) {
 
                         //execute cell function
-                        spreadToken[i]->setTokenAccessNumber(spreadTokenCells[i]->_tokenAccessNumber);
+                        spreadToken[i]->setTokenAccessNumber(spreadTokenCells[i]->getTokenAccessNumber());
                         AlienCell::ProcessingResult processingResult = spreadTokenCells[i]->process(spreadToken[i], cell);
                         if( processingResult.decompose )
                             decompose = true;
@@ -601,13 +602,13 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
                     }
 
                     //average internal energies
-                    qreal energyAv = cell->_energy;
+                    qreal energyAv = cell->getEnergy();
                     for( int i = 0; i < spreadTokenCounter; ++i )
-                        energyAv += spreadTokenCells[i]->_energy;
+                        energyAv += spreadTokenCells[i]->getEnergy();
                     energyAv = energyAv / (spreadTokenCounter+1);
                     for( int i = 0; i < spreadTokenCounter; ++i )
-                        spreadTokenCells[i]->_energy = energyAv;
-                    cell->_energy = energyAv;
+                        spreadTokenCells[i]->setEnergy(energyAv);
+                    cell->setEnergy(energyAv);
                 }
             }
         }
@@ -626,7 +627,7 @@ void AlienCellCluster::movementProcessingStep5 ()
 
         //kill cells which are too far from cluster center
         if(cell->getRelPos().length() > (maxClusterRadius-1.0) )
-            cell->_toBeKilled = true;
+            cell->setToBeKilled(true);
 
         //find nearby cells and kill if they are too close
         QVector3D pos = calcPosition(cell, true);
@@ -636,7 +637,7 @@ void AlienCellCluster::movementProcessingStep5 ()
                 if( otherCell ) {
                     if( otherCell != cell ) {
 //                    if( otherCell->_cluster != this ) {
-                        AlienCellCluster* otherCluster = otherCell->_cluster;
+                        AlienCellCluster* otherCluster = otherCell->getCluster();
 //                        foreach(AlienCell* otherCell2, otherCluster->getCells()) {
 //                            if( otherCell2 != cell ) {
                                 QVector3D displacement = otherCluster->calcPosition(otherCell, true)-calcPosition(cell, true);
@@ -644,12 +645,12 @@ void AlienCellCluster::movementProcessingStep5 ()
                                 if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
                                     if( _cells.size() > otherCluster->_cells.size()) {
 //                                        if( otherCell->_protectionCounter == 0 ) {
-                                            otherCell->_toBeKilled = true;
+                                            otherCell->setToBeKilled(true);
 //                                        }
                                     }
                                     else {
 //                                        if( cell->_protectionCounter == 0 ) {
-                                            cell->_toBeKilled = true;
+                                            cell->setToBeKilled(true);
 //                                        }
                                     }
                                 }
@@ -664,7 +665,7 @@ void AlienCellCluster::movementProcessingStep5 ()
 void AlienCellCluster::addCell (AlienCell* cell, QVector3D absPos)
 {
     cell->setRelPos(absToRelPos(absPos));
-    cell->_cluster = this;
+    cell->setCluster(this);
     _cells << cell;
 
     updateRelCoordinates(true);
@@ -683,27 +684,27 @@ void AlienCellCluster::removeCell (AlienCell* cell, bool maintainCenter)
 void AlienCellCluster::updateCellVel (bool forceCheck)
 {
     if( _cells.size() == 1 ) {
-        _cells[0]->_vel = _vel;
+        _cells[0]->setVel(_vel);
     }
     else {
 
         //calc cell velocities
         foreach( AlienCell* cell, _cells) {
             QVector3D vel = Physics::tangentialVelocity(calcCellDistWithoutTorusCorrection(cell), _vel, _angularVel);
-            if( cell->_vel.isNull() ) {
-                cell->_vel = vel;
+            if( cell->getVel().isNull() ) {
+                cell->setVel(vel);
             }
             else {
-                QVector3D a = vel - cell->_vel;
+                QVector3D a = vel - cell->getVel();
 
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
                     if( a.length() > simulationParameters.CELL_MAX_FORCE ) {
                         if( (qreal)qrand()/RAND_MAX < simulationParameters.CELL_MAX_FORCE_DECAY_PROB )
-                            cell->_toBeKilled = true;
+                            cell->setToBeKilled(true);
                     }
                 }
-                cell->_vel = vel;
+                cell->setVel(vel);
             }
         }
     }
@@ -765,7 +766,7 @@ void AlienCellCluster::updateVel_angularVel_via_cellVelocities ()
         //first step: calc cluster mean velocity
         _vel = QVector3D(0.0, 0.0, 0.0);
         foreach( AlienCell* cell, _cells ) {
-            _vel += cell->_vel;
+            _vel += cell->getVel();
         }
         _vel = _vel/_cells.size();
 
@@ -773,7 +774,7 @@ void AlienCellCluster::updateVel_angularVel_via_cellVelocities ()
         qreal angularMomentum = 0.0;
         foreach( AlienCell* cell, _cells ) {
             QVector3D r = calcPosition(cell)-_pos;
-            QVector3D v = cell->_vel - _vel;
+            QVector3D v = cell->getVel() - _vel;
             angularMomentum += Physics::angularMomentum(r, v);     //we only need the 3rd component of the 3D cross product
         }
 
@@ -782,7 +783,7 @@ void AlienCellCluster::updateVel_angularVel_via_cellVelocities ()
 
     }
     else if( _cells.size() == 1 ) {
-        _vel = _cells[0]->_vel;
+        _vel = _cells[0]->getVel();
         _angularVel = 0.0;
     }
 }
@@ -834,13 +835,13 @@ QList< AlienCellCluster* > AlienCellCluster::decompose ()
         //remove fragment from clusters
         QMap< quint64, AlienCellCluster* > idClusterMap;
         foreach( AlienCell* cell, component) {
-            idClusterMap[cell->_cluster->_id] = cell->_cluster;
+            idClusterMap[cell->getCluster()->_id] = cell->getCluster();
         }
 
         foreach( AlienCellCluster* cluster, idClusterMap.values() ) {
             QMutableListIterator<AlienCell*> i(cluster->_cells);
             while (i.hasNext()) {
-                if( i.next()->_tag == tag )
+                if( i.next()->getTag() == tag )
                     i.remove();
             }
         }
@@ -1055,11 +1056,11 @@ void AlienCellCluster::getConnectedComponent(AlienCell* cell, QList< AlienCell* 
 
 void AlienCellCluster::getConnectedComponent(AlienCell* cell, const quint64& tag, QList< AlienCell* >& component)
 {
-    if( cell->_tag != tag ) {
-        cell->_tag = tag;
+    if( cell->getTag() != tag ) {
+        cell->setTag(tag);
         component << cell;
-        for( int i = 0; i < cell->_numConnections; ++i ) {
-            getConnectedComponent(cell->_connectingCells[i], tag, component);
+        for( int i = 0; i < cell->getNumConnections(); ++i ) {
+            getConnectedComponent(cell->getConnection(i), tag, component);
         }
     }
 }
@@ -1089,7 +1090,7 @@ AlienCellCluster::AlienCellCluster(QList< AlienCell* > cells, qreal angle, QVect
 {
     grid->correctPosition(_pos);
     foreach(AlienCell* cell, _cells) {
-        cell->_cluster = this;
+        cell->setCluster(this);
     }
     calcTransform();
     updateRelCoordinates();
@@ -1109,9 +1110,14 @@ AlienCellCluster::AlienCellCluster (QDataStream& stream, QMap< quint64, quint64 
     setAngle(angle);
     int numCells(0);
     stream >> numCells;
+    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+    AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
     for(int i = 0; i < numCells; ++i ) {
-        AlienCell* cell(new AlienCell(stream, connectingCells, _grid));
-        cell->_cluster = this;
+
+        AlienCell* cell = entityFactory->buildCell(stream, connectingCells, _grid);
+        decoratorFactory->addCellFunction(cell, stream, _grid);
+        decoratorFactory->addEnergyGuidance(cell, grid);
+        cell->setCluster(this);
         _cells << cell;
         idCellMap[cell->getId()] = cell;
 
@@ -1136,7 +1142,7 @@ AlienCellCluster::AlienCellCluster (QDataStream& stream, QMap< quint64, quint64 
         QList< quint64 > cellIdList(it.value());
         int i(0);
         foreach(quint64 cellId, cellIdList) {
-            cell->_connectingCells[i] = idCellMap[cellId];
+            cell->setConnection(i, idCellMap[cellId]);
             ++i;
         }
     }
@@ -1155,7 +1161,7 @@ AlienCellCluster::AlienCellCluster(QList< AlienCell* > cells, qreal angle, Alien
     //calc new center
     QVector3D center(0.0,0.0,0.0);
     foreach( AlienCell* cell, _cells) {
-        center += cell->_cluster->calcPosition(cell);
+        center += cell->getCluster()->calcPosition(cell);
     }
     center /= _cells.size();
     setPosition(center);
@@ -1164,8 +1170,8 @@ AlienCellCluster::AlienCellCluster(QList< AlienCell* > cells, qreal angle, Alien
     foreach(AlienCell* cell, _cells) {
 
         //adjust relative position of the cells
-        QVector3D pos(cell->_cluster->calcPosition(cell));
-        cell->_cluster = this;
+        QVector3D pos(cell->getCluster()->calcPosition(cell));
+        cell->setCluster(this);
         cell->setAbsPosition(pos);
     }
 
@@ -1198,10 +1204,8 @@ void AlienCellCluster::radiation (qreal& energy, AlienCell* originCell, AlienEne
         QVector3D velPerturbation(((qreal)qrand()/RAND_MAX-0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB,
                                   ((qreal)qrand()/RAND_MAX-0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
-        energyParticle = new AlienEnergy(radEnergy,
-                                         calcPosition(originCell, _grid)+posPerturbation,
-                                         originCell->_vel*simulationParameters.CELL_RAD_ENERGY_VEL_MULT+velPerturbation,
-                                         _grid);
+        energyParticle = new AlienEnergy(radEnergy, calcPosition(originCell, _grid)+posPerturbation
+            , originCell->getVel()*simulationParameters.CELL_RAD_ENERGY_VEL_MULT+velPerturbation, _grid);
         energyParticle->color = originCell->getColor();
     }
 /*

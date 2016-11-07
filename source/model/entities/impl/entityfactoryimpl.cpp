@@ -30,3 +30,5 @@ AlienCell* EntityFactoryImpl::buildCellWithoutConnectingCells (QDataStream& stre
 {
     return new AlienCellImpl(stream, grid);
 }
+
+EntityFactoryImpl entityFactoryImpl;
