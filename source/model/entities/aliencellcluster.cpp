@@ -1,5 +1,7 @@
 #include "aliencellcluster.h"
 
+#include "model/decorators/aliencellfunction.h"
+#include "model/decorators/alienenergyguidance.h"
 #include "model/decorators/aliencelldecoratorfactory.h"
 #include "model/entities/entityfactory.h"
 #include "model/entities/alientoken.h"
@@ -1115,8 +1117,8 @@ AlienCellCluster::AlienCellCluster (QDataStream& stream, QMap< quint64, quint64 
     for(int i = 0; i < numCells; ++i ) {
 
         AlienCell* cell = entityFactory->buildCell(stream, connectingCells, _grid);
-        decoratorFactory->addCellFunction(cell, stream, _grid);
-        decoratorFactory->addEnergyGuidance(cell, grid);
+        cell = decoratorFactory->addCellFunction(cell, stream, _grid);
+        cell = decoratorFactory->addEnergyGuidance(cell, grid);
         cell->setCluster(this);
         _cells << cell;
         idCellMap[cell->getId()] = cell;

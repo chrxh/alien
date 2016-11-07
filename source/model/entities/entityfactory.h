@@ -18,4 +18,5 @@ public:
         , AlienGrid*& grid) = 0;
     virtual AlienCell* buildCellWithoutConnectingCells (QDataStream& stream, AlienGrid*& grid) = 0;
 };
+
 #endif // ENTITYFACTORY_H

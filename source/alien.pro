@@ -8,19 +8,19 @@ QMAKE_CXXFLAGS_DEBUG    = -std=c++11
 TARGET = alien
 TEMPLATE = app
 SOURCES += main.cpp \
-    model/entities/impl/aliencellimpl.cpp \
+    model/entities/_impl/aliencellimpl.cpp \
     model/entities/aliencellcluster.cpp \
     model/physics/physics.cpp \
     global/global.cpp \
     model/entities/alientoken.cpp \
     model/entities/aliengrid.cpp \
     model/decorators/aliencellfunction.cpp \
-    model/decorators/impl/aliencellfunctionscanner.cpp \
+    model/decorators/_impl/aliencellfunctionscanner.cpp \
     model/entities/alienenergy.cpp \
     gui/monitoring/simulationmonitor.cpp \
     gui/microeditor/hexedit.cpp \
     model/alienthread.cpp \
-    model/decorators/impl/aliencellfunctionconstructor.cpp \
+    model/decorators/_impl/aliencellfunctionconstructor.cpp \
     gui/macroeditor/pixeluniverse.cpp \
     gui/macroeditor/shapeuniverse.cpp \
     gui/macroeditor/aliencellgraphicsitem.cpp \
@@ -35,7 +35,7 @@ SOURCES += main.cpp \
     gui/microeditor/clusteredit.cpp \
     gui/microeditor/tokenedit.cpp \
     gui/macroeditor/markergraphicsitem.cpp \
-    model/decorators/impl/aliencellfunctionweapon.cpp \
+    model/decorators/_impl/aliencellfunctionweapon.cpp \
     gui/microeditor/celledit.cpp \
     gui/microeditor/energyedit.cpp \
     gui/microeditor/tokentab.cpp \
@@ -49,36 +49,37 @@ SOURCES += main.cpp \
     gui/dialogs/selectionmultiplyrandomdialog.cpp \
     gui/dialogs/selectionmultiplyarrangementdialog.cpp \
     gui/microeditor/cellcomputeredit.cpp \
-    model/decorators/impl/aliencellfunctionsensor.cpp \
-    model/decorators/impl/aliencellfunctionpropulsion.cpp \
+    model/decorators/_impl/aliencellfunctionsensor.cpp \
+    model/decorators/_impl/aliencellfunctionpropulsion.cpp \
     gui/dialogs/addrectstructuredialog.cpp \
     gui/dialogs/addhexagonstructuredialog.cpp \
     gui/assistance/tutorialwindow.cpp \
-    model/decorators/impl/aliencellfunctioncommunicator.cpp \
+    model/decorators/_impl/aliencellfunctioncommunicator.cpp \
     model/simulationsettings.cpp \
     model/metadatamanager.cpp \
     gui/misc/startscreencontroller.cpp \
     gui/guisettings.cpp \
-    model/decorators/impl/aliencelldecoratorfactoryimpl.cpp \
+    model/decorators/_impl/aliencelldecoratorfactoryimpl.cpp \
     global/servicelocator.cpp \
-    model/decorators/impl/aliencellfunctioncomputerimpl.cpp \
+    model/decorators/_impl/aliencellfunctioncomputerimpl.cpp \
     model/decorators/aliencellfunctioncomputer.cpp \
     model/decorators/aliencelldecorator.cpp \
-    model/entities/impl/entityfactoryimpl.cpp \
-    model/decorators/impl/alienenergyguidanceimpl.cpp
+    model/entities/_impl/entityfactoryimpl.cpp \
+    model/decorators/_impl/alienenergyguidanceimpl.cpp \
+    model/_impl/modelfactoryimpl.cpp
 HEADERS += \
-    model/entities/impl/aliencellimpl.h \
+    model/entities/_impl/aliencellimpl.h \
     model/entities/aliencellcluster.h \
     model/physics/physics.h \
     global/global.h \
     model/entities/alientoken.h \
     model/entities/aliengrid.h \
     model/decorators/aliencelldecoratorfactory.h \
-    model/decorators/impl/aliencellfunctionscanner.h \
+    model/decorators/_impl/aliencellfunctionscanner.h \
     model/entities/alienenergy.h \
     gui/monitoring/simulationmonitor.h \
     model/alienthread.h \
-    model/decorators/impl/aliencellfunctionconstructor.h \
+    model/decorators/_impl/aliencellfunctionconstructor.h \
     gui/microeditor/hexedit.h \
     gui/macroeditor/pixeluniverse.h \
     gui/macroeditor/shapeuniverse.h \
@@ -95,7 +96,7 @@ HEADERS += \
     gui/microeditor/clusteredit.h \
     gui/microeditor/tokenedit.h \
     gui/macroeditor/markergraphicsitem.h \
-    model/decorators/impl/aliencellfunctionweapon.h \
+    model/decorators/_impl/aliencellfunctionweapon.h \
     gui/microeditor/celledit.h \
     gui/microeditor/energyedit.h \
     gui/microeditor/tokentab.h \
@@ -110,27 +111,27 @@ HEADERS += \
     gui/dialogs/selectionmultiplyrandomdialog.h \
     gui/dialogs/selectionmultiplyarrangementdialog.h \
     gui/microeditor/cellcomputeredit.h \
-    model/decorators/impl/aliencellfunctionsensor.h \
-    model/decorators/impl/aliencellfunctionpropulsion.h \
+    model/decorators/_impl/aliencellfunctionsensor.h \
+    model/decorators/_impl/aliencellfunctionpropulsion.h \
     gui/dialogs/addrectstructuredialog.h \
     gui/dialogs/addhexagonstructuredialog.h \
     gui/assistance/tutorialwindow.h \
-    model/decorators/impl/aliencellfunctioncommunicator.h \
+    model/decorators/_impl/aliencellfunctioncommunicator.h \
     model/simulationsettings.h \
     model/metadatamanager.h \
     gui/misc/startscreencontroller.h \
     model/entities/aliencell.h \
-    model/decorators/impl/aliencelldecoratorfactoryimpl.h \
+    model/decorators/_impl/aliencelldecoratorfactoryimpl.h \
     global/servicelocator.h \
     model/decorators/aliencelldecorator.h \
     model/decorators/aliencellfunctioncomputer.h \
     model/decorators/aliencellfunction.h \
     model/decorators/alienenergyguidance.h \
-    model/decorators/impl/alienenergyguidanceimpl.h \
-    model/decorators/impl/aliencellfunctioncomputerimpl.h \
+    model/decorators/_impl/alienenergyguidanceimpl.h \
+    model/decorators/_impl/aliencellfunctioncomputerimpl.h \
     model/decorators/constants.h \
     model/entities/entityfactory.h \
-    model/entities/impl/entityfactoryimpl.h \
+    model/entities/_impl/entityfactoryimpl.h \
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
@@ -146,7 +147,9 @@ FORMS += gui/monitoring/simulationmonitor.ui \
     gui/microeditor/cellcomputeredit.ui \
     gui/dialogs/addrectstructuredialog.ui \
     gui/dialogs/addhexagonstructuredialog.ui \
-    gui/assistance/tutorialwindow.ui
+    gui/assistance/tutorialwindow.ui \
+    model/_impl/modelfactoryimpl.h \
+    model/modelfactory.h
 
 RESOURCES += \
     gui/resources/ressources.qrc

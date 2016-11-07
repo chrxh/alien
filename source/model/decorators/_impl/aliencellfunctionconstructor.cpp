@@ -1,6 +1,6 @@
 #include "aliencellfunctionconstructor.h"
-#include "model/decorators/aliencelldecoratorfactory.h"
-#include "model/entities/entityfactory.h"
+
+#include "model/modelfactory.h"
 #include "model/entities/aliencellcluster.h"
 #include "model/entities/alientoken.h"
 #include "model/physics/physics.h"
@@ -42,15 +42,12 @@ namespace {
     AlienCell* constructNewCell (AlienCell* baseCell, QVector3D posOfNewCell, int maxConnections
         , int tokenAccessNumber, int cellType, quint8* cellFunctionData, AlienGrid*& grid)
     {
-        EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-        AlienCell* newCell = entityFactory->buildCell(simulationParameters.NEW_CELL_ENERGY, grid);
+        ModelFactory* factory = ServiceLocator::getInstance().getService<ModelFactory>();
+        AlienCell* newCell = factory->buildDecoratedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
         AlienCellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
         newCell->setTokenAccessNumber(tokenAccessNumber);
-        AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
-        decoratorFactory->addCellFunction(newCell, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
-        decoratorFactory->addEnergyGuidance(newCell, grid);
         newCell->setColor(baseCell->getColor());
         cluster->addCell(newCell, posOfNewCell);
         return newCell;
