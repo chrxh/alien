@@ -74,7 +74,7 @@ HEADERS += \
     model/entities/alientoken.h \
     model/entities/aliengrid.h \
     model/decorators/aliencelldecoratorfactory.h \
-    model/decorators/aliencellfunctionscanner.h \
+    model/decorators/impl/aliencellfunctionscanner.h \
     model/entities/alienenergy.h \
     gui/monitoring/simulationmonitor.h \
     model/alienthread.h \
@@ -130,7 +130,7 @@ HEADERS += \
     model/decorators/impl/aliencellfunctioncomputerimpl.h \
     model/decorators/constants.h \
     model/entities/entityfactory.h \
-    model/entities/impl/entityfactoryimpl.h
+    model/entities/impl/entityfactoryimpl.h \
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \

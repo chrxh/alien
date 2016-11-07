@@ -669,6 +669,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
             token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_CONNECTION);
         }
     }
+    return processingResult;
 }
 
 void AlienCellFunctionConstructor::serialize (QDataStream& stream)

@@ -12,9 +12,9 @@ public:
     virtual ~AlienCellFunction() {}
 
     virtual CellFunctionType getType () const = 0;
+    virtual void getInternalData (quint8* data) const {}
 
 protected:
-    virtual void getInternalData (quint8* data) const = 0;
     qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const;
 
     static qreal convertDataToAngle (quint8 b);

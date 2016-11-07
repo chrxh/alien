@@ -1,49 +1,17 @@
-#ifndef ALIENTOKENPROCESSINGSCANNER_H
-#define ALIENTOKENPROCESSINGSCANNER_H
+#ifndef ALIENCELLFUNCTIONSCANNER_H
+#define ALIENCELLFUNCTIONSCANNER_H
 
-#include "aliencellfunction.h"
+#include "model/decorators/aliencellfunction.h"
 
 class AlienCellFunctionScanner : public AlienCellFunction
 {
 public:
-    AlienCellFunctionScanner (AlienGrid*& grid);
-    AlienCellFunctionScanner (quint8* cellFunctionData, AlienGrid*& grid);
-    AlienCellFunctionScanner (QDataStream& stream, AlienGrid*& grid);
+    AlienCellFunctionScanner (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunctionScanner (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid);
+    AlienCellFunctionScanner (AlienCell* cell, QDataStream& stream, AlienGrid*& grid);
 
-    void execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose);
-    void serialize (QDataStream& stream);
-
-    //constants for cell function programming
-    enum class SCANNER {
-        OUT = 5,
-        INOUT_CELL_NUMBER = 12,
-        OUT_MASS = 13,
-        OUT_ENERGY = 14,
-        OUT_ANGLE = 15,
-        OUT_DISTANCE = 16,
-        OUT_CELL_MAX_CONNECTIONS = 17,
-        OUT_CELL_BRANCH_NO = 18,
-        OUT_CELL_FUNCTION = 19,
-        OUT_CELL_FUNCTION_DATA = 40
-    };
-    enum class SCANNER_OUT {
-        SUCCESS,
-        FINISHED,
-        RESTART
-    };
-    enum class SCANNER_OUT_CELL_FUNCTION {
-        COMPUTER,
-        PROP,
-        SCANNER,
-        WEAPON,
-        CONSTR,
-        SENSOR,
-        COMMUNICATOR
-    };
-
-protected:
-    void spiralLookupAlgorithm (AlienCell*& cell, AlienCell*& previousCell1, AlienCell*& previousCell2, int n, const quint64& tag);
-    int convertCellTypeNameToNumber(QString type);
+    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
+    CellFunctionType getType () const { return CellFunctionType::SCANNER; }
 };
 
-#endif // ALIENTOKENPROCESSINGSCANNER_H
+#endif // ALIENCELLFUNCTIONSCANNER_H

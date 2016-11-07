@@ -1,44 +1,112 @@
 #include "aliencellfunctionscanner.h"
-#include "aliencellfunctionfactory.h"
-#include "../entities/aliencell.h"
-#include "../entities/aliencellcluster.h"
-#include "../physics/physics.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/entities/alientoken.h"
+#include "model/physics/physics.h"
 #include "global/global.h"
 
 #include <QString>
 #include <QtCore/qmath.h>
 
-AlienCellFunctionScanner::AlienCellFunctionScanner(AlienGrid*& grid)
-    : AlienCellFunction(grid)
+AlienCellFunctionScanner::AlienCellFunctionScanner(AlienCell* cell,AlienGrid*& grid)
+    : AlienCellFunction(cell, grid)
 {
 }
 
-AlienCellFunctionScanner::AlienCellFunctionScanner (quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(grid)
-{
-
-}
-
-AlienCellFunctionScanner::AlienCellFunctionScanner (QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(grid)
+AlienCellFunctionScanner::AlienCellFunctionScanner (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
+    : AlienCellFunction(cell, grid)
 {
 
 }
 
-void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, AlienCell* previousCell, AlienEnergy*& newParticle, bool& decompose)
+AlienCellFunctionScanner::AlienCellFunctionScanner (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunction(cell, grid)
 {
+
+}
+
+namespace {
+
+    void spiralLookupAlgorithm (AlienCell*& cell, AlienCell*& previousCell1, AlienCell*& previousCell2, int n, const quint64& tag)
+    {
+        //tag cell
+        cell->setTag(tag);
+
+        //finished?
+        if( n == 0 )
+            return;
+
+        //calc angle from previousCell to baseCell
+        qreal originAngle = Physics::angleOfVector(previousCell1->getRelPos() - cell->getRelPos());
+
+        //iterate over all connected base cells
+        bool nextCellFound = false;
+        AlienCell* nextCell = 0;
+        qreal nextCellAngle = 0.0;
+        int numCon = cell->getNumConnections();
+        for( int i = 0; i < numCon; ++i ) {
+            AlienCell* nextCandCell = cell->getConnection(i);
+            if( (nextCandCell->getTag() != tag )
+             && (!nextCandCell->isTokenBlocked()) ) {
+    //         && nextCandCell->isConnectedTo(previousCell1) ) {
+
+                //calc angle from "nextCandCell"
+                qreal angle = Physics::angleOfVector(nextCandCell->getRelPos() - cell->getRelPos());
+
+                //another cell already found? => compare angles
+                if( nextCellFound ) {
+
+                    //new angle should be between "originAngle" and "nextCellAngle" in modulo arithmetic,
+                    //i.e. nextCellAngle > originAngle: angle\in (nextCellAngle,originAngle]
+                    //nextCellAngle < originAngle: angle >= originAngle or angle < nextCellAngle
+                    if( ((nextCellAngle > angle) && (angle >= originAngle))
+                        || ((nextCellAngle < originAngle) && ((angle >= originAngle) || (angle < nextCellAngle))) ) {
+                        nextCell = nextCandCell;
+                        nextCellAngle = angle;
+                    }
+
+                }
+
+                //no other cell found so far? => save cell and its angle
+                else {
+                    nextCell = nextCandCell;
+                    nextCellAngle = angle;
+                }
+                nextCellFound = true;
+            }
+        }
+
+        //next cell found?
+        if( nextCellFound ) {
+            previousCell2 = previousCell1;
+            previousCell1 = cell;
+            cell = nextCell;
+            spiralLookupAlgorithm(cell, previousCell1, previousCell2, n-1, tag);
+        }
+
+        //no next cell found? => finish
+        else {
+            previousCell2 = previousCell1;
+            previousCell1 = cell;
+        }
+    }
+
+}
+
+AlienCell::ProcessingResult AlienCellFunctionScanner::process (AlienToken* token, AlienCell* previousCell)
+{
+    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
     int n = token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)];
     quint64 tag(GlobalFunctions::getTag());
     AlienCell* scanCellPre1 = previousCell;
     AlienCell* scanCellPre2 = previousCell;
-    AlienCell* scanCell = cell;
+    AlienCell* scanCell = _cell;
     spiralLookupAlgorithm(scanCell, scanCellPre1, scanCellPre2, n, tag);
 
     //restart?
     if( (n>0) && (scanCell == scanCellPre1) ) {
         token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)] = 1;
-        scanCell = cell;
-        scanCellPre1 = cell;
+        scanCell = _cell;
+        scanCellPre1 = _cell;
         token->memory[static_cast<int>(SCANNER::OUT)] = static_cast<int>(SCANNER_OUT::RESTART);
     }
 
@@ -51,7 +119,7 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, Alie
         tag = GlobalFunctions::getTag();
         AlienCell* scanCellPreTemp1 = previousCell;
         AlienCell* scanCellPreTemp2 = previousCell;
-        AlienCell* scanCellTemp = cell;
+        AlienCell* scanCellTemp = _cell;
         spiralLookupAlgorithm(scanCellTemp, scanCellPreTemp1, scanCellPreTemp2, n+1, tag);
         if( scanCellTemp == scanCellPreTemp1 )
             token->memory[static_cast<int>(SCANNER::OUT)] = static_cast<int>(SCANNER_OUT::FINISHED);
@@ -93,101 +161,15 @@ void AlienCellFunctionScanner::execute (AlienToken* token, AlienCell* cell, Alie
     token->memory[static_cast<int>(SCANNER::OUT_ENERGY)] = e;
     token->memory[static_cast<int>(SCANNER::OUT_CELL_MAX_CONNECTIONS)] = scanCell->getMaxConnections();
     token->memory[static_cast<int>(SCANNER::OUT_CELL_BRANCH_NO)] = scanCell->getTokenAccessNumber();
-    token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION)] = convertCellTypeNameToNumber(scanCell->getCellFunction()->getCellFunctionName());
-    scanCell->getCellFunction()->getInternalData(&token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA)]);
+    AlienCellFunction* scanCellFunction = AlienCellDecorator::findObject<AlienCellFunction>(scanCell);
+    token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION)] = static_cast<quint8>(scanCellFunction->getType());
+    scanCellFunction->getInternalData(&token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA)]);
 
     //scan cluster
-    quint32 mass = qFloor(cell->getCluster()->getMass());
+    quint32 mass = qFloor(_cell->getCluster()->getMass());
     if( mass > 255 )        //restrict value to 8 bit
         mass = 255;
     token->memory[static_cast<int>(SCANNER::OUT_MASS)] = mass;
-}
-
-void AlienCellFunctionScanner::serialize (QDataStream& stream)
-{
-    AlienCellFunction::serialize(stream);
-}
-
-void AlienCellFunctionScanner::spiralLookupAlgorithm (AlienCell*& cell, AlienCell*& previousCell1, AlienCell*& previousCell2, int n, const quint64& tag)
-{
-    //tag cell
-    cell->setTag(tag);
-
-    //finished?
-    if( n == 0 )
-        return;
-
-    //calc angle from previousCell to baseCell
-    qreal originAngle = Physics::angleOfVector(previousCell1->getRelPos() - cell->getRelPos());
-
-    //iterate over all connected base cells
-    bool nextCellFound = false;
-    AlienCell* nextCell = 0;
-    qreal nextCellAngle = 0.0;
-    int numCon = cell->getNumConnections();
-    for( int i = 0; i < numCon; ++i ) {
-        AlienCell* nextCandCell = cell->getConnection(i);
-        if( (nextCandCell->getTag() != tag )
-         && (!nextCandCell->blockToken()) ) {
-//         && nextCandCell->isConnectedTo(previousCell1) ) {
-
-            //calc angle from "nextCandCell"
-            qreal angle = Physics::angleOfVector(nextCandCell->getRelPos() - cell->getRelPos());
-
-            //another cell already found? => compare angles
-            if( nextCellFound ) {
-
-                //new angle should be between "originAngle" and "nextCellAngle" in modulo arithmetic,
-                //i.e. nextCellAngle > originAngle: angle\in (nextCellAngle,originAngle]
-                //nextCellAngle < originAngle: angle >= originAngle or angle < nextCellAngle
-                if( ((nextCellAngle > angle) && (angle >= originAngle))
-                    || ((nextCellAngle < originAngle) && ((angle >= originAngle) || (angle < nextCellAngle))) ) {
-                    nextCell = nextCandCell;
-                    nextCellAngle = angle;
-                }
-
-            }
-
-            //no other cell found so far? => save cell and its angle
-            else {
-                nextCell = nextCandCell;
-                nextCellAngle = angle;
-            }
-            nextCellFound = true;
-        }
-    }
-
-    //next cell found?
-    if( nextCellFound ) {
-        previousCell2 = previousCell1;
-        previousCell1 = cell;
-        cell = nextCell;
-        spiralLookupAlgorithm(cell, previousCell1, previousCell2, n-1, tag);
-    }
-
-    //no next cell found? => finish
-    else {
-        previousCell2 = previousCell1;
-        previousCell1 = cell;
-    }
-}
-
-int AlienCellFunctionScanner::convertCellTypeNameToNumber (QString type)
-{
-    if( type == "COMPUTER" )
-        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::COMPUTER);
-    if( type == "PROPULSION" )
-        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::PROP);
-    if( type == "SCANNER" )
-        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::SCANNER);
-    if( type == "WEAPON" )
-        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::WEAPON);
-    if( type == "CONSTRUCTOR" )
-        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::CONSTR);
-    if( type == "SENSOR" )
-        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::SENSOR);
-    if( type == "COMMUNICATOR" )
-        return static_cast<int>(SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR);
-    return 0;
+    return processingResult;
 }
 

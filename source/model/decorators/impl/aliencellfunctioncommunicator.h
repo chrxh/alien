@@ -18,6 +18,7 @@ public:
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
 
     void serialize (QDataStream& stream);
+    void getInternalData (quint8* data);
 
     friend TestAlienCellFunctionCommunicator;
 
@@ -29,7 +30,6 @@ private:
         quint8 distance = 0;
     };
 
-    void getInternalData (quint8* data);
 
     COMMUNICATOR_IN readCommandFromToken (AlienToken* token) const;
     void setListeningChannel (AlienToken* token);

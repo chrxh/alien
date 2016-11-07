@@ -19,10 +19,9 @@ public:
     virtual CompilationState injectAndCompileInstructionCode (QString code);
 
     void serialize (QDataStream& stream);
-
+    void getInternalData (quint8* data);
 
 private:
-    void getInternalData (quint8* data);
     void codeInstruction (int& instructionPointer,
                           quint8 instr,
                           quint8 opTyp1,
