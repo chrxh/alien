@@ -13,18 +13,6 @@ AlienCellFunctionPropulsion::AlienCellFunctionPropulsion(AlienCell* cell, AlienG
 {
 }
 
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
-AlienCellFunctionPropulsion::AlienCellFunctionPropulsion (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
 namespace {
     qreal convertDataToThrustPower (quint8 b)
     {

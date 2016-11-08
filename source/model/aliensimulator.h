@@ -1,7 +1,7 @@
 #ifndef ALIENSIMULATOR_H
 #define ALIENSIMULATOR_H
 
-#include "entities/aliencellto.h"
+#include "aliencellto.h"
 
 #include <QObject>
 #include <QVector3D>

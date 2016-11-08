@@ -27,6 +27,7 @@ public: //redirect following methods to AlienCell
     virtual void delConnection (AlienCell* otherCell);
     virtual void delAllConnection ();
     virtual int getNumConnections () const;
+    virtual void setNumConnections (int num);
     virtual int getMaxConnections () const;
     virtual void setMaxConnections (int maxConnections);
     virtual AlienCell* getConnection (int i) const;

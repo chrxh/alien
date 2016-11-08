@@ -14,7 +14,12 @@ public:
     virtual CellFunctionType getType () const = 0;
     virtual void getInternalData (quint8* data) const {}
 
+    static CellFunctionType getType (QDataStream& stream);
+    void serialize (QDataStream& stream) const;
+
 protected:
+    virtual void serializeInternalData (QDataStream& stream) const {}
+
     qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const;
 
     static qreal convertDataToAngle (quint8 b);
