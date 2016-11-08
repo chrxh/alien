@@ -2,7 +2,8 @@
 
 AlienCellDecorator::~AlienCellDecorator ()
 {
-    delete _cell;
+    if( _cell)
+        delete _cell;
 }
 
 void AlienCellDecorator::serialize (QDataStream& stream) const
@@ -31,19 +32,19 @@ void AlienCellDecorator::resetConnections (int maxConnections)
     _cell->resetConnections(maxConnections);
 }
 
-void AlienCellDecorator::newConnection (AlienCell* otherCell)
+void AlienCellDecorator::newConnection (AlienCell* thisCell, AlienCell* otherCell)
 {
-    _cell->newConnection(otherCell);
+    _cell->newConnection(thisCell, otherCell);
 }
 
-void AlienCellDecorator::delConnection (AlienCell* otherCell)
+void AlienCellDecorator::delConnection (AlienCell* thisCell, AlienCell* otherCell)
 {
-    _cell->delConnection(otherCell);
+    _cell->delConnection(thisCell, otherCell);
 }
 
-void AlienCellDecorator::delAllConnection ()
+void AlienCellDecorator::delAllConnection (AlienCell* thisCell)
 {
-    _cell->delAllConnection();
+    _cell->delAllConnection(thisCell);
 }
 
 int AlienCellDecorator::getNumConnections () const
@@ -146,9 +147,9 @@ void AlienCellDecorator::setAbsPosition (QVector3D pos)
     _cell->setAbsPosition(pos);
 }
 
-void AlienCellDecorator::setAbsPositionAndUpdateMap (QVector3D pos)
+void AlienCellDecorator::setAbsPositionAndUpdateMap (AlienCell* thisCell, QVector3D pos)
 {
-    _cell->setAbsPositionAndUpdateMap(pos);
+    _cell->setAbsPositionAndUpdateMap(thisCell, pos);
 }
 
 QVector3D AlienCellDecorator::getRelPos () const
@@ -178,10 +179,10 @@ bool AlienCellDecorator::isTokenBlocked () const
 
 void AlienCellDecorator::setTokenBlocked (bool block)
 {
-    _cell->setBlockToken(block);
+    _cell->setTokenBlocked(block);
 }
 
-qreal AlienCellDecorator::getEnergy()
+qreal AlienCellDecorator::getEnergy() const
 {
     return _cell->getEnergy();
 }
@@ -194,11 +195,6 @@ qreal AlienCellDecorator::getEnergyIncludingTokens() const
 void AlienCellDecorator::setEnergy (qreal i)
 {
     _cell->setEnergy(i);
-}
-
-QVector< quint8 >& AlienCellDecorator::getMemoryReference ()
-{
-    return _cell->getMemory();
 }
 
 void AlienCellDecorator::serialize (QDataStream& stream)

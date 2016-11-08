@@ -11,7 +11,7 @@ EntityFactoryImpl::EntityFactoryImpl ()
 AlienCell* EntityFactoryImpl::buildCell (qreal energy, AlienGrid*& grid, int maxConnections
     , int tokenAccessNumber, QVector3D relPos)
 {
-    return new AlienCellImpl(energy, grid, false, maxConnections, tokenAccessNumber, relPos);
+    return new AlienCellImpl(energy, grid, maxConnections, tokenAccessNumber, relPos);
 }
 
 AlienCell* EntityFactoryImpl::buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells

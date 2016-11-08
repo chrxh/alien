@@ -1,5 +1,4 @@
 #include "microeditor.h"
-//#include "ui_microeditor.h"
 
 #include "microeditor/tokentab.h"
 #include "microeditor/celledit.h"
@@ -8,15 +7,16 @@
 #include "microeditor/hexedit.h"
 #include "microeditor/metadataedit.h"
 #include "microeditor/symboledit.h"
-//#include "microeditor/computercodeedit.h"
 #include "microeditor/cellcomputeredit.h"
 #include "gui/editorsettings.h"
 #include "gui/guisettings.h"
 #include "model/simulationsettings.h"
 #include "model/metadatamanager.h"
+#include "model/modelfacade.h"
 #include "model/entities/aliencell.h"
 #include "model/entities/aliencellcluster.h"
 #include "model/entities/aliengrid.h"
+#include "global/servicelocator.h"
 
 #include <QTabWidget>
 #include <QToolButton>
@@ -238,7 +238,8 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
 
     //update data for cluster editor
     _grid->lockData();
-    _focusCellReduced = AlienCellTO(cell);
+    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    _focusCellReduced = facade->buildCellTO(cell);
     quint64 id = cell->getId();
     QList< quint64 > ids = cell->getCluster()->getCellIds();
     quint8 color = cell->getColor();
@@ -251,7 +252,7 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
                                     MetadataManager::getGlobalInstance().getCellDescription(id));
 
     //update data for cell function: computer
-    if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
+    if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
@@ -372,7 +373,8 @@ void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
 
             //update data for cluster editor
             _grid->lockData();
-            _focusCellReduced = AlienCellTO(_focusCell);
+            ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+            _focusCellReduced = facade->buildCellTO(_focusCell);
             quint64 id = _focusCell->getId();
             QList< quint64 > ids = _focusCell->getCluster()->getCellIds();
             quint8 color = _focusCell->getColor();
@@ -385,7 +387,7 @@ void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
                                             MetadataManager::getGlobalInstance().getCellDescription(id));
 
             //update computer code editor
-            if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
+            if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
                 //_computerCodeEditor->update(_focusCellReduced.computerCode);
             }
         }
@@ -404,7 +406,7 @@ void MicroEditor::requestUpdate ()
     if( _focusCell ) {
 
          //save edited code from code editor
-        if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
+        if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
             _grid->lockData();
             quint64 id = _focusCell->getId();
             _grid->unlockData();
@@ -645,7 +647,7 @@ void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
     }
 
     //update data for cell function: computer
-    if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
+    if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);

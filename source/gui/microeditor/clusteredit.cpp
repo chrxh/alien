@@ -1,7 +1,6 @@
 #include "clusteredit.h"
 
 #include "gui/editorsettings.h"
-#include "model/processing/aliencellfunction.h"
 #include "model/entities/aliencell.h"
 #include "model/entities/aliencellcluster.h"
 

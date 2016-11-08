@@ -45,7 +45,7 @@ AlienCell::ProcessingResult AlienCellFunctionCommunicator::process (AlienToken* 
     return processingResult;
 }
 
-void AlienCellFunctionCommunicator::serializeInternalData (QDataStream& stream)
+void AlienCellFunctionCommunicator::serializeInternalData (QDataStream& stream) const
 {
     stream << _newMessageReceived
            << _receivedMessage.channel
