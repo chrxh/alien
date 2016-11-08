@@ -60,7 +60,6 @@ public:
     virtual qreal getEnergy() const = 0;
     virtual qreal getEnergyIncludingTokens() const = 0;
     virtual void setEnergy (qreal i) = 0;
-    virtual QVector< quint8 >& getMemoryReference () = 0;
 
     virtual void serialize (QDataStream& stream) const = 0;
 

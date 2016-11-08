@@ -3,23 +3,25 @@
 
 #include <QByteArray>
 #include <QChar>
+#include <QVector>
 
 #include "model/decorators/aliencellfunctioncomputer.h"
 
 class AlienCellFunctionComputerImpl: public AlienCellFunctionComputer
 {
 public:
-    AlienCellFunctionComputerImpl (AlienCell* cell, bool randomData, AlienGrid*& grid);
+    AlienCellFunctionComputerImpl (AlienCell* cell, AlienGrid*& grid);
     AlienCellFunctionComputerImpl (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid);
     AlienCellFunctionComputerImpl (AlienCell* cell, QDataStream& stream, AlienGrid*& grid);
 
     ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
-    QString decompileInstructionCode () const;
-    virtual CompilationState injectAndCompileInstructionCode (QString code);
-
-    void serialize (QDataStream& stream);
     void getInternalData (quint8* data);
+    void serializeInternalData (QDataStream& stream) const;
+
+    QString decompileInstructionCode () const;
+    CompilationState injectAndCompileInstructionCode (QString code);
+    QVector< quint8 >& getMemoryReference ();
 
 private:
     void codeInstruction (int& instructionPointer,
@@ -37,6 +39,7 @@ private:
 
     QByteArray _code;
     int _numInstr;
+    QVector< quint8 > _memory;
 };
 
 #endif // ALIENTOKENFUNCTIONCOMPUTERIMPL_H

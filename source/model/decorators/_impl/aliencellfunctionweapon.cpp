@@ -10,18 +10,6 @@ AlienCellFunctionWeapon::AlienCellFunctionWeapon (AlienCell* cell, AlienGrid*& g
 {
 }
 
-AlienCellFunctionWeapon::AlienCellFunctionWeapon (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
-AlienCellFunctionWeapon::AlienCellFunctionWeapon (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
 AlienCell::ProcessingResult AlienCellFunctionWeapon::process (AlienToken* token, AlienCell* previousCell)
 {
     AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
@@ -47,4 +35,3 @@ AlienCell::ProcessingResult AlienCellFunctionWeapon::process (AlienToken* token,
         }
     return processingResult;
 }
-

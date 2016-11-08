@@ -62,11 +62,10 @@ SOURCES += main.cpp \
     model/decorators/_impl/aliencelldecoratorfactoryimpl.cpp \
     global/servicelocator.cpp \
     model/decorators/_impl/aliencellfunctioncomputerimpl.cpp \
-    model/decorators/aliencellfunctioncomputer.cpp \
     model/decorators/aliencelldecorator.cpp \
     model/entities/_impl/entityfactoryimpl.cpp \
     model/decorators/_impl/alienenergyguidanceimpl.cpp \
-    model/_impl/modelfactoryimpl.cpp
+    model/_impl/modelfacadeimpl.cpp
 HEADERS += \
     model/entities/_impl/aliencellimpl.h \
     model/entities/aliencellcluster.h \
@@ -148,8 +147,8 @@ FORMS += gui/monitoring/simulationmonitor.ui \
     gui/dialogs/addrectstructuredialog.ui \
     gui/dialogs/addhexagonstructuredialog.ui \
     gui/assistance/tutorialwindow.ui \
-    model/_impl/modelfactoryimpl.h \
-    model/modelfactory.h
+    model/modelfacade.h \
+    model/_impl/modelfacadeimpl.h
 
 RESOURCES += \
     gui/resources/ressources.qrc

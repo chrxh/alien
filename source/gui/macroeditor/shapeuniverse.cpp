@@ -630,10 +630,10 @@ void ShapeUniverse::createConnectionItem (AlienCell* cell, AlienCell* otherCell)
 
     //directed connection?
     AlienCellConnectionGraphicsItem::ConnectionState s = AlienCellConnectionGraphicsItem::NO_DIR_CONNECTION;
-    if( cell->getTokenAccessNumber() == ((otherCell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) && (!cell->blockToken()) ) {
+    if( cell->getTokenAccessNumber() == ((otherCell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) && (!cell->isTokenBlocked()) ) {
         s = AlienCellConnectionGraphicsItem::B_TO_A_CONNECTION;
     }
-    if( ((cell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->blockToken()) ) {
+    if( ((cell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->isTokenBlocked()) ) {
         s = AlienCellConnectionGraphicsItem::A_TO_B_CONNECTION;
     }
     AlienCellConnectionGraphicsItem* connectionItem = new AlienCellConnectionGraphicsItem(pos.x(), pos.y(), otherPos.x(), otherPos.y(), s);

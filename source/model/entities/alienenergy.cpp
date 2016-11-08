@@ -3,7 +3,7 @@
 #include "aliencell.h"
 #include "aliencellcluster.h"
 
-#include "model/modelfactory.h"
+#include "model/modelfacade.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 
@@ -101,8 +101,8 @@ bool AlienEnergy::movement (AlienCellCluster*& cluster)
 
                 //create cell and cluster
                 QList< AlienCell* > cells;
-                ModelFactory* factory = ServiceLocator::getInstance().getService<ModelFactory>();
-                AlienCell* c = factory->buildDecoratedCellWithRandomData(eNew, _grid);
+                ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+                AlienCell* c = facade->buildDecoratedCellWithRandomData(eNew, _grid);
                 cells << c;
                 cluster = AlienCellCluster::buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
                 amount = 0;

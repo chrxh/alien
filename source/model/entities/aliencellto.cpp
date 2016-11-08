@@ -1,9 +1,5 @@
 #include "aliencellto.h"
 
-#include "aliencell.h"
-#include "aliencellcluster.h"
-#include "model/processing/aliencellfunction.h"
-
 #include "model/simulationsettings.h"
 
 AlienCellTO::AlienCellTO ()
@@ -31,7 +27,7 @@ AlienCellTO::AlienCellTO (AlienCell* cell)
     cellEnergy = cell->getEnergy();
     cellNumCon = cell->getNumConnections();
     cellMaxCon = cell->getMaxConnections();
-    cellAllowToken = !cell->blockToken();
+    cellAllowToken = !cell->isTokenBlocked();
     cellTokenAccessNum = cell->getTokenAccessNumber();
     cellFunctionName = cell->getCellFunction()->getCellFunctionName();
 

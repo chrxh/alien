@@ -17,8 +17,6 @@
 #include "model/entities/aliencell.h"
 #include "model/entities/aliencellcluster.h"
 #include "model/entities/aliengrid.h"
-#include "model/processing/aliencellfunction.h"
-#include "model/processing/aliencellfunctionfactory.h"
 
 #include <QTabWidget>
 #include <QToolButton>

@@ -6,6 +6,40 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
+CellFunctionType AlienCellFunction::getType (QDataStream& stream)
+{
+//    quint8 type;
+//    stream >> type;
+    //>>>>>>>>>>>> TODO: remove because this is temporary and only for converting
+    QString name;
+    stream >> name;
+    CellFunctionType type;
+
+    if( name == "COMPUTER" )
+        type = CellFunctionType::COMPUTER;
+    if( name == "PROPULSION" )
+        type = CellFunctionType::PROPULSION;
+    if( name == "SCANNER" )
+        type = CellFunctionType::SCANNER;
+    if( name == "WEAPON" )
+        type = CellFunctionType::WEAPON;
+    if( name == "CONSTRUCTOR" )
+        type = CellFunctionType::CONSTRUCTOR;
+    if( name == "SENSOR" )
+        type = CellFunctionType::SENSOR;
+    if( name == "COMMUNICATOR" )
+        type = CellFunctionType::COMMUNICATOR;
+    //<<<<<<<<<<<<
+    return static_cast<CellFunctionType>(type);
+}
+
+void AlienCellFunction::serialize (QDataStream& stream) const
+{
+    AlienCellDecorator::serialize(stream);
+    stream << static_cast<quint8>(getType());
+    serializeInternalData(stream);
+}
+
 qreal AlienCellFunction::calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const
 {
     QVector3D v1 = _grid->displacement(origin, ref1);

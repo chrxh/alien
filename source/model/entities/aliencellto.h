@@ -1,6 +1,7 @@
-#ifndef ALIENCELLTO
-#define ALIENCELLTO
+#ifndef ALIENCELLTO_H
+#define ALIENCELLTO_H
 
+#include "model/decorators/constants.h"
 #include <QVector>
 #include <QList>
 #include <QVector3D>
@@ -29,7 +30,7 @@ struct AlienCellTO  //TO = Transfer Object
     int cellMaxCon;
     bool cellAllowToken;
     int cellTokenAccessNum;
-    QString cellFunctionName;
+    CellFunctionType cellFunctionType;
 
     //computer data
     QVector< quint8 > computerMemory;
@@ -40,5 +41,5 @@ struct AlienCellTO  //TO = Transfer Object
     QList< QVector< quint8 > > tokenData;
 };
 
-#endif // ALIENCELLTO
+#endif // ALIENCELLTO_H
 

@@ -12,18 +12,6 @@ AlienCellFunctionSensor::AlienCellFunctionSensor (AlienCell* cell, AlienGrid*& g
 {
 }
 
-AlienCellFunctionSensor::AlienCellFunctionSensor (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
-AlienCellFunctionSensor::AlienCellFunctionSensor (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
 AlienCell::ProcessingResult AlienCellFunctionSensor::process (AlienToken* token, AlienCell* previousCell)
 {
     AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
@@ -150,4 +138,3 @@ AlienCell::ProcessingResult AlienCellFunctionSensor::process (AlienToken* token,
     token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::NOTHING_FOUND);
     return processingResult;
 }
-

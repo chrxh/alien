@@ -11,11 +11,10 @@ class AlienCellImpl : public AlienCell
 {
 public:
 
-    AlienCellImpl (qreal energy, AlienGrid*& grid, bool random = true, int maxConnections = 0,
+    AlienCellImpl (qreal energy, AlienGrid*& grid, int maxConnections = 0,
                    int tokenAccessNumber = 0, QVector3D relPos = QVector3D());
     AlienCellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells,
                    AlienGrid*& grid);
-    AlienCellImpl (QDataStream& stream, AlienGrid*& grid);     //build without connecting cells
     ~AlienCellImpl();
 
     ProcessingResult process (AlienToken* token, AlienCell* previousCell);
@@ -59,7 +58,6 @@ public:
     qreal getEnergy() const;
     qreal getEnergyIncludingTokens() const;
     void setEnergy (qreal i);
-    QVector< quint8 >& getMemoryReference ();
 
     void serialize (QDataStream& stream) const;
 
@@ -95,7 +93,6 @@ private:
 
     int _tokenAccessNumber;
     bool _blockToken;
-    QVector< quint8 > _memory;
 
     QVector3D _vel;
     quint8 _color;      //metadata

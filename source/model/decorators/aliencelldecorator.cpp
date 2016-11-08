@@ -51,6 +51,11 @@ int AlienCellDecorator::getNumConnections () const
     return _cell->getNumConnections();
 }
 
+void AlienCellDecorator::setNumConnections (int num)
+{
+    _cell->setNumConnections(num);
+}
+
 int AlienCellDecorator::getMaxConnections () const
 {
     return _cell->getMaxConnections();
@@ -168,7 +173,7 @@ void AlienCellDecorator::setTokenAccessNumber (int i)
 
 bool AlienCellDecorator::isTokenBlocked () const
 {
-    return _cell->blockToken();
+    return _cell->isTokenBlocked();
 }
 
 void AlienCellDecorator::setTokenBlocked (bool block)
