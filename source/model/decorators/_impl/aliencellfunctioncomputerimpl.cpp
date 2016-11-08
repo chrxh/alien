@@ -7,36 +7,46 @@
 #include <QString>
 #include <qdebug.h>
 
-AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, bool randomData, AlienGrid*& grid)
+AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, AlienGrid*& grid)
     : AlienCellFunctionComputer(cell, grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
+    , _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
-    if( randomData ) {
-
-        //init with random code
-        for( int i = 0; i < 3*simulationParameters.CELL_CODESIZE; ++i )
-            _code[i] = qrand()%256;
-    }
-    else {
-
-        //init with zero data
-        _numInstr = 0;
-        for( int i = 0; i < 3*simulationParameters.CELL_CODESIZE; ++i )
-            _code[i] = 0;
-    }
+    //init with zero data
+    _numInstr = 0;
+    for( int i = 0; i < 3*simulationParameters.CELL_CODESIZE; ++i )
+        _code[i] = 0;
 }
 
 AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunctionComputer(cell, grid), _code(), _numInstr(0)
+    : AlienCellFunctionComputer(cell, grid), _code(), _numInstr(0), _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     _numInstr = cellFunctionData[0];
+    _code.resize(3*_numInstr);
     for( int i = 0; i < 3*_numInstr; ++i ) {
         _code[i] = cellFunctionData[i+1];
     }
 }
 
 AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunctionComputer(cell, grid)
+    : AlienCellFunctionComputer(cell, grid), _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
+    //load cell memory
+    int memSize;
+    stream >> memSize;
+    quint8 data;
+    for(int i = 0; i < memSize; ++i ) {
+        if( i < simulationParameters.CELL_MEMSIZE ) {
+            stream >> data;
+            _memory[i] = data;
+        }
+        else {
+            stream >> data;
+        }
+    }
+    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
+        _memory[i] = 0;
+
+    //load remaining attributes
     stream >> _code >> _numInstr;
 }
 
@@ -77,7 +87,7 @@ AlienCell::ProcessingResult AlienCellFunctionComputerImpl::process (AlienToken* 
             op1Pointer = (qint8*)&(token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)]);
         }
         if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
-            op1Pointer = (qint8*)&(_cell->getMemory()[convertToAddress(op1, simulationParameters.CELL_MEMSIZE)]);
+            op1Pointer = (qint8*)&(_memory[convertToAddress(op1, simulationParameters.CELL_MEMSIZE)]);
 
         //operand 2: loading value
         if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::MEM) )
@@ -87,7 +97,7 @@ AlienCell::ProcessingResult AlienCellFunctionComputerImpl::process (AlienToken* 
             op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
         }
         if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
-            op2 = _cell->getMemory()[convertToAddress(op2, simulationParameters.CELL_MEMSIZE)];
+            op2 = _memory[convertToAddress(op2, simulationParameters.CELL_MEMSIZE)];
 
         //execute instruction
         bool execute = true;
@@ -521,9 +531,11 @@ AlienCellFunctionComputer::CompilationState AlienCellFunctionComputerImpl::injec
     }
 }
 
-void AlienCellFunctionComputerImpl::serialize (QDataStream& stream)
+void AlienCellFunctionComputerImpl::serializeInternalData (QDataStream& stream)
 {
-    AlienCellDecorator::serialize(stream);
+    stream << simulationParameters.CELL_MEMSIZE;
+    for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
+        stream << _memory[i];
     stream << _code << _numInstr;
 }
 

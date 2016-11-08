@@ -16,9 +16,8 @@ public:
 
     ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
-
-    void serialize (QDataStream& stream);
     void getInternalData (quint8* data);
+    void serializeInternalData (QDataStream& stream) const;
 
     friend TestAlienCellFunctionCommunicator;
 

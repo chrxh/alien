@@ -12,18 +12,6 @@ AlienCellFunctionScanner::AlienCellFunctionScanner(AlienCell* cell,AlienGrid*& g
 {
 }
 
-AlienCellFunctionScanner::AlienCellFunctionScanner (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
-AlienCellFunctionScanner::AlienCellFunctionScanner (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
 namespace {
 
     void spiralLookupAlgorithm (AlienCell*& cell, AlienCell*& previousCell1, AlienCell*& previousCell2, int n, const quint64& tag)

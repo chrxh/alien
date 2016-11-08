@@ -2,7 +2,7 @@
 
 #include "gui/mainwindow.h"
 #include "model/aliensimulator.h"
-#include "model/entities/aliencellto.h"
+#include "model/aliencellto.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
 
@@ -11,8 +11,9 @@
 //QT += webkitwidgets
 
 //Model-Refactoring:
-//- random AlienCell-build wird in Modelfactory gemacht
+//- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
 //- Prefix Alien in Klassen entfernen
+//- suche nach "TODO"
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)

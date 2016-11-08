@@ -1,6 +1,6 @@
 #include "aliencellfunctionconstructor.h"
 
-#include "model/modelfactory.h"
+#include "model/modelfacade.h"
 #include "model/entities/aliencellcluster.h"
 #include "model/entities/alientoken.h"
 #include "model/physics/physics.h"
@@ -18,18 +18,6 @@
 AlienCellFunctionConstructor::AlienCellFunctionConstructor (AlienCell* cell, AlienGrid*& grid)
     : AlienCellFunction(cell, grid)
 {
-}
-
-AlienCellFunctionConstructor::AlienCellFunctionConstructor (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
-}
-
-AlienCellFunctionConstructor::AlienCellFunctionConstructor (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
-{
-
 }
 
 namespace {
@@ -667,10 +655,5 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
         }
     }
     return processingResult;
-}
-
-void AlienCellFunctionConstructor::serialize (QDataStream& stream)
-{
-    AlienCellDecorator::serialize(stream);
 }
 

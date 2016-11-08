@@ -20,7 +20,6 @@
 #include "model/aliensimulator.h"
 #include "model/entities/aliencell.h"
 #include "model/entities/aliencellcluster.h"
-#include "model/processing/aliencellfunction.h"
 
 #include <QGraphicsScene>
 #include <QGLWidget>
