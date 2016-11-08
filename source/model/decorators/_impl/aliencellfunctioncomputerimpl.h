@@ -17,13 +17,14 @@ public:
     ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
     void getInternalData (quint8* data);
-    void serializeInternalData (QDataStream& stream) const;
 
     QString decompileInstructionCode () const;
     CompilationState injectAndCompileInstructionCode (QString code);
     QVector< quint8 >& getMemoryReference ();
 
 private:
+    void serializeInternalData (QDataStream& stream) const;
+
     void codeInstruction (int& instructionPointer,
                           quint8 instr,
                           quint8 opTyp1,

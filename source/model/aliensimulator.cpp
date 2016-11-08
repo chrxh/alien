@@ -1,14 +1,16 @@
 #include "aliensimulator.h"
 
 #include "alienthread.h"
-#include "entities/aliengrid.h"
-#include "entities/aliencellcluster.h"
-#include "processing/aliencellfunction.h"
-#include "processing/aliencellfunctionfactory.h"
-#include "physics/physics.h"
+#include "metadatamanager.h"
+#include "modelfacade.h"
+#include "model/decorators/aliencellfunctioncomputer.h"
+#include "model/entities/alientoken.h"
+#include "model/entities/aliengrid.h"
+#include "model/entities/aliencellcluster.h"
+#include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 #include "global/global.h"
-#include "metadatamanager.h"
+#include "global/servicelocator.h"
 
 #include <QTimer>
 #include <QtCore/qmath.h>
@@ -175,6 +177,7 @@ qint32 AlienSimulator::getUniverseSizeY ()
 void AlienSimulator::addBlockStructure (QVector3D center, int numCellX, int numCellY, QVector3D dist, qreal energy)
 {
     //create cell grid
+    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
     AlienCell* cellGrid[numCellX][numCellY];
     for(int i = 0; i < numCellX; ++i )
         for(int j = 0; j < numCellY; ++j ) {
@@ -185,7 +188,7 @@ void AlienSimulator::addBlockStructure (QVector3D center, int numCellX, int numC
                 maxCon = 3;
             if( ((i == 0) || (i == (numCellX-1))) && ((j == 0) || (j == (numCellY-1))) )
                 maxCon = 2;
-            AlienCell* cell = AlienCell::buildCell(energy, _grid, maxCon, 0, 0, QVector3D(x, y, 0.0));
+            AlienCell* cell = facade->buildDecoratedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(x, y, 0.0));
 
             cellGrid[i][j] = cell;
         }
@@ -213,6 +216,7 @@ void AlienSimulator::addBlockStructure (QVector3D center, int numCellX, int numC
 void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal dist, qreal energy)
 {
     //create hexagon cell structure
+    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
     AlienCell* cellGrid[2*numLayers-1][2*numLayers-1];
     QList< AlienCell* > cells;
     int maxCon = 6;
@@ -229,7 +233,7 @@ void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal
                 maxCon = 6;
 
             //create cell: upper layer
-            cellGrid[numLayers-1+i][numLayers-1-j] = AlienCell::buildCell(energy, _grid, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
+            cellGrid[numLayers-1+i][numLayers-1-j] = facade->buildDecoratedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
             cells << cellGrid[numLayers-1+i][numLayers-1-j];
             if( numLayers-1+i > 0 )
                 cellGrid[numLayers-1+i][numLayers-1-j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1-j]);
@@ -240,7 +244,7 @@ void AlienSimulator::addHexagonStructure (QVector3D center, int numLayers, qreal
 
             //create cell: under layer (except for 0-layer)
             if( j > 0 ) {
-                cellGrid[numLayers-1+i][numLayers-1+j] = AlienCell::buildCell(energy, _grid, maxCon, 0, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
+                cellGrid[numLayers-1+i][numLayers-1+j] = facade->buildDecoratedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
                 cells << cellGrid[numLayers-1+i][numLayers-1+j];
                 if( numLayers-1+i > 0 )
                     cellGrid[numLayers-1+i][numLayers-1+j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1+j]);
@@ -336,8 +340,9 @@ void AlienSimulator::buildCell (QDataStream& stream,
     _grid->lockData();
 
     //read cell data
+    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
     QList< AlienCell* > newCells;
-    AlienCell* newCell = AlienCell::buildCellWithoutConnectingCells(stream, _grid);
+    AlienCell* newCell = facade->buildDecoratedCell(stream, _grid);
     newCells << newCell;
     newCells[0]->setRelPos(QVector3D());
     newCluster = AlienCellCluster::buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _grid);
@@ -587,10 +592,9 @@ void AlienSimulator::newCell (QVector3D pos)
 {
     //create cluster with single cell
     _grid->lockData();
-    AlienCell* cell = AlienCell::buildCell(simulationParameters.NEW_CELL_ENERGY,
-                                           _grid,
-                                           simulationParameters.NEW_CELL_MAX_CONNECTION,
-                                           simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
+    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    AlienCell* cell = facade->buildDecoratedCell(simulationParameters.NEW_CELL_ENERGY, CellFunctionType::COMPUTER
+        , _grid, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< AlienCell* > cells;
     cells << cell;
@@ -637,18 +641,23 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellTO >
             if( newCellData.cellMaxCon > simulationParameters.MAX_CELL_CONNECTIONS )
                 newCellData.cellMaxCon = simulationParameters.MAX_CELL_CONNECTIONS;
             cell->setMaxConnections(newCellData.cellMaxCon);
-            cell->setBlockToken(!newCellData.cellAllowToken);
+            cell->setTokenBlocked(!newCellData.cellAllowToken);
             cell->setTokenAccessNumber(newCellData.cellTokenAccessNum);
-            cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
+//            cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 
             //update cell computer
-            for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
-                cell->getMemory()[i] = newCellData.computerMemory[i];
-            int errorLine = 0;
-            if( cell->getCellFunction()->compileCode(newCellData.computerCode, errorLine) == false )
-                emit computerCompilationReturn(true, errorLine);
-            else
-                emit computerCompilationReturn(false, 0);
+            AlienCellFunctionComputer* computer = AlienCellDecorator::findObject<AlienCellFunctionComputer>(cell);
+            if( computer ) {
+                for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i ) {
+                    computer->getMemoryReference()[i] = newCellData.computerMemory[i];
+                }
+                AlienCellFunctionComputer::CompilationState state
+                    = computer->injectAndCompileInstructionCode(newCellData.computerCode);
+                if( !state.compilationOk )
+                    emit computerCompilationReturn(true, state.errorAtLine);
+                else
+                    emit computerCompilationReturn(false, 0);
+            }
 
 
             //update token

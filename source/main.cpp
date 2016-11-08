@@ -2,9 +2,9 @@
 
 #include "gui/mainwindow.h"
 #include "model/aliensimulator.h"
-#include "model/aliencellto.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
+#include "model/entities/aliencellto.h"
 
 #include <QtCore/qmath.h>
 
@@ -14,6 +14,7 @@
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
 //- Prefix Alien in Klassen entfernen
 //- suche nach "TODO"
+//- AlienSimulator::updateCell: Konzept für cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)

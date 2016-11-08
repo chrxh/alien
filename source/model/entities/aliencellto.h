@@ -12,7 +12,6 @@ struct AlienCellTO  //TO = Transfer Object
 {
 
     AlienCellTO ();
-    AlienCellTO (AlienCell* cell);
     ~AlienCellTO ();
 
     void copyCellProperties (const AlienCellTO& otherCell);    //copy internal cell data except computer and token data
