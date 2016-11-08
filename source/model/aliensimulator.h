@@ -1,7 +1,7 @@
 #ifndef ALIENSIMULATOR_H
 #define ALIENSIMULATOR_H
 
-#include "aliencellto.h"
+#include "entities/aliencellto.h"
 
 #include <QObject>
 #include <QVector3D>
@@ -13,6 +13,7 @@ class AlienEnergy;
 class AlienGrid;
 class AlienThread;
 class Visualizer;
+
 class AlienSimulator  : public QObject
 {
     Q_OBJECT

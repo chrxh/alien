@@ -7,6 +7,7 @@
 #include "aliencellfunctionweapon.h"
 #include "aliencellfunctionsensor.h"
 #include "aliencellfunctioncommunicator.h"
+#include "alienenergyguidanceimpl.h"
 
 #include "global/servicelocator.h"
 
@@ -54,21 +55,16 @@ AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* ce
     switch( type ) {
         case CellFunctionType::COMPUTER :
             return new AlienCellFunctionComputerImpl(cell, stream, grid);
-        case CellFunctionType::PROPULSION :
-            return new AlienCellFunctionPropulsion(cell, stream, grid);
-        case CellFunctionType::SCANNER :
-            return new AlienCellFunctionScanner(cell, stream, grid);
-        case CellFunctionType::WEAPON :
-            return new AlienCellFunctionWeapon(cell, stream, grid);
-        case CellFunctionType::CONSTRUCTOR :
-            return new AlienCellFunctionConstructor(cell, stream, grid);
-        case CellFunctionType::SENSOR :
-            return new AlienCellFunctionSensor(cell, stream, grid);
         case CellFunctionType::COMMUNICATOR :
             return new AlienCellFunctionCommunicator(cell, stream, grid);
         default:
-            return 0;
+            return addCellFunction(cell, type, grid);
     }
+}
+
+AlienEnergyGuidance* AlienCellDecoratorFactoryImpl::addEnergyGuidance (AlienCell* cell, AlienGrid*& grid)
+{
+    return new AlienEnergyGuidanceImpl(cell, grid);
 }
 
 AlienCellDecoratorFactoryImpl cellDecoratorFactoryImpl;

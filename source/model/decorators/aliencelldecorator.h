@@ -23,9 +23,9 @@ public: //redirect following methods to AlienCell
     virtual bool connectable (AlienCell* otherCell) const;
     virtual bool isConnectedTo (AlienCell* otherCell) const;
     virtual void resetConnections (int maxConnections);
-    virtual void newConnection (AlienCell* otherCell);
-    virtual void delConnection (AlienCell* otherCell);
-    virtual void delAllConnection ();
+    virtual void newConnection (AlienCell* thisCell, AlienCell* otherCell);
+    virtual void delConnection (AlienCell* thisCell, AlienCell* otherCell);
+    virtual void delAllConnection (AlienCell* thisCell);
     virtual int getNumConnections () const;
     virtual void setNumConnections (int num);
     virtual int getMaxConnections () const;
@@ -48,7 +48,7 @@ public: //redirect following methods to AlienCell
     virtual AlienCellCluster* getCluster () const;
     virtual QVector3D calcPosition (bool topologyCorrection = false) const;
     virtual void setAbsPosition (QVector3D pos);
-    virtual void setAbsPositionAndUpdateMap (QVector3D pos);
+    virtual void setAbsPositionAndUpdateMap (AlienCell* thisCell, QVector3D pos);
     virtual QVector3D getRelPos () const;
     virtual void setRelPos (QVector3D relPos);
 
@@ -59,7 +59,6 @@ public: //redirect following methods to AlienCell
     virtual qreal getEnergy() const;
     virtual qreal getEnergyIncludingTokens() const;
     virtual void setEnergy (qreal i);
-    virtual QVector< quint8 >& getMemoryReference ();
 
     virtual void serialize (QDataStream& stream);
 

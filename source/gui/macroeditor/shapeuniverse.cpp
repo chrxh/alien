@@ -8,10 +8,12 @@
 #include "gui/editorsettings.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
-
+#include "model/modelfacade.h"
 #include "model/entities/aliencellcluster.h"
 #include "model/entities/alienenergy.h"
 #include "model/entities/aliengrid.h"
+
+#include "global/servicelocator.h"
 
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
@@ -539,12 +541,13 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             QList< AlienCellTO > newCellsData;
 
             //update focused cells
+            ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
             foreach( AlienCellGraphicsItem* cellItem, _focusCells ) {
 
                 //retrieve cell information
                 AlienCell* cell = cellItem->getCell();
                 _grid->lockData();
-                AlienCellTO newCellData(cell);
+                AlienCellTO newCellData = facade->buildCellTO(cell);
                 _grid->unlockData();
 
                 //only left mouse button pressed?

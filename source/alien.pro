@@ -131,6 +131,8 @@ HEADERS += \
     model/decorators/constants.h \
     model/entities/entityfactory.h \
     model/entities/_impl/entityfactoryimpl.h \
+    model/modelfacade.h \
+    model/_impl/modelfacadeimpl.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
@@ -147,8 +149,6 @@ FORMS += gui/monitoring/simulationmonitor.ui \
     gui/dialogs/addrectstructuredialog.ui \
     gui/dialogs/addhexagonstructuredialog.ui \
     gui/assistance/tutorialwindow.ui \
-    model/modelfacade.h \
-    model/_impl/modelfacadeimpl.h
 
 RESOURCES += \
     gui/resources/ressources.qrc

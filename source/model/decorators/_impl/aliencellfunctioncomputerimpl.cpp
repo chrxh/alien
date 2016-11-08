@@ -531,7 +531,13 @@ AlienCellFunctionComputer::CompilationState AlienCellFunctionComputerImpl::injec
     }
 }
 
-void AlienCellFunctionComputerImpl::serializeInternalData (QDataStream& stream)
+QVector< quint8 >& AlienCellFunctionComputerImpl::getMemoryReference ()
+{
+    return _memory;
+}
+
+
+void AlienCellFunctionComputerImpl::serializeInternalData (QDataStream& stream) const
 {
     stream << simulationParameters.CELL_MEMSIZE;
     for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )

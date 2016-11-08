@@ -114,15 +114,15 @@ void AlienCellImpl::resetConnections (int maxConnections)
     _connectingCells = new AlienCell*[maxConnections];
 }
 
-void AlienCellImpl::newConnection (AlienCell* otherCell)
+void AlienCellImpl::newConnection (AlienCell* thisCell, AlienCell* otherCell)
 {
     _connectingCells[_numConnections] = otherCell;
     _numConnections++;
-    otherCell->setConnection(otherCell->getNumConnections(), this);
+    otherCell->setConnection(otherCell->getNumConnections(), thisCell);
     otherCell->setNumConnections(otherCell->getNumConnections()+1);
 }
 
-void AlienCellImpl::delConnection (AlienCell* otherCell)
+void AlienCellImpl::delConnection (AlienCell* thisCell, AlienCell* otherCell)
 {
     for( int i = 0; i < _numConnections; ++i ) {
         if( _connectingCells[i] == otherCell ) {
@@ -134,7 +134,7 @@ void AlienCellImpl::delConnection (AlienCell* otherCell)
         }
     }
     for( int i = 0; i < otherCell->getNumConnections(); ++i ) {
-        if( otherCell->getConnection(i) == this ) {
+        if( otherCell->getConnection(i) == thisCell ) {
             for( int j = i+1; j < otherCell->getNumConnections(); ++j ) {
                 otherCell->setConnection(j-1, otherCell->getConnection(j));
             }
@@ -144,12 +144,12 @@ void AlienCellImpl::delConnection (AlienCell* otherCell)
     }
 }
 
-void AlienCellImpl::delAllConnection ()
+void AlienCellImpl::delAllConnection (AlienCell* thisCell)
 {
     for( int i = 0; i < _numConnections; ++i ) {
         AlienCell* otherCell(_connectingCells[i]);
         for( int j = 0; j < otherCell->getNumConnections(); ++j ) {
-            if( otherCell->getConnection(j) == this ) {
+            if( otherCell->getConnection(j) == thisCell ) {
                 for( int k = j+1; k < otherCell->getNumConnections(); ++k ) {
                     otherCell->setConnection(k-1, otherCell->getConnection(k));
                 }
@@ -354,14 +354,14 @@ void AlienCellImpl::setAbsPosition (QVector3D pos)
     _relPos = _cluster->absToRelPos(pos);
 }
 
-void AlienCellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
+void AlienCellImpl::setAbsPositionAndUpdateMap (AlienCell* thisCell, QVector3D pos)
 {
     QVector3D oldPos(calcPosition());
-    if( _grid->getCell(oldPos) == this )
+    if( _grid->getCell(oldPos) == thisCell )
         _grid->setCell(oldPos, 0);
     _relPos = _cluster->absToRelPos(pos);
     if( _grid->getCell(pos) == 0 )
-        _grid->setCell(pos, this);
+        _grid->setCell(pos, thisCell);
 }
 
 QVector3D AlienCellImpl::getRelPos () const

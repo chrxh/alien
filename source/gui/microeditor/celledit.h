@@ -32,7 +32,7 @@ private:
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
-    QString generateFormattedCellFunctionString (QString f);
+    QString generateFormattedCellFunctionString (CellFunctionType type);
 
     AlienCellTO _cell;
 };

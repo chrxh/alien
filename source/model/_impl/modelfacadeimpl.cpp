@@ -26,6 +26,17 @@ AlienCell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType t
     return cell;
 }
 
+AlienCell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType type, AlienGrid*& grid, int maxConnections
+    , int tokenAccessNumber, QVector3D relPos)
+{
+    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+    AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
+    AlienCell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
+    cell = decoratorFactory->addCellFunction(cell, type, grid);
+    cell = decoratorFactory->addEnergyGuidance(cell, grid);
+    return cell;
+}
+
 AlienCell* ModelFacadeImpl::buildDecoratedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
     , AlienGrid*& grid)
 {

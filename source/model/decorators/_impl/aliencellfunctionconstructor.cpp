@@ -30,8 +30,8 @@ namespace {
     AlienCell* constructNewCell (AlienCell* baseCell, QVector3D posOfNewCell, int maxConnections
         , int tokenAccessNumber, int cellType, quint8* cellFunctionData, AlienGrid*& grid)
     {
-        ModelFactory* factory = ServiceLocator::getInstance().getService<ModelFactory>();
-        AlienCell* newCell = factory->buildDecoratedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
+        ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+        AlienCell* newCell = facade->buildDecoratedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
         AlienCellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
