@@ -1,6 +1,7 @@
 #include "aliencellcluster.h"
 
 #include "model/modelfacade.h"
+#include "model/decorators/aliencelldecorator.h"
 #include "model/entities/entityfactory.h"
 #include "model/entities/alientoken.h"
 #include "model/physics/physics.h"
@@ -589,7 +590,7 @@ void AlienCellCluster::movementProcessingStep4 (QList< AlienEnergy* >& energyPar
 
                         //execute cell function
                         spreadToken[i]->setTokenAccessNumber(spreadTokenCells[i]->getTokenAccessNumber());
-                        AlienCell::ProcessingResult processingResult = spreadTokenCells[i]->process(spreadToken[i], cell);
+                        AlienCellDecorator::ProcessingResult processingResult = spreadTokenCells[i]->getFeatureChain()->process(spreadToken[i], spreadTokenCells[i], cell);
                         if( processingResult.decompose )
                             decompose = true;
                         if( processingResult.newEnergyParticle )

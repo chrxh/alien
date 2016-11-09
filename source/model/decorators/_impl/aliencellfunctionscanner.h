@@ -6,10 +6,12 @@
 class AlienCellFunctionScanner : public AlienCellFunction
 {
 public:
-    AlienCellFunctionScanner (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunctionScanner (AlienGrid*& grid);
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::SCANNER; }
+
+protected:
+    ProcessingResult processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
 };
 
 #endif // ALIENCELLFUNCTIONSCANNER_H

@@ -9,11 +9,11 @@ public:
     AlienCellDecoratorFactoryImpl ();
     ~AlienCellDecoratorFactoryImpl () {}
 
-    AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, AlienGrid*& grid);
-    AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid);
-    AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, QDataStream& stream, AlienGrid*& grid);
+    void addCellFunction (AlienCell* cell, CellFunctionType type, AlienGrid*& grid);
+    void addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid);
+    void addCellFunction (AlienCell* cell, CellFunctionType type, QDataStream& stream, AlienGrid*& grid);
 
-    AlienEnergyGuidance* addEnergyGuidance (AlienCell* cell, AlienGrid*& grid);
+    void addEnergyGuidance (AlienCell* cell, AlienGrid*& grid);
 };
 
 #endif // ALIENCELLDECORATORFACTORYIMPL_H

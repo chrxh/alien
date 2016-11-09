@@ -6,9 +6,10 @@
 class AlienEnergyGuidanceImpl : public AlienEnergyGuidance
 {
 public:
-    AlienEnergyGuidanceImpl (AlienCell* cell, AlienGrid*& grid);
+    AlienEnergyGuidanceImpl (AlienGrid*& grid);
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell);
+protected:
+    ProcessingResult processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
 };
 
 #endif // ALIENENERGYGUIDANCEDECORATORIMPL_H

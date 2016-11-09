@@ -6,10 +6,12 @@
 class AlienCellFunctionWeapon : public AlienCellFunction
 {
 public:
-    AlienCellFunctionWeapon (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunctionWeapon (AlienGrid*& grid);
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::WEAPON; }
+
+protected:
+    ProcessingResult processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
 };
 
 #endif // ALIENCELLFUNCTIONWEAPON_H

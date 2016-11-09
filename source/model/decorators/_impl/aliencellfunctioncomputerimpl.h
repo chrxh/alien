@@ -10,11 +10,10 @@
 class AlienCellFunctionComputerImpl: public AlienCellFunctionComputer
 {
 public:
-    AlienCellFunctionComputerImpl (AlienCell* cell, AlienGrid*& grid);
-    AlienCellFunctionComputerImpl (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid);
-    AlienCellFunctionComputerImpl (AlienCell* cell, QDataStream& stream, AlienGrid*& grid);
+    AlienCellFunctionComputerImpl (AlienGrid*& grid);
+    AlienCellFunctionComputerImpl (quint8* cellFunctionData, AlienGrid*& grid);
+    AlienCellFunctionComputerImpl (QDataStream& stream, AlienGrid*& grid);
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
     void getInternalData (quint8* data);
 
@@ -22,8 +21,11 @@ public:
     CompilationState injectAndCompileInstructionCode (QString code);
     QVector< quint8 >& getMemoryReference ();
 
+protected:
+    ProcessingResult processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
+    void serializeImpl (QDataStream& stream) const;
+
 private:
-    void serializeInternalData (QDataStream& stream) const;
 
     void codeInstruction (int& instructionPointer,
                           quint8 instr,

@@ -6,10 +6,12 @@
 class AlienCellFunctionSensor : public AlienCellFunction
 {
 public:
-    AlienCellFunctionSensor (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunctionSensor (AlienGrid*& grid);
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::SENSOR; }
+
+protected:
+    ProcessingResult processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
 };
 
 #endif // ALIENCELLFUNCTIONSENSOR_H

@@ -21,8 +21,8 @@ AlienCell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType t
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
     AlienCell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
-    cell = decoratorFactory->addCellFunction(cell, type, data, grid);
-    cell = decoratorFactory->addEnergyGuidance(cell, grid);
+    decoratorFactory->addCellFunction(cell, type, data, grid);
+    decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
 }
 
@@ -32,8 +32,8 @@ AlienCell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType t
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
     AlienCell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
-    cell = decoratorFactory->addCellFunction(cell, type, grid);
-    cell = decoratorFactory->addEnergyGuidance(cell, grid);
+    decoratorFactory->addCellFunction(cell, type, grid);
+    decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
 }
 
@@ -44,8 +44,8 @@ AlienCell* ModelFacadeImpl::buildDecoratedCell (QDataStream& stream, QMap< quint
     AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
     AlienCell* cell = entityFactory->buildCell(stream, connectingCells, grid);
     CellFunctionType type = AlienCellFunction::getType(stream);
-    cell = decoratorFactory->addCellFunction(cell, type, stream, grid);
-    cell = decoratorFactory->addEnergyGuidance(cell, grid);
+    decoratorFactory->addCellFunction(cell, type, stream, grid);
+    decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
 }
 
@@ -83,7 +83,7 @@ AlienCellTO ModelFacadeImpl::buildCellTO (AlienCell* cell)
     to.cellMaxCon = cell->getMaxConnections();
     to.cellAllowToken = !cell->isTokenBlocked();
     to.cellTokenAccessNum = cell->getTokenAccessNumber();
-    AlienCellFunction* cellFunction = AlienCellDecorator::findObject<AlienCellFunction>(cell);
+    AlienCellFunction* cellFunction = AlienCellDecorator::findObject<AlienCellFunction>(cell->getFeatureChain());
     to.cellFunctionType = cellFunction->getType();
 
     //copy computer data

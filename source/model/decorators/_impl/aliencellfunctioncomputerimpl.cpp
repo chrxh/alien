@@ -7,8 +7,8 @@
 #include <QString>
 #include <qdebug.h>
 
-AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, AlienGrid*& grid)
-    : AlienCellFunctionComputer(cell, grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
+AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienGrid*& grid)
+    : AlienCellFunctionComputer(grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
     , _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     //init with zero data
@@ -17,8 +17,8 @@ AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, A
         _code[i] = 0;
 }
 
-AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, quint8* cellFunctionData, AlienGrid*& grid)
-    : AlienCellFunctionComputer(cell, grid), _code(), _numInstr(0), _memory(simulationParameters.CELL_MEMSIZE, 0)
+AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (quint8* cellFunctionData, AlienGrid*& grid)
+    : AlienCellFunctionComputer(grid), _code(), _numInstr(0), _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     _numInstr = cellFunctionData[0];
     _code.resize(3*_numInstr);
@@ -27,8 +27,8 @@ AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, q
     }
 }
 
-AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (AlienCell* cell, QDataStream& stream, AlienGrid*& grid)
-    : AlienCellFunctionComputer(cell, grid), _memory(simulationParameters.CELL_MEMSIZE, 0)
+AlienCellFunctionComputerImpl::AlienCellFunctionComputerImpl (QDataStream& stream, AlienGrid*& grid)
+    : AlienCellFunctionComputer(grid), _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     //load cell memory
     int memSize;
@@ -62,129 +62,6 @@ namespace {
     {
         return c.isLetterOrNumber() || (c == ':');
     }
-}
-
-AlienCell::ProcessingResult AlienCellFunctionComputerImpl::process (AlienToken* token, AlienCell* previousCell)
-{
-    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
-
-    bool condTable[simulationParameters.CELL_CODESIZE];
-    int condPointer(0);
-    int i(0);
-    while( i < (3*_numInstr) ) {
-
-        //decode instruction
-        quint8 instr, opTyp1, opTyp2;
-        qint8 op1, op2;
-        decodeInstruction(i, instr, opTyp1, opTyp2, op1, op2);
-
-        //operand 1: pointer to mem
-        qint8* op1Pointer = 0;
-        if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::MEM) )
-            op1Pointer = (qint8*)&(token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)]);
-        if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::MEMMEM) ) {
-            op1 = token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)];
-            op1Pointer = (qint8*)&(token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)]);
-        }
-        if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
-            op1Pointer = (qint8*)&(_memory[convertToAddress(op1, simulationParameters.CELL_MEMSIZE)]);
-
-        //operand 2: loading value
-        if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::MEM) )
-            op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
-        if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::MEMMEM) ) {
-            op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
-            op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
-        }
-        if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
-            op2 = _memory[convertToAddress(op2, simulationParameters.CELL_MEMSIZE)];
-
-        //execute instruction
-        bool execute = true;
-        for(int k = 0; k < condPointer; ++k)
-            if( !condTable[k] )
-                execute = false;
-        if( execute ) {
-//        if( (condPointer == 0) || ((condPointer > 0) && condTable[condPointer-1]) ) {
-            if( instr == static_cast<int>(COMPUTER_OPERATION::MOV) )
-                *op1Pointer = op2;
-            if( instr == static_cast<int>(COMPUTER_OPERATION::ADD) )
-                *op1Pointer += op2;
-            if( instr == static_cast<int>(COMPUTER_OPERATION::SUB) )
-                *op1Pointer -= op2;
-            if( instr == static_cast<int>(COMPUTER_OPERATION::MUL) )
-                *op1Pointer *= op2;
-            if( instr == static_cast<int>(COMPUTER_OPERATION::DIV) ) {
-                if( op2 > 0)
-                    *op1Pointer /= op2;
-                else
-                    *op1Pointer = 0;
-            }
-            if( instr == static_cast<int>(COMPUTER_OPERATION::XOR) )
-                *op1Pointer ^= op2;
-            if( instr == static_cast<int>(COMPUTER_OPERATION::OR) )
-                *op1Pointer |= op2;
-            if( instr == static_cast<int>(COMPUTER_OPERATION::AND) )
-                *op1Pointer &= op2;
-        }
-
-            //if instructions
-            if( instr == static_cast<int>(COMPUTER_OPERATION::IFG) ) {
-                if( (qint8)(*op1Pointer) > (qint8)op2 )
-                    condTable[condPointer] = true;
-                else
-                    condTable[condPointer] = false;
-                condPointer++;
-            }
-            if( instr == static_cast<int>(COMPUTER_OPERATION::IFGE) ) {
-                if( (qint8)(*op1Pointer) >= (qint8)op2 )
-                    condTable[condPointer] = true;
-                else
-                    condTable[condPointer] = false;
-                condPointer++;
-            }
-            if( instr == static_cast<int>(COMPUTER_OPERATION::IFE) ) {
-                if( (qint8)(*op1Pointer) == (qint8)op2 )
-                    condTable[condPointer] = true;
-                else
-                    condTable[condPointer] = false;
-                condPointer++;
-            }
-            if( instr == static_cast<int>(COMPUTER_OPERATION::IFNE) ) {
-                if( (qint8)(*op1Pointer) != (qint8)op2 )
-                    condTable[condPointer] = true;
-                else
-                    condTable[condPointer] = false;
-                condPointer++;
-            }
-            if( instr == static_cast<int>(COMPUTER_OPERATION::IFLE) ) {
-                if( (qint8)(*op1Pointer) <= (qint8)op2 )
-                    condTable[condPointer] = true;
-                else
-                    condTable[condPointer] = false;
-                condPointer++;
-            }
-            if( instr == static_cast<int>(COMPUTER_OPERATION::IFL) ) {
-                if( (qint8)(*op1Pointer) < (qint8)op2 )
-                    condTable[condPointer] = true;
-                else
-                    condTable[condPointer] = false;
-                condPointer++;
-            }
-
-        //else instruction
-        if( instr == static_cast<int>(COMPUTER_OPERATION::ELSE) ) {
-            if( condPointer > 0 )
-                condTable[condPointer-1] = !condTable[condPointer-1];
-        }
-
-        //endif instruction
-        if( instr == static_cast<int>(COMPUTER_OPERATION::ENDIF) ) {
-            if( condPointer > 0 )
-                condPointer--;
-        }
-    }
-    return processingResult;
 }
 
 QString AlienCellFunctionComputerImpl::decompileInstructionCode () const
@@ -537,7 +414,130 @@ QVector< quint8 >& AlienCellFunctionComputerImpl::getMemoryReference ()
 }
 
 
-void AlienCellFunctionComputerImpl::serializeInternalData (QDataStream& stream) const
+AlienCellDecorator::ProcessingResult AlienCellFunctionComputerImpl::processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell)
+{
+    ProcessingResult processingResult {false, 0};
+
+    bool condTable[simulationParameters.CELL_CODESIZE];
+    int condPointer(0);
+    int i(0);
+    while( i < (3*_numInstr) ) {
+
+        //decode instruction
+        quint8 instr, opTyp1, opTyp2;
+        qint8 op1, op2;
+        decodeInstruction(i, instr, opTyp1, opTyp2, op1, op2);
+
+        //operand 1: pointer to mem
+        qint8* op1Pointer = 0;
+        if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::MEM) )
+            op1Pointer = (qint8*)&(token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)]);
+        if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::MEMMEM) ) {
+            op1 = token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)];
+            op1Pointer = (qint8*)&(token->memory[convertToAddress(op1, simulationParameters.TOKEN_MEMSIZE)]);
+        }
+        if( opTyp1 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
+            op1Pointer = (qint8*)&(_memory[convertToAddress(op1, simulationParameters.CELL_MEMSIZE)]);
+
+        //operand 2: loading value
+        if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::MEM) )
+            op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
+        if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::MEMMEM) ) {
+            op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
+            op2 = token->memory[convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE)];
+        }
+        if( opTyp2 == static_cast<int>(COMPUTER_OPTYPE::CMEM) )
+            op2 = _memory[convertToAddress(op2, simulationParameters.CELL_MEMSIZE)];
+
+        //execute instruction
+        bool execute = true;
+        for(int k = 0; k < condPointer; ++k)
+            if( !condTable[k] )
+                execute = false;
+        if( execute ) {
+//        if( (condPointer == 0) || ((condPointer > 0) && condTable[condPointer-1]) ) {
+            if( instr == static_cast<int>(COMPUTER_OPERATION::MOV) )
+                *op1Pointer = op2;
+            if( instr == static_cast<int>(COMPUTER_OPERATION::ADD) )
+                *op1Pointer += op2;
+            if( instr == static_cast<int>(COMPUTER_OPERATION::SUB) )
+                *op1Pointer -= op2;
+            if( instr == static_cast<int>(COMPUTER_OPERATION::MUL) )
+                *op1Pointer *= op2;
+            if( instr == static_cast<int>(COMPUTER_OPERATION::DIV) ) {
+                if( op2 > 0)
+                    *op1Pointer /= op2;
+                else
+                    *op1Pointer = 0;
+            }
+            if( instr == static_cast<int>(COMPUTER_OPERATION::XOR) )
+                *op1Pointer ^= op2;
+            if( instr == static_cast<int>(COMPUTER_OPERATION::OR) )
+                *op1Pointer |= op2;
+            if( instr == static_cast<int>(COMPUTER_OPERATION::AND) )
+                *op1Pointer &= op2;
+        }
+
+            //if instructions
+            if( instr == static_cast<int>(COMPUTER_OPERATION::IFG) ) {
+                if( (qint8)(*op1Pointer) > (qint8)op2 )
+                    condTable[condPointer] = true;
+                else
+                    condTable[condPointer] = false;
+                condPointer++;
+            }
+            if( instr == static_cast<int>(COMPUTER_OPERATION::IFGE) ) {
+                if( (qint8)(*op1Pointer) >= (qint8)op2 )
+                    condTable[condPointer] = true;
+                else
+                    condTable[condPointer] = false;
+                condPointer++;
+            }
+            if( instr == static_cast<int>(COMPUTER_OPERATION::IFE) ) {
+                if( (qint8)(*op1Pointer) == (qint8)op2 )
+                    condTable[condPointer] = true;
+                else
+                    condTable[condPointer] = false;
+                condPointer++;
+            }
+            if( instr == static_cast<int>(COMPUTER_OPERATION::IFNE) ) {
+                if( (qint8)(*op1Pointer) != (qint8)op2 )
+                    condTable[condPointer] = true;
+                else
+                    condTable[condPointer] = false;
+                condPointer++;
+            }
+            if( instr == static_cast<int>(COMPUTER_OPERATION::IFLE) ) {
+                if( (qint8)(*op1Pointer) <= (qint8)op2 )
+                    condTable[condPointer] = true;
+                else
+                    condTable[condPointer] = false;
+                condPointer++;
+            }
+            if( instr == static_cast<int>(COMPUTER_OPERATION::IFL) ) {
+                if( (qint8)(*op1Pointer) < (qint8)op2 )
+                    condTable[condPointer] = true;
+                else
+                    condTable[condPointer] = false;
+                condPointer++;
+            }
+
+        //else instruction
+        if( instr == static_cast<int>(COMPUTER_OPERATION::ELSE) ) {
+            if( condPointer > 0 )
+                condTable[condPointer-1] = !condTable[condPointer-1];
+        }
+
+        //endif instruction
+        if( instr == static_cast<int>(COMPUTER_OPERATION::ENDIF) ) {
+            if( condPointer > 0 )
+                condPointer--;
+        }
+    }
+    return processingResult;
+}
+
+void AlienCellFunctionComputerImpl::serializeImpl (QDataStream& stream) const
 {
     stream << simulationParameters.CELL_MEMSIZE;
     for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
