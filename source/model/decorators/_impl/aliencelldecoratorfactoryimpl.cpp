@@ -1,5 +1,6 @@
 #include "aliencelldecoratorfactoryimpl.h"
 
+#include "model/entities/aliencell.h"
 #include "aliencellfunctioncomputerimpl.h"
 #include "aliencellfunctionconstructor.h"
 #include "aliencellfunctionpropulsion.h"
@@ -16,55 +17,77 @@ AlienCellDecoratorFactoryImpl::AlienCellDecoratorFactoryImpl ()
     ServiceLocator::getInstance().registerService<AlienCellDecoratorFactory>(this);
 }
 
-AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, AlienGrid*& grid)
+namespace {
+    void registerNewFeature (AlienCell* cell, AlienCellDecorator* newFeature)
+    {
+        AlienCellDecorator* features = cell->getFeatureChain();
+        if( features )
+            features->registerNextFeature(newFeature);
+        else
+            cell->registerFeatureChain(newFeature);
+    }
+}
+
+void AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, AlienGrid*& grid)
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-            return new AlienCellFunctionComputerImpl(cell, grid);
+        registerNewFeature(cell, new AlienCellFunctionComputerImpl(grid));
+        break;
         case CellFunctionType::PROPULSION :
-            return new AlienCellFunctionPropulsion(cell, grid);
+        registerNewFeature(cell, new AlienCellFunctionPropulsion(grid));
+        break;
         case CellFunctionType::SCANNER :
-            return new AlienCellFunctionScanner(cell, grid);
+        registerNewFeature(cell, new AlienCellFunctionScanner(grid));
+        break;
         case CellFunctionType::WEAPON :
-            return new AlienCellFunctionWeapon(cell, grid);
+        registerNewFeature(cell, new AlienCellFunctionWeapon(grid));
+        break;
         case CellFunctionType::CONSTRUCTOR :
-            return new AlienCellFunctionConstructor(cell, grid);
+        registerNewFeature(cell, new AlienCellFunctionConstructor(grid));
+        break;
         case CellFunctionType::SENSOR :
-            return new AlienCellFunctionSensor(cell, grid);
+        registerNewFeature(cell, new AlienCellFunctionSensor(grid));
+        break;
         case CellFunctionType::COMMUNICATOR :
-            return new AlienCellFunctionCommunicator(cell, grid);
+        registerNewFeature(cell, new AlienCellFunctionCommunicator(grid));
+        break;
         default:
-            return 0;
+        break;
     }
 }
 
-AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid)
+void AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid)
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-            return new AlienCellFunctionComputerImpl(cell, data, grid);
+        registerNewFeature(cell, new AlienCellFunctionComputerImpl(data, grid));
+        break;
         case CellFunctionType::COMMUNICATOR :
-            return new AlienCellFunctionCommunicator(cell, data, grid);
+        registerNewFeature(cell, new AlienCellFunctionCommunicator(data, grid));
+        break;
         default:
-            return addCellFunction(cell, type, grid);
+        addCellFunction(cell, type, grid);
     }
 }
 
-AlienCellFunction* AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, QDataStream& stream, AlienGrid*& grid)
+void AlienCellDecoratorFactoryImpl::addCellFunction (AlienCell* cell, CellFunctionType type, QDataStream& stream, AlienGrid*& grid)
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-            return new AlienCellFunctionComputerImpl(cell, stream, grid);
+        registerNewFeature(cell, new AlienCellFunctionComputerImpl(stream, grid));
+        break;
         case CellFunctionType::COMMUNICATOR :
-            return new AlienCellFunctionCommunicator(cell, stream, grid);
+        registerNewFeature(cell, new AlienCellFunctionCommunicator(stream, grid));
+        break;
         default:
-            return addCellFunction(cell, type, grid);
+        addCellFunction(cell, type, grid);
     }
 }
 
-AlienEnergyGuidance* AlienCellDecoratorFactoryImpl::addEnergyGuidance (AlienCell* cell, AlienGrid*& grid)
+void AlienCellDecoratorFactoryImpl::addEnergyGuidance (AlienCell* cell, AlienGrid*& grid)
 {
-    return new AlienEnergyGuidanceImpl(cell, grid);
+    registerNewFeature(cell, new AlienEnergyGuidanceImpl(grid));
 }
 
 AlienCellDecoratorFactoryImpl cellDecoratorFactoryImpl;

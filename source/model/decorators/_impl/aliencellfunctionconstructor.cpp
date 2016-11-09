@@ -15,8 +15,8 @@
 
 
 
-AlienCellFunctionConstructor::AlienCellFunctionConstructor (AlienCell* cell, AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
+AlienCellFunctionConstructor::AlienCellFunctionConstructor (AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
@@ -113,10 +113,10 @@ namespace {
     }
 }
 
-AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (AlienToken* token, AlienCell* previousCell)
+AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell)
 {
-    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
-    AlienCellCluster* cluster(_cell->getCluster());
+    ProcessingResult processingResult {false, 0};
+    AlienCellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(CONSTR::IN)] % 4;
     quint8 opt = token->memory[static_cast<int>(CONSTR::IN_OPTION)] % 7;
 
@@ -132,11 +132,11 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
     }
 
     //looking for construction site
-    int numCon(_cell->getNumConnections());
+    int numCon(cell->getNumConnections());
     AlienCell* constructionCell(0);
     for(int i = 0; i < numCon; ++i) {
-        if( _cell->getConnection(i)->isTokenBlocked() ) {
-            constructionCell = _cell->getConnection(i);
+        if( cell->getConnection(i)->isTokenBlocked() ) {
+            constructionCell = cell->getConnection(i);
         }
     }
 
@@ -149,16 +149,16 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
     if( constructionCell ) {
 
         //determine construction site via connected components
-        _cell->delConnection(constructionCell);
+        cell->delConnection(constructionCell);
         QList< AlienCell* > constructionSite;
         cluster->getConnectedComponent(constructionCell, constructionSite);
 
         //construction site only connected with "cell"?
-        if( !constructionSite.contains(_cell) ) {
+        if( !constructionSite.contains(cell) ) {
 
             //identify constructor (remaining cells)
             QList< AlienCell* > constructor;
-            cluster->getConnectedComponent(_cell, constructor);
+            cluster->getConnectedComponent(cell, constructor);
 
             //calc possible angle for rotation of the construction site
             qreal minAngleConstrSite = 360.0;
@@ -249,7 +249,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
             if( performRotationOnly ) {
 
                 //restore connection to "cell"
-                _cell->newConnection(constructionCell);
+                cell->newConnection(constructionCell);
 
                 //estimate expended energy for new cell
                 qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
@@ -307,7 +307,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
             else {
 
                 //calc translation vector for construction site
-                QVector3D transOld = constructionCell->getRelPos() - _cell->getRelPos();
+                QVector3D transOld = constructionCell->getRelPos() - cell->getRelPos();
                 QVector3D trans = transOld.normalized() * len;
                 QVector3D transFinish(0.0, 0.0, 0.0);
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
@@ -321,7 +321,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                     otherCell->setRelPos(otherCell->getRelPos() + trans + transFinish);
 
                 //calc position for new cell
-                QVector3D pos = cluster->relToAbsPos(_cell->getRelPos() + transOld + transFinish);
+                QVector3D pos = cluster->relToAbsPos(cell->getRelPos() + transOld + transFinish);
 
                 //estimate expended energy for new cell
                 qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
@@ -352,7 +352,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
 //                        otherCell->setRelPos(transform.map(otherCell->getRelPos()));
 
                     //restore connection from construction site to "cell"
-                    _cell->newConnection(constructionCell);
+                    cell->newConnection(constructionCell);
                     return processingResult;
                 }
 
@@ -363,7 +363,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                 if( maxCon > simulationParameters.MAX_CELL_CONNECTIONS )
                     maxCon = simulationParameters.MAX_CELL_CONNECTIONS;
                 int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)] % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-                AlienCell* newCell = constructNewCell(_cell, pos, maxCon, tokenAccessNumber,
+                AlienCell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber,
                                                       token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)],
                                                       &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _grid);
 
@@ -384,13 +384,13 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                         cluster->drawCellsToMap();
 
                         //restore connection from construction site to "cell"
-                        _cell->newConnection(constructionCell);
+                        cell->newConnection(constructionCell);
                         return processingResult;
                     }
                 }
 
                 //establish connections
-                newCell->newConnection(_cell);
+                newCell->newConnection(cell);
                 newCell->newConnection(constructionCell);
 
                 //connect cell with construction site
@@ -426,8 +426,8 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
-                    qreal av = averageEnergy(_cell->getEnergy(), newCell->getEnergy());
-                    _cell->setEnergy(av);
+                    qreal av = averageEnergy(cell->getEnergy(), newCell->getEnergy());
+                    cell->setEnergy(av);
                     newCell->setEnergy(av);
                 }
 
@@ -447,12 +447,12 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                 //separate construction site?
                 if( opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP) ) {
                     processingResult.decompose = true;
-                    separateConstruction(newCell, _cell, false);
+                    separateConstruction(newCell, cell, false);
                 }
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     processingResult.decompose = true;
-                    separateConstruction(newCell, _cell, true);
+                    separateConstruction(newCell, cell, true);
                 }
 
                 //update token data
@@ -484,7 +484,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
             token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_CONNECTION);
 
             //restore connection to "cell"
-            _cell->newConnection(constructionCell);
+            cell->newConnection(constructionCell);
         }
     }
 
@@ -500,7 +500,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                 //find biggest angle gap for new cell
                 QVector< qreal > angles(numCon);
                 for(int i = 0; i < numCon; ++i) {
-                    QVector3D displacement = cluster->calcPosition(_cell->getConnection(i),true)-cluster->calcPosition(_cell, true);
+                    QVector3D displacement = cluster->calcPosition(cell->getConnection(i),true)-cluster->calcPosition(cell, true);
                     _grid->correctDisplacement(displacement);
                     angles[i] = Physics::angleOfVector(displacement);
                 }
@@ -524,7 +524,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
 
                 //calc coordinates for new cell from angle gap and construct cell
                 QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*simulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
-                QVector3D pos = cluster->calcPosition(_cell)+angleGapPos;
+                QVector3D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) )
@@ -560,7 +560,7 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                     maxCon = simulationParameters.MAX_CELL_CONNECTIONS;
                 int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)]
                         % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-                AlienCell* newCell = constructNewCell(_cell, pos, maxCon, tokenAccessNumber,
+                AlienCell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber,
                                                       token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)],
                                                       &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _grid);
 
@@ -584,9 +584,9 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                 }
 
                 //establish connection
-                if( _cell->getNumConnections() == _cell->getMaxConnections() )
-                    _cell->setMaxConnections(_cell->getMaxConnections()+1);
-                _cell->newConnection(newCell);
+                if( cell->getNumConnections() == cell->getMaxConnections() )
+                    cell->setMaxConnections(cell->getMaxConnections()+1);
+                cell->newConnection(newCell);
 
                 //update token energy
                 token->energy = token->energy - newCell->getEnergy() - eDiff;
@@ -595,8 +595,8 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
-                    qreal av = averageEnergy(_cell->getEnergy(), newCell->getEnergy());
-                    _cell->setEnergy(av);
+                    qreal av = averageEnergy(cell->getEnergy(), newCell->getEnergy());
+                    cell->setEnergy(av);
                     newCell->setEnergy(av);
                 }
 
@@ -613,12 +613,12 @@ AlienCellDecorator::ProcessingResult AlienCellFunctionConstructor::process (Alie
                 //separate construction site?
                 if( opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP) ) {
                     processingResult.decompose = true;
-                    separateConstruction(newCell, _cell, false);
+                    separateConstruction(newCell, cell, false);
                 }
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     processingResult.decompose = true;
-                    separateConstruction(newCell, _cell, true);
+                    separateConstruction(newCell, cell, true);
                 }
 
                 //update token data

@@ -7,6 +7,7 @@ class AlienCellCluster;
 class AlienEnergy;
 class AlienGrid;
 class AlienToken;
+class AlienCellDecorator;
 
 class AlienCell
 {
@@ -14,22 +15,15 @@ public:
     AlienCell (AlienGrid*& grid) : _grid(grid) {}
     virtual ~AlienCell() {}
 
-    struct ProcessingResult {
-        bool decompose;
-        AlienEnergy* newEnergyParticle;
-    };
-
-    virtual ProcessingResult process (AlienToken* token, AlienCell* previousCell) = 0;
+    virtual void registerFeatureChain (AlienCellDecorator* features) = 0;
+    virtual AlienCellDecorator* getFeatureChain () const = 0;
 
     virtual bool connectable (AlienCell* otherCell) const = 0;
     virtual bool isConnectedTo (AlienCell* otherCell) const = 0;
     virtual void resetConnections (int maxConnections) = 0;
-    virtual void newConnection (AlienCell* thisCell, AlienCell* otherCell) = 0;
-    virtual void newConnection (AlienCell* otherCell) { newConnection(this, otherCell); }
-    virtual void delConnection (AlienCell* thisCell, AlienCell* otherCell) = 0;
-    virtual void delConnection (AlienCell* otherCell) { delConnection(this, otherCell); }
-    virtual void delAllConnection (AlienCell* thisCell) = 0;
-    virtual void delAllConnection () { delAllConnection(this); }
+    virtual void newConnection (AlienCell* otherCell) = 0;
+    virtual void delConnection (AlienCell* otherCell) = 0;
+    virtual void delAllConnection () = 0;
     virtual int getNumConnections () const = 0;
     virtual void setNumConnections (int num) = 0;
     virtual int getMaxConnections () const = 0;
@@ -52,8 +46,7 @@ public:
     virtual AlienCellCluster* getCluster () const = 0;
     virtual QVector3D calcPosition (bool topologyCorrection = false) const = 0;
     virtual void setAbsPosition (QVector3D pos) = 0;
-    virtual void setAbsPositionAndUpdateMap (AlienCell* thisCell, QVector3D pos) = 0;
-    virtual void setAbsPositionAndUpdateMap (QVector3D pos){ setAbsPositionAndUpdateMap(this, pos); }
+    virtual void setAbsPositionAndUpdateMap (QVector3D pos) = 0;
     virtual QVector3D getRelPos () const = 0;
     virtual void setRelPos (QVector3D relPos) = 0;
 

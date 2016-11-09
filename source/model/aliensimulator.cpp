@@ -646,7 +646,7 @@ void AlienSimulator::updateCell (QList< AlienCell* > cells, QList< AlienCellTO >
 //            cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 
             //update cell computer
-            AlienCellFunctionComputer* computer = AlienCellDecorator::findObject<AlienCellFunctionComputer>(cell);
+            AlienCellFunctionComputer* computer = AlienCellDecorator::findObject<AlienCellFunctionComputer>(cell->getFeatureChain());
             if( computer ) {
                 for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i ) {
                     computer->getMemoryReference()[i] = newCellData.computerMemory[i];

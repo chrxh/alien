@@ -9,10 +9,12 @@ class AlienCellCluster;
 class AlienCellFunctionConstructor : public AlienCellFunction
 {
 public:
-    AlienCellFunctionConstructor (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunctionConstructor (AlienGrid*& grid);
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::CONSTRUCTOR; }
+
+protected:
+    ProcessingResult processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
 };
 
 #endif // ALIENCELLFUNCTIONCONSTRUCTOR_H

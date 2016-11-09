@@ -6,9 +6,12 @@
 class AlienCellFunctionComputer: public AlienCellFunction
 {
 public:
-    AlienCellFunctionComputer (AlienCell* cell, AlienGrid*& grid) : AlienCellFunction(cell, grid) {}
+    AlienCellFunctionComputer (AlienGrid*& grid) : AlienCellFunction(grid) {}
     virtual ~AlienCellFunctionComputer () {}
 
+    CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
+
+    //new interface
     virtual QString decompileInstructionCode () const = 0;
     struct CompilationState {
         bool compilationOk;
@@ -16,8 +19,6 @@ public:
     };
     virtual CompilationState injectAndCompileInstructionCode (QString code) = 0;
     virtual QVector< quint8 >& getMemoryReference () = 0;
-
-    CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
 };
 
 #endif // ALIENCELLFUNCTIONCOMPUTER_H

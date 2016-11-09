@@ -35,9 +35,8 @@ CellFunctionType AlienCellFunction::getType (QDataStream& stream)
 
 void AlienCellFunction::serialize (QDataStream& stream) const
 {
-    AlienCellDecorator::serialize(stream);
     stream << static_cast<quint8>(getType());
-    serializeInternalData(stream);
+    AlienCellDecorator::serialize(stream);
 }
 
 qreal AlienCellFunction::calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const

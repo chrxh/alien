@@ -15,11 +15,11 @@ class AlienCellDecoratorFactory
 public:
     virtual ~AlienCellDecoratorFactory () {}
 
-    virtual AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid) = 0;
-    virtual AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, AlienGrid*& grid) = 0;
-    virtual AlienCellFunction* addCellFunction (AlienCell* cell, CellFunctionType type, QDataStream& stream, AlienGrid*& grid) = 0;
+    virtual void addCellFunction (AlienCell* cell, CellFunctionType type, quint8* data, AlienGrid*& grid) = 0;
+    virtual void addCellFunction (AlienCell* cell, CellFunctionType type, AlienGrid*& grid) = 0;
+    virtual void addCellFunction (AlienCell* cell, CellFunctionType type, QDataStream& stream, AlienGrid*& grid) = 0;
 
-    virtual AlienEnergyGuidance* addEnergyGuidance (AlienCell* cell, AlienGrid*& grid) = 0;
+    virtual void addEnergyGuidance (AlienCell* cell, AlienGrid*& grid) = 0;
 };
 
 #endif // ALIENCELLDECORATORFACTORY_H

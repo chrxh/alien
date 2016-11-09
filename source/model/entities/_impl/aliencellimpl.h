@@ -17,14 +17,15 @@ public:
                    AlienGrid*& grid);
     ~AlienCellImpl();
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell);
+    void registerFeatureChain (AlienCellDecorator* features);
+    AlienCellDecorator* getFeatureChain () const;
 
     bool connectable (AlienCell* otherCell) const;
     bool isConnectedTo (AlienCell* otherCell) const;
     void resetConnections (int maxConnections);
-    void newConnection (AlienCell* thisCell, AlienCell* otherCell);
-    void delConnection (AlienCell* thisCell, AlienCell* otherCell);
-    void delAllConnection (AlienCell* thisCell);
+    void newConnection (AlienCell* otherCell);
+    void delConnection (AlienCell* otherCell);
+    void delAllConnection ();
     int getNumConnections () const;
     void setNumConnections (int num);
     int getMaxConnections () const;
@@ -47,7 +48,7 @@ public:
     AlienCellCluster* getCluster () const;
     QVector3D calcPosition (bool topologyCorrection = false) const;
     void setAbsPosition (QVector3D pos);
-    void setAbsPositionAndUpdateMap (AlienCell* thisCell, QVector3D pos);
+    void setAbsPositionAndUpdateMap (QVector3D pos);
     QVector3D getRelPos () const;
     void setRelPos (QVector3D relPos);
 
@@ -73,6 +74,8 @@ public:
 
 private:
     friend class AlienCellCluster;
+
+    AlienCellDecorator* _features = 0;
 
     QVector< AlienToken* > _tokenStack;
     QVector< AlienToken* > _newTokenStack;
