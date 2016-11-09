@@ -7,8 +7,8 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-AlienCellFunctionScanner::AlienCellFunctionScanner(AlienCell* cell,AlienGrid*& grid)
-    : AlienCellFunction(cell, grid)
+AlienCellFunctionScanner::AlienCellFunctionScanner(AlienGrid*& grid)
+    : AlienCellFunction(grid)
 {
 }
 
@@ -80,21 +80,21 @@ namespace {
 
 }
 
-AlienCell::ProcessingResult AlienCellFunctionScanner::process (AlienToken* token, AlienCell* previousCell)
+AlienCellDecorator::ProcessingResult AlienCellFunctionScanner::processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell)
 {
-    AlienCell::ProcessingResult processingResult = _cell->process(token, previousCell);
+    ProcessingResult processingResult {false, 0};
     int n = token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)];
     quint64 tag(GlobalFunctions::getTag());
     AlienCell* scanCellPre1 = previousCell;
     AlienCell* scanCellPre2 = previousCell;
-    AlienCell* scanCell = _cell;
+    AlienCell* scanCell = cell;
     spiralLookupAlgorithm(scanCell, scanCellPre1, scanCellPre2, n, tag);
 
     //restart?
     if( (n>0) && (scanCell == scanCellPre1) ) {
         token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)] = 1;
-        scanCell = _cell;
-        scanCellPre1 = _cell;
+        scanCell = cell;
+        scanCellPre1 = cell;
         token->memory[static_cast<int>(SCANNER::OUT)] = static_cast<int>(SCANNER_OUT::RESTART);
     }
 
@@ -107,7 +107,7 @@ AlienCell::ProcessingResult AlienCellFunctionScanner::process (AlienToken* token
         tag = GlobalFunctions::getTag();
         AlienCell* scanCellPreTemp1 = previousCell;
         AlienCell* scanCellPreTemp2 = previousCell;
-        AlienCell* scanCellTemp = _cell;
+        AlienCell* scanCellTemp = cell;
         spiralLookupAlgorithm(scanCellTemp, scanCellPreTemp1, scanCellPreTemp2, n+1, tag);
         if( scanCellTemp == scanCellPreTemp1 )
             token->memory[static_cast<int>(SCANNER::OUT)] = static_cast<int>(SCANNER_OUT::FINISHED);
@@ -149,12 +149,12 @@ AlienCell::ProcessingResult AlienCellFunctionScanner::process (AlienToken* token
     token->memory[static_cast<int>(SCANNER::OUT_ENERGY)] = e;
     token->memory[static_cast<int>(SCANNER::OUT_CELL_MAX_CONNECTIONS)] = scanCell->getMaxConnections();
     token->memory[static_cast<int>(SCANNER::OUT_CELL_BRANCH_NO)] = scanCell->getTokenAccessNumber();
-    AlienCellFunction* scanCellFunction = AlienCellDecorator::findObject<AlienCellFunction>(scanCell);
+    AlienCellFunction* scanCellFunction = AlienCellDecorator::findObject<AlienCellFunction>(scanCell->getFeatureChain());
     token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION)] = static_cast<quint8>(scanCellFunction->getType());
     scanCellFunction->getInternalData(&token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA)]);
 
     //scan cluster
-    quint32 mass = qFloor(_cell->getCluster()->getMass());
+    quint32 mass = qFloor(cell->getCluster()->getMass());
     if( mass > 255 )        //restrict value to 8 bit
         mass = 255;
     token->memory[static_cast<int>(SCANNER::OUT_MASS)] = mass;

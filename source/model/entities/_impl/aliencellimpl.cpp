@@ -84,9 +84,14 @@ AlienCellImpl::~AlienCellImpl()
         delete _connectingCells;
 }
 
-AlienCell::ProcessingResult AlienCellImpl::process (AlienToken* token, AlienCell* previousCell)
+void AlienCellImpl::registerFeatureChain (AlienCellDecorator* features)
 {
-    return {false, 0};
+    _features = features;
+}
+
+AlienCellDecorator* AlienCellImpl::getFeatureChain () const
+{
+    return _features;
 }
 
 bool AlienCellImpl::connectable (AlienCell* otherCell) const
@@ -114,15 +119,15 @@ void AlienCellImpl::resetConnections (int maxConnections)
     _connectingCells = new AlienCell*[maxConnections];
 }
 
-void AlienCellImpl::newConnection (AlienCell* thisCell, AlienCell* otherCell)
+void AlienCellImpl::newConnection (AlienCell* otherCell)
 {
     _connectingCells[_numConnections] = otherCell;
     _numConnections++;
-    otherCell->setConnection(otherCell->getNumConnections(), thisCell);
+    otherCell->setConnection(otherCell->getNumConnections(), this);
     otherCell->setNumConnections(otherCell->getNumConnections()+1);
 }
 
-void AlienCellImpl::delConnection (AlienCell* thisCell, AlienCell* otherCell)
+void AlienCellImpl::delConnection (AlienCell* otherCell)
 {
     for( int i = 0; i < _numConnections; ++i ) {
         if( _connectingCells[i] == otherCell ) {
@@ -134,7 +139,7 @@ void AlienCellImpl::delConnection (AlienCell* thisCell, AlienCell* otherCell)
         }
     }
     for( int i = 0; i < otherCell->getNumConnections(); ++i ) {
-        if( otherCell->getConnection(i) == thisCell ) {
+        if( otherCell->getConnection(i) == this ) {
             for( int j = i+1; j < otherCell->getNumConnections(); ++j ) {
                 otherCell->setConnection(j-1, otherCell->getConnection(j));
             }
@@ -144,12 +149,12 @@ void AlienCellImpl::delConnection (AlienCell* thisCell, AlienCell* otherCell)
     }
 }
 
-void AlienCellImpl::delAllConnection (AlienCell* thisCell)
+void AlienCellImpl::delAllConnection ()
 {
     for( int i = 0; i < _numConnections; ++i ) {
         AlienCell* otherCell(_connectingCells[i]);
         for( int j = 0; j < otherCell->getNumConnections(); ++j ) {
-            if( otherCell->getConnection(j) == thisCell ) {
+            if( otherCell->getConnection(j) == this ) {
                 for( int k = j+1; k < otherCell->getNumConnections(); ++k ) {
                     otherCell->setConnection(k-1, otherCell->getConnection(k));
                 }
@@ -354,14 +359,14 @@ void AlienCellImpl::setAbsPosition (QVector3D pos)
     _relPos = _cluster->absToRelPos(pos);
 }
 
-void AlienCellImpl::setAbsPositionAndUpdateMap (AlienCell* thisCell, QVector3D pos)
+void AlienCellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
 {
     QVector3D oldPos(calcPosition());
-    if( _grid->getCell(oldPos) == thisCell )
+    if( _grid->getCell(oldPos) == this )
         _grid->setCell(oldPos, 0);
     _relPos = _cluster->absToRelPos(pos);
     if( _grid->getCell(pos) == 0 )
-        _grid->setCell(pos, thisCell);
+        _grid->setCell(pos, this);
 }
 
 QVector3D AlienCellImpl::getRelPos () const
@@ -478,7 +483,7 @@ void AlienCellImpl::setToBeKilled (bool toBeKilled)
 
 AlienToken* AlienCellImpl::takeTokenFromStack ()
 {
-    if( _newTokenStackPointer == 0 )
+    if( _tokenStackPointer == 0 )
         return 0;
     else {
         return _tokenStack[--_tokenStackPointer];

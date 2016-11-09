@@ -6,10 +6,12 @@
 class AlienCellFunctionPropulsion : public AlienCellFunction
 {
 public:
-    AlienCellFunctionPropulsion (AlienCell* cell, AlienGrid*& grid);
+    AlienCellFunctionPropulsion (AlienGrid*& grid);
 
-    ProcessingResult process (AlienToken* token, AlienCell* previousCell) ;
     CellFunctionType getType () const { return CellFunctionType::PROPULSION; }
+
+protected:
+    ProcessingResult processImpl (AlienToken* token, AlienCell* cell, AlienCell* previousCell);
 };
 
 #endif // ALIENCELLFUNCTIONPROPULSION_H

@@ -8,20 +8,21 @@
 class AlienCellFunction: public AlienCellDecorator
 {
 public:
-    AlienCellFunction (AlienCell* cell, AlienGrid*& grid) : AlienCellDecorator(cell, grid) {}
+    AlienCellFunction (AlienGrid*& grid) : AlienCellDecorator(grid) {}
     virtual ~AlienCellFunction() {}
 
+    void serialize (QDataStream& stream) const;
+
+    //new interface
     virtual CellFunctionType getType () const = 0;
     virtual void getInternalData (quint8* data) const {}
 
-    static CellFunctionType getType (QDataStream& stream);
-    void serialize (QDataStream& stream) const;
-
 protected:
-    virtual void serializeInternalData (QDataStream& stream) const {}
-
     qreal calcAngle (AlienCell* origin, AlienCell* ref1, AlienCell* ref2) const;
 
+public:
+    static CellFunctionType getType (QDataStream& stream);
+protected:
     static qreal convertDataToAngle (quint8 b);
     static quint8 convertAngleToData (qreal a);
     static qreal convertDataToShiftLen (quint8 b);
