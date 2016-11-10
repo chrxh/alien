@@ -17,9 +17,9 @@
 #include "global/global.h"
 #include "model/simulationsettings.h"
 #include "model/metadatamanager.h"
-#include "model/aliensimulator.h"
-#include "model/entities/aliencell.h"
-#include "model/entities/aliencellcluster.h"
+#include "model/simulator.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
 
 #include <QGraphicsScene>
 #include <QGLWidget>
@@ -30,7 +30,7 @@
 #include <QMessageBox>
 #include <QFont>
 
-MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
+MainWindow::MainWindow(Simulator* simulator, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _simulator(simulator),
@@ -98,34 +98,34 @@ MainWindow::MainWindow(AlienSimulator* simulator, QWidget *parent) :
     ui->macroEditor->setLayout(layout);
 */
     //connect coordinators
-    connect(_simulator, SIGNAL(cellCreated(AlienCell*)), ui->macroEditor, SLOT(cellCreated(AlienCell*)));
-    connect(_simulator, SIGNAL(cellCreated(AlienCell*)), _microEditor, SLOT(cellFocused(AlienCell*)));
-    connect(_simulator, SIGNAL(cellCreated(AlienCell*)), this, SLOT(cellFocused(AlienCell*)));
-    connect(_simulator, SIGNAL(energyParticleCreated(AlienEnergy*)), ui->macroEditor, SLOT(energyParticleCreated(AlienEnergy*)));
-    connect(_simulator, SIGNAL(energyParticleCreated(AlienEnergy*)), _microEditor, SLOT(energyParticleFocused(AlienEnergy*)));
-    connect(_simulator, SIGNAL(energyParticleCreated(AlienEnergy*)), this, SLOT(energyParticleFocused(AlienEnergy*)));
-    connect(_simulator, SIGNAL(universeUpdated(AlienGrid*, bool)), ui->macroEditor, SLOT(universeUpdated(AlienGrid*, bool)));
-    connect(_simulator, SIGNAL(universeUpdated(AlienGrid*, bool)), _microEditor, SLOT(universeUpdated(AlienGrid*, bool)));
-    connect(_simulator, SIGNAL(reclustered(QList<AlienCellCluster*>)), ui->macroEditor, SLOT(reclustered(QList<AlienCellCluster*>)));
-    connect(_simulator, SIGNAL(reclustered(QList<AlienCellCluster*>)), _microEditor, SLOT(reclustered(QList<AlienCellCluster*>)));
+    connect(_simulator, SIGNAL(cellCreated(Cell*)), ui->macroEditor, SLOT(cellCreated(Cell*)));
+    connect(_simulator, SIGNAL(cellCreated(Cell*)), _microEditor, SLOT(cellFocused(Cell*)));
+    connect(_simulator, SIGNAL(cellCreated(Cell*)), this, SLOT(cellFocused(Cell*)));
+    connect(_simulator, SIGNAL(energyParticleCreated(EnergyParticle*)), ui->macroEditor, SLOT(energyParticleCreated(EnergyParticle*)));
+    connect(_simulator, SIGNAL(energyParticleCreated(EnergyParticle*)), _microEditor, SLOT(energyParticleFocused(EnergyParticle*)));
+    connect(_simulator, SIGNAL(energyParticleCreated(EnergyParticle*)), this, SLOT(energyParticleFocused(EnergyParticle*)));
+    connect(_simulator, SIGNAL(universeUpdated(Grid*, bool)), ui->macroEditor, SLOT(universeUpdated(Grid*, bool)));
+    connect(_simulator, SIGNAL(universeUpdated(Grid*, bool)), _microEditor, SLOT(universeUpdated(Grid*, bool)));
+    connect(_simulator, SIGNAL(reclustered(QList<CellCluster*>)), ui->macroEditor, SLOT(reclustered(QList<CellCluster*>)));
+    connect(_simulator, SIGNAL(reclustered(QList<CellCluster*>)), _microEditor, SLOT(reclustered(QList<CellCluster*>)));
     connect(_simulator, SIGNAL(computerCompilationReturn(bool,int)), _microEditor, SLOT(computerCompilationReturn(bool,int)));
     connect(ui->macroEditor, SIGNAL(requestNewCell(QVector3D)), _simulator, SLOT(newCell(QVector3D)));
     connect(ui->macroEditor, SIGNAL(requestNewEnergyParticle(QVector3D)), _simulator, SLOT(newEnergyParticle(QVector3D)));
     connect(ui->macroEditor, SIGNAL(defocus()), _microEditor, SLOT(defocused()));
     connect(ui->macroEditor, SIGNAL(defocus()), this, SLOT(cellDefocused()));
-    connect(ui->macroEditor, SIGNAL(focusCell(AlienCell*)), _microEditor, SLOT(cellFocused(AlienCell*)));
-    connect(ui->macroEditor, SIGNAL(focusCell(AlienCell*)), this, SLOT(cellFocused(AlienCell*)));
-    connect(ui->macroEditor, SIGNAL(focusEnergyParticle(AlienEnergy*)), _microEditor, SLOT(energyParticleFocused(AlienEnergy*)));
-    connect(ui->macroEditor, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)), _simulator, SLOT(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)));
-    connect(ui->macroEditor, SIGNAL(energyParticleUpdated(AlienEnergy*)), _microEditor, SLOT(energyParticleUpdated_Slot(AlienEnergy*)));
+    connect(ui->macroEditor, SIGNAL(focusCell(Cell*)), _microEditor, SLOT(cellFocused(Cell*)));
+    connect(ui->macroEditor, SIGNAL(focusCell(Cell*)), this, SLOT(cellFocused(Cell*)));
+    connect(ui->macroEditor, SIGNAL(focusEnergyParticle(EnergyParticle*)), _microEditor, SLOT(energyParticleFocused(EnergyParticle*)));
+    connect(ui->macroEditor, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), _simulator, SLOT(updateCell(QList<Cell*>,QList<CellTO>,bool)));
+    connect(ui->macroEditor, SIGNAL(energyParticleUpdated(EnergyParticle*)), _microEditor, SLOT(energyParticleUpdated_Slot(EnergyParticle*)));
     connect(ui->macroEditor, SIGNAL(entitiesSelected(int,int)), _microEditor, SLOT(entitiesSelected(int,int)));
     connect(ui->macroEditor, SIGNAL(entitiesSelected(int,int)), this, SLOT(entitiesSelected(int,int)));
-    connect(ui->macroEditor, SIGNAL(delSelection(QList<AlienCell*>,QList<AlienEnergy*>)), _simulator, SLOT(delSelection(QList<AlienCell*>,QList<AlienEnergy*>)));
-    connect(ui->macroEditor, SIGNAL(delExtendedSelection(QList<AlienCellCluster*>,QList<AlienEnergy*>)), _simulator, SLOT(delExtendedSelection(QList<AlienCellCluster*>,QList<AlienEnergy*>)));
+    connect(ui->macroEditor, SIGNAL(delSelection(QList<Cell*>,QList<EnergyParticle*>)), _simulator, SLOT(delSelection(QList<Cell*>,QList<EnergyParticle*>)));
+    connect(ui->macroEditor, SIGNAL(delExtendedSelection(QList<CellCluster*>,QList<EnergyParticle*>)), _simulator, SLOT(delExtendedSelection(QList<CellCluster*>,QList<EnergyParticle*>)));
     connect(_microEditor, SIGNAL(requestNewCell()), ui->macroEditor, SLOT(newCellRequested()));
     connect(_microEditor, SIGNAL(requestNewEnergyParticle()), ui->macroEditor, SLOT(newEnergyParticleRequested()));
-    connect(_microEditor, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)), _simulator, SLOT(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)));
-    connect(_microEditor, SIGNAL(energyParticleUpdated(AlienEnergy*)), ui->macroEditor, SLOT(energyParticleUpdated_Slot(AlienEnergy*)));
+    connect(_microEditor, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), _simulator, SLOT(updateCell(QList<Cell*>,QList<CellTO>,bool)));
+    connect(_microEditor, SIGNAL(energyParticleUpdated(EnergyParticle*)), ui->macroEditor, SLOT(energyParticleUpdated_Slot(EnergyParticle*)));
     connect(_microEditor, SIGNAL(delSelection()), ui->macroEditor, SLOT(delSelection_Slot()));
     connect(_microEditor, SIGNAL(delExtendedSelection()), ui->macroEditor, SLOT(delExtendedSelection_Slot()));
     connect(_microEditor, SIGNAL(defocus()), ui->macroEditor, SLOT(defocused()));
@@ -563,7 +563,7 @@ void MainWindow::addRandomEnergy ()
 void MainWindow::copyCell ()
 {
     //serialize cell
-    AlienCell* focusCell = _microEditor->getFocusedCell();
+    Cell* focusCell = _microEditor->getFocusedCell();
     QDataStream out(&_serializedCellData, QIODevice::WriteOnly);
     quint64 clusterId;
     quint64 cellId;
@@ -579,7 +579,7 @@ void MainWindow::pasteCell ()
     QDataStream in(&_serializedCellData, QIODevice::ReadOnly);
     QMap< quint64, quint64 > oldNewCellIdMap;
     QMap< quint64, quint64 > oldNewClusterIdMap;
-    AlienCellCluster* newCluster;
+    CellCluster* newCluster;
     _simulator->buildCell(in, ui->macroEditor->getViewCenterPosWithInc(), newCluster, oldNewClusterIdMap, oldNewCellIdMap);
     MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
@@ -700,8 +700,8 @@ void MainWindow::loadExtendedSelection ()
             QDataStream in(&file);
             QMap< quint64, quint64 > oldNewCellIdMap;
             QMap< quint64, quint64 > oldNewClusterIdMap;
-            QList< AlienCellCluster* > newClusters;
-            QList< AlienEnergy* > newEnergyParticles;
+            QList< CellCluster* > newClusters;
+            QList< EnergyParticle* > newEnergyParticles;
             _simulator->buildExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters,  newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
             MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
             file.close();
@@ -727,8 +727,8 @@ void MainWindow::saveExtendedSelection ()
         if( file.open(QIODevice::WriteOnly) ) {
 
             //get selected clusters and energy particles
-            QList< AlienCellCluster* > clusters;
-            QList< AlienEnergy* > es;
+            QList< CellCluster* > clusters;
+            QList< EnergyParticle* > es;
             ui->macroEditor->getExtendedSelection(clusters, es);
 
             //serialize lists
@@ -749,8 +749,8 @@ void MainWindow::saveExtendedSelection ()
 void MainWindow::copyExtendedSelection ()
 {
     //get selected clusters and energy particles
-    QList< AlienCellCluster* > clusters;
-    QList< AlienEnergy* > es;
+    QList< CellCluster* > clusters;
+    QList< EnergyParticle* > es;
     ui->macroEditor->getExtendedSelection(clusters, es);
 
     //serialize lists
@@ -769,8 +769,8 @@ void MainWindow::pasteExtendedSelection ()
     QDataStream in(&_serializedEnsembleData, QIODevice::ReadOnly);
     QMap< quint64, quint64 > oldNewCellIdMap;
     QMap< quint64, quint64 > oldNewClusterIdMap;
-    QList< AlienCellCluster* > newClusters;
-    QList< AlienEnergy* > newEnergyParticles;
+    QList< CellCluster* > newClusters;
+    QList< EnergyParticle* > newEnergyParticles;
     _simulator->buildExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
     MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
@@ -787,8 +787,8 @@ void MainWindow::multiplyRandomExtendedSelection ()
     if( d.exec() ) {
 
         //get selected clusters and energy particles
-        QList< AlienCellCluster* > clusters;
-        QList< AlienEnergy* > es;
+        QList< CellCluster* > clusters;
+        QList< EnergyParticle* > es;
         ui->macroEditor->getExtendedSelection(clusters, es);
 
         //serialize lists
@@ -804,8 +804,8 @@ void MainWindow::multiplyRandomExtendedSelection ()
             QDataStream in(&serializedEnsembleData, QIODevice::ReadOnly);
             QMap< quint64, quint64 > oldNewCellIdMap;
             QMap< quint64, quint64 > oldNewClusterIdMap;
-            QList< AlienCellCluster* > newClusters;
-            QList< AlienEnergy* > newEnergyParticles;
+            QList< CellCluster* > newClusters;
+            QList< EnergyParticle* > newEnergyParticles;
             QVector3D pos(GlobalFunctions::random(0.0, _simulator->getUniverseSizeX()), GlobalFunctions::random(0.0, _simulator->getUniverseSizeY()), 0.0);
             _simulator->buildExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
             MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
@@ -836,8 +836,8 @@ void MainWindow::multiplyRandomExtendedSelection ()
 void MainWindow::multiplyArrangementExtendedSelection ()
 {
     //get selected clusters and energy particles
-    QList< AlienCellCluster* > clusters;
-    QList< AlienEnergy* > es;
+    QList< CellCluster* > clusters;
+    QList< EnergyParticle* > es;
     ui->macroEditor->getExtendedSelection(clusters, es);
 
     //celc center
@@ -859,8 +859,8 @@ void MainWindow::multiplyArrangementExtendedSelection ()
                 QDataStream in(&serializedEnsembleData, QIODevice::ReadOnly);
                 QMap< quint64, quint64 > oldNewCellIdMap;
                 QMap< quint64, quint64 > oldNewClusterIdMap;
-                QList< AlienCellCluster* > newClusters;
-                QList< AlienEnergy* > newEnergyParticles;
+                QList< CellCluster* > newClusters;
+                QList< EnergyParticle* > newEnergyParticles;
                 QVector3D pos(d.getInitialPosX() + (qreal)i*d.getHorizontalInterval(),
                               d.getInitialPosY() + (qreal)j*d.getVerticalInterval(), 0.0);
                 _simulator->buildExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
@@ -988,7 +988,7 @@ void MainWindow::readFrame (QDataStream& stream)
     updateFrameLabel();
 }
 
-void MainWindow::cellFocused (AlienCell* cell)
+void MainWindow::cellFocused (Cell* cell)
 {
     if( _microEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);
@@ -1010,7 +1010,7 @@ void MainWindow::cellDefocused ()
     ui->actionDeleteExtension->setEnabled(false);
 }
 
-void MainWindow::energyParticleFocused (AlienEnergy* e)
+void MainWindow::energyParticleFocused (EnergyParticle* e)
 {
     if( _microEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);

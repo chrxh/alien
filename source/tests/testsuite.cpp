@@ -2,17 +2,17 @@
 #include <QTextCodec>
 
 #include "testphysics.h"
-#include "testaliencellcluster.h"
-#include "testalientoken.h"
-#include "testaliencellfunctioncommunicator.h"
+#include "testcellcluster.h"
+#include "testtoken.h"
+#include "testcellfunctioncommunicator.h"
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
 
     TestPhysics testPhysics;
-    TestAlienCellCluster testCellCluster;
-    TestAlienToken testToken;
-    TestAlienCellFunctionCommunicator testCommunicator;
+    TestCellCluster testCellCluster;
+    TestToken testToken;
+    TestCellFunctionCommunicator testCommunicator;
 
     return QTest::qExec(&testPhysics, argc, argv)
             | QTest::qExec(&testCellCluster, argc, argv)

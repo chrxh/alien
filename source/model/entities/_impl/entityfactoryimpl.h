@@ -1,5 +1,5 @@
-#ifndef ALIENCELLFACTORYIMPL_H
-#define ALIENCELLFACTORYIMPL_H
+#ifndef CELLFACTORYIMPL_H
+#define CELLFACTORYIMPL_H
 
 #include "model/entities/entityfactory.h"
 
@@ -10,10 +10,10 @@ public:
     EntityFactoryImpl ();
     ~EntityFactoryImpl () {}
 
-    AlienCell* buildCell (qreal energy, AlienGrid*& grid, int maxConnections = 0, int tokenAccessNumber = 0
+    Cell* buildCell (qreal energy, Grid*& grid, int maxConnections = 0, int tokenAccessNumber = 0
         , QVector3D relPos = QVector3D());
-    AlienCell* buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, AlienGrid*& grid);
-    AlienCell* buildCellWithRandomData (qreal energy, AlienGrid*& grid);
+    Cell* buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, Grid*& grid);
+    Cell* buildCellWithRandomData (qreal energy, Grid*& grid);
 };
 
-#endif // ALIENCELLFACTORYIMPL_H
+#endif // CELLFACTORYIMPL_H

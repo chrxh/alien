@@ -4,17 +4,17 @@
 #include <QtGlobal>
 #include <QVector3D>
 
-class AlienCell;
-class AlienGrid;
+class Cell;
+class Grid;
 
 class EntityFactory
 {
 public:
     virtual ~EntityFactory () {}
-    virtual AlienCell* buildCell (qreal energy, AlienGrid*& grid, int maxConnections = 0, int tokenAccessNumber = 0
+    virtual Cell* buildCell (qreal energy, Grid*& grid, int maxConnections = 0, int tokenAccessNumber = 0
         , QVector3D relPos = QVector3D()) = 0;
-    virtual AlienCell* buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, AlienGrid*& grid) = 0;
-    virtual AlienCell* buildCellWithRandomData (qreal energy, AlienGrid*& grid) = 0;
+    virtual Cell* buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, Grid*& grid) = 0;
+    virtual Cell* buildCellWithRandomData (qreal energy, Grid*& grid) = 0;
 };
 
 #endif // ENTITYFACTORY_H

@@ -2,10 +2,10 @@
 
 #include "gui/guisettings.h"
 
-#include "model/entities/aliengrid.h"
-#include "model/entities/aliencell.h"
-#include "model/entities/aliencellcluster.h"
-#include "model/entities/alienenergy.h"
+#include "model/entities/grid.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
@@ -43,7 +43,7 @@ void PixelUniverse::reset ()
     update();
 }
 
-void PixelUniverse::universeUpdated (AlienGrid* grid)
+void PixelUniverse::universeUpdated (Grid* grid)
 {
     _grid = grid;
 
@@ -68,7 +68,7 @@ void PixelUniverse::universeUpdated (AlienGrid* grid)
         for(int y = 0; y < sizeY; ++y) {
 
             //draw energy particle
-            AlienEnergy* energy(grid->getEnergyFast(x,y));
+            EnergyParticle* energy(grid->getEnergyFast(x,y));
             if( energy ) {
                 quint32 e(energy->amount+10);
                 e *= 5;
@@ -78,7 +78,7 @@ void PixelUniverse::universeUpdated (AlienGrid* grid)
             }
 
             //draw cell
-            AlienCell* cell(grid->getCellFast(x,y));
+            Cell* cell(grid->getCellFast(x,y));
             if( cell ) {
 //                cell = grid->getCell(QVector3D(x,y,0.0));
                 if(cell->getNumToken() > 0 )
@@ -141,8 +141,8 @@ void PixelUniverse::universeUpdated (AlienGrid* grid)
     }
 
     //draw selected clusters
-    foreach(AlienCellCluster* cluster, _selectedClusters) {
-        foreach(AlienCell* cell, cluster->getCells()) {
+    foreach(CellCluster* cluster, _selectedClusters) {
+        foreach(Cell* cell, cluster->getCells()) {
             QVector3D pos = cell->calcPosition(_grid);
             _image->setPixel(pos.x(), pos.y(), 0xBFBFBF);
         }
@@ -166,21 +166,21 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
     if( (_leftMouseButtonPressed && (!_rightMouseButtonPressed)) || ((!_leftMouseButtonPressed) && _rightMouseButtonPressed)) {
 
         //scan for clusters
-        QMap< quint64, AlienCellCluster* > clusters;
+        QMap< quint64, CellCluster* > clusters;
         QVector3D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
         for(int rx = -5; rx < 6; ++rx )
             for(int ry = -5; ry < 6; ++ry ) {
                 QVector3D scanPos = mousePos + QVector3D(rx,ry,0.0);
                 if( (scanPos.x() >= 0.0) && (scanPos.x() < _grid->getSizeX())
                     && (scanPos.y() >= 0.0) && (scanPos.y() < _grid->getSizeY()) ) {
-                    AlienCell* cell = _grid->getCell(scanPos);
+                    Cell* cell = _grid->getCell(scanPos);
                     if( cell)
                         clusters[cell->getCluster()->getId()] = cell->getCluster();
                 }
             }
 
         //remove clusters from simulation (temporarily)
-        foreach(AlienCellCluster* cluster, clusters) {
+        foreach(CellCluster* cluster, clusters) {
             _grid->getClusters().removeOne(cluster);
             cluster->clearCellsFromMap();
         }
@@ -188,8 +188,8 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         //calc center
         QVector3D center;
         int numCells = 0;
-        foreach(AlienCellCluster* cluster, clusters) {
-            foreach(AlienCell* cell, cluster->getCells()) {
+        foreach(CellCluster* cluster, clusters) {
+            foreach(Cell* cell, cluster->getCells()) {
                 center += cell->calcPosition();
             }
             numCells += cluster->getCells().size();
@@ -207,7 +207,7 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
     if( _leftMouseButtonPressed && _rightMouseButtonPressed ) {
 
         //move selected clusters to simulation
-        foreach(AlienCellCluster* cluster, _selectedClusters) {
+        foreach(CellCluster* cluster, _selectedClusters) {
             cluster->drawCellsToMap();
         }
         _grid->getClusters() << _selectedClusters;
@@ -228,7 +228,7 @@ void PixelUniverse::mouseReleaseEvent (QGraphicsSceneMouseEvent* e)
     _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
 
     //move selected clusters to simulation
-    foreach(AlienCellCluster* cluster, _selectedClusters) {
+    foreach(CellCluster* cluster, _selectedClusters) {
         cluster->drawCellsToMap();
     }
     _grid->getClusters() << _selectedClusters;
@@ -260,7 +260,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
         _grid->lockData();
 
         //update position and velocity
-        foreach(AlienCellCluster* cluster, _selectedClusters) {
+        foreach(CellCluster* cluster, _selectedClusters) {
             cluster->setPosition(cluster->getPosition()+mouseDiff);
             cluster->setVel((cumMouseDiff)/5.0);
         }
@@ -278,7 +278,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
         _grid->lockData();
 
         //1. step: rotate each cluster around own center
-        foreach(AlienCellCluster* cluster, _selectedClusters) {
+        foreach(CellCluster* cluster, _selectedClusters) {
             cluster->setAngle(cluster->getAngle()+mouseDiff.x()+mouseDiff.y());
             cluster->setAngularVel((cumMouseDiff.x() + cumMouseDiff.y())/3.0);
         }
@@ -287,8 +287,8 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
         //calc center
         QVector3D center;
         int numCells = 0;
-        foreach(AlienCellCluster* cluster, _selectedClusters) {
-            foreach(AlienCell* cell, cluster->getCells()) {
+        foreach(CellCluster* cluster, _selectedClusters) {
+            foreach(Cell* cell, cluster->getCells()) {
                 center += cell->calcPosition();
             }
             numCells += cluster->getCells().size();
@@ -299,7 +299,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
         transform.translate(center);
         transform.rotate(mouseDiff.x()+mouseDiff.y(), 0.0, 0.0, 1.0);
         transform.translate(-center);
-        foreach(AlienCellCluster* cluster, _selectedClusters) {
+        foreach(CellCluster* cluster, _selectedClusters) {
             cluster->setPosition(transform.map(cluster->getPosition()));
         }
 
@@ -317,13 +317,13 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
             qreal dist = mouseDiff.length();
 
             //scan mouse path for clusters
-            QMap< quint64, AlienCellCluster* > clusters;
-            QMap< quint64, AlienCell* > cells;
+            QMap< quint64, CellCluster* > clusters;
+            QMap< quint64, Cell* > cells;
             for(int d = 0; d < qFloor(dist)+1; ++d ) {
                 for(int rx = -5; rx < 6; ++rx )
                     for(int ry = -5; ry < 6; ++ry ) {
                         QVector3D scanPos = mousePos + dir*d + QVector3D(rx,ry,0.0);
-                        AlienCell* cell = _grid->getCell(scanPos);
+                        Cell* cell = _grid->getCell(scanPos);
                         if( cell) {
                             clusters[cell->getCluster()->getId()] = cell->getCluster();
                             cells[cell->getCluster()->getId()] = cell;
@@ -332,20 +332,20 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
             }
 
             //apply forces to all encountered cells
-            QMapIterator< quint64, AlienCell* > itCell(cells);
+            QMapIterator< quint64, Cell* > itCell(cells);
             while(itCell.hasNext()) {
                 itCell.next();
-                AlienCell* cell = itCell.value();
+                Cell* cell = itCell.value();
 
                 //apply force
                 cell->setVel(cell->getVel() + dir*dist*cell->getCluster()->getMass()*0.05);
             }
 
             //calc effective velocities of the clusters
-            QMapIterator< quint64, AlienCellCluster* > itCluster(clusters);
+            QMapIterator< quint64, CellCluster* > itCluster(clusters);
             while(itCluster.hasNext()) {
                 itCluster.next();
-                AlienCellCluster* cluster = itCluster.value();
+                CellCluster* cluster = itCluster.value();
                 cluster->updateVel_angularVel_via_cellVelocities();
                 cluster->updateCellVel(false);
             }
@@ -360,7 +360,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
 void PixelUniverse::timeout ()
 {
     //set velocity of selected clusters to 0
-    foreach(AlienCellCluster* cluster, _selectedClusters) {
+    foreach(CellCluster* cluster, _selectedClusters) {
         if( _leftMouseButtonPressed )
             cluster->setVel(QVector3D());
         if( _rightMouseButtonPressed )

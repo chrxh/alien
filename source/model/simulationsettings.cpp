@@ -1,11 +1,11 @@
 #include "simulationsettings.h"
 #include "model/metadatamanager.h"
-#include "model/decorators/constants.h"
+#include "model/features/constants.h"
 
 
 #include <QtGlobal>
 
-void AlienMetadata::loadDefaultMetadata (MetadataManager* meta)
+void Metadata::loadDefaultMetadata (MetadataManager* meta)
 {
     meta->clearSymbolTable();
 
