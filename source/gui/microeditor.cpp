@@ -13,9 +13,9 @@
 #include "model/simulationsettings.h"
 #include "model/metadatamanager.h"
 #include "model/modelfacade.h"
-#include "model/entities/aliencell.h"
-#include "model/entities/aliencellcluster.h"
-#include "model/entities/aliengrid.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/grid.h"
 #include "global/servicelocator.h"
 
 #include <QTabWidget>
@@ -117,8 +117,8 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     _tabSymbolsWidget->parent()->installEventFilter(this);
 
     //establish connections
-    connect(_cellEditor, SIGNAL(cellDataChanged(AlienCellTO)), this, SLOT(changesFromCellEditor(AlienCellTO)));
-    connect(_clusterEditor, SIGNAL(clusterDataChanged(AlienCellTO)), this, SLOT(changesFromClusterEditor(AlienCellTO)));
+    connect(_cellEditor, SIGNAL(cellDataChanged(CellTO)), this, SLOT(changesFromCellEditor(CellTO)));
+    connect(_clusterEditor, SIGNAL(clusterDataChanged(CellTO)), this, SLOT(changesFromClusterEditor(CellTO)));
     connect(_energyEditor, SIGNAL(energyParticleDataChanged(QVector3D,QVector3D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector3D,QVector3D,qreal)));
     connect(_requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
     connect(_requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
@@ -169,7 +169,7 @@ bool MicroEditor::eventFilter (QObject * watched, QEvent * event)
     return QObject::eventFilter(watched, event);
 }
 
-AlienCell* MicroEditor::getFocusedCell ()
+Cell* MicroEditor::getFocusedCell ()
 {
     return _focusCell;
 }
@@ -227,7 +227,7 @@ void MicroEditor::defocused (bool requestDataUpdate)
     _focusEnergyParticle = 0;
 }
 
-void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
+void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 {
     if( (!isVisible()) || (!_grid) || (!cell) )
         return;
@@ -318,7 +318,7 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
         _delTokenButton->setEnabled(false);
 }
 
-void MicroEditor::energyParticleFocused (AlienEnergy* e)
+void MicroEditor::energyParticleFocused (EnergyParticle* e)
 {
     if( (!isVisible()) || (!_grid) || (!e) )
         return;
@@ -337,7 +337,7 @@ void MicroEditor::energyParticleFocused (AlienEnergy* e)
     energyParticleUpdated_Slot(e);
 }
 
-void MicroEditor::energyParticleUpdated_Slot (AlienEnergy* e)
+void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 {
     if( !e )
         return;
@@ -354,7 +354,7 @@ void MicroEditor::energyParticleUpdated_Slot (AlienEnergy* e)
 }
 
 
-void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
+void MicroEditor::reclustered (QList< CellCluster* > clusters)
 {
     if( !_grid )
         return;
@@ -363,7 +363,7 @@ void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
         //_focusCell contained in clusters?
         _grid->lockData();
         bool contained = false;
-        foreach(AlienCellCluster* cluster, clusters)
+        foreach(CellCluster* cluster, clusters)
             if( cluster->getCells().contains(_focusCell) )
                 contained = true;
         _grid->unlockData();
@@ -394,7 +394,7 @@ void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
     }
 }
 
-void MicroEditor::universeUpdated (AlienGrid* grid, bool force)
+void MicroEditor::universeUpdated (Grid* grid, bool force)
 {
     _grid = grid;
     defocused(false);
@@ -634,7 +634,7 @@ void MicroEditor::mousePressEvent(QMouseEvent * event)
     return;
 }
 */
-void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
+void MicroEditor::changesFromCellEditor (CellTO newCellProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyCellProperties(newCellProperties);
@@ -680,7 +680,7 @@ void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
 
 }
 
-void MicroEditor::changesFromClusterEditor (AlienCellTO newClusterProperties)
+void MicroEditor::changesFromClusterEditor (CellTO newClusterProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyClusterProperties(newClusterProperties);
@@ -804,8 +804,8 @@ void MicroEditor::compileButtonClicked (QString code)
 
 void MicroEditor::invokeUpdateCell (bool clusterDataChanged)
 {
-    QList< AlienCell* > cells;
-    QList< AlienCellTO > newCellsData;
+    QList< Cell* > cells;
+    QList< CellTO > newCellsData;
     cells << _focusCell;
     newCellsData << _focusCellReduced;
     emit updateCell(cells, newCellsData, clusterDataChanged);

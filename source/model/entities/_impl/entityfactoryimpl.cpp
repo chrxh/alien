@@ -1,6 +1,6 @@
 #include "entityfactoryimpl.h"
 
-#include "aliencellimpl.h"
+#include "cellimpl.h"
 #include "global/servicelocator.h"
 
 EntityFactoryImpl::EntityFactoryImpl ()
@@ -8,21 +8,21 @@ EntityFactoryImpl::EntityFactoryImpl ()
     ServiceLocator::getInstance().registerService<EntityFactory>(this);
 }
 
-AlienCell* EntityFactoryImpl::buildCell (qreal energy, AlienGrid*& grid, int maxConnections
+Cell* EntityFactoryImpl::buildCell (qreal energy, Grid*& grid, int maxConnections
     , int tokenAccessNumber, QVector3D relPos)
 {
-    return new AlienCellImpl(energy, grid, maxConnections, tokenAccessNumber, relPos);
+    return new CellImpl(energy, grid, maxConnections, tokenAccessNumber, relPos);
 }
 
-AlienCell* EntityFactoryImpl::buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-    , AlienGrid*& grid)
+Cell* EntityFactoryImpl::buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
+    , Grid*& grid)
 {
-    return new AlienCellImpl(stream, connectingCells, grid);
+    return new CellImpl(stream, connectingCells, grid);
 }
 
-AlienCell* EntityFactoryImpl::buildCellWithRandomData (qreal energy, AlienGrid*& grid)
+Cell* EntityFactoryImpl::buildCellWithRandomData (qreal energy, Grid*& grid)
 {
-    return new AlienCellImpl(energy, grid, true);
+    return new CellImpl(energy, grid, true);
 }
 
 EntityFactoryImpl entityFactoryImpl;

@@ -7,9 +7,9 @@
 #include "gui/editorsettings.h"
 #include "gui/guisettings.h"
 
-#include "model/entities/aliengrid.h"
-#include "model/entities/aliencellcluster.h"
-#include "model/entities/aliencell.h"
+#include "model/entities/grid.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/cell.h"
 
 #include <QScrollBar>
 #include <QTimer>
@@ -38,11 +38,11 @@ MacroEditor::MacroEditor(QWidget *parent) :
     ui->simulationView->setScene(_pixelUniverse);
 
     //connect signals
-    connect(_shapeUniverse, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)), this, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)));
+    connect(_shapeUniverse, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), this, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)));
     connect(_shapeUniverse, SIGNAL(defocus()), this, SIGNAL(defocus()), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(focusCell(AlienCell*)), this, SIGNAL(focusCell(AlienCell*)), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(focusEnergyParticle(AlienEnergy*)), this, SIGNAL(focusEnergyParticle(AlienEnergy*)), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(energyParticleUpdated(AlienEnergy*)), this, SIGNAL(energyParticleUpdated(AlienEnergy*)), Qt::QueuedConnection);
+    connect(_shapeUniverse, SIGNAL(focusCell(Cell*)), this, SIGNAL(focusCell(Cell*)), Qt::QueuedConnection);
+    connect(_shapeUniverse, SIGNAL(focusEnergyParticle(EnergyParticle*)), this, SIGNAL(focusEnergyParticle(EnergyParticle*)), Qt::QueuedConnection);
+    connect(_shapeUniverse, SIGNAL(energyParticleUpdated(EnergyParticle*)), this, SIGNAL(energyParticleUpdated(EnergyParticle*)), Qt::QueuedConnection);
     connect(_shapeUniverse, SIGNAL(entitiesSelected(int,int)), this, SIGNAL(entitiesSelected(int,int)));
 
     //set up timer
@@ -126,7 +126,7 @@ QVector3D MacroEditor::getViewCenterPosWithInc ()
     return pos + posIncrement;
 }
 
-void MacroEditor::getExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es)
+void MacroEditor::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
     if( _activeScene == SHAPE_SCENE ) {
         _shapeUniverse->getExtendedSelection(clusters, es);
@@ -234,8 +234,8 @@ void MacroEditor::delSelection_Slot ()
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
-        QList< AlienCell* > cells;
-        QList< AlienEnergy* > es;
+        QList< Cell* > cells;
+        QList< EnergyParticle* > es;
         _shapeUniverse->delSelection(cells, es);
         emit delSelection(cells, es);
     }
@@ -245,13 +245,13 @@ void MacroEditor::delExtendedSelection_Slot ()
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
-        QList< AlienCellCluster* > clusters;
-        QList< AlienEnergy* > es;
+        QList< CellCluster* > clusters;
+        QList< EnergyParticle* > es;
         _shapeUniverse->delExtendedSelection(clusters, es);
         //*********
-//        foreach(AlienCellCluster* c, _grid->getClusters())
+//        foreach(CellCluster* c, _grid->getClusters())
 //            clusters << c;
-//            foreach(AlienCell* cell, c->getCells())
+//            foreach(Cell* cell, c->getCells())
 //                if( (qrand() % 2 == 0) )
 //                cells << cell;
         //*********
@@ -259,7 +259,7 @@ void MacroEditor::delExtendedSelection_Slot ()
     }
 }
 
-void MacroEditor::cellCreated (AlienCell* cell)
+void MacroEditor::cellCreated (Cell* cell)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -267,7 +267,7 @@ void MacroEditor::cellCreated (AlienCell* cell)
     }
 }
 
-void MacroEditor::energyParticleCreated(AlienEnergy* e)
+void MacroEditor::energyParticleCreated(EnergyParticle* e)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -275,7 +275,7 @@ void MacroEditor::energyParticleCreated(AlienEnergy* e)
     }
 }
 
-void MacroEditor::energyParticleUpdated_Slot (AlienEnergy* e)
+void MacroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -283,13 +283,13 @@ void MacroEditor::energyParticleUpdated_Slot (AlienEnergy* e)
     }
 }
 
-void MacroEditor::reclustered (QList< AlienCellCluster* > clusters)
+void MacroEditor::reclustered (QList< CellCluster* > clusters)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
 //        _shapeUniverse->universeUpdated(_grid);
-/*        foreach(AlienCellCluster* cluster, clusters) {
-            foreach(AlienCell* cell, cluster->getCells()) {
+/*        foreach(CellCluster* cluster, clusters) {
+            foreach(Cell* cell, cluster->getCells()) {
                 cell->setRelPos(cell->getRelPos());
             }
         }*/
@@ -299,7 +299,7 @@ void MacroEditor::reclustered (QList< AlienCellCluster* > clusters)
         _pixelUniverse->universeUpdated(_grid);
 }
 
-void MacroEditor::universeUpdated (AlienGrid* grid, bool force)
+void MacroEditor::universeUpdated (Grid* grid, bool force)
 {
     //valid grid pointer available?
     if( grid )
@@ -357,7 +357,7 @@ void MacroEditor::updateTimerTimeout ()
     _screenUpdatePossible = true;
 }
 
-void MacroEditor::centerView (AlienGrid* grid)
+void MacroEditor::centerView (Grid* grid)
 {
     //load size of the universe
     grid->lockData();

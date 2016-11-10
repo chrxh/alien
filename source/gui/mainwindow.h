@@ -5,9 +5,9 @@
 #include <QByteArray>
 #include <QStack>
 
-class AlienCell;
-class AlienEnergy;
-class AlienSimulator;
+class Cell;
+class EnergyParticle;
+class Simulator;
 class MicroEditor;
 class UniversePixelScene;
 class UniverseShapeScene;
@@ -24,7 +24,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    MainWindow (AlienSimulator* simulator, QWidget *parent = 0);
+    MainWindow (Simulator* simulator, QWidget *parent = 0);
     ~MainWindow ();
 
 private slots:
@@ -83,9 +83,9 @@ private slots:
     void decFrame ();
     void readFrame (QDataStream& stream);
 
-    void cellFocused (AlienCell* cell);
+    void cellFocused (Cell* cell);
     void cellDefocused ();
-    void energyParticleFocused (AlienEnergy* e);
+    void energyParticleFocused (EnergyParticle* e);
     void entitiesSelected(int numCells, int numEnergyParticles);
 
     void updateFrameLabel ();
@@ -96,7 +96,7 @@ private:
 
     void changeEvent(QEvent *e);
 
-    AlienSimulator* _simulator;
+    Simulator* _simulator;
     MicroEditor* _microEditor;
 
     QTimer* _timer;
