@@ -1,7 +1,7 @@
 #ifndef MACROEDITOR_H
 #define MACROEDITOR_H
 
-#include "model/entities/aliencellto.h"
+#include "model/entities/cellto.h"
 
 #include <QWidget>
 #include <QVector3D>
@@ -11,10 +11,10 @@ namespace Ui {
 class MacroEditor;
 }
 
-class AlienCell;
-class AlienCellCluster;
-class AlienEnergy;
-class AlienGrid;
+class Cell;
+class CellCluster;
+class EnergyParticle;
+class Grid;
 class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
@@ -36,7 +36,7 @@ public:
 
     void setActiveScene (ActiveScene activeScene);
     QVector3D getViewCenterPosWithInc ();
-    void getExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es);
+    void getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es);
 
     void serializeViewMatrix (QDataStream& stream);
     void loadViewMatrix (QDataStream& stream);
@@ -49,17 +49,17 @@ signals:
     void requestNewCell (QVector3D pos);    //for simulator
     void requestNewEnergyParticle (QVector3D pos);    //for simulator
     void defocus ();                        //for microeditor
-    void focusCell (AlienCell* cell);       //for microeditor
-    void focusEnergyParticle (AlienEnergy* e);       //for microeditor
-    void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellTO > newCellsData,
+    void focusCell (Cell* cell);       //for microeditor
+    void focusEnergyParticle (EnergyParticle* e);       //for microeditor
+    void updateCell (QList< Cell* > cells,
+                     QList< CellTO > newCellsData,
                      bool clusterDataChanged);      //for simulator
-    void energyParticleUpdated (AlienEnergy* e); //for microeditor
+    void energyParticleUpdated (EnergyParticle* e); //for microeditor
     void entitiesSelected (int numCells, int numEnergyParticles);   //for microeditor
-    void delSelection (QList< AlienCell* > cells,
-                      QList< AlienEnergy* > es);               //for simulator
-    void delExtendedSelection (QList< AlienCellCluster* > clusters,
-                         QList< AlienEnergy* > es);               //for simulator
+    void delSelection (QList< Cell* > cells,
+                      QList< EnergyParticle* > es);               //for simulator
+    void delExtendedSelection (QList< CellCluster* > clusters,
+                         QList< EnergyParticle* > es);               //for simulator
 
 
 public slots:
@@ -72,22 +72,22 @@ public slots:
     void defocused ();
     void delSelection_Slot ();
     void delExtendedSelection_Slot ();
-    void cellCreated (AlienCell* cell);
-    void energyParticleCreated (AlienEnergy* e);
-    void energyParticleUpdated_Slot (AlienEnergy* e);
-    void reclustered (QList< AlienCellCluster* > clusters);
-    void universeUpdated (AlienGrid* grid, bool force);
+    void cellCreated (Cell* cell);
+    void energyParticleCreated (EnergyParticle* e);
+    void energyParticleUpdated_Slot (EnergyParticle* e);
+    void reclustered (QList< CellCluster* > clusters);
+    void universeUpdated (Grid* grid, bool force);
     void metadataUpdated ();
 
 private slots:
     void updateTimerTimeout ();
 
 private:
-    void centerView (AlienGrid* grid);
+    void centerView (Grid* grid);
 
     Ui::MacroEditor *ui;
 
-    AlienGrid* _grid;
+    Grid* _grid;
     ActiveScene _activeScene;
     PixelUniverse* _pixelUniverse;
     ShapeUniverse* _shapeUniverse;

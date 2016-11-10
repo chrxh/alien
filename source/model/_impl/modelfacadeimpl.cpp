@@ -1,12 +1,12 @@
 #include "modelfacadeimpl.h"
 
-#include "model/entities/aliencellcluster.h"
-#include "model/entities/alientoken.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/token.h"
 #include "model/entities/entityfactory.h"
-#include "model/decorators/aliencellfunction.h"
-#include "model/decorators/aliencellfunctioncomputer.h"
-#include "model/decorators/alienenergyguidance.h"
-#include "model/decorators/aliencelldecoratorfactory.h"
+#include "model/features/cellfunction.h"
+#include "model/features/cellfunctioncomputer.h"
+#include "model/features/energyguidance.h"
+#include "model/features/cellfeaturefactory.h"
 #include "global/servicelocator.h"
 #include "model/simulationsettings.h"
 
@@ -15,47 +15,47 @@ ModelFacadeImpl::ModelFacadeImpl ()
     ServiceLocator::getInstance().registerService<ModelFacade>(this);
 }
 
-AlienCell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType type, quint8* data, AlienGrid*& grid
+Cell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType type, quint8* data, Grid*& grid
     , int maxConnections, int tokenAccessNumber, QVector3D relPos)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
-    AlienCell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
+    CellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellDecoratorFactory>();
+    Cell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
     decoratorFactory->addCellFunction(cell, type, data, grid);
     decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
 }
 
-AlienCell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType type, AlienGrid*& grid, int maxConnections
+Cell* ModelFacadeImpl::buildDecoratedCell (qreal energy, CellFunctionType type, Grid*& grid, int maxConnections
     , int tokenAccessNumber, QVector3D relPos)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
-    AlienCell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
+    CellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellDecoratorFactory>();
+    Cell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
     decoratorFactory->addCellFunction(cell, type, grid);
     decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
 }
 
-AlienCell* ModelFacadeImpl::buildDecoratedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-    , AlienGrid*& grid)
+Cell* ModelFacadeImpl::buildDecoratedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
+    , Grid*& grid)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    AlienCellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<AlienCellDecoratorFactory>();
-    AlienCell* cell = entityFactory->buildCell(stream, connectingCells, grid);
-    CellFunctionType type = AlienCellFunction::getType(stream);
+    CellDecoratorFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellDecoratorFactory>();
+    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
+    CellFunctionType type = CellFunction::getType(stream);
     decoratorFactory->addCellFunction(cell, type, stream, grid);
     decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
 }
 
-AlienCell* ModelFacadeImpl::buildDecoratedCell (QDataStream& stream, AlienGrid*& grid)
+Cell* ModelFacadeImpl::buildDecoratedCell (QDataStream& stream, Grid*& grid)
 {
     QMap< quint64, QList< quint64 > > temp;
     return buildDecoratedCell(stream, temp, grid);
 }
 
-AlienCell* ModelFacadeImpl::buildDecoratedCellWithRandomData (qreal energy, AlienGrid*& grid)
+Cell* ModelFacadeImpl::buildDecoratedCellWithRandomData (qreal energy, Grid*& grid)
 {
     int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
     int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
@@ -66,12 +66,12 @@ AlienCell* ModelFacadeImpl::buildDecoratedCellWithRandomData (qreal energy, Alie
     return buildDecoratedCell(energy, randomCellFunction, randomData, grid, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
-AlienCellTO ModelFacadeImpl::buildCellTO (AlienCell* cell)
+CellTO ModelFacadeImpl::buildCellTO (Cell* cell)
 {
-    AlienCellTO to;
+    CellTO to;
 
     //copy cell properties
-    AlienCellCluster* cluster = cell->getCluster();
+    CellCluster* cluster = cell->getCluster();
     to.numCells = cluster->getMass();
     to.clusterPos = cluster->getPosition();
     to.clusterVel = cluster->getVel();
@@ -83,11 +83,11 @@ AlienCellTO ModelFacadeImpl::buildCellTO (AlienCell* cell)
     to.cellMaxCon = cell->getMaxConnections();
     to.cellAllowToken = !cell->isTokenBlocked();
     to.cellTokenAccessNum = cell->getTokenAccessNumber();
-    AlienCellFunction* cellFunction = AlienCellDecorator::findObject<AlienCellFunction>(cell->getFeatureChain());
+    CellFunction* cellFunction = CellDecorator::findObject<CellFunction>(cell->getFeatureChain());
     to.cellFunctionType = cellFunction->getType();
 
     //copy computer data
-    AlienCellFunctionComputer* computer = AlienCellDecorator::findObject<AlienCellFunctionComputer>(cellFunction);
+    CellFunctionComputer* computer = CellDecorator::findObject<CellFunctionComputer>(cellFunction);
     if( computer ) {
         QVector< quint8 > d = computer->getMemoryReference();
         for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i)
@@ -97,7 +97,7 @@ AlienCellTO ModelFacadeImpl::buildCellTO (AlienCell* cell)
 
     //copy token data
     for(int i = 0; i < cell->getNumToken(); ++i) {
-        AlienToken* token = cell->getToken(i);
+        Token* token = cell->getToken(i);
         to.tokenEnergies << token->energy;
         QVector< quint8 > d(simulationParameters.TOKEN_MEMSIZE);
         for(int j = 0; j < simulationParameters.TOKEN_MEMSIZE; ++j)

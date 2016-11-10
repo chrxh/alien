@@ -1,7 +1,7 @@
 #ifndef MICROEDITOR_H
 #define MICROEDITOR_H
 
-#include "model/entities/aliencellto.h"
+#include "model/entities/cellto.h"
 
 #include <QWidget>
 #include <QTimer>
@@ -10,10 +10,10 @@ namespace Ui {
 class MicroEditor;
 }
 
-class AlienCell;
-class AlienCellCluster;
-class AlienEnergy;
-class AlienGrid;
+class Cell;
+class CellCluster;
+class EnergyParticle;
+class Grid;
 class CellEdit;
 class ClusterEdit;
 class CellComputerEdit;
@@ -57,29 +57,29 @@ public:
     bool isVisible ();
     bool eventFilter(QObject * watched, QEvent * event);
 
-    AlienCell* getFocusedCell ();
+    Cell* getFocusedCell ();
 
 signals:
     void requestNewCell ();                                     //to macro editor
     void requestNewEnergyParticle ();                           //to macro editor
-    void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellTO > newCellsData,
+    void updateCell (QList< Cell* > cells,
+                     QList< CellTO > newCellsData,
                      bool clusterDataChanged);                  //to simulator
     void delSelection ();                                       //to macro editor
     void delExtendedSelection ();                                //to macro editor
     void defocus ();                                            //to macro editor
-    void energyParticleUpdated (AlienEnergy* e);                //to macro editor
+    void energyParticleUpdated (EnergyParticle* e);                //to macro editor
     void metadataUpdated ();                                    //to macro editor
     void numTokenUpdate (int numToken, int maxToken, bool pasteTokenPossible);  //to main windows
 
 public slots:
     void computerCompilationReturn (bool error, int line);
     void defocused (bool requestDataUpdate = true);
-    void cellFocused (AlienCell* cell, bool requestDataUpdate = true);
-    void energyParticleFocused (AlienEnergy* e);
-    void energyParticleUpdated_Slot (AlienEnergy* e);
-    void reclustered (QList< AlienCellCluster* > clusters);
-    void universeUpdated (AlienGrid* grid, bool force);
+    void cellFocused (Cell* cell, bool requestDataUpdate = true);
+    void energyParticleFocused (EnergyParticle* e);
+    void energyParticleUpdated_Slot (EnergyParticle* e);
+    void reclustered (QList< CellCluster* > clusters);
+    void universeUpdated (Grid* grid, bool force);
     void requestUpdate ();
     void entitiesSelected (int numCells, int numEnergyParticles);
     void addTokenClicked ();
@@ -93,8 +93,8 @@ public slots:
 //    void mousePressEvent(QMouseEvent * event);
 
 private slots:
-    void changesFromCellEditor (AlienCellTO newCellProperties);
-    void changesFromClusterEditor (AlienCellTO newClusterProperties);
+    void changesFromCellEditor (CellTO newCellProperties);
+    void changesFromClusterEditor (CellTO newClusterProperties);
     void changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue);
     void changesFromTokenEditor (qreal energy);
     void changesFromComputerMemoryEditor (QVector< quint8 > data);
@@ -130,10 +130,10 @@ private:
     QToolButton* _delTokenButton;
 
 //    Ui::MicroEditor *ui;
-    AlienCell* _focusCell;
-    AlienCellTO _focusCellReduced;
-    AlienEnergy* _focusEnergyParticle;
-    AlienGrid* _grid;
+    Cell* _focusCell;
+    CellTO _focusCellReduced;
+    EnergyParticle* _focusEnergyParticle;
+    Grid* _grid;
     QWidget* _tabCluster;
     QWidget* _tabCell;
     QWidget* _tabParticle;

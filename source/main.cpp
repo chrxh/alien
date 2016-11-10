@@ -1,10 +1,10 @@
 #include <QApplication>
 
 #include "gui/mainwindow.h"
-#include "model/aliensimulator.h"
+#include "model/simulator.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
-#include "model/entities/aliencellto.h"
+#include "model/entities/cellto.h"
 
 #include <QtCore/qmath.h>
 
@@ -74,14 +74,14 @@
 int main(int argc, char *argv[])
 {
     //register types
-    qRegisterMetaType<AlienCellTO>("AlienCellReduced");
+    qRegisterMetaType<CellTO>("CellReduced");
 
     //load default metadata
-    AlienMetadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());
+    Metadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());
 
     //init main objects
     QApplication a(argc, argv);
-    AlienSimulator simulator(400, 200);
+    Simulator simulator(400, 200);
     MainWindow w(&simulator);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 

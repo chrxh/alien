@@ -115,7 +115,7 @@ QString MetadataManager::getAndUniteClusterName (const QList< quint64 >& ids)
 
 void MetadataManager::cleanUp (const QSet< quint64 >& ids)
 {
-    QMutableMapIterator< quint64, AlienCellMetadata > it(_idCellMetadataMap);
+    QMutableMapIterator< quint64, CellMetadata > it(_idCellMetadataMap);
     while(it.hasNext()) {
         it.next();
         quint64 id = it.key();
@@ -125,7 +125,7 @@ void MetadataManager::cleanUp (const QSet< quint64 >& ids)
     }
 }
 
-const QMap< quint64, AlienCellMetadata >& MetadataManager::getCellMetadata ()
+const QMap< quint64, CellMetadata >& MetadataManager::getCellMetadata ()
 {
     return _idCellMetadataMap;
 }
@@ -235,22 +235,22 @@ void MetadataManager::serializeMetadataUniverse (QDataStream& stream)
     //cell data
     quint32 size = _idCellMetadataMap.size();
     stream << size;
-    QMapIterator< quint64, AlienCellMetadata > it(_idCellMetadataMap);
+    QMapIterator< quint64, CellMetadata > it(_idCellMetadataMap);
     while(it.hasNext()) {
         it.next();
         quint64 cellId = it.key();
-        AlienCellMetadata cellMeta = it.value();
+        CellMetadata cellMeta = it.value();
         stream << cellId << cellMeta.computerCode << cellMeta.name << cellMeta.description << cellMeta.clusterName;
     }
 
     //cluster data
 /*    size = _idClusterMetadataMap.size();
     stream << size;
-    QMapIterator< quint64, AlienCellClusterMetadata > it2(_idClusterMetadataMap);
+    QMapIterator< quint64, CellClusterMetadata > it2(_idClusterMetadataMap);
     while(it2.hasNext()) {
         it2.next();
         quint64 clusterId = it2.key();
-        AlienCellClusterMetadata clusterMeta = it2.value();
+        CellClusterMetadata clusterMeta = it2.value();
         stream << clusterId << clusterMeta.clusterName;
     }*/
 }

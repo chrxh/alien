@@ -7,7 +7,7 @@
 const qreal ALIEN_PRECISION = 0.0000001;
 
 class MetadataManager;
-class AlienMetadata
+class Metadata
 {
 public:
     static void loadDefaultMetadata (MetadataManager* meta);

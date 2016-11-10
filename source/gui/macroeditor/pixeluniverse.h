@@ -5,8 +5,8 @@
 #include <QVector3D>
 #include <QTimer>
 
-class AlienCellCluster;
-class AlienGrid;
+class CellCluster;
+class Grid;
 class PixelUniverse : public QGraphicsScene
 {
     Q_OBJECT
@@ -15,7 +15,7 @@ public:
     ~PixelUniverse();
 
     void reset ();
-    void universeUpdated (AlienGrid* grid);
+    void universeUpdated (Grid* grid);
 
 protected:
 
@@ -28,12 +28,12 @@ private slots:
     void timeout ();
 
 private:
-    AlienGrid* _grid;
+    Grid* _grid;
     QGraphicsPixmapItem* _pixelMap;
     QImage* _image;
     QTimer* _timer;
 
-    QList< AlienCellCluster* > _selectedClusters;
+    QList< CellCluster* > _selectedClusters;
     QVector3D _selectionPos;
     QVector< QVector3D > _lastMouseDiffs;
     bool _leftMouseButtonPressed;

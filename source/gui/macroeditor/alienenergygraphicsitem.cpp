@@ -4,28 +4,28 @@
 
 #include <QPainter>
 
-AlienEnergyGraphicsItem::AlienEnergyGraphicsItem (QGraphicsItem* parent)
+EnergyGraphicsItem::EnergyGraphicsItem (QGraphicsItem* parent)
     : QGraphicsItem(parent), _e(0), _focusState(NO_FOCUS)
 {
     QGraphicsItem::setPos(0.0, 0.0);
 }
 
-AlienEnergyGraphicsItem::AlienEnergyGraphicsItem (AlienEnergy* e, qreal x, qreal y, QGraphicsItem* parent)
+EnergyGraphicsItem::EnergyGraphicsItem (EnergyParticle* e, qreal x, qreal y, QGraphicsItem* parent)
     : QGraphicsItem(parent), _e(e), _focusState(NO_FOCUS)
 {
     QGraphicsItem::setPos(x, y);
 }
 
-AlienEnergyGraphicsItem::~AlienEnergyGraphicsItem ()
+EnergyGraphicsItem::~EnergyGraphicsItem ()
 {
 }
 
-QRectF AlienEnergyGraphicsItem::boundingRect () const
+QRectF EnergyGraphicsItem::boundingRect () const
 {
     return QRectF(-0.4, -0.4, 0.8, 0.8);
 }
 
-void AlienEnergyGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void EnergyGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if( _focusState == NO_FOCUS ) {
         painter->setPen(QPen(QBrush(QColor(0,0,0,0)), 0.03));
@@ -39,17 +39,17 @@ void AlienEnergyGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphi
     }
 }
 
-int AlienEnergyGraphicsItem::type() const
+int EnergyGraphicsItem::type() const
 {
     return Type;
 }
 
-void AlienEnergyGraphicsItem::setFocusState (FocusState focusState)
+void EnergyGraphicsItem::setFocusState (FocusState focusState)
 {
     _focusState = focusState;
 }
 
-AlienEnergy* AlienEnergyGraphicsItem::getEnergyParticle ()
+EnergyParticle* EnergyGraphicsItem::getEnergyParticle ()
 {
     return _e;
 }

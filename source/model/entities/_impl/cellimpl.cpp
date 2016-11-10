@@ -1,0 +1,492 @@
+#include "cellimpl.h"
+
+#include "model/entities/cellcluster.h"
+#include "model/entities/token.h"
+#include "model/physics/physics.h"
+#include "model/simulationsettings.h"
+
+#include "global/global.h"
+
+#include <QtCore/qmath.h>
+
+CellImpl::CellImpl (qreal energy, Grid*& grid, int maxConnections, int tokenAccessNumber, QVector3D relPos)
+    : Cell(grid),
+      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _tokenStackPointer(0),
+      _newTokenStackPointer(0),
+      _toBeKilled(false),
+      _tag(0),
+      _id(GlobalFunctions::getTag()),
+      _protectionCounter(0),
+      _relPos(relPos),
+      _cluster(0),
+      _energy(energy),
+      _maxConnections(0),
+      _numConnections(0),
+      _connectingCells(0),
+      _tokenAccessNumber(tokenAccessNumber),
+      _blockToken(false),
+      _vel(0.0, 0.0, 0.0),
+      _color(0)
+{
+      resetConnections(maxConnections);
+}
+
+CellImpl::CellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells,
+                              Grid*& grid)
+    : Cell(grid),
+      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
+      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE)
+{
+
+    //token stack
+    stream >> _tokenStackPointer;
+    for( int i = 0; i < _tokenStackPointer; ++i ) {
+        if( i < simulationParameters.CELL_TOKENSTACKSIZE )
+            _tokenStack[i] = new Token(stream);
+        else{
+            //dummy token
+            Token* temp = new Token(stream);
+            delete temp;
+        }
+    }
+    if( _tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE )
+        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
+    _newTokenStackPointer = 0;
+
+    //remaining data
+    int numConnections(0);
+    stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
+           >> _energy >> _maxConnections >> numConnections;
+
+    //connecting cells
+    _connectingCells = 0;
+    resetConnections(_maxConnections);
+    _numConnections = numConnections;
+    for( int i = 0; i < _numConnections; ++i) {
+        quint64 id;
+        stream >> id;
+        connectingCells[_id] << id;
+    }
+
+    //remaining data
+    stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
+}
+
+CellImpl::~CellImpl()
+{
+    for(int i = 0; i < _tokenStackPointer; ++i )
+        delete _tokenStack[i];
+    for(int i = 0; i < _newTokenStackPointer; ++i )
+        delete _newTokenStack[i];
+    if( _maxConnections > 0 )
+        delete _connectingCells;
+}
+
+void CellImpl::registerFeatureChain (CellDecorator* features)
+{
+    _features = features;
+}
+
+CellDecorator* CellImpl::getFeatureChain () const
+{
+    return _features;
+}
+
+bool CellImpl::connectable (Cell* otherCell) const
+{
+    return (_numConnections < _maxConnections) && (otherCell->getNumConnections() < otherCell->getMaxConnections());
+}
+
+bool CellImpl::isConnectedTo (Cell* otherCell) const
+{
+    for( int i = 0; i < _numConnections; ++i )
+        if( _connectingCells[i] == otherCell )
+            return true;
+    return false;
+}
+
+void CellImpl::resetConnections (int maxConnections)
+{
+    //delete old array
+    if( _connectingCells )
+        delete _connectingCells;
+
+    //set up new array
+    _maxConnections = maxConnections;
+    _numConnections = 0;
+    _connectingCells = new Cell*[maxConnections];
+}
+
+void CellImpl::newConnection (Cell* otherCell)
+{
+    _connectingCells[_numConnections] = otherCell;
+    _numConnections++;
+    otherCell->setConnection(otherCell->getNumConnections(), this);
+    otherCell->setNumConnections(otherCell->getNumConnections()+1);
+}
+
+void CellImpl::delConnection (Cell* otherCell)
+{
+    for( int i = 0; i < _numConnections; ++i ) {
+        if( _connectingCells[i] == otherCell ) {
+            for( int j = i+1; j < _numConnections; ++j ) {
+                _connectingCells[j-1] = _connectingCells[j];
+            }
+            _numConnections--;
+            break;
+        }
+    }
+    for( int i = 0; i < otherCell->getNumConnections(); ++i ) {
+        if( otherCell->getConnection(i) == this ) {
+            for( int j = i+1; j < otherCell->getNumConnections(); ++j ) {
+                otherCell->setConnection(j-1, otherCell->getConnection(j));
+            }
+            otherCell->setNumConnections(otherCell->getNumConnections()-1);
+            break;
+        }
+    }
+}
+
+void CellImpl::delAllConnection ()
+{
+    for( int i = 0; i < _numConnections; ++i ) {
+        Cell* otherCell(_connectingCells[i]);
+        for( int j = 0; j < otherCell->getNumConnections(); ++j ) {
+            if( otherCell->getConnection(j) == this ) {
+                for( int k = j+1; k < otherCell->getNumConnections(); ++k ) {
+                    otherCell->setConnection(k-1, otherCell->getConnection(k));
+                }
+                otherCell->setNumConnections(otherCell->getNumConnections()-1);
+                break;
+            }
+        }
+    }
+    _numConnections = 0;
+}
+
+int CellImpl::getNumConnections () const
+{
+    return _numConnections;
+}
+
+void CellImpl::setNumConnections (int num)
+{
+    _numConnections = num;
+}
+
+int CellImpl::getMaxConnections () const
+{
+    return _maxConnections;
+}
+
+void CellImpl::setMaxConnections (int maxConnections)
+{
+
+    //new array
+    Cell** newArray = new Cell*[maxConnections];
+    if( _connectingCells ) {
+
+        //copy old array
+        for(int i = 0 ; i < qMin(_maxConnections, maxConnections); ++i) {
+            newArray[i] = _connectingCells[i];
+        }
+
+        //delete old array
+        delete _connectingCells;
+    }
+    _maxConnections = maxConnections;
+    if( _numConnections > _maxConnections )
+        _numConnections = _maxConnections;
+    _connectingCells = newArray;
+}
+
+
+Cell* CellImpl::getConnection (int i) const
+{
+    return _connectingCells[i];
+}
+
+void CellImpl::setConnection (int i, Cell* cell)
+{
+    _connectingCells[i] = cell;
+}
+
+QVector3D CellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const
+{
+    if( _numConnections < 2 ) {
+        return outerSpace.normalized();
+    }
+
+    //find adjacent cells to the outerSpace vector
+    outerSpace.normalize();
+    Cell* minCell(0);
+    Cell* maxCell(0);
+    QVector3D minVector(0.0, 0.0, 0.0);
+    QVector3D maxVector(0.0, 0.0, 0.0);
+    qreal minH(0.0);
+    qreal maxH(0.0);
+
+    for(int i = 0; i < _numConnections; ++i) {
+
+        //calculate h (angular distance from outerSpace vector)
+        QVector3D u = (transform.map(_connectingCells[i]->getRelPos())-transform.map(_relPos)).normalized();
+        qreal h = QVector3D::dotProduct(outerSpace, u);
+        if( (outerSpace.x()*u.y()-outerSpace.y()*u.x()) < 0.0 )
+            h = -2 - h;
+
+        //save min and max
+        if( (!minCell) || (h < minH) ) {
+            minCell = _connectingCells[i];
+            minVector = u;
+            minH = h;
+        }
+        if( (!maxCell) || (h > maxH) ) {
+            maxCell = _connectingCells[i];
+            maxVector = u;
+            maxH = h;
+        }
+    }
+
+    //no adjacent cells?
+    if( (!minCell) && (!maxCell) ) {
+        return outerSpace;
+    }
+
+    //one adjacent cells?
+    if( minCell == maxCell ) {
+        return transform.map(_relPos)-transform.map(minCell->getRelPos());
+    }
+
+    //calc normal vectors
+    qreal temp = maxVector.x();
+    maxVector.setX(maxVector.y());
+    maxVector.setY(-temp);
+    temp = minVector.x();
+    minVector.setX(-minVector.y());
+    minVector.setY(temp);
+    return minVector+maxVector;
+}
+
+void CellImpl::activatingNewTokens ()
+{
+    _tokenStackPointer = _newTokenStackPointer;
+    for( int i = 0; i < _newTokenStackPointer; ++i ) {
+        _tokenStack[i] = _newTokenStack[i];
+//        _tokenStack[i]->setTokenAccessNumber(_tokenAccessNumber);
+    }
+    _newTokenStackPointer = 0;
+}
+
+const quint64& CellImpl::getId () const
+{
+    return _id;
+}
+
+void CellImpl::setId (quint64 id)
+{
+    _id = id;
+}
+
+const quint64& CellImpl::getTag () const
+{
+    return _tag;
+}
+
+void CellImpl::setTag (quint64 tag)
+{
+    _tag = tag;
+}
+
+int CellImpl::getNumToken (bool newTokenStackPointer) const
+{
+    if( newTokenStackPointer )
+        return _newTokenStackPointer;
+    else
+        return _tokenStackPointer;
+}
+
+Token* CellImpl::getToken (int i) const
+{
+    return _tokenStack[i];
+}
+
+void CellImpl::addToken (Token* token, bool activateNow, bool setAccessNumber)
+{
+    if( setAccessNumber )
+        token->setTokenAccessNumber(_tokenAccessNumber);
+    if( activateNow ) {
+        _tokenStack[_tokenStackPointer] = token;
+        ++_tokenStackPointer;
+    }
+    else {
+        _newTokenStack[_newTokenStackPointer] = token;
+        ++_newTokenStackPointer;
+    }
+}
+
+void CellImpl::delAllTokens ()
+{
+/*    for( int j = i+1; j < _tokenStackPointer; ++j )
+        _tokenStack[j-1] = _tokenStack[j];
+    --_tokenStackPointer;*/
+    for( int j = 0; j < _tokenStackPointer; ++j )
+         delete _tokenStack[j];
+    for( int j = 0; j < _newTokenStackPointer; ++j )
+         delete _newTokenStack[j];
+    _tokenStackPointer = 0;
+    _newTokenStackPointer = 0;
+}
+
+void CellImpl::setCluster (CellCluster* cluster)
+{
+    _cluster = cluster;
+}
+
+CellCluster* CellImpl::getCluster() const
+{
+    return _cluster;
+}
+
+QVector3D CellImpl::calcPosition (bool topologyCorrection) const
+{
+    return _cluster->calcPosition(this, topologyCorrection);
+}
+
+void CellImpl::setAbsPosition (QVector3D pos)
+{
+    _relPos = _cluster->absToRelPos(pos);
+}
+
+void CellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
+{
+    QVector3D oldPos(calcPosition());
+    if( _grid->getCell(oldPos) == this )
+        _grid->setCell(oldPos, 0);
+    _relPos = _cluster->absToRelPos(pos);
+    if( _grid->getCell(pos) == 0 )
+        _grid->setCell(pos, this);
+}
+
+QVector3D CellImpl::getRelPos () const
+{
+    return _relPos;
+}
+
+void CellImpl::setRelPos (QVector3D relPos)
+{
+    _relPos = relPos;
+}
+
+
+int CellImpl::getTokenAccessNumber () const
+{
+    return _tokenAccessNumber;
+}
+
+void CellImpl::setTokenAccessNumber (int i)
+{
+    _tokenAccessNumber = i % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
+}
+
+bool CellImpl::isTokenBlocked () const
+{
+    return _blockToken;
+}
+
+void CellImpl::setTokenBlocked (bool block)
+{
+    _blockToken = block;
+}
+
+qreal CellImpl::getEnergy() const
+{
+    return _energy;
+}
+
+qreal CellImpl::getEnergyIncludingTokens() const
+{
+    qreal energy = _energy;
+    for(int i = 0; i < _tokenStackPointer; ++i)
+        energy += _tokenStack[i]->energy;
+    for(int i = 0; i < _newTokenStackPointer; ++i)
+        energy += _newTokenStack[i]->energy;
+    return energy;
+}
+
+void CellImpl::setEnergy (qreal i)
+{
+    _energy = i;
+}
+
+void CellImpl::serialize (QDataStream& stream) const
+{
+    //token
+    stream << _tokenStackPointer;
+    for( int i = 0; i < _tokenStackPointer; ++i) {
+        _tokenStack[i]->serialize(stream);
+    }
+
+    //remaining data
+    stream << _toBeKilled << _tag << _id << _protectionCounter << _relPos
+           << _energy << _maxConnections << _numConnections;
+
+    //connecting cells
+    for( int i = 0; i < _numConnections; ++i) {
+        stream << _connectingCells[i]->getId();
+    }
+
+    //remaining data
+    stream << _tokenAccessNumber << _blockToken << _vel << _color;
+}
+
+QVector3D CellImpl::getVel () const
+{
+    return _vel;
+}
+
+void CellImpl::setVel (QVector3D vel)
+{
+    _vel = vel;
+}
+
+quint8 CellImpl::getColor () const
+{
+    return _color;
+}
+
+void CellImpl::setColor (quint8 color)
+{
+    _color = color;
+}
+
+int CellImpl::getProtectionCounter () const
+{
+    return _protectionCounter;
+}
+
+void CellImpl::setProtectionCounter (int counter)
+{
+    _protectionCounter = counter;
+}
+
+bool CellImpl::isToBeKilled() const
+{
+    return _toBeKilled;
+}
+
+void CellImpl::setToBeKilled (bool toBeKilled)
+{
+    _toBeKilled = toBeKilled;
+}
+
+Token* CellImpl::takeTokenFromStack ()
+{
+    if( _tokenStackPointer == 0 )
+        return 0;
+    else {
+        return _tokenStack[--_tokenStackPointer];
+    }
+}
+

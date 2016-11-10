@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QString>
 
-struct AlienCellMetadata
+struct CellMetadata
 {
     QString computerCode;
 //    quint8 colorNumber;
@@ -36,7 +36,7 @@ public:
 
     void cleanUp (const QSet< quint64 >& ids);          //preserve metadata for the cells specified in ids
 
-    const QMap< quint64, AlienCellMetadata >& getCellMetadata ();
+    const QMap< quint64, CellMetadata >& getCellMetadata ();
 
     void addSymbolEntry (QString key, QString value);
     void delSymbolEntry (QString key);
@@ -55,7 +55,7 @@ public:
     void readSymbolTable (QDataStream& stream, bool merge = false);
 
 private:
-    QMap< quint64, AlienCellMetadata > _idCellMetadataMap;
+    QMap< quint64, CellMetadata > _idCellMetadataMap;
     QMap< QString, QString > _symbolTable;
 };
 
