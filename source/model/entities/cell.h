@@ -7,7 +7,7 @@ class CellCluster;
 class EnergyParticle;
 class Grid;
 class Token;
-class CellDecorator;
+class CellFeature;
 
 class Cell
 {
@@ -15,8 +15,9 @@ public:
     Cell (Grid*& grid) : _grid(grid) {}
     virtual ~Cell() {}
 
-    virtual void registerFeatureChain (CellDecorator* features) = 0;
-    virtual CellDecorator* getFeatureChain () const = 0;
+    virtual void registerFeatures (CellFeature* features) = 0;
+    virtual CellFeature* getFeatures () const = 0;
+    virtual void removeFeatures () = 0;
 
     virtual bool connectable (Cell* otherCell) const = 0;
     virtual bool isConnectedTo (Cell* otherCell) const = 0;

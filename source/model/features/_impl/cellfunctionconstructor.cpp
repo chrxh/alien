@@ -31,7 +31,7 @@ namespace {
         , int tokenAccessNumber, int cellType, quint8* cellFunctionData, Grid*& grid)
     {
         ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
-        Cell* newCell = facade->buildDecoratedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
+        Cell* newCell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
         CellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
@@ -113,7 +113,7 @@ namespace {
     }
 }
 
-CellDecorator::ProcessingResult CellFunctionConstructor::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());

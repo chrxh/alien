@@ -10,10 +10,10 @@ class Cell;
 class CellFunction;
 class EnergyGuidance;
 
-class CellDecoratorFactory
+class CellFeatureFactory
 {
 public:
-    virtual ~CellDecoratorFactory () {}
+    virtual ~CellFeatureFactory () {}
 
     virtual void addCellFunction (Cell* cell, CellFunctionType type, quint8* data, Grid*& grid) = 0;
     virtual void addCellFunction (Cell* cell, CellFunctionType type, Grid*& grid) = 0;

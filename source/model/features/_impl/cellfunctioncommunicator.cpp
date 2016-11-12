@@ -32,7 +32,7 @@ CellFunctionCommunicator::CellFunctionCommunicator (QDataStream& stream, Grid*& 
            >> _receivedMessage.distance;
 }
 
-CellDecorator::ProcessingResult CellFunctionCommunicator::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionCommunicator::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     COMMUNICATOR_IN cmd = readCommandFromToken(token);
@@ -106,7 +106,7 @@ QList< Cell* > CellFunctionCommunicator::findNearbyCommunicator(Cell* cell) cons
     Grid::CellSelectFunction cellSelectCommunicatorFunction =
         [](Cell* cell)
         {
-            CellFunction* cellFunction = CellDecorator::findObject<CellFunction>(cell->getFeatureChain());
+            CellFunction* cellFunction = CellFeature::findObject<CellFunction>(cell->getFeatures());
             return cellFunction && (cellFunction->getType() == CellFunctionType::COMMUNICATOR);
         };
     QVector3D cellPos = cell->calcPosition();
@@ -119,7 +119,7 @@ bool CellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const 
                                                                        Cell* senderPreviousCell,
                                                                        Cell* receiverCell) const
 {
-    CellFunctionCommunicator* communicator = CellDecorator::findObject<CellFunctionCommunicator>(receiverCell->getFeatureChain());
+    CellFunctionCommunicator* communicator = CellFeature::findObject<CellFunctionCommunicator>(receiverCell->getFeatures());
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);

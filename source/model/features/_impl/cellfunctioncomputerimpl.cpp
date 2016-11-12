@@ -414,7 +414,7 @@ QVector< quint8 >& CellFunctionComputerImpl::getMemoryReference ()
 }
 
 
-CellDecorator::ProcessingResult CellFunctionComputerImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
 

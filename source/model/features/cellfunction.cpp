@@ -8,10 +8,10 @@
 
 CellFunctionType CellFunction::getType (QDataStream& stream)
 {
-//    quint8 type;
-//    stream >> type;
+    quint8 type;
+    stream >> type;
     //>>>>>>>>>>>> TODO: remove because this is temporary and only for converting
-    QString name;
+/*    QString name;
     stream >> name;
     CellFunctionType type;
 
@@ -28,7 +28,7 @@ CellFunctionType CellFunction::getType (QDataStream& stream)
     if( name == "SENSOR" )
         type = CellFunctionType::SENSOR;
     if( name == "COMMUNICATOR" )
-        type = CellFunctionType::COMMUNICATOR;
+        type = CellFunctionType::COMMUNICATOR;*/
     //<<<<<<<<<<<<
     return static_cast<CellFunctionType>(type);
 }
@@ -36,7 +36,7 @@ CellFunctionType CellFunction::getType (QDataStream& stream)
 void CellFunction::serialize (QDataStream& stream) const
 {
     stream << static_cast<quint8>(getType());
-    CellDecorator::serialize(stream);
+    CellFeature::serialize(stream);
 }
 
 qreal CellFunction::calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const

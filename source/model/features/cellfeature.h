@@ -8,42 +8,42 @@ class Cell;
 class Token;
 class EnergyParticle;
 
-class CellDecorator
+class CellFeature
 {
 public:
-    CellDecorator (Grid*& grid) : _grid(grid), _nextFeature(0) {}
-    virtual ~CellDecorator ();
+    CellFeature (Grid*& grid) : _grid(grid), _nextFeature(0) {}
+    virtual ~CellFeature ();
 
-    void registerNextFeature (CellDecorator* nextFeature);
+    void registerNextFeature (CellFeature* nextFeature);
     struct ProcessingResult {
         bool decompose;
         EnergyParticle* newEnergyParticle;
     };
-    ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
-    void serialize (QDataStream& stream) const;
+    virtual ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
+    virtual void serialize (QDataStream& stream) const;
 
 protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;
     virtual void serializeImpl (QDataStream& stream) const {}
 
     Grid* _grid;
-    CellDecorator* _nextFeature;
+    CellFeature* _nextFeature;
 
 public:
     template< typename T >
-    static T* findObject (CellDecorator* feature);
+    static T* findObject (CellFeature* feature);
 };
 
 
 template< typename T >
-T* CellDecorator::findObject (CellDecorator* feature)
+T* CellFeature::findObject (CellFeature* feature)
 {
     T* object = dynamic_cast< T* >(feature);
     if( object )
         return object;
     else {
         if( feature->_nextFeature )
-            return CellDecorator::findObject<T>(feature->_nextFeature);
+            return CellFeature::findObject<T>(feature->_nextFeature);
         else
             return 0;
     }

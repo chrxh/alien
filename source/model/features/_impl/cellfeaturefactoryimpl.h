@@ -3,7 +3,7 @@
 
 #include "model/features/cellfeaturefactory.h"
 
-class CellDecoratorFactoryImpl : public CellDecoratorFactory
+class CellDecoratorFactoryImpl : public CellFeatureFactory
 {
 public:
     CellDecoratorFactoryImpl ();

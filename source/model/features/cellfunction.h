@@ -5,10 +5,10 @@
 
 #include "constants.h"
 
-class CellFunction: public CellDecorator
+class CellFunction: public CellFeature
 {
 public:
-    CellFunction (Grid*& grid) : CellDecorator(grid) {}
+    CellFunction (Grid*& grid) : CellFeature(grid) {}
     virtual ~CellFunction() {}
 
     void serialize (QDataStream& stream) const;

@@ -188,7 +188,7 @@ void Simulator::addBlockStructure (QVector3D center, int numCellX, int numCellY,
                 maxCon = 3;
             if( ((i == 0) || (i == (numCellX-1))) && ((j == 0) || (j == (numCellY-1))) )
                 maxCon = 2;
-            Cell* cell = facade->buildDecoratedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(x, y, 0.0));
+            Cell* cell = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(x, y, 0.0));
 
             cellGrid[i][j] = cell;
         }
@@ -233,7 +233,7 @@ void Simulator::addHexagonStructure (QVector3D center, int numLayers, qreal dist
                 maxCon = 6;
 
             //create cell: upper layer
-            cellGrid[numLayers-1+i][numLayers-1-j] = facade->buildDecoratedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
+            cellGrid[numLayers-1+i][numLayers-1-j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
             cells << cellGrid[numLayers-1+i][numLayers-1-j];
             if( numLayers-1+i > 0 )
                 cellGrid[numLayers-1+i][numLayers-1-j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1-j]);
@@ -244,7 +244,7 @@ void Simulator::addHexagonStructure (QVector3D center, int numLayers, qreal dist
 
             //create cell: under layer (except for 0-layer)
             if( j > 0 ) {
-                cellGrid[numLayers-1+i][numLayers-1+j] = facade->buildDecoratedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
+                cellGrid[numLayers-1+i][numLayers-1+j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
                 cells << cellGrid[numLayers-1+i][numLayers-1+j];
                 if( numLayers-1+i > 0 )
                     cellGrid[numLayers-1+i][numLayers-1+j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1+j]);
@@ -342,7 +342,7 @@ void Simulator::buildCell (QDataStream& stream,
     //read cell data
     ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
     QList< Cell* > newCells;
-    Cell* newCell = facade->buildDecoratedCell(stream, _grid);
+    Cell* newCell = facade->buildFeaturedCell(stream, _grid);
     newCells << newCell;
     newCells[0]->setRelPos(QVector3D());
     newCluster = CellCluster::buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _grid);
@@ -593,7 +593,7 @@ void Simulator::newCell (QVector3D pos)
     //create cluster with single cell
     _grid->lockData();
     ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
-    Cell* cell = facade->buildDecoratedCell(simulationParameters.NEW_CELL_ENERGY, CellFunctionType::COMPUTER
+    Cell* cell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, CellFunctionType::COMPUTER
         , _grid, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
@@ -628,6 +628,7 @@ void Simulator::updateCell (QList< Cell* > cells, QList< CellTO > newCellsData, 
         QListIterator< Cell* > iCells(cells);
         QListIterator< CellTO > iNewCellsData(newCellsData);
         QSet< CellCluster* > sumNewClusters;
+        ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
         while (iCells.hasNext()) {
 
             Cell* cell = iCells.next();
@@ -643,10 +644,11 @@ void Simulator::updateCell (QList< Cell* > cells, QList< CellTO > newCellsData, 
             cell->setMaxConnections(newCellData.cellMaxCon);
             cell->setTokenBlocked(!newCellData.cellAllowToken);
             cell->setTokenAccessNumber(newCellData.cellTokenAccessNum);
+            facade->changeFeaturesOfCell(cell, newCellData.cellFunctionType, _grid);
 //            cell->setCellFunction(CellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 
             //update cell computer
-            CellFunctionComputer* computer = CellDecorator::findObject<CellFunctionComputer>(cell->getFeatureChain());
+            CellFunctionComputer* computer = CellFeature::findObject<CellFunctionComputer>(cell->getFeatures());
             if( computer ) {
                 for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i ) {
                     computer->getMemoryReference()[i] = newCellData.computerMemory[i];
