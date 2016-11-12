@@ -25,7 +25,7 @@ private slots:
         QList< Cell* > cells;
         ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
         for(int i = 0; i <= 100; ++i) {
-            Cell* cell = facade->buildDecoratedCell(100.0, CellFunctionType::COMPUTER, _grid);
+            Cell* cell = facade->buildFeaturedCell(100.0, CellFunctionType::COMPUTER, _grid);
             cell->setRelPos(QVector3D(i, 0.0, 0.0));
             cells << cell;
         }

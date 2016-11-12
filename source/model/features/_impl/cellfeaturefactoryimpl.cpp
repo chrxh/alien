@@ -14,17 +14,17 @@
 
 CellDecoratorFactoryImpl::CellDecoratorFactoryImpl ()
 {
-    ServiceLocator::getInstance().registerService<CellDecoratorFactory>(this);
+    ServiceLocator::getInstance().registerService<CellFeatureFactory>(this);
 }
 
 namespace {
-    void registerNewFeature (Cell* cell, CellDecorator* newFeature)
+    void registerNewFeature (Cell* cell, CellFeature* newFeature)
     {
-        CellDecorator* features = cell->getFeatureChain();
+        CellFeature* features = cell->getFeatures();
         if( features )
             features->registerNextFeature(newFeature);
         else
-            cell->registerFeatureChain(newFeature);
+            cell->registerFeatures(newFeature);
     }
 }
 

@@ -2,6 +2,7 @@
 
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
+#include "model/features/cellfeature.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 
@@ -82,16 +83,25 @@ CellImpl::~CellImpl()
         delete _newTokenStack[i];
     if( _maxConnections > 0 )
         delete _connectingCells;
+    if( _features )
+        delete _features;
 }
 
-void CellImpl::registerFeatureChain (CellDecorator* features)
+void CellImpl::registerFeatures (CellFeature* features)
 {
     _features = features;
 }
 
-CellDecorator* CellImpl::getFeatureChain () const
+CellFeature* CellImpl::getFeatures () const
 {
     return _features;
+}
+
+void CellImpl::removeFeatures ()
+{
+    if( _features )
+        delete _features;
+    _features = 0;
 }
 
 bool CellImpl::connectable (Cell* otherCell) const
@@ -439,6 +449,9 @@ void CellImpl::serialize (QDataStream& stream) const
 
     //remaining data
     stream << _tokenAccessNumber << _blockToken << _vel << _color;
+
+    if( _features )
+        _features->serialize(stream);
 }
 
 QVector3D CellImpl::getVel () const

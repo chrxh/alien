@@ -31,11 +31,11 @@ private slots:
             _communicator1a = new CellFunctionCommunicator(_grid);
             QVector3D relPos = QVector3D();
             _cellWithToken = factory->buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, relPos);
-            _cellWithToken->registerFeatureChain(_communicator1a);
+            _cellWithToken->registerFeatures(_communicator1a);
             _communicator1b = new CellFunctionCommunicator(_grid);
             relPos = QVector3D(0.0, 1.0, 0.0);
             _cellWithoutToken = factory->buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, relPos);
-            _cellWithoutToken->registerFeatureChain(_communicator1b);
+            _cellWithoutToken->registerFeatures(_communicator1b);
             qreal tokenEnergy = 0.0;
             _token = new Token(tokenEnergy);
             _cellWithToken->addToken(_token);
@@ -59,7 +59,7 @@ private slots:
             _communicator2 = new CellFunctionCommunicator(_grid);
             QVector3D relPos = QVector3D();
             Cell* cell = factory->buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, relPos);
-            cell->registerFeatureChain(_communicator2);
+            cell->registerFeatures(_communicator2);
 
             //create cluster2 within communication range
             QList< Cell* > cells;
@@ -117,9 +117,7 @@ private slots:
         _token->memory[static_cast<int>(COMMUNICATOR::IN_DISTANCE)] = distance;
 
         //1. test: message received?
-        EnergyParticle* energy = 0;
-        bool decompose = false;
-        _communicator1a->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
+        _communicator1a->process(_token, _cellWithToken, _cellWithoutToken);
         QVERIFY2(_communicator2->_newMessageReceived, "No message received.");
 
         //2. test: correct angle received?
@@ -129,21 +127,21 @@ private slots:
 
         //3. test: correct angle received for an other direction?
         angle = CellFunction::convertAngleToData(0.0);
-        _token->memory[static_cast<int>(CellFunctionCommunicator::COMMUNICATOR::IN_ANGLE)] = angle;
-        _communicator1a->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
+        _token->memory[static_cast<int>(COMMUNICATOR::IN_ANGLE)] = angle;
+        _communicator1a->process(_token, _cellWithToken, _cellWithoutToken);
         receivedAngle = CellFunction::convertDataToAngle(_communicator2->_receivedMessage.angle);
         s = QString("Message received with wrong angle; received angle: %1, expected angle: %2").arg(receivedAngle).arg(-135.0);
         QVERIFY2(qAbs(receivedAngle - (-135.0)) < 2.0, s.toLatin1().data());
 
         //4. test: two messages sent?
-        quint8 numMsg = _token->memory[static_cast<int>(CellFunctionCommunicator::COMMUNICATOR::OUT_SENT_NUM_MESSAGE)];
+        quint8 numMsg = _token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)];
         s = QString("Wrong number messages sent. Messages sent: %1, should be 2.").arg(numMsg);
         QVERIFY2(numMsg == 2, s.toLatin1().data());
 
         //5. test: one receiver has different channel => only one message sent?
         _communicator2->_receivedMessage.channel = differentChannel;
-        _communicator1a->execute(_token, _cellWithToken, _cellWithoutToken, energy, decompose);
-        numMsg = _token->memory[static_cast<int>(CellFunctionCommunicator::COMMUNICATOR::OUT_SENT_NUM_MESSAGE)];
+        _communicator1a->process(_token, _cellWithToken, _cellWithoutToken);
+        numMsg = _token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)];
         s = QString("Wrong number messages sent. Messages sent: %1, should be 1.").arg(numMsg);
         QVERIFY2(numMsg == 1, s.toLatin1().data());
     }

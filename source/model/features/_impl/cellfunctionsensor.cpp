@@ -12,7 +12,7 @@ CellFunctionSensor::CellFunctionSensor (Grid*& grid)
 {
 }
 
-CellDecorator::ProcessingResult CellFunctionSensor::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionSensor::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());

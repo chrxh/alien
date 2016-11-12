@@ -17,8 +17,9 @@ public:
                    Grid*& grid);
     ~CellImpl();
 
-    void registerFeatureChain (CellDecorator* features);
-    CellDecorator* getFeatureChain () const;
+    void registerFeatures (CellFeature* features);
+    CellFeature* getFeatures () const;
+    void removeFeatures ();
 
     bool connectable (Cell* otherCell) const;
     bool isConnectedTo (Cell* otherCell) const;
@@ -75,7 +76,7 @@ public:
 private:
     friend class CellCluster;
 
-    CellDecorator* _features = 0;
+    CellFeature* _features = 0;
 
     QVector< Token* > _tokenStack;
     QVector< Token* > _newTokenStack;

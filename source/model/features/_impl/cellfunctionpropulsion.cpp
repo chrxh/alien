@@ -20,7 +20,7 @@ namespace {
     }
 }
 
-CellDecorator::ProcessingResult CellFunctionPropulsion::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionPropulsion::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());
