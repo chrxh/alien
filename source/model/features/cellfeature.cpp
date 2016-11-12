@@ -1,17 +1,17 @@
 #include "cellfeature.h"
 
-CellDecorator::~CellDecorator ()
+CellFeature::~CellFeature ()
 {
     if( _nextFeature )
         delete _nextFeature;
 }
 
-void CellDecorator::registerNextFeature (CellDecorator* nextFeature)
+void CellFeature::registerNextFeature (CellFeature* nextFeature)
 {
     _nextFeature = nextFeature;
 }
 
-CellDecorator::ProcessingResult CellDecorator::process (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult resultFromNextFeature {false, 0 };
     if( _nextFeature)
@@ -26,7 +26,7 @@ CellDecorator::ProcessingResult CellDecorator::process (Token* token, Cell* cell
     return mergedResult;
 }
 
-void CellDecorator::serialize (QDataStream& stream) const
+void CellFeature::serialize (QDataStream& stream) const
 {
     serializeImpl(stream);
     if( _nextFeature)

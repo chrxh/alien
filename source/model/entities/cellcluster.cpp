@@ -590,7 +590,7 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
 
                         //execute cell function
                         spreadToken[i]->setTokenAccessNumber(spreadTokenCells[i]->getTokenAccessNumber());
-                        CellDecorator::ProcessingResult processingResult = spreadTokenCells[i]->getFeatureChain()->process(spreadToken[i], spreadTokenCells[i], cell);
+                        CellFeature::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
                         if( processingResult.decompose )
                             decompose = true;
                         if( processingResult.newEnergyParticle )
@@ -1113,7 +1113,7 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
     stream >> numCells;
     ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
     for(int i = 0; i < numCells; ++i ) {
-        Cell* cell = facade->buildDecoratedCell(stream, connectingCells, _grid);
+        Cell* cell = facade->buildFeaturedCell(stream, connectingCells, _grid);
         cell->setCluster(this);
         _cells << cell;
         idCellMap[cell->getId()] = cell;

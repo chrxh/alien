@@ -80,7 +80,7 @@ namespace {
 
 }
 
-CellDecorator::ProcessingResult CellFunctionScanner::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionScanner::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     int n = token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)];
@@ -149,7 +149,7 @@ CellDecorator::ProcessingResult CellFunctionScanner::processImpl (Token* token, 
     token->memory[static_cast<int>(SCANNER::OUT_ENERGY)] = e;
     token->memory[static_cast<int>(SCANNER::OUT_CELL_MAX_CONNECTIONS)] = scanCell->getMaxConnections();
     token->memory[static_cast<int>(SCANNER::OUT_CELL_BRANCH_NO)] = scanCell->getTokenAccessNumber();
-    CellFunction* scanCellFunction = CellDecorator::findObject<CellFunction>(scanCell->getFeatureChain());
+    CellFunction* scanCellFunction = CellFeature::findObject<CellFunction>(scanCell->getFeatures());
     token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION)] = static_cast<quint8>(scanCellFunction->getType());
     scanCellFunction->getInternalData(&token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA)]);
 

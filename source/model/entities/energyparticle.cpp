@@ -102,7 +102,7 @@ bool EnergyParticle::movement (CellCluster*& cluster)
                 //create cell and cluster
                 QList< Cell* > cells;
                 ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
-                Cell* c = facade->buildDecoratedCellWithRandomData(eNew, _grid);
+                Cell* c = facade->buildFeaturedCellWithRandomData(eNew, _grid);
                 cells << c;
                 cluster = CellCluster::buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
                 amount = 0;

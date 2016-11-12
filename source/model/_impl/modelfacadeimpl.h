@@ -9,14 +9,16 @@ public:
     ModelFacadeImpl ();
     ~ModelFacadeImpl () {}
 
-    Cell* buildDecoratedCell (qreal energy, CellFunctionType type, quint8* data, Grid*& grid, int maxConnections = 0
+    Cell* buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid*& grid, int maxConnections = 0
         , int tokenAccessNumber = 0 , QVector3D relPos = QVector3D());
-    Cell* buildDecoratedCell (qreal energy, CellFunctionType type, Grid*& grid, int maxConnections = 0
+    Cell* buildFeaturedCell (qreal energy, CellFunctionType type, Grid*& grid, int maxConnections = 0
         , int tokenAccessNumber = 0 , QVector3D relPos = QVector3D());
-    Cell* buildDecoratedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, Grid*& grid);
-    Cell* buildDecoratedCell (QDataStream& stream, Grid*& grid);
-    Cell* buildDecoratedCellWithRandomData (qreal energy, Grid*& grid);
+    Cell* buildFeaturedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, Grid*& grid);
+    Cell* buildFeaturedCell (QDataStream& stream, Grid*& grid);
+    Cell* buildFeaturedCellWithRandomData (qreal energy, Grid*& grid);
     CellTO buildCellTO (Cell* cell);
+
+    void changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid*& grid);
 };
 
 #endif // MODELFACTORYIMPL_H

@@ -3,7 +3,7 @@
 # -------------------------------------------------
 QT += opengl
 QT += testlib
-QMAKE_CXXFLAGS_RELEASE    = -O4 -march=native -ffast-math -funroll-loops -std=c++11
+QMAKE_CXXFLAGS_RELEASE    = -O4 -march=native -ffast-math -funroll-loops -std=c++11 -Wno-unused-variable -Wno-unused-parameter
 QMAKE_CXXFLAGS_DEBUG    = -std=c++11
 TARGET = alien
 TEMPLATE = app

@@ -3,10 +3,10 @@
 
 #include "cellfeature.h"
 
-class EnergyGuidance: public CellDecorator
+class EnergyGuidance: public CellFeature
 {
 public:
-    EnergyGuidance (Grid*& grid) : CellDecorator(grid) {}
+    EnergyGuidance (Grid*& grid) : CellFeature(grid) {}
 
     virtual ~EnergyGuidance () {}
 };

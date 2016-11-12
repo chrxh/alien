@@ -10,7 +10,7 @@ CellFunctionWeapon::CellFunctionWeapon (Grid*& grid)
 {
 }
 
-CellDecorator::ProcessingResult CellFunctionWeapon::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionWeapon::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     token->memory[static_cast<int>(WEAPON::OUT)] = static_cast<int>(WEAPON_OUT::NO_TARGET);
