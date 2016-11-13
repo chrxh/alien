@@ -291,7 +291,8 @@ void Simulator::serializeCell (QDataStream& stream, Cell* cell, quint64& cluster
     _grid->lockData();
 
     //serialize cell data
-    cell->serialize(stream);
+    ModelFacade *facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    facade->serializeFeaturedCell(cell, stream);
     stream << clusterId;
 
     //get ids

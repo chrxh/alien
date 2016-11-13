@@ -14,14 +14,15 @@ public:
     CellFunctionCommunicator (quint8* cellFunctionData, Grid*& grid);
     CellFunctionCommunicator (QDataStream& stream, Grid*& grid);
 
+    void serialize (QDataStream& stream) const;
+
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
-    void getInternalData (quint8* data);
+    void getInternalData (quint8* ptr) const;
 
     friend TestCellFunctionCommunicator;
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
-    void serializeImpl (QDataStream& stream) const;
 
 private:
     struct MessageData {

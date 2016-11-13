@@ -25,6 +25,9 @@ public:
     virtual CellTO buildCellTO (Cell* cell) = 0;
 
     virtual void changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid*& grid) = 0;
+
+    virtual void serializeFeaturedCell (Cell* cell, QDataStream& stream) = 0;
+
 };
 
 #endif // MODELFACADE_H
