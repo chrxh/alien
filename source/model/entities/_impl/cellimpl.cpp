@@ -34,8 +34,8 @@ CellImpl::CellImpl (qreal energy, Grid*& grid, int maxConnections, int tokenAcce
       resetConnections(maxConnections);
 }
 
-CellImpl::CellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells,
-                              Grid*& grid)
+CellImpl::CellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
+    , Grid*& grid)
     : Cell(grid),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE)

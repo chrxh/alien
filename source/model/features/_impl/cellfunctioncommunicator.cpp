@@ -106,7 +106,7 @@ QList< Cell* > CellFunctionCommunicator::findNearbyCommunicator(Cell* cell) cons
     Grid::CellSelectFunction cellSelectCommunicatorFunction =
         [](Cell* cell)
         {
-            CellFunction* cellFunction = CellFeature::findObject<CellFunction>(cell->getFeatures());
+            CellFunction* cellFunction = cell->getFeatures()->findObject<CellFunction>();
             return cellFunction && (cellFunction->getType() == CellFunctionType::COMMUNICATOR);
         };
     QVector3D cellPos = cell->calcPosition();
@@ -119,7 +119,7 @@ bool CellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const 
                                                                        Cell* senderPreviousCell,
                                                                        Cell* receiverCell) const
 {
-    CellFunctionCommunicator* communicator = CellFeature::findObject<CellFunctionCommunicator>(receiverCell->getFeatures());
+    CellFunctionCommunicator* communicator = receiverCell->getFeatures()->findObject<CellFunctionCommunicator>();
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
