@@ -2,9 +2,7 @@
 # Project created by QtCreator 2012-04-08T22:05:32
 # -------------------------------------------------
 QT += opengl
-QT += testlib
 QMAKE_CXXFLAGS_RELEASE    = -O4 -march=native -ffast-math -funroll-loops -std=c++11 -Wno-unused-variable -Wno-unused-parameter
-QMAKE_CXXFLAGS_DEBUG    = -std=c++11
 TARGET = alien
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -132,10 +130,7 @@ HEADERS += \
     model/features/energyguidance.h \
     model/features/cellfunctioncomputer.h \
     model/features/cellfunction.h \
-    model/features/_impl/cellfeaturefactoryimpl.h \
-    tests/testcellcluster.h \
-    tests/testtoken.h \
-    tests/testcellfunctioncommunicator.h
+    model/features/_impl/cellfeaturefactoryimpl.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
@@ -166,8 +161,10 @@ test {
     SOURCES -= main.cpp
 
     HEADERS += tests/testphysics.h \
-        tests/testsettings.h
-
+        tests/testsettings.h \
+        tests/testcellcluster.h \
+        tests/testtoken.h \
+        tests/testcellfunctioncommunicator.h
 
     SOURCES += tests/testsuite.cpp
 
