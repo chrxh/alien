@@ -30,19 +30,19 @@ protected:
 
 public:
     template< typename T >
-    static T* findObject (CellFeature* feature);
+    T* findObject ();
 };
 
 
 template< typename T >
-T* CellFeature::findObject (CellFeature* feature)
+T* CellFeature::findObject ()
 {
-    T* object = dynamic_cast< T* >(feature);
+    T* object = dynamic_cast< T* >(this);
     if( object )
         return object;
     else {
-        if( feature->_nextFeature )
-            return CellFeature::findObject<T>(feature->_nextFeature);
+        if( _nextFeature )
+            return _nextFeature->findObject<T>();
         else
             return 0;
     }
