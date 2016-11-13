@@ -322,18 +322,14 @@ Token* CellImpl::getToken (int i) const
     return _tokenStack[i];
 }
 
-void CellImpl::addToken (Token* token, bool activateNow, bool setAccessNumber)
+void CellImpl::addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_NUMBER update)
 {
-    if( setAccessNumber )
+    if( update == UPDATE_TOKEN_ACCESS_NUMBER::YES )
         token->setTokenAccessNumber(_tokenAccessNumber);
-    if( activateNow ) {
-        _tokenStack[_tokenStackPointer] = token;
-        ++_tokenStackPointer;
-    }
-    else {
-        _newTokenStack[_newTokenStackPointer] = token;
-        ++_newTokenStackPointer;
-    }
+    if( act == ACTIVATE_TOKEN::NOW )
+        _tokenStack[_tokenStackPointer++] = token;
+    else
+        _newTokenStack[_newTokenStackPointer++] = token;
 }
 
 void CellImpl::delAllTokens ()

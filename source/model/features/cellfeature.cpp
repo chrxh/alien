@@ -13,10 +13,10 @@ void CellFeature::registerNextFeature (CellFeature* nextFeature)
 
 CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Cell* previousCell)
 {
+    ProcessingResult resultFromThisFeature = processImpl(token, cell, previousCell);
     ProcessingResult resultFromNextFeature {false, 0 };
     if( _nextFeature)
         resultFromNextFeature = _nextFeature->process(token, cell, previousCell);
-    ProcessingResult resultFromThisFeature = processImpl(token, cell, previousCell);
     ProcessingResult mergedResult;
     mergedResult.decompose = resultFromThisFeature.decompose | resultFromNextFeature.decompose;
     if( resultFromThisFeature.newEnergyParticle )

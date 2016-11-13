@@ -42,7 +42,7 @@ public:
     void setTag (quint64 tag);
     int getNumToken (bool newTokenStackPointer = false) const;
     Token* getToken (int i) const;
-    void addToken (Token* token, bool activateNow = true, bool setAccessNumber = true);
+    void addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_NUMBER update);
     void delAllTokens ();
 
     void setCluster (CellCluster* cluster);
