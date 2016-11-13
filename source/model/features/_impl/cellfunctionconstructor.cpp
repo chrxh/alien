@@ -214,10 +214,6 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
             //round angle when restricted
             qreal discrErrorRotation = 0.0;
             if( performRotationOnly ) {
-//                angleConstrSite = convertDataToAngle(convertAngleToData(angleConstrSite));
-//                angleConstructor = convertDataToAngle(convertAngleToData(angleConstructor));
-//                discrErrorRotation = angleSum - angleConstrSite - angleConstructor;
-//                discrErrorRotation = discrErrorRotation -convertDataToAngle(convertAngleToData(discrErrorRotation));
                 angleConstrSite = angleConstrSite + discrErrorRotation/2.0;
                 angleConstructor = angleConstructor + discrErrorRotation/2.0;
             }
@@ -228,10 +224,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
             transformConstrSite.setToIdentity();
             transformConstrSite.translate(constructionCell->getRelPos());
             transformConstrSite.rotate(angleConstrSite, 0.0, 0.0, 1.0);
-//            if( performRotationOnly )
-                transformConstrSite.translate(-constructionCell->getRelPos());
-//            else
-//                transformConstrSite.translate(-cell->getRelPos());
+            transformConstrSite.translate(-constructionCell->getRelPos());
 
             QMatrix4x4 transformConstructor;
             transformConstructor.setToIdentity();
@@ -268,9 +261,6 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                         otherCell->setRelPos(relPosCells.first());
                         relPosCells.removeFirst();
                     }
-//                    transform = transform.inverted();
-//                    foreach( Cell* otherCell, constructionSite )
-//                        otherCell->setRelPos(transform.map(otherCell->getRelPos()));
                     cluster->drawCellsToMap();
                     return processingResult;
                 }
@@ -348,9 +338,6 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                         relPosCells.removeFirst();
                     }
                     cluster->drawCellsToMap();
-//                    transform = transform.inverted();
-//                    foreach( Cell* otherCell, constructionSite )
-//                        otherCell->setRelPos(transform.map(otherCell->getRelPos()));
 
                     //restore connection from construction site to "cell"
                     cell->newConnection(constructionCell);
