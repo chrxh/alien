@@ -37,68 +37,17 @@ Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, G
     return cell;
 }
 
-#include "model/features/_impl/cellfunctioncomputerimpl.h"
-
 Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
     , Grid*& grid)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-/*    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
+    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
     quint8 rawType;
     stream >> rawType;
     CellFunctionType type = static_cast<CellFunctionType>(rawType);
     decoratorFactory->addEnergyGuidance(cell, grid);
-    decoratorFactory->addCellFunction(cell, type, stream, grid);*/
-    //>>>>>>>>>>>> TODO: remove because this is temporary and only for converting
-    Cell *dummyCell = entityFactory->buildCell(100, grid);
-    QString name;
-    stream >> name;
-
-    CellFunctionType type;
-    if( name == "COMPUTER" )
-        type = CellFunctionType::COMPUTER;
-    if( name == "PROPULSION" )
-        type = CellFunctionType::PROPULSION;
-    if( name == "SCANNER" )
-        type = CellFunctionType::SCANNER;
-    if( name == "WEAPON" )
-        type = CellFunctionType::WEAPON;
-    if( name == "CONSTRUCTOR" )
-        type = CellFunctionType::CONSTRUCTOR;
-    if( name == "SENSOR" )
-        type = CellFunctionType::SENSOR;
-    if( name == "COMMUNICATOR" )
-        type = CellFunctionType::COMMUNICATOR;
-    decoratorFactory->addCellFunction(dummyCell, type, stream, grid);
-    decoratorFactory->addEnergyGuidance(dummyCell, grid);
-    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
-    cell->registerFeatures(dummyCell->getFeatures());
-    dummyCell->registerFeatures(0);
-    delete dummyCell;
-
-    QVector< quint8 > _memory(simulationParameters.CELL_MEMSIZE);
-    int memSize;
-    stream >> memSize;
-    quint8 data;
-    for(int i = 0; i < memSize; ++i ) {
-        if( i < simulationParameters.CELL_MEMSIZE ) {
-            stream >> data;
-            _memory[i] = data;
-        }
-        else {
-            stream >> data;
-        }
-    }
-    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
-        _memory[i] = 0;
-    if( cell->getFeatures() ) {
-        CellFunctionComputerImpl* com = cell->getFeatures()->findObject<CellFunctionComputerImpl>();
-        if( com )
-            com->getMemoryReference() = _memory;
-    }
-
-    //<<<<<<<<<<<<
+    decoratorFactory->addCellFunction(cell, type, stream, grid);
     return cell;
 }
 
