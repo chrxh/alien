@@ -19,6 +19,9 @@ public:
     CellTO buildCellTO (Cell* cell);
 
     void changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid*& grid);
+
+    void serializeFeaturedCell (Cell* cell, QDataStream& stream);
+
 };
 
 #endif // MODELFACTORYIMPL_H

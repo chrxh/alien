@@ -45,7 +45,7 @@ CellFeature::ProcessingResult CellFunctionCommunicator::processImpl (Token* toke
     return processingResult;
 }
 
-void CellFunctionCommunicator::serializeImpl (QDataStream& stream) const
+void CellFunctionCommunicator::serialize (QDataStream& stream) const
 {
     stream << _newMessageReceived
            << _receivedMessage.channel
@@ -55,7 +55,7 @@ void CellFunctionCommunicator::serializeImpl (QDataStream& stream) const
 }
 
 
-void CellFunctionCommunicator::getInternalData (quint8* data)
+void CellFunctionCommunicator::getInternalData (quint8* data) const
 {
     data[0] = static_cast<quint8>(_newMessageReceived);
     data[1] = _receivedMessage.channel;

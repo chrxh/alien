@@ -14,16 +14,16 @@ public:
     CellFunctionComputerImpl (quint8* cellFunctionData, Grid*& grid);
     CellFunctionComputerImpl (QDataStream& stream, Grid*& grid);
 
-    CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
-    void getInternalData (quint8* data);
+    void getInternalData (quint8* data) const;
 
     QString decompileInstructionCode () const;
     CompilationState injectAndCompileInstructionCode (QString code);
     QVector< quint8 >& getMemoryReference ();
 
+    void serialize (QDataStream& stream) const;
+
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
-    void serializeImpl (QDataStream& stream) const;
 
 private:
 

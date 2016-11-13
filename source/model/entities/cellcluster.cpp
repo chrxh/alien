@@ -1032,8 +1032,9 @@ void CellCluster::serialize (QDataStream& stream)
 {
     stream << _angle << _pos << _angularVel << _vel;
     stream << _cells.size();
+    ModelFacade *facade = ServiceLocator::getInstance().getService<ModelFacade>();
     foreach( Cell* cell, _cells ) {
-        cell->serialize(stream);
+        facade->serializeFeaturedCell(cell, stream);
     }
     stream << _id;
     stream << _color;

@@ -26,10 +26,3 @@ CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Ce
     return mergedResult;
 }
 
-void CellFeature::serialize (QDataStream& stream) const
-{
-    serializeImpl(stream);
-    if( _nextFeature)
-        _nextFeature->serialize(stream);
-}
-
