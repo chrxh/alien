@@ -43,7 +43,29 @@ Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QL
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
     Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
-    CellFunctionType type = CellFunction::getType(stream);
+/*    quint8 rawType;
+    stream >> rawType;
+    CellFunctionType type = static_cast<CellFunctionType>(rawType);*/
+    //>>>>>>>>>>>> TODO: remove because this is temporary and only for converting
+    QString name;
+    stream >> name;
+    CellFunctionType type;
+
+    if( name == "COMPUTER" )
+        type = CellFunctionType::COMPUTER;
+    if( name == "PROPULSION" )
+        type = CellFunctionType::PROPULSION;
+    if( name == "SCANNER" )
+        type = CellFunctionType::SCANNER;
+    if( name == "WEAPON" )
+        type = CellFunctionType::WEAPON;
+    if( name == "CONSTRUCTOR" )
+        type = CellFunctionType::CONSTRUCTOR;
+    if( name == "SENSOR" )
+        type = CellFunctionType::SENSOR;
+    if( name == "COMMUNICATOR" )
+        type = CellFunctionType::COMMUNICATOR;
+    //<<<<<<<<<<<<
     decoratorFactory->addCellFunction(cell, type, stream, grid);
     decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
@@ -114,5 +136,17 @@ void ModelFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, G
     decoratorFactory->addCellFunction(cell, type, grid);
     decoratorFactory->addEnergyGuidance(cell, grid);
 }
+
+void ModelFacadeImpl::serializeFeaturedCell (Cell* cell, QDataStream& stream)
+{
+    cell->serialize(stream);
+    CellFeature* features = cell->getFeatures();
+    CellFunction* cellFunction = CellFeature::findObject<CellFunction>(features);
+    if( cellFunction ) {
+        stream << static_cast<quint8>(cellFunction->getType());
+    }
+    cellFunction->serialize(stream);
+}
+
 
 ModelFacadeImpl modelFacadeImpl;

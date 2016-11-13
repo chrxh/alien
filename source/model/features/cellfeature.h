@@ -1,5 +1,5 @@
-#ifndef CELLDECORATOR_H
-#define CELLDECORATOR_H
+#ifndef CELLFEATURE_H
+#define CELLFEATURE_H
 
 #include <QDataStream>
 
@@ -20,11 +20,10 @@ public:
         EnergyParticle* newEnergyParticle;
     };
     virtual ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
-    virtual void serialize (QDataStream& stream) const;
+    virtual void serialize (QDataStream& stream) const {}
 
 protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;
-    virtual void serializeImpl (QDataStream& stream) const {}
 
     Grid* _grid;
     CellFeature* _nextFeature;
@@ -49,4 +48,4 @@ T* CellFeature::findObject (CellFeature* feature)
     }
 }
 
-#endif // CELLDECORATOR_H
+#endif // CELLFEATURE_H

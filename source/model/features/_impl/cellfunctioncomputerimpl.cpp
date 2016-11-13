@@ -537,7 +537,7 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
     return processingResult;
 }
 
-void CellFunctionComputerImpl::serializeImpl (QDataStream& stream) const
+void CellFunctionComputerImpl::serialize (QDataStream& stream) const
 {
     stream << simulationParameters.CELL_MEMSIZE;
     for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
@@ -545,7 +545,7 @@ void CellFunctionComputerImpl::serializeImpl (QDataStream& stream) const
     stream << _code << _numInstr;
 }
 
-void CellFunctionComputerImpl::getInternalData (quint8* data)
+void CellFunctionComputerImpl::getInternalData (quint8* data) const
 {
     data[0] = _numInstr;
     for( int i = 0; i < 3*_numInstr; ++i ) {

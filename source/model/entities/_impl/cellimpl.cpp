@@ -449,9 +449,6 @@ void CellImpl::serialize (QDataStream& stream) const
 
     //remaining data
     stream << _tokenAccessNumber << _blockToken << _vel << _color;
-
-    if( _features )
-        _features->serialize(stream);
 }
 
 QVector3D CellImpl::getVel () const
