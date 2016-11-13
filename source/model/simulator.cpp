@@ -649,7 +649,7 @@ void Simulator::updateCell (QList< Cell* > cells, QList< CellTO > newCellsData, 
 //            cell->setCellFunction(CellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 
             //update cell computer
-            CellFunctionComputer* computer = CellFeature::findObject<CellFunctionComputer>(cell->getFeatures());
+            CellFunctionComputer* computer = cell->getFeatures()->findObject<CellFunctionComputer>();
             if( computer ) {
                 for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i ) {
                     computer->getMemoryReference()[i] = newCellData.computerMemory[i];

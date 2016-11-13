@@ -149,7 +149,7 @@ CellFeature::ProcessingResult CellFunctionScanner::processImpl (Token* token, Ce
     token->memory[static_cast<int>(SCANNER::OUT_ENERGY)] = e;
     token->memory[static_cast<int>(SCANNER::OUT_CELL_MAX_CONNECTIONS)] = scanCell->getMaxConnections();
     token->memory[static_cast<int>(SCANNER::OUT_CELL_BRANCH_NO)] = scanCell->getTokenAccessNumber();
-    CellFunction* scanCellFunction = CellFeature::findObject<CellFunction>(scanCell->getFeatures());
+    CellFunction* scanCellFunction = scanCell->getFeatures()->findObject<CellFunction>();
     token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION)] = static_cast<quint8>(scanCellFunction->getType());
     scanCellFunction->getInternalData(&token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA)]);
 

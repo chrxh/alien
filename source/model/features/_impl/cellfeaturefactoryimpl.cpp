@@ -21,8 +21,9 @@ namespace {
     void registerNewFeature (Cell* cell, CellFeature* newFeature)
     {
         CellFeature* features = cell->getFeatures();
-        if( features )
+        if( features ) {
             features->registerNextFeature(newFeature);
+        }
         else
             cell->registerFeatures(newFeature);
     }

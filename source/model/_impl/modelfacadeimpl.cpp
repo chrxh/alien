@@ -37,20 +37,25 @@ Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, G
     return cell;
 }
 
+#include "model/features/_impl/cellfunctioncomputerimpl.h"
+
 Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
     , Grid*& grid)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
-/*    quint8 rawType;
+/*    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
+    quint8 rawType;
     stream >> rawType;
-    CellFunctionType type = static_cast<CellFunctionType>(rawType);*/
+    CellFunctionType type = static_cast<CellFunctionType>(rawType);
+    decoratorFactory->addEnergyGuidance(cell, grid);
+    decoratorFactory->addCellFunction(cell, type, stream, grid);*/
     //>>>>>>>>>>>> TODO: remove because this is temporary and only for converting
+    Cell *dummyCell = entityFactory->buildCell(100, grid);
     QString name;
     stream >> name;
-    CellFunctionType type;
 
+    CellFunctionType type;
     if( name == "COMPUTER" )
         type = CellFunctionType::COMPUTER;
     if( name == "PROPULSION" )
@@ -65,9 +70,35 @@ Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QL
         type = CellFunctionType::SENSOR;
     if( name == "COMMUNICATOR" )
         type = CellFunctionType::COMMUNICATOR;
+    decoratorFactory->addCellFunction(dummyCell, type, stream, grid);
+    decoratorFactory->addEnergyGuidance(dummyCell, grid);
+    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
+    cell->registerFeatures(dummyCell->getFeatures());
+    dummyCell->registerFeatures(0);
+    delete dummyCell;
+
+    QVector< quint8 > _memory(simulationParameters.CELL_MEMSIZE);
+    int memSize;
+    stream >> memSize;
+    quint8 data;
+    for(int i = 0; i < memSize; ++i ) {
+        if( i < simulationParameters.CELL_MEMSIZE ) {
+            stream >> data;
+            _memory[i] = data;
+        }
+        else {
+            stream >> data;
+        }
+    }
+    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
+        _memory[i] = 0;
+    if( cell->getFeatures() ) {
+        CellFunctionComputerImpl* com = cell->getFeatures()->findObject<CellFunctionComputerImpl>();
+        if( com )
+            com->getMemoryReference() = _memory;
+    }
+
     //<<<<<<<<<<<<
-    decoratorFactory->addCellFunction(cell, type, stream, grid);
-    decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
 }
 
@@ -105,11 +136,11 @@ CellTO ModelFacadeImpl::buildCellTO (Cell* cell)
     to.cellMaxCon = cell->getMaxConnections();
     to.cellAllowToken = !cell->isTokenBlocked();
     to.cellTokenAccessNum = cell->getTokenAccessNumber();
-    CellFunction* cellFunction = CellFeature::findObject<CellFunction>(cell->getFeatures());
+    CellFunction* cellFunction = cell->getFeatures()->findObject<CellFunction>();
     to.cellFunctionType = cellFunction->getType();
 
     //copy computer data
-    CellFunctionComputer* computer = CellFeature::findObject<CellFunctionComputer>(cellFunction);
+    CellFunctionComputer* computer = cellFunction->findObject<CellFunctionComputer>();
     if( computer ) {
         QVector< quint8 > d = computer->getMemoryReference();
         for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i)
@@ -141,7 +172,7 @@ void ModelFacadeImpl::serializeFeaturedCell (Cell* cell, QDataStream& stream)
 {
     cell->serialize(stream);
     CellFeature* features = cell->getFeatures();
-    CellFunction* cellFunction = CellFeature::findObject<CellFunction>(features);
+    CellFunction* cellFunction = features->findObject<CellFunction>();
     if( cellFunction ) {
         stream << static_cast<quint8>(cellFunction->getType());
     }
