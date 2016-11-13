@@ -13,7 +13,8 @@
 #include <QList>
 #include <QtAlgorithms>
 
-
+using ACTIVATE_TOKEN = Cell::ACTIVATE_TOKEN;
+using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UPDATE_TOKEN_ACCESS_NUMBER;
 
 CellFunctionConstructor::CellFunctionConstructor (Grid*& grid)
     : CellFunction(grid)
@@ -464,7 +465,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
                     if( newCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) {
-                        newCell->addToken(new Token(simulationParameters.NEW_TOKEN_ENERGY), false);
+                        newCell->addToken(new Token(simulationParameters.NEW_TOKEN_ENERGY), ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                         token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
                     }
                 }
@@ -472,7 +473,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                     if( newCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) {
                         Token* dup = token->duplicate();
                         dup->energy = simulationParameters.NEW_TOKEN_ENERGY;
-                        newCell->addToken(dup, false);
+                        newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                         token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
                     }
                 }
@@ -629,13 +630,13 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                 //create new token if desired
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
-                    newCell->addToken(new Token(simulationParameters.NEW_TOKEN_ENERGY), false);
+                    newCell->addToken(new Token(simulationParameters.NEW_TOKEN_ENERGY), ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                     token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
                 }
                 if( opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN) ) {
                     Token* dup = token->duplicate();
                     dup->energy = simulationParameters.NEW_TOKEN_ENERGY;
-                    newCell->addToken(dup, false);
+                    newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                     token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
                 }
 

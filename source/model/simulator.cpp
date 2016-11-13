@@ -667,7 +667,7 @@ void Simulator::updateCell (QList< Cell* > cells, QList< CellTO > newCellsData, 
             cell->delAllTokens();
             int numToken = newCellData.tokenEnergies.size();
             for( int i = 0; i < numToken; ++i )
-                cell->addToken(new Token(newCellData.tokenEnergies[i], newCellData.tokenData[i]), true, false);
+                cell->addToken(new Token(newCellData.tokenEnergies[i], newCellData.tokenData[i]), Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::NO);
 
             //searching for nearby clusters
             QVector3D pos = cell->calcPosition();

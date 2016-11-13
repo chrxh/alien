@@ -487,7 +487,7 @@ void CellCluster::movementProcessingStep3 ()
                         //create token?
                         if( (cell->getNumToken() < simulationParameters.CELL_TOKENSTACKSIZE) && (eDiff > simulationParameters.MIN_TOKEN_ENERGY) ) {
                             Token* token = new Token(eDiff, true);
-                            cell->addToken(token, true);
+                            cell->addToken(token, Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
                         }
                         //if not add to internal cell energy
                         else
@@ -513,9 +513,11 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
     Cell* spreadTokenCells[simulationParameters.MAX_CELL_CONNECTIONS];
 
     //placing new tokens
-    foreach( Cell* cell, _cells) {
-        Token* token = cell->takeTokenFromStack();
-        if( token ) {
+    foreach(Cell* cell, _cells) {
+        while(true) {
+            Token* token = cell->takeTokenFromStack();
+            if( !token )
+                break;
             int tokenAccessNumber = token->getTokenAccessNumber();
 
             //determine number of places for tokens
@@ -536,7 +538,6 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
 
             //free places for tokens available
             else {
-                //-----------
                 //not enough cell energy available?
                 if( //(cell->_energy < ((qreal)numPlaces-1.0)*token->energy) ||
                     token->energy < simulationParameters.MIN_TOKEN_ENERGY) {
@@ -548,11 +549,8 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
                     qreal tokenEnergy = token->energy;
                     qreal availableTokenEnergy = tokenEnergy / numPlaces;
 
-//                    cell->_energy -= ((qreal)numPlaces-1.0)*token->energy;
-
                     //spread token to free places on adjacent cells and duplicate token if necessary
                     int spreadTokenCounter = 0;
-//                    token->energy = tokenEnergy;
                     for(int j = 0; j < cell->getNumConnections(); ++j) {
                         Cell* otherCell = cell->getConnection(j);
                         if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
@@ -560,12 +558,12 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
                             if( spreadTokenCounter > 0 ) {
                                 spreadTokenCells[spreadTokenCounter] = otherCell;
                                 spreadToken[spreadTokenCounter] = token->duplicate();
-                                otherCell->addToken(spreadToken[spreadTokenCounter], false, true);
+                                otherCell->addToken(spreadToken[spreadTokenCounter], Cell::ACTIVATE_TOKEN::LATER, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
                             }
                             if( spreadTokenCounter == 0 ) {
                                 spreadTokenCells[0] = otherCell;
                                 spreadToken[0] = token;
-                                otherCell->addToken(token, false, true);
+                                otherCell->addToken(token, Cell::ACTIVATE_TOKEN::LATER, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
                             }
                             if( numPlaces > 1 ) {
                                 spreadToken[spreadTokenCounter]->energy = availableTokenEnergy;
@@ -573,7 +571,7 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
                                 //transfer remaining energy from cell to token if possible
                                 if( otherCell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+tokenEnergy-availableTokenEnergy) ) {
                                     spreadToken[spreadTokenCounter]->energy = tokenEnergy;
-                                    otherCell->setEnergy(otherCell->getEnergy() - tokenEnergy-availableTokenEnergy);
+                                    otherCell->setEnergy(otherCell->getEnergy() - (tokenEnergy-availableTokenEnergy));
                                 }
                                 else if( otherCell->getEnergy() > simulationParameters.CRIT_CELL_TRANSFORM_ENERGY ) {
                                     spreadToken[spreadTokenCounter]->energy += otherCell->getEnergy() - simulationParameters.CRIT_CELL_TRANSFORM_ENERGY;
@@ -589,17 +587,12 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
                     for( int i = 0; i < spreadTokenCounter; ++i ) {
 
                         //execute cell function
-                        spreadToken[i]->setTokenAccessNumber(spreadTokenCells[i]->getTokenAccessNumber());
                         CellFeature::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
                         if( processingResult.decompose )
                             decompose = true;
                         if( processingResult.newEnergyParticle )
                             energyParticles << processingResult.newEnergyParticle;
 
-                        //average internal energies
-/*                        qreal av((cell->_energy + spreadTokenCells[i]->_energy)/2.0);
-                        cell->_energy = av;
-                        spreadTokenCells[i]->_energy = av;*/
                     }
 
                     //average internal energies
