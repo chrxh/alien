@@ -1112,7 +1112,6 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
     setAngle(angle);
     int numCells(0);
     stream >> numCells;
-    qDebug() << "cellcluster";
     ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
     for(int i = 0; i < numCells; ++i ) {
         Cell* cell = facade->buildFeaturedCell(stream, connectingCells, _grid);
@@ -1126,7 +1125,6 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
         oldIdCellMap[cell->getId()] = cell;
         cell->setId(newId);
     }
-    qDebug() << "cellcluster2";
     quint64 oldClusterId(0);
     stream >> oldClusterId;
     stream >> _color;

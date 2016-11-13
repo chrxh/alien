@@ -30,8 +30,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, Gr
 CellFunctionComputerImpl::CellFunctionComputerImpl (QDataStream& stream, Grid*& grid)
     : CellFunctionComputer(grid), _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
-    //TODO: hinzufügen
-/*    //load cell memory
+    //load cell memory
     int memSize;
     stream >> memSize;
     quint8 data;
@@ -46,7 +45,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (QDataStream& stream, Grid*& 
     }
     for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
         _memory[i] = 0;
-*/
+
     //load remaining attributes
     stream >> _code >> _numInstr;
 
