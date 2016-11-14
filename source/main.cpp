@@ -1,7 +1,7 @@
 #include <QApplication>
 
 #include "gui/mainwindow.h"
-#include "model/simulator.h"
+#include "model/simulationcontroller.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
 #include "model/entities/cellto.h"
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     //init main objects
     QApplication a(argc, argv);
-    Simulator simulator(400, 200);
+    SimulationController simulator(400, 200, SimulationController::Threading::MULTI);
     MainWindow w(&simulator);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 

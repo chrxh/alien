@@ -1,4 +1,4 @@
-#include "simulationthread.h"
+#include "simulationunit.h"
 
 #include "entities/cell.h"
 #include "entities/cellcluster.h"
@@ -9,35 +9,32 @@
 
 #include "global/global.h"
 
-#include<QThread>
-
-
-Thread::Thread (QObject* parent)
-    : QThread(parent), _grid(0)
+SimulationUnit::SimulationUnit (QObject* parent)
+    : QObject(parent), _grid(0)
 {
 
 }
 
-Thread::~Thread ()
+SimulationUnit::~SimulationUnit ()
 {
 }
 
-void Thread::init (Grid* grid)
+void SimulationUnit::init (Grid* grid)
 {
     _grid = grid;
 }
 
-QList< CellCluster* >& Thread::getClusters ()
+QList< CellCluster* >& SimulationUnit::getClusters ()
 {
     return _grid->getClusters();
 }
 
-QList< EnergyParticle* >& Thread::getEnergyParticles ()
+QList< EnergyParticle* >& SimulationUnit::getEnergyParticles ()
 {
     return _grid->getEnergyParticles();
 }
 
-qreal Thread::calcTransEnergy ()
+qreal SimulationUnit::calcTransEnergy ()
 {
     qreal transEnergy(0.0);
     foreach( CellCluster* cluster, _grid->getClusters() ) {
@@ -50,7 +47,7 @@ qreal Thread::calcTransEnergy ()
     return transEnergy;
 }
 
-qreal Thread::calcRotEnergy ()
+qreal SimulationUnit::calcRotEnergy ()
 {
     qreal rotEnergy(0.0);
     foreach( CellCluster* cluster, _grid->getClusters() ) {
@@ -63,7 +60,7 @@ qreal Thread::calcRotEnergy ()
     return rotEnergy;
 }
 
-qreal Thread::calcInternalEnergy ()
+qreal SimulationUnit::calcInternalEnergy ()
 {
     qreal internalEnergy(0.0);
     foreach( CellCluster* cluster, _grid->getClusters() ) {
@@ -79,13 +76,13 @@ qreal Thread::calcInternalEnergy ()
     return internalEnergy;
 }
 
-void Thread::setRandomSeed (uint seed)
+void SimulationUnit::setRandomSeed (uint seed)
 {
     qsrand(seed);
     qrand();
 }
 
-void Thread::calcNextTimestep ()
+void SimulationUnit::calcNextTimestep ()
 {
     _grid->lockData();
 
@@ -187,7 +184,7 @@ void Thread::calcNextTimestep ()
     emit nextTimestepCalculated();
 }
 
-void Thread::debugCluster (CellCluster* c, int s)
+void SimulationUnit::debugCluster (CellCluster* c, int s)
 {
     /*foreach(Cell* cell, c->getCells()) {
         for(int i = 0; i < cell->getNumConnections(); ++i) {

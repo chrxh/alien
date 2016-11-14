@@ -7,7 +7,7 @@
 
 class Cell;
 class EnergyParticle;
-class Simulator;
+class SimulationController;
 class MicroEditor;
 class UniversePixelScene;
 class UniverseShapeScene;
@@ -24,7 +24,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    MainWindow (Simulator* simulator, QWidget *parent = 0);
+    MainWindow (SimulationController* simulator, QWidget *parent = 0);
     ~MainWindow ();
 
 private slots:
@@ -96,7 +96,7 @@ private:
 
     void changeEvent(QEvent *e);
 
-    Simulator* _simulator;
+    SimulationController* _simulator;
     MicroEditor* _microEditor;
 
     QTimer* _timer;

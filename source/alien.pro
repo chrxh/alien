@@ -50,8 +50,6 @@ SOURCES += main.cpp \
     model/entities/grid.cpp \
     model/entities/cellto.cpp \
     model/entities/_impl/cellimpl.cpp \
-    model/simulator.cpp \
-    model/simulationthread.cpp \
     model/features/cellfeature.cpp \
     model/features/cellfunction.cpp \
     model/features/_impl/cellfeaturefactoryimpl.cpp \
@@ -63,7 +61,9 @@ SOURCES += main.cpp \
     model/features/_impl/cellfunctionscanner.cpp \
     model/features/_impl/cellfunctionpropulsion.cpp \
     model/features/_impl/cellfunctionconstructor.cpp \
-    model/entities/energyparticle.cpp
+    model/entities/energyparticle.cpp \
+    model/simulationunit.cpp \
+    model/simulationcontroller.cpp
 HEADERS += \
     model/physics/physics.h \
     global/global.h \
@@ -115,8 +115,6 @@ HEADERS += \
     model/entities/energyparticle.h \
     model/entities/cellcluster.h \
     model/entities/_impl/cellimpl.h \
-    model/simulator.h \
-    model/simulationthread.h \
     model/features/_impl/cellfunctionweapon.h \
     model/features/_impl/energyguidanceimpl.h \
     model/features/_impl/cellfunctionsensor.h \
@@ -130,7 +128,10 @@ HEADERS += \
     model/features/energyguidance.h \
     model/features/cellfunctioncomputer.h \
     model/features/cellfunction.h \
-    model/features/_impl/cellfeaturefactoryimpl.h
+    model/features/_impl/cellfeaturefactoryimpl.h \
+    tests/integrationtestsimulation.h \
+    model/simulationunit.h \
+    model/simulationcontroller.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
@@ -156,7 +157,7 @@ OTHER_FILES +=
 test {
     message(Tests build)
     QT += testlib
-    TARGET = UnitTests
+    TARGET = Tests
 
     SOURCES -= main.cpp
 
