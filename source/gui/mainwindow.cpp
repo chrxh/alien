@@ -17,7 +17,7 @@
 #include "global/global.h"
 #include "model/simulationsettings.h"
 #include "model/metadatamanager.h"
-#include "model/simulator.h"
+#include "model/simulationcontroller.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 
@@ -30,7 +30,7 @@
 #include <QMessageBox>
 #include <QFont>
 
-MainWindow::MainWindow(Simulator* simulator, QWidget *parent) :
+MainWindow::MainWindow(SimulationController* simulator, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _simulator(simulator),
