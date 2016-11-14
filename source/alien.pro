@@ -129,7 +129,6 @@ HEADERS += \
     model/features/cellfunctioncomputer.h \
     model/features/cellfunction.h \
     model/features/_impl/cellfeaturefactoryimpl.h \
-    tests/integrationtestsimulation.h \
     model/simulationunit.h \
     model/simulationcontroller.h
 FORMS += gui/monitoring/simulationmonitor.ui \
@@ -165,6 +164,7 @@ test {
         tests/testsettings.h \
         tests/testcellcluster.h \
         tests/testtoken.h \
+        tests/integrationtestsimulation.h \
         tests/testcellfunctioncommunicator.h
 
     SOURCES += tests/testsuite.cpp
