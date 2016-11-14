@@ -1,25 +1,28 @@
-#ifndef SIMULATOR_H
-#define SIMULATOR_H
+#ifndef SIMULATIONCONTROLLER_H
+#define SIMULATIONCONTROLLER_H
 
 #include "entities/cellto.h"
 
 #include <QObject>
 #include <QVector3D>
+#include <QThread>
 
 class QTimer;
 class Cell;
 class CellCluster;
 class EnergyParticle;
 class Grid;
-class Thread;
-class Visualizer;
+class SimulationUnit;
 
-class Simulator  : public QObject
+class SimulationController  : public QObject
 {
     Q_OBJECT
 public:
-    Simulator (int sizeX, int sizeY, QObject* parent = 0);
-    ~Simulator ();
+    enum class Threading {
+        SINGLE, MULTI
+    };
+    SimulationController (int sizeX, int sizeY, Threading threading, QObject* parent = 0);
+    ~SimulationController ();
 
     QMap< QString, qreal > getMonitorData ();
 
@@ -105,7 +108,8 @@ protected:
     int _newCellTokenAccessNumber;
 
     Grid* _grid;
-    Thread* _thread;
+    SimulationUnit* _unit;
+    QThread _thrd;
 };
 
-#endif // SIMULATOR_H
+#endif // SIMULATIONCONTROLLER_H

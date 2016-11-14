@@ -1,17 +1,17 @@
-#ifndef THREAD_H
-#define THREAD_H
+#ifndef SIMULATIONUNIT_H
+#define SIMULATIONUNIT_H
 
-#include <QThread>
+#include <QObject>
 
 class CellCluster;
 class EnergyParticle;
 class Grid;
-class Thread : public QThread
+class SimulationUnit : public QObject
 {
     Q_OBJECT
 public:
-    Thread (QObject* parent = 0);
-    ~Thread ();
+    SimulationUnit (QObject* parent = 0);
+    ~SimulationUnit ();
 
     void init (Grid* grid);
     QList< CellCluster* >& getClusters ();
@@ -36,4 +36,4 @@ protected:
     int _time;
 };
 
-#endif // THREAD_H
+#endif // SIMULATIONUNIT_H
