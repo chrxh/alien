@@ -84,6 +84,7 @@ void SimulationUnit::setRandomSeed (uint seed)
 
 void SimulationUnit::calcNextTimestep ()
 {
+
     _grid->lockData();
 
     //cell movement: step 1

@@ -109,7 +109,7 @@ protected:
 
     Grid* _grid;
     SimulationUnit* _unit;
-    QThread _thrd;
+    QThread _thread;
 };
 
 #endif // SIMULATIONCONTROLLER_H
