@@ -1,7 +1,7 @@
 #ifndef SIMULATIONUNIT_H
 #define SIMULATIONUNIT_H
 
-#include <QObject>
+#include <QThread>
 
 class CellCluster;
 class EnergyParticle;
