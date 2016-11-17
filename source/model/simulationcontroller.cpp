@@ -21,8 +21,7 @@ SimulationController::SimulationController(int sizeX, int sizeY, Threading threa
     _forceFpsTimer = new QTimer(this);
     _grid = new Grid(this);
     _unit = new SimulationUnit();
-    _grid->init(sizeX, sizeY);
-    _unit->init(_grid);
+    connect(&_thread, &QThread::finished, _unit, &QObject::deleteLater);
 
     connect(_forceFpsTimer, SIGNAL(timeout()), this, SLOT(forceFpsTimerSlot()));
     connect(this, SIGNAL(setRandomSeed(uint)), _unit, SLOT(setRandomSeed(uint)));
@@ -31,9 +30,16 @@ SimulationController::SimulationController(int sizeX, int sizeY, Threading threa
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()));
         connect(_unit, SIGNAL(nextTimestepCalculated()), this, SLOT(nextTimestepCalculated()));
 
+        _grid->init(sizeX, sizeY);
+        _unit->init(_grid);
+
         //start thread
-        _unit->moveToThread(&_thrd);
-        _thrd.start();
+        _unit->moveToThread(&_thread);
+        _thread.start();
+
+        //start thread
+//        _unit->start();
+//        _unit->moveToThread(_unit);
     }
     if( threading == Threading::SINGLE ) {
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()), Qt::DirectConnection);
@@ -44,11 +50,12 @@ SimulationController::SimulationController(int sizeX, int sizeY, Threading threa
 
 SimulationController::~SimulationController ()
 {
-    _thrd.quit();
-    if( !_thrd.wait(2000) ) {
-        _thrd.terminate();
-        _thrd.wait();
+    _thread.quit();
+    if( !_thread.wait(2000) ) {
+        _thread.terminate();
+        _thread.wait();
     }
+//    delete _unit;
 }
 
 QMap< QString, qreal > SimulationController::getMonitorData ()
