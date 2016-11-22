@@ -15,6 +15,8 @@ public:
     Cell (Grid*& grid) : _grid(grid) {}
     virtual ~Cell() {}
 
+    virtual bool compareEqual (Cell* otherCell) const = 0;
+
     virtual void registerFeatures (CellFeature* features) = 0;
     virtual CellFeature* getFeatures () const = 0;
     virtual void removeFeatures () = 0;

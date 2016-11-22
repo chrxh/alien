@@ -8,7 +8,7 @@ void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D
                          /*QVector3D posA, QVector3D posB, QVector3D posP, */qreal angularVelA1,
                          qreal angularVelB1, QVector3D n, qreal angularMassA, qreal angularMassB,
                          qreal massA, qreal massB,
-                         QVector3D& vA2, QVector3D& vB2, qreal& angularVelA2, qreal& angularVelB2)
+                         QVector3D& vA2, QVector3D& vB2, qreal& angularVelA2, qreal& angularVelB2, int temp)
 {
     angularVelA1 *= degToRad;
     angularVelB1 *= degToRad;
@@ -57,10 +57,33 @@ void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D
             angularVelA2 = angularVelA1;
             vB2 = vB1 - j/massB*n;
             angularVelB2 = angularVelB1;
+/*            if (temp == 20308) {     //TEMP
+                qDebug() << QString("collision: vB1: ") + QString::number(vB1.x(),'g', 20)+ QString(", ") + QString::number(vB1.y(),'g', 20);
+                qDebug() << QString("collision: j/massB*n ") + QString::number((j/massB*n).x(),'g', 20) + QString(", ") + QString::number((j/massB*n).y(),'g', 20);
+                qDebug() << QString("collision: vB2: ") + QString::number(vB2.x(),'g', 20)+ QString(", ") + QString::number(vB2.y(),'g', 20);
+            }*/
         }
     }
     angularVelA2 *= radToDeg;
     angularVelB2 *= radToDeg;
+
+/*    if (temp == 20308) {    //TEMP
+        qDebug() << QString("collision: vA1: ") + QString::number(vA1.x(),'g', 20)+ QString(", ") + QString::number(vA1.y(),'g', 20);
+        qDebug() << QString("collision: vB1: ") + QString::number(vB1.x(),'g', 20)+ QString(", ") + QString::number(vB1.y(),'g', 20);
+        qDebug() << QString("collision: rAPp: ") + QString::number(rAPp.x(),'g', 20)+ QString(", ") + QString::number(rAPp.y(),'g', 20);
+        qDebug() << QString("collision: rBPp: ") + QString::number(rBPp.x(),'g', 20)+ QString(", ") + QString::number(rBPp.y(),'g', 20);
+        qDebug() << QString("collision: angularVelA1: ") + QString::number(angularVelA1,'g', 20);
+        qDebug() << QString("collision: angularVelB1: ") + QString::number(angularVelB1,'g', 20);
+        qDebug() << QString("collision: n: ") + QString::number(n.x(),'g', 20)+ QString(", ") + QString::number(n.y(),'g', 20);
+        qDebug() << QString("collision: massA: ") + QString::number(massA,'g', 20);
+        qDebug() << QString("collision: massB: ") + QString::number(massB,'g', 20);
+        qDebug() << QString("collision: angularMassA: ") + QString::number(angularMassA,'g', 20);
+        qDebug() << QString("collision: angularMassB: ") + QString::number(angularMassB,'g', 20);
+        qDebug() << QString("collision: vA2: ") + QString::number(vA2.x(),'g', 20)+ QString(", ") + QString::number(vA2.y(),'g', 20);
+        qDebug() << QString("collision: vB2: ") + QString::number(vB2.x(),'g', 20)+ QString(", ") + QString::number(vB2.y(),'g', 20);
+        qDebug() << QString("collision: angularVelA2: ") + QString::number(angularVelA2,'g', 20);
+        qDebug() << QString("collision: angularVelB2: ") + QString::number(angularVelB2,'g', 20);
+    }*/
 }
 
 void Physics::fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp,

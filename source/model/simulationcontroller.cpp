@@ -14,38 +14,42 @@
 
 #include <QTimer>
 #include <QtCore/qmath.h>
+#include <QVector2D>
+#include <set>
 
-SimulationController::SimulationController(int sizeX, int sizeY, Threading threading, QObject* parent)
-    : QObject(parent), _run(false), _fps(0), _calculating(false), _frame(0), _newCellTokenAccessNumber(0)
+SimulationController::SimulationController(Threading threading, QObject* parent)
+    : QObject(parent)
 {
     _forceFpsTimer = new QTimer(this);
     _grid = new Grid(this);
     _unit = new SimulationUnit();
-    connect(&_thread, &QThread::finished, _unit, &QObject::deleteLater);
+    _unit->init(_grid);
 
+    connect(&_thread, &QThread::finished, _unit, &QObject::deleteLater);
     connect(_forceFpsTimer, SIGNAL(timeout()), this, SLOT(forceFpsTimerSlot()));
     connect(this, SIGNAL(setRandomSeed(uint)), _unit, SLOT(setRandomSeed(uint)));
 
-    if( threading == Threading::MULTI ) {
+    if( threading == Threading::EXTRA_THREAD ) {
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()));
         connect(_unit, SIGNAL(nextTimestepCalculated()), this, SLOT(nextTimestepCalculated()));
-
-        _grid->init(sizeX, sizeY);
-        _unit->init(_grid);
 
         //start thread
         _unit->moveToThread(&_thread);
         _thread.start();
 
-        //start thread
-//        _unit->start();
-//        _unit->moveToThread(_unit);
     }
-    if( threading == Threading::SINGLE ) {
+    if( threading == Threading::NO_EXTRA_THREAD ) {
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()), Qt::DirectConnection);
         _unit->setParent(this);
     }
+
     emit setRandomSeed(0);
+}
+
+SimulationController::SimulationController(QVector2D size, Threading threading, QObject* parent)
+    : SimulationController(threading, parent)
+{
+    _grid->init(size.x(), size.y());
 }
 
 SimulationController::~SimulationController ()
@@ -55,7 +59,6 @@ SimulationController::~SimulationController ()
         _thread.terminate();
         _thread.wait();
     }
-//    delete _unit;
 }
 
 QMap< QString, qreal > SimulationController::getMonitorData ()
@@ -84,13 +87,18 @@ QMap< QString, qreal > SimulationController::getMonitorData ()
     return data;
 }
 
+Grid* SimulationController::getGrid ()
+{
+    return _grid;
+}
+
 void SimulationController::newUniverse (qint32 sizeX, qint32 sizeY)
 {
     _grid->lockData();
     _frame = 0;
 
     //clean up metadata
-    QSet< quint64 > ids = _grid->getAllCellIds();
+    std::set<quint64> ids = _grid->getAllCellIds();
     MetadataManager::getGlobalInstance().cleanUp(ids);
 
     //set up new grid
@@ -108,7 +116,7 @@ void SimulationController::serializeUniverse (QDataStream& stream)
     stream << _frame;
 
     //clean up metadata
-    QSet< quint64 > ids = _grid->getAllCellIds();
+    std::set<quint64> ids = _grid->getAllCellIds();
     MetadataManager::getGlobalInstance().cleanUp(ids);
 
     //serialize grid size
@@ -147,7 +155,7 @@ void SimulationController::buildUniverse (QDataStream& stream, QMap< quint64, qu
     //reconstruct cluster
     quint32 numCluster;
     stream >> numCluster;
-    for(auto i = 0; i < numCluster; ++i) {
+    for(quint32 i = 0; i < numCluster; ++i) {
         CellCluster* cluster = CellCluster::buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid);
         _grid->getClusters() << cluster;
     }
@@ -155,7 +163,7 @@ void SimulationController::buildUniverse (QDataStream& stream, QMap< quint64, qu
     //reconstruct energy particles
     quint32 numEnergyParticles;
     stream >> numEnergyParticles;
-    for(auto i = 0; i < numEnergyParticles; ++i) {
+    for(quint32 i = 0; i < numEnergyParticles; ++i) {
         EnergyParticle* e = new EnergyParticle(stream, oldIdEnergyMap, _grid);
         _grid->getEnergyParticles() << e;
     }
@@ -365,10 +373,10 @@ void SimulationController::buildCell (QDataStream& stream,
     stream >> oldClusterId;
 
     //assigning new ids
-    newCluster->setId(GlobalFunctions::getTag());
+    newCluster->setId(GlobalFunctions::createNewTag());
     oldNewClusterIdMap[oldClusterId] = newCluster->getId();
     quint64 oldCellId = newCell->getId();
-    newCell->setId(GlobalFunctions::getTag());
+    newCell->setId(GlobalFunctions::createNewTag());
     oldNewCellIdMap[oldCellId] = newCell->getId();
 
     //draw cluster

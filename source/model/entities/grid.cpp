@@ -1,5 +1,5 @@
 #include "grid.h"
-#include "cell.h"
+
 #include "cellcluster.h"
 #include "energyparticle.h"
 
@@ -90,13 +90,15 @@ void Grid::unlockData ()
     _mutex.unlock();
 }
 
-QSet< quint64 > Grid::getAllCellIds () const
+std::set<quint64> Grid::getAllCellIds () const
 {
     QList< quint64 > cellIds;
     foreach(CellCluster* cluster, _clusters) {
         cellIds << cluster->getCellIds();
     }
-    return cellIds.toSet();
+    std::list<quint64> cellIdsStdList = cellIds.toStdList();
+    std::set<quint64> cellIdsStdSet(cellIdsStdList.begin(), cellIdsStdList.end());
+    return cellIdsStdSet;
 }
 
 void Grid::clearGrids ()

@@ -3,14 +3,31 @@
 
 QMutex _mutex;
 
-quint64 _tag(0);
+namespace {
+    quint64 _tag(0);
+}
+
+quint64 GlobalFunctions::createNewTag ()
+{
+    _mutex.lock();
+    quint64 tag = ++_tag;
+    _mutex.unlock();
+    return tag;
+}
 
 quint64 GlobalFunctions::getTag ()
 {
     _mutex.lock();
-    quint64 tag(++_tag);
+    quint64 tag = _tag;
     _mutex.unlock();
     return tag;
+}
+
+void GlobalFunctions::setTag (quint64 tag)
+{
+    _mutex.lock();
+    _tag = tag;
+    _mutex.unlock();
 }
 
 quint32 GlobalFunctions::random (quint32 range)

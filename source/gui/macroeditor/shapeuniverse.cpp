@@ -215,15 +215,15 @@ void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList
     _grid->lockData();
 
     //identify all cells and their clusters which should be deleted
-    QSet< quint64 > cellsToBeDeleted;
-    QSet< quint64 > clustersToBeDeleted;
+    std::set<quint64> cellsToBeDeleted;
+    std::set<quint64> clustersToBeDeleted;
     QMap< quint64, CellCluster* > idClusterMap;
     foreach(CellGraphicsItem* cellItem, _focusCells) {
         CellCluster* cluster = cellItem->getCell()->getCluster();
-        clustersToBeDeleted << cluster->getId();
+        clustersToBeDeleted.insert(cluster->getId());
         idClusterMap[cluster->getId()] = cluster;
         foreach( Cell* cell, cluster->getCells()) {
-            cellsToBeDeleted << cell->getId();
+            cellsToBeDeleted.insert(cell->getId());
         }
     }
     _focusCells.clear();

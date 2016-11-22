@@ -32,6 +32,9 @@ private:
         quint8 distance = 0;
     };
 
+    bool _newMessageReceived = false;
+    MessageData _receivedMessage;
+
     COMMUNICATOR_IN readCommandFromToken (Token* token) const;
     void setListeningChannel (Token* token);
 
@@ -43,9 +46,6 @@ private:
 
     void receiveMessage (Token* token,Cell* receiverCell, Cell* receiverPreviousCell);
     void calcReceivedMessageAngle (Cell* receiverCell, Cell* receiverPreviousCell);
-
-    bool _newMessageReceived = false;
-    MessageData _receivedMessage;
 };
 
 #endif // CELLFUNCTIONCOMMUNICATOR_H

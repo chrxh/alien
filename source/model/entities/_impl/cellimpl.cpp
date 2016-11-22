@@ -18,7 +18,7 @@ CellImpl::CellImpl (qreal energy, Grid*& grid, int maxConnections, int tokenAcce
       _newTokenStackPointer(0),
       _toBeKilled(false),
       _tag(0),
-      _id(GlobalFunctions::getTag()),
+      _id(GlobalFunctions::createNewTag()),
       _protectionCounter(0),
       _relPos(relPos),
       _cluster(0),
@@ -85,6 +85,14 @@ CellImpl::~CellImpl()
         delete _connectingCells;
     if( _features )
         delete _features;
+}
+
+bool CellImpl::compareEqual (Cell* otherCell) const
+{
+    CellImpl* otherCellImpl = dynamic_cast<CellImpl*>(otherCell);
+    if (!otherCellImpl)
+        return false;
+    return true;
 }
 
 void CellImpl::registerFeatures (CellFeature* features)

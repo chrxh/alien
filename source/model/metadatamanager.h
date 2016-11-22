@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QString>
+#include <set>
 
 struct CellMetadata
 {
@@ -34,7 +35,7 @@ public:
     void setAndUniteClusterName (const QList< quint64 >& ids, QString clusterName);       //list contains ids of all cells in the cluster
     QString getAndUniteClusterName (const QList< quint64 >& ids);    //list contains ids of all cells in the cluster
 
-    void cleanUp (const QSet< quint64 >& ids);          //preserve metadata for the cells specified in ids
+    void cleanUp (std::set< quint64 > const& ids);          //preserve metadata for the cells specified in ids
 
     const QMap< quint64, CellMetadata >& getCellMetadata ();
 
