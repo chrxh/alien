@@ -18,13 +18,7 @@ private slots:
     void cleanupTestCase();
 
 private:
-    bool compareClusterSizes ();
-    QList<int> getAbnormalClusterNumbers (int timestep);
-
-    SimulationController* _simController1;
-    SimulationController* _simController2;
-    quint64 _tag1 = 0;
-    quint64 _tag2 = 0;
+    SimulationController* _simController;
 };
 
 #endif // INTEGRATIONTESTDETERMINISM_H
