@@ -210,6 +210,46 @@ MainWindow::MainWindow(SimulationController* simulator, QWidget *parent) :
 //    connect(_startScreen, SIGNAL(startScreenFinished()), ui->actionEditor, SLOT(setEnabled(bool)));
     connect(_startScreen, SIGNAL(startScreenFinished()), SLOT(startScreenFinished()));
     _startScreen->runStartScreen(ui->macroEditor->getGraphicsView());
+
+    //TEMP!!!!
+    QFile file("../source/testdata/determinism.sim");
+    if( file.open(QIODevice::ReadOnly) ) {
+        _frame = 0;
+
+        //stop simulation
+        ui->actionPlay->setChecked(false);
+        runClicked(false);
+
+        //read simulation data
+        QDataStream in(&file);
+        QMap< quint64, quint64 > oldNewCellIdMap;
+        QMap< quint64, quint64 > oldNewClusterIdMap;
+        _simulator->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
+        simulationParameters.readData(in);
+        MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
+        MetadataManager::getGlobalInstance().readSymbolTable(in);
+        readFrame(in);
+        file.close();
+
+        //reset editors
+        ui->macroEditor->reset();
+        _microEditor->updateSymbolTable();
+
+        //force simulator to update other coordinators
+        _simulator->updateUniverse();
+
+        //no step back option
+        ui->actionStepBack->setEnabled(false);
+        _undoUniverserses.clear();
+
+        //update monitor
+        _monitor->update(_simulator->getMonitorData());
+    }
+    else {
+        QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified simulation could not loaded.");
+        msgBox.exec();
+    }
+
 }
 
 MainWindow::~MainWindow()

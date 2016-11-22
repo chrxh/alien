@@ -3,11 +3,11 @@
 
 #include <QList>
 
-#include "cell.h"
 #include "grid.h"
 #include "energyparticle.h"
 #include <QMatrix4x4>
 
+class Cell;
 
 class CellCluster
 {
@@ -29,6 +29,8 @@ public:
                                                                Grid*& grid);
 
     ~CellCluster ();
+
+    bool compareEqual (CellCluster* otherCluster) const;
 
     void clearCellsFromMap ();
     void clearCellFromMap (Cell* cell);
@@ -102,17 +104,17 @@ private:
 
     Grid*& _grid;
 
-    qreal _angle;       //in deg
+    qreal _angle = 0.0;       //in deg
     QVector3D _pos;
-    qreal _angularVel;  //in deg
+    qreal _angularVel = 0.0;  //in deg
     QVector3D _vel;
     QMatrix4x4 _transform;
-    qreal _angularMass;
+    qreal _angularMass = 0.0;
 
     QList< Cell* > _cells;
 
-    quint64 _id;
-    quint64 _color;
+    quint64 _id = 0;
+    quint64 _color = 0;
 };
 
 

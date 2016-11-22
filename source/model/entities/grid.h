@@ -10,10 +10,12 @@
 #include <QMap>
 #include <QSet>
 #include <QtCore/qmath.h>
+#include <set>
 
-//class Cell;
+class Cell;
 class EnergyParticle;
 class CellCluster;
+
 class Grid : public QObject
 {
     Q_OBJECT
@@ -29,7 +31,7 @@ public:
     //access functions to all entities
     QList< CellCluster* >& getClusters ();
     QList< EnergyParticle* >& getEnergyParticles ();
-    QSet< quint64 > getAllCellIds () const;
+    std::set< quint64 > getAllCellIds () const;
     void clearGrids ();
     qint32 getSizeX() const;
     qint32 getSizeY() const;

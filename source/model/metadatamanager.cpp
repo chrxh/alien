@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QDataStream>
+#include <set>
 
 MetadataManager& MetadataManager::getGlobalInstance ()
 {
@@ -113,13 +114,13 @@ QString MetadataManager::getAndUniteClusterName (const QList< quint64 >& ids)
     return mostCountedName;
 }
 
-void MetadataManager::cleanUp (const QSet< quint64 >& ids)
+void MetadataManager::cleanUp (std::set< quint64 > const & ids)
 {
     QMutableMapIterator< quint64, CellMetadata > it(_idCellMetadataMap);
     while(it.hasNext()) {
         it.next();
         quint64 id = it.key();
-        if( !ids.contains(id) ) {
+        if (ids.find(id) == ids.end()) {
             it.remove();
         }
     }

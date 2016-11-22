@@ -19,12 +19,14 @@ class SimulationController  : public QObject
     Q_OBJECT
 public:
     enum class Threading {
-        SINGLE, MULTI
+        NO_EXTRA_THREAD, EXTRA_THREAD
     };
-    SimulationController (int sizeX, int sizeY, Threading threading, QObject* parent = 0);
+    SimulationController (Threading threading, QObject* parent = 0);
+    SimulationController (QVector2D size, Threading threading, QObject* parent = 0);
     ~SimulationController ();
 
     QMap< QString, qreal > getMonitorData ();
+    Grid* getGrid ();
 
     //universe manipulation tools
     void newUniverse (qint32 sizeX, qint32 sizeY);
@@ -100,12 +102,11 @@ protected slots:
 
 protected:
     QTimer* _forceFpsTimer;
-    bool _run;
-    int _fps;
-    bool _calculating;
-    //bool _editMode;
-    quint64 _frame;
-    int _newCellTokenAccessNumber;
+    bool _run = false;
+    int _fps = 0;
+    bool _calculating = false;
+    quint64 _frame = 0;
+    int _newCellTokenAccessNumber = 0;
 
     Grid* _grid;
     SimulationUnit* _unit;
