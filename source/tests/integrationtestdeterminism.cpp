@@ -11,12 +11,10 @@
 #include <QtTest/QtTest>
 
 namespace {
-    void loadData(SimulationController* simulationController)
+    bool loadDataAndReturnSuccess(SimulationController* simulationController, QString fileName)
     {
-        QFile file(TESTDATA_FILENAME);
+        QFile file(fileName );
         bool fileOpened = file.open(QIODevice::ReadOnly);
-        QString msg = QString("Could not open file %1 in IntegrationTestDeterminism::loadData().").arg(TESTDATA_FILENAME);
-        QVERIFY2(fileOpened, msg.toLatin1().data());
         if( fileOpened ) {
             QDataStream in(&file);
             QMap< quint64, quint64 > oldNewCellIdMap;
@@ -27,67 +25,159 @@ namespace {
             MetadataManager::getGlobalInstance().readSymbolTable(in);
             file.close();
         }
+        return fileOpened;
+    }
+
+    char const* createValueDeviationMessageForCluster (int time, int clusterId, QString what, qreal ref, qreal comp)
+    {
+        QString msg = QString("Deviation at time ") + QString::number(time);
+        msg += QString(" in cluster ") + QString::number(clusterId) + QString(" ") + what;
+        msg += QString(": reference value: ");
+        msg += QString::number(ref, 'g', 12);
+        msg += QString(" and computation: ");
+        msg += QString::number(comp, 'g', 12);
+        return msg.toLatin1().data();
+    }
+
+    char const* createVectorDeviationMessageForCluster (int time, int clusterId, QString what, QVector3D ref, QVector3D comp)
+    {
+        QString msg = QString("Deviation at time ") + QString::number(time);
+        msg += QString(" in cluster ") + QString::number(clusterId) + QString(" ") + what;
+        msg += QString(": reference value: ");
+        msg += QString("(") + QString::number(ref.x(), 'g', 12) + QString(", ") + QString::number(ref.y(), 'g', 12) + QString(")");
+        msg += QString(" and computation: ");
+        msg += QString("(") + QString::number(comp.x(), 'g', 12) + QString(", ") + QString::number(comp.y(), 'g', 12) + QString(")");
+        return msg.toLatin1().data();
+    }
+
+    char const* createVectorDeviationMessageForCell (int time, int clusterId, int cellId, QString what, QVector3D ref, QVector3D comp)
+    {
+        QString msg = QString("Deviation at time ") + QString::number(time);
+        msg += QString(" in cluster ") + QString::number(clusterId);
+        msg += QString(" at cell ") + QString::number(cellId) + QString(" ") + what;
+        msg += QString(": reference value: ");
+        msg += QString("(") + QString::number(ref.x(), 'g', 12) + QString(", ") + QString::number(ref.y(), 'g', 12) + QString(")");
+        msg += QString(" and computation: ");
+        msg += QString("(") + QString::number(comp.x(), 'g', 12) + QString(", ") + QString::number(comp.y(), 'g', 12) + QString(")");
+        return msg.toLatin1().data();
     }
 }
 
 void IntegrationTestDeterminism::initTestCase()
 {
-    _simController1 = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD, this);
-    _simController2 = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD, this);
-    GlobalFunctions::setTag(_tag1);
-    loadData(_simController1);
-    _tag1 = GlobalFunctions::getTag();
-    GlobalFunctions::setTag(_tag2);
-    loadData(_simController2);
-    _tag2 = GlobalFunctions::getTag();
+    _simController = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD, this);
+    QString fileName = TESTDATA_DETERMINISM_FOLDER + QString("/initial.sim");
+    if (!loadDataAndReturnSuccess(_simController, fileName)) {
+        QString msg = QString("Could not open file ") + fileName + QString(" in IntegrationTestDeterminism::loadData().");
+        QFAIL(msg.toLatin1().data());
+    }
 }
 
 void IntegrationTestDeterminism::testRunSimulations ()
 {
-    for (int i = 0; i < TIMESTEPS; ++i) {
-        QString msg = QString("Number of clusters do not coincide at timestep %1.").arg(i);
-        QVERIFY2(compareClusterSizes(), msg.toLatin1().data());
-
-        QList<int> abnormalClusterNumbers = getAbnormalClusterNumbers(i);
-        if (!abnormalClusterNumbers.empty()) {
-            QString msg = QString("The following clusters do not coincide at timestep %1: ").arg(i);
-            for (int i = 0; i < 10 && i < abnormalClusterNumbers.size(); ++i) {
-                msg += QString("%1 ").arg(abnormalClusterNumbers.at(i));
+    Grid* grid = _simController->getGrid();
+    for (int time = 0; time < TIMESTEPS; ++time) {
+        QString fileName = TESTDATA_DETERMINISM_FOLDER + QString("/computation%1.dat").arg(time);
+        {
+            QFile file(fileName);
+            if (!file.open(QIODevice::ReadOnly)) {
+                QWARN("Test data for IntegrationTestDeterminism do not exist. It will now be created for the next cycle.");
             }
-            QFAIL(msg.toLatin1().data());
-        }
-        qsrand(i);
-        GlobalFunctions::setTag(_tag1);
-        _simController1->requestNextTimestep();
-        _tag1 = GlobalFunctions::getTag();
-        qsrand(i);
-        GlobalFunctions::setTag(_tag2);
-        _simController2->requestNextTimestep();
-        _tag2 = GlobalFunctions::getTag();
-    }
-}
+            else {
+                QDataStream in(&file);
+                quint32 numCluster;
+                in >> numCluster;
+                QList<QList<QVector3D>> clusterCellPosList;
+                QList<QList<QVector3D>> clusterCellVelList;
+                QList<QVector3D> clusterPosList;
+                QList<qreal> clusterAngleList;
+                QList<QVector3D> clusterVelList;
+                QList<qreal> clusterAnglularVelList;
+                QList<qreal> clusterAnglularMassList;
+                for(int i = 0; i < numCluster; ++i) {
+                    QList<QVector3D> cellPosList;
+                    QList<QVector3D> cellVelList;
+                    QVector3D pos;
+                    qreal angle;
+                    QVector3D vel;
+                    qreal angularVel;
+                    qreal angularMass;
+                    quint32 numCell;
+                    in >> pos;
+                    in >> angle;
+                    in >> vel;
+                    in >> angularVel;
+                    in >> angularMass;
+                    clusterPosList << pos;
+                    clusterAngleList << angle;
+                    clusterVelList << vel;
+                    clusterAnglularVelList << angularVel;
+                    clusterAnglularMassList << angularMass;
+                    in >> numCell;
+                    for(int i = 0; i < numCell; ++i) {
+                        QVector3D pos;
+                        QVector3D vel;
+                        in >> pos;
+                        in >> vel;
+                        cellPosList << pos;
+                        cellVelList << vel;
+                    }
+                    clusterCellPosList << cellPosList;
+                    clusterCellVelList << cellVelList;
+                }
+                file.close();
 
-bool IntegrationTestDeterminism::compareClusterSizes ()
-{
-    Grid* grid1 = _simController1->getGrid();
-    Grid* grid2 = _simController2->getGrid();
-    return grid1->getClusters().size() == grid2->getClusters().size();
-}
+                //checking
+                QVERIFY2(grid->getClusters().size() == static_cast<int>(numCluster), "Deviation in number of clusters.");
+                int minNumCluster = qMin(grid->getClusters().size(), static_cast<int>(numCluster));
+                for(int i = 0; i < minNumCluster; ++i) {
+                    QList<QVector3D> cellPosList = clusterCellPosList.at(i);
+                    QList<QVector3D> cellVelList = clusterCellVelList.at(i);
+                    CellCluster* cluster = grid->getClusters().at(i);
+                    int minCell = qMin(cluster->getCells().size(), cellPosList.size());
+                    QVERIFY2(clusterPosList.at(i) == cluster->getPosition(), createVectorDeviationMessageForCluster(time, cluster->getId(), "in pos", clusterPosList.at(i), cluster->getPosition()));
+                    QVERIFY2(clusterVelList.at(i) == cluster->getVel(), createVectorDeviationMessageForCluster(time, cluster->getId(), "in vel", clusterVelList.at(i), cluster->getVel()));
+                    QVERIFY2(clusterAngleList.at(i) == cluster->getAngle(), createValueDeviationMessageForCluster(time, cluster->getId(), "in angle", clusterAngleList.at(i), cluster->getAngle()));
+                    QVERIFY2(clusterAnglularVelList.at(i) == cluster->getAngularVel(), createValueDeviationMessageForCluster(time, cluster->getId(), "in angular vel", clusterAnglularVelList.at(i), cluster->getAngularVel()));
+                    QVERIFY2(clusterAnglularMassList.at(i) == cluster->getAngularMass(), createValueDeviationMessageForCluster(time, cluster->getId(), "in angular mass", clusterAnglularMassList.at(i), cluster->getAngularMass()));
 
-QList<int> IntegrationTestDeterminism::getAbnormalClusterNumbers (int timestep)
-{
-    Grid* grid1 = _simController1->getGrid();
-    Grid* grid2 = _simController2->getGrid();
-    int minClusters = qMin(grid1->getClusters().size(), grid2->getClusters().size());
-    QList<int> abnormalClusterNumbers;
-    for (int i = 0; i < minClusters; ++i) {
-        CellCluster* cluster1 = grid1->getClusters().at(i);
-        CellCluster* cluster2 = grid2->getClusters().at(i);
-        if (!cluster1->compareEqual(cluster2)) {
-            abnormalClusterNumbers << i;
+                    for(int j = 0; j < minCell; ++j) {
+                        QVERIFY2(cellPosList.at(i) == cluster->getCells().at(j)->getRelPos(), createVectorDeviationMessageForCell(time, cluster->getId()
+                            , cluster->getCells().at(j)->getId(), "in rel pos", cellPosList.at(i), cluster->getCells().at(j)->getRelPos()));
+                        QVERIFY2(cellVelList.at(i) == cluster->getCells().at(j)->getVel(), createVectorDeviationMessageForCell(time, cluster->getId()
+                            , cluster->getCells().at(j)->getId(), "in rel pos", cellVelList.at(i), cluster->getCells().at(j)->getVel()));
+                    }
+                }
+            }
         }
+        {
+            QFile file(fileName);
+            if( file.open(QIODevice::WriteOnly) ) {
+                QDataStream out(&file);
+                quint32 numCluster = grid->getClusters().size();
+                out << numCluster;
+                foreach (CellCluster* cluster, grid->getClusters()) {
+                    quint32 numCells = cluster->getCells().size();
+                    out << cluster->getPosition();
+                    out << cluster->getAngle();
+                    out << cluster->getVel();
+                    out << cluster->getAngularVel();
+                    out << cluster->getAngularMass();
+                    out << numCells;
+                    foreach (Cell* cell, cluster->getCells()) {
+                        out << cell->getRelPos();
+                        out << cell->getVel();
+                    }
+                }
+                file.close();
+            }
+        }
+
+        qsrand(time);
+        _simController->requestNextTimestep();
+
+
     }
-    return abnormalClusterNumbers;
 }
 
 void IntegrationTestDeterminism::cleanupTestCase()
