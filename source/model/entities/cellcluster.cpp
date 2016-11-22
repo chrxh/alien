@@ -1,4 +1,5 @@
 #include "cellcluster.h"
+#include "cell.h"
 
 #include "model/modelfacade.h"
 #include "model/features/cellfeature.h"
@@ -50,6 +51,26 @@ CellCluster::~CellCluster ()
     foreach(Cell* cell, _cells) {
         delete cell;
     }
+}
+
+bool CellCluster::compareEqual (CellCluster* otherCluster) const
+{
+    bool equal = (_angle == otherCluster->_angle &&
+                  _pos == otherCluster->_pos &&
+                  _angularVel == otherCluster->_angularVel &&
+                  _vel == otherCluster->_vel &&
+                  _angularMass == otherCluster->_angularMass &&
+                  _id == otherCluster->_id &&
+                  _color == otherCluster->_color &&
+                  _cells.size() == otherCluster->_cells.size());
+    if (equal) {
+        for(int i = 0; i < _cells.size(); ++i) {
+            Cell* cell1 = _cells.at(i);
+            Cell* cell2 = otherCluster->_cells.at(i);
+            equal = equal && cell1->compareEqual(cell2);
+        }
+    }
+    return equal;
 }
 
 void CellCluster::clearCellsFromMap ()
@@ -153,7 +174,7 @@ void CellCluster::movementProcessingStep2 (QList< CellCluster* >& fragments, QLi
 
             //find fragment
             QList< Cell* > component;
-            quint64 tag(GlobalFunctions::getTag());
+            quint64 tag(GlobalFunctions::createNewTag());
             getConnectedComponent(_cells[0], tag, component);
             if( component.size() < size ) {
                 CellCluster* part(new CellCluster(component, _angle, _grid));
@@ -174,8 +195,6 @@ void CellCluster::movementProcessingStep2 (QList< CellCluster* >& fragments, QLi
                 //calc energy difference
                 newEnergy += Physics::kineticEnergy(size, _vel, _angularMass, _angularVel);
                 qreal diffEnergy = oldEnergy-newEnergy;
-//                if( qAbs(diffEnergy) > 10.0 )
-//                    qDebug("ups1 %f, size: %d, pos x: %f, pos y: %f, , oldpos x: %f, oldpos y: %f",diffEnergy,  _cells.size(), _pos.x(), _pos.y(), oldPos.x(), oldPos.y());
 
                 //spread energy difference on cells
                 qreal diffEnergyCell = (diffEnergy/(qreal)size)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
@@ -193,12 +212,6 @@ void CellCluster::movementProcessingStep2 (QList< CellCluster* >& fragments, QLi
             newEnergy += Physics::kineticEnergy(cluster->_cells.size(), cluster->_vel, cluster->_angularMass, cluster->_angularVel);
         }
         qreal diffEnergy = oldEnergy-newEnergy;
-//        if( qAbs(diffEnergy) > 10.0 ) {
-//            qDebug("ups2 %f", diffEnergy);
-//            foreach(CellCluster* cluster, fragments) {
-//                qDebug("size: %d, pos x: %f, pos y: %f", cluster->_cells.size(), cluster->_cells.size(), cluster->_pos.x(), cluster->_pos.y());
-//            }
-//        }
 
         //spread energy difference on cells
         qreal diffEnergyCell = (diffEnergy/(qreal)size)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
@@ -226,9 +239,10 @@ void CellCluster::movementProcessingStep2 (QList< CellCluster* >& fragments, QLi
 //set cells to grid map
 void CellCluster::movementProcessingStep3 ()
 {
+    updateCellVel();    //TEMP!!!!!
     struct CollisionData {
-        int movementState;  //0: will do nothing, 1: collision, 2: fusion
-        QSet< quint64 > overlappingCells;
+        int movementState = 0;  //0: will do nothing, 1: collision, 2: fusion
+        std::set<quint64> overlappingCells;
         QList< QPair< Cell*, Cell* > > overlappingCellPairs;
     };
 
@@ -248,6 +262,10 @@ void CellCluster::movementProcessingStep3 ()
     _grid->correctPosition(_pos);
     calcTransform();
     QVector3D pos;
+    if (_id == 16502) { //TEMP
+        int temp = 0;
+
+    }
 
     //collect information for every colliding cluster
     QMap< quint64, CollisionData > clusterCollisionDataMap;
@@ -266,6 +284,10 @@ void CellCluster::movementProcessingStep3 ()
                         _grid->correctDisplacement(displacement);
                         if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MAX ) {
                             quint64 clusterId = tempCell->getCluster()->_id;
+                            if (tempCell->getCluster()->_id == 11758) //TEMP
+                            {
+                                int t = 0;
+                            }
 
                             //read collision data for the colliding cluster
                             CollisionData colData;
@@ -277,7 +299,7 @@ void CellCluster::movementProcessingStep3 ()
                             //remember cell
                             idCellMap[tempCell->getId()] = tempCell;
                             idClusterMap[clusterId] = tempCell->getCluster();
-                            colData.overlappingCells << tempCell->getId();
+                            colData.overlappingCells.insert(tempCell->getId());
                             colData.overlappingCellPairs << QPair< Cell*, Cell* >(cell, tempCell);
 
                             //first time check?
@@ -335,10 +357,19 @@ void CellCluster::movementProcessingStep3 ()
             //performing collisions:
             //calc center position of the overlapping cells
             QVector3D centerPos(0.0, 0.0, 0.0);
-            QSetIterator< quint64 > it3(colData.overlappingCells);
-            while( it3.hasNext() ) {
-                Cell* otherCell(idCellMap[it3.next()]);
+            std::set<quint64>::iterator it3;
+            for (it3 = colData.overlappingCells.begin(); it3 != colData.overlappingCells.end(); ++it3) {
+                Cell* otherCell = idCellMap[*it3];
                 centerPos = centerPos + otherCluster->_transform.map(otherCell->getRelPos());
+                if (_id == 16502) //TEMP
+                {
+                    qDebug() << QString("Problem: abs pos of overlapping cells of cluster id ") << otherCluster->_id
+                             << QString(": ")
+                             << QString::number(otherCluster->_transform.map(otherCell->getRelPos()).x(),'g', 20)+ QString(", ") + QString::number(otherCluster->_transform.map(otherCell->getRelPos()).y(),'g', 20);
+                    qDebug() << QString("Problem: rel pos of overlapping cells of cluster id ") << otherCluster->_id
+                             << QString(": ")
+                             << QString::number(otherCell->getRelPos().x(),'g', 20)+ QString(", ") + QString::number(otherCell->getRelPos().y(),'g', 20);
+                }
             }
             centerPos = centerPos/colData.overlappingCells.size();
 
@@ -352,10 +383,9 @@ void CellCluster::movementProcessingStep3 ()
             QVector3D outerSpace = (otherCluster->_vel-rBPp*otherCluster->_angularVel*degToRad)-(_vel-rAPp*_angularVel*degToRad);
 
             //calc center normal vector of the overlapping cells from the other cluster
-            it3 = colData.overlappingCells;
-            QVector3D n(0.0, 0.0, 0.0);
-            while( it3.hasNext() ) {
-                Cell* otherCell(idCellMap[it3.next()]);
+            QVector3D n;
+            for (it3 = colData.overlappingCells.begin(); it3 != colData.overlappingCells.end(); ++it3) {
+                Cell* otherCell = idCellMap[*it3];
                 n = n + otherCell->calcNormal(outerSpace, otherCluster->_transform).normalized();
             }
 //            qDebug("o: %f, %f", outerSpace.x(), outerSpace.y());
@@ -364,16 +394,35 @@ void CellCluster::movementProcessingStep3 ()
             qreal mA = _cells.size();
             qreal mB = otherCluster->_cells.size();
             QVector3D vA2, vB2;
-            qreal angularVelA2, angularVelB2;
+            qreal angularVelA2 = 0;
+            qreal angularVelB2 = 0;
             n.normalize();
-            if( (n.x() == 0.0) && (n.y() == 0.0) )
+            if( n.length() < ALIEN_PRECISION )
                 n.setX(1.0);
 
             Physics::collision(_vel, otherCluster->_vel,//, clusterPos, otherClusterPos, centerPos,
                                rAPp, rBPp,
                                _angularVel, otherCluster->_angularVel, n,
                                _angularMass, otherCluster->_angularMass, mA, mB, vA2, vB2, angularVelA2,
-                               angularVelB2);
+                               angularVelB2, otherCluster->getId());
+
+            if (_id == 16502) //TEMP
+            {
+                qDebug() << QString("Problem: cluster1: vel after: ") + QString::number(vA2.x(),'g', 10)+ QString(", ") + QString::number(vA2.y(),'g', 10);
+                qDebug() << QString("Problem: cluster2: vel after: ") + QString::number(vB2.x(),'g', 10)+ QString(", ") + QString::number(vB2.y(),'g', 10);
+                qDebug() << QString("Problem: cluster1: vel: ") + QString::number(_vel.x(),'g', 10)+ QString(", ") + QString::number(_vel.y(),'g', 10);
+                qDebug() << QString("Problem: cluster2: vel: ") + QString::number(otherCluster->_vel.x(),'g', 10)+ QString(", ") + QString::number(otherCluster->_vel.y(),'g', 10);
+                qDebug() << QString("Problem: cluster1: pos: ") + QString::number(_pos.x(),'g', 10)+ QString(", ") + QString::number(_pos.y(),'g', 10);
+                qDebug() << QString("Problem: cluster2: pos: ") + QString::number(otherCluster->_pos.x(),'g', 10)+ QString(", ") + QString::number(otherCluster->_pos.y(),'g', 10);
+                qDebug() << QString("Problem: cluster1: angular vel: ") + QString::number(_angularVel,'g', 10);
+                qDebug() << QString("Problem: cluster2: angular vel: ") + QString::number(otherCluster->_angularVel,'g', 10);
+                qDebug() << QString("Problem: cluster1: mass: ") + QString::number(mA,'g', 10);
+                qDebug() << QString("Problem: cluster2: mass: ") + QString::number(mB,'g', 10);
+                qDebug() << QString("Problem: cluster1: angular mass: ") + QString::number(_angularMass,'g', 10);
+                qDebug() << QString("Problem: cluster2: angular mass: ") + QString::number(otherCluster->_angularMass,'g', 10);
+                qDebug() << QString("Problem: center position: ") + QString::number(centerPos.x(),'g', 10)+ QString(", ") + QString::number(centerPos.y(),'g', 10);
+                qDebug() << QString("Problem: normal n: ") + QString::number(n.x(),'g', 10)+ QString(", ") + QString::number(n.y(),'g', 10);
+            }
 
             //set new vectors
             _vel = vA2;
@@ -392,7 +441,7 @@ void CellCluster::movementProcessingStep3 ()
         if( colData.movementState == 2 ) {
 
             //connecting clusters if possible
-            QSet< quint64 > fusedCells;
+            std::set<quint64> fusedCells;
             QListIterator< QPair< Cell*, Cell* > > it2(colData.overlappingCellPairs);
             while (it2.hasNext()) {
                 QPair< Cell*, Cell* > item(it2.next());
@@ -418,15 +467,15 @@ void CellCluster::movementProcessingStep3 ()
                 //connecting cells
                 if( cell->connectable(otherCell) ) {
                     cell->newConnection(otherCell);
-                    fusedCells << cell->getId();
-                    fusedCells << otherCell->getId();
+                    fusedCells.insert(cell->getId());
+                    fusedCells.insert(otherCell->getId());
                     idCellMap[cell->getId()] = cell;
                 }
                 otherCluster = otherCell->getCluster();
             }
 
             //cells connected?
-            if( fusedCells.size() > 0) {
+            if (!fusedCells.empty()) {
                 updateCellVel();
                 otherCluster->updateCellVel();
 
@@ -481,17 +530,17 @@ void CellCluster::movementProcessingStep3 ()
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
                 qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew)/(qreal)fusedCells.size())/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
                 if( eDiff > ALIEN_PRECISION ) {
-                    foreach( quint64 id, fusedCells ) {
+                    for (quint64 id : fusedCells) {
                         Cell* cell = idCellMap[id];
 
                         //create token?
-                        if( (cell->getNumToken() < simulationParameters.CELL_TOKENSTACKSIZE) && (eDiff > simulationParameters.MIN_TOKEN_ENERGY) ) {
+/*TEMP!!!!                        if( (cell->getNumToken() < simulationParameters.CELL_TOKENSTACKSIZE) && (eDiff > simulationParameters.MIN_TOKEN_ENERGY) ) {
                             Token* token = new Token(eDiff, true);
                             cell->addToken(token, Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
                         }
                         //if not add to internal cell energy
                         else
-                            cell->setEnergy(cell->getEnergy() + eDiff);
+*/                            cell->setEnergy(cell->getEnergy() + eDiff);
                     }
                 }
             }
@@ -503,6 +552,12 @@ void CellCluster::movementProcessingStep3 ()
         QVector3D pos = _transform.map(cell->getRelPos());
         _grid->setCell(pos, cell);
     }
+
+    /*if (_id == 11758) { //TEMP
+        qDebug() << "cluster vel: "
+                 << QString::number(_vel.x(), 'g', 20) << ", "
+                 << QString::number(_vel.y(), 'g', 20);
+    }*/
 }
 
 //step 4:
@@ -587,11 +642,11 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
                     for( int i = 0; i < spreadTokenCounter; ++i ) {
 
                         //execute cell function
-                        CellFeature::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
+/*                        CellFeature::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
                         if( processingResult.decompose )
                             decompose = true;
                         if( processingResult.newEnergyParticle )
-                            energyParticles << processingResult.newEnergyParticle;
+                            energyParticles << processingResult.newEnergyParticle;*/
 
                     }
 
@@ -823,7 +878,7 @@ QList< CellCluster* > CellCluster::decompose ()
 
         //find fragment
         QList< Cell* > component;
-        quint64 tag(GlobalFunctions::getTag());
+        quint64 tag(GlobalFunctions::createNewTag());
         getConnectedComponent(_cells[0], tag, component);
 
         //remove fragment from clusters
@@ -1045,7 +1100,7 @@ Cell* CellCluster::findNearestCell (QVector3D pos)
 void CellCluster::getConnectedComponent(Cell* cell, QList< Cell* >& component)
 {
     component.clear();
-    quint64 tag(GlobalFunctions::getTag());
+    quint64 tag(GlobalFunctions::createNewTag());
     getConnectedComponent(cell, tag, component);
 }
 
@@ -1067,8 +1122,8 @@ CellCluster::CellCluster (Grid*& grid)
       _angularVel(0.0),
       _vel(0.0, 0.0, 0.0),
       _angularMass(0.0),
-      _id(GlobalFunctions::getTag()),
-      _color(GlobalFunctions::getTag())
+      _id(GlobalFunctions::createNewTag()),
+      _color(GlobalFunctions::createNewTag())
 {
     calcTransform();
 }
@@ -1080,8 +1135,8 @@ CellCluster::CellCluster(QList< Cell* > cells, qreal angle, QVector3D pos, qreal
       _angularVel(angularVel),
       _vel(vel),
       _cells(cells),
-      _id(GlobalFunctions::getTag()),
-      _color(GlobalFunctions::getTag())
+      _id(GlobalFunctions::createNewTag()),
+      _color(GlobalFunctions::createNewTag())
 {
     grid->correctPosition(_pos);
     foreach(Cell* cell, _cells) {
@@ -1098,11 +1153,7 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
     //read data and reconstructing structures
     QMap< quint64, QList< quint64 > > connectingCells;
     QMap< quint64, Cell* > idCellMap;
-    qreal angle(0);
-    QVector3D pos;
-    stream >> angle >> pos >> _angularVel >> _vel;
-    setPosition(pos);
-    setAngle(angle);
+    stream >> _angle >> _pos >> _angularVel >> _vel;
     int numCells(0);
     stream >> numCells;
     ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
@@ -1113,7 +1164,7 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
         idCellMap[cell->getId()] = cell;
 
         //assigning new cell id
-        quint64 newId = GlobalFunctions::getTag();
+        quint64 newId = GlobalFunctions::createNewTag();
         oldNewCellIdMap[cell->getId()] = newId;
         oldIdCellMap[cell->getId()] = cell;
         cell->setId(newId);
@@ -1123,7 +1174,7 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
     stream >> _color;
 
     //assigning new cluster id
-    _id = GlobalFunctions::getTag();
+    _id = GlobalFunctions::createNewTag();
     oldNewClusterIdMap[oldClusterId] = _id;
 
     QMapIterator< quint64, QList< quint64 > > it(connectingCells);
@@ -1137,7 +1188,7 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
             ++i;
         }
     }
-
+    calcTransform();
     updateRelCoordinates();
     updateAngularMass();
 }
@@ -1146,8 +1197,8 @@ CellCluster::CellCluster(QList< Cell* > cells, qreal angle, Grid*& grid)
     : _grid(grid),
       _angle(angle),
       _cells(cells),
-      _id(GlobalFunctions::getTag()),
-      _color(GlobalFunctions::getTag())
+      _id(GlobalFunctions::createNewTag()),
+      _color(GlobalFunctions::createNewTag())
 {
     //calc new center
     QVector3D center(0.0,0.0,0.0);

@@ -7,6 +7,7 @@
 #include "model/entities/cellto.h"
 
 #include <QtCore/qmath.h>
+#include <QVector2D>
 
 //QT += webkitwidgets
 
@@ -15,11 +16,16 @@
 //- Prefix Alien in Klassen entfernen
 //- suche nach "TODO"
 //- AlienSimulator::updateCell: Konzept für cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
+//- Radiation als Feature
+//- SimulationSettings und MetadataManager über Grid erreichbar
+//- Grid zerteilen
+//- NICHT Set<CellCluster*> in SimulationController::updateCell benutzen!!!
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)
 //- AlienCellCluster: calcTransform() nach setPosition(...) aufrufen
 //- ShapeUniverse: _grid->correctPosition(pos) nach Positionsänderungen aufrufen
+//- ReadSimulationParameters VOR Clusters lesen
 
 //Optimierung:
 //- bei AlienCellFunctionConstructor: Energie im Vorfeld checken
@@ -70,7 +76,6 @@
 //Optional:
 //- Cell-memory im Scanner auslesen und im Constructor erstellen
 
-
 int main(int argc, char *argv[])
 {
     //register types
@@ -81,7 +86,7 @@ int main(int argc, char *argv[])
 
     //init main objects
     QApplication a(argc, argv);
-    SimulationController simulator(400, 200, SimulationController::Threading::MULTI);
+    SimulationController simulator(QVector2D(400, 200), SimulationController::Threading::EXTRA_THREAD);
     MainWindow w(&simulator);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 

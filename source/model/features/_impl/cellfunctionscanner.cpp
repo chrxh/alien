@@ -84,7 +84,7 @@ CellFeature::ProcessingResult CellFunctionScanner::processImpl (Token* token, Ce
 {
     ProcessingResult processingResult {false, 0};
     int n = token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)];
-    quint64 tag(GlobalFunctions::getTag());
+    quint64 tag(GlobalFunctions::createNewTag());
     Cell* scanCellPre1 = previousCell;
     Cell* scanCellPre2 = previousCell;
     Cell* scanCell = cell;
@@ -104,7 +104,7 @@ CellFeature::ProcessingResult CellFunctionScanner::processImpl (Token* token, Ce
         token->memory[static_cast<int>(SCANNER::OUT)] = static_cast<int>(SCANNER_OUT::SUCCESS);
 
         //prove whether finished or not
-        tag = GlobalFunctions::getTag();
+        tag = GlobalFunctions::createNewTag();
         Cell* scanCellPreTemp1 = previousCell;
         Cell* scanCellPreTemp2 = previousCell;
         Cell* scanCellTemp = cell;

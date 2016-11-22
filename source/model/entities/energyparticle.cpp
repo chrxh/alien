@@ -13,7 +13,7 @@
 #include <qmath.h>
 
 EnergyParticle::EnergyParticle(qreal amount_, QVector3D pos_, QVector3D vel_, Grid*& grid)
-    : _grid(grid), amount(amount_), pos(pos_), vel(vel_), id(GlobalFunctions::getTag()), color(0)
+    : _grid(grid), amount(amount_), pos(pos_), vel(vel_), id(GlobalFunctions::createNewTag()), color(0)
 {
 }
 

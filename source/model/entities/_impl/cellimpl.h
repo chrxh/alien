@@ -17,6 +17,8 @@ public:
                    Grid*& grid);
     ~CellImpl();
 
+    bool compareEqual (Cell* otherCell) const;
+
     void registerFeatures (CellFeature* features);
     CellFeature* getFeatures () const;
     void removeFeatures ();
@@ -80,26 +82,26 @@ private:
 
     QVector< Token* > _tokenStack;
     QVector< Token* > _newTokenStack;
-    int _tokenStackPointer;
-    int _newTokenStackPointer;
+    int _tokenStackPointer = 0;
+    int _newTokenStackPointer = 0;
 
-    bool _toBeKilled;
-    quint64 _tag;
-    quint64 _id;
-    int _protectionCounter;
+    bool _toBeKilled = false;
+    quint64 _tag = 0;
+    quint64 _id = 0;
+    int _protectionCounter = 0;
     QVector3D _relPos;
     CellCluster* _cluster;
-    qreal _energy;
+    qreal _energy = 0.0;
 
-    int _maxConnections;
-    int _numConnections;
-    Cell** _connectingCells;
+    int _maxConnections = 0;
+    int _numConnections = 0;
+    Cell** _connectingCells = 0;
 
-    int _tokenAccessNumber;
-    bool _blockToken;
+    int _tokenAccessNumber = 0;
+    bool _blockToken = false;
 
     QVector3D _vel;
-    quint8 _color;      //metadata
+    quint8 _color = 0;      //metadata
 };
 
 #endif // CELLIMPL_H

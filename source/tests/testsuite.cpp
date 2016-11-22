@@ -5,7 +5,8 @@
 #include "testcellcluster.h"
 #include "testtoken.h"
 #include "testcellfunctioncommunicator.h"
-#include "integrationtestsimulation.h"
+#include "integrationtestreplicator.h"
+#include "integrationtestdeterminism.h"
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
@@ -15,11 +16,14 @@ int main(int argc, char** argv) {
     TestToken testToken;
     TestCellFunctionCommunicator testCommunicator;
 
-    IntegrationTestSimulation intTestSimulation;
+    IntegrationTestReplicator intTestSimulation;
+    IntegrationTestDeterminism intTestDeterminism;
 
+    //TODO: Determinismustest
     return QTest::qExec(&testPhysics, argc, argv)
             | QTest::qExec(&testCellCluster, argc, argv)
             | QTest::qExec(&testToken, argc, argv)
             | QTest::qExec(&testCommunicator, argc, argv)
-            | QTest::qExec(&intTestSimulation, argc, argv);
+            | QTest::qExec(&intTestSimulation, argc, argv)
+            | QTest::qExec(&intTestDeterminism, argc, argv);
 }

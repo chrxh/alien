@@ -146,7 +146,7 @@ FORMS += gui/monitoring/simulationmonitor.ui \
     gui/microeditor/cellcomputeredit.ui \
     gui/dialogs/addrectstructuredialog.ui \
     gui/dialogs/addhexagonstructuredialog.ui \
-    gui/assistance/tutorialwindow.ui \
+    gui/assistance/tutorialwindow.ui
 
 RESOURCES += \
     gui/resources/ressources.qrc
@@ -164,10 +164,13 @@ test {
         tests/testsettings.h \
         tests/testcellcluster.h \
         tests/testtoken.h \
-        tests/integrationtestsimulation.h \
-        tests/testcellfunctioncommunicator.h
+        tests/testcellfunctioncommunicator.h \
+        tests/integrationtestdeterminism.h \
+        tests/integrationtestreplicator.h
 
-    SOURCES += tests/testsuite.cpp
+    SOURCES += tests/testsuite.cpp \
+        tests/integrationtestdeterminism.cpp \
+        tests/integrationtestreplicator.cpp
 
 } else {
     message(Normal build)
