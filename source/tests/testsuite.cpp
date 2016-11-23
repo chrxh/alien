@@ -6,7 +6,7 @@
 #include "testtoken.h"
 #include "testcellfunctioncommunicator.h"
 #include "integrationtestreplicator.h"
-#include "integrationtestdeterminism.h"
+#include "integrationtestcomparison.h"
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     TestCellFunctionCommunicator testCommunicator;
 
     IntegrationTestReplicator intTestSimulation;
-    IntegrationTestDeterminism intTestDeterminism;
+    IntegrationTestComparison intTestDeterminism;
 
     //TODO: Determinismustest
     return QTest::qExec(&testPhysics, argc, argv)
