@@ -1,5 +1,5 @@
-#ifndef INTEGRATIONTESTDETERMINISM_H
-#define INTEGRATIONTESTDETERMINISM_H
+#ifndef INTEGRATIONTESTCOMPARISON_H
+#define INTEGRATIONTESTCOMPARISON_H
 
 #include <QObject>
 #include <QVector3D>
@@ -8,7 +8,7 @@
 class SimulationController;
 class Grid;
 
-class IntegrationTestDeterminism : public QObject
+class IntegrationTestComparison : public QObject
 {
     Q_OBJECT
 private slots:
@@ -21,4 +21,4 @@ private:
     SimulationController* _simController;
 };
 
-#endif // INTEGRATIONTESTDETERMINISM_H
+#endif // INTEGRATIONTESTCOMPARISON_H
