@@ -12,14 +12,6 @@
 
 namespace {
 
-    void runSimulation(SimulationController* simulationController)
-    {
-        for (int time = 0; time < INTEGRATIONTEST_COMPARISON_TIMESTEPS; ++time) {
-            qsrand(time);
-            simulationController->requestNextTimestep();
-        }
-    }
-
     bool loadSimulationAndReturnSuccess(SimulationController* simulationController)
     {
         QFile file(INTEGRATIONTEST_COMPARISON_INIT);
@@ -116,6 +108,13 @@ namespace {
             file.close();
         }
         return fileOpened;
+    }
+
+    void runSimulation(SimulationController* simulationController)
+    {
+        for (int time = 0; time < INTEGRATIONTEST_COMPARISON_TIMESTEPS; ++time) {
+            simulationController->requestNextTimestep();
+        }
     }
 
     char const* createValueDeviationMessageForCluster (int time, int clusterId, QString what, qreal ref, qreal comp)
