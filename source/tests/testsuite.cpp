@@ -16,14 +16,14 @@ int main(int argc, char** argv) {
     TestToken testToken;
     TestCellFunctionCommunicator testCommunicator;
 
-    IntegrationTestReplicator intTestSimulation;
-    IntegrationTestComparison intTestDeterminism;
+    IntegrationTestReplicator intTestReplicator;
+//    IntegrationTestComparison intTestComparison;
 
     //TODO: Determinismustest
     return QTest::qExec(&testPhysics, argc, argv)
             | QTest::qExec(&testCellCluster, argc, argv)
             | QTest::qExec(&testToken, argc, argv)
             | QTest::qExec(&testCommunicator, argc, argv)
-            | QTest::qExec(&intTestSimulation, argc, argv)
-            | QTest::qExec(&intTestDeterminism, argc, argv);
+            | QTest::qExec(&intTestReplicator, argc, argv);
+//            | QTest::qExec(&intTestComparison, argc, argv);
 }
