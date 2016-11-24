@@ -10,9 +10,9 @@
 class CellFunctionComputerImpl: public CellFunctionComputer
 {
 public:
-    CellFunctionComputerImpl (Grid*& grid);
-    CellFunctionComputerImpl (quint8* cellFunctionData, Grid*& grid);
-    CellFunctionComputerImpl (QDataStream& stream, Grid*& grid);
+    CellFunctionComputerImpl (Grid* grid);
+    CellFunctionComputerImpl (quint8* cellFunctionData, Grid* grid);
+    CellFunctionComputerImpl (QDataStream& stream, Grid* grid);
 
     void getInternalData (quint8* data) const;
 

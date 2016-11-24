@@ -9,7 +9,7 @@ class CellCluster;
 class CellFunctionConstructor : public CellFunction
 {
 public:
-    CellFunctionConstructor (Grid*& grid);
+    CellFunctionConstructor (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::CONSTRUCTOR; }
 

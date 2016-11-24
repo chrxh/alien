@@ -6,7 +6,7 @@
 class CellFunctionWeapon : public CellFunction
 {
 public:
-    CellFunctionWeapon (Grid*& grid);
+    CellFunctionWeapon (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::WEAPON; }
 

@@ -6,7 +6,7 @@
 class CellFunctionSensor : public CellFunction
 {
 public:
-    CellFunctionSensor (Grid*& grid);
+    CellFunctionSensor (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::SENSOR; }
 

@@ -29,7 +29,7 @@ namespace {
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, Grid*& grid)
+void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, Grid* grid)
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
@@ -58,7 +58,7 @@ void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType typ
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, quint8* data, Grid*& grid)
+void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, quint8* data, Grid* grid)
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
@@ -72,7 +72,7 @@ void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType typ
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream, Grid*& grid)
+void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream, Grid* grid)
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
@@ -86,7 +86,7 @@ void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType typ
     }
 }
 
-void CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, Grid*& grid)
+void CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, Grid* grid)
 {
     registerNewFeature(cell, new EnergyGuidanceImpl(grid));
 }

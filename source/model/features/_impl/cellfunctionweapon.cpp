@@ -5,7 +5,7 @@
 
 #include "model/simulationsettings.h"
 
-CellFunctionWeapon::CellFunctionWeapon (Grid*& grid)
+CellFunctionWeapon::CellFunctionWeapon (Grid* grid)
     : CellFunction(grid)
 {
 }
