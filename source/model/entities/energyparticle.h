@@ -8,15 +8,15 @@ class Grid;
 class EnergyParticle
 {
 public:
-    EnergyParticle (qreal amount_, QVector3D pos_, QVector3D vel_, Grid*& grid);
-    EnergyParticle (QDataStream& stream, QMap< quint64, EnergyParticle* >& oldIdEnergyMap, Grid*& grid);
+    EnergyParticle (qreal amount_, QVector3D pos_, QVector3D vel_, Grid* grid);
+    EnergyParticle (QDataStream& stream, QMap< quint64, EnergyParticle* >& oldIdEnergyMap, Grid* grid);
 
     bool movement (CellCluster*& cluster);
 
     void serialize (QDataStream& stream);
 
 private:
-    Grid*& _grid;
+    Grid* _grid;
 
 public:
     qreal amount;

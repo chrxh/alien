@@ -16,7 +16,7 @@
 using ACTIVATE_TOKEN = Cell::ACTIVATE_TOKEN;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UPDATE_TOKEN_ACCESS_NUMBER;
 
-CellFunctionConstructor::CellFunctionConstructor (Grid*& grid)
+CellFunctionConstructor::CellFunctionConstructor (Grid* grid)
     : CellFunction(grid)
 {
 }
@@ -29,7 +29,7 @@ namespace {
     }
 
     Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
-        , int tokenAccessNumber, int cellType, quint8* cellFunctionData, Grid*& grid)
+        , int tokenAccessNumber, int cellType, quint8* cellFunctionData, Grid* grid)
     {
         ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
         Cell* newCell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
@@ -42,7 +42,7 @@ namespace {
         return newCell;
     }
 
-    Cell* obstacleCheck (CellCluster* cluster, bool safeMode, Grid*& grid)
+    Cell* obstacleCheck (CellCluster* cluster, bool safeMode, Grid* grid)
     {
         //obstacle check
         foreach( Cell* cell, cluster->getCells() ) {

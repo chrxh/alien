@@ -6,7 +6,7 @@
 class CellFunctionPropulsion : public CellFunction
 {
 public:
-    CellFunctionPropulsion (Grid*& grid);
+    CellFunctionPropulsion (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::PROPULSION; }
 

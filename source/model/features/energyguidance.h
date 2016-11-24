@@ -6,7 +6,7 @@
 class EnergyGuidance: public CellFeature
 {
 public:
-    EnergyGuidance (Grid*& grid) : CellFeature(grid) {}
+    EnergyGuidance (Grid* grid) : CellFeature(grid) {}
 
     virtual ~EnergyGuidance () {}
 };

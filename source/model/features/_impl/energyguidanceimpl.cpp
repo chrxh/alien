@@ -6,7 +6,7 @@
 #include "model/simulationsettings.h"
 
 
-EnergyGuidanceImpl::EnergyGuidanceImpl (Grid*& grid)
+EnergyGuidanceImpl::EnergyGuidanceImpl (Grid* grid)
     : EnergyGuidance(grid)
 {
 

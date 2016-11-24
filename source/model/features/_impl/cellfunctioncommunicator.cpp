@@ -6,13 +6,13 @@
 
 #include <QString>
 
-CellFunctionCommunicator::CellFunctionCommunicator(Grid*& grid)
+CellFunctionCommunicator::CellFunctionCommunicator(Grid* grid)
     : CellFunction(grid)
 {
 
 }
 
-CellFunctionCommunicator::CellFunctionCommunicator (quint8* cellFunctionData, Grid*& grid)
+CellFunctionCommunicator::CellFunctionCommunicator (quint8* cellFunctionData, Grid* grid)
     : CellFunction(grid)
 {
     _newMessageReceived = static_cast<bool>(cellFunctionData[0]);
@@ -22,7 +22,7 @@ CellFunctionCommunicator::CellFunctionCommunicator (quint8* cellFunctionData, Gr
     _receivedMessage.distance = cellFunctionData[4];
 }
 
-CellFunctionCommunicator::CellFunctionCommunicator (QDataStream& stream, Grid*& grid)
+CellFunctionCommunicator::CellFunctionCommunicator (QDataStream& stream, Grid* grid)
     : CellFunction(grid)
 {
     stream >> _newMessageReceived

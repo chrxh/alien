@@ -10,9 +10,9 @@ class TestCellFunctionCommunicator;
 class CellFunctionCommunicator : public CellFunction
 {
 public:
-    CellFunctionCommunicator (Grid*& grid);
-    CellFunctionCommunicator (quint8* cellFunctionData, Grid*& grid);
-    CellFunctionCommunicator (QDataStream& stream, Grid*& grid);
+    CellFunctionCommunicator (Grid* grid);
+    CellFunctionCommunicator (quint8* cellFunctionData, Grid* grid);
+    CellFunctionCommunicator (QDataStream& stream, Grid* grid);
 
     void serialize (QDataStream& stream) const;
 

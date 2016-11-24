@@ -12,21 +12,21 @@ class Cell;
 class CellCluster
 {
 public:
-    static CellCluster* buildEmptyCellCluster (Grid*& grid);
+    static CellCluster* buildEmptyCellCluster (Grid* grid);
     static CellCluster* buildCellCluster (QList< Cell* > cells,
                                                qreal angle,
                                                QVector3D pos,
                                                qreal angularVel,
                                                QVector3D vel,
-                                               Grid*& grid);
+                                               Grid* grid);
     static CellCluster* buildCellCluster (QDataStream& stream,
                                                QMap< quint64, quint64 >& oldNewClusterIdMap,
                                                QMap< quint64, quint64 >& oldNewCellIdMap,
                                                QMap< quint64, Cell* >& oldIdCellMap,
-                                               Grid*& grid);
+                                               Grid* grid);
     static CellCluster* buildCellClusterFromForeignCells (QList< Cell* > cells,
                                                                qreal angle,
-                                                               Grid*& grid);
+                                                               Grid* grid);
 
     ~CellCluster ();
 
@@ -84,25 +84,25 @@ public:
     void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component);
 
 private:
-    CellCluster (Grid*& grid);
+    CellCluster (Grid* grid);
     CellCluster (QList< Cell* > cells,
                       qreal angle,
                       QVector3D pos,
                       qreal angularVel,
                       QVector3D vel,
-                      Grid*& grid);
+                      Grid* grid);
     CellCluster (QDataStream& stream,
                       QMap< quint64, quint64 >& oldNewClusterIdMap,
                       QMap< quint64, quint64 >& oldNewCellIdMap,
                       QMap< quint64, Cell* >& oldIdCellMap,
-                      Grid*& grid);
+                      Grid* grid);
     CellCluster (QList< Cell* > cells,
                       qreal angle,
-                      Grid*& grid);
+                      Grid* grid);
 
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle);
 
-    Grid*& _grid;
+    Grid* _grid;
 
     qreal _angle = 0.0;       //in deg
     QVector3D _pos;

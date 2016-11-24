@@ -15,7 +15,7 @@
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
-CellCluster* CellCluster::buildEmptyCellCluster (Grid*& grid)
+CellCluster* CellCluster::buildEmptyCellCluster (Grid* grid)
 {
     return new CellCluster(grid);
 }
@@ -25,7 +25,7 @@ CellCluster* CellCluster::buildCellCluster (QList< Cell* > cells,
                                            QVector3D pos,
                                            qreal angularVel,
                                            QVector3D vel,
-                                           Grid*& grid)
+                                           Grid* grid)
 {
     return new CellCluster(cells, angle, pos, angularVel, vel, grid);
 }
@@ -34,14 +34,14 @@ CellCluster* CellCluster::buildCellCluster (QDataStream& stream,
                                            QMap< quint64, quint64 >& oldNewClusterIdMap,
                                            QMap< quint64, quint64 >& oldNewCellIdMap,
                                            QMap< quint64, Cell* >& oldIdCellMap,
-                                           Grid*& grid)
+                                           Grid* grid)
 {
     return new CellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, grid);
 }
 
 CellCluster* CellCluster::buildCellClusterFromForeignCells (QList< Cell* > cells,
                                                            qreal angle,
-                                                           Grid*& grid)
+                                                           Grid* grid)
 {
     return new CellCluster(cells, angle, grid);
 }
@@ -1073,7 +1073,7 @@ void CellCluster::getConnectedComponent(Cell* cell, const quint64& tag, QList< C
     }
 }
 
-CellCluster::CellCluster (Grid*& grid)
+CellCluster::CellCluster (Grid* grid)
     : _grid(grid),
       _angle(0.0),
       _pos(0.0, 0.0, 0.0),
@@ -1086,7 +1086,7 @@ CellCluster::CellCluster (Grid*& grid)
     calcTransform();
 }
 
-CellCluster::CellCluster(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, Grid*& grid)
+CellCluster::CellCluster(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, Grid* grid)
     : _grid(grid),
       _angle(angle),
       _pos(pos),
@@ -1105,7 +1105,7 @@ CellCluster::CellCluster(QList< Cell* > cells, qreal angle, QVector3D pos, qreal
     updateAngularMass();
 }
 
-CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid*& grid)
+CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid)
     : _grid(grid)
 {
     //read data and reconstructing structures
@@ -1151,7 +1151,7 @@ CellCluster::CellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewC
     updateAngularMass();
 }
 
-CellCluster::CellCluster(QList< Cell* > cells, qreal angle, Grid*& grid)
+CellCluster::CellCluster(QList< Cell* > cells, qreal angle, Grid* grid)
     : _grid(grid),
       _angle(angle),
       _cells(cells),

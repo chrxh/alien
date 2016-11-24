@@ -7,7 +7,7 @@
 
 #include <QtCore/qmath.h>
 
-CellFunctionSensor::CellFunctionSensor (Grid*& grid)
+CellFunctionSensor::CellFunctionSensor (Grid* grid)
     : CellFunction(grid)
 {
 }

@@ -6,7 +6,7 @@
 class EnergyGuidanceImpl : public EnergyGuidance
 {
 public:
-    EnergyGuidanceImpl (Grid*& grid);
+    EnergyGuidanceImpl (Grid* grid);
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);

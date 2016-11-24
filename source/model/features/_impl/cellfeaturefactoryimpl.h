@@ -9,11 +9,11 @@ public:
     CellDecoratorFactoryImpl ();
     ~CellDecoratorFactoryImpl () {}
 
-    void addCellFunction (Cell* cell, CellFunctionType type, Grid*& grid);
-    void addCellFunction (Cell* cell, CellFunctionType type, quint8* data, Grid*& grid);
-    void addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream, Grid*& grid);
+    void addCellFunction (Cell* cell, CellFunctionType type, Grid* grid);
+    void addCellFunction (Cell* cell, CellFunctionType type, quint8* data, Grid* grid);
+    void addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream, Grid* grid);
 
-    void addEnergyGuidance (Cell* cell, Grid*& grid);
+    void addEnergyGuidance (Cell* cell, Grid* grid);
 };
 
 #endif // CELLDECORATORFACTORYIMPL_H

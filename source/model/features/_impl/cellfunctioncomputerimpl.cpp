@@ -7,7 +7,7 @@
 #include <QString>
 #include <qdebug.h>
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (Grid*& grid)
+CellFunctionComputerImpl::CellFunctionComputerImpl (Grid* grid)
     : CellFunctionComputer(grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
     , _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
@@ -17,7 +17,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (Grid*& grid)
         _code[i] = 0;
 }
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, Grid*& grid)
+CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, Grid* grid)
     : CellFunctionComputer(grid), _code(), _numInstr(0), _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     _numInstr = cellFunctionData[0];
@@ -27,7 +27,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, Gr
     }
 }
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (QDataStream& stream, Grid*& grid)
+CellFunctionComputerImpl::CellFunctionComputerImpl (QDataStream& stream, Grid* grid)
     : CellFunctionComputer(grid), _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     //load cell memory

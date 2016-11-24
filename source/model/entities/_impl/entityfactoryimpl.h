@@ -10,10 +10,10 @@ public:
     EntityFactoryImpl ();
     ~EntityFactoryImpl () {}
 
-    Cell* buildCell (qreal energy, Grid*& grid, int maxConnections = 0, int tokenAccessNumber = 0
+    Cell* buildCell (qreal energy, Grid* grid, int maxConnections = 0, int tokenAccessNumber = 0
         , QVector3D relPos = QVector3D());
-    Cell* buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, Grid*& grid);
-    Cell* buildCellWithRandomData (qreal energy, Grid*& grid);
+    Cell* buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, Grid* grid);
+    Cell* buildCellWithRandomData (qreal energy, Grid* grid);
 };
 
 #endif // CELLFACTORYIMPL_H

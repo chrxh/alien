@@ -8,7 +8,7 @@
 #include <QtCore/qmath.h>
 
 
-CellFunctionPropulsion::CellFunctionPropulsion (Grid*& grid)
+CellFunctionPropulsion::CellFunctionPropulsion (Grid* grid)
     : CellFunction(grid)
 {
 }

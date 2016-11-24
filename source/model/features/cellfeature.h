@@ -11,7 +11,7 @@ class EnergyParticle;
 class CellFeature
 {
 public:
-    CellFeature (Grid*& grid) : _grid(grid), _nextFeature(0) {}
+    CellFeature (Grid* grid) : _grid(grid), _nextFeature(0) {}
     virtual ~CellFeature ();
 
     void registerNextFeature (CellFeature* nextFeature);

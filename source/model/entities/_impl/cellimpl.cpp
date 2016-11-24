@@ -10,7 +10,7 @@
 
 #include <QtCore/qmath.h>
 
-CellImpl::CellImpl (qreal energy, Grid*& grid, int maxConnections, int tokenAccessNumber, QVector3D relPos)
+CellImpl::CellImpl (qreal energy, Grid* grid, int maxConnections, int tokenAccessNumber, QVector3D relPos)
     : Cell(grid),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
@@ -35,7 +35,7 @@ CellImpl::CellImpl (qreal energy, Grid*& grid, int maxConnections, int tokenAcce
 }
 
 CellImpl::CellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-    , Grid*& grid)
+    , Grid* grid)
     : Cell(grid),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE)
