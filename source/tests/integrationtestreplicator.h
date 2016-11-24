@@ -11,12 +11,11 @@ class IntegrationTestReplicator : public QObject
 private slots:
 
     void initTestCase();
-    void testLoadReplicator();
     void testRunSimulation();
     void cleanupTestCase();
 
 private:
-    SimulationController* _simulator;
+    SimulationController* _simulationController;
 };
 
 
