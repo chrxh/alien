@@ -11,11 +11,20 @@
 #include <QtTest/QtTest>
 
 namespace {
-    bool loadDataAndReturnSuccess(SimulationController* simulationController, QString fileName)
+
+    void runSimulation(SimulationController* simulationController)
     {
-        QFile file(fileName );
+        for (int time = 0; time < INTEGRATIONTEST_COMPARISON_TIMESTEPS; ++time) {
+            qsrand(time);
+            simulationController->requestNextTimestep();
+        }
+    }
+
+    bool loadSimulationAndReturnSuccess(SimulationController* simulationController)
+    {
+        QFile file(INTEGRATIONTEST_COMPARISON_INIT);
         bool fileOpened = file.open(QIODevice::ReadOnly);
-        if( fileOpened ) {
+        if (fileOpened) {
             QDataStream in(&file);
             QMap< quint64, quint64 > oldNewCellIdMap;
             QMap< quint64, quint64 > oldNewClusterIdMap;
@@ -23,6 +32,87 @@ namespace {
             simulationParameters.readData(in);
             MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
             MetadataManager::getGlobalInstance().readSymbolTable(in);
+            file.close();
+        }
+        return fileOpened;
+    }
+
+    struct LoadedReferenceData {
+        bool success = false;
+        QList<QList<QVector3D>> clusterCellPosList;
+        QList<QList<QVector3D>> clusterCellVelList;
+        QList<QVector3D> clusterPosList;
+        QList<qreal> clusterAngleList;
+        QList<QVector3D> clusterVelList;
+        QList<qreal> clusterAnglularVelList;
+        QList<qreal> clusterAnglularMassList;
+    };
+
+    LoadedReferenceData loadReferenceData()
+    {
+        LoadedReferenceData ref;
+        QFile file(INTEGRATIONTEST_COMPARISON_REF);
+        if (!file.open(QIODevice::ReadOnly))
+            return ref;
+
+        QDataStream in(&file);
+        quint32 numCluster;
+        in >> numCluster;
+        for(int i = 0; i < numCluster; ++i) {
+            QList<QVector3D> cellPosList;
+            QList<QVector3D> cellVelList;
+            QVector3D pos;
+            qreal angle;
+            QVector3D vel;
+            qreal angularVel;
+            qreal angularMass;
+            quint32 numCell;
+            in >> pos >> angle >> vel >> angularVel >> angularMass;
+            ref.clusterPosList << pos;
+            ref.clusterAngleList << angle;
+            ref.clusterVelList << vel;
+            ref.clusterAnglularVelList << angularVel;
+            ref.clusterAnglularMassList << angularMass;
+            in >> numCell;
+            for(int i = 0; i < numCell; ++i) {
+                QVector3D pos;
+                QVector3D vel;
+                in >> pos >> vel;
+                cellPosList << pos;
+                cellVelList << vel;
+            }
+            ref.clusterCellPosList << cellPosList;
+            ref.clusterCellVelList << cellVelList;
+        }
+        file.close();
+        ref.success = true;
+        return ref;
+    }
+
+    bool updateReferenceDataAndReturnSuccess(SimulationController* simulationController)
+    {
+        if (!INTEGRATIONTEST_COMPARISON_UPDATE_REF)
+            return false;
+        QFile file(INTEGRATIONTEST_COMPARISON_REF);
+        Grid* grid = simulationController->getGrid();
+        bool fileOpened = file.open(QIODevice::WriteOnly);
+        if (fileOpened) {
+            QDataStream out(&file);
+            quint32 numCluster = grid->getClusters().size();
+            out << numCluster;
+            foreach (CellCluster* cluster, grid->getClusters()) {
+                quint32 numCells = cluster->getCells().size();
+                out << cluster->getPosition();
+                out << cluster->getAngle();
+                out << cluster->getVel();
+                out << cluster->getAngularVel();
+                out << cluster->getAngularMass();
+                out << numCells;
+                foreach (Cell* cell, cluster->getCells()) {
+                    out << cell->getRelPos();
+                    out << cell->getVel();
+                }
+            }
             file.close();
         }
         return fileOpened;
@@ -61,123 +151,53 @@ namespace {
         msg += QString("(") + QString::number(comp.x(), 'g', 12) + QString(", ") + QString::number(comp.y(), 'g', 12) + QString(")");
         return msg.toLatin1().data();
     }
+
+    void compareReferenceWithSimulation(SimulationController* simulationController, LoadedReferenceData const& ref)
+    {
+        Grid* grid = simulationController->getGrid();
+        int refNumCluster = ref.clusterPosList.size();
+        QVERIFY2(grid->getClusters().size() == static_cast<int>(refNumCluster), "Deviation in number of clusters.");
+        int minNumCluster = qMin(grid->getClusters().size(), static_cast<int>(refNumCluster));
+        for(int i = 0; i < minNumCluster; ++i) {
+            CellCluster* cluster = grid->getClusters().at(i);
+            QVERIFY2(ref.clusterPosList.at(i) == cluster->getPosition(), createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in pos", ref.clusterPosList.at(i), cluster->getPosition()));
+            QVERIFY2(ref.clusterVelList.at(i) == cluster->getVel(), createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in vel", ref.clusterVelList.at(i), cluster->getVel()));
+            QVERIFY2(ref.clusterAngleList.at(i) == cluster->getAngle(), createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angle", ref.clusterAngleList.at(i), cluster->getAngle()));
+            QVERIFY2(ref.clusterAnglularVelList.at(i) == cluster->getAngularVel(), createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular vel", ref.clusterAnglularVelList.at(i), cluster->getAngularVel()));
+            QVERIFY2(ref.clusterAnglularMassList.at(i) == cluster->getAngularMass(), createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular mass", ref.clusterAnglularMassList.at(i), cluster->getAngularMass()));
+            QList<QVector3D> cellPosList = ref.clusterCellPosList.at(i);
+            QList<QVector3D> cellVelList = ref.clusterCellVelList.at(i);
+            int minNumCell = qMin(cluster->getCells().size(), cellPosList.size());
+            for(int j = 0; j < minNumCell; ++j) {
+                QVERIFY2(cellPosList.at(j) == cluster->getCells().at(j)->getRelPos(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
+                    , cluster->getCells().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCells().at(j)->getRelPos()));
+                QVERIFY2(cellVelList.at(j) == cluster->getCells().at(j)->getVel(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
+                    , cluster->getCells().at(j)->getId(), "in vel", cellVelList.at(j), cluster->getCells().at(j)->getVel()));
+            }
+        }
+    }
 }
 
 void IntegrationTestComparison::initTestCase()
 {
-    _simController = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD, this);
-    QString fileName = TESTDATA_COMPARISON_REF_FOLDER + QString("/initial.sim");
-    if (!loadDataAndReturnSuccess(_simController, fileName)) {
-        QString msg = QString("Could not open file ") + fileName + QString(" in IntegrationTestDeterminism::loadData().");
+    _simulationController = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD, this);
+    if (!loadSimulationAndReturnSuccess(_simulationController)) {
+        QString msg = QString("Could not open file ") + INTEGRATIONTEST_COMPARISON_INIT + QString(" in loadDataAndReturnSuccess(...).");
         QFAIL(msg.toLatin1().data());
     }
 }
 
-void IntegrationTestComparison::testRunSimulations ()
+void IntegrationTestComparison::testRunAndCompareSimulation ()
 {
-    Grid* grid = _simController->getGrid();
-    for (int time = 0; time < TIMESTEPS; ++time) {
-        qsrand(time);
-        _simController->requestNextTimestep();
-    }
-
-    {
-        int time = TIMESTEPS;
-        QString fileName = TESTDATA_COMPARISON_REF_FOLDER + QString("/computation.dat");
-        QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly)) {
-            QWARN("Test data for IntegrationTestComparison do not exist. It will now be created for the next cycle.");
-        }
-        else {
-            QDataStream in(&file);
-            quint32 numCluster;
-            in >> numCluster;
-            QList<QList<QVector3D>> clusterCellPosList;
-            QList<QList<QVector3D>> clusterCellVelList;
-            QList<QVector3D> clusterPosList;
-            QList<qreal> clusterAngleList;
-            QList<QVector3D> clusterVelList;
-            QList<qreal> clusterAnglularVelList;
-            QList<qreal> clusterAnglularMassList;
-            for(int i = 0; i < numCluster; ++i) {
-                QList<QVector3D> cellPosList;
-                QList<QVector3D> cellVelList;
-                QVector3D pos;
-                qreal angle;
-                QVector3D vel;
-                qreal angularVel;
-                qreal angularMass;
-                quint32 numCell;
-                in >> pos;
-                in >> angle;
-                in >> vel;
-                in >> angularVel;
-                in >> angularMass;
-                clusterPosList << pos;
-                clusterAngleList << angle;
-                clusterVelList << vel;
-                clusterAnglularVelList << angularVel;
-                clusterAnglularMassList << angularMass;
-                in >> numCell;
-                for(int i = 0; i < numCell; ++i) {
-                    QVector3D pos;
-                    QVector3D vel;
-                    in >> pos;
-                    in >> vel;
-                    cellPosList << pos;
-                    cellVelList << vel;
-                }
-                clusterCellPosList << cellPosList;
-                clusterCellVelList << cellVelList;
-            }
-            file.close();
-
-            //checking
-            QVERIFY2(grid->getClusters().size() == static_cast<int>(numCluster), "Deviation in number of clusters.");
-            int minNumCluster = qMin(grid->getClusters().size(), static_cast<int>(numCluster));
-            for(int i = 0; i < minNumCluster; ++i) {
-                QList<QVector3D> cellPosList = clusterCellPosList.at(i);
-                QList<QVector3D> cellVelList = clusterCellVelList.at(i);
-                CellCluster* cluster = grid->getClusters().at(i);
-                int minNumCell = qMin(cluster->getCells().size(), cellPosList.size());
-                QVERIFY2(clusterPosList.at(i) == cluster->getPosition(), createVectorDeviationMessageForCluster(time, cluster->getId(), "in pos", clusterPosList.at(i), cluster->getPosition()));
-                QVERIFY2(clusterVelList.at(i) == cluster->getVel(), createVectorDeviationMessageForCluster(time, cluster->getId(), "in vel", clusterVelList.at(i), cluster->getVel()));
-                QVERIFY2(clusterAngleList.at(i) == cluster->getAngle(), createValueDeviationMessageForCluster(time, cluster->getId(), "in angle", clusterAngleList.at(i), cluster->getAngle()));
-                QVERIFY2(clusterAnglularVelList.at(i) == cluster->getAngularVel(), createValueDeviationMessageForCluster(time, cluster->getId(), "in angular vel", clusterAnglularVelList.at(i), cluster->getAngularVel()));
-                QVERIFY2(clusterAnglularMassList.at(i) == cluster->getAngularMass(), createValueDeviationMessageForCluster(time, cluster->getId(), "in angular mass", clusterAnglularMassList.at(i), cluster->getAngularMass()));
-
-                for(int j = 0; j < minNumCell; ++j) {
-                    QVERIFY2(cellPosList.at(j) == cluster->getCells().at(j)->getRelPos(), createVectorDeviationMessageForCell(time, cluster->getId()
-                        , cluster->getCells().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCells().at(j)->getRelPos()));
-                    QVERIFY2(cellVelList.at(j) == cluster->getCells().at(j)->getVel(), createVectorDeviationMessageForCell(time, cluster->getId()
-                        , cluster->getCells().at(j)->getId(), "in rel pos", cellVelList.at(j), cluster->getCells().at(j)->getVel()));
-                }
-            }
-        }
-    }
-    {
-        QString fileName = TESTDATA_COMPARISON_SIM_FOLDER + QString("/computation.dat");
-        QFile file(fileName);
-        if( file.open(QIODevice::WriteOnly) ) {
-            QDataStream out(&file);
-            quint32 numCluster = grid->getClusters().size();
-            out << numCluster;
-            foreach (CellCluster* cluster, grid->getClusters()) {
-                quint32 numCells = cluster->getCells().size();
-                out << cluster->getPosition();
-                out << cluster->getAngle();
-                out << cluster->getVel();
-                out << cluster->getAngularVel();
-                out << cluster->getAngularMass();
-                out << numCells;
-                foreach (Cell* cell, cluster->getCells()) {
-                    out << cell->getRelPos();
-                    out << cell->getVel();
-                }
-            }
-            file.close();
-        }
-    }
+    runSimulation(_simulationController);
+    LoadedReferenceData ref = loadReferenceData();
+    bool refUpdated = updateReferenceDataAndReturnSuccess(_simulationController);
+    if (ref.success)
+        compareReferenceWithSimulation(_simulationController, ref);
+    else if (refUpdated)
+        QFAIL("Reference file does not exist. It has been created for the next cycle.");
+    else
+        QFAIL("Reference file does not exist. It has not been created.");
 }
 
 
