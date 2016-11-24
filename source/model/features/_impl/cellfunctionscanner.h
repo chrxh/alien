@@ -6,7 +6,7 @@
 class CellFunctionScanner : public CellFunction
 {
 public:
-    CellFunctionScanner (Grid*& grid);
+    CellFunctionScanner (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::SCANNER; }
 

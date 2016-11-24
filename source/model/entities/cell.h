@@ -12,7 +12,7 @@ class CellFeature;
 class Cell
 {
 public:
-    Cell (Grid*& grid) : _grid(grid) {}
+    Cell (Grid* grid) : _grid(grid) {}
     virtual ~Cell() {}
 
     virtual bool compareEqual (Cell* otherCell) const = 0;
@@ -82,7 +82,7 @@ public:
 
 
 protected:
-    Grid*& _grid;
+    Grid* _grid;
 };
 
 #endif // CELL_H

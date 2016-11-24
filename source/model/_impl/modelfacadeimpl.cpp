@@ -15,7 +15,7 @@ ModelFacadeImpl::ModelFacadeImpl ()
     ServiceLocator::getInstance().registerService<ModelFacade>(this);
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid*& grid
+Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid* grid
     , int maxConnections, int tokenAccessNumber, QVector3D relPos)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -26,7 +26,7 @@ Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, q
     return cell;
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, Grid*& grid, int maxConnections
+Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, Grid* grid, int maxConnections
     , int tokenAccessNumber, QVector3D relPos)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -38,7 +38,7 @@ Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, G
 }
 
 Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-    , Grid*& grid)
+    , Grid* grid)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
@@ -51,13 +51,13 @@ Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QL
     return cell;
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, Grid*& grid)
+Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, Grid* grid)
 {
     QMap< quint64, QList< quint64 > > temp;
     return buildFeaturedCell(stream, temp, grid);
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid*& grid)
+Cell* ModelFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid* grid)
 {
     int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
     int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
@@ -109,7 +109,7 @@ CellTO ModelFacadeImpl::buildCellTO (Cell* cell)
     return to;
 }
 
-void ModelFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid*& grid)
+void ModelFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid* grid)
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();

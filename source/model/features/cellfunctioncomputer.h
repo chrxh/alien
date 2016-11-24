@@ -6,7 +6,7 @@
 class CellFunctionComputer: public CellFunction
 {
 public:
-    CellFunctionComputer (Grid*& grid) : CellFunction(grid) {}
+    CellFunctionComputer (Grid* grid) : CellFunction(grid) {}
     virtual ~CellFunctionComputer () {}
 
     CellFunctionType getType () const { return CellFunctionType::COMPUTER; }

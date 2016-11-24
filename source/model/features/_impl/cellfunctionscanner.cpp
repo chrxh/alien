@@ -7,7 +7,7 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-CellFunctionScanner::CellFunctionScanner(Grid*& grid)
+CellFunctionScanner::CellFunctionScanner(Grid* grid)
     : CellFunction(grid)
 {
 }

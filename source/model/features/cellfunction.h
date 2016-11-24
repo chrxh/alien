@@ -8,7 +8,7 @@
 class CellFunction: public CellFeature
 {
 public:
-    CellFunction (Grid*& grid) : CellFeature(grid) {}
+    CellFunction (Grid* grid) : CellFeature(grid) {}
     virtual ~CellFunction() {}
 
     //new interface
