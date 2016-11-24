@@ -17,7 +17,7 @@ public:
     static void collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp, qreal angularVelA1,
                            qreal angularVelB1, QVector3D n, qreal angularMassA, qreal angularMassB,
                            qreal massA, qreal massB,
-                           QVector3D& vA2, QVector3D& vB2, qreal& angularVelA2, qreal& angularVelB2, int temp = 0); //TEMP
+                           QVector3D& vA2, QVector3D& vB2, qreal& angularVelA2, qreal& angularVelB2);
     static void fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp, qreal angularVelA1,
                            qreal angularVelB1, QVector3D n, qreal angularMassA, qreal angularMassB, qreal angularMassAB,
                            qreal massA, qreal massB,
