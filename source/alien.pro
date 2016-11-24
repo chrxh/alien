@@ -63,8 +63,7 @@ SOURCES += main.cpp \
     model/features/_impl/cellfunctionconstructor.cpp \
     model/entities/energyparticle.cpp \
     model/simulationunit.cpp \
-    model/simulationcontroller.cpp \
-    tests/integrationtestcomparison.cpp
+    model/simulationcontroller.cpp
 HEADERS += \
     model/physics/physics.h \
     global/global.h \
@@ -131,8 +130,7 @@ HEADERS += \
     model/features/cellfunction.h \
     model/features/_impl/cellfeaturefactoryimpl.h \
     model/simulationunit.h \
-    model/simulationcontroller.h \
-    tests/integrationtestcomparison.h
+    model/simulationcontroller.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
@@ -167,10 +165,12 @@ test {
         tests/testcellcluster.h \
         tests/testtoken.h \
         tests/testcellfunctioncommunicator.h \
-        tests/integrationtestreplicator.h
+        tests/integrationtestreplicator.h \
+        tests/integrationtestcomparison.h
 
     SOURCES += tests/testsuite.cpp \
-        tests/integrationtestreplicator.cpp
+        tests/integrationtestreplicator.cpp \
+        tests/integrationtestcomparison.cpp
 
 } else {
     message(Normal build)

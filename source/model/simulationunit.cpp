@@ -88,134 +88,6 @@ void SimulationUnit::calcNextTimestep ()
 {
     _grid->lockData();
 
-    //<TEMP>
-    static int a = 0;
-    if( ++a == 999 ) {
-        qDebug() << _grid->getClusters().first()->getPosition();//->getCells().first()->calcPosition();
-    }
-
-    if( a < 300 ) {
-
-        QString fileName = QString("../source/testdata/test%1.dat").arg(a);
-        QFile file(fileName);
-        if( file.open(QIODevice::ReadOnly) ) {
-            QDataStream in(&file);
-            quint32 numCluster;
-            in >> numCluster;
-            QList<QList<QVector3D>> clusterCellPosList;
-            QList<QList<QVector3D>> clusterCellVelList;
-            QList<QVector3D> clusterPosList;
-            QList<qreal> clusterAngleList;
-            QList<QVector3D> clusterVelList;
-            QList<qreal> clusterAnglularVelList;
-            QList<qreal> clusterAnglularMassList;
-            for(int i = 0; i < numCluster; ++i) {
-                QList<QVector3D> cellPosList;
-                QList<QVector3D> cellVelList;
-                QVector3D pos;
-                qreal angle;
-                QVector3D vel;
-                qreal angularVel;
-                qreal angularMass;
-                quint32 numCell;
-                in >> pos;
-                in >> angle;
-                in >> vel;
-                in >> angularVel;
-                in >> angularMass;
-                clusterPosList << pos;
-                clusterAngleList << angle;
-                clusterVelList << vel;
-                clusterAnglularVelList << angularVel;
-                clusterAnglularMassList << angularMass;
-                in >> numCell;
-                for(int i = 0; i < numCell; ++i) {
-                    QVector3D pos;
-                    QVector3D vel;
-                    in >> pos;
-                    in >> vel;
-                    cellPosList << pos;
-                    cellVelList << vel;
-                }
-                clusterCellPosList << cellPosList;
-                clusterCellVelList << cellVelList;
-            }
-            file.close();
-
-            //checking
-            int minCluster = qMin(_grid->getClusters().size(), (int)numCluster);
-            bool breaking = false;
-            qDebug() <<  "Timestep: " << a;
-            for(int i = 0; i < minCluster; ++i) {
-                QList<QVector3D> cellPosList = clusterCellPosList.at(i);
-                QList<QVector3D> cellVelList = clusterCellVelList.at(i);
-                CellCluster* cluster = _grid->getClusters().at(i);
-                int minCell = qMin(cluster->getCells().size(), cellPosList.size());
-
-                if(clusterPosList.at(i) != cluster->getPosition())
-                    qDebug() << "DEVIATION of cluster " << i << "/" << minCluster << " in pos; OLD: " << clusterPosList.at(i) << ", NEW: " << cluster->getPosition();
-                if(clusterAngleList.at(i) != cluster->getAngle())
-                    qDebug() << "DEVIATION of cluster " << i << "/" << minCluster << " in angle; OLD: " << clusterAngleList.at(i) << ", NEW: " << cluster->getAngle();
-                if(clusterVelList.at(i) != cluster->getVel()) {
-                    qDebug() << "DEVIATION of cluster " << i << "/" << minCluster << " in vel; OLD: ("
-                             << QString::number(clusterVelList.at(i).x(), 'g', 20) << ", "
-                             << QString::number(clusterVelList.at(i).y(), 'g', 20)
-                             << "), NEW: ("
-                             << QString::number(cluster->getVel().x(), 'g', 20) << ", "
-                             << QString::number(cluster->getVel().y(), 'g', 20) << ")";
-                }
-                if(clusterAnglularVelList.at(i) != cluster->getAngularVel())
-                    qDebug() << "DEVIATION of cluster " << i << "/" << minCluster << " in angularVel; OLD: " << QString::number(clusterAnglularVelList.at(i), 'g', 20) << ", NEW: " << QString::number(cluster->getAngularVel(), 'g', 20);
-                if(clusterAnglularMassList.at(i) != cluster->getAngularMass())
-                    qDebug() << "DEVIATION of cluster " << i << "/" << minCluster << " in angularMass; OLD: " << clusterAnglularMassList.at(i) << ", NEW: " << cluster->getAngularMass();
-                for(int j = 0; j < minCell; ++j) {
-                    if( cellPosList.at(j) != cluster->getCells().at(j)->getRelPos()) {
-                        qDebug() << "DEVIATION of cluster " << i << "/" << minCluster << " and cell " << j << "/" << minCell
-                                 << " in pos; OLD: " << cellPosList.at(j) << ", NEW: " << cluster->getCells().at(j)->getRelPos();
-                    }
-                    if( cellVelList.at(j) != cluster->getCells().at(j)->getVel()) {
-                        qDebug() << "DEVIATION of cluster " << i << "/" << minCluster << " and cell " << j << "/" << minCell
-                                 << " in vel; OLD: ("
-                                 << QString::number(cellVelList.at(j).x(), 'g', 20) << ", "
-                                 << QString::number(cellVelList.at(j).y(), 'g', 20)
-                                 << "), NEW: ("
-                                 << QString::number(cluster->getCells().at(j)->getVel().x(), 'g', 20) << ", "
-                                 << QString::number(cluster->getCells().at(j)->getVel().y(), 'g', 20) << ")";
-//                        breaking = true;
-//                        break;
-                    }
-                }
-                if (breaking)
-                    break;
-                }
-        }
-
-/*        QString fileName = QString("../source/testdata/test%1.dat").arg(a);
-        if( !fileName.isEmpty() ) {
-            QFile file(fileName);
-            if( file.open(QIODevice::WriteOnly) ) {
-                QDataStream out(&file);
-                quint32 numCluster = _grid->getClusters().size();
-                out << numCluster;
-                foreach (CellCluster* cluster, _grid->getClusters()) {
-                    quint32 numCells = cluster->getCells().size();
-                    out << cluster->getPosition();
-                    out << cluster->getAngle();
-                    out << cluster->getVel();
-                    out << cluster->getAngularVel();
-                    out << cluster->getAngularMass();
-                    out << numCells;
-                    foreach (Cell* cell, cluster->getCells()) {
-                        out << cell->getRelPos();
-                        out << cell->getVel();
-                    }
-                }
-                file.close();
-            }
-        }*/
-    }
-    //</TEMP>
-
     //cell movement: step 1
     foreach( CellCluster* cluster, _grid->getClusters()) {
         cluster->movementProcessingStep1();
@@ -225,7 +97,7 @@ void SimulationUnit::calcNextTimestep ()
     //----
 //    qreal eOld(calcInternalEnergy()+(calcTransEnergy()+calcRotEnergy())/INTERNAL_TO_KINETIC_ENERGY);
     //----
-/*    QMutableListIterator<CellCluster*> i(_grid->getClusters());
+    QMutableListIterator<CellCluster*> i(_grid->getClusters());
     QList< EnergyParticle* > energyParticles;
     while (i.hasNext()) {
 
@@ -253,7 +125,7 @@ void SimulationUnit::calcNextTimestep ()
 //    if( ( qAbs(eOld-eNew) > 0.1 ) )
         //qDebug("step 2: old: %f new: %f, internal: %f, trans: %f, rot: %f", eOld, eNew, calcInternalEnergy(), calcTransEnergy(), calcRotEnergy());
     //----
-*/
+
     //cell movement: step 3
     foreach( CellCluster* cluster, _grid->getClusters()) {
         cluster->movementProcessingStep3();
@@ -261,30 +133,15 @@ void SimulationUnit::calcNextTimestep ()
     }
 
 
-    /*int p = 0;  //TEMP
-    foreach( CellCluster* cluster, _grid->getClusters()) {
-        if( p++ == 3857+2021) {
-            qDebug() << "Vel of 3857+2021: ";
-        }
-    }
-    */
-
-
     //cell movement: step 4
     QMutableListIterator<CellCluster*> j(_grid->getClusters());
-    int z = 0;  //TEMP
-    int c = 0;  //TEMP
     while (j.hasNext()) {
         CellCluster* cluster(j.next());
         if( cluster->isEmpty()) {
             delete cluster;
             j.remove();
-            if (z <= 3857)   //TEMP
-                ++c;
         }
-        else
-            ++z; //TEMP
-/*        else {
+        else {
             energyParticles.clear();
             bool decompose = false;
             cluster->movementProcessingStep4(energyParticles, decompose);
@@ -300,19 +157,17 @@ void SimulationUnit::calcNextTimestep ()
                     j.insert(newCluster);
                 }
             }
-        }*/
+        }
     }
-    /*if (a == 1) //TEMP
-        qDebug() << "Deleted objects: " << c;*/
 
     //cell movement: step 5
-/*    foreach( CellCluster* cluster, _grid->getClusters()) {
+    foreach( CellCluster* cluster, _grid->getClusters()) {
         cluster->movementProcessingStep5();
         debugCluster(cluster, 5);
     }
-*/
+
     //energy particle movement
-    /*QMutableListIterator<EnergyParticle*> p(_grid->getEnergyParticles());
+    QMutableListIterator<EnergyParticle*> p(_grid->getEnergyParticles());
     while (p.hasNext()) {
         EnergyParticle* e(p.next());
         CellCluster* cluster(0);
@@ -325,7 +180,7 @@ void SimulationUnit::calcNextTimestep ()
             delete e;
             p.remove();
         }
-    }*/
+    }
 
     _grid->unlockData();
 

@@ -239,7 +239,6 @@ void CellCluster::movementProcessingStep2 (QList< CellCluster* >& fragments, QLi
 //set cells to grid map
 void CellCluster::movementProcessingStep3 ()
 {
-    updateCellVel();    //TEMP!!!!!
     struct CollisionData {
         int movementState = 0;  //0: will do nothing, 1: collision, 2: fusion
         std::set<quint64> overlappingCells;
@@ -262,10 +261,6 @@ void CellCluster::movementProcessingStep3 ()
     _grid->correctPosition(_pos);
     calcTransform();
     QVector3D pos;
-    if (_id == 16502) { //TEMP
-        int temp = 0;
-
-    }
 
     //collect information for every colliding cluster
     QMap< quint64, CollisionData > clusterCollisionDataMap;
@@ -284,10 +279,6 @@ void CellCluster::movementProcessingStep3 ()
                         _grid->correctDisplacement(displacement);
                         if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MAX ) {
                             quint64 clusterId = tempCell->getCluster()->_id;
-                            if (tempCell->getCluster()->_id == 11758) //TEMP
-                            {
-                                int t = 0;
-                            }
 
                             //read collision data for the colliding cluster
                             CollisionData colData;
@@ -361,15 +352,6 @@ void CellCluster::movementProcessingStep3 ()
             for (it3 = colData.overlappingCells.begin(); it3 != colData.overlappingCells.end(); ++it3) {
                 Cell* otherCell = idCellMap[*it3];
                 centerPos = centerPos + otherCluster->_transform.map(otherCell->getRelPos());
-                if (_id == 16502) //TEMP
-                {
-                    qDebug() << QString("Problem: abs pos of overlapping cells of cluster id ") << otherCluster->_id
-                             << QString(": ")
-                             << QString::number(otherCluster->_transform.map(otherCell->getRelPos()).x(),'g', 20)+ QString(", ") + QString::number(otherCluster->_transform.map(otherCell->getRelPos()).y(),'g', 20);
-                    qDebug() << QString("Problem: rel pos of overlapping cells of cluster id ") << otherCluster->_id
-                             << QString(": ")
-                             << QString::number(otherCell->getRelPos().x(),'g', 20)+ QString(", ") + QString::number(otherCell->getRelPos().y(),'g', 20);
-                }
             }
             centerPos = centerPos/colData.overlappingCells.size();
 
@@ -388,7 +370,6 @@ void CellCluster::movementProcessingStep3 ()
                 Cell* otherCell = idCellMap[*it3];
                 n = n + otherCell->calcNormal(outerSpace, otherCluster->_transform).normalized();
             }
-//            qDebug("o: %f, %f", outerSpace.x(), outerSpace.y());
 
             //calc new vectors
             qreal mA = _cells.size();
@@ -404,25 +385,7 @@ void CellCluster::movementProcessingStep3 ()
                                rAPp, rBPp,
                                _angularVel, otherCluster->_angularVel, n,
                                _angularMass, otherCluster->_angularMass, mA, mB, vA2, vB2, angularVelA2,
-                               angularVelB2, otherCluster->getId());
-
-            if (_id == 16502) //TEMP
-            {
-                qDebug() << QString("Problem: cluster1: vel after: ") + QString::number(vA2.x(),'g', 10)+ QString(", ") + QString::number(vA2.y(),'g', 10);
-                qDebug() << QString("Problem: cluster2: vel after: ") + QString::number(vB2.x(),'g', 10)+ QString(", ") + QString::number(vB2.y(),'g', 10);
-                qDebug() << QString("Problem: cluster1: vel: ") + QString::number(_vel.x(),'g', 10)+ QString(", ") + QString::number(_vel.y(),'g', 10);
-                qDebug() << QString("Problem: cluster2: vel: ") + QString::number(otherCluster->_vel.x(),'g', 10)+ QString(", ") + QString::number(otherCluster->_vel.y(),'g', 10);
-                qDebug() << QString("Problem: cluster1: pos: ") + QString::number(_pos.x(),'g', 10)+ QString(", ") + QString::number(_pos.y(),'g', 10);
-                qDebug() << QString("Problem: cluster2: pos: ") + QString::number(otherCluster->_pos.x(),'g', 10)+ QString(", ") + QString::number(otherCluster->_pos.y(),'g', 10);
-                qDebug() << QString("Problem: cluster1: angular vel: ") + QString::number(_angularVel,'g', 10);
-                qDebug() << QString("Problem: cluster2: angular vel: ") + QString::number(otherCluster->_angularVel,'g', 10);
-                qDebug() << QString("Problem: cluster1: mass: ") + QString::number(mA,'g', 10);
-                qDebug() << QString("Problem: cluster2: mass: ") + QString::number(mB,'g', 10);
-                qDebug() << QString("Problem: cluster1: angular mass: ") + QString::number(_angularMass,'g', 10);
-                qDebug() << QString("Problem: cluster2: angular mass: ") + QString::number(otherCluster->_angularMass,'g', 10);
-                qDebug() << QString("Problem: center position: ") + QString::number(centerPos.x(),'g', 10)+ QString(", ") + QString::number(centerPos.y(),'g', 10);
-                qDebug() << QString("Problem: normal n: ") + QString::number(n.x(),'g', 10)+ QString(", ") + QString::number(n.y(),'g', 10);
-            }
+                               angularVelB2);
 
             //set new vectors
             _vel = vA2;
@@ -534,13 +497,13 @@ void CellCluster::movementProcessingStep3 ()
                         Cell* cell = idCellMap[id];
 
                         //create token?
-/*TEMP!!!!                        if( (cell->getNumToken() < simulationParameters.CELL_TOKENSTACKSIZE) && (eDiff > simulationParameters.MIN_TOKEN_ENERGY) ) {
+                        if( (cell->getNumToken() < simulationParameters.CELL_TOKENSTACKSIZE) && (eDiff > simulationParameters.MIN_TOKEN_ENERGY) ) {
                             Token* token = new Token(eDiff, true);
                             cell->addToken(token, Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
                         }
                         //if not add to internal cell energy
                         else
-*/                            cell->setEnergy(cell->getEnergy() + eDiff);
+                            cell->setEnergy(cell->getEnergy() + eDiff);
                     }
                 }
             }
@@ -553,11 +516,6 @@ void CellCluster::movementProcessingStep3 ()
         _grid->setCell(pos, cell);
     }
 
-    /*if (_id == 11758) { //TEMP
-        qDebug() << "cluster vel: "
-                 << QString::number(_vel.x(), 'g', 20) << ", "
-                 << QString::number(_vel.y(), 'g', 20);
-    }*/
 }
 
 //step 4:
@@ -642,11 +600,11 @@ void CellCluster::movementProcessingStep4 (QList< EnergyParticle* >& energyParti
                     for( int i = 0; i < spreadTokenCounter; ++i ) {
 
                         //execute cell function
-/*                        CellFeature::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
+                        CellFeature::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
                         if( processingResult.decompose )
                             decompose = true;
                         if( processingResult.newEnergyParticle )
-                            energyParticles << processingResult.newEnergyParticle;*/
+                            energyParticles << processingResult.newEnergyParticle;
 
                     }
 
