@@ -14,11 +14,13 @@ class IntegrationTestComparison : public QObject
 private slots:
 
     void initTestCase();
-    void testRunSimulations ();
+    void testRunAndCompareSimulation ();
     void cleanupTestCase();
 
 private:
-    SimulationController* _simController;
+    void test();
+
+    SimulationController* _simulationController;
 };
 
 #endif // INTEGRATIONTESTCOMPARISON_H

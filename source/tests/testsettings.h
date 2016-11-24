@@ -6,8 +6,9 @@
 
 const qreal TEST_REAL_PRECISION = 1.0e-5;
 const qreal TEST_LOW_REAL_PRECISION = 1.0e-1;
-const QString TESTDATA_COMPARISON_REF_FOLDER = "../source/testdata";
-const QString TESTDATA_COMPARISON_SIM_FOLDER = "../source/testdata";
-const int TIMESTEPS = 1000;
+const QString INTEGRATIONTEST_COMPARISON_INIT = "../source/testdata/initial.sim";
+const QString INTEGRATIONTEST_COMPARISON_REF = "../source/testdata/computation.dat";
+const bool INTEGRATIONTEST_COMPARISON_UPDATE_REF = true;
+const int INTEGRATIONTEST_COMPARISON_TIMESTEPS = 1000;
 
 #endif // TESTSETTINGS_H
