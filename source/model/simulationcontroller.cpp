@@ -2,11 +2,12 @@
 
 #include "simulationunit.h"
 #include "metadatamanager.h"
-#include "modelfacade.h"
+#include "factoryfacade.h"
 #include "model/features/cellfunctioncomputer.h"
 #include "model/entities/token.h"
 #include "model/entities/grid.h"
 #include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 #include "global/global.h"
@@ -15,6 +16,7 @@
 #include <QTimer>
 #include <QtCore/qmath.h>
 #include <QVector2D>
+#include <QMatrix4x4>
 #include <set>
 
 SimulationController::SimulationController(Threading threading, QObject* parent)
@@ -70,8 +72,8 @@ QMap< QString, qreal > SimulationController::getMonitorData ()
     int token(0);
     qreal internalEnergy(_unit->calcInternalEnergy());
     foreach( CellCluster* cluster, _unit->getClusters() ) {
-        cells += cluster->getCells().size();
-        foreach( Cell* cell, cluster->getCells() ) {
+        cells += cluster->getCellsRef().size();
+        foreach( Cell* cell, cluster->getCellsRef() ) {
             token += cell->getNumToken();
         }
     }
@@ -155,8 +157,9 @@ void SimulationController::buildUniverse (QDataStream& stream, QMap< quint64, qu
     //reconstruct cluster
     quint32 numCluster;
     stream >> numCluster;
+    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     for(quint32 i = 0; i < numCluster; ++i) {
-        CellCluster* cluster = CellCluster::buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid);
+        CellCluster* cluster = facade->buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid);
         _grid->getClusters() << cluster;
     }
 
@@ -196,7 +199,7 @@ qint32 SimulationController::getUniverseSizeY ()
 void SimulationController::addBlockStructure (QVector3D center, int numCellX, int numCellY, QVector3D dist, qreal energy)
 {
     //create cell grid
-    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     Cell* cellGrid[numCellX][numCellY];
     for(int i = 0; i < numCellX; ++i )
         for(int j = 0; j < numCellY; ++j ) {
@@ -223,7 +226,7 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
 
     //create cluster
     _grid->lockData();
-    CellCluster* cluster = CellCluster::buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
+    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
     cluster->drawCellsToMap();
     _unit->getClusters() << cluster;
     _grid->unlockData();
@@ -235,7 +238,7 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
 void SimulationController::addHexagonStructure (QVector3D center, int numLayers, qreal dist, qreal energy)
 {
     //create hexagon cell structure
-    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     Cell* cellGrid[2*numLayers-1][2*numLayers-1];
     QList< Cell* > cells;
     int maxCon = 6;
@@ -275,7 +278,7 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
 
     //create cluster
     _grid->lockData();
-    CellCluster* cluster = CellCluster::buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
+    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
     cluster->drawCellsToMap();
     _unit->getClusters() << cluster;
     _grid->unlockData();
@@ -310,7 +313,7 @@ void SimulationController::serializeCell (QDataStream& stream, Cell* cell, quint
     _grid->lockData();
 
     //serialize cell data
-    ModelFacade *facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    FactoryFacade *facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     facade->serializeFeaturedCell(cell, stream);
     stream << clusterId;
 
@@ -334,7 +337,7 @@ void SimulationController::serializeExtendedSelection (QDataStream& stream, cons
     foreach(CellCluster* cluster, clusters) {
         cluster->serialize(stream);
         clusterIds << cluster->getId();
-        foreach(Cell* cell, cluster->getCells())
+        foreach(Cell* cell, cluster->getCellsRef())
             cellIds << cell->getId();
     }
 
@@ -360,12 +363,12 @@ void SimulationController::buildCell (QDataStream& stream,
     _grid->lockData();
 
     //read cell data
-    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     QList< Cell* > newCells;
     Cell* newCell = facade->buildFeaturedCell(stream, _grid);
     newCells << newCell;
     newCells[0]->setRelPos(QVector3D());
-    newCluster = CellCluster::buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _grid);
+    newCluster = facade->buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _grid);
     _unit->getClusters() << newCluster;
 
     //read old cluster id
@@ -407,12 +410,13 @@ void SimulationController::buildExtendedSelection (QDataStream& stream,
     //read cluster data
     QVector3D center(0.0, 0.0, 0.0);
     quint32 numCells = 0;
+    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     for(int i = 0; i < numClusters; ++i) {
-        CellCluster* cluster = CellCluster::buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid);
+        CellCluster* cluster = facade->buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid);
         newClusters << cluster;
-        foreach(Cell* cell, cluster->getCells())
+        foreach(Cell* cell, cluster->getCellsRef())
             center += cell->calcPosition();
-        numCells += cluster->getCells().size();
+        numCells += cluster->getCellsRef().size();
     }
     _unit->getClusters() << newClusters;
 
@@ -432,7 +436,7 @@ void SimulationController::buildExtendedSelection (QDataStream& stream,
     center = center / (qreal)(numCells+numEnergyParticles);
     foreach(CellCluster* cluster, newClusters) {
         cluster->setPosition(cluster->getPosition()-center+pos);
-        cluster->calcTransform();
+        cluster->updateTransformationMatrix();
         if( drawToMap )
             cluster->drawCellsToMap();
     }
@@ -583,9 +587,9 @@ QVector3D SimulationController::getCenterPosExtendedSelection (const QList< Cell
     _grid->lockData();
     foreach(CellCluster* cluster, clusters) {
         center += cluster->getPosition()*cluster->getMass();
-/*        foreach(Cell* cell, cluster->getCells())
+/*        foreach(Cell* cell, cluster->getCellsRef())
             center += cell->calcPosition();*/
-        numCells += cluster->getCells().size();
+        numCells += cluster->getCellsRef().size();
     }
     foreach(EnergyParticle* e, es) {
         center += e->pos;
@@ -612,13 +616,13 @@ void SimulationController::newCell (QVector3D pos)
 {
     //create cluster with single cell
     _grid->lockData();
-    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     Cell* cell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, CellFunctionType::COMPUTER
         , _grid, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
     cells << cell;
-    CellCluster* cluster = CellCluster::buildCellCluster(cells, 0.0, pos, 0, QVector3D(), _grid);
+    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, pos, 0, QVector3D(), _grid);
     _grid->setCell(pos, cell);
     _unit->getClusters() << cluster;
     _grid->unlockData();
@@ -648,14 +652,14 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
         QListIterator< Cell* > iCells(cells);
         QListIterator< CellTO > iNewCellsData(newCellsData);
         QSet< CellCluster* > sumNewClusters;
-        ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+        FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
         while (iCells.hasNext()) {
 
             Cell* cell = iCells.next();
             CellTO newCellData = iNewCellsData.next();
 
             //update cell properties
-            cell->getCluster()->calcTransform();
+            cell->getCluster()->updateTransformationMatrix();
             cell->setAbsPositionAndUpdateMap(newCellData.cellPos);
             cell->setEnergy(newCellData.cellEnergy);
             cell->delAllConnection();
@@ -703,7 +707,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             QList< Cell* > neighborCells;
             QList< QVector3D > neighborCellsRelPos;
             foreach(CellCluster* cluster, clusters)
-                foreach(Cell* otherCell, cluster->getCells()) {
+                foreach(Cell* otherCell, cluster->getCellsRef()) {
                     QVector3D displacement = otherCell->calcPosition()-pos;
                     _grid->correctDisplacement(displacement);
                     qreal dist = displacement.length();
@@ -785,10 +789,10 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             cluster->setAngle(newCellData.clusterAngle);
             cluster->setVel(newCellData.clusterVel);
             cluster->setAngularVel(newCellData.clusterAngVel);
-            cluster->calcTransform();
+            cluster->updateTransformationMatrix();
             cluster->drawCellsToMap();
             cluster->updateCellVel();
-/*            foreach (Cell* otherCell, cluster->getCells() ) {
+/*            foreach (Cell* otherCell, cluster->getCellsRef() ) {
                 otherCell->setVel(QVector3D());
             }*/
             sumNewClusters<< cluster;

@@ -44,8 +44,7 @@ SOURCES += main.cpp \
     gui/guisettings.cpp \
     global/servicelocator.cpp \
     model/entities/_impl/entityfactoryimpl.cpp \
-    model/_impl/modelfacadeimpl.cpp \
-    model/entities/cellcluster.cpp \
+    model/entities/_impl/cellclusterimpl.cpp \
     model/entities/token.cpp \
     model/entities/grid.cpp \
     model/entities/cellto.cpp \
@@ -63,7 +62,8 @@ SOURCES += main.cpp \
     model/features/_impl/cellfunctionconstructor.cpp \
     model/entities/energyparticle.cpp \
     model/simulationunit.cpp \
-    model/simulationcontroller.cpp
+    model/simulationcontroller.cpp \
+    model/_impl/factoryfacadeimpl.cpp
 HEADERS += \
     model/physics/physics.h \
     global/global.h \
@@ -106,14 +106,12 @@ HEADERS += \
     model/features/constants.h \
     model/entities/entityfactory.h \
     model/entities/_impl/entityfactoryimpl.h \
-    model/modelfacade.h \
-    model/_impl/modelfacadeimpl.h \
     model/entities/cell.h \
     model/entities/cellto.h \
     model/entities/token.h \
     model/entities/grid.h \
     model/entities/energyparticle.h \
-    model/entities/cellcluster.h \
+    model/entities/_impl/cellclusterimpl.h \
     model/entities/_impl/cellimpl.h \
     model/features/_impl/cellfunctionweapon.h \
     model/features/_impl/energyguidanceimpl.h \
@@ -130,7 +128,10 @@ HEADERS += \
     model/features/cellfunction.h \
     model/features/_impl/cellfeaturefactoryimpl.h \
     model/simulationunit.h \
-    model/simulationcontroller.h
+    model/simulationcontroller.h \
+    model/entities/cellcluster.h \
+    model/factoryfacade.h \
+    model/_impl/factoryfacadeimpl.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \

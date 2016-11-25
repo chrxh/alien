@@ -35,7 +35,7 @@ public:
     void setMaxConnections (int maxConnections);
     Cell* getConnection (int i) const;
     void setConnection (int i, Cell* cell);
-    QVector3D calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const;
+    QVector3D calcNormal (QVector3D outerSpace) const;
 
     void activatingNewTokens ();
     const quint64& getId () const;
@@ -63,8 +63,6 @@ public:
     qreal getEnergyIncludingTokens() const;
     void setEnergy (qreal i);
 
-    void serialize (QDataStream& stream) const;
-
     QVector3D getVel () const;
     void setVel (QVector3D vel);
     quint8 getColor () const;
@@ -74,6 +72,9 @@ public:
     bool isToBeKilled() const;
     void setToBeKilled (bool toBeKilled);
     Token* takeTokenFromStack ();
+
+    void serialize (QDataStream& stream) const;
+
 
 private:
     friend class CellCluster;

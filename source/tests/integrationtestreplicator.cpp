@@ -31,14 +31,14 @@ void IntegrationTestReplicator::testRunSimulation()
 
     Grid* grid = _simulationController->getGrid();
     QVERIFY(!grid->getClusters().empty());
-    int replicatorSize = grid->getClusters().at(0)->getCells().size();
+    int replicatorSize = grid->getClusters().at(0)->getCellsRef().size();
     for (int time = 0; time < INTEGRATIONTEST_REPLICATOR_TIMESTEPS; ++time) {
         _simulationController->requestNextTimestep();
     }
 
     int replicators = 0;
     foreach (CellCluster* cluster, grid->getClusters()) {
-        if (cluster->getCells().size() >= replicatorSize)
+        if (cluster->getCellsRef().size() >= replicatorSize)
             ++replicators;
     }
     QVERIFY2(replicators > 8, "Not enough replicators.");

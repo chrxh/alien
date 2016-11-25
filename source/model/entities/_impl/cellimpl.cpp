@@ -2,6 +2,7 @@
 
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
+#include "model/entities/grid.h"
 #include "model/features/cellfeature.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
@@ -85,14 +86,6 @@ CellImpl::~CellImpl()
         delete _connectingCells;
     if( _features )
         delete _features;
-}
-
-bool CellImpl::compareEqual (Cell* otherCell) const
-{
-    CellImpl* otherCellImpl = dynamic_cast<CellImpl*>(otherCell);
-    if (!otherCellImpl)
-        return false;
-    return true;
 }
 
 void CellImpl::registerFeatures (CellFeature* features)
@@ -231,7 +224,7 @@ void CellImpl::setConnection (int i, Cell* cell)
     _connectingCells[i] = cell;
 }
 
-QVector3D CellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const
+QVector3D CellImpl::calcNormal (QVector3D outerSpace) const
 {
     if( _numConnections < 2 ) {
         return outerSpace.normalized();
@@ -249,7 +242,8 @@ QVector3D CellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform) con
     for(int i = 0; i < _numConnections; ++i) {
 
         //calculate h (angular distance from outerSpace vector)
-        QVector3D u = (transform.map(_connectingCells[i]->getRelPos())-transform.map(_relPos)).normalized();
+        //QVector3D u = (transform.map(_connectingCells[i]->getRelPos())-transform.map(_relPos)).normalized(); OLD
+        QVector3D u = (_connectingCells[i]->calcPosition()- calcPosition()).normalized();
         qreal h = QVector3D::dotProduct(outerSpace, u);
         if( (outerSpace.x()*u.y()-outerSpace.y()*u.x()) < 0.0 )
             h = -2 - h;
@@ -274,7 +268,8 @@ QVector3D CellImpl::calcNormal (QVector3D outerSpace, QMatrix4x4& transform) con
 
     //one adjacent cells?
     if( minCell == maxCell ) {
-        return transform.map(_relPos)-transform.map(minCell->getRelPos());
+        //return transform.map(_relPos)-transform.map(minCell->getRelPos()); OLD
+        return calcPosition()-minCell->calcPosition();
     }
 
     //calc normal vectors
@@ -434,27 +429,6 @@ void CellImpl::setEnergy (qreal i)
     _energy = i;
 }
 
-void CellImpl::serialize (QDataStream& stream) const
-{
-    //token
-    stream << _tokenStackPointer;
-    for( int i = 0; i < _tokenStackPointer; ++i) {
-        _tokenStack[i]->serialize(stream);
-    }
-
-    //remaining data
-    stream << _toBeKilled << _tag << _id << _protectionCounter << _relPos
-           << _energy << _maxConnections << _numConnections;
-
-    //connecting cells
-    for( int i = 0; i < _numConnections; ++i) {
-        stream << _connectingCells[i]->getId();
-    }
-
-    //remaining data
-    stream << _tokenAccessNumber << _blockToken << _vel << _color;
-}
-
 QVector3D CellImpl::getVel () const
 {
     return _vel;
@@ -503,4 +477,26 @@ Token* CellImpl::takeTokenFromStack ()
         return _tokenStack[--_tokenStackPointer];
     }
 }
+
+void CellImpl::serialize (QDataStream& stream) const
+{
+    //token
+    stream << _tokenStackPointer;
+    for( int i = 0; i < _tokenStackPointer; ++i) {
+        _tokenStack[i]->serialize(stream);
+    }
+
+    //remaining data
+    stream << _toBeKilled << _tag << _id << _protectionCounter << _relPos
+           << _energy << _maxConnections << _numConnections;
+
+    //connecting cells
+    for( int i = 0; i < _numConnections; ++i) {
+        stream << _connectingCells[i]->getId();
+    }
+
+    //remaining data
+    stream << _tokenAccessNumber << _blockToken << _vel << _color;
+}
+
 
