@@ -17,13 +17,13 @@ int main(int argc, char** argv) {
     TestCellFunctionCommunicator testCommunicator;
 
     IntegrationTestReplicator intTestReplicator;
-//    IntegrationTestComparison intTestComparison;
+    IntegrationTestComparison intTestComparison;
 
     //TODO: Determinismustest
     return QTest::qExec(&testPhysics, argc, argv)
             | QTest::qExec(&testCellCluster, argc, argv)
             | QTest::qExec(&testToken, argc, argv)
             | QTest::qExec(&testCommunicator, argc, argv)
-            | QTest::qExec(&intTestReplicator, argc, argv);
-//            | QTest::qExec(&intTestComparison, argc, argv);
+            | QTest::qExec(&intTestReplicator, argc, argv)
+            | QTest::qExec(&intTestComparison, argc, argv);
 }
