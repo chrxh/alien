@@ -41,7 +41,7 @@ qreal SimulationUnit::calcTransEnergy ()
     qreal transEnergy(0.0);
     foreach( CellCluster* cluster, _grid->getClusters() ) {
         if( !cluster->isEmpty() )
-            transEnergy += Physics::kineticEnergy(cluster->getCells().size(),
+            transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(),
                                                   cluster->getVel(),
                                                   0.0,
                                                   0.0);
@@ -67,7 +67,7 @@ qreal SimulationUnit::calcInternalEnergy ()
     qreal internalEnergy(0.0);
     foreach( CellCluster* cluster, _grid->getClusters() ) {
         if( !cluster->isEmpty() ) {
-            foreach( Cell* cell, cluster->getCells() ) {
+            foreach( Cell* cell, cluster->getCellsRef() ) {
                 internalEnergy += cell->getEnergyIncludingTokens();
             }
         }
@@ -189,7 +189,7 @@ void SimulationUnit::calcNextTimestep ()
 
 void SimulationUnit::debugCluster (CellCluster* c, int s)
 {
-    /*foreach(Cell* cell, c->getCells()) {
+    /*foreach(Cell* cell, c->getCellsRef()) {
         for(int i = 0; i < cell->getNumConnections(); ++i) {
             QVector3D d = cell->getRelPos()-cell->getConnection(i)->getRelPos();
             if( d.length() > (CRIT_CELL_DIST_MAX+0.1) )

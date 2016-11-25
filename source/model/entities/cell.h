@@ -15,8 +15,6 @@ public:
     Cell (Grid* grid) : _grid(grid) {}
     virtual ~Cell() {}
 
-    virtual bool compareEqual (Cell* otherCell) const = 0;
-
     virtual void registerFeatures (CellFeature* features) = 0;
     virtual CellFeature* getFeatures () const = 0;
     virtual void removeFeatures () = 0;
@@ -33,7 +31,7 @@ public:
     virtual void setMaxConnections (int maxConnections) = 0;
     virtual Cell* getConnection (int i) const = 0;
     virtual void setConnection (int i, Cell* cell) = 0;
-    virtual QVector3D calcNormal (QVector3D outerSpace, QMatrix4x4& transform) const = 0;
+    virtual QVector3D calcNormal (QVector3D outerSpace) const = 0;
 
     virtual void activatingNewTokens () = 0;
     virtual const quint64& getId () const = 0;
@@ -68,8 +66,6 @@ public:
     virtual qreal getEnergyIncludingTokens() const = 0;
     virtual void setEnergy (qreal i) = 0;
 
-    virtual void serialize (QDataStream& stream) const = 0;
-
     virtual QVector3D getVel () const = 0;
     virtual void setVel (QVector3D vel) = 0;
     virtual quint8 getColor () const = 0;
@@ -79,6 +75,8 @@ public:
     virtual bool isToBeKilled() const = 0;
     virtual void setToBeKilled (bool toBeKilled) = 0;
     virtual Token* takeTokenFromStack () = 0;
+
+    virtual void serialize (QDataStream& stream) const = 0;
 
 
 protected:

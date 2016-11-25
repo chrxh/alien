@@ -10,6 +10,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QtCore/qmath.h>
+#include <QMatrix4x4>
 
 const int MOUSE_HISTORY = 10;
 
@@ -142,7 +143,7 @@ void PixelUniverse::universeUpdated (Grid* grid)
 
     //draw selected clusters
     foreach(CellCluster* cluster, _selectedClusters) {
-        foreach(Cell* cell, cluster->getCells()) {
+        foreach(Cell* cell, cluster->getCellsRef()) {
             QVector3D pos = cell->calcPosition(_grid);
             _image->setPixel(pos.x(), pos.y(), 0xBFBFBF);
         }
@@ -189,10 +190,10 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         QVector3D center;
         int numCells = 0;
         foreach(CellCluster* cluster, clusters) {
-            foreach(Cell* cell, cluster->getCells()) {
+            foreach(Cell* cell, cluster->getCellsRef()) {
                 center += cell->calcPosition();
             }
-            numCells += cluster->getCells().size();
+            numCells += cluster->getCellsRef().size();
         }
         center = center / numCells;
 
@@ -288,10 +289,10 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
         QVector3D center;
         int numCells = 0;
         foreach(CellCluster* cluster, _selectedClusters) {
-            foreach(Cell* cell, cluster->getCells()) {
+            foreach(Cell* cell, cluster->getCellsRef()) {
                 center += cell->calcPosition();
             }
-            numCells += cluster->getCells().size();
+            numCells += cluster->getCellsRef().size();
         }
         center = center / numCells;
         QMatrix4x4 transform;

@@ -1,11 +1,35 @@
 #include "entityfactoryimpl.h"
 
 #include "cellimpl.h"
+#include "cellclusterimpl.h"
+
 #include "global/servicelocator.h"
 
 EntityFactoryImpl::EntityFactoryImpl ()
 {
     ServiceLocator::getInstance().registerService<EntityFactory>(this);
+}
+
+CellCluster* EntityFactoryImpl::buildEmptyCellCluster (Grid* grid)
+{
+    return new CellClusterImpl(grid);
+}
+
+CellCluster* EntityFactoryImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
+    , QVector3D vel, Grid* grid)
+{
+    return new CellClusterImpl(cells, angle, pos, angularVel, vel, grid);
+}
+
+CellCluster* EntityFactoryImpl::buildCellClusterFromForeignCells (QList< Cell* > cells, qreal angle, Grid* grid)
+{
+    return new CellClusterImpl(cells, angle, grid);
+}
+
+CellCluster* EntityFactoryImpl::buildCellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
+    ,  QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid)
+{
+    return new CellClusterImpl(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, grid);
 }
 
 Cell* EntityFactoryImpl::buildCell (qreal energy, Grid* grid, int maxConnections

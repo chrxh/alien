@@ -12,10 +12,11 @@
 #include "gui/guisettings.h"
 #include "model/simulationsettings.h"
 #include "model/metadatamanager.h"
-#include "model/modelfacade.h"
+#include "model/factoryfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/grid.h"
+#include "model/entities/energyparticle.h"
 #include "global/servicelocator.h"
 
 #include <QTabWidget>
@@ -238,8 +239,8 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 
     //update data for cluster editor
     _grid->lockData();
-    ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
-    _focusCellReduced = facade->buildCellTO(cell);
+    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    _focusCellReduced = facade->buildFeaturedCellTO(cell);
     quint64 id = cell->getId();
     QList< quint64 > ids = cell->getCluster()->getCellIds();
     quint8 color = cell->getColor();
@@ -364,7 +365,7 @@ void MicroEditor::reclustered (QList< CellCluster* > clusters)
         _grid->lockData();
         bool contained = false;
         foreach(CellCluster* cluster, clusters)
-            if( cluster->getCells().contains(_focusCell) )
+            if( cluster->getCellsRef().contains(_focusCell) )
                 contained = true;
         _grid->unlockData();
 
@@ -373,8 +374,8 @@ void MicroEditor::reclustered (QList< CellCluster* > clusters)
 
             //update data for cluster editor
             _grid->lockData();
-            ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
-            _focusCellReduced = facade->buildCellTO(_focusCell);
+            FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+            _focusCellReduced = facade->buildFeaturedCellTO(_focusCell);
             quint64 id = _focusCell->getId();
             QList< quint64 > ids = _focusCell->getCluster()->getCellIds();
             quint8 color = _focusCell->getColor();

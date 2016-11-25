@@ -3,7 +3,7 @@
 #include "cell.h"
 #include "cellcluster.h"
 
-#include "model/modelfacade.h"
+#include "model/factoryfacade.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
 
@@ -101,10 +101,10 @@ bool EnergyParticle::movement (CellCluster*& cluster)
 
                 //create cell and cluster
                 QList< Cell* > cells;
-                ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+                FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
                 Cell* c = facade->buildFeaturedCellWithRandomData(eNew, _grid);
                 cells << c;
-                cluster = CellCluster::buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
+                cluster = facade->buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
                 amount = 0;
                 _grid->setCell(pos, c);
                 c->setColor(color);

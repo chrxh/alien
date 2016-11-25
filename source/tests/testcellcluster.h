@@ -3,8 +3,9 @@
 
 #include "testsettings.h"
 
+#include "model/entities/grid.h"
 #include "model/entities/token.h"
-#include "model/modelfacade.h"
+#include "model/factoryfacade.h"
 #include "model/entities/cellcluster.h"
 #include "global/servicelocator.h"
 
@@ -24,14 +25,14 @@ private slots:
     void testCreation()
     {
         QList< Cell* > cells;
-        ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+        FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
         for(int i = 0; i <= 100; ++i) {
             Cell* cell = facade->buildFeaturedCell(100.0, CellFunctionType::COMPUTER, _grid);
             cell->setRelPos(QVector3D(i, 0.0, 0.0));
             cells << cell;
         }
         QVector3D pos(200.0, 100.0, 0.0);
-        _cluster = CellCluster::buildCellCluster(cells, 0.0, pos, 0.0, QVector3D(), _grid);
+        _cluster = facade->buildCellCluster(cells, 0.0, pos, 0.0, QVector3D(), _grid);
         QCOMPARE(_cluster->getPosition().x(), 250.0);
         QCOMPARE(_cluster->getPosition().y(), 100.0);
     }
@@ -52,11 +53,11 @@ private slots:
     void testNewConnections()
     {
         //take three arbitrary cells
-        QVERIFY(_cluster->getCells().size() > 3);
-        _cell1 = _cluster->getCells().at(0);
-        _cell2 = _cluster->getCells().at(1);
-        _cell3 = _cluster->getCells().at(2);
-        _cell4 = _cluster->getCells().at(3);
+        QVERIFY(_cluster->getCellsRef().size() > 3);
+        _cell1 = _cluster->getCellsRef().at(0);
+        _cell2 = _cluster->getCellsRef().at(1);
+        _cell3 = _cluster->getCellsRef().at(2);
+        _cell4 = _cluster->getCellsRef().at(3);
         _cell1->resetConnections(3);
         _cell2->resetConnections(1);
         _cell3->resetConnections(1);

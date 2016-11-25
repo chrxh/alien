@@ -1,5 +1,6 @@
-#include "modelfacadeimpl.h"
+#include "factoryfacadeimpl.h"
 
+#include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
 #include "model/entities/entityfactory.h"
@@ -10,12 +11,31 @@
 #include "global/servicelocator.h"
 #include "model/simulationsettings.h"
 
-ModelFacadeImpl::ModelFacadeImpl ()
+FactoryFacadeImpl::FactoryFacadeImpl ()
 {
-    ServiceLocator::getInstance().registerService<ModelFacade>(this);
+    ServiceLocator::getInstance().registerService<FactoryFacade>(this);
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid* grid
+CellCluster* FactoryFacadeImpl::buildEmptyCellCluster (Grid* grid)
+{
+    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+    return entityFactory->buildEmptyCellCluster(grid);
+}
+
+CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel , QVector3D vel, Grid* grid)
+{
+    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+    return entityFactory->buildCellCluster(cells, angle, pos, angularVel, vel, grid);
+}
+
+CellCluster* FactoryFacadeImpl::buildCellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
+    ,  QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid)
+{
+    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+    return entityFactory->buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, grid);
+}
+
+Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid* grid
     , int maxConnections, int tokenAccessNumber, QVector3D relPos)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -26,7 +46,7 @@ Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, q
     return cell;
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, Grid* grid, int maxConnections
+Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, Grid* grid, int maxConnections
     , int tokenAccessNumber, QVector3D relPos)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -37,7 +57,7 @@ Cell* ModelFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, G
     return cell;
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
+Cell* FactoryFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
     , Grid* grid)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -51,13 +71,13 @@ Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QL
     return cell;
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCell (QDataStream& stream, Grid* grid)
+Cell* FactoryFacadeImpl::buildFeaturedCell (QDataStream& stream, Grid* grid)
 {
     QMap< quint64, QList< quint64 > > temp;
     return buildFeaturedCell(stream, temp, grid);
 }
 
-Cell* ModelFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid* grid)
+Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid* grid)
 {
     int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
     int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
@@ -68,7 +88,7 @@ Cell* ModelFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid* grid
     return buildFeaturedCell(energy, randomCellFunction, randomData, grid, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
-CellTO ModelFacadeImpl::buildCellTO (Cell* cell)
+CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell)
 {
     CellTO to;
 
@@ -109,7 +129,7 @@ CellTO ModelFacadeImpl::buildCellTO (Cell* cell)
     return to;
 }
 
-void ModelFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid* grid)
+void FactoryFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid* grid)
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
@@ -117,7 +137,7 @@ void ModelFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, G
     decoratorFactory->addEnergyGuidance(cell, grid);
 }
 
-void ModelFacadeImpl::serializeFeaturedCell (Cell* cell, QDataStream& stream)
+void FactoryFacadeImpl::serializeFeaturedCell (Cell* cell, QDataStream& stream)
 {
     cell->serialize(stream);
     CellFeature* features = cell->getFeatures();
@@ -129,4 +149,4 @@ void ModelFacadeImpl::serializeFeaturedCell (Cell* cell, QDataStream& stream)
 }
 
 
-ModelFacadeImpl modelFacadeImpl;
+FactoryFacadeImpl modelFacadeImpl;
