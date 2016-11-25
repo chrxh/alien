@@ -13,7 +13,7 @@ class EntityFactory
 public:
     virtual ~EntityFactory () {}
 
-    virtual CellCluster* buildEmptyCellCluster (Grid* grid);
+    virtual CellCluster* buildEmptyCellCluster (Grid* grid) = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
         , QVector3D vel, Grid* grid) = 0;
     virtual CellCluster* buildCellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
