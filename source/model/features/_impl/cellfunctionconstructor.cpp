@@ -1,7 +1,9 @@
 #include "cellfunctionconstructor.h"
 
-#include "model/modelfacade.h"
+#include "model/factoryfacade.h"
+#include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
+#include "model/entities/grid.h"
 #include "model/entities/token.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
@@ -12,6 +14,7 @@
 #include <QString>
 #include <QList>
 #include <QtAlgorithms>
+#include <QMatrix4x4>
 
 using ACTIVATE_TOKEN = Cell::ACTIVATE_TOKEN;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UPDATE_TOKEN_ACCESS_NUMBER;
@@ -31,7 +34,7 @@ namespace {
     Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
         , int tokenAccessNumber, int cellType, quint8* cellFunctionData, Grid* grid)
     {
-        ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+        FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
         Cell* newCell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, grid);
         CellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
@@ -45,7 +48,7 @@ namespace {
     Cell* obstacleCheck (CellCluster* cluster, bool safeMode, Grid* grid)
     {
         //obstacle check
-        foreach( Cell* cell, cluster->getCells() ) {
+        foreach( Cell* cell, cluster->getCellsRef() ) {
             QVector3D pos = cluster->calcPosition(cell, true);
 
             for(int dx = -1; dx < 2; ++dx ) {
@@ -143,7 +146,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
 
     //save relative position of cells
     QList< QVector3D > relPosCells;
-    foreach( Cell* otherCell, cluster->getCells() )
+    foreach( Cell* otherCell, cluster->getCellsRef() )
         relPosCells << otherCell->getRelPos();
 
     //construction already in progress?
@@ -257,7 +260,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                     token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_NO_ENERGY);
 
                     //restore cluster
-                    foreach( Cell* otherCell, cluster->getCells() ) {
+                    foreach( Cell* otherCell, cluster->getCellsRef() ) {
                         otherCell->setRelPos(relPosCells.first());
                         relPosCells.removeFirst();
                     }
@@ -275,7 +278,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE);
 
                         //restore construction site
-                        foreach( Cell* otherCell, cluster->getCells() ) {
+                        foreach( Cell* otherCell, cluster->getCellsRef() ) {
                             otherCell->setRelPos(relPosCells.first());
                             relPosCells.removeFirst();
                         }
@@ -333,7 +336,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                     token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_NO_ENERGY);
 
                     //restore construction site
-                    foreach( Cell* otherCell, cluster->getCells() ) {
+                    foreach( Cell* otherCell, cluster->getCellsRef() ) {
                         otherCell->setRelPos(relPosCells.first());
                         relPosCells.removeFirst();
                     }
@@ -364,7 +367,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                         //restore construction site
                         cluster->removeCell(newCell);
                         delete newCell;
-                        foreach( Cell* otherCell, cluster->getCells() ) {
+                        foreach( Cell* otherCell, cluster->getCellsRef() ) {
                             otherCell->setRelPos(relPosCells.first());
                             relPosCells.removeFirst();
                         }
@@ -561,7 +564,7 @@ CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token
                         //restore construction site
                         cluster->removeCell(newCell);
                         delete newCell;
-                        foreach( Cell* otherCell, cluster->getCells() ) {
+                        foreach( Cell* otherCell, cluster->getCellsRef() ) {
                             otherCell->setRelPos(relPosCells.first());
                             relPosCells.removeFirst();
                         }

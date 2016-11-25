@@ -93,14 +93,14 @@ namespace {
             quint32 numCluster = grid->getClusters().size();
             out << numCluster;
             foreach (CellCluster* cluster, grid->getClusters()) {
-                quint32 numCells = cluster->getCells().size();
+                quint32 numCells = cluster->getCellsRef().size();
                 out << cluster->getPosition();
                 out << cluster->getAngle();
                 out << cluster->getVel();
                 out << cluster->getAngularVel();
                 out << cluster->getAngularMass();
                 out << numCells;
-                foreach (Cell* cell, cluster->getCells()) {
+                foreach (Cell* cell, cluster->getCellsRef()) {
                     out << cell->getRelPos();
                     out << cell->getVel();
                 }
@@ -166,12 +166,12 @@ namespace {
             QVERIFY2(ref.clusterAnglularMassList.at(i) == cluster->getAngularMass(), createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular mass", ref.clusterAnglularMassList.at(i), cluster->getAngularMass()));
             QList<QVector3D> cellPosList = ref.clusterCellPosList.at(i);
             QList<QVector3D> cellVelList = ref.clusterCellVelList.at(i);
-            int minNumCell = qMin(cluster->getCells().size(), cellPosList.size());
+            int minNumCell = qMin(cluster->getCellsRef().size(), cellPosList.size());
             for(int j = 0; j < minNumCell; ++j) {
-                QVERIFY2(cellPosList.at(j) == cluster->getCells().at(j)->getRelPos(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
-                    , cluster->getCells().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCells().at(j)->getRelPos()));
-                QVERIFY2(cellVelList.at(j) == cluster->getCells().at(j)->getVel(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
-                    , cluster->getCells().at(j)->getId(), "in vel", cellVelList.at(j), cluster->getCells().at(j)->getVel()));
+                QVERIFY2(cellPosList.at(j) == cluster->getCellsRef().at(j)->getRelPos(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
+                    , cluster->getCellsRef().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPos()));
+                QVERIFY2(cellVelList.at(j) == cluster->getCellsRef().at(j)->getVel(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
+                    , cluster->getCellsRef().at(j)->getId(), "in vel", cellVelList.at(j), cluster->getCellsRef().at(j)->getVel()));
             }
         }
     }

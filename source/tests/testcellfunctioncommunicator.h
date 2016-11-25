@@ -3,12 +3,12 @@
 
 #include "testsettings.h"
 
-#include "model/entities/entityfactory.h"
 #include "model/entities/grid.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
 #include "model/features/_impl/cellfunctioncommunicator.h"
+#include "model/factoryfacade.h"
 #include "global/servicelocator.h"
 
 #include <QtTest/QtTest>
@@ -21,21 +21,22 @@ private slots:
     {
         _grid = new Grid();
         _grid->init(1000, 1000);
-        EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
+        FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
 
         {
             //create cells, cell functions and token for cluster1
             qreal cellEnergy = 0.0;
             int maxConnections = 0;
             int tokenAccessNumber = 0;
-            _communicator1a = new CellFunctionCommunicator(_grid);
+
             QVector3D relPos = QVector3D();
-            _cellWithToken = factory->buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, relPos);
-            _cellWithToken->registerFeatures(_communicator1a);
-            _communicator1b = new CellFunctionCommunicator(_grid);
+            _cellWithToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
+            _communicator1a = _cellWithToken->getFeatures()->findObject<CellFunctionCommunicator>();
+
             relPos = QVector3D(0.0, 1.0, 0.0);
-            _cellWithoutToken = factory->buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, relPos);
-            _cellWithoutToken->registerFeatures(_communicator1b);
+            _cellWithoutToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
+            _communicator1b = _cellWithoutToken->getFeatures()->findObject<CellFunctionCommunicator>();
+
             qreal tokenEnergy = 0.0;
             _token = new Token(tokenEnergy);
             _cellWithToken->addToken(_token);
@@ -48,7 +49,7 @@ private slots:
             QVector3D vel(0.0, 0.0, 0.0);
             qreal angle = 0.0;
             qreal angularVel = 0.0;
-            _cluster1 = CellCluster::buildCellCluster(cells, angle, pos, angularVel, vel, _grid);
+            _cluster1 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _grid);
         }
 
         {
@@ -56,10 +57,10 @@ private slots:
             qreal cellEnergy = 0.0;
             int maxConnections = 0;
             int tokenAccessNumber = 0;
-            _communicator2 = new CellFunctionCommunicator(_grid);
+
             QVector3D relPos = QVector3D();
-            Cell* cell = factory->buildCell(cellEnergy, _grid, maxConnections, tokenAccessNumber, relPos);
-            cell->registerFeatures(_communicator2);
+            Cell* cell = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
+            _communicator2 = cell->getFeatures()->findObject<CellFunctionCommunicator>();
 
             //create cluster2 within communication range
             QList< Cell* > cells;
@@ -69,7 +70,7 @@ private slots:
             QVector3D vel(0.0, 0.0, 0.0);
             qreal angle = 0.0;
             qreal angularVel = 0.0;
-            _cluster2 = CellCluster::buildCellCluster(cells, angle, pos, angularVel, vel, _grid);
+            _cluster2 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _grid);
         }
 
         //draw cells

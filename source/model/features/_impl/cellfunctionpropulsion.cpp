@@ -1,6 +1,8 @@
 #include "cellfunctionpropulsion.h"
 
+#include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
 #include "model/entities/token.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"

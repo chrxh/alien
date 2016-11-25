@@ -8,7 +8,7 @@
 #include "gui/editorsettings.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
-#include "model/modelfacade.h"
+#include "model/factoryfacade.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/entities/grid.h"
@@ -17,6 +17,7 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
+#include <QMatrix4x4>
 
 ShapeUniverse::ShapeUniverse(QObject *parent) :
     QGraphicsScene(parent), _grid(0), _marker(0), _focusCenterCellItem(0)
@@ -62,7 +63,7 @@ void ShapeUniverse::universeUpdated (Grid* grid)
 
     //draw cell clusters
     foreach( CellCluster* cluster, grid->getClusters() ) {
-        foreach( Cell* cell, cluster->getCells()) {
+        foreach( Cell* cell, cluster->getCellsRef()) {
 
             //create connections between cells
             for(int i = 0; i < cell->getNumConnections(); ++i ) {
@@ -222,7 +223,7 @@ void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList
         CellCluster* cluster = cellItem->getCell()->getCluster();
         clustersToBeDeleted.insert(cluster->getId());
         idClusterMap[cluster->getId()] = cluster;
-        foreach( Cell* cell, cluster->getCells()) {
+        foreach( Cell* cell, cluster->getCellsRef()) {
             cellsToBeDeleted.insert(cell->getId());
         }
     }
@@ -292,7 +293,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
 
     //move graphic cells corresponding to the Cells in "clusters" and delete their connections
     foreach(CellCluster* cluster, clusters) {
-        foreach(Cell* cell, cluster->getCells()) {
+        foreach(Cell* cell, cluster->getCellsRef()) {
 
             //move cell
             if( _cellItems.contains(cell->getId()) ) {
@@ -327,7 +328,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
 
     //draw cell connection
     foreach( CellCluster* cluster, clusters ) {
-        foreach( Cell* cell, cluster->getCells()) {
+        foreach( Cell* cell, cluster->getCellsRef()) {
 
             //create connections between cells
             for(int i = 0; i < cell->getNumConnections(); ++i ) {
@@ -541,13 +542,13 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             QList< CellTO > newCellsData;
 
             //update focused cells
-            ModelFacade* facade = ServiceLocator::getInstance().getService<ModelFacade>();
+            FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
             foreach( CellGraphicsItem* cellItem, _focusCells ) {
 
                 //retrieve cell information
                 Cell* cell = cellItem->getCell();
                 _grid->lockData();
-                CellTO newCellData = facade->buildCellTO(cell);
+                CellTO newCellData = facade->buildFeaturedCellTO(cell);
                 _grid->unlockData();
 
                 //only left mouse button pressed?
@@ -685,7 +686,7 @@ void ShapeUniverse::highlightCell (Cell* cell)
         return;
 
     //focus cellcluster
-    foreach(Cell* otherCell, cell->getCluster()->getCells()) {
+    foreach(Cell* otherCell, cell->getCluster()->getCellsRef()) {
         if( _cellItems.contains(otherCell->getId()) ) {
             CellGraphicsItem* cellItem = _cellItems[otherCell->getId()];
             if( cellItem->getFocusState() == CellGraphicsItem::NO_FOCUS )

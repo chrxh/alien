@@ -251,7 +251,7 @@ void MacroEditor::delExtendedSelection_Slot ()
         //*********
 //        foreach(CellCluster* c, _grid->getClusters())
 //            clusters << c;
-//            foreach(Cell* cell, c->getCells())
+//            foreach(Cell* cell, c->getCellsRef())
 //                if( (qrand() % 2 == 0) )
 //                cells << cell;
         //*********
@@ -289,7 +289,7 @@ void MacroEditor::reclustered (QList< CellCluster* > clusters)
     if( _activeScene == SHAPE_SCENE ) {
 //        _shapeUniverse->universeUpdated(_grid);
 /*        foreach(CellCluster* cluster, clusters) {
-            foreach(Cell* cell, cluster->getCells()) {
+            foreach(Cell* cell, cluster->getCellsRef()) {
                 cell->setRelPos(cell->getRelPos());
             }
         }*/
