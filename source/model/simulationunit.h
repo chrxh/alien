@@ -1,11 +1,9 @@
 #ifndef SIMULATIONUNIT_H
 #define SIMULATIONUNIT_H
 
+#include "definitions.h"
 #include <QThread>
 
-class CellCluster;
-class EnergyParticle;
-class Grid;
 class SimulationUnit : public QObject
 {
     Q_OBJECT
