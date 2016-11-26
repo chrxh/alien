@@ -419,7 +419,7 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
 {
     ProcessingResult processingResult {false, 0};
 
-    bool condTable[simulationParameters.CELL_CODESIZE];
+    std::vector<bool> condTable(simulationParameters.CELL_CODESIZE);
     int condPointer(0);
     int i(0);
     while( i < (3*_numInstr) ) {
