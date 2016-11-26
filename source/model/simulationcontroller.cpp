@@ -18,6 +18,7 @@
 #include <QVector2D>
 #include <QMatrix4x4>
 #include <set>
+#include <vector>
 
 SimulationController::SimulationController(Threading threading, QObject* parent)
     : QObject(parent)
@@ -206,7 +207,11 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
 {
     //create cell grid
     FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-    Cell* cellGrid[numCellX][numCellY];
+	std::vector<std::vector<Cell*>> cellGrid;
+	cellGrid.resize(numCellX);
+	for (int x = 0; x < numCellX; ++x) {
+		cellGrid[x].resize(numCellY);
+	}
     for(int i = 0; i < numCellX; ++i )
         for(int j = 0; j < numCellY; ++j ) {
             qreal x = - ((qreal)numCellX-1.0)*dist.x()/2.0 + (qreal)i*dist.x();
@@ -245,7 +250,12 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
 {
     //create hexagon cell structure
     FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-    Cell* cellGrid[2*numLayers-1][2*numLayers-1];
+	std::vector<std::vector<Cell*>> cellGrid;
+	int size = 2 * numLayers - 1;
+	cellGrid.resize(size);
+	for (int x = 0; x < size; ++x) {
+		cellGrid[x].resize(size);
+	}
     QList< Cell* > cells;
     int maxCon = 6;
     qreal incY = qSqrt(3)*dist/2.0;

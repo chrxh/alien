@@ -579,8 +579,8 @@ void CellClusterImpl::movementProcessingStep3 ()
 //token processing
 void CellClusterImpl::movementProcessingStep4 (QList< EnergyParticle* >& energyParticles, bool& decompose)
 {
-    Token* spreadToken[simulationParameters.MAX_CELL_CONNECTIONS];
-    Cell* spreadTokenCells[simulationParameters.MAX_CELL_CONNECTIONS];
+    std::vector<Token*> spreadToken(simulationParameters.MAX_CELL_CONNECTIONS);
+    std::vector<Cell*> spreadTokenCells(simulationParameters.MAX_CELL_CONNECTIONS);
 
     //placing new tokens
     foreach(Cell* cell, _cells) {
