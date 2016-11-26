@@ -263,12 +263,7 @@ void MainWindow::loadSimulation ()
 
             //read simulation data
             QDataStream in(&file);
-            QMap< quint64, quint64 > oldNewCellIdMap;
-            QMap< quint64, quint64 > oldNewClusterIdMap;
-            _simulator->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-            simulationParameters.readData(in);
-            MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-            MetadataManager::getGlobalInstance().readSymbolTable(in);
+            _simulator->buildUniverse(in);
             readFrame(in);
             file.close();
 
@@ -374,10 +369,7 @@ void MainWindow::stepBackClicked ()
     QDataStream in(&b, QIODevice::ReadOnly);
 
     //read simulation data
-    QMap< quint64, quint64 > oldNewCellIdMap;
-    QMap< quint64, quint64 > oldNewClusterIdMap;
-    _simulator->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-    MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
+    _simulator->buildUniverse(in);
 
     //reset coordinators
 //    ui->macroEditor->reset();
@@ -415,11 +407,7 @@ void MainWindow::restoreUniverse ()
     QDataStream in(&_snapshot, QIODevice::ReadOnly);
 
     //read simulation data
-    QMap< quint64, quint64 > oldNewCellIdMap;
-    QMap< quint64, quint64 > oldNewClusterIdMap;
-    _simulator->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-    MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-//    _snapshot.clear();
+    _simulator->buildUniverse(in);
 
     //reset editors
     ui->macroEditor->reset();
