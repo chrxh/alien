@@ -142,8 +142,10 @@ void SimulationController::serializeUniverse (QDataStream& stream)
     _grid->unlockData();
 }
 
-void SimulationController::buildUniverse (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap)
+void SimulationController::buildUniverse (QDataStream& stream)
 {
+    QMap< quint64, quint64 > oldNewCellIdMap;
+    QMap< quint64, quint64 > oldNewClusterIdMap;
     _grid->lockData();
     stream >> _frame;
 
@@ -175,6 +177,10 @@ void SimulationController::buildUniverse (QDataStream& stream, QMap< quint64, qu
     _grid->buildMap(stream, oldIdCellMap, oldIdEnergyMap);
 
     _grid->unlockData();
+
+    simulationParameters.readData(stream);
+    MetadataManager::getGlobalInstance().readMetadataUniverse(stream, oldNewClusterIdMap, oldNewCellIdMap);
+    MetadataManager::getGlobalInstance().readSymbolTable(stream);
 
     //reset random seed for simulation thread to be deterministic
     emit setRandomSeed(_frame);

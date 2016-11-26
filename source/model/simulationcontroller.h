@@ -27,7 +27,7 @@ public:
     //universe manipulation tools
     void newUniverse (qint32 sizeX, qint32 sizeY);
     void serializeUniverse (QDataStream& stream);
-    void buildUniverse (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap);
+    void buildUniverse (QDataStream& stream);
     qint32 getUniverseSizeX();
     qint32 getUniverseSizeY ();
     void addBlockStructure (QVector3D center, int numCellX, int numCellY, QVector3D dist, qreal energy);
