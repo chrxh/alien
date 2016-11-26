@@ -63,7 +63,8 @@ SOURCES += main.cpp \
     model/entities/energyparticle.cpp \
     model/simulationunit.cpp \
     model/simulationcontroller.cpp \
-    model/_impl/factoryfacadeimpl.cpp
+    model/_impl/factoryfacadeimpl.cpp \
+    model/_impl/simulationcontextimpl.cpp
 HEADERS += \
     model/physics/physics.h \
     global/global.h \
@@ -131,7 +132,11 @@ HEADERS += \
     model/simulationcontroller.h \
     model/entities/cellcluster.h \
     model/factoryfacade.h \
-    model/_impl/factoryfacadeimpl.h
+    model/_impl/factoryfacadeimpl.h \
+    model/simulationcontext.h \
+    model/definitions.h \
+    model/_impl/simulationcontextimpl.h \
+    model/topology.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \

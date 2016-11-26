@@ -1,6 +1,7 @@
 #ifndef SIMULATIONCONTROLLER_H
 #define SIMULATIONCONTROLLER_H
 
+#include "definitions.h"
 #include "entities/cellto.h"
 
 #include <QObject>
@@ -8,11 +9,6 @@
 #include <QThread>
 
 class QTimer;
-class Cell;
-class CellCluster;
-class EnergyParticle;
-class Grid;
-class SimulationUnit;
 
 class SimulationController  : public QObject
 {

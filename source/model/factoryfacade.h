@@ -1,15 +1,12 @@
 #ifndef FACTORYFACADE_H
 #define FACTORYFACADE_H
 
+#include "definitions.h"
 #include "model/entities/cellto.h"
 #include "model/features/constants.h"
 
 #include <QtGlobal>
 #include <QVector3D>
-
-class Cell;
-class CellCluster;
-class Grid;
 
 class FactoryFacade
 {
