@@ -10,9 +10,9 @@ class SimulationContext
 public:
     virtual ~SimulationContext () {}
 
-    virtual void lock ();
-    virtual void unlock ();
-
+    virtual void lock () = 0;
+    virtual void unlock () = 0;
+	
     virtual void reinit (QSize size) = 0;
 
     virtual Topology* getTopology () const = 0;
