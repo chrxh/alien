@@ -18,12 +18,7 @@ namespace {
         bool fileOpened = file.open(QIODevice::ReadOnly);
         if (fileOpened) {
             QDataStream in(&file);
-            QMap< quint64, quint64 > oldNewCellIdMap;
-            QMap< quint64, quint64 > oldNewClusterIdMap;
-            simulationController->buildUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-            simulationParameters.readData(in);
-            MetadataManager::getGlobalInstance().readMetadataUniverse(in, oldNewClusterIdMap, oldNewCellIdMap);
-            MetadataManager::getGlobalInstance().readSymbolTable(in);
+            simulationController->buildUniverse(in);
             file.close();
         }
         return fileOpened;
