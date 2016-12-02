@@ -3,10 +3,10 @@
 
 #include "model/features/cellfunction.h"
 
-class CellFunctionWeapon : public CellFunction
+class CellFunctionWeaponImpl : public CellFunction
 {
 public:
-    CellFunctionWeapon (Grid* grid);
+    CellFunctionWeaponImpl (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::WEAPON; }
 

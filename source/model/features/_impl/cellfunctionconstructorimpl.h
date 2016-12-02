@@ -5,11 +5,10 @@
 
 #include <QVector3D>
 
-class CellCluster;
-class CellFunctionConstructor : public CellFunction
+class CellFunctionConstructorImpl : public CellFunction
 {
 public:
-    CellFunctionConstructor (Grid* grid);
+    CellFunctionConstructorImpl (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::CONSTRUCTOR; }
 

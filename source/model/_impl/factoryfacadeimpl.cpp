@@ -148,5 +148,6 @@ void FactoryFacadeImpl::serializeFeaturedCell (Cell* cell, QDataStream& stream)
     cellFunction->serialize(stream);
 }
 
-
-FactoryFacadeImpl modelFacadeImpl;
+namespace {
+	FactoryFacadeImpl modelFacadeImpl;
+}

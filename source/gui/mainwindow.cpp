@@ -22,7 +22,6 @@
 #include "model/entities/cellcluster.h"
 
 #include <QGraphicsScene>
-#include <QGLWidget>
 #include <QTimer>
 #include <QScrollBar>
 #include <QSpinBox>

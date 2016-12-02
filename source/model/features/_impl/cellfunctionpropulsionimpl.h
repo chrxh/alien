@@ -3,10 +3,10 @@
 
 #include "model/features/cellfunction.h"
 
-class CellFunctionPropulsion : public CellFunction
+class CellFunctionPropulsionImpl : public CellFunction
 {
 public:
-    CellFunctionPropulsion (Grid* grid);
+    CellFunctionPropulsionImpl (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::PROPULSION; }
 
