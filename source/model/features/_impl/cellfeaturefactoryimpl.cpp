@@ -2,12 +2,12 @@
 
 #include "model/entities/cell.h"
 #include "cellfunctioncomputerimpl.h"
-#include "cellfunctionconstructor.h"
-#include "cellfunctionpropulsion.h"
-#include "cellfunctionscanner.h"
-#include "cellfunctionweapon.h"
-#include "cellfunctionsensor.h"
-#include "cellfunctioncommunicator.h"
+#include "cellfunctionconstructorimpl.h"
+#include "cellfunctionpropulsionimpl.h"
+#include "cellfunctionscannerimpl.h"
+#include "cellfunctionweaponimpl.h"
+#include "cellfunctionsensorimpl.h"
+#include "cellfunctioncommunicatorimpl.h"
 #include "energyguidanceimpl.h"
 
 #include "global/servicelocator.h"
@@ -36,22 +36,22 @@ void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType typ
         registerNewFeature(cell, new CellFunctionComputerImpl(grid));
         break;
         case CellFunctionType::PROPULSION :
-        registerNewFeature(cell, new CellFunctionPropulsion(grid));
+        registerNewFeature(cell, new CellFunctionPropulsionImpl(grid));
         break;
         case CellFunctionType::SCANNER :
-        registerNewFeature(cell, new CellFunctionScanner(grid));
+        registerNewFeature(cell, new CellFunctionScannerImpl(grid));
         break;
         case CellFunctionType::WEAPON :
-        registerNewFeature(cell, new CellFunctionWeapon(grid));
+        registerNewFeature(cell, new CellFunctionWeaponImpl(grid));
         break;
         case CellFunctionType::CONSTRUCTOR :
-        registerNewFeature(cell, new CellFunctionConstructor(grid));
+        registerNewFeature(cell, new CellFunctionConstructorImpl(grid));
         break;
         case CellFunctionType::SENSOR :
-        registerNewFeature(cell, new CellFunctionSensor(grid));
+        registerNewFeature(cell, new CellFunctionSensorImpl(grid));
         break;
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicator(grid));
+        registerNewFeature(cell, new CellFunctionCommunicatorImpl(grid));
         break;
         default:
         break;
@@ -65,7 +65,7 @@ void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType typ
         registerNewFeature(cell, new CellFunctionComputerImpl(data, grid));
         break;
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicator(data, grid));
+        registerNewFeature(cell, new CellFunctionCommunicatorImpl(data, grid));
         break;
         default:
         addCellFunction(cell, type, grid);
@@ -79,7 +79,7 @@ void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType typ
         registerNewFeature(cell, new CellFunctionComputerImpl(stream, grid));
         break;
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicator(stream, grid));
+        registerNewFeature(cell, new CellFunctionCommunicatorImpl(stream, grid));
         break;
         default:
         addCellFunction(cell, type, grid);

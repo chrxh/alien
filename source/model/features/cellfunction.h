@@ -3,7 +3,8 @@
 
 #include "cellfeature.h"
 
-#include "constants.h"
+#include "cellfeatureconstants.h"
+#include "model/definitions.h"
 
 class CellFunction: public CellFeature
 {

@@ -1,22 +1,20 @@
 #ifndef INTEGRATIONTESTREPLICATOR_H
 #define INTEGRATIONTESTREPLICATOR_H
 
-#include <QObject>
+#include <gtest/gtest.h>
 
 class SimulationController;
 
-class IntegrationTestReplicator : public QObject
+class IntegrationTestReplicator : public ::testing::Test
 {
-    Q_OBJECT
-private slots:
+public:
+	IntegrationTestReplicator();
+	~IntegrationTestReplicator();
 
-    void initTestCase();
-    void testRunSimulation();
-    void cleanupTestCase();
-
-private:
+protected:
     SimulationController* _simulationController;
 };
+
 
 
 #endif // INTEGRATIONTESTREPLICATOR_H

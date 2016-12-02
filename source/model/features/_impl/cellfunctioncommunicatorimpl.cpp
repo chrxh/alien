@@ -1,4 +1,4 @@
-#include "cellfunctioncommunicator.h"
+#include "cellfunctioncommunicatorimpl.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
@@ -7,13 +7,13 @@
 
 #include <QString>
 
-CellFunctionCommunicator::CellFunctionCommunicator(Grid* grid)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(Grid* grid)
     : CellFunction(grid)
 {
 
 }
 
-CellFunctionCommunicator::CellFunctionCommunicator (quint8* cellFunctionData, Grid* grid)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (quint8* cellFunctionData, Grid* grid)
     : CellFunction(grid)
 {
     _newMessageReceived = static_cast<bool>(cellFunctionData[0]);
@@ -23,7 +23,7 @@ CellFunctionCommunicator::CellFunctionCommunicator (quint8* cellFunctionData, Gr
     _receivedMessage.distance = cellFunctionData[4];
 }
 
-CellFunctionCommunicator::CellFunctionCommunicator (QDataStream& stream, Grid* grid)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QDataStream& stream, Grid* grid)
     : CellFunction(grid)
 {
     stream >> _newMessageReceived
@@ -33,7 +33,7 @@ CellFunctionCommunicator::CellFunctionCommunicator (QDataStream& stream, Grid* g
            >> _receivedMessage.distance;
 }
 
-CellFeature::ProcessingResult CellFunctionCommunicator::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionCommunicatorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     COMMUNICATOR_IN cmd = readCommandFromToken(token);
@@ -46,7 +46,7 @@ CellFeature::ProcessingResult CellFunctionCommunicator::processImpl (Token* toke
     return processingResult;
 }
 
-void CellFunctionCommunicator::serialize (QDataStream& stream) const
+void CellFunctionCommunicatorImpl::serialize (QDataStream& stream) const
 {
     stream << _newMessageReceived
            << _receivedMessage.channel
@@ -56,7 +56,7 @@ void CellFunctionCommunicator::serialize (QDataStream& stream) const
 }
 
 
-void CellFunctionCommunicator::getInternalData (quint8* data) const
+void CellFunctionCommunicatorImpl::getInternalData (quint8* data) const
 {
     data[0] = static_cast<quint8>(_newMessageReceived);
     data[1] = _receivedMessage.channel;
@@ -65,18 +65,18 @@ void CellFunctionCommunicator::getInternalData (quint8* data) const
     data[4] = _receivedMessage.distance;
 }
 
-COMMUNICATOR_IN CellFunctionCommunicator::readCommandFromToken (Token* token) const
+COMMUNICATOR_IN CellFunctionCommunicatorImpl::readCommandFromToken (Token* token) const
 {
     return static_cast<COMMUNICATOR_IN>(token->memory[static_cast<int>(COMMUNICATOR::IN)] % 4);
 }
 
-void CellFunctionCommunicator::setListeningChannel (Token* token)
+void CellFunctionCommunicatorImpl::setListeningChannel (Token* token)
 {
     _receivedMessage.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
 }
 
 
-void CellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token,
+void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token,
                                                                             Cell* cell,
                                                                             Cell* previousCell) const
 {
@@ -89,7 +89,7 @@ void CellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndUpdateToken (T
     token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = convertIntToData(numMsg);
 }
 
-int CellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
+int CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
                                                                             Cell* senderCell,
                                                                             Cell* senderPreviousCell) const
 {
@@ -102,7 +102,7 @@ int CellFunctionCommunicator::sendMessageToNearbyCommunicatorsAndReturnNumber (c
     return numMsg;
 }
 
-QList< Cell* > CellFunctionCommunicator::findNearbyCommunicator(Cell* cell) const
+QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) const
 {
     Grid::CellSelectFunction cellSelectCommunicatorFunction =
         [](Cell* cell)
@@ -115,12 +115,12 @@ QList< Cell* > CellFunctionCommunicator::findNearbyCommunicator(Cell* cell) cons
     return _grid->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 
-bool CellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
+bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
                                                                        Cell* senderCell,
                                                                        Cell* senderPreviousCell,
                                                                        Cell* receiverCell) const
 {
-    CellFunctionCommunicator* communicator = receiverCell->getFeatures()->findObject<CellFunctionCommunicator>();
+    CellFunctionCommunicatorImpl* communicator = receiverCell->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
@@ -137,7 +137,7 @@ bool CellFunctionCommunicator::sendMessageToCommunicatorAndReturnSuccess (const 
     return false;
 }
 
-QVector3D CellFunctionCommunicator::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend,
+QVector3D CellFunctionCommunicatorImpl::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend,
                                                                              Cell* senderCell,
                                                                              Cell* senderPreviousCell) const
 {
@@ -148,7 +148,7 @@ QVector3D CellFunctionCommunicator::calcDisplacementOfObjectFromSender (const Me
     return displacementFromSender;
 }
 
-void CellFunctionCommunicator::receiveMessage (Token* token,
+void CellFunctionCommunicatorImpl::receiveMessage (Token* token,
                                                     Cell* receiverCell,
                                                     Cell* receiverPreviousCell)
 {
@@ -169,7 +169,7 @@ void CellFunctionCommunicator::receiveMessage (Token* token,
                 = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO);
 }
 
-void CellFunctionCommunicator::calcReceivedMessageAngle (Cell* receiverCell,
+void CellFunctionCommunicatorImpl::calcReceivedMessageAngle (Cell* receiverCell,
                                                               Cell* receiverPreviousCell)
 {
     QVector3D displacement = receiverPreviousCell->calcPosition() - receiverCell->calcPosition();

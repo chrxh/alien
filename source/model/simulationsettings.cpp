@@ -1,6 +1,6 @@
 #include "simulationsettings.h"
 #include "model/metadatamanager.h"
-#include "model/features/constants.h"
+#include "model/features/cellfeatureconstants.h"
 
 
 #include <QtGlobal>

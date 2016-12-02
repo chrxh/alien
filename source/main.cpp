@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<CellTO>("CellReduced");
 
     //load default metadata
-    Metadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());
+//    Metadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());
 
     //init main objects
     QApplication a(argc, argv);
@@ -91,6 +91,6 @@ int main(int argc, char *argv[])
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();
-    return a.exec();
+	return a.exec();
 }
 

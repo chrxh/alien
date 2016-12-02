@@ -3,7 +3,7 @@
 
 #include "definitions.h"
 #include "model/entities/cellto.h"
-#include "model/features/constants.h"
+#include "model/features/cellfeatureconstants.h"
 
 #include <QtGlobal>
 #include <QVector3D>

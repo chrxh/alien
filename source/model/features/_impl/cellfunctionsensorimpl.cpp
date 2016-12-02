@@ -1,4 +1,4 @@
-#include "cellfunctionsensor.h"
+#include "cellfunctionsensorimpl.h"
 
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
@@ -8,12 +8,12 @@
 
 #include <QtCore/qmath.h>
 
-CellFunctionSensor::CellFunctionSensor (Grid* grid)
+CellFunctionSensorImpl::CellFunctionSensorImpl (Grid* grid)
     : CellFunction(grid)
 {
 }
 
-CellFeature::ProcessingResult CellFunctionSensor::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());

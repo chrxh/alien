@@ -1,4 +1,4 @@
-#include "cellfunctionscanner.h"
+#include "cellfunctionscannerimpl.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
@@ -8,7 +8,7 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-CellFunctionScanner::CellFunctionScanner(Grid* grid)
+CellFunctionScannerImpl::CellFunctionScannerImpl(Grid* grid)
     : CellFunction(grid)
 {
 }
@@ -81,7 +81,7 @@ namespace {
 
 }
 
-CellFeature::ProcessingResult CellFunctionScanner::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     int n = token->memory[static_cast<int>(SCANNER::INOUT_CELL_NUMBER)];

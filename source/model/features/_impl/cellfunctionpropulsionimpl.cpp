@@ -1,4 +1,4 @@
-#include "cellfunctionpropulsion.h"
+#include "cellfunctionpropulsionimpl.h"
 
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -10,7 +10,7 @@
 #include <QtCore/qmath.h>
 
 
-CellFunctionPropulsion::CellFunctionPropulsion (Grid* grid)
+CellFunctionPropulsionImpl::CellFunctionPropulsionImpl (Grid* grid)
     : CellFunction(grid)
 {
 }
@@ -22,7 +22,7 @@ namespace {
     }
 }
 
-CellFeature::ProcessingResult CellFunctionPropulsion::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());

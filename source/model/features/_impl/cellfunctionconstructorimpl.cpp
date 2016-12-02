@@ -1,4 +1,4 @@
-#include "cellfunctionconstructor.h"
+#include "cellfunctionconstructorimpl.h"
 
 #include "model/factoryfacade.h"
 #include "model/entities/cell.h"
@@ -19,7 +19,7 @@
 using ACTIVATE_TOKEN = Cell::ACTIVATE_TOKEN;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UPDATE_TOKEN_ACCESS_NUMBER;
 
-CellFunctionConstructor::CellFunctionConstructor (Grid* grid)
+CellFunctionConstructorImpl::CellFunctionConstructorImpl (Grid* grid)
     : CellFunction(grid)
 {
 }
@@ -117,7 +117,7 @@ namespace {
     }
 }
 
-CellFeature::ProcessingResult CellFunctionConstructor::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());

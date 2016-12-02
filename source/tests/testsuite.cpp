@@ -1,29 +1,21 @@
-#include <QtTest>
-#include <QTextCodec>
+#include <gtest/gtest.h>
+#include <QApplication>
 
-#include "testphysics.h"
-#include "testcellcluster.h"
-#include "testtoken.h"
-#include "testcellfunctioncommunicator.h"
-#include "integrationtestreplicator.h"
-#include "integrationtestcomparison.h"
+/*
+#include "unittests/testphysics.h"
+#include "unittests/testcellcluster.h"
+#include "unittests/testtoken.h"
+#include "unittests/testcellfunctioncommunicator.h"
+#include "integrationtests/integrationtestreplicator.h"
+#include "integrationtests/integrationtestcomparison.h"
+*/
+
+//--gtest_filter=<test string>
+// Ex.: SquareRoot*
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
 
-    TestPhysics testPhysics;
-    TestCellCluster testCellCluster;
-    TestToken testToken;
-    TestCellFunctionCommunicator testCommunicator;
-
-    IntegrationTestReplicator intTestReplicator;
-    IntegrationTestComparison intTestComparison;
-
-    //TODO: Determinismustest
-    return QTest::qExec(&testPhysics, argc, argv)
-            | QTest::qExec(&testCellCluster, argc, argv)
-            | QTest::qExec(&testToken, argc, argv)
-            | QTest::qExec(&testCommunicator, argc, argv)
-            | QTest::qExec(&intTestReplicator, argc, argv)
-            | QTest::qExec(&intTestComparison, argc, argv);
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

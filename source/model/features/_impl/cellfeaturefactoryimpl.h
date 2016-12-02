@@ -1,5 +1,5 @@
-#ifndef CELLDECORATORFACTORYIMPL_H
-#define CELLDECORATORFACTORYIMPL_H
+#ifndef CELLFEATUREFACTORYIMPL_H
+#define CELLFEATUREFACTORYIMPL_H
 
 #include "model/features/cellfeaturefactory.h"
 
@@ -16,4 +16,4 @@ public:
     void addEnergyGuidance (Cell* cell, Grid* grid);
 };
 
-#endif // CELLDECORATORFACTORYIMPL_H
+#endif // CELLFEATUREFACTORYIMPL_H

@@ -1,7 +1,7 @@
 #ifndef CELLDECORATORFACTORY_H
 #define CELLDECORATORFACTORY_H
 
-#include "constants.h"
+#include "cellfeatureconstants.h"
 
 #include <QString>
 

@@ -1,4 +1,4 @@
-#include "cellfunctionweapon.h"
+#include "cellfunctionweaponimpl.h"
 
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
@@ -6,12 +6,12 @@
 
 #include "model/simulationsettings.h"
 
-CellFunctionWeapon::CellFunctionWeapon (Grid* grid)
+CellFunctionWeaponImpl::CellFunctionWeaponImpl (Grid* grid)
     : CellFunction(grid)
 {
 }
 
-CellFeature::ProcessingResult CellFunctionWeapon::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     token->memory[static_cast<int>(WEAPON::OUT)] = static_cast<int>(WEAPON_OUT::NO_TARGET);

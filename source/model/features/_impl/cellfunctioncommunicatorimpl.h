@@ -1,5 +1,5 @@
-#ifndef CELLFUNCTIONCOMMUNICATOR_H
-#define CELLFUNCTIONCOMMUNICATOR_H
+#ifndef CELLFUNCTIONCOMMUNICATORIMPL_H
+#define CELLFUNCTIONCOMMUNICATORIMPL_H
 
 #include "model/features/cellfunction.h"
 
@@ -7,12 +7,12 @@
 
 class TestCellFunctionCommunicator;
 
-class CellFunctionCommunicator : public CellFunction
+class CellFunctionCommunicatorImpl : public CellFunction
 {
 public:
-    CellFunctionCommunicator (Grid* grid);
-    CellFunctionCommunicator (quint8* cellFunctionData, Grid* grid);
-    CellFunctionCommunicator (QDataStream& stream, Grid* grid);
+    CellFunctionCommunicatorImpl (Grid* grid);
+    CellFunctionCommunicatorImpl (quint8* cellFunctionData, Grid* grid);
+    CellFunctionCommunicatorImpl (QDataStream& stream, Grid* grid);
 
     void serialize (QDataStream& stream) const;
 
@@ -48,4 +48,4 @@ private:
     void calcReceivedMessageAngle (Cell* receiverCell, Cell* receiverPreviousCell);
 };
 
-#endif // CELLFUNCTIONCOMMUNICATOR_H
+#endif // CELLFUNCTIONCOMMUNICATORIMPL_H

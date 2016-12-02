@@ -1,5 +1,6 @@
 #include "integrationtestcomparison.h"
-#include "testsettings.h"
+
+#include "tests/testsettings.h"
 #include "model/simulationcontroller.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
@@ -8,7 +9,7 @@
 #include "model/entities/cell.h"
 #include "global/global.h"
 
-#include <QtTest/QtTest>
+#include <QFile>
 
 namespace {
 
@@ -146,56 +147,71 @@ namespace {
         return msg.toLatin1().data();
     }
 
-    void compareReferenceWithSimulation(SimulationController* simulationController, LoadedReferenceData const& ref)
+    void compareReferenceWithSimulation (SimulationController* simulationController, LoadedReferenceData const& ref)
     {
         Grid* grid = simulationController->getGrid();
         int refNumCluster = ref.clusterPosList.size();
-        QVERIFY2(grid->getClusters().size() == static_cast<int>(refNumCluster), "Deviation in number of clusters.");
+		ASSERT_EQ(grid->getClusters().size(), static_cast<int>(refNumCluster))
+			<< "Deviation in number of clusters.";
         int minNumCluster = qMin(grid->getClusters().size(), static_cast<int>(refNumCluster));
         for(int i = 0; i < minNumCluster; ++i) {
             CellCluster* cluster = grid->getClusters().at(i);
-            QVERIFY2(ref.clusterPosList.at(i) == cluster->getPosition(), createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in pos", ref.clusterPosList.at(i), cluster->getPosition()));
-            QVERIFY2(ref.clusterVelList.at(i) == cluster->getVel(), createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in vel", ref.clusterVelList.at(i), cluster->getVel()));
-            QVERIFY2(ref.clusterAngleList.at(i) == cluster->getAngle(), createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angle", ref.clusterAngleList.at(i), cluster->getAngle()));
-            QVERIFY2(ref.clusterAnglularVelList.at(i) == cluster->getAngularVel(), createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular vel", ref.clusterAnglularVelList.at(i), cluster->getAngularVel()));
-            QVERIFY2(ref.clusterAnglularMassList.at(i) == cluster->getAngularMass(), createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular mass", ref.clusterAnglularMassList.at(i), cluster->getAngularMass()));
+			ASSERT_EQ(ref.clusterPosList.at(i), cluster->getPosition()) 
+				<< createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in pos", ref.clusterPosList.at(i), cluster->getPosition());
+			ASSERT_EQ(ref.clusterVelList.at(i), cluster->getVel()) 
+				<< createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in vel", ref.clusterVelList.at(i), cluster->getVel());
+			ASSERT_EQ(ref.clusterAngleList.at(i), cluster->getAngle()) 
+				<< createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angle", ref.clusterAngleList.at(i), cluster->getAngle());
+			ASSERT_EQ(ref.clusterAnglularVelList.at(i), cluster->getAngularVel()) 
+				<< createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular vel", ref.clusterAnglularVelList.at(i), cluster->getAngularVel());
+			ASSERT_EQ(ref.clusterAnglularMassList.at(i), cluster->getAngularMass()) 
+				<< createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular mass", ref.clusterAnglularMassList.at(i), cluster->getAngularMass());
             QList<QVector3D> cellPosList = ref.clusterCellPosList.at(i);
             QList<QVector3D> cellVelList = ref.clusterCellVelList.at(i);
             int minNumCell = qMin(cluster->getCellsRef().size(), cellPosList.size());
             for(int j = 0; j < minNumCell; ++j) {
-                QVERIFY2(cellPosList.at(j) == cluster->getCellsRef().at(j)->getRelPos(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
-                    , cluster->getCellsRef().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPos()));
-                QVERIFY2(cellVelList.at(j) == cluster->getCellsRef().at(j)->getVel(), createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
-                    , cluster->getCellsRef().at(j)->getId(), "in vel", cellVelList.at(j), cluster->getCellsRef().at(j)->getVel()));
+				ASSERT_EQ(cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPos())
+					<< createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
+						, cluster->getCellsRef().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPos());
+				ASSERT_EQ(cellVelList.at(j), cluster->getCellsRef().at(j)->getVel())
+					<< createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
+						, cluster->getCellsRef().at(j)->getId(), "in vel", cellVelList.at(j), cluster->getCellsRef().at(j)->getVel());
             }
         }
     }
 }
 
-void IntegrationTestComparison::initTestCase()
+IntegrationTestComparison::IntegrationTestComparison()
 {
-    _simulationController = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD, this);
-    if (!loadSimulationAndReturnSuccess(_simulationController)) {
-        QString msg = QString("Could not open file ") + INTEGRATIONTEST_COMPARISON_INIT + QString(" in loadDataAndReturnSuccess(...).");
-        QFAIL(msg.toLatin1().data());
-    }
+	_simulationController = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD);
 }
 
-void IntegrationTestComparison::testRunAndCompareSimulation ()
+IntegrationTestComparison::~IntegrationTestComparison()
 {
-    runSimulation(_simulationController);
+	delete _simulationController;
+}
+
+
+TEST_F (IntegrationTestComparison, testLoadSimulation)
+{
+}
+
+TEST_F (IntegrationTestComparison, testRunAndCompareSimulation)
+{
+	if (!loadSimulationAndReturnSuccess(_simulationController)) {
+		QString msg = QString("Could not open file ") + INTEGRATIONTEST_COMPARISON_INIT + QString(" in loadDataAndReturnSuccess(...).");
+		FAIL() << msg.toLatin1().data();
+	}
+	runSimulation(_simulationController);
     LoadedReferenceData ref = loadReferenceData();
     bool refUpdated = updateReferenceDataAndReturnSuccess(_simulationController);
     if (ref.success)
         compareReferenceWithSimulation(_simulationController, ref);
     else if (refUpdated)
-        QFAIL("Reference file does not exist. It has been created for the next cycle.");
+        FAIL() << "Reference file does not exist. It has been created for the next cycle.";
     else
-        QFAIL("Reference file does not exist. It has not been created.");
+        FAIL() << "Reference file does not exist. It has not been created.";
 }
 
 
-void IntegrationTestComparison::cleanupTestCase()
-{
 
-}

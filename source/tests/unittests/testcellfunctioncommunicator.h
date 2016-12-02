@@ -7,7 +7,7 @@
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
-#include "model/features/_impl/cellfunctioncommunicator.h"
+#include "model/features/_impl/cellfunctioncommunicatorimpl.h"
 #include "model/factoryfacade.h"
 #include "global/servicelocator.h"
 
@@ -31,11 +31,11 @@ private slots:
 
             QVector3D relPos = QVector3D();
             _cellWithToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
-            _communicator1a = _cellWithToken->getFeatures()->findObject<CellFunctionCommunicator>();
+            _communicator1a = _cellWithToken->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
             relPos = QVector3D(0.0, 1.0, 0.0);
             _cellWithoutToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
-            _communicator1b = _cellWithoutToken->getFeatures()->findObject<CellFunctionCommunicator>();
+            _communicator1b = _cellWithoutToken->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
             qreal tokenEnergy = 0.0;
             _token = new Token(tokenEnergy);
@@ -60,7 +60,7 @@ private slots:
 
             QVector3D relPos = QVector3D();
             Cell* cell = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
-            _communicator2 = cell->getFeatures()->findObject<CellFunctionCommunicator>();
+            _communicator2 = cell->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
             //create cluster2 within communication range
             QList< Cell* > cells;
@@ -161,13 +161,13 @@ private:
     CellCluster* _cluster1;
     Cell* _cellWithToken;
     Cell* _cellWithoutToken;
-    CellFunctionCommunicator* _communicator1a;
-    CellFunctionCommunicator* _communicator1b;
+    CellFunctionCommunicatorImpl* _communicator1a;
+	CellFunctionCommunicatorImpl* _communicator1b;
     Token* _token;
 
     //data for cluster2
     CellCluster* _cluster2;
-    CellFunctionCommunicator* _communicator2;
+	CellFunctionCommunicatorImpl* _communicator2;
 };
 
 #endif // TESTCELLFUNCTIONCOMMUNICATOR_H

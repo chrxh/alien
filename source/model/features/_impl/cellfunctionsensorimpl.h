@@ -3,10 +3,10 @@
 
 #include "model/features/cellfunction.h"
 
-class CellFunctionSensor : public CellFunction
+class CellFunctionSensorImpl : public CellFunction
 {
 public:
-    CellFunctionSensor (Grid* grid);
+    CellFunctionSensorImpl (Grid* grid);
 
     CellFunctionType getType () const { return CellFunctionType::SENSOR; }
 
