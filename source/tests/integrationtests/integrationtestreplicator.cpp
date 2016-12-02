@@ -1,31 +1,35 @@
 #include "integrationtestreplicator.h"
 
-#include "testsettings.h"
+#include "tests/testsettings.h"
 #include "model/entities/grid.h"
 #include "model/entities/cellcluster.h"
 #include "model/simulationcontroller.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
 
-#include <QtTest/QtTest>
+#include <QFile>
+#include <QDir>
 
-void IntegrationTestReplicator::initTestCase ()
+IntegrationTestReplicator::IntegrationTestReplicator()
 {
-    _simulationController = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD, this);
+	_simulationController = new SimulationController(SimulationController::Threading::NO_EXTRA_THREAD);
 }
 
-void IntegrationTestReplicator::testRunSimulation()
+IntegrationTestReplicator::~IntegrationTestReplicator()
+{
+	delete _simulationController;
+}
+
+TEST_F (IntegrationTestReplicator, testRunSimulation)
 {
     QFile file(INTEGRATIONTEST_REPLICATOR_INIT);
-    bool fileOpened = file.open(QIODevice::ReadOnly);
-    if (fileOpened) {
-        QDataStream in(&file);
-        _simulationController->buildUniverse(in);
-        file.close();
-    }
+	ASSERT_TRUE(file.open(QIODevice::ReadOnly));
+    QDataStream in(&file);
+    _simulationController->buildUniverse(in);
+    file.close();
 
     Grid* grid = _simulationController->getGrid();
-    QVERIFY(!grid->getClusters().empty());
+    ASSERT_TRUE(!grid->getClusters().empty());
     int replicatorSize = grid->getClusters().at(0)->getCellsRef().size();
     for (int time = 0; time < INTEGRATIONTEST_REPLICATOR_TIMESTEPS; ++time) {
         _simulationController->requestNextTimestep();
@@ -36,9 +40,6 @@ void IntegrationTestReplicator::testRunSimulation()
         if (cluster->getCellsRef().size() >= replicatorSize)
             ++replicators;
     }
-    QVERIFY2(replicators > 8, "Not enough replicators.");
+    ASSERT_TRUE(replicators > 8);
 }
 
-void IntegrationTestReplicator::cleanupTestCase()
-{
-}

@@ -2,7 +2,7 @@
 
 #include "model/entities/token.h"
 #include "model/entities/cell.h"
-#include "model/features/constants.h"
+#include "model/features/cellfeatureconstants.h"
 #include "model/simulationsettings.h"
 
 
