@@ -3,6 +3,7 @@
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
 #include "model/physics/physics.h"
+#include "model/physics/codingphysicalquantities.h"
 #include "global/global.h"
 
 #include <QString>
@@ -125,7 +126,7 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPos() - scanCellPre1->getRelPos()).length();
-        token->memory[static_cast<int>(SCANNER::OUT_DISTANCE)] = convertShiftLenToData(len);
+        token->memory[static_cast<int>(SCANNER::OUT_DISTANCE)] = CodingPhysicalQuantities::convertShiftLenToData(len);
     }
 
     //further cell
@@ -135,12 +136,12 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
         qreal a1 = Physics::angleOfVector(scanCellPre2->getRelPos() - scanCellPre1->getRelPos());
         qreal a2 = Physics::angleOfVector(-scanCell->getRelPos() + scanCellPre1->getRelPos());
         qreal angle = a1 - a2;
-        token->memory[static_cast<int>(SCANNER::OUT_ANGLE)] = convertAngleToData(angle);
+        token->memory[static_cast<int>(SCANNER::OUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(angle);
 //        qDebug("-> v: %f, n: %f", -angle, convertDataToAngle(convertAngleToData(-angle)));
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPos() - scanCellPre1->getRelPos()).length();
-        token->memory[static_cast<int>(SCANNER::OUT_DISTANCE)] = convertShiftLenToData(len);
+        token->memory[static_cast<int>(SCANNER::OUT_DISTANCE)] = CodingPhysicalQuantities::convertShiftLenToData(len);
     }
 
     //scan cell

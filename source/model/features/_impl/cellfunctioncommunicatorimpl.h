@@ -19,18 +19,19 @@ public:
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
     void getInternalData (quint8* ptr) const;
 
-    friend TestCellFunctionCommunicator;
+	struct MessageData {
+		quint8 channel = 0;
+		quint8 message = 0;
+		quint8 angle = 0;
+		quint8 distance = 0;
+	};
+	bool& getNewMessageReceivedRef();
+	MessageData& getReceivedMessageRef();
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
 
 private:
-    struct MessageData {
-        quint8 channel = 0;
-        quint8 message = 0;
-        quint8 angle = 0;
-        quint8 distance = 0;
-    };
 
     bool _newMessageReceived = false;
     MessageData _receivedMessage;

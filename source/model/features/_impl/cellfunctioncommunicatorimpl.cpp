@@ -4,6 +4,7 @@
 #include "model/entities/token.h"
 #include "model/entities/grid.h"
 #include "model/physics/physics.h"
+#include "model/physics/codingphysicalquantities.h"
 
 #include <QString>
 
@@ -31,6 +32,16 @@ CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QDataStream& stream,
            >> _receivedMessage.message
            >> _receivedMessage.angle
            >> _receivedMessage.distance;
+}
+
+bool & CellFunctionCommunicatorImpl::getNewMessageReceivedRef()
+{
+	return _newMessageReceived;
+}
+
+CellFunctionCommunicatorImpl::MessageData & CellFunctionCommunicatorImpl::getReceivedMessageRef()
+{
+	return _receivedMessage;
 }
 
 CellFeature::ProcessingResult CellFunctionCommunicatorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
@@ -86,7 +97,7 @@ void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToke
     messageDataToSend.angle = token->memory[static_cast<int>(COMMUNICATOR::IN_ANGLE)];
     messageDataToSend.distance = token->memory[static_cast<int>(COMMUNICATOR::IN_DISTANCE)];
     int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageDataToSend, cell, previousCell);
-    token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = convertIntToData(numMsg);
+    token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = CodingPhysicalQuantities::convertIntToData(numMsg);
 }
 
 int CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
@@ -127,8 +138,8 @@ bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (co
             QVector3D displacementOfObjectFromReceiver = _grid->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
-            communicator->_receivedMessage.angle = convertAngleToData(angleSeenFromReceiver);
-            communicator->_receivedMessage.distance = convertURealToData(distanceSeenFromReceiver);
+            communicator->_receivedMessage.angle = CodingPhysicalQuantities::convertAngleToData(angleSeenFromReceiver);
+            communicator->_receivedMessage.distance = CodingPhysicalQuantities::convertURealToData(distanceSeenFromReceiver);
             communicator->_receivedMessage.message = messageDataToSend.message;
             communicator->_newMessageReceived = true;
             return true;
@@ -143,8 +154,8 @@ QVector3D CellFunctionCommunicatorImpl::calcDisplacementOfObjectFromSender (cons
 {
     QVector3D displacementFromSender = senderPreviousCell->calcPosition() - senderCell->calcPosition();
     displacementFromSender.normalize();
-    displacementFromSender = Physics::rotateClockwise(displacementFromSender, convertDataToAngle(messageDataToSend.angle));
-    displacementFromSender = displacementFromSender*convertDataToUReal(messageDataToSend.distance);
+    displacementFromSender = Physics::rotateClockwise(displacementFromSender, CodingPhysicalQuantities::convertDataToAngle(messageDataToSend.angle));
+    displacementFromSender = displacementFromSender * CodingPhysicalQuantities::convertDataToUReal(messageDataToSend.distance);
     return displacementFromSender;
 }
 
@@ -174,7 +185,7 @@ void CellFunctionCommunicatorImpl::calcReceivedMessageAngle (Cell* receiverCell,
 {
     QVector3D displacement = receiverPreviousCell->calcPosition() - receiverCell->calcPosition();
     qreal localAngle = Physics::angleOfVector(displacement);
-    qreal messageAngle = convertDataToAngle(_receivedMessage.angle);
+    qreal messageAngle = CodingPhysicalQuantities::convertDataToAngle(_receivedMessage.angle);
     qreal relAngle = Physics::subtractAngle(messageAngle, localAngle);
-    _receivedMessage.angle = convertAngleToData(relAngle);
+    _receivedMessage.angle = CodingPhysicalQuantities::convertAngleToData(relAngle);
 }

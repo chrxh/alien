@@ -85,21 +85,25 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <ExecutablePath>..\..\external\gtest\googletest;..\..\external\gtest\googletest\include;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <LibraryPath>..\..\external\gtest\googletest\msvc\gtest-md\Release;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(SolutionDir)\..\..\source;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <LibraryPath>..\..\libs\gtest\googletest\msvc\x64\Release;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\..\external\gtest\googletest\msvc\x64\Debug;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(ProjectDir)\..\..\external\gtest\googletest;$(ProjectDir)\..\..\external\gtest\googletest\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <ExecutablePath>..\..\libs\gtest\googletest;..\..\libs\gtest\googletest\include;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
-    <LibraryPath>..\..\libs\gtest\googletest\msvc\gtest-md\Release;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <ExecutablePath>..\..\external\gtest\googletest;..\..\libs\gtest\googletest\include;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <LibraryPath>..\..\external\gtest\googletest\msvc\gtest-md\Release;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -115,7 +119,7 @@
     <CodeAnalysisRuleAssemblies />
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <ExecutablePath>$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
-    <LibraryPath>..\..\external\gtest\googletest\msvc\x64\Release;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\..\external\gtest\googletest\msvc\x64\Release;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <IncludePath>$(ProjectDir)\..\..\external\gtest\googletest;$(ProjectDir)\..\..\external\gtest\googletest\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
@@ -141,7 +145,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gtest.lib;qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -150,7 +154,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>.;$(QTDIR)\include;$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\source;.;$(QTDIR)\include;$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
     </ClCompile>
     <Link>
@@ -158,8 +162,11 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gtestd.lib;qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -208,6 +215,7 @@
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>gtest.lib;qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/LTCG %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -236,47 +244,11 @@
   <ItemGroup>
     <ClCompile Include="..\..\source\tests\integrationtests\integrationtestcomparison.cpp" />
     <ClCompile Include="..\..\source\tests\integrationtests\integrationtestreplicator.cpp" />
+    <ClCompile Include="..\..\source\tests\predicates.cpp" />
     <ClCompile Include="..\..\source\tests\testsuite.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\source\tests\integrationtests\integrationtestreplicator.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Command>
-    </CustomBuild>
+    <ClCompile Include="..\..\source\tests\unittests\unittestcellcluster.cpp" />
+    <ClCompile Include="..\..\source\tests\unittests\unittestcellfunctioncommunicator.cpp" />
+    <ClCompile Include="..\..\source\tests\unittests\unittestphysics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\alien\alien.vcxproj">
@@ -284,47 +256,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\source\tests\integrationtests\integrationtestcomparison.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Command>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\source\tests\testsettings.h" />
+    <ClInclude Include="..\..\source\tests\predicates.h" />
+    <ClInclude Include="..\..\source\tests\settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,7 @@
 #include "model/entities/token.h"
 #include "model/entities/grid.h"
 #include "model/physics/physics.h"
+#include "model/physics/codingphysicalquantities.h"
 #include "model/simulationsettings.h"
 
 #include <QtCore/qmath.h>
@@ -43,13 +44,13 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 //        cout << "Dauer: " << diff1.count() << endl;
         if( otherCluster ) {
             token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
-            token->memory[static_cast<int>(SENSOR::OUT_MASS)] = convertURealToData(otherCluster->getMass());
+            token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(otherCluster->getMass());
 
             //calc relative angle
             QVector3D dir  = _grid->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
             qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
-            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertAngleToData(relAngle);
+            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(relAngle);
 
             //calc distance by scanning along beam
             QVector3D beamPos = cell->calcPosition(true);
@@ -65,7 +66,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
                                 qreal dist = _grid->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
-                                token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = convertURealToData(dist);
+                                token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
                                 return processingResult;
                             }
                         }
@@ -82,7 +83,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
     QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
     QVector3D dir(0.0, 0.0, 0.0);
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_BY_ANGLE) ) {
-        qreal relAngle = convertDataToAngle(token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)]);
+        qreal relAngle = CodingPhysicalQuantities::convertDataToAngle(token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)]);
         qreal angle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos()) + cluster->getAngle() + relAngle;
         dir = Physics::unitVectorOfAngle(angle);
     }
@@ -130,8 +131,8 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
             }
             token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
             qreal dist = _grid->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
-            token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = convertURealToData(dist);
-            token->memory[static_cast<int>(SENSOR::OUT_MASS)] = convertURealToData(largestClusterCell->getCluster()->getMass());
+            token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
+            token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(largestClusterCell->getCluster()->getMass());
 //            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);
             return processingResult;
         }

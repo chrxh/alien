@@ -5,6 +5,7 @@
 #include "model/entities/energyparticle.h"
 #include "model/entities/token.h"
 #include "model/physics/physics.h"
+#include "model/physics/codingphysicalquantities.h"
 #include "model/simulationsettings.h"
 
 #include <QtCore/qmath.h>
@@ -27,7 +28,7 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());
     quint8 cmd = token->memory[static_cast<int>(PROP::IN)]%7;
-    qreal angle = convertDataToAngle(token->memory[static_cast<int>(PROP::IN_ANGLE)]);
+    qreal angle = CodingPhysicalQuantities::convertDataToAngle(token->memory[static_cast<int>(PROP::IN_ANGLE)]);
     qreal power = convertDataToThrustPower(token->memory[static_cast<int>(PROP::IN_POWER)]);
 
     if( cmd == static_cast<int>(PROP_IN::DO_NOTHING) ) {

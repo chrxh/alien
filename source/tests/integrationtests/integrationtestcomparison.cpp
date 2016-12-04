@@ -1,6 +1,4 @@
-#include "integrationtestcomparison.h"
-
-#include "tests/testsettings.h"
+#include "tests/settings.h"
 #include "model/simulationcontroller.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
@@ -10,6 +8,18 @@
 #include "global/global.h"
 
 #include <QFile>
+
+#include <gtest/gtest.h>
+
+class IntegrationTestComparison : public ::testing::Test
+{
+public:
+	IntegrationTestComparison();
+	~IntegrationTestComparison();
+
+protected:
+	SimulationController* _simulationController;
+};
 
 namespace {
 
@@ -189,11 +199,6 @@ IntegrationTestComparison::IntegrationTestComparison()
 IntegrationTestComparison::~IntegrationTestComparison()
 {
 	delete _simulationController;
-}
-
-
-TEST_F (IntegrationTestComparison, testLoadSimulation)
-{
 }
 
 TEST_F (IntegrationTestComparison, testRunAndCompareSimulation)

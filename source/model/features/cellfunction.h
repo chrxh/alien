@@ -18,14 +18,6 @@ public:
 
 protected:
     qreal calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const;
-
-    static qreal convertDataToAngle (quint8 b);
-    static quint8 convertAngleToData (qreal a);
-    static qreal convertDataToShiftLen (quint8 b);
-    static quint8 convertShiftLenToData (qreal len);
-    static quint8 convertURealToData (qreal r);
-    static qreal convertDataToUReal (quint8 d);
-    static quint8 convertIntToData (int i);
 };
 
 #endif // CELLFUNCTION_H

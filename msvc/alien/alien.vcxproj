@@ -30,6 +30,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <IntermediateDirectory>release\</IntermediateDirectory>
     <PrimaryOutput>alien</PrimaryOutput>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|x64'" Label="Configuration">
     <PlatformToolSet>v140</PlatformToolSet>
@@ -45,7 +46,7 @@
     <OutputDirectory>debug\</OutputDirectory>
     <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
     <CharacterSet>NotSet</CharacterSet>
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <IntermediateDirectory>debug\</IntermediateDirectory>
     <PrimaryOutput>alien</PrimaryOutput>
   </PropertyGroup>
@@ -66,15 +67,14 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">alien</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">alien</TargetName>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</IgnoreImportLibrary>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">alien</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)</TargetName>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -93,8 +93,7 @@
       <DisableSpecificWarnings>4577;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;ALIEN_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -102,6 +101,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(QTDIR)\lib\qtmain.lib;shell32.lib;$(QTDIR)\lib\Qt5OpenGL.lib;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Core.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -111,7 +111,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
       <LinkIncremental>false</LinkIncremental>
-      <OutputFile>$(OutDir)\alien.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -157,6 +157,7 @@
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
     <Midl>
       <DefaultCharType>Unsigned</DefaultCharType>
@@ -198,6 +199,7 @@
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
     <Midl>
       <DefaultCharType>Unsigned</DefaultCharType>
@@ -223,7 +225,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing tutorialwindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\addenergydialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -237,7 +239,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing addenergydialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\addhexagonstructuredialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -251,7 +253,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing addhexagonstructuredialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\addrectstructuredialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -265,7 +267,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing addrectstructuredialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\newsimulationdialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -279,7 +281,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing newsimulationdialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyarrangementdialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -293,7 +295,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing selectionmultiplyarrangementdialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyrandomdialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -307,7 +309,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing selectionmultiplyrandomdialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\simulationparametersdialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -321,7 +323,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing simulationparametersdialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\symboltabledialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -335,7 +337,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing symboltabledialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\gui\editorsettings.h" />
     <ClInclude Include="..\..\source\gui\guisettings.h" />
@@ -351,7 +353,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing macroeditor.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\mainwindow.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -365,7 +367,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing mainwindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -379,7 +381,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing microeditor.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\gui\macroeditor\aliencellconnectiongraphicsitem.h" />
     <ClInclude Include="..\..\source\gui\macroeditor\aliencellgraphicsitem.h" />
@@ -397,7 +399,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing pixeluniverse.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\macroeditor\shapeuniverse.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -411,7 +413,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing shapeuniverse.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\cellcomputeredit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -425,7 +427,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing cellcomputeredit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\celledit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -439,7 +441,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing celledit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\clusteredit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -453,7 +455,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing clusteredit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\computercodeedit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -467,7 +469,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing computercodeedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\energyedit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -481,7 +483,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing energyedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\hexedit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -495,7 +497,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing hexedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\metadataedit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -509,7 +511,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing metadataedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\metadatapropertiesedit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -523,7 +525,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing metadatapropertiesedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\symboledit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -537,7 +539,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing symboledit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\tokenedit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -551,7 +553,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing tokenedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\microeditor\tokentab.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -565,7 +567,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing tokentab.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\misc\startscreencontroller.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -579,7 +581,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing startscreencontroller.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\monitoring\simulationmonitor.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -593,7 +595,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing simulationmonitor.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\model\definitions.h" />
     <ClInclude Include="..\..\source\model\entities\cell.h" />
@@ -613,7 +615,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing grid.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\model\entities\token.h" />
     <ClInclude Include="..\..\source\model\entities\_impl\cellclusterimpl.h" />
@@ -636,6 +638,7 @@
     <ClInclude Include="..\..\source\model\features\_impl\cellfunctionweaponimpl.h" />
     <ClInclude Include="..\..\source\model\features\_impl\energyguidanceimpl.h" />
     <ClInclude Include="..\..\source\model\metadatamanager.h" />
+    <ClInclude Include="..\..\source\model\physics\codingphysicalquantities.h" />
     <ClInclude Include="..\..\source\model\physics\physics.h" />
     <ClInclude Include="..\..\source\model\simulationcontext.h" />
     <CustomBuild Include="..\..\source\model\simulationcontroller.h">
@@ -650,7 +653,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing simulationcontroller.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\model\simulationsettings.h" />
     <CustomBuild Include="..\..\source\model\simulationunit.h">
@@ -665,7 +668,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing simulationunit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\model\topology.h" />
     <ClInclude Include="..\..\source\model\_impl\factoryfacadeimpl.h" />
@@ -741,6 +744,7 @@
     <ClCompile Include="..\..\source\model\features\_impl\cellfunctionweaponimpl.cpp" />
     <ClCompile Include="..\..\source\model\features\_impl\energyguidanceimpl.cpp" />
     <ClCompile Include="..\..\source\model\metadatamanager.cpp" />
+    <ClCompile Include="..\..\source\model\physics\codingphysicalquantities.cpp" />
     <ClCompile Include="..\..\source\model\physics\physics.cpp" />
     <ClCompile Include="..\..\source\model\simulationcontroller.cpp" />
     <ClCompile Include="..\..\source\model\simulationsettings.cpp" />
