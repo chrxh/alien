@@ -6,6 +6,7 @@
 #include "model/entities/grid.h"
 #include "model/entities/token.h"
 #include "model/physics/physics.h"
+#include "model/physics/codingphysicalquantities.h"
 #include "model/simulationsettings.h"
 
 #include "global/servicelocator.h"
@@ -129,7 +130,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
         return processingResult;
 
     //read shift length for construction site from token data
-    qreal len = convertDataToShiftLen(token->memory[static_cast<int>(CONSTR::IN_DIST)]);
+    qreal len = CodingPhysicalQuantities::convertDataToShiftLen(token->memory[static_cast<int>(CONSTR::IN_DIST)]);
     if( len > simulationParameters.CRIT_CELL_DIST_MAX ) {        //length to large?
         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_DIST);
         return processingResult;
@@ -185,7 +186,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             }
 
             //read desired rotation angle from token
-            qreal angleSum = convertDataToAngle(token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)]);
+            qreal angleSum = CodingPhysicalQuantities::convertDataToAngle(token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)]);
 
             //calc angular masses with respect to "constructionCell"
             qreal angMassConstrSite = 0.0;
@@ -293,7 +294,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //update token data
                 token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::SUCCESS_ROT);
-                token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)] = convertAngleToData(angleSum - angleConstrSite - angleConstructor);
+                token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
                 cluster->drawCellsToMap();
             }
 
@@ -511,7 +512,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 }
 
                 //calc start angle
-                angleGap = angleGap + convertDataToAngle(token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)]);
+                angleGap = angleGap + CodingPhysicalQuantities::convertDataToAngle(token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)]);
 
                 //calc coordinates for new cell from angle gap and construct cell
                 QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*simulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;

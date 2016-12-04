@@ -1,14 +1,24 @@
-#include "integrationtestreplicator.h"
-
-#include "tests/testsettings.h"
+#include "tests/settings.h"
 #include "model/entities/grid.h"
 #include "model/entities/cellcluster.h"
 #include "model/simulationcontroller.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
 
+#include <gtest/gtest.h>
 #include <QFile>
 #include <QDir>
+
+class IntegrationTestReplicator : public ::testing::Test
+{
+public:
+	IntegrationTestReplicator();
+	~IntegrationTestReplicator();
+
+protected:
+	SimulationController* _simulationController;
+};
+
 
 IntegrationTestReplicator::IntegrationTestReplicator()
 {

@@ -10,7 +10,7 @@
 #include "integrationtests/integrationtestcomparison.h"
 */
 
-//--gtest_filter=<test string>
+//--gtest_filter=TestPhysics*
 // Ex.: SquareRoot*
 
 int main(int argc, char** argv) {
