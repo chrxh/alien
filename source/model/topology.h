@@ -6,10 +6,32 @@
 class Topology
 {
 public:
+	Topology(IntVector2D size);
+	virtual ~Topology() {}
+
+	IntVector2D getSize() const;
+
+	void correctPosition(QVector3D& pos) const;
+	IntVector2D correctPositionWithIntPrecision(QVector3D const& pos) const;
+	IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const;
+	void correctDisplacement(QVector3D& displacement) const;
+	QVector3D displacement(QVector3D fromPoint, QVector3D toPoint) const;
+	QVector3D displacement(Cell* fromCell, Cell* toCell) const;
+	qreal distance(Cell* fromCell, Cell* toCell) const;
+
+	void serialize(QDataStream& stream) const;
+	void build(QDataStream& stream, const QMap< quint64, Cell* >& oldIdCellMap, const QMap< quint64, EnergyParticle* >& oldIdEnergyMap);
 
 private:
-    quint32 sizeX;
-    quint32 sizeY;
+	inline void correctPosition(IntVector2D & pos) const;
+
+	IntVector2D _size { 0, 0 };
 };
+
+void Topology::correctPosition(IntVector2D & pos) const
+{
+	pos.x = ((pos.x % _size.x) + _size.x) % _size.x;
+	pos.y = ((pos.y % _size.y) + _size.y) % _size.y;
+}
 
 #endif // TOPOLOGY_H

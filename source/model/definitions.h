@@ -2,6 +2,14 @@
 #define DEFINITIONS_H
 
 #include <QtGlobal>
+#include <QVector3D>
+#include <QSize>
+#include <QMap>
+#include <QSet>
+#include <qmath.h>
+#include <QDataStream>
+
+#include <unordered_set>
 
 class Cell;
 class CellCluster;
@@ -13,5 +21,17 @@ class SimulationUnit;
 class CellMap;
 class EnergyParticleMap;
 class Topology;
+
+struct CellClusterHash
+{
+	std::size_t operator()(CellCluster* const& s) const;
+};
+
+typedef std::unordered_set<CellCluster*, CellClusterHash> CellClusterSet;
+
+struct IntVector2D {
+	int x;
+	int y;
+};
 
 #endif // DEFINITIONS_H
