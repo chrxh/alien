@@ -15,7 +15,7 @@ public:
 	
     virtual void reinit (QSize size) = 0;
 
-    virtual Topology* getTopology () const = 0;
+    virtual Topology getTopology () const = 0;
     virtual EnergyParticleMap* getEnergyParticleMap () const = 0;
     virtual CellMap* getCellMap () const = 0;
     virtual QList<CellCluster*>& getClustersRef () = 0;
