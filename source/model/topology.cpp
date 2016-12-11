@@ -7,6 +7,7 @@ Topology::Topology(IntVector2D size)
 {
 }
 
+
 IntVector2D Topology::getSize() const
 {
 	return _size;
@@ -69,10 +70,12 @@ qreal Topology::distance(Cell * fromCell, Cell * toCell) const
 
 void Topology::serialize(QDataStream & stream) const
 {
+	stream << _size.x << _size.y;
 }
 
-void Topology::build(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap, const QMap<quint64, EnergyParticle*>& oldIdEnergyMap)
+void Topology::deserialize(QDataStream & stream)
 {
+	stream >> _size.x >> _size.y;
 }
 
 

@@ -20,7 +20,7 @@ public:
 	qreal distance(Cell* fromCell, Cell* toCell) const;
 
 	void serialize(QDataStream& stream) const;
-	void build(QDataStream& stream, const QMap< quint64, Cell* >& oldIdCellMap, const QMap< quint64, EnergyParticle* >& oldIdEnergyMap);
+	void deserialize(QDataStream& stream);
 
 private:
 	inline void correctPosition(IntVector2D & pos) const;

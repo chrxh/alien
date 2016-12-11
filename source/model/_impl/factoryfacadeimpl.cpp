@@ -2,14 +2,23 @@
 
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
 #include "model/entities/token.h"
 #include "model/entities/entityfactory.h"
 #include "model/features/cellfunction.h"
 #include "model/features/cellfunctioncomputer.h"
 #include "model/features/energyguidance.h"
 #include "model/features/cellfeaturefactory.h"
-#include "global/servicelocator.h"
 #include "model/simulationsettings.h"
+#include "model/cellmap.h"
+#include "model/energyparticlemap.h"
+#include "model/topology.h"
+#include "model/_impl/simulationcontextimpl.h"
+#include "global/servicelocator.h"
+
+namespace {
+	FactoryFacadeImpl factoryFacadeImpl;
+}
 
 FactoryFacadeImpl::FactoryFacadeImpl ()
 {
@@ -28,12 +37,6 @@ CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal an
     return entityFactory->buildCellCluster(cells, angle, pos, angularVel, vel, grid);
 }
 
-CellCluster* FactoryFacadeImpl::buildCellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
-    ,  QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid)
-{
-    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    return entityFactory->buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, grid);
-}
 
 Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid* grid
     , int maxConnections, int tokenAccessNumber, QVector3D relPos)
@@ -55,26 +58,6 @@ Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type,
     decoratorFactory->addCellFunction(cell, type, grid);
     decoratorFactory->addEnergyGuidance(cell, grid);
     return cell;
-}
-
-Cell* FactoryFacadeImpl::buildFeaturedCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-    , Grid* grid)
-{
-    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-    Cell* cell = entityFactory->buildCell(stream, connectingCells, grid);
-    quint8 rawType;
-    stream >> rawType;
-    CellFunctionType type = static_cast<CellFunctionType>(rawType);
-    decoratorFactory->addEnergyGuidance(cell, grid);
-    decoratorFactory->addCellFunction(cell, type, stream, grid);
-    return cell;
-}
-
-Cell* FactoryFacadeImpl::buildFeaturedCell (QDataStream& stream, Grid* grid)
-{
-    QMap< quint64, QList< quint64 > > temp;
-    return buildFeaturedCell(stream, temp, grid);
 }
 
 Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid* grid)
@@ -137,17 +120,3 @@ void FactoryFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type,
     decoratorFactory->addEnergyGuidance(cell, grid);
 }
 
-void FactoryFacadeImpl::serializeFeaturedCell (Cell* cell, QDataStream& stream)
-{
-    cell->serialize(stream);
-    CellFeature* features = cell->getFeatures();
-    CellFunction* cellFunction = features->findObject<CellFunction>();
-    if( cellFunction ) {
-        stream << static_cast<quint8>(cellFunction->getType());
-    }
-    cellFunction->serialize(stream);
-}
-
-namespace {
-	FactoryFacadeImpl modelFacadeImpl;
-}

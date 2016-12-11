@@ -6,18 +6,19 @@
 class EnergyParticleMap
 {
 public:
+	EnergyParticleMap(Topology* topo);
 	virtual ~EnergyParticleMap();
 
-	void init (Topology* topo);
+	void topologyUpdated();
 	void clear();
-
+	
 	void removeParticleIfPresent(QVector3D pos, EnergyParticle* energy);
 	void setParticle(QVector3D pos, EnergyParticle* energy);
 	EnergyParticle* getParticle(QVector3D pos) const;
 	inline EnergyParticle* getParticleFast(IntVector2D const& pos) const;
 
 	void serialize(QDataStream& stream) const;
-	void build(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap);
+	void deserialize(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap);
 
 private:
 	void deleteCellMap();

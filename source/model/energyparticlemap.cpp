@@ -3,15 +3,26 @@
 #include "model/topology.h"
 #include "model/entities/energyparticle.h"
 
+
+EnergyParticleMap::EnergyParticleMap(Topology* topo)
+{
+	_topo = topo;
+	IntVector2D size = _topo->getSize();
+	_energyGrid = new EnergyParticle**[size.x];
+	for (int x = 0; x < size.x; ++x) {
+		_energyGrid[x] = new EnergyParticle*[size.y];
+	}
+	clear();
+}
 EnergyParticleMap::~EnergyParticleMap()
 {
 	deleteCellMap();
 }
 
-void EnergyParticleMap::init(Topology* topo)
+
+void EnergyParticleMap::topologyUpdated()
 {
 	deleteCellMap();
-	_topo = topo;
 	IntVector2D size = _topo->getSize();
 	_energyGrid = new EnergyParticle**[size.x];
 	for (int x = 0; x < size.x; ++x) {
@@ -25,14 +36,14 @@ void EnergyParticleMap::clear()
 	IntVector2D size = _topo->getSize();
 	for (int x = 0; x < size.x; ++x)
 		for (int y = 0; y < size.y; ++y)
-			_energyGrid[x][y] = 0;
+			_energyGrid[x][y] = nullptr;
 }
 
 void EnergyParticleMap::removeParticleIfPresent(QVector3D pos, EnergyParticle * energy)
 {
 	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
 	if (_energyGrid[intPos.x][intPos.y] == energy)
-		_energyGrid[intPos.x][intPos.y] = 0;
+		_energyGrid[intPos.x][intPos.y] = nullptr;
 }
 
 void EnergyParticleMap::setParticle(QVector3D pos, EnergyParticle * energy)
@@ -69,7 +80,7 @@ void EnergyParticleMap::serialize(QDataStream & stream) const
 		}
 }
 
-void EnergyParticleMap::build(QDataStream & stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap)
+void EnergyParticleMap::deserialize (QDataStream & stream, QMap<quint64, EnergyParticle*> const & oldIdEnergyMap)
 {
 	quint32 numEntries = 0;
 	qint32 x = 0;
@@ -80,12 +91,11 @@ void EnergyParticleMap::build(QDataStream & stream, QMap<quint64, EnergyParticle
 		stream >> x >> y >> oldId;
 		_energyGrid[x][y] = oldIdEnergyMap[oldId];
 	}
-
 }
 
 void EnergyParticleMap::deleteCellMap()
 {
-	if (_energyGrid != nullptr) {
+	if (_energyGrid) {
 		int sizeX = _topo->getSize().x;
 		for (int x = 0; x < sizeX; ++x) {
 			delete[] _energyGrid[x];
