@@ -6,9 +6,10 @@
 class CellMap
 {
 public:
+	CellMap(Topology* topo);
 	virtual ~CellMap();
 
-	void init(Topology* topo);
+	void topologyUpdated();
 	void clear();
 
 	void setCell(QVector3D pos, Cell* cell);
@@ -24,7 +25,7 @@ public:
 	QList< Cell* > getNearbySpecificCells(QVector3D const& pos, qreal r, CellSelectFunction selection) const;
 
 	void serialize(QDataStream& stream) const;
-	void build(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap);
+	void deserialize(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap);
 
 private:
 	void deleteCellMap();
@@ -42,7 +43,7 @@ Cell * CellMap::getCellFast(IntVector2D const& intPos) const
 void CellMap::removeCellIfPresent(int const &x, int const &y, Cell* cell)
 {
 	if (_cellGrid[x][y] == cell)
-		_cellGrid[x][y] = 0;
+		_cellGrid[x][y] = nullptr;
 }
 
 #endif //CELLMAP_H

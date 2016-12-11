@@ -4,16 +4,25 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 
+CellMap::CellMap(Topology* topo)
+{
+	_topo = topo;
+	IntVector2D size = _topo->getSize();
+	_cellGrid = new Cell**[size.x];
+	for (int x = 0; x < size.x; ++x) {
+		_cellGrid[x] = new Cell*[size.y];
+	}
+	clear();
+}
+
 
 CellMap::~CellMap()
 {
 	deleteCellMap();
 }
 
-void CellMap::init(Topology* topo)
+void CellMap::topologyUpdated()
 {
-	deleteCellMap();
-	_topo = topo;
 	IntVector2D size = _topo->getSize();
 	_cellGrid = new Cell**[size.x];
 	for (int x = 0; x < size.x; ++x) {
@@ -27,7 +36,7 @@ void CellMap::clear()
 	IntVector2D size = _topo->getSize();
 	for (int x = 0; x < size.x; ++x)
 		for (int y = 0; y < size.y; ++y)
-			_cellGrid[x][y] = 0;
+			_cellGrid[x][y] = nullptr;
 }
 
 void CellMap::setCell(QVector3D pos, Cell * cell)
@@ -42,17 +51,17 @@ void CellMap::removeCell(QVector3D pos)
 	IntVector2D intPosM = _topo->shiftPosition(intPos, { -1, -1 });
 	IntVector2D intPosP = _topo->shiftPosition(intPos, { 1, 1 });
 
-	_cellGrid[intPosM.x][intPosM.y] = 0;
-	_cellGrid[intPos.x][intPosM.y] = 0;
-	_cellGrid[intPosP.x][intPosM.y] = 0;
+	_cellGrid[intPosM.x][intPosM.y] = nullptr;
+	_cellGrid[intPos.x][intPosM.y] = nullptr;
+	_cellGrid[intPosP.x][intPosM.y] = nullptr;
 
-	_cellGrid[intPosM.x][intPos.y] = 0;
-	_cellGrid[intPos.x][intPos.y] = 0;
-	_cellGrid[intPosP.x][intPos.y] = 0;
+	_cellGrid[intPosM.x][intPos.y] = nullptr;
+	_cellGrid[intPos.x][intPos.y] = nullptr;
+	_cellGrid[intPosP.x][intPos.y] = nullptr;
 
-	_cellGrid[intPosM.x][intPosP.y] = 0;
-	_cellGrid[intPos.x][intPosP.y] = 0;
-	_cellGrid[intPosP.x][intPosP.y] = 0;
+	_cellGrid[intPosM.x][intPosP.y] = nullptr;
+	_cellGrid[intPos.x][intPosP.y] = nullptr;
+	_cellGrid[intPosP.x][intPosP.y] = nullptr;
 }
 
 void CellMap::removeCellIfPresent(QVector3D pos, Cell * cell)
@@ -173,7 +182,7 @@ void CellMap::serialize(QDataStream & stream) const
 		}
 }
 
-void CellMap::build(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap)
+void CellMap::deserialize(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap)
 {
 	quint32 numEntries = 0;
 	qint32 x = 0;

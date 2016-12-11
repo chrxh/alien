@@ -21,6 +21,7 @@ class SimulationUnit;
 class CellMap;
 class EnergyParticleMap;
 class Topology;
+class SimulationContext;
 
 struct CellClusterHash
 {

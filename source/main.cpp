@@ -20,6 +20,8 @@
 //- SimulationSettings und MetadataManager über Grid erreichbar
 //- Grid zerteilen
 //- NICHT Set<CellCluster*> in SimulationController::updateCell benutzen!!!
+//- Design-Entscheidung: alle Serialisierung und Deserialisierung sollen von FactoryFacade gesteuert werden;
+//						 im Konstruktor bzw. serialize()-Methode nur (De)serialiseriung von elementaren Datentypen
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)

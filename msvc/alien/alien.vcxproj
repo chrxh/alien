@@ -642,6 +642,7 @@
     <ClInclude Include="..\..\source\model\metadatamanager.h" />
     <ClInclude Include="..\..\source\model\physics\codingphysicalquantities.h" />
     <ClInclude Include="..\..\source\model\physics\physics.h" />
+    <ClInclude Include="..\..\source\model\serializationfacade.h" />
     <ClInclude Include="..\..\source\model\simulationcontext.h" />
     <CustomBuild Include="..\..\source\model\simulationcontroller.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -674,6 +675,7 @@
     </CustomBuild>
     <ClInclude Include="..\..\source\model\topology.h" />
     <ClInclude Include="..\..\source\model\_impl\factoryfacadeimpl.h" />
+    <ClInclude Include="..\..\source\model\_impl\serializationfacadeimpl.h" />
     <ClInclude Include="..\..\source\model\_impl\simulationcontextimpl.h" />
     <ClInclude Include="ui_addenergydialog.h" />
     <ClInclude Include="ui_addhexagonstructuredialog.h" />
@@ -756,6 +758,7 @@
     <ClCompile Include="..\..\source\model\simulationunit.cpp" />
     <ClCompile Include="..\..\source\model\topology.cpp" />
     <ClCompile Include="..\..\source\model\_impl\factoryfacadeimpl.cpp" />
+    <ClCompile Include="..\..\source\model\_impl\serializationfacadeimpl.cpp" />
     <ClCompile Include="..\..\source\model\_impl\simulationcontextimpl.cpp" />
     <ClCompile Include="Debug\moc_addenergydialog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
