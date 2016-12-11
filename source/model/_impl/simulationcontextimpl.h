@@ -8,30 +8,28 @@
 class SimulationContextImpl : public SimulationContext
 {
 public:
-    SimulationContextImpl ();
-    ~SimulationContextImpl ();
+	SimulationContextImpl();
+	SimulationContextImpl(IntVector2D size);
+	virtual ~SimulationContextImpl();
 
     void lock ();
     void unlock ();
 
-    void init (IntVector2D size);
-
-    Topology getTopology () const;
+    Topology* getTopology () const;
     EnergyParticleMap* getEnergyParticleMap () const;
     CellMap* getCellMap () const;
-    QList<CellCluster*>& getClustersRef ();
+	QList<CellCluster*>& getClustersRef();
     QList<EnergyParticle*>& getEnergyParticlesRef ();
 
-	void serialize(QDataStream& stream) const;
-	void build(QDataStream& stream);
-
 private:
+	void deleteAttributes ();
+
     QMutex _mutex;
     QList<CellCluster*> _clusters;
     QList<EnergyParticle*> _energyParticles;
-    Topology _topology;
-    EnergyParticleMap* _energyParticleMap;
-    CellMap* _cellMap;
+    Topology* _topology = nullptr;
+    EnergyParticleMap* _energyParticleMap = nullptr;
+    CellMap* _cellMap = nullptr;
 
 };
 
