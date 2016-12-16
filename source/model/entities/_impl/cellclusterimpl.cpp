@@ -49,52 +49,6 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D po
     updateAngularMass();
 }
 
-CellClusterImpl::CellClusterImpl (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid)
-    : _grid(grid)
-{
-    //read data and reconstructing structures
-    QMap< quint64, QList< quint64 > > connectingCells;
-    QMap< quint64, Cell* > idCellMap;
-    stream >> _angle >> _pos >> _angularVel >> _vel;
-    int numCells(0);
-    stream >> numCells;
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-    for(int i = 0; i < numCells; ++i ) {
-        Cell* cell = facade->buildFeaturedCell(stream, connectingCells, _grid);
-        cell->setCluster(this);
-        _cells << cell;
-        idCellMap[cell->getId()] = cell;
-
-        //assigning new cell id
-        quint64 newId = GlobalFunctions::createNewTag();
-        oldNewCellIdMap[cell->getId()] = newId;
-        oldIdCellMap[cell->getId()] = cell;
-        cell->setId(newId);
-    }
-    quint64 oldClusterId(0);
-    stream >> oldClusterId;
-    stream >> _color;
-
-    //assigning new cluster id
-    _id = GlobalFunctions::createNewTag();
-    oldNewClusterIdMap[oldClusterId] = _id;
-
-    QMapIterator< quint64, QList< quint64 > > it(connectingCells);
-    while (it.hasNext()) {
-        it.next();
-        Cell* cell(idCellMap[it.key()]);
-        QList< quint64 > cellIdList(it.value());
-        int i(0);
-        foreach(quint64 cellId, cellIdList) {
-            cell->setConnection(i, idCellMap[cellId]);
-            ++i;
-        }
-    }
-    updateTransformationMatrix();
-    updateRelCoordinates();
-    updateAngularMass();
-}
-
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, Grid* grid)
     : _grid(grid),
       _angle(angle),
@@ -254,7 +208,7 @@ void CellClusterImpl::movementProcessingStep2 (QList< CellCluster* >& fragments,
                 qreal diffEnergy = oldEnergy-newEnergy;
 
                 //spread energy difference on cells
-                qreal diffEnergyCell = (diffEnergy/(qreal)size)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                qreal diffEnergyCell = (diffEnergy/static_cast<qreal>(size))/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
                 foreach(Cell* cell, _cells) {
                     if( cell->getEnergy() > (-diffEnergyCell) )
                         cell->setEnergy(cell->getEnergy() + diffEnergyCell);
@@ -271,7 +225,7 @@ void CellClusterImpl::movementProcessingStep2 (QList< CellCluster* >& fragments,
         qreal diffEnergy = oldEnergy-newEnergy;
 
         //spread energy difference on cells
-        qreal diffEnergyCell = (diffEnergy/(qreal)size)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+        qreal diffEnergyCell = (diffEnergy/static_cast<qreal>(size))/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
         foreach(CellCluster* cluster, fragments)
             foreach(Cell* cell, cluster->getCellsRef()) {
                 if( cell->getEnergy() > (-diffEnergyCell) )
@@ -548,7 +502,7 @@ void CellClusterImpl::movementProcessingStep3 ()
                 qreal eKinNew = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
-                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew)/(qreal)fusedCells.size())/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew)/static_cast<qreal>(fusedCells.size()))/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
                 if( eDiff > ALIEN_PRECISION ) {
                     for (quint64 id : fusedCells) {
                         Cell* cell = idCellMap[id];
@@ -764,7 +718,7 @@ void CellClusterImpl::updateCellVel (bool forceCheck)
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
                     if( a.length() > simulationParameters.CELL_MAX_FORCE ) {
-                        if( (qreal)qrand()/RAND_MAX < simulationParameters.CELL_MAX_FORCE_DECAY_PROB )
+                        if(GlobalFunctions::random() < simulationParameters.CELL_MAX_FORCE_DECAY_PROB )
                             cell->setToBeKilled(true);
                     }
                 }
@@ -1095,17 +1049,6 @@ QVector3D CellClusterImpl::absToRelPos (QVector3D absPos) const
     return _transform.inverted().map(absPos);
 }
 
-void CellClusterImpl::serialize (QDataStream& stream) const
-{
-    stream << _angle << _pos << _angularVel << _vel;
-    stream << _cells.size();
-    FactoryFacade *facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-    foreach( Cell* cell, _cells ) {
-        facade->serializeFeaturedCell(cell, stream);
-    }
-    stream << _id;
-    stream << _color;
-}
 
 
 Cell* CellClusterImpl::findNearestCell (QVector3D pos) const
@@ -1148,16 +1091,16 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     }*/
 
     //2. step: distribute the radiated energy to energy particles
-    if( (qreal)qrand()/RAND_MAX < radFrequency) {
+    if(GlobalFunctions::random() < radFrequency) {
         radEnergy = radEnergy / radFrequency;
-        radEnergy = radEnergy *2.0 * ((qreal)qrand()/RAND_MAX);
+        radEnergy = radEnergy *2.0 * (static_cast<qreal>(qrand()) /RAND_MAX);
         if( radEnergy > (energy-1.0) )
             radEnergy = energy-1.0;
         energy = energy - radEnergy;
 
         //create energy particle with radEnergy
-        QVector3D velPerturbation(((qreal)qrand()/RAND_MAX-0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB,
-                                  ((qreal)qrand()/RAND_MAX-0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB, 0.0);
+        QVector3D velPerturbation((GlobalFunctions::random() -0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB,
+                                  (GlobalFunctions::random() -0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
         energyParticle = new EnergyParticle(radEnergy, calcPosition(originCell, _grid)+posPerturbation
             , originCell->getVel()*simulationParameters.CELL_RAD_ENERGY_VEL_MULT+velPerturbation, _grid);
@@ -1165,6 +1108,22 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     }
 }
 
+void CellClusterImpl::serializePrimitives (QDataStream& stream) const
+{
+    stream << _angle << _pos << _angularVel << _vel;
+    /*stream << _cells.size();
+    FactoryFacade *facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    foreach( Cell* cell, _cells ) {
+        facade->serializeFeaturedCell(cell, stream);
+    }*/
+    stream << _id << _color;
+}
+
+void CellClusterImpl::deserializePrimitives(QDataStream& stream)
+{
+	stream >> _angle >> _pos >> _angularVel >> _vel;
+	stream >> _id >> _color;
+}
 /*
     //calc rad prob via a function prob f(x) = 1-a/(x+b) with f(0)=CELL_RAD_PROB_LOW and f(1000)=CELL_RAD_PROB_HIGH
     qreal radProb = (energy * (simulationParameters.CELL_RAD_PROB_HIGH - simulationParameters.CELL_RAD_PROB_LOW) + 1000.0*simulationParameters.CELL_RAD_PROB_LOW*(1.0-simulationParameters.CELL_RAD_PROB_HIGH))

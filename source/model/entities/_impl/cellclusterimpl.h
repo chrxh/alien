@@ -10,8 +10,6 @@ class CellClusterImpl : public CellCluster
 public:
     CellClusterImpl (Grid* grid);
     CellClusterImpl (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, Grid* grid);
-    CellClusterImpl (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
-        , QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid);
     CellClusterImpl (QList< Cell* > cells, qreal angle, Grid* grid);
 
     ~CellClusterImpl ();
@@ -66,7 +64,8 @@ public:
     void getConnectedComponent(Cell* cell, QList< Cell* >& component) const;
     void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const;
 
-    void serialize (QDataStream& stream) const;
+    void serializePrimitives (QDataStream& stream) const;
+	virtual void deserializePrimitives(QDataStream& stream);
 
 private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
