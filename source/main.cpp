@@ -11,6 +11,10 @@
 
 //QT += webkitwidgets
 
+//Design-Entscheidung:
+//- alle Serialisierung und Deserialisierung sollen von SerializationFacade gesteuert werden
+//- (de)serialisierung elementarer(Qt) Typen in den Methoden (de)serialize(...)
+
 //Model-Refactoring:
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
 //- Prefix Alien in Klassen entfernen
@@ -20,8 +24,6 @@
 //- SimulationSettings und MetadataManager über Grid erreichbar
 //- Grid zerteilen
 //- NICHT Set<CellCluster*> in SimulationController::updateCell benutzen!!!
-//- Design-Entscheidung: alle Serialisierung und Deserialisierung sollen von FactoryFacade gesteuert werden;
-//						 im Konstruktor bzw. serialize()-Methode nur (De)serialiseriung von elementaren Datentypen
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)

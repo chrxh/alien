@@ -129,7 +129,7 @@ void SimulationController::serializeUniverse (QDataStream& stream)
     quint32 numCluster = _unit->getClusters().size();
     stream << numCluster;
     foreach(CellCluster* cluster, _unit->getClusters())
-        cluster->serialize(stream);
+        cluster->serializePrimitives(stream);
 
     //serialize energy particles
     quint32 numEnergyParticles = _unit->getEnergyParticles().size();
@@ -351,7 +351,7 @@ void SimulationController::serializeExtendedSelection (QDataStream& stream, cons
 
     //serialize cluster data
     foreach(CellCluster* cluster, clusters) {
-        cluster->serialize(stream);
+        cluster->serializePrimitives(stream);
         clusterIds << cluster->getId();
         foreach(Cell* cell, cluster->getCellsRef())
             cellIds << cell->getId();

@@ -63,7 +63,8 @@ public:
     virtual void getConnectedComponent(Cell* cell, QList< Cell* >& component) const = 0;
     virtual void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const = 0;
 
-    virtual void serialize (QDataStream& stream) const = 0;
+    virtual void serializePrimitives (QDataStream& stream) const = 0;
+	virtual void deserializePrimitives (QDataStream& stream) = 0;
 };
 
 

@@ -40,3 +40,9 @@ qreal GlobalFunctions::random (qreal min, qreal max)
     return (qreal)GlobalFunctions::random((max-min)*1000)/1000.0+min;
 }
 
+qreal GlobalFunctions::random()
+{
+	return static_cast<qreal>(qrand())/RAND_MAX;
+}
+
+

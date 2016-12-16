@@ -26,12 +26,6 @@ CellCluster* EntityFactoryImpl::buildCellClusterFromForeignCells (QList< Cell* >
     return new CellClusterImpl(cells, angle, grid);
 }
 
-CellCluster* EntityFactoryImpl::buildCellCluster (QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
-    ,  QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid)
-{
-    return new CellClusterImpl(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, grid);
-}
-
 Cell* EntityFactoryImpl::buildCell (qreal energy, Grid* grid, int maxConnections
     , int tokenAccessNumber, QVector3D relPos)
 {

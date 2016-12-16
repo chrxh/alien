@@ -12,6 +12,7 @@ public:
 	void serializeSimulationContext(SimulationContext* context, QDataStream& stream);
 	SimulationContext* deserializeSimulationContext(QDataStream& stream);
 
+	void serializeCellCluster(CellCluster* cluster, QDataStream& stream);
 	CellCluster* deserializeCellCluster(QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
 		, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid);
 
