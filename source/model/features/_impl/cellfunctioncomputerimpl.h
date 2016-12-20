@@ -20,7 +20,7 @@ public:
     CompilationState injectAndCompileInstructionCode (QString code);
     QVector< quint8 >& getMemoryReference ();
 
-    void serialize (QDataStream& stream) const;
+    void serializePrimitives (QDataStream& stream) const;
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);

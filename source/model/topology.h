@@ -19,8 +19,8 @@ public:
 	QVector3D displacement(Cell* fromCell, Cell* toCell) const;
 	qreal distance(Cell* fromCell, Cell* toCell) const;
 
-	void serialize(QDataStream& stream) const;
-	void deserialize(QDataStream& stream);
+	void serializePrimitives(QDataStream& stream) const;
+	void deserializePrimitives(QDataStream& stream);
 
 private:
 	inline void correctPosition(IntVector2D & pos) const;
