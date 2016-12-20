@@ -20,7 +20,8 @@ public:
         EnergyParticle* newEnergyParticle;
     };
     virtual ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
-    virtual void serialize (QDataStream& stream) const {}
+
+    virtual void serializePrimitives (QDataStream& stream) const {}
 
 protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;

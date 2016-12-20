@@ -76,7 +76,7 @@ public:
     virtual void setToBeKilled (bool toBeKilled) = 0;
     virtual Token* takeTokenFromStack () = 0;
 
-    virtual void serialize (QDataStream& stream) const = 0;
+    virtual void serializePrimitives (QDataStream& stream) const = 0;
 
 
 protected:

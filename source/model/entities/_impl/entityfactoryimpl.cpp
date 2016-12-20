@@ -32,12 +32,6 @@ Cell* EntityFactoryImpl::buildCell (qreal energy, Grid* grid, int maxConnections
     return new CellImpl(energy, grid, maxConnections, tokenAccessNumber, relPos);
 }
 
-Cell* EntityFactoryImpl::buildCell (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-    , Grid* grid)
-{
-    return new CellImpl(stream, connectingCells, grid);
-}
-
 Cell* EntityFactoryImpl::buildCellWithRandomData (qreal energy, Grid* grid)
 {
     return new CellImpl(energy, grid, true);
