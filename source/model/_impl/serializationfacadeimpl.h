@@ -9,16 +9,16 @@ public:
 	SerializationFacadeImpl();
 	~SerializationFacadeImpl() = default;
 
-	void serializeSimulationContext(SimulationContext* context, QDataStream& stream);
-	SimulationContext* deserializeSimulationContext(QDataStream& stream);
+	void serializeSimulationContext(SimulationContext* context, QDataStream& stream) override;
+	SimulationContext* deserializeSimulationContext(QDataStream& stream) override;
 
-	void serializeCellCluster(CellCluster* cluster, QDataStream& stream);
+	void serializeCellCluster(CellCluster* cluster, QDataStream& stream) override;
 	CellCluster* deserializeCellCluster(QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
-		, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, Grid* grid);
+		, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, SimulationContext* context) override;
 
-	void serializeFeaturedCell(Cell* cell, QDataStream& stream);
-	Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, Grid* grid);
-	Cell* deserializeFeaturedCell(QDataStream& stream, Grid* grid);
+	void serializeFeaturedCell(Cell* cell, QDataStream& stream) override;
+	Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) override;
+	Cell* deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) override;
 
 };
 

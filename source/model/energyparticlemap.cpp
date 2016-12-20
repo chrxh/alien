@@ -58,7 +58,7 @@ EnergyParticle * EnergyParticleMap::getParticle(QVector3D pos) const
 	return _energyGrid[intPos.x][intPos.y];
 }
 
-void EnergyParticleMap::serialize(QDataStream & stream) const
+void EnergyParticleMap::serializePrimitives(QDataStream & stream) const
 {
 	//determine number of energy particle entries
 	quint32 numEntries = 0;
@@ -80,7 +80,7 @@ void EnergyParticleMap::serialize(QDataStream & stream) const
 		}
 }
 
-void EnergyParticleMap::deserialize (QDataStream & stream, QMap<quint64, EnergyParticle*> const & oldIdEnergyMap)
+void EnergyParticleMap::deserializePrimitives (QDataStream & stream, QMap<quint64, EnergyParticle*> const & oldIdEnergyMap)
 {
 	quint32 numEntries = 0;
 	qint32 x = 0;

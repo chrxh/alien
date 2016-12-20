@@ -35,47 +35,6 @@ CellImpl::CellImpl (qreal energy, Grid* grid, int maxConnections, int tokenAcces
       resetConnections(maxConnections);
 }
 
-CellImpl::CellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-    , Grid* grid)
-    : Cell(grid),
-      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE)
-{
-
-    //token stack
-    stream >> _tokenStackPointer;
-    for( int i = 0; i < _tokenStackPointer; ++i ) {
-        if( i < simulationParameters.CELL_TOKENSTACKSIZE )
-            _tokenStack[i] = new Token(stream);
-        else{
-            //dummy token
-            Token* temp = new Token(stream);
-            delete temp;
-        }
-    }
-    if( _tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE )
-        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
-    _newTokenStackPointer = 0;
-
-    //remaining data
-    int numConnections(0);
-    stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
-           >> _energy >> _maxConnections >> numConnections;
-
-    //connecting cells
-    _connectingCells = 0;
-    resetConnections(_maxConnections);
-    _numConnections = numConnections;
-    for( int i = 0; i < _numConnections; ++i) {
-        quint64 id;
-        stream >> id;
-        connectingCells[_id] << id;
-    }
-
-    //remaining data
-    stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
-}
-
 CellImpl::~CellImpl()
 {
     for(int i = 0; i < _tokenStackPointer; ++i )
@@ -478,25 +437,62 @@ Token* CellImpl::takeTokenFromStack ()
     }
 }
 
-void CellImpl::serialize (QDataStream& stream) const
+void CellImpl::serializePrimitives (QDataStream& stream) const
 {
     //token
-    stream << _tokenStackPointer;
+    /*stream << _tokenStackPointer;
     for( int i = 0; i < _tokenStackPointer; ++i) {
         _tokenStack[i]->serialize(stream);
-    }
+    }*/
 
     //remaining data
     stream << _toBeKilled << _tag << _id << _protectionCounter << _relPos
            << _energy << _maxConnections << _numConnections;
 
     //connecting cells
-    for( int i = 0; i < _numConnections; ++i) {
+    /*for( int i = 0; i < _numConnections; ++i) {
         stream << _connectingCells[i]->getId();
     }
-
+	*/
     //remaining data
     stream << _tokenAccessNumber << _blockToken << _vel << _color;
+}
+
+void CellImpl::deserializePrimitives(QDataStream& stream)
+{
+
+	//token stack
+	/*stream >> _tokenStackPointer;
+	for (int i = 0; i < _tokenStackPointer; ++i) {
+		if (i < simulationParameters.CELL_TOKENSTACKSIZE)
+			_tokenStack[i] = new Token(stream);
+		else {
+			//dummy token
+			Token* temp = new Token(stream);
+			delete temp;
+		}
+	}
+	if (_tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE)
+		_tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
+	_newTokenStackPointer = 0;
+	*/
+	//remaining data
+	int numConnections(0);
+	stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
+		>> _energy >> _maxConnections >> numConnections;
+
+	//connecting cells
+	_connectingCells = 0;
+	resetConnections(_maxConnections);
+	_numConnections = numConnections;
+	/*for (int i = 0; i < _numConnections; ++i) {
+		quint64 id;
+		stream >> id;
+		connectingCells[_id] << id;
+	}
+	*/
+	//remaining data
+	stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
 }
 
 

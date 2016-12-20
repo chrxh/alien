@@ -14,7 +14,7 @@ public:
     CellFunctionCommunicatorImpl (quint8* cellFunctionData, Grid* grid);
     CellFunctionCommunicatorImpl (QDataStream& stream, Grid* grid);
 
-    void serialize (QDataStream& stream) const;
+    void serializePrimitives (QDataStream& stream) const;
 
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
     void getInternalData (quint8* ptr) const;

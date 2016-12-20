@@ -1124,6 +1124,7 @@ void CellClusterImpl::deserializePrimitives(QDataStream& stream)
 	stream >> _angle >> _pos >> _angularVel >> _vel;
 	stream >> _id >> _color;
 }
+
 /*
     //calc rad prob via a function prob f(x) = 1-a/(x+b) with f(0)=CELL_RAD_PROB_LOW and f(1000)=CELL_RAD_PROB_HIGH
     qreal radProb = (energy * (simulationParameters.CELL_RAD_PROB_HIGH - simulationParameters.CELL_RAD_PROB_LOW) + 1000.0*simulationParameters.CELL_RAD_PROB_LOW*(1.0-simulationParameters.CELL_RAD_PROB_HIGH))

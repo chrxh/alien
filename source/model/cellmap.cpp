@@ -160,7 +160,7 @@ QList<Cell*> CellMap::getNearbySpecificCells(const QVector3D & pos, qreal r, Cel
 	return cells;
 }
 
-void CellMap::serialize(QDataStream & stream) const
+void CellMap::serializePrimitives(QDataStream & stream) const
 {
 	//determine number of cell entries
 	quint32 numEntries = 0;
@@ -182,7 +182,7 @@ void CellMap::serialize(QDataStream & stream) const
 		}
 }
 
-void CellMap::deserialize(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap)
+void CellMap::deserializePrimitives(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap)
 {
 	quint32 numEntries = 0;
 	qint32 x = 0;

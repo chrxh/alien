@@ -17,8 +17,8 @@ public:
 	EnergyParticle* getParticle(QVector3D pos) const;
 	inline EnergyParticle* getParticleFast(IntVector2D const& pos) const;
 
-	void serialize(QDataStream& stream) const;
-	void deserialize(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap);
+	void serializePrimitives(QDataStream& stream) const;
+	void deserializePrimitives(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap);
 
 private:
 	void deleteCellMap();

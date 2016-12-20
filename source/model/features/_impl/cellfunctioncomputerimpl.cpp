@@ -538,7 +538,7 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
     return processingResult;
 }
 
-void CellFunctionComputerImpl::serialize (QDataStream& stream) const
+void CellFunctionComputerImpl::serializePrimitives (QDataStream& stream) const
 {
     stream << simulationParameters.CELL_MEMSIZE;
     for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )

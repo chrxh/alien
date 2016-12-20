@@ -68,12 +68,12 @@ qreal Topology::distance(Cell * fromCell, Cell * toCell) const
 	return displacement(fromCell, toCell).length();
 }
 
-void Topology::serialize(QDataStream & stream) const
+void Topology::serializePrimitives(QDataStream & stream) const
 {
 	stream << _size.x << _size.y;
 }
 
-void Topology::deserialize(QDataStream & stream)
+void Topology::deserializePrimitives(QDataStream & stream)
 {
 	stream >> _size.x >> _size.y;
 }

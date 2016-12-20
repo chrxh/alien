@@ -24,8 +24,8 @@ public:
 	using CellSelectFunction = bool(*)(Cell*);
 	QList< Cell* > getNearbySpecificCells(QVector3D const& pos, qreal r, CellSelectFunction selection) const;
 
-	void serialize(QDataStream& stream) const;
-	void deserialize(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap);
+	void serializePrimitives(QDataStream& stream) const;
+	void deserializePrimitives(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap);
 
 private:
 	void deleteCellMap();

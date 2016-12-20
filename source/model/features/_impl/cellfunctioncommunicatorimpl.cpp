@@ -57,7 +57,7 @@ CellFeature::ProcessingResult CellFunctionCommunicatorImpl::processImpl (Token* 
     return processingResult;
 }
 
-void CellFunctionCommunicatorImpl::serialize (QDataStream& stream) const
+void CellFunctionCommunicatorImpl::serializePrimitives (QDataStream& stream) const
 {
     stream << _newMessageReceived
            << _receivedMessage.channel

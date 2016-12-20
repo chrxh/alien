@@ -73,7 +73,8 @@ public:
     void setToBeKilled (bool toBeKilled);
     Token* takeTokenFromStack ();
 
-    void serialize (QDataStream& stream) const;
+    void serializePrimitives (QDataStream& stream) const;
+	void deserializePrimitives(QDataStream& stream);
 
 
 private:
