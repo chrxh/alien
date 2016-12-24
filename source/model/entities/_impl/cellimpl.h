@@ -11,6 +11,7 @@ class CellImpl : public Cell
 {
 public:
 
+    CellImpl (Grid* grid);
     CellImpl (qreal energy, Grid* grid, int maxConnections = 0,
                    int tokenAccessNumber = 0, QVector3D relPos = QVector3D());
     CellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells,
@@ -71,16 +72,18 @@ public:
     void setProtectionCounter (int counter);
     bool isToBeKilled() const;
     void setToBeKilled (bool toBeKilled);
-    Token* takeTokenFromStack ();
+    int getTokenStackPointer () const override;
+    QVector<Token*>& getTokenStackRef () override;
+    Token* takeTokenFromStack () override;
 
-    void serializePrimitives (QDataStream& stream) const;
-	void deserializePrimitives(QDataStream& stream);
+    void serializePrimitives (QDataStream& stream) const override;
+    void deserializePrimitives(QDataStream& stream) override;
 
 
 private:
     friend class CellCluster;
 
-    CellFeature* _features = 0;
+    CellFeature* _features = nullptr;
 
     QVector< Token* > _tokenStack;
     QVector< Token* > _newTokenStack;
@@ -92,12 +95,12 @@ private:
     quint64 _id = 0;
     int _protectionCounter = 0;
     QVector3D _relPos;
-    CellCluster* _cluster;
+    CellCluster* _cluster = nullptr;
     qreal _energy = 0.0;
 
     int _maxConnections = 0;
     int _numConnections = 0;
-    Cell** _connectingCells = 0;
+    Cell** _connectingCells = nullptr;
 
     int _tokenAccessNumber = 0;
     bool _blockToken = false;

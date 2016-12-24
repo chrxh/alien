@@ -1,4 +1,4 @@
-#include "CellFunctionComputerimpl.h"
+#include "cellfunctioncomputerimpl.h"
 #include "model/metadatamanager.h"
 #include "model/simulationsettings.h"
 #include "model/entities/cell.h"

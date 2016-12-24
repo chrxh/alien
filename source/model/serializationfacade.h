@@ -16,8 +16,8 @@ public:
 		, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, SimulationContext* context) = 0;
 
 	virtual void serializeFeaturedCell(Cell* cell, QDataStream& stream) = 0;
-	virtual Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) = 0;
-	virtual Cell* deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) = 0;
+    virtual Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) = 0;
+    virtual Cell* deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) = 0;
 };
 
 #endif //SERIALIZATIONFACADE_H

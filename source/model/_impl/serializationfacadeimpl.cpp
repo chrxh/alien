@@ -89,7 +89,7 @@ void SerializationFacadeImpl::serializeCellCluster(CellCluster* cluster, QDataSt
 {
 	cluster->serializePrimitives(stream);
 	QList<Cell*>& cells = cluster->getCellsRef();
-	stream << cells.size();
+    stream << static_cast<quint32>(cells.size());
 	foreach( Cell* cell, cells) {
 		serializeFeaturedCell(cell, stream);
 	}
@@ -105,11 +105,11 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
 	//read data and reconstructing structures
 	QMap< quint64, QList< quint64 > > connectingCells;
 	QMap< quint64, Cell* > idCellMap;
-	int numCells(0);
+    quint32 numCells(0);
 	stream >> numCells;
 
 	QList< Cell* >& cells = cluster->getCellsRef();
-	for (int i = 0; i < numCells; ++i) {
+    for (quint32 i = 0; i < numCells; ++i) {
 		Cell* cell = deserializeFeaturedCell(stream, connectingCells, context);
 		cell->setCluster(cluster);
 		cells << cell;
@@ -153,12 +153,11 @@ void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& str
 	CellFunction* cellFunction = features->findObject<CellFunction>();
 	if (cellFunction) {
 		stream << static_cast<quint8>(cellFunction->getType());
-	}
-	cellFunction->serializePrimitives(stream);
+        cellFunction->serializePrimitives(stream);
+    }
 
 	int tokenStackPointer = cell->getTokenStackPointer();
 	QVector<Token*>& tokenStack = cell->getTokenStackRef();
-	stream << static_cast<quint32>(tokenStackPointer);
 	for( int i = 0; i < tokenStackPointer; ++i) {
 		serializeToken(tokenStack[i], stream);
 	}
@@ -171,22 +170,52 @@ void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& str
 }
 
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells
-	, SimulationContext* context)
+    , SimulationContext* context)
 {
 	EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-	Cell* cell = entityFactory->buildCell(stream, connectingCells, context);
-	quint8 rawType;
+    Cell* cell = entityFactory->buildEmptyCell(context);
+    cell->deserializePrimitives(stream);
+    quint8 rawType;
 	stream >> rawType;
 	CellFunctionType type = static_cast<CellFunctionType>(rawType);
 	decoratorFactory->addEnergyGuidance(cell, context);
-	decoratorFactory->addCellFunction(cell, type, stream, context);
+    decoratorFactory->addCellFunction(cell, type, stream, context);
+
+    QVector<Token*>& tokenStack = cell->getTokenStackRef();
+    for (int i = 0; i < cell->getTokenStackPointer(); ++i) {
+        Token* token = deserializeToken(stream, context);
+        if (i < simulationParameters.CELL_TOKENSTACKSIZE)
+            tokenStack[i] = token;
+        else
+            delete token;
+    }
+
+    quint64 id;
+    for (int i = 0; i < cell->getNumConnections(); ++i) {
+        stream >> id;
+        connectingCells[cell->getId()] << id;
+    }
+
 	return cell;
 }
 
+
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, SimulationContext* context)
 {
-	QMap< quint64, QList< quint64 > > temp;
-	return deserializeFeaturedCell(stream, temp, context);
+    QMap< quint64, QList< quint64 > > temp;
+    return deserializeFeaturedCell(stream, temp, context);
 }
 
+void SerializationFacadeImpl::serializeToken(Token* token, QDataStream& stream)
+{
+    token->serializePrimitives(stream);
+}
+
+Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream, SimulationContext* context)
+{
+    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+    Token* token = entityFactory->buildEmptyToken(context);
+    token->deserializePrimitives(stream);
+    return token;
+}

@@ -11,28 +11,23 @@
 
 #include <QtCore/qmath.h>
 
-CellImpl::CellImpl (qreal energy, Grid* grid, int maxConnections, int tokenAccessNumber, QVector3D relPos)
+CellImpl::CellImpl (Grid* grid)
     : Cell(grid),
       _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
       _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _tokenStackPointer(0),
-      _newTokenStackPointer(0),
-      _toBeKilled(false),
-      _tag(0),
-      _id(GlobalFunctions::createNewTag()),
-      _protectionCounter(0),
-      _relPos(relPos),
-      _cluster(0),
-      _energy(energy),
-      _maxConnections(0),
-      _numConnections(0),
-      _connectingCells(0),
-      _tokenAccessNumber(tokenAccessNumber),
-      _blockToken(false),
-      _vel(0.0, 0.0, 0.0),
-      _color(0)
+      _id(GlobalFunctions::createNewTag())
 {
-      resetConnections(maxConnections);
+
+}
+
+CellImpl::CellImpl (qreal energy, Grid* grid, int maxConnections, int tokenAccessNumber
+    , QVector3D relPos)
+    : CellImpl(grid)
+{
+    _relPos = relPos;
+    _energy = energy;
+    _tokenAccessNumber = tokenAccessNumber;
+    resetConnections(maxConnections);
 }
 
 CellImpl::~CellImpl()
@@ -428,6 +423,17 @@ void CellImpl::setToBeKilled (bool toBeKilled)
     _toBeKilled = toBeKilled;
 }
 
+int CellImpl::getTokenStackPointer () const
+{
+    return _tokenStackPointer;
+}
+
+QVector<Token*>& CellImpl::getTokenStackRef ()
+{
+    return _tokenStack;
+}
+
+
 Token* CellImpl::takeTokenFromStack ()
 {
     if( _tokenStackPointer == 0 )
@@ -444,6 +450,7 @@ void CellImpl::serializePrimitives (QDataStream& stream) const
     for( int i = 0; i < _tokenStackPointer; ++i) {
         _tokenStack[i]->serialize(stream);
     }*/
+    stream << static_cast<quint32>(_tokenStackPointer);
 
     //remaining data
     stream << _toBeKilled << _tag << _id << _protectionCounter << _relPos
@@ -476,8 +483,15 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
 		_tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
 	_newTokenStackPointer = 0;
 	*/
+    quint32 tokenStackPointer;
+    stream >> tokenStackPointer;
+    _tokenStackPointer = static_cast<quint32>(tokenStackPointer);
+    if (_tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE)
+        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
+    _newTokenStackPointer = 0;
+
 	//remaining data
-	int numConnections(0);
+    int numConnections;
 	stream >> _toBeKilled >> _tag >> _id >> _protectionCounter >> _relPos
 		>> _energy >> _maxConnections >> numConnections;
 

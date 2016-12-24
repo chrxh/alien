@@ -52,19 +52,24 @@ SOURCES += main.cpp \
     model/features/cellfeature.cpp \
     model/features/cellfunction.cpp \
     model/features/_impl/cellfeaturefactoryimpl.cpp \
-    model/features/_impl/cellfunctioncommunicator.cpp \
     model/features/_impl/cellfunctioncomputerimpl.cpp \
-    model/features/_impl/cellfunctionweapon.cpp \
-    model/features/_impl/energyguidanceimpl.cpp \
-    model/features/_impl/cellfunctionsensor.cpp \
-    model/features/_impl/cellfunctionscanner.cpp \
-    model/features/_impl/cellfunctionpropulsion.cpp \
-    model/features/_impl/cellfunctionconstructor.cpp \
     model/entities/energyparticle.cpp \
     model/simulationunit.cpp \
     model/simulationcontroller.cpp \
     model/_impl/factoryfacadeimpl.cpp \
-    model/_impl/simulationcontextimpl.cpp
+    model/_impl/simulationcontextimpl.cpp \
+    model/cellmap.cpp \
+    model/definitions.cpp \
+    model/energyparticlemap.cpp \
+    model/topology.cpp \
+    model/_impl/serializationfacadeimpl.cpp \
+    model/features/_impl/cellfunctioncommunicatorimpl.cpp \
+    model/features/_impl/cellfunctionconstructorimpl.cpp \
+    model/features/_impl/cellfunctionpropulsionimpl.cpp \
+    model/features/_impl/cellfunctionscannerimpl.cpp \
+    model/features/_impl/cellfunctionsensorimpl.cpp \
+    model/features/_impl/cellfunctionweaponimpl.cpp \
+    model/physics/codingphysicalquantities.cpp
 HEADERS += \
     model/physics/physics.h \
     global/global.h \
@@ -114,14 +119,6 @@ HEADERS += \
     model/entities/energyparticle.h \
     model/entities/_impl/cellclusterimpl.h \
     model/entities/_impl/cellimpl.h \
-    model/features/_impl/cellfunctionweapon.h \
-    model/features/_impl/energyguidanceimpl.h \
-    model/features/_impl/cellfunctionsensor.h \
-    model/features/_impl/cellfunctionscanner.h \
-    model/features/_impl/cellfunctionpropulsion.h \
-    model/features/_impl/cellfunctionconstructor.h \
-    model/features/_impl/cellfunctioncomputerimpl.h \
-    model/features/_impl/cellfunctioncommunicator.h \
     model/features/cellfeature.h \
     model/features/cellfeaturefactory.h \
     model/features/energyguidance.h \
@@ -136,7 +133,20 @@ HEADERS += \
     model/simulationcontext.h \
     model/definitions.h \
     model/_impl/simulationcontextimpl.h \
-    model/topology.h
+    model/topology.h \
+    model/cellmap.h \
+    model/energyparticlemap.h \
+    model/serializationfacade.h \
+    model/_impl/serializationfacadeimpl.h \
+    model/features/cellfeatureconstants.h \
+    model/features/_impl/cellfunctioncommunicatorimpl.h \
+    model/features/_impl/cellfunctionconstructorimpl.h \
+    model/features/_impl/cellfunctionpropulsionimpl.h \
+    model/features/_impl/cellfunctionscannerimpl.h \
+    model/features/_impl/cellfunctionsensorimpl.h \
+    model/features/_impl/cellfunctionweaponimpl.h \
+    model/physics/codingphysicalquantities.h \
+    model/features/_impl/cellfunctioncomputerimpl.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
@@ -166,17 +176,16 @@ test {
 
     SOURCES -= main.cpp
 
-    HEADERS += tests/testphysics.h \
-        tests/testsettings.h \
-        tests/testcellcluster.h \
-        tests/testtoken.h \
-        tests/testcellfunctioncommunicator.h \
-        tests/integrationtestreplicator.h \
-        tests/integrationtestcomparison.h
+    HEADERS += tests/predicates.h \
+        tests/settings.h
 
     SOURCES += tests/testsuite.cpp \
-        tests/integrationtestreplicator.cpp \
-        tests/integrationtestcomparison.cpp
+        tests/predicates.cpp \
+        tests/integrationtests/integrationtestreplicator.cpp \
+        tests/integrationtests/integrationtestcomparison.cpp \
+        tests/unittests/unittestphysics.spp \
+        tests/unittests/unittestcellcluster.cpp \
+        tests/unittests/unittestcellfunctioncommunicator.cpp
 
 } else {
     message(Normal build)
