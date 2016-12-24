@@ -17,9 +17,15 @@ public:
 		, QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap, SimulationContext* context) override;
 
 	void serializeFeaturedCell(Cell* cell, QDataStream& stream) override;
-	Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) override;
-	Cell* deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) override;
+    Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) override;
+    Cell* deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) override;
 
+    void serializeToken(Token* token, QDataStream& stream);
+    Token* deserializeToken(QDataStream& stream, SimulationContext* context);
+
+private:
+    void serializeToken(Token* token, QDataStream& stream) override;
+    Token* deserializeSimulationContext(QDataStream& stream, SimulationContext* context) override;
 };
 
 #endif //SERIALIZATIONFACADEIMPL_H

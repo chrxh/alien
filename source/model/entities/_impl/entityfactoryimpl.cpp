@@ -2,8 +2,14 @@
 
 #include "cellimpl.h"
 #include "cellclusterimpl.h"
+#include "model/entities/token.h"
 
 #include "global/servicelocator.h"
+
+namespace
+{
+    EntityFactoryImpl entityFactoryImpl;
+}
 
 EntityFactoryImpl::EntityFactoryImpl ()
 {
@@ -26,6 +32,11 @@ CellCluster* EntityFactoryImpl::buildCellClusterFromForeignCells (QList< Cell* >
     return new CellClusterImpl(cells, angle, grid);
 }
 
+Cell* EntityFactoryImpl::buildEmptyCell (Grid* grid) override
+{
+    return new CellImpl(grid);
+}
+
 Cell* EntityFactoryImpl::buildCell (qreal energy, Grid* grid, int maxConnections
     , int tokenAccessNumber, QVector3D relPos)
 {
@@ -37,4 +48,7 @@ Cell* EntityFactoryImpl::buildCellWithRandomData (qreal energy, Grid* grid)
     return new CellImpl(energy, grid, true);
 }
 
-EntityFactoryImpl entityFactoryImpl;
+Token* EntityFactoryImpl::buildEmptyToken ()
+{
+    return new Token();
+}

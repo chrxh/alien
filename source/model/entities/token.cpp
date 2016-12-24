@@ -15,25 +15,6 @@ Token::Token(qreal energy_, bool randomData)
     }
 }
 
-Token::Token (QDataStream& stream)
-: memory(simulationParameters.TOKEN_MEMSIZE)
-{
-    int memSize;
-    stream >> memSize;
-    quint8 data;
-    for(int i = 0; i < memSize; ++i ) {
-        if( i < simulationParameters.TOKEN_MEMSIZE ) {
-            stream >> data;
-            memory[i] = data;
-        }
-        else {
-            stream >> data;
-        }
-    }
-    for(int i = memSize; i < simulationParameters.TOKEN_MEMSIZE; ++i)
-        memory[i] = 0;
-    stream >> energy;
-}
 
 Token::Token (qreal energy_, QVector< quint8 > memory_)
     : memory(simulationParameters.TOKEN_MEMSIZE), energy(energy_)
@@ -65,27 +46,31 @@ void Token::setTokenAccessNumber (int i)
     memory[0] = i;
 }
 
-void Token::serialize (QDataStream& stream)
+void Token::serializePrimitives (QDataStream& stream)
 {
     stream << simulationParameters.TOKEN_MEMSIZE;
     for(int i = 0; i < simulationParameters.TOKEN_MEMSIZE; ++i )
         stream << memory[i];
     stream << energy;
 }
-/*
-#include <QtTest/QtTest>
 
-class TestToken: public QObject
+void Token::deserializePrimitives (QDataStream& stream)
 {
-    Q_OBJECT
-private slots:
-    void test1()
-    {
-        QString str = "Hello";
-        QCOMPARE(str.toUpper(), QString("HELLO"));
-    }
-};
+    memory.resize(simulationParameters.TOKEN_MEMSIZE);
 
-QTEST_MAIN(TestToken)
-#include "alientoken.moc"
-*/
+    int memSize;
+    stream >> memSize;
+    quint8 data;
+    for(int i = 0; i < memSize; ++i ) {
+        if( i < simulationParameters.TOKEN_MEMSIZE ) {
+            stream >> data;
+            memory[i] = data;
+        }
+        else {
+            stream >> data;
+        }
+    }
+    for(int i = memSize; i < simulationParameters.TOKEN_MEMSIZE; ++i)
+        memory[i] = 0;
+    stream >> energy;
+}

@@ -16,6 +16,7 @@
 //- (de)serialisierung elementarer(Qt) Typen in den Methoden (de)serialize(...)
 
 //Model-Refactoring:
+//- factoryfacade in featuredcellfactory umbenennen
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
 //- Prefix Alien in Klassen entfernen
 //- suche nach "TODO"
