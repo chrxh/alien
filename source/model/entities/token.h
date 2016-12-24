@@ -9,13 +9,13 @@ class Token
 public:
     Token (qreal energy_ = 0.0, bool randomData = false);
     Token (qreal energy_, QVector< quint8 > memory_);
-    Token (QDataStream& stream);
 
     Token* duplicate ();
     int getTokenAccessNumber ();        //from memory[0]
     void setTokenAccessNumber (int i);
 
-    void serialize (QDataStream& stream);
+    void serializePrimitives (QDataStream& stream);
+    void deserializePrimitives (QDataStream& stream);
 
 
     QVector< quint8 >memory;
