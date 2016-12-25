@@ -156,10 +156,9 @@ void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& str
         cellFunction->serializePrimitives(stream);
     }
 
-	int tokenStackPointer = cell->getTokenStackPointer();
-	QVector<Token*>& tokenStack = cell->getTokenStackRef();
-	for( int i = 0; i < tokenStackPointer; ++i) {
-		serializeToken(tokenStack[i], stream);
+    int numToken = cell->getNumToken();
+    for( int i = 0; i < numToken; ++i) {
+        serializeToken(cell->getToken(i), stream);
 	}
 
 	int numConnections = cell->getNumConnections;
@@ -178,15 +177,14 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, QMap
     cell->deserializePrimitives(stream);
     quint8 rawType;
 	stream >> rawType;
-	CellFunctionType type = static_cast<CellFunctionType>(rawType);
+    CellFunctionType type = static_cast<CellFunctionType>(rawType);
 	decoratorFactory->addEnergyGuidance(cell, context);
     decoratorFactory->addCellFunction(cell, type, stream, context);
 
-    QVector<Token*>& tokenStack = cell->getTokenStackRef();
-    for (int i = 0; i < cell->getTokenStackPointer(); ++i) {
+    for (int i = 0; i < cell->getNumToken(); ++i) {
         Token* token = deserializeToken(stream, context);
         if (i < simulationParameters.CELL_TOKENSTACKSIZE)
-            tokenStack[i] = token;
+            cell->setToken(i, token);
         else
             delete token;
     }

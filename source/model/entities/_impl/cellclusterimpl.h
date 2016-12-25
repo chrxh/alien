@@ -18,11 +18,11 @@ public:
     void clearCellFromMap (Cell* cell);
     void drawCellsToMap ();
 
-    void movementProcessingStep1 ();
-    void movementProcessingStep2 (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles);
-    void movementProcessingStep3 ();
-    void movementProcessingStep4 (QList< EnergyParticle* >& energyParticles, bool& decompose);
-    void movementProcessingStep5 ();
+    void processingInit ();
+    void processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles);
+    void processingMovement ();
+    void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose);
+    void processingFinish ();
 
     void addCell (Cell* cell, QVector3D absPos);
     void removeCell (Cell* cell, bool maintainCenter = true);

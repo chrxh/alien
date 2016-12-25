@@ -91,7 +91,7 @@ void SimulationUnit::calcNextTimestep ()
 
     //cell movement: step 1
     foreach( CellCluster* cluster, _grid->getClusters()) {
-        cluster->movementProcessingStep1();
+        cluster->processingInit();
     }
 
     //cell movement: step 2
@@ -105,7 +105,7 @@ void SimulationUnit::calcNextTimestep ()
         QList< CellCluster* > fragments;
         CellCluster* cluster(i.next());
         energyParticles.clear();
-        cluster->movementProcessingStep2(fragments, energyParticles);
+        cluster->processingDissipation(fragments, energyParticles);
         _grid->getEnergyParticles() << energyParticles;
 
         debugCluster(cluster, 2);
@@ -129,7 +129,7 @@ void SimulationUnit::calcNextTimestep ()
 
     //cell movement: step 3
     foreach( CellCluster* cluster, _grid->getClusters()) {
-        cluster->movementProcessingStep3();
+        cluster->processingMovement();
         debugCluster(cluster, 3);
     }
 
@@ -145,7 +145,7 @@ void SimulationUnit::calcNextTimestep ()
         else {
             energyParticles.clear();
             bool decompose = false;
-            cluster->movementProcessingStep4(energyParticles, decompose);
+            cluster->processingToken(energyParticles, decompose);
             _grid->getEnergyParticles() << energyParticles;
             debugCluster(cluster, 4);
 
@@ -163,7 +163,7 @@ void SimulationUnit::calcNextTimestep ()
 
     //cell movement: step 5
     foreach( CellCluster* cluster, _grid->getClusters()) {
-        cluster->movementProcessingStep5();
+        cluster->processingFinish();
         debugCluster(cluster, 5);
     }
 
