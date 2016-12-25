@@ -8,12 +8,12 @@
 class CellFunctionConstructorImpl : public CellFunction
 {
 public:
-    CellFunctionConstructorImpl (Grid* grid);
+    CellFunctionConstructorImpl (SimulationContext* context);
 
     CellFunctionType getType () const { return CellFunctionType::CONSTRUCTOR; }
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
 
 #endif // CELLFUNCTIONCONSTRUCTOR_H

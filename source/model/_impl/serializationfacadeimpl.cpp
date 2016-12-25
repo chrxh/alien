@@ -126,8 +126,7 @@ void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& str
 	for (int i = 0; i < numConnections; ++i) {
 		stream << cell->getConnection(i)->getId();
 	}
-	
-}
+	}
 
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) const
 {
@@ -223,14 +222,16 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
     , QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
+    CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
     Cell* cell = entityFactory->buildCell(context);
+    featureFactory->addEnergyGuidance(cell, context);
+
     cell->deserializePrimitives(stream);
     quint8 rawType;
     stream >> rawType;
     CellFunctionType type = static_cast<CellFunctionType>(rawType);
-    decoratorFactory->addEnergyGuidance(cell, context);
-    decoratorFactory->addCellFunction(cell, type, stream, context);
+    CellFeature* feature = featureFactory->addCellFunction(cell, type, context);
+    feature->deserializePrimitives(stream);
 
     for (int i = 0; i < cell->getNumToken(); ++i) {
         Token* token = deserializeToken(stream);

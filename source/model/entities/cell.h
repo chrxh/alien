@@ -3,16 +3,11 @@
 
 #include <QVector3D>
 
-class CellCluster;
-class EnergyParticle;
-class Grid;
-class Token;
-class CellFeature;
+#include "model/definitions.h"
 
 class Cell
 {
 public:
-    Cell (Grid* grid) : _grid(grid) {}
     virtual ~Cell() {}
 
     virtual void registerFeatures (CellFeature* features) = 0;
@@ -71,15 +66,10 @@ public:
     virtual void setProtectionCounter (int counter) = 0;
     virtual bool isToBeKilled() const = 0;
     virtual void setToBeKilled (bool toBeKilled) = 0;
-    virtual QVector<Token*>& getTokenStackRef () = 0;
     virtual Token* takeTokenFromStack () = 0;
 
     virtual void serializePrimitives (QDataStream& stream) const = 0;
     virtual void deserializePrimitives(QDataStream& stream) = 0;
-
-
-protected:
-    Grid* _grid;
 };
 
 #endif // CELL_H

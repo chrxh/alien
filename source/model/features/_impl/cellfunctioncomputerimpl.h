@@ -10,20 +10,20 @@
 class CellFunctionComputerImpl: public CellFunctionComputer
 {
 public:
-    CellFunctionComputerImpl (Grid* grid);
-    CellFunctionComputerImpl (quint8* cellFunctionData, Grid* grid);
-    CellFunctionComputerImpl (QDataStream& stream, Grid* grid);
+    CellFunctionComputerImpl (SimulationContext* context);
+    CellFunctionComputerImpl (quint8* cellFunctionData, SimulationContext* context);
 
-    void getInternalData (quint8* data) const;
+    void getInternalData (quint8* data) const override;
 
-    QString decompileInstructionCode () const;
-    CompilationState injectAndCompileInstructionCode (QString code);
-    QVector< quint8 >& getMemoryReference ();
+    QString decompileInstructionCode () const override;
+    CompilationState injectAndCompileInstructionCode (QString code) override;
+    QVector< quint8 >& getMemoryReference () override;
 
-    void serializePrimitives (QDataStream& stream) const;
+    void serializePrimitives (QDataStream& stream) const override;
+    void deserializePrimitives (QDataStream& stream) const override;
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
 
@@ -41,7 +41,7 @@ private:
                             qint8& op2) const;
 
     QByteArray _code;
-    int _numInstr;
+    int _numInstr = 0;
     QVector< quint8 > _memory;
 };
 

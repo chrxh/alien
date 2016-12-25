@@ -9,11 +9,10 @@ public:
     CellDecoratorFactoryImpl ();
     ~CellDecoratorFactoryImpl () {}
 
-    void addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const override;
-    void addCellFunction (Cell* cell, CellFunctionType type, quint8* data, SimulationContext* context) const override;
-    void addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream, SimulationContext* context) const override;
+    CellFeature* addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const override;
+    CellFeature* addCellFunction (Cell* cell, CellFunctionType type, quint8* data, SimulationContext* context) const override;
 
-    void addEnergyGuidance (Cell* cell, SimulationContext* context) const override;
+    CellFeature* addEnergyGuidance (Cell* cell, SimulationContext* context) const override;
 };
 
 #endif // CELLFEATUREFACTORYIMPL_H

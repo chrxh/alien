@@ -20,8 +20,8 @@
 using ACTIVATE_TOKEN = Cell::ACTIVATE_TOKEN;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UPDATE_TOKEN_ACCESS_NUMBER;
 
-CellFunctionConstructorImpl::CellFunctionConstructorImpl (Grid* grid)
-    : CellFunction(grid)
+CellFunctionConstructorImpl::CellFunctionConstructorImpl (SimulationContext* context)
+    : CellFunction(context)
 {
 }
 
@@ -275,7 +275,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {
                     bool safeMode = (cmd == static_cast<int>(CONSTR_IN::SAFE));
-                    if( obstacleCheck(cluster, safeMode, _grid) ) {
+                    if( obstacleCheck(cluster, safeMode, _context) ) {
                         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE);
 
                         //restore construction site
@@ -357,12 +357,12 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)] % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
                 Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber,
                                                       token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)],
-                                                      &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _grid);
+                                                      &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _context);
 
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {
                     bool safeMode = (cmd == static_cast<int>(CONSTR_IN::SAFE));
-                    if( obstacleCheck(cluster, safeMode, _grid) ) {
+                    if( obstacleCheck(cluster, safeMode, _context) ) {
                         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE);
 
                         //restore construction site
@@ -390,7 +390,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                     if( (otherCell->getNumConnections() < simulationParameters.MAX_CELL_CONNECTIONS)
                             && (newCell->getNumConnections() < simulationParameters.MAX_CELL_CONNECTIONS)
                             && (otherCell !=constructionCell ) ) {
-                        if( _grid->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (simulationParameters.CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
+                        if( _context->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (simulationParameters.CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( token->memory[static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS)] == 0 ) {
@@ -493,7 +493,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 QVector< qreal > angles(numCon);
                 for(int i = 0; i < numCon; ++i) {
                     QVector3D displacement = cluster->calcPosition(cell->getConnection(i),true)-cluster->calcPosition(cell, true);
-                    _grid->correctDisplacement(displacement);
+                    _context->correctDisplacement(displacement);
                     angles[i] = Physics::angleOfVector(displacement);
                 }
                 qSort(angles);
@@ -554,12 +554,12 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
                 Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber,
                                                       token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)],
-                                                      &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _grid);
+                                                      &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _context);
 
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {
                     bool safeMode = (cmd == static_cast<int>(CONSTR_IN::SAFE));
-                    if( obstacleCheck(cluster, safeMode, _grid) ) {
+                    if( obstacleCheck(cluster, safeMode, _context) ) {
                         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE);
 
                         //restore construction site

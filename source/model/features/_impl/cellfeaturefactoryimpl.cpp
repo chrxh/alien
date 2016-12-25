@@ -18,7 +18,7 @@ CellDecoratorFactoryImpl::CellDecoratorFactoryImpl ()
 }
 
 namespace {
-    void registerNewFeature (Cell* cell, CellFeature* newFeature)
+    CellFeature* registerNewFeature (Cell* cell, CellFeature* newFeature)
     {
         CellFeature* features = cell->getFeatures();
         if( features ) {
@@ -26,71 +26,48 @@ namespace {
         }
         else
             cell->registerFeatures(newFeature);
+        return newFeature;
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const
+CellFeature* CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-        registerNewFeature(cell, new CellFunctionComputerImpl(contex));
-        break;
+            return registerNewFeature(cell, new CellFunctionComputerImpl(contex));
         case CellFunctionType::PROPULSION :
-        registerNewFeature(cell, new CellFunctionPropulsionImpl(context));
-        break;
+            return registerNewFeature(cell, new CellFunctionPropulsionImpl(context));
         case CellFunctionType::SCANNER :
-        registerNewFeature(cell, new CellFunctionScannerImpl(context));
-        break;
+            return registerNewFeature(cell, new CellFunctionScannerImpl(context));
         case CellFunctionType::WEAPON :
-        registerNewFeature(cell, new CellFunctionWeaponImpl(context));
-        break;
+            return registerNewFeature(cell, new CellFunctionWeaponImpl(context));
         case CellFunctionType::CONSTRUCTOR :
-        registerNewFeature(cell, new CellFunctionConstructorImpl(context));
-        break;
+            return registerNewFeature(cell, new CellFunctionConstructorImpl(context));
         case CellFunctionType::SENSOR :
-        registerNewFeature(cell, new CellFunctionSensorImpl(context));
-        break;
+            return registerNewFeature(cell, new CellFunctionSensorImpl(context));
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicatorImpl(context));
-        break;
+            return registerNewFeature(cell, new CellFunctionCommunicatorImpl(context));
         default:
-        break;
+            return nullptr;
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, quint8* data
+CellFeature* CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, quint8* data
     , SimulationContext* context) const
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-        registerNewFeature(cell, new CellFunctionComputerImpl(data, context));
-        break;
+            return registerNewFeature(cell, new CellFunctionComputerImpl(data, context));
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicatorImpl(data, context));
-        break;
+            return registerNewFeature(cell, new CellFunctionCommunicatorImpl(data, context));
         default:
-        addCellFunction(cell, type, context);
+            return addCellFunction(cell, type, context);
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream
-    , SimulationContext* context) const
+CellFeature* CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, SimulationContext* context) const
 {
-    switch( type ) {
-        case CellFunctionType::COMPUTER :
-        registerNewFeature(cell, new CellFunctionComputerImpl(stream, context));
-        break;
-        case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicatorImpl(stream, context));
-        break;
-        default:
-        addCellFunction(cell, type, context);
-    }
-}
-
-void CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, SimulationContext* context) const
-{
-    registerNewFeature(cell, new EnergyGuidanceImpl(context));
+    return registerNewFeature(cell, new EnergyGuidanceImpl(context));
 }
 
 CellDecoratorFactoryImpl cellDecoratorFactoryImpl;

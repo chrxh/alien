@@ -11,11 +11,10 @@ class CellImpl : public Cell
 {
 public:
 
-    CellImpl (Grid* grid);
-    CellImpl (qreal energy, Grid* grid, int maxConnections = 0,
-                   int tokenAccessNumber = 0, QVector3D relPos = QVector3D());
-    CellImpl (QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells,
-                   Grid* grid);
+    CellImpl (SimulationContext* context);
+    CellImpl (qreal energy, SimulationContext* context, int maxConnections
+        , int tokenAccessNumber, QVector3D relPos);
+
     ~CellImpl();
 
     void registerFeatures (CellFeature* features) override;
@@ -80,6 +79,7 @@ public:
 private:
     friend class CellCluster;
 
+    CellMap* _cellMap = nullptr;
     CellFeature* _features = nullptr;
 
     QVector< Token* > _tokenStack;

@@ -11,8 +11,8 @@
 #include <QtCore/qmath.h>
 
 
-CellFunctionPropulsionImpl::CellFunctionPropulsionImpl (Grid* grid)
-    : CellFunction(grid)
+CellFunctionPropulsionImpl::CellFunctionPropulsionImpl (SimulationContext* context)
+    : CellFunction(context)
 {
 }
 
@@ -98,8 +98,8 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     if( token->energy >= (energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
-        processingResult.newEnergyParticle = new EnergyParticle(qAbs(energyDiff), cluster->calcPosition(cell, _grid)-impulse.normalized()
-            , tangVel-impulse.normalized()/4.0, _grid);
+        processingResult.newEnergyParticle = new EnergyParticle(qAbs(energyDiff), cluster->calcPosition(cell, _context)-impulse.normalized()
+            , tangVel-impulse.normalized()/4.0, _context);
 
         //update velocities
         cluster->setVel(newVel);
