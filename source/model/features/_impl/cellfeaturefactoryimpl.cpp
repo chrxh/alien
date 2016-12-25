@@ -29,66 +29,68 @@ namespace {
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, Grid* grid)
+void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-        registerNewFeature(cell, new CellFunctionComputerImpl(grid));
+        registerNewFeature(cell, new CellFunctionComputerImpl(contex));
         break;
         case CellFunctionType::PROPULSION :
-        registerNewFeature(cell, new CellFunctionPropulsionImpl(grid));
+        registerNewFeature(cell, new CellFunctionPropulsionImpl(context));
         break;
         case CellFunctionType::SCANNER :
-        registerNewFeature(cell, new CellFunctionScannerImpl(grid));
+        registerNewFeature(cell, new CellFunctionScannerImpl(context));
         break;
         case CellFunctionType::WEAPON :
-        registerNewFeature(cell, new CellFunctionWeaponImpl(grid));
+        registerNewFeature(cell, new CellFunctionWeaponImpl(context));
         break;
         case CellFunctionType::CONSTRUCTOR :
-        registerNewFeature(cell, new CellFunctionConstructorImpl(grid));
+        registerNewFeature(cell, new CellFunctionConstructorImpl(context));
         break;
         case CellFunctionType::SENSOR :
-        registerNewFeature(cell, new CellFunctionSensorImpl(grid));
+        registerNewFeature(cell, new CellFunctionSensorImpl(context));
         break;
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicatorImpl(grid));
+        registerNewFeature(cell, new CellFunctionCommunicatorImpl(context));
         break;
         default:
         break;
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, quint8* data, Grid* grid)
+void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, quint8* data
+    , SimulationContext* context) const
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-        registerNewFeature(cell, new CellFunctionComputerImpl(data, grid));
+        registerNewFeature(cell, new CellFunctionComputerImpl(data, context));
         break;
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicatorImpl(data, grid));
+        registerNewFeature(cell, new CellFunctionCommunicatorImpl(data, context));
         break;
         default:
-        addCellFunction(cell, type, grid);
+        addCellFunction(cell, type, context);
     }
 }
 
-void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream, Grid* grid)
+void CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, QDataStream& stream
+    , SimulationContext* context) const
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-        registerNewFeature(cell, new CellFunctionComputerImpl(stream, grid));
+        registerNewFeature(cell, new CellFunctionComputerImpl(stream, context));
         break;
         case CellFunctionType::COMMUNICATOR :
-        registerNewFeature(cell, new CellFunctionCommunicatorImpl(stream, grid));
+        registerNewFeature(cell, new CellFunctionCommunicatorImpl(stream, context));
         break;
         default:
-        addCellFunction(cell, type, grid);
+        addCellFunction(cell, type, context);
     }
 }
 
-void CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, Grid* grid)
+void CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, SimulationContext* context) const
 {
-    registerNewFeature(cell, new EnergyGuidanceImpl(grid));
+    registerNewFeature(cell, new EnergyGuidanceImpl(context));
 }
 
 CellDecoratorFactoryImpl cellDecoratorFactoryImpl;

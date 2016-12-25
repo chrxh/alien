@@ -3,27 +3,28 @@
 
 #include <QVector3D>
 
-class CellCluster;
-class Grid;
+#include "model/definitions.h"
+
 class EnergyParticle
 {
 public:
-    EnergyParticle (qreal amount_, QVector3D pos_, QVector3D vel_, Grid* grid);
-    EnergyParticle (QDataStream& stream, QMap< quint64, EnergyParticle* >& oldIdEnergyMap, Grid* grid);
+    EnergyParticle (SimulationContext* context);
+    EnergyParticle (qreal amount_, QVector3D pos_, QVector3D vel_, SimulationContext* context);
 
     bool movement (CellCluster*& cluster);
 
-    void serialize (QDataStream& stream);
+    void serializePrimitives (QDataStream& stream);
+    void deserializePrimitives (QDataStream& stream);
 
 private:
-    Grid* _grid;
+    SimulationContext* _context;
 
 public:
-    qreal amount;
+    qreal amount = 0.0;
     QVector3D pos;
     QVector3D vel;
-    quint64 id;
-    quint8 color;
+    quint64 id = 0;
+    quint8 color = 0;
 };
 
 #endif // ENERGY_H

@@ -299,8 +299,8 @@ void CellImpl::delAllTokens ()
          delete _tokenStack[j];
     for( int j = 0; j < _newTokenStackPointer; ++j )
          delete _newTokenStack[j];
-    _tokenStackPointer = nullptr;
-    _newTokenStackPointer = nullptr;
+    _tokenStackPointer = 0;
+    _newTokenStackPointer = 0;
 }
 
 void CellImpl::setCluster (CellCluster* cluster)

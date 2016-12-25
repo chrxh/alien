@@ -8,9 +8,9 @@
 class CellClusterImpl : public CellCluster
 {
 public:
-    CellClusterImpl (Grid* grid);
-    CellClusterImpl (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, Grid* grid);
-    CellClusterImpl (QList< Cell* > cells, qreal angle, Grid* grid);
+    CellClusterImpl (SimulationContext* context);
+    CellClusterImpl (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, SimulationContext* context);
+    CellClusterImpl (QList< Cell* > cells, qreal angle, SimulationContext* context);
 
     ~CellClusterImpl ();
 
@@ -31,7 +31,6 @@ public:
     void updateRelCoordinates (bool maintainCenter = false);
     void updateVel_angularVel_via_cellVelocities ();
     QVector3D calcPosition (const Cell *cell, bool topologyCorrection = false) const;
-    QVector3D calcTopologyCorrection (CellCluster* cluster) const;
     QVector3D calcCellDistWithoutTorusCorrection (Cell* cell) const;
     QList< CellCluster* > decompose () const;
     qreal calcAngularMassWithNewParticle (QVector3D particlePos) const;
@@ -70,6 +69,9 @@ public:
 private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
 
+    SimulationContext* _context;
+    Topology* _topology;
+    CellMap* _cellMap;
     Grid* _grid;
 
     qreal _angle = 0.0;       //in deg

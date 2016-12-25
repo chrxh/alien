@@ -16,8 +16,8 @@ public:
 	IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const;
 	void correctDisplacement(QVector3D& displacement) const;
 	QVector3D displacement(QVector3D fromPoint, QVector3D toPoint) const;
-	QVector3D displacement(Cell* fromCell, Cell* toCell) const;
-	qreal distance(Cell* fromCell, Cell* toCell) const;
+    qreal distance(QVector3D fromPoint, QVector3D toPoint) const;
+    QVector3D correctionIncrement (QVector3D pos1, QVector3D pos2) const;
 
 	void serializePrimitives(QDataStream& stream) const;
 	void deserializePrimitives(QDataStream& stream);

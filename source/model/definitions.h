@@ -27,8 +27,13 @@ struct CellClusterHash
 {
 	std::size_t operator()(CellCluster* const& s) const;
 };
-
 typedef std::unordered_set<CellCluster*, CellClusterHash> CellClusterSet;
+
+struct CellHash
+{
+    std::size_t operator()(Cell* const& s) const;
+};
+typedef std::unordered_set<Cell*, CellHash> CellSet;
 
 struct IntVector2D {
 	int x;

@@ -9,7 +9,7 @@ public:
     FactoryFacadeImpl ();
 	~FactoryFacadeImpl() = default;
 
-    CellCluster* buildEmptyCellCluster (Grid* grid);
+    CellCluster* buildCellCluster (Grid* grid);
     CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel , QVector3D vel, Grid* grid);
     Cell* buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid* grid, int maxConnections = 0
         , int tokenAccessNumber = 0 , QVector3D relPos = QVector3D());
