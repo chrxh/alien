@@ -25,10 +25,10 @@ FactoryFacadeImpl::FactoryFacadeImpl ()
     ServiceLocator::getInstance().registerService<FactoryFacade>(this);
 }
 
-CellCluster* FactoryFacadeImpl::buildEmptyCellCluster (Grid* grid)
+CellCluster* FactoryFacadeImpl::buildCellCluster (Grid* grid)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    return entityFactory->buildEmptyCellCluster(grid);
+    return entityFactory->buildCellCluster(grid);
 }
 
 CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel , QVector3D vel, Grid* grid)

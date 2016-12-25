@@ -4,9 +4,7 @@
 #include <QList>
 #include <QVector3D>
 
-class Cell;
-class EnergyParticle;
-class Grid;
+#include "model/definitions.h"
 
 class CellCluster
 {
@@ -30,7 +28,6 @@ public:
     virtual void updateRelCoordinates (bool maintainCenter = false) = 0;
     virtual void updateVel_angularVel_via_cellVelocities () = 0;
     virtual QVector3D calcPosition (const Cell *cell, bool topologyCorrection = false) const = 0;
-    virtual QVector3D calcTopologyCorrection (CellCluster* cluster) const = 0;
     virtual QVector3D calcCellDistWithoutTorusCorrection (Cell* cell) const = 0;
     virtual QList< CellCluster* > decompose () const = 0;
     virtual qreal calcAngularMassWithNewParticle (QVector3D particlePos) const = 0;

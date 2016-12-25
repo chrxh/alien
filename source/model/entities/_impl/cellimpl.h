@@ -18,8 +18,6 @@ public:
                    Grid* grid);
     ~CellImpl();
 
-    bool compareEqual (Cell* otherCell) const override;
-
     void registerFeatures (CellFeature* features) override;
     CellFeature* getFeatures () const override;
     void removeFeatures () override;

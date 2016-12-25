@@ -135,7 +135,7 @@ void SimulationController::serializeUniverse (QDataStream& stream)
     quint32 numEnergyParticles = _unit->getEnergyParticles().size();
     stream << numEnergyParticles;
     foreach(EnergyParticle* e, _unit->getEnergyParticles())
-        e->serialize(stream);
+        e->serializePrimitives(stream);
 
     //serialize map data
     _grid->serializeMap(stream);
@@ -363,7 +363,7 @@ void SimulationController::serializeExtendedSelection (QDataStream& stream, cons
 
     //serialize energy particle data
     foreach(EnergyParticle* e, es) {
-        e->serialize(stream);
+        e->serializePrimitives(stream);
     }
 
     _grid->unlockData();
