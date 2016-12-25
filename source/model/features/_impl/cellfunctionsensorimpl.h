@@ -6,12 +6,12 @@
 class CellFunctionSensorImpl : public CellFunction
 {
 public:
-    CellFunctionSensorImpl (Grid* grid);
+    CellFunctionSensorImpl (SimulationContext* context);
 
     CellFunctionType getType () const { return CellFunctionType::SENSOR; }
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
 
 #endif // CELLFUNCTIONSENSOR_H

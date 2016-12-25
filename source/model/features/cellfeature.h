@@ -3,15 +3,12 @@
 
 #include <QDataStream>
 
-class Grid;
-class Cell;
-class Token;
-class EnergyParticle;
+#include "model/definitions.h"
 
 class CellFeature
 {
 public:
-    CellFeature (Grid* grid) : _grid(grid), _nextFeature(0) {}
+    CellFeature (SimulationContext* context) : _context(context) {}
     virtual ~CellFeature ();
 
     void registerNextFeature (CellFeature* nextFeature);
@@ -21,13 +18,14 @@ public:
     };
     virtual ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
 
-    virtual void serializePrimitives (QDataStream& stream) const {}
+    virtual void serializePrimitives (QDataStream& stream) const;
+    virtual void deserializePrimitives (QDataStream& stream) const;
 
 protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;
 
-    Grid* _grid;
-    CellFeature* _nextFeature;
+    SimulationContext* _context = nullptr;
+    CellFeature* _nextFeature = nullptr;
 
 public:
     template< typename T >

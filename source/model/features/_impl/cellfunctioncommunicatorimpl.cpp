@@ -8,30 +8,20 @@
 
 #include <QString>
 
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(Grid* grid)
-    : CellFunction(grid)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(SimulationContext* context)
+    : CellFunction(context)
 {
 
 }
 
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (quint8* cellFunctionData, Grid* grid)
-    : CellFunction(grid)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (quint8* cellFunctionData, SimulationContext* context)
+    : CellFunction(context)
 {
     _newMessageReceived = static_cast<bool>(cellFunctionData[0]);
     _receivedMessage.channel = cellFunctionData[1];
     _receivedMessage.message = cellFunctionData[2];
     _receivedMessage.angle = cellFunctionData[3];
     _receivedMessage.distance = cellFunctionData[4];
-}
-
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QDataStream& stream, Grid* grid)
-    : CellFunction(grid)
-{
-    stream >> _newMessageReceived
-           >> _receivedMessage.channel
-           >> _receivedMessage.message
-           >> _receivedMessage.angle
-           >> _receivedMessage.distance;
 }
 
 bool & CellFunctionCommunicatorImpl::getNewMessageReceivedRef()
@@ -65,6 +55,16 @@ void CellFunctionCommunicatorImpl::serializePrimitives (QDataStream& stream) con
            << _receivedMessage.angle
            << _receivedMessage.distance;
 }
+
+void CellFunctionCommunicatorImpl::deserializePrimitives (QDataStream& stream) const
+{
+    stream >> _newMessageReceived
+           >> _receivedMessage.channel
+           >> _receivedMessage.message
+           >> _receivedMessage.angle
+           >> _receivedMessage.distance;
+}
+
 
 
 void CellFunctionCommunicatorImpl::getInternalData (quint8* data) const
@@ -123,7 +123,7 @@ QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) 
         };
     QVector3D cellPos = cell->calcPosition();
     qreal range = simulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE;
-    return _grid->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
+    return _context->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 
 bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
@@ -135,7 +135,7 @@ bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (co
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
-            QVector3D displacementOfObjectFromReceiver = _grid->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
+            QVector3D displacementOfObjectFromReceiver = _context->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
             communicator->_receivedMessage.angle = CodingPhysicalQuantities::convertAngleToData(angleSeenFromReceiver);

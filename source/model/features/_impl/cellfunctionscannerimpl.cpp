@@ -9,8 +9,8 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-CellFunctionScannerImpl::CellFunctionScannerImpl(Grid* grid)
-    : CellFunction(grid)
+CellFunctionScannerImpl::CellFunctionScannerImpl(SimulationContext* context)
+    : CellFunction(context)
 {
 }
 

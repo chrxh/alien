@@ -6,23 +6,25 @@
 #include "model/features/cellfeature.h"
 #include "model/physics/physics.h"
 #include "model/simulationsettings.h"
+#include "model/simulationcontext.h"
+#include "model/cellmap.h"
 
 #include "global/global.h"
 
 #include <QtCore/qmath.h>
 
-CellImpl::CellImpl (Grid* grid)
-    : Cell(grid),
-      _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE),
-      _id(GlobalFunctions::createNewTag())
+CellImpl::CellImpl (SimulationContext* context)
+    : _cellMap(context->getCellMap())
+    , _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE)
+    , _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE)
+    , _id(GlobalFunctions::createNewTag())
 {
 
 }
 
-CellImpl::CellImpl (qreal energy, Grid* grid, int maxConnections, int tokenAccessNumber
+CellImpl::CellImpl (qreal energy, SimulationContext* context, int maxConnections, int tokenAccessNumber
     , QVector3D relPos)
-    : CellImpl(grid)
+    : CellImpl(context)
 {
     _relPos = relPos;
     _energy = energy;
@@ -292,9 +294,6 @@ void CellImpl::addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_N
 
 void CellImpl::delAllTokens ()
 {
-/*    for( int j = i+1; j < _tokenStackPointer; ++j )
-        _tokenStack[j-1] = _tokenStack[j];
-    --_tokenStackPointer;*/
     for( int j = 0; j < _tokenStackPointer; ++j )
          delete _tokenStack[j];
     for( int j = 0; j < _newTokenStackPointer; ++j )
@@ -326,11 +325,11 @@ void CellImpl::setAbsPosition (QVector3D pos)
 void CellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
 {
     QVector3D oldPos(calcPosition());
-    if( _grid->getCell(oldPos) == this )
-        _grid->setCell(oldPos, 0);
+    if( _cellMap->getCell(oldPos) == this )
+        _cellMap->setCell(oldPos, 0);
     _relPos = _cluster->absToRelPos(pos);
-    if( _grid->getCell(pos) == 0 )
-        _grid->setCell(pos, this);
+    if( _cellMap->getCell(pos) == 0 )
+        _cellMap->setCell(pos, this);
 }
 
 QVector3D CellImpl::getRelPos () const

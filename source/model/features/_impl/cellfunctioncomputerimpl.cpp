@@ -7,8 +7,10 @@
 #include <QString>
 #include <qdebug.h>
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (Grid* grid)
-    : CellFunctionComputer(grid), _code(3*simulationParameters.CELL_CODESIZE, 0), _numInstr(simulationParameters.CELL_CODESIZE)
+CellFunctionComputerImpl::CellFunctionComputerImpl (SimulationContext* context)
+    : CellFunctionComputer(context)
+    , _code(3*simulationParameters.CELL_CODESIZE, 0)
+    , _numInstr(simulationParameters.CELL_CODESIZE)
     , _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     //init with zero data
@@ -17,8 +19,9 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (Grid* grid)
         _code[i] = 0;
 }
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, Grid* grid)
-    : CellFunctionComputer(grid), _code(), _numInstr(0), _memory(simulationParameters.CELL_MEMSIZE, 0)
+CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, SimulationContext* context)
+    : CellFunctionComputer(context)
+    , _memory(simulationParameters.CELL_MEMSIZE, 0)
 {
     _numInstr = cellFunctionData[0];
     _code.resize(3*_numInstr);
@@ -26,31 +29,6 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, Gr
         _code[i] = cellFunctionData[i+1];
     }
 }
-
-CellFunctionComputerImpl::CellFunctionComputerImpl (QDataStream& stream, Grid* grid)
-    : CellFunctionComputer(grid), _memory(simulationParameters.CELL_MEMSIZE, 0)
-{
-    //load cell memory
-    int memSize;
-    stream >> memSize;
-    quint8 data;
-    for(int i = 0; i < memSize; ++i ) {
-        if( i < simulationParameters.CELL_MEMSIZE ) {
-            stream >> data;
-            _memory[i] = data;
-        }
-        else {
-            stream >> data;
-        }
-    }
-    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
-        _memory[i] = 0;
-
-    //load remaining attributes
-    stream >> _code >> _numInstr;
-
-}
-
 
 namespace {
     quint8 convertToAddress (qint8 addr, quint32 size)
@@ -545,6 +523,29 @@ void CellFunctionComputerImpl::serializePrimitives (QDataStream& stream) const
         stream << _memory[i];
     stream << _code << _numInstr;
 }
+
+void CellFunctionComputerImpl::deserializePrimitives (QDataStream& stream) const
+{
+    //load cell memory
+    int memSize;
+    stream >> memSize;
+    quint8 data;
+    for(int i = 0; i < memSize; ++i ) {
+        if( i < simulationParameters.CELL_MEMSIZE ) {
+            stream >> data;
+            _memory[i] = data;
+        }
+        else {
+            stream >> data;
+        }
+    }
+    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
+        _memory[i] = 0;
+
+    //load remaining attributes
+    stream >> _code >> _numInstr;
+}
+
 
 void CellFunctionComputerImpl::getInternalData (quint8* data) const
 {

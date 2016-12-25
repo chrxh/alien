@@ -10,14 +10,14 @@ class TestCellFunctionCommunicator;
 class CellFunctionCommunicatorImpl : public CellFunction
 {
 public:
-    CellFunctionCommunicatorImpl (Grid* grid);
-    CellFunctionCommunicatorImpl (quint8* cellFunctionData, Grid* grid);
-    CellFunctionCommunicatorImpl (QDataStream& stream, Grid* grid);
+    CellFunctionCommunicatorImpl (SimulationContext* context);
+    CellFunctionCommunicatorImpl (quint8* cellFunctionData, SimulationContext* context);
 
-    void serializePrimitives (QDataStream& stream) const;
+    void serializePrimitives (QDataStream& stream) const override;
+    void deserializePrimitives (QDataStream& stream) const override;
 
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
-    void getInternalData (quint8* ptr) const;
+    void getInternalData (quint8* ptr) const override;
 
 	struct MessageData {
 		quint8 channel = 0;
@@ -25,11 +25,11 @@ public:
 		quint8 angle = 0;
 		quint8 distance = 0;
 	};
-	bool& getNewMessageReceivedRef();
-	MessageData& getReceivedMessageRef();
+    bool& getNewMessageReceivedRef() override;
+    MessageData& getReceivedMessageRef() override;
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
 
