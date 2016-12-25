@@ -16,40 +16,51 @@ EntityFactoryImpl::EntityFactoryImpl ()
     ServiceLocator::getInstance().registerService<EntityFactory>(this);
 }
 
-CellCluster* EntityFactoryImpl::buildEmptyCellCluster (SimulationContext* context)
+CellCluster* EntityFactoryImpl::buildCellCluster (SimulationContext* context) const
 {
     return new CellClusterImpl(context);
 }
 
 CellCluster* EntityFactoryImpl::buildCellCluster (QList< Cell* > cells, qreal angle
-    , QVector3D pos, qreal angularVel, QVector3D vel, SimulationContext* context)
+    , QVector3D pos, qreal angularVel, QVector3D vel, SimulationContext* context) const
 {
     return new CellClusterImpl(cells, angle, pos, angularVel, vel, context);
 }
 
 CellCluster* EntityFactoryImpl::buildCellClusterFromForeignCells (QList< Cell* > cells
-    , qreal angle, SimulationContext* context)
+    , qreal angle, SimulationContext* context) const
 {
     return new CellClusterImpl(cells, angle, context);
 }
 
-Cell* EntityFactoryImpl::buildEmptyCell (SimulationContext* context) override
+Cell* EntityFactoryImpl::buildCell (SimulationContext* context) const
 {
     return new CellImpl(context);
 }
 
 Cell* EntityFactoryImpl::buildCell (qreal energy, SimulationContext* context, int maxConnections
-    , int tokenAccessNumber, QVector3D relPos)
+    , int tokenAccessNumber, QVector3D relPos) const
 {
     return new CellImpl(energy, context, maxConnections, tokenAccessNumber, relPos);
 }
 
-Cell* EntityFactoryImpl::buildCellWithRandomData (qreal energy, SimulationContext* context)
+Cell* EntityFactoryImpl::buildCellWithRandomData (qreal energy, SimulationContext* context) const
 {
     return new CellImpl(energy, context, true);
 }
 
-Token* EntityFactoryImpl::buildEmptyToken ()
+Token* EntityFactoryImpl::buildToken () const
 {
     return new Token();
+}
+
+EnergyParticle* EntityFactoryImpl::buildEnergyParticle(SimulationContext* context) const
+{
+    return new EnergyParticle(context);
+}
+
+EnergyParticle *EntityFactoryImpl::buildEnergyParticle(qreal energy, QVector3D pos, QVector3D vel
+    , SimulationContext *context) const
+{
+    return new EnergyParticle(energy, pos, vel, context);
 }

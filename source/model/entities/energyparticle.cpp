@@ -12,16 +12,19 @@
 
 #include <qmath.h>
 
-EnergyParticle::EnergyParticle(qreal amount_, QVector3D pos_, QVector3D vel_, Grid* grid)
-    : _grid(grid), amount(amount_), pos(pos_), vel(vel_), id(GlobalFunctions::createNewTag()), color(0)
+EnergyParticle::EnergyParticle(SimulationContext* context)
+    : _context(context)
 {
+
 }
 
-EnergyParticle::EnergyParticle (QDataStream& stream, QMap< quint64, EnergyParticle* >& oldIdEnergyMap, Grid* grid)
-    : _grid(grid)
+EnergyParticle::EnergyParticle(qreal amount_, QVector3D pos_, QVector3D vel_, SimulationContext* context)
+    : _context(context)
+    , amount(amount_)
+    , pos(pos_)
+    , vel(vel_)
+    , id(GlobalFunctions::createNewTag())
 {
-    stream >> amount >> pos >> vel >> id >> color;
-    oldIdEnergyMap[id] = this;
 }
 
 //return: true = energy is zero
@@ -119,11 +122,15 @@ bool EnergyParticle::movement (CellCluster*& cluster)
     }
 }
 
-void EnergyParticle::serialize (QDataStream& stream)
+void EnergyParticle::serializePrimitives (QDataStream& stream)
 {
     stream << amount << pos << vel << id << color;
 }
 
+void EnergyParticle::deserializePrimitives (QDataStream& stream)
+{
+    stream >> amount >> pos >> vel >> id >> color;
+}
 
 
 
