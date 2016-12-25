@@ -92,7 +92,7 @@ void SerializationFacadeImpl::serializeCellCluster(CellCluster* cluster, QDataSt
 	cluster->serializePrimitives(stream);
 	QList<Cell*>& cells = cluster->getCellsRef();
     stream << static_cast<quint32>(cells.size());
-	foreach( Cell* cell, cells) {
+    foreach (Cell* cell, cells) {
 		serializeFeaturedCell(cell, stream);
 	}
 }
@@ -164,9 +164,9 @@ Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream) const
     return token;
 }
 
-CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap
-    , QMap< quint64, quint64 >& oldNewCellIdMap, QMap< quint64, Cell* >& oldIdCellMap
-    , SimulationContext* context) const
+CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
+    , QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap
+    , QMap< quint64, Cell* >& oldIdCellMap, SimulationContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellCluster* cluster = entityFactory->buildCellCluster(context);
@@ -178,6 +178,7 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     quint32 numCells(0);
     stream >> numCells;
 
+    //assigning new cell ids
     QList< Cell* >& cells = cluster->getCellsRef();
     for (quint32 i = 0; i < numCells; ++i) {
         Cell* cell = deserializeFeaturedCell(stream, connectingCells, context);
@@ -185,7 +186,6 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
         cells << cell;
         idCellMap[cell->getId()] = cell;
 
-        //assigning new cell id
         quint64 newId = GlobalFunctions::createNewTag();
         oldNewCellIdMap[cell->getId()] = newId;
         oldIdCellMap[cell->getId()] = cell;
@@ -256,6 +256,5 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
     EnergyParticle* particle = factory->buildEnergyParticle(context);
     particle->deserializePrimitives(stream);
     oldIdEnergyMap[particle->id] = particle;
-    particle->id = GlobalFunctions::createNewTag();
     return particle;
 }
