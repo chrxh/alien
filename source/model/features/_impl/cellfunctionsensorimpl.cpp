@@ -9,8 +9,8 @@
 
 #include <QtCore/qmath.h>
 
-CellFunctionSensorImpl::CellFunctionSensorImpl (Grid* grid)
-    : CellFunction(grid)
+CellFunctionSensorImpl::CellFunctionSensorImpl (SimulationContext* context)
+    : CellFunction(context)
 {
 }
 
@@ -33,9 +33,9 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 
     //scanning vicinity?
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_VICINITY) ) {
-        QVector3D cellPos = cell->calcPosition(_grid);
+        QVector3D cellPos = cell->calcPosition(_context);
 //        auto time1 = high_resolution_clock::now();
-        CellCluster* otherCluster = _grid->getNearbyClusterFast(cellPos,
+        CellCluster* otherCluster = _context->getNearbyClusterFast(cellPos,
                                                                     simulationParameters.CELL_FUNCTION_SENSOR_RANGE,
                                                                     minMassReal,
                                                                     maxMassReal,
@@ -47,7 +47,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(otherCluster->getMass());
 
             //calc relative angle
-            QVector3D dir  = _grid->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
+            QVector3D dir  = _context->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
             qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(relAngle);
@@ -62,10 +62,10 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                         scanPos = beamPos;
                         scanPos.setX(scanPos.x()+rx);
                         scanPos.setY(scanPos.y()+ry);
-                        Cell* scanCell = _grid->getCell(scanPos);
+                        Cell* scanCell = _context->getCell(scanPos);
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
-                                qreal dist = _grid->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
+                                qreal dist = _context->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
                                 token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
                                 return processingResult;
                             }
@@ -105,7 +105,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                 scanPos = beamPos;
                 scanPos.setX(scanPos.x()+rx);
                 scanPos.setY(scanPos.y()+ry);
-                Cell* scanCell = _grid->getCell(scanPos);
+                Cell* scanCell = _context->getCell(scanPos);
                 if( scanCell ) {
                     if( scanCell->getCluster() != cluster ) {
 
@@ -130,7 +130,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                 }
             }
             token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
-            qreal dist = _grid->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
+            qreal dist = _context->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
             token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(largestClusterCell->getCluster()->getMass());
 //            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);

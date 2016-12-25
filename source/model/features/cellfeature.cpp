@@ -2,8 +2,7 @@
 
 CellFeature::~CellFeature ()
 {
-    if( _nextFeature )
-        delete _nextFeature;
+    delete _nextFeature;
 }
 
 void CellFeature::registerNextFeature (CellFeature* nextFeature)
@@ -14,7 +13,7 @@ void CellFeature::registerNextFeature (CellFeature* nextFeature)
 CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult resultFromThisFeature = processImpl(token, cell, previousCell);
-    ProcessingResult resultFromNextFeature {false, 0 };
+    ProcessingResult resultFromNextFeature {false, nullptr };
     if( _nextFeature)
         resultFromNextFeature = _nextFeature->process(token, cell, previousCell);
     ProcessingResult mergedResult;
@@ -26,3 +25,10 @@ CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Ce
     return mergedResult;
 }
 
+void CellFeature::serializePrimitives (QDataStream& stream) const
+{
+}
+
+void CellFeature::deserializePrimitives (QDataStream& stream) const
+{
+}

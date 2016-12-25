@@ -6,12 +6,12 @@
 class CellFunctionWeaponImpl : public CellFunction
 {
 public:
-    CellFunctionWeaponImpl (Grid* grid);
+    CellFunctionWeaponImpl (SimulationContext* context);
 
     CellFunctionType getType () const { return CellFunctionType::WEAPON; }
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
 
 #endif // CELLFUNCTIONWEAPON_H

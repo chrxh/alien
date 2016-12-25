@@ -6,8 +6,8 @@
 
 #include "model/simulationsettings.h"
 
-CellFunctionWeaponImpl::CellFunctionWeaponImpl (Grid* grid)
-    : CellFunction(grid)
+CellFunctionWeaponImpl::CellFunctionWeaponImpl (SimulationContext* context)
+    : CellFunction(context)
 {
 }
 
@@ -19,7 +19,7 @@ CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token,
     for(int x = -2; x < 3; ++x)
         for(int y = -2; y < 3; ++y) {
             QVector3D searchPos(pos.x()+x, pos.y()+y, 0.0);
-            Cell* otherCell = _grid->getCell(searchPos);
+            Cell* otherCell = _context->getCell(searchPos);
 
             //other cell found?
             if( otherCell ) {

@@ -6,12 +6,12 @@
 class CellFunctionPropulsionImpl : public CellFunction
 {
 public:
-    CellFunctionPropulsionImpl (Grid* grid);
+    CellFunctionPropulsionImpl (SimulationContext* context);
 
     CellFunctionType getType () const { return CellFunctionType::PROPULSION; }
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
 
 #endif // CELLFUNCTIONPROPULSION_H

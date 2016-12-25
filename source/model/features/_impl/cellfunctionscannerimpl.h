@@ -6,12 +6,12 @@
 class CellFunctionScannerImpl : public CellFunction
 {
 public:
-    CellFunctionScannerImpl (Grid* grid);
+    CellFunctionScannerImpl (SimulationContext* context);
 
     CellFunctionType getType () const { return CellFunctionType::SCANNER; }
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
 
 #endif // CELLFUNCTIONSCANNER_H
