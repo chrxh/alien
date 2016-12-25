@@ -38,8 +38,7 @@ CellImpl::~CellImpl()
         delete _newTokenStack[i];
     if( _maxConnections > 0 )
         delete _connectingCells;
-    if( _features )
-        delete _features;
+    delete _features;
 }
 
 void CellImpl::registerFeatures (CellFeature* features)
@@ -54,9 +53,8 @@ CellFeature* CellImpl::getFeatures () const
 
 void CellImpl::removeFeatures ()
 {
-    if( _features )
-        delete _features;
-    _features = 0;
+    delete _features;
+    _features = nullptr;
 }
 
 bool CellImpl::connectable (Cell* otherCell) const
@@ -75,8 +73,7 @@ bool CellImpl::isConnectedTo (Cell* otherCell) const
 void CellImpl::resetConnections (int maxConnections)
 {
     //delete old array
-    if( _connectingCells )
-        delete _connectingCells;
+    delete _connectingCells;
 
     //set up new array
     _maxConnections = maxConnections;
@@ -241,7 +238,6 @@ void CellImpl::activatingNewTokens ()
     _tokenStackPointer = _newTokenStackPointer;
     for( int i = 0; i < _newTokenStackPointer; ++i ) {
         _tokenStack[i] = _newTokenStack[i];
-//        _tokenStack[i]->setTokenAccessNumber(_tokenAccessNumber);
     }
     _newTokenStackPointer = 0;
 }
@@ -279,6 +275,11 @@ Token* CellImpl::getToken (int i) const
     return _tokenStack[i];
 }
 
+void CellImpl::setToken (int i, Token* token)
+{
+    _tokenStack[i] = token;
+}
+
 void CellImpl::addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_NUMBER update)
 {
     if( update == UPDATE_TOKEN_ACCESS_NUMBER::YES )
@@ -298,8 +299,8 @@ void CellImpl::delAllTokens ()
          delete _tokenStack[j];
     for( int j = 0; j < _newTokenStackPointer; ++j )
          delete _newTokenStack[j];
-    _tokenStackPointer = 0;
-    _newTokenStackPointer = 0;
+    _tokenStackPointer = nullptr;
+    _newTokenStackPointer = nullptr;
 }
 
 void CellImpl::setCluster (CellCluster* cluster)
@@ -422,17 +423,6 @@ void CellImpl::setToBeKilled (bool toBeKilled)
 {
     _toBeKilled = toBeKilled;
 }
-
-int CellImpl::getTokenStackPointer () const
-{
-    return _tokenStackPointer;
-}
-
-QVector<Token*>& CellImpl::getTokenStackRef ()
-{
-    return _tokenStack;
-}
-
 
 Token* CellImpl::takeTokenFromStack ()
 {

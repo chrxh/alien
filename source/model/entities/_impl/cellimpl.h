@@ -18,63 +18,62 @@ public:
                    Grid* grid);
     ~CellImpl();
 
-    bool compareEqual (Cell* otherCell) const;
+    bool compareEqual (Cell* otherCell) const override;
 
-    void registerFeatures (CellFeature* features);
-    CellFeature* getFeatures () const;
-    void removeFeatures ();
+    void registerFeatures (CellFeature* features) override;
+    CellFeature* getFeatures () const override;
+    void removeFeatures () override;
 
-    bool connectable (Cell* otherCell) const;
-    bool isConnectedTo (Cell* otherCell) const;
-    void resetConnections (int maxConnections);
-    void newConnection (Cell* otherCell);
-    void delConnection (Cell* otherCell);
-    void delAllConnection ();
-    int getNumConnections () const;
-    void setNumConnections (int num);
-    int getMaxConnections () const;
-    void setMaxConnections (int maxConnections);
-    Cell* getConnection (int i) const;
-    void setConnection (int i, Cell* cell);
-    QVector3D calcNormal (QVector3D outerSpace) const;
+    bool connectable (Cell* otherCell) const override;
+    bool isConnectedTo (Cell* otherCell) const override;
+    void resetConnections (int maxConnections) override;
+    void newConnection (Cell* otherCell) override;
+    void delConnection (Cell* otherCell) override;
+    void delAllConnection () override;
+    int getNumConnections () const override;
+    void setNumConnections (int num) override;
+    int getMaxConnections () const override;
+    void setMaxConnections (int maxConnections) override;
+    Cell* getConnection (int i) const override;
+    void setConnection (int i, Cell* cell) override;
+    QVector3D calcNormal (QVector3D outerSpace) const override;
 
-    void activatingNewTokens ();
-    const quint64& getId () const;
-    void setId (quint64 id);
-    const quint64& getTag () const;
-    void setTag (quint64 tag);
-    int getNumToken (bool newTokenStackPointer = false) const;
-    Token* getToken (int i) const;
-    void addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_NUMBER update);
-    void delAllTokens ();
-
-    void setCluster (CellCluster* cluster);
-    CellCluster* getCluster () const;
-    QVector3D calcPosition (bool topologyCorrection = false) const;
-    void setAbsPosition (QVector3D pos);
-    void setAbsPositionAndUpdateMap (QVector3D pos);
-    QVector3D getRelPos () const;
-    void setRelPos (QVector3D relPos);
-
-    int getTokenAccessNumber () const;
-    void setTokenAccessNumber (int i);
-    bool isTokenBlocked () const;
-    void setTokenBlocked (bool block);
-    qreal getEnergy() const;
-    qreal getEnergyIncludingTokens() const;
-    void setEnergy (qreal i);
-
-    QVector3D getVel () const;
-    void setVel (QVector3D vel);
-    quint8 getColor () const;
-    void setColor (quint8 color);
-    int getProtectionCounter () const;
-    void setProtectionCounter (int counter);
-    bool isToBeKilled() const;
-    void setToBeKilled (bool toBeKilled);
-    int getTokenStackPointer () const override;
-    QVector<Token*>& getTokenStackRef () override;
+    void activatingNewTokens () override;
+    const quint64& getId () const override;
+    void setId (quint64 id) override;
+    const quint64& getTag () const override;
+    void setTag (quint64 tag) override;
+    int getNumToken (bool newTokenStackPointer = false) const override;
+    Token* getToken (int i) const override;
+    void setToken (int i, Token* token) override;
+    void addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_NUMBER update) override;
+    void delAllTokens () override;
     Token* takeTokenFromStack () override;
+
+    void setCluster (CellCluster* cluster) override;
+    CellCluster* getCluster () const override;
+    QVector3D calcPosition (bool topologyCorrection = false) const override;
+    void setAbsPosition (QVector3D pos) override;
+    void setAbsPositionAndUpdateMap (QVector3D pos) override;
+    QVector3D getRelPos () const override;
+    void setRelPos (QVector3D relPos) override;
+
+    int getTokenAccessNumber () const override;
+    void setTokenAccessNumber (int i) override;
+    bool isTokenBlocked () const override;
+    void setTokenBlocked (bool block) override;
+    qreal getEnergy() const override;
+    qreal getEnergyIncludingTokens() const override;
+    void setEnergy (qreal i) override;
+
+    QVector3D getVel () const override;
+    void setVel (QVector3D vel) override;
+    quint8 getColor () const override;
+    void setColor (quint8 color) override;
+    int getProtectionCounter () const override;
+    void setProtectionCounter (int counter) override;
+    bool isToBeKilled() const override;
+    void setToBeKilled (bool toBeKilled) override;
 
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives(QDataStream& stream) override;

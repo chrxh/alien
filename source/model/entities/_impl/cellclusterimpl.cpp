@@ -106,7 +106,7 @@ void CellClusterImpl::drawCellsToMap ()
 
 //step 1:
 //initiate movement of particles
-void CellClusterImpl::movementProcessingStep1 ()
+void CellClusterImpl::processingInit ()
 {
     //clear cells
     foreach( Cell* cell, _cells) {
@@ -120,7 +120,7 @@ void CellClusterImpl::movementProcessingStep1 ()
 }
 
 //step 2: dissipation, returns lost energy
-void CellClusterImpl::movementProcessingStep2 (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles)
+void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles)
 {
     updateCellVel();
 
@@ -248,7 +248,7 @@ void CellClusterImpl::movementProcessingStep2 (QList< CellCluster* >& fragments,
 //step 3:
 //actual movement, fusion and collision
 //set cells to grid map
-void CellClusterImpl::movementProcessingStep3 ()
+void CellClusterImpl::processingMovement ()
 {
     struct CollisionData {
         int movementState = 0;  //0: will do nothing, 1: collision, 2: fusion
@@ -531,7 +531,7 @@ void CellClusterImpl::movementProcessingStep3 ()
 
 //step 4:
 //token processing
-void CellClusterImpl::movementProcessingStep4 (QList< EnergyParticle* >& energyParticles, bool& decompose)
+void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose)
 {
     std::vector<Token*> spreadToken(simulationParameters.MAX_CELL_CONNECTIONS);
     std::vector<Cell*> spreadTokenCells(simulationParameters.MAX_CELL_CONNECTIONS);
@@ -635,7 +635,7 @@ void CellClusterImpl::movementProcessingStep4 (QList< EnergyParticle* >& energyP
 
 //step 5:
 //activate new token and kill cells which are too close or where too much forces are applied
-void CellClusterImpl::movementProcessingStep5 ()
+void CellClusterImpl::processingFinish ()
 {
     qreal maxClusterRadius = qMin(_grid->getSizeX()/2.0, _grid->getSizeY()/2.0);
     foreach( Cell* cell, _cells) {

@@ -20,12 +20,9 @@ public:
     Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) override;
     Cell* deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) override;
 
-    void serializeToken(Token* token, QDataStream& stream);
-    Token* deserializeToken(QDataStream& stream, SimulationContext* context);
-
 private:
     void serializeToken(Token* token, QDataStream& stream) override;
-    Token* deserializeSimulationContext(QDataStream& stream, SimulationContext* context) override;
+    Token* deserializeToken(QDataStream& stream, SimulationContext* context) override;
 };
 
 #endif //SERIALIZATIONFACADEIMPL_H
