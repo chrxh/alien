@@ -29,6 +29,6 @@ void CellFeature::serializePrimitives (QDataStream& stream) const
 {
 }
 
-void CellFeature::deserializePrimitives (QDataStream& stream) const
+void CellFeature::deserializePrimitives (QDataStream& stream)
 {
 }

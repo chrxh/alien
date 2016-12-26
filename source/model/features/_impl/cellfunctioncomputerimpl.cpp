@@ -524,7 +524,7 @@ void CellFunctionComputerImpl::serializePrimitives (QDataStream& stream) const
     stream << _code << _numInstr;
 }
 
-void CellFunctionComputerImpl::deserializePrimitives (QDataStream& stream) const
+void CellFunctionComputerImpl::deserializePrimitives (QDataStream& stream)
 {
     //load cell memory
     int memSize;

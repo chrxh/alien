@@ -1,13 +1,16 @@
 #include "cellfunctionweaponimpl.h"
 
+#include "model/simulationcontext.h"
+#include "model/cellmap.h"
+#include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-#include "model/entities/grid.h"
 
 #include "model/simulationsettings.h"
 
 CellFunctionWeaponImpl::CellFunctionWeaponImpl (SimulationContext* context)
     : CellFunction(context)
+    , _cellMap(context->getCellMap())
 {
 }
 
@@ -19,7 +22,7 @@ CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token,
     for(int x = -2; x < 3; ++x)
         for(int y = -2; y < 3; ++y) {
             QVector3D searchPos(pos.x()+x, pos.y()+y, 0.0);
-            Cell* otherCell = _context->getCell(searchPos);
+            Cell* otherCell = _cellMap->getCell(searchPos);
 
             //other cell found?
             if( otherCell ) {

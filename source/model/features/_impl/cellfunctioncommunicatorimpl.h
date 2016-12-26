@@ -14,7 +14,7 @@ public:
     CellFunctionCommunicatorImpl (quint8* cellFunctionData, SimulationContext* context);
 
     void serializePrimitives (QDataStream& stream) const override;
-    void deserializePrimitives (QDataStream& stream) const override;
+    void deserializePrimitives (QDataStream& stream) override;
 
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
     void getInternalData (quint8* ptr) const override;
@@ -25,8 +25,8 @@ public:
 		quint8 angle = 0;
 		quint8 distance = 0;
 	};
-    bool& getNewMessageReceivedRef() override;
-    MessageData& getReceivedMessageRef() override;
+    bool& getNewMessageReceivedRef();
+    MessageData& getReceivedMessageRef();
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;

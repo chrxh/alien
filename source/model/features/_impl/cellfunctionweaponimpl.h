@@ -12,6 +12,9 @@ public:
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
+
+private:
+    CellMap* _cellMap;
 };
 
 #endif // CELLFUNCTIONWEAPON_H

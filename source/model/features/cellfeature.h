@@ -19,7 +19,7 @@ public:
     virtual ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
 
     virtual void serializePrimitives (QDataStream& stream) const;
-    virtual void deserializePrimitives (QDataStream& stream) const;
+    virtual void deserializePrimitives (QDataStream& stream);
 
 protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;

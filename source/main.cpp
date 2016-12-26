@@ -15,6 +15,9 @@
 //- alle Serialisierung und Deserialisierung sollen von SerializationFacade gesteuert werden
 //- (de)serialisierung elementarer(Qt) Typen in den Methoden (de)serialize(...)
 
+//Nächstes Mal:
+//- SimulationContext in den Implementierungen der CellFeatures verwenden
+
 //Model-Refactoring:
 //- factoryfacade in featuredcellfactory umbenennen
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
