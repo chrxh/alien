@@ -2,7 +2,9 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-#include "model/entities/grid.h"
+#include "model/simulationcontext.h"
+#include "model/cellmap.h"
+#include "model/topology.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
 
@@ -56,7 +58,7 @@ void CellFunctionCommunicatorImpl::serializePrimitives (QDataStream& stream) con
            << _receivedMessage.distance;
 }
 
-void CellFunctionCommunicatorImpl::deserializePrimitives (QDataStream& stream) const
+void CellFunctionCommunicatorImpl::deserializePrimitives (QDataStream& stream)
 {
     stream >> _newMessageReceived
            >> _receivedMessage.channel
@@ -115,7 +117,7 @@ int CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumbe
 
 QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) const
 {
-    Grid::CellSelectFunction cellSelectCommunicatorFunction =
+    CellMap::CellSelectFunction cellSelectCommunicatorFunction =
         [](Cell* cell)
         {
             CellFunction* cellFunction = cell->getFeatures()->findObject<CellFunction>();
@@ -123,7 +125,7 @@ QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) 
         };
     QVector3D cellPos = cell->calcPosition();
     qreal range = simulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE;
-    return _context->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
+    return _context->getCellMap()->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 
 bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
@@ -135,7 +137,8 @@ bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (co
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
-            QVector3D displacementOfObjectFromReceiver = _context->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
+            Topology* topology = _context->getTopology();
+            QVector3D displacementOfObjectFromReceiver = topology->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
             communicator->_receivedMessage.angle = CodingPhysicalQuantities::convertAngleToData(angleSeenFromReceiver);
