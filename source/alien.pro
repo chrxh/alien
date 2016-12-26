@@ -63,6 +63,7 @@ SOURCES += main.cpp \
     model/energyparticlemap.cpp \
     model/topology.cpp \
     model/_impl/serializationfacadeimpl.cpp \
+    model/features/_impl/energyguidanceimpl.cpp \
     model/features/_impl/cellfunctioncommunicatorimpl.cpp \
     model/features/_impl/cellfunctionconstructorimpl.cpp \
     model/features/_impl/cellfunctionpropulsionimpl.cpp \
@@ -124,6 +125,7 @@ HEADERS += \
     model/features/energyguidance.h \
     model/features/cellfunctioncomputer.h \
     model/features/cellfunction.h \
+    model/features/_impl/energyguidanceimpl.h \
     model/features/_impl/cellfeaturefactoryimpl.h \
     model/simulationunit.h \
     model/simulationcontroller.h \

@@ -25,42 +25,43 @@ FactoryFacadeImpl::FactoryFacadeImpl ()
     ServiceLocator::getInstance().registerService<FactoryFacade>(this);
 }
 
-CellCluster* FactoryFacadeImpl::buildCellCluster (Grid* grid)
+CellCluster* FactoryFacadeImpl::buildCellCluster (SimulationContext* context)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    return entityFactory->buildCellCluster(grid);
+    return entityFactory->buildCellCluster(context);
 }
 
-CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel , QVector3D vel, Grid* grid)
+CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
+    , QVector3D vel, SimulationContext* context)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    return entityFactory->buildCellCluster(cells, angle, pos, angularVel, vel, grid);
+    return entityFactory->buildCellCluster(cells, angle, pos, angularVel, vel, context);
 }
 
 
-Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, Grid* grid
+Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data
+    , SimulationContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos)
+{
+    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+    CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
+    Cell* cell = entityFactory->buildCell(energy, context, maxConnections, tokenAccessNumber, relPos);
+    decoratorFactory->addCellFunction(cell, type, data, context);
+    decoratorFactory->addEnergyGuidance(cell, context);
+    return cell;
+}
+
+Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, SimulationContext* context
     , int maxConnections, int tokenAccessNumber, QVector3D relPos)
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-    Cell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
-    decoratorFactory->addCellFunction(cell, type, data, grid);
-    decoratorFactory->addEnergyGuidance(cell, grid);
+    Cell* cell = entityFactory->buildCell(energy, context, maxConnections, tokenAccessNumber, relPos);
+    decoratorFactory->addCellFunction(cell, type, context);
+    decoratorFactory->addEnergyGuidance(cell, context);
     return cell;
 }
 
-Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, Grid* grid, int maxConnections
-    , int tokenAccessNumber, QVector3D relPos)
-{
-    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-    Cell* cell = entityFactory->buildCell(energy, grid, maxConnections, tokenAccessNumber, relPos);
-    decoratorFactory->addCellFunction(cell, type, grid);
-    decoratorFactory->addEnergyGuidance(cell, grid);
-    return cell;
-}
-
-Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid* grid)
+Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context)
 {
     int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
     int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
@@ -68,7 +69,7 @@ Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Grid* gr
     for( int i = 0; i <256; ++i )
         randomData[i] = qrand()%256;
     CellFunctionType randomCellFunction = static_cast<CellFunctionType>(qrand() % static_cast<int>(CellFunctionType::_COUNTER));
-    return buildFeaturedCell(energy, randomCellFunction, randomData, grid, randomMaxConnections, randomTokenAccessNumber, QVector3D());
+    return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
 CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell)
@@ -112,11 +113,11 @@ CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell)
     return to;
 }
 
-void FactoryFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, Grid* grid)
+void FactoryFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, SimulationContext* context)
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-    decoratorFactory->addCellFunction(cell, type, grid);
-    decoratorFactory->addEnergyGuidance(cell, grid);
+    decoratorFactory->addCellFunction(cell, type, context);
+    decoratorFactory->addEnergyGuidance(cell, context);
 }
 

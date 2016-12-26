@@ -20,7 +20,7 @@ public:
     QVector< quint8 >& getMemoryReference () override;
 
     void serializePrimitives (QDataStream& stream) const override;
-    void deserializePrimitives (QDataStream& stream) const override;
+    void deserializePrimitives (QDataStream& stream) override;
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;

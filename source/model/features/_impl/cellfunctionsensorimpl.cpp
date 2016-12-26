@@ -1,16 +1,21 @@
 #include "cellfunctionsensorimpl.h"
 
+#include "model/simulationsettings.h"
+#include "model/simulationcontext.h"
+#include "model/cellmap.h"
+#include "model/topology.h"
+#include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-#include "model/entities/grid.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
-#include "model/simulationsettings.h"
 
 #include <QtCore/qmath.h>
 
 CellFunctionSensorImpl::CellFunctionSensorImpl (SimulationContext* context)
     : CellFunction(context)
+    , _cellMap(context->getCellMap())
+    , _topology(context->getTopology())
 {
 }
 
@@ -35,11 +40,8 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
     if( cmd == static_cast<int>(SENSOR_IN::SEARCH_VICINITY) ) {
         QVector3D cellPos = cell->calcPosition(_context);
 //        auto time1 = high_resolution_clock::now();
-        CellCluster* otherCluster = _context->getNearbyClusterFast(cellPos,
-                                                                    simulationParameters.CELL_FUNCTION_SENSOR_RANGE,
-                                                                    minMassReal,
-                                                                    maxMassReal,
-                                                                    cluster);
+        CellCluster* otherCluster = _cellMap->getNearbyClusterFast(cellPos, simulationParameters.CELL_FUNCTION_SENSOR_RANGE
+            , minMassReal, maxMassReal, cluster);
 //        nanoseconds diff1 = high_resolution_clock::now()- time1;
 //        cout << "Dauer: " << diff1.count() << endl;
         if( otherCluster ) {
@@ -47,7 +49,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(otherCluster->getMass());
 
             //calc relative angle
-            QVector3D dir  = _context->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
+            QVector3D dir  = _topology->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
             qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(relAngle);
@@ -62,10 +64,10 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                         scanPos = beamPos;
                         scanPos.setX(scanPos.x()+rx);
                         scanPos.setY(scanPos.y()+ry);
-                        Cell* scanCell = _context->getCell(scanPos);
+                        Cell* scanCell = _cellMap->getCell(scanPos);
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
-                                qreal dist = _context->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
+                                qreal dist = _topology->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
                                 token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
                                 return processingResult;
                             }
@@ -105,7 +107,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                 scanPos = beamPos;
                 scanPos.setX(scanPos.x()+rx);
                 scanPos.setY(scanPos.y()+ry);
-                Cell* scanCell = _context->getCell(scanPos);
+                Cell* scanCell = _cellMap->getCell(scanPos);
                 if( scanCell ) {
                     if( scanCell->getCluster() != cluster ) {
 
@@ -130,7 +132,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                 }
             }
             token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
-            qreal dist = _context->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
+            qreal dist = _topology->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
             token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
             token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(largestClusterCell->getCluster()->getMass());
 //            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);
