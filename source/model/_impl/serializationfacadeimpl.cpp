@@ -28,8 +28,7 @@ SerializationFacadeImpl::SerializationFacadeImpl()
     ServiceLocator::getInstance().registerService<SerializationFacade>(this);
 }
 
-void SerializationFacadeImpl::serializeSimulationContext(SimulationContext * context
-    , QDataStream & stream) const
+void SerializationFacadeImpl::serializeSimulationContext(SimulationContext * context, QDataStream & stream) const
 {
 	context->getTopology()->serializePrimitives(stream);
 

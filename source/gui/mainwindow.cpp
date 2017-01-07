@@ -554,7 +554,7 @@ void MainWindow::copyCell ()
     QDataStream out(&_serializedCellData, QIODevice::WriteOnly);
     quint64 clusterId;
     quint64 cellId;
-    _simulator->serializeCell(out, focusCell, clusterId, cellId);
+    _simulator->saveCell(out, focusCell, clusterId, cellId);
     MetadataManager::getGlobalInstance().serializeMetadataCell(out, clusterId, cellId);
 
     //set actions
@@ -564,11 +564,8 @@ void MainWindow::copyCell ()
 void MainWindow::pasteCell ()
 {
     QDataStream in(&_serializedCellData, QIODevice::ReadOnly);
-    QMap< quint64, quint64 > oldNewCellIdMap;
-    QMap< quint64, quint64 > oldNewClusterIdMap;
-    CellCluster* newCluster;
-    _simulator->buildCell(in, ui->macroEditor->getViewCenterPosWithInc(), newCluster, oldNewClusterIdMap, oldNewCellIdMap);
-    MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
+    _simulator->loadCell(in, ui->macroEditor->getViewCenterPosWithInc());
+//    MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //force simulator to update other coordinators
     _simulator->updateUniverse();
@@ -689,7 +686,7 @@ void MainWindow::loadExtendedSelection ()
             QMap< quint64, quint64 > oldNewClusterIdMap;
             QList< CellCluster* > newClusters;
             QList< EnergyParticle* > newEnergyParticles;
-            _simulator->buildExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters,  newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
+            _simulator->loadExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters,  newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
             MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
             file.close();
 
@@ -722,7 +719,7 @@ void MainWindow::saveExtendedSelection ()
             QDataStream out(&file);
             QList< quint64 > clusterIds;
             QList< quint64 > cellIds;
-            _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
+            _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
             MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
             file.close();
         }
@@ -744,7 +741,7 @@ void MainWindow::copyExtendedSelection ()
     QDataStream out(&_serializedEnsembleData, QIODevice::WriteOnly);
     QList< quint64 > clusterIds;
     QList< quint64 > cellIds;
-    _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
+    _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
     MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
     //set actions
@@ -758,7 +755,7 @@ void MainWindow::pasteExtendedSelection ()
     QMap< quint64, quint64 > oldNewClusterIdMap;
     QList< CellCluster* > newClusters;
     QList< EnergyParticle* > newEnergyParticles;
-    _simulator->buildExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
+    _simulator->loadExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
     MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //force simulator to update other coordinators
@@ -783,7 +780,7 @@ void MainWindow::multiplyRandomExtendedSelection ()
         QDataStream out(&serializedEnsembleData, QIODevice::WriteOnly);
         QList< quint64 > clusterIds;
         QList< quint64 > cellIds;
-        _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
+        _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
         MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
         //read list and rebuild structure n times
@@ -794,7 +791,7 @@ void MainWindow::multiplyRandomExtendedSelection ()
             QList< CellCluster* > newClusters;
             QList< EnergyParticle* > newEnergyParticles;
             QVector3D pos(GlobalFunctions::random(0.0, _simulator->getUniverseSize()), GlobalFunctions::random(0.0, _simulator->getUniverseSizeY()), 0.0);
-            _simulator->buildExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
+            _simulator->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
             MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
             //randomize angles and velocities if desired
@@ -837,7 +834,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
         QDataStream out(&serializedEnsembleData, QIODevice::WriteOnly);
         QList< quint64 > clusterIds;
         QList< quint64 > cellIds;
-        _simulator->serializeExtendedSelection(out, clusters, es, clusterIds, cellIds);
+        _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
         MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
         //read list and rebuild structure n x m times
@@ -850,7 +847,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
                 QList< EnergyParticle* > newEnergyParticles;
                 QVector3D pos(d.getInitialPosX() + (qreal)i*d.getHorizontalInterval(),
                               d.getInitialPosY() + (qreal)j*d.getVerticalInterval(), 0.0);
-                _simulator->buildExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
+                _simulator->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
                 MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
                 //set angles and velocities
