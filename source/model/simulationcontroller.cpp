@@ -107,12 +107,8 @@ SimulationContext* SimulationController::getSimulationContext()
 
 void SimulationController::newUniverse (qint32 sizeX, qint32 sizeY)
 {
-	_context->lock();
     _frame = 0;
-
-    //clean up metadata
-    std::set<quint64> ids = _context->getAllCellIds();
-    MetadataManager::getGlobalInstance().cleanUp(ids);
+	_context->lock();
 
     //set up new grid
 	_context->init({ sizeX, sizeY });
@@ -123,17 +119,14 @@ void SimulationController::newUniverse (qint32 sizeX, qint32 sizeY)
 void SimulationController::serializeUniverse (QDataStream& stream)
 {
     emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
+
     stream << _frame;
-
 	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-    _context->lock();
 
-	//clean up metadata
+    _context->lock();
 	std::set<quint64> ids = _context->getAllCellIds();
 	MetadataManager::getGlobalInstance().cleanUp(ids);
-
 	facade->serializeSimulationContext(_context, stream);
-
     _context->unlock();
 }
 
@@ -280,7 +273,7 @@ void SimulationController::addRandomEnergy (qreal energy, qreal maxEnergyPerPart
     _context->unlock();
 }
 
-void SimulationController::serializeCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId)
+void SimulationController::saveCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId)
 {
     _context->lock();
 
@@ -297,17 +290,20 @@ void SimulationController::serializeCell (QDataStream& stream, Cell* cell, quint
     _context->unlock();
 }
 
-void SimulationController::serializeExtendedSelection (QDataStream& stream, const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es, QList< quint64 >& clusterIds, QList< quint64 >& cellIds)
+void SimulationController::saveExtendedSelection (QDataStream& stream, const QList< CellCluster* >& clusters
+	, const QList< EnergyParticle* >& es, QList< quint64 >& clusterIds, QList< quint64 >& cellIds)
 {
-    _context->lock();
+	_context->lock();
 
-    //serialize num clusters
+	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+
+	//serialize num clusters
     quint32 numClusters = clusters.size();
     stream << numClusters;
 
     //serialize cluster data
     foreach(CellCluster* cluster, clusters) {
-        cluster->serializePrimitives(stream);
+		facade->serializeCellCluster(cluster, stream);
         clusterIds << cluster->getId();
         foreach(Cell* cell, cluster->getCellsRef())
             cellIds << cell->getId();
@@ -319,41 +315,31 @@ void SimulationController::serializeExtendedSelection (QDataStream& stream, cons
 
     //serialize energy particle data
     foreach(EnergyParticle* e, es) {
-        e->serializePrimitives(stream);
+		facade->serializeEnergyParticle(e, stream);
     }
 
     _context->unlock();
 }
 
-void SimulationController::buildCell (QDataStream& stream,
-                QVector3D pos,
-                CellCluster*& newCluster,
-                QMap< quint64, quint64 >& oldNewClusterIdMap,
-                QMap< quint64, quint64 >& oldNewCellIdMap,
-                bool drawToMap)
+void SimulationController::loadCell(QDataStream& stream, QVector3D pos, bool drawToMap /*= true*/)
 {
     _context->lock();
 
-    //read cell data
     SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 	FactoryFacade* factory = ServiceLocator::getInstance().getService<FactoryFacade>();
+
 	QList< Cell* > newCells;
 	Cell* newCell = facade->deserializeFeaturedCell(stream, _context);
     newCells << newCell;
     newCells[0]->setRelPos(QVector3D());
-    newCluster = factory->buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _context);
+    CellCluster* newCluster = factory->buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _context);
     _context->getClustersRef() << newCluster;
 
     //read old cluster id
-    quint64 oldClusterId(0);
+    quint64 oldClusterId = 0;
     stream >> oldClusterId;
 
-    //assigning new ids
-    newCluster->setId(GlobalFunctions::createNewTag());
-    oldNewClusterIdMap[oldClusterId] = newCluster->getId();
-    quint64 oldCellId = newCell->getId();
-    newCell->setId(GlobalFunctions::createNewTag());
-    oldNewCellIdMap[oldCellId] = newCell->getId();
+//->	MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //draw cluster
     if( drawToMap )
@@ -362,7 +348,7 @@ void SimulationController::buildCell (QDataStream& stream,
     _context->unlock();
 }
 
-void SimulationController::buildExtendedSelection (QDataStream& stream,
+void SimulationController::loadExtendedSelection (QDataStream& stream,
                                              QVector3D pos,
                                              QList< CellCluster* >& newClusters,
                                              QList< EnergyParticle* >& newEnergyParticles,
@@ -478,10 +464,6 @@ void SimulationController::delExtendedSelection (QList< CellCluster* > clusters,
 		_context->getEnergyParticleMap()->removeParticleIfPresent(e->pos, e);
         delete e;
     }
-
-    //clean up metadata
-//    QSet< quint64 > ids = _grid->getAllCellIds();
-//    _meta->cleanUp(ids);
 
     _context->unlock();
 }

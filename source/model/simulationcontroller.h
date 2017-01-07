@@ -34,19 +34,15 @@ public:
     void addRandomEnergy (qreal energy, qreal maxEnergyPerParticle);
 
     //selection manipulation Tools
-    void serializeCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId);
-    void serializeExtendedSelection (QDataStream& stream,
+    void saveCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId);
+    void saveExtendedSelection (QDataStream& stream,
                                     const QList< CellCluster* >& clusters,
                                     const QList< EnergyParticle* >& es,
                                     QList< quint64 >& clusterIds,
                                     QList< quint64 >& cellIds);
-    void buildCell (QDataStream& stream,                //returns a map which maps to old to the new cell and cluster ids
-                    QVector3D pos,
-                    CellCluster*& newCluster,
-                    QMap< quint64, quint64 >& oldNewClusterIdMap,
-                    QMap< quint64, quint64 >& oldNewCellIdMap,
+    void loadCell (QDataStream& stream,                QVector3D pos,
                     bool drawToMap = true);
-    void buildExtendedSelection (QDataStream& stream,   //returns a map which maps to old to the new cell and cluster ids
+    void loadExtendedSelection (QDataStream& stream,   //returns a map which maps to old to the new cell and cluster ids
                                 QVector3D pos,
                                 QList< CellCluster* >& newClusters,
                                 QList< EnergyParticle* >& newEnergyParticles,
