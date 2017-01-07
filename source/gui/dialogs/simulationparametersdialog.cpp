@@ -6,7 +6,7 @@
 
 #include "global/global.h"
 #include "gui/guisettings.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 SimulationParametersDialog::SimulationParametersDialog(QWidget *parent) :
     QDialog(parent),

@@ -9,7 +9,7 @@
 #include "model/features/cellfunctioncomputer.h"
 #include "model/features/energyguidance.h"
 #include "model/features/cellfeaturefactory.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
@@ -27,7 +27,7 @@ FactoryFacadeImpl::FactoryFacadeImpl ()
 
 SimulationContext* FactoryFacadeImpl::buildSimulationContext() const
 {
-
+	return new SimulationContextImpl();
 }
 
 CellCluster* FactoryFacadeImpl::buildCellCluster (SimulationContext* context) const

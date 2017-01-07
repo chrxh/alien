@@ -1,13 +1,15 @@
-#include "tests/settings.h"
+#include <QDir>
+#include <QFile>
+#include <gtest/gtest.h>
+
 #include "model/entities/grid.h"
 #include "model/entities/cellcluster.h"
 #include "model/simulationcontroller.h"
 #include "model/metadatamanager.h"
-#include "model/simulationsettings.h"
+#include "model/simulationcontext.h"
+#include "model/config.h"
+#include "tests/settings.h"
 
-#include <gtest/gtest.h>
-#include <QFile>
-#include <QDir>
 
 class IntegrationTestReplicator : public ::testing::Test
 {
@@ -35,18 +37,18 @@ TEST_F (IntegrationTestReplicator, testRunSimulation)
     QFile file(INTEGRATIONTEST_REPLICATOR_INIT);
 	ASSERT_TRUE(file.open(QIODevice::ReadOnly));
     QDataStream in(&file);
-    _simulationController->buildUniverse(in);
+    _simulationController->loadUniverse(in);
     file.close();
 
-    Grid* grid = _simulationController->getGrid();
-    ASSERT_TRUE(!grid->getClusters().empty());
-    int replicatorSize = grid->getClusters().at(0)->getCellsRef().size();
+    SimulationContext* context = _simulationController->getSimulationContext();
+    ASSERT_TRUE(!context->getClustersRef().empty());
+    int replicatorSize = context->getClustersRef().at(0)->getCellsRef().size();
     for (int time = 0; time < INTEGRATIONTEST_REPLICATOR_TIMESTEPS; ++time) {
         _simulationController->requestNextTimestep();
     }
 
     int replicators = 0;
-    foreach (CellCluster* cluster, grid->getClusters()) {
+    foreach (CellCluster* cluster, context->getClustersRef()) {
         if (cluster->getCellsRef().size() >= replicatorSize)
             ++replicators;
     }

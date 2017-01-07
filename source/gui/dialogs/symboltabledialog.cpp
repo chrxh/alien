@@ -2,7 +2,7 @@
 #include "ui_symboltabledialog.h"
 
 #include "gui/guisettings.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/metadatamanager.h"
 
 #include <QFileDialog>

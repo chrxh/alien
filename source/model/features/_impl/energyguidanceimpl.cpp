@@ -3,7 +3,7 @@
 #include "model/entities/token.h"
 #include "model/entities/cell.h"
 #include "model/features/cellfeatureconstants.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 
 EnergyGuidanceImpl::EnergyGuidanceImpl (SimulationContext* context)
