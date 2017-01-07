@@ -16,15 +16,18 @@ public:
     void serializePrimitives (QDataStream& stream);
     void deserializePrimitives (QDataStream& stream);
 
-private:
-    SimulationContext* _context;
-
 public:
     qreal amount = 0.0;
     QVector3D pos;
     QVector3D vel;
     quint64 id = 0;
     quint8 color = 0;
+
+private:
+    SimulationContext* _context;
+	Topology* _topology;
+	CellMap* _cellMap;
+	EnergyParticleMap* _energyMap;
 };
 
 #endif // ENERGY_H

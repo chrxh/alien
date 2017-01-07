@@ -6,13 +6,8 @@
 #include "model/entities/energyparticle.h"
 
 SimulationContextImpl::SimulationContextImpl()
-	: SimulationContextImpl({ 0, 0 })
 {
-}
-
-SimulationContextImpl::SimulationContextImpl(IntVector2D size)
-{
-	_topology = new Topology(size);
+	_topology = new Topology();
 	_energyParticleMap = new EnergyParticleMap(_topology);
 	_cellMap = new CellMap(_topology);
 }
@@ -20,6 +15,13 @@ SimulationContextImpl::SimulationContextImpl(IntVector2D size)
 SimulationContextImpl::~SimulationContextImpl ()
 {
 	deleteAttributes();
+}
+
+void SimulationContextImpl::init(IntVector2D size)
+{
+	_topology->init(size);
+	_energyParticleMap->init();
+	_cellMap->init();
 }
 
 void SimulationContextImpl::lock ()
@@ -56,6 +58,17 @@ QList<CellCluster*>& SimulationContextImpl::getClustersRef ()
 QList<EnergyParticle*>& SimulationContextImpl::getEnergyParticlesRef ()
 {
     return _energyParticles;
+}
+
+std::set<quint64> SimulationContextImpl::getAllCellIds() const
+{
+	QList< quint64 > cellIds;
+	foreach(CellCluster* cluster, _clusters) {
+		cellIds << cluster->getCellIds();
+	}
+	std::list<quint64> cellIdsStdList = cellIds.toStdList();
+	std::set<quint64> cellIdsStdSet(cellIdsStdList.begin(), cellIdsStdList.end());
+	return cellIdsStdSet;
 }
 
 void SimulationContextImpl::deleteAttributes()

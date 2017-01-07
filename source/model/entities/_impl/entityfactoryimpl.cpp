@@ -3,6 +3,7 @@
 #include "cellimpl.h"
 #include "cellclusterimpl.h"
 #include "model/entities/token.h"
+#include "model/entities/energyparticle.h"
 
 #include "global/servicelocator.h"
 
@@ -42,11 +43,6 @@ Cell* EntityFactoryImpl::buildCell (qreal energy, SimulationContext* context, in
     , int tokenAccessNumber, QVector3D relPos) const
 {
     return new CellImpl(energy, context, maxConnections, tokenAccessNumber, relPos);
-}
-
-Cell* EntityFactoryImpl::buildCellWithRandomData (qreal energy, SimulationContext* context) const
-{
-    return new CellImpl(energy, context, true);
 }
 
 Token* EntityFactoryImpl::buildToken () const

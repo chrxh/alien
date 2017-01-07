@@ -8,6 +8,11 @@ Topology::Topology(IntVector2D size)
 }
 
 
+IntVector2D Topology::init(IntVector2D size)
+{
+	_size = size;
+}
+
 IntVector2D Topology::getSize() const
 {
 	return _size;
