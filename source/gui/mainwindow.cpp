@@ -793,7 +793,7 @@ void MainWindow::multiplyRandomExtendedSelection ()
             QMap< quint64, quint64 > oldNewClusterIdMap;
             QList< CellCluster* > newClusters;
             QList< EnergyParticle* > newEnergyParticles;
-            QVector3D pos(GlobalFunctions::random(0.0, _simulator->getUniverseSizeX()), GlobalFunctions::random(0.0, _simulator->getUniverseSizeY()), 0.0);
+            QVector3D pos(GlobalFunctions::random(0.0, _simulator->getUniverseSize()), GlobalFunctions::random(0.0, _simulator->getUniverseSizeY()), 0.0);
             _simulator->buildExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
             MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 

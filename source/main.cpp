@@ -87,7 +87,8 @@
 int main(int argc, char *argv[])
 {
     //register types
-    qRegisterMetaType<CellTO>("CellReduced");
+    qRegisterMetaType<CellTO>("CellTO");
+//	qRegisterMetaType<SimulationContext>("SimulationContext");
 
     //load default metadata
 //    Metadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());

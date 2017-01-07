@@ -335,7 +335,7 @@ void Grid::buildMap (QDataStream& stream, const QMap< quint64, Cell* >& oldIdCel
     qint32 y = 0;
     quint64 oldId = 0;
     stream >> numEntries;
-    for(auto i = 0; i < numEntries; ++i) {
+    for(quint32 i = 0; i < numEntries; ++i) {
         stream >> x >> y >> oldId;
         _cellGrid[x][y] = oldIdCellMap[oldId];
     }
@@ -343,7 +343,7 @@ void Grid::buildMap (QDataStream& stream, const QMap< quint64, Cell* >& oldIdCel
     //read energy particle entries
     numEntries = 0;
     stream >> numEntries;
-    for(auto i = 0; i < numEntries; ++i) {
+    for(quint32 i = 0; i < numEntries; ++i) {
         stream >> x >> y >> oldId;
         _energyGrid[x][y] = oldIdEnergyMap[oldId];
     }
