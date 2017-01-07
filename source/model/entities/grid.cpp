@@ -3,7 +3,7 @@
 #include "cellcluster.h"
 #include "energyparticle.h"
 
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 #include <QMutex>
 #include <cmath>

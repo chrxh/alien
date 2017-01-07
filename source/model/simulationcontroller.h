@@ -26,8 +26,8 @@ public:
 
     //universe manipulation tools
     void newUniverse (qint32 sizeX, qint32 sizeY);
-    void serializeUniverse (QDataStream& stream);
-    SimulationContext* buildUniverse (QDataStream& stream);
+    void saveUniverse (QDataStream& stream);
+    void loadUniverse (QDataStream& stream);
     IntVector2D getUniverseSize();
     void addBlockStructure (QVector3D center, int numCellX, int numCellY, QVector3D dist, qreal energy);
     void addHexagonStructure (QVector3D center, int numLayers, qreal dist, qreal energy);

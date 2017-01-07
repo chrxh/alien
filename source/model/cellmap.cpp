@@ -1,6 +1,6 @@
 #include "cellmap.h"
 #include "topology.h"
-#include "simulationsettings.h"
+#include "config.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 
@@ -21,7 +21,7 @@ CellMap::~CellMap()
 	deleteCellMap();
 }
 
-void CellMap::topologyUpdated()
+void CellMap::init()
 {
 	IntVector2D size = _topo->getSize();
 	_cellGrid = new Cell**[size.x];

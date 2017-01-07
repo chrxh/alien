@@ -9,7 +9,7 @@
 #include "model/features/cellfunctioncomputer.h"
 #include "model/features/energyguidance.h"
 #include "model/features/cellfeaturefactory.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
@@ -61,8 +61,8 @@ SimulationContext * SerializationFacadeImpl::deserializeSimulationContext(QDataS
 	//deserialize map size
 	SimulationContext* context = new SimulationContextImpl();
 	context->getTopology()->deserializePrimitives(stream);
-	context->getCellMap()->topologyUpdated();
-	context->getEnergyParticleMap()->topologyUpdated();
+	context->getCellMap()->init();
+	context->getEnergyParticleMap()->init();
 
 	//deserialize clusters
 	quint32 numCluster;

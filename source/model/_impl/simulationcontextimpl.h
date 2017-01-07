@@ -19,6 +19,8 @@ public:
     Topology* getTopology () const override;
     EnergyParticleMap* getEnergyParticleMap () const override;
     CellMap* getCellMap () const override;
+	MetadataManager* getMetadataManager() const override;
+
 	QList<CellCluster*>& getClustersRef() override;
     QList<EnergyParticle*>& getEnergyParticlesRef () override;
 	std::set<quint64> SimulationContextImpl::getAllCellIds() const override;
@@ -32,7 +34,7 @@ private:
     Topology* _topology = nullptr;
     EnergyParticleMap* _energyParticleMap = nullptr;
     CellMap* _cellMap = nullptr;
-
+	MetadataManager* _meta = nullptr;
 };
 
 #endif // SIMULATIONCONTEXTIMPL_H

@@ -1,15 +1,16 @@
-#include "tests/settings.h"
-#include "model/simulationcontroller.h"
-#include "model/metadatamanager.h"
-#include "model/simulationsettings.h"
-#include "model/entities/grid.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/cell.h"
-#include "global/global.h"
-
+#include <gtest/gtest.h>
 #include <QFile>
 
-#include <gtest/gtest.h>
+#include "global/global.h"
+#include "model/simulationcontroller.h"
+#include "model/metadatamanager.h"
+#include "model/simulationcontext.h"
+#include "model/config.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/cell.h"
+
+#include "tests/settings.h"
+
 
 class IntegrationTestComparison : public ::testing::Test
 {
@@ -29,7 +30,7 @@ namespace {
         bool fileOpened = file.open(QIODevice::ReadOnly);
         if (fileOpened) {
             QDataStream in(&file);
-            simulationController->buildUniverse(in);
+            simulationController->loadUniverse(in);
             file.close();
         }
         return fileOpened;
@@ -92,13 +93,13 @@ namespace {
         if (!INTEGRATIONTEST_COMPARISON_UPDATE_REF)
             return false;
         QFile file(INTEGRATIONTEST_COMPARISON_REF);
-        Grid* grid = simulationController->getGrid();
+        SimulationContext* context = simulationController->getSimulationContext();
         bool fileOpened = file.open(QIODevice::WriteOnly);
         if (fileOpened) {
             QDataStream out(&file);
-            quint32 numCluster = grid->getClusters().size();
+            quint32 numCluster = context->getClustersRef().size();
             out << numCluster;
-            foreach (CellCluster* cluster, grid->getClusters()) {
+            foreach (CellCluster* cluster, context->getClustersRef()) {
                 quint32 numCells = cluster->getCellsRef().size();
                 out << cluster->getPosition();
                 out << cluster->getAngle();
@@ -159,13 +160,13 @@ namespace {
 
     void compareReferenceWithSimulation (SimulationController* simulationController, LoadedReferenceData const& ref)
     {
-        Grid* grid = simulationController->getGrid();
+        SimulationContext* context = simulationController->getSimulationContext();
         int refNumCluster = ref.clusterPosList.size();
-		ASSERT_EQ(grid->getClusters().size(), static_cast<int>(refNumCluster))
+		ASSERT_EQ(context->getClustersRef().size(), static_cast<int>(refNumCluster))
 			<< "Deviation in number of clusters.";
-        int minNumCluster = qMin(grid->getClusters().size(), static_cast<int>(refNumCluster));
+        int minNumCluster = qMin(context->getClustersRef().size(), static_cast<int>(refNumCluster));
         for(int i = 0; i < minNumCluster; ++i) {
-            CellCluster* cluster = grid->getClusters().at(i);
+            CellCluster* cluster = context->getClustersRef().at(i);
 			ASSERT_EQ(ref.clusterPosList.at(i), cluster->getPosition()) 
 				<< createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in pos", ref.clusterPosList.at(i), cluster->getPosition());
 			ASSERT_EQ(ref.clusterVelList.at(i), cluster->getVel()) 

@@ -3,7 +3,7 @@
 #include "gui/mainwindow.h"
 #include "model/simulationcontroller.h"
 #include "model/metadatamanager.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/entities/cellto.h"
 
 #include <QtCore/qmath.h>
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     //init main objects
     QApplication a(argc, argv);
-    SimulationController simulator(QVector2D(400, 200), SimulationController::Threading::EXTRA_THREAD);
+	SimulationController simulator({ 400, 200 }, SimulationController::Threading::EXTRA_THREAD);
     MainWindow w(&simulator);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
