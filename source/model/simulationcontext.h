@@ -10,6 +10,8 @@ class SimulationContext
 public:
     virtual ~SimulationContext () {}
 
+	virtual void init(IntVector2D size) = 0;
+
     virtual void lock () = 0;
     virtual void unlock () = 0;
 	
@@ -18,6 +20,8 @@ public:
 	virtual CellMap* getCellMap() const = 0;
 	virtual QList<CellCluster*>& getClustersRef() = 0;
     virtual QList<EnergyParticle*>& getEnergyParticlesRef () = 0;
+
+	virtual std::set<quint64> getAllCellIds() const = 0;
 };
 
 #endif // SIMULATIONCONTEXT_H
