@@ -6,7 +6,7 @@
 #include "model/entities/token.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 #include <QtCore/qmath.h>
 

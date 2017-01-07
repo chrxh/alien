@@ -15,7 +15,7 @@
 #include "gui/guisettings.h"
 #include "gui/editorsettings.h"
 #include "global/global.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/metadatamanager.h"
 #include "model/simulationcontroller.h"
 #include "model/entities/cell.h"
@@ -262,7 +262,7 @@ void MainWindow::loadSimulation ()
 
             //read simulation data
             QDataStream in(&file);
-            _simulator->buildUniverse(in);
+            _simulator->loadUniverse(in);
             readFrame(in);
             file.close();
 
@@ -294,7 +294,7 @@ void MainWindow::saveSimulation ()
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
             QDataStream out(&file);
-            _simulator->serializeUniverse(out);
+            _simulator->saveUniverse(out);
             simulationParameters.serializeData(out);
             MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
             MetadataManager::getGlobalInstance().serializeSymbolTable(out);
@@ -346,7 +346,7 @@ void MainWindow::stepForwardClicked ()
     //save old universe
     QByteArray b;
     QDataStream out(&b, QIODevice::WriteOnly);
-    _simulator->serializeUniverse(out);
+    _simulator->saveUniverse(out);
     MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
     _undoUniverserses.push(b);
 
@@ -368,7 +368,7 @@ void MainWindow::stepBackClicked ()
     QDataStream in(&b, QIODevice::ReadOnly);
 
     //read simulation data
-    _simulator->buildUniverse(in);
+    _simulator->loadUniverse(in);
 
     //reset coordinators
 //    ui->macroEditor->reset();
@@ -392,7 +392,7 @@ void MainWindow::snapshotUniverse ()
     //save old universe
     _snapshot.clear();
     QDataStream out(&_snapshot, QIODevice::WriteOnly);
-    _simulator->serializeUniverse(out);
+    _simulator->saveUniverse(out);
     MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
     ui->macroEditor->serializeViewMatrix(out);
     out << _frame;
@@ -406,7 +406,7 @@ void MainWindow::restoreUniverse ()
     QDataStream in(&_snapshot, QIODevice::ReadOnly);
 
     //read simulation data
-    _simulator->buildUniverse(in);
+    _simulator->loadUniverse(in);
 
     //reset editors
     ui->macroEditor->reset();
@@ -790,7 +790,8 @@ void MainWindow::multiplyRandomExtendedSelection ()
             QMap< quint64, quint64 > oldNewClusterIdMap;
             QList< CellCluster* > newClusters;
             QList< EnergyParticle* > newEnergyParticles;
-            QVector3D pos(GlobalFunctions::random(0.0, _simulator->getUniverseSize()), GlobalFunctions::random(0.0, _simulator->getUniverseSizeY()), 0.0);
+			IntVector2D universeSize = _simulator->getUniverseSize();
+            QVector3D pos(GlobalFunctions::random(0.0, universeSize.x), GlobalFunctions::random(0.0, universeSize.y), 0.0);
             _simulator->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
             MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 

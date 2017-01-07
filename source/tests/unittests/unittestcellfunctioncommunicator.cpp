@@ -1,15 +1,16 @@
-#include "tests/settings.h"
+#include <gtest/gtest.h>
 
-#include "model/entities/grid.h"
+#include "global/servicelocator.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
 #include "model/features/_impl/cellfunctioncommunicatorimpl.h"
-#include "model/factoryfacade.h"
 #include "model/physics/codingphysicalquantities.h"
-#include "global/servicelocator.h"
+#include "model/simulationcontext.h"
+#include "model/factoryfacade.h"
+#include "model/config.h"
 
-#include <gtest/gtest.h>
+#include "tests/settings.h"
 
 class TestCellFunctionCommunicator : public ::testing::Test
 {
@@ -18,7 +19,7 @@ public:
 	~TestCellFunctionCommunicator();
 
 protected:
-    Grid* _grid;
+    SimulationContext* _context;
 
     //data for cluster1
     CellCluster* _cluster1;
@@ -35,9 +36,10 @@ protected:
 
 TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 {
-	_grid = new Grid();
-	_grid->init(1000, 1000);
 	FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+
+	_context = facade->buildSimulationContext();
+	_context->init({1000, 1000});
 
 	{
 		//create cells, cell functions and token for cluster1
@@ -46,11 +48,11 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 		int tokenAccessNumber = 0;
 
 		QVector3D relPos = QVector3D();
-		_cellWithToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
+		_cellWithToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _context, maxConnections, tokenAccessNumber, relPos);
 		_communicator1a = _cellWithToken->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
 		relPos = QVector3D(0.0, 1.0, 0.0);
-		_cellWithoutToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
+		_cellWithoutToken = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _context, maxConnections, tokenAccessNumber, relPos);
 		_communicator1b = _cellWithoutToken->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
 		qreal tokenEnergy = 0.0;
@@ -65,7 +67,7 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 		QVector3D vel(0.0, 0.0, 0.0);
 		qreal angle = 0.0;
 		qreal angularVel = 0.0;
-		_cluster1 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _grid);
+		_cluster1 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _context);
 	}
 
 	{
@@ -75,7 +77,7 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 		int tokenAccessNumber = 0;
 
 		QVector3D relPos = QVector3D();
-		Cell* cell = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _grid, maxConnections, tokenAccessNumber, relPos);
+		Cell* cell = facade->buildFeaturedCell(cellEnergy, CellFunctionType::COMMUNICATOR, _context, maxConnections, tokenAccessNumber, relPos);
 		_communicator2 = cell->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
 		//create cluster2 within communication range
@@ -86,7 +88,7 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 		QVector3D vel(0.0, 0.0, 0.0);
 		qreal angle = 0.0;
 		qreal angularVel = 0.0;
-		_cluster2 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _grid);
+		_cluster2 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _context);
 	}
 
 	//draw cells
@@ -156,5 +158,5 @@ TestCellFunctionCommunicator::~TestCellFunctionCommunicator()
 {
 	delete _cluster1;
 	delete _cluster2;
-	delete _grid;
+	delete _context;
 }

@@ -23,6 +23,7 @@ class CellMap;
 class EnergyParticleMap;
 class Topology;
 class SimulationContext;
+class MetadataManager;
 
 class EntityFactory;
 

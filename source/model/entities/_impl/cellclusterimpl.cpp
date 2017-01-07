@@ -7,7 +7,7 @@
 #include "model/entities/token.h"
 #include "model/entities/energyparticle.h"
 #include "model/physics/physics.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/simulationcontext.h"
 #include "model/cellmap.h"
 #include "model/topology.h"

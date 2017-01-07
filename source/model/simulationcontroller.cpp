@@ -13,7 +13,7 @@
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/physics/physics.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "simulationcontext.h"
 #include "simulationunit.h"
 #include "energyparticlemap.h"
@@ -116,7 +116,7 @@ void SimulationController::newUniverse (qint32 sizeX, qint32 sizeY)
 	_context->unlock();
 }
 
-void SimulationController::serializeUniverse (QDataStream& stream)
+void SimulationController::saveUniverse (QDataStream& stream)
 {
     emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
 
@@ -130,7 +130,7 @@ void SimulationController::serializeUniverse (QDataStream& stream)
     _context->unlock();
 }
 
-SimulationContext* SimulationController::buildUniverse(QDataStream& stream)
+void SimulationController::loadUniverse(QDataStream& stream)
 {
 	stream >> _frame;
 	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
