@@ -2,11 +2,10 @@
 
 #include "model/entities/cell.h"
 
-Topology::Topology(IntVector2D size)
-	: _size(size)
+void Topology::init(IntVector2D size)
 {
+	_size = size;
 }
-
 
 IntVector2D Topology::getSize() const
 {
@@ -58,7 +57,7 @@ QVector3D Topology::displacement(QVector3D fromPoint, QVector3D toPoint) const
 	return d;
 }
 
-qreal Topology::distance(Vector3D fromPoint, QVector3D toPoint) const
+qreal Topology::distance(QVector3D fromPoint, QVector3D toPoint) const
 {
     return displacement(fromPoint, toPoint).length();
 }
@@ -78,13 +77,13 @@ QVector3D Topology::correctionIncrement (QVector3D pos1, QVector3D pos2) const
 {
     QVector3D correction;
     if( (pos2.x()-pos1.x()) > (_size.x/2.0) )
-        correction.setX(-_topology->getSize().x);
+        correction.setX(-_size.x);
     if( (pos1.x()-pos2.x()) > (_size.x/2.0) )
-        correction.setX(_topology->getSize().x);
+        correction.setX(_size.x);
     if( (pos2.y()-pos1.y()) > (_size.y/2.0) )
-        correction.setY(-_topology->getSize().y);
+        correction.setY(-_size.y);
     if( (pos1.y()-pos2.y()) > (_size.y/2.0) )
-        correction.setY(_topology->getSize().y);
+        correction.setY(_size.y);
     return correction;
 }
 

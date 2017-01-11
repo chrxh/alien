@@ -9,7 +9,7 @@
 #include "model/features/cellfunctioncomputer.h"
 #include "model/features/energyguidance.h"
 #include "model/features/cellfeaturefactory.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
@@ -25,14 +25,19 @@ FactoryFacadeImpl::FactoryFacadeImpl ()
     ServiceLocator::getInstance().registerService<FactoryFacade>(this);
 }
 
-CellCluster* FactoryFacadeImpl::buildCellCluster (SimulationContext* context)
+SimulationContext* FactoryFacadeImpl::buildSimulationContext() const
+{
+	return new SimulationContextImpl();
+}
+
+CellCluster* FactoryFacadeImpl::buildCellCluster (SimulationContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     return entityFactory->buildCellCluster(context);
 }
 
 CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
-    , QVector3D vel, SimulationContext* context)
+    , QVector3D vel, SimulationContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     return entityFactory->buildCellCluster(cells, angle, pos, angularVel, vel, context);
@@ -40,7 +45,7 @@ CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal an
 
 
 Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data
-    , SimulationContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos)
+    , SimulationContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
@@ -51,7 +56,7 @@ Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type,
 }
 
 Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, SimulationContext* context
-    , int maxConnections, int tokenAccessNumber, QVector3D relPos)
+    , int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
@@ -61,7 +66,7 @@ Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type,
     return cell;
 }
 
-Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context)
+Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const
 {
     int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
     int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
@@ -72,7 +77,7 @@ Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Simulati
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
-CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell)
+CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell) const
 {
     CellTO to;
 
@@ -113,7 +118,7 @@ CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell)
     return to;
 }
 
-void FactoryFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, SimulationContext* context)
+void FactoryFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, SimulationContext* context) const
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();

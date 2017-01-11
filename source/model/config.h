@@ -1,5 +1,5 @@
-#ifndef SIMULATIONSETTINGS_H
-#define SIMULATIONSETTINGS_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #include<QColor>
 #include<QDataStream>
@@ -57,4 +57,4 @@ struct SimulationParameters
 
 extern SimulationParameters simulationParameters;
 
-#endif // SIMULATIONSETTINGS_H
+#endif // CONFIG_H

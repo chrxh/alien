@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include "tests/predicates.h"
 
-#include "model/entities/grid.h"
+#include "model/simulationcontext.h"
+#include "model/config.h"
+#include "model/entities/cell.h"
 #include "model/entities/token.h"
 #include "model/factoryfacade.h"
 #include "model/entities/cellcluster.h"
@@ -14,7 +16,7 @@ public:
 	~UnitTestCellCluster();
 
 protected:
-	Grid* _grid;
+	SimulationContext* _context;
 	CellCluster* _cluster;
 	Cell* _cell1;
 	Cell* _cell2;
@@ -25,18 +27,19 @@ protected:
 
 UnitTestCellCluster::UnitTestCellCluster()
 {
-	_grid = new Grid();
-	_grid->init(1000, 1000);
+	FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+
+	_context = facade->buildSimulationContext();
+	_context->init({ 1000, 1000 });
 
 	QList< Cell* > cells;
-	FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
 	for (int i = 0; i <= 100; ++i) {
-		Cell* cell = facade->buildFeaturedCell(100.0, CellFunctionType::COMPUTER, _grid);
+		Cell* cell = facade->buildFeaturedCell(100.0, CellFunctionType::COMPUTER, _context);
 		cell->setRelPos(QVector3D(i, 0.0, 0.0));
 		cells << cell;
 	}
 	QVector3D pos(200.0, 100.0, 0.0);
-	_cluster = facade->buildCellCluster(cells, 0.0, pos, 0.0, QVector3D(), _grid);
+	_cluster = facade->buildCellCluster(cells, 0.0, pos, 0.0, QVector3D(), _context);
 	_cell1 = _cluster->getCellsRef().at(0);
 	_cell2 = _cluster->getCellsRef().at(1);
 	_cell3 = _cluster->getCellsRef().at(2);
@@ -45,7 +48,7 @@ UnitTestCellCluster::UnitTestCellCluster()
 
 UnitTestCellCluster::~UnitTestCellCluster()
 {
-	delete _grid;
+	delete _context;
 }
 
 //calc cell velocities and then the cluster velocity
@@ -97,7 +100,7 @@ TEST_F (UnitTestCellCluster, testTokenSpreading)
 	_cell1->addToken(token, Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
 	QList< EnergyParticle* > tempEP;
 	bool tempDecomp = false;
-	_cluster->movementProcessingStep4(tempEP, tempDecomp);
+	_cluster->processingToken(tempEP, tempDecomp);
 	ASSERT_EQ(_cell1->getNumToken(true), 0);
 	ASSERT_EQ(_cell2->getNumToken(true), 1);
 	ASSERT_EQ(_cell3->getNumToken(true), 1);

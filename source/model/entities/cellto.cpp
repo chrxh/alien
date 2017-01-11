@@ -1,6 +1,6 @@
 #include "cellto.h"
 
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 CellTO::CellTO ()
     : numCells(0), clusterPos(0.0, 0.0, 0.0), clusterVel(0.0, 0.0, 0.0),

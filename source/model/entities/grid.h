@@ -2,7 +2,7 @@
 #define GRID_H
 
 #include "cell.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 #include <QObject>
 #include <QVector3D>

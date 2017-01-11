@@ -1,6 +1,6 @@
 #include "token.h"
 
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 Token::Token(qreal energy_, bool randomData)
     : memory(simulationParameters.TOKEN_MEMSIZE), energy(energy_)

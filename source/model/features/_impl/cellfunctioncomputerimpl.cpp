@@ -1,6 +1,6 @@
 #include "cellfunctioncomputerimpl.h"
 #include "model/metadatamanager.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
 

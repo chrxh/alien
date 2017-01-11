@@ -1,8 +1,8 @@
 #ifndef SIMULATIONUNIT_H
 #define SIMULATIONUNIT_H
 
-#include "definitions.h"
 #include <QThread>
+#include "definitions.h"
 
 class SimulationUnit : public QObject
 {
@@ -11,17 +11,16 @@ public:
     SimulationUnit (QObject* parent = 0);
     ~SimulationUnit ();
 
-    void init (Grid* grid);
-    QList< CellCluster* >& getClusters ();
-    QList< EnergyParticle* >& getEnergyParticles ();
-//    void updateCluster (CellCluster* cluster);
+public slots:
+	void init(SimulationContext* context);
+	void setRandomSeed(uint seed);
 
+public:
     qreal calcTransEnergy ();
     qreal calcRotEnergy ();
     qreal calcInternalEnergy ();
 
 public slots:
-    void setRandomSeed (uint seed);
     void calcNextTimestep ();
 
 signals:
@@ -30,8 +29,7 @@ signals:
 protected:
     void debugCluster (CellCluster* c, int s);
 
-    Grid* _grid;
-    int _time;
+    SimulationContext* _context = nullptr;
 };
 
 #endif // SIMULATIONUNIT_H
