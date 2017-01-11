@@ -45,7 +45,9 @@ namespace {
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
         newCell->setTokenAccessNumber(tokenAccessNumber);
-        newCell->setColor(baseCell->getColor());
+		CellMetadata meta;
+		meta.color = baseCell->getMetadata().color;
+        newCell->setMetadata(meta);
         cluster->addCell(newCell, posOfNewCell);
         return newCell;
     }
