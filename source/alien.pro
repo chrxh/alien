@@ -70,7 +70,8 @@ SOURCES += main.cpp \
     model/features/_impl/cellfunctionscannerimpl.cpp \
     model/features/_impl/cellfunctionsensorimpl.cpp \
     model/features/_impl/cellfunctionweaponimpl.cpp \
-    model/physics/codingphysicalquantities.cpp
+    model/physics/codingphysicalquantities.cpp \
+    model/metadata/symboltable.cpp
 HEADERS += \
     model/physics/physics.h \
     global/global.h \
@@ -148,7 +149,10 @@ HEADERS += \
     model/features/_impl/cellfunctionsensorimpl.h \
     model/features/_impl/cellfunctionweaponimpl.h \
     model/physics/codingphysicalquantities.h \
-    model/features/_impl/cellfunctioncomputerimpl.h
+    model/features/_impl/cellfunctioncomputerimpl.h \
+    model/metadata/cellmetadata.h \
+    model/metadata/cellclustermetadata.h \
+    model/metadata/symboltable.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \

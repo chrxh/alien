@@ -16,7 +16,10 @@
 //- (de)serialisierung elementarer(Qt) Typen in den Methoden (de)serialize(...)
 
 //Nächstes Mal:
-//- SimulationContext in den Implementierungen der CellFeatures verwenden
+//- in SimulationContext kommt noch
+//  - MetadataManager
+//  - SimulationParameters
+//- Metadata aufspalten: Teile kommen in Cells und CellClusters
 
 //Model-Refactoring:
 //- factoryfacade in featuredcellfactory umbenennen
