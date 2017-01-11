@@ -1,4 +1,4 @@
-#include "simulationsettings.h"
+#include "config.h"
 #include "model/metadatamanager.h"
 #include "model/features/cellfeatureconstants.h"
 

@@ -9,7 +9,7 @@ public:
 	CellMap(Topology* topo);
 	virtual ~CellMap();
 
-	void topologyUpdated();
+	void init();
 	void clear();
 
 	void setCell(QVector3D pos, Cell* cell);

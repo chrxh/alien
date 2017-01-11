@@ -1,18 +1,19 @@
-#include "simulationunit.h"
+#include <QFile>
 
+#include "global/global.h"
+
+#include "physics/physics.h"
 #include "entities/cell.h"
 #include "entities/cellcluster.h"
 #include "entities/energyparticle.h"
 #include "entities/grid.h"
 #include "entities/token.h"
-#include "physics/physics.h"
 
-#include "global/global.h"
-
-#include <QFile>
+#include "simulationunit.h"
+#include "simulationcontext.h"
 
 SimulationUnit::SimulationUnit (QObject* parent)
-    : QObject(parent), _grid(0)
+    : QObject(parent)
 {
 
 }
@@ -21,25 +22,22 @@ SimulationUnit::~SimulationUnit ()
 {
 }
 
-void SimulationUnit::init (Grid* grid)
+void SimulationUnit::init (SimulationContext* context)
 {
-    _grid = grid;
+	setRandomSeed(0);
+	_context = context;
 }
 
-QList< CellCluster* >& SimulationUnit::getClusters ()
+void SimulationUnit::setRandomSeed(uint seed)
 {
-    return _grid->getClusters();
-}
-
-QList< EnergyParticle* >& SimulationUnit::getEnergyParticles ()
-{
-    return _grid->getEnergyParticles();
+	qsrand(seed);
+	qrand();
 }
 
 qreal SimulationUnit::calcTransEnergy ()
 {
     qreal transEnergy(0.0);
-    foreach( CellCluster* cluster, _grid->getClusters() ) {
+    foreach(CellCluster* cluster, _context->getClustersRef()) {
         if( !cluster->isEmpty() )
             transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(),
                                                   cluster->getVel(),
@@ -52,7 +50,7 @@ qreal SimulationUnit::calcTransEnergy ()
 qreal SimulationUnit::calcRotEnergy ()
 {
     qreal rotEnergy(0.0);
-    foreach( CellCluster* cluster, _grid->getClusters() ) {
+    foreach( CellCluster* cluster, _context->getClustersRef() ) {
         if( cluster->getMass() > 1.0 )
             rotEnergy += Physics::kineticEnergy(0.0,
                                                 QVector3D(0.0, 0.0, 0.0),
@@ -65,32 +63,27 @@ qreal SimulationUnit::calcRotEnergy ()
 qreal SimulationUnit::calcInternalEnergy ()
 {
     qreal internalEnergy(0.0);
-    foreach( CellCluster* cluster, _grid->getClusters() ) {
+    foreach( CellCluster* cluster, _context->getClustersRef() ) {
         if( !cluster->isEmpty() ) {
             foreach( Cell* cell, cluster->getCellsRef() ) {
                 internalEnergy += cell->getEnergyIncludingTokens();
             }
         }
     }
-    foreach( EnergyParticle* energyParticle, _grid->getEnergyParticles() ) {
+    foreach( EnergyParticle* energyParticle, _context->getEnergyParticlesRef() ) {
         internalEnergy += energyParticle->amount;
     }
     return internalEnergy;
 }
 
-void SimulationUnit::setRandomSeed (uint seed)
-{
-    qsrand(seed);
-    qrand();
-}
 
 void SimulationUnit::calcNextTimestep ()
 {
 	
-	_grid->lockData();
+	_context->lock();
 
     //cell movement: step 1
-    foreach( CellCluster* cluster, _grid->getClusters()) {
+    foreach( CellCluster* cluster, _context->getClustersRef()) {
         cluster->processingInit();
     }
 
@@ -98,7 +91,7 @@ void SimulationUnit::calcNextTimestep ()
     //----
 //    qreal eOld(calcInternalEnergy()+(calcTransEnergy()+calcRotEnergy())/INTERNAL_TO_KINETIC_ENERGY);
     //----
-    QMutableListIterator<CellCluster*> i(_grid->getClusters());
+    QMutableListIterator<CellCluster*> i(_context->getClustersRef());
     QList< EnergyParticle* > energyParticles;
     while (i.hasNext()) {
 
@@ -106,7 +99,7 @@ void SimulationUnit::calcNextTimestep ()
         CellCluster* cluster(i.next());
         energyParticles.clear();
         cluster->processingDissipation(fragments, energyParticles);
-        _grid->getEnergyParticles() << energyParticles;
+        _context->getEnergyParticlesRef() << energyParticles;
 
         debugCluster(cluster, 2);
         //new cell cluster fragments?
@@ -128,14 +121,14 @@ void SimulationUnit::calcNextTimestep ()
     //----
 
     //cell movement: step 3
-    foreach( CellCluster* cluster, _grid->getClusters()) {
+    foreach( CellCluster* cluster, _context->getClustersRef()) {
         cluster->processingMovement();
         debugCluster(cluster, 3);
     }
 
 
     //cell movement: step 4
-    QMutableListIterator<CellCluster*> j(_grid->getClusters());
+    QMutableListIterator<CellCluster*> j(_context->getClustersRef());
     while (j.hasNext()) {
         CellCluster* cluster(j.next());
         if( cluster->isEmpty()) {
@@ -146,7 +139,7 @@ void SimulationUnit::calcNextTimestep ()
             energyParticles.clear();
             bool decompose = false;
             cluster->processingToken(energyParticles, decompose);
-            _grid->getEnergyParticles() << energyParticles;
+            _context->getEnergyParticlesRef() << energyParticles;
             debugCluster(cluster, 4);
 
             //decompose cluster?
@@ -162,13 +155,13 @@ void SimulationUnit::calcNextTimestep ()
     }
 
     //cell movement: step 5
-    foreach( CellCluster* cluster, _grid->getClusters()) {
+    foreach( CellCluster* cluster, _context->getClustersRef()) {
         cluster->processingFinish();
         debugCluster(cluster, 5);
     }
 
     //energy particle movement
-    QMutableListIterator<EnergyParticle*> p(_grid->getEnergyParticles());
+    QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());
     while (p.hasNext()) {
         EnergyParticle* e(p.next());
         CellCluster* cluster(0);
@@ -176,14 +169,14 @@ void SimulationUnit::calcNextTimestep ()
 
             //transform into cell?
             if( cluster ) {
-                _grid->getClusters() << cluster;
+                _context->getClustersRef() << cluster;
             }
             delete e;
             p.remove();
         }
     }
 
-    _grid->unlockData();
+    _context->unlock();
 
     emit nextTimestepCalculated();
 }

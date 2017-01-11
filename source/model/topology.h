@@ -6,8 +6,10 @@
 class Topology
 {
 public:
-	Topology(IntVector2D size);
+
 	virtual ~Topology() {}
+
+	void init(IntVector2D size);
 
 	IntVector2D getSize() const;
 

@@ -2,7 +2,7 @@
 #include "ui_addrectstructuredialog.h"
 
 #include "gui/guisettings.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 AddRectStructureDialog::AddRectStructureDialog(QWidget *parent) :
     QDialog(parent),

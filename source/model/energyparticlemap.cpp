@@ -20,7 +20,7 @@ EnergyParticleMap::~EnergyParticleMap()
 }
 
 
-void EnergyParticleMap::topologyUpdated()
+void EnergyParticleMap::init()
 {
 	deleteCellMap();
 	IntVector2D size = _topo->getSize();

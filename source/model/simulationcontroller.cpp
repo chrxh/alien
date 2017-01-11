@@ -1,18 +1,3 @@
-#include "simulationcontroller.h"
-
-#include "simulationunit.h"
-#include "metadatamanager.h"
-#include "factoryfacade.h"
-#include "model/features/cellfunctioncomputer.h"
-#include "model/entities/token.h"
-#include "model/entities/grid.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/energyparticle.h"
-#include "model/physics/physics.h"
-#include "model/simulationsettings.h"
-#include "global/global.h"
-#include "global/servicelocator.h"
-
 #include <QTimer>
 #include <QtCore/qmath.h>
 #include <QVector2D>
@@ -20,17 +5,39 @@
 #include <set>
 #include <vector>
 
+#include "global/global.h"
+#include "global/servicelocator.h"
+#include "model/features/cellfunctioncomputer.h"
+#include "model/entities/token.h"
+#include "model/entities/grid.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
+#include "model/physics/physics.h"
+#include "model/config.h"
+#include "simulationcontext.h"
+#include "simulationunit.h"
+#include "energyparticlemap.h"
+#include "cellmap.h"
+#include "topology.h"
+#include "metadatamanager.h"
+#include "serializationfacade.h"
+#include "factoryfacade.h"
+
+#include "simulationcontroller.h"
+
 SimulationController::SimulationController(Threading threading, QObject* parent)
     : QObject(parent)
 {
+	FactoryFacade* factory = ServiceLocator::getInstance().getService<FactoryFacade>();
+
     _forceFpsTimer = new QTimer(this);
-    _grid = new Grid(this);
+    _context = factory->buildSimulationContext();
     _unit = new SimulationUnit();
-    _unit->init(_grid);
 
     connect(&_thread, &QThread::finished, _unit, &QObject::deleteLater);
     connect(_forceFpsTimer, SIGNAL(timeout()), this, SLOT(forceFpsTimerSlot()));
-    connect(this, SIGNAL(setRandomSeed(uint)), _unit, SLOT(setRandomSeed(uint)));
+    connect(this, SIGNAL(init(SimulationContext*)), _unit, SLOT(init(SimulationContext*)));
+	connect(this, SIGNAL(setRandomSeed(uint)), _unit, SLOT(setRandomSeed(uint)));
 
     if( threading == Threading::EXTRA_THREAD ) {
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()));
@@ -46,13 +53,15 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
         _unit->setParent(this);
     }
 
-    emit setRandomSeed(0);
+    emit init(_context);
 }
 
-SimulationController::SimulationController(QVector2D size, Threading threading, QObject* parent)
+SimulationController::SimulationController(IntVector2D size, Threading threading, QObject* parent)
     : SimulationController(threading, parent)
 {
-    _grid->init(size.x(), size.y());
+	_context->lock();
+	_context->init(size);
+	_context->unlock();
 }
 
 SimulationController::~SimulationController ()
@@ -62,26 +71,27 @@ SimulationController::~SimulationController ()
         _thread.terminate();
         _thread.wait();
     }
+	delete _context;
 }
 
 QMap< QString, qreal > SimulationController::getMonitorData ()
 {
     QMap< QString, qreal > data;
-    _grid->lockData();
+    _context->lock();
     int cells(0);
     int particles(0);
     int token(0);
     qreal internalEnergy(_unit->calcInternalEnergy());
-    foreach( CellCluster* cluster, _unit->getClusters() ) {
+    foreach( CellCluster* cluster, _context->getClustersRef() ) {
         cells += cluster->getCellsRef().size();
         foreach( Cell* cell, cluster->getCellsRef() ) {
             token += cell->getNumToken();
         }
     }
-    particles = _unit->getEnergyParticles().size();
-    _grid->unlockData();
-    data["cells"] = cells;
-    data["clusters"] = _unit->getClusters().size();
+    particles = _context->getEnergyParticlesRef().size();
+	_context->unlock();
+	data["cells"] = cells;
+    data["clusters"] = _context->getClustersRef().size();
     data["energyParticles"] = particles;
     data["token"] = token;
     data["internalEnergy"] = internalEnergy;
@@ -90,117 +100,56 @@ QMap< QString, qreal > SimulationController::getMonitorData ()
     return data;
 }
 
-Grid* SimulationController::getGrid ()
+SimulationContext* SimulationController::getSimulationContext()
 {
-    return _grid;
+    return _context;
 }
 
 void SimulationController::newUniverse (qint32 sizeX, qint32 sizeY)
 {
-    _grid->lockData();
     _frame = 0;
-
-    //clean up metadata
-    std::set<quint64> ids = _grid->getAllCellIds();
-    MetadataManager::getGlobalInstance().cleanUp(ids);
+	_context->lock();
 
     //set up new grid
-    _grid->reinit(sizeX, sizeY);
+	_context->init({ sizeX, sizeY });
 
-    _grid->unlockData();
+	_context->unlock();
 }
 
-void SimulationController::serializeUniverse (QDataStream& stream)
+void SimulationController::saveUniverse (QDataStream& stream)
 {
-    //reset random seed for simulation thread to be deterministic
-    emit setRandomSeed(_frame);
+    emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
 
-    _grid->lockData();
     stream << _frame;
+	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 
-    //clean up metadata
-    std::set<quint64> ids = _grid->getAllCellIds();
-    MetadataManager::getGlobalInstance().cleanUp(ids);
-
-    //serialize grid size
-    _grid->serializeSize(stream);
-
-    //serialize clusters
-    quint32 numCluster = _unit->getClusters().size();
-    stream << numCluster;
-    foreach(CellCluster* cluster, _unit->getClusters())
-        cluster->serializePrimitives(stream);
-
-    //serialize energy particles
-    quint32 numEnergyParticles = _unit->getEnergyParticles().size();
-    stream << numEnergyParticles;
-    foreach(EnergyParticle* e, _unit->getEnergyParticles())
-        e->serializePrimitives(stream);
-
-    //serialize map data
-    _grid->serializeMap(stream);
-
-    _grid->unlockData();
+    _context->lock();
+	std::set<quint64> ids = _context->getAllCellIds();
+	MetadataManager::getGlobalInstance().cleanUp(ids);
+	facade->serializeSimulationContext(_context, stream);
+    _context->unlock();
 }
 
-void SimulationController::buildUniverse (QDataStream& stream)
+void SimulationController::loadUniverse(QDataStream& stream)
 {
-    QMap< quint64, quint64 > oldNewCellIdMap;
-    QMap< quint64, quint64 > oldNewClusterIdMap;
-    _grid->lockData();
-    stream >> _frame;
+	stream >> _frame;
+	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+	facade->deserializeSimulationContext(stream);
 
-    //maps for associating new cells and energy particles
-    QMap< quint64, Cell* > oldIdCellMap;
-    QMap< quint64, EnergyParticle* > oldIdEnergyMap;
+    emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
 
-    //construct empty map
-    _grid->buildEmptyMap(stream);
-
-    //reconstruct cluster
-    quint32 numCluster;
-    stream >> numCluster;
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-    for(quint32 i = 0; i < numCluster; ++i) {
-        CellCluster* cluster = facade->buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid);
-        _grid->getClusters() << cluster;
-    }
-
-    //reconstruct energy particles
-    quint32 numEnergyParticles;
-    stream >> numEnergyParticles;
-    for(quint32 i = 0; i < numEnergyParticles; ++i) {
-        EnergyParticle* e = new EnergyParticle(stream, oldIdEnergyMap, _grid);
-        _grid->getEnergyParticles() << e;
-    }
-
-    //reconstruct map
-    _grid->buildMap(stream, oldIdCellMap, oldIdEnergyMap);
-
-    _grid->unlockData();
-
-    simulationParameters.readData(stream);
+/*    simulationParameters.readData(stream);
     MetadataManager::getGlobalInstance().readMetadataUniverse(stream, oldNewClusterIdMap, oldNewCellIdMap);
     MetadataManager::getGlobalInstance().readSymbolTable(stream);
-
-    //reset random seed for simulation thread to be deterministic
-    emit setRandomSeed(_frame);
+	*/
 }
 
-qint32 SimulationController::getUniverseSizeX ()
+IntVector2D SimulationController::getUniverseSize()
 {
-    _grid->lockData();
-    quint32 sizeX = _grid->getSizeX();
-    _grid->unlockData();
-    return sizeX;
-}
-
-qint32 SimulationController::getUniverseSizeY ()
-{
-    _grid->lockData();
-    quint32 sizeY = _grid->getSizeY();
-    _grid->unlockData();
-    return sizeY;
+    _context->lock();
+	IntVector2D size = _context->getTopology()->getSize();
+    _context->unlock();
+    return size;
 }
 
 void SimulationController::addBlockStructure (QVector3D center, int numCellX, int numCellY, QVector3D dist, qreal energy)
@@ -221,7 +170,7 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
                 maxCon = 3;
             if( ((i == 0) || (i == (numCellX-1))) && ((j == 0) || (j == (numCellY-1))) )
                 maxCon = 2;
-            Cell* cell = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(x, y, 0.0));
+            Cell* cell = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _context, maxCon, 0, QVector3D(x, y, 0.0));
 
             cellGrid[i][j] = cell;
         }
@@ -236,11 +185,11 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
         }
 
     //create cluster
-    _grid->lockData();
-    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
+    _context->lock();
+    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _context);
     cluster->drawCellsToMap();
-    _unit->getClusters() << cluster;
-    _grid->unlockData();
+    _context->getClustersRef() << cluster;
+    _context->unlock();
     QList< CellCluster* > newCluster;
     newCluster << cluster;
     emit reclustered(newCluster);
@@ -271,7 +220,7 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
                 maxCon = 6;
 
             //create cell: upper layer
-            cellGrid[numLayers-1+i][numLayers-1-j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
+            cellGrid[numLayers-1+i][numLayers-1-j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _context, maxCon, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
             cells << cellGrid[numLayers-1+i][numLayers-1-j];
             if( numLayers-1+i > 0 )
                 cellGrid[numLayers-1+i][numLayers-1-j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1-j]);
@@ -282,7 +231,7 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
 
             //create cell: under layer (except for 0-layer)
             if( j > 0 ) {
-                cellGrid[numLayers-1+i][numLayers-1+j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _grid, maxCon, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
+                cellGrid[numLayers-1+i][numLayers-1+j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _context, maxCon, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
                 cells << cellGrid[numLayers-1+i][numLayers-1+j];
                 if( numLayers-1+i > 0 )
                     cellGrid[numLayers-1+i][numLayers-1+j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1+j]);
@@ -293,11 +242,11 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
     }
 
     //create cluster
-    _grid->lockData();
-    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _grid);
+    _context->lock();
+    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, center, 0.0, QVector3D(), _context);
     cluster->drawCellsToMap();
-    _unit->getClusters() << cluster;
-    _grid->unlockData();
+    _context->getClustersRef() << cluster;
+    _context->unlock();
     QList< CellCluster* > newCluster;
     newCluster << cluster;
     emit reclustered(newCluster);
@@ -305,53 +254,56 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
 
 void SimulationController::addRandomEnergy (qreal energy, qreal maxEnergyPerParticle)
 {
-    _grid->lockData();
+    _context->lock();
 
     while( energy > 0.0 ) {
         qreal rEnergy = GlobalFunctions::random(0.01, maxEnergyPerParticle);
         if( rEnergy > energy )
             rEnergy = energy;
-        qreal posX = GlobalFunctions::random(0.0, _grid->getSizeX());
-        qreal posY = GlobalFunctions::random(0.0, _grid->getSizeY());
+        qreal posX = GlobalFunctions::random(0.0, _context->getTopology()->getSize().x);
+        qreal posY = GlobalFunctions::random(0.0, _context->getTopology()->getSize().x);
         qreal velX = GlobalFunctions::random(-1.0, 1.0);
         qreal velY = GlobalFunctions::random(-1.0, 1.0);
 
-        EnergyParticle* e = new EnergyParticle(rEnergy, QVector3D(posX, posY, 0.0), QVector3D(velX, velY, 0.0), _grid);
-        _grid->getEnergyParticles() << e;
-        _grid->setEnergy(e->pos, e);
+        EnergyParticle* e = new EnergyParticle(rEnergy, QVector3D(posX, posY, 0.0), QVector3D(velX, velY, 0.0), _context);
+        _context->getEnergyParticlesRef() << e;
+        _context->getEnergyParticleMap()->setParticle(e->pos, e);
         energy -= rEnergy;
     }
-    _grid->unlockData();
+    _context->unlock();
 }
 
-void SimulationController::serializeCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId)
+void SimulationController::saveCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId)
 {
-    _grid->lockData();
+    _context->lock();
 
     //serialize cell data
-    FactoryFacade *facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    SerializationFacade *facade = ServiceLocator::getInstance().getService<SerializationFacade>();
     facade->serializeFeaturedCell(cell, stream);
     stream << clusterId;
 
-    //get ids
+    //return ids
     CellCluster* cluster = cell->getCluster();
     clusterId = cluster->getId();
     cellId = cell->getId();
 
-    _grid->unlockData();
+    _context->unlock();
 }
 
-void SimulationController::serializeExtendedSelection (QDataStream& stream, const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es, QList< quint64 >& clusterIds, QList< quint64 >& cellIds)
+void SimulationController::saveExtendedSelection (QDataStream& stream, const QList< CellCluster* >& clusters
+	, const QList< EnergyParticle* >& es, QList< quint64 >& clusterIds, QList< quint64 >& cellIds)
 {
-    _grid->lockData();
+	_context->lock();
 
-    //serialize num clusters
+	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+
+	//serialize num clusters
     quint32 numClusters = clusters.size();
     stream << numClusters;
 
     //serialize cluster data
     foreach(CellCluster* cluster, clusters) {
-        cluster->serializePrimitives(stream);
+		facade->serializeCellCluster(cluster, stream);
         clusterIds << cluster->getId();
         foreach(Cell* cell, cluster->getCellsRef())
             cellIds << cell->getId();
@@ -363,49 +315,40 @@ void SimulationController::serializeExtendedSelection (QDataStream& stream, cons
 
     //serialize energy particle data
     foreach(EnergyParticle* e, es) {
-        e->serializePrimitives(stream);
+		facade->serializeEnergyParticle(e, stream);
     }
 
-    _grid->unlockData();
+    _context->unlock();
 }
 
-void SimulationController::buildCell (QDataStream& stream,
-                QVector3D pos,
-                CellCluster*& newCluster,
-                QMap< quint64, quint64 >& oldNewClusterIdMap,
-                QMap< quint64, quint64 >& oldNewCellIdMap,
-                bool drawToMap)
+void SimulationController::loadCell(QDataStream& stream, QVector3D pos, bool drawToMap /*= true*/)
 {
-    _grid->lockData();
+    _context->lock();
 
-    //read cell data
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-    QList< Cell* > newCells;
-    Cell* newCell = facade->buildFeaturedCell(stream, _grid);
+    SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+	FactoryFacade* factory = ServiceLocator::getInstance().getService<FactoryFacade>();
+
+	QList< Cell* > newCells;
+	Cell* newCell = facade->deserializeFeaturedCell(stream, _context);
     newCells << newCell;
     newCells[0]->setRelPos(QVector3D());
-    newCluster = facade->buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _grid);
-    _unit->getClusters() << newCluster;
+    CellCluster* newCluster = factory->buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _context);
+    _context->getClustersRef() << newCluster;
 
     //read old cluster id
-    quint64 oldClusterId(0);
+    quint64 oldClusterId = 0;
     stream >> oldClusterId;
 
-    //assigning new ids
-    newCluster->setId(GlobalFunctions::createNewTag());
-    oldNewClusterIdMap[oldClusterId] = newCluster->getId();
-    quint64 oldCellId = newCell->getId();
-    newCell->setId(GlobalFunctions::createNewTag());
-    oldNewCellIdMap[oldCellId] = newCell->getId();
+//->	MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //draw cluster
     if( drawToMap )
         newCluster->drawCellsToMap();
 
-    _grid->unlockData();
+    _context->unlock();
 }
 
-void SimulationController::buildExtendedSelection (QDataStream& stream,
+void SimulationController::loadExtendedSelection (QDataStream& stream,
                                              QVector3D pos,
                                              QList< CellCluster* >& newClusters,
                                              QList< EnergyParticle* >& newEnergyParticles,
@@ -413,11 +356,10 @@ void SimulationController::buildExtendedSelection (QDataStream& stream,
                                              QMap< quint64, quint64 >& oldNewCellIdMap,
                                              bool drawToMap)
 {
-    _grid->lockData();
+    _context->lock();
 
     //maps for associating new cells and energy particles
     QMap< quint64, Cell* > oldIdCellMap;
-    QMap< quint64, EnergyParticle* > oldIdEnergyMap;
 
     //read num clusters
     quint32 numClusters;
@@ -426,15 +368,15 @@ void SimulationController::buildExtendedSelection (QDataStream& stream,
     //read cluster data
     QVector3D center(0.0, 0.0, 0.0);
     quint32 numCells = 0;
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
     for(int i = 0; i < numClusters; ++i) {
-        CellCluster* cluster = facade->buildCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, _grid);
+        CellCluster* cluster = facade->deserializeCellCluster(stream, _context);
         newClusters << cluster;
         foreach(Cell* cell, cluster->getCellsRef())
             center += cell->calcPosition();
         numCells += cluster->getCellsRef().size();
     }
-    _unit->getClusters() << newClusters;
+    _context->getClustersRef() << newClusters;
 
     //read num energy particles
     quint32 numEnergyParticles;
@@ -442,11 +384,11 @@ void SimulationController::buildExtendedSelection (QDataStream& stream,
 
     //read energy particle data
     for(int i = 0; i < numEnergyParticles; ++i) {
-        EnergyParticle* e(new EnergyParticle(stream, oldIdEnergyMap, _grid));
+        EnergyParticle* e = facade->deserializeEnergyParticle(stream, _context);
         center += e->pos;
         newEnergyParticles << e;
     }
-    _grid->getEnergyParticles() << newEnergyParticles;
+    _context->getEnergyParticlesRef() << newEnergyParticles;
 
     //set new center and draw cluster
     center = center / (qreal)(numCells+numEnergyParticles);
@@ -459,19 +401,19 @@ void SimulationController::buildExtendedSelection (QDataStream& stream,
     foreach(EnergyParticle* e, newEnergyParticles) {
         e->pos = e->pos-center+pos;
         if( drawToMap )
-            _grid->setEnergy(e->pos, e);
+            _context->getEnergyParticleMap()->setParticle(e->pos, e);
     }
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void SimulationController::delSelection (QList< Cell* > cells, QList< EnergyParticle* > es)
 {
-    _grid->lockData();
+    _context->lock();
 
     //remove energy particles
     foreach(EnergyParticle* e, es) {
-        _unit->getEnergyParticles().removeAll(e);
-        _grid->removeEnergy(e->pos, e);
+        _context->getEnergyParticlesRef().removeAll(e);
+		_context->getEnergyParticleMap()->removeParticleIfPresent(e->pos, e);
         delete e;
     }
 
@@ -481,15 +423,15 @@ void SimulationController::delSelection (QList< Cell* > cells, QList< EnergyPart
 
         //remove cell from cluster structure
         CellCluster* cluster = cell->getCluster();
-        _grid->removeCellIfPresent(cluster->calcPosition(cell, _grid), cell);
+        _context->getCellMap()->removeCellIfPresent(cluster->calcPosition(cell), cell);
         cluster->removeCell(cell, false);
         delete cell;
 
         //calculate new cluster structure
         QList< CellCluster* > newClusters;
         newClusters = cluster->decompose();
-        _unit->getClusters() << newClusters;
-        _unit->getClusters().removeAll(cluster);
+        _context->getClustersRef() << newClusters;
+        _context->getClustersRef().removeAll(cluster);
         allNewClusters.removeAll(cluster);
         allNewClusters << newClusters;
         delete cluster;
@@ -499,7 +441,7 @@ void SimulationController::delSelection (QList< Cell* > cells, QList< EnergyPart
 //    QSet< quint64 > ids = _grid->getAllCellIds();
 //    _meta->cleanUp(ids);
 
-    _grid->unlockData();
+    _context->unlock();
 //????
 //    if( !allNewClusters.isEmpty() )
         emit reclustered(allNewClusters);
@@ -507,32 +449,28 @@ void SimulationController::delSelection (QList< Cell* > cells, QList< EnergyPart
 
 void SimulationController::delExtendedSelection (QList< CellCluster* > clusters, QList< EnergyParticle* > es)
 {
-    _grid->lockData();
+    _context->lock();
 
     //remove cell clusters
     foreach(CellCluster* cluster, clusters) {
         cluster->clearCellsFromMap();
-        _unit->getClusters().removeAll(cluster);
+        _context->getClustersRef().removeAll(cluster);
         delete cluster;
     }
 
     //remove energy particles
     foreach(EnergyParticle* e, es) {
-        _unit->getEnergyParticles().removeAll(e);
-        _grid->removeEnergy(e->pos, e);
+        _context->getEnergyParticlesRef().removeAll(e);
+		_context->getEnergyParticleMap()->removeParticleIfPresent(e->pos, e);
         delete e;
     }
 
-    //clean up metadata
-//    QSet< quint64 > ids = _grid->getAllCellIds();
-//    _meta->cleanUp(ids);
-
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void SimulationController::rotateExtendedSelection (qreal angle, const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+    _context->lock();
 
     //1. step: rotate each cluster around own center
     foreach(CellCluster* cluster, clusters) {
@@ -540,9 +478,9 @@ void SimulationController::rotateExtendedSelection (qreal angle, const QList< Ce
     }
 
     //2. step: rotate cluster around common center
-    _grid->unlockData();
+    _context->unlock();
     QVector3D center = getCenterPosExtendedSelection(clusters, es);
-    _grid->lockData();
+    _context->lock();
     QMatrix4x4 transform;
     transform.setToIdentity();
     transform.translate(center);
@@ -554,12 +492,12 @@ void SimulationController::rotateExtendedSelection (qreal angle, const QList< Ce
     foreach(EnergyParticle* e, es) {
         e->pos = transform.map(e->pos);
     }
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void SimulationController::setVelocityXExtendedSelection (qreal velX, const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+    _context->lock();
     foreach(CellCluster* cluster, clusters) {
         QVector3D vel = cluster->getVel();
         vel.setX(velX);
@@ -568,12 +506,12 @@ void SimulationController::setVelocityXExtendedSelection (qreal velX, const QLis
     foreach(EnergyParticle* e, es) {
         e->vel.setX(velX);
     }
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void SimulationController::setVelocityYExtendedSelection (qreal velY, const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+    _context->lock();
     foreach(CellCluster* cluster, clusters) {
         QVector3D vel = cluster->getVel();
         vel.setY(velY);
@@ -582,16 +520,16 @@ void SimulationController::setVelocityYExtendedSelection (qreal velY, const QLis
     foreach(EnergyParticle* e, es) {
         e->vel.setY(velY);
     }
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void SimulationController::setAngularVelocityExtendedSelection (qreal angVel, const QList< CellCluster* >& clusters)
 {
-    _grid->lockData();
+    _context->lock();
     foreach(CellCluster* cluster, clusters) {
         cluster->setAngularVel(angVel);
     }
-    _grid->unlockData();
+    _context->unlock();
 }
 
 
@@ -600,7 +538,7 @@ QVector3D SimulationController::getCenterPosExtendedSelection (const QList< Cell
     QVector3D center(0.0, 0.0, 0.0);
     quint32 numCells = 0;
 
-    _grid->lockData();
+    _context->lock();
     foreach(CellCluster* cluster, clusters) {
         center += cluster->getPosition()*cluster->getMass();
 /*        foreach(Cell* cell, cluster->getCellsRef())
@@ -610,7 +548,7 @@ QVector3D SimulationController::getCenterPosExtendedSelection (const QList< Cell
     foreach(EnergyParticle* e, es) {
         center += e->pos;
     }
-    _grid->unlockData();
+    _context->unlock();
 
     center = center / (qreal)(numCells+es.size());
     return center;
@@ -618,30 +556,30 @@ QVector3D SimulationController::getCenterPosExtendedSelection (const QList< Cell
 
 void SimulationController::drawToMapExtendedSelection (const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+    _context->lock();
     foreach(CellCluster* cluster, clusters) {
         cluster->drawCellsToMap();
     }
     foreach(EnergyParticle* e, es) {
-        _grid->setEnergy(e->pos, e);
+		_context->getEnergyParticleMap()->setParticle(e->pos, e);
     }
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void SimulationController::newCell (QVector3D pos)
 {
     //create cluster with single cell
-    _grid->lockData();
+    _context->lock();
     FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     Cell* cell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, CellFunctionType::COMPUTER
-        , _grid, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
+        , _context, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
     cells << cell;
-    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, pos, 0, QVector3D(), _grid);
-    _grid->setCell(pos, cell);
-    _unit->getClusters() << cluster;
-    _grid->unlockData();
+    CellCluster* cluster = facade->buildCellCluster(cells, 0.0, pos, 0, QVector3D(), _context);
+	_context->getCellMap()->setCell(pos, cell);
+    _context->getClustersRef() << cluster;
+    _context->unlock();
 
     emit cellCreated(cell);
 }
@@ -649,11 +587,11 @@ void SimulationController::newCell (QVector3D pos)
 void SimulationController::newEnergyParticle (QVector3D pos)
 {
     //create energy particle
-    _grid->lockData();
-    EnergyParticle* energy = new EnergyParticle(simulationParameters.CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _grid);
-    _grid->setEnergy(pos, energy);
-    _unit->getEnergyParticles() << energy;
-    _grid->unlockData();
+    _context->lock();
+    EnergyParticle* energy = new EnergyParticle(simulationParameters.CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _context);
+	_context->getEnergyParticleMap()->setParticle(pos, energy);
+    _context->getEnergyParticlesRef() << energy;
+    _context->unlock();
 
     emit energyParticleCreated(energy);
 }
@@ -663,7 +601,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
 {
     //update purely cell data and no cluster data?
     if( !clusterDataChanged ) {
-        _grid->lockData();
+        _context->lock();
 
         QListIterator< Cell* > iCells(cells);
         QListIterator< CellTO > iNewCellsData(newCellsData);
@@ -684,7 +622,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             cell->setMaxConnections(newCellData.cellMaxCon);
             cell->setTokenBlocked(!newCellData.cellAllowToken);
             cell->setTokenAccessNumber(newCellData.cellTokenAccessNum);
-            facade->changeFeaturesOfCell(cell, newCellData.cellFunctionType, _grid);
+            facade->changeFeaturesOfCell(cell, newCellData.cellFunctionType, _context);
 //            cell->setCellFunction(CellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 
             //update cell computer
@@ -710,9 +648,9 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
 
             //searching for nearby clusters
             QVector3D pos = cell->calcPosition();
-            QSet< CellCluster* > clusters(_grid->getNearbyClusters(pos, qFloor(simulationParameters.CRIT_CELL_DIST_MAX+1.0)));
+            CellClusterSet clusters = _context->getCellMap()->getNearbyClusters(pos, qFloor(simulationParameters.CRIT_CELL_DIST_MAX+1.0));
 //            if( !clusters.contains(cell->getCluster()) )
-            clusters << cell->getCluster();
+            clusters.insert(cell->getCluster());
 
             //update cell velocities
 /*            foreach(CellCluster* cluster, clusters) {
@@ -725,7 +663,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             foreach(CellCluster* cluster, clusters)
                 foreach(Cell* otherCell, cluster->getCellsRef()) {
                     QVector3D displacement = otherCell->calcPosition()-pos;
-                    _grid->correctDisplacement(displacement);
+                    _context->getTopology()->correctDisplacement(displacement);
                     qreal dist = displacement.length();
                     if( (cell != otherCell) && (dist < simulationParameters.CRIT_CELL_DIST_MAX) ) {
 
@@ -768,11 +706,11 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             QList< CellCluster* > newClusters;
             foreach(CellCluster* cluster, clusters){//_thread->getClusters()) {
                 newClusters << cluster->decompose();
-                _unit->getClusters().removeAll(cluster);
+                _context->getClustersRef().removeAll(cluster);
                 sumNewClusters.remove(cluster);
                 delete cluster;
             }
-            _unit->getClusters() << newClusters;
+            _context->getClustersRef() << newClusters;
 
     //        if( _grid->getCell(cell->calcPosition()) == 0 )
     //            _grid->setCell(cell->calcPosition(), cell);
@@ -784,14 +722,14 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
         foreach(CellCluster* cluster, changedClusters)
             cluster->updateCellVel();
 
-        _grid->unlockData();
+        _context->unlock();
 
         //inform other instances about reclustering
         emit reclustered(changedClusters);
     }
     //update only cluster data
     else {
-        _grid->lockData();
+        _context->lock();
 
         QListIterator< Cell* > iCells(cells);
         QListIterator< CellTO > iNewCellsData(newCellsData);
@@ -813,7 +751,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             }*/
             sumNewClusters<< cluster;
         }
-        _grid->unlockData();
+        _context->unlock();
         emit reclustered(sumNewClusters);
     }
 }
@@ -854,7 +792,7 @@ void SimulationController::requestNextTimestep ()
 
 void SimulationController::updateUniverse ()
 {
-    emit universeUpdated(_grid, true);
+    emit universeUpdated(_context, true);
 }
 
 void SimulationController::forceFpsTimerSlot ()
@@ -871,7 +809,7 @@ void SimulationController::nextTimestepCalculated ()
 {
     _frame++;
     _calculating = false;
-    emit universeUpdated(_grid, false);
+    emit universeUpdated(_context, false);
 
     //fps forcing must be deactivate in order to continue with next the frame
     if( _run ) {

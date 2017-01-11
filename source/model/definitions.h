@@ -9,6 +9,7 @@
 #include <qmath.h>
 #include <QDataStream>
 
+#include <set>
 #include <unordered_set>
 
 class Cell;
@@ -22,6 +23,12 @@ class CellMap;
 class EnergyParticleMap;
 class Topology;
 class SimulationContext;
+class MetadataManager;
+
+class EntityFactory;
+
+class FactoryFacade;
+class SerializationFacade;
 
 struct CellClusterHash
 {

@@ -9,17 +9,21 @@ class SimulationContextImpl : public SimulationContext
 {
 public:
 	SimulationContextImpl();
-	SimulationContextImpl(IntVector2D size);
 	virtual ~SimulationContextImpl();
 
-    void lock ();
-    void unlock ();
+	void init(IntVector2D size) override;
 
-    Topology* getTopology () const;
-    EnergyParticleMap* getEnergyParticleMap () const;
-    CellMap* getCellMap () const;
-	QList<CellCluster*>& getClustersRef();
-    QList<EnergyParticle*>& getEnergyParticlesRef ();
+    void lock () override;
+    void unlock () override;
+
+    Topology* getTopology () const override;
+    EnergyParticleMap* getEnergyParticleMap () const override;
+    CellMap* getCellMap () const override;
+	MetadataManager* getMetadataManager() const override;
+
+	QList<CellCluster*>& getClustersRef() override;
+    QList<EnergyParticle*>& getEnergyParticlesRef () override;
+	std::set<quint64> SimulationContextImpl::getAllCellIds() const override;
 
 private:
 	void deleteAttributes ();
@@ -30,7 +34,7 @@ private:
     Topology* _topology = nullptr;
     EnergyParticleMap* _energyParticleMap = nullptr;
     CellMap* _cellMap = nullptr;
-
+	MetadataManager* _meta = nullptr;
 };
 
 #endif // SIMULATIONCONTEXTIMPL_H

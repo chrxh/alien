@@ -1,30 +1,38 @@
+#include <qmath.h>
+
+#include "global/servicelocator.h"
+#include "global/global.h"
+
+#include "model/factoryfacade.h"
+#include "model/physics/physics.h"
+#include "model/config.h"
+#include "model/simulationcontext.h"
+#include "model/energyparticlemap.h"
+#include "model/cellmap.h"
+#include "model/topology.h"
+
 #include "energyparticle.h"
 #include "grid.h"
 #include "cell.h"
 #include "cellcluster.h"
 
-#include "model/factoryfacade.h"
-#include "model/physics/physics.h"
-#include "model/simulationsettings.h"
-
-#include "global/servicelocator.h"
-#include "global/global.h"
-
-#include <qmath.h>
 
 EnergyParticle::EnergyParticle(SimulationContext* context)
     : _context(context)
+	, _topology(context->getTopology())
+	, _cellMap(context->getCellMap())
+	, _energyMap(context->getEnergyParticleMap())
+	, id(GlobalFunctions::createNewTag())
 {
 
 }
 
 EnergyParticle::EnergyParticle(qreal amount_, QVector3D pos_, QVector3D vel_, SimulationContext* context)
-    : _context(context)
-    , amount(amount_)
-    , pos(pos_)
-    , vel(vel_)
-    , id(GlobalFunctions::createNewTag())
+    : EnergyParticle(context)
 {
+	amount = amount_;
+	pos = pos_;
+	vel = vel_;
 }
 
 //return: true = energy is zero
@@ -32,11 +40,11 @@ EnergyParticle::EnergyParticle(qreal amount_, QVector3D pos_, QVector3D vel_, Si
 bool EnergyParticle::movement (CellCluster*& cluster)
 {
     //remove old position from map
-    _grid->removeEnergy(pos, this);
+    _energyMap->removeParticleIfPresent(pos, this);
 
     //update position
     pos += vel;
-    _grid->correctPosition(pos);
+    _topology->correctPosition(pos);
 
     //apply gravitational force
 /*    QVector3D gSource1(200.0+qSin(0.5*degToRad*(qreal)time)*50, 200.0+qCos(0.5*degToRad*(qreal)time)*50, 0.0);
@@ -55,7 +63,7 @@ bool EnergyParticle::movement (CellCluster*& cluster)
     vel += (distance2.normalized()/(distance2.lengthSquared()+4.0));
 */
     //is there energy at new position?
-    EnergyParticle* otherEnergy(_grid->getEnergy(pos));
+    EnergyParticle* otherEnergy(_energyMap->getParticle(pos));
     if( otherEnergy ) {
 
         //particle with most energy inherits color
@@ -70,7 +78,7 @@ bool EnergyParticle::movement (CellCluster*& cluster)
     }
     else {
         //is there a cell at new position?
-        Cell* cell(_grid->getCell(pos));
+        Cell* cell(_cellMap->getCell(pos));
         if( cell ) {
             cell->setEnergy(cell->getEnergy() + amount);
             //create token?
@@ -95,8 +103,8 @@ bool EnergyParticle::movement (CellCluster*& cluster)
                 //look for neighbor cell
                 for(int dx = -2; dx < 3; ++dx ) {
                     for(int dy = -2; dy < 3; ++dy ) {
-                        if( _grid->getCell(pos+QVector3D(dx,dy,0.0)) ) {
-                            _grid->setEnergy(pos, this);
+                        if( _cellMap->getCell(pos+QVector3D(dx,dy,0.0)) ) {
+                            _energyMap->setParticle(pos, this);
                             return false;
                         }
                     }
@@ -105,16 +113,16 @@ bool EnergyParticle::movement (CellCluster*& cluster)
                 //create cell and cluster
                 QList< Cell* > cells;
                 FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-                Cell* c = facade->buildFeaturedCellWithRandomData(eNew, _grid);
+                Cell* c = facade->buildFeaturedCellWithRandomData(eNew, _context);
                 cells << c;
-                cluster = facade->buildCellCluster(cells, 0.0, pos, 0, vel, _grid);
+                cluster = facade->buildCellCluster(cells, 0.0, pos, 0, vel, _context);
                 amount = 0;
-                _grid->setCell(pos, c);
+                _cellMap->setCell(pos, c);
                 c->setColor(color);
                 return true;
             }
             else {
-                _grid->setEnergy(pos, this);
+                _energyMap->setParticle(pos, this);
                 return false;
             }
 

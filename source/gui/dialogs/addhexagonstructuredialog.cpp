@@ -2,7 +2,7 @@
 #include "ui_addhexagonstructuredialog.h"
 
 #include "gui/guisettings.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 
 AddHexagonStructureDialog::AddHexagonStructureDialog(QWidget *parent) :
     QDialog(parent),
