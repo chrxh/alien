@@ -34,7 +34,7 @@ CellFeature* CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunction
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
-            return registerNewFeature(cell, new CellFunctionComputerImpl(contex));
+            return registerNewFeature(cell, new CellFunctionComputerImpl(context));
         case CellFunctionType::PROPULSION :
             return registerNewFeature(cell, new CellFunctionPropulsionImpl(context));
         case CellFunctionType::SCANNER :

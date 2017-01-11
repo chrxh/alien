@@ -10,7 +10,7 @@
 #include "microeditor/cellcomputeredit.h"
 #include "gui/editorsettings.h"
 #include "gui/guisettings.h"
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/metadatamanager.h"
 #include "model/factoryfacade.h"
 #include "model/entities/cell.h"

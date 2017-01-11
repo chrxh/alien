@@ -18,36 +18,31 @@ public:
         NO_EXTRA_THREAD, EXTRA_THREAD
     };
     SimulationController (Threading threading, QObject* parent = 0);
-    SimulationController (QVector2D size, Threading threading, QObject* parent = 0);
+    SimulationController (IntVector2D size, Threading threading, QObject* parent = 0);
     ~SimulationController ();
 
     QMap< QString, qreal > getMonitorData ();
-    Grid* getGrid ();
+    SimulationContext* getSimulationContext ();
 
     //universe manipulation tools
     void newUniverse (qint32 sizeX, qint32 sizeY);
-    void serializeUniverse (QDataStream& stream);
-    void buildUniverse (QDataStream& stream);
-    qint32 getUniverseSizeX();
-    qint32 getUniverseSizeY ();
+    void saveUniverse (QDataStream& stream);
+    void loadUniverse (QDataStream& stream);
+    IntVector2D getUniverseSize();
     void addBlockStructure (QVector3D center, int numCellX, int numCellY, QVector3D dist, qreal energy);
     void addHexagonStructure (QVector3D center, int numLayers, qreal dist, qreal energy);
     void addRandomEnergy (qreal energy, qreal maxEnergyPerParticle);
 
     //selection manipulation Tools
-    void serializeCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId);
-    void serializeExtendedSelection (QDataStream& stream,
+    void saveCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId);
+    void saveExtendedSelection (QDataStream& stream,
                                     const QList< CellCluster* >& clusters,
                                     const QList< EnergyParticle* >& es,
                                     QList< quint64 >& clusterIds,
                                     QList< quint64 >& cellIds);
-    void buildCell (QDataStream& stream,                //returns a map which maps to old to the new cell and cluster ids
-                    QVector3D pos,
-                    CellCluster*& newCluster,
-                    QMap< quint64, quint64 >& oldNewClusterIdMap,
-                    QMap< quint64, quint64 >& oldNewCellIdMap,
+    void loadCell (QDataStream& stream,                QVector3D pos,
                     bool drawToMap = true);
-    void buildExtendedSelection (QDataStream& stream,   //returns a map which maps to old to the new cell and cluster ids
+    void loadExtendedSelection (QDataStream& stream,   //returns a map which maps to old to the new cell and cluster ids
                                 QVector3D pos,
                                 QList< CellCluster* >& newClusters,
                                 QList< EnergyParticle* >& newEnergyParticles,
@@ -71,9 +66,7 @@ public:
 public slots:
     void newCell (QVector3D pos);
     void newEnergyParticle (QVector3D pos);
-    void updateCell (QList< Cell* > cells,
-                     QList< CellTO > newCellsData,
-                     bool clusterDataChanged);
+    void updateCell (QList< Cell* > cells, QList< CellTO > newCellsData, bool clusterDataChanged);
 
     //misc
 public slots:
@@ -84,12 +77,13 @@ public slots:
     void updateUniverse ();
 
 signals:
-    void setRandomSeed (uint seed);
-    void calcNextTimestep ();
+    void init (SimulationContext* context);
+	void setRandomSeed (uint seed);
+	void calcNextTimestep();
     void cellCreated (Cell* cell);
     void energyParticleCreated (EnergyParticle* cell);
     void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (Grid* grid, bool force);
+    void universeUpdated (SimulationContext* context, bool force);
     void computerCompilationReturn (bool error, int line);
 
 protected slots:
@@ -97,15 +91,15 @@ protected slots:
     virtual void nextTimestepCalculated ();
 
 protected:
-    QTimer* _forceFpsTimer;
+    QTimer* _forceFpsTimer = nullptr;
     bool _run = false;
     int _fps = 0;
     bool _calculating = false;
     quint64 _frame = 0;
     int _newCellTokenAccessNumber = 0;
 
-    Grid* _grid;
-    SimulationUnit* _unit;
+    SimulationContext* _context = nullptr;
+    SimulationUnit* _unit = nullptr;
     QThread _thread;
 };
 
