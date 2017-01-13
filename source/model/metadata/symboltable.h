@@ -3,21 +3,21 @@
 
 #include "model/definitions.h"
 
-class Symboltable
+class SymbolTable
 {
 public:
 
-    void addSymbolEntry (QString key, QString value);
-    void delSymbolEntry (QString key);
-    QString applyTableToCode (QString input) const;
+    void addEntry (QString const& key, QString const& value);
+    void delEntry (QString const& key);
+    QString applyTableToCode (QString const& input) const;
     void clearTable ();
     QMap< QString, QString > const& getTable () const;
-    void setTable (const QMap< QString, QString >& table);
+    void setTable (QMap< QString, QString > const& table);
 
     void serializePrimitives (QDataStream& stream) const;
     void deserializePrimitives (QDataStream& stream);
 
-    void uniteTable(QMap< QString, QString > const& otherTable);
+//    void uniteTable(QMap< QString, QString > const& otherTable);
 
 private:
     QMap<QString,QString> _symbolTable;
