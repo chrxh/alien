@@ -65,16 +65,16 @@ public:
 
     QVector3D getVel () const override;
     void setVel (QVector3D vel) override;
-    quint8 getColor () const override;
-    void setColor (quint8 color) override;
     int getProtectionCounter () const override;
     void setProtectionCounter (int counter) override;
     bool isToBeKilled() const override;
     void setToBeKilled (bool toBeKilled) override;
 
+	CellMetadata getMetadata() const override;
+	void setMetadata(CellMetadata metadata) override;
+
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives(QDataStream& stream) override;
-
 
 private:
     friend class CellCluster;
@@ -103,7 +103,8 @@ private:
     bool _blockToken = false;
 
     QVector3D _vel;
-    quint8 _color = 0;      //metadata
+
+	CellMetadata _metadata;
 };
 
 #endif // CELLIMPL_H

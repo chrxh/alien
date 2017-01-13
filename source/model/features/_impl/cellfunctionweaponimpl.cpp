@@ -1,12 +1,12 @@
-#include "cellfunctionweaponimpl.h"
-
 #include "model/simulationcontext.h"
 #include "model/cellmap.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
 
-#include "model/simulationsettings.h"
+#include "model/config.h"
+
+#include "cellfunctionweaponimpl.h"
 
 CellFunctionWeaponImpl::CellFunctionWeaponImpl (SimulationContext* context)
     : CellFunction(context)
