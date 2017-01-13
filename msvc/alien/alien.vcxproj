@@ -640,6 +640,9 @@
     <ClInclude Include="..\..\source\model\features\_impl\cellfunctionweaponimpl.h" />
     <ClInclude Include="..\..\source\model\features\_impl\energyguidanceimpl.h" />
     <ClInclude Include="..\..\source\model\metadatamanager.h" />
+    <ClInclude Include="..\..\source\model\metadata\cellclustermetadata.h" />
+    <ClInclude Include="..\..\source\model\metadata\cellmetadata.h" />
+    <ClInclude Include="..\..\source\model\metadata\symboltable.h" />
     <ClInclude Include="..\..\source\model\physics\codingphysicalquantities.h" />
     <ClInclude Include="..\..\source\model\physics\physics.h" />
     <ClInclude Include="..\..\source\model\serializationfacade.h" />
@@ -751,6 +754,7 @@
     <ClCompile Include="..\..\source\model\features\_impl\cellfunctionweaponimpl.cpp" />
     <ClCompile Include="..\..\source\model\features\_impl\energyguidanceimpl.cpp" />
     <ClCompile Include="..\..\source\model\metadatamanager.cpp" />
+    <ClCompile Include="..\..\source\model\metadata\symboltable.cpp" />
     <ClCompile Include="..\..\source\model\physics\codingphysicalquantities.cpp" />
     <ClCompile Include="..\..\source\model\physics\physics.cpp" />
     <ClCompile Include="..\..\source\model\simulationcontroller.cpp" />

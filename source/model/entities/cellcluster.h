@@ -39,8 +39,6 @@ public:
     virtual const quint64& getId () const = 0;
     virtual void setId (quint64 id) = 0;
     virtual QList< quint64 > getCellIds () const = 0;
-    virtual quint64 getColor () const = 0;
-    virtual void setColor (quint64 color) = 0;
     virtual QVector3D getPosition () const = 0;
     virtual void setPosition (QVector3D pos, bool updateTransform = true) = 0;
     virtual qreal getAngle () const = 0;  //in degrees
@@ -59,6 +57,9 @@ public:
     virtual Cell* findNearestCell (QVector3D pos) const = 0;
     virtual void getConnectedComponent(Cell* cell, QList< Cell* >& component) const = 0;
     virtual void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const = 0;
+
+	virtual CellClusterMetadata getMetadata() const = 0;
+	virtual void setMetadata(CellClusterMetadata metadata) = 0;
 
     virtual void serializePrimitives (QDataStream& stream) const = 0;
 	virtual void deserializePrimitives (QDataStream& stream) = 0;

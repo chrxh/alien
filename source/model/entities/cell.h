@@ -60,13 +60,14 @@ public:
 
     virtual QVector3D getVel () const = 0;
     virtual void setVel (QVector3D vel) = 0;
-    virtual quint8 getColor () const = 0;
-    virtual void setColor (quint8 color) = 0;
     virtual int getProtectionCounter () const = 0;
     virtual void setProtectionCounter (int counter) = 0;
     virtual bool isToBeKilled() const = 0;
     virtual void setToBeKilled (bool toBeKilled) = 0;
     virtual Token* takeTokenFromStack () = 0;
+
+	virtual CellMetadata getMetadata() const = 0;
+	virtual void setMetadata(CellMetadata metadata) = 0;
 
     virtual void serializePrimitives (QDataStream& stream) const = 0;
     virtual void deserializePrimitives(QDataStream& stream) = 0;

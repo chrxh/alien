@@ -393,16 +393,6 @@ void CellImpl::setVel (QVector3D vel)
     _vel = vel;
 }
 
-quint8 CellImpl::getColor () const
-{
-    return _color;
-}
-
-void CellImpl::setColor (quint8 color)
-{
-    _color = color;
-}
-
 int CellImpl::getProtectionCounter () const
 {
     return _protectionCounter;
@@ -421,6 +411,16 @@ bool CellImpl::isToBeKilled() const
 void CellImpl::setToBeKilled (bool toBeKilled)
 {
     _toBeKilled = toBeKilled;
+}
+
+CellMetadata CellImpl::getMetadata() const
+{
+	return _metadata;
+}
+
+void CellImpl::setMetadata(CellMetadata metadata)
+{
+	_metadata = metadata;
 }
 
 Token* CellImpl::takeTokenFromStack ()
@@ -451,7 +451,7 @@ void CellImpl::serializePrimitives (QDataStream& stream) const
     }
 	*/
     //remaining data
-    stream << _tokenAccessNumber << _blockToken << _vel << _color;
+    stream << _tokenAccessNumber << _blockToken << _vel;
 }
 
 void CellImpl::deserializePrimitives(QDataStream& stream)
@@ -495,7 +495,7 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
 	}
 	*/
 	//remaining data
-	stream >> _tokenAccessNumber >> _blockToken >> _vel >> _color;
+	stream >> _tokenAccessNumber >> _blockToken >> _vel;
 }
 
 

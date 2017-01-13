@@ -14,57 +14,58 @@ public:
 
     ~CellClusterImpl ();
 
-    void clearCellsFromMap ();
-    void clearCellFromMap (Cell* cell);
-    void drawCellsToMap ();
+    void clearCellsFromMap () override;
+    void clearCellFromMap (Cell* cell) override;
+    void drawCellsToMap () override;
 
-    void processingInit ();
-    void processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles);
-    void processingMovement ();
-    void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose);
-    void processingFinish ();
+    void processingInit () override;
+    void processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles) override;
+    void processingMovement () override;
+    void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose) override;
+    void processingFinish () override;
 
-    void addCell (Cell* cell, QVector3D absPos);
-    void removeCell (Cell* cell, bool maintainCenter = true);
-    void updateCellVel (bool forceCheck = true);
-    void updateAngularMass ();
-    void updateRelCoordinates (bool maintainCenter = false);
-    void updateVel_angularVel_via_cellVelocities ();
-    QVector3D calcPosition (const Cell *cell, bool topologyCorrection = false) const;
-    QVector3D calcCellDistWithoutTorusCorrection (Cell* cell) const;
-    QList< CellCluster* > decompose () const;
-    qreal calcAngularMassWithNewParticle (QVector3D particlePos) const;
-    qreal calcAngularMassWithoutUpdate () const;
+    void addCell (Cell* cell, QVector3D absPos) override;
+    void removeCell (Cell* cell, bool maintainCenter = true) override;
+    void updateCellVel (bool forceCheck = true) override;
+    void updateAngularMass () override;
+    void updateRelCoordinates (bool maintainCenter = false) override;
+    void updateVel_angularVel_via_cellVelocities () override;
+    QVector3D calcPosition (const Cell *cell, bool topologyCorrection = false) const override;
+    QVector3D calcCellDistWithoutTorusCorrection (Cell* cell) const override;
+    QList< CellCluster* > decompose () const override;
+    qreal calcAngularMassWithNewParticle (QVector3D particlePos) const override;
+    qreal calcAngularMassWithoutUpdate () const override;
 
-    bool isEmpty() const;
+    bool isEmpty() const override;
 
-    QList< Cell* >& getCellsRef();
-    const quint64& getId () const;
-    void setId (quint64 id);
-    QList< quint64 > getCellIds () const;
-    quint64 getColor () const;
-    void setColor (quint64 color);
-    QVector3D getPosition () const;
-    void setPosition (QVector3D pos, bool updateTransform = true);
-    qreal getAngle () const;
-    void setAngle (qreal angle, bool updateTransform = true);
-    QVector3D getVel () const;
-    void setVel (QVector3D vel);
-    qreal getMass () const;
-    qreal getAngularVel () const;
-    void setAngularVel (qreal vel);
-    qreal getAngularMass () const;
-    void updateTransformationMatrix ();
-    QVector3D relToAbsPos (QVector3D relPos) const;
-    QVector3D absToRelPos (QVector3D absPos) const;
+    QList< Cell* >& getCellsRef() override;
+    const quint64& getId () const override;
+    void setId (quint64 id) override;
+    QList< quint64 > getCellIds () const override;
+    QVector3D getPosition () const override;
+    void setPosition (QVector3D pos, bool updateTransform = true) override;
+    qreal getAngle () const override;
+    void setAngle (qreal angle, bool updateTransform = true) override;
+    QVector3D getVel () const override;
+    void setVel (QVector3D vel) override;
+    qreal getMass () const override;
+    qreal getAngularVel () const override;
+    void setAngularVel (qreal vel) override;
+    qreal getAngularMass () const override;
+    void updateTransformationMatrix () override;
+    QVector3D relToAbsPos (QVector3D relPos) const override;
+    QVector3D absToRelPos (QVector3D absPos) const override;
 
-    void findNearestCells (QVector3D pos, Cell*& cell1, Cell*& cell2) const;
-    Cell* findNearestCell (QVector3D pos) const;
-    void getConnectedComponent(Cell* cell, QList< Cell* >& component) const;
-    void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const;
+    void findNearestCells (QVector3D pos, Cell*& cell1, Cell*& cell2) const override;
+    Cell* findNearestCell (QVector3D pos) const override;
+    void getConnectedComponent(Cell* cell, QList< Cell* >& component) const override;
+    void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const override;
 
-    void serializePrimitives (QDataStream& stream) const;
-	virtual void deserializePrimitives(QDataStream& stream);
+	CellClusterMetadata getMetadata() const override;
+	void setMetadata(CellClusterMetadata metadata) override;
+
+    void serializePrimitives (QDataStream& stream) const override;
+	virtual void deserializePrimitives(QDataStream& stream) override;
 
 private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
@@ -84,7 +85,8 @@ private:
     QList< Cell* > _cells;
 
     quint64 _id = 0;
-    quint64 _color = 0;
+
+	CellClusterMetadata _meta;
 };
 
 

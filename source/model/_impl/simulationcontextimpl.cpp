@@ -2,7 +2,7 @@
 #include "model/energyparticlemap.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
-#include "model/metadatamanager.h"
+#include "model/metadata/symboltable.h"
 
 #include "simulationcontextimpl.h"
 
@@ -11,7 +11,7 @@ SimulationContextImpl::SimulationContextImpl()
 	_topology = new Topology();
 	_energyParticleMap = new EnergyParticleMap(_topology);
 	_cellMap = new CellMap(_topology);
-	_meta = new MetadataManager();
+	_symbolTable = new SymbolTable();
 }
 
 SimulationContextImpl::~SimulationContextImpl ()
@@ -52,9 +52,9 @@ CellMap* SimulationContextImpl::getCellMap () const
     return _cellMap;
 }
 
-MetadataManager * SimulationContextImpl::getMetadataManager() const
+SymbolTable* SimulationContextImpl::getSymbolTable() const 
 {
-	return _meta;
+	return _symbolTable;
 }
 
 QList<CellCluster*>& SimulationContextImpl::getClustersRef ()

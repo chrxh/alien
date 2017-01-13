@@ -19,7 +19,7 @@ public:
     Topology* getTopology () const override;
     EnergyParticleMap* getEnergyParticleMap () const override;
     CellMap* getCellMap () const override;
-	MetadataManager* getMetadataManager() const override;
+	SymbolTable* getSymbolTable() const override;
 
 	QList<CellCluster*>& getClustersRef() override;
     QList<EnergyParticle*>& getEnergyParticlesRef () override;
@@ -34,7 +34,7 @@ private:
     Topology* _topology = nullptr;
     EnergyParticleMap* _energyParticleMap = nullptr;
     CellMap* _cellMap = nullptr;
-	MetadataManager* _meta = nullptr;
+	SymbolTable* _symbolTable = nullptr;
 };
 
 #endif // SIMULATIONCONTEXTIMPL_H

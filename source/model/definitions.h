@@ -12,6 +12,9 @@
 #include <set>
 #include <unordered_set>
 
+#include "model/metadata/cellmetadata.h"
+#include "model/metadata/cellclustermetadata.h"
+
 class Cell;
 class CellCluster;
 class Grid;
@@ -23,7 +26,7 @@ class CellMap;
 class EnergyParticleMap;
 class Topology;
 class SimulationContext;
-class MetadataManager;
+class SymbolTable;
 
 class EntityFactory;
 

@@ -1,6 +1,6 @@
 #include "cellfunctionsensorimpl.h"
 
-#include "model/simulationsettings.h"
+#include "model/config.h"
 #include "model/simulationcontext.h"
 #include "model/cellmap.h"
 #include "model/topology.h"

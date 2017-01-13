@@ -1,14 +1,14 @@
 #ifndef CELLMETADATA_H
 #define CELLMETADATA_H
 
-#include "model/definitions.h"
+#include <QString>
 
 struct CellMetadata
 {
     QString computerSourcecode;
     QString name;
     QString description;
-    quint8 color;
+    quint8 color = 0;
 };
 
 #endif // CELLMETADATA_H

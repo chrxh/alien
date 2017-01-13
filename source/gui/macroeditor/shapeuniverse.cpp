@@ -619,7 +619,7 @@ CellGraphicsItem* ShapeUniverse::createCellItem (Cell* cell)
     //create item
     QVector3D pos(cell->calcPosition());
     bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
-    CellGraphicsItem* cellItem = new CellGraphicsItem(cell, pos.x(), pos.y(), connectable, cell->getNumToken(), cell->getColor());
+    CellGraphicsItem* cellItem = new CellGraphicsItem(cell, pos.x(), pos.y(), connectable, cell->getNumToken(), cell->getMetadata().color);
     QGraphicsScene::addItem(cellItem);
 
     //register item
@@ -717,7 +717,8 @@ void ShapeUniverse::setCellColorFromMetadata ()
     while( it.hasNext() ) {
         it.next();
         CellGraphicsItem* cellItem = it.value();
-        cellItem->setColor(cellItem->getCell()->getColor());
+		Cell* cell = cellItem->getCell();
+        cellItem->setColor(cell->getMetadata().color);
     }
 }
 

@@ -24,7 +24,6 @@ CellClusterImpl::CellClusterImpl (SimulationContext* context)
     ,  _topology(context->getTopology())
     ,  _cellMap(context->getCellMap())
     ,  _id(GlobalFunctions::createNewTag())
-    ,  _color(GlobalFunctions::createNewTag())
 {
     updateTransformationMatrix();
 }
@@ -40,7 +39,6 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D po
     ,  _vel(vel)
     ,  _cells(cells)
     ,  _id(GlobalFunctions::createNewTag())
-    ,  _color(GlobalFunctions::createNewTag())
 {
     _topology->correctPosition(_pos);
     foreach(Cell* cell, _cells) {
@@ -58,7 +56,6 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationCo
     ,  _angle(angle)
     ,  _cells(cells)
     ,  _id(GlobalFunctions::createNewTag())
-    ,  _color(GlobalFunctions::createNewTag())
 {
     //calc new center
     QVector3D center;
@@ -165,7 +162,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
                 + kinEnergy / simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
             energyParticle = factory->buildEnergyParticle(
                 energyForParticle, calcPosition(cell, true), cell->getVel(), _context);
-            energyParticle->color = cell->getColor();
+            energyParticle->color = cell->getMetadata().color;
             energyParticles << energyParticle;
             cell->setEnergy(0.0);
 
@@ -239,17 +236,6 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
                 if( cell->getEnergy() > (-diffEnergyCell) )
                     cell->setEnergy(cell->getEnergy() + diffEnergyCell);
             }
-
-        //largest CellClusterImpl inherits the color
-        int largestSize(0);
-        CellCluster* largestCluster(0);
-        foreach( CellCluster* cluster, fragments) {
-            if( cluster->getCellsRef().size() > largestSize ) {
-                largestSize = cluster->getCellsRef().size();
-                largestCluster = cluster;
-            }
-        }
-        largestCluster->setColor(_color);
     }
 }
 
@@ -463,11 +449,6 @@ void CellClusterImpl::processingMovement ()
                 qreal mB = otherCluster->getCellsRef().size();
                 qreal eKinOld1 = Physics::kineticEnergy(mA, _vel, _angularMass, _angularVel);
                 qreal eKinOld2 = Physics::kineticEnergy(mB, otherCluster->getVel(), otherCluster->getAngularMass(), otherCluster->getAngularVel());
-
-                if( otherCluster->getCellsRef().size() > _cells.size() )
-                    _color = otherCluster->getColor();
-
-//                qDebug("cluster center: (%f, %f)",_pos.x(), _pos.y);
 
                 //calculate new center
                 QVector3D centre(0.0,0.0,0.0);
@@ -953,16 +934,6 @@ QList< quint64 > CellClusterImpl::getCellIds () const
     return ids;
 }
 
-quint64 CellClusterImpl::getColor () const
-{
-    return _color;
-}
-
-void CellClusterImpl::setColor (quint64 color)
-{
-    _color = color;
-}
-
 QVector3D CellClusterImpl::getPosition () const
 {
     return _pos;
@@ -1092,8 +1063,18 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
             , calcPosition(originCell)+posPerturbation
             , originCell->getVel()*simulationParameters.CELL_RAD_ENERGY_VEL_MULT+velPerturbation
             , _context);
-        energyParticle->color = originCell->getColor();
+        energyParticle->color = originCell->getMetadata().color;
     }
+}
+
+CellClusterMetadata CellClusterImpl::getMetadata() const
+{
+	return _meta;
+}
+
+void CellClusterImpl::setMetadata(CellClusterMetadata metadata)
+{
+	_meta = metadata;
 }
 
 void CellClusterImpl::serializePrimitives (QDataStream& stream) const
@@ -1104,13 +1085,13 @@ void CellClusterImpl::serializePrimitives (QDataStream& stream) const
     foreach( Cell* cell, _cells ) {
         facade->serializeFeaturedCell(cell, stream);
     }*/
-    stream << _id << _color;
+    stream << _id;
 }
 
 void CellClusterImpl::deserializePrimitives(QDataStream& stream)
 {
 	stream >> _angle >> _pos >> _angularVel >> _vel;
-	stream >> _id >> _color;
+	stream >> _id;
 }
 
 /*

@@ -85,7 +85,7 @@ void PixelUniverse::universeUpdated (Grid* grid)
                 if(cell->getNumToken() > 0 )
                     _image->setPixel(x, y, 0xFFFFFF);
                 else {
-                    quint8 color = cell->getColor();
+                    quint8 color = cell->getMetadata().color;
                     if( color == 0 ) {
                         r = INDIVIDUAL_CELL_COLOR1.red();
                         g = INDIVIDUAL_CELL_COLOR1.green();

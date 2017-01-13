@@ -19,7 +19,7 @@ public:
     virtual Topology* getTopology () const = 0;
 	virtual EnergyParticleMap* getEnergyParticleMap() const = 0;
 	virtual CellMap* getCellMap() const = 0;
-	virtual MetadataManager* getMetadataManager() const = 0;
+	virtual SymbolTable* getSymbolTable() const = 0;
 
 	virtual QList<CellCluster*>& getClustersRef() = 0;
     virtual QList<EnergyParticle*>& getEnergyParticlesRef () = 0;
