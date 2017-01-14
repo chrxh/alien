@@ -14,7 +14,7 @@ struct CellMetadata_old
     QString clusterName;
 };
 
-class MetadataManager
+/*class MetadataManager
 {
 public:
     static MetadataManager& getGlobalInstance ();
@@ -24,8 +24,6 @@ public:
 
     void setCellCode (quint64 id, QString code);
     QString getCellCode (quint64 id);
-//    void setCellColorNumber(quint64 id, quint8 color);
-//    quint8 getCellColorNumber (quint64 id);
     void setCellName (quint64 id, QString name);
     QString getCellName (quint64 id);
     void setCellDescription (quint64 id, QString descr);
@@ -59,5 +57,5 @@ private:
     QMap< quint64, CellMetadata_old > _idCellMetadataMap;
     QMap< QString, QString > _symbolTable;
 };
-
+*/
 #endif // METADATAMANAGER_H

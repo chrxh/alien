@@ -23,7 +23,7 @@ void SymbolTable::clearTable()
 	_symbolTable.clear();
 }
 
-QMap< QString, QString > const& SymbolTable::getTable() const
+QMap< QString, QString > const& SymbolTable::getTableConstRef() const
 {
 	return _symbolTable;
 }
@@ -31,6 +31,11 @@ QMap< QString, QString > const& SymbolTable::getTable() const
 void SymbolTable::setTable(const QMap< QString, QString >& table)
 {
 	_symbolTable = table;
+}
+
+void SymbolTable::merge(SymbolTable const& table)
+{
+	_symbolTable.unite(table._symbolTable);
 }
 
 void SymbolTable::serializePrimitives(QDataStream& stream) const

@@ -10,9 +10,9 @@
 
 #include <QDebug>
 
-NewSimulationDialog::NewSimulationDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::NewSimulationDialog)
+NewSimulationDialog::NewSimulationDialog(QWidget *parent)
+	: QDialog(parent)
+	, ui(new Ui::NewSimulationDialog)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
@@ -33,22 +33,21 @@ NewSimulationDialog::~NewSimulationDialog()
     delete ui;
 }
 
-int NewSimulationDialog::getSizeX ()
+IntVector2D NewSimulationDialog::getSize ()
 {
     bool ok(true);
-    return ui->sizeXEdit->text().toInt(&ok);
-}
-
-int NewSimulationDialog::getSizeY ()
-{
-    bool ok(true);
-    return ui->sizeYEdit->text().toInt(&ok);
+	return{ ui->sizeXEdit->text().toInt(&ok), ui->sizeYEdit->text().toInt(&ok) };
 }
 
 qreal NewSimulationDialog::getEnergy ()
 {
     bool ok(true);
     return ui->energyEdit->text().toDouble(&ok);
+}
+
+SymbolTable * NewSimulationDialog::getSymbolTable()
+{
+	return _symTblDialog->getNewSymbolTableRef();
 }
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
@@ -64,7 +63,6 @@ void NewSimulationDialog::symbolTableButtonClicked ()
 void NewSimulationDialog::okButtonClicked ()
 {
     _simParaDialog->updateSimulationParameters();
-    _symTblDialog->updateSymbolTable(&MetadataManager::getGlobalInstance());
 }
 
 

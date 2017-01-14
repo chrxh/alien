@@ -12,6 +12,9 @@ public:
     void serializeSimulationContext(SimulationContext* context, QDataStream& stream) const override;
     SimulationContext* deserializeSimulationContext(QDataStream& stream) const override;
 
+	void serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const override;
+	SymbolTable* deserializeSymbolTable(QDataStream& stream) const override;
+
     void serializeCellCluster(CellCluster* cluster, QDataStream& stream) const override;
     virtual CellCluster* deserializeCellCluster(QDataStream& stream, SimulationContext* context) const override;
 

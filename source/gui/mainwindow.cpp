@@ -230,8 +230,6 @@ void MainWindow::newSimulation ()
         _simulator->newUniverse(d.getSizeX(), d.getSizeY());
         _simulator->addRandomEnergy (d.getEnergy(), simulationParameters.CRIT_CELL_TRANSFORM_ENERGY);
 
-        //create energy
-
         //reset editors
         ui->macroEditor->reset();
         _microEditor->updateSymbolTable();
@@ -580,7 +578,7 @@ void MainWindow::editSymbolTable ()
     if( d.exec() ) {
 
         //update symbol table
-        d.updateSymbolTable(&MetadataManager::getGlobalInstance());
+        d.widgetsToSymbolTable(&MetadataManager::getGlobalInstance());
 
         //update editor
         _microEditor->updateSymbolTable();

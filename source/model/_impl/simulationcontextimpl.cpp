@@ -14,6 +14,14 @@ SimulationContextImpl::SimulationContextImpl()
 	_symbolTable = new SymbolTable();
 }
 
+SimulationContextImpl::SimulationContextImpl(SymbolTable * symbolTable)
+	: _symbolTable(symbolTable)
+{
+	_topology = new Topology();
+	_energyParticleMap = new EnergyParticleMap(_topology);
+	_cellMap = new CellMap(_topology);
+}
+
 SimulationContextImpl::~SimulationContextImpl ()
 {
 	deleteAttributes();
