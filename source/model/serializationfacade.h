@@ -11,6 +11,9 @@ public:
     virtual void serializeSimulationContext(SimulationContext* context, QDataStream& stream) const = 0;
     virtual SimulationContext* deserializeSimulationContext(QDataStream& stream) const = 0;
 
+	virtual void serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const = 0;
+	virtual SymbolTable* deserializeSymbolTable(QDataStream& stream) const = 0;
+
     virtual void serializeCellCluster(CellCluster* cluster, QDataStream& stream) const = 0;
     virtual CellCluster* deserializeCellCluster(QDataStream& stream, SimulationContext* context) const = 0;
 

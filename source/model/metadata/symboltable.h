@@ -7,12 +7,13 @@ class SymbolTable
 {
 public:
 
-    void addEntry (QString const& key, QString const& value);
-    void delEntry (QString const& key);
-    QString applyTableToCode (QString const& input) const;
-    void clearTable ();
-    QMap< QString, QString > const& getTable () const;
-    void setTable (QMap< QString, QString > const& table);
+    void addEntry(QString const& key, QString const& value);
+    void delEntry(QString const& key);
+    QString applyTableToCode(QString const& input) const;
+    void clearTable();
+    QMap< QString, QString > const& getTableConstRef () const;
+    void setTable(QMap< QString, QString > const& table);
+	void merge(SymbolTable const& table);
 
     void serializePrimitives (QDataStream& stream) const;
     void deserializePrimitives (QDataStream& stream);

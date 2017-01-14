@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QDataStream>
 #include <set>
-
+/*
 MetadataManager& MetadataManager::getGlobalInstance ()
 {
     static MetadataManager instance;
@@ -191,12 +191,6 @@ void MetadataManager::serializeMetadataEnsemble (QDataStream& stream, const QLis
         stream << cellId << code << name << descr << clusterName;
     }
 
-    //cluster data
-/*    size = clusterIds.size();
-    stream << size;
-    foreach(quint64 clusterId, clusterIds) {
-        stream << clusterId << getClusterName(clusterId);
-    }*/
 }
 
 void MetadataManager::readMetadata (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap)
@@ -220,15 +214,6 @@ void MetadataManager::readMetadata (QDataStream& stream, const QMap< quint64, qu
             setClusterName(oldNewCellIdMap[id], clusterName);
         }
     }
-
-    //cluster data
-/*    stream >> size;
-    for(int i = 0; i < size; ++i) {
-        stream >> id >> name;
-        if( oldNewClusterIdMap.contains(id) ) {
-            setClusterName(oldNewClusterIdMap[id], name);
-        }
-    }*/
 }
 
 void MetadataManager::serializeMetadataUniverse (QDataStream& stream)
@@ -243,17 +228,6 @@ void MetadataManager::serializeMetadataUniverse (QDataStream& stream)
         CellMetadata_old cellMeta = it.value();
         stream << cellId << cellMeta.computerCode << cellMeta.name << cellMeta.description << cellMeta.clusterName;
     }
-
-    //cluster data
-/*    size = _idClusterMetadataMap.size();
-    stream << size;
-    QMapIterator< quint64, CellClusterMetadata > it2(_idClusterMetadataMap);
-    while(it2.hasNext()) {
-        it2.next();
-        quint64 clusterId = it2.key();
-        CellClusterMetadata clusterMeta = it2.value();
-        stream << clusterId << clusterMeta.clusterName;
-    }*/
 }
 
 void MetadataManager::readMetadataUniverse (QDataStream& stream, const QMap< quint64, quint64 >& oldNewClusterIdMap, const QMap< quint64, quint64 >& oldNewCellIdMap)
@@ -279,7 +253,7 @@ void MetadataManager::readSymbolTable (QDataStream& stream, bool merge)
         _symbolTable.insert(it.key(), it.value());
     }
 }
-
+*/
 
 
 

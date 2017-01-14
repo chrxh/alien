@@ -9,6 +9,7 @@ class SimulationContextImpl : public SimulationContext
 {
 public:
 	SimulationContextImpl();
+	SimulationContextImpl(SymbolTable* symbolTable);
 	virtual ~SimulationContextImpl();
 
 	void init(IntVector2D size) override;
