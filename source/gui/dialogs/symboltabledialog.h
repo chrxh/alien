@@ -3,23 +3,24 @@
 
 #include <QDialog>
 
+#include "model/definitions.h"
+
 namespace Ui {
 class SymbolTableDialog;
 }
 
-class MetadataManager;
 class SymbolTableDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit SymbolTableDialog (QWidget *parent = 0);
-    ~SymbolTableDialog();
+	SymbolTableDialog(SymbolTable const& symbolTable, QWidget *parent = 0);
+	~SymbolTableDialog();
 
-    void updateSymbolTable (MetadataManager* meta);
+    SymbolTable const& getNewSymbolTableRef ();
 
 private slots:
-    void setSymbolTableToWidget (MetadataManager* meta);
+    void symbolTableToWidgets ();
     void itemSelectionChanged ();
     void addButtonClicked ();
     void delButtonClicked ();
@@ -29,7 +30,10 @@ private slots:
     void mergeWithButtonClicked ();
 
 private:
+	void widgetsToSymbolTable();
+
     Ui::SymbolTableDialog *ui;
+	SymbolTable _symbolTable;
 };
 
 #endif // SYMBOLTABLEDIALOG_H

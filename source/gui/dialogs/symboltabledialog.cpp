@@ -1,21 +1,22 @@
-#include "symboltabledialog.h"
-#include "ui_symboltabledialog.h"
-
-#include "gui/guisettings.h"
-#include "model/config.h"
-#include "model/metadatamanager.h"
-
 #include <QFileDialog>
 #include <QMessageBox>
 
-SymbolTableDialog::SymbolTableDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::SymbolTableDialog)
+#include "global/servicelocator.h"
+#include "model/config.h"
+#include "model/serializationfacade.h"
+#include "model/metadata/symboltable.h"
+#include "gui/guisettings.h"
+
+#include "symboltabledialog.h"
+#include "ui_symboltabledialog.h"
+
+SymbolTableDialog::SymbolTableDialog(SymbolTable const& symbolTable, QWidget *parent)
+	: QDialog(parent)
+	, ui(new Ui::SymbolTableDialog)
+	, _symbolTable(symbolTable)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
-
-//    _localMeta.setSymbolTable(meta->getSymbolTable());
 
     //create headers
     ui->tableWidget->horizontalHeader()->resizeSection(0, 400);
@@ -25,11 +26,10 @@ SymbolTableDialog::SymbolTableDialog(QWidget *parent) :
     ui->tableWidget->horizontalHeaderItem(1)->setFont(GuiFunctions::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(1)->setTextAlignment(Qt::AlignLeft);
 
-    setSymbolTableToWidget(&MetadataManager::getGlobalInstance());
+    symbolTableToWidgets();
 
     //connections
     connect(ui->tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()));
-//    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(getSymbolTableFromWidgets()));
     connect(ui->addButton, SIGNAL(clicked()), this, SLOT(addButtonClicked()));
     connect(ui->delButton, SIGNAL(clicked()), this, SLOT(delButtonClicked()));
     connect(ui->defaultButton, SIGNAL(clicked()), this, SLOT(defaultButtonClicked()));
@@ -43,24 +43,30 @@ SymbolTableDialog::~SymbolTableDialog()
     delete ui;
 }
 
-void SymbolTableDialog::updateSymbolTable (MetadataManager* meta)
+SymbolTable const& SymbolTableDialog::getNewSymbolTableRef()
 {
-    meta->clearSymbolTable();
+	widgetsToSymbolTable();
+	return _symbolTable;
+}
+
+void SymbolTableDialog::widgetsToSymbolTable ()
+{
+    _symbolTable.clearTable();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
         QTableWidgetItem* item1 = ui->tableWidget->item(i, 0);
         QTableWidgetItem* item2 = ui->tableWidget->item(i, 1);
-        meta->addSymbolEntry(item1->text(), item2->text());
+        _symbolTable.addEntry(item1->text(), item2->text());
     }
 }
 
-void SymbolTableDialog::setSymbolTableToWidget (MetadataManager* meta)
+void SymbolTableDialog::symbolTableToWidgets()
 {
     int row = ui->tableWidget->rowCount();
     for(int i = 0; i < row; ++i)
         ui->tableWidget->removeRow(0);
 
     //create entries in the table
-    QMapIterator< QString, QString > it = meta->getSymbolTable();
+    QMapIterator< QString, QString > it = _symbolTable.getTableConstRef();
     row = 0;
     while( it.hasNext() ) {
         it.next();
@@ -108,8 +114,6 @@ void SymbolTableDialog::delButtonClicked ()
     while( !ui->tableWidget->selectedItems().isEmpty() ) {
         QList< QTableWidgetItem* > items = ui->tableWidget->selectedItems();
         int row = items.at(0)->row();
-//        QString key = ui->tableWidget->item(row, 0)->text();
-//        _meta->delSymbolEntry(key);
         ui->tableWidget->removeRow(row);
     }
     if( ui->tableWidget->rowCount() == 0 )
@@ -118,25 +122,23 @@ void SymbolTableDialog::delButtonClicked ()
 
 void SymbolTableDialog::defaultButtonClicked ()
 {
-    MetadataManager* localMeta = new MetadataManager();
-    Metadata::loadDefaultMetadata(localMeta);
-    setSymbolTableToWidget(localMeta);
-    delete localMeta;
+	_symbolTable = SymbolTable();
+    symbolTableToWidgets();
 }
 
 void SymbolTableDialog::loadButtonClicked ()
 {
-    MetadataManager* localMeta = new MetadataManager();
-    Metadata::loadDefaultMetadata(localMeta);
     QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
+			QDataStream in(&file);
 
-            //read simulation data
-            QDataStream in(&file);
-            localMeta->readSymbolTable(in, false);
-            setSymbolTableToWidget(localMeta);
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
+			_symbolTable = *symbolTable;
+			delete symbolTable;
+            symbolTableToWidgets();
             file.close();
         }
         else {
@@ -144,7 +146,6 @@ void SymbolTableDialog::loadButtonClicked ()
             msgBox.exec();
         }
     }
-    delete localMeta;
 }
 
 void SymbolTableDialog::saveButtonClicked ()
@@ -153,16 +154,12 @@ void SymbolTableDialog::saveButtonClicked ()
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
+			widgetsToSymbolTable();
 
-            MetadataManager* localMeta = new MetadataManager();
-            Metadata::loadDefaultMetadata(localMeta);
-            updateSymbolTable(localMeta);
-
-            //serialize symbol table
-            QDataStream out(&file);
-            localMeta->serializeSymbolTable(out);
-            file.close();
-            delete localMeta;
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+			QDataStream out(&file);
+			facade->serializeSymbolTable(&_symbolTable, out);
+			file.close();
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The symbol table could not saved.");
@@ -177,15 +174,16 @@ void SymbolTableDialog::mergeWithButtonClicked ()
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
+			widgetsToSymbolTable();
 
-            //read simulation data
-            MetadataManager* localMeta = new MetadataManager();
-            Metadata::loadDefaultMetadata(localMeta);
-            updateSymbolTable(localMeta);
-            QDataStream in(&file);
-            localMeta->readSymbolTable(in, true);
-            setSymbolTableToWidget(localMeta);
-            file.close();
+			QDataStream in(&file);
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
+			_symbolTable.merge(*symbolTable);
+			delete symbolTable;
+			file.close();
+
+			symbolTableToWidgets();
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified symbol table could not loaded.");

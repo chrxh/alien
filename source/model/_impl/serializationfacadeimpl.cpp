@@ -29,6 +29,27 @@ SerializationFacadeImpl::SerializationFacadeImpl()
     ServiceLocator::getInstance().registerService<SerializationFacade>(this);
 }
 
+void SerializationFacadeImpl::serializeSimulationContext(SimulationContext * context, QDataStream & stream) const
+{
+	context->getTopology()->serializePrimitives(stream);
+
+	auto const& clusters = context->getClustersRef();
+	quint32 numCluster = clusters.size();
+	stream << numCluster;
+	foreach(CellCluster* cluster, clusters)
+		serializeCellCluster(cluster, stream);
+
+	auto const& energyParticles = context->getEnergyParticlesRef();
+	quint32 numEnergyParticles = energyParticles.size();
+	stream << numEnergyParticles;
+	foreach(EnergyParticle* e, energyParticles)
+		e->serializePrimitives(stream);
+
+	context->getCellMap()->serializePrimitives(stream);
+	context->getEnergyParticleMap()->serializePrimitives(stream);
+	context->getSymbolTable()->serializePrimitives(stream);
+}
+
 SimulationContext * SerializationFacadeImpl::deserializeSimulationContext(QDataStream & stream) const
 {
 	//mapping old ids to new ids
@@ -68,25 +89,15 @@ SimulationContext * SerializationFacadeImpl::deserializeSimulationContext(QDataS
 	return context;
 }
 
-void SerializationFacadeImpl::serializeSimulationContext(SimulationContext * context, QDataStream & stream) const
+void SerializationFacadeImpl::serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const
 {
-	context->getTopology()->serializePrimitives(stream);
+	symbolTable->serializePrimitives(stream);
+}
 
-	auto const& clusters = context->getClustersRef();
-	quint32 numCluster = clusters.size();
-	stream << numCluster;
-	foreach(CellCluster* cluster, clusters)
-		serializeCellCluster(cluster, stream);
-
-	auto const& energyParticles = context->getEnergyParticlesRef();
-	quint32 numEnergyParticles = energyParticles.size();
-	stream << numEnergyParticles;
-	foreach(EnergyParticle* e, energyParticles)
-		e->serializePrimitives(stream);
-
-	context->getCellMap()->serializePrimitives(stream);
-	context->getEnergyParticleMap()->serializePrimitives(stream);
-	context->getSymbolTable()->serializePrimitives(stream);
+SymbolTable* SerializationFacadeImpl::deserializeSymbolTable(QDataStream& stream) const
+{
+	SymbolTable* symbolTable = new SymbolTable();
+	symbolTable->deserializePrimitives(stream);
 }
 
 void SerializationFacadeImpl::serializeCellCluster(CellCluster* cluster, QDataStream& stream) const
@@ -169,6 +180,30 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     return deserializeCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, context);
 }
 
+void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& stream) const
+{
+	cell->serializePrimitives(stream);
+	CellFeature* features = cell->getFeatures();
+	CellFunction* cellFunction = features->findObject<CellFunction>();
+	if (cellFunction) {
+		stream << static_cast<quint8>(cellFunction->getType());
+		cellFunction->serializePrimitives(stream);
+	}
+
+	int numToken = cell->getNumToken();
+	for (int i = 0; i < numToken; ++i) {
+		serializeToken(cell->getToken(i), stream);
+	}
+
+	int numConnections = cell->getNumConnections();
+	for (int i = 0; i < numConnections; ++i) {
+		stream << cell->getConnection(i)->getId();
+	}
+
+	CellMetadata meta = cell->getMetadata();
+	stream << meta.color << meta.computerSourcecode << meta.description << meta.name;
+}
+
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	, QMap< quint64, QList< quint64 > >& connectingCells, SimulationContext* context) const
 {
@@ -207,34 +242,15 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, SimulationContext* context) const
 {
-    QMap< quint64, QList< quint64 > > temp;
-    Cell* cell = deserializeFeaturedCell(stream, temp, context);
-    cell->setId(GlobalFunctions::createNewTag());
-    return cell;
+	QMap< quint64, QList< quint64 > > temp;
+	Cell* cell = deserializeFeaturedCell(stream, temp, context);
+	cell->setId(GlobalFunctions::createNewTag());
+	return cell;
 }
 
-void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& stream) const
+void SerializationFacadeImpl::serializeToken(Token* token, QDataStream& stream) const
 {
-	cell->serializePrimitives(stream);
-	CellFeature* features = cell->getFeatures();
-	CellFunction* cellFunction = features->findObject<CellFunction>();
-	if (cellFunction) {
-		stream << static_cast<quint8>(cellFunction->getType());
-		cellFunction->serializePrimitives(stream);
-	}
-
-	int numToken = cell->getNumToken();
-	for (int i = 0; i < numToken; ++i) {
-		serializeToken(cell->getToken(i), stream);
-	}
-
-	int numConnections = cell->getNumConnections();
-	for (int i = 0; i < numConnections; ++i) {
-		stream << cell->getConnection(i)->getId();
-	}
-
-	CellMetadata meta = cell->getMetadata();
-	stream << meta.color << meta.computerSourcecode << meta.description << meta.name;
+    token->serializePrimitives(stream);
 }
 
 Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream) const
@@ -245,9 +261,9 @@ Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream) const
     return token;
 }
 
-void SerializationFacadeImpl::serializeToken(Token* token, QDataStream& stream) const
+void SerializationFacadeImpl::serializeEnergyParticle(EnergyParticle* particle, QDataStream& stream) const
 {
-    token->serializePrimitives(stream);
+	particle->serializePrimitives(stream);
 }
 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
@@ -260,7 +276,6 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
     return particle;
 }
 
-
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
 	, SimulationContext* context) const
 {
@@ -268,10 +283,4 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
 	EnergyParticle* particle = deserializeEnergyParticle(stream, temp, context);
 	particle->id = GlobalFunctions::createNewTag();
 	return particle;
-}
-
-
-void SerializationFacadeImpl::serializeEnergyParticle(EnergyParticle* particle, QDataStream& stream) const
-{
-	particle->serializePrimitives(stream);
 }
