@@ -12,20 +12,14 @@
 #include "simulationunit.h"
 #include "simulationcontext.h"
 
-SimulationUnit::SimulationUnit (QObject* parent)
+SimulationUnit::SimulationUnit (SimulationContext* context, QObject* parent)
     : QObject(parent)
+	, _context(context)
 {
-
 }
 
 SimulationUnit::~SimulationUnit ()
 {
-}
-
-void SimulationUnit::init (SimulationContext* context)
-{
-	setRandomSeed(0);
-	_context = context;
 }
 
 void SimulationUnit::setRandomSeed(uint seed)

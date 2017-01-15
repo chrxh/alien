@@ -28,12 +28,12 @@ QMap< QString, QString > const& SymbolTable::getTableConstRef() const
 	return _symbolTable;
 }
 
-void SymbolTable::setTable(const QMap< QString, QString >& table)
+void SymbolTable::setTable(SymbolTable const& table)
 {
-	_symbolTable = table;
+	_symbolTable = table._symbolTable;
 }
 
-void SymbolTable::merge(SymbolTable const& table)
+void SymbolTable::mergeTable(SymbolTable const& table)
 {
 	_symbolTable.unite(table._symbolTable);
 }

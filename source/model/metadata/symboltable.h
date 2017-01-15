@@ -12,13 +12,11 @@ public:
     QString applyTableToCode(QString const& input) const;
     void clearTable();
     QMap< QString, QString > const& getTableConstRef () const;
-    void setTable(QMap< QString, QString > const& table);
-	void merge(SymbolTable const& table);
+    void setTable(SymbolTable const& table);
+	void mergeTable(SymbolTable const& table);
 
     void serializePrimitives (QDataStream& stream) const;
     void deserializePrimitives (QDataStream& stream);
-
-//    void uniteTable(QMap< QString, QString > const& otherTable);
 
 private:
     QMap<QString,QString> _symbolTable;

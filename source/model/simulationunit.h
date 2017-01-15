@@ -8,11 +8,10 @@ class SimulationUnit : public QObject
 {
     Q_OBJECT
 public:
-    SimulationUnit (QObject* parent = 0);
+    SimulationUnit (SimulationContext* context, QObject* parent = 0);
     ~SimulationUnit ();
 
-public slots:
-	void init(SimulationContext* context);
+	public slots:
 	void setRandomSeed(uint seed);
 
 public:
