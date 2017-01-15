@@ -179,7 +179,7 @@ void SymbolTableDialog::mergeWithButtonClicked ()
 			QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
-			_symbolTable.merge(*symbolTable);
+			_symbolTable.mergeTable(*symbolTable);
 			delete symbolTable;
 			file.close();
 

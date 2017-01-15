@@ -1,6 +1,13 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "microeditor.h"
+#include <QGraphicsScene>
+#include <QTimer>
+#include <QScrollBar>
+#include <QSpinBox>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QFont>
+
+#include "global/global.h"
+#include "global/servicelocator.h"
 #include "dialogs/addenergydialog.h"
 #include "dialogs/addrectstructuredialog.h"
 #include "dialogs/addhexagonstructuredialog.h"
@@ -14,33 +21,28 @@
 #include "misc/startscreencontroller.h"
 #include "gui/guisettings.h"
 #include "gui/editorsettings.h"
-#include "global/global.h"
 #include "model/config.h"
 #include "model/metadatamanager.h"
 #include "model/simulationcontroller.h"
+#include "model/simulationcontext.h"
+#include "model/serializationfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
+#include "model/metadata/symboltable.h"
+#include "microeditor.h"
 
-#include <QGraphicsScene>
-#include <QTimer>
-#include <QScrollBar>
-#include <QSpinBox>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QFont>
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
-MainWindow::MainWindow(SimulationController* simulator, QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    _simulator(simulator),
-    _microEditor(new MicroEditor(this)),
-    _timer(0),
-    _monitor(new SimulationMonitor(this)),
-    _tutorialWindow(new TutorialWindow(this)),
-    _startScreen(new StartScreenController(this)),
-    _oldFrame(0),
-    _frame(0),
-    _frameSec(0)
+MainWindow::MainWindow(SimulationController* simulator, QWidget *parent)
+	: QMainWindow(parent)
+	, ui(new Ui::MainWindow)
+	, _simulator(simulator)
+	, _microEditor(new MicroEditor(this))
+	, _oneSecondTimer(new QTimer(this))
+    , _monitor(new SimulationMonitor(this))
+    , _tutorialWindow(new TutorialWindow(this))
+    , _startScreen(new StartScreenController(this))
 {
     ui->setupUi(this);
 
@@ -83,19 +85,6 @@ MainWindow::MainWindow(SimulationController* simulator, QWidget *parent) :
     p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
     ui->fpsForcingButton->setPalette(p);
 
-
-/*    menuBar()->setStyleSheet("QMenuBar::item {background-color: #606060; selection-color: #ffffff; selection-background-color: #606090; color: #DDDDDD; }"
-                             "QMenuBar { background-color: #606060; selection-color: #ffffff; selection-background-color: #606090; color: #DDDDDD; }"
-                             "QMenu { background-color: #606060; selection-color: #ffffff; selection-background-color: #606090; color: #DDDDDD;}"
-                             );
-*/
-/*
-    //layout
-    QGridLayout* layout = new QGridLayout();
-    layout->addWidget(ui->microEditor, 0, 0);
-    delete ui->macroEditor->layout();
-    ui->macroEditor->setLayout(layout);
-*/
     //connect coordinators
     connect(_simulator, SIGNAL(cellCreated(Cell*)), ui->macroEditor, SLOT(cellCreated(Cell*)));
     connect(_simulator, SIGNAL(cellCreated(Cell*)), _microEditor, SLOT(cellFocused(Cell*)));
@@ -183,7 +172,7 @@ MainWindow::MainWindow(SimulationController* simulator, QWidget *parent) :
     connect(_monitor, SIGNAL(closed()), this, SLOT(alienMonitorClosed()));
 
     //connect fps widgets
-    connect(_simulator, SIGNAL(calcNextTimestep()), this, SLOT( incFrame() ));
+    connect(_simulator, SIGNAL(calcNextTimestep()), this, SLOT(updateFrameLabel()));
     connect(ui->fpsForcingButton, SIGNAL(toggled(bool)), this, SLOT(fpsForcingButtonClicked(bool)));
     connect(ui->fpsForcingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(fpsForcingSpinboxClicked()));
 
@@ -199,11 +188,9 @@ MainWindow::MainWindow(SimulationController* simulator, QWidget *parent) :
     f.setItalic(true);
     ui->frameLabel->setFont(f);
 
-    //init frame counter
-    incFrame();
-    _timer = new QTimer(this);
-    connect(_timer, SIGNAL(timeout()), this, SLOT(timeout()));
-    _timer->start(1000);
+    //init timer
+    connect(_oneSecondTimer, SIGNAL(oneSecondTimeout()), this, SLOT(oneSecondTimeout()));
+    _oneSecondTimer->start(1000);
 
     //connect and run start screen
 //    connect(_startScreen, SIGNAL(startScreenFinished()), ui->actionEditor, SLOT(setEnabled(bool)));
@@ -218,16 +205,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::newSimulation ()
 {
-    NewSimulationDialog d;
+	SymbolTable* oldSymbolTable = _simulator->getSimulationContext()->getSymbolTable();
+    NewSimulationDialog d(*oldSymbolTable);
     if( d.exec() ) {
-        _frame = 0;
 
         //stop simulation
         ui->actionPlay->setChecked(false);
         runClicked(false);
 
         //create new simulation
-        _simulator->newUniverse(d.getSizeX(), d.getSizeY());
+        _simulator->newUniverse(d.getSize(), d.getNewSymbolTableRef());
         _simulator->addRandomEnergy (d.getEnergy(), simulationParameters.CRIT_CELL_TRANSFORM_ENERGY);
 
         //reset editors
@@ -240,9 +227,6 @@ void MainWindow::newSimulation ()
         //no step back option
         ui->actionStepBack->setEnabled(false);
         _undoUniverserses.clear();
-
-        //update monitor
-        _monitor->update(_simulator->getMonitorData());
     }
 }
 
@@ -252,34 +236,26 @@ void MainWindow::loadSimulation ()
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
-            _frame = 0;
 
             //stop simulation
             ui->actionPlay->setChecked(false);
+            ui->actionStepBack->setEnabled(false);
+            _undoUniverserses.clear();
             runClicked(false);
 
             //read simulation data
             QDataStream in(&file);
             _simulator->loadUniverse(in);
-            readFrame(in);
-            file.close();
+			simulationParameters.deserializeData(in);
+			file.close();
 
-            //reset editors
             ui->macroEditor->reset();
             _microEditor->updateSymbolTable();
 
-            //force simulator to update other coordinators
             _simulator->updateUniverse();
-
-            //no step back option
-            ui->actionStepBack->setEnabled(false);
-            _undoUniverserses.clear();
-
-            //update monitor
-            _monitor->update(_simulator->getMonitorData());
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified simulation could not loaded.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified simulation could not loaded.");
             msgBox.exec();
         }
     }
@@ -294,13 +270,10 @@ void MainWindow::saveSimulation ()
             QDataStream out(&file);
             _simulator->saveUniverse(out);
             simulationParameters.serializeData(out);
-            MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
-            MetadataManager::getGlobalInstance().serializeSymbolTable(out);
-            out << _frame;
             file.close();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The simulation could not saved.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The simulation could not saved.");
             msgBox.exec();
         }
     }
@@ -345,7 +318,6 @@ void MainWindow::stepForwardClicked ()
     QByteArray b;
     QDataStream out(&b, QIODevice::WriteOnly);
     _simulator->saveUniverse(out);
-    MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
     _undoUniverserses.push(b);
 
     //calc next time step
@@ -377,10 +349,6 @@ void MainWindow::stepBackClicked ()
     //no step back any more?
     if( _undoUniverserses.isEmpty() )
         ui->actionStepBack->setEnabled(false);
-
-    //update monitor
-    _monitor->update(_simulator->getMonitorData());
-    decFrame();
 }
 
 void MainWindow::snapshotUniverse ()
@@ -391,9 +359,7 @@ void MainWindow::snapshotUniverse ()
     _snapshot.clear();
     QDataStream out(&_snapshot, QIODevice::WriteOnly);
     _simulator->saveUniverse(out);
-    MetadataManager::getGlobalInstance().serializeMetadataUniverse(out);
     ui->macroEditor->serializeViewMatrix(out);
-    out << _frame;
 }
 
 void MainWindow::restoreUniverse ()
@@ -415,15 +381,9 @@ void MainWindow::restoreUniverse ()
     //force simulator to update other coordinators
     _simulator->updateUniverse();
 
-    //update monitor
-    _monitor->update(_simulator->getMonitorData());
-
     //hide "step back" button
     _undoUniverserses.clear();
     ui->actionStepBack->setEnabled(false);
-
-    //save frame
-    readFrame(in);
 }
 
 void MainWindow::editSimulationParameters ()
@@ -443,11 +403,11 @@ void MainWindow::loadSimulationParameters ()
 
             //read simulation data
             QDataStream in(&file);
-            simulationParameters.readData(in);
+            simulationParameters.deserializeData(in);
             file.close();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified simulation parameter file could not loaded.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified simulation parameter file could not loaded.");
             msgBox.exec();
         }
     }
@@ -466,7 +426,7 @@ void MainWindow::saveSimulationParameters ()
             file.close();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The simulation parameters could not saved.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The simulation parameters could not saved.");
             msgBox.exec();
         }
     }
@@ -553,7 +513,6 @@ void MainWindow::copyCell ()
     quint64 clusterId;
     quint64 cellId;
     _simulator->saveCell(out, focusCell, clusterId, cellId);
-    MetadataManager::getGlobalInstance().serializeMetadataCell(out, clusterId, cellId);
 
     //set actions
     ui->actionPasteCell->setEnabled(true);
@@ -567,18 +526,18 @@ void MainWindow::pasteCell ()
 
     //force simulator to update other coordinators
     _simulator->updateUniverse();
-
-    //update monitor
-    _monitor->update(_simulator->getMonitorData());
 }
 
 void MainWindow::editSymbolTable ()
 {
-    SymbolTableDialog d;
-    if( d.exec() ) {
+	SymbolTable* symbolTable = _simulator->getSimulationContext()->getSymbolTable();
+	if (!symbolTable)
+		return;
+    SymbolTableDialog d(*symbolTable);
+    if (d.exec()) {
 
         //update symbol table
-        d.widgetsToSymbolTable(&MetadataManager::getGlobalInstance());
+		symbolTable->setTable(d.getNewSymbolTableRef());
 
         //update editor
         _microEditor->updateSymbolTable();
@@ -588,21 +547,23 @@ void MainWindow::editSymbolTable ()
 
 void MainWindow::loadSymbols ()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
+	QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
 
-            //read simulation data
             QDataStream in(&file);
-            MetadataManager::getGlobalInstance().readSymbolTable(in);
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+			SymbolTable* oldSymbolTable = _simulator->getSimulationContext()->getSymbolTable();
+			SymbolTable* newSymbolTable = facade->deserializeSymbolTable(in);
+			oldSymbolTable->setTable(*newSymbolTable);
+			delete newSymbolTable;
             file.close();
 
-            //update editor
             _microEditor->updateSymbolTable();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified symbol table could not loaded.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
             msgBox.exec();
         }
     }
@@ -615,13 +576,14 @@ void MainWindow::saveSymbols ()
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
 
-            //serialize symbol table
             QDataStream out(&file);
-            MetadataManager::getGlobalInstance().serializeSymbolTable(out);
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+			SymbolTable* symbolTable = _simulator->getSimulationContext()->getSymbolTable();
+			facade->serializeSymbolTable(symbolTable, out);
             file.close();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The symbol table could not saved.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The symbol table could not saved.");
             msgBox.exec();
         }
     }
@@ -634,16 +596,18 @@ void MainWindow::loadSymbolsWithMerging ()
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
 
-            //read simulation data
-            QDataStream in(&file);
-            MetadataManager::getGlobalInstance().readSymbolTable(in, true);
-            file.close();
+			QDataStream in(&file);
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+			SymbolTable* oldSymbolTable = _simulator->getSimulationContext()->getSymbolTable();
+			SymbolTable* newSymbolTable = facade->deserializeSymbolTable(in);
+			oldSymbolTable->mergeTable(*newSymbolTable);
+			delete newSymbolTable;
+			file.close();
 
-            //update editor
             _microEditor->updateSymbolTable();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified symbol table could not loaded.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
             msgBox.exec();
         }
     }
@@ -654,10 +618,8 @@ void MainWindow::addBlockStructure ()
     AddRectStructureDialog d;
     if( d.exec() ) {
         QVector3D center = ui->macroEditor->getViewCenterPosWithInc();
-       _simulator->addBlockStructure(center,
-                                     d.getBlockSizeX(), d.getBlockSizeY(),
-                                     QVector3D(d.getDistance(), d.getDistance(), 0.0),
-                                     d.getInternalEnergy());
+       _simulator->addBlockStructure(center, d.getBlockSizeX(), d.getBlockSizeY(), QVector3D(d.getDistance(), d.getDistance(), 0.0)
+		   , d.getInternalEnergy());
     }
 }
 
@@ -666,10 +628,7 @@ void MainWindow::addHexagonStructure ()
     AddHexagonStructureDialog d;
     if( d.exec() ) {
         QVector3D center = ui->macroEditor->getViewCenterPosWithInc();
-       _simulator->addHexagonStructure(center,
-                                       d.getLayers(),
-                                       d.getDistance(),
-                                       d.getInternalEnergy());
+       _simulator->addHexagonStructure(center, d.getLayers(), d.getDistance(), d.getInternalEnergy());
     }
 }
 
@@ -685,17 +644,12 @@ void MainWindow::loadExtendedSelection ()
             QList< CellCluster* > newClusters;
             QList< EnergyParticle* > newEnergyParticles;
             _simulator->loadExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters,  newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
-            MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
             file.close();
 
-            //force simulator to update other coordinators
             _simulator->updateUniverse();
-
-            //update monitor
-            _monitor->update(_simulator->getMonitorData());
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified ensemble could not loaded.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified ensemble could not loaded.");
             msgBox.exec();
         }
     }
@@ -718,7 +672,6 @@ void MainWindow::saveExtendedSelection ()
             QList< quint64 > clusterIds;
             QList< quint64 > cellIds;
             _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
-            MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
             file.close();
         }
         else {
@@ -740,7 +693,6 @@ void MainWindow::copyExtendedSelection ()
     QList< quint64 > clusterIds;
     QList< quint64 > cellIds;
     _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
-    MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
     //set actions
     ui->actionPaste_cell_extension->setEnabled(true);
@@ -754,13 +706,9 @@ void MainWindow::pasteExtendedSelection ()
     QList< CellCluster* > newClusters;
     QList< EnergyParticle* > newEnergyParticles;
     _simulator->loadExtendedSelection(in, ui->macroEditor->getViewCenterPosWithInc(), newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap);
-    MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //force simulator to update other coordinators
     _simulator->updateUniverse();
-
-    //update monitor
-    _monitor->update(_simulator->getMonitorData());
 }
 
 void MainWindow::multiplyRandomExtendedSelection ()
@@ -779,7 +727,6 @@ void MainWindow::multiplyRandomExtendedSelection ()
         QList< quint64 > clusterIds;
         QList< quint64 > cellIds;
         _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
-        MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
         //read list and rebuild structure n times
         for(int i = 0; i < d.getNumber(); ++i) {
@@ -791,7 +738,6 @@ void MainWindow::multiplyRandomExtendedSelection ()
 			IntVector2D universeSize = _simulator->getUniverseSize();
             QVector3D pos(GlobalFunctions::random(0.0, universeSize.x), GlobalFunctions::random(0.0, universeSize.y), 0.0);
             _simulator->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
-            MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
             //randomize angles and velocities if desired
             if( d.randomizeAngle() )
@@ -807,12 +753,7 @@ void MainWindow::multiplyRandomExtendedSelection ()
             _simulator->drawToMapExtendedSelection(newClusters, newEnergyParticles);
         }
 
-        //force simulator to update other coordinators
         _simulator->updateUniverse();
-
-        //update monitor
-        _monitor->update(_simulator->getMonitorData());
-
     }
 }
 
@@ -834,7 +775,6 @@ void MainWindow::multiplyArrangementExtendedSelection ()
         QList< quint64 > clusterIds;
         QList< quint64 > cellIds;
         _simulator->saveExtendedSelection(out, clusters, es, clusterIds, cellIds);
-        MetadataManager::getGlobalInstance().serializeMetadataEnsemble(out, clusterIds, cellIds);
 
         //read list and rebuild structure n x m times
         for(int i = 0; i < d.getHorizontalNumber(); ++i) {
@@ -847,7 +787,6 @@ void MainWindow::multiplyArrangementExtendedSelection ()
                 QVector3D pos(d.getInitialPosX() + (qreal)i*d.getHorizontalInterval(),
                               d.getInitialPosY() + (qreal)j*d.getVerticalInterval(), 0.0);
                 _simulator->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
-                MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
                 //set angles and velocities
                 if( d.changeAngle() ) {
@@ -875,11 +814,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
         //delete original cluster
         _simulator->delExtendedSelection(clusters, es);
 
-        //force simulator to update other coordinators
         _simulator->updateUniverse();
-
-        //update monitor
-        _monitor->update(_simulator->getMonitorData());
     }
 }
 
@@ -894,15 +829,10 @@ void MainWindow::tutorialClosed()
     ui->actionTutorial->setChecked(false);
 }
 
-void MainWindow::timeout ()
+void MainWindow::oneSecondTimeout ()
 {
-    //update fps
-    _frameSec = _frame - _oldFrame;
-    _oldFrame = _frame;
-    updateFrameLabel();
-
-    //update monitor
     _monitor->update(_simulator->getMonitorData());
+	updateFrameLabel();
 }
 
 void MainWindow::fpsForcingButtonClicked (bool toggled)
@@ -949,26 +879,6 @@ void MainWindow::numTokenChanged (int numToken, int maxToken, bool pasteTokenPos
         ui->actionCopyToken->setEnabled(false);
         ui->actionDeleteToken->setEnabled(false);
     }
-}
-
-void MainWindow::incFrame ()
-{
-    ++_frame;
-    updateFrameLabel();
-}
-
-void MainWindow::decFrame ()
-{
-    --_frame;
-    _oldFrame = _frame;
-    updateFrameLabel();
-}
-
-void MainWindow::readFrame (QDataStream& stream)
-{
-    stream >> _frame;
-    _oldFrame = _frame;
-    updateFrameLabel();
 }
 
 void MainWindow::cellFocused (Cell* cell)
@@ -1024,7 +934,10 @@ void MainWindow::entitiesSelected (int numCells, int numEnergyParticles)
 
 void MainWindow::updateFrameLabel ()
 {
-    ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x").arg(_frame, 9, 10, QLatin1Char('0')).arg(_frameSec, 5, 10, QLatin1Char('0')).arg(ui->macroEditor->getZoomFactor()));
+    ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x")
+		.arg(_simulator->getFrame(), 9, 10, QLatin1Char('0'))
+		.arg(_simulator->getFrame(), 5, 10, QLatin1Char('0'))
+		.arg(ui->macroEditor->getZoomFactor()));
 }
 
 void MainWindow::startScreenFinished ()

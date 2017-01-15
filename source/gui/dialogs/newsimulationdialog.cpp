@@ -1,16 +1,17 @@
-#include "newsimulationdialog.h"
-#include "ui_newsimulationdialog.h"
-
-#include "simulationparametersdialog.h"
-#include "symboltabledialog.h"
+#include <QDebug>
 
 #include "gui/guisettings.h"
 #include "global/global.h"
 #include "model/metadatamanager.h"
+#include "model/simulationcontext.h"
 
-#include <QDebug>
+#include "simulationparametersdialog.h"
+#include "symboltabledialog.h"
 
-NewSimulationDialog::NewSimulationDialog(QWidget *parent)
+#include "newsimulationdialog.h"
+#include "ui_newsimulationdialog.h"
+
+NewSimulationDialog::NewSimulationDialog(SymbolTable const& oldSymbolTable, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
 {
@@ -18,13 +19,14 @@ NewSimulationDialog::NewSimulationDialog(QWidget *parent)
     setFont(GuiFunctions::getGlobalFont());
 
     _simParaDialog = new SimulationParametersDialog();
-    _symTblDialog = new SymbolTableDialog();
+    _symTblDialog = new SymbolTableDialog(oldSymbolTable);
 
     //connections
     connect(ui->simulationParametersButton, SIGNAL(clicked()), this, SLOT(simulationParametersButtonClicked()));
     connect(ui->symbolTableButton, SIGNAL(clicked()), this, SLOT(symbolTableButtonClicked()));
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okButtonClicked()));
 }
+
 
 NewSimulationDialog::~NewSimulationDialog()
 {
@@ -45,7 +47,7 @@ qreal NewSimulationDialog::getEnergy ()
     return ui->energyEdit->text().toDouble(&ok);
 }
 
-SymbolTable * NewSimulationDialog::getSymbolTable()
+SymbolTable const& NewSimulationDialog::getNewSymbolTableRef()
 {
 	return _symTblDialog->getNewSymbolTableRef();
 }

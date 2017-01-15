@@ -12,6 +12,7 @@
 #include "model/entities/grid.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
+#include "model/metadata/symboltable.h"
 #include "model/physics/physics.h"
 #include "model/config.h"
 #include "simulationcontext.h"
@@ -31,19 +32,21 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
 	FactoryFacade* factory = ServiceLocator::getInstance().getService<FactoryFacade>();
 
     _forceFpsTimer = new QTimer(this);
-    _context = factory->buildSimulationContext();
-    _unit = new SimulationUnit();
+	_oneSecondTimer = new QTimer(this);
+	_context = factory->buildSimulationContext();
+    _unit = new SimulationUnit(_context);
 
+	connect(_oneSecondTimer, SIGNAL(timeout()), this, SLOT(oneSecondTimerSlot()));
     connect(&_thread, &QThread::finished, _unit, &QObject::deleteLater);
     connect(_forceFpsTimer, SIGNAL(timeout()), this, SLOT(forceFpsTimerSlot()));
-    connect(this, SIGNAL(init(SimulationContext*)), _unit, SLOT(init(SimulationContext*)));
 	connect(this, SIGNAL(setRandomSeed(uint)), _unit, SLOT(setRandomSeed(uint)));
+
+	_oneSecondTimer->start(1000);
 
     if( threading == Threading::EXTRA_THREAD ) {
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()));
         connect(_unit, SIGNAL(nextTimestepCalculated()), this, SLOT(nextTimestepCalculated()));
 
-        //start thread
         _unit->moveToThread(&_thread);
         _thread.start();
 
@@ -53,25 +56,22 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
         _unit->setParent(this);
     }
 
-    emit init(_context);
-}
-
-SimulationController::SimulationController(IntVector2D size, Threading threading, QObject* parent)
-    : SimulationController(threading, parent)
-{
-	_context->lock();
-	_context->init(size);
-	_context->unlock();
+	emit setRandomSeed(0);
 }
 
 SimulationController::~SimulationController ()
 {
-    _thread.quit();
-    if( !_thread.wait(2000) ) {
-        _thread.terminate();
-        _thread.wait();
-    }
+	terminateThread();
 	delete _context;
+}
+
+void SimulationController::terminateThread()
+{
+	_thread.quit();
+	if (!_thread.wait(2000)) {
+		_thread.terminate();
+		_thread.wait();
+	}
 }
 
 QMap< QString, qreal > SimulationController::getMonitorData ()
@@ -105,13 +105,16 @@ SimulationContext* SimulationController::getSimulationContext()
     return _context;
 }
 
-void SimulationController::newUniverse (qint32 sizeX, qint32 sizeY)
+void SimulationController::newUniverse (IntVector2D size, SymbolTable const& symbolTable)
 {
-    _frame = 0;
 	_context->lock();
 
-    //set up new grid
-	_context->init({ sizeX, sizeY });
+	_frame = 0;
+
+	_context->init(size);
+	_context->getSymbolTable()->setTable(symbolTable);
+	_context->getClustersRef().clear();
+	_context->getEnergyParticlesRef().clear();
 
 	_context->unlock();
 }
@@ -125,7 +128,6 @@ void SimulationController::saveUniverse (QDataStream& stream)
 
     _context->lock();
 	std::set<quint64> ids = _context->getAllCellIds();
-	MetadataManager::getGlobalInstance().cleanUp(ids);
 	facade->serializeSimulationContext(_context, stream);
     _context->unlock();
 }
@@ -134,7 +136,7 @@ void SimulationController::loadUniverse(QDataStream& stream)
 {
 	stream >> _frame;
 	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-	facade->deserializeSimulationContext(stream);
+	_context = facade->deserializeSimulationContext(stream);
 
     emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
 
@@ -348,13 +350,20 @@ void SimulationController::loadCell(QDataStream& stream, QVector3D pos, bool dra
     _context->unlock();
 }
 
-void SimulationController::loadExtendedSelection (QDataStream& stream,
-                                             QVector3D pos,
-                                             QList< CellCluster* >& newClusters,
-                                             QList< EnergyParticle* >& newEnergyParticles,
-                                             QMap< quint64, quint64 >& oldNewClusterIdMap,
-                                             QMap< quint64, quint64 >& oldNewCellIdMap,
-                                             bool drawToMap)
+int const & SimulationController::getFrame() const
+{
+	return _frame;
+}
+
+int const& SimulationController::getFps() const
+{
+	return _fps;
+}
+
+
+void SimulationController::loadExtendedSelection (QDataStream& stream, QVector3D pos, QList< CellCluster* >& newClusters
+	, QList< EnergyParticle* >& newEnergyParticles, QMap< quint64, quint64 >& oldNewClusterIdMap
+	, QMap< quint64, quint64 >& oldNewCellIdMap, bool drawToMap)
 {
     _context->lock();
 
@@ -772,7 +781,7 @@ void SimulationController::setRun (bool run)
 //fps = 0: deactivate forcing
 void SimulationController::forceFps (int fps)
 {
-    _fps = fps;
+    _forceFps = fps;
     _forceFpsTimer->stop();
     if( fps > 0 ){
         _forceFpsTimer->start(1000/fps);
@@ -805,6 +814,12 @@ void SimulationController::forceFpsTimerSlot ()
     }
 }
 
+void SimulationController::oneSecondTimerSlot()
+{
+	_fps = _frame - _frameFromLastSecond;
+	_frameFromLastSecond = _frame;
+}
+
 void SimulationController::nextTimestepCalculated ()
 {
     _frame++;
@@ -813,7 +828,7 @@ void SimulationController::nextTimestepCalculated ()
 
     //fps forcing must be deactivate in order to continue with next the frame
     if( _run ) {
-        if( _fps == 0 )
+        if( _forceFps == 0 )
             emit calcNextTimestep();
     }
 }
