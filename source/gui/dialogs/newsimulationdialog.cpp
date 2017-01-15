@@ -2,7 +2,6 @@
 
 #include "gui/guisettings.h"
 #include "global/global.h"
-#include "model/metadatamanager.h"
 #include "model/simulationcontext.h"
 
 #include "simulationparametersdialog.h"

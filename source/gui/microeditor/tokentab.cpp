@@ -1,15 +1,15 @@
-#include "tokentab.h"
-#include "ui_tokentab.h"
-
-#include "hexedit.h"
-#include "model/metadatamanager.h"
-
-#include "gui/editorsettings.h"
-#include "gui/guisettings.h"
-#include "global/global.h"
-
 #include <QScrollBar>
 #include <QSignalMapper>
+
+#include "global/global.h"
+
+#include "model/metadata/symboltable.h"
+#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
+
+#include "hexedit.h"
+#include "tokentab.h"
+#include "ui_tokentab.h"
 
 TokenTab::TokenTab(QWidget *parent) :
     QWidget(parent),
@@ -58,7 +58,7 @@ TokenTab::~TokenTab()
     delete ui;
 }
 
-void TokenTab::update (qreal tokenEnergy, const QVector< quint8 >& tokenMemory)
+void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, const QVector< quint8 >& tokenMemory)
 {
 //    ui->tokenMemoryEditor->update(tokenMemory);
     ui->tokenEditor->update(tokenEnergy);
@@ -71,7 +71,7 @@ void TokenTab::update (qreal tokenEnergy, const QVector< quint8 >& tokenMemory)
     //find all addresses from variables
     _hexEditList.clear();
     QMap< quint8, QStringList > addressVarMap;
-    QMapIterator< QString, QString > symTblIt(MetadataManager::getGlobalInstance().getSymbolTable());
+    QMapIterator< QString, QString > symTblIt = symbolTable->getTableConstRef();
     while(symTblIt.hasNext()) {
         symTblIt.next();
         QString k = symTblIt.key();

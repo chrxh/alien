@@ -27,7 +27,9 @@ FactoryFacadeImpl::FactoryFacadeImpl ()
 
 SimulationContext* FactoryFacadeImpl::buildSimulationContext() const
 {
-	return new SimulationContextImpl();
+	SimulationContext* context = new SimulationContextImpl();
+	Metadata::loadDefaultSymbolTable(context->getSymbolTable());
+	return context;
 }
 
 CellCluster* FactoryFacadeImpl::buildCellCluster (SimulationContext* context) const

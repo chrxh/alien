@@ -7,6 +7,9 @@ class SymbolTable
 {
 public:
 
+	SymbolTable();
+	virtual ~SymbolTable();
+
     void addEntry(QString const& key, QString const& value);
     void delEntry(QString const& key);
     QString applyTableToCode(QString const& input) const;

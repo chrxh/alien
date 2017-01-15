@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include "model/definitions.h"
+#include "model/metadata/symboltable.h"
 
 namespace Ui {
 class SymbolTableDialog;

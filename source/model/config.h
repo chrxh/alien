@@ -4,13 +4,14 @@
 #include<QColor>
 #include<QDataStream>
 
+#include "model/definitions.h"
+
 const qreal ALIEN_PRECISION = 0.0000001;
 
-class MetadataManager;
 class Metadata
 {
 public:
-    static void loadDefaultMetadata (MetadataManager* meta);
+    static void loadDefaultSymbolTable (SymbolTable* meta);
 };
 
 struct SimulationParameters

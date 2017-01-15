@@ -1,17 +1,20 @@
-#include "cellfunctioncomputerimpl.h"
-#include "model/metadatamanager.h"
+#include <QString>
+#include <qdebug.h>
+
+#include "model/simulationcontext.h"
 #include "model/config.h"
+#include "model/metadata/symboltable.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
 
-#include <QString>
-#include <qdebug.h>
+#include "cellfunctioncomputerimpl.h"
 
 CellFunctionComputerImpl::CellFunctionComputerImpl (SimulationContext* context)
     : CellFunctionComputer(context)
     , _code(3*simulationParameters.CELL_CODESIZE, 0)
     , _numInstr(simulationParameters.CELL_CODESIZE)
     , _memory(simulationParameters.CELL_MEMSIZE, 0)
+	, _symbolTable(context->getSymbolTable())
 {
     //init with zero data
     _numInstr = 0;
@@ -20,8 +23,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (SimulationContext* context)
 }
 
 CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, SimulationContext* context)
-    : CellFunctionComputer(context)
-    , _memory(simulationParameters.CELL_MEMSIZE, 0)
+	: CellFunctionComputerImpl(context)
 {
     _numInstr = cellFunctionData[0];
     _code.resize(3*_numInstr);
@@ -245,9 +247,8 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
         if( (c == '\n') || ((i+1) == code.length()) )
             instructionRead = true;
         if( instructionRead ) {
-            op1 = MetadataManager::getGlobalInstance().applySymbolTableToCode(op1);
-            op2 = MetadataManager::getGlobalInstance().applySymbolTableToCode(op2);
-//            qDebug("INSTR: %s, OP1: %s, COMP: %s OP2: %s", qPrintable(instr), qPrintable(op1),qPrintable(comp), qPrintable(op2));
+            op1 = _symbolTable->applyTableToCode(op1);
+            op2 = _symbolTable->applyTableToCode(op2);
 
             //prepare data for instruction coding
             quint8 instrN(0), opTyp1(0), opTyp2(0);
