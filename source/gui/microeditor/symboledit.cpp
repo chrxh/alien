@@ -1,11 +1,12 @@
-#include "symboledit.h"
-#include "ui_symboledit.h"
+#include <QScrollBar>
 
+#include "model/metadata/symboltable.h"
 #include "gui/editorsettings.h"
 #include "gui/guisettings.h"
 #include "global/global.h"
 
-#include <QScrollBar>
+#include "symboledit.h"
+#include "ui_symboledit.h"
 
 SymbolEdit::SymbolEdit(QWidget *parent) :
     QWidget(parent),
@@ -60,9 +61,9 @@ SymbolEdit::~SymbolEdit()
     delete ui;
 }
 
-void SymbolEdit::loadSymbols (MetadataManager* meta)
+void SymbolEdit::loadSymbols(SymbolTable* symbolTable)
 {
-    _meta = meta;
+    _symbolTable = symbolTable;
 
     //disable notification for item changes
     disconnect(ui->tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)), 0, 0);
@@ -72,7 +73,7 @@ void SymbolEdit::loadSymbols (MetadataManager* meta)
         ui->tableWidget->removeRow(0);
 
     //create entries in the table
-    QMapIterator< QString, QString > it = _meta->getSymbolTable();
+    QMapIterator< QString, QString > it = _symbolTable->getTableConstRef();
     int i = 0;
     while( it.hasNext() ) {
         it.next();
@@ -129,7 +130,7 @@ void SymbolEdit::delSymbolButtonClicked ()
         QList< QTableWidgetItem* > items = ui->tableWidget->selectedItems();
         int row = items.at(0)->row();
         QString key = ui->tableWidget->item(row, 0)->text();
-        _meta->delSymbolEntry(key);
+        _symbolTable->delEntry(key);
         ui->tableWidget->removeRow(row);
     }
     if( ui->tableWidget->rowCount() == 0 )
@@ -151,13 +152,13 @@ void SymbolEdit::itemSelectionChanged ()
 void SymbolEdit::itemContentChanged (QTableWidgetItem* item)
 {
     //clear and update complete symbol table
-    _meta->clearSymbolTable();
+    _symbolTable->clearTable();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
 
         //obtain key and value text
         QString key = ui->tableWidget->item(i, 0)->text();
         QString value = ui->tableWidget->item(i, 1)->text();
-        _meta->addSymbolEntry(key, value);
+        _symbolTable->addEntry(key, value);
     }
 
     emit symbolTableChanged();

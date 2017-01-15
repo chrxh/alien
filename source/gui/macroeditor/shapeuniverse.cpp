@@ -6,7 +6,6 @@
 #include "markergraphicsitem.h"
 
 #include "gui/editorsettings.h"
-#include "model/metadatamanager.h"
 #include "model/config.h"
 #include "model/factoryfacade.h"
 #include "model/entities/cellcluster.h"

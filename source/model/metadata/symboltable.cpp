@@ -1,5 +1,14 @@
 #include "symboltable.h"
 
+SymbolTable::SymbolTable()
+{
+
+}
+
+SymbolTable::~SymbolTable()
+{
+}
+
 void SymbolTable::addEntry(QString const& key, QString const& value)
 {
 	_symbolTable[key] = value;
