@@ -52,7 +52,7 @@ struct SimulationParameters
     SimulationParameters ();
 
     void serializeData (QDataStream& stream);
-    void readData (QDataStream& stream);
+    void deserializeData (QDataStream& stream);
 };
 
 extern SimulationParameters simulationParameters;

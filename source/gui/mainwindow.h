@@ -74,14 +74,10 @@ private slots:
     void tutorialClosed();
 
     //misc
-    void timeout ();
+    void oneSecondTimeout ();
     void fpsForcingButtonClicked (bool toggled);
     void fpsForcingSpinboxClicked ();
     void numTokenChanged (int numToken, int maxToken, bool pasteTokenPossible);
-
-    void incFrame ();
-    void decFrame ();
-    void readFrame (QDataStream& stream);
 
     void cellFocused (Cell* cell);
     void cellDefocused ();
@@ -99,14 +95,10 @@ private:
     SimulationController* _simulator;
     MicroEditor* _microEditor;
 
-    QTimer* _timer;
+    QTimer* _oneSecondTimer;
     SimulationMonitor* _monitor;
     TutorialWindow* _tutorialWindow;
     StartScreenController* _startScreen;
-
-    int _oldFrame;
-    int _frame;
-    int _frameSec;
 
     QByteArray _serializedEnsembleData;
     QByteArray _serializedCellData;

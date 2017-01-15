@@ -214,7 +214,7 @@ void SimulationParameters::serializeData (QDataStream& stream)
     stream << CELL_RAD_ENERGY_VEL_PERTURB;
 }
 
-void SimulationParameters::readData (QDataStream& stream)
+void SimulationParameters::deserializeData (QDataStream& stream)
 {
     stream >> CRIT_CELL_DIST_MIN;
     stream >> CRIT_CELL_DIST_MAX;

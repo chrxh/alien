@@ -18,14 +18,15 @@ public:
         NO_EXTRA_THREAD, EXTRA_THREAD
     };
     SimulationController (Threading threading, QObject* parent = 0);
-    SimulationController (IntVector2D size, Threading threading, QObject* parent = 0);
     ~SimulationController ();
+
+	void terminateThread();
 
     QMap< QString, qreal > getMonitorData ();
     SimulationContext* getSimulationContext ();
 
     //universe manipulation tools
-    void newUniverse (qint32 sizeX, qint32 sizeY);
+    void newUniverse (IntVector2D size, SymbolTable const& symbolTable);
     void saveUniverse (QDataStream& stream);
     void loadUniverse (QDataStream& stream);
     IntVector2D getUniverseSize();
@@ -49,6 +50,9 @@ public:
                                 QMap< quint64, quint64 >& oldNewClusterIdMap,
                                 QMap< quint64, quint64 >& oldNewCellIdMap,
                                 bool drawToMap = true);
+	int const& getFrame() const;
+	int const& getFps() const;
+
 public slots:
     void delSelection (QList< Cell* > cells,
                       QList< EnergyParticle* > es);
@@ -87,16 +91,20 @@ signals:
     void computerCompilationReturn (bool error, int line);
 
 protected slots:
-    virtual void forceFpsTimerSlot ();
-    virtual void nextTimestepCalculated ();
+    void forceFpsTimerSlot ();
+	void oneSecondTimerSlot();
+    void nextTimestepCalculated ();
 
 protected:
     QTimer* _forceFpsTimer = nullptr;
-    bool _run = false;
-    int _fps = 0;
-    bool _calculating = false;
+	QTimer* _oneSecondTimer = nullptr;
+	bool _run = false;
+    int _forceFps = 0;
+	int _fps = 0;
+	bool _calculating = false;
     quint64 _frame = 0;
-    int _newCellTokenAccessNumber = 0;
+	quint64 _frameFromLastSecond = 0;
+	int _newCellTokenAccessNumber = 0;
 
     SimulationContext* _context = nullptr;
     SimulationUnit* _unit = nullptr;

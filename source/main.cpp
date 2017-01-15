@@ -14,6 +14,8 @@
 //Design-Entscheidung:
 //- alle Serialisierung und Deserialisierung sollen von SerializationFacade gesteuert werden
 //- (de)serialisierung elementarer(Qt) Typen in den Methoden (de)serialize(...)
+//- bei Konstruktion Pointer verdrahten
+//- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
 //- in SimulationContext kommt noch

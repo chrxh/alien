@@ -121,7 +121,7 @@ void SimulationParametersDialog::loadButtonClicked ()
 
             //read simulation data
             QDataStream in(&file);
-            localSimulationParameters.readData(in);
+            localSimulationParameters.deserializeData(in);
             file.close();
 
             //update widgets
