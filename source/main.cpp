@@ -1,13 +1,13 @@
 #include <QApplication>
+#include <QtCore/qmath.h>
+#include <QVector2D>
 
 #include "gui/mainwindow.h"
 #include "model/simulationcontroller.h"
-#include "model/metadatamanager.h"
+#include "model/metadata/symboltable.h"
 #include "model/config.h"
 #include "model/entities/cellto.h"
 
-#include <QtCore/qmath.h>
-#include <QVector2D>
 
 //QT += webkitwidgets
 
@@ -19,20 +19,16 @@
 
 //Nächstes Mal:
 //- in SimulationContext kommt noch
-//  - MetadataManager
 //  - SimulationParameters
-//- Metadata aufspalten: Teile kommen in Cells und CellClusters
 
 //Model-Refactoring:
 //- factoryfacade in featuredcellfactory umbenennen
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
-//- Prefix Alien in Klassen entfernen
 //- suche nach "TODO"
 //- AlienSimulator::updateCell: Konzept für cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 //- Radiation als Feature
 //- SimulationSettings und MetadataManager über Grid erreichbar
 //- Grid zerteilen
-//- NICHT Set<CellCluster*> in SimulationController::updateCell benutzen!!!
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)
@@ -100,7 +96,9 @@ int main(int argc, char *argv[])
 
     //init main objects
     QApplication a(argc, argv);
-	SimulationController simulator({ 400, 200 }, SimulationController::Threading::EXTRA_THREAD);
+	SimulationController simulator(SimulationController::Threading::EXTRA_THREAD);
+	SymbolTable symbolTable;
+	simulator.newUniverse({ 400, 200 }, symbolTable);
     MainWindow w(&simulator);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 

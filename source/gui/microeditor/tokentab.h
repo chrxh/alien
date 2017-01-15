@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QMap>
 
+#include "model/definitions.h"
+
 namespace Ui {
     class TokenTab;
 }
@@ -15,10 +17,10 @@ class TokenTab : public QWidget
     Q_OBJECT
     
 public:
-    explicit TokenTab(QWidget *parent = 0);
+    TokenTab(QWidget *parent = 0);
     ~TokenTab();
 
-    void update (qreal tokenEnergy, const QVector< quint8 >& tokenData);
+    void update (SymbolTable* symbolTable, qreal tokenEnergy, const QVector< quint8 >& tokenData);
     void requestUpdate ();
 
 signals:

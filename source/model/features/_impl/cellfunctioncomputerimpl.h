@@ -43,6 +43,7 @@ private:
     QByteArray _code;
     int _numInstr = 0;
     QVector< quint8 > _memory;
+	SymbolTable* _symbolTable;
 };
 
 #endif // TOKENFUNCTIONCOMPUTERIMPL_H

@@ -20,7 +20,6 @@
 #include "energyparticlemap.h"
 #include "cellmap.h"
 #include "topology.h"
-#include "metadatamanager.h"
 #include "serializationfacade.h"
 #include "factoryfacade.h"
 
@@ -350,12 +349,12 @@ void SimulationController::loadCell(QDataStream& stream, QVector3D pos, bool dra
     _context->unlock();
 }
 
-int const & SimulationController::getFrame() const
+int SimulationController::getFrame() const
 {
 	return _frame;
 }
 
-int const& SimulationController::getFps() const
+int SimulationController::getFps() const
 {
 	return _fps;
 }

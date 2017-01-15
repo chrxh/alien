@@ -3,7 +3,6 @@
 
 #include "global/global.h"
 #include "model/simulationcontroller.h"
-#include "model/metadatamanager.h"
 #include "model/simulationcontext.h"
 #include "model/config.h"
 #include "model/entities/cellcluster.h"

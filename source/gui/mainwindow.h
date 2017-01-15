@@ -92,7 +92,7 @@ private:
 
     void changeEvent(QEvent *e);
 
-    SimulationController* _simulator;
+    SimulationController* _simController;
     MicroEditor* _microEditor;
 
     QTimer* _oneSecondTimer;

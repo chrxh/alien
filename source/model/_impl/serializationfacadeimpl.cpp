@@ -98,6 +98,7 @@ SymbolTable* SerializationFacadeImpl::deserializeSymbolTable(QDataStream& stream
 {
 	SymbolTable* symbolTable = new SymbolTable();
 	symbolTable->deserializePrimitives(stream);
+	return symbolTable;
 }
 
 void SerializationFacadeImpl::serializeCellCluster(CellCluster* cluster, QDataStream& stream) const

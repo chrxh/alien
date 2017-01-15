@@ -1,147 +1,147 @@
-#include "config.h"
-#include "model/metadatamanager.h"
-#include "model/features/cellfeatureconstants.h"
-
-
 #include <QtGlobal>
 
-void Metadata::loadDefaultMetadata (MetadataManager* meta)
+#include "model/features/cellfeatureconstants.h"
+#include "model/metadata/symboltable.h"
+
+#include "config.h"
+
+void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
 {
-    meta->clearSymbolTable();
+    symbolTable->clearTable();
 
     //general variables
-    meta->addSymbolEntry("i","[255]");
-    meta->addSymbolEntry("j","[254]");
-    meta->addSymbolEntry("k","[253]");
-    meta->addSymbolEntry("l","[252]");
+    symbolTable->addEntry("i","[255]");
+    symbolTable->addEntry("j","[254]");
+    symbolTable->addEntry("k","[253]");
+    symbolTable->addEntry("l","[252]");
 
     //token branch number
-    meta->addSymbolEntry("BRANCH_NUMBER","[0]");
+    symbolTable->addEntry("BRANCH_NUMBER","[0]");
 
     //energy guidance system
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN","["+QString::number(static_cast<int>(ENERGY_GUIDANCE::IN))+"]");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::DEACTIVATED",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::DEACTIVATED)));
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_CELL",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_CELL)));
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_TOKEN",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_TOKEN)));
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::BALANCE_BOTH",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_BOTH)));
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_CELL",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::HARVEST_CELL)));
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN::HARVEST_TOKEN",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::HARVEST_TOKEN)));
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_CELL","["+QString::number(static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_CELL))+"]");
-    meta->addSymbolEntry("ENERGY_GUIDANCE_IN_VALUE_TOKEN","["+QString::number(static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_TOKEN))+"]");
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN","["+QString::number(static_cast<int>(ENERGY_GUIDANCE::IN))+"]");
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN::DEACTIVATED",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::DEACTIVATED)));
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN::BALANCE_CELL",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_CELL)));
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN::BALANCE_TOKEN",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_TOKEN)));
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN::BALANCE_BOTH",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::BALANCE_BOTH)));
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN::HARVEST_CELL",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::HARVEST_CELL)));
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN::HARVEST_TOKEN",QString::number(static_cast<int>(ENERGY_GUIDANCE_IN::HARVEST_TOKEN)));
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN_VALUE_CELL","["+QString::number(static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_CELL))+"]");
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN_VALUE_TOKEN","["+QString::number(static_cast<int>(ENERGY_GUIDANCE::IN_VALUE_TOKEN))+"]");
 
     //constructor
-    meta->addSymbolEntry("CONSTR_OUT","["+QString::number(static_cast<int>(CONSTR::OUT))+"]");
-    meta->addSymbolEntry("CONSTR_OUT::SUCCESS",QString::number(static_cast<int>(CONSTR_OUT::SUCCESS)));
-    meta->addSymbolEntry("CONSTR_OUT::SUCCESS_ROT",QString::number(static_cast<int>(CONSTR_OUT::SUCCESS_ROT)));
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_NO_ENERGY",QString::number(static_cast<int>(CONSTR_OUT::ERROR_NO_ENERGY)));
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_OBSTACLE",QString::number(static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE)));
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_CONNECTION",QString::number(static_cast<int>(CONSTR_OUT::ERROR_CONNECTION)));
-    meta->addSymbolEntry("CONSTR_OUT::ERROR_DIST",QString::number(static_cast<int>(CONSTR_OUT::ERROR_DIST)));
-    meta->addSymbolEntry("CONSTR_IN","["+QString::number(static_cast<int>(CONSTR::IN))+"]");
-    meta->addSymbolEntry("CONSTR_IN::DO_NOTHING",QString::number(static_cast<int>(CONSTR_IN::DO_NOTHING)));
-    meta->addSymbolEntry("CONSTR_IN::SAFE",QString::number(static_cast<int>(CONSTR_IN::SAFE)));
-    meta->addSymbolEntry("CONSTR_IN::UNSAFE",QString::number(static_cast<int>(CONSTR_IN::UNSAFE)));
-    meta->addSymbolEntry("CONSTR_IN::BRUTEFORCE",QString::number(static_cast<int>(CONSTR_IN::BRUTEFORCE)));
-    meta->addSymbolEntry("CONSTR_IN_OPTION","["+QString::number(static_cast<int>(CONSTR::IN_OPTION))+"]");
-    meta->addSymbolEntry("CONSTR_IN_OPTION::STANDARD",QString::number(static_cast<int>(CONSTR_IN_OPTION::STANDARD)));
-    meta->addSymbolEntry("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN",QString::number(static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN)));
-    meta->addSymbolEntry("CONSTR_IN_OPTION::CREATE_DUP_TOKEN",QString::number(static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN)));
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_NO_SEP",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_NO_SEP)));
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP)));
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP_RED",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED)));
-    meta->addSymbolEntry("CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)));
-    meta->addSymbolEntry("CONSTR_INOUT_ANGLE","["+QString::number(static_cast<int>(CONSTR::INOUT_ANGLE))+"]");
-    meta->addSymbolEntry("CONSTR_IN_DIST","["+QString::number(static_cast<int>(CONSTR::IN_DIST))+"]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS))+"]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO","0");       //artificial entry (has no symbol in enum class)
-    meta->addSymbolEntry("CONSTR_IN_CELL_BRANCH_NO","["+QString::number(static_cast<int>(CONSTR::IN_CELL_BRANCH_NO))+"]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION","["+QString::number(static_cast<int>(CONSTR::IN_CELL_FUNCTION))+"]");
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMPUTER",QString::number(static_cast<int>(CellFunctionType::COMPUTER)));
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::PROP",QString::number(static_cast<int>(CellFunctionType::PROPULSION)));
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SCANNER",QString::number(static_cast<int>(CellFunctionType::SCANNER)));
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::WEAPON",QString::number(static_cast<int>(CellFunctionType::WEAPON)));
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::CONSTR",QString::number(static_cast<int>(CellFunctionType::CONSTRUCTOR)));
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::SENSOR",QString::number(static_cast<int>(CellFunctionType::SENSOR)));
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION::COMMUNICATOR",QString::number(static_cast<int>(CellFunctionType::COMMUNICATOR)));
-    meta->addSymbolEntry("CONSTR_IN_CELL_FUNCTION_DATA","["+QString::number(static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA))+"]");
+    symbolTable->addEntry("CONSTR_OUT","["+QString::number(static_cast<int>(CONSTR::OUT))+"]");
+    symbolTable->addEntry("CONSTR_OUT::SUCCESS",QString::number(static_cast<int>(CONSTR_OUT::SUCCESS)));
+    symbolTable->addEntry("CONSTR_OUT::SUCCESS_ROT",QString::number(static_cast<int>(CONSTR_OUT::SUCCESS_ROT)));
+    symbolTable->addEntry("CONSTR_OUT::ERROR_NO_ENERGY",QString::number(static_cast<int>(CONSTR_OUT::ERROR_NO_ENERGY)));
+    symbolTable->addEntry("CONSTR_OUT::ERROR_OBSTACLE",QString::number(static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE)));
+    symbolTable->addEntry("CONSTR_OUT::ERROR_CONNECTION",QString::number(static_cast<int>(CONSTR_OUT::ERROR_CONNECTION)));
+    symbolTable->addEntry("CONSTR_OUT::ERROR_DIST",QString::number(static_cast<int>(CONSTR_OUT::ERROR_DIST)));
+    symbolTable->addEntry("CONSTR_IN","["+QString::number(static_cast<int>(CONSTR::IN))+"]");
+    symbolTable->addEntry("CONSTR_IN::DO_NOTHING",QString::number(static_cast<int>(CONSTR_IN::DO_NOTHING)));
+    symbolTable->addEntry("CONSTR_IN::SAFE",QString::number(static_cast<int>(CONSTR_IN::SAFE)));
+    symbolTable->addEntry("CONSTR_IN::UNSAFE",QString::number(static_cast<int>(CONSTR_IN::UNSAFE)));
+    symbolTable->addEntry("CONSTR_IN::BRUTEFORCE",QString::number(static_cast<int>(CONSTR_IN::BRUTEFORCE)));
+    symbolTable->addEntry("CONSTR_IN_OPTION","["+QString::number(static_cast<int>(CONSTR::IN_OPTION))+"]");
+    symbolTable->addEntry("CONSTR_IN_OPTION::STANDARD",QString::number(static_cast<int>(CONSTR_IN_OPTION::STANDARD)));
+    symbolTable->addEntry("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN",QString::number(static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN)));
+    symbolTable->addEntry("CONSTR_IN_OPTION::CREATE_DUP_TOKEN",QString::number(static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN)));
+    symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_NO_SEP",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_NO_SEP)));
+    symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP)));
+    symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP_RED",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED)));
+    symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED",QString::number(static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)));
+    symbolTable->addEntry("CONSTR_INOUT_ANGLE","["+QString::number(static_cast<int>(CONSTR::INOUT_ANGLE))+"]");
+    symbolTable->addEntry("CONSTR_IN_DIST","["+QString::number(static_cast<int>(CONSTR::IN_DIST))+"]");
+    symbolTable->addEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS))+"]");
+    symbolTable->addEntry("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO","0");       //artificial entry (has no symbol in enum class)
+    symbolTable->addEntry("CONSTR_IN_CELL_BRANCH_NO","["+QString::number(static_cast<int>(CONSTR::IN_CELL_BRANCH_NO))+"]");
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION","["+QString::number(static_cast<int>(CONSTR::IN_CELL_FUNCTION))+"]");
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::COMPUTER",QString::number(static_cast<int>(CellFunctionType::COMPUTER)));
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::PROP",QString::number(static_cast<int>(CellFunctionType::PROPULSION)));
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::SCANNER",QString::number(static_cast<int>(CellFunctionType::SCANNER)));
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::WEAPON",QString::number(static_cast<int>(CellFunctionType::WEAPON)));
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::CONSTR",QString::number(static_cast<int>(CellFunctionType::CONSTRUCTOR)));
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::SENSOR",QString::number(static_cast<int>(CellFunctionType::SENSOR)));
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::COMMUNICATOR",QString::number(static_cast<int>(CellFunctionType::COMMUNICATOR)));
+    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION_DATA","["+QString::number(static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA))+"]");
 
     //propulsion
-    meta->addSymbolEntry("PROP_OUT","["+QString::number(static_cast<int>(PROP::OUT))+"]");
-    meta->addSymbolEntry("PROP_OUT::SUCCESS",QString::number(static_cast<int>(PROP_OUT::SUCCESS)));
-    meta->addSymbolEntry("PROP_OUT::SUCCESS_DAMPING_FINISHED",QString::number(static_cast<int>(PROP_OUT::SUCCESS_DAMPING_FINISHED)));
-    meta->addSymbolEntry("PROP_OUT::ERROR_NO_ENERGY",QString::number(static_cast<int>(PROP_OUT::ERROR_NO_ENERGY)));
-    meta->addSymbolEntry("PROP_IN","["+QString::number(static_cast<int>(PROP::IN))+"]");
-    meta->addSymbolEntry("PROP_IN::DO_NOTHING",QString::number(static_cast<int>(PROP_IN::DO_NOTHING)));
-    meta->addSymbolEntry("PROP_IN::BY_ANGLE",QString::number(static_cast<int>(PROP_IN::BY_ANGLE)));
-    meta->addSymbolEntry("PROP_IN::FROM_CENTER",QString::number(static_cast<int>(PROP_IN::FROM_CENTER)));
-    meta->addSymbolEntry("PROP_IN::TOWARD_CENTER",QString::number(static_cast<int>(PROP_IN::TOWARD_CENTER)));
-    meta->addSymbolEntry("PROP_IN::ROTATION_CLOCKWISE",QString::number(static_cast<int>(PROP_IN::ROTATION_CLOCKWISE)));
-    meta->addSymbolEntry("PROP_IN::ROTATION_COUNTERCLOCKWISE",QString::number(static_cast<int>(PROP_IN::ROTATION_COUNTERCLOCKWISE)));
-    meta->addSymbolEntry("PROP_IN::DAMP_ROTATION",QString::number(static_cast<int>(PROP_IN::DAMP_ROTATION)));
-    meta->addSymbolEntry("PROP_IN_ANGLE","["+QString::number(static_cast<int>(PROP::IN_ANGLE))+"]");
-    meta->addSymbolEntry("PROP_IN_POWER","["+QString::number(static_cast<int>(PROP::IN_POWER))+"]");
+    symbolTable->addEntry("PROP_OUT","["+QString::number(static_cast<int>(PROP::OUT))+"]");
+    symbolTable->addEntry("PROP_OUT::SUCCESS",QString::number(static_cast<int>(PROP_OUT::SUCCESS)));
+    symbolTable->addEntry("PROP_OUT::SUCCESS_DAMPING_FINISHED",QString::number(static_cast<int>(PROP_OUT::SUCCESS_DAMPING_FINISHED)));
+    symbolTable->addEntry("PROP_OUT::ERROR_NO_ENERGY",QString::number(static_cast<int>(PROP_OUT::ERROR_NO_ENERGY)));
+    symbolTable->addEntry("PROP_IN","["+QString::number(static_cast<int>(PROP::IN))+"]");
+    symbolTable->addEntry("PROP_IN::DO_NOTHING",QString::number(static_cast<int>(PROP_IN::DO_NOTHING)));
+    symbolTable->addEntry("PROP_IN::BY_ANGLE",QString::number(static_cast<int>(PROP_IN::BY_ANGLE)));
+    symbolTable->addEntry("PROP_IN::FROM_CENTER",QString::number(static_cast<int>(PROP_IN::FROM_CENTER)));
+    symbolTable->addEntry("PROP_IN::TOWARD_CENTER",QString::number(static_cast<int>(PROP_IN::TOWARD_CENTER)));
+    symbolTable->addEntry("PROP_IN::ROTATION_CLOCKWISE",QString::number(static_cast<int>(PROP_IN::ROTATION_CLOCKWISE)));
+    symbolTable->addEntry("PROP_IN::ROTATION_COUNTERCLOCKWISE",QString::number(static_cast<int>(PROP_IN::ROTATION_COUNTERCLOCKWISE)));
+    symbolTable->addEntry("PROP_IN::DAMP_ROTATION",QString::number(static_cast<int>(PROP_IN::DAMP_ROTATION)));
+    symbolTable->addEntry("PROP_IN_ANGLE","["+QString::number(static_cast<int>(PROP::IN_ANGLE))+"]");
+    symbolTable->addEntry("PROP_IN_POWER","["+QString::number(static_cast<int>(PROP::IN_POWER))+"]");
 
     //scanner
-    meta->addSymbolEntry("SCANNER_OUT","["+QString::number(static_cast<int>(SCANNER::OUT))+"]");
-    meta->addSymbolEntry("SCANNER_OUT::SUCCESS",QString::number(static_cast<int>(SCANNER_OUT::SUCCESS)));
-    meta->addSymbolEntry("SCANNER_OUT::FINISHED",QString::number(static_cast<int>(SCANNER_OUT::FINISHED)));
-    meta->addSymbolEntry("SCANNER_OUT::RESTART",QString::number(static_cast<int>(SCANNER_OUT::RESTART)));
-//    meta->addSymbolEntry("SCANNER_IN","[11]");
-    meta->addSymbolEntry("SCANNER_INOUT_CELL_NUMBER","["+QString::number(static_cast<int>(SCANNER::INOUT_CELL_NUMBER))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_MASS","["+QString::number(static_cast<int>(SCANNER::OUT_MASS))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_ENERGY","["+QString::number(static_cast<int>(SCANNER::OUT_ENERGY))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_ANGLE","["+QString::number(static_cast<int>(SCANNER::OUT_ANGLE))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_DISTANCE","["+QString::number(static_cast<int>(SCANNER::OUT_DISTANCE))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_MAX_CONNECTIONS))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_BRANCH_NO","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_BRANCH_NO))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_FUNCTION))+"]");
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMPUTER",QString::number(static_cast<int>(CellFunctionType::COMPUTER)));
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::PROP",QString::number(static_cast<int>(CellFunctionType::PROPULSION)));
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SCANNER",QString::number(static_cast<int>(CellFunctionType::SCANNER)));
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::WEAPON",QString::number(static_cast<int>(CellFunctionType::WEAPON)));
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::CONSTR",QString::number(static_cast<int>(CellFunctionType::CONSTRUCTOR)));
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::SENSOR",QString::number(static_cast<int>(CellFunctionType::SENSOR)));
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR",QString::number(static_cast<int>(CellFunctionType::COMMUNICATOR)));
-    meta->addSymbolEntry("SCANNER_OUT_CELL_FUNCTION_DATA","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA))+"]");
+    symbolTable->addEntry("SCANNER_OUT","["+QString::number(static_cast<int>(SCANNER::OUT))+"]");
+    symbolTable->addEntry("SCANNER_OUT::SUCCESS",QString::number(static_cast<int>(SCANNER_OUT::SUCCESS)));
+    symbolTable->addEntry("SCANNER_OUT::FINISHED",QString::number(static_cast<int>(SCANNER_OUT::FINISHED)));
+    symbolTable->addEntry("SCANNER_OUT::RESTART",QString::number(static_cast<int>(SCANNER_OUT::RESTART)));
+//    meta->addEntry("SCANNER_IN","[11]");
+    symbolTable->addEntry("SCANNER_INOUT_CELL_NUMBER","["+QString::number(static_cast<int>(SCANNER::INOUT_CELL_NUMBER))+"]");
+    symbolTable->addEntry("SCANNER_OUT_MASS","["+QString::number(static_cast<int>(SCANNER::OUT_MASS))+"]");
+    symbolTable->addEntry("SCANNER_OUT_ENERGY","["+QString::number(static_cast<int>(SCANNER::OUT_ENERGY))+"]");
+    symbolTable->addEntry("SCANNER_OUT_ANGLE","["+QString::number(static_cast<int>(SCANNER::OUT_ANGLE))+"]");
+    symbolTable->addEntry("SCANNER_OUT_DISTANCE","["+QString::number(static_cast<int>(SCANNER::OUT_DISTANCE))+"]");
+    symbolTable->addEntry("SCANNER_OUT_CELL_MAX_CONNECTIONS","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_MAX_CONNECTIONS))+"]");
+    symbolTable->addEntry("SCANNER_OUT_CELL_BRANCH_NO","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_BRANCH_NO))+"]");
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_FUNCTION))+"]");
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::COMPUTER",QString::number(static_cast<int>(CellFunctionType::COMPUTER)));
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::PROP",QString::number(static_cast<int>(CellFunctionType::PROPULSION)));
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::SCANNER",QString::number(static_cast<int>(CellFunctionType::SCANNER)));
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::WEAPON",QString::number(static_cast<int>(CellFunctionType::WEAPON)));
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::CONSTR",QString::number(static_cast<int>(CellFunctionType::CONSTRUCTOR)));
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::SENSOR",QString::number(static_cast<int>(CellFunctionType::SENSOR)));
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR",QString::number(static_cast<int>(CellFunctionType::COMMUNICATOR)));
+    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION_DATA","["+QString::number(static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA))+"]");
 
     //weapon
-    meta->addSymbolEntry("WEAPON_OUT","["+QString::number(static_cast<int>(WEAPON::OUT))+"]");
-    meta->addSymbolEntry("WEAPON_OUT::NO_TARGET",QString::number(static_cast<int>(WEAPON_OUT::NO_TARGET)));
-    meta->addSymbolEntry("WEAPON_OUT::STRIKE_SUCCESSFUL",QString::number(static_cast<int>(WEAPON_OUT::STRIKE_SUCCESSFUL)));
+    symbolTable->addEntry("WEAPON_OUT","["+QString::number(static_cast<int>(WEAPON::OUT))+"]");
+    symbolTable->addEntry("WEAPON_OUT::NO_TARGET",QString::number(static_cast<int>(WEAPON_OUT::NO_TARGET)));
+    symbolTable->addEntry("WEAPON_OUT::STRIKE_SUCCESSFUL",QString::number(static_cast<int>(WEAPON_OUT::STRIKE_SUCCESSFUL)));
 
     //sensor
-    meta->addSymbolEntry("SENSOR_OUT", "["+QString::number(static_cast<int>(SENSOR::OUT))+"]");
-    meta->addSymbolEntry("SENSOR_OUT::NOTHING_FOUND", QString::number(static_cast<int>(SENSOR_OUT::NOTHING_FOUND)));
-    meta->addSymbolEntry("SENSOR_OUT::CLUSTER_FOUND", QString::number(static_cast<int>(SENSOR_OUT::CLUSTER_FOUND)));
-    meta->addSymbolEntry("SENSOR_IN", "["+QString::number(static_cast<int>(SENSOR::IN))+"]");
-    meta->addSymbolEntry("SENSOR_IN::DO_NOTHING", QString::number(static_cast<int>(SENSOR_IN::DO_NOTHING)));
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_VICINITY", QString::number(static_cast<int>(SENSOR_IN::SEARCH_VICINITY)));
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_BY_ANGLE", QString::number(static_cast<int>(SENSOR_IN::SEARCH_BY_ANGLE)));
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_FROM_CENTER", QString::number(static_cast<int>(SENSOR_IN::SEARCH_FROM_CENTER)));
-    meta->addSymbolEntry("SENSOR_IN::SEARCH_TOWARD_CENTER", QString::number(static_cast<int>(SENSOR_IN::SEARCH_TOWARD_CENTER)));
-    meta->addSymbolEntry("SENSOR_INOUT_ANGLE", "["+QString::number(static_cast<int>(SENSOR::INOUT_ANGLE))+"]");
-    meta->addSymbolEntry("SENSOR_IN_MIN_MASS", "["+QString::number(static_cast<int>(SENSOR::IN_MIN_MASS))+"]");
-    meta->addSymbolEntry("SENSOR_IN_MAX_MASS", "["+QString::number(static_cast<int>(SENSOR::IN_MAX_MASS))+"]");
-    meta->addSymbolEntry("SENSOR_OUT_MASS", "["+QString::number(static_cast<int>(SENSOR::OUT_MASS))+"]");
-    meta->addSymbolEntry("SENSOR_OUT_DISTANCE", "["+QString::number(static_cast<int>(SENSOR::OUT_DISTANCE))+"]");
+    symbolTable->addEntry("SENSOR_OUT", "["+QString::number(static_cast<int>(SENSOR::OUT))+"]");
+    symbolTable->addEntry("SENSOR_OUT::NOTHING_FOUND", QString::number(static_cast<int>(SENSOR_OUT::NOTHING_FOUND)));
+    symbolTable->addEntry("SENSOR_OUT::CLUSTER_FOUND", QString::number(static_cast<int>(SENSOR_OUT::CLUSTER_FOUND)));
+    symbolTable->addEntry("SENSOR_IN", "["+QString::number(static_cast<int>(SENSOR::IN))+"]");
+    symbolTable->addEntry("SENSOR_IN::DO_NOTHING", QString::number(static_cast<int>(SENSOR_IN::DO_NOTHING)));
+    symbolTable->addEntry("SENSOR_IN::SEARCH_VICINITY", QString::number(static_cast<int>(SENSOR_IN::SEARCH_VICINITY)));
+    symbolTable->addEntry("SENSOR_IN::SEARCH_BY_ANGLE", QString::number(static_cast<int>(SENSOR_IN::SEARCH_BY_ANGLE)));
+    symbolTable->addEntry("SENSOR_IN::SEARCH_FROM_CENTER", QString::number(static_cast<int>(SENSOR_IN::SEARCH_FROM_CENTER)));
+    symbolTable->addEntry("SENSOR_IN::SEARCH_TOWARD_CENTER", QString::number(static_cast<int>(SENSOR_IN::SEARCH_TOWARD_CENTER)));
+    symbolTable->addEntry("SENSOR_INOUT_ANGLE", "["+QString::number(static_cast<int>(SENSOR::INOUT_ANGLE))+"]");
+    symbolTable->addEntry("SENSOR_IN_MIN_MASS", "["+QString::number(static_cast<int>(SENSOR::IN_MIN_MASS))+"]");
+    symbolTable->addEntry("SENSOR_IN_MAX_MASS", "["+QString::number(static_cast<int>(SENSOR::IN_MAX_MASS))+"]");
+    symbolTable->addEntry("SENSOR_OUT_MASS", "["+QString::number(static_cast<int>(SENSOR::OUT_MASS))+"]");
+    symbolTable->addEntry("SENSOR_OUT_DISTANCE", "["+QString::number(static_cast<int>(SENSOR::OUT_DISTANCE))+"]");
 
     //communicator
-    meta->addSymbolEntry("COMMUNICATOR_IN", "["+QString::number(static_cast<int>(COMMUNICATOR::IN))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_IN::DO_NOTHING", QString::number(static_cast<int>(COMMUNICATOR_IN::DO_NOTHING)));
-    meta->addSymbolEntry("COMMUNICATOR_IN::SET_LISTENING_CHANNEL", QString::number(static_cast<int>(COMMUNICATOR_IN::SET_LISTENING_CHANNEL)));
-    meta->addSymbolEntry("COMMUNICATOR_IN::SEND_MESSAGE", QString::number(static_cast<int>(COMMUNICATOR_IN::SEND_MESSAGE)));
-    meta->addSymbolEntry("COMMUNICATOR_IN::RECEIVE_MESSAGE", QString::number(static_cast<int>(COMMUNICATOR_IN::RECEIVE_MESSAGE)));
-    meta->addSymbolEntry("COMMUNICATOR_IN_CHANNEL", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_CHANNEL))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_IN_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_MESSAGE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_IN_ANGLE", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_ANGLE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_IN_DISTANCE", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_DISTANCE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_OUT_SENT_NUM_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO", QString::number(static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO)));
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES", QString::number(static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES)));
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_MESSAGE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_ANGLE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_ANGLE))+"]");
-    meta->addSymbolEntry("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_DISTANCE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_IN", "["+QString::number(static_cast<int>(COMMUNICATOR::IN))+"]");
+    symbolTable->addEntry("COMMUNICATOR_IN::DO_NOTHING", QString::number(static_cast<int>(COMMUNICATOR_IN::DO_NOTHING)));
+    symbolTable->addEntry("COMMUNICATOR_IN::SET_LISTENING_CHANNEL", QString::number(static_cast<int>(COMMUNICATOR_IN::SET_LISTENING_CHANNEL)));
+    symbolTable->addEntry("COMMUNICATOR_IN::SEND_MESSAGE", QString::number(static_cast<int>(COMMUNICATOR_IN::SEND_MESSAGE)));
+    symbolTable->addEntry("COMMUNICATOR_IN::RECEIVE_MESSAGE", QString::number(static_cast<int>(COMMUNICATOR_IN::RECEIVE_MESSAGE)));
+    symbolTable->addEntry("COMMUNICATOR_IN_CHANNEL", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_CHANNEL))+"]");
+    symbolTable->addEntry("COMMUNICATOR_IN_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_MESSAGE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_IN_ANGLE", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_ANGLE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_IN_DISTANCE", "["+QString::number(static_cast<int>(COMMUNICATOR::IN_DISTANCE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_OUT_SENT_NUM_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO", QString::number(static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO)));
+    symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES", QString::number(static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES)));
+    symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_MESSAGE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_ANGLE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_ANGLE))+"]");
+    symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "["+QString::number(static_cast<int>(COMMUNICATOR::OUT_RECEIVED_DISTANCE))+"]");
 }
 
 SimulationParameters simulationParameters;

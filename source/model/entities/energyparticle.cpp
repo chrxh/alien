@@ -118,7 +118,9 @@ bool EnergyParticle::movement (CellCluster*& cluster)
                 cluster = facade->buildCellCluster(cells, 0.0, pos, 0, vel, _context);
                 amount = 0;
                 _cellMap->setCell(pos, c);
-                c->setColor(color);
+				CellMetadata meta = c->getMetadata();
+				meta.color = color;
+                c->setMetadata(meta);
                 return true;
             }
             else {

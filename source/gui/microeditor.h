@@ -1,10 +1,11 @@
 #ifndef MICROEDITOR_H
 #define MICROEDITOR_H
 
-#include "model/entities/cellto.h"
-
 #include <QWidget>
 #include <QTimer>
+
+#include "model/entities/cellto.h"
+#include "model/definitions.h"
 
 namespace Ui {
 class MicroEditor;
@@ -30,7 +31,7 @@ class MicroEditor : public QObject
     Q_OBJECT
 
 public:
-    explicit MicroEditor(QObject *parent = 0);
+    MicroEditor(SimulationContext* context, QObject *parent = 0);
     ~MicroEditor();
 
     void init (QTabWidget* tabClusterWidget,
@@ -76,12 +77,17 @@ public slots:
     void computerCompilationReturn (bool error, int line);
     void defocused (bool requestDataUpdate = true);
     void cellFocused (Cell* cell, bool requestDataUpdate = true);
-    void energyParticleFocused (EnergyParticle* e);
+
+
+
+	void energyParticleFocused(EnergyParticle* e);
     void energyParticleUpdated_Slot (EnergyParticle* e);
     void reclustered (QList< CellCluster* > clusters);
     void universeUpdated (Grid* grid, bool force);
     void requestUpdate ();
-    void entitiesSelected (int numCells, int numEnergyParticles);
+
+
+	void entitiesSelected(int numCells, int numEnergyParticles);
     void addTokenClicked ();
     void delTokenClicked ();
     void copyTokenClicked ();
@@ -107,8 +113,15 @@ private slots:
     void compileButtonClicked (QString code);
 
 private:
+	CellMetadata getCellMetadata(Cell* cell);
+	CellClusterMetadata getCellClusterMetadata(Cell* cell);
+	void setCellMetadata(Cell* cell, CellMetadata meta);
+	void setCellClusterMetadata(Cell* cell, CellClusterMetadata meta);
+
     void invokeUpdateCell (bool clusterDataChanged);
     void setTabSymbolsWidgetVisibility ();
+
+	SimulationContext* _context;
 
     //widgets
     QTabWidget* _tabClusterWidget;

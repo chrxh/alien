@@ -50,8 +50,8 @@ public:
                                 QMap< quint64, quint64 >& oldNewClusterIdMap,
                                 QMap< quint64, quint64 >& oldNewCellIdMap,
                                 bool drawToMap = true);
-	int const& getFrame() const;
-	int const& getFps() const;
+	int getFrame() const;
+	int getFps() const;
 
 public slots:
     void delSelection (QList< Cell* > cells,
