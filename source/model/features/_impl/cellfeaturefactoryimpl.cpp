@@ -12,6 +12,10 @@
 
 #include "global/servicelocator.h"
 
+namespace {
+	CellDecoratorFactoryImpl cellDecoratorFactoryImpl;
+}
+
 CellDecoratorFactoryImpl::CellDecoratorFactoryImpl ()
 {
     ServiceLocator::getInstance().registerService<CellFeatureFactory>(this);
@@ -70,4 +74,3 @@ CellFeature* CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, Simulation
     return registerNewFeature(cell, new EnergyGuidanceImpl(context));
 }
 
-CellDecoratorFactoryImpl cellDecoratorFactoryImpl;

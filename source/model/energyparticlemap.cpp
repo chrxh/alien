@@ -5,15 +5,10 @@
 
 
 EnergyParticleMap::EnergyParticleMap(Topology* topo)
+	: _topo(topo)
 {
-	_topo = topo;
-	IntVector2D size = _topo->getSize();
-	_energyGrid = new EnergyParticle**[size.x];
-	for (int x = 0; x < size.x; ++x) {
-		_energyGrid[x] = new EnergyParticle*[size.y];
-	}
-	clear();
 }
+
 EnergyParticleMap::~EnergyParticleMap()
 {
 	deleteCellMap();
