@@ -91,9 +91,6 @@ int main(int argc, char *argv[])
     qRegisterMetaType<CellTO>("CellTO");
 //	qRegisterMetaType<SimulationContext>("SimulationContext");
 
-    //load default metadata
-//    Metadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());
-
     //init main objects
     QApplication a(argc, argv);
 	SimulationController simulator(SimulationController::Threading::EXTRA_THREAD);

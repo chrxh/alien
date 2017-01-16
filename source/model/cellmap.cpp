@@ -5,14 +5,8 @@
 #include "model/entities/cellcluster.h"
 
 CellMap::CellMap(Topology* topo)
+	: _topo(topo)
 {
-	_topo = topo;
-	IntVector2D size = _topo->getSize();
-	_cellGrid = new Cell**[size.x];
-	for (int x = 0; x < size.x; ++x) {
-		_cellGrid[x] = new Cell*[size.y];
-	}
-	clear();
 }
 
 
