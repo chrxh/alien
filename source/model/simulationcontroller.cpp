@@ -9,7 +9,7 @@
 #include "global/servicelocator.h"
 #include "model/features/cellfunctioncomputer.h"
 #include "model/entities/token.h"
-#include "model/entities/grid.h"
+#include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/metadata/symboltable.h"

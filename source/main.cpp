@@ -5,8 +5,9 @@
 #include "gui/mainwindow.h"
 #include "model/simulationcontroller.h"
 #include "model/metadata/symboltable.h"
-#include "model/config.h"
 #include "model/entities/cellto.h"
+#include "model/simulationcontext.h"
+#include "model/config.h"
 
 
 //QT += webkitwidgets
@@ -93,10 +94,9 @@ int main(int argc, char *argv[])
 
     //init main objects
     QApplication a(argc, argv);
-	SimulationController simulator(SimulationController::Threading::EXTRA_THREAD);
-	SymbolTable symbolTable;
-	simulator.newUniverse({ 400, 200 }, symbolTable);
-    MainWindow w(&simulator);
+	SimulationController controller(SimulationController::Threading::EXTRA_THREAD);
+	controller.newUniverse({ 400, 200 }, *controller.getSimulationContext()->getSymbolTable());
+    MainWindow w(&controller);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();

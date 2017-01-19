@@ -85,7 +85,6 @@ void PixelUniverse::universeUpdated (SimulationContext* context)
             //draw cell
             Cell* cell = cellMap->getCellFast(pos);
             if( cell ) {
-//                cell = grid->getCell(QVector3D(x,y,0.0));
                 if(cell->getNumToken() > 0 )
                     _image->setPixel(pos.x, pos.y, 0xFFFFFF);
                 else {
