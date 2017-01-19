@@ -2,7 +2,6 @@
 
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-#include "model/entities/grid.h"
 #include "model/features/cellfeature.h"
 #include "model/physics/physics.h"
 #include "model/config.h"

@@ -73,7 +73,6 @@ private:
     SimulationContext* _context;
     Topology* _topology;
     CellMap* _cellMap;
-    Grid* _grid;
 
     qreal _angle = 0.0;       //in deg
     QVector3D _pos;

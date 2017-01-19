@@ -57,7 +57,6 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     }
 
     QVector3D rAPp = cellRelPos;
-//    grid->correctDistance(rAPp);
     rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
     if( cmd == static_cast<int>(PROP_IN::ROTATION_CLOCKWISE) ) {
         impulse = -rAPp.normalized()*power;

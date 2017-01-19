@@ -12,7 +12,6 @@
 #include "model/topology.h"
 
 #include "energyparticle.h"
-#include "grid.h"
 #include "cell.h"
 #include "cellcluster.h"
 

@@ -26,7 +26,6 @@ MacroEditor::MacroEditor(QWidget *parent)
 {
     ui->setupUi(this);
 
-//    ui->simulationView->setStyleSheet("background-color: #000000; color: #B0B0B0; gridline-color: #303030;");
     ui->simulationView->horizontalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
     ui->simulationView->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
 
@@ -244,13 +243,6 @@ void MacroEditor::delExtendedSelection_Slot ()
         QList< CellCluster* > clusters;
         QList< EnergyParticle* > es;
         _shapeUniverse->delExtendedSelection(clusters, es);
-        //*********
-//        foreach(CellCluster* c, _grid->getClusters())
-//            clusters << c;
-//            foreach(Cell* cell, c->getCellsRef())
-//                if( (qrand() % 2 == 0) )
-//                cells << cell;
-        //*********
         emit delExtendedSelection(clusters, es);
     }
 }
@@ -283,12 +275,6 @@ void MacroEditor::reclustered (QList< CellCluster* > clusters)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
-//        _shapeUniverse->universeUpdated(_grid);
-/*        foreach(CellCluster* cluster, clusters) {
-            foreach(Cell* cell, cluster->getCellsRef()) {
-                cell->setRelPos(cell->getRelPos());
-            }
-        }*/
         _shapeUniverse->reclustered(clusters);
     }
     else

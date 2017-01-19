@@ -6,7 +6,6 @@
 #include "entities/cell.h"
 #include "entities/cellcluster.h"
 #include "entities/energyparticle.h"
-#include "entities/grid.h"
 #include "entities/token.h"
 
 #include "simulationunit.h"

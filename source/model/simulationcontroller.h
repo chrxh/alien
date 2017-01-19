@@ -36,20 +36,13 @@ public:
 
     //selection manipulation Tools
     void saveCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId);
-    void saveExtendedSelection (QDataStream& stream,
-                                    const QList< CellCluster* >& clusters,
-                                    const QList< EnergyParticle* >& es,
-                                    QList< quint64 >& clusterIds,
-                                    QList< quint64 >& cellIds);
-    void loadCell (QDataStream& stream,                QVector3D pos,
-                    bool drawToMap = true);
-    void loadExtendedSelection (QDataStream& stream,   //returns a map which maps to old to the new cell and cluster ids
-                                QVector3D pos,
-                                QList< CellCluster* >& newClusters,
-                                QList< EnergyParticle* >& newEnergyParticles,
-                                QMap< quint64, quint64 >& oldNewClusterIdMap,
-                                QMap< quint64, quint64 >& oldNewCellIdMap,
-                                bool drawToMap = true);
+    void saveExtendedSelection (QDataStream& stream, const QList< CellCluster* >& clusters
+		, const QList< EnergyParticle* >& es, QList< quint64 >& clusterIds, QList< quint64 >& cellIds);
+    void loadCell (QDataStream& stream, QVector3D pos, bool drawToMap = true);
+    void loadExtendedSelection (QDataStream& stream   //returns a map which maps to old to the new cell and cluster ids
+		, QVector3D pos, QList< CellCluster* >& newClusters, QList< EnergyParticle* >& newEnergyParticles
+		, QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap
+		, bool drawToMap = true);
 	int getFrame() const;
 	int getFps() const;
 
