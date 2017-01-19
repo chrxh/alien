@@ -1,32 +1,28 @@
-#include "macroeditor.h"
-#include "ui_macroeditor.h"
+#include <QScrollBar>
+#include <QTimer>
+#include <QGraphicsItem>
 
-#include "microeditor.h"
+#include "model/simulationcontext.h"
+#include "model/topology.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/cell.h"
 #include "macroeditor/pixeluniverse.h"
 #include "macroeditor/shapeuniverse.h"
 #include "gui/editorsettings.h"
 #include "gui/guisettings.h"
 
-#include "model/entities/grid.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/cell.h"
 
-#include <QScrollBar>
-#include <QTimer>
-#include <QGraphicsItem>
+#include "microeditor.h"
+#include "macroeditor.h"
+#include "ui_macroeditor.h"
 
-MacroEditor::MacroEditor(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::MacroEditor),
-    _grid(0),
-    _activeScene(PIXEL_SCENE),
-    _pixelUniverse(new PixelUniverse(this)),
-    _shapeUniverse(new ShapeUniverse(this)),
-    _pixelUniverseInit(false),
-    _shapeUniverseInit(false),
-    _posIncrement(0),
-    _updateTimer(0),
-    _screenUpdatePossible(true)
+
+MacroEditor::MacroEditor(QWidget *parent)
+	: QWidget(parent)
+	, ui(new Ui::MacroEditor)
+	, _activeScene(PIXEL_SCENE)
+	, _pixelUniverse(new PixelUniverse(this))
+	, _shapeUniverse(new ShapeUniverse(this))
 {
     ui->setupUi(this);
 
@@ -107,7 +103,7 @@ void MacroEditor::setActiveScene (ActiveScene activeScene)
 
     //update scene
     _screenUpdatePossible = true;
-    universeUpdated(_grid, true);
+    universeUpdated(_context, true);
 }
 
 QVector3D MacroEditor::getViewCenterPosWithInc ()
@@ -296,17 +292,16 @@ void MacroEditor::reclustered (QList< CellCluster* > clusters)
         _shapeUniverse->reclustered(clusters);
     }
     else
-        _pixelUniverse->universeUpdated(_grid);
+        _pixelUniverse->universeUpdated(_context);
 }
 
-void MacroEditor::universeUpdated (Grid* grid, bool force)
+void MacroEditor::universeUpdated (SimulationContext* context, bool force)
 {
-    //valid grid pointer available?
-    if( grid )
-        _grid = grid;
+    if(context)
+        _context = context;
     else
-        grid = _grid;
-    if( !grid )
+		context = _context;
+    if( !context)
         return;
 
     //update possible? (see updateTimerTimeout())
@@ -315,23 +310,23 @@ void MacroEditor::universeUpdated (Grid* grid, bool force)
 
         //update active scene
         if( _activeScene == PIXEL_SCENE ) {
-            _pixelUniverse->universeUpdated(grid);
+            _pixelUniverse->universeUpdated(context);
 
             //first time? => center view
             if( !_pixelUniverseInit ) {
                _pixelUniverseInit = true;
                ui->simulationView->scale(2.0,2.0);
-               centerView(grid);
+               centerView(context);
             }
         }
         if( _activeScene == SHAPE_SCENE ) {
-            _shapeUniverse->universeUpdated(grid);
+            _shapeUniverse->universeUpdated(context);
 
             //first time? => center view
             if( !_shapeUniverseInit ) {
                _shapeUniverseInit = true;
                ui->simulationView->scale(20.0,20.0);
-               centerView(grid);
+               centerView(context);
             }
             QGraphicsItem* cellItem = _shapeUniverse->getFocusCenterCell();
             if( cellItem )
@@ -357,13 +352,14 @@ void MacroEditor::updateTimerTimeout ()
     _screenUpdatePossible = true;
 }
 
-void MacroEditor::centerView (Grid* grid)
+void MacroEditor::centerView (SimulationContext* context)
 {
     //load size of the universe
-    grid->lockData();
-    qreal sizeX = grid->getSizeX();
-    qreal sizeY = grid->getSizeY();
-    grid->unlockData();
+	context->lock();
+	Topology* topo = context->getTopology();
+    qreal sizeX = topo->getSize().x;
+    qreal sizeY = topo->getSize().y;
+	context->unlock();
 
     //set view position
     ui->simulationView->centerOn(sizeX/2.0, sizeY/2.0);

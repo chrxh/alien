@@ -175,7 +175,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     ui->frameLabel->setFont(f);
 
     //init timer
-    connect(_oneSecondTimer, SIGNAL(oneSecondTimeout()), this, SLOT(oneSecondTimeout()));
+    connect(_oneSecondTimer, SIGNAL(timeout()), this, SLOT(oneSecondTimeout()));
     _oneSecondTimer->start(1000);
 
     //connect and run start screen
