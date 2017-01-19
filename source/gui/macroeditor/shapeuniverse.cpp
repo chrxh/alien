@@ -1,37 +1,38 @@
-#include "shapeuniverse.h"
+#include <QGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QMatrix4x4>
+
+#include "global/servicelocator.h"
+#include "model/config.h"
+#include "model/factoryfacade.h"
+#include "model/simulationcontext.h"
+#include "model/topology.h"
+#include "model/energyparticlemap.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
+#include "gui/editorsettings.h"
 
 #include "aliencellgraphicsitem.h"
 #include "aliencellconnectiongraphicsitem.h"
 #include "alienenergygraphicsitem.h"
 #include "markergraphicsitem.h"
+#include "shapeuniverse.h"
 
-#include "gui/editorsettings.h"
-#include "model/config.h"
-#include "model/factoryfacade.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/energyparticle.h"
-#include "model/entities/grid.h"
-
-#include "global/servicelocator.h"
-
-#include <QGraphicsItem>
-#include <QGraphicsSceneMouseEvent>
-#include <QMatrix4x4>
-
-ShapeUniverse::ShapeUniverse(QObject *parent) :
-    QGraphicsScene(parent), _grid(0), _marker(0), _focusCenterCellItem(0)
+ShapeUniverse::ShapeUniverse(QObject *parent)
+	: QGraphicsScene(parent)
 {
     setBackgroundBrush(QBrush(QColor(0,0,0x30)));
 }
 
 
-void ShapeUniverse::universeUpdated (Grid* grid)
+void ShapeUniverse::universeUpdated (SimulationContext* context)
 {
-    _grid = grid;
-    if( !_grid )
+    _context = context;
+    if( !_context)
         return;
 
-    grid->lockData();
+	_context->lock();
     _focusCells.clear();
     _focusEnergyParticles.clear();
     _highlightedCells.clear();
@@ -50,18 +51,19 @@ void ShapeUniverse::universeUpdated (Grid* grid)
 
     //reset scene
     clear();
-    setSceneRect(0,0,grid->getSizeX(),grid->getSizeY());
+	IntVector2D size = _context->getTopology()->getSize();
+    setSceneRect(0, 0, size.x, size.y);
 
     //draw boundaries
-    QGraphicsScene::addRect(0.0, 0.0, grid->getSizeX(), grid->getSizeY(), QPen(QColor(0, 0, 0x80)));
+    QGraphicsScene::addRect(0.0, 0.0, size.x, size.y, QPen(QColor(0, 0, 0x80)));
 
     //draw energy particles
-    foreach( EnergyParticle* energy, grid->getEnergyParticles() ) {
+    foreach( EnergyParticle* energy, _context->getEnergyParticlesRef() ) {
         createEnergyItem(energy);
     }
 
     //draw cell clusters
-    foreach( CellCluster* cluster, grid->getClusters() ) {
+    foreach( CellCluster* cluster, _context->getClustersRef() ) {
         foreach( Cell* cell, cluster->getCellsRef()) {
 
             //create connections between cells
@@ -86,16 +88,16 @@ void ShapeUniverse::universeUpdated (Grid* grid)
     //set cell color according to the meta data
     setCellColorFromMetadata();
 
-    grid->unlockData();
+    _context->unlock();
     update();
 }
 
 void ShapeUniverse::cellCreated (Cell* cell)
 {
-    if( (!_grid) || (!cell) )
+    if( (!_context) || (!cell) )
         return;
 
-    _grid->lockData();
+	_context->lock();
     createCellItem(cell);
 
     //remember focus cell
@@ -107,16 +109,16 @@ void ShapeUniverse::cellCreated (Cell* cell)
     unhighlight();
     highlightCell(cell);
 
-    _grid->unlockData();
+	_context->unlock();
     QGraphicsScene::update();
 }
 
 void ShapeUniverse::energyParticleCreated (EnergyParticle* e)
 {
-    if( (!_grid) || (!e) )
+    if( (!_context) || (!e) )
         return;
 
-    _grid->lockData();
+	_context->lock();
     _focusCells.clear();
     _focusEnergyParticles.clear();
 
@@ -128,7 +130,7 @@ void ShapeUniverse::energyParticleCreated (EnergyParticle* e)
     unhighlight();
     highlightEnergyParticle(eItem);
 
-    _grid->unlockData();
+	_context->unlock();
     QGraphicsScene::update();
 }
 
@@ -143,17 +145,17 @@ void ShapeUniverse::defocused ()
 
 void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
 {
-    if( !_grid )
+    if( !_context)
         return;
-    _grid->lockData();
+	_context->lock();
 
     if( _energyItems.contains(e->id) ) {
         QVector3D pos = e->pos;
         EnergyGraphicsItem* eItem = _energyItems[e->id];
-        _grid->correctPosition(pos);
+		_context->getTopology()->correctPosition(pos);
         eItem->setPos(pos.x(), pos.y());
     }
-    _grid->unlockData();
+	_context->unlock();
 
     QGraphicsScene::update();
 }
@@ -161,14 +163,14 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
 void ShapeUniverse::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
     //extract selected cluster
-    _grid->lockData();
+	_context->lock();
     QMap< quint64, CellCluster* > idClusterMap;
     QList< CellGraphicsItem* > highlightedCells = _highlightedCells.values();
     foreach( CellGraphicsItem* cellItem, highlightedCells ) {
         CellCluster* cluster = cellItem->getCell()->getCluster();
         idClusterMap[cluster->getId()] = cluster;
     }
-    _grid->unlockData();
+	_context->unlock();
     clusters = idClusterMap.values();
 
     //selected energy particles
@@ -180,7 +182,7 @@ void ShapeUniverse::getExtendedSelection (QList< CellCluster* >& clusters, QList
 
 void ShapeUniverse::delSelection (QList< Cell* >& cells, QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+	_context->lock();
 
     //remove highlighting (has to be done first since the cells will be deleted in the following!!!)
     unhighlight();
@@ -206,13 +208,13 @@ void ShapeUniverse::delSelection (QList< Cell* >& cells, QList< EnergyParticle* 
         delete eItem;
     }
     _focusEnergyParticles.clear();
-    _grid->unlockData();
+	_context->unlock();
     QGraphicsScene::update();
 }
 
 void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+    _context->lock();
 
     //identify all cells and their clusters which should be deleted
     std::set<quint64> cellsToBeDeleted;
@@ -261,16 +263,16 @@ void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList
     }
     _focusEnergyParticles.clear();
     _highlightedEnergyParticles.clear();
-    _grid->unlockData();
+    _context->unlock();
     QGraphicsScene::update();
 }
 
 void ShapeUniverse::metadataUpdated ()
 {
     //set cell colors
-    _grid->lockData();
+    _context->lock();
     setCellColorFromMetadata();
-    _grid->unlockData();
+    _context->unlock();
 
     QGraphicsScene::update();
 }
@@ -282,15 +284,16 @@ QGraphicsItem* ShapeUniverse::getFocusCenterCell ()
 
 void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
 {
-    if( !_grid )
+    if( !_context)
         return;
 
-    _grid->lockData();
+    _context->lock();
 
      //remove hightlighting
     unhighlight();
 
     //move graphic cells corresponding to the Cells in "clusters" and delete their connections
+	Topology* topo = _context->getTopology();
     foreach(CellCluster* cluster, clusters) {
         foreach(Cell* cell, cluster->getCellsRef()) {
 
@@ -298,7 +301,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
             if( _cellItems.contains(cell->getId()) ) {
                 QVector3D pos = cell->calcPosition();
                 CellGraphicsItem* cellItem = _cellItems[cell->getId()];
-                _grid->correctPosition(pos);
+                topo->correctPosition(pos);
                 cellItem->setPos(pos.x(), pos.y());
                 cellItem->setNumToken(cell->getNumToken());
                 bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
@@ -349,16 +352,16 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
     foreach(EnergyGraphicsItem* eItem, _focusEnergyParticles)
         highlightEnergyParticle(eItem);
 
-    _grid->unlockData();
+    _context->unlock();
     QGraphicsScene::update();
 }
 
 
 void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
 {
-    if( !_grid )
+    if( !_context )
         return;
-    _grid->lockData();
+    _context->lock();
 
     bool _clickedOnSomething = false;
     QList< QGraphicsItem* > items(QGraphicsScene::items(e->scenePos()));
@@ -406,7 +409,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         qDebug("h: %d", _highlightedCells.size());
         unhighlight();
         QGraphicsScene::update();
-        _grid->unlockData();
+        _context->unlock();
         return;
     }
 */
@@ -428,7 +431,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         QGraphicsScene::update();
     }
 
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
@@ -446,10 +449,10 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-    if( !_grid )
+    if( !_context)
         return;
 
-//    _grid->lockData();
+//    _context->lock();
 
     //mouse buttons
     bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
@@ -459,7 +462,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
         //move marker?
         if( _marker ) {
-            _grid->lockData();
+            _context->lock();
 
             //set pos
             _marker->setEndPos(e->scenePos().x(), e->scenePos().y());
@@ -492,7 +495,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 }
             }
 
-            _grid->unlockData();
+            _context->unlock();
             emit entitiesSelected(_focusCells.size(), _focusEnergyParticles.size());
             QGraphicsScene::update();
         }
@@ -513,12 +516,13 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
 
             //update focused energy particles
+			EnergyParticleMap* energyMap = _context->getEnergyParticleMap();
             foreach( EnergyGraphicsItem* eItem, _focusEnergyParticles ) {
 
                 //update new position to the energy particle on our own
                 EnergyParticle* energy = eItem->getEnergyParticle();
-                _grid->lockData();
-                _grid->setEnergy(energy->pos, 0);
+                _context->lock();
+                energyMap->setParticle(energy->pos, 0);
 
                 //not [left and right] mouse button pressed?
                 if( (!leftButton) || (!rightButton) ) {
@@ -528,8 +532,8 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                     energy->pos = transform.map(energy->pos);
                 }
 
-                _grid->setEnergy(energy->pos, energy);
-                _grid->unlockData();
+                energyMap->setParticle(energy->pos, energy);
+                _context->unlock();
 //                QPointF p = eItem->pos();
                 eItem->setPos(energy->pos.x(), energy->pos.y());
 
@@ -546,9 +550,9 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
                 //retrieve cell information
                 Cell* cell = cellItem->getCell();
-                _grid->lockData();
+                _context->lock();
                 CellTO newCellData = facade->buildFeaturedCellTO(cell);
-                _grid->unlockData();
+                _context->unlock();
 
                 //only left mouse button pressed?
                 if( leftButton && (!rightButton) ) {
@@ -598,7 +602,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             }
         }
     }
-//    _grid->unlockData();
+//    _context->unlock();
 }
 
 EnergyGraphicsItem* ShapeUniverse::createEnergyItem (EnergyParticle* e)
