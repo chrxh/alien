@@ -4,6 +4,15 @@
 #include <QTextEdit>
 #include <QEvent>
 
+#include "model/config.h"
+#include "model/simulationcontext.h"
+#include "model/energyparticlemap.h"
+#include "model/factoryfacade.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
+#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 #include "microeditor/tokentab.h"
 #include "microeditor/celledit.h"
 #include "microeditor/clusteredit.h"
@@ -12,15 +21,6 @@
 #include "microeditor/metadataedit.h"
 #include "microeditor/symboledit.h"
 #include "microeditor/cellcomputeredit.h"
-#include "gui/editorsettings.h"
-#include "gui/guisettings.h"
-#include "model/config.h"
-#include "model/simulationcontext.h"
-#include "model/factoryfacade.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/grid.h"
-#include "model/entities/energyparticle.h"
 #include "global/servicelocator.h"
 
 #include "microeditor.h"
@@ -230,7 +230,7 @@ void MicroEditor::defocused (bool requestDataUpdate)
 
 void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 {
-    if( (!isVisible()) || (!_grid) || (!cell) )
+    if( (!isVisible()) || (!_context) || (!cell) )
         return;
 
     defocused(requestDataUpdate);
@@ -238,11 +238,11 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
     _focusCell = cell;
 
     //update data for cluster editor
-    _grid->lockData();
+    _context->lock();
     FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
     _focusCellReduced = facade->buildFeaturedCellTO(cell);
     QList< quint64 > ids = cell->getCluster()->getCellIds();
-	_grid->unlockData();
+	_context->unlock();
 	CellMetadata cellMeta = getCellMetadata(cell);
 	CellClusterMetadata clusterMeta = getCellClusterMetadata(cell);
     _clusterEditor->updateCluster(_focusCellReduced);
@@ -333,7 +333,7 @@ CellClusterMetadata MicroEditor::getCellClusterMetadata(Cell* cell)
 
 void MicroEditor::energyParticleFocused (EnergyParticle* e)
 {
-    if( (!isVisible()) || (!_grid) || (!e) )
+    if( (!isVisible()) || (!_context) || (!e) )
         return;
 
     defocused();
@@ -357,11 +357,11 @@ void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 
     //update data for editor if particle is focused (we also use cluster editor)
     if( _focusEnergyParticle == e ) {
-        _grid->lockData();
+        _context->lock();
         QVector3D pos = e->pos;
         QVector3D vel = e->vel;
         qreal energyValue = e->amount;
-        _grid->unlockData();
+        _context->unlock();
         _energyEditor->updateEnergyParticle(pos, vel, energyValue);
     }
 }
@@ -369,26 +369,26 @@ void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 
 void MicroEditor::reclustered (QList< CellCluster* > clusters)
 {
-    if( !_grid )
+    if( !_context)
         return;
     if( _focusCell ) {
 
         //_focusCell contained in clusters?
-        _grid->lockData();
+        _context->lock();
         bool contained = false;
         foreach(CellCluster* cluster, clusters)
             if( cluster->getCellsRef().contains(_focusCell) )
                 contained = true;
-        _grid->unlockData();
+        _context->unlock();
 
         //proceed only if _focusCell is contained in clusters
         if( contained ) {
 
             //update data for cluster editor
             FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-            _grid->lockData();
+            _context->lock();
             _focusCellReduced = facade->buildFeaturedCellTO(_focusCell);
-            _grid->unlockData();
+            _context->unlock();
 			CellMetadata cellMeta = getCellMetadata(_focusCell);
 			CellClusterMetadata clusterMeta = getCellClusterMetadata(_focusCell);
 			_clusterEditor->updateCluster(_focusCellReduced);
@@ -403,9 +403,9 @@ void MicroEditor::reclustered (QList< CellCluster* > clusters)
     }
 }
 
-void MicroEditor::universeUpdated (Grid* grid, bool force)
+void MicroEditor::universeUpdated (SimulationContext* context, bool force)
 {
-    _grid = grid;
+	_context = context;
     defocused(false);
 }
 
@@ -446,16 +446,16 @@ void MicroEditor::requestUpdate ()
 
 void MicroEditor::setCellMetadata(Cell* cell, CellMetadata meta)
 {
-	_grid->lockData();
+	_context->lock();
 	cell->setMetadata(meta);
-	_grid->unlockData();
+	_context->unlock();
 }
 
 void MicroEditor::setCellClusterMetadata(Cell * cell, CellClusterMetadata meta)
 {
-	_grid->lockData();
+	_context->lock();
 	cell->getCluster()->setMetadata(meta);
-	_grid->unlockData();
+	_context->unlock();
 }
 
 void MicroEditor::entitiesSelected (int numCells, int numEnergyParticles)
@@ -616,7 +616,7 @@ void MicroEditor::pasteTokenClicked ()
 
 void MicroEditor::delSelectionClicked ()
 {
-    if( !_grid )
+    if( !_context)
         return;
 
     //defocus
@@ -628,7 +628,7 @@ void MicroEditor::delSelectionClicked ()
 
 void MicroEditor::delExtendedSelectionClicked ()
 {
-    if( !_grid )
+    if( !_context)
         return;
 
     //defocus
@@ -692,17 +692,17 @@ void MicroEditor::changesFromClusterEditor (CellTO newClusterProperties)
 
 void MicroEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue)
 {
-    if( (!_grid) || (!_focusEnergyParticle) )
+    if( (!_context) || (!_focusEnergyParticle) )
         return;
 
     //update energy particle (we do this without informing the simulator...)
-    _grid->lockData();
-    _grid->setEnergy(_focusEnergyParticle->pos, 0);
+    _context->lock();
+	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->pos, 0);
     _focusEnergyParticle->pos = pos;
     _focusEnergyParticle->vel = vel;
     _focusEnergyParticle->amount = energyValue;
-    _grid->setEnergy(_focusEnergyParticle->pos, _focusEnergyParticle);
-    _grid->unlockData();
+	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->pos, _focusEnergyParticle);
+    _context->unlock();
 
     //emit signal to notify other instances
     emit energyParticleUpdated(_focusEnergyParticle);
@@ -781,7 +781,7 @@ void MicroEditor::tokenTabChanged (int index)
 
 void MicroEditor::compileButtonClicked (QString code)
 {
-    if( (!_grid) || (!_focusCell) )
+    if( (!_context) || (!_focusCell) )
         return;
 
     //transfer code to cell meta data

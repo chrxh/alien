@@ -1,11 +1,12 @@
 #ifndef MACROEDITOR_H
 #define MACROEDITOR_H
 
-#include "model/entities/cellto.h"
-
 #include <QWidget>
 #include <QVector3D>
 #include <QMatrix>
+
+#include "model/definitions.h"
+#include "model/entities/cellto.h"
 
 namespace Ui {
 class MacroEditor;
@@ -14,7 +15,6 @@ class MacroEditor;
 class Cell;
 class CellCluster;
 class EnergyParticle;
-class Grid;
 class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
@@ -76,34 +76,34 @@ public slots:
     void energyParticleCreated (EnergyParticle* e);
     void energyParticleUpdated_Slot (EnergyParticle* e);
     void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (Grid* grid, bool force);
+    void universeUpdated (SimulationContext* context, bool force);
     void metadataUpdated ();
 
 private slots:
     void updateTimerTimeout ();
 
 private:
-    void centerView (Grid* grid);
+    void centerView (SimulationContext* context);
 
     Ui::MacroEditor *ui;
 
-    Grid* _grid;
+    SimulationContext* _context = nullptr;
     ActiveScene _activeScene;
     PixelUniverse* _pixelUniverse;
     ShapeUniverse* _shapeUniverse;
 
-    bool _pixelUniverseInit;
-    bool _shapeUniverseInit;
+    bool _pixelUniverseInit = false;
+    bool _shapeUniverseInit = false;
     QMatrix _pixelUniverseViewMatrix;
     QMatrix _shapeUniverseViewMatrix;
     int _pixelUniversePosX, _pixelUniversePosY;
     int _shapeUniversePosX, _shapeUniversePosY;
 
-    qreal _posIncrement;
+    qreal _posIncrement = 0.0;
 
     //timer for limiting screen updates
-    QTimer* _updateTimer;
-    bool _screenUpdatePossible;
+    QTimer* _updateTimer = nullptr;
+    bool _screenUpdatePossible = true;
 };
 
 #endif // MACROEDITOR_H

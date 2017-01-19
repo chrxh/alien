@@ -14,7 +14,6 @@ class MicroEditor;
 class Cell;
 class CellCluster;
 class EnergyParticle;
-class Grid;
 class CellEdit;
 class ClusterEdit;
 class CellComputerEdit;
@@ -83,7 +82,7 @@ public slots:
 	void energyParticleFocused(EnergyParticle* e);
     void energyParticleUpdated_Slot (EnergyParticle* e);
     void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (Grid* grid, bool force);
+    void universeUpdated (SimulationContext* context, bool force);
     void requestUpdate ();
 
 
@@ -146,7 +145,6 @@ private:
     Cell* _focusCell;
     CellTO _focusCellReduced;
     EnergyParticle* _focusEnergyParticle;
-    Grid* _grid;
     QWidget* _tabCluster;
     QWidget* _tabCell;
     QWidget* _tabParticle;

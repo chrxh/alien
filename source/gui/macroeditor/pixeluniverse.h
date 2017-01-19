@@ -5,8 +5,8 @@
 #include <QVector3D>
 #include <QTimer>
 
-class CellCluster;
-class Grid;
+#include "model/definitions.h"
+
 class PixelUniverse : public QGraphicsScene
 {
     Q_OBJECT
@@ -15,7 +15,7 @@ public:
     ~PixelUniverse();
 
     void reset ();
-    void universeUpdated (Grid* grid);
+    void universeUpdated (SimulationContext* context);
 
 protected:
 
@@ -28,7 +28,7 @@ private slots:
     void timeout ();
 
 private:
-    Grid* _grid;
+	SimulationContext* _context;
     QGraphicsPixmapItem* _pixelMap;
     QImage* _image;
     QTimer* _timer;

@@ -1,21 +1,19 @@
 #ifndef SHAPEUNIVERSE_H
 #define SHAPEUNIVERSE_H
 
-#include "model/entities/cellto.h"
-
 #include <QGraphicsScene>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsLineItem>
 #include <QMap>
 #include <QVector3D>
 
-class Cell;
-class CellCluster;
+#include "model/definitions.h"
+#include "model/entities/cellto.h"
+
+
 class CellGraphicsItem;
 class CellConnectionGraphicsItem;
-class EnergyParticle;
 class EnergyGraphicsItem;
-class Grid;
 class MarkerGraphicsItem;
 class QGraphicsSceneMouseEvent;
 class ShapeUniverse : public QGraphicsScene
@@ -24,7 +22,7 @@ class ShapeUniverse : public QGraphicsScene
 public:
     ShapeUniverse (QObject *parent = 0);
 
-    void universeUpdated (Grid* grid);
+    void universeUpdated (SimulationContext* context);
     void cellCreated (Cell* cell);
     void energyParticleCreated (EnergyParticle* e);
     void defocused ();
@@ -70,13 +68,13 @@ private:
     void setCellColorFromMetadata ();
 
     //internal data for display and editing
-    Grid* _grid;
+	SimulationContext* _context = nullptr;
     QList< CellGraphicsItem* > _focusCells;
     QList< EnergyGraphicsItem* > _focusEnergyParticles;
     QMap< quint64, CellGraphicsItem* > _highlightedCells;  //contains the whole clusters when a single cell in focused therein
     QMap< quint64, EnergyGraphicsItem* > _highlightedEnergyParticles;
-    MarkerGraphicsItem* _marker;
-    CellGraphicsItem* _focusCenterCellItem;
+    MarkerGraphicsItem* _marker = nullptr;
+    CellGraphicsItem* _focusCenterCellItem = nullptr;
 
     //associations
     QMap< quint64, CellGraphicsItem* > _cellItems;
