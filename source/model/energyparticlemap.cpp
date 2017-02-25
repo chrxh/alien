@@ -84,7 +84,8 @@ void EnergyParticleMap::deserializePrimitives (QDataStream & stream, QMap<quint6
 	stream >> numEntries;
 	for (quint32 i = 0; i < numEntries; ++i) {
 		stream >> x >> y >> oldId;
-		_energyGrid[x][y] = oldIdEnergyMap[oldId];
+		EnergyParticle* particle = oldIdEnergyMap[oldId];
+		_energyGrid[x][y] = particle;
 	}
 }
 

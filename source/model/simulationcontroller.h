@@ -20,6 +20,7 @@ public:
     SimulationController (Threading threading, QObject* parent = 0);
     ~SimulationController ();
 
+	void startThread();
 	void terminateThread();
 
     QMap< QString, qreal > getMonitorData ();
@@ -89,6 +90,7 @@ protected slots:
     void nextTimestepCalculated ();
 
 protected:
+	Threading _threading;
     QTimer* _forceFpsTimer = nullptr;
 	QTimer* _oneSecondTimer = nullptr;
 	bool _run = false;
@@ -101,7 +103,7 @@ protected:
 
     SimulationContext* _context = nullptr;
     SimulationUnit* _unit = nullptr;
-    QThread _thread;
+    QThread* _thread = nullptr;
 };
 
 #endif // SIMULATIONCONTROLLER_H

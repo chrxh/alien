@@ -9,7 +9,7 @@ public:
 	virtual ~SerializationFacade() {}
 
     virtual void serializeSimulationContext(SimulationContext* context, QDataStream& stream) const = 0;
-    virtual SimulationContext* deserializeSimulationContext(QDataStream& stream) const = 0;
+    virtual void deserializeSimulationContext(SimulationContext* prevContext, QDataStream& stream) const = 0;
 
 	virtual void serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const = 0;
 	virtual SymbolTable* deserializeSymbolTable(QDataStream& stream) const = 0;

@@ -10,7 +10,7 @@ public:
 	~SerializationFacadeImpl() = default;
 
     void serializeSimulationContext(SimulationContext* context, QDataStream& stream) const override;
-    SimulationContext* deserializeSimulationContext(QDataStream& stream) const override;
+    void deserializeSimulationContext(SimulationContext* prevContext, QDataStream& stream) const override;
 
 	void serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const override;
 	SymbolTable* deserializeSymbolTable(QDataStream& stream) const override;
@@ -33,7 +33,7 @@ private:
         , SimulationContext* context) const;
 
     EnergyParticle* deserializeEnergyParticle(QDataStream& stream
-        , QMap< quint64, EnergyParticle* > oldIdEnergyMap, SimulationContext* context) const;
+        , QMap< quint64, EnergyParticle* >& oldIdEnergyMap, SimulationContext* context) const;
 
     Cell* deserializeFeaturedCell(QDataStream& stream, QMap< quint64
         , QList< quint64 > >& connectingCells, SimulationContext* context) const;
