@@ -19,6 +19,7 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
+//- FPS-Bug
 //- in SimulationContext kommt noch
 //  - SimulationParameters
 

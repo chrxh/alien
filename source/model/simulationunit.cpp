@@ -21,6 +21,11 @@ SimulationUnit::~SimulationUnit ()
 {
 }
 
+void SimulationUnit::setContext(SimulationContext* context)
+{
+	_context = context;
+}
+
 void SimulationUnit::setRandomSeed(uint seed)
 {
 	qsrand(seed);
