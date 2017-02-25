@@ -236,8 +236,7 @@ void MainWindow::loadSimulation ()
 			file.close();
 
             ui->macroEditor->reset();
-            _microEditor->updateSymbolTable();
-
+			_microEditor->updateSymbolTable();
             _simController->updateUniverse();
         }
         else {

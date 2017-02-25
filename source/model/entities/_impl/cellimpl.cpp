@@ -263,7 +263,7 @@ void CellImpl::setTag (quint64 tag)
     _tag = tag;
 }
 
-int CellImpl::getNumToken (bool newTokenStackPointer) const
+int CellImpl::getNumToken (bool newTokenStackPointer /* = false*/) const
 {
     if( newTokenStackPointer )
         return _newTokenStackPointer;

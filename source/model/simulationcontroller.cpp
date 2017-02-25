@@ -27,6 +27,7 @@
 
 SimulationController::SimulationController(Threading threading, QObject* parent)
     : QObject(parent)
+	, _threading(threading)
 {
 	FactoryFacade* factory = ServiceLocator::getInstance().getService<FactoryFacade>();
 
@@ -36,9 +37,9 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
     _unit = new SimulationUnit(_context);
 
 	connect(_oneSecondTimer, SIGNAL(timeout()), this, SLOT(oneSecondTimerSlot()));
-    connect(&_thread, &QThread::finished, _unit, &QObject::deleteLater);
     connect(_forceFpsTimer, SIGNAL(timeout()), this, SLOT(forceFpsTimerSlot()));
 	connect(this, SIGNAL(setRandomSeed(uint)), _unit, SLOT(setRandomSeed(uint)));
+	connect(this, SIGNAL(setContext(SimulationContext*)), _unit, SLOT(setContext(SimulationContext*)));
 
 	_oneSecondTimer->start(1000);
 
@@ -46,9 +47,7 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()));
         connect(_unit, SIGNAL(nextTimestepCalculated()), this, SLOT(nextTimestepCalculated()));
 
-        _unit->moveToThread(&_thread);
-        _thread.start();
-
+		startThread();
     }
     if( threading == Threading::NO_EXTRA_THREAD ) {
         connect(this, SIGNAL(calcNextTimestep()), _unit, SLOT(calcNextTimestep()), Qt::DirectConnection);
@@ -64,12 +63,20 @@ SimulationController::~SimulationController ()
 	delete _context;
 }
 
+void SimulationController::startThread()
+{
+	_thread = new QThread(this);
+	connect(_thread, &QThread::finished, _unit, &QObject::deleteLater);
+	_unit->moveToThread(_thread);
+	_thread->start();
+}
+
 void SimulationController::terminateThread()
 {
-	_thread.quit();
-	if (!_thread.wait(2000)) {
-		_thread.terminate();
-		_thread.wait();
+	_thread->quit();
+	if (!_thread->wait(2000)) {
+		_thread->terminate();
+		_thread->wait();
 	}
 }
 
@@ -135,9 +142,13 @@ void SimulationController::loadUniverse(QDataStream& stream)
 {
 	stream >> _frame;
 	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-	_context = facade->deserializeSimulationContext(stream);
+	_context->lock();
+	facade->deserializeSimulationContext(_context, stream);
+	_unit->setContext(_context);
+	_context->unlock();
 
-    emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
+//	emit setContext(_context);
+	emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
 
 /*    simulationParameters.readData(stream);
     MetadataManager::getGlobalInstance().readMetadataUniverse(stream, oldNewClusterIdMap, oldNewCellIdMap);

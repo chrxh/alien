@@ -36,21 +36,23 @@ void SerializationFacadeImpl::serializeSimulationContext(SimulationContext * con
 	auto const& clusters = context->getClustersRef();
 	quint32 numCluster = clusters.size();
 	stream << numCluster;
-	foreach(CellCluster* cluster, clusters)
+	foreach(CellCluster* cluster, clusters) {
 		serializeCellCluster(cluster, stream);
+	}
 
 	auto const& energyParticles = context->getEnergyParticlesRef();
 	quint32 numEnergyParticles = energyParticles.size();
 	stream << numEnergyParticles;
-	foreach(EnergyParticle* e, energyParticles)
+	foreach(EnergyParticle* e, energyParticles) {
 		e->serializePrimitives(stream);
+	}
 
 	context->getCellMap()->serializePrimitives(stream);
 	context->getEnergyParticleMap()->serializePrimitives(stream);
 	context->getSymbolTable()->serializePrimitives(stream);
 }
 
-SimulationContext * SerializationFacadeImpl::deserializeSimulationContext(QDataStream & stream) const
+void SerializationFacadeImpl::deserializeSimulationContext(SimulationContext* prevContext, QDataStream & stream) const
 {
 	//mapping old ids to new ids
 	QMap< quint64, quint64 > oldNewCellIdMap;
@@ -61,32 +63,30 @@ SimulationContext * SerializationFacadeImpl::deserializeSimulationContext(QDataS
 	QMap< quint64, EnergyParticle* > oldIdEnergyMap;
 
 	//deserialize map size
-	SimulationContext* context = new SimulationContextImpl();
-	context->getTopology()->deserializePrimitives(stream);
-	context->getCellMap()->init();
-	context->getEnergyParticleMap()->init();
+	prevContext->getTopology()->deserializePrimitives(stream);
+	prevContext->getCellMap()->init();
+	prevContext->getEnergyParticleMap()->init();
 
 	//deserialize clusters
 	quint32 numCluster;
 	stream >> numCluster;
 	for (quint32 i = 0; i < numCluster; ++i) {
-		CellCluster* cluster = deserializeCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, context);
-		context->getClustersRef() << cluster;
+		CellCluster* cluster = deserializeCellCluster(stream, oldNewClusterIdMap, oldNewCellIdMap, oldIdCellMap, prevContext);
+		prevContext->getClustersRef() << cluster;
 	}
 
 	//deserialize energy particles
 	quint32 numEnergyParticles;
 	stream >> numEnergyParticles;
 	for (quint32 i = 0; i < numEnergyParticles; ++i) {
-        EnergyParticle* e = deserializeEnergyParticle(stream, oldIdEnergyMap, context);
-		context->getEnergyParticlesRef() << e;
+        EnergyParticle* e = deserializeEnergyParticle(stream, oldIdEnergyMap, prevContext);
+		prevContext->getEnergyParticlesRef() << e;
 	}
 
 	//deserialize maps
-	context->getCellMap()->deserializePrimitives(stream, oldIdCellMap);
-	context->getEnergyParticleMap()->deserializePrimitives(stream, oldIdEnergyMap);
-	context->getSymbolTable()->deserializePrimitives(stream);
-	return context;
+	prevContext->getCellMap()->deserializePrimitives(stream, oldIdCellMap);
+	prevContext->getEnergyParticleMap()->deserializePrimitives(stream, oldIdEnergyMap);
+	prevContext->getSymbolTable()->deserializePrimitives(stream);
 }
 
 void SerializationFacadeImpl::serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const
@@ -268,13 +268,14 @@ void SerializationFacadeImpl::serializeEnergyParticle(EnergyParticle* particle, 
 }
 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
-    , QMap< quint64, EnergyParticle* > oldIdEnergyMap, SimulationContext* context) const
+    , QMap< quint64, EnergyParticle* >& oldIdEnergyMap, SimulationContext* context) const
 {
     EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
     EnergyParticle* particle = factory->buildEnergyParticle(context);
     particle->deserializePrimitives(stream);
     oldIdEnergyMap[particle->id] = particle;
-    return particle;
+	particle->id = GlobalFunctions::createNewTag();
+	return particle;
 }
 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream

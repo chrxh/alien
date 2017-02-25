@@ -13,6 +13,7 @@ public:
 
 	public slots:
 	void setRandomSeed(uint seed);
+	void setContext(SimulationContext* context);
 
 public:
     qreal calcTransEnergy ();

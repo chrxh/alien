@@ -17,6 +17,7 @@ CellMap::~CellMap()
 
 void CellMap::init()
 {
+	deleteCellMap();
 	IntVector2D size = _topo->getSize();
 	_cellGrid = new Cell**[size.x];
 	for (int x = 0; x < size.x; ++x) {
