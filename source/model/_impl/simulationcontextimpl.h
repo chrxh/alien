@@ -13,6 +13,7 @@ public:
 	virtual ~SimulationContextImpl();
 
 	void init(IntVector2D size) override;
+	void initWithoutTopology() override;
 
     void lock () override;
     void unlock () override;
@@ -27,7 +28,8 @@ public:
 	std::set<quint64> SimulationContextImpl::getAllCellIds() const override;
 
 private:
-	void deleteAttributes ();
+	void deleteAll ();
+	void deleteClustersAndEnergyParticles();
 
     QMutex _mutex;
     QList<CellCluster*> _clusters;

@@ -11,8 +11,8 @@ public:
     SimulationUnit (SimulationContext* context, QObject* parent = 0);
     ~SimulationUnit ();
 
-	public slots:
-	void setRandomSeed(uint seed);
+public slots:
+	void init(uint seed);
 	void setContext(SimulationContext* context);
 
 public:

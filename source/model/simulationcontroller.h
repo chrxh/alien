@@ -76,7 +76,7 @@ public slots:
 
 signals:
     void init (SimulationContext* context);
-	void setRandomSeed (uint seed);
+	void initUnit(uint seed);
 	void calcNextTimestep();
     void cellCreated (Cell* cell);
     void energyParticleCreated (EnergyParticle* cell);

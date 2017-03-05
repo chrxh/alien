@@ -38,8 +38,7 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
 
 	connect(_oneSecondTimer, SIGNAL(timeout()), this, SLOT(oneSecondTimerSlot()));
     connect(_forceFpsTimer, SIGNAL(timeout()), this, SLOT(forceFpsTimerSlot()));
-	connect(this, SIGNAL(setRandomSeed(uint)), _unit, SLOT(setRandomSeed(uint)));
-	connect(this, SIGNAL(setContext(SimulationContext*)), _unit, SLOT(setContext(SimulationContext*)));
+	connect(this, SIGNAL(initUnit(uint)), _unit, SLOT(init(uint)));
 
 	_oneSecondTimer->start(1000);
 
@@ -54,7 +53,7 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
         _unit->setParent(this);
     }
 
-	emit setRandomSeed(0);
+	emit initUnit(0);
 }
 
 SimulationController::~SimulationController ()
@@ -127,12 +126,12 @@ void SimulationController::newUniverse (IntVector2D size, SymbolTable const& sym
 
 void SimulationController::saveUniverse (QDataStream& stream)
 {
-    emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
+    emit initUnit(_frame);	//reset random seed for simulation thread to be deterministic
 
-    stream << _frame;
+	_context->lock();
+	stream << _frame;
 	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 
-    _context->lock();
 	std::set<quint64> ids = _context->getAllCellIds();
 	facade->serializeSimulationContext(_context, stream);
     _context->unlock();
@@ -140,15 +139,14 @@ void SimulationController::saveUniverse (QDataStream& stream)
 
 void SimulationController::loadUniverse(QDataStream& stream)
 {
+	_context->lock();
 	stream >> _frame;
 	SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-	_context->lock();
 	facade->deserializeSimulationContext(_context, stream);
 	_unit->setContext(_context);
 	_context->unlock();
 
-//	emit setContext(_context);
-	emit setRandomSeed(_frame);	//reset random seed for simulation thread to be deterministic
+	emit initUnit(_frame);	//reset random seed for simulation thread to be deterministic
 
 /*    simulationParameters.readData(stream);
     MetadataManager::getGlobalInstance().readMetadataUniverse(stream, oldNewClusterIdMap, oldNewCellIdMap);

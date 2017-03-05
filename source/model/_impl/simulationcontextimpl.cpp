@@ -24,7 +24,7 @@ SimulationContextImpl::SimulationContextImpl(SymbolTable * symbolTable)
 
 SimulationContextImpl::~SimulationContextImpl ()
 {
-	deleteAttributes();
+	deleteAll();
 }
 
 void SimulationContextImpl::init(IntVector2D size)
@@ -32,6 +32,14 @@ void SimulationContextImpl::init(IntVector2D size)
 	_topology->init(size);
 	_energyParticleMap->init();
 	_cellMap->init();
+	deleteClustersAndEnergyParticles();
+}
+
+void SimulationContextImpl::initWithoutTopology()
+{
+	_energyParticleMap->init();
+	_cellMap->init();
+	deleteClustersAndEnergyParticles();
 }
 
 void SimulationContextImpl::lock ()
@@ -86,16 +94,23 @@ std::set<quint64> SimulationContextImpl::getAllCellIds() const
 	return cellIdsStdSet;
 }
 
-void SimulationContextImpl::deleteAttributes()
+void SimulationContextImpl::deleteAll()
 {
-	foreach(CellCluster* cluster, _clusters)
-		delete cluster;
-	foreach(EnergyParticle* energy, _energyParticles)
-		delete energy;
+	deleteClustersAndEnergyParticles();
 	delete _cellMap;
 	delete _energyParticleMap;
 	delete _topology;
+}
+
+void SimulationContextImpl::deleteClustersAndEnergyParticles()
+{
+	foreach(CellCluster* cluster, _clusters) {
+		delete cluster;
+	}
 	_clusters.clear();
+	foreach(EnergyParticle* particle, _energyParticles) {
+		delete particle;
+	}
 	_energyParticles.clear();
 }
 
