@@ -73,8 +73,8 @@ Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Simulati
     int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
     int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
     quint8 randomData[256];
-    for( int i = 0; i <256; ++i )
-        randomData[i] = qrand()%256;
+	for (int i = 0; i < 256; ++i)
+		randomData[i] = 0;// qrand() % 256;
     CellFunctionType randomCellFunction = static_cast<CellFunctionType>(qrand() % static_cast<int>(CellFunctionType::_COUNTER));
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }

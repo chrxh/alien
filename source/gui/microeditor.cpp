@@ -137,14 +137,10 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
 }
 
 
-void MicroEditor::updateSymbolTable ()
+void MicroEditor::update ()
 {
     _symbolEdit->loadSymbols(_context->getSymbolTable());
-}
-
-void MicroEditor::updateTokenTab ()
-{
-    changesFromSymbolTableEditor();
+	changesFromSymbolTableEditor(); //nach reset
 }
 
 void MicroEditor::setVisible (bool visible)

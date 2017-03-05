@@ -64,8 +64,7 @@ void SerializationFacadeImpl::deserializeSimulationContext(SimulationContext* pr
 
 	//deserialize map size
 	prevContext->getTopology()->deserializePrimitives(stream);
-	prevContext->getCellMap()->init();
-	prevContext->getEnergyParticleMap()->init();
+	prevContext->initWithoutTopology();
 
 	//deserialize clusters
 	quint32 numCluster;

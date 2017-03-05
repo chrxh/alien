@@ -194,25 +194,13 @@ void MainWindow::newSimulation ()
 	SymbolTable* oldSymbolTable = _simController->getSimulationContext()->getSymbolTable();
     NewSimulationDialog d(*oldSymbolTable);
     if( d.exec() ) {
-
-        //stop simulation
-        ui->actionPlay->setChecked(false);
-        runClicked(false);
+		stopSimulation();
 
         //create new simulation
         _simController->newUniverse(d.getSize(), d.getNewSymbolTableRef());
         _simController->addRandomEnergy (d.getEnergy(), simulationParameters.CRIT_CELL_TRANSFORM_ENERGY);
 
-        //reset editors
-        ui->macroEditor->reset();
-        _microEditor->updateSymbolTable();
-
-        //force simulator to update other coordinators
-        _simController->updateUniverse();
-
-        //no step back option
-        ui->actionStepBack->setEnabled(false);
-        _undoUniverserses.clear();
+		updateControllerAndEditors();
     }
 }
 
@@ -222,12 +210,7 @@ void MainWindow::loadSimulation ()
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
-
-            //stop simulation
-            ui->actionPlay->setChecked(false);
-            ui->actionStepBack->setEnabled(false);
-            _undoUniverserses.clear();
-            runClicked(false);
+			stopSimulation();
 
             //read simulation data
             QDataStream in(&file);
@@ -235,10 +218,8 @@ void MainWindow::loadSimulation ()
 			simulationParameters.deserializeData(in);
 			file.close();
 
-            ui->macroEditor->reset();
-			_microEditor->updateSymbolTable();
-            _simController->updateUniverse();
-        }
+			updateControllerAndEditors();
+		}
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified simulation could not loaded.");
             msgBox.exec();
@@ -525,8 +506,7 @@ void MainWindow::editSymbolTable ()
 		symbolTable->setTable(d.getNewSymbolTableRef());
 
         //update editor
-        _microEditor->updateSymbolTable();
-        _microEditor->updateTokenTab();
+        _microEditor->update();
     }
 }
 
@@ -545,7 +525,7 @@ void MainWindow::loadSymbols ()
 			delete newSymbolTable;
             file.close();
 
-            _microEditor->updateSymbolTable();
+            _microEditor->update();
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -589,7 +569,7 @@ void MainWindow::loadSymbolsWithMerging ()
 			delete newSymbolTable;
 			file.close();
 
-            _microEditor->updateSymbolTable();
+            _microEditor->update();
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -921,7 +901,7 @@ void MainWindow::updateFrameLabel ()
 {
     ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x")
 		.arg(_simController->getFrame(), 9, 10, QLatin1Char('0'))
-		.arg(_simController->getFrame(), 5, 10, QLatin1Char('0'))
+		.arg(_simController->getFps(), 5, 10, QLatin1Char('0'))
 		.arg(ui->macroEditor->getZoomFactor()));
 }
 
@@ -942,6 +922,21 @@ void MainWindow::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void MainWindow::stopSimulation()
+{
+	ui->actionPlay->setChecked(false);
+	ui->actionStepBack->setEnabled(false);
+	_undoUniverserses.clear();
+	runClicked(false);
+}
+
+void MainWindow::updateControllerAndEditors()
+{
+	ui->macroEditor->reset();
+	_microEditor->update();
+	_simController->updateUniverse();
 }
 
 

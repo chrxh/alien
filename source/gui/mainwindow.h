@@ -32,7 +32,7 @@ private slots:
     //menu: simulation
     void newSimulation ();
     void loadSimulation ();
-    void saveSimulation ();
+	void saveSimulation();
     void runClicked (bool run);
     void stepForwardClicked ();
     void stepBackClicked ();
@@ -91,6 +91,8 @@ private:
     Ui::MainWindow *ui;
 
     void changeEvent(QEvent *e);
+	void stopSimulation();
+	void updateControllerAndEditors();
 
     SimulationController* _simController;
     MicroEditor* _microEditor;

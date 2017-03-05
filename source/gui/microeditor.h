@@ -50,8 +50,7 @@ public:
                QToolButton* delClusterButton,
                QToolButton* addTokenButton,
                QToolButton* delTokenButton);
-    void updateSymbolTable ();
-    void updateTokenTab ();
+    void update ();
 
     void setVisible (bool visible);
     bool isVisible ();
