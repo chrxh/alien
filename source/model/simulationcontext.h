@@ -12,6 +12,7 @@ public:
     virtual ~SimulationContext () {}
 
 	virtual void init(IntVector2D size) = 0;
+	virtual void initWithoutTopology() = 0;
 
     virtual void lock () = 0;
     virtual void unlock () = 0;
