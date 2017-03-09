@@ -19,6 +19,7 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
+//- mov [i],4 akzeptiert er nicht
 //- Token-Konstruktor refactorisieren
 //- in SimulationContext kommt noch
 //  - SimulationParameters
