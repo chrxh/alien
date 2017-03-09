@@ -33,7 +33,7 @@ struct SimulationParameters
     qreal CLUSTER_FUSION_VEL;
 
     qreal CELL_WEAPON_STRENGTH;
-    int CELL_CODESIZE;
+    int CELL_NUM_INSTR;
     int CELL_MEMSIZE;
     int TOKEN_MEMSIZE;
     qreal CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
