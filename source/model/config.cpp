@@ -163,7 +163,7 @@ SimulationParameters::SimulationParameters ()
       CLUSTER_FUSION_VEL(0.4),
 
       CELL_WEAPON_STRENGTH(0.1),
-      CELL_CODESIZE(15),
+      CELL_NUM_INSTR(15),
       CELL_MEMSIZE(8),
       TOKEN_MEMSIZE(256),
       CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST(1.0),
@@ -199,7 +199,7 @@ void SimulationParameters::serializeData (QDataStream& stream)
     stream << CELL_TRANSFORM_PROB;
     stream << CLUSTER_FUSION_VEL;
     stream << CELL_WEAPON_STRENGTH;
-    stream << CELL_CODESIZE;
+    stream << CELL_NUM_INSTR;
     stream << CELL_MEMSIZE;
     stream << TOKEN_MEMSIZE;
     stream << CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
@@ -231,7 +231,7 @@ void SimulationParameters::deserializeData (QDataStream& stream)
     stream >> CELL_TRANSFORM_PROB;
     stream >> CLUSTER_FUSION_VEL;
     stream >> CELL_WEAPON_STRENGTH;
-    stream >> CELL_CODESIZE;
+    stream >> CELL_NUM_INSTR;
     stream >> CELL_MEMSIZE;
     stream >> TOKEN_MEMSIZE;
     stream >> CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
