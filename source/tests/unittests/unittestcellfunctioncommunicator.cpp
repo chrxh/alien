@@ -7,7 +7,7 @@
 #include "model/features/_impl/cellfunctioncommunicatorimpl.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/simulationcontext.h"
-#include "model/factoryfacade.h"
+#include "model/alienfacade.h"
 #include "model/config.h"
 
 #include "tests/settings.h"

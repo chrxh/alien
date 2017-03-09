@@ -20,11 +20,11 @@ public:
     TokenTab(QWidget *parent = 0);
     ~TokenTab();
 
-    void update (SymbolTable* symbolTable, qreal tokenEnergy, const QVector< quint8 >& tokenData);
+    void update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray const& tokenData);
     void requestUpdate ();
 
 signals:
-    void tokenMemoryChanged (QVector< quint8 > data);
+    void tokenMemoryChanged (QByteArray data);
     void tokenPropChanged (qreal energy);
 
 private slots:
@@ -35,7 +35,7 @@ private slots:
 private:
     Ui::TokenTab *ui;
     QMap< quint8, HexEdit* > _hexEditList;      //associate start addresses with hex editors
-    QVector< quint8 > _tokenMemory;
+    QByteArray _tokenMemory;
     QSignalMapper* _signalMapper;
     QSignalMapper* _signalMapper2;
     QSignalMapper* _signalMapper3;

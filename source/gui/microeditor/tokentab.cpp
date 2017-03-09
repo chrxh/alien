@@ -58,7 +58,7 @@ TokenTab::~TokenTab()
     delete ui;
 }
 
-void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, const QVector< quint8 >& tokenMemory)
+void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray const& tokenMemory)
 {
 //    ui->tokenMemoryEditor->update(tokenMemory);
     ui->tokenEditor->update(tokenEnergy);
@@ -130,7 +130,7 @@ void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, const QVecto
             _signalMapper->setMapping(hex, tokenMemPointer);
             _signalMapper2->setMapping(hex, tokenMemPointer);
             _signalMapper3->setMapping(hex, tokenMemPointer);
-            connect(hex, SIGNAL(dataChanged(QVector< quint8 >)), _signalMapper, SLOT(map()));
+            connect(hex, SIGNAL(dataChanged(QByteArray)), _signalMapper, SLOT(map()));
             connect(hex, SIGNAL(cursorReachedBeginning(int)), _signalMapper2, SLOT(map()));
             connect(hex, SIGNAL(cursorReachedEnd(int)), _signalMapper3, SLOT(map()));
             _hexEditList[tokenMemPointer] = hex;
@@ -187,7 +187,7 @@ void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, const QVecto
             _signalMapper->setMapping(hex, tokenMemPointer);
             _signalMapper2->setMapping(hex, tokenMemPointer);
             _signalMapper3->setMapping(hex, tokenMemPointer);
-            connect(hex, SIGNAL(dataChanged(QVector< quint8 >)), _signalMapper, SLOT(map()));
+            connect(hex, SIGNAL(dataChanged(QByteArray)), _signalMapper, SLOT(map()));
             connect(hex, SIGNAL(cursorReachedBeginning(int)), _signalMapper2, SLOT(map()));
             connect(hex, SIGNAL(cursorReachedEnd(int)), _signalMapper3, SLOT(map()));
             _hexEditList[tokenMemPointer] = hex;
@@ -209,7 +209,7 @@ void TokenTab::tokenMemoryChanged_Slot (int tokenMemPointer)
 {
     HexEdit* hex = _hexEditList[tokenMemPointer];
     if( hex ) {
-        QVector< quint8 > newData = hex->getData();
+        QByteArray newData = hex->getDataRef();
         for(int i = 0; i < newData.size(); ++i) {
             _tokenMemory[tokenMemPointer+i] = newData[i];
         }

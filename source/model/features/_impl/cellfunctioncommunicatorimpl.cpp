@@ -16,14 +16,14 @@ CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(SimulationContext* co
 
 }
 
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (quint8* cellFunctionData, SimulationContext* context)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QByteArray data, SimulationContext* context)
     : CellFunction(context)
 {
-    _newMessageReceived = static_cast<bool>(cellFunctionData[0]);
-    _receivedMessage.channel = cellFunctionData[1];
-    _receivedMessage.message = cellFunctionData[2];
-    _receivedMessage.angle = cellFunctionData[3];
-    _receivedMessage.distance = cellFunctionData[4];
+    _newMessageReceived = static_cast<bool>(data[0]);
+    _receivedMessage.channel = data[1];
+    _receivedMessage.message = data[2];
+    _receivedMessage.angle = data[3];
+    _receivedMessage.distance = data[4];
 }
 
 bool & CellFunctionCommunicatorImpl::getNewMessageReceivedRef()
@@ -69,13 +69,15 @@ void CellFunctionCommunicatorImpl::deserializePrimitives (QDataStream& stream)
 
 
 
-void CellFunctionCommunicatorImpl::getInternalData (quint8* data) const
+QByteArray CellFunctionCommunicatorImpl::getInternalData () const
 {
+	QByteArray data(5, 0);
     data[0] = static_cast<quint8>(_newMessageReceived);
     data[1] = _receivedMessage.channel;
     data[2] = _receivedMessage.message;
     data[3] = _receivedMessage.angle;
     data[4] = _receivedMessage.distance;
+	return data;
 }
 
 COMMUNICATOR_IN CellFunctionCommunicatorImpl::readCommandFromToken (Token* token) const

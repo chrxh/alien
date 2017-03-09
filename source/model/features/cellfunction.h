@@ -14,7 +14,9 @@ public:
 
     //new interface
     virtual CellFunctionType getType () const = 0;
-    virtual void getInternalData (quint8* ptr) const {}
+	virtual QByteArray getInternalData() const {
+		return QByteArray();
+	}
 
 protected:
     qreal calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const;

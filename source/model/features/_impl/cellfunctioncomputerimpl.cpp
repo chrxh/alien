@@ -11,25 +11,22 @@
 
 CellFunctionComputerImpl::CellFunctionComputerImpl (SimulationContext* context)
     : CellFunctionComputer(context)
-    , _code(3*simulationParameters.CELL_CODESIZE, 0)
-    , _numInstr(simulationParameters.CELL_CODESIZE)
     , _memory(simulationParameters.CELL_MEMSIZE, 0)
 	, _symbolTable(context->getSymbolTable())
 {
-    //init with zero data
-    _numInstr = 0;
-    for( int i = 0; i < 3*simulationParameters.CELL_CODESIZE; ++i )
-        _code[i] = 0;
 }
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (quint8* cellFunctionData, SimulationContext* context)
+CellFunctionComputerImpl::CellFunctionComputerImpl (QByteArray data, SimulationContext* context)
 	: CellFunctionComputerImpl(context)
 {
-    _numInstr = cellFunctionData[0];
-    _code.resize(3*_numInstr);
-    for( int i = 0; i < 3*_numInstr; ++i ) {
-        _code[i] = cellFunctionData[i+1];
-    }
+	if (!data.isEmpty()) {
+		int numInstructions = data[0];
+		int minSize = 3 * std::min(numInstructions, simulationParameters.CELL_CODESIZE);
+		_code = data.left(minSize);
+		if (_code.size() != minSize) {
+			_code.clear();
+		}
+	}
 }
 
 namespace {
@@ -49,14 +46,13 @@ QString CellFunctionComputerImpl::decompileInstructionCode () const
 {
     QString text;
     QString textOp1, textOp2;
-    int conditionLevel(0);
-    int i(0);
-    while( i < (3*_numInstr) ) {
+    int conditionLevel = 0;
+	for(int instructionPointer = 0; instructionPointer < _code.size(); ) {
 
         //decode instruction data
         quint8 instr, opTyp1, opTyp2;
         qint8 op1, op2;
-        decodeInstruction(i, instr, opTyp1, opTyp2, op1, op2);
+        decodeInstruction(instructionPointer, instr, opTyp1, opTyp2, op1, op2);
 
         //write spacing
         for(int j = 0; j < conditionLevel; ++j )
@@ -113,22 +109,22 @@ QString CellFunctionComputerImpl::decompileInstructionCode () const
             textOp2 = QString("0x%1").arg(convertToAddress(op2, simulationParameters.TOKEN_MEMSIZE),0, 16);
 
         //write separation/comparator
-        if( instr <= static_cast<int>(COMPUTER_OPERATION::AND) ) {
+        if (instr <= static_cast<int>(COMPUTER_OPERATION::AND)) {
             text += " " + textOp1 + ", " + textOp2;
         }
-        if( instr == static_cast<int>(COMPUTER_OPERATION::IFG) )
+        if (instr == static_cast<int>(COMPUTER_OPERATION::IFG))
             text += " " + textOp1 + " > " + textOp2;
-        if( instr == static_cast<int>(COMPUTER_OPERATION::IFGE) )
+        if (instr == static_cast<int>(COMPUTER_OPERATION::IFGE))
             text += " " + textOp1 + " >= " + textOp2;
-        if( instr == static_cast<int>(COMPUTER_OPERATION::IFE) )
+        if (instr == static_cast<int>(COMPUTER_OPERATION::IFE))
             text += " " + textOp1 + " = " + textOp2;
-        if( instr == static_cast<int>(COMPUTER_OPERATION::IFNE) )
+        if (instr == static_cast<int>(COMPUTER_OPERATION::IFNE))
             text += " " + textOp1 + " != " + textOp2;
-        if( instr == static_cast<int>(COMPUTER_OPERATION::IFLE) )
+        if (instr == static_cast<int>(COMPUTER_OPERATION::IFLE))
             text += " " + textOp1 + " <= " + textOp2;
-        if( instr == static_cast<int>(COMPUTER_OPERATION::IFL) )
+        if (instr == static_cast<int>(COMPUTER_OPERATION::IFL))
             text += " " + textOp1 + " < " + textOp2;
-        if( i < (3*_numInstr) )
+        if (instructionPointer < _code.size())
             text += "\n";
     }
     return text;
@@ -153,7 +149,7 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
 
     QString instr, op1, comp, op2;
     int instructionPointer(0);
-    _numInstr = 0;
+//    _numInstr = 0;
     errorLine = 1;
 
     for(int i = 0; i < code.length(); ++i) {
@@ -371,14 +367,10 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
             codeInstruction(instructionPointer, instrN, opTyp1, opTyp2, op1N, op2N);
             state = LOOKING_FOR_INSTR_START;
             instructionRead = false;
-            _numInstr++;
             errorLine++;
-            if( instructionPointer == (3*simulationParameters.CELL_CODESIZE) )
-                return {true, errorLine};
-/*            instr.clear();
-            op1.clear();
-            op2.clear();
-            comp.clear();*/
+			if (instructionPointer == (3 * simulationParameters.CELL_CODESIZE)) {
+				return{ true, errorLine };
+			}
         }
     }
     if( state == LOOKING_FOR_INSTR_START )
@@ -388,7 +380,7 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
     }
 }
 
-QVector< quint8 >& CellFunctionComputerImpl::getMemoryReference ()
+QByteArray& CellFunctionComputerImpl::getMemoryReference ()
 {
     return _memory;
 }
@@ -401,7 +393,7 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
     std::vector<bool> condTable(simulationParameters.CELL_CODESIZE);
     int condPointer(0);
     int i(0);
-    while( i < (3*_numInstr) ) {
+    while( i < _code.size() ) {
 
         //decode instruction
         quint8 instr, opTyp1, opTyp2;
@@ -519,65 +511,39 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
 
 void CellFunctionComputerImpl::serializePrimitives (QDataStream& stream) const
 {
-    stream << simulationParameters.CELL_MEMSIZE;
-    for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i )
-        stream << _memory[i];
-    stream << _code << _numInstr;
+    stream << _memory << _code;
 }
 
 void CellFunctionComputerImpl::deserializePrimitives (QDataStream& stream)
 {
-    //load cell memory
-    int memSize;
-    stream >> memSize;
-    quint8 data;
-    for(int i = 0; i < memSize; ++i ) {
-        if( i < simulationParameters.CELL_MEMSIZE ) {
-            stream >> data;
-            _memory[i] = data;
-        }
-        else {
-            stream >> data;
-        }
-    }
-    for(int i = memSize; i < simulationParameters.CELL_MEMSIZE; ++i)
-        _memory[i] = 0;
-
     //load remaining attributes
-    stream >> _code >> _numInstr;
+    stream >> _memory >> _code;
+	_memory = _memory.left(simulationParameters.CELL_MEMSIZE);
 }
 
 
-void CellFunctionComputerImpl::getInternalData (quint8* data) const
+QByteArray CellFunctionComputerImpl::getInternalData () const
 {
-    data[0] = _numInstr;
-    for( int i = 0; i < 3*_numInstr; ++i ) {
-        data[i+1] = _code[i];
-    }
+	QByteArray data;
+	data.push_back(_code.size() / 3);
+	data.push_back(_code);
+	return data;
 }
 
-void CellFunctionComputerImpl::codeInstruction (int& instructionPointer,
-                                                   quint8 instr,
-                                                   quint8 opTyp1,
-                                                   quint8 opTyp2,
-                                                   qint8 op1,
-                                                   qint8 op2)
+void CellFunctionComputerImpl::codeInstruction (int& instructionPointer, quint8 instr, quint8 opTyp1, quint8 opTyp2
+	, qint8 op1, qint8 op2)
 {
     //machine code: [INSTR - 4 Bits][MEM/MEMMEM/CMEM - 2 Bit][MEM/MEMMEM/CMEM/CONST - 2 Bit]
-    _code[instructionPointer] = (instr << 4) | (opTyp1 << 2) | opTyp2;
-    _code[instructionPointer+1] = op1;
-    _code[instructionPointer+2] = op2;
+    _code.push_back((instr << 4) | (opTyp1 << 2) | opTyp2);
+    _code.push_back(op1);
+    _code.push_back(op2);
 
     //increment instruction pointer
     instructionPointer += 3;
 }
 
-void CellFunctionComputerImpl::decodeInstruction (int& instructionPointer,
-                                                        quint8& instr,
-                                                        quint8& opTyp1,
-                                                        quint8& opTyp2,
-                                                        qint8& op1,
-                                                        qint8& op2) const
+void CellFunctionComputerImpl::decodeInstruction (int& instructionPointer, quint8& instr, quint8& opTyp1, quint8& opTyp2
+	, qint8& op1, qint8& op2) const
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
     instr = (_code[instructionPointer] >> 4) & 0xF;

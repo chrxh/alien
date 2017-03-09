@@ -9,10 +9,10 @@
 
 #include "definitions.h"
 
-class FactoryFacade
+class AlienFacade
 {
 public:
-    virtual ~FactoryFacade () {}
+    virtual ~AlienFacade () {}
 
 	virtual SimulationContext* buildSimulationContext() const = 0;
 
@@ -20,7 +20,7 @@ public:
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
         , QVector3D vel, SimulationContext* context) const = 0;
 
-    virtual Cell* buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, SimulationContext* context
+    virtual Cell* buildFeaturedCell (qreal energy, CellFunctionType type, QByteArray data, SimulationContext* context
         , int maxConnections = 0, int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const = 0;
     virtual Cell* buildFeaturedCell (qreal energy, CellFunctionType type, SimulationContext* context
         , int maxConnections = 0, int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const = 0;

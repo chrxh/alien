@@ -5,7 +5,7 @@
 #include "model/config.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
-#include "model/factoryfacade.h"
+#include "model/alienfacade.h"
 #include "model/entities/cellcluster.h"
 #include "global/servicelocator.h"
 

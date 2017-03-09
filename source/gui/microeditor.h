@@ -101,8 +101,8 @@ private slots:
     void changesFromClusterEditor (CellTO newClusterProperties);
     void changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue);
     void changesFromTokenEditor (qreal energy);
-    void changesFromComputerMemoryEditor (QVector< quint8 > data);
-    void changesFromTokenMemoryEditor (QVector< quint8 > data);
+    void changesFromComputerMemoryEditor (QByteArray const& data);
+    void changesFromTokenMemoryEditor (QByteArray data);
     void changesFromMetadataEditor (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
     void changesFromSymbolTableEditor ();
 
@@ -156,7 +156,7 @@ private:
 
     bool _pasteTokenPossible;
     qreal _savedTokenEnergy;        //for copying tokens
-    QVector< quint8 > _savedTokenData;  //for copying tokens
+    QByteArray _savedTokenData;  //for copying tokens
 };
 
 

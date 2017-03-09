@@ -13,10 +13,10 @@
 #include "global/servicelocator.h"
 
 namespace {
-	CellDecoratorFactoryImpl cellDecoratorFactoryImpl;
+	CellFeatureFactoryImpl cellDecoratorFactoryImpl;
 }
 
-CellDecoratorFactoryImpl::CellDecoratorFactoryImpl ()
+CellFeatureFactoryImpl::CellFeatureFactoryImpl ()
 {
     ServiceLocator::getInstance().registerService<CellFeatureFactory>(this);
 }
@@ -34,7 +34,7 @@ namespace {
     }
 }
 
-CellFeature* CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const
+CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const
 {
     switch( type ) {
         case CellFunctionType::COMPUTER :
@@ -56,7 +56,7 @@ CellFeature* CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunction
     }
 }
 
-CellFeature* CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, quint8* data
+CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, QByteArray data
     , SimulationContext* context) const
 {
     switch( type ) {
@@ -69,7 +69,7 @@ CellFeature* CellDecoratorFactoryImpl::addCellFunction (Cell* cell, CellFunction
     }
 }
 
-CellFeature* CellDecoratorFactoryImpl::addEnergyGuidance (Cell* cell, SimulationContext* context) const
+CellFeature* CellFeatureFactoryImpl::addEnergyGuidance (Cell* cell, SimulationContext* context) const
 {
     return registerNewFeature(cell, new EnergyGuidanceImpl(context));
 }

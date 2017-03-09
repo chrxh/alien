@@ -30,7 +30,7 @@ class SymbolTable;
 
 class EntityFactory;
 
-class FactoryFacade;
+class AlienFacade;
 class SerializationFacade;
 
 struct CellClusterHash

@@ -18,7 +18,7 @@ public:
         int errorAtLine;
     };
     virtual CompilationState injectAndCompileInstructionCode (QString code) = 0;
-    virtual QVector< quint8 >& getMemoryReference () = 0;
+    virtual QByteArray& getMemoryReference () = 0;
 };
 
 #endif // CELLFUNCTIONCOMPUTER_H

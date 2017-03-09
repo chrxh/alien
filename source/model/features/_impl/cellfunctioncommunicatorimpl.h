@@ -11,13 +11,13 @@ class CellFunctionCommunicatorImpl : public CellFunction
 {
 public:
     CellFunctionCommunicatorImpl (SimulationContext* context);
-    CellFunctionCommunicatorImpl (quint8* cellFunctionData, SimulationContext* context);
+    CellFunctionCommunicatorImpl (QByteArray data, SimulationContext* context);
 
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives (QDataStream& stream) override;
 
     CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
-    void getInternalData (quint8* ptr) const override;
+	QByteArray getInternalData () const override;
 
 	struct MessageData {
 		quint8 channel = 0;

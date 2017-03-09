@@ -21,7 +21,7 @@
 #include "cellmap.h"
 #include "topology.h"
 #include "serializationfacade.h"
-#include "factoryfacade.h"
+#include "alienfacade.h"
 
 #include "simulationcontroller.h"
 
@@ -29,7 +29,7 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
     : QObject(parent)
 	, _threading(threading)
 {
-	FactoryFacade* factory = ServiceLocator::getInstance().getService<FactoryFacade>();
+	AlienFacade* factory = ServiceLocator::getInstance().getService<AlienFacade>();
 
     _forceFpsTimer = new QTimer(this);
 	_oneSecondTimer = new QTimer(this);
@@ -165,7 +165,7 @@ IntVector2D SimulationController::getUniverseSize()
 void SimulationController::addBlockStructure (QVector3D center, int numCellX, int numCellY, QVector3D dist, qreal energy)
 {
     //create cell grid
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 	std::vector<std::vector<Cell*>> cellGrid;
 	cellGrid.resize(numCellX);
 	for (int x = 0; x < numCellX; ++x) {
@@ -208,7 +208,7 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
 void SimulationController::addHexagonStructure (QVector3D center, int numLayers, qreal dist, qreal energy)
 {
     //create hexagon cell structure
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 	std::vector<std::vector<Cell*>> cellGrid;
 	int size = 2 * numLayers - 1;
 	cellGrid.resize(size);
@@ -336,7 +336,7 @@ void SimulationController::loadCell(QDataStream& stream, QVector3D pos, bool dra
     _context->lock();
 
     SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-	FactoryFacade* factory = ServiceLocator::getInstance().getService<FactoryFacade>();
+	AlienFacade* factory = ServiceLocator::getInstance().getService<AlienFacade>();
 
 	QList< Cell* > newCells;
 	Cell* newCell = facade->deserializeFeaturedCell(stream, _context);
@@ -587,7 +587,7 @@ void SimulationController::newCell (QVector3D pos)
 {
     //create cluster with single cell
     _context->lock();
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
     Cell* cell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, CellFunctionType::COMPUTER
         , _context, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
@@ -623,7 +623,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
         QListIterator< Cell* > iCells(cells);
         QListIterator< CellTO > iNewCellsData(newCellsData);
         QSet< CellCluster* > sumNewClusters;
-        FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+        AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
         while (iCells.hasNext()) {
 
             Cell* cell = iCells.next();

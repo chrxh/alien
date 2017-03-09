@@ -23,20 +23,20 @@ void HexEdit::update ()
     QTextEdit::setText("");
 }
 
-void HexEdit::update (const QVector< quint8 >& data)
+void HexEdit::update (QByteArray const& data)
 {
     _data = data;
     displayData();
 }
 
-const QVector< quint8 >& HexEdit::getData ()
+QByteArray const& HexEdit::getDataRef ()
 {
     return _data;
 }
 
-QVector< quint8 > HexEdit::convertHexStringToByteArray (QString hexCode)
+QByteArray HexEdit::convertHexStringToByteArray(QString hexCode)
 {
-    QVector< quint8 > d(hexCode.size()/2);
+    QByteArray d(hexCode.size()/2, 0);
     int len = hexCode.length()/2;
     for(int i = 0; i < len; ++i ) {
         bool ok = true;

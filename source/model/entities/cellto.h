@@ -32,12 +32,12 @@ struct CellTO  //TO = Transfer Object
     CellFunctionType cellFunctionType;
 
     //computer data
-    QVector< quint8 > computerMemory;
+	QByteArray computerMemory;
     QString computerCode;
 
     //token data
     QList< qreal > tokenEnergies;
-    QList< QVector< quint8 > > tokenData;
+    QList< QByteArray > tokenData;
 };
 
 #endif // CELLTO_H

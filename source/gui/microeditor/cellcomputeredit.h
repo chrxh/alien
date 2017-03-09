@@ -15,7 +15,7 @@ public:
     explicit CellComputerEdit(QWidget *parent = 0);
     ~CellComputerEdit();
 
-    void updateComputerMemory (const QVector< quint8 >& data);
+    void updateComputerMemory (QByteArray const& data);
     void updateComputerCode (QString code);
     QString getComputerCode ();
 
@@ -23,7 +23,7 @@ public:
     void expectCellCompilerAnswer ();
 
 signals:
-    void changesFromComputerMemoryEditor (QVector< quint8 > data);
+    void changesFromComputerMemoryEditor (QByteArray data);
     void compileButtonClicked (QString code);
 
 private slots:
