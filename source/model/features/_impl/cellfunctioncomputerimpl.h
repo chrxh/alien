@@ -42,13 +42,13 @@ private:
 		LOOKING_FOR_OP2_END
 	};
 	struct Instruction {
+		bool read = false;
 		QString name;
 		QString op1;
 		QString op2;
 		QString comp;
 	};
-	bool stateMachine(State &state, QChar &currentSymbol, Instruction& instruction, bool& instructionRead
-		, int symbolPos, int codeSize);
+	bool stateMachine(State &state, QChar &currentSymbol, Instruction& instruction, int symbolPos, int codeSize);
 
     QByteArray _code;
 	QByteArray _memory;
