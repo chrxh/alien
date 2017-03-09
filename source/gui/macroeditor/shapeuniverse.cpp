@@ -4,7 +4,7 @@
 
 #include "global/servicelocator.h"
 #include "model/config.h"
-#include "model/factoryfacade.h"
+#include "model/alienfacade.h"
 #include "model/simulationcontext.h"
 #include "model/topology.h"
 #include "model/energyparticlemap.h"
@@ -545,7 +545,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             QList< CellTO > newCellsData;
 
             //update focused cells
-            FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+            AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
             foreach( CellGraphicsItem* cellItem, _focusCells ) {
 
                 //retrieve cell information

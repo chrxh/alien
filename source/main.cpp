@@ -19,6 +19,7 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
+//- Token-Konstruktor refactorisieren
 //- in SimulationContext kommt noch
 //  - SimulationParameters
 

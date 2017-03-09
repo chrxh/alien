@@ -1,6 +1,6 @@
 #include "cellfunctionconstructorimpl.h"
 
-#include "model/factoryfacade.h"
+#include "model/alienfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
@@ -37,9 +37,9 @@ namespace {
     }
 
     Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
-        , int tokenAccessNumber, int cellType, quint8* cellFunctionData, SimulationContext* context)
+        , int tokenAccessNumber, int cellType, QByteArray cellFunctionData, SimulationContext* context)
     {
-        FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+        AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
         Cell* newCell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, context);
         CellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
@@ -360,9 +360,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 if( maxCon > simulationParameters.MAX_CELL_CONNECTIONS )
                     maxCon = simulationParameters.MAX_CELL_CONNECTIONS;
                 int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)] % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-                Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber,
-                                                      token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)],
-                                                      &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _context);
+                Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
+					, token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)]
+					, token->memory.mid(static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA))
+					, _context);
 
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {
@@ -398,7 +399,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         if (_topology->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (simulationParameters.CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
-                            if( token->memory[static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS)] == 0 ) {
+                            if( token->memory.at(static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS)) == 0 ) {
                                 if( newCell->getNumConnections() == newCell->getMaxConnections() ) {
                                     newCell->setMaxConnections(newCell->getMaxConnections()+1);
                                 }
@@ -557,9 +558,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                     maxCon = simulationParameters.MAX_CELL_CONNECTIONS;
                 int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)]
                         % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-                Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber,
-                                                      token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)],
-                                                      &(token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)]), _context);
+                Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
+					, token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)]
+					, token->memory.mid(static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)), _context);
 
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {

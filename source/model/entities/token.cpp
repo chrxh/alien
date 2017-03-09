@@ -3,24 +3,19 @@
 #include "model/config.h"
 
 Token::Token(qreal energy_, bool randomData)
-    : memory(simulationParameters.TOKEN_MEMSIZE), energy(energy_)
+    : memory(simulationParameters.TOKEN_MEMSIZE, 0), energy(energy_)
 {
     if( randomData ) {
         for( int i = 0; i < simulationParameters.TOKEN_MEMSIZE; ++i )
             memory[i] = qrand()%256;
     }
-    else {
-        for( int i = 0; i < simulationParameters.TOKEN_MEMSIZE; ++i )
-            memory[i] = 0;
-    }
 }
 
 
-Token::Token (qreal energy_, QVector< quint8 > memory_)
-    : memory(simulationParameters.TOKEN_MEMSIZE), energy(energy_)
+Token::Token (qreal energy_, QByteArray memory_)
+    : energy(energy_)
 {
-    for( int i = 0; i < simulationParameters.TOKEN_MEMSIZE; ++i )
-        memory[i] = memory_[i];
+	memory = memory_.left(simulationParameters.TOKEN_MEMSIZE);
 }
 
 Token* Token::duplicate ()

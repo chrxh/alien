@@ -7,7 +7,7 @@
 #include "model/config.h"
 #include "model/simulationcontext.h"
 #include "model/energyparticlemap.h"
-#include "model/factoryfacade.h"
+#include "model/alienfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
@@ -125,7 +125,7 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     connect(_requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
     connect(_delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
     connect(_delClusterButton, SIGNAL(clicked()), this, SLOT(delExtendedSelectionClicked()));
-    connect(_cellComputerEdit, SIGNAL(changesFromComputerMemoryEditor(QVector< quint8 >)), this, SLOT(changesFromComputerMemoryEditor(QVector< quint8 >)));
+    connect(_cellComputerEdit, SIGNAL(changesFromComputerMemoryEditor(QByteArray)), this, SLOT(changesFromComputerMemoryEditor(QByteArray)));
     connect(_cellComputerEdit, SIGNAL(compileButtonClicked(QString)), this, SLOT(compileButtonClicked(QString)));
     connect(_addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
     connect(_delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
@@ -235,7 +235,7 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 
     //update data for cluster editor
     _context->lock();
-    FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+    AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
     _focusCellReduced = facade->buildFeaturedCellTO(cell);
     QList< quint64 > ids = cell->getCluster()->getCellIds();
 	_context->unlock();
@@ -285,7 +285,7 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
         disconnect(_tabTokenWidget, SIGNAL(currentChanged(int)), 0, 0);
         for(int i = 0; i < numToken; ++i) {
             TokenTab* tokenTab = new TokenTab(_tabTokenWidget);
-            connect(tokenTab, SIGNAL(tokenMemoryChanged(QVector< quint8 >)), this, SLOT(changesFromTokenMemoryEditor(QVector< quint8 >)));
+            connect(tokenTab, SIGNAL(tokenMemoryChanged(QByteArray)), this, SLOT(changesFromTokenMemoryEditor(QByteArray)));
             connect(tokenTab, SIGNAL(tokenPropChanged(qreal)), this, SLOT(changesFromTokenEditor(qreal)));
             _tabTokenWidget->addTab(tokenTab, QString("token %1").arg(i+1));
             tokenTab->update(_context->getSymbolTable(), _focusCellReduced.tokenEnergies[i], _focusCellReduced.tokenData[i]);
@@ -381,7 +381,7 @@ void MicroEditor::reclustered (QList< CellCluster* > clusters)
         if( contained ) {
 
             //update data for cluster editor
-            FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+            AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
             _context->lock();
             _focusCellReduced = facade->buildFeaturedCellTO(_focusCell);
             _context->unlock();
@@ -493,7 +493,7 @@ void MicroEditor::addTokenClicked ()
     //create token (new token is the last token on the stack)
     int newTokenTab = _currentTokenTab+1;
     _focusCellReduced.tokenEnergies.insert(newTokenTab, simulationParameters.NEW_TOKEN_ENERGY);
-    QVector< quint8 > data(simulationParameters.TOKEN_MEMSIZE, 0);
+    QByteArray data(simulationParameters.TOKEN_MEMSIZE, 0);
     data[0] = _focusCellReduced.cellTokenAccessNum; //set access number for new token
     _focusCellReduced.tokenData.insert(newTokenTab, data);
 
@@ -712,7 +712,7 @@ void MicroEditor::changesFromTokenEditor (qreal energy)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromComputerMemoryEditor (QVector< quint8 > data)
+void MicroEditor::changesFromComputerMemoryEditor(QByteArray const& data)
 {
     //copy cell memory
     _focusCellReduced.computerMemory = data;
@@ -721,7 +721,7 @@ void MicroEditor::changesFromComputerMemoryEditor (QVector< quint8 > data)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromTokenMemoryEditor (QVector< quint8 > data)
+void MicroEditor::changesFromTokenMemoryEditor(QByteArray data)
 {
     //copy token memory
     _focusCellReduced.tokenData[_currentTokenTab] = data;
