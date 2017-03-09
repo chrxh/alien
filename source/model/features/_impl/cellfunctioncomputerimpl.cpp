@@ -132,228 +132,131 @@ QString CellFunctionComputerImpl::decompileInstructionCode () const
 
 CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompileInstructionCode (QString code)
 {
-    enum State {
-        LOOKING_FOR_INSTR_START,
-        LOOKING_FOR_INSTR_END,
-        LOOKING_FOR_OP1_START,
-        LOOKING_FOR_OP1_END,
-        LOOKING_FOR_SEPARATOR,
-        LOOKING_FOR_COMPARATOR,
-        LOOKING_FOR_OP2_START,
-        LOOKING_FOR_OP2_END
-    };
     State state(LOOKING_FOR_INSTR_START);
     bool instructionRead(false);
 
-    int errorLine = 0;
+    int linePos = 1;
+	Instruction instruction;
+	for (int codePos = 0; codePos < code.length(); ++codePos) {
+        QChar currentSymbol(code[codePos]);
 
-    QString instr, op1, comp, op2;
-    int instructionPointer(0);
-//    _numInstr = 0;
-    errorLine = 1;
-
-    for(int i = 0; i < code.length(); ++i) {
-        QChar c(code[i]);
-
-        //looking for the first character of a new instruction
-        switch( state ) {
-        case LOOKING_FOR_INSTR_START : {
-            if( c.isLetter() ) {
-                state = LOOKING_FOR_INSTR_END;
-                instr = c;
-            }
-        }
-        break;
-        case LOOKING_FOR_INSTR_END : {
-            if( !c.isLetter() ) {
-                if( (instr.toLower() == "else") || (instr.toLower() == "endif"))
-                    instructionRead = true;
-                else
-                    state = LOOKING_FOR_OP1_START;
-            }
-            else {
-                instr += c;
-                if( (i+1) == code.length() && ((instr.toLower() == "else") || (instr.toLower() == "endif")) )
-                    instructionRead = true;
-            }
-        }
-        break;
-        case LOOKING_FOR_OP1_START : {
-            if( isNameChar(c) || (c == '-') || (c == '_') || (c == '[')  || (c == '(')) {
-                state = LOOKING_FOR_OP1_END;
-                op1 = c;
-            }
-        }
-        break;
-        case LOOKING_FOR_OP1_END : {
-            if( (c == '<') || (c == '>') || (c == '=') || (c == '!') ) {
-                state = LOOKING_FOR_COMPARATOR;
-                comp = c;
-            }
-            else if( c == ',' )
-                state = LOOKING_FOR_OP2_START;
-            else if( !isNameChar(c) && (c != '-') && (c != '_') && (c != '[') && (c != ']') && (c != '(') && (c != ')'))
-                state = LOOKING_FOR_SEPARATOR;
-            else
-                op1 += c;
-        }
-        break;
-        case LOOKING_FOR_SEPARATOR : {
-            if( c == ',' )
-                state = LOOKING_FOR_OP2_START;
-            else if( (c == '<') || (c == '>') || (c == '=') || (c == '!') ) {
-                state = LOOKING_FOR_COMPARATOR;
-                comp = c;
-            }
-            else if( isNameChar(c) || (c == '-') || (c == '_') || (c == '[') || (c == ']') || (c == '(') || (c == ')') )
-                return { false, errorLine };
-        }
-        break;
-        case LOOKING_FOR_COMPARATOR : {
-            if( (c == '<') || (c == '>') || (c == '=') || (c == '!') )
-                comp += c;
-            else if( !isNameChar(c) && (c != '-') && (c != '_') && (c != '[') && (c != '('))
-                state = LOOKING_FOR_OP2_START;
-            else {
-                state = LOOKING_FOR_OP2_END;
-                op2 = c;
-            }
-        }
-        break;
-        case LOOKING_FOR_OP2_START : {
-            if( isNameChar(c) || (c == '-') || (c == '_') || (c == '[') || (c == '(') ) {
-                state = LOOKING_FOR_OP2_END;
-                op2 = c;
-                if( i == (code.length()-1) )
-                    instructionRead = true;
-            }
-        }
-        break;
-        case LOOKING_FOR_OP2_END : {
-            if( !isNameChar(c) && (c != '-') && (c != '_') && (c != '[') && (c != ']') && (c != '(') && (c != ')'))
-                instructionRead = true;
-            else {
-                op2 += c;
-                if( (i+1) == code.length() )
-                    instructionRead = true;
-            }
-        }
-        break;
-        }
-        if( (c == '\n') || ((i+1) == code.length()) )
+		if (!stateMachine(state, currentSymbol, instruction, instructionRead, codePos, code.length())) {
+			return{ false, linePos };
+		}
+		if ((currentSymbol == '\n') || ((codePos + 1) == code.length()))
             instructionRead = true;
         if( instructionRead ) {
-            op1 = _symbolTable->applyTableToCode(op1);
-            op2 = _symbolTable->applyTableToCode(op2);
+            instruction.op1 = _symbolTable->applyTableToCode(instruction.op1);
+            instruction.op2 = _symbolTable->applyTableToCode(instruction.op2);
 
             //prepare data for instruction coding
             quint8 instrN(0), opTyp1(0), opTyp2(0);
             qint8 op1N(0), op2N(0);
-            if( instr.toLower() == "mov" )
+            if( instruction.name.toLower() == "mov" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::MOV);
-            else if ( instr.toLower() == "add" )
+            else if ( instruction.name.toLower() == "add" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::ADD);
-            else if ( instr.toLower() == "sub" )
+            else if ( instruction.name.toLower() == "sub" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::SUB);
-            else if ( instr.toLower() == "mul" )
+            else if ( instruction.name.toLower() == "mul" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::MUL);
-            else if ( instr.toLower() == "div" )
+            else if ( instruction.name.toLower() == "div" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::DIV);
-            else if ( instr.toLower() == "xor" )
+            else if ( instruction.name.toLower() == "xor" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::XOR);
-            else if ( instr.toLower() == "or" )
+            else if ( instruction.name.toLower() == "or" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::OR);
-            else if ( instr.toLower() == "and" )
+            else if ( instruction.name.toLower() == "and" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::AND);
-            else if ( instr.toLower() == "if" ) {
-                if( comp.toLower() == ">" )
+            else if ( instruction.name.toLower() == "if" ) {
+                if( instruction.comp.toLower() == ">" )
                     instrN = static_cast<int>(COMPUTER_OPERATION::IFG);
-                else if( (comp.toLower() == ">=" ) || (comp.toLower() == "=>" ))
+                else if( (instruction.comp.toLower() == ">=" ) || (instruction.comp.toLower() == "=>" ))
                     instrN = static_cast<int>(COMPUTER_OPERATION::IFGE);
-                else if( (comp.toLower() == "=" ) || (comp.toLower() == "==" ))
+                else if( (instruction.comp.toLower() == "=" ) || (instruction.comp.toLower() == "==" ))
                     instrN = static_cast<int>(COMPUTER_OPERATION::IFE);
-                else if( comp.toLower() == "!=" )
+                else if( instruction.comp.toLower() == "!=" )
                     instrN = static_cast<int>(COMPUTER_OPERATION::IFNE);
-                else if( (comp.toLower() == "<=" ) || (comp.toLower() == "=<" ))
+                else if( (instruction.comp.toLower() == "<=" ) || (instruction.comp.toLower() == "=<" ))
                     instrN = static_cast<int>(COMPUTER_OPERATION::IFLE);
-                else if( comp.toLower() == "<" )
+                else if( instruction.comp.toLower() == "<" )
                     instrN = static_cast<int>(COMPUTER_OPERATION::IFL);
                 else {
-                    return {false, errorLine};
+                    return {false, linePos};
                 }
             }
-            else if ( instr.toLower() == "else" )
+            else if ( instruction.name.toLower() == "else" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::ELSE);
-            else if ( instr.toLower() == "endif" )
+            else if ( instruction.name.toLower() == "endif" )
                 instrN = static_cast<int>(COMPUTER_OPERATION::ENDIF);
             else {
-                return {false, errorLine};
+                return {false, linePos};
             }
 
             if( (instrN != static_cast<int>(COMPUTER_OPERATION::ELSE)) && (instrN != static_cast<int>(COMPUTER_OPERATION::ENDIF)) ) {
-                if( (op1.left(2) == "[[") && (op1.right(2) == "]]") ) {
+                if( (instruction.op1.left(2) == "[[") && (instruction.op1.right(2) == "]]") ) {
                     opTyp1 = static_cast<int>(COMPUTER_OPTYPE::MEMMEM);
-                    op1 = op1.remove(0,2);
-                    op1.chop(2);
+                    instruction.op1 = instruction.op1.remove(0,2);
+                    instruction.op1.chop(2);
                 }
-                else if( (op1.left(1) == "[") && (op1.right(1) == "]") ) {
+                else if( (instruction.op1.left(1) == "[") && (instruction.op1.right(1) == "]") ) {
                     opTyp1 = static_cast<int>(COMPUTER_OPTYPE::MEM);
-                    op1 = op1.remove(0,1);
-                    op1.chop(1);
+                    instruction.op1 = instruction.op1.remove(0,1);
+                    instruction.op1.chop(1);
                 }
-                else if( (op1.left(1) == "(") && (op1.right(1) == ")") ) {
+                else if( (instruction.op1.left(1) == "(") && (instruction.op1.right(1) == ")") ) {
                     opTyp1 = static_cast<int>(COMPUTER_OPTYPE::CMEM);
-                    op1 = op1.remove(0,1);
-                    op1.chop(1);
+                    instruction.op1 = instruction.op1.remove(0,1);
+                    instruction.op1.chop(1);
                 }
                 else {
-                    return {false, errorLine};
+                    return {false, linePos};
                 }
 
-                if( (op2.left(2) == "[[") && (op2.right(2) == "]]") ) {
+                if( (instruction.op2.left(2) == "[[") && (instruction.op2.right(2) == "]]") ) {
                     opTyp2 = static_cast<int>(COMPUTER_OPTYPE::MEMMEM);
-                    op2 = op2.remove(0,2);
-                    op2.chop(2);
+                    instruction.op2 = instruction.op2.remove(0,2);
+                    instruction.op2.chop(2);
                 }
-                else if( (op2.left(1) == "[") && (op2.right(1) == "]") ) {
+                else if( (instruction.op2.left(1) == "[") && (instruction.op2.right(1) == "]") ) {
                     opTyp2 = static_cast<int>(COMPUTER_OPTYPE::MEM);
-                    op2 = op2.remove(0,1);
-                    op2.chop(1);
+                    instruction.op2 = instruction.op2.remove(0,1);
+                    instruction.op2.chop(1);
                 }
-                else if( (op2.left(1) == "(") && (op2.right(1) == ")") ) {
+                else if( (instruction.op2.left(1) == "(") && (instruction.op2.right(1) == ")") ) {
                     opTyp2 = static_cast<int>(COMPUTER_OPTYPE::CMEM);
-                    op2 = op2.remove(0,1);
-                    op2.chop(1);
+                    instruction.op2 = instruction.op2.remove(0,1);
+                    instruction.op2.chop(1);
                 }
                 else
                     opTyp2 = static_cast<int>(COMPUTER_OPTYPE::CONST);
 
 
-                if( op1.left(2) == "0x" ) {
+                if( instruction.op1.left(2) == "0x" ) {
                     bool ok(true);
-                    op1N = op1.remove(0,2).toInt(&ok, 16);
+                    op1N = instruction.op1.remove(0,2).toInt(&ok, 16);
                     if( !ok ) {
-                        return {false, errorLine};
+                        return {false, linePos};
                     }
                 }
                 else {
                     bool ok(true);
-                    op1N = op1.toInt(&ok, 10);
+                    op1N = instruction.op1.toInt(&ok, 10);
                     if( !ok )
-                        return {false, errorLine};
+                        return {false, linePos};
                 }
-                if( op2.left(2) == "0x" ) {
+                if( instruction.op2.left(2) == "0x" ) {
                     bool ok(true);
-                    op2N = op2.remove(0,2).toInt(&ok, 16);
+                    op2N = instruction.op2.remove(0,2).toInt(&ok, 16);
                     if( !ok ) {
-                        return {false, errorLine};
+                        return {false, linePos};
                     }
                 }
                 else {
                     bool ok(true);
-                    op2N = op2.toInt(&ok, 10);
+                    op2N = instruction.op2.toInt(&ok, 10);
                     if( !ok ) {
-                        return {false, errorLine};
+                        return {false, linePos};
                     }
                 }
             }
@@ -364,20 +267,107 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
                 op2N = 0;
             }
 
-            codeInstruction(instructionPointer, instrN, opTyp1, opTyp2, op1N, op2N);
+            codeInstruction(instrN, opTyp1, opTyp2, op1N, op2N);
             state = LOOKING_FOR_INSTR_START;
             instructionRead = false;
-            errorLine++;
-			if (instructionPointer == (3 * simulationParameters.CELL_NUM_INSTR)) {
-				return{ true, errorLine };
-			}
+            linePos++;
         }
     }
     if( state == LOOKING_FOR_INSTR_START )
-        return {true, errorLine};
+        return {true, linePos};
     else {
-        return {false, errorLine};
+        return {false, linePos};
     }
+}
+
+bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, Instruction& instruction
+	, bool& instructionRead, int symbolPos, int codeSize)
+{
+	switch (state) {
+		case LOOKING_FOR_INSTR_START: {
+			if (currentSymbol.isLetter()) {
+				state = LOOKING_FOR_INSTR_END;
+				instruction.name = currentSymbol;
+			}
+		}
+		break;
+		case LOOKING_FOR_INSTR_END: {
+			if (!currentSymbol.isLetter()) {
+				if ((instruction.name.toLower() == "else") || (instruction.name.toLower() == "endif"))
+					instructionRead = true;
+				else
+					state = LOOKING_FOR_OP1_START;
+			}
+			else {
+				instruction.name += currentSymbol;
+				if ((symbolPos + 1) == codeSize && ((instruction.name.toLower() == "else") || (instruction.name.toLower() == "endif")))
+					instructionRead = true;
+			}
+		}
+		break;
+		case LOOKING_FOR_OP1_START: {
+			if (isNameChar(currentSymbol) || (currentSymbol == '-') || (currentSymbol == '_') || (currentSymbol == '[') || (currentSymbol == '(')) {
+				state = LOOKING_FOR_OP1_END;
+				instruction.op1 = currentSymbol;
+			}
+		}
+		break;
+		case LOOKING_FOR_OP1_END: {
+			if ((currentSymbol == '<') || (currentSymbol == '>') || (currentSymbol == '=') || (currentSymbol == '!')) {
+				state = LOOKING_FOR_COMPARATOR;
+				instruction.comp = currentSymbol;
+			}
+			else if (currentSymbol == ',')
+				state = LOOKING_FOR_OP2_START;
+			else if (!isNameChar(currentSymbol) && (currentSymbol != '-') && (currentSymbol != '_') && (currentSymbol != '[') && (currentSymbol != ']') && (currentSymbol != '(') && (currentSymbol != ')'))
+				state = LOOKING_FOR_SEPARATOR;
+			else
+				instruction.op1 += currentSymbol;
+		}
+		break;
+		case LOOKING_FOR_SEPARATOR: {
+			if (currentSymbol == ',')
+				state = LOOKING_FOR_OP2_START;
+			else if ((currentSymbol == '<') || (currentSymbol == '>') || (currentSymbol == '=') || (currentSymbol == '!')) {
+				state = LOOKING_FOR_COMPARATOR;
+				instruction.comp = currentSymbol;
+			}
+			else if (isNameChar(currentSymbol) || (currentSymbol == '-') || (currentSymbol == '_') || (currentSymbol == '[') || (currentSymbol == ']') || (currentSymbol == '(') || (currentSymbol == ')'))
+				return false;
+		}
+		break;
+		case LOOKING_FOR_COMPARATOR: {
+			if ((currentSymbol == '<') || (currentSymbol == '>') || (currentSymbol == '=') || (currentSymbol == '!'))
+				instruction.comp += currentSymbol;
+			else if (!isNameChar(currentSymbol) && (currentSymbol != '-') && (currentSymbol != '_') && (currentSymbol != '[') && (currentSymbol != '('))
+				state = LOOKING_FOR_OP2_START;
+			else {
+				state = LOOKING_FOR_OP2_END;
+				instruction.op2 = currentSymbol;
+			}
+		}
+		break;
+		case LOOKING_FOR_OP2_START: {
+			if (isNameChar(currentSymbol) || (currentSymbol == '-') || (currentSymbol == '_') || (currentSymbol == '[') || (currentSymbol == '(')) {
+				state = LOOKING_FOR_OP2_END;
+				instruction.op2 = currentSymbol;
+				if (symbolPos == (codeSize - 1))
+					instructionRead = true;
+			}
+		}
+		break;
+		case LOOKING_FOR_OP2_END: {
+			if (!isNameChar(currentSymbol) && (currentSymbol != '-') && (currentSymbol != '_') && (currentSymbol != '[') && (currentSymbol != ']') && (currentSymbol != '(') && (currentSymbol != ')'))
+				instructionRead = true;
+			else {
+				instruction.op2 += currentSymbol;
+				if ((symbolPos + 1) == codeSize)
+					instructionRead = true;
+			}
+		}
+		break;
+	}
+	return true;
 }
 
 QByteArray& CellFunctionComputerImpl::getMemoryReference ()
@@ -531,16 +521,12 @@ QByteArray CellFunctionComputerImpl::getInternalData () const
 	return data;
 }
 
-void CellFunctionComputerImpl::codeInstruction (int& instructionPointer, quint8 instr, quint8 opTyp1, quint8 opTyp2
-	, qint8 op1, qint8 op2)
+void CellFunctionComputerImpl::codeInstruction (quint8 instr, quint8 opTyp1, quint8 opTyp2, qint8 op1, qint8 op2)
 {
     //machine code: [INSTR - 4 Bits][MEM/MEMMEM/CMEM - 2 Bit][MEM/MEMMEM/CMEM/CONST - 2 Bit]
     _code.push_back((instr << 4) | (opTyp1 << 2) | opTyp2);
     _code.push_back(op1);
     _code.push_back(op2);
-
-    //increment instruction pointer
-    instructionPointer += 3;
 }
 
 void CellFunctionComputerImpl::decodeInstruction (int& instructionPointer, quint8& instr, quint8& opTyp1, quint8& opTyp2
