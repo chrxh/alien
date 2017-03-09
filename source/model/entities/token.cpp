@@ -43,29 +43,12 @@ void Token::setTokenAccessNumber (int i)
 
 void Token::serializePrimitives (QDataStream& stream)
 {
-    stream << simulationParameters.TOKEN_MEMSIZE;
-    for(int i = 0; i < simulationParameters.TOKEN_MEMSIZE; ++i )
-        stream << memory[i];
-    stream << energy;
+    stream << memory << energy;
 }
 
-void Token::deserializePrimitives (QDataStream& stream)
+void Token::deserializePrimitives(QDataStream& stream)
 {
-    memory.resize(simulationParameters.TOKEN_MEMSIZE);
-
-    int memSize;
-    stream >> memSize;
-    quint8 data;
-    for(int i = 0; i < memSize; ++i ) {
-        if( i < simulationParameters.TOKEN_MEMSIZE ) {
-            stream >> data;
-            memory[i] = data;
-        }
-        else {
-            stream >> data;
-        }
-    }
-    for(int i = memSize; i < simulationParameters.TOKEN_MEMSIZE; ++i)
-        memory[i] = 0;
-    stream >> energy;
+	stream >> memory >> energy;
+	memory = memory.left(simulationParameters.TOKEN_MEMSIZE);
+	memory.resize(simulationParameters.TOKEN_MEMSIZE);
 }

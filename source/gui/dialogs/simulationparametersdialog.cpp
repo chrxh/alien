@@ -52,7 +52,7 @@ void SimulationParametersDialog::setLocalSimulationParametersToWidgets ()
     ui->treeWidget->findItems("transformation probability", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_TRANSFORM_PROB));
     ui->treeWidget->findItems("fusion velocity", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CLUSTER_FUSION_VEL));
 
-    ui->treeWidget->findItems("max instructions", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_CODESIZE));
+    ui->treeWidget->findItems("max instructions", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_NUM_INSTR));
     ui->treeWidget->findItems("cell memory size", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_MEMSIZE));
     ui->treeWidget->findItems("token memory size", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.TOKEN_MEMSIZE));
     ui->treeWidget->findItems("offspring distance", Qt::MatchExactly | Qt::MatchRecursive).at(0)->setText(1, QString("%1").arg(localSimulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST));
@@ -88,7 +88,7 @@ void SimulationParametersDialog::getLocalSimulationParametersFromWidgets ()
     localSimulationParameters.CELL_TRANSFORM_PROB = ui->treeWidget->findItems("transformation probability", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toDouble(&ok);
     localSimulationParameters.CLUSTER_FUSION_VEL = ui->treeWidget->findItems("fusion velocity", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toDouble(&ok);
 
-    localSimulationParameters.CELL_CODESIZE = ui->treeWidget->findItems("max instructions", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toInt(&ok);
+    localSimulationParameters.CELL_NUM_INSTR = ui->treeWidget->findItems("max instructions", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toInt(&ok);
     localSimulationParameters.CELL_MEMSIZE = ui->treeWidget->findItems("cell memory size", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toInt(&ok);
     localSimulationParameters.TOKEN_MEMSIZE = ui->treeWidget->findItems("token memory size", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toInt(&ok);
     localSimulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST = ui->treeWidget->findItems("offspring distance", Qt::MatchExactly | Qt::MatchRecursive).at(0)->text(1).toInt(&ok);

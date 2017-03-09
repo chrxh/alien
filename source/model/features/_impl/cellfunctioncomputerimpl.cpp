@@ -21,7 +21,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (QByteArray data, SimulationC
 {
 	if (!data.isEmpty()) {
 		int numInstructions = data[0];
-		int minSize = 3 * std::min(numInstructions, simulationParameters.CELL_CODESIZE);
+		int minSize = 3 * std::min(numInstructions, simulationParameters.CELL_NUM_INSTR);
 		_code = data.left(minSize);
 		if (_code.size() != minSize) {
 			_code.clear();
@@ -368,7 +368,7 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
             state = LOOKING_FOR_INSTR_START;
             instructionRead = false;
             errorLine++;
-			if (instructionPointer == (3 * simulationParameters.CELL_CODESIZE)) {
+			if (instructionPointer == (3 * simulationParameters.CELL_NUM_INSTR)) {
 				return{ true, errorLine };
 			}
         }
@@ -390,7 +390,7 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
 {
     ProcessingResult processingResult {false, 0};
 
-    std::vector<bool> condTable(simulationParameters.CELL_CODESIZE);
+    std::vector<bool> condTable(simulationParameters.CELL_NUM_INSTR);
     int condPointer(0);
     int i(0);
     while( i < _code.size() ) {
@@ -519,8 +519,9 @@ void CellFunctionComputerImpl::deserializePrimitives (QDataStream& stream)
     //load remaining attributes
     stream >> _memory >> _code;
 	_memory = _memory.left(simulationParameters.CELL_MEMSIZE);
+	_memory.resize(simulationParameters.TOKEN_MEMSIZE);
+	_code = _code.left(3 * simulationParameters.CELL_NUM_INSTR);
 }
-
 
 QByteArray CellFunctionComputerImpl::getInternalData () const
 {
