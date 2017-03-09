@@ -11,11 +11,11 @@ public:
     ~HexEdit ();
 
     void update ();
-    void update (const QVector< quint8 >& data);
+    void update (QByteArray const& data);
 
-    const QVector< quint8 >& getData ();
+	QByteArray const& getDataRef ();
 
-    static QVector< quint8 > convertHexStringToByteArray (QString hexCode);
+    static QByteArray convertHexStringToByteArray (QString hexCode);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -24,14 +24,14 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 signals:
-    void dataChanged (QVector< quint8 > data);
+    void dataChanged (QByteArray data);
     void cursorReachedBeginning (int newCol);   //newCol = -1: end of previous block
     void cursorReachedEnd (int newCol);
 
 private:
     void displayData ();
 
-    QVector< quint8 > _data;
+    QByteArray _data;
 };
 
 #endif // HEXEDIT_H

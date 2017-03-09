@@ -153,7 +153,8 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
     token->memory[static_cast<int>(SCANNER::OUT_CELL_BRANCH_NO)] = scanCell->getTokenAccessNumber();
     CellFunction* scanCellFunction = scanCell->getFeatures()->findObject<CellFunction>();
     token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION)] = static_cast<quint8>(scanCellFunction->getType());
-    scanCellFunction->getInternalData(&token->memory[static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA)]);
+    QByteArray data = scanCellFunction->getInternalData();
+	token->memory.replace(static_cast<int>(SCANNER::OUT_CELL_FUNCTION_DATA), data.size(), data);
 
     //scan cluster
     quint32 mass = qFloor(cell->getCluster()->getMass());

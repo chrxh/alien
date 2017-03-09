@@ -1,4 +1,4 @@
-#include "factoryfacadeimpl.h"
+#include "alienfacadeimpl.h"
 
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -17,28 +17,28 @@
 #include "global/servicelocator.h"
 
 namespace {
-	FactoryFacadeImpl factoryFacadeImpl;
+	AlienFacadeImpl factoryFacadeImpl;
 }
 
-FactoryFacadeImpl::FactoryFacadeImpl ()
+AlienFacadeImpl::AlienFacadeImpl ()
 {
-    ServiceLocator::getInstance().registerService<FactoryFacade>(this);
+    ServiceLocator::getInstance().registerService<AlienFacade>(this);
 }
 
-SimulationContext* FactoryFacadeImpl::buildSimulationContext() const
+SimulationContext* AlienFacadeImpl::buildSimulationContext() const
 {
 	SimulationContext* context = new SimulationContextImpl();
 	Metadata::loadDefaultSymbolTable(context->getSymbolTable());
 	return context;
 }
 
-CellCluster* FactoryFacadeImpl::buildCellCluster (SimulationContext* context) const
+CellCluster* AlienFacadeImpl::buildCellCluster (SimulationContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     return entityFactory->buildCellCluster(context);
 }
 
-CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
+CellCluster* AlienFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
     , QVector3D vel, SimulationContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -46,7 +46,7 @@ CellCluster* FactoryFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal an
 }
 
 
-Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data
+Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, QByteArray data
     , SimulationContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -57,7 +57,7 @@ Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type,
     return cell;
 }
 
-Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, SimulationContext* context
+Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, SimulationContext* context
     , int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -68,18 +68,18 @@ Cell* FactoryFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type,
     return cell;
 }
 
-Cell* FactoryFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const
+Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const
 {
     int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
     int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
-    quint8 randomData[256];
+    QByteArray randomData(256, 0);
 	for (int i = 0; i < 256; ++i)
-		randomData[i] = 0;// qrand() % 256;
+		randomData[i] = qrand() % 256;
     CellFunctionType randomCellFunction = static_cast<CellFunctionType>(qrand() % static_cast<int>(CellFunctionType::_COUNTER));
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
-CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell) const
+CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
 {
     CellTO to;
 
@@ -102,7 +102,7 @@ CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     //copy computer data
     CellFunctionComputer* computer = cellFunction->findObject<CellFunctionComputer>();
     if( computer ) {
-        QVector< quint8 > d = computer->getMemoryReference();
+        QByteArray d = computer->getMemoryReference();
         for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i)
             to.computerMemory[i] = d[i];
         to.computerCode = computer->decompileInstructionCode();
@@ -112,7 +112,7 @@ CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     for(int i = 0; i < cell->getNumToken(); ++i) {
         Token* token = cell->getToken(i);
         to.tokenEnergies << token->energy;
-        QVector< quint8 > d(simulationParameters.TOKEN_MEMSIZE);
+		QByteArray d(simulationParameters.TOKEN_MEMSIZE, 0);
         for(int j = 0; j < simulationParameters.TOKEN_MEMSIZE; ++j)
             d[j] = token->memory[j];
         to.tokenData << d;
@@ -120,7 +120,7 @@ CellTO FactoryFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     return to;
 }
 
-void FactoryFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, SimulationContext* context) const
+void AlienFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, SimulationContext* context) const
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();

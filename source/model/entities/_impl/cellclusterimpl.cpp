@@ -1,7 +1,7 @@
 #include "cellclusterimpl.h"
 
 #include "model/entities/cell.h"
-#include "model/factoryfacade.h"
+#include "model/alienfacade.h"
 #include "model/features/cellfeature.h"
 #include "model/entities/entityfactory.h"
 #include "model/entities/token.h"

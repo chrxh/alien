@@ -102,7 +102,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>Full</Optimization>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(QTDIR)\lib\qtmain.lib;shell32.lib;$(QTDIR)\lib\Qt5OpenGL.lib;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Core.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -610,7 +610,7 @@
     <ClInclude Include="..\..\source\model\entities\_impl\cellclusterimpl.h" />
     <ClInclude Include="..\..\source\model\entities\_impl\cellimpl.h" />
     <ClInclude Include="..\..\source\model\entities\_impl\entityfactoryimpl.h" />
-    <ClInclude Include="..\..\source\model\factoryfacade.h" />
+    <ClInclude Include="..\..\source\model\alienfacade.h" />
     <ClInclude Include="..\..\source\model\features\cellfeature.h" />
     <ClInclude Include="..\..\source\model\features\cellfeatureconstants.h" />
     <ClInclude Include="..\..\source\model\features\cellfeaturefactory.h" />
@@ -663,7 +663,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\model\topology.h" />
-    <ClInclude Include="..\..\source\model\_impl\factoryfacadeimpl.h" />
+    <ClInclude Include="..\..\source\model\_impl\alienfacadeimpl.h" />
     <ClInclude Include="..\..\source\model\_impl\serializationfacadeimpl.h" />
     <ClInclude Include="..\..\source\model\_impl\simulationcontextimpl.h" />
     <ClInclude Include="ui_addenergydialog.h" />
@@ -745,7 +745,7 @@
     <ClCompile Include="..\..\source\model\config.cpp" />
     <ClCompile Include="..\..\source\model\simulationunit.cpp" />
     <ClCompile Include="..\..\source\model\topology.cpp" />
-    <ClCompile Include="..\..\source\model\_impl\factoryfacadeimpl.cpp" />
+    <ClCompile Include="..\..\source\model\_impl\alienfacadeimpl.cpp" />
     <ClCompile Include="..\..\source\model\_impl\serializationfacadeimpl.cpp" />
     <ClCompile Include="..\..\source\model\_impl\simulationcontextimpl.cpp" />
     <ClCompile Include="Debug\moc_addenergydialog.cpp">

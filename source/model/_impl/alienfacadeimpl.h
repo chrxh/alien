@@ -1,13 +1,13 @@
 #ifndef FACTORYFACADEIMPL_H
 #define FACTORYFACADEIMPL_H
 
-#include "model/factoryfacade.h"
+#include "model/alienfacade.h"
 
-class FactoryFacadeImpl : public FactoryFacade
+class AlienFacadeImpl : public AlienFacade
 {
 public:
-    FactoryFacadeImpl ();
-	~FactoryFacadeImpl() = default;
+    AlienFacadeImpl ();
+	~AlienFacadeImpl() = default;
 
 	SimulationContext* buildSimulationContext() const override;
 
@@ -15,7 +15,7 @@ public:
     CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel
         , SimulationContext* context) const override;
 
-    Cell* buildFeaturedCell (qreal energy, CellFunctionType type, quint8* data, SimulationContext* context
+    Cell* buildFeaturedCell (qreal energy, CellFunctionType type, QByteArray data, SimulationContext* context
         , int maxConnections = 0, int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const override;
     Cell* buildFeaturedCell (qreal energy, CellFunctionType type, SimulationContext* context, int maxConnections = 0
         , int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const override;
