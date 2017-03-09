@@ -133,19 +133,22 @@ QString CellFunctionComputerImpl::decompileInstructionCode () const
 CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompileInstructionCode (QString code)
 {
     State state(LOOKING_FOR_INSTR_START);
-    bool instructionRead(false);
 
-    int linePos = 1;
+    int linePos = 0;
 	Instruction instruction;
 	for (int codePos = 0; codePos < code.length(); ++codePos) {
         QChar currentSymbol(code[codePos]);
 
-		if (!stateMachine(state, currentSymbol, instruction, instructionRead, codePos, code.length())) {
+		if (!stateMachine(state, currentSymbol, instruction, codePos, code.length())) {
 			return{ false, linePos };
 		}
-		if ((currentSymbol == '\n') || ((codePos + 1) == code.length()))
-            instructionRead = true;
-        if( instructionRead ) {
+		if ((currentSymbol == '\n') || ((codePos + 1) == code.length())) {
+			linePos++;
+			if (!instruction.name.isEmpty()) {
+				instruction.read = true;
+			}
+		}
+        if( instruction.read ) {
             instruction.op1 = _symbolTable->applyTableToCode(instruction.op1);
             instruction.op2 = _symbolTable->applyTableToCode(instruction.op2);
 
@@ -269,8 +272,7 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
 
             codeInstruction(instrN, opTyp1, opTyp2, op1N, op2N);
             state = LOOKING_FOR_INSTR_START;
-            instructionRead = false;
-            linePos++;
+			instruction = Instruction();
         }
     }
     if( state == LOOKING_FOR_INSTR_START )
@@ -281,7 +283,7 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
 }
 
 bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, Instruction& instruction
-	, bool& instructionRead, int symbolPos, int codeSize)
+	, int symbolPos, int codeSize)
 {
 	switch (state) {
 		case LOOKING_FOR_INSTR_START: {
@@ -294,14 +296,14 @@ bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, 
 		case LOOKING_FOR_INSTR_END: {
 			if (!currentSymbol.isLetter()) {
 				if ((instruction.name.toLower() == "else") || (instruction.name.toLower() == "endif"))
-					instructionRead = true;
+					instruction.read = true;
 				else
 					state = LOOKING_FOR_OP1_START;
 			}
 			else {
 				instruction.name += currentSymbol;
 				if ((symbolPos + 1) == codeSize && ((instruction.name.toLower() == "else") || (instruction.name.toLower() == "endif")))
-					instructionRead = true;
+					instruction.read = true;
 			}
 		}
 		break;
@@ -352,17 +354,17 @@ bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, 
 				state = LOOKING_FOR_OP2_END;
 				instruction.op2 = currentSymbol;
 				if (symbolPos == (codeSize - 1))
-					instructionRead = true;
+					instruction.read = true;
 			}
 		}
 		break;
 		case LOOKING_FOR_OP2_END: {
 			if (!isNameChar(currentSymbol) && (currentSymbol != '-') && (currentSymbol != '_') && (currentSymbol != '[') && (currentSymbol != ']') && (currentSymbol != '(') && (currentSymbol != ')'))
-				instructionRead = true;
+				instruction.read = true;
 			else {
 				instruction.op2 += currentSymbol;
 				if ((symbolPos + 1) == codeSize)
-					instructionRead = true;
+					instruction.read = true;
 			}
 		}
 		break;
