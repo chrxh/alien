@@ -40,8 +40,8 @@ private:
 	struct InstructionUncoded {
 		bool readingFinished = false;
 		QString name;
-		QString op1;
-		QString op2;
+		QString operand1;
+		QString operand2;
 		QString comp;
 	};
 	struct InstructionCoded {
@@ -56,6 +56,8 @@ private:
 
 	void writeInstruction(InstructionCoded const& instructionCoded);
 	void readInstruction(int& instructionPointer, InstructionCoded& instructionCoded) const;
+
+	QString applyTableToCode(QString s);
 
     QByteArray _code;
 	QByteArray _memory;
