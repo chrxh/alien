@@ -20,7 +20,6 @@
 
 //Nächstes Mal:
 //- CellFunctionComputerImpl::injectAndCompileInstructionCode refaktorisieren
-//- Bug: Code: mov [i],4 compiliert nicht
 //- Token-Konstruktor refaktorisieren
 //- in SimulationContext kommt noch
 //  - SimulationParameters
