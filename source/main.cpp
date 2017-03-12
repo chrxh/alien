@@ -19,8 +19,9 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
-//- mov [i],4 akzeptiert er nicht
-//- Token-Konstruktor refactorisieren
+//- CellFunctionComputerImpl::injectAndCompileInstructionCode refaktorisieren
+//- Bug: Code: mov [i],4 compiliert nicht
+//- Token-Konstruktor refaktorisieren
 //- in SimulationContext kommt noch
 //  - SimulationParameters
 
