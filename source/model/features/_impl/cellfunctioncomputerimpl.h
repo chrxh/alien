@@ -16,7 +16,7 @@ public:
 	QByteArray getInternalData () const override;
 
     QString decompileInstructionCode () const override;
-    CompilationState injectAndCompileInstructionCode (QString code) override;
+    CompilationState injectAndCompileInstructionCode (QString sourceCode) override;
 
 	QByteArray& getMemoryReference() override;
 
@@ -53,9 +53,9 @@ private:
 	};
 	bool resolveInstruction(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded);
 	bool stateMachine(State &state, QChar &currentSymbol, InstructionUncoded& instruction, int symbolPos, int codeSize);
-	void codeInstruction(InstructionCoded const& instructionCoded);
-	void decodeInstruction(int& instructionPointer, quint8& instr, quint8& opTyp1, quint8& opTyp2
-		, qint8& op1, qint8& op2) const;
+
+	void writeInstruction(InstructionCoded const& instructionCoded);
+	void readInstruction(int& instructionPointer, InstructionCoded& instructionCoded) const;
 
     QByteArray _code;
 	QByteArray _memory;
