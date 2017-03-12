@@ -27,11 +27,7 @@ protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
-    void codeInstruction (quint8 instr, quint8 opTyp1, quint8 opTyp2, qint8 op1, qint8 op2);
-    void decodeInstruction (int& instructionPointer, quint8& instr, quint8& opTyp1, quint8& opTyp2
-		, qint8& op1, qint8& op2) const;
-
-	enum State {
+	enum class State {
 		LOOKING_FOR_INSTR_START,
 		LOOKING_FOR_INSTR_END,
 		LOOKING_FOR_OP1_START,
@@ -41,14 +37,25 @@ private:
 		LOOKING_FOR_OP2_START,
 		LOOKING_FOR_OP2_END
 	};
-	struct Instruction {
-		bool read = false;
+	struct InstructionUncoded {
+		bool readingFinished = false;
 		QString name;
 		QString op1;
 		QString op2;
 		QString comp;
 	};
-	bool stateMachine(State &state, QChar &currentSymbol, Instruction& instruction, int symbolPos, int codeSize);
+	struct InstructionCoded {
+		COMPUTER_OPERATION operation;
+		COMPUTER_OPTYPE opType1;
+		COMPUTER_OPTYPE opType2;
+		quint8 operand1;
+		quint8 operand2;
+	};
+	bool resolveInstruction(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded);
+	bool stateMachine(State &state, QChar &currentSymbol, InstructionUncoded& instruction, int symbolPos, int codeSize);
+	void codeInstruction(InstructionCoded const& instructionCoded);
+	void decodeInstruction(int& instructionPointer, quint8& instr, quint8& opTyp1, quint8& opTyp2
+		, qint8& op1, qint8& op2) const;
 
     QByteArray _code;
 	QByteArray _memory;
