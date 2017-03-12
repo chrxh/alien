@@ -162,8 +162,8 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
 
 bool CellFunctionComputerImpl::resolveInstruction(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded)
 {
-	instructionUncoded.op1 = _symbolTable->applyTableToCode(instructionUncoded.op1);
-	instructionUncoded.op2 = _symbolTable->applyTableToCode(instructionUncoded.op2);
+	instructionUncoded.operand1 = applyTableToCode(instructionUncoded.operand1);
+	instructionUncoded.operand2 = applyTableToCode(instructionUncoded.operand2);
 
 	//prepare data for instruction coding
 	if (instructionUncoded.name.toLower() == "mov")
@@ -208,67 +208,67 @@ bool CellFunctionComputerImpl::resolveInstruction(InstructionCoded& instructionC
 	}
 
 	if (instructionCoded.operation != COMPUTER_OPERATION::ELSE && instructionCoded.operation != COMPUTER_OPERATION::ENDIF) {
-		if ((instructionUncoded.op1.left(2) == "[[") && (instructionUncoded.op1.right(2) == "]]")) {
+		if ((instructionUncoded.operand1.left(2) == "[[") && (instructionUncoded.operand1.right(2) == "]]")) {
 			instructionCoded.opType1 =  COMPUTER_OPTYPE::MEMMEM;
-			instructionUncoded.op1 = instructionUncoded.op1.remove(0, 2);
-			instructionUncoded.op1.chop(2);
+			instructionUncoded.operand1 = instructionUncoded.operand1.remove(0, 2);
+			instructionUncoded.operand1.chop(2);
 		}
-		else if ((instructionUncoded.op1.left(1) == "[") && (instructionUncoded.op1.right(1) == "]")) {
+		else if ((instructionUncoded.operand1.left(1) == "[") && (instructionUncoded.operand1.right(1) == "]")) {
 			instructionCoded.opType1 = COMPUTER_OPTYPE::MEM;
-			instructionUncoded.op1 = instructionUncoded.op1.remove(0, 1);
-			instructionUncoded.op1.chop(1);
+			instructionUncoded.operand1 = instructionUncoded.operand1.remove(0, 1);
+			instructionUncoded.operand1.chop(1);
 		}
-		else if ((instructionUncoded.op1.left(1) == "(") && (instructionUncoded.op1.right(1) == ")")) {
+		else if ((instructionUncoded.operand1.left(1) == "(") && (instructionUncoded.operand1.right(1) == ")")) {
 			instructionCoded.opType1 = COMPUTER_OPTYPE::CMEM;
-			instructionUncoded.op1 = instructionUncoded.op1.remove(0, 1);
-			instructionUncoded.op1.chop(1);
+			instructionUncoded.operand1 = instructionUncoded.operand1.remove(0, 1);
+			instructionUncoded.operand1.chop(1);
 		}
 		else {
 			return false;
 		}
 
-		if ((instructionUncoded.op2.left(2) == "[[") && (instructionUncoded.op2.right(2) == "]]")) {
+		if ((instructionUncoded.operand2.left(2) == "[[") && (instructionUncoded.operand2.right(2) == "]]")) {
 			instructionCoded.opType2 = COMPUTER_OPTYPE::MEMMEM;
-			instructionUncoded.op2 = instructionUncoded.op2.remove(0, 2);
-			instructionUncoded.op2.chop(2);
+			instructionUncoded.operand2 = instructionUncoded.operand2.remove(0, 2);
+			instructionUncoded.operand2.chop(2);
 		}
-		else if ((instructionUncoded.op2.left(1) == "[") && (instructionUncoded.op2.right(1) == "]")) {
+		else if ((instructionUncoded.operand2.left(1) == "[") && (instructionUncoded.operand2.right(1) == "]")) {
 			instructionCoded.opType2 = COMPUTER_OPTYPE::MEM;
-			instructionUncoded.op2 = instructionUncoded.op2.remove(0, 1);
-			instructionUncoded.op2.chop(1);
+			instructionUncoded.operand2 = instructionUncoded.operand2.remove(0, 1);
+			instructionUncoded.operand2.chop(1);
 		}
-		else if ((instructionUncoded.op2.left(1) == "(") && (instructionUncoded.op2.right(1) == ")")) {
+		else if ((instructionUncoded.operand2.left(1) == "(") && (instructionUncoded.operand2.right(1) == ")")) {
 			instructionCoded.opType2 = COMPUTER_OPTYPE::CMEM;
-			instructionUncoded.op2 = instructionUncoded.op2.remove(0, 1);
-			instructionUncoded.op2.chop(1);
+			instructionUncoded.operand2 = instructionUncoded.operand2.remove(0, 1);
+			instructionUncoded.operand2.chop(1);
 		}
 		else
 			instructionCoded.opType2 = COMPUTER_OPTYPE::CONST;
 
 
-		if (instructionUncoded.op1.left(2) == "0x") {
+		if (instructionUncoded.operand1.left(2) == "0x") {
 			bool ok(true);
-			instructionCoded.operand1 = instructionUncoded.op1.remove(0, 2).toInt(&ok, 16);
+			instructionCoded.operand1 = instructionUncoded.operand1.remove(0, 2).toInt(&ok, 16);
 			if (!ok) {
 				return false;
 			}
 		}
 		else {
 			bool ok(true);
-			instructionCoded.operand1 = instructionUncoded.op1.toInt(&ok, 10);
+			instructionCoded.operand1 = instructionUncoded.operand1.toInt(&ok, 10);
 			if (!ok)
 				return false;
 		}
-		if (instructionUncoded.op2.left(2) == "0x") {
+		if (instructionUncoded.operand2.left(2) == "0x") {
 			bool ok(true);
-			instructionCoded.operand2 = instructionUncoded.op2.remove(0, 2).toInt(&ok, 16);
+			instructionCoded.operand2 = instructionUncoded.operand2.remove(0, 2).toInt(&ok, 16);
 			if (!ok) {
 				return false;
 			}
 		}
 		else {
 			bool ok(true);
-			instructionCoded.operand2 = instructionUncoded.op2.toInt(&ok, 10);
+			instructionCoded.operand2 = instructionUncoded.operand2.toInt(&ok, 10);
 			if (!ok) {
 				return false;
 			}
@@ -309,7 +309,7 @@ bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, 
 		case State::LOOKING_FOR_OP1_START: {
 			if (isNameChar(currentSymbol) || (currentSymbol == '-') || (currentSymbol == '_') || (currentSymbol == '[') || (currentSymbol == '(')) {
 				state = State::LOOKING_FOR_OP1_END;
-				instruction.op1 = currentSymbol;
+				instruction.operand1 = currentSymbol;
 			}
 		}
 		break;
@@ -323,7 +323,7 @@ bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, 
 			else if (!isNameChar(currentSymbol) && (currentSymbol != '-') && (currentSymbol != '_') && (currentSymbol != '[') && (currentSymbol != ']') && (currentSymbol != '(') && (currentSymbol != ')'))
 				state = State::LOOKING_FOR_SEPARATOR;
 			else
-				instruction.op1 += currentSymbol;
+				instruction.operand1 += currentSymbol;
 		}
 		break;
 		case State::LOOKING_FOR_SEPARATOR: {
@@ -344,14 +344,14 @@ bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, 
 				state = State::LOOKING_FOR_OP2_START;
 			else {
 				state = State::LOOKING_FOR_OP2_END;
-				instruction.op2 = currentSymbol;
+				instruction.operand2 = currentSymbol;
 			}
 		}
 		break;
 		case State::LOOKING_FOR_OP2_START: {
 			if (isNameChar(currentSymbol) || (currentSymbol == '-') || (currentSymbol == '_') || (currentSymbol == '[') || (currentSymbol == '(')) {
 				state = State::LOOKING_FOR_OP2_END;
-				instruction.op2 = currentSymbol;
+				instruction.operand2 = currentSymbol;
 				if (bytePos == (codeSize - 1))
 					instruction.readingFinished = true;
 			}
@@ -361,7 +361,7 @@ bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, 
 			if (!isNameChar(currentSymbol) && (currentSymbol != '-') && (currentSymbol != '_') && (currentSymbol != '[') && (currentSymbol != ']') && (currentSymbol != '(') && (currentSymbol != ')'))
 				instruction.readingFinished = true;
 			else {
-				instruction.op2 += currentSymbol;
+				instruction.operand2 += currentSymbol;
 				if ((bytePos + 1) == codeSize)
 					instruction.readingFinished = true;
 			}
@@ -574,4 +574,24 @@ void CellFunctionComputerImpl::readInstruction (int& instructionPointer, Instruc
 
     //increment instruction pointer
     instructionPointer += 3;
+}
+
+QString CellFunctionComputerImpl::applyTableToCode(QString s)
+{
+	QString prefix;
+	QString postfix;
+	for (int i = 0; i < 2; ++i) {
+		if (s.left(1) == "[" || s.left(1) == "(") {
+			prefix = prefix + s.left(1);
+			s = s.mid(1);
+		}
+	}
+	for (int i = 0; i < 2; ++i) {
+		if (s.right(1) == "]" || s.right(1) == ")") {
+			postfix = s.right(1) + postfix;
+			s.chop(1);
+		}
+	}
+	s = _symbolTable->applyTableToCode(s);
+	return prefix + s + postfix;
 }
