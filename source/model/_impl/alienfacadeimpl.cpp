@@ -1,5 +1,4 @@
-#include "alienfacadeimpl.h"
-
+#include "global/servicelocator.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
@@ -9,12 +8,14 @@
 #include "model/features/cellfunctioncomputer.h"
 #include "model/features/energyguidance.h"
 #include "model/features/cellfeaturefactory.h"
-#include "model/config.h"
+#include "model/simulationparameters.h"
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
+#include "model/config.h"
 #include "model/_impl/simulationcontextimpl.h"
-#include "global/servicelocator.h"
+
+#include "alienfacadeimpl.h"
 
 namespace {
 	AlienFacadeImpl factoryFacadeImpl;
@@ -29,6 +30,7 @@ SimulationContext* AlienFacadeImpl::buildSimulationContext() const
 {
 	SimulationContext* context = new SimulationContextImpl();
 	Metadata::loadDefaultSymbolTable(context->getSymbolTable());
+	Metadata::loadDefaultSimulationParameters(context->getSimulationParameters());
 	return context;
 }
 
@@ -70,8 +72,9 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, S
 
 Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const
 {
-    int randomMaxConnections = qrand() % (simulationParameters.MAX_CELL_CONNECTIONS+1);
-    int randomTokenAccessNumber = qrand() % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
+	SimulationParameters* parameters = context->getSimulationParameters();
+    int randomMaxConnections = qrand() % (parameters->MAX_CELL_CONNECTIONS+1);
+    int randomTokenAccessNumber = qrand() % parameters->MAX_TOKEN_ACCESS_NUMBERS;
     QByteArray randomData(256, 0);
 	for (int i = 0; i < 256; ++i)
 		randomData[i] = qrand() % 256;
@@ -103,8 +106,7 @@ CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     CellFunctionComputer* computer = cellFunction->findObject<CellFunctionComputer>();
     if( computer ) {
         QByteArray d = computer->getMemoryReference();
-        for(int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i)
-            to.computerMemory[i] = d[i];
+		to.computerMemory = d;
         to.computerCode = computer->decompileInstructionCode();
     }
 
@@ -112,10 +114,7 @@ CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     for(int i = 0; i < cell->getNumToken(); ++i) {
         Token* token = cell->getToken(i);
         to.tokenEnergies << token->energy;
-		QByteArray d(simulationParameters.TOKEN_MEMSIZE, 0);
-        for(int j = 0; j < simulationParameters.TOKEN_MEMSIZE; ++j)
-            d[j] = token->memory[j];
-        to.tokenData << d;
+        to.tokenData << token->memory;
     }
     return to;
 }

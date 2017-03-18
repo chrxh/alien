@@ -36,10 +36,10 @@ public:
     virtual int getNumToken (bool newTokenStackPointer = false) const = 0;
     virtual Token* getToken (int i) const = 0;
     virtual void setToken (int i, Token* token) = 0;
-    enum class ACTIVATE_TOKEN { NOW, LATER };
-    enum class UPDATE_TOKEN_ACCESS_NUMBER { YES, NO };
-    virtual void addToken (Token* token, ACTIVATE_TOKEN act = ACTIVATE_TOKEN::NOW
-        , UPDATE_TOKEN_ACCESS_NUMBER update = UPDATE_TOKEN_ACCESS_NUMBER::YES) = 0;
+    enum class ActivateToken { NOW, LATER };
+    enum class UpdateTokenAccessNumber { YES, NO };
+    virtual void addToken (Token* token, ActivateToken act = ActivateToken::NOW
+        , UpdateTokenAccessNumber update = UpdateTokenAccessNumber::YES) = 0;
     virtual void delAllTokens () = 0;
 
     virtual void setCluster (CellCluster* cluster) = 0;

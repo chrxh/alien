@@ -35,6 +35,7 @@ private:
 
     bool _newMessageReceived = false;
     MessageData _receivedMessage;
+	SimulationParameters* _parameters = nullptr;
 
     COMMUNICATOR_IN readCommandFromToken (Token* token) const;
     void setListeningChannel (Token* token);

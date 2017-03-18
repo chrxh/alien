@@ -662,6 +662,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\source\model\simulationparameters.h" />
     <ClInclude Include="..\..\source\model\topology.h" />
     <ClInclude Include="..\..\source\model\_impl\alienfacadeimpl.h" />
     <ClInclude Include="..\..\source\model\_impl\serializationfacadeimpl.h" />
@@ -743,6 +744,7 @@
     <ClCompile Include="..\..\source\model\physics\physics.cpp" />
     <ClCompile Include="..\..\source\model\simulationcontroller.cpp" />
     <ClCompile Include="..\..\source\model\config.cpp" />
+    <ClCompile Include="..\..\source\model\simulationparameters.cpp" />
     <ClCompile Include="..\..\source\model\simulationunit.cpp" />
     <ClCompile Include="..\..\source\model\topology.cpp" />
     <ClCompile Include="..\..\source\model\_impl\alienfacadeimpl.cpp" />

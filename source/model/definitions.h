@@ -26,10 +26,9 @@ class CellMap;
 class EnergyParticleMap;
 class Topology;
 class SimulationContext;
+struct SimulationParameters;
 class SymbolTable;
-
 class EntityFactory;
-
 class AlienFacade;
 class SerializationFacade;
 

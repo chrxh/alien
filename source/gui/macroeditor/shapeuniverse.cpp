@@ -11,6 +11,7 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
+#include "model/simulationparameters.h"
 #include "gui/editorsettings.h"
 
 #include "aliencellgraphicsitem.h"
@@ -637,10 +638,10 @@ void ShapeUniverse::createConnectionItem (Cell* cell, Cell* otherCell)
 
     //directed connection?
     CellConnectionGraphicsItem::ConnectionState s = CellConnectionGraphicsItem::NO_DIR_CONNECTION;
-    if( cell->getTokenAccessNumber() == ((otherCell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) && (!cell->isTokenBlocked()) ) {
+    if( cell->getTokenAccessNumber() == ((otherCell->getTokenAccessNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) && (!cell->isTokenBlocked()) ) {
         s = CellConnectionGraphicsItem::B_TO_A_CONNECTION;
     }
-    if( ((cell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->isTokenBlocked()) ) {
+    if( ((cell->getTokenAccessNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->isTokenBlocked()) ) {
         s = CellConnectionGraphicsItem::A_TO_B_CONNECTION;
     }
     CellConnectionGraphicsItem* connectionItem = new CellConnectionGraphicsItem(pos.x(), pos.y(), otherPos.x(), otherPos.y(), s);

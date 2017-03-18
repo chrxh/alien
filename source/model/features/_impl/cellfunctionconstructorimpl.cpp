@@ -1,5 +1,10 @@
-#include "cellfunctionconstructorimpl.h"
+#include <qmath.h>
+#include <QString>
+#include <QList>
+#include <QtAlgorithms>
+#include <QMatrix4x4>
 
+#include "global/servicelocator.h"
 #include "model/alienfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -10,22 +15,18 @@
 #include "model/simulationcontext.h"
 #include "model/cellmap.h"
 #include "model/topology.h"
+#include "model/simulationparameters.h"
 
-#include "global/servicelocator.h"
+#include "cellfunctionconstructorimpl.h"
 
-#include <qmath.h>
-#include <QString>
-#include <QList>
-#include <QtAlgorithms>
-#include <QMatrix4x4>
-
-using ACTIVATE_TOKEN = Cell::ACTIVATE_TOKEN;
-using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UPDATE_TOKEN_ACCESS_NUMBER;
+using ACTIVATE_TOKEN = Cell::ActivateToken;
+using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenAccessNumber;
 
 CellFunctionConstructorImpl::CellFunctionConstructorImpl (SimulationContext* context)
     : CellFunction(context)
     , _cellMap(context->getCellMap())
     , _topology(context->getTopology())
+	, _parameters(context->getSimulationParameters())
 {
 }
 
@@ -40,7 +41,8 @@ namespace {
         , int tokenAccessNumber, int cellType, QByteArray cellFunctionData, SimulationContext* context)
     {
         AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
-        Cell* newCell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, convertCellTypeNumberToName(cellType), cellFunctionData, context);
+        Cell* newCell = facade->buildFeaturedCell(context->getSimulationParameters()->NEW_CELL_ENERGY
+			, convertCellTypeNumberToName(cellType), cellFunctionData, context);
         CellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
@@ -52,7 +54,7 @@ namespace {
         return newCell;
     }
 
-    Cell* obstacleCheck (CellCluster* cluster, bool safeMode, CellMap* cellMap, Topology* topology)
+    Cell* obstacleCheck (CellCluster* cluster, bool safeMode, CellMap* cellMap, Topology* topology, SimulationParameters* parameters)
     {
         foreach( Cell* cell, cluster->getCellsRef() ) {
             QVector3D pos = cluster->calcPosition(cell, true);
@@ -63,7 +65,7 @@ namespace {
 
                     //obstacle found?
                     if( obstacleCell ) {
-                        if( topology->displacement(obstacleCell->getCluster()->calcPosition(obstacleCell), pos).length() < simulationParameters.CRIT_CELL_DIST_MIN ) {
+                        if( topology->displacement(obstacleCell->getCluster()->calcPosition(obstacleCell), pos).length() <  parameters->CRIT_CELL_DIST_MIN ) {
                             if( safeMode ) {
                                 if( obstacleCell != cell ) {
                                     cluster->clearCellsFromMap();
@@ -80,7 +82,7 @@ namespace {
                         //check also connected cells
                         for(int i = 0; i < obstacleCell->getNumConnections(); ++i) {
                             Cell* connectedObstacleCell = obstacleCell->getConnection(i);
-                            if( topology->displacement(connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell), pos).length() < simulationParameters.CRIT_CELL_DIST_MIN ) {
+                            if( topology->displacement(connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell), pos).length() < parameters->CRIT_CELL_DIST_MIN ) {
                                 if( safeMode ) {
                                     if( connectedObstacleCell != cell ) {
                                         cluster->clearCellsFromMap();
@@ -136,7 +138,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
     //read shift length for construction site from token data
     qreal len = CodingPhysicalQuantities::convertDataToShiftLen(token->memory[static_cast<int>(CONSTR::IN_DIST)]);
-    if( len > simulationParameters.CRIT_CELL_DIST_MAX ) {        //length to large?
+    if( len > _parameters->CRIT_CELL_DIST_MAX ) {        //length to large?
         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_DIST);
         return processingResult;
     }
@@ -174,8 +176,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             qreal minAngleConstrSite = 360.0;
             foreach( Cell* otherCell, constructionSite ) {
                 qreal r = (otherCell->getRelPos() - constructionCell->getRelPos()).length();
-                if( simulationParameters.CRIT_CELL_DIST_MAX < (2.0*r) ) {
-                    qreal a = qAbs(2.0*qAsin(simulationParameters.CRIT_CELL_DIST_MAX/(2.0*r))*radToDeg);
+                if( _parameters->CRIT_CELL_DIST_MAX < (2.0*r) ) {
+                    qreal a = qAbs(2.0*qAsin(_parameters->CRIT_CELL_DIST_MAX/(2.0*r))*radToDeg);
                     if( a < minAngleConstrSite )
                         minAngleConstrSite = a;
                 }
@@ -183,8 +185,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             qreal minAngleConstructor = 360.0;
             foreach( Cell* otherCell, constructor ) {
                 qreal r = (otherCell->getRelPos() - constructionCell->getRelPos()).length();
-                if( simulationParameters.CRIT_CELL_DIST_MAX < (2.0*r) ) {
-                    qreal a = qAbs(2.0*qAsin(simulationParameters.CRIT_CELL_DIST_MAX/(2.0*r))*radToDeg);
+                if( _parameters->CRIT_CELL_DIST_MAX < (2.0*r) ) {
+                    qreal a = qAbs(2.0*qAsin(_parameters->CRIT_CELL_DIST_MAX/(2.0*r))*radToDeg);
                     if( a < minAngleConstructor )
                         minAngleConstructor = a;
                 }
@@ -259,10 +261,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 qreal angularMassNew = cluster->calcAngularMassWithoutUpdate();
                 qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), angularMassNew, angularVelNew);
-                qreal eDiff = (kinEnergyNew-kinEnergyOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                qreal eDiff = (kinEnergyNew-kinEnergyOld)/_parameters->INTERNAL_TO_KINETIC_ENERGY;
 
                 //not enough energy?
-                if( token->energy <= (simulationParameters.NEW_CELL_ENERGY + eDiff + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
+                if( token->energy <= (_parameters->NEW_CELL_ENERGY + eDiff + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
                     token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_NO_ENERGY);
 
                     //restore cluster
@@ -280,7 +282,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {
                     bool safeMode = (cmd == static_cast<int>(CONSTR_IN::SAFE));
-                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology) ) {
+                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
                         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE);
 
                         //restore construction site
@@ -328,17 +330,17 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
                 qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVel(), angularMassNew, angularVelNew);
-                qreal eDiff = (kinEnergyNew-kinEnergyOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                qreal eDiff = (kinEnergyNew-kinEnergyOld)/_parameters->INTERNAL_TO_KINETIC_ENERGY;
 
                 //energy for possible new token
                 qreal tokenEnergy = 0;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED) ))
-                    tokenEnergy = simulationParameters.NEW_TOKEN_ENERGY;
+                    tokenEnergy = _parameters->NEW_TOKEN_ENERGY;
 
                 //not enough energy?
-                if( token->energy <= (simulationParameters.NEW_CELL_ENERGY + tokenEnergy + eDiff + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
+                if( token->energy <= (_parameters->NEW_CELL_ENERGY + tokenEnergy + eDiff + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
                     token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_NO_ENERGY);
 
                     //restore construction site
@@ -357,9 +359,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 quint8 maxCon = token->memory[static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS)];
                 if( maxCon < 2 )
                     maxCon = 2;
-                if( maxCon > simulationParameters.MAX_CELL_CONNECTIONS )
-                    maxCon = simulationParameters.MAX_CELL_CONNECTIONS;
-                int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)] % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
+                if( maxCon > _parameters->MAX_CELL_CONNECTIONS )
+                    maxCon = _parameters->MAX_CELL_CONNECTIONS;
+                int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)] % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
                 Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
 					, token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)]
 					, token->memory.mid(static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA))
@@ -368,7 +370,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {
                     bool safeMode = (cmd == static_cast<int>(CONSTR_IN::SAFE));
-                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology) ) {
+                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
                         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE);
 
                         //restore construction site
@@ -393,10 +395,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //connect cell with construction site
                 foreach(Cell* otherCell, constructionSite) {
-                    if( (otherCell->getNumConnections() < simulationParameters.MAX_CELL_CONNECTIONS)
-                            && (newCell->getNumConnections() < simulationParameters.MAX_CELL_CONNECTIONS)
+                    if( (otherCell->getNumConnections() < _parameters->MAX_CELL_CONNECTIONS)
+                            && (newCell->getNumConnections() < _parameters->MAX_CELL_CONNECTIONS)
                             && (otherCell !=constructionCell ) ) {
-                        if (_topology->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (simulationParameters.CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
+                        if (_topology->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (_parameters->CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( token->memory.at(static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS)) == 0 ) {
@@ -461,17 +463,17 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //create new token if desired
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
-                    if( newCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) {
-                        newCell->addToken(new Token(simulationParameters.NEW_TOKEN_ENERGY), ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                        token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
+                    if( newCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) {
+                        newCell->addToken(new Token(_context, _parameters->NEW_TOKEN_ENERGY), ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                        token->energy = token->energy - _parameters->NEW_TOKEN_ENERGY;
                     }
                 }
                 if( opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN) ) {
-                    if( newCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) {
+                    if( newCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) {
                         Token* dup = token->duplicate();
-                        dup->energy = simulationParameters.NEW_TOKEN_ENERGY;
+                        dup->energy = _parameters->NEW_TOKEN_ENERGY;
                         newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                        token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
+                        token->energy = token->energy - _parameters->NEW_TOKEN_ENERGY;
                     }
                 }
             }
@@ -490,7 +492,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
     else {
 
         //new cell connection possible?
-        if( numCon < simulationParameters.MAX_CELL_CONNECTIONS ) {
+        if( numCon < _parameters->MAX_CELL_CONNECTIONS ) {
 
             //is there any connection?
             if( numCon > 0 ) {
@@ -521,7 +523,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 angleGap = angleGap + CodingPhysicalQuantities::convertDataToAngle(token->memory[static_cast<int>(CONSTR::INOUT_ANGLE)]);
 
                 //calc coordinates for new cell from angle gap and construct cell
-                QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*simulationParameters.CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
+                QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*_parameters->CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
                 QVector3D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_SEP_RED))
@@ -534,17 +536,17 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
                 qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVel(), angularMassNew, angularVelNew);
-                qreal eDiff = (kinEnergyNew-kinEnergyOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                qreal eDiff = (kinEnergyNew-kinEnergyOld)/_parameters->INTERNAL_TO_KINETIC_ENERGY;
 
                 //energy for possible new token
                 qreal tokenEnergy = 0;
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN) )
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) )
-                    tokenEnergy = simulationParameters.NEW_TOKEN_ENERGY;
+                    tokenEnergy = _parameters->NEW_TOKEN_ENERGY;
 
                 //not enough energy?
-                if( token->energy <= (simulationParameters.NEW_CELL_ENERGY + tokenEnergy + eDiff + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
+                if( token->energy <= (_parameters->NEW_CELL_ENERGY + tokenEnergy + eDiff + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
                     token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_NO_ENERGY);
                     return processingResult;
                 }
@@ -554,10 +556,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 quint8 maxCon = token->memory[static_cast<int>(CONSTR::IN_CELL_MAX_CONNECTIONS)];
                 if( maxCon < 1 )
                     maxCon = 1;
-                if( maxCon > simulationParameters.MAX_CELL_CONNECTIONS )
-                    maxCon = simulationParameters.MAX_CELL_CONNECTIONS;
+                if( maxCon > _parameters->MAX_CELL_CONNECTIONS )
+                    maxCon = _parameters->MAX_CELL_CONNECTIONS;
                 int tokenAccessNumber = token->memory[static_cast<int>(CONSTR::IN_CELL_BRANCH_NO)]
-                        % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
+                        % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
                 Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
 					, token->memory[static_cast<int>(CONSTR::IN_CELL_FUNCTION)]
 					, token->memory.mid(static_cast<int>(CONSTR::IN_CELL_FUNCTION_DATA)), _context);
@@ -565,7 +567,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != static_cast<int>(CONSTR_IN::BRUTEFORCE)) {
                     bool safeMode = (cmd == static_cast<int>(CONSTR_IN::SAFE));
-                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology) ) {
+                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
                         token->memory[static_cast<int>(CONSTR::OUT)] = static_cast<int>(CONSTR_OUT::ERROR_OBSTACLE);
 
                         //restore construction site
@@ -627,14 +629,14 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //create new token if desired
                 if( (opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN))
                         || (opt == static_cast<int>(CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED)) ) {
-                    newCell->addToken(new Token(simulationParameters.NEW_TOKEN_ENERGY), ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                    token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
+                    newCell->addToken(new Token(_context, _parameters->NEW_TOKEN_ENERGY), ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                    token->energy = token->energy - _parameters->NEW_TOKEN_ENERGY;
                 }
                 if( opt == static_cast<int>(CONSTR_IN_OPTION::CREATE_DUP_TOKEN) ) {
                     Token* dup = token->duplicate();
-                    dup->energy = simulationParameters.NEW_TOKEN_ENERGY;
+                    dup->energy = _parameters->NEW_TOKEN_ENERGY;
                     newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                    token->energy = token->energy - simulationParameters.NEW_TOKEN_ENERGY;
+                    token->energy = token->energy - _parameters->NEW_TOKEN_ENERGY;
                 }
 
             }

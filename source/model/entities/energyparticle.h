@@ -24,10 +24,11 @@ public:
     quint8 color = 0;
 
 private:
-    SimulationContext* _context;
-	Topology* _topology;
-	CellMap* _cellMap;
-	EnergyParticleMap* _energyMap;
+    SimulationContext* _context = nullptr;
+	Topology* _topology = nullptr;
+	CellMap* _cellMap = nullptr;
+	EnergyParticleMap* _energyMap = nullptr;
+	SimulationParameters* _parameters = nullptr;
 };
 
 #endif // ENERGY_H

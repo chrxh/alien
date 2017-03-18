@@ -3,7 +3,7 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-
+#include "model/simulationparameters.h"
 #include "model/config.h"
 
 #include "cellfunctionweaponimpl.h"
@@ -11,6 +11,7 @@
 CellFunctionWeaponImpl::CellFunctionWeaponImpl (SimulationContext* context)
     : CellFunction(context)
     , _cellMap(context->getCellMap())
+	, _parameters(context->getSimulationParameters())
 {
 }
 
@@ -27,7 +28,7 @@ CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token,
             //other cell found?
             if( otherCell ) {
                 if( otherCell->getCluster() != cell->getCluster() ) {
-                    qreal energy = otherCell->getEnergy()*simulationParameters.CELL_WEAPON_STRENGTH+1.0;
+                    qreal energy = otherCell->getEnergy()*_parameters->CELL_WEAPON_STRENGTH+1.0;
                     if( otherCell->getEnergy() > energy ) {
                         otherCell->setEnergy(otherCell->getEnergy()-energy);
                         token->energy += energy/2.0;

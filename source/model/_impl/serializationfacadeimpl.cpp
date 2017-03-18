@@ -15,6 +15,7 @@
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
 #include "model/_impl/simulationcontextimpl.h"
+#include "model/simulationparameters.h"
 #include "global/servicelocator.h"
 #include "global/global.h"
 
@@ -50,6 +51,7 @@ void SerializationFacadeImpl::serializeSimulationContext(SimulationContext * con
 	context->getCellMap()->serializePrimitives(stream);
 	context->getEnergyParticleMap()->serializePrimitives(stream);
 	context->getSymbolTable()->serializePrimitives(stream);
+	context->getSimulationParameters()->serializePrimitives(stream);
 }
 
 void SerializationFacadeImpl::deserializeSimulationContext(SimulationContext* prevContext, QDataStream & stream) const
@@ -86,6 +88,19 @@ void SerializationFacadeImpl::deserializeSimulationContext(SimulationContext* pr
 	prevContext->getCellMap()->deserializePrimitives(stream, oldIdCellMap);
 	prevContext->getEnergyParticleMap()->deserializePrimitives(stream, oldIdEnergyMap);
 	prevContext->getSymbolTable()->deserializePrimitives(stream);
+	prevContext->getSimulationParameters()->deserializePrimitives(stream);
+}
+
+void SerializationFacadeImpl::serializeSimulationParameters(SimulationParameters* parameters, QDataStream& stream) const
+{
+	parameters->serializePrimitives(stream);
+}
+
+SimulationParameters* SerializationFacadeImpl::deserializeSimulationParameters(QDataStream& stream) const
+{
+	SimulationParameters* parameters = new SimulationParameters();
+	parameters->deserializePrimitives(stream);
+	return parameters;
 }
 
 void SerializationFacadeImpl::serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const
@@ -219,9 +234,10 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	CellFeature* feature = featureFactory->addCellFunction(cell, type, context);
 	feature->deserializePrimitives(stream);
 
+	SimulationParameters* parameters = context->getSimulationParameters();
 	for (int i = 0; i < cell->getNumToken(); ++i) {
-		Token* token = deserializeToken(stream);
-		if (i < simulationParameters.CELL_TOKENSTACKSIZE)
+		Token* token = deserializeToken(stream, context);
+		if (i < parameters->CELL_TOKENSTACKSIZE)
 			cell->setToken(i, token);
 		else
 			delete token;
@@ -253,10 +269,10 @@ void SerializationFacadeImpl::serializeToken(Token* token, QDataStream& stream) 
     token->serializePrimitives(stream);
 }
 
-Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream) const
+Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream, SimulationContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    Token* token = entityFactory->buildToken();
+    Token* token = entityFactory->buildToken(context);
     token->deserializePrimitives(stream);
     return token;
 }

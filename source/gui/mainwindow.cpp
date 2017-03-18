@@ -191,14 +191,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::newSimulation ()
 {
-	SymbolTable* oldSymbolTable = _simController->getSimulationContext()->getSymbolTable();
-    NewSimulationDialog d(*oldSymbolTable);
+    NewSimulationDialog d(_simController->getSimulationContext());
     if( d.exec() ) {
 		stopSimulation();
 
         //create new simulation
         _simController->newUniverse(d.getSize(), d.getNewSymbolTableRef());
-        _simController->addRandomEnergy (d.getEnergy(), simulationParameters.CRIT_CELL_TRANSFORM_ENERGY);
+		SimulationParameters* parameters = _simController->getSimulationContext()->getSimulationParameters();
+        _simController->addRandomEnergy (d.getEnergy(), parameters->CRIT_CELL_TRANSFORM_ENERGY);
 
 		updateControllerAndEditors();
     }
@@ -215,7 +215,6 @@ void MainWindow::loadSimulation ()
             //read simulation data
             QDataStream in(&file);
             _simController->loadUniverse(in);
-			simulationParameters.deserializeData(in);
 			file.close();
 
 			updateControllerAndEditors();
@@ -235,7 +234,6 @@ void MainWindow::saveSimulation ()
         if( file.open(QIODevice::WriteOnly) ) {
             QDataStream out(&file);
             _simController->saveUniverse(out);
-            simulationParameters.serializeData(out);
             file.close();
         }
         else {
@@ -354,7 +352,7 @@ void MainWindow::restoreUniverse ()
 
 void MainWindow::editSimulationParameters ()
 {
-    SimulationParametersDialog d;
+    SimulationParametersDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
         d.updateSimulationParameters();
     }
@@ -367,10 +365,11 @@ void MainWindow::loadSimulationParameters ()
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
 
-            //read simulation data
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
             QDataStream in(&file);
-            simulationParameters.deserializeData(in);
+			SimulationParameters* parameters = facade->deserializeSimulationParameters(in);
             file.close();
+			_simController->getSimulationContext()->getSimulationParameters()->setParameters(parameters);
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified simulation parameter file could not loaded.");
@@ -386,9 +385,10 @@ void MainWindow::saveSimulationParameters ()
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
 
-            //serialize symbol table
-            QDataStream out(&file);
-            simulationParameters.serializeData(out);
+			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
+			QDataStream out(&file);
+			SimulationParameters* parameters = _simController->getSimulationContext()->getSimulationParameters();
+			facade->serializeSimulationParameters(parameters, out);
             file.close();
         }
         else {
@@ -499,7 +499,7 @@ void MainWindow::editSymbolTable ()
 	SymbolTable* symbolTable = _simController->getSimulationContext()->getSymbolTable();
 	if (!symbolTable)
 		return;
-    SymbolTableDialog d(*symbolTable);
+    SymbolTableDialog d(symbolTable);
     if (d.exec()) {
 
         //update symbol table
@@ -580,7 +580,7 @@ void MainWindow::loadSymbolsWithMerging ()
 
 void MainWindow::addBlockStructure ()
 {
-    AddRectStructureDialog d;
+    AddRectStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
         QVector3D center = ui->macroEditor->getViewCenterPosWithInc();
        _simController->addBlockStructure(center, d.getBlockSizeX(), d.getBlockSizeY(), QVector3D(d.getDistance(), d.getDistance(), 0.0)
@@ -590,7 +590,7 @@ void MainWindow::addBlockStructure ()
 
 void MainWindow::addHexagonStructure ()
 {
-    AddHexagonStructureDialog d;
+    AddHexagonStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
         QVector3D center = ui->macroEditor->getViewCenterPosWithInc();
        _simController->addHexagonStructure(center, d.getLayers(), d.getDistance(), d.getInternalEnergy());

@@ -1,10 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include<QColor>
-#include<QDataStream>
-
-#include "model/definitions.h"
+#include "definitions.h"
 
 const qreal ALIEN_PRECISION = 0.0000001;
 
@@ -12,9 +9,10 @@ class Metadata
 {
 public:
     static void loadDefaultSymbolTable (SymbolTable* meta);
+	static void loadDefaultSimulationParameters(SimulationParameters* parameters);
 };
 
-struct SimulationParameters
+/*struct SimulationParameters
 {
     //simulation constants
     qreal CRIT_CELL_DIST_MIN;
@@ -57,5 +55,5 @@ struct SimulationParameters
 };
 
 extern SimulationParameters simulationParameters;
-
+*/
 #endif // CONFIG_H

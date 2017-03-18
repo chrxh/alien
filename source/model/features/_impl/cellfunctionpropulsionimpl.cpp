@@ -1,4 +1,4 @@
-#include "cellfunctionpropulsionimpl.h"
+#include <QtCore/qmath.h>
 
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -7,12 +7,14 @@
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/config.h"
+#include "model/simulationcontext.h"
+#include "model/simulationparameters.h"
 
-#include <QtCore/qmath.h>
+#include "cellfunctionpropulsionimpl.h"
 
 
 CellFunctionPropulsionImpl::CellFunctionPropulsionImpl (SimulationContext* context)
-    : CellFunction(context)
+    : CellFunction(context), _parameters(context->getSimulationParameters())
 {
 }
 
@@ -91,10 +93,10 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
 
     //calc new kinetic energy
     qreal eKinNew(Physics::kineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
-    qreal energyDiff((eKinNew-eKinOld)/simulationParameters.INTERNAL_TO_KINETIC_ENERGY);
+    qreal energyDiff((eKinNew-eKinOld)/_parameters->INTERNAL_TO_KINETIC_ENERGY);
 
     //has token enough energy?
-    if( token->energy >= (energyDiff + qAbs(energyDiff) + simulationParameters.MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
+    if( token->energy >= (energyDiff + qAbs(energyDiff) + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
         processingResult.newEnergyParticle = new EnergyParticle(qAbs(energyDiff), cluster->calcPosition(cell, _context)-impulse.normalized()

@@ -10,15 +10,15 @@
 #include "newsimulationdialog.h"
 #include "ui_newsimulationdialog.h"
 
-NewSimulationDialog::NewSimulationDialog(SymbolTable const& oldSymbolTable, QWidget *parent)
+NewSimulationDialog::NewSimulationDialog(SimulationContext* context, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
 
-    _simParaDialog = new SimulationParametersDialog();
-    _symTblDialog = new SymbolTableDialog(oldSymbolTable);
+    _simParaDialog = new SimulationParametersDialog(context->getSimulationParameters());
+    _symTblDialog = new SymbolTableDialog(context->getSymbolTable());
 
     //connections
     connect(ui->simulationParametersButton, SIGNAL(clicked()), this, SLOT(simulationParametersButtonClicked()));
