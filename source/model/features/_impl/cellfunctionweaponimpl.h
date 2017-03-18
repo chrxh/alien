@@ -14,7 +14,8 @@ protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
-    CellMap* _cellMap;
+    CellMap* _cellMap = nullptr;
+	SimulationParameters* _parameters = nullptr;
 };
 
 #endif // CELLFUNCTIONWEAPON_H

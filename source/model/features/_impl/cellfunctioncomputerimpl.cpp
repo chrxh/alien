@@ -6,13 +6,15 @@
 #include "model/metadata/symboltable.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
+#include "model/simulationparameters.h"
 
 #include "cellfunctioncomputerimpl.h"
 
 CellFunctionComputerImpl::CellFunctionComputerImpl (SimulationContext* context)
     : CellFunctionComputer(context)
-    , _memory(simulationParameters.CELL_MEMSIZE, 0)
+    , _memory(context->getSimulationParameters()->CELL_MEMSIZE, 0)
 	, _symbolTable(context->getSymbolTable())
+	, _parameters(context->getSimulationParameters())
 {
 }
 
@@ -21,7 +23,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (QByteArray data, SimulationC
 {
 	if (!data.isEmpty()) {
 		int numInstructions = data[0];
-		int minSize = 3 * std::min(numInstructions, simulationParameters.CELL_NUM_INSTR);
+		int minSize = 3 * std::min(numInstructions, context->getSimulationParameters()->CELL_NUM_INSTR);
 		_code = data.left(minSize);
 		if (_code.size() != minSize) {
 			_code.clear();
@@ -93,19 +95,19 @@ QString CellFunctionComputerImpl::decompileInstructionCode () const
 
         //write operands
         if( instruction.opType1 == COMPUTER_OPTYPE::MEM)
-            textOp1 = "["+ QString("0x%1").arg(convertToAddress(instruction.operand1, simulationParameters.TOKEN_MEMSIZE),0, 16)+"]";
+            textOp1 = "["+ QString("0x%1").arg(convertToAddress(instruction.operand1, _parameters->TOKEN_MEMSIZE),0, 16)+"]";
         if( instruction.opType1 == COMPUTER_OPTYPE::MEMMEM)
-            textOp1 = "[["+ QString("0x%1").arg(convertToAddress(instruction.operand1, simulationParameters.TOKEN_MEMSIZE),0, 16)+"]]";
+            textOp1 = "[["+ QString("0x%1").arg(convertToAddress(instruction.operand1, _parameters->TOKEN_MEMSIZE),0, 16)+"]]";
         if( instruction.opType1 == COMPUTER_OPTYPE::CMEM)
-            textOp1 = "("+ QString("0x%1").arg(convertToAddress(instruction.operand1, simulationParameters.CELL_MEMSIZE),0, 16)+")";
+            textOp1 = "("+ QString("0x%1").arg(convertToAddress(instruction.operand1, _parameters->CELL_MEMSIZE),0, 16)+")";
         if( instruction.opType2 == COMPUTER_OPTYPE::MEM)
-            textOp2 = "["+ QString("0x%1").arg(convertToAddress(instruction.operand2, simulationParameters.TOKEN_MEMSIZE),0, 16)+"]";
+            textOp2 = "["+ QString("0x%1").arg(convertToAddress(instruction.operand2, _parameters->TOKEN_MEMSIZE),0, 16)+"]";
         if( instruction.opType2 == COMPUTER_OPTYPE::MEMMEM)
-            textOp2 = "[["+ QString("0x%1").arg(convertToAddress(instruction.operand2, simulationParameters.TOKEN_MEMSIZE),0, 16)+"]]";
+            textOp2 = "[["+ QString("0x%1").arg(convertToAddress(instruction.operand2, _parameters->TOKEN_MEMSIZE),0, 16)+"]]";
         if( instruction.opType2 == COMPUTER_OPTYPE::CMEM)
-            textOp2 = "("+ QString("0x%1").arg(convertToAddress(instruction.operand2, simulationParameters.CELL_MEMSIZE),0, 16)+")";
+            textOp2 = "("+ QString("0x%1").arg(convertToAddress(instruction.operand2, _parameters->CELL_MEMSIZE),0, 16)+")";
         if( instruction.opType2 == COMPUTER_OPTYPE::CONST)
-            textOp2 = QString("0x%1").arg(convertToAddress(instruction.operand2, simulationParameters.TOKEN_MEMSIZE),0, 16);
+            textOp2 = QString("0x%1").arg(convertToAddress(instruction.operand2, _parameters->TOKEN_MEMSIZE),0, 16);
 
         //write separation/comparator
         if (instruction.operation <= COMPUTER_OPERATION::AND) {
@@ -140,12 +142,12 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
 	for (int bytePos = 0; bytePos < sourceCode.length(); ++bytePos) {
         QChar currentSymbol = sourceCode[bytePos];
 
-		if (!stateMachine(state, currentSymbol, instructionUncoded, bytePos, sourceCode.length())) {
+		if (!gotoNextStateAndReturnSuccess(state, currentSymbol, instructionUncoded, bytePos, sourceCode.length())) {
 			return{ false, linePos };
 		}
         if( instructionUncoded.readingFinished ) {
 			linePos++;
-			if (!resolveInstruction(instructionCoded, instructionUncoded)) {
+			if (!resolveInstructionAndReturnSuccess(instructionCoded, instructionUncoded)) {
 				return{ false, linePos };
 			}
             writeInstruction(instructionCoded);
@@ -160,7 +162,7 @@ CellFunctionComputer::CompilationState CellFunctionComputerImpl::injectAndCompil
     }
 }
 
-bool CellFunctionComputerImpl::resolveInstruction(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded)
+bool CellFunctionComputerImpl::resolveInstructionAndReturnSuccess(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded)
 {
 	instructionUncoded.operand1 = applyTableToCode(instructionUncoded.operand1);
 	instructionUncoded.operand2 = applyTableToCode(instructionUncoded.operand2);
@@ -281,7 +283,7 @@ bool CellFunctionComputerImpl::resolveInstruction(InstructionCoded& instructionC
 	return true;
 }
 
-bool CellFunctionComputerImpl::stateMachine(State &state, QChar &currentSymbol, InstructionUncoded& instruction
+bool CellFunctionComputerImpl::gotoNextStateAndReturnSuccess(State &state, QChar &currentSymbol, InstructionUncoded& instruction
 	, int bytePos, int codeSize)
 {
 	switch (state) {
@@ -413,7 +415,7 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
 {
     ProcessingResult processingResult {false, 0};
 
-    std::vector<bool> condTable(simulationParameters.CELL_NUM_INSTR);
+    std::vector<bool> condTable(_parameters->CELL_NUM_INSTR);
     int condPointer(0);
     int bytePos = 0;
     while( bytePos < _code.size() ) {
@@ -426,25 +428,25 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
         quint8 opPointer1 = 0;
 		MemoryType memType = MemoryType::TOKEN;
         if (instruction.opType1 == COMPUTER_OPTYPE::MEM)
-            opPointer1 = convertToAddress(instruction.operand1, simulationParameters.TOKEN_MEMSIZE);
+            opPointer1 = convertToAddress(instruction.operand1, _parameters->TOKEN_MEMSIZE);
         if (instruction.opType1 == COMPUTER_OPTYPE::MEMMEM) {
-            instruction.operand1 = token->memory[convertToAddress(instruction.operand1, simulationParameters.TOKEN_MEMSIZE)];
-            opPointer1 = convertToAddress(instruction.operand1, simulationParameters.TOKEN_MEMSIZE);
+            instruction.operand1 = token->memory[convertToAddress(instruction.operand1, _parameters->TOKEN_MEMSIZE)];
+            opPointer1 = convertToAddress(instruction.operand1, _parameters->TOKEN_MEMSIZE);
         }
 		if (instruction.opType1 == COMPUTER_OPTYPE::CMEM) {
-			opPointer1 = convertToAddress(instruction.operand1, simulationParameters.CELL_MEMSIZE);
+			opPointer1 = convertToAddress(instruction.operand1, _parameters->CELL_MEMSIZE);
 			memType = MemoryType::CELL;
 		}
 
         //operand 2: loading value
         if (instruction.opType2 == COMPUTER_OPTYPE::MEM)
-            instruction.operand2 = token->memory[convertToAddress(instruction.operand2, simulationParameters.TOKEN_MEMSIZE)];
+            instruction.operand2 = token->memory[convertToAddress(instruction.operand2, _parameters->TOKEN_MEMSIZE)];
         if (instruction.opType2 == COMPUTER_OPTYPE::MEMMEM) {
-            instruction.operand2 = token->memory[convertToAddress(instruction.operand2, simulationParameters.TOKEN_MEMSIZE)];
-            instruction.operand2 = token->memory[convertToAddress(instruction.operand2, simulationParameters.TOKEN_MEMSIZE)];
+            instruction.operand2 = token->memory[convertToAddress(instruction.operand2, _parameters->TOKEN_MEMSIZE)];
+            instruction.operand2 = token->memory[convertToAddress(instruction.operand2, _parameters->TOKEN_MEMSIZE)];
         }
         if (instruction.opType2 == COMPUTER_OPTYPE::CMEM)
-            instruction.operand2 = _memory[convertToAddress(instruction.operand2, simulationParameters.CELL_MEMSIZE)];
+            instruction.operand2 = _memory[convertToAddress(instruction.operand2, _parameters->CELL_MEMSIZE)];
 
         //execute instruction
         bool execute = true;
@@ -541,9 +543,9 @@ void CellFunctionComputerImpl::deserializePrimitives (QDataStream& stream)
 {
     //load remaining attributes
     stream >> _memory >> _code;
-	_memory = _memory.left(simulationParameters.CELL_MEMSIZE);
-	_memory.resize(simulationParameters.TOKEN_MEMSIZE);
-	_code = _code.left(3 * simulationParameters.CELL_NUM_INSTR);
+	_memory = _memory.left(_parameters->CELL_MEMSIZE);
+	_memory.resize(_parameters->TOKEN_MEMSIZE);
+	_code = _code.left(3 * _parameters->CELL_NUM_INSTR);
 }
 
 QByteArray CellFunctionComputerImpl::getInternalData () const

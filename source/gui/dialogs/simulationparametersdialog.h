@@ -2,8 +2,7 @@
 #define SIMULATIONPARAMETERSDIALOG_H
 
 #include <QDialog>
-
-#include "model/config.h"
+#include "model/simulationparameters.h"
 
 namespace Ui {
 class SimulationParametersDialog;
@@ -14,7 +13,7 @@ class SimulationParametersDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SimulationParametersDialog(QWidget *parent = 0);
+    SimulationParametersDialog(SimulationParameters* parameters, QWidget *parent = 0);
     ~SimulationParametersDialog();
 
     void updateSimulationParameters ();
@@ -31,7 +30,8 @@ private:
     Ui::SimulationParametersDialog *ui;
 
     //simulation parameters (not the global ones)
-    SimulationParameters localSimulationParameters;
+	SimulationParameters& _simulationParameters;
+    SimulationParameters _localSimulationParameters;
 };
 
 #endif // SIMULATIONPARAMETERSDIALOG_H

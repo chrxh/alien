@@ -10,6 +10,7 @@
 #include "model/energyparticlemap.h"
 #include "model/cellmap.h"
 #include "model/topology.h"
+#include "model/simulationparameters.h"
 
 #include "energyparticle.h"
 #include "cell.h"
@@ -21,6 +22,7 @@ EnergyParticle::EnergyParticle(SimulationContext* context)
 	, _topology(context->getTopology())
 	, _cellMap(context->getCellMap())
 	, _energyMap(context->getEnergyParticleMap())
+	, _parameters(context->getSimulationParameters())
 	, id(GlobalFunctions::createNewTag())
 {
 
@@ -96,8 +98,8 @@ bool EnergyParticle::movement (CellCluster*& cluster)
             //enough energy for cell transformation?
             qreal p((qreal)qrand()/RAND_MAX);
             qreal eKin = Physics::kineticEnergy(1, vel, 0, 0);
-            qreal eNew = amount - (eKin/simulationParameters.INTERNAL_TO_KINETIC_ENERGY);
-            if( (eNew >= simulationParameters.CRIT_CELL_TRANSFORM_ENERGY) && ( p < simulationParameters.CELL_TRANSFORM_PROB) ) {
+            qreal eNew = amount - (eKin/_parameters->INTERNAL_TO_KINETIC_ENERGY);
+            if( (eNew >= _parameters->CRIT_CELL_TRANSFORM_ENERGY) && ( p < _parameters->CELL_TRANSFORM_PROB) ) {
 
                 //look for neighbor cell
                 for(int dx = -2; dx < 3; ++dx ) {

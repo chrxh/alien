@@ -2,6 +2,7 @@
 #define ADDRECTSTRUCTUREDIALOG_H
 
 #include <QDialog>
+#include "model/definitions.h"
 
 namespace Ui {
 class AddRectStructureDialog;
@@ -12,7 +13,7 @@ class AddRectStructureDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit AddRectStructureDialog(QWidget *parent = 0);
+    explicit AddRectStructureDialog(SimulationParameters* simulationParameters, QWidget *parent = 0);
     ~AddRectStructureDialog();
 
     int getBlockSizeX ();

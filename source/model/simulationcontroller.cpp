@@ -16,6 +16,7 @@
 #include "model/physics/physics.h"
 #include "model/config.h"
 #include "simulationcontext.h"
+#include "simulationparameters.h"
 #include "simulationunit.h"
 #include "energyparticlemap.h"
 #include "cellmap.h"
@@ -100,8 +101,8 @@ QMap< QString, qreal > SimulationController::getMonitorData ()
     data["energyParticles"] = particles;
     data["token"] = token;
     data["internalEnergy"] = internalEnergy;
-    data["transEnergy"] = _unit->calcTransEnergy()/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
-    data["rotEnergy"] = _unit->calcRotEnergy()/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+    data["transEnergy"] = _unit->calcTransEnergy() / _context->getSimulationParameters()->INTERNAL_TO_KINETIC_ENERGY;
+    data["rotEnergy"] = _unit->calcRotEnergy()/ _context->getSimulationParameters()->INTERNAL_TO_KINETIC_ENERGY;
     return data;
 }
 
@@ -588,8 +589,9 @@ void SimulationController::newCell (QVector3D pos)
     //create cluster with single cell
     _context->lock();
     AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
-    Cell* cell = facade->buildFeaturedCell(simulationParameters.NEW_CELL_ENERGY, CellFunctionType::COMPUTER
-        , _context, simulationParameters.NEW_CELL_MAX_CONNECTION, simulationParameters.NEW_CELL_TOKEN_ACCESS_NUMBER);
+	SimulationParameters* paramters = _context->getSimulationParameters();
+    Cell* cell = facade->buildFeaturedCell(paramters->NEW_CELL_ENERGY, CellFunctionType::COMPUTER
+        , _context, paramters->NEW_CELL_MAX_CONNECTION, paramters->NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
     cells << cell;
@@ -605,7 +607,7 @@ void SimulationController::newEnergyParticle (QVector3D pos)
 {
     //create energy particle
     _context->lock();
-    EnergyParticle* energy = new EnergyParticle(simulationParameters.CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _context);
+    EnergyParticle* energy = new EnergyParticle(_context->getSimulationParameters()->CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _context);
 	_context->getEnergyParticleMap()->setParticle(pos, energy);
     _context->getEnergyParticlesRef() << energy;
     _context->unlock();
@@ -624,6 +626,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
         QListIterator< CellTO > iNewCellsData(newCellsData);
         QSet< CellCluster* > sumNewClusters;
         AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+		SimulationParameters* parameters = _context->getSimulationParameters();
         while (iCells.hasNext()) {
 
             Cell* cell = iCells.next();
@@ -634,8 +637,8 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             cell->setAbsPositionAndUpdateMap(newCellData.cellPos);
             cell->setEnergy(newCellData.cellEnergy);
             cell->delAllConnection();
-            if( newCellData.cellMaxCon > simulationParameters.MAX_CELL_CONNECTIONS )
-                newCellData.cellMaxCon = simulationParameters.MAX_CELL_CONNECTIONS;
+            if( newCellData.cellMaxCon > parameters->MAX_CELL_CONNECTIONS )
+                newCellData.cellMaxCon = parameters->MAX_CELL_CONNECTIONS;
             cell->setMaxConnections(newCellData.cellMaxCon);
             cell->setTokenBlocked(!newCellData.cellAllowToken);
             cell->setTokenAccessNumber(newCellData.cellTokenAccessNum);
@@ -645,7 +648,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             //update cell computer
             CellFunctionComputer* computer = cell->getFeatures()->findObject<CellFunctionComputer>();
             if( computer ) {
-                for( int i = 0; i < simulationParameters.CELL_MEMSIZE; ++i ) {
+                for( int i = 0; i < parameters->CELL_MEMSIZE; ++i ) {
                     computer->getMemoryReference()[i] = newCellData.computerMemory[i];
                 }
                 CellFunctionComputer::CompilationState state
@@ -661,11 +664,11 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             cell->delAllTokens();
             int numToken = newCellData.tokenEnergies.size();
             for( int i = 0; i < numToken; ++i )
-                cell->addToken(new Token(newCellData.tokenEnergies[i], newCellData.tokenData[i]), Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::NO);
+                cell->addToken(new Token(_context, newCellData.tokenEnergies[i], newCellData.tokenData[i]), Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::NO);
 
             //searching for nearby clusters
             QVector3D pos = cell->calcPosition();
-            CellClusterSet clusters = _context->getCellMap()->getNearbyClusters(pos, qFloor(simulationParameters.CRIT_CELL_DIST_MAX+1.0));
+            CellClusterSet clusters = _context->getCellMap()->getNearbyClusters(pos, qFloor(parameters->CRIT_CELL_DIST_MAX+1.0));
 //            if( !clusters.contains(cell->getCluster()) )
             clusters.insert(cell->getCluster());
 
@@ -682,7 +685,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
                     QVector3D displacement = otherCell->calcPosition()-pos;
                     _context->getTopology()->correctDisplacement(displacement);
                     qreal dist = displacement.length();
-                    if( (cell != otherCell) && (dist < simulationParameters.CRIT_CELL_DIST_MAX) ) {
+                    if (cell != otherCell && dist < parameters->CRIT_CELL_DIST_MAX) {
 
                         //cells connectable?
                         if( cell->connectable(otherCell)) {

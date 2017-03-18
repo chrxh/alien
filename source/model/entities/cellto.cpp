@@ -3,13 +3,7 @@
 #include "model/config.h"
 
 CellTO::CellTO ()
-    : numCells(0), clusterPos(0.0, 0.0, 0.0), clusterVel(0.0, 0.0, 0.0),
-      clusterAngle(0.0), clusterAngVel(0.0), cellPos(0.0, 0.0, 0.0),
-      cellEnergy(0.0), cellNumCon(0), cellMaxCon(0), cellAllowToken(true),
-      cellTokenAccessNum(0), computerMemory(simulationParameters.CELL_MEMSIZE, 0)
 {
-/*    for(int i = 0; i < CELL_MEMSIZE; ++i)
-        computerMemory[i] = 0;*/
 }
 
 CellTO::~CellTO ()

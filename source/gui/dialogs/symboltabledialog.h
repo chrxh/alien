@@ -15,7 +15,7 @@ class SymbolTableDialog : public QDialog
     Q_OBJECT
     
 public:
-	SymbolTableDialog(SymbolTable const& symbolTable, QWidget *parent = 0);
+	SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent = 0);
 	~SymbolTableDialog();
 
     SymbolTable const& getNewSymbolTableRef ();

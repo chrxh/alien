@@ -19,7 +19,6 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
-//- CellFunctionComputerImpl::injectAndCompileInstructionCode refaktorisieren
 //- Token-Konstruktor refaktorisieren
 //- in SimulationContext kommt noch
 //  - SimulationParameters

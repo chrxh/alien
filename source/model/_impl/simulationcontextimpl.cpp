@@ -1,5 +1,6 @@
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
+#include "model/simulationparameters.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/metadata/symboltable.h"
@@ -12,6 +13,7 @@ SimulationContextImpl::SimulationContextImpl()
 	_energyParticleMap = new EnergyParticleMap(_topology);
 	_cellMap = new CellMap(_topology);
 	_symbolTable = new SymbolTable();
+	_simulationParameters = new SimulationParameters();
 }
 
 SimulationContextImpl::SimulationContextImpl(SymbolTable * symbolTable)
@@ -20,6 +22,7 @@ SimulationContextImpl::SimulationContextImpl(SymbolTable * symbolTable)
 	_topology = new Topology();
 	_energyParticleMap = new EnergyParticleMap(_topology);
 	_cellMap = new CellMap(_topology);
+	_simulationParameters = new SimulationParameters();
 }
 
 SimulationContextImpl::~SimulationContextImpl ()
@@ -73,6 +76,11 @@ SymbolTable* SimulationContextImpl::getSymbolTable() const
 	return _symbolTable;
 }
 
+SimulationParameters* SimulationContextImpl::getSimulationParameters() const
+{
+	return _simulationParameters;
+}
+
 QList<CellCluster*>& SimulationContextImpl::getClustersRef ()
 {
     return _clusters;
@@ -100,6 +108,7 @@ void SimulationContextImpl::deleteAll()
 	delete _cellMap;
 	delete _energyParticleMap;
 	delete _topology;
+	delete _simulationParameters;
 }
 
 void SimulationContextImpl::deleteClustersAndEnergyParticles()

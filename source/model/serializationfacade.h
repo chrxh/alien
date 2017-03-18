@@ -11,6 +11,9 @@ public:
     virtual void serializeSimulationContext(SimulationContext* context, QDataStream& stream) const = 0;
     virtual void deserializeSimulationContext(SimulationContext* prevContext, QDataStream& stream) const = 0;
 
+	virtual void serializeSimulationParameters(SimulationParameters* parameters, QDataStream& stream) const = 0;
+	virtual SimulationParameters* deserializeSimulationParameters(QDataStream& stream) const = 0;
+
 	virtual void serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const = 0;
 	virtual SymbolTable* deserializeSymbolTable(QDataStream& stream) const = 0;
 
@@ -24,7 +27,7 @@ public:
     virtual EnergyParticle* deserializeEnergyParticle(QDataStream& stream, SimulationContext* context) const = 0;
 
     virtual void serializeToken(Token* token, QDataStream& stream) const = 0;
-    virtual Token* deserializeToken(QDataStream& stream) const = 0;
+    virtual Token* deserializeToken(QDataStream& stream, SimulationContext* context) const = 0;
 
 };
 

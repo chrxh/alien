@@ -4,7 +4,7 @@
 #include <QTextEdit>
 #include <QEvent>
 
-#include "model/config.h"
+#include "model/simulationparameters.h"
 #include "model/simulationcontext.h"
 #include "model/energyparticlemap.h"
 #include "model/alienfacade.h"
@@ -293,7 +293,8 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
         connect(_tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
 
     }
-    emit numTokenUpdate(numToken, simulationParameters.CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+	SimulationParameters* parameters = _context->getSimulationParameters();
+    emit numTokenUpdate(numToken, parameters->CELL_TOKENSTACKSIZE, _pasteTokenPossible);
 
     //update Symbols Widget
     setTabSymbolsWidgetVisibility();
@@ -301,7 +302,7 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
     //update buttons
     _delEntityButton->setEnabled(true);
     _delClusterButton->setEnabled(true);
-    if( numToken < simulationParameters.CELL_TOKENSTACKSIZE)
+    if( numToken < parameters->CELL_TOKENSTACKSIZE)
         _addTokenButton->setEnabled(true);
     else
         _addTokenButton->setEnabled(false);
@@ -492,8 +493,9 @@ void MicroEditor::addTokenClicked ()
 {
     //create token (new token is the last token on the stack)
     int newTokenTab = _currentTokenTab+1;
-    _focusCellReduced.tokenEnergies.insert(newTokenTab, simulationParameters.NEW_TOKEN_ENERGY);
-    QByteArray data(simulationParameters.TOKEN_MEMSIZE, 0);
+	SimulationParameters* parameters = _context->getSimulationParameters();
+    _focusCellReduced.tokenEnergies.insert(newTokenTab, parameters->NEW_TOKEN_ENERGY);
+    QByteArray data(parameters->TOKEN_MEMSIZE, 0);
     data[0] = _focusCellReduced.cellTokenAccessNum; //set access number for new token
     _focusCellReduced.tokenData.insert(newTokenTab, data);
 
@@ -589,7 +591,8 @@ void MicroEditor::copyTokenClicked ()
     _savedTokenData = _focusCellReduced.tokenData[_currentTokenTab];
     _pasteTokenPossible = true;
     int numToken = _focusCellReduced.tokenEnergies.size();
-    emit numTokenUpdate(numToken, simulationParameters.CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+	SimulationParameters* parameters = _context->getSimulationParameters();
+	emit numTokenUpdate(numToken, parameters->CELL_TOKENSTACKSIZE, _pasteTokenPossible);
 }
 
 void MicroEditor::pasteTokenClicked ()

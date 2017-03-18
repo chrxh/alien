@@ -1,21 +1,21 @@
-#include "cellimpl.h"
+#include <QtCore/qmath.h>
 
+#include "global/global.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
 #include "model/features/cellfeature.h"
 #include "model/physics/physics.h"
-#include "model/config.h"
+#include "model/simulationparameters.h"
 #include "model/simulationcontext.h"
 #include "model/cellmap.h"
 
-#include "global/global.h"
-
-#include <QtCore/qmath.h>
+#include "cellimpl.h"
 
 CellImpl::CellImpl (SimulationContext* context)
     : _cellMap(context->getCellMap())
-    , _tokenStack(simulationParameters.CELL_TOKENSTACKSIZE)
-    , _newTokenStack(simulationParameters.CELL_TOKENSTACKSIZE)
+	, _parameters(context->getSimulationParameters())
+	, _tokenStack(context->getSimulationParameters()->CELL_TOKENSTACKSIZE)
+    , _newTokenStack(context->getSimulationParameters()->CELL_TOKENSTACKSIZE)
     , _id(GlobalFunctions::createNewTag())
 {
 
@@ -281,11 +281,11 @@ void CellImpl::setToken (int i, Token* token)
     _tokenStack[i] = token;
 }
 
-void CellImpl::addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_NUMBER update)
+void CellImpl::addToken (Token* token, ActivateToken act, UpdateTokenAccessNumber update)
 {
-    if( update == UPDATE_TOKEN_ACCESS_NUMBER::YES )
+    if( update == UpdateTokenAccessNumber::YES )
         token->setTokenAccessNumber(_tokenAccessNumber);
-    if( act == ACTIVATE_TOKEN::NOW )
+    if( act == ActivateToken::NOW )
         _tokenStack[_tokenStackPointer++] = token;
     else
         _newTokenStack[_newTokenStackPointer++] = token;
@@ -349,7 +349,7 @@ int CellImpl::getTokenAccessNumber () const
 
 void CellImpl::setTokenAccessNumber (int i)
 {
-    _tokenAccessNumber = i % simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
+    _tokenAccessNumber = i % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
 }
 
 bool CellImpl::isTokenBlocked () const
@@ -474,8 +474,8 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
     quint32 tokenStackPointer;
     stream >> tokenStackPointer;
     _tokenStackPointer = static_cast<quint32>(tokenStackPointer);
-    if (_tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE)
-        _tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
+    if (_tokenStackPointer > _parameters->CELL_TOKENSTACKSIZE)
+        _tokenStackPointer = _parameters->CELL_TOKENSTACKSIZE;
     _newTokenStackPointer = 0;
 
 	//remaining data

@@ -12,6 +12,9 @@ public:
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
+
+private:
+	SimulationParameters* _parameters = nullptr;
 };
 
 #endif // CELLFUNCTIONPROPULSION_H

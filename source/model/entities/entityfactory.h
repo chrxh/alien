@@ -21,7 +21,7 @@ public:
     virtual Cell* buildCell (qreal energy, SimulationContext* context, int maxConnections
         , int tokenAccessNumber = 0, QVector3D relPos = QVector3D()) const = 0;
     
-    virtual Token* buildToken () const = 0;
+    virtual Token* buildToken (SimulationContext* context) const = 0;
 
     virtual EnergyParticle* buildEnergyParticle(SimulationContext* context) const = 0;
     virtual EnergyParticle* buildEnergyParticle(qreal energy, QVector3D pos, QVector3D vel

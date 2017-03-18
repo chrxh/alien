@@ -1,27 +1,30 @@
+#include "model/config.h"
+#include "model/simulationparameters.h"
+#include "model/simulationcontext.h"
+
 #include "token.h"
 
-#include "model/config.h"
-
-Token::Token(qreal energy_, bool randomData)
-    : memory(simulationParameters.TOKEN_MEMSIZE, 0), energy(energy_)
+Token::Token(SimulationContext* context, qreal energy_, bool randomData)
+    : energy(energy_), _context(context)
 {
-    if( randomData ) {
-        for( int i = 0; i < simulationParameters.TOKEN_MEMSIZE; ++i )
+	memory = QByteArray(context->getSimulationParameters()->TOKEN_MEMSIZE, 0);
+	if (randomData) {
+        for( int i = 0; i < context->getSimulationParameters()->TOKEN_MEMSIZE; ++i )
             memory[i] = qrand()%256;
     }
 }
 
 
-Token::Token (qreal energy_, QByteArray memory_)
-    : energy(energy_)
+Token::Token (SimulationContext* context, qreal energy_, QByteArray memory_)
+    : energy(energy_), _context(context)
 {
-	memory = memory_.left(simulationParameters.TOKEN_MEMSIZE);
+	memory = memory_.left(context->getSimulationParameters()->TOKEN_MEMSIZE);
 }
 
 Token* Token::duplicate ()
 {
-    Token* newToken(new Token());
-    for( int i = 0; i < simulationParameters.TOKEN_MEMSIZE; ++i )
+    Token* newToken(new Token(_context));
+    for( int i = 0; i < _context->getSimulationParameters()->TOKEN_MEMSIZE; ++i )
         newToken->memory[i] = memory[i];
     newToken->energy = energy;
 /*    newToken->linkStackPointer = linkStackPointer;
@@ -33,7 +36,7 @@ Token* Token::duplicate ()
 
 int Token::getTokenAccessNumber ()
 {
-    return memory[0]%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS;
+    return memory[0]% _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS;
 }
 
 void Token::setTokenAccessNumber (int i)
@@ -49,6 +52,7 @@ void Token::serializePrimitives (QDataStream& stream)
 void Token::deserializePrimitives(QDataStream& stream)
 {
 	stream >> memory >> energy;
-	memory = memory.left(simulationParameters.TOKEN_MEMSIZE);
-	memory.resize(simulationParameters.TOKEN_MEMSIZE);
+	auto memSize = _context->getSimulationParameters()->TOKEN_MEMSIZE;
+	memory = memory.left(memSize);
+	memory.resize(memSize);
 }

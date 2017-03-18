@@ -1,5 +1,8 @@
-#include "cellclusterimpl.h"
+#include <QMatrix4x4>
+#include <qmath.h>
 
+#include "global/global.h"
+#include "global/servicelocator.h"
 #include "model/entities/cell.h"
 #include "model/alienfacade.h"
 #include "model/features/cellfeature.h"
@@ -11,11 +14,9 @@
 #include "model/simulationcontext.h"
 #include "model/cellmap.h"
 #include "model/topology.h"
-#include "global/global.h"
-#include "global/servicelocator.h"
+#include "model/simulationparameters.h"
 
-#include <QMatrix4x4>
-#include <qmath.h>
+#include "cellclusterimpl.h"
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
@@ -23,6 +24,7 @@ CellClusterImpl::CellClusterImpl (SimulationContext* context)
     : _context(context)
     ,  _topology(context->getTopology())
     ,  _cellMap(context->getCellMap())
+	, _parameters(context->getSimulationParameters())
     ,  _id(GlobalFunctions::createNewTag())
 {
     updateTransformationMatrix();
@@ -154,12 +156,12 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
         }
 
         //kill cell?
-        if( (cell->isToBeKilled() || (cell->getEnergy() < simulationParameters.CRIT_CELL_TRANSFORM_ENERGY)) ) {
+        if( (cell->isToBeKilled() || (cell->getEnergy() < _parameters->CRIT_CELL_TRANSFORM_ENERGY)) ) {
             qreal kinEnergy = Physics::kineticEnergy(1.0, cell->getVel(), 0.0, 0.0);
             qreal internalEnergy = cell->getEnergyIncludingTokens();
             EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
             qreal energyForParticle = internalEnergy
-                + kinEnergy / simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                + kinEnergy / _parameters->INTERNAL_TO_KINETIC_ENERGY;
             energyParticle = factory->buildEnergyParticle(
                 energyForParticle, calcPosition(cell, true), cell->getVel(), _context);
             energyParticle->color = cell->getMetadata().color;
@@ -213,7 +215,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
                 qreal diffEnergy = oldEnergy-newEnergy;
 
                 //spread energy difference on cells
-                qreal diffEnergyCell = (diffEnergy/static_cast<qreal>(size))/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                qreal diffEnergyCell = (diffEnergy/static_cast<qreal>(size)) / _parameters->INTERNAL_TO_KINETIC_ENERGY;
                 foreach(Cell* cell, _cells) {
                     if( cell->getEnergy() > (-diffEnergyCell) )
                         cell->setEnergy(cell->getEnergy() + diffEnergyCell);
@@ -230,7 +232,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
         qreal diffEnergy = oldEnergy-newEnergy;
 
         //spread energy difference on cells
-        qreal diffEnergyCell = (diffEnergy/static_cast<qreal>(size))/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+        qreal diffEnergyCell = (diffEnergy/static_cast<qreal>(size)) / _parameters->INTERNAL_TO_KINETIC_ENERGY;
         foreach(CellCluster* cluster, fragments)
             foreach(Cell* cell, cluster->getCellsRef()) {
                 if( cell->getEnergy() > (-diffEnergyCell) )
@@ -282,7 +284,7 @@ void CellClusterImpl::processingMovement ()
                         //cell close enough?
                         QVector3D displacement(tempCell->getCluster()->calcPosition(tempCell, true)-pos);
                         _topology->correctDisplacement(displacement);
-                        if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MAX ) {
+                        if( displacement.length() < _parameters->CRIT_CELL_DIST_MAX ) {
                             quint64 clusterId = tempCell->getCluster()->getId();
 
                             //read collision data for the colliding cluster
@@ -302,7 +304,7 @@ void CellClusterImpl::processingMovement ()
                             if( colData.movementState == 0 ) {
 
                                 //fusion possible? (velocities high enough?)
-                                if( cell->connectable(tempCell) && ((cell->getVel()-tempCell->getVel()).length() >= simulationParameters.CLUSTER_FUSION_VEL) )
+                                if( cell->connectable(tempCell) && ((cell->getVel()-tempCell->getVel()).length() >= _parameters->CLUSTER_FUSION_VEL) )
                                     colData.movementState = 2;
 
                                 //collision possible?
@@ -315,7 +317,7 @@ void CellClusterImpl::processingMovement ()
                             if( colData.movementState == 1 ) {
 
                                 //fusion possible?
-                                if( cell->connectable(tempCell) && ((cell->getVel()-tempCell->getVel()).length() >= simulationParameters.CLUSTER_FUSION_VEL) )
+                                if( cell->connectable(tempCell) && ((cell->getVel()-tempCell->getVel()).length() >= _parameters->CLUSTER_FUSION_VEL) )
                                     colData.movementState = 2;
                             }
 
@@ -416,7 +418,7 @@ void CellClusterImpl::processingMovement ()
                 _topology->correctDisplacement(displacement);
 
                 //kill cell if too close
-                if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
+                if( displacement.length() < _parameters->CRIT_CELL_DIST_MIN ){
                     if( _cells.size() > otherCell->getCluster()->getCellsRef().size()) {
     //                    if( otherCell->_protectionCounter == 0 ) {
                             otherCell->setToBeKilled(true);
@@ -488,14 +490,14 @@ void CellClusterImpl::processingMovement ()
                 qreal eKinNew = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
-                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew)/static_cast<qreal>(fusedCells.size()))/simulationParameters.INTERNAL_TO_KINETIC_ENERGY;
+                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew)/static_cast<qreal>(fusedCells.size())) / _parameters->INTERNAL_TO_KINETIC_ENERGY;
                 if( eDiff > ALIEN_PRECISION ) {
                     for (Cell* cell : fusedCells) {
 
                         //create token?
-                        if( (cell->getNumToken() < simulationParameters.CELL_TOKENSTACKSIZE) && (eDiff > simulationParameters.MIN_TOKEN_ENERGY) ) {
-                            Token* token = new Token(eDiff, true);
-                            cell->addToken(token, Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                        if( (cell->getNumToken() < _parameters->CELL_TOKENSTACKSIZE) && (eDiff > _parameters->MIN_TOKEN_ENERGY) ) {
+                            Token* token = new Token(_context, eDiff, true);
+                            cell->addToken(token, Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::YES);
                         }
                         //if not add to internal cell energy
                         else
@@ -518,8 +520,8 @@ void CellClusterImpl::processingMovement ()
 //token processing
 void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose)
 {
-    std::vector<Token*> spreadToken(simulationParameters.MAX_CELL_CONNECTIONS);
-    std::vector<Cell*> spreadTokenCells(simulationParameters.MAX_CELL_CONNECTIONS);
+    std::vector<Token*> spreadToken(_parameters->MAX_CELL_CONNECTIONS);
+    std::vector<Cell*> spreadTokenCells(_parameters->MAX_CELL_CONNECTIONS);
 
     //placing new tokens
     foreach(Cell* cell, _cells) {
@@ -533,8 +535,8 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
             int numPlaces = 0;
             for(int j = 0; j < cell->getNumConnections(); ++j) {
                 Cell* otherCell = cell->getConnection(j);
-                if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
-                    && (otherCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) ) {
+                if( (((tokenAccessNumber+1) % _parameters->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
+                    && (otherCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) ) {
                     ++numPlaces;
                 }
             }
@@ -549,7 +551,7 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
             else {
                 //not enough cell energy available?
                 if( //(cell->_energy < ((qreal)numPlaces-1.0)*token->energy) ||
-                    token->energy < simulationParameters.MIN_TOKEN_ENERGY) {
+                    token->energy < _parameters->MIN_TOKEN_ENERGY) {
                     cell->setEnergy(cell->getEnergy() + token->energy);
                     delete token;
                 }
@@ -562,29 +564,29 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
                     int spreadTokenCounter = 0;
                     for(int j = 0; j < cell->getNumConnections(); ++j) {
                         Cell* otherCell = cell->getConnection(j);
-                        if( (((tokenAccessNumber+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
-                            && (otherCell->getNumToken(true) < simulationParameters.CELL_TOKENSTACKSIZE ) ) {
+                        if( (((tokenAccessNumber+1) % _parameters->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
+                            && (otherCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) ) {
                             if( spreadTokenCounter > 0 ) {
                                 spreadTokenCells[spreadTokenCounter] = otherCell;
                                 spreadToken[spreadTokenCounter] = token->duplicate();
-                                otherCell->addToken(spreadToken[spreadTokenCounter], Cell::ACTIVATE_TOKEN::LATER, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                                otherCell->addToken(spreadToken[spreadTokenCounter], Cell::ActivateToken::LATER, Cell::UpdateTokenAccessNumber::YES);
                             }
                             if( spreadTokenCounter == 0 ) {
                                 spreadTokenCells[0] = otherCell;
                                 spreadToken[0] = token;
-                                otherCell->addToken(token, Cell::ACTIVATE_TOKEN::LATER, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                                otherCell->addToken(token, Cell::ActivateToken::LATER, Cell::UpdateTokenAccessNumber::YES);
                             }
                             if( numPlaces > 1 ) {
                                 spreadToken[spreadTokenCounter]->energy = availableTokenEnergy;
 
                                 //transfer remaining energy from cell to token if possible
-                                if( otherCell->getEnergy() > (simulationParameters.CRIT_CELL_TRANSFORM_ENERGY+tokenEnergy-availableTokenEnergy) ) {
+                                if (otherCell->getEnergy() > _parameters->CRIT_CELL_TRANSFORM_ENERGY + tokenEnergy - availableTokenEnergy) {
                                     spreadToken[spreadTokenCounter]->energy = tokenEnergy;
                                     otherCell->setEnergy(otherCell->getEnergy() - (tokenEnergy-availableTokenEnergy));
                                 }
-                                else if( otherCell->getEnergy() > simulationParameters.CRIT_CELL_TRANSFORM_ENERGY ) {
-                                    spreadToken[spreadTokenCounter]->energy += otherCell->getEnergy() - simulationParameters.CRIT_CELL_TRANSFORM_ENERGY;
-                                    otherCell->setEnergy(simulationParameters.CRIT_CELL_TRANSFORM_ENERGY);
+                                else if (otherCell->getEnergy() > _parameters->CRIT_CELL_TRANSFORM_ENERGY) {
+                                    spreadToken[spreadTokenCounter]->energy += otherCell->getEnergy() - _parameters->CRIT_CELL_TRANSFORM_ENERGY;
+                                    otherCell->setEnergy(_parameters->CRIT_CELL_TRANSFORM_ENERGY);
                                 }
                             }
                             spreadTokenCounter++;
@@ -645,7 +647,7 @@ void CellClusterImpl::processingFinish ()
 //                            if( otherCell2 != cell ) {
                                 QVector3D displacement = otherCluster->calcPosition(otherCell, true)-calcPosition(cell, true);
                                 _topology->correctDisplacement(displacement);
-                                if( displacement.length() < simulationParameters.CRIT_CELL_DIST_MIN ){
+                                if (displacement.length() < _parameters->CRIT_CELL_DIST_MIN) {
                                     if( _cells.size() > otherCluster->getCellsRef().size()) {
 //                                        if( otherCell->_protectionCounter == 0 ) {
                                             otherCell->setToBeKilled(true);
@@ -702,8 +704,8 @@ void CellClusterImpl::updateCellVel (bool forceCheck)
 
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
-                    if( a.length() > simulationParameters.CELL_MAX_FORCE ) {
-                        if(GlobalFunctions::random() < simulationParameters.CELL_MAX_FORCE_DECAY_PROB )
+                    if (a.length() > _parameters->CELL_MAX_FORCE) {
+                        if (GlobalFunctions::random() < _parameters->CELL_MAX_FORCE_DECAY_PROB)
                             cell->setToBeKilled(true);
                     }
                 }
@@ -1038,10 +1040,10 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     energyParticle = 0;
 
     //1. step: calculate thermal radiation via power law (Stefan-Boltzmann law in 2D: Power ~ T^3)
-    qreal radEnergy = qPow(energy, simulationParameters.RAD_EXPONENT) * simulationParameters.RAD_FACTOR;
+    qreal radEnergy = qPow(energy, _parameters->RAD_EXPONENT) * _parameters->RAD_FACTOR;
 
     //2. step: calculate radiation frequency
-    qreal radFrequency = simulationParameters.RAD_PROBABILITY;
+    qreal radFrequency = _parameters->RAD_PROBABILITY;
 /*    if( (radEnergy / radFrequency) < 1.0) {
         radFrequency = radEnergy;
     }*/
@@ -1055,13 +1057,13 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
         energy = energy - radEnergy;
 
         //create energy particle with radEnergy
-        QVector3D velPerturbation((GlobalFunctions::random() -0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB,
-                                  (GlobalFunctions::random() -0.5)*simulationParameters.CELL_RAD_ENERGY_VEL_PERTURB, 0.0);
+        QVector3D velPerturbation((GlobalFunctions::random() - 0.5) * _parameters->CELL_RAD_ENERGY_VEL_PERTURB,
+                                  (GlobalFunctions::random() - 0.5) * _parameters->CELL_RAD_ENERGY_VEL_PERTURB, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
         EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
         energyParticle = factory->buildEnergyParticle(radEnergy
-            , calcPosition(originCell)+posPerturbation
-            , originCell->getVel()*simulationParameters.CELL_RAD_ENERGY_VEL_MULT+velPerturbation
+            , calcPosition(originCell) + posPerturbation
+            , originCell->getVel() * _parameters->CELL_RAD_ENERGY_VEL_MULT + velPerturbation
             , _context);
         energyParticle->color = originCell->getMetadata().color;
     }

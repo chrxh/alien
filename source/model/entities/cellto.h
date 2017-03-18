@@ -18,17 +18,17 @@ struct CellTO  //TO = Transfer Object
     void copyClusterProperties (const CellTO& otherCell); //copy internal cluster data
 
     //cell properties
-    int numCells;
+	int numCells = 0;
     QVector3D clusterPos;
     QVector3D clusterVel;
-    qreal clusterAngle;
-    qreal clusterAngVel;
+    qreal clusterAngle = 0.0;
+    qreal clusterAngVel = 0.0;
     QVector3D cellPos;
-    qreal cellEnergy;
-    int cellNumCon;
-    int cellMaxCon;
-    bool cellAllowToken;
-    int cellTokenAccessNum;
+    qreal cellEnergy = 0.0;
+    int cellNumCon = 0;
+    int cellMaxCon = 0;
+    bool cellAllowToken = true;
+    int cellTokenAccessNum = 0;
     CellFunctionType cellFunctionType;
 
     //computer data
