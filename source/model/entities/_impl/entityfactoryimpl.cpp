@@ -45,9 +45,9 @@ Cell* EntityFactoryImpl::buildCell (qreal energy, SimulationContext* context, in
     return new CellImpl(energy, context, maxConnections, tokenAccessNumber, relPos);
 }
 
-Token* EntityFactoryImpl::buildToken () const
+Token* EntityFactoryImpl::buildToken (SimulationContext* context) const
 {
-    return new Token();
+    return new Token(context);
 }
 
 EnergyParticle* EntityFactoryImpl::buildEnergyParticle(SimulationContext* context) const

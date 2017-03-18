@@ -1,16 +1,16 @@
-#include "addhexagonstructuredialog.h"
-#include "ui_addhexagonstructuredialog.h"
-
 #include "gui/guisettings.h"
-#include "model/config.h"
+#include "model/simulationparameters.h"
 
-AddHexagonStructureDialog::AddHexagonStructureDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::AddHexagonStructureDialog)
+#include "ui_addhexagonstructuredialog.h"
+#include "addhexagonstructuredialog.h"
+
+
+AddHexagonStructureDialog::AddHexagonStructureDialog(SimulationParameters* simulationParameters, QWidget *parent)
+	: QDialog(parent), ui(new Ui::AddHexagonStructureDialog)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
-    ui->energyEdit->setText(QString("%1").arg(simulationParameters.NEW_CELL_ENERGY));
+    ui->energyEdit->setText(QString("%1").arg(simulationParameters->NEW_CELL_ENERGY));
 }
 
 AddHexagonStructureDialog::~AddHexagonStructureDialog()

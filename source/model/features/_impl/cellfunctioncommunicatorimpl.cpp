@@ -1,4 +1,5 @@
-#include "cellfunctioncommunicatorimpl.h"
+#include <QString>
+
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
@@ -7,17 +8,18 @@
 #include "model/topology.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
+#include "model/simulationparameters.h"
 
-#include <QString>
+#include "cellfunctioncommunicatorimpl.h"
 
 CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(SimulationContext* context)
-    : CellFunction(context)
+    : CellFunction(context), _parameters(context->getSimulationParameters())
 {
 
 }
 
 CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QByteArray data, SimulationContext* context)
-    : CellFunction(context)
+	: CellFunction(context), _parameters(context->getSimulationParameters())
 {
     _newMessageReceived = static_cast<bool>(data[0]);
     _receivedMessage.channel = data[1];
@@ -91,9 +93,7 @@ void CellFunctionCommunicatorImpl::setListeningChannel (Token* token)
 }
 
 
-void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token,
-                                                                            Cell* cell,
-                                                                            Cell* previousCell) const
+void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token, Cell* cell, Cell* previousCell) const
 {
     MessageData messageDataToSend;
     messageDataToSend.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
@@ -126,7 +126,7 @@ QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) 
             return cellFunction && (cellFunction->getType() == CellFunctionType::COMMUNICATOR);
         };
     QVector3D cellPos = cell->calcPosition();
-    qreal range = simulationParameters.CELL_FUNCTION_COMMUNICATOR_RANGE;
+    qreal range = _parameters->CELL_FUNCTION_COMMUNICATOR_RANGE;
     return _context->getCellMap()->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 

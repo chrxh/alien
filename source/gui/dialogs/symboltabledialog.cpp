@@ -10,10 +10,10 @@
 #include "symboltabledialog.h"
 #include "ui_symboltabledialog.h"
 
-SymbolTableDialog::SymbolTableDialog(SymbolTable const& symbolTable, QWidget *parent)
+SymbolTableDialog::SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::SymbolTableDialog)
-	, _symbolTable(symbolTable)
+	, _symbolTable(*symbolTable)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());

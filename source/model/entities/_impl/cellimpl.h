@@ -43,7 +43,7 @@ public:
     int getNumToken (bool newTokenStackPointer = false) const override;
     Token* getToken (int i) const override;
     void setToken (int i, Token* token) override;
-    void addToken (Token* token, ACTIVATE_TOKEN act, UPDATE_TOKEN_ACCESS_NUMBER update) override;
+    void addToken (Token* token, ActivateToken act, UpdateTokenAccessNumber update) override;
     void delAllTokens () override;
     Token* takeTokenFromStack () override;
 
@@ -80,10 +80,11 @@ private:
     friend class CellCluster;
 
     CellMap* _cellMap = nullptr;
-    CellFeature* _features = nullptr;
+	SimulationParameters* _parameters = nullptr;
+	CellFeature* _features = nullptr;
 
-    QVector< Token* > _tokenStack;
-    QVector< Token* > _newTokenStack;
+    QVector<Token*> _tokenStack;
+    QVector<Token*> _newTokenStack;
     int _tokenStackPointer = 0;
     int _newTokenStackPointer = 0;
 

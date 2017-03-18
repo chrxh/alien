@@ -51,8 +51,8 @@ private:
 		quint8 operand1;
 		quint8 operand2;
 	};
-	bool resolveInstruction(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded);
-	bool stateMachine(State &state, QChar &currentSymbol, InstructionUncoded& instruction, int symbolPos, int codeSize);
+	bool resolveInstructionAndReturnSuccess(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded);
+	bool gotoNextStateAndReturnSuccess(State &state, QChar &currentSymbol, InstructionUncoded& instruction, int symbolPos, int codeSize);
 
 	void writeInstruction(InstructionCoded const& instructionCoded);
 	void readInstruction(int& instructionPointer, InstructionCoded& instructionCoded) const;
@@ -61,7 +61,8 @@ private:
 
     QByteArray _code;
 	QByteArray _memory;
-	SymbolTable* _symbolTable;
+	SymbolTable* _symbolTable = nullptr;
+	SimulationParameters* _parameters = nullptr;
 };
 
 #endif // TOKENFUNCTIONCOMPUTERIMPL_H

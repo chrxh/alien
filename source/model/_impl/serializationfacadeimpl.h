@@ -12,6 +12,9 @@ public:
     void serializeSimulationContext(SimulationContext* context, QDataStream& stream) const override;
     void deserializeSimulationContext(SimulationContext* prevContext, QDataStream& stream) const override;
 
+	void serializeSimulationParameters(SimulationParameters* parameters, QDataStream& stream) const override;
+	SimulationParameters* deserializeSimulationParameters(QDataStream& stream) const override;
+
 	void serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const override;
 	SymbolTable* deserializeSymbolTable(QDataStream& stream) const override;
 
@@ -25,7 +28,7 @@ public:
     EnergyParticle* deserializeEnergyParticle(QDataStream& stream, SimulationContext* context) const override;
 
     void serializeToken(Token* token, QDataStream& stream) const override;
-    Token* deserializeToken(QDataStream& stream) const override;
+    Token* deserializeToken(QDataStream& stream, SimulationContext* context) const override;
 
 private:
     CellCluster* deserializeCellCluster(QDataStream& stream, QMap< quint64, quint64 >& oldNewClusterIdMap

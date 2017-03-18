@@ -20,7 +20,7 @@ public:
     Cell* buildCell (qreal energy, SimulationContext* context, int maxConnections = 0
         , int tokenAccessNumber = 0, QVector3D relPos = QVector3D()) const override;
 
-	Token* buildToken () const override;
+	Token* buildToken (SimulationContext* context) const override;
 
     EnergyParticle* buildEnergyParticle(SimulationContext* context) const override;
     EnergyParticle* buildEnergyParticle(qreal energy, QVector3D pos, QVector3D vel
