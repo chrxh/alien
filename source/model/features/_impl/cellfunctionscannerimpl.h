@@ -8,7 +8,7 @@ class CellFunctionScannerImpl : public CellFunction
 public:
     CellFunctionScannerImpl (SimulationContext* context);
 
-    CellFunctionType getType () const { return CellFunctionType::SCANNER; }
+    Enums::CellFunction::Type getType () const { return Enums::CellFunction::SCANNER; }
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;

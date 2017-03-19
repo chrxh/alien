@@ -34,35 +34,35 @@ namespace {
     }
 }
 
-CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const
+CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, SimulationContext* context) const
 {
     switch( type ) {
-        case CellFunctionType::COMPUTER :
+        case Enums::CellFunction::COMPUTER :
             return registerNewFeature(cell, new CellFunctionComputerImpl(context));
-        case CellFunctionType::PROPULSION :
+        case Enums::CellFunction::PROPULSION :
             return registerNewFeature(cell, new CellFunctionPropulsionImpl(context));
-        case CellFunctionType::SCANNER :
+        case Enums::CellFunction::SCANNER :
             return registerNewFeature(cell, new CellFunctionScannerImpl(context));
-        case CellFunctionType::WEAPON :
+        case Enums::CellFunction::WEAPON :
             return registerNewFeature(cell, new CellFunctionWeaponImpl(context));
-        case CellFunctionType::CONSTRUCTOR :
+        case Enums::CellFunction::CONSTRUCTOR :
             return registerNewFeature(cell, new CellFunctionConstructorImpl(context));
-        case CellFunctionType::SENSOR :
+        case Enums::CellFunction::SENSOR :
             return registerNewFeature(cell, new CellFunctionSensorImpl(context));
-        case CellFunctionType::COMMUNICATOR :
+        case Enums::CellFunction::COMMUNICATOR :
             return registerNewFeature(cell, new CellFunctionCommunicatorImpl(context));
         default:
             return nullptr;
     }
 }
 
-CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, CellFunctionType type, QByteArray data
+CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data
     , SimulationContext* context) const
 {
     switch( type ) {
-        case CellFunctionType::COMPUTER :
+        case Enums::CellFunction::COMPUTER :
             return registerNewFeature(cell, new CellFunctionComputerImpl(data, context));
-        case CellFunctionType::COMMUNICATOR :
+        case Enums::CellFunction::COMMUNICATOR :
             return registerNewFeature(cell, new CellFunctionCommunicatorImpl(data, context));
         default:
             return addCellFunction(cell, type, context);

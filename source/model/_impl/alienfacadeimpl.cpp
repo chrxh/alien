@@ -48,7 +48,7 @@ CellCluster* AlienFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angl
 }
 
 
-Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, QByteArray data
+Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, QByteArray data
     , SimulationContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -59,7 +59,7 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, Q
     return cell;
 }
 
-Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, CellFunctionType type, SimulationContext* context
+Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, SimulationContext* context
     , int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -78,7 +78,7 @@ Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Simulation
     QByteArray randomData(256, 0);
 	for (int i = 0; i < 256; ++i)
 		randomData[i] = qrand() % 256;
-    CellFunctionType randomCellFunction = static_cast<CellFunctionType>(qrand() % static_cast<int>(CellFunctionType::_COUNTER));
+    Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(qrand() % Enums::CellFunction::_COUNTER);
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
@@ -113,13 +113,13 @@ CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     //copy token data
     for(int i = 0; i < cell->getNumToken(); ++i) {
         Token* token = cell->getToken(i);
-        to.tokenEnergies << token->energy;
-        to.tokenData << token->memory;
+        to.tokenEnergies << token->getEnergy();
+        to.tokenData << token->getMemoryRef();
     }
     return to;
 }
 
-void AlienFacadeImpl::changeFeaturesOfCell (Cell* cell, CellFunctionType type, SimulationContext* context) const
+void AlienFacadeImpl::changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, SimulationContext* context) const
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();

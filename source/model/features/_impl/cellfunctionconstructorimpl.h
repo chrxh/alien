@@ -10,7 +10,7 @@ class CellFunctionConstructorImpl : public CellFunction
 public:
     CellFunctionConstructorImpl (SimulationContext* context);
 
-    CellFunctionType getType () const { return CellFunctionType::CONSTRUCTOR; }
+    Enums::CellFunction::Type getType () const { return Enums::CellFunction::CONSTRUCTOR; }
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;

@@ -16,7 +16,7 @@ public:
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives (QDataStream& stream) override;
 
-    CellFunctionType getType () const { return CellFunctionType::COMMUNICATOR; }
+    Enums::CellFunction::Type getType () const { return Enums::CellFunction::COMMUNICATOR; }
 	QByteArray getInternalData () const override;
 
 	struct MessageData {
@@ -37,7 +37,7 @@ private:
     MessageData _receivedMessage;
 	SimulationParameters* _parameters = nullptr;
 
-    COMMUNICATOR_IN readCommandFromToken (Token* token) const;
+    Enums::CommunicatorIn::Type readCommandFromToken (Token* token) const;
     void setListeningChannel (Token* token);
 
     void sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token, Cell* cell, Cell* previousCell) const;

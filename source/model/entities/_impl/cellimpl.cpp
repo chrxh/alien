@@ -371,9 +371,9 @@ qreal CellImpl::getEnergyIncludingTokens() const
 {
     qreal energy = _energy;
     for(int i = 0; i < _tokenStackPointer; ++i)
-        energy += _tokenStack[i]->energy;
+        energy += _tokenStack[i]->getEnergy();
     for(int i = 0; i < _newTokenStackPointer; ++i)
-        energy += _newTokenStack[i]->energy;
+        energy += _newTokenStack[i]->getEnergy();
     return energy;
 }
 
@@ -457,20 +457,6 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
 {
 
 	//token stack
-	/*stream >> _tokenStackPointer;
-	for (int i = 0; i < _tokenStackPointer; ++i) {
-		if (i < simulationParameters.CELL_TOKENSTACKSIZE)
-			_tokenStack[i] = new Token(stream);
-		else {
-			//dummy token
-			Token* temp = new Token(stream);
-			delete temp;
-		}
-	}
-	if (_tokenStackPointer > simulationParameters.CELL_TOKENSTACKSIZE)
-		_tokenStackPointer = simulationParameters.CELL_TOKENSTACKSIZE;
-	_newTokenStackPointer = 0;
-	*/
     quint32 tokenStackPointer;
     stream >> tokenStackPointer;
     _tokenStackPointer = static_cast<quint32>(tokenStackPointer);
@@ -487,12 +473,7 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
 	_connectingCells = 0;
 	resetConnections(_maxConnections);
 	_numConnections = numConnections;
-	/*for (int i = 0; i < _numConnections; ++i) {
-		quint64 id;
-		stream >> id;
-		connectingCells[_id] << id;
-	}
-	*/
+
 	//remaining data
 	stream >> _tokenAccessNumber >> _blockToken >> _vel;
 }

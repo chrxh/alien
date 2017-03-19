@@ -160,7 +160,9 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
         int numToken = cell->getNumToken();
         if( numToken > 0 ) {
             for( int i = 0; i < numToken; ++i ) {
-                radiation(cell->getToken(i)->energy, cell, energyParticle);
+				qreal tokenEnergy = cell->getToken(i)->getEnergy();
+                radiation(tokenEnergy, cell, energyParticle);
+				cell->getToken(i)->setEnergy(tokenEnergy);
                 if( energyParticle )
                     energyParticles << energyParticle;
             }
@@ -453,18 +455,18 @@ void CellClusterImpl::processingMovement ()
                 qreal eKinOld2 = Physics::kineticEnergy(mB, otherCluster->getVel(), otherCluster->getAngularMass(), otherCluster->getAngularVel());
 
                 //calculate new center
-                QVector3D centre(0.0,0.0,0.0);
+                QVector3D center;
                 QVector3D correction(_topology->correctionIncrement(_pos, otherCluster->getPosition()));
                 foreach( Cell* cell, _cells) {
                     cell->setRelPos(calcPosition(cell));     //store absolute position only temporarily
-                    centre += cell->getRelPos();
+                    center += cell->getRelPos();
                 }
                 foreach( Cell* cell, otherCluster->getCellsRef()) {
                     cell->setRelPos(otherCluster->calcPosition(cell)+correction);
-                    centre += cell->getRelPos();
+                    center += cell->getRelPos();
                 }
-                centre /= (_cells.size()+otherCluster->getCellsRef().size());
-                _pos = centre;
+                center /= (_cells.size()+otherCluster->getCellsRef().size());
+                _pos = center;
                 updateTransformationMatrix();
 
                 //transfer cells
@@ -490,13 +492,14 @@ void CellClusterImpl::processingMovement ()
                 qreal eKinNew = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
-                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew)/static_cast<qreal>(fusedCells.size())) / _parameters->INTERNAL_TO_KINETIC_ENERGY;
+                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew) / static_cast<qreal>(fusedCells.size())) / _parameters->INTERNAL_TO_KINETIC_ENERGY;
                 if( eDiff > ALIEN_PRECISION ) {
                     for (Cell* cell : fusedCells) {
 
                         //create token?
                         if( (cell->getNumToken() < _parameters->CELL_TOKENSTACKSIZE) && (eDiff > _parameters->MIN_TOKEN_ENERGY) ) {
-                            Token* token = new Token(_context, eDiff, true);
+							auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
+                            auto token = factory->buildTokenWithRandomData(_context, eDiff);
                             cell->addToken(token, Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::YES);
                         }
                         //if not add to internal cell energy
@@ -543,7 +546,7 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
 
             //no free places for token?
             if( numPlaces == 0 ) {
-                cell->setEnergy(cell->getEnergy() + token->energy);
+                cell->setEnergy(cell->getEnergy() + token->getEnergy());
                 delete token;
             }
 
@@ -551,13 +554,13 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
             else {
                 //not enough cell energy available?
                 if( //(cell->_energy < ((qreal)numPlaces-1.0)*token->energy) ||
-                    token->energy < _parameters->MIN_TOKEN_ENERGY) {
-                    cell->setEnergy(cell->getEnergy() + token->energy);
+                    token->getEnergy() < _parameters->MIN_TOKEN_ENERGY) {
+                    cell->setEnergy(cell->getEnergy() + token->getEnergy());
                     delete token;
                 }
                 else {
                     //calc available token energy
-                    qreal tokenEnergy = token->energy;
+                    qreal tokenEnergy = token->getEnergy();
                     qreal availableTokenEnergy = tokenEnergy / numPlaces;
 
                     //spread token to free places on adjacent cells and duplicate token if necessary
@@ -577,15 +580,16 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
                                 otherCell->addToken(token, Cell::ActivateToken::LATER, Cell::UpdateTokenAccessNumber::YES);
                             }
                             if( numPlaces > 1 ) {
-                                spreadToken[spreadTokenCounter]->energy = availableTokenEnergy;
+                                spreadToken[spreadTokenCounter]->setEnergy(availableTokenEnergy);
 
                                 //transfer remaining energy from cell to token if possible
                                 if (otherCell->getEnergy() > _parameters->CRIT_CELL_TRANSFORM_ENERGY + tokenEnergy - availableTokenEnergy) {
-                                    spreadToken[spreadTokenCounter]->energy = tokenEnergy;
+                                    spreadToken[spreadTokenCounter]->setEnergy(tokenEnergy);
                                     otherCell->setEnergy(otherCell->getEnergy() - (tokenEnergy-availableTokenEnergy));
                                 }
                                 else if (otherCell->getEnergy() > _parameters->CRIT_CELL_TRANSFORM_ENERGY) {
-                                    spreadToken[spreadTokenCounter]->energy += otherCell->getEnergy() - _parameters->CRIT_CELL_TRANSFORM_ENERGY;
+									spreadToken[spreadTokenCounter]->setEnergy(spreadToken[spreadTokenCounter]->getEnergy()
+										+ otherCell->getEnergy() - _parameters->CRIT_CELL_TRANSFORM_ENERGY);
                                     otherCell->setEnergy(_parameters->CRIT_CELL_TRANSFORM_ENERGY);
                                 }
                             }

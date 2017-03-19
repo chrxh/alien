@@ -8,7 +8,7 @@ class CellFunctionWeaponImpl : public CellFunction
 public:
     CellFunctionWeaponImpl (SimulationContext* context);
 
-    CellFunctionType getType () const { return CellFunctionType::WEAPON; }
+    Enums::CellFunction::Type getType () const { return Enums::CellFunction::WEAPON; }
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
