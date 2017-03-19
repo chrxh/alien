@@ -40,7 +40,7 @@ public:
     virtual void setId (quint64 id) = 0;
     virtual QList< quint64 > getCellIds () const = 0;
     virtual QVector3D getPosition () const = 0;
-    virtual void setPosition (QVector3D pos, bool updateTransform = true) = 0;
+    virtual void setCenterPosition (QVector3D pos, bool updateTransform = true) = 0;
     virtual qreal getAngle () const = 0;  //in degrees
     virtual void setAngle (qreal angle, bool updateTransform = true) = 0;
     virtual QVector3D getVel () const = 0;

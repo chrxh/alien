@@ -43,7 +43,7 @@ public:
     void setId (quint64 id) override;
     QList< quint64 > getCellIds () const override;
     QVector3D getPosition () const override;
-    void setPosition (QVector3D pos, bool updateTransform = true) override;
+    void setCenterPosition (QVector3D pos, bool updateTransform = true) override;
     qreal getAngle () const override;
     void setAngle (qreal angle, bool updateTransform = true) override;
     QVector3D getVel () const override;
@@ -82,7 +82,7 @@ private:
     QMatrix4x4 _transform;
     qreal _angularMass = 0.0;
 
-    QList< Cell* > _cells;
+    QList<Cell*> _cells;
 
     quint64 _id = 0;
 
