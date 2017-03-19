@@ -52,6 +52,30 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D po
     updateAngularMass();
 }
 
+namespace
+{
+	QVector3D calcCenterPosition(QList<Cell*> const& cells)
+	{
+		QVector3D result;
+		foreach(Cell* cell, cells) {
+			result += cell->getCluster()->calcPosition(cell);
+		}
+		result /= cells.size();
+		return result;
+	}
+
+	void setRelPositionInCluster(QList<Cell*> const& cells, CellCluster* cluster)
+	{
+		foreach(Cell* cell, cells) {
+
+			//adjust relative position of the cells
+			QVector3D pos(cell->getCluster()->calcPosition(cell));
+			cell->setCluster(cluster);
+			cell->setAbsPosition(pos);
+		}
+	}
+}
+
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationContext* context)
     : _context(context)
     , _topology(context->getTopology())
@@ -61,23 +85,8 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationCo
     , _cells(cells)
     , _id(GlobalFunctions::createNewTag())
 {
-    //calc new center
-    QVector3D center;
-    foreach( Cell* cell, _cells) {
-        center += cell->getCluster()->calcPosition(cell);
-    }
-    center /= _cells.size();
-    setPosition(center);
-
-    //set rel coordinated with respect to the new center
-    foreach(Cell* cell, _cells) {
-
-        //adjust relative position of the cells
-        QVector3D pos(cell->getCluster()->calcPosition(cell));
-        cell->setCluster(this);
-        cell->setAbsPosition(pos);
-    }
-
+    setCenterPosition(calcCenterPosition(_cells));
+	setRelPositionInCluster(_cells, this);
     updateAngularMass();
     updateVel_angularVel_via_cellVelocities();
 }
@@ -337,12 +346,6 @@ void CellClusterImpl::processingMovement ()
         CellCluster* otherCluster = idClusterMap[it.key()];
         CollisionData collisionData = it.value();
 
-
-        //taking fusion probability into account
-/*        if( (colData.movementState == 2) && ((qreal)qrand()/RAND_MAX > simulationParameters.CLUSTER_FUSION_PROB) ) {
-            colData.movementState = 1;
-        }
-*/
         //collision?
         if( collisionData.movementState == 1 ) {
 
@@ -399,11 +402,6 @@ void CellClusterImpl::processingMovement ()
             _angularVel = angularVelA2;
             otherCluster->setAngularVel(angularVelB2);
 
-            //add new velocities to the old positions
-//            _angle = oldAngle+_angularVel;
-//            _pos = oldPos+_vel;
-//            cellMap->correctPosition(_pos);
-//            calcTransform();
         }
 
         //fusion?
@@ -744,18 +742,10 @@ void CellClusterImpl::updateRelCoordinates (bool maintainCenter)
     }
     else {
 
-        //calc new center
-//        calcTransform();
-        QVector3D centre(0.0,0.0,0.0);
-        foreach( Cell* cell, _cells) {
-            centre += _transform.map(cell->getRelPos());
-        }
-        centre /= _cells.size();
-
         //center transformation
-        QMatrix4x4 oldTransform(_transform);
-        _pos = centre;
-        updateTransformationMatrix();
+        _pos = calcCenterPosition(_cells);
+		QMatrix4x4 oldTransform(_transform);
+		updateTransformationMatrix();
         QMatrix4x4 newTransformInv(_transform.inverted());
 
         //set rel coordinated with respect to the new center
@@ -943,7 +933,7 @@ QVector3D CellClusterImpl::getPosition () const
     return _pos;
 }
 
-void CellClusterImpl::setPosition (QVector3D pos, bool updateTransform)
+void CellClusterImpl::setCenterPosition (QVector3D pos, bool updateTransform)
 {
     _pos = pos;
     if( updateTransform )

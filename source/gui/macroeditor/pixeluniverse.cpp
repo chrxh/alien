@@ -267,7 +267,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
 
         //update position and velocity
         foreach(CellCluster* cluster, _selectedClusters) {
-            cluster->setPosition(cluster->getPosition()+mouseDiff);
+            cluster->setCenterPosition(cluster->getPosition()+mouseDiff);
             cluster->setVel((cumMouseDiff)/5.0);
         }
 
@@ -306,7 +306,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
         transform.rotate(mouseDiff.x()+mouseDiff.y(), 0.0, 0.0, 1.0);
         transform.translate(-center);
         foreach(CellCluster* cluster, _selectedClusters) {
-            cluster->setPosition(transform.map(cluster->getPosition()));
+            cluster->setCenterPosition(transform.map(cluster->getPosition()));
         }
 
 		_context->unlock();
