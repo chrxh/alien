@@ -31,11 +31,11 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     CellCluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
     quint8 cmd = tokenMem[Enums::Prop::IN] % 7;
-    qreal angle = CodingPhysicalQuantities::convertDataToAngle(tokenMem[static_cast<int>(Enums::Prop::IN_ANGLE)]);
-    qreal power = convertDataToThrustPower(tokenMem[static_cast<int>(Enums::Prop::IN_POWER)]);
+    qreal angle = CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
+    qreal power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
-    if( cmd == static_cast<int>(Enums::PropIn::DO_NOTHING) ) {
-        tokenMem[static_cast<int>(Enums::Prop::OUT)] = static_cast<int>(Enums::PropOut::SUCCESS);
+    if( cmd == Enums::PropIn::DO_NOTHING ) {
+        tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
         return processingResult;
     }
 
@@ -48,26 +48,26 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
 
     //calc impulse angle
     QVector3D impulse(0.0, 0.0, 0.0);
-    if( cmd == static_cast<int>(Enums::PropIn::BY_ANGLE) ) {
+    if( cmd == Enums::PropIn::BY_ANGLE ) {
         qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
         impulse = QVector3D(qSin(thrustAngle), -qCos(thrustAngle), 0.0)*power;
     }
-    if( cmd == static_cast<int>(Enums::PropIn::FROM_CENTER) ) {
+    if( cmd == Enums::PropIn::FROM_CENTER ) {
         impulse = cellRelPos.normalized()*power;
     }
-    if( cmd == static_cast<int>(Enums::PropIn::TOWARD_CENTER) ) {
+    if( cmd == Enums::PropIn::TOWARD_CENTER ) {
         impulse = -cellRelPos.normalized()*power;
     }
 
     QVector3D rAPp = cellRelPos;
     rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
-    if( cmd == static_cast<int>(Enums::PropIn::ROTATION_CLOCKWISE) ) {
+    if( cmd == Enums::PropIn::ROTATION_CLOCKWISE ) {
         impulse = -rAPp.normalized()*power;
     }
-    if( cmd == static_cast<int>(Enums::PropIn::ROTATION_COUNTERCLOCKWISE) ) {
+    if( cmd == Enums::PropIn::ROTATION_COUNTERCLOCKWISE ) {
         impulse = rAPp.normalized()*power;
     }
-    if( cmd == static_cast<int>(Enums::PropIn::DAMP_ROTATION) ) {
+    if( cmd == Enums::PropIn::DAMP_ROTATION ) {
         if( cluster->getAngularVel() > 0.00 )
             impulse = rAPp.normalized()*power;
         if( cluster->getAngularVel() < 0.00 )
@@ -80,14 +80,14 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     Physics::applyImpulse(impulse, rAPp, cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
 
     //only for damping: prove if its too much
-    if( cmd == static_cast<int>(Enums::PropIn::DAMP_ROTATION) ) {
+    if( cmd == Enums::PropIn::DAMP_ROTATION ) {
         if( (cluster->getAngularVel() > 0.0 && newAngularVel < 0.0)
                 || (cluster->getAngularVel() < 0.0 && newAngularVel > 0.0) ) {
             newVel = cluster->getVel();
             newAngularVel = cluster->getAngularVel();
 
             //update return value
-            tokenMem[static_cast<int>(Enums::Prop::OUT)] = static_cast<int>(Enums::PropOut::SUCCESS_DAMPING_FINISHED);
+            tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS_DAMPING_FINISHED;
             return processingResult;
         }
     }
@@ -109,12 +109,12 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
         token->setEnergy(token->getEnergy() - (energyDiff+qAbs(energyDiff)));
 
         //update return value
-        tokenMem[static_cast<int>(Enums::Prop::OUT)] = static_cast<int>(Enums::PropOut::SUCCESS);
+        tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
     }
     else {
 
         //update return value
-        tokenMem[static_cast<int>(Enums::Prop::OUT)] = static_cast<int>(Enums::PropOut::ERROR_NO_ENERGY);
+        tokenMem[Enums::Prop::OUT] = Enums::PropOut::ERROR_NO_ENERGY;
     }
     return processingResult;
 }

@@ -131,17 +131,17 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
-	quint8 cmd = tokenMem[static_cast<int>(Enums::Constr::IN)] % 4;
-    quint8 opt = tokenMem[static_cast<int>(Enums::Constr::IN_OPTION)] % 7;
+	quint8 cmd = tokenMem[Enums::Constr::IN] % 4;
+    quint8 opt = tokenMem[Enums::Constr::IN_OPTION] % 7;
 
     //do nothing?
-    if( cmd == static_cast<int>(Enums::ConstrIn::DO_NOTHING) )
+    if( cmd == Enums::ConstrIn::DO_NOTHING )
         return processingResult;
 
     //read shift length for construction site from token data
-    qreal len = CodingPhysicalQuantities::convertDataToShiftLen(tokenMem[static_cast<int>(Enums::Constr::IN_DIST)]);
+    qreal len = CodingPhysicalQuantities::convertDataToShiftLen(tokenMem[Enums::Constr::IN_DIST]);
     if( len > _parameters->CRIT_CELL_DIST_MAX ) {        //length to large?
-        tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_DIST);
+        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
         return processingResult;
     }
 
@@ -195,7 +195,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             }
 
             //read desired rotation angle from token
-            qreal angleSum = CodingPhysicalQuantities::convertDataToAngle(tokenMem[static_cast<int>(Enums::Constr::INOUT_ANGLE)]);
+            qreal angleSum = CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
             //calc angular masses with respect to "constructionCell"
             qreal angMassConstrSite = 0.0;
@@ -267,7 +267,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //not enough energy?
                 if( token->getEnergy() <= (_parameters->NEW_CELL_ENERGY + eDiff + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
-                    tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_NO_ENERGY);
+                    tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore cluster
                     foreach( Cell* otherCell, cluster->getCellsRef() ) {
@@ -282,10 +282,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 cluster->updateRelCoordinates(true);
 
                 //obstacle found?
-                if( cmd != static_cast<int>(Enums::ConstrIn::BRUTEFORCE)) {
-                    bool safeMode = (cmd == static_cast<int>(Enums::ConstrIn::SAFE));
+                if( cmd != Enums::ConstrIn::BRUTEFORCE) {
+                    bool safeMode = (cmd == Enums::ConstrIn::SAFE);
                     if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
-                        tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_OBSTACLE);
+                        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
                         foreach( Cell* otherCell, cluster->getCellsRef() ) {
@@ -302,8 +302,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 cluster->setAngularVel(angularVelNew);
 
                 //update token data
-                tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::SUCCESS_ROT);
-                tokenMem[static_cast<int>(Enums::Constr::INOUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
+                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS_ROT;
+                tokenMem[Enums::Constr::INOUT_ANGLE] = CodingPhysicalQuantities::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
                 cluster->drawCellsToMap();
             }
 
@@ -314,9 +314,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 QVector3D transOld = constructionCell->getRelPos() - cell->getRelPos();
                 QVector3D trans = transOld.normalized() * len;
                 QVector3D transFinish(0.0, 0.0, 0.0);
-                if( (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) )
+                if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
                     transFinish = trans;
 
 
@@ -336,14 +336,14 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //energy for possible new token
                 qreal tokenEnergy = 0;
-                if( (opt == static_cast<int>(Enums::ConstrInOption::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::CREATE_DUP_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ))
+                if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
+                        || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED ))
                     tokenEnergy = _parameters->NEW_TOKEN_ENERGY;
 
                 //not enough energy?
                 if( token->getEnergy() <= (_parameters->NEW_CELL_ENERGY + tokenEnergy + eDiff + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
-                    tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_NO_ENERGY);
+                    tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore construction site
                     foreach( Cell* otherCell, cluster->getCellsRef() ) {
@@ -358,22 +358,22 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 }
 
                 //construct new cell
-                quint8 maxCon = tokenMem[static_cast<int>(Enums::Constr::IN_CELL_MAX_CONNECTIONS)];
+                quint8 maxCon = tokenMem[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
                 if( maxCon < 2 )
                     maxCon = 2;
                 if( maxCon > _parameters->MAX_CELL_CONNECTIONS )
                     maxCon = _parameters->MAX_CELL_CONNECTIONS;
-                int tokenAccessNumber = tokenMem[static_cast<int>(Enums::Constr::IN_CELL_BRANCH_NO)] % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
+                int tokenAccessNumber = tokenMem[Enums::Constr::IN_CELL_BRANCH_NO] % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
                 Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
-					, tokenMem[static_cast<int>(Enums::Constr::IN_CELL_FUNCTION)]
-					, tokenMem.mid(static_cast<int>(Enums::Constr::IN_CELL_FUNCTION_DATA))
+					, tokenMem[Enums::Constr::IN_CELL_FUNCTION]
+					, tokenMem.mid(Enums::Constr::IN_CELL_FUNCTION_DATA)
 					, _context);
 
                 //obstacle found?
-                if( cmd != static_cast<int>(Enums::ConstrIn::BRUTEFORCE)) {
-                    bool safeMode = (cmd == static_cast<int>(Enums::ConstrIn::SAFE));
+                if( cmd != Enums::ConstrIn::BRUTEFORCE) {
+                    bool safeMode = (cmd == Enums::ConstrIn::SAFE);
                     if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
-                        tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_OBSTACLE);
+                        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
                         cluster->removeCell(newCell);
@@ -403,7 +403,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         if (_topology->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (_parameters->CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
-                            if( tokenMem.at(static_cast<int>(Enums::Constr::IN_CELL_MAX_CONNECTIONS)) == 0 ) {
+                            if( tokenMem.at(Enums::Constr::IN_CELL_MAX_CONNECTIONS) == 0 ) {
                                 if( newCell->getNumConnections() == newCell->getMaxConnections() ) {
                                     newCell->setMaxConnections(newCell->getMaxConnections()+1);
                                 }
@@ -425,9 +425,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 token->setEnergy(token->getEnergy() - newCell->getEnergy() - eDiff);
 
                 //average cell energy if token is created
-                if( (opt == static_cast<int>(Enums::ConstrInOption::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::CREATE_DUP_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) ) {
+                if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
+                        || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     qreal av = averageEnergy(cell->getEnergy(), newCell->getEnergy());
                     cell->setEnergy(av);
                     newCell->setEnergy(av);
@@ -440,31 +440,31 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 constructionCell->setTokenBlocked(false);
 
                 //finish construction site?
-                if( (opt == static_cast<int>(Enums::ConstrInOption::FINISH_NO_SEP))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) )
+                if( (opt == Enums::ConstrInOption::FINISH_NO_SEP)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
                     newCell->setTokenBlocked(false);
 
                 //separate construction site?
-                if( opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP) ) {
+                if( opt == Enums::ConstrInOption::FINISH_WITH_SEP ) {
                     processingResult.decompose = true;
                     separateConstruction(newCell, cell, false);
                 }
-                if( (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) ) {
+                if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     processingResult.decompose = true;
                     separateConstruction(newCell, cell, true);
                 }
 
                 //update token data
-                tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::SUCCESS);
-                tokenMem[static_cast<int>(Enums::Constr::INOUT_ANGLE)] = 0;
+                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+                tokenMem[Enums::Constr::INOUT_ANGLE] = 0;
                 cluster->drawCellsToMap();
 
                 //create new token if desired
-                if( (opt == static_cast<int>(Enums::ConstrInOption::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) ) {
+                if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     if( newCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) {
 						auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 						auto token = factory->buildToken(_context, _parameters->NEW_TOKEN_ENERGY);
@@ -472,7 +472,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         token->setEnergy(token->getEnergy() - _parameters->NEW_TOKEN_ENERGY);
                     }
                 }
-                if( opt == static_cast<int>(Enums::ConstrInOption::CREATE_DUP_TOKEN) ) {
+                if( opt == Enums::ConstrInOption::CREATE_DUP_TOKEN ) {
                     if( newCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) {
                         auto dup = token->duplicate();
                         dup->setEnergy(_parameters->NEW_TOKEN_ENERGY);
@@ -485,7 +485,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
         //construction site connected with other cells than "cell"? => error
         else {
-            tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_CONNECTION);
+            tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
 
             //restore connection to "cell"
             cell->newConnection(constructionCell);
@@ -524,14 +524,14 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 }
 
                 //calc start angle
-                angleGap = angleGap + CodingPhysicalQuantities::convertDataToAngle(tokenMem[static_cast<int>(Enums::Constr::INOUT_ANGLE)]);
+                angleGap = angleGap + CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
                 //calc coordinates for new cell from angle gap and construct cell
                 QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*_parameters->CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST;
                 QVector3D pos = cluster->calcPosition(cell)+angleGapPos;
-                if( (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) )
+                if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
                     pos = pos + angleGapPos;
 
 
@@ -544,35 +544,35 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //energy for possible new token
                 qreal tokenEnergy = 0;
-                if( (opt == static_cast<int>(Enums::ConstrInOption::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::CREATE_DUP_TOKEN) )
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) )
+                if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
+                        || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN )
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
                     tokenEnergy = _parameters->NEW_TOKEN_ENERGY;
 
                 //not enough energy?
                 if( token->getEnergy() <= (_parameters->NEW_CELL_ENERGY + tokenEnergy + eDiff + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
-                    tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_NO_ENERGY);
+                    tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
                     return processingResult;
                 }
 
                 //construct new cell
                 cluster->clearCellsFromMap();
-                quint8 maxCon = tokenMem[static_cast<int>(Enums::Constr::IN_CELL_MAX_CONNECTIONS)];
+                quint8 maxCon = tokenMem[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
                 if( maxCon < 1 )
                     maxCon = 1;
                 if( maxCon > _parameters->MAX_CELL_CONNECTIONS )
                     maxCon = _parameters->MAX_CELL_CONNECTIONS;
-                int tokenAccessNumber = tokenMem[static_cast<int>(Enums::Constr::IN_CELL_BRANCH_NO)]
+                int tokenAccessNumber = tokenMem[Enums::Constr::IN_CELL_BRANCH_NO]
                         % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
                 Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
-					, tokenMem[static_cast<int>(Enums::Constr::IN_CELL_FUNCTION)]
-					, tokenMem.mid(static_cast<int>(Enums::Constr::IN_CELL_FUNCTION_DATA)), _context);
+					, tokenMem[Enums::Constr::IN_CELL_FUNCTION]
+					, tokenMem.mid(Enums::Constr::IN_CELL_FUNCTION_DATA), _context);
 
                 //obstacle found?
-                if( cmd != static_cast<int>(Enums::ConstrIn::BRUTEFORCE)) {
-                    bool safeMode = (cmd == static_cast<int>(Enums::ConstrIn::SAFE));
+                if( cmd != Enums::ConstrIn::BRUTEFORCE) {
+                    bool safeMode = (cmd == Enums::ConstrIn::SAFE);
                     if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
-                        tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_OBSTACLE);
+                        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
                         cluster->removeCell(newCell);
@@ -596,9 +596,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 token->setEnergy(token->getEnergy() - newCell->getEnergy() - eDiff);
 
                 //average cell energy if token is created
-                if( (opt == static_cast<int>(Enums::ConstrInOption::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::CREATE_DUP_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) ) {
+                if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
+                        || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     qreal av = averageEnergy(cell->getEnergy(), newCell->getEnergy());
                     cell->setEnergy(av);
                     newCell->setEnergy(av);
@@ -608,37 +608,37 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 cluster->setAngularVel(angularVelNew);
 
                 //finish construction site?
-                if( (opt == static_cast<int>(Enums::ConstrInOption::FINISH_NO_SEP))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) )
+                if( (opt == Enums::ConstrInOption::FINISH_NO_SEP)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
                     newCell->setTokenBlocked(false);
 
                 //separate construction site?
-                if( opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP) ) {
+                if( opt == Enums::ConstrInOption::FINISH_WITH_SEP ) {
                     processingResult.decompose = true;
                     separateConstruction(newCell, cell, false);
                 }
-                if( (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_SEP_RED))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) ) {
+                if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     processingResult.decompose = true;
                     separateConstruction(newCell, cell, true);
                 }
 
                 //update token data
-                tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::SUCCESS);
-                tokenMem[static_cast<int>(Enums::Constr::INOUT_ANGLE)] = 0;
+                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+                tokenMem[Enums::Constr::INOUT_ANGLE] = 0;
                 cluster->drawCellsToMap();
 
                 //create new token if desired
 				auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-				if ((opt == static_cast<int>(Enums::ConstrInOption::CREATE_EMPTY_TOKEN))
-                        || (opt == static_cast<int>(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)) ) {
+				if ((opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
+                        || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
 					auto token = factory->buildToken(_context, _parameters->NEW_TOKEN_ENERGY);
                     newCell->addToken(token, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                     token->setEnergy(token->getEnergy() - _parameters->NEW_TOKEN_ENERGY);
                 }
-                if( opt == static_cast<int>(Enums::ConstrInOption::CREATE_DUP_TOKEN) ) {
+                if( opt == Enums::ConstrInOption::CREATE_DUP_TOKEN ) {
                     auto dup = token->duplicate();
                     dup->setEnergy(_parameters->NEW_TOKEN_ENERGY);
                     newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
@@ -649,7 +649,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
             //no connection by now
             else {
-                tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_CONNECTION);
+                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
             }
         }
 
@@ -657,7 +657,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
         else {
 
             //error code
-            tokenMem[static_cast<int>(Enums::Constr::OUT)] = static_cast<int>(Enums::ConstrOut::ERROR_CONNECTION);
+            tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
         }
     }
     return processingResult;

@@ -18,12 +18,12 @@ CellFeature::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cel
 {
     ProcessingResult processingResult {false, 0};
 	auto& tokenMem = token->getMemoryRef();
-	quint8 cmd = tokenMem[static_cast<int>(Enums::EnergyGuidance::IN)] % 6;
-    qreal valueCell = tokenMem[static_cast<int>(Enums::EnergyGuidance::IN_VALUE_CELL)];
-    qreal valueToken = tokenMem[static_cast<int>(Enums::EnergyGuidance::IN_VALUE_TOKEN)];
+	quint8 cmd = tokenMem[Enums::EnergyGuidance::IN] % 6;
+    qreal valueCell = tokenMem[Enums::EnergyGuidance::IN_VALUE_CELL];
+    qreal valueToken = tokenMem[Enums::EnergyGuidance::IN_VALUE_TOKEN];
     qreal amount = 10.0;
 
-    if( cmd == static_cast<int>(Enums::EnergyGuidanceIn::BALANCE_CELL) ) {
+    if( cmd == Enums::EnergyGuidanceIn::BALANCE_CELL ) {
         if( cell->getEnergy() > (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell) ) {
             cell->setEnergy(cell->getEnergy()-amount);
             token->setEnergy(token->getEnergy() + amount);
@@ -35,7 +35,7 @@ CellFeature::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cel
             }
         }
     }
-    if( cmd == static_cast<int>(Enums::EnergyGuidanceIn::BALANCE_TOKEN) ) {
+    if( cmd == Enums::EnergyGuidanceIn::BALANCE_TOKEN ) {
         if( token->getEnergy() > (_parameters->MIN_TOKEN_ENERGY+valueToken) ) {
             cell->setEnergy(cell->getEnergy()+amount);
 			token->setEnergy(token->getEnergy() - amount);
@@ -47,7 +47,7 @@ CellFeature::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cel
 			}
         }
     }
-    if( cmd == static_cast<int>(Enums::EnergyGuidanceIn::BALANCE_BOTH) ) {
+    if( cmd == Enums::EnergyGuidanceIn::BALANCE_BOTH ) {
         if( (token->getEnergy() > (_parameters->MIN_TOKEN_ENERGY+valueToken+amount))
                 && (cell->getEnergy() < (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell)) ) {
             cell->setEnergy(cell->getEnergy()+amount);
@@ -59,13 +59,13 @@ CellFeature::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cel
 			token->setEnergy(token->getEnergy() + amount);
 		}
     }
-    if( cmd == static_cast<int>(Enums::EnergyGuidanceIn::HARVEST_CELL) ) {
+    if( cmd == Enums::EnergyGuidanceIn::HARVEST_CELL ) {
         if( cell->getEnergy() > (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount) ) {
             cell->setEnergy(cell->getEnergy()-amount);
 			token->setEnergy(token->getEnergy() + amount);
 		}
     }
-    if( cmd == static_cast<int>(Enums::EnergyGuidanceIn::HARVEST_TOKEN) ) {
+    if( cmd == Enums::EnergyGuidanceIn::HARVEST_TOKEN ) {
         if( token->getEnergy() > (_parameters->MIN_TOKEN_ENERGY+valueToken+amount) ) {
             cell->setEnergy(cell->getEnergy()+amount);
 			token->setEnergy(token->getEnergy() - amount);

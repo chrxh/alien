@@ -19,7 +19,7 @@ CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token,
 {
     ProcessingResult processingResult {false, 0};
 	auto& tokenMem = token->getMemoryRef();
-    tokenMem[static_cast<int>(Enums::Weapon::OUT)] = static_cast<int>(Enums::WeaponOut::NO_TARGET);
+    tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::NO_TARGET;
     QVector3D pos = cell->getCluster()->calcPosition(cell);
     for(int x = -2; x < 3; ++x)
         for(int y = -2; y < 3; ++y) {
@@ -34,7 +34,7 @@ CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token,
                         otherCell->setEnergy(otherCell->getEnergy()-energy);
                         token->setEnergy(token->getEnergy() + energy/2.0);
                         cell->setEnergy(cell->getEnergy()+energy/2.0);
-                        tokenMem[static_cast<int>(Enums::Weapon::OUT)] = static_cast<int>(Enums::WeaponOut::STRIKE_SUCCESSFUL);
+                        tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
                     }
                 }
             }
