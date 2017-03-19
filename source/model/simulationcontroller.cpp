@@ -411,7 +411,7 @@ void SimulationController::loadExtendedSelection (QDataStream& stream, QVector3D
     //set new center and draw cluster
     center = center / (qreal)(numCells+numEnergyParticles);
     foreach(CellCluster* cluster, newClusters) {
-        cluster->setPosition(cluster->getPosition()-center+pos);
+        cluster->setCenterPosition(cluster->getPosition()-center+pos);
         cluster->updateTransformationMatrix();
         if( drawToMap )
             cluster->drawCellsToMap();
@@ -505,7 +505,7 @@ void SimulationController::rotateExtendedSelection (qreal angle, const QList< Ce
     transform.rotate(angle, 0.0, 0.0, 1.0);
     transform.translate(-center);
     foreach(CellCluster* cluster, clusters) {
-        cluster->setPosition(transform.map(cluster->getPosition()));
+        cluster->setCenterPosition(transform.map(cluster->getPosition()));
     }
     foreach(EnergyParticle* e, es) {
         e->pos = transform.map(e->pos);
@@ -759,7 +759,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             CellTO newCellData = iNewCellsData.next();
             CellCluster* cluster = cell->getCluster();
             cluster->clearCellsFromMap();
-            cluster->setPosition(newCellData.clusterPos);
+            cluster->setCenterPosition(newCellData.clusterPos);
             cluster->setAngle(newCellData.clusterAngle);
             cluster->setVel(newCellData.clusterVel);
             cluster->setAngularVel(newCellData.clusterAngVel);
