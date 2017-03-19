@@ -89,19 +89,19 @@ Enums::CommunicatorIn::Type CellFunctionCommunicatorImpl::readCommandFromToken (
 
 void CellFunctionCommunicatorImpl::setListeningChannel (Token* token)
 {
-    _receivedMessage.channel = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_CHANNEL)];
+    _receivedMessage.channel = token->getMemoryRef()[Enums::Communicator::IN_CHANNEL];
 }
 
 
 void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token, Cell* cell, Cell* previousCell) const
 {
     MessageData messageDataToSend;
-    messageDataToSend.channel = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_CHANNEL)];
-    messageDataToSend.message = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_MESSAGE)];
-    messageDataToSend.angle = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_ANGLE)];
-    messageDataToSend.distance = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_DISTANCE)];
+    messageDataToSend.channel = token->getMemoryRef()[Enums::Communicator::IN_CHANNEL];
+    messageDataToSend.message = token->getMemoryRef()[Enums::Communicator::IN_MESSAGE];
+    messageDataToSend.angle = token->getMemoryRef()[Enums::Communicator::IN_ANGLE];
+    messageDataToSend.distance = token->getMemoryRef()[Enums::Communicator::IN_DISTANCE];
     int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageDataToSend, cell, previousCell);
-    token->getMemoryRef()[static_cast<int>(Enums::Communicator::OUT_SENT_NUM_MESSAGE)] = CodingPhysicalQuantities::convertIntToData(numMsg);
+    token->getMemoryRef()[Enums::Communicator::OUT_SENT_NUM_MESSAGE] = CodingPhysicalQuantities::convertIntToData(numMsg);
 }
 
 int CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
@@ -175,8 +175,8 @@ void CellFunctionCommunicatorImpl::receiveMessage (Token* token, Cell* receiverC
 		tokenMem[Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE] = Enums::CommunicatorOutReceivedNewMessage::YES;
     }
 	else {
-		tokenMem[static_cast<int>(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE)]
-			= static_cast<int>(Enums::CommunicatorOutReceivedNewMessage::NO);
+		tokenMem[Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE]
+			= Enums::CommunicatorOutReceivedNewMessage::NO;
 	}
 }
 
