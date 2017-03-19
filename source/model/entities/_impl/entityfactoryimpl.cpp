@@ -1,11 +1,11 @@
-#include "entityfactoryimpl.h"
+#include "global/servicelocator.h"
+
+#include "model/entities/energyparticle.h"
 
 #include "cellimpl.h"
 #include "cellclusterimpl.h"
-#include "model/entities/token.h"
-#include "model/entities/energyparticle.h"
-
-#include "global/servicelocator.h"
+#include "tokenimpl.h"
+#include "entityfactoryimpl.h"
 
 namespace
 {
@@ -47,7 +47,22 @@ Cell* EntityFactoryImpl::buildCell (qreal energy, SimulationContext* context, in
 
 Token* EntityFactoryImpl::buildToken (SimulationContext* context) const
 {
-    return new Token(context);
+    return new TokenImpl(context);
+}
+
+Token * EntityFactoryImpl::buildToken(SimulationContext* context, qreal energy) const
+{
+	return new TokenImpl(context, energy);
+}
+
+Token * EntityFactoryImpl::buildToken(SimulationContext* context, qreal energy, QByteArray const& memory) const
+{
+	return new TokenImpl(context, energy, memory);
+}
+
+Token * EntityFactoryImpl::buildTokenWithRandomData(SimulationContext* context, qreal energy) const
+{
+	return new TokenImpl(context, energy, true);
 }
 
 EnergyParticle* EntityFactoryImpl::buildEnergyParticle(SimulationContext* context) const

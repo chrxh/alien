@@ -5,28 +5,22 @@
 
 #include "model/definitions.h"
 
-class Cell;
 class Token
 {
 public:
-    Token (SimulationContext* context, qreal energy_ = 0.0, bool randomData = false);
-    Token (SimulationContext* context, qreal energy_, QByteArray memory_);
+	virtual ~Token() {}
 
-    Token* duplicate ();
-    int getTokenAccessNumber ();        //from memory[0]
-    void setTokenAccessNumber (int i);
+    virtual Token* duplicate () const = 0;
+	virtual int getTokenAccessNumber() const = 0;
+	virtual void setTokenAccessNumber (int i) = 0;
 
-    void serializePrimitives (QDataStream& stream);
-    void deserializePrimitives (QDataStream& stream);
+	virtual void setEnergy (qreal energy) = 0;
+	virtual qreal getEnergy () const = 0;
 
+	virtual QByteArray& getMemoryRef () = 0;
 
-	QByteArray memory;
-    qreal energy;
-//    Cell* linkStack[TOKEN_STACKSIZE];
-//    int linkStackPointer;
-
-private:
-	SimulationContext* _context = nullptr;
+	virtual void serializePrimitives (QDataStream& stream) const = 0;
+	virtual void deserializePrimitives (QDataStream& stream) = 0;
 };
 
 #endif // TOKEN_H

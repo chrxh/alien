@@ -8,7 +8,7 @@ class CellFunctionPropulsionImpl : public CellFunction
 public:
     CellFunctionPropulsionImpl (SimulationContext* context);
 
-    CellFunctionType getType () const { return CellFunctionType::PROPULSION; }
+    Enums::CellFunction::Type getType () const { return Enums::CellFunction::PROPULSION; }
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;

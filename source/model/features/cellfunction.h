@@ -13,7 +13,7 @@ public:
     virtual ~CellFunction() {}
 
     //new interface
-    virtual CellFunctionType getType () const = 0;
+    virtual Enums::CellFunction::Type getType () const = 0;
 	virtual QByteArray getInternalData() const {
 		return QByteArray();
 	}

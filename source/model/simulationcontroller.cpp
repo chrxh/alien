@@ -8,6 +8,7 @@
 #include "global/global.h"
 #include "global/servicelocator.h"
 #include "model/features/cellfunctioncomputer.h"
+#include "model/entities/entityfactory.h"
 #include "model/entities/token.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -181,7 +182,7 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
                 maxCon = 3;
             if( ((i == 0) || (i == (numCellX-1))) && ((j == 0) || (j == (numCellY-1))) )
                 maxCon = 2;
-            Cell* cell = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _context, maxCon, 0, QVector3D(x, y, 0.0));
+            Cell* cell = facade->buildFeaturedCell(energy, Enums::CellFunction::COMPUTER, _context, maxCon, 0, QVector3D(x, y, 0.0));
 
             cellGrid[i][j] = cell;
         }
@@ -231,7 +232,7 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
                 maxCon = 6;
 
             //create cell: upper layer
-            cellGrid[numLayers-1+i][numLayers-1-j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _context, maxCon, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
+            cellGrid[numLayers-1+i][numLayers-1-j] = facade->buildFeaturedCell(energy, Enums::CellFunction::COMPUTER, _context, maxCon, 0, QVector3D(i*dist+j*dist/2.0, -j*incY, 0.0));
             cells << cellGrid[numLayers-1+i][numLayers-1-j];
             if( numLayers-1+i > 0 )
                 cellGrid[numLayers-1+i][numLayers-1-j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1-j]);
@@ -242,7 +243,7 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
 
             //create cell: under layer (except for 0-layer)
             if( j > 0 ) {
-                cellGrid[numLayers-1+i][numLayers-1+j] = facade->buildFeaturedCell(energy, CellFunctionType::COMPUTER, _context, maxCon, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
+                cellGrid[numLayers-1+i][numLayers-1+j] = facade->buildFeaturedCell(energy, Enums::CellFunction::COMPUTER, _context, maxCon, 0, QVector3D(i*dist+j*dist/2.0, +j*incY, 0.0));
                 cells << cellGrid[numLayers-1+i][numLayers-1+j];
                 if( numLayers-1+i > 0 )
                     cellGrid[numLayers-1+i][numLayers-1+j]->newConnection(cellGrid[numLayers-1+i-1][numLayers-1+j]);
@@ -590,7 +591,7 @@ void SimulationController::newCell (QVector3D pos)
     _context->lock();
     AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 	SimulationParameters* paramters = _context->getSimulationParameters();
-    Cell* cell = facade->buildFeaturedCell(paramters->NEW_CELL_ENERGY, CellFunctionType::COMPUTER
+    Cell* cell = facade->buildFeaturedCell(paramters->NEW_CELL_ENERGY, Enums::CellFunction::COMPUTER
         , _context, paramters->NEW_CELL_MAX_CONNECTION, paramters->NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
@@ -626,6 +627,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
         QListIterator< CellTO > iNewCellsData(newCellsData);
         QSet< CellCluster* > sumNewClusters;
         AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+		EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 		SimulationParameters* parameters = _context->getSimulationParameters();
         while (iCells.hasNext()) {
 
@@ -663,8 +665,10 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             //update token
             cell->delAllTokens();
             int numToken = newCellData.tokenEnergies.size();
-            for( int i = 0; i < numToken; ++i )
-                cell->addToken(new Token(_context, newCellData.tokenEnergies[i], newCellData.tokenData[i]), Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::NO);
+			for (int i = 0; i < numToken; ++i) {
+				auto token = entityFactory->buildToken(_context, newCellData.tokenEnergies[i], newCellData.tokenData[i]);
+				cell->addToken(token, Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::NO);
+			}
 
             //searching for nearby clusters
             QVector3D pos = cell->calcPosition();

@@ -25,21 +25,22 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());
-    quint8 cmd = token->memory[static_cast<int>(SENSOR::IN)]%5;
+	auto& tokenMem = token->getMemoryRef();
+	quint8 cmd = tokenMem[static_cast<int>(Enums::Sensor::IN)] % 5;
 
-    if( cmd == static_cast<int>(SENSOR_IN::DO_NOTHING) ) {
-        token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::NOTHING_FOUND);
+    if( cmd == static_cast<int>(Enums::SensorIn::DO_NOTHING) ) {
+        tokenMem[static_cast<int>(Enums::Sensor::OUT)] = static_cast<int>(Enums::SensorOut::NOTHING_FOUND);
         return processingResult;
     }
-    quint8 minMass = token->memory[static_cast<int>(SENSOR::IN_MIN_MASS)];
-    quint8 maxMass = token->memory[static_cast<int>(SENSOR::IN_MAX_MASS)];
+    quint8 minMass = tokenMem[static_cast<int>(Enums::Sensor::IN_MIN_MASS)];
+    quint8 maxMass = tokenMem[static_cast<int>(Enums::Sensor::IN_MAX_MASS)];
     qreal minMassReal = static_cast<qreal>(minMass);
     qreal maxMassReal = static_cast<qreal>(maxMass);
     if( maxMass == 0 )
         maxMassReal = 16000;    //large value => no max mass check
 
     //scanning vicinity?
-    if( cmd == static_cast<int>(SENSOR_IN::SEARCH_VICINITY) ) {
+    if( cmd == static_cast<int>(Enums::SensorIn::SEARCH_VICINITY) ) {
         QVector3D cellPos = cell->calcPosition(_context);
 //        auto time1 = high_resolution_clock::now();
         CellCluster* otherCluster = _cellMap->getNearbyClusterFast(cellPos, _parameters->CELL_FUNCTION_SENSOR_RANGE
@@ -47,14 +48,14 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 //        nanoseconds diff1 = high_resolution_clock::now()- time1;
 //        cout << "Dauer: " << diff1.count() << endl;
         if( otherCluster ) {
-            token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
-            token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(otherCluster->getMass());
+            tokenMem[static_cast<int>(Enums::Sensor::OUT)] = static_cast<int>(Enums::SensorOut::CLUSTER_FOUND);
+            tokenMem[static_cast<int>(Enums::Sensor::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(otherCluster->getMass());
 
             //calc relative angle
             QVector3D dir  = _topology->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
             qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
-            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(relAngle);
+            tokenMem[static_cast<int>(Enums::Sensor::INOUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(relAngle);
 
             //calc distance by scanning along beam
             QVector3D beamPos = cell->calcPosition(true);
@@ -70,31 +71,31 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
                                 qreal dist = _topology->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
-                                token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
+                                tokenMem[static_cast<int>(Enums::Sensor::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
                                 return processingResult;
                             }
                         }
                     }
             }
-            token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::NOTHING_FOUND);
+            tokenMem[static_cast<int>(Enums::Sensor::OUT)] = static_cast<int>(Enums::SensorOut::NOTHING_FOUND);
         }
         else
-            token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::NOTHING_FOUND);
+            tokenMem[static_cast<int>(Enums::Sensor::OUT)] = static_cast<int>(Enums::SensorOut::NOTHING_FOUND);
         return processingResult;
     }
 
     //scanning in a particular direction?
     QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
     QVector3D dir(0.0, 0.0, 0.0);
-    if( cmd == static_cast<int>(SENSOR_IN::SEARCH_BY_ANGLE) ) {
-        qreal relAngle = CodingPhysicalQuantities::convertDataToAngle(token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)]);
+    if( cmd == static_cast<int>(Enums::SensorIn::SEARCH_BY_ANGLE) ) {
+        qreal relAngle = CodingPhysicalQuantities::convertDataToAngle(tokenMem[static_cast<int>(Enums::Sensor::INOUT_ANGLE)]);
         qreal angle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos()) + cluster->getAngle() + relAngle;
         dir = Physics::unitVectorOfAngle(angle);
     }
-    if( cmd == static_cast<int>(SENSOR_IN::SEARCH_FROM_CENTER) ) {
+    if( cmd == static_cast<int>(Enums::SensorIn::SEARCH_FROM_CENTER) ) {
         dir = cellRelPos.normalized();
     }
-    if( cmd == static_cast<int>(SENSOR_IN::SEARCH_TOWARD_CENTER) ) {
+    if( cmd == static_cast<int>(Enums::SensorIn::SEARCH_TOWARD_CENTER) ) {
         dir = -cellRelPos.normalized();
     }
 
@@ -133,14 +134,14 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                     largestClusterCell = hitCell;
                 }
             }
-            token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::CLUSTER_FOUND);
+            tokenMem[static_cast<int>(Enums::Sensor::OUT)] = static_cast<int>(Enums::SensorOut::CLUSTER_FOUND);
             qreal dist = _topology->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
-            token->memory[static_cast<int>(SENSOR::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
-            token->memory[static_cast<int>(SENSOR::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(largestClusterCell->getCluster()->getMass());
-//            token->memory[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);
+            tokenMem[static_cast<int>(Enums::Sensor::OUT_DISTANCE)] = CodingPhysicalQuantities::convertURealToData(dist);
+            tokenMem[static_cast<int>(Enums::Sensor::OUT_MASS)] = CodingPhysicalQuantities::convertURealToData(largestClusterCell->getCluster()->getMass());
+//            tokenMem[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);
             return processingResult;
         }
     }
-    token->memory[static_cast<int>(SENSOR::OUT)] = static_cast<int>(SENSOR_OUT::NOTHING_FOUND);
+    tokenMem[static_cast<int>(Enums::Sensor::OUT)] = static_cast<int>(Enums::SensorOut::NOTHING_FOUND);
     return processingResult;
 }

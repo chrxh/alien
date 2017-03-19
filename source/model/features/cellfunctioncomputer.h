@@ -9,7 +9,7 @@ public:
     CellFunctionComputer (SimulationContext* context) : CellFunction(context) {}
     virtual ~CellFunctionComputer () {}
 
-    CellFunctionType getType () const { return CellFunctionType::COMPUTER; }
+    Enums::CellFunction::Type getType () const { return Enums::CellFunction::COMPUTER; }
 
     //new interface
     virtual QString decompileInstructionCode () const = 0;

@@ -22,6 +22,9 @@ public:
         , int tokenAccessNumber = 0, QVector3D relPos = QVector3D()) const = 0;
     
     virtual Token* buildToken (SimulationContext* context) const = 0;
+	virtual Token* buildToken (SimulationContext* context, qreal energy) const = 0;
+	virtual Token* buildToken (SimulationContext* context, qreal energy, QByteArray const& memory) const = 0;
+	virtual Token* buildTokenWithRandomData(SimulationContext* context, qreal energy) const = 0;
 
     virtual EnergyParticle* buildEnergyParticle(SimulationContext* context) const = 0;
     virtual EnergyParticle* buildEnergyParticle(qreal energy, QVector3D pos, QVector3D vel

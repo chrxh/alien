@@ -45,9 +45,9 @@ private:
 		QString comp;
 	};
 	struct InstructionCoded {
-		COMPUTER_OPERATION operation;
-		COMPUTER_OPTYPE opType1;
-		COMPUTER_OPTYPE opType2;
+		Enums::ComputerOperation::Type operation;
+		Enums::ComputerOptype::Type opType1;
+		Enums::ComputerOptype::Type opType2;
 		quint8 operand1;
 		quint8 operand2;
 	};

@@ -29,7 +29,7 @@ struct CellTO  //TO = Transfer Object
     int cellMaxCon = 0;
     bool cellAllowToken = true;
     int cellTokenAccessNum = 0;
-    CellFunctionType cellFunctionType;
+    Enums::CellFunction::Type cellFunctionType;
 
     //computer data
 	QByteArray computerMemory;

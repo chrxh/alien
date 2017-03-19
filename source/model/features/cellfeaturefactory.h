@@ -11,8 +11,8 @@ class CellFeatureFactory
 public:
     virtual ~CellFeatureFactory () {}
 
-    virtual CellFeature* addCellFunction (Cell* cell, CellFunctionType type, QByteArray data, SimulationContext* context) const = 0;
-    virtual CellFeature* addCellFunction (Cell* cell, CellFunctionType type, SimulationContext* context) const = 0;
+    virtual CellFeature* addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data, SimulationContext* context) const = 0;
+    virtual CellFeature* addCellFunction (Cell* cell, Enums::CellFunction::Type type, SimulationContext* context) const = 0;
 
     virtual CellFeature* addEnergyGuidance (Cell* cell, SimulationContext* context) const = 0;
 };
