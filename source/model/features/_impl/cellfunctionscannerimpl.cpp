@@ -86,7 +86,7 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
 {
     ProcessingResult processingResult {false, 0};
 	auto& tokenMem = token->getMemoryRef();
-	int n = tokenMem[static_cast<int>(Enums::Scanner::INOUT_CELL_NUMBER)];
+	int n = tokenMem[Enums::Scanner::INOUT_CELL_NUMBER];
     quint64 tag(GlobalFunctions::createNewTag());
     Cell* scanCellPre1 = previousCell;
     Cell* scanCellPre2 = previousCell;
@@ -95,16 +95,16 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
 
     //restart?
     if( (n>0) && (scanCell == scanCellPre1) ) {
-        tokenMem[static_cast<int>(Enums::Scanner::INOUT_CELL_NUMBER)] = 1;
+        tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = 1;
         scanCell = cell;
         scanCellPre1 = cell;
-        tokenMem[static_cast<int>(Enums::Scanner::OUT)] = static_cast<int>(Enums::ScannerOut::RESTART);
+        tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::RESTART;
     }
 
     //no restart? => increase cell number
     else {
-        tokenMem[static_cast<int>(Enums::Scanner::INOUT_CELL_NUMBER)] = n+1;
-        tokenMem[static_cast<int>(Enums::Scanner::OUT)] = static_cast<int>(Enums::ScannerOut::SUCCESS);
+        tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = n+1;
+        tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::SUCCESS;
 
         //prove whether finished or not
         tag = GlobalFunctions::createNewTag();
@@ -113,21 +113,21 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
         Cell* scanCellTemp = cell;
         spiralLookupAlgorithm(scanCellTemp, scanCellPreTemp1, scanCellPreTemp2, n+1, tag);
         if( scanCellTemp == scanCellPreTemp1 )
-            tokenMem[static_cast<int>(Enums::Scanner::OUT)] = static_cast<int>(Enums::ScannerOut::FINISHED);
+            tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::FINISHED;
     }
 
     //start cell
     if( n == 0 ) {
-        tokenMem[static_cast<int>(Enums::Scanner::OUT_DISTANCE)] = 0;
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = 0;
     }
 
     //second cell
     if( n == 1 ) {
-        tokenMem[static_cast<int>(Enums::Scanner::OUT_ANGLE)] = 0;
+        tokenMem[Enums::Scanner::OUT_ANGLE] = 0;
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPos() - scanCellPre1->getRelPos()).length();
-        tokenMem[static_cast<int>(Enums::Scanner::OUT_DISTANCE)] = CodingPhysicalQuantities::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = CodingPhysicalQuantities::convertShiftLenToData(len);
     }
 
     //further cell
@@ -137,31 +137,31 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
         qreal a1 = Physics::angleOfVector(scanCellPre2->getRelPos() - scanCellPre1->getRelPos());
         qreal a2 = Physics::angleOfVector(-scanCell->getRelPos() + scanCellPre1->getRelPos());
         qreal angle = a1 - a2;
-        tokenMem[static_cast<int>(Enums::Scanner::OUT_ANGLE)] = CodingPhysicalQuantities::convertAngleToData(angle);
+        tokenMem[Enums::Scanner::OUT_ANGLE] = CodingPhysicalQuantities::convertAngleToData(angle);
 //        qDebug("-> v: %f, n: %f", -angle, convertDataToAngle(convertAngleToData(-angle)));
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPos() - scanCellPre1->getRelPos()).length();
-        tokenMem[static_cast<int>(Enums::Scanner::OUT_DISTANCE)] = CodingPhysicalQuantities::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = CodingPhysicalQuantities::convertShiftLenToData(len);
     }
 
     //scan cell
     quint32 e = qFloor(scanCell->getEnergy());
     if( e > 255 )        //restrict value to 8 bit
         e = 255;
-    tokenMem[static_cast<int>(Enums::Scanner::OUT_ENERGY)] = e;
-    tokenMem[static_cast<int>(Enums::Scanner::OUT_CELL_MAX_CONNECTIONS)] = scanCell->getMaxConnections();
-    tokenMem[static_cast<int>(Enums::Scanner::OUT_CELL_BRANCH_NO)] = scanCell->getTokenAccessNumber();
+    tokenMem[Enums::Scanner::OUT_ENERGY] = e;
+    tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = scanCell->getMaxConnections();
+    tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = scanCell->getTokenAccessNumber();
     CellFunction* scanCellFunction = scanCell->getFeatures()->findObject<CellFunction>();
-    tokenMem[static_cast<int>(Enums::Scanner::OUT_CELL_FUNCTION)] = static_cast<quint8>(scanCellFunction->getType());
+    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<quint8>(scanCellFunction->getType());
     QByteArray data = scanCellFunction->getInternalData();
-	tokenMem.replace(static_cast<int>(Enums::Scanner::OUT_CELL_FUNCTION_DATA), data.size(), data);
+	tokenMem.replace(Enums::Scanner::OUT_CELL_FUNCTION_DATA, data.size(), data);
 
     //scan cluster
     quint32 mass = qFloor(cell->getCluster()->getMass());
     if( mass > 255 )        //restrict value to 8 bit
         mass = 255;
-    tokenMem[static_cast<int>(Enums::Scanner::OUT_MASS)] = mass;
+    tokenMem[Enums::Scanner::OUT_MASS] = mass;
     return processingResult;
 }
 
