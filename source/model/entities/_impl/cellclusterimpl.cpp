@@ -22,10 +22,10 @@ const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
 CellClusterImpl::CellClusterImpl (SimulationContext* context)
     : _context(context)
-    ,  _topology(context->getTopology())
-    ,  _cellMap(context->getCellMap())
+    , _topology(context->getTopology())
+    , _cellMap(context->getCellMap())
 	, _parameters(context->getSimulationParameters())
-    ,  _id(GlobalFunctions::createNewTag())
+    , _id(GlobalFunctions::createNewTag())
 {
     updateTransformationMatrix();
 }
@@ -33,14 +33,15 @@ CellClusterImpl::CellClusterImpl (SimulationContext* context)
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
     , QVector3D vel, SimulationContext* context)
     : _context(context)
-    ,  _topology(context->getTopology())
-    ,  _cellMap(context->getCellMap())
-    ,  _angle(angle)
-    ,  _pos(pos)
-    ,  _angularVel(angularVel)
-    ,  _vel(vel)
-    ,  _cells(cells)
-    ,  _id(GlobalFunctions::createNewTag())
+    , _topology(context->getTopology())
+    , _cellMap(context->getCellMap())
+	, _parameters(context->getSimulationParameters())
+	, _angle(angle)
+    , _pos(pos)
+    , _angularVel(angularVel)
+    , _vel(vel)
+    , _cells(cells)
+    , _id(GlobalFunctions::createNewTag())
 {
     _topology->correctPosition(_pos);
     foreach(Cell* cell, _cells) {
@@ -53,11 +54,12 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D po
 
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationContext* context)
     : _context(context)
-    ,  _topology(context->getTopology())
-    ,  _cellMap(context->getCellMap())
-    ,  _angle(angle)
-    ,  _cells(cells)
-    ,  _id(GlobalFunctions::createNewTag())
+    , _topology(context->getTopology())
+    , _cellMap(context->getCellMap())
+	, _parameters(context->getSimulationParameters())
+	, _angle(angle)
+    , _cells(cells)
+    , _id(GlobalFunctions::createNewTag())
 {
     //calc new center
     QVector3D center;
