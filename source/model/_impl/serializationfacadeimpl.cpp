@@ -230,7 +230,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	cell->deserializePrimitives(stream);
 	quint8 rawType;
 	stream >> rawType;
-	CellFunctionType type = static_cast<CellFunctionType>(rawType);
+	Enums::CellFunction::Type type = static_cast<Enums::CellFunction::Type>(rawType);
 	CellFeature* feature = featureFactory->addCellFunction(cell, type, context);
 	feature->deserializePrimitives(stream);
 

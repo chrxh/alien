@@ -41,12 +41,12 @@ CellFunctionCommunicatorImpl::MessageData & CellFunctionCommunicatorImpl::getRec
 CellFeature::ProcessingResult CellFunctionCommunicatorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
-    COMMUNICATOR_IN cmd = readCommandFromToken(token);
-    if( cmd == COMMUNICATOR_IN::SET_LISTENING_CHANNEL )
+    Enums::CommunicatorIn::Type cmd = readCommandFromToken(token);
+    if( cmd == Enums::CommunicatorIn::SET_LISTENING_CHANNEL )
         setListeningChannel(token);
-    if( cmd == COMMUNICATOR_IN::SEND_MESSAGE )
+    if( cmd == Enums::CommunicatorIn::SEND_MESSAGE )
         sendMessageToNearbyCommunicatorsAndUpdateToken(token, cell, previousCell);
-    if( cmd == COMMUNICATOR_IN::RECEIVE_MESSAGE )
+    if( cmd == Enums::CommunicatorIn::RECEIVE_MESSAGE )
         receiveMessage(token, cell, previousCell);
     return processingResult;
 }
@@ -82,26 +82,26 @@ QByteArray CellFunctionCommunicatorImpl::getInternalData () const
 	return data;
 }
 
-COMMUNICATOR_IN CellFunctionCommunicatorImpl::readCommandFromToken (Token* token) const
+Enums::CommunicatorIn::Type CellFunctionCommunicatorImpl::readCommandFromToken (Token* token) const
 {
-    return static_cast<COMMUNICATOR_IN>(token->memory[static_cast<int>(COMMUNICATOR::IN)] % 4);
+    return static_cast<Enums::CommunicatorIn::Type>(token->getMemoryRef()[Enums::Communicator::IN] % 4);
 }
 
 void CellFunctionCommunicatorImpl::setListeningChannel (Token* token)
 {
-    _receivedMessage.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
+    _receivedMessage.channel = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_CHANNEL)];
 }
 
 
 void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token, Cell* cell, Cell* previousCell) const
 {
     MessageData messageDataToSend;
-    messageDataToSend.channel = token->memory[static_cast<int>(COMMUNICATOR::IN_CHANNEL)];
-    messageDataToSend.message = token->memory[static_cast<int>(COMMUNICATOR::IN_MESSAGE)];
-    messageDataToSend.angle = token->memory[static_cast<int>(COMMUNICATOR::IN_ANGLE)];
-    messageDataToSend.distance = token->memory[static_cast<int>(COMMUNICATOR::IN_DISTANCE)];
+    messageDataToSend.channel = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_CHANNEL)];
+    messageDataToSend.message = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_MESSAGE)];
+    messageDataToSend.angle = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_ANGLE)];
+    messageDataToSend.distance = token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_DISTANCE)];
     int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageDataToSend, cell, previousCell);
-    token->memory[static_cast<int>(COMMUNICATOR::OUT_SENT_NUM_MESSAGE)] = CodingPhysicalQuantities::convertIntToData(numMsg);
+    token->getMemoryRef()[static_cast<int>(Enums::Communicator::OUT_SENT_NUM_MESSAGE)] = CodingPhysicalQuantities::convertIntToData(numMsg);
 }
 
 int CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
@@ -123,7 +123,7 @@ QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) 
         [](Cell* cell)
         {
             CellFunction* cellFunction = cell->getFeatures()->findObject<CellFunction>();
-            return cellFunction && (cellFunction->getType() == CellFunctionType::COMMUNICATOR);
+            return cellFunction && (cellFunction->getType() == Enums::CellFunction::COMMUNICATOR);
         };
     QVector3D cellPos = cell->calcPosition();
     qreal range = _parameters->CELL_FUNCTION_COMMUNICATOR_RANGE;
@@ -153,9 +153,8 @@ bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (co
     return false;
 }
 
-QVector3D CellFunctionCommunicatorImpl::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend,
-                                                                             Cell* senderCell,
-                                                                             Cell* senderPreviousCell) const
+QVector3D CellFunctionCommunicatorImpl::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend
+	, Cell* senderCell, Cell* senderPreviousCell) const
 {
     QVector3D displacementFromSender = senderPreviousCell->calcPosition() - senderCell->calcPosition();
     displacementFromSender.normalize();
@@ -164,25 +163,21 @@ QVector3D CellFunctionCommunicatorImpl::calcDisplacementOfObjectFromSender (cons
     return displacementFromSender;
 }
 
-void CellFunctionCommunicatorImpl::receiveMessage (Token* token,
-                                                    Cell* receiverCell,
-                                                    Cell* receiverPreviousCell)
+void CellFunctionCommunicatorImpl::receiveMessage (Token* token, Cell* receiverCell, Cell* receiverPreviousCell)
 {
-    if( _newMessageReceived ) {
+	QByteArray& tokenMem = token->getMemoryRef();
+	if (_newMessageReceived) {
         _newMessageReceived = false;
         calcReceivedMessageAngle(receiverCell, receiverPreviousCell);
-        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_ANGLE)]
-                = _receivedMessage.angle;
-        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_DISTANCE)]
-                = _receivedMessage.distance;
-        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_MESSAGE)]
-                = _receivedMessage.message;
-        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
-                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES);
+		tokenMem[Enums::Communicator::OUT_RECEIVED_ANGLE] = _receivedMessage.angle;
+		tokenMem[Enums::Communicator::OUT_RECEIVED_DISTANCE] = _receivedMessage.distance;
+		tokenMem[Enums::Communicator::OUT_RECEIVED_MESSAGE] = _receivedMessage.message;
+		tokenMem[Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE] = Enums::CommunicatorOutReceivedNewMessage::YES;
     }
-    else
-        token->memory[static_cast<int>(COMMUNICATOR::OUT_RECEIVED_NEW_MESSAGE)]
-                = static_cast<int>(COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO);
+	else {
+		tokenMem[static_cast<int>(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE)]
+			= static_cast<int>(Enums::CommunicatorOutReceivedNewMessage::NO);
+	}
 }
 
 void CellFunctionCommunicatorImpl::calcReceivedMessageAngle (Cell* receiverCell,

@@ -8,7 +8,7 @@ class CellFunctionSensorImpl : public CellFunction
 public:
     CellFunctionSensorImpl (SimulationContext* context);
 
-    CellFunctionType getType () const { return CellFunctionType::SENSOR; }
+    Enums::CellFunction::Type getType () const { return Enums::CellFunction::SENSOR; }
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;

@@ -1,162 +1,210 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-enum class CellFunctionType {
-    COMPUTER,
-    PROPULSION,
-    SCANNER,
-    WEAPON,
-    CONSTRUCTOR,
-    SENSOR,
-    COMMUNICATOR,
-    _COUNTER
-};
+namespace Enums
+{
+	struct CellFunction {
+		enum Type {
+			COMPUTER,
+			PROPULSION,
+			SCANNER,
+			WEAPON,
+			CONSTRUCTOR,
+			SENSOR,
+			COMMUNICATOR,
+			_COUNTER
+		};
+	};
 
-enum class ENERGY_GUIDANCE {
-    IN = 1,
-    IN_VALUE_CELL = 2,
-    IN_VALUE_TOKEN = 3
-};
-enum class ENERGY_GUIDANCE_IN {
-    DEACTIVATED,
-    BALANCE_CELL,
-    BALANCE_TOKEN,
-    BALANCE_BOTH,
-    HARVEST_CELL,
-    HARVEST_TOKEN
-};
+	struct EnergyGuidance {
+		enum Type {
+			IN = 1,
+			IN_VALUE_CELL = 2,
+			IN_VALUE_TOKEN = 3
+		};
+	};
 
-enum class COMMUNICATOR {
-    IN = 26,
-    IN_CHANNEL = 27,
-    IN_MESSAGE = 28,
-    IN_ANGLE = 29,
-    IN_DISTANCE = 30,
-    OUT_SENT_NUM_MESSAGE = 31,
-    OUT_RECEIVED_NEW_MESSAGE = 32,
-    OUT_RECEIVED_MESSAGE = 33,
-    OUT_RECEIVED_ANGLE = 34,
-    OUT_RECEIVED_DISTANCE = 35,
-};
-enum class COMMUNICATOR_IN {
-    DO_NOTHING,
-    SET_LISTENING_CHANNEL,
-    SEND_MESSAGE,
-    RECEIVE_MESSAGE
-};
-enum class COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE {
-    NO,
-    YES
-};
+	struct EnergyGuidanceIn {
+		enum Type {
+			DEACTIVATED,
+			BALANCE_CELL,
+			BALANCE_TOKEN,
+			BALANCE_BOTH,
+			HARVEST_CELL,
+			HARVEST_TOKEN
+		};
+	};
 
-enum class COMPUTER_OPERATION {
-    MOV, ADD, SUB, MUL, DIV, XOR, OR, AND, IFG, IFGE, IFE, IFNE, IFLE, IFL, ELSE, ENDIF
-};
-enum class COMPUTER_OPTYPE {
-    MEM, MEMMEM, CMEM, CONST
-};
+	struct Communicator {
+		enum Type {
+			IN = 26,
+			IN_CHANNEL = 27,
+			IN_MESSAGE = 28,
+			IN_ANGLE = 29,
+			IN_DISTANCE = 30,
+			OUT_SENT_NUM_MESSAGE = 31,
+			OUT_RECEIVED_NEW_MESSAGE = 32,
+			OUT_RECEIVED_MESSAGE = 33,
+			OUT_RECEIVED_ANGLE = 34,
+			OUT_RECEIVED_DISTANCE = 35,
+		};
+	};
+	struct CommunicatorIn {
+		enum Type {
+			DO_NOTHING,
+			SET_LISTENING_CHANNEL,
+			SEND_MESSAGE,
+			RECEIVE_MESSAGE
+		};
+	};
+	struct CommunicatorOutReceivedNewMessage {
+		enum Type {
+			NO,
+			YES
+		};
+	};
 
-enum class CONSTR {
-    OUT = 5,
-    IN = 6,
-    IN_OPTION = 7,
-    INOUT_ANGLE = 15,
-    IN_DIST = 16,
-    IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
-    IN_CELL_BRANCH_NO = 18,
-    IN_CELL_FUNCTION = 19,
-    IN_CELL_FUNCTION_DATA = 40
-};
-enum class CONSTR_OUT {
-    SUCCESS,
-    SUCCESS_ROT,
-    ERROR_NO_ENERGY,
-    ERROR_OBSTACLE,
-    ERROR_CONNECTION,
-    ERROR_DIST
-};
-enum class CONSTR_IN {
-    DO_NOTHING,
-    SAFE,
-    UNSAFE,
-    BRUTEFORCE
-};
-enum class CONSTR_IN_OPTION {
-    STANDARD,
-    CREATE_EMPTY_TOKEN,
-    CREATE_DUP_TOKEN,
-    FINISH_NO_SEP,
-    FINISH_WITH_SEP,
-    FINISH_WITH_SEP_RED,
-    FINISH_WITH_TOKEN_SEP_RED
-};
+	struct ComputerOperation {
+		enum Type {
+			MOV, ADD, SUB, MUL, DIV, XOR, OR, AND, IFG, IFGE, IFE, IFNE, IFLE, IFL, ELSE, ENDIF
+		};
+	};
+	struct ComputerOptype {
+		enum Type {
+			MEM, MEMMEM, CMEM, CONST
+		};
+	};
 
-enum class PROP {
-    OUT = 5,
-    IN = 8,
-    IN_ANGLE = 9,
-    IN_POWER = 10
-};
-enum class PROP_OUT {
-    SUCCESS,
-    SUCCESS_DAMPING_FINISHED,
-    ERROR_NO_ENERGY
-};
-enum class PROP_IN {
-    DO_NOTHING,
-    BY_ANGLE,
-    FROM_CENTER,
-    TOWARD_CENTER,
-    ROTATION_CLOCKWISE,
-    ROTATION_COUNTERCLOCKWISE,
-    DAMP_ROTATION
-};
+	struct Constr {
+		enum Type {
+			OUT = 5,
+			IN = 6,
+			IN_OPTION = 7,
+			INOUT_ANGLE = 15,
+			IN_DIST = 16,
+			IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
+			IN_CELL_BRANCH_NO = 18,
+			IN_CELL_FUNCTION = 19,
+			IN_CELL_FUNCTION_DATA = 40
+		};
+	};
+	struct ConstrOut {
+		enum Type {
+			SUCCESS,
+			SUCCESS_ROT,
+			ERROR_NO_ENERGY,
+			ERROR_OBSTACLE,
+			ERROR_CONNECTION,
+			ERROR_DIST
+		};
+	};
+	struct ConstrIn {
+		enum Type {
+			DO_NOTHING,
+			SAFE,
+			UNSAFE,
+			BRUTEFORCE
+		};
+	};
+	struct ConstrInOption {
+		enum Type {
+			STANDARD,
+			CREATE_EMPTY_TOKEN,
+			CREATE_DUP_TOKEN,
+			FINISH_NO_SEP,
+			FINISH_WITH_SEP,
+			FINISH_WITH_SEP_RED,
+			FINISH_WITH_TOKEN_SEP_RED
+		};
+	};
 
-enum class SCANNER {
-    OUT = 5,
-    INOUT_CELL_NUMBER = 12,
-    OUT_MASS = 13,
-    OUT_ENERGY = 14,
-    OUT_ANGLE = 15,
-    OUT_DISTANCE = 16,
-    OUT_CELL_MAX_CONNECTIONS = 17,
-    OUT_CELL_BRANCH_NO = 18,
-    OUT_CELL_FUNCTION = 19,
-    OUT_CELL_FUNCTION_DATA = 40
-};
-enum class SCANNER_OUT {
-    SUCCESS,
-    FINISHED,
-    RESTART
-};
+	struct Prop {
+		enum Type {
+			OUT = 5,
+			IN = 8,
+			IN_ANGLE = 9,
+			IN_POWER = 10
+		};
+	};
+	struct PropOut {
+		enum Type {
+			SUCCESS,
+			SUCCESS_DAMPING_FINISHED,
+			ERROR_NO_ENERGY
+		};
+	};
+	struct PropIn {
+		enum Type {
+			DO_NOTHING,
+			BY_ANGLE,
+			FROM_CENTER,
+			TOWARD_CENTER,
+			ROTATION_CLOCKWISE,
+			ROTATION_COUNTERCLOCKWISE,
+			DAMP_ROTATION
+		};
+	};
 
-enum class SENSOR {
-    OUT = 5,
-    IN = 20,
-    INOUT_ANGLE = 21,
-    IN_MIN_MASS = 22,
-    IN_MAX_MASS = 23,
-    OUT_MASS = 24,
-    OUT_DISTANCE = 25
-};
-enum class SENSOR_IN {
-    DO_NOTHING,
-    SEARCH_VICINITY,
-    SEARCH_BY_ANGLE,
-    SEARCH_FROM_CENTER,
-    SEARCH_TOWARD_CENTER
-};
-enum class SENSOR_OUT {
-    NOTHING_FOUND,
-    CLUSTER_FOUND
-};
+	struct Scanner {
+		enum Type {
+			OUT = 5,
+			INOUT_CELL_NUMBER = 12,
+			OUT_MASS = 13,
+			OUT_ENERGY = 14,
+			OUT_ANGLE = 15,
+			OUT_DISTANCE = 16,
+			OUT_CELL_MAX_CONNECTIONS = 17,
+			OUT_CELL_BRANCH_NO = 18,
+			OUT_CELL_FUNCTION = 19,
+			OUT_CELL_FUNCTION_DATA = 40
+		};
+	};
+	struct ScannerOut {
+		enum Type {
+			SUCCESS,
+			FINISHED,
+			RESTART
+		};
+	};
 
-enum class WEAPON {
-    OUT = 5,
-};
-enum class WEAPON_OUT {
-    NO_TARGET,
-    STRIKE_SUCCESSFUL
-};
+	struct Sensor {
+		enum Type {
+			OUT = 5,
+			IN = 20,
+			INOUT_ANGLE = 21,
+			IN_MIN_MASS = 22,
+			IN_MAX_MASS = 23,
+			OUT_MASS = 24,
+			OUT_DISTANCE = 25
+		};
+	};
+	struct SensorIn {
+		enum Type {
+			DO_NOTHING,
+			SEARCH_VICINITY,
+			SEARCH_BY_ANGLE,
+			SEARCH_FROM_CENTER,
+			SEARCH_TOWARD_CENTER
+		};
+	};
+	struct SensorOut {
+		enum Type {
+			NOTHING_FOUND,
+			CLUSTER_FOUND
+		};
+	};
+
+	struct Weapon {
+		enum Type {
+			OUT = 5,
+		};
+	};
+	struct WeaponOut {
+		enum Type {
+			NO_TARGET,
+			STRIKE_SUCCESSFUL
+		};
+	};
+}
 
 #endif // CONSTANTS_H

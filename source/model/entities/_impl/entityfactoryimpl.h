@@ -21,6 +21,9 @@ public:
         , int tokenAccessNumber = 0, QVector3D relPos = QVector3D()) const override;
 
 	Token* buildToken (SimulationContext* context) const override;
+	Token* buildToken(SimulationContext* context, qreal energy) const override;
+	Token* buildToken (SimulationContext* context, qreal energy, QByteArray const& memory) const override;
+	Token* buildTokenWithRandomData (SimulationContext* context, qreal energy) const override;
 
     EnergyParticle* buildEnergyParticle(SimulationContext* context) const override;
     EnergyParticle* buildEnergyParticle(qreal energy, QVector3D pos, QVector3D vel

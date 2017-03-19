@@ -246,7 +246,7 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 	_metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
 
     //update data for cell function: computer
-    if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
+    if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
@@ -393,7 +393,7 @@ void MicroEditor::reclustered (QList< CellCluster* > clusters)
 			_metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
 
             //update computer code editor
-            if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
+            if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
                 //_computerCodeEditor->update(_focusCellReduced.computerCode);
             }
         }
@@ -412,7 +412,7 @@ void MicroEditor::requestUpdate ()
     if( _focusCell ) {
 
          //save edited code from code editor
-        if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
+        if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
             QString code = _cellComputerEdit->getComputerCode();
 			CellMetadata meta = getCellMetadata(_focusCell);
 			meta.computerSourcecode = code;
@@ -650,7 +650,7 @@ void MicroEditor::changesFromCellEditor (CellTO newCellProperties)
     }
 
     //update data for cell function: computer
-    if( _focusCellReduced.cellFunctionType == CellFunctionType::COMPUTER ) {
+    if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
