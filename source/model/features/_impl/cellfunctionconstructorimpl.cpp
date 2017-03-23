@@ -157,7 +157,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
     //save relative position of cells
     QList< QVector3D > relPosCells;
     foreach( Cell* otherCell, cluster->getCellsRef() )
-        relPosCells << otherCell->getRelPos();
+        relPosCells << otherCell->getRelPosition();
 
     //construction already in progress?
     if( constructionCell ) {
@@ -177,7 +177,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             //calc possible angle for rotation of the construction site
             qreal minAngleConstrSite = 360.0;
             foreach( Cell* otherCell, constructionSite ) {
-                qreal r = (otherCell->getRelPos() - constructionCell->getRelPos()).length();
+                qreal r = (otherCell->getRelPosition() - constructionCell->getRelPosition()).length();
                 if( _parameters->CRIT_CELL_DIST_MAX < (2.0*r) ) {
                     qreal a = qAbs(2.0*qAsin(_parameters->CRIT_CELL_DIST_MAX/(2.0*r))*radToDeg);
                     if( a < minAngleConstrSite )
@@ -186,7 +186,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             }
             qreal minAngleConstructor = 360.0;
             foreach( Cell* otherCell, constructor ) {
-                qreal r = (otherCell->getRelPos() - constructionCell->getRelPos()).length();
+                qreal r = (otherCell->getRelPosition() - constructionCell->getRelPosition()).length();
                 if( _parameters->CRIT_CELL_DIST_MAX < (2.0*r) ) {
                     qreal a = qAbs(2.0*qAsin(_parameters->CRIT_CELL_DIST_MAX/(2.0*r))*radToDeg);
                     if( a < minAngleConstructor )
@@ -201,9 +201,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             qreal angMassConstrSite = 0.0;
             qreal angMassConstructor = 0.0;
             foreach( Cell* otherCell, constructionSite )
-                angMassConstrSite = angMassConstrSite + (otherCell->getRelPos() - constructionCell->getRelPos()).lengthSquared();
+                angMassConstrSite = angMassConstrSite + (otherCell->getRelPosition() - constructionCell->getRelPosition()).lengthSquared();
             foreach( Cell* otherCell, constructor )
-                angMassConstructor = angMassConstructor + (otherCell->getRelPos() - constructionCell->getRelPos()).lengthSquared();
+                angMassConstructor = angMassConstructor + (otherCell->getRelPosition() - constructionCell->getRelPosition()).lengthSquared();
 
             //calc angles for construction site and constructor
             qreal angleConstrSite = angMassConstructor*angleSum/(angMassConstrSite + angMassConstructor);
@@ -235,22 +235,22 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             //calc rigid tranformation for construction site and constructor
             QMatrix4x4 transformConstrSite;
             transformConstrSite.setToIdentity();
-            transformConstrSite.translate(constructionCell->getRelPos());
+            transformConstrSite.translate(constructionCell->getRelPosition());
             transformConstrSite.rotate(angleConstrSite, 0.0, 0.0, 1.0);
-            transformConstrSite.translate(-constructionCell->getRelPos());
+            transformConstrSite.translate(-constructionCell->getRelPosition());
 
             QMatrix4x4 transformConstructor;
             transformConstructor.setToIdentity();
-            transformConstructor.translate(constructionCell->getRelPos());
+            transformConstructor.translate(constructionCell->getRelPosition());
             transformConstructor.rotate(-angleConstructor, 0.0, 0.0, 1.0);
-            transformConstructor.translate(-constructionCell->getRelPos());
+            transformConstructor.translate(-constructionCell->getRelPosition());
 
             //apply rigid transformation to construction site and constructor
             cluster->clearCellsFromMap();
             foreach( Cell* otherCell, constructionSite )
-                otherCell->setRelPos(transformConstrSite.map(otherCell->getRelPos()));
+                otherCell->setRelPosition(transformConstrSite.map(otherCell->getRelPosition()));
             foreach( Cell* otherCell, constructor )
-                otherCell->setRelPos(transformConstructor.map(otherCell->getRelPos()));
+                otherCell->setRelPosition(transformConstructor.map(otherCell->getRelPosition()));
 
             //only rotation?
             if( performRotationOnly ) {
@@ -271,7 +271,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                     //restore cluster
                     foreach( Cell* otherCell, cluster->getCellsRef() ) {
-                        otherCell->setRelPos(relPosCells.first());
+                        otherCell->setRelPosition(relPosCells.first());
                         relPosCells.removeFirst();
                     }
                     cluster->drawCellsToMap();
@@ -289,7 +289,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                         //restore construction site
                         foreach( Cell* otherCell, cluster->getCellsRef() ) {
-                            otherCell->setRelPos(relPosCells.first());
+                            otherCell->setRelPosition(relPosCells.first());
                             relPosCells.removeFirst();
                         }
                         cluster->drawCellsToMap();
@@ -311,7 +311,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             else {
 
                 //calc translation vector for construction site
-                QVector3D transOld = constructionCell->getRelPos() - cell->getRelPos();
+                QVector3D transOld = constructionCell->getRelPosition() - cell->getRelPosition();
                 QVector3D trans = transOld.normalized() * len;
                 QVector3D transFinish(0.0, 0.0, 0.0);
                 if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
@@ -322,10 +322,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //shift construction site
                 foreach( Cell* otherCell, constructionSite )
-                    otherCell->setRelPos(otherCell->getRelPos() + trans + transFinish);
+                    otherCell->setRelPosition(otherCell->getRelPosition() + trans + transFinish);
 
                 //calc position for new cell
-                QVector3D pos = cluster->relToAbsPos(cell->getRelPos() + transOld + transFinish);
+                QVector3D pos = cluster->relToAbsPos(cell->getRelPosition() + transOld + transFinish);
 
                 //estimate expended energy for new cell
                 qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
@@ -347,7 +347,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                     //restore construction site
                     foreach( Cell* otherCell, cluster->getCellsRef() ) {
-                        otherCell->setRelPos(relPosCells.first());
+                        otherCell->setRelPosition(relPosCells.first());
                         relPosCells.removeFirst();
                     }
                     cluster->drawCellsToMap();
@@ -379,7 +379,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         cluster->removeCell(newCell);
                         delete newCell;
                         foreach( Cell* otherCell, cluster->getCellsRef() ) {
-                            otherCell->setRelPos(relPosCells.first());
+                            otherCell->setRelPosition(relPosCells.first());
                             relPosCells.removeFirst();
                         }
                         cluster->updateAngularMass();
@@ -400,7 +400,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                     if( (otherCell->getNumConnections() < _parameters->MAX_CELL_CONNECTIONS)
                             && (newCell->getNumConnections() < _parameters->MAX_CELL_CONNECTIONS)
                             && (otherCell !=constructionCell ) ) {
-                        if (_topology->displacement(newCell->getRelPos(), otherCell->getRelPos()).length() <= (_parameters->CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
+                        if (_topology->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (_parameters->CRIT_CELL_DIST_MAX + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( tokenMem.at(Enums::Constr::IN_CELL_MAX_CONNECTIONS) == 0 ) {
@@ -578,7 +578,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         cluster->removeCell(newCell);
                         delete newCell;
                         foreach( Cell* otherCell, cluster->getCellsRef() ) {
-                            otherCell->setRelPos(relPosCells.first());
+                            otherCell->setRelPosition(relPosCells.first());
                             relPosCells.removeFirst();
                         }
                         cluster->drawCellsToMap();

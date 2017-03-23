@@ -1,5 +1,5 @@
-#ifndef ENERGY_H
-#define ENERGY_H
+#ifndef ENERGYPARTICLE_H
+#define ENERGYPARTICLE_H
 
 #include <QVector3D>
 
@@ -8,27 +8,27 @@
 class EnergyParticle
 {
 public:
-    EnergyParticle (SimulationContext* context);
-    EnergyParticle (qreal amount_, QVector3D pos_, QVector3D vel_, SimulationContext* context);
+	virtual ~EnergyParticle() {}
 
-    bool movement (CellCluster*& cluster);
+    virtual bool movement (CellCluster*& cluster) = 0;
 
-    void serializePrimitives (QDataStream& stream);
-    void deserializePrimitives (QDataStream& stream);
+	virtual qreal getEnergy() const = 0;
+	virtual void setEnergy(qreal value) = 0;
 
-public:
-    qreal amount = 0.0;
-    QVector3D pos;
-    QVector3D vel;
-    quint64 id = 0;
-    quint8 color = 0;
+	virtual QVector3D getPosition () const = 0;
+	virtual void setPosition(QVector3D value) = 0;
 
-private:
-    SimulationContext* _context = nullptr;
-	Topology* _topology = nullptr;
-	CellMap* _cellMap = nullptr;
-	EnergyParticleMap* _energyMap = nullptr;
-	SimulationParameters* _parameters = nullptr;
+	virtual QVector3D getVelocity() const = 0;
+	virtual void setVelocity(QVector3D value) = 0;
+
+	virtual quint64 getId() const = 0;
+	virtual void setId(quint64 value) = 0;
+
+	virtual EnergyParticleMetadata getMetadata() const = 0;
+	virtual void setMetadata(EnergyParticleMetadata value) = 0;
+
+    virtual void serializePrimitives (QDataStream& stream) const = 0;
+	virtual void deserializePrimitives (QDataStream& stream) = 0;
 };
 
-#endif // ENERGY_H
+#endif // ENERGYPARTICLE_H

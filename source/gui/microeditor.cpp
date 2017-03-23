@@ -355,9 +355,9 @@ void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
     //update data for editor if particle is focused (we also use cluster editor)
     if( _focusEnergyParticle == e ) {
         _context->lock();
-        QVector3D pos = e->pos;
-        QVector3D vel = e->vel;
-        qreal energyValue = e->amount;
+        auto pos = e->getPosition();
+        auto vel = e->getVelocity();
+        auto energyValue = e->getEnergy();
         _context->unlock();
         _energyEditor->updateEnergyParticle(pos, vel, energyValue);
     }
@@ -696,11 +696,11 @@ void MicroEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel,
 
     //update energy particle (we do this without informing the simulator...)
     _context->lock();
-	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->pos, 0);
-    _focusEnergyParticle->pos = pos;
-    _focusEnergyParticle->vel = vel;
-    _focusEnergyParticle->amount = energyValue;
-	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->pos, _focusEnergyParticle);
+	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->getPosition(), 0);
+    _focusEnergyParticle->setPosition(pos);
+    _focusEnergyParticle->setVelocity(vel);
+    _focusEnergyParticle->setEnergy(energyValue);
+	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->getPosition(), _focusEnergyParticle);
     _context->unlock();
 
     //emit signal to notify other instances

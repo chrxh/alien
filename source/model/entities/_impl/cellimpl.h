@@ -52,8 +52,8 @@ public:
     QVector3D calcPosition (bool topologyCorrection = false) const override;
     void setAbsPosition (QVector3D pos) override;
     void setAbsPositionAndUpdateMap (QVector3D pos) override;
-    QVector3D getRelPos () const override;
-    void setRelPos (QVector3D relPos) override;
+    QVector3D getRelPosition () const override;
+    void setRelPosition (QVector3D relPos) override;
 
     int getTokenAccessNumber () const override;
     void setTokenAccessNumber (int i) override;
@@ -63,8 +63,8 @@ public:
     qreal getEnergyIncludingTokens() const override;
     void setEnergy (qreal i) override;
 
-    QVector3D getVel () const override;
-    void setVel (QVector3D vel) override;
+    QVector3D getVelocity () const override;
+    void setVelocity (QVector3D vel) override;
     int getProtectionCounter () const override;
     void setProtectionCounter (int counter) override;
     bool isToBeKilled() const override;

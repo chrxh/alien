@@ -36,11 +36,9 @@ qreal SimulationUnit::calcTransEnergy ()
 {
     qreal transEnergy(0.0);
     foreach(CellCluster* cluster, _context->getClustersRef()) {
-        if( !cluster->isEmpty() )
-            transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(),
-                                                  cluster->getVel(),
-                                                  0.0,
-                                                  0.0);
+		if (!cluster->isEmpty()) {
+			transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVel(), 0.0, 0.0);
+		}
     }
     return transEnergy;
 }
@@ -48,12 +46,10 @@ qreal SimulationUnit::calcTransEnergy ()
 qreal SimulationUnit::calcRotEnergy ()
 {
     qreal rotEnergy(0.0);
-    foreach( CellCluster* cluster, _context->getClustersRef() ) {
-        if( cluster->getMass() > 1.0 )
-            rotEnergy += Physics::kineticEnergy(0.0,
-                                                QVector3D(0.0, 0.0, 0.0),
-                                                cluster->getAngularMass(),
-                                                cluster->getAngularVel());
+	foreach(CellCluster* cluster, _context->getClustersRef()) {
+		if (cluster->getMass() > 1.0) {
+			rotEnergy += Physics::kineticEnergy(0.0, QVector3D(), cluster->getAngularMass(), cluster->getAngularVel());
+		}
     }
     return rotEnergy;
 }
@@ -69,7 +65,7 @@ qreal SimulationUnit::calcInternalEnergy ()
         }
     }
     foreach( EnergyParticle* energyParticle, _context->getEnergyParticlesRef() ) {
-        internalEnergy += energyParticle->amount;
+        internalEnergy += energyParticle->getEnergy();
     }
     return internalEnergy;
 }

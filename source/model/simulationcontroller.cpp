@@ -276,10 +276,10 @@ void SimulationController::addRandomEnergy (qreal energy, qreal maxEnergyPerPart
         qreal posY = GlobalFunctions::random(0.0, _context->getTopology()->getSize().x);
         qreal velX = GlobalFunctions::random(-1.0, 1.0);
         qreal velY = GlobalFunctions::random(-1.0, 1.0);
-
-        EnergyParticle* e = new EnergyParticle(rEnergy, QVector3D(posX, posY, 0.0), QVector3D(velX, velY, 0.0), _context);
+		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
+        EnergyParticle* e = factory->buildEnergyParticle(rEnergy, QVector3D(posX, posY, 0.0), QVector3D(velX, velY, 0.0), _context);
         _context->getEnergyParticlesRef() << e;
-        _context->getEnergyParticleMap()->setParticle(e->pos, e);
+        _context->getEnergyParticleMap()->setParticle(e->getPosition(), e);
         energy -= rEnergy;
     }
     _context->unlock();
@@ -343,8 +343,8 @@ void SimulationController::loadCell(QDataStream& stream, QVector3D pos, bool dra
 	QList< Cell* > newCells;
 	Cell* newCell = facade->deserializeFeaturedCell(stream, _context);
     newCells << newCell;
-    newCells[0]->setRelPos(QVector3D());
-    CellCluster* newCluster = factory->buildCellCluster(newCells, 0, pos, 0, newCell->getVel(), _context);
+    newCells[0]->setRelPosition(QVector3D());
+    CellCluster* newCluster = factory->buildCellCluster(newCells, 0, pos, 0, newCell->getVelocity(), _context);
     _context->getClustersRef() << newCluster;
 
     //read old cluster id
@@ -404,7 +404,7 @@ void SimulationController::loadExtendedSelection (QDataStream& stream, QVector3D
     //read energy particle data
     for(int i = 0; i < numEnergyParticles; ++i) {
         EnergyParticle* e = facade->deserializeEnergyParticle(stream, _context);
-        center += e->pos;
+        center += e->getPosition();
         newEnergyParticles << e;
     }
     _context->getEnergyParticlesRef() << newEnergyParticles;
@@ -418,9 +418,9 @@ void SimulationController::loadExtendedSelection (QDataStream& stream, QVector3D
             cluster->drawCellsToMap();
     }
     foreach(EnergyParticle* e, newEnergyParticles) {
-        e->pos = e->pos-center+pos;
+        e->setPosition(e->getPosition()-center+pos);
         if( drawToMap )
-            _context->getEnergyParticleMap()->setParticle(e->pos, e);
+            _context->getEnergyParticleMap()->setParticle(e->getPosition(), e);
     }
     _context->unlock();
 }
@@ -432,7 +432,7 @@ void SimulationController::delSelection (QList< Cell* > cells, QList< EnergyPart
     //remove energy particles
     foreach(EnergyParticle* e, es) {
         _context->getEnergyParticlesRef().removeAll(e);
-		_context->getEnergyParticleMap()->removeParticleIfPresent(e->pos, e);
+		_context->getEnergyParticleMap()->removeParticleIfPresent(e->getPosition(), e);
         delete e;
     }
 
@@ -480,7 +480,7 @@ void SimulationController::delExtendedSelection (QList< CellCluster* > clusters,
     //remove energy particles
     foreach(EnergyParticle* e, es) {
         _context->getEnergyParticlesRef().removeAll(e);
-		_context->getEnergyParticleMap()->removeParticleIfPresent(e->pos, e);
+		_context->getEnergyParticleMap()->removeParticleIfPresent(e->getPosition(), e);
         delete e;
     }
 
@@ -509,7 +509,7 @@ void SimulationController::rotateExtendedSelection (qreal angle, const QList< Ce
         cluster->setCenterPosition(transform.map(cluster->getPosition()));
     }
     foreach(EnergyParticle* e, es) {
-        e->pos = transform.map(e->pos);
+        e->setPosition(transform.map(e->getPosition()));
     }
     _context->unlock();
 }
@@ -523,7 +523,9 @@ void SimulationController::setVelocityXExtendedSelection (qreal velX, const QLis
         cluster->setVel(vel);
     }
     foreach(EnergyParticle* e, es) {
-        e->vel.setX(velX);
+		auto vel = e->getVelocity();
+		vel.setX(velX);
+		e->setVelocity(vel);
     }
     _context->unlock();
 }
@@ -537,7 +539,9 @@ void SimulationController::setVelocityYExtendedSelection (qreal velY, const QLis
         cluster->setVel(vel);
     }
     foreach(EnergyParticle* e, es) {
-        e->vel.setY(velY);
+		auto vel = e->getVelocity();
+		vel.setY(velY);
+		e->setVelocity(vel);
     }
     _context->unlock();
 }
@@ -565,7 +569,7 @@ QVector3D SimulationController::getCenterPosExtendedSelection (const QList< Cell
         numCells += cluster->getCellsRef().size();
     }
     foreach(EnergyParticle* e, es) {
-        center += e->pos;
+        center += e->getPosition();
     }
     _context->unlock();
 
@@ -580,7 +584,7 @@ void SimulationController::drawToMapExtendedSelection (const QList< CellCluster*
         cluster->drawCellsToMap();
     }
     foreach(EnergyParticle* e, es) {
-		_context->getEnergyParticleMap()->setParticle(e->pos, e);
+		_context->getEnergyParticleMap()->setParticle(e->getPosition(), e);
     }
     _context->unlock();
 }
@@ -608,7 +612,8 @@ void SimulationController::newEnergyParticle (QVector3D pos)
 {
     //create energy particle
     _context->lock();
-    EnergyParticle* energy = new EnergyParticle(_context->getSimulationParameters()->CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _context);
+	auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
+    EnergyParticle* energy = factory->buildEnergyParticle(_context->getSimulationParameters()->CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _context);
 	_context->getEnergyParticleMap()->setParticle(pos, energy);
     _context->getEnergyParticlesRef() << energy;
     _context->unlock();

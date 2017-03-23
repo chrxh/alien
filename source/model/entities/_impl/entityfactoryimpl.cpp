@@ -1,7 +1,6 @@
 #include "global/servicelocator.h"
 
-#include "model/entities/energyparticle.h"
-
+#include "energyparticleimpl.h"
 #include "cellimpl.h"
 #include "cellclusterimpl.h"
 #include "tokenimpl.h"
@@ -67,11 +66,11 @@ Token * EntityFactoryImpl::buildTokenWithRandomData(SimulationContext* context, 
 
 EnergyParticle* EntityFactoryImpl::buildEnergyParticle(SimulationContext* context) const
 {
-    return new EnergyParticle(context);
+    return new EnergyParticleImpl(context);
 }
 
 EnergyParticle *EntityFactoryImpl::buildEnergyParticle(qreal energy, QVector3D pos, QVector3D vel
     , SimulationContext *context) const
 {
-    return new EnergyParticle(energy, pos, vel, context);
+    return new EnergyParticleImpl(energy, pos, vel, context);
 }

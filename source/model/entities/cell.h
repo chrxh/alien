@@ -47,8 +47,8 @@ public:
     virtual QVector3D calcPosition (bool topologyCorrection = false) const = 0;
     virtual void setAbsPosition (QVector3D pos) = 0;
     virtual void setAbsPositionAndUpdateMap (QVector3D pos) = 0;
-    virtual QVector3D getRelPos () const = 0;
-    virtual void setRelPos (QVector3D relPos) = 0;
+    virtual QVector3D getRelPosition () const = 0;
+    virtual void setRelPosition (QVector3D relPos) = 0;
 
     virtual int getTokenAccessNumber () const = 0;
     virtual void setTokenAccessNumber (int i) = 0;
@@ -58,8 +58,8 @@ public:
     virtual qreal getEnergyIncludingTokens() const = 0;
     virtual void setEnergy (qreal i) = 0;
 
-    virtual QVector3D getVel () const = 0;
-    virtual void setVel (QVector3D vel) = 0;
+    virtual QVector3D getVelocity () const = 0;
+    virtual void setVelocity (QVector3D vel) = 0;
     virtual int getProtectionCounter () const = 0;
     virtual void setProtectionCounter (int counter) = 0;
     virtual bool isToBeKilled() const = 0;
