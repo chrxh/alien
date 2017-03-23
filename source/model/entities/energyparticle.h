@@ -10,7 +10,7 @@ class EnergyParticle
 public:
 	virtual ~EnergyParticle() {}
 
-    virtual bool movement (CellCluster*& cluster) = 0;
+    virtual bool processingMovement (CellCluster*& cluster) = 0;
 
 	virtual qreal getEnergy() const = 0;
 	virtual void setEnergy(qreal value) = 0;
