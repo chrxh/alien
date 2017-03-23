@@ -53,7 +53,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 
             //calc relative angle
             QVector3D dir  = _topology->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
-            qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos());
+            qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             tokenMem[Enums::Sensor::INOUT_ANGLE] = CodingPhysicalQuantities::convertAngleToData(relAngle);
 
@@ -89,7 +89,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
     QVector3D dir(0.0, 0.0, 0.0);
     if( cmd == Enums::SensorIn::SEARCH_BY_ANGLE ) {
         qreal relAngle = CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Sensor::INOUT_ANGLE]);
-        qreal angle = Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos()) + cluster->getAngle() + relAngle;
+        qreal angle = Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition()) + cluster->getAngle() + relAngle;
         dir = Physics::unitVectorOfAngle(angle);
     }
     if( cmd == Enums::SensorIn::SEARCH_FROM_CENTER ) {

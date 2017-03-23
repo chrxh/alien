@@ -186,7 +186,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level2</WarningLevel>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
@@ -609,6 +609,7 @@
     <ClInclude Include="..\..\source\model\entities\token.h" />
     <ClInclude Include="..\..\source\model\entities\_impl\cellclusterimpl.h" />
     <ClInclude Include="..\..\source\model\entities\_impl\cellimpl.h" />
+    <ClInclude Include="..\..\source\model\entities\_impl\energyparticleimpl.h" />
     <ClInclude Include="..\..\source\model\entities\_impl\entityfactoryimpl.h" />
     <ClInclude Include="..\..\source\model\alienfacade.h" />
     <ClInclude Include="..\..\source\model\entities\_impl\tokenimpl.h" />
@@ -629,6 +630,7 @@
     <ClInclude Include="..\..\source\model\features\_impl\energyguidanceimpl.h" />
     <ClInclude Include="..\..\source\model\metadata\cellclustermetadata.h" />
     <ClInclude Include="..\..\source\model\metadata\cellmetadata.h" />
+    <ClInclude Include="..\..\source\model\metadata\energyparticlemetadata.h" />
     <ClInclude Include="..\..\source\model\metadata\symboltable.h" />
     <ClInclude Include="..\..\source\model\physics\codingphysicalquantities.h" />
     <ClInclude Include="..\..\source\model\physics\physics.h" />
@@ -724,9 +726,9 @@
     <ClCompile Include="..\..\source\model\definitions.cpp" />
     <ClCompile Include="..\..\source\model\energyparticlemap.cpp" />
     <ClCompile Include="..\..\source\model\entities\cellto.cpp" />
-    <ClCompile Include="..\..\source\model\entities\energyparticle.cpp" />
     <ClCompile Include="..\..\source\model\entities\_impl\cellclusterimpl.cpp" />
     <ClCompile Include="..\..\source\model\entities\_impl\cellimpl.cpp" />
+    <ClCompile Include="..\..\source\model\entities\_impl\energyparticleimpl.cpp" />
     <ClCompile Include="..\..\source\model\entities\_impl\entityfactoryimpl.cpp" />
     <ClCompile Include="..\..\source\model\entities\_impl\tokenimpl.cpp" />
     <ClCompile Include="..\..\source\model\features\cellfeature.cpp" />

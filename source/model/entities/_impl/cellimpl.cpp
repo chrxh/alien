@@ -331,12 +331,12 @@ void CellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
         _cellMap->setCell(pos, this);
 }
 
-QVector3D CellImpl::getRelPos () const
+QVector3D CellImpl::getRelPosition () const
 {
     return _relPos;
 }
 
-void CellImpl::setRelPos (QVector3D relPos)
+void CellImpl::setRelPosition (QVector3D relPos)
 {
     _relPos = relPos;
 }
@@ -382,12 +382,12 @@ void CellImpl::setEnergy (qreal i)
     _energy = i;
 }
 
-QVector3D CellImpl::getVel () const
+QVector3D CellImpl::getVelocity () const
 {
     return _vel;
 }
 
-void CellImpl::setVel (QVector3D vel)
+void CellImpl::setVelocity (QVector3D vel)
 {
     _vel = vel;
 }

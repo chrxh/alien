@@ -14,6 +14,7 @@
 
 #include "model/metadata/cellmetadata.h"
 #include "model/metadata/cellclustermetadata.h"
+#include "model/metadata/energyparticlemetadata.h"
 
 class Cell;
 class CellCluster;
