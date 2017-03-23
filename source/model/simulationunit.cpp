@@ -159,15 +159,15 @@ void SimulationUnit::calcNextTimestep ()
     while (p.hasNext()) {
         EnergyParticle* e(p.next());
         CellCluster* cluster(0);
-        if( e->movement(cluster) ) {
+		if (!e->processingMovement(cluster)) {
 
-            //transform into cell?
-            if( cluster ) {
-                _context->getClustersRef() << cluster;
-            }
-            delete e;
-            p.remove();
-        }
+			//transform into cell?
+			if (cluster) {
+				_context->getClustersRef() << cluster;
+			}
+			delete e;
+			p.remove();
+		}
     }
 
     _context->unlock();
