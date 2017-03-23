@@ -150,9 +150,9 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
         return;
 	_context->lock();
 
-    if( _energyItems.contains(e->id) ) {
-        QVector3D pos = e->pos;
-        EnergyGraphicsItem* eItem = _energyItems[e->id];
+    if( _energyItems.contains(e->getId()) ) {
+        QVector3D pos = e->getPosition();
+        EnergyGraphicsItem* eItem = _energyItems[e->getId()];
 		_context->getTopology()->correctPosition(pos);
         eItem->setPos(pos.x(), pos.y());
     }
@@ -205,7 +205,7 @@ void ShapeUniverse::delSelection (QList< Cell* >& cells, QList< EnergyParticle* 
     //del focused energy particles
     foreach( EnergyGraphicsItem* eItem, _focusEnergyParticles ) {
         es << eItem->getEnergyParticle();
-        _energyItems.remove(eItem->getEnergyParticle()->id);
+        _energyItems.remove(eItem->getEnergyParticle()->getId());
         delete eItem;
     }
     _focusEnergyParticles.clear();
@@ -259,7 +259,7 @@ void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList
     //del focused energy particles
     foreach( EnergyGraphicsItem* eItem, _focusEnergyParticles ) {
         es << eItem->getEnergyParticle();
-        _energyItems.remove(eItem->getEnergyParticle()->id);
+        _energyItems.remove(eItem->getEnergyParticle()->getId());
         delete eItem;
     }
     _focusEnergyParticles.clear();
@@ -523,20 +523,21 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 //update new position to the energy particle on our own
                 EnergyParticle* energy = eItem->getEnergyParticle();
                 _context->lock();
-                energyMap->setParticle(energy->pos, 0);
+                energyMap->setParticle(energy->getPosition(), nullptr);
 
                 //not [left and right] mouse button pressed?
                 if( (!leftButton) || (!rightButton) ) {
-                    energy->pos = energy->pos + delta;
+                    energy->setPosition(energy->getPosition() + delta);
                 }
                 else {
-                    energy->pos = transform.map(energy->pos);
+                    energy->setPosition(transform.map(energy->getPosition()));
                 }
 
-                energyMap->setParticle(energy->pos, energy);
+                energyMap->setParticle(energy->getPosition(), energy);
                 _context->unlock();
 //                QPointF p = eItem->pos();
-                eItem->setPos(energy->pos.x(), energy->pos.y());
+				auto particlePos = energy->getPosition();
+                eItem->setPos(particlePos.x(), particlePos.y());
 
                 //inform other instances about cell cluster changes
                 emit energyParticleUpdated(energy);
@@ -609,12 +610,12 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 EnergyGraphicsItem* ShapeUniverse::createEnergyItem (EnergyParticle* e)
 {
     //create item
-    QVector3D pos(e->pos);
+    QVector3D pos(e->getPosition());
     EnergyGraphicsItem* eItem = new EnergyGraphicsItem(e, pos.x(), pos.y());
     QGraphicsScene::addItem(eItem);
 
     //register item
-    _energyItems[e->id] = eItem;
+    _energyItems[e->getId()] = eItem;
     return eItem;
 }
 
@@ -711,7 +712,7 @@ void ShapeUniverse::highlightEnergyParticle (EnergyGraphicsItem* e)
 
     //focus energy particle
     e->setFocusState(EnergyGraphicsItem::FOCUS);
-    _highlightedEnergyParticles[e->getEnergyParticle()->id] = e;
+    _highlightedEnergyParticles[e->getEnergyParticle()->getId()] = e;
 }
 
 void ShapeUniverse::setCellColorFromMetadata ()

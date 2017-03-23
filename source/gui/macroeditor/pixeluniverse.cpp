@@ -75,7 +75,7 @@ void PixelUniverse::universeUpdated (SimulationContext* context)
             //draw energy particle
 			EnergyParticle* energy(energyMap->getParticleFast(pos));
             if( energy ) {
-                quint32 e(energy->amount+10);
+                quint32 e(energy->getEnergy()+10);
                 e *= 5;
                 if( e > 150)
                     e = 150;
@@ -345,7 +345,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
                 Cell* cell = itCell.value();
 
                 //apply force
-                cell->setVel(cell->getVel() + dir*dist*cell->getCluster()->getMass()*0.05);
+                cell->setVelocity(cell->getVelocity() + dir*dist*cell->getCluster()->getMass()*0.05);
             }
 
             //calc effective velocities of the clusters

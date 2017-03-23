@@ -69,7 +69,7 @@ void EnergyParticleMap::serializePrimitives(QDataStream & stream) const
 		for (qint32 y = 0; y < size.y; ++y) {
 			EnergyParticle* e = _energyGrid[x][y];
 			if (e) {
-				stream << x << y << e->id;
+				stream << x << y << e->getId();
 			}
 
 		}

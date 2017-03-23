@@ -280,6 +280,8 @@ Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream, Simulation
 void SerializationFacadeImpl::serializeEnergyParticle(EnergyParticle* particle, QDataStream& stream) const
 {
 	particle->serializePrimitives(stream);
+	auto metadata = particle->getMetadata();
+	stream << metadata.color;
 }
 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
@@ -288,8 +290,11 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
     EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
     EnergyParticle* particle = factory->buildEnergyParticle(context);
     particle->deserializePrimitives(stream);
-    oldIdEnergyMap[particle->id] = particle;
-	particle->id = GlobalFunctions::createNewTag();
+	EnergyParticleMetadata metadata;
+	stream >> metadata.color;
+	particle->setMetadata(metadata);
+	oldIdEnergyMap[particle->getId()] = particle;
+	particle->setId(GlobalFunctions::createNewTag());
 	return particle;
 }
 
@@ -298,6 +303,9 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
 {
 	QMap< quint64, EnergyParticle* > temp;
 	EnergyParticle* particle = deserializeEnergyParticle(stream, temp, context);
-	particle->id = GlobalFunctions::createNewTag();
+	EnergyParticleMetadata metadata;
+	stream >> metadata.color;
+	particle->setMetadata(metadata);
+	particle->setId(GlobalFunctions::createNewTag());
 	return particle;
 }

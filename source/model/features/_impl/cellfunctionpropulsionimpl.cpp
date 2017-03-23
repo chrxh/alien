@@ -1,9 +1,11 @@
 #include <QtCore/qmath.h>
 
+#include "global/servicelocator.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/entities/token.h"
+#include "model/entities/entityfactory.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/config.h"
@@ -49,7 +51,7 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     //calc impulse angle
     QVector3D impulse(0.0, 0.0, 0.0);
     if( cmd == Enums::PropIn::BY_ANGLE ) {
-        qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPos() + previousCell->getRelPos())+cluster->getAngle()+ angle)*degToRad;
+        qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition())+cluster->getAngle()+ angle)*degToRad;
         impulse = QVector3D(qSin(thrustAngle), -qCos(thrustAngle), 0.0)*power;
     }
     if( cmd == Enums::PropIn::FROM_CENTER ) {
@@ -100,8 +102,10 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     if( token->getEnergy() >= (energyDiff + qAbs(energyDiff) + _parameters->MIN_TOKEN_ENERGY + ALIEN_PRECISION) ) {
 
         //create energy particle with difference energy
-        processingResult.newEnergyParticle = new EnergyParticle(qAbs(energyDiff), cluster->calcPosition(cell, _context)-impulse.normalized()
-            , tangVel-impulse.normalized()/4.0, _context);
+		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
+		processingResult.newEnergyParticle = factory->buildEnergyParticle(qAbs(energyDiff)
+			, cluster->calcPosition(cell, _context) - impulse.normalized()
+			, tangVel - impulse.normalized() / 4.0, _context);
 
         //update velocities
         cluster->setVel(newVel);
