@@ -10,7 +10,7 @@ public:
 	EnergyParticleImpl(SimulationContext* context);
 	EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, SimulationContext* context);
 
-	bool movement(CellCluster*& cluster) override;
+	bool processingMovement(CellCluster*& cluster) override;
 
 	virtual qreal getEnergy() const override;
 	virtual void setEnergy(qreal value) override;
@@ -31,6 +31,10 @@ public:
 	virtual void deserializePrimitives(QDataStream& stream) override;
 
 private:
+	void move();
+	void collisionWithEnergyParticle(EnergyParticle* otherEnergy);
+	void collisionWithCell(Cell* cell);
+
 	SimulationContext* _context = nullptr;
 	Topology* _topology = nullptr;
 	CellMap* _cellMap = nullptr;
