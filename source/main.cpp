@@ -19,18 +19,11 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
-//- Token-Konstruktor refaktorisieren
-//- in SimulationContext kommt noch
-//  - SimulationParameters
 
 //Model-Refactoring:
-//- factoryfacade in featuredcellfactory umbenennen
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
 //- suche nach "TODO"
-//- AlienSimulator::updateCell: Konzept für cell->setCellFunction(AlienCellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 //- Radiation als Feature
-//- SimulationSettings und MetadataManager über Grid erreichbar
-//- Grid zerteilen
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)
@@ -56,9 +49,6 @@
 //- große Cluster Verschieben=> werden nicht richtig gelöscht und neu gezeichnet...
 //- Arbeiten mit dem Makro-Editor bei laufender Simulation erzeugt Fehler (weil auf cells zugegriffen werden, die vielleicht nicht mehr existieren)
 //- Fehler bei der Winkelmessung in AlienCellFunctionScanner
-
-//TODO (nächstes Mal):
-//- CellFunction Sensor: nehegelegene Masse ab vorgegebener Größe orten
 
 //TODO (kurzfristig):
 //- Computer-Code-Editor: Meldung, wenn maximale Zeilen überschritten sind
