@@ -23,7 +23,7 @@ CellComputerEdit::CellComputerEdit(QWidget *parent) :
     ui->computerCodeLabel2->setPalette(p);
 
     //connections
-    connect(ui->computerMemoryEditor2, SIGNAL(dataChanged(QVector< quint8 >)), this, SIGNAL(changesFromComputerMemoryEditor(QVector< quint8 >)));
+    connect(ui->computerMemoryEditor2, SIGNAL(dataChanged(QByteArray)), this, SIGNAL(changesFromComputerMemoryEditor(QByteArray)));
     connect(ui->compileButton2, SIGNAL(clicked()), this, SLOT(compileButtonClicked_Slot()));
     connect(_timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
 }
@@ -33,7 +33,7 @@ CellComputerEdit::~CellComputerEdit()
     delete ui;
 }
 
-void CellComputerEdit::updateComputerMemory (const QVector< quint8 >& data)
+void CellComputerEdit::updateComputerMemory(QByteArray const& data)
 {
     ui->computerMemoryEditor2->update(data);
 }

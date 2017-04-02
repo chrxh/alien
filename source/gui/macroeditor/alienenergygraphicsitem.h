@@ -1,10 +1,10 @@
-#ifndef ALIENENERGYGRAPHICSITEM_H
-#define ALIENENERGYGRAPHICSITEM_H
+#ifndef ENERGYGRAPHICSITEM_H
+#define ENERGYGRAPHICSITEM_H
 
 #include <QGraphicsItem>
 
-class AlienEnergy;
-class AlienEnergyGraphicsItem : public QGraphicsItem
+class EnergyParticle;
+class EnergyGraphicsItem : public QGraphicsItem
 {
 public:
     enum FocusState {
@@ -16,20 +16,20 @@ public:
         Type = UserType + 2
     };
 
-    AlienEnergyGraphicsItem (QGraphicsItem* parent = 0);
-    AlienEnergyGraphicsItem (AlienEnergy* e, qreal x, qreal y, QGraphicsItem* parent = 0);
-    ~AlienEnergyGraphicsItem ();
+    EnergyGraphicsItem (QGraphicsItem* parent = 0);
+    EnergyGraphicsItem (EnergyParticle* e, qreal x, qreal y, QGraphicsItem* parent = 0);
+    ~EnergyGraphicsItem ();
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     int type() const;
 
     void setFocusState (FocusState focusState);
-    AlienEnergy* getEnergyParticle ();
+    EnergyParticle* getEnergyParticle ();
 
 private:
-    AlienEnergy* _e;
+    EnergyParticle* _e;
     FocusState _focusState;
 };
 
-#endif // ALIENENERGYGRAPHICSITEM_H
+#endif // ENERGYGRAPHICSITEM_H

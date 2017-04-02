@@ -1,9 +1,9 @@
 #ifndef SYMBOLEDIT_H
 #define SYMBOLEDIT_H
 
-#include "model/metadatamanager.h"
-
 #include <QWidget>
+
+#include "model/definitions.h"
 
 namespace Ui {
 class SymbolEdit;
@@ -18,7 +18,7 @@ public:
     explicit SymbolEdit(QWidget *parent = 0);
     ~SymbolEdit();
 
-    void loadSymbols (MetadataManager* meta);
+    void loadSymbols (SymbolTable* symbolTable);
 
 signals:
     void symbolTableChanged (); //current symbol table can be obtained from MetadataManager
@@ -32,7 +32,7 @@ private slots:
 private:
     Ui::SymbolEdit *ui;
 
-    MetadataManager* _meta;
+    SymbolTable* _symbolTable;
 };
 
 #endif // SYMBOLEDIT_H

@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "model/definitions.h"
+
 namespace Ui {
 class NewSimulationDialog;
 }
@@ -14,12 +16,12 @@ class NewSimulationDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit NewSimulationDialog(QWidget *parent = 0);
+	NewSimulationDialog(SimulationContext* context, QWidget* parent = 0);
     ~NewSimulationDialog();
 
-    int getSizeX ();
-    int getSizeY ();
-    qreal getEnergy ();
+    IntVector2D getSize();
+    qreal getEnergy();
+	SymbolTable const& getNewSymbolTableRef();
 
 private slots:
     void simulationParametersButtonClicked ();

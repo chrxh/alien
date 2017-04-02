@@ -1,16 +1,16 @@
+#include "gui/guisettings.h"
+#include "model/simulationparameters.h"
+
 #include "addrectstructuredialog.h"
 #include "ui_addrectstructuredialog.h"
 
-#include "gui/guisettings.h"
-#include "model/simulationsettings.h"
 
-AddRectStructureDialog::AddRectStructureDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::AddRectStructureDialog)
+AddRectStructureDialog::AddRectStructureDialog(SimulationParameters* simulationParameters, QWidget *parent)
+	: QDialog(parent), ui(new Ui::AddRectStructureDialog)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
-    ui->energyEdit->setText(QString("%1").arg(simulationParameters.NEW_CELL_ENERGY));
+    ui->energyEdit->setText(QString("%1").arg(simulationParameters->NEW_CELL_ENERGY));
 }
 
 AddRectStructureDialog::~AddRectStructureDialog()

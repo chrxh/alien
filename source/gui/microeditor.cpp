@@ -1,6 +1,18 @@
-#include "microeditor.h"
-//#include "ui_microeditor.h"
+#include <QTabWidget>
+#include <QToolButton>
+#include <QLabel>
+#include <QTextEdit>
+#include <QEvent>
 
+#include "model/simulationparameters.h"
+#include "model/simulationcontext.h"
+#include "model/energyparticlemap.h"
+#include "model/alienfacade.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
+#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 #include "microeditor/tokentab.h"
 #include "microeditor/celledit.h"
 #include "microeditor/clusteredit.h"
@@ -8,36 +20,23 @@
 #include "microeditor/hexedit.h"
 #include "microeditor/metadataedit.h"
 #include "microeditor/symboledit.h"
-//#include "microeditor/computercodeedit.h"
 #include "microeditor/cellcomputeredit.h"
-#include "gui/editorsettings.h"
-#include "gui/guisettings.h"
-#include "model/simulationsettings.h"
-#include "model/metadatamanager.h"
-#include "model/entities/aliencell.h"
-#include "model/entities/aliencellcluster.h"
-#include "model/entities/aliengrid.h"
-#include "model/processing/aliencellfunction.h"
-#include "model/processing/aliencellfunctionfactory.h"
+#include "global/servicelocator.h"
 
-#include <QTabWidget>
-#include <QToolButton>
-#include <QLabel>
-#include <QTextEdit>
-#include <QEvent>
+#include "microeditor.h"
 
 const int tabPosX1 = 410;
 const int tabPosX2 = 810;
 
-MicroEditor::MicroEditor(QObject *parent) :
-    QObject(parent),
-//    ui(new Ui::MicroEditor),
-    _focusCell(0),
-    _focusEnergyParticle(0),
-    _currentClusterTab(0),
-    _currentTokenTab(0),
-    _pasteTokenPossible(false),
-    _savedTokenEnergy(0)
+MicroEditor::MicroEditor(SimulationContext* context, QObject *parent)
+	: QObject(parent)
+	, _context(context)
+    , _focusCell(0)
+    , _focusEnergyParticle(0)
+    , _currentClusterTab(0)
+    , _currentTokenTab(0)
+    , _pasteTokenPossible(false)
+    , _savedTokenEnergy(0)
 {
 //    ui->setupUi(this);
 
@@ -119,14 +118,14 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     _tabSymbolsWidget->parent()->installEventFilter(this);
 
     //establish connections
-    connect(_cellEditor, SIGNAL(cellDataChanged(AlienCellTO)), this, SLOT(changesFromCellEditor(AlienCellTO)));
-    connect(_clusterEditor, SIGNAL(clusterDataChanged(AlienCellTO)), this, SLOT(changesFromClusterEditor(AlienCellTO)));
+    connect(_cellEditor, SIGNAL(cellDataChanged(CellTO)), this, SLOT(changesFromCellEditor(CellTO)));
+    connect(_clusterEditor, SIGNAL(clusterDataChanged(CellTO)), this, SLOT(changesFromClusterEditor(CellTO)));
     connect(_energyEditor, SIGNAL(energyParticleDataChanged(QVector3D,QVector3D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector3D,QVector3D,qreal)));
     connect(_requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
     connect(_requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
     connect(_delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
     connect(_delClusterButton, SIGNAL(clicked()), this, SLOT(delExtendedSelectionClicked()));
-    connect(_cellComputerEdit, SIGNAL(changesFromComputerMemoryEditor(QVector< quint8 >)), this, SLOT(changesFromComputerMemoryEditor(QVector< quint8 >)));
+    connect(_cellComputerEdit, SIGNAL(changesFromComputerMemoryEditor(QByteArray)), this, SLOT(changesFromComputerMemoryEditor(QByteArray)));
     connect(_cellComputerEdit, SIGNAL(compileButtonClicked(QString)), this, SLOT(compileButtonClicked(QString)));
     connect(_addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
     connect(_delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
@@ -134,18 +133,14 @@ void MicroEditor::init (QTabWidget* tabClusterWidget,
     connect(_metadataEditor, SIGNAL(metadataChanged(QString,QString,quint8,QString)), this, SLOT(changesFromMetadataEditor(QString,QString,quint8,QString)));
     connect(_symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
 
-    _symbolEdit->loadSymbols(&MetadataManager::getGlobalInstance());
+    _symbolEdit->loadSymbols(_context->getSymbolTable());
 }
 
 
-void MicroEditor::updateSymbolTable ()
+void MicroEditor::update ()
 {
-    _symbolEdit->loadSymbols(&MetadataManager::getGlobalInstance());
-}
-
-void MicroEditor::updateTokenTab ()
-{
-    changesFromSymbolTableEditor();
+    _symbolEdit->loadSymbols(_context->getSymbolTable());
+	changesFromSymbolTableEditor(); //nach reset
 }
 
 void MicroEditor::setVisible (bool visible)
@@ -171,7 +166,7 @@ bool MicroEditor::eventFilter (QObject * watched, QEvent * event)
     return QObject::eventFilter(watched, event);
 }
 
-AlienCell* MicroEditor::getFocusedCell ()
+Cell* MicroEditor::getFocusedCell ()
 {
     return _focusCell;
 }
@@ -229,9 +224,9 @@ void MicroEditor::defocused (bool requestDataUpdate)
     _focusEnergyParticle = 0;
 }
 
-void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
+void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 {
-    if( (!isVisible()) || (!_grid) || (!cell) )
+    if( (!isVisible()) || (!_context) || (!cell) )
         return;
 
     defocused(requestDataUpdate);
@@ -239,21 +234,19 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
     _focusCell = cell;
 
     //update data for cluster editor
-    _grid->lockData();
-    _focusCellReduced = AlienCellTO(cell);
-    quint64 id = cell->getId();
+    _context->lock();
+    AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+    _focusCellReduced = facade->buildFeaturedCellTO(cell);
     QList< quint64 > ids = cell->getCluster()->getCellIds();
-    quint8 color = cell->getColor();
-    _grid->unlockData();
+	_context->unlock();
+	CellMetadata cellMeta = getCellMetadata(cell);
+	CellClusterMetadata clusterMeta = getCellClusterMetadata(cell);
     _clusterEditor->updateCluster(_focusCellReduced);
     _cellEditor->updateCell(_focusCellReduced);
-    _metadataEditor->updateMetadata(MetadataManager::getGlobalInstance().getAndUniteClusterName(ids),
-                                    MetadataManager::getGlobalInstance().getCellName(id),
-                                    color,
-                                    MetadataManager::getGlobalInstance().getCellDescription(id));
+	_metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
 
     //update data for cell function: computer
-    if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
+    if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
@@ -265,9 +258,8 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
         _cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
 
         //load computer code from meta data if available
-        QString code = MetadataManager::getGlobalInstance().getCellCode(id);
-        if( !code.isEmpty() ) {
-            _cellComputerEdit->updateComputerCode(code);
+        if( !cellMeta.computerSourcecode.isEmpty() ) {
+            _cellComputerEdit->updateComputerCode(cellMeta.computerSourcecode);
         }
 
         //otherwise use translated cell data
@@ -293,15 +285,16 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
         disconnect(_tabTokenWidget, SIGNAL(currentChanged(int)), 0, 0);
         for(int i = 0; i < numToken; ++i) {
             TokenTab* tokenTab = new TokenTab(_tabTokenWidget);
-            connect(tokenTab, SIGNAL(tokenMemoryChanged(QVector< quint8 >)), this, SLOT(changesFromTokenMemoryEditor(QVector< quint8 >)));
+            connect(tokenTab, SIGNAL(tokenMemoryChanged(QByteArray)), this, SLOT(changesFromTokenMemoryEditor(QByteArray)));
             connect(tokenTab, SIGNAL(tokenPropChanged(qreal)), this, SLOT(changesFromTokenEditor(qreal)));
             _tabTokenWidget->addTab(tokenTab, QString("token %1").arg(i+1));
-            tokenTab->update(_focusCellReduced.tokenEnergies[i], _focusCellReduced.tokenData[i]);
+            tokenTab->update(_context->getSymbolTable(), _focusCellReduced.tokenEnergies[i], _focusCellReduced.tokenData[i]);
         }
         connect(_tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
 
     }
-    emit numTokenUpdate(numToken, simulationParameters.CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+	SimulationParameters* parameters = _context->getSimulationParameters();
+    emit numTokenUpdate(numToken, parameters->CELL_TOKENSTACKSIZE, _pasteTokenPossible);
 
     //update Symbols Widget
     setTabSymbolsWidgetVisibility();
@@ -309,7 +302,7 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
     //update buttons
     _delEntityButton->setEnabled(true);
     _delClusterButton->setEnabled(true);
-    if( numToken < simulationParameters.CELL_TOKENSTACKSIZE)
+    if( numToken < parameters->CELL_TOKENSTACKSIZE)
         _addTokenButton->setEnabled(true);
     else
         _addTokenButton->setEnabled(false);
@@ -319,9 +312,25 @@ void MicroEditor::cellFocused (AlienCell* cell, bool requestDataUpdate)
         _delTokenButton->setEnabled(false);
 }
 
-void MicroEditor::energyParticleFocused (AlienEnergy* e)
+CellMetadata MicroEditor::getCellMetadata(Cell* cell)
 {
-    if( (!isVisible()) || (!_grid) || (!e) )
+	_context->lock();
+	CellMetadata meta = cell->getMetadata();
+	_context->unlock();
+	return meta;
+}
+
+CellClusterMetadata MicroEditor::getCellClusterMetadata(Cell* cell)
+{
+	_context->lock();
+	CellClusterMetadata meta = cell->getCluster()->getMetadata();
+	_context->unlock();
+	return meta;
+}
+
+void MicroEditor::energyParticleFocused (EnergyParticle* e)
+{
+    if( (!isVisible()) || (!_context) || (!e) )
         return;
 
     defocused();
@@ -338,65 +347,62 @@ void MicroEditor::energyParticleFocused (AlienEnergy* e)
     energyParticleUpdated_Slot(e);
 }
 
-void MicroEditor::energyParticleUpdated_Slot (AlienEnergy* e)
+void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 {
     if( !e )
         return;
 
     //update data for editor if particle is focused (we also use cluster editor)
     if( _focusEnergyParticle == e ) {
-        _grid->lockData();
-        QVector3D pos = e->pos;
-        QVector3D vel = e->vel;
-        qreal energyValue = e->amount;
-        _grid->unlockData();
+        _context->lock();
+        auto pos = e->getPosition();
+        auto vel = e->getVelocity();
+        auto energyValue = e->getEnergy();
+        _context->unlock();
         _energyEditor->updateEnergyParticle(pos, vel, energyValue);
     }
 }
 
 
-void MicroEditor::reclustered (QList< AlienCellCluster* > clusters)
+void MicroEditor::reclustered (QList< CellCluster* > clusters)
 {
-    if( !_grid )
+    if( !_context)
         return;
     if( _focusCell ) {
 
         //_focusCell contained in clusters?
-        _grid->lockData();
+        _context->lock();
         bool contained = false;
-        foreach(AlienCellCluster* cluster, clusters)
-            if( cluster->getCells().contains(_focusCell) )
+        foreach(CellCluster* cluster, clusters)
+            if( cluster->getCellsRef().contains(_focusCell) )
                 contained = true;
-        _grid->unlockData();
+        _context->unlock();
 
         //proceed only if _focusCell is contained in clusters
         if( contained ) {
 
             //update data for cluster editor
-            _grid->lockData();
-            _focusCellReduced = AlienCellTO(_focusCell);
-            quint64 id = _focusCell->getId();
-            QList< quint64 > ids = _focusCell->getCluster()->getCellIds();
-            quint8 color = _focusCell->getColor();
-            _grid->unlockData();
-            _clusterEditor->updateCluster(_focusCellReduced);
+            AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+            _context->lock();
+            _focusCellReduced = facade->buildFeaturedCellTO(_focusCell);
+            _context->unlock();
+			CellMetadata cellMeta = getCellMetadata(_focusCell);
+			CellClusterMetadata clusterMeta = getCellClusterMetadata(_focusCell);
+			_clusterEditor->updateCluster(_focusCellReduced);
             _cellEditor->updateCell(_focusCellReduced);
-            _metadataEditor->updateMetadata(MetadataManager::getGlobalInstance().getAndUniteClusterName(ids),
-                                            MetadataManager::getGlobalInstance().getCellName(id),
-                                            color,
-                                            MetadataManager::getGlobalInstance().getCellDescription(id));
+			_metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
 
             //update computer code editor
-            if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
+            if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
                 //_computerCodeEditor->update(_focusCellReduced.computerCode);
             }
         }
     }
 }
 
-void MicroEditor::universeUpdated (AlienGrid* grid, bool force)
+void MicroEditor::universeUpdated (SimulationContext* context, bool force)
 {
-    _grid = grid;
+	_context = context;
     defocused(false);
 }
 
@@ -406,12 +412,11 @@ void MicroEditor::requestUpdate ()
     if( _focusCell ) {
 
          //save edited code from code editor
-        if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
-            _grid->lockData();
-            quint64 id = _focusCell->getId();
-            _grid->unlockData();
+        if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
             QString code = _cellComputerEdit->getComputerCode();
-            MetadataManager::getGlobalInstance().setCellCode(id, code);
+			CellMetadata meta = getCellMetadata(_focusCell);
+			meta.computerSourcecode = code;
+			setCellMetadata(_focusCell, meta);
         }
 
         //save edited code from cluster editor
@@ -434,6 +439,20 @@ void MicroEditor::requestUpdate ()
         _energyEditor->requestUpdate();
     }
 
+}
+
+void MicroEditor::setCellMetadata(Cell* cell, CellMetadata meta)
+{
+	_context->lock();
+	cell->setMetadata(meta);
+	_context->unlock();
+}
+
+void MicroEditor::setCellClusterMetadata(Cell * cell, CellClusterMetadata meta)
+{
+	_context->lock();
+	cell->getCluster()->setMetadata(meta);
+	_context->unlock();
 }
 
 void MicroEditor::entitiesSelected (int numCells, int numEnergyParticles)
@@ -474,8 +493,9 @@ void MicroEditor::addTokenClicked ()
 {
     //create token (new token is the last token on the stack)
     int newTokenTab = _currentTokenTab+1;
-    _focusCellReduced.tokenEnergies.insert(newTokenTab, simulationParameters.NEW_TOKEN_ENERGY);
-    QVector< quint8 > data(simulationParameters.TOKEN_MEMSIZE, 0);
+	SimulationParameters* parameters = _context->getSimulationParameters();
+    _focusCellReduced.tokenEnergies.insert(newTokenTab, parameters->NEW_TOKEN_ENERGY);
+    QByteArray data(parameters->TOKEN_MEMSIZE, 0);
     data[0] = _focusCellReduced.cellTokenAccessNum; //set access number for new token
     _focusCellReduced.tokenData.insert(newTokenTab, data);
 
@@ -571,7 +591,8 @@ void MicroEditor::copyTokenClicked ()
     _savedTokenData = _focusCellReduced.tokenData[_currentTokenTab];
     _pasteTokenPossible = true;
     int numToken = _focusCellReduced.tokenEnergies.size();
-    emit numTokenUpdate(numToken, simulationParameters.CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+	SimulationParameters* parameters = _context->getSimulationParameters();
+	emit numTokenUpdate(numToken, parameters->CELL_TOKENSTACKSIZE, _pasteTokenPossible);
 }
 
 void MicroEditor::pasteTokenClicked ()
@@ -594,7 +615,7 @@ void MicroEditor::pasteTokenClicked ()
 
 void MicroEditor::delSelectionClicked ()
 {
-    if( !_grid )
+    if( !_context)
         return;
 
     //defocus
@@ -606,7 +627,7 @@ void MicroEditor::delSelectionClicked ()
 
 void MicroEditor::delExtendedSelectionClicked ()
 {
-    if( !_grid )
+    if( !_context)
         return;
 
     //defocus
@@ -616,25 +637,7 @@ void MicroEditor::delExtendedSelectionClicked ()
     emit delExtendedSelection();
 }
 
-/*
-void MicroEditor::mousePressEvent(QMouseEvent * event)
-{
-    QGraphicsView* m = parentWidget()->findChild<QGraphicsView*>("simulationView");
-    if( m ) {
-        QObjectList l = m->children();
-        foreach(QObject* o, l) {
-            qDebug() << o->objectName();
-        }
-//        QCoreApplication::sendEvent(m, event);
-        m->setFocus(Qt::MouseFocusReason);
-        QMouseEvent e(QEvent::MouseButtonPress, event->pos(), event->button(), event->buttons(), event->modifiers());
-        qApp->sendEvent(m, &e);
-        qDebug() << m->objectName() << event->pos().y();
-    }
-    return;
-}
-*/
-void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
+void MicroEditor::changesFromCellEditor (CellTO newCellProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyCellProperties(newCellProperties);
@@ -647,7 +650,7 @@ void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
     }
 
     //update data for cell function: computer
-    if( _focusCellReduced.cellFunctionName == "COMPUTER" ) {
+    if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
@@ -657,12 +660,9 @@ void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
         _cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
 
         //load computer code from meta data if available
-        _grid->lockData();
-        quint64 id = _focusCell->getId();
-        _grid->unlockData();
-        QString code = MetadataManager::getGlobalInstance().getCellCode(id);
-        if( !code.isEmpty() ) {
-            _cellComputerEdit->updateComputerCode(code);
+		CellMetadata meta = getCellMetadata(_focusCell);
+        if( !meta.computerSourcecode.isEmpty() ) {
+            _cellComputerEdit->updateComputerCode(meta.computerSourcecode);
         }
 
         //otherwise use translated cell data
@@ -680,7 +680,7 @@ void MicroEditor::changesFromCellEditor (AlienCellTO newCellProperties)
 
 }
 
-void MicroEditor::changesFromClusterEditor (AlienCellTO newClusterProperties)
+void MicroEditor::changesFromClusterEditor (CellTO newClusterProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyClusterProperties(newClusterProperties);
@@ -691,17 +691,17 @@ void MicroEditor::changesFromClusterEditor (AlienCellTO newClusterProperties)
 
 void MicroEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue)
 {
-    if( (!_grid) || (!_focusEnergyParticle) )
+    if( (!_context) || (!_focusEnergyParticle) )
         return;
 
     //update energy particle (we do this without informing the simulator...)
-    _grid->lockData();
-    _grid->setEnergy(_focusEnergyParticle->pos, 0);
-    _focusEnergyParticle->pos = pos;
-    _focusEnergyParticle->vel = vel;
-    _focusEnergyParticle->amount = energyValue;
-    _grid->setEnergy(_focusEnergyParticle->pos, _focusEnergyParticle);
-    _grid->unlockData();
+    _context->lock();
+	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->getPosition(), 0);
+    _focusEnergyParticle->setPosition(pos);
+    _focusEnergyParticle->setVelocity(vel);
+    _focusEnergyParticle->setEnergy(energyValue);
+	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->getPosition(), _focusEnergyParticle);
+    _context->unlock();
 
     //emit signal to notify other instances
     emit energyParticleUpdated(_focusEnergyParticle);
@@ -715,7 +715,7 @@ void MicroEditor::changesFromTokenEditor (qreal energy)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromComputerMemoryEditor (QVector< quint8 > data)
+void MicroEditor::changesFromComputerMemoryEditor(QByteArray const& data)
 {
     //copy cell memory
     _focusCellReduced.computerMemory = data;
@@ -724,7 +724,7 @@ void MicroEditor::changesFromComputerMemoryEditor (QVector< quint8 > data)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromTokenMemoryEditor (QVector< quint8 > data)
+void MicroEditor::changesFromTokenMemoryEditor(QByteArray data)
 {
     //copy token memory
     _focusCellReduced.tokenData[_currentTokenTab] = data;
@@ -733,20 +733,20 @@ void MicroEditor::changesFromTokenMemoryEditor (QVector< quint8 > data)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromMetadataEditor (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
+void MicroEditor::changesFromMetadataEditor(QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
 {
-    //get cell id
-    _grid->lockData();
-    quint64 id = _focusCell->getId();
-    QList< quint64 > ids = _focusCell->getCluster()->getCellIds();
-    _focusCell->setColor(cellColor);
-    _grid->unlockData();
-
-    //set meta data
-    MetadataManager::getGlobalInstance().setAndUniteClusterName(ids, clusterName);
-    MetadataManager::getGlobalInstance().setCellName(id, cellName);
-//    _meta->setCellColorNumber(id, cellColor);
-    MetadataManager::getGlobalInstance().setCellDescription(id, cellDescription);
+	{
+		CellMetadata meta = getCellMetadata(_focusCell);
+		meta.name = cellName;
+		meta.color = cellColor;
+		meta.description = cellDescription;
+		setCellMetadata(_focusCell, meta);
+	}
+	{
+		CellClusterMetadata meta = getCellClusterMetadata(_focusCell);
+		meta.name = clusterName;
+		setCellClusterMetadata(_focusCell, meta);
+	}
 
     //emit signal to notify macro editor
     emit metadataUpdated();
@@ -757,7 +757,7 @@ void MicroEditor::changesFromSymbolTableEditor ()
     QWidget* widget = _tabTokenWidget->currentWidget();
     TokenTab* tokenTab= qobject_cast<TokenTab*>(widget);
     if( tokenTab ) {
-        tokenTab->update(_focusCellReduced.tokenEnergies[_currentTokenTab], _focusCellReduced.tokenData[_currentTokenTab]);
+		tokenTab->update(_context->getSymbolTable(), _focusCellReduced.tokenEnergies[_currentTokenTab], _focusCellReduced.tokenData[_currentTokenTab]);
     }
 //    _focusCellReduced.tokenData[_currentTokenTab] = data;
 }
@@ -780,17 +780,13 @@ void MicroEditor::tokenTabChanged (int index)
 
 void MicroEditor::compileButtonClicked (QString code)
 {
-    if( (!_grid) || (!_focusCell) )
+    if( (!_context) || (!_focusCell) )
         return;
 
     //transfer code to cell meta data
-    _grid->lockData();
-    quint64 id = _focusCell->getId();
-    _grid->unlockData();
-    MetadataManager::getGlobalInstance().setCellCode(id, code);
-
-    //translate code via symbol table
-//    _meta->applySymbolTableToCode(code);
+	CellMetadata meta = _focusCell->getMetadata();
+	meta.computerSourcecode = code;
+	setCellMetadata(_focusCell, meta);
 
     //update cell data
     _focusCellReduced.computerCode = code;
@@ -804,8 +800,8 @@ void MicroEditor::compileButtonClicked (QString code)
 
 void MicroEditor::invokeUpdateCell (bool clusterDataChanged)
 {
-    QList< AlienCell* > cells;
-    QList< AlienCellTO > newCellsData;
+    QList< Cell* > cells;
+    QList< CellTO > newCellsData;
     cells << _focusCell;
     newCellsData << _focusCellReduced;
     emit updateCell(cells, newCellsData, clusterDataChanged);
@@ -815,11 +811,6 @@ void MicroEditor::setTabSymbolsWidgetVisibility ()
 {
     if( _tabTokenWidget->isVisible() ) {
         _tabSymbolsWidget->setGeometry(tabPosX2, _tabClusterWidget->y(), _tabSymbolsWidget->width(), _tabSymbolsWidget->height());
-
-        //adjust position
-/*        if( _tabSymbolsWidget->parentWidget()->height() < (_tabSymbolsWidget->y() + _tabSymbolsWidget->height()+20) ) {
-            _tabSymbolsWidget->setGeometry(_tabTokenWidget->x(), tabPosY1, _tabSymbolsWidget->width(), _tabSymbolsWidget->height());
-        }*/
         _tabSymbolsWidget->setVisible(true);
     }
     else if( _tabComputerWidget->isVisible() ) {

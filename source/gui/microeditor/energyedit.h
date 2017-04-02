@@ -4,9 +4,9 @@
 #include <QTextEdit>
 #include <QVector3D>
 
-#include "model/entities/aliencellto.h"
+#include "model/entities/cellto.h"
 
-class AlienCell;
+class Cell;
 class EnergyEdit : public QTextEdit
 {
     Q_OBJECT

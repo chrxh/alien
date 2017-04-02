@@ -1,9 +1,8 @@
 #include "celledit.h"
 
 #include "gui/editorsettings.h"
-#include "model/processing/aliencellfunction.h"
-#include "model/entities/aliencell.h"
-#include "model/entities/aliencellcluster.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>
@@ -16,7 +15,7 @@ CellEdit::CellEdit(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void CellEdit::updateCell (AlienCellTO cell)
+void CellEdit::updateCell (CellTO cell)
 {
     _cell = cell;
     updateDisplay();
@@ -292,19 +291,19 @@ void CellEdit::mousePressEvent(QMouseEvent* e)
     //cursor at cell function?
     if( (row >= 7) && (col >= 18) && (col <= 36)) {
         if( row == 7 )
-            _cell.cellFunctionName = "COMPUTER";
+            _cell.cellFunctionType = Enums::CellFunction::COMPUTER;
         if( row == 8 )
-            _cell.cellFunctionName = "PROPULSION";
+            _cell.cellFunctionType = Enums::CellFunction::PROPULSION;
         if( row == 9 )
-            _cell.cellFunctionName = "SCANNER";
+            _cell.cellFunctionType = Enums::CellFunction::SCANNER;
         if( row == 10 )
-            _cell.cellFunctionName = "WEAPON";
+            _cell.cellFunctionType = Enums::CellFunction::WEAPON;
         if( row == 11 )
-            _cell.cellFunctionName = "CONSTRUCTOR";
+            _cell.cellFunctionType = Enums::CellFunction::CONSTRUCTOR;
         if( row == 12 )
-            _cell.cellFunctionName = "SENSOR";
+            _cell.cellFunctionType = Enums::CellFunction::SENSOR;
         if( row == 13 )
-            _cell.cellFunctionName = "COMMUNICATOR";
+            _cell.cellFunctionType = Enums::CellFunction::COMMUNICATOR;
         updateDisplay();
 
         //inform other instances
@@ -364,7 +363,7 @@ void CellEdit::updateDisplay ()
         text += colorDataStart+"n"+colorEnd+parEnd;
         text += parStart+colorTextStartInactive+ "branch number: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd+parEnd;
     }
-    text += generateFormattedCellFunctionString(_cell.cellFunctionName);
+    text += generateFormattedCellFunctionString(_cell.cellFunctionType);
 
     QTextEdit::setText(text);
 
@@ -427,7 +426,7 @@ QString CellEdit::generateFormattedRealString (qreal r)
         return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
 }
 
-QString CellEdit::generateFormattedCellFunctionString (QString f)
+QString CellEdit::generateFormattedCellFunctionString (Enums::CellFunction::Type type)
 {
     //define auxilliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
@@ -440,31 +439,31 @@ QString CellEdit::generateFormattedCellFunctionString (QString f)
 
     //generate formatted string
     text += parStart+colorTextStart+ "cell function:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    if( f == "COMPUTER" )
+    if( type == Enums::CellFunction::COMPUTER )
         text += colorDataStart+"&nbsp;&#9002; computer &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += colorData2Start+"&nbsp;&nbsp;&nbsp;computer"+colorEnd+parEnd;
-    if( f == "PROPULSION" )
+    if( type == Enums::CellFunction::PROPULSION )
         text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; propulsion &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;propulsion"+colorEnd+parEnd;
-    if( f == "SCANNER" )
+    if( type == Enums::CellFunction::SCANNER )
         text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; scanner &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scanner"+colorEnd+parEnd;
-    if( f == "WEAPON" )
+    if( type == Enums::CellFunction::WEAPON )
         text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; weapon &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;weapon"+colorEnd+parEnd;
-    if( f == "CONSTRUCTOR" )
+    if( type == Enums::CellFunction::CONSTRUCTOR )
         text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; constructor &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constructor"+colorEnd+parEnd;
-    if( f == "SENSOR" )
+    if( type == Enums::CellFunction::SENSOR )
         text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; sensor &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sensor"+colorEnd+parEnd;
-    if( f == "COMMUNICATOR" )
+    if( type == Enums::CellFunction::COMMUNICATOR )
         text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; communicator &#9001;&nbsp;"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;communicator"+colorEnd+parEnd;
