@@ -111,7 +111,7 @@ QVector3D MacroEditor::getViewCenterPosWithInc ()
     QPointF posView(ui->simulationView->mapToScene(ui->simulationView->width()/2, ui->simulationView->height()/2));
 
     //calc center of view in simulation coordinate
-    QVector3D pos(posView.x(), posView.y(), 0.0);
+    QVector3D pos(posView.x()/GRAPHICS_ITEM_SIZE, posView.y() / GRAPHICS_ITEM_SIZE, 0.0);
 
     //add increment
     QVector3D posIncrement(_posIncrement, -_posIncrement, 0.0);
@@ -195,20 +195,8 @@ void MacroEditor::zoomOut ()
 
 void MacroEditor::newCellRequested ()
 {
-    //calc center of view
-    QPointF posView(ui->simulationView->mapToScene(ui->simulationView->width()/2, ui->simulationView->height()/2));
-
-    //calc center of view in simulation coordinate
-    QVector3D pos(posView.x(), posView.y(), 0.0);
-
-    //add increment
-    QVector3D posIncrement(_posIncrement, -_posIncrement, 0.0);
-    _posIncrement = _posIncrement + 1.0;
-    if( _posIncrement > 9.0)
-        _posIncrement = 0.0;
-
     //request new cell at pos
-    emit requestNewCell(pos+posIncrement);
+    emit requestNewCell(getViewCenterPosWithInc());
 }
 
 void MacroEditor::newEnergyParticleRequested ()
@@ -311,7 +299,7 @@ void MacroEditor::universeUpdated (SimulationContext* context, bool force)
             //first time? => center view
             if( !_shapeUniverseInit ) {
                _shapeUniverseInit = true;
-               ui->simulationView->scale(20.0,20.0);
+               ui->simulationView->scale(20.0 / GRAPHICS_ITEM_SIZE, 20.0 / GRAPHICS_ITEM_SIZE);
                centerView(context);
             }
             QGraphicsItem* cellItem = _shapeUniverse->getFocusCenterCell();
@@ -326,13 +314,7 @@ void MacroEditor::metadataUpdated ()
     if( _activeScene == SHAPE_SCENE )
         _shapeUniverse->metadataUpdated();
 }
-/*
-void MacroEditor::mousePressEvent (QMouseEvent* event)
-{
-    qDebug("hier");
-    QWidget::mousePressEvent(event);
-}
-*/
+
 void MacroEditor::updateTimerTimeout ()
 {
     _screenUpdatePossible = true;
@@ -348,7 +330,7 @@ void MacroEditor::centerView (SimulationContext* context)
 	context->unlock();
 
     //set view position
-    ui->simulationView->centerOn(sizeX/2.0, sizeY/2.0);
+    ui->simulationView->centerOn(sizeX/2.0*GRAPHICS_ITEM_SIZE, sizeY/2.0*GRAPHICS_ITEM_SIZE);
 }
 
 

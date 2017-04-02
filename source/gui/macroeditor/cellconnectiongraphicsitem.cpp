@@ -1,6 +1,7 @@
-#include "aliencellconnectiongraphicsitem.h"
+#include "cellconnectiongraphicsitem.h"
 
 #include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 
 #include <QPainter>
 #include <qmath.h>
@@ -28,9 +29,9 @@ QRectF CellConnectionGraphicsItem::boundingRect () const
 void CellConnectionGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if( _connectionState == NO_DIR_CONNECTION )
-        painter->setPen(QPen(QBrush(LINE_INACTIVE_COLOR), 0.03));
+        painter->setPen(QPen(QBrush(LINE_INACTIVE_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
     else
-        painter->setPen(QPen(QBrush(LINE_ACTIVE_COLOR), 0.03));
+        painter->setPen(QPen(QBrush(LINE_ACTIVE_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
     painter->drawLine(QPointF(0.0, 0.0), QPointF(_dx, _dy));
 
     if( (_connectionState == A_TO_B_CONNECTION) || (_connectionState == B_TO_A_CONNECTION) ) {
@@ -46,10 +47,10 @@ void CellConnectionGraphicsItem::paint (QPainter *painter, const QStyleOptionGra
         }
 
         qreal len = qSqrt(relPosX*relPosX+relPosY*relPosY);
-        relPosX = relPosX / len;
-        relPosY = relPosY / len;
+        relPosX = relPosX / len * GRAPHICS_ITEM_SIZE;
+        relPosY = relPosY / len * GRAPHICS_ITEM_SIZE;
 
-        //rotate 45 degree counterclockwise and skaling
+        //rotate 45 degree counterclockwise and scaling
         qreal aX = (relPosX-relPosY)/10.0;
         qreal aY = (relPosX+relPosY)/10.0;
         qreal bX = x2 + relPosX*0.35;
