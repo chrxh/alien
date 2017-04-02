@@ -6,8 +6,10 @@
 #include "cellgraphicsitemconfig.h"
 #include "cellgraphicsitem.h"
 
-CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem *parent)
-    : QGraphicsItem(parent), _config(config), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken), _color(color)
+CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken
+	, quint8 color, QString displayString, QGraphicsItem *parent)
+    : QGraphicsItem(parent), _config(config), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken)
+	, _color(color), _displayString(displayString)
 {
     QGraphicsItem::setPos(x, y);
 }
@@ -18,7 +20,7 @@ CellGraphicsItem::~CellGraphicsItem()
 
 QRectF CellGraphicsItem::boundingRect () const
 {
-    return QRectF(-0.5*GRAPHICS_ITEM_SIZE, -0.5*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE);
+    return QRectF(-1.5*GRAPHICS_ITEM_SIZE, -0.5*GRAPHICS_ITEM_SIZE, 3.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE);
 }
 
 void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -64,8 +66,8 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
 	if (_config->showCellFunctions) {
 		auto font = GuiFunctions::getCellFont();
 		painter->setFont(font);
-		painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
-		painter->drawText(QRectF(-1.0*GRAPHICS_ITEM_SIZE, 0.2*GRAPHICS_ITEM_SIZE, 2.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, "computer");
+		painter->setPen(QPen(QBrush(GRAPHICS_ITEM_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+		painter->drawText(QRectF(-1.5*GRAPHICS_ITEM_SIZE, 0.2*GRAPHICS_ITEM_SIZE, 3.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, _displayString);
 	}
 
     //draw token
@@ -125,5 +127,10 @@ void CellGraphicsItem::setNumToken (int numToken)
 void CellGraphicsItem::setColor (quint8 color)
 {
     _color = color;
+}
+
+void CellGraphicsItem::setDisplayString(QString value)
+{
+	_displayString = value;
 }
 

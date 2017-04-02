@@ -17,7 +17,8 @@ public:
         Type = UserType + 1
     };
 
-    CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem* parent = 0);
+    CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color
+		, QString displayString, QGraphicsItem* parent = 0);
     ~CellGraphicsItem ();
 
     QRectF boundingRect () const;
@@ -30,6 +31,7 @@ public:
     void setFocusState (FocusState focusState);
     void setNumToken (int numToken);
     void setColor (quint8 color);
+	void setDisplayString (QString value);
 
 private:
     Cell* _cell;
@@ -38,6 +40,7 @@ private:
     FocusState _focusState;
     int _numToken;
     quint8 _color;
+	QString _displayString;
 };
 
 #endif // CELLGRAPHICSITEM_H
