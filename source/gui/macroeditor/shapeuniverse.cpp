@@ -314,6 +314,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
                 topo->correctPosition(pos);
                 cellItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
                 cellItem->setNumToken(cell->getNumToken());
+				cellItem->setDisplayString(getCellFunctionString(cell));
                 bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
                 cellItem->setConnectable(connectable);
             }
