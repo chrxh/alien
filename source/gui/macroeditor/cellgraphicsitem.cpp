@@ -1,18 +1,13 @@
-#include "aliencellgraphicsitem.h"
+#include <QPainter>
 
 #include "gui/editorsettings.h"
 #include "gui/guisettings.h"
 
-#include <QPainter>
+#include "cellgraphicsitemconfig.h"
+#include "cellgraphicsitem.h"
 
-CellGraphicsItem::CellGraphicsItem (QGraphicsItem* parent)
-    : QGraphicsItem(parent), _cell(0), _connectable(false), _focusState(NO_FOCUS), _numToken(0), _color(0)
-{
-    QGraphicsItem::setPos(0.0, 0.0);
-}
-
-CellGraphicsItem::CellGraphicsItem (Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem *parent)
-    : QGraphicsItem(parent), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken), _color(color)
+CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem *parent)
+    : QGraphicsItem(parent), _config(config), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken), _color(color)
 {
     QGraphicsItem::setPos(x, y);
 }
@@ -23,25 +18,25 @@ CellGraphicsItem::~CellGraphicsItem()
 
 QRectF CellGraphicsItem::boundingRect () const
 {
-    return QRectF(-0.5, -0.5, 1.0, 1.0);
+    return QRectF(-0.5*GRAPHICS_ITEM_SIZE, -0.5*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE);
 }
 
 void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    //set pen color depending on wheter the cell is on focus or not
+    //set pen color depending on whether the cell is on focus or not
     if( _focusState == NO_FOCUS ) {
 
         //no pen
-        painter->setPen(QPen(QBrush(QColor(0,0,0,0)), 0.03));
+        painter->setPen(QPen(QBrush(QColor(0,0,0,0)), 0.03 * GRAPHICS_ITEM_SIZE));
     }
     else {
 
         //pen
-        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03));
+        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
     }
 
     //set brush color
-    QColor brushColor;//(CELL_COLOR);
+	QColor brushColor;
     if( _color == 0 )
        brushColor = INDIVIDUAL_CELL_COLOR1;
     if( _color == 1 )
@@ -56,46 +51,22 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
         brushColor = INDIVIDUAL_CELL_COLOR6;
     if( _color >= 6 )
         brushColor = INDIVIDUAL_CELL_COLOR7;
-    if( _focusState != NO_FOCUS ) {
-//        brushColor.setAlpha(0xFF);
-    }
     if( !_connectable )
-//        brushColor.setHsl(qMax(0, brushColor.hslHue()-30), qMax(0, brushColor.hslSaturation()-60), brushColor.lightness(), brushColor.alpha());
         brushColor.setHsl(brushColor.hslHue(), brushColor.hslSaturation(), qMax(0, brushColor.lightness()-60), brushColor.alpha());
     painter->setBrush(QBrush(brushColor));
-/*    if( _color == 0 ) {
-
-        //set color depending on wheter the cell is on focus or not
-        if( _focusState == NO_FOCUS ) {
-
-            //brush
-            if( _connectable )
-                painter->setBrush(QBrush(CELL_CONNECTABLE_COLOR));
-            else
-                painter->setBrush(QBrush(CELL_COLOR));
-        }
-        else {
-
-            //brush
-            if( _connectable )
-                painter->setBrush(QBrush(CELL_CLUSTER_CONNECTABLE_FOCUS_COLOR));
-            else
-                painter->setBrush(QBrush(CELL_CLUSTER_FOCUS_COLOR));
-        }
-    }
-
-    //metadata active?
-    else {
-
-        //brush
-    }
-    */
 
     //draw cell
     if( (_focusState == NO_FOCUS) || (_focusState == FOCUS_CLUSTER) )
-        painter->drawEllipse(QPointF(0.0, 0.0), 0.33, 0.33);
+        painter->drawEllipse(QPointF(0.0, 0.0), 0.33*GRAPHICS_ITEM_SIZE, 0.33*GRAPHICS_ITEM_SIZE);
     else
-        painter->drawEllipse(QPointF(0.0, 0.0), 0.5, 0.5);
+        painter->drawEllipse(QPointF(0.0, 0.0), 0.5*GRAPHICS_ITEM_SIZE, 0.5*GRAPHICS_ITEM_SIZE);
+
+	if (_config->showCellFunctions) {
+		auto font = GuiFunctions::getCellFont();
+		painter->setFont(font);
+		painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+		painter->drawText(QRectF(-1.0*GRAPHICS_ITEM_SIZE, 0.2*GRAPHICS_ITEM_SIZE, 2.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, "computer");
+	}
 
     //draw token
     if( _numToken > 0 ) {
@@ -103,7 +74,7 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
             painter->setBrush(QBrush(TOKEN_COLOR));
         else
             painter->setBrush(QBrush(TOKEN_FOCUS_COLOR));
-        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03));
+        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
         qreal shift1 = -0.5*0.20*(qreal)(_numToken-1);
         if( _numToken > 3)
             shift1 = -0.5*0.20*2.0;
@@ -112,9 +83,9 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
             qreal shift2 = 0.20*(qreal)(i%3);
             qreal shiftY2 = 0.35*(qreal)(i/3);
             if( _numToken <= 3 )
-                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), 0.2, 0.2);
+                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), 0.2*GRAPHICS_ITEM_SIZE, 0.2*GRAPHICS_ITEM_SIZE);
             else
-                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), 0.1, 0.1);
+                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), 0.1*GRAPHICS_ITEM_SIZE, 0.1*GRAPHICS_ITEM_SIZE);
         }
     }
 

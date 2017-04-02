@@ -10,6 +10,7 @@ const QString SCROLLBAR_STYLESHEET = "background-color: #303030; color: #B0B0B0;
 const QColor BUTTON_TEXT_COLOR = QColor(0xC2, 0xC2, 0xC2);
 const QColor BUTTON_TEXT_HIGHLIGHT_COLOR = QColor(0x90, 0x90, 0xFF);
 const QString GLOBAL_FONT = "Courier New";
+const qreal GRAPHICS_ITEM_SIZE = 10.0;
 
 //cell colors
 const QColor INDIVIDUAL_CELL_COLOR1(0x50, 0x90, 0xFF, 0xB0);
@@ -24,6 +25,7 @@ class GuiFunctions
 {
 public:
     static QFont getGlobalFont ();
+	static QFont getCellFont();
 };
 
 #endif // GUISETTINGS_H
