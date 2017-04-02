@@ -7,3 +7,11 @@ QFont GuiFunctions::getGlobalFont ()
     f.setStyleStrategy(QFont::PreferBitmap);
     return f;
 }
+
+QFont GuiFunctions::getCellFont()
+{
+	//set font
+	QFont f(GLOBAL_FONT, 3, QFont::Normal);
+	f.setStyleStrategy(QFont::PreferBitmap);
+	return f;
+}

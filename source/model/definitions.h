@@ -1,5 +1,5 @@
-#ifndef DEFINITIONS_H
-#define DEFINITIONS_H
+#ifndef MODEL_DEFINITIONS_H
+#define MODEL_DEFINITIONS_H
 
 #include <QtGlobal>
 #include <QVector3D>
@@ -50,4 +50,4 @@ struct IntVector2D {
 	int y;
 };
 
-#endif // DEFINITIONS_H
+#endif // MODEL_DEFINITIONS_H

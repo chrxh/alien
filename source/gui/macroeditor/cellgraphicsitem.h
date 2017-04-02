@@ -2,6 +2,7 @@
 #define CELLGRAPHICSITEM_H
 
 #include <QGraphicsItem>
+#include "gui/definitions.h"
 
 class Cell;
 class CellGraphicsItem : public QGraphicsItem
@@ -16,8 +17,7 @@ public:
         Type = UserType + 1
     };
 
-    CellGraphicsItem (QGraphicsItem* parent = 0);
-    CellGraphicsItem (Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem* parent = 0);
+    CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem* parent = 0);
     ~CellGraphicsItem ();
 
     QRectF boundingRect () const;
@@ -33,7 +33,8 @@ public:
 
 private:
     Cell* _cell;
-    bool _connectable;
+	CellGraphicsItemConfig* _config = nullptr;
+    bool _connectable = false;
     FocusState _focusState;
     int _numToken;
     quint8 _color;

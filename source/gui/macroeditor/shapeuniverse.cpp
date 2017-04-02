@@ -12,11 +12,13 @@
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/simulationparameters.h"
+#include "gui/guisettings.h"
 #include "gui/editorsettings.h"
 
-#include "aliencellgraphicsitem.h"
-#include "aliencellconnectiongraphicsitem.h"
-#include "alienenergygraphicsitem.h"
+#include "cellgraphicsitem.h"
+#include "cellconnectiongraphicsitem.h"
+#include "cellgraphicsitemconfig.h"
+#include "energygraphicsitem.h"
 #include "markergraphicsitem.h"
 #include "shapeuniverse.h"
 
@@ -24,6 +26,13 @@ ShapeUniverse::ShapeUniverse(QObject *parent)
 	: QGraphicsScene(parent)
 {
     setBackgroundBrush(QBrush(QColor(0,0,0x30)));
+	_itemConfig = new CellGraphicsItemConfig();
+	_itemConfig->showCellFunctions = false;
+}
+
+ShapeUniverse::~ShapeUniverse()
+{
+	delete _itemConfig;
 }
 
 
@@ -53,10 +62,10 @@ void ShapeUniverse::universeUpdated (SimulationContext* context)
     //reset scene
     clear();
 	IntVector2D size = _context->getTopology()->getSize();
-    setSceneRect(0, 0, size.x, size.y);
+    setSceneRect(0, 0, size.x*GRAPHICS_ITEM_SIZE, size.y*GRAPHICS_ITEM_SIZE);
 
     //draw boundaries
-    QGraphicsScene::addRect(0.0, 0.0, size.x, size.y, QPen(QColor(0, 0, 0x80)));
+    QGraphicsScene::addRect(0.0, 0.0, size.x*GRAPHICS_ITEM_SIZE, size.y*GRAPHICS_ITEM_SIZE, QPen(QColor(0, 0, 0x80)));
 
     //draw energy particles
     foreach( EnergyParticle* energy, _context->getEnergyParticlesRef() ) {
@@ -154,7 +163,7 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
         QVector3D pos = e->getPosition();
         EnergyGraphicsItem* eItem = _energyItems[e->getId()];
 		_context->getTopology()->correctPosition(pos);
-        eItem->setPos(pos.x(), pos.y());
+        eItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
     }
 	_context->unlock();
 
@@ -303,7 +312,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
                 QVector3D pos = cell->calcPosition();
                 CellGraphicsItem* cellItem = _cellItems[cell->getId()];
                 topo->correctPosition(pos);
-                cellItem->setPos(pos.x(), pos.y());
+                cellItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
                 cellItem->setNumToken(cell->getNumToken());
                 bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
                 cellItem->setConnectable(connectable);
@@ -505,6 +514,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             QPointF lastPos = e->lastScenePos();
             QPointF pos = e->scenePos();
             QVector3D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y(), 0.0);
+			delta = delta / GRAPHICS_ITEM_SIZE;
 
             //calc rotation matrix (used when both mouse buttons are pressed)
             QVector3D center = calcCenterOfHighlightedObjects();
@@ -537,7 +547,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 _context->unlock();
 //                QPointF p = eItem->pos();
 				auto particlePos = energy->getPosition();
-                eItem->setPos(particlePos.x(), particlePos.y());
+                eItem->setPos(particlePos.x()*GRAPHICS_ITEM_SIZE, particlePos.y()*GRAPHICS_ITEM_SIZE);
 
                 //inform other instances about cell cluster changes
                 emit energyParticleUpdated(energy);
@@ -611,7 +621,7 @@ EnergyGraphicsItem* ShapeUniverse::createEnergyItem (EnergyParticle* e)
 {
     //create item
     QVector3D pos(e->getPosition());
-    EnergyGraphicsItem* eItem = new EnergyGraphicsItem(e, pos.x(), pos.y());
+    EnergyGraphicsItem* eItem = new EnergyGraphicsItem(e, pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
     QGraphicsScene::addItem(eItem);
 
     //register item
@@ -624,7 +634,8 @@ CellGraphicsItem* ShapeUniverse::createCellItem (Cell* cell)
     //create item
     QVector3D pos(cell->calcPosition());
     bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
-    CellGraphicsItem* cellItem = new CellGraphicsItem(cell, pos.x(), pos.y(), connectable, cell->getNumToken(), cell->getMetadata().color);
+    CellGraphicsItem* cellItem = new CellGraphicsItem(_itemConfig, cell, pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE
+		, connectable, cell->getNumToken(), cell->getMetadata().color);
     QGraphicsScene::addItem(cellItem);
 
     //register item
@@ -645,7 +656,7 @@ void ShapeUniverse::createConnectionItem (Cell* cell, Cell* otherCell)
     if( ((cell->getTokenAccessNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->isTokenBlocked()) ) {
         s = CellConnectionGraphicsItem::A_TO_B_CONNECTION;
     }
-    CellConnectionGraphicsItem* connectionItem = new CellConnectionGraphicsItem(pos.x(), pos.y(), otherPos.x(), otherPos.y(), s);
+    CellConnectionGraphicsItem* connectionItem = new CellConnectionGraphicsItem(pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE, otherPos.x() * GRAPHICS_ITEM_SIZE, otherPos.y() * GRAPHICS_ITEM_SIZE, s);
     QGraphicsScene::addItem(connectionItem);
 
     //register connection

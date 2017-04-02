@@ -9,6 +9,7 @@
 
 #include "model/definitions.h"
 #include "model/entities/cellto.h"
+#include "gui/definitions.h"
 
 
 class CellGraphicsItem;
@@ -21,6 +22,7 @@ class ShapeUniverse : public QGraphicsScene
     Q_OBJECT
 public:
     ShapeUniverse (QObject *parent = 0);
+	virtual ~ShapeUniverse();
 
     void universeUpdated (SimulationContext* context);
     void cellCreated (Cell* cell);
@@ -69,6 +71,7 @@ private:
 
     //internal data for display and editing
 	SimulationContext* _context = nullptr;
+	CellGraphicsItemConfig* _itemConfig = nullptr;
     QList< CellGraphicsItem* > _focusCells;
     QList< EnergyGraphicsItem* > _focusEnergyParticles;
     QMap< quint64, CellGraphicsItem* > _highlightedCells;  //contains the whole clusters when a single cell in focused therein

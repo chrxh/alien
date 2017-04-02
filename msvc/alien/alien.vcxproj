@@ -340,6 +340,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\source\gui\definitions.h" />
     <ClInclude Include="..\..\source\gui\editorsettings.h" />
     <ClInclude Include="..\..\source\gui\guisettings.h" />
     <CustomBuild Include="..\..\source\gui\macroeditor.h">
@@ -384,9 +385,10 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG -D_WINDLL  "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
-    <ClInclude Include="..\..\source\gui\macroeditor\aliencellconnectiongraphicsitem.h" />
-    <ClInclude Include="..\..\source\gui\macroeditor\aliencellgraphicsitem.h" />
-    <ClInclude Include="..\..\source\gui\macroeditor\alienenergygraphicsitem.h" />
+    <ClInclude Include="..\..\source\gui\macroeditor\cellconnectiongraphicsitem.h" />
+    <ClInclude Include="..\..\source\gui\macroeditor\cellgraphicsitem.h" />
+    <ClInclude Include="..\..\source\gui\macroeditor\energygraphicsitem.h" />
+    <ClInclude Include="..\..\source\gui\macroeditor\cellgraphicsitemconfig.h" />
     <ClInclude Include="..\..\source\gui\macroeditor\markergraphicsitem.h" />
     <CustomBuild Include="..\..\source\gui\macroeditor\pixeluniverse.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -701,9 +703,9 @@
     <ClCompile Include="..\..\source\gui\dialogs\symboltabledialog.cpp" />
     <ClCompile Include="..\..\source\gui\guisettings.cpp" />
     <ClCompile Include="..\..\source\gui\macroeditor.cpp" />
-    <ClCompile Include="..\..\source\gui\macroeditor\aliencellconnectiongraphicsitem.cpp" />
-    <ClCompile Include="..\..\source\gui\macroeditor\aliencellgraphicsitem.cpp" />
-    <ClCompile Include="..\..\source\gui\macroeditor\alienenergygraphicsitem.cpp" />
+    <ClCompile Include="..\..\source\gui\macroeditor\cellconnectiongraphicsitem.cpp" />
+    <ClCompile Include="..\..\source\gui\macroeditor\cellgraphicsitem.cpp" />
+    <ClCompile Include="..\..\source\gui\macroeditor\energygraphicsitem.cpp" />
     <ClCompile Include="..\..\source\gui\macroeditor\markergraphicsitem.cpp" />
     <ClCompile Include="..\..\source\gui\macroeditor\pixeluniverse.cpp" />
     <ClCompile Include="..\..\source\gui\macroeditor\shapeuniverse.cpp" />
