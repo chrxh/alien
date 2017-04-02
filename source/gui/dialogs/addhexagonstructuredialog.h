@@ -2,6 +2,7 @@
 #define ADDHEXAGONSTRUCTUREDIALOG_H
 
 #include <QDialog>
+#include "model/definitions.h"
 
 namespace Ui {
 class AddHexagonStructureDialog;
@@ -12,7 +13,7 @@ class AddHexagonStructureDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit AddHexagonStructureDialog(QWidget *parent = 0);
+    explicit AddHexagonStructureDialog(SimulationParameters* simulationParameters, QWidget *parent = 0);
     ~AddHexagonStructureDialog();
 
     int getLayers ();

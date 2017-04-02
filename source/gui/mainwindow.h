@@ -5,9 +5,9 @@
 #include <QByteArray>
 #include <QStack>
 
-class AlienCell;
-class AlienEnergy;
-class AlienSimulator;
+class Cell;
+class EnergyParticle;
+class SimulationController;
 class MicroEditor;
 class UniversePixelScene;
 class UniverseShapeScene;
@@ -24,7 +24,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    MainWindow (AlienSimulator* simulator, QWidget *parent = 0);
+    MainWindow (SimulationController* simulator, QWidget *parent = 0);
     ~MainWindow ();
 
 private slots:
@@ -32,7 +32,7 @@ private slots:
     //menu: simulation
     void newSimulation ();
     void loadSimulation ();
-    void saveSimulation ();
+	void saveSimulation();
     void runClicked (bool run);
     void stepForwardClicked ();
     void stepBackClicked ();
@@ -74,18 +74,14 @@ private slots:
     void tutorialClosed();
 
     //misc
-    void timeout ();
+    void oneSecondTimeout ();
     void fpsForcingButtonClicked (bool toggled);
     void fpsForcingSpinboxClicked ();
     void numTokenChanged (int numToken, int maxToken, bool pasteTokenPossible);
 
-    void incFrame ();
-    void decFrame ();
-    void readFrame (QDataStream& stream);
-
-    void cellFocused (AlienCell* cell);
+    void cellFocused (Cell* cell);
     void cellDefocused ();
-    void energyParticleFocused (AlienEnergy* e);
+    void energyParticleFocused (EnergyParticle* e);
     void entitiesSelected(int numCells, int numEnergyParticles);
 
     void updateFrameLabel ();
@@ -95,18 +91,16 @@ private:
     Ui::MainWindow *ui;
 
     void changeEvent(QEvent *e);
+	void stopSimulation();
+	void updateControllerAndEditors();
 
-    AlienSimulator* _simulator;
+    SimulationController* _simController;
     MicroEditor* _microEditor;
 
-    QTimer* _timer;
+    QTimer* _oneSecondTimer;
     SimulationMonitor* _monitor;
     TutorialWindow* _tutorialWindow;
     StartScreenController* _startScreen;
-
-    int _oldFrame;
-    int _frame;
-    int _frameSec;
 
     QByteArray _serializedEnsembleData;
     QByteArray _serializedCellData;

@@ -1,19 +1,19 @@
 #ifndef MICROEDITOR_H
 #define MICROEDITOR_H
 
-#include "model/entities/aliencellto.h"
-
 #include <QWidget>
 #include <QTimer>
+
+#include "model/entities/cellto.h"
+#include "model/definitions.h"
 
 namespace Ui {
 class MicroEditor;
 }
 
-class AlienCell;
-class AlienCellCluster;
-class AlienEnergy;
-class AlienGrid;
+class Cell;
+class CellCluster;
+class EnergyParticle;
 class CellEdit;
 class ClusterEdit;
 class CellComputerEdit;
@@ -30,7 +30,7 @@ class MicroEditor : public QObject
     Q_OBJECT
 
 public:
-    explicit MicroEditor(QObject *parent = 0);
+    MicroEditor(SimulationContext* context, QObject *parent = 0);
     ~MicroEditor();
 
     void init (QTabWidget* tabClusterWidget,
@@ -50,38 +50,42 @@ public:
                QToolButton* delClusterButton,
                QToolButton* addTokenButton,
                QToolButton* delTokenButton);
-    void updateSymbolTable ();
-    void updateTokenTab ();
+    void update ();
 
     void setVisible (bool visible);
     bool isVisible ();
     bool eventFilter(QObject * watched, QEvent * event);
 
-    AlienCell* getFocusedCell ();
+    Cell* getFocusedCell ();
 
 signals:
     void requestNewCell ();                                     //to macro editor
     void requestNewEnergyParticle ();                           //to macro editor
-    void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellTO > newCellsData,
+    void updateCell (QList< Cell* > cells,
+                     QList< CellTO > newCellsData,
                      bool clusterDataChanged);                  //to simulator
     void delSelection ();                                       //to macro editor
     void delExtendedSelection ();                                //to macro editor
     void defocus ();                                            //to macro editor
-    void energyParticleUpdated (AlienEnergy* e);                //to macro editor
+    void energyParticleUpdated (EnergyParticle* e);                //to macro editor
     void metadataUpdated ();                                    //to macro editor
     void numTokenUpdate (int numToken, int maxToken, bool pasteTokenPossible);  //to main windows
 
 public slots:
     void computerCompilationReturn (bool error, int line);
     void defocused (bool requestDataUpdate = true);
-    void cellFocused (AlienCell* cell, bool requestDataUpdate = true);
-    void energyParticleFocused (AlienEnergy* e);
-    void energyParticleUpdated_Slot (AlienEnergy* e);
-    void reclustered (QList< AlienCellCluster* > clusters);
-    void universeUpdated (AlienGrid* grid, bool force);
+    void cellFocused (Cell* cell, bool requestDataUpdate = true);
+
+
+
+	void energyParticleFocused(EnergyParticle* e);
+    void energyParticleUpdated_Slot (EnergyParticle* e);
+    void reclustered (QList< CellCluster* > clusters);
+    void universeUpdated (SimulationContext* context, bool force);
     void requestUpdate ();
-    void entitiesSelected (int numCells, int numEnergyParticles);
+
+
+	void entitiesSelected(int numCells, int numEnergyParticles);
     void addTokenClicked ();
     void delTokenClicked ();
     void copyTokenClicked ();
@@ -93,12 +97,12 @@ public slots:
 //    void mousePressEvent(QMouseEvent * event);
 
 private slots:
-    void changesFromCellEditor (AlienCellTO newCellProperties);
-    void changesFromClusterEditor (AlienCellTO newClusterProperties);
+    void changesFromCellEditor (CellTO newCellProperties);
+    void changesFromClusterEditor (CellTO newClusterProperties);
     void changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue);
     void changesFromTokenEditor (qreal energy);
-    void changesFromComputerMemoryEditor (QVector< quint8 > data);
-    void changesFromTokenMemoryEditor (QVector< quint8 > data);
+    void changesFromComputerMemoryEditor (QByteArray const& data);
+    void changesFromTokenMemoryEditor (QByteArray data);
     void changesFromMetadataEditor (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
     void changesFromSymbolTableEditor ();
 
@@ -107,8 +111,15 @@ private slots:
     void compileButtonClicked (QString code);
 
 private:
+	CellMetadata getCellMetadata(Cell* cell);
+	CellClusterMetadata getCellClusterMetadata(Cell* cell);
+	void setCellMetadata(Cell* cell, CellMetadata meta);
+	void setCellClusterMetadata(Cell* cell, CellClusterMetadata meta);
+
     void invokeUpdateCell (bool clusterDataChanged);
     void setTabSymbolsWidgetVisibility ();
+
+	SimulationContext* _context;
 
     //widgets
     QTabWidget* _tabClusterWidget;
@@ -130,10 +141,9 @@ private:
     QToolButton* _delTokenButton;
 
 //    Ui::MicroEditor *ui;
-    AlienCell* _focusCell;
-    AlienCellTO _focusCellReduced;
-    AlienEnergy* _focusEnergyParticle;
-    AlienGrid* _grid;
+    Cell* _focusCell;
+    CellTO _focusCellReduced;
+    EnergyParticle* _focusEnergyParticle;
     QWidget* _tabCluster;
     QWidget* _tabCell;
     QWidget* _tabParticle;
@@ -146,7 +156,7 @@ private:
 
     bool _pasteTokenPossible;
     qreal _savedTokenEnergy;        //for copying tokens
-    QVector< quint8 > _savedTokenData;  //for copying tokens
+    QByteArray _savedTokenData;  //for copying tokens
 };
 
 

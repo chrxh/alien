@@ -5,28 +5,28 @@
 
 #include <QPainter>
 
-AlienCellGraphicsItem::AlienCellGraphicsItem (QGraphicsItem* parent)
+CellGraphicsItem::CellGraphicsItem (QGraphicsItem* parent)
     : QGraphicsItem(parent), _cell(0), _connectable(false), _focusState(NO_FOCUS), _numToken(0), _color(0)
 {
     QGraphicsItem::setPos(0.0, 0.0);
 }
 
-AlienCellGraphicsItem::AlienCellGraphicsItem (AlienCell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem *parent)
+CellGraphicsItem::CellGraphicsItem (Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color, QGraphicsItem *parent)
     : QGraphicsItem(parent), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken), _color(color)
 {
     QGraphicsItem::setPos(x, y);
 }
 
-AlienCellGraphicsItem::~AlienCellGraphicsItem()
+CellGraphicsItem::~CellGraphicsItem()
 {
 }
 
-QRectF AlienCellGraphicsItem::boundingRect () const
+QRectF CellGraphicsItem::boundingRect () const
 {
     return QRectF(-0.5, -0.5, 1.0, 1.0);
 }
 
-void AlienCellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     //set pen color depending on wheter the cell is on focus or not
     if( _focusState == NO_FOCUS ) {
@@ -120,38 +120,38 @@ void AlienCellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphics
 
 }
 
-int AlienCellGraphicsItem::type() const
+int CellGraphicsItem::type() const
 {
     // enables the use of qgraphicsitem_cast with this item.
     return Type;
 }
 
-AlienCell* AlienCellGraphicsItem::getCell ()
+Cell* CellGraphicsItem::getCell ()
 {
     return _cell;
 }
 
-void AlienCellGraphicsItem::setConnectable (bool connectable)
+void CellGraphicsItem::setConnectable (bool connectable)
 {
     _connectable = connectable;
 }
 
-AlienCellGraphicsItem::FocusState AlienCellGraphicsItem::getFocusState ()
+CellGraphicsItem::FocusState CellGraphicsItem::getFocusState ()
 {
     return _focusState;
 }
 
-void AlienCellGraphicsItem::setFocusState (FocusState focusState)
+void CellGraphicsItem::setFocusState (FocusState focusState)
 {
     _focusState = focusState;
 }
 
-void AlienCellGraphicsItem::setNumToken (int numToken)
+void CellGraphicsItem::setNumToken (int numToken)
 {
     _numToken = numToken;
 }
 
-void AlienCellGraphicsItem::setColor (quint8 color)
+void CellGraphicsItem::setColor (quint8 color)
 {
     _color = color;
 }

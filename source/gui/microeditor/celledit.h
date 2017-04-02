@@ -4,20 +4,20 @@
 #include <QTextEdit>
 #include <QVector3D>
 
-#include "model/entities/aliencellto.h"
+#include "model/entities/cellto.h"
 
-class AlienCell;
+class Cell;
 class CellEdit : public QTextEdit
 {
     Q_OBJECT
 public:
     explicit CellEdit(QWidget *parent = 0);
 
-    void updateCell (AlienCellTO cell);
+    void updateCell (CellTO cell);
     void requestUpdate ();
 
 signals:
-    void cellDataChanged (AlienCellTO cell);
+    void cellDataChanged (CellTO cell);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -32,9 +32,9 @@ private:
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
-    QString generateFormattedCellFunctionString (QString f);
+    QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
-    AlienCellTO _cell;
+    CellTO _cell;
 };
 
 #endif // CELLEDIT_H

@@ -1,21 +1,21 @@
-#include <QtTest>
-#include <QTextCodec>
+#include <gtest/gtest.h>
+#include <QApplication>
 
-#include "testphysics.h"
-#include "testaliencellcluster.h"
-#include "testalientoken.h"
-#include "testaliencellfunctioncommunicator.h"
+/*
+#include "unittests/testphysics.h"
+#include "unittests/testcellcluster.h"
+#include "unittests/testtoken.h"
+#include "unittests/testcellfunctioncommunicator.h"
+#include "integrationtests/integrationtestreplicator.h"
+#include "integrationtests/integrationtestcomparison.h"
+*/
+
+//--gtest_filter=TestPhysics*
+// Ex.: SquareRoot*
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
 
-    TestPhysics testPhysics;
-    TestAlienCellCluster testCellCluster;
-    TestAlienToken testToken;
-    TestAlienCellFunctionCommunicator testCommunicator;
-
-    return QTest::qExec(&testPhysics, argc, argv)
-            | QTest::qExec(&testCellCluster, argc, argv)
-            | QTest::qExec(&testToken, argc, argv)
-            | QTest::qExec(&testCommunicator, argc, argv);
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

@@ -4,20 +4,20 @@
 #include <QTextEdit>
 #include <QVector3D>
 
-#include "model/entities/aliencellto.h"
+#include "model/entities/cellto.h"
 
-class AlienCell;
+class Cell;
 class ClusterEdit : public QTextEdit
 {
     Q_OBJECT
 public:
     explicit ClusterEdit(QWidget *parent = 0);
 
-    void updateCluster (AlienCellTO cell);
+    void updateCluster (CellTO cell);
     void requestUpdate ();
 
 signals:
-    void clusterDataChanged (AlienCellTO cell);
+    void clusterDataChanged (CellTO cell);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -33,7 +33,7 @@ private:
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 
-    AlienCellTO _cell;
+    CellTO _cell;
 };
 
 #endif // CLUSTEREDIT_H

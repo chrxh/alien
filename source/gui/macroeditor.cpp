@@ -1,36 +1,31 @@
-#include "macroeditor.h"
-#include "ui_macroeditor.h"
+#include <QScrollBar>
+#include <QTimer>
+#include <QGraphicsItem>
 
-#include "microeditor.h"
+#include "model/simulationcontext.h"
+#include "model/topology.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/cell.h"
 #include "macroeditor/pixeluniverse.h"
 #include "macroeditor/shapeuniverse.h"
 #include "gui/editorsettings.h"
 #include "gui/guisettings.h"
 
-#include "model/entities/aliengrid.h"
-#include "model/entities/aliencellcluster.h"
-#include "model/entities/aliencell.h"
 
-#include <QScrollBar>
-#include <QTimer>
-#include <QGraphicsItem>
+#include "microeditor.h"
+#include "macroeditor.h"
+#include "ui_macroeditor.h"
 
-MacroEditor::MacroEditor(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::MacroEditor),
-    _grid(0),
-    _activeScene(PIXEL_SCENE),
-    _pixelUniverse(new PixelUniverse(this)),
-    _shapeUniverse(new ShapeUniverse(this)),
-    _pixelUniverseInit(false),
-    _shapeUniverseInit(false),
-    _posIncrement(0),
-    _updateTimer(0),
-    _screenUpdatePossible(true)
+
+MacroEditor::MacroEditor(QWidget *parent)
+	: QWidget(parent)
+	, ui(new Ui::MacroEditor)
+	, _activeScene(PIXEL_SCENE)
+	, _pixelUniverse(new PixelUniverse(this))
+	, _shapeUniverse(new ShapeUniverse(this))
 {
     ui->setupUi(this);
 
-//    ui->simulationView->setStyleSheet("background-color: #000000; color: #B0B0B0; gridline-color: #303030;");
     ui->simulationView->horizontalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
     ui->simulationView->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
 
@@ -38,11 +33,11 @@ MacroEditor::MacroEditor(QWidget *parent) :
     ui->simulationView->setScene(_pixelUniverse);
 
     //connect signals
-    connect(_shapeUniverse, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)), this, SIGNAL(updateCell(QList<AlienCell*>,QList<AlienCellTO>,bool)));
+    connect(_shapeUniverse, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), this, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)));
     connect(_shapeUniverse, SIGNAL(defocus()), this, SIGNAL(defocus()), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(focusCell(AlienCell*)), this, SIGNAL(focusCell(AlienCell*)), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(focusEnergyParticle(AlienEnergy*)), this, SIGNAL(focusEnergyParticle(AlienEnergy*)), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(energyParticleUpdated(AlienEnergy*)), this, SIGNAL(energyParticleUpdated(AlienEnergy*)), Qt::QueuedConnection);
+    connect(_shapeUniverse, SIGNAL(focusCell(Cell*)), this, SIGNAL(focusCell(Cell*)), Qt::QueuedConnection);
+    connect(_shapeUniverse, SIGNAL(focusEnergyParticle(EnergyParticle*)), this, SIGNAL(focusEnergyParticle(EnergyParticle*)), Qt::QueuedConnection);
+    connect(_shapeUniverse, SIGNAL(energyParticleUpdated(EnergyParticle*)), this, SIGNAL(energyParticleUpdated(EnergyParticle*)), Qt::QueuedConnection);
     connect(_shapeUniverse, SIGNAL(entitiesSelected(int,int)), this, SIGNAL(entitiesSelected(int,int)));
 
     //set up timer
@@ -107,7 +102,7 @@ void MacroEditor::setActiveScene (ActiveScene activeScene)
 
     //update scene
     _screenUpdatePossible = true;
-    universeUpdated(_grid, true);
+    universeUpdated(_context, true);
 }
 
 QVector3D MacroEditor::getViewCenterPosWithInc ()
@@ -126,7 +121,7 @@ QVector3D MacroEditor::getViewCenterPosWithInc ()
     return pos + posIncrement;
 }
 
-void MacroEditor::getExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es)
+void MacroEditor::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
     if( _activeScene == SHAPE_SCENE ) {
         _shapeUniverse->getExtendedSelection(clusters, es);
@@ -234,8 +229,8 @@ void MacroEditor::delSelection_Slot ()
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
-        QList< AlienCell* > cells;
-        QList< AlienEnergy* > es;
+        QList< Cell* > cells;
+        QList< EnergyParticle* > es;
         _shapeUniverse->delSelection(cells, es);
         emit delSelection(cells, es);
     }
@@ -245,21 +240,14 @@ void MacroEditor::delExtendedSelection_Slot ()
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
-        QList< AlienCellCluster* > clusters;
-        QList< AlienEnergy* > es;
+        QList< CellCluster* > clusters;
+        QList< EnergyParticle* > es;
         _shapeUniverse->delExtendedSelection(clusters, es);
-        //*********
-//        foreach(AlienCellCluster* c, _grid->getClusters())
-//            clusters << c;
-//            foreach(AlienCell* cell, c->getCells())
-//                if( (qrand() % 2 == 0) )
-//                cells << cell;
-        //*********
         emit delExtendedSelection(clusters, es);
     }
 }
 
-void MacroEditor::cellCreated (AlienCell* cell)
+void MacroEditor::cellCreated (Cell* cell)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -267,7 +255,7 @@ void MacroEditor::cellCreated (AlienCell* cell)
     }
 }
 
-void MacroEditor::energyParticleCreated(AlienEnergy* e)
+void MacroEditor::energyParticleCreated(EnergyParticle* e)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -275,7 +263,7 @@ void MacroEditor::energyParticleCreated(AlienEnergy* e)
     }
 }
 
-void MacroEditor::energyParticleUpdated_Slot (AlienEnergy* e)
+void MacroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -283,30 +271,23 @@ void MacroEditor::energyParticleUpdated_Slot (AlienEnergy* e)
     }
 }
 
-void MacroEditor::reclustered (QList< AlienCellCluster* > clusters)
+void MacroEditor::reclustered (QList< CellCluster* > clusters)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
-//        _shapeUniverse->universeUpdated(_grid);
-/*        foreach(AlienCellCluster* cluster, clusters) {
-            foreach(AlienCell* cell, cluster->getCells()) {
-                cell->setRelPos(cell->getRelPos());
-            }
-        }*/
         _shapeUniverse->reclustered(clusters);
     }
     else
-        _pixelUniverse->universeUpdated(_grid);
+        _pixelUniverse->universeUpdated(_context);
 }
 
-void MacroEditor::universeUpdated (AlienGrid* grid, bool force)
+void MacroEditor::universeUpdated (SimulationContext* context, bool force)
 {
-    //valid grid pointer available?
-    if( grid )
-        _grid = grid;
+    if(context)
+        _context = context;
     else
-        grid = _grid;
-    if( !grid )
+		context = _context;
+    if( !context)
         return;
 
     //update possible? (see updateTimerTimeout())
@@ -315,23 +296,23 @@ void MacroEditor::universeUpdated (AlienGrid* grid, bool force)
 
         //update active scene
         if( _activeScene == PIXEL_SCENE ) {
-            _pixelUniverse->universeUpdated(grid);
+            _pixelUniverse->universeUpdated(context);
 
             //first time? => center view
             if( !_pixelUniverseInit ) {
                _pixelUniverseInit = true;
                ui->simulationView->scale(2.0,2.0);
-               centerView(grid);
+               centerView(context);
             }
         }
         if( _activeScene == SHAPE_SCENE ) {
-            _shapeUniverse->universeUpdated(grid);
+            _shapeUniverse->universeUpdated(context);
 
             //first time? => center view
             if( !_shapeUniverseInit ) {
                _shapeUniverseInit = true;
                ui->simulationView->scale(20.0,20.0);
-               centerView(grid);
+               centerView(context);
             }
             QGraphicsItem* cellItem = _shapeUniverse->getFocusCenterCell();
             if( cellItem )
@@ -357,13 +338,14 @@ void MacroEditor::updateTimerTimeout ()
     _screenUpdatePossible = true;
 }
 
-void MacroEditor::centerView (AlienGrid* grid)
+void MacroEditor::centerView (SimulationContext* context)
 {
     //load size of the universe
-    grid->lockData();
-    qreal sizeX = grid->getSizeX();
-    qreal sizeY = grid->getSizeY();
-    grid->unlockData();
+	context->lock();
+	Topology* topo = context->getTopology();
+    qreal sizeX = topo->getSize().x;
+    qreal sizeY = topo->getSize().y;
+	context->unlock();
 
     //set view position
     ui->simulationView->centerOn(sizeX/2.0, sizeY/2.0);

@@ -1,9 +1,8 @@
 #include "clusteredit.h"
 
 #include "gui/editorsettings.h"
-#include "model/processing/aliencellfunction.h"
-#include "model/entities/aliencell.h"
-#include "model/entities/aliencellcluster.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>
@@ -16,7 +15,7 @@ ClusterEdit::ClusterEdit(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void ClusterEdit::updateCluster (AlienCellTO cell)
+void ClusterEdit::updateCluster (CellTO cell)
 {
     _cell = cell;
     updateDisplay();

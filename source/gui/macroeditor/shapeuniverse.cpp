@@ -1,35 +1,39 @@
-#include "shapeuniverse.h"
+#include <QGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QMatrix4x4>
+
+#include "global/servicelocator.h"
+#include "model/config.h"
+#include "model/alienfacade.h"
+#include "model/simulationcontext.h"
+#include "model/topology.h"
+#include "model/energyparticlemap.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
+#include "model/simulationparameters.h"
+#include "gui/editorsettings.h"
 
 #include "aliencellgraphicsitem.h"
 #include "aliencellconnectiongraphicsitem.h"
 #include "alienenergygraphicsitem.h"
 #include "markergraphicsitem.h"
+#include "shapeuniverse.h"
 
-#include "gui/editorsettings.h"
-#include "model/metadatamanager.h"
-#include "model/simulationsettings.h"
-
-#include "model/entities/aliencellcluster.h"
-#include "model/entities/alienenergy.h"
-#include "model/entities/aliengrid.h"
-
-#include <QGraphicsItem>
-#include <QGraphicsSceneMouseEvent>
-
-ShapeUniverse::ShapeUniverse(QObject *parent) :
-    QGraphicsScene(parent), _grid(0), _marker(0), _focusCenterCellItem(0)
+ShapeUniverse::ShapeUniverse(QObject *parent)
+	: QGraphicsScene(parent)
 {
     setBackgroundBrush(QBrush(QColor(0,0,0x30)));
 }
 
 
-void ShapeUniverse::universeUpdated (AlienGrid* grid)
+void ShapeUniverse::universeUpdated (SimulationContext* context)
 {
-    _grid = grid;
-    if( !_grid )
+    _context = context;
+    if( !_context)
         return;
 
-    grid->lockData();
+	_context->lock();
     _focusCells.clear();
     _focusEnergyParticles.clear();
     _highlightedCells.clear();
@@ -41,30 +45,31 @@ void ShapeUniverse::universeUpdated (AlienGrid* grid)
         _marker = 0;
     }
 
-    AlienCell* focusCenterCell(0);
+    Cell* focusCenterCell(0);
     if( _focusCenterCellItem)
         focusCenterCell = _focusCenterCellItem->getCell();
     _focusCenterCellItem = 0;
 
     //reset scene
     clear();
-    setSceneRect(0,0,grid->getSizeX(),grid->getSizeY());
+	IntVector2D size = _context->getTopology()->getSize();
+    setSceneRect(0, 0, size.x, size.y);
 
     //draw boundaries
-    QGraphicsScene::addRect(0.0, 0.0, grid->getSizeX(), grid->getSizeY(), QPen(QColor(0, 0, 0x80)));
+    QGraphicsScene::addRect(0.0, 0.0, size.x, size.y, QPen(QColor(0, 0, 0x80)));
 
     //draw energy particles
-    foreach( AlienEnergy* energy, grid->getEnergyParticles() ) {
+    foreach( EnergyParticle* energy, _context->getEnergyParticlesRef() ) {
         createEnergyItem(energy);
     }
 
     //draw cell clusters
-    foreach( AlienCellCluster* cluster, grid->getClusters() ) {
-        foreach( AlienCell* cell, cluster->getCells()) {
+    foreach( CellCluster* cluster, _context->getClustersRef() ) {
+        foreach( Cell* cell, cluster->getCellsRef()) {
 
             //create connections between cells
             for(int i = 0; i < cell->getNumConnections(); ++i ) {
-                AlienCell* otherCell(cell->getConnection(i));
+                Cell* otherCell(cell->getConnection(i));
 
                 //otherCell not already drawn?
                 if( !_cellItems.contains(otherCell->getId()) ) {
@@ -73,7 +78,7 @@ void ShapeUniverse::universeUpdated (AlienGrid* grid)
             }
 
             //create graphic representation of cell
-            AlienCellGraphicsItem* cellItem = createCellItem(cell);
+            CellGraphicsItem* cellItem = createCellItem(cell);
 
             //remember the cell item which should be focused
             if( cell == focusCenterCell )
@@ -84,16 +89,16 @@ void ShapeUniverse::universeUpdated (AlienGrid* grid)
     //set cell color according to the meta data
     setCellColorFromMetadata();
 
-    grid->unlockData();
+    _context->unlock();
     update();
 }
 
-void ShapeUniverse::cellCreated (AlienCell* cell)
+void ShapeUniverse::cellCreated (Cell* cell)
 {
-    if( (!_grid) || (!cell) )
+    if( (!_context) || (!cell) )
         return;
 
-    _grid->lockData();
+	_context->lock();
     createCellItem(cell);
 
     //remember focus cell
@@ -105,28 +110,28 @@ void ShapeUniverse::cellCreated (AlienCell* cell)
     unhighlight();
     highlightCell(cell);
 
-    _grid->unlockData();
+	_context->unlock();
     QGraphicsScene::update();
 }
 
-void ShapeUniverse::energyParticleCreated (AlienEnergy* e)
+void ShapeUniverse::energyParticleCreated (EnergyParticle* e)
 {
-    if( (!_grid) || (!e) )
+    if( (!_context) || (!e) )
         return;
 
-    _grid->lockData();
+	_context->lock();
     _focusCells.clear();
     _focusEnergyParticles.clear();
 
     //create graphic item
-    AlienEnergyGraphicsItem* eItem = createEnergyItem(e);
+    EnergyGraphicsItem* eItem = createEnergyItem(e);
     _focusEnergyParticles << eItem;
 
     //highlight energy particle
     unhighlight();
     highlightEnergyParticle(eItem);
 
-    _grid->unlockData();
+	_context->unlock();
     QGraphicsScene::update();
 }
 
@@ -139,52 +144,52 @@ void ShapeUniverse::defocused ()
     QGraphicsScene::update();
 }
 
-void ShapeUniverse::energyParticleUpdated_Slot (AlienEnergy* e)
+void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
 {
-    if( !_grid )
+    if( !_context)
         return;
-    _grid->lockData();
+	_context->lock();
 
-    if( _energyItems.contains(e->id) ) {
-        QVector3D pos = e->pos;
-        AlienEnergyGraphicsItem* eItem = _energyItems[e->id];
-        _grid->correctPosition(pos);
+    if( _energyItems.contains(e->getId()) ) {
+        QVector3D pos = e->getPosition();
+        EnergyGraphicsItem* eItem = _energyItems[e->getId()];
+		_context->getTopology()->correctPosition(pos);
         eItem->setPos(pos.x(), pos.y());
     }
-    _grid->unlockData();
+	_context->unlock();
 
     QGraphicsScene::update();
 }
 
-void ShapeUniverse::getExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es)
+void ShapeUniverse::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
     //extract selected cluster
-    _grid->lockData();
-    QMap< quint64, AlienCellCluster* > idClusterMap;
-    QList< AlienCellGraphicsItem* > highlightedCells = _highlightedCells.values();
-    foreach( AlienCellGraphicsItem* cellItem, highlightedCells ) {
-        AlienCellCluster* cluster = cellItem->getCell()->getCluster();
+	_context->lock();
+    QMap< quint64, CellCluster* > idClusterMap;
+    QList< CellGraphicsItem* > highlightedCells = _highlightedCells.values();
+    foreach( CellGraphicsItem* cellItem, highlightedCells ) {
+        CellCluster* cluster = cellItem->getCell()->getCluster();
         idClusterMap[cluster->getId()] = cluster;
     }
-    _grid->unlockData();
+	_context->unlock();
     clusters = idClusterMap.values();
 
     //selected energy particles
-    QList< AlienEnergyGraphicsItem* > highlightedEs = _highlightedEnergyParticles.values();
-    foreach (AlienEnergyGraphicsItem* eItem, highlightedEs) {
+    QList< EnergyGraphicsItem* > highlightedEs = _highlightedEnergyParticles.values();
+    foreach (EnergyGraphicsItem* eItem, highlightedEs) {
         es << eItem->getEnergyParticle();
     }
 }
 
-void ShapeUniverse::delSelection (QList< AlienCell* >& cells, QList< AlienEnergy* >& es)
+void ShapeUniverse::delSelection (QList< Cell* >& cells, QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+	_context->lock();
 
     //remove highlighting (has to be done first since the cells will be deleted in the following!!!)
     unhighlight();
 
     //del focused cells with connections
-    foreach( AlienCellGraphicsItem* cellItem, _focusCells ) {
+    foreach( CellGraphicsItem* cellItem, _focusCells ) {
         cells << cellItem->getCell();
         quint64 cellId = cellItem->getCell()->getId();
 
@@ -198,30 +203,30 @@ void ShapeUniverse::delSelection (QList< AlienCell* >& cells, QList< AlienEnergy
     _focusCells.clear();
 
     //del focused energy particles
-    foreach( AlienEnergyGraphicsItem* eItem, _focusEnergyParticles ) {
+    foreach( EnergyGraphicsItem* eItem, _focusEnergyParticles ) {
         es << eItem->getEnergyParticle();
-        _energyItems.remove(eItem->getEnergyParticle()->id);
+        _energyItems.remove(eItem->getEnergyParticle()->getId());
         delete eItem;
     }
     _focusEnergyParticles.clear();
-    _grid->unlockData();
+	_context->unlock();
     QGraphicsScene::update();
 }
 
-void ShapeUniverse::delExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es)
+void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
-    _grid->lockData();
+    _context->lock();
 
     //identify all cells and their clusters which should be deleted
-    QSet< quint64 > cellsToBeDeleted;
-    QSet< quint64 > clustersToBeDeleted;
-    QMap< quint64, AlienCellCluster* > idClusterMap;
-    foreach(AlienCellGraphicsItem* cellItem, _focusCells) {
-        AlienCellCluster* cluster = cellItem->getCell()->getCluster();
-        clustersToBeDeleted << cluster->getId();
+    std::set<quint64> cellsToBeDeleted;
+    std::set<quint64> clustersToBeDeleted;
+    QMap< quint64, CellCluster* > idClusterMap;
+    foreach(CellGraphicsItem* cellItem, _focusCells) {
+        CellCluster* cluster = cellItem->getCell()->getCluster();
+        clustersToBeDeleted.insert(cluster->getId());
         idClusterMap[cluster->getId()] = cluster;
-        foreach( AlienCell* cell, cluster->getCells()) {
-            cellsToBeDeleted << cell->getId();
+        foreach( Cell* cell, cluster->getCellsRef()) {
+            cellsToBeDeleted.insert(cell->getId());
         }
     }
     _focusCells.clear();
@@ -233,14 +238,14 @@ void ShapeUniverse::delExtendedSelection (QList< AlienCellCluster* >& clusters, 
     foreach(quint64 cellId, cellsToBeDeleted) {
 
         //del cell
-        AlienCellGraphicsItem* cellItem = _cellItems.take(cellId);
+        CellGraphicsItem* cellItem = _cellItems.take(cellId);
         if( cellItem )
             delete cellItem;
 
         //del cell connections
-        QMap< quint64, AlienCellConnectionGraphicsItem* > items = _connectionItems.take(cellId);
+        QMap< quint64, CellConnectionGraphicsItem* > items = _connectionItems.take(cellId);
         if( !items.empty() ) {
-            foreach(AlienCellConnectionGraphicsItem* conItem, items.values()) {
+            foreach(CellConnectionGraphicsItem* conItem, items.values()) {
                 delete conItem;
             }
             foreach(quint64 key, items.keys()) {
@@ -252,23 +257,23 @@ void ShapeUniverse::delExtendedSelection (QList< AlienCellCluster* >& clusters, 
     }
 
     //del focused energy particles
-    foreach( AlienEnergyGraphicsItem* eItem, _focusEnergyParticles ) {
+    foreach( EnergyGraphicsItem* eItem, _focusEnergyParticles ) {
         es << eItem->getEnergyParticle();
-        _energyItems.remove(eItem->getEnergyParticle()->id);
+        _energyItems.remove(eItem->getEnergyParticle()->getId());
         delete eItem;
     }
     _focusEnergyParticles.clear();
     _highlightedEnergyParticles.clear();
-    _grid->unlockData();
+    _context->unlock();
     QGraphicsScene::update();
 }
 
 void ShapeUniverse::metadataUpdated ()
 {
     //set cell colors
-    _grid->lockData();
+    _context->lock();
     setCellColorFromMetadata();
-    _grid->unlockData();
+    _context->unlock();
 
     QGraphicsScene::update();
 }
@@ -278,25 +283,26 @@ QGraphicsItem* ShapeUniverse::getFocusCenterCell ()
     return _focusCenterCellItem;
 }
 
-void ShapeUniverse::reclustered (QList< AlienCellCluster* > clusters)
+void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
 {
-    if( !_grid )
+    if( !_context)
         return;
 
-    _grid->lockData();
+    _context->lock();
 
      //remove hightlighting
     unhighlight();
 
-    //move graphic cells corresponding to the AlienCells in "clusters" and delete their connections
-    foreach(AlienCellCluster* cluster, clusters) {
-        foreach(AlienCell* cell, cluster->getCells()) {
+    //move graphic cells corresponding to the Cells in "clusters" and delete their connections
+	Topology* topo = _context->getTopology();
+    foreach(CellCluster* cluster, clusters) {
+        foreach(Cell* cell, cluster->getCellsRef()) {
 
             //move cell
             if( _cellItems.contains(cell->getId()) ) {
                 QVector3D pos = cell->calcPosition();
-                AlienCellGraphicsItem* cellItem = _cellItems[cell->getId()];
-                _grid->correctPosition(pos);
+                CellGraphicsItem* cellItem = _cellItems[cell->getId()];
+                topo->correctPosition(pos);
                 cellItem->setPos(pos.x(), pos.y());
                 cellItem->setNumToken(cell->getNumToken());
                 bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
@@ -309,9 +315,9 @@ void ShapeUniverse::reclustered (QList< AlienCellCluster* > clusters)
             }
 
             //del cell connections
-            QMap< quint64, AlienCellConnectionGraphicsItem* > items = _connectionItems.take(cell->getId());
+            QMap< quint64, CellConnectionGraphicsItem* > items = _connectionItems.take(cell->getId());
             if( !items.empty() ) {
-                foreach(AlienCellConnectionGraphicsItem* conItem, items.values()) {
+                foreach(CellConnectionGraphicsItem* conItem, items.values()) {
                     delete conItem;
                 }
                 foreach(quint64 key, items.keys()) {
@@ -324,12 +330,12 @@ void ShapeUniverse::reclustered (QList< AlienCellCluster* > clusters)
     }
 
     //draw cell connection
-    foreach( AlienCellCluster* cluster, clusters ) {
-        foreach( AlienCell* cell, cluster->getCells()) {
+    foreach( CellCluster* cluster, clusters ) {
+        foreach( Cell* cell, cluster->getCellsRef()) {
 
             //create connections between cells
             for(int i = 0; i < cell->getNumConnections(); ++i ) {
-                AlienCell* otherCell(cell->getConnection(i));
+                Cell* otherCell(cell->getConnection(i));
 
                 //otherCell not already drawn?
                 if( !_connectionItems[cell->getId()].contains(otherCell->getId()) ) {
@@ -342,28 +348,28 @@ void ShapeUniverse::reclustered (QList< AlienCellCluster* > clusters)
 
     //highlight cells, clusters and energy particles
 //    unhighlight();
-    foreach(AlienCellGraphicsItem* cellItem, _focusCells)
+    foreach(CellGraphicsItem* cellItem, _focusCells)
         highlightCell(cellItem->getCell());
-    foreach(AlienEnergyGraphicsItem* eItem, _focusEnergyParticles)
+    foreach(EnergyGraphicsItem* eItem, _focusEnergyParticles)
         highlightEnergyParticle(eItem);
 
-    _grid->unlockData();
+    _context->unlock();
     QGraphicsScene::update();
 }
 
 
 void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
 {
-    if( !_grid )
+    if( !_context )
         return;
-    _grid->lockData();
+    _context->lock();
 
     bool _clickedOnSomething = false;
     QList< QGraphicsItem* > items(QGraphicsScene::items(e->scenePos()));
     foreach(QGraphicsItem* item, items ) {
 
         //clicked on cell item?
-        AlienCellGraphicsItem* cellItem = qgraphicsitem_cast<AlienCellGraphicsItem*>(item);
+        CellGraphicsItem* cellItem = qgraphicsitem_cast<CellGraphicsItem*>(item);
         if( cellItem ) {
             _clickedOnSomething = true;
 
@@ -382,7 +388,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         }
 
         //clicked on energy particle item?
-        AlienEnergyGraphicsItem* eItem = qgraphicsitem_cast<AlienEnergyGraphicsItem*>(item);
+        EnergyGraphicsItem* eItem = qgraphicsitem_cast<EnergyGraphicsItem*>(item);
         if( eItem ) {
             _clickedOnSomething = true;
 
@@ -404,7 +410,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         qDebug("h: %d", _highlightedCells.size());
         unhighlight();
         QGraphicsScene::update();
-        _grid->unlockData();
+        _context->unlock();
         return;
     }
 */
@@ -426,7 +432,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         QGraphicsScene::update();
     }
 
-    _grid->unlockData();
+    _context->unlock();
 }
 
 void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
@@ -444,10 +450,10 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-    if( !_grid )
+    if( !_context)
         return;
 
-//    _grid->lockData();
+//    _context->lock();
 
     //mouse buttons
     bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
@@ -457,7 +463,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
         //move marker?
         if( _marker ) {
-            _grid->lockData();
+            _context->lock();
 
             //set pos
             _marker->setEndPos(e->scenePos().x(), e->scenePos().y());
@@ -472,7 +478,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             foreach( QGraphicsItem* item, items ){
 
                 //cell item?
-                AlienCellGraphicsItem* cellItem = qgraphicsitem_cast<AlienCellGraphicsItem*>(item);
+                CellGraphicsItem* cellItem = qgraphicsitem_cast<CellGraphicsItem*>(item);
                 if( cellItem ) {
 
                     //highlight cell
@@ -481,7 +487,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 }
 
                 //energy item?
-                AlienEnergyGraphicsItem* eItem = qgraphicsitem_cast<AlienEnergyGraphicsItem*>(item);
+                EnergyGraphicsItem* eItem = qgraphicsitem_cast<EnergyGraphicsItem*>(item);
                 if( eItem ) {
 
                     //highlight new particle
@@ -490,7 +496,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 }
             }
 
-            _grid->unlockData();
+            _context->unlock();
             emit entitiesSelected(_focusCells.size(), _focusEnergyParticles.size());
             QGraphicsScene::update();
         }
@@ -511,41 +517,44 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
 
             //update focused energy particles
-            foreach( AlienEnergyGraphicsItem* eItem, _focusEnergyParticles ) {
+			EnergyParticleMap* energyMap = _context->getEnergyParticleMap();
+            foreach( EnergyGraphicsItem* eItem, _focusEnergyParticles ) {
 
                 //update new position to the energy particle on our own
-                AlienEnergy* energy = eItem->getEnergyParticle();
-                _grid->lockData();
-                _grid->setEnergy(energy->pos, 0);
+                EnergyParticle* energy = eItem->getEnergyParticle();
+                _context->lock();
+                energyMap->setParticle(energy->getPosition(), nullptr);
 
                 //not [left and right] mouse button pressed?
                 if( (!leftButton) || (!rightButton) ) {
-                    energy->pos = energy->pos + delta;
+                    energy->setPosition(energy->getPosition() + delta);
                 }
                 else {
-                    energy->pos = transform.map(energy->pos);
+                    energy->setPosition(transform.map(energy->getPosition()));
                 }
 
-                _grid->setEnergy(energy->pos, energy);
-                _grid->unlockData();
+                energyMap->setParticle(energy->getPosition(), energy);
+                _context->unlock();
 //                QPointF p = eItem->pos();
-                eItem->setPos(energy->pos.x(), energy->pos.y());
+				auto particlePos = energy->getPosition();
+                eItem->setPos(particlePos.x(), particlePos.y());
 
                 //inform other instances about cell cluster changes
                 emit energyParticleUpdated(energy);
             }
 
-            QList< AlienCell* > cells;
-            QList< AlienCellTO > newCellsData;
+            QList< Cell* > cells;
+            QList< CellTO > newCellsData;
 
             //update focused cells
-            foreach( AlienCellGraphicsItem* cellItem, _focusCells ) {
+            AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+            foreach( CellGraphicsItem* cellItem, _focusCells ) {
 
                 //retrieve cell information
-                AlienCell* cell = cellItem->getCell();
-                _grid->lockData();
-                AlienCellTO newCellData(cell);
-                _grid->unlockData();
+                Cell* cell = cellItem->getCell();
+                _context->lock();
+                CellTO newCellData = facade->buildFeaturedCellTO(cell);
+                _context->unlock();
 
                 //only left mouse button pressed?
                 if( leftButton && (!rightButton) ) {
@@ -595,27 +604,27 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             }
         }
     }
-//    _grid->unlockData();
+//    _context->unlock();
 }
 
-AlienEnergyGraphicsItem* ShapeUniverse::createEnergyItem (AlienEnergy* e)
+EnergyGraphicsItem* ShapeUniverse::createEnergyItem (EnergyParticle* e)
 {
     //create item
-    QVector3D pos(e->pos);
-    AlienEnergyGraphicsItem* eItem = new AlienEnergyGraphicsItem(e, pos.x(), pos.y());
+    QVector3D pos(e->getPosition());
+    EnergyGraphicsItem* eItem = new EnergyGraphicsItem(e, pos.x(), pos.y());
     QGraphicsScene::addItem(eItem);
 
     //register item
-    _energyItems[e->id] = eItem;
+    _energyItems[e->getId()] = eItem;
     return eItem;
 }
 
-AlienCellGraphicsItem* ShapeUniverse::createCellItem (AlienCell* cell)
+CellGraphicsItem* ShapeUniverse::createCellItem (Cell* cell)
 {
     //create item
     QVector3D pos(cell->calcPosition());
     bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
-    AlienCellGraphicsItem* cellItem = new AlienCellGraphicsItem(cell, pos.x(), pos.y(), connectable, cell->getNumToken(), cell->getColor());
+    CellGraphicsItem* cellItem = new CellGraphicsItem(cell, pos.x(), pos.y(), connectable, cell->getNumToken(), cell->getMetadata().color);
     QGraphicsScene::addItem(cellItem);
 
     //register item
@@ -623,20 +632,20 @@ AlienCellGraphicsItem* ShapeUniverse::createCellItem (AlienCell* cell)
     return cellItem;
 }
 
-void ShapeUniverse::createConnectionItem (AlienCell* cell, AlienCell* otherCell)
+void ShapeUniverse::createConnectionItem (Cell* cell, Cell* otherCell)
 {
     QVector3D pos(cell->getCluster()->calcPosition(cell));
     QVector3D otherPos(otherCell->getCluster()->calcPosition(otherCell));
 
     //directed connection?
-    AlienCellConnectionGraphicsItem::ConnectionState s = AlienCellConnectionGraphicsItem::NO_DIR_CONNECTION;
-    if( cell->getTokenAccessNumber() == ((otherCell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) && (!cell->blockToken()) ) {
-        s = AlienCellConnectionGraphicsItem::B_TO_A_CONNECTION;
+    CellConnectionGraphicsItem::ConnectionState s = CellConnectionGraphicsItem::NO_DIR_CONNECTION;
+    if( cell->getTokenAccessNumber() == ((otherCell->getTokenAccessNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) && (!cell->isTokenBlocked()) ) {
+        s = CellConnectionGraphicsItem::B_TO_A_CONNECTION;
     }
-    if( ((cell->getTokenAccessNumber()+1)%simulationParameters.MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->blockToken()) ) {
-        s = AlienCellConnectionGraphicsItem::A_TO_B_CONNECTION;
+    if( ((cell->getTokenAccessNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->isTokenBlocked()) ) {
+        s = CellConnectionGraphicsItem::A_TO_B_CONNECTION;
     }
-    AlienCellConnectionGraphicsItem* connectionItem = new AlienCellConnectionGraphicsItem(pos.x(), pos.y(), otherPos.x(), otherPos.y(), s);
+    CellConnectionGraphicsItem* connectionItem = new CellConnectionGraphicsItem(pos.x(), pos.y(), otherPos.x(), otherPos.y(), s);
     QGraphicsScene::addItem(connectionItem);
 
     //register connection
@@ -646,9 +655,9 @@ void ShapeUniverse::createConnectionItem (AlienCell* cell, AlienCell* otherCell)
 
 void ShapeUniverse::delConnectionItem (quint64 cellId)
 {
-    QMap< quint64, AlienCellConnectionGraphicsItem* > items = _connectionItems.take(cellId);
+    QMap< quint64, CellConnectionGraphicsItem* > items = _connectionItems.take(cellId);
     if( !items.empty() ) {
-        foreach(AlienCellConnectionGraphicsItem* conItem, items.values()) {
+        foreach(CellConnectionGraphicsItem* conItem, items.values()) {
             delete conItem;
         }
         foreach(quint64 key, items.keys()) {
@@ -662,69 +671,70 @@ void ShapeUniverse::delConnectionItem (quint64 cellId)
 void ShapeUniverse::unhighlight ()
 {
     //defocus old cells
-    QList< AlienCellGraphicsItem* > highlightedCells = _highlightedCells.values();
-    foreach(AlienCellGraphicsItem* cellItem, highlightedCells) {
-        cellItem->setFocusState(AlienCellGraphicsItem::NO_FOCUS);
+    QList< CellGraphicsItem* > highlightedCells = _highlightedCells.values();
+    foreach(CellGraphicsItem* cellItem, highlightedCells) {
+        cellItem->setFocusState(CellGraphicsItem::NO_FOCUS);
     }
     _highlightedCells.clear();
 
     //defocus old energy particles
-    QList< AlienEnergyGraphicsItem* > highlightedEs = _highlightedEnergyParticles.values();
-    foreach(AlienEnergyGraphicsItem* eItem, highlightedEs) {
-        eItem->setFocusState(AlienEnergyGraphicsItem::NO_FOCUS);
+    QList< EnergyGraphicsItem* > highlightedEs = _highlightedEnergyParticles.values();
+    foreach(EnergyGraphicsItem* eItem, highlightedEs) {
+        eItem->setFocusState(EnergyGraphicsItem::NO_FOCUS);
     }
     _highlightedEnergyParticles.clear();
 }
 
-void ShapeUniverse::highlightCell (AlienCell* cell)
+void ShapeUniverse::highlightCell (Cell* cell)
 {
     if( !cell )
         return;
 
     //focus cellcluster
-    foreach(AlienCell* otherCell, cell->getCluster()->getCells()) {
+    foreach(Cell* otherCell, cell->getCluster()->getCellsRef()) {
         if( _cellItems.contains(otherCell->getId()) ) {
-            AlienCellGraphicsItem* cellItem = _cellItems[otherCell->getId()];
-            if( cellItem->getFocusState() == AlienCellGraphicsItem::NO_FOCUS )
-                cellItem->setFocusState(AlienCellGraphicsItem::FOCUS_CLUSTER);
+            CellGraphicsItem* cellItem = _cellItems[otherCell->getId()];
+            if( cellItem->getFocusState() == CellGraphicsItem::NO_FOCUS )
+                cellItem->setFocusState(CellGraphicsItem::FOCUS_CLUSTER);
             _highlightedCells[otherCell->getId()] = cellItem;
         }
     }
 
     //focus cell
     if( _cellItems.contains(cell->getId()) )
-        _cellItems[cell->getId()]->setFocusState(AlienCellGraphicsItem::FOCUS_CELL);
+        _cellItems[cell->getId()]->setFocusState(CellGraphicsItem::FOCUS_CELL);
 }
 
-void ShapeUniverse::highlightEnergyParticle (AlienEnergyGraphicsItem* e)
+void ShapeUniverse::highlightEnergyParticle (EnergyGraphicsItem* e)
 {
     if( !e )
         return;
 
     //focus energy particle
-    e->setFocusState(AlienEnergyGraphicsItem::FOCUS);
-    _highlightedEnergyParticles[e->getEnergyParticle()->id] = e;
+    e->setFocusState(EnergyGraphicsItem::FOCUS);
+    _highlightedEnergyParticles[e->getEnergyParticle()->getId()] = e;
 }
 
 void ShapeUniverse::setCellColorFromMetadata ()
 {
     //set cell colors
-    QMapIterator< quint64, AlienCellGraphicsItem* > it(_cellItems);
+    QMapIterator< quint64, CellGraphicsItem* > it(_cellItems);
     while( it.hasNext() ) {
         it.next();
-        AlienCellGraphicsItem* cellItem = it.value();
-        cellItem->setColor(cellItem->getCell()->getColor());
+        CellGraphicsItem* cellItem = it.value();
+		Cell* cell = cellItem->getCell();
+        cellItem->setColor(cell->getMetadata().color);
     }
 }
 
 QVector3D ShapeUniverse::calcCenterOfHighlightedObjects ()
 {
     QVector3D center;
-    QList< AlienCellGraphicsItem* > cellItems(_highlightedCells.values());
-    foreach( AlienCellGraphicsItem* cellItem, cellItems )
+    QList< CellGraphicsItem* > cellItems(_highlightedCells.values());
+    foreach( CellGraphicsItem* cellItem, cellItems )
         center += QVector3D(cellItem->pos().x(), cellItem->pos().y(), 0.0);
-    QList< AlienEnergyGraphicsItem* > eItems(_highlightedEnergyParticles.values());
-    foreach( AlienEnergyGraphicsItem* eItem, eItems )
+    QList< EnergyGraphicsItem* > eItems(_highlightedEnergyParticles.values());
+    foreach( EnergyGraphicsItem* eItem, eItems )
         center += QVector3D(eItem->pos().x(), eItem->pos().y(), 0.0);
     return center/(cellItems.size()+eItems.size());
 }
