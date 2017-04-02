@@ -2,26 +2,14 @@
 # Project created by QtCreator 2012-04-08T22:05:32
 # -------------------------------------------------
 QT += opengl
-QT += testlib
-QMAKE_CXXFLAGS_RELEASE    = -O4 -march=native -ffast-math -funroll-loops -std=c++11
-QMAKE_CXXFLAGS_DEBUG    = -std=c++11
+QMAKE_CXXFLAGS_RELEASE    = -O4 -march=native -ffast-math -funroll-loops -std=c++11 -Wno-unused-variable -Wno-unused-parameter
 TARGET = alien
 TEMPLATE = app
 SOURCES += main.cpp \
-    model/entities/aliencell.cpp \
-    model/entities/aliencellcluster.cpp \
     model/physics/physics.cpp \
     global/global.cpp \
-    model/entities/alientoken.cpp \
-    model/entities/aliengrid.cpp \
-    model/processing/aliencellfunction.cpp \
-    model/processing/aliencellfunctionfactory.cpp \
-    model/processing/aliencellfunctionscanner.cpp \
-    model/entities/alienenergy.cpp \
     gui/monitoring/simulationmonitor.cpp \
     gui/microeditor/hexedit.cpp \
-    model/alienthread.cpp \
-    model/processing/aliencellfunctionconstructor.cpp \
     gui/macroeditor/pixeluniverse.cpp \
     gui/macroeditor/shapeuniverse.cpp \
     gui/macroeditor/aliencellgraphicsitem.cpp \
@@ -31,13 +19,9 @@ SOURCES += main.cpp \
     gui/macroeditor.cpp \
     gui/mainwindow.cpp \
     gui/microeditor.cpp \
-    model/entities/aliencellto.cpp \
-    model/aliensimulator.cpp \
     gui/microeditor/clusteredit.cpp \
     gui/microeditor/tokenedit.cpp \
     gui/macroeditor/markergraphicsitem.cpp \
-    model/processing/aliencellfunctioncomputer.cpp \
-    model/processing/aliencellfunctionweapon.cpp \
     gui/microeditor/celledit.cpp \
     gui/microeditor/energyedit.cpp \
     gui/microeditor/tokentab.cpp \
@@ -51,30 +35,47 @@ SOURCES += main.cpp \
     gui/dialogs/selectionmultiplyrandomdialog.cpp \
     gui/dialogs/selectionmultiplyarrangementdialog.cpp \
     gui/microeditor/cellcomputeredit.cpp \
-    model/processing/aliencellfunctionsensor.cpp \
-    model/processing/aliencellfunctionpropulsion.cpp \
     gui/dialogs/addrectstructuredialog.cpp \
     gui/dialogs/addhexagonstructuredialog.cpp \
     gui/assistance/tutorialwindow.cpp \
-    model/processing/aliencellfunctioncommunicator.cpp \
     model/simulationsettings.cpp \
     model/metadatamanager.cpp \
     gui/misc/startscreencontroller.cpp \
-    gui/guisettings.cpp
+    gui/guisettings.cpp \
+    global/servicelocator.cpp \
+    model/entities/_impl/entityfactoryimpl.cpp \
+    model/entities/_impl/cellclusterimpl.cpp \
+    model/entities/token.cpp \
+    model/entities/grid.cpp \
+    model/entities/cellto.cpp \
+    model/entities/_impl/cellimpl.cpp \
+    model/features/cellfeature.cpp \
+    model/features/cellfunction.cpp \
+    model/features/_impl/cellfeaturefactoryimpl.cpp \
+    model/features/_impl/cellfunctioncomputerimpl.cpp \
+    model/entities/energyparticle.cpp \
+    model/simulationunit.cpp \
+    model/simulationcontroller.cpp \
+    model/_impl/factoryfacadeimpl.cpp \
+    model/_impl/simulationcontextimpl.cpp \
+    model/cellmap.cpp \
+    model/definitions.cpp \
+    model/energyparticlemap.cpp \
+    model/topology.cpp \
+    model/_impl/serializationfacadeimpl.cpp \
+    model/features/_impl/energyguidanceimpl.cpp \
+    model/features/_impl/cellfunctioncommunicatorimpl.cpp \
+    model/features/_impl/cellfunctionconstructorimpl.cpp \
+    model/features/_impl/cellfunctionpropulsionimpl.cpp \
+    model/features/_impl/cellfunctionscannerimpl.cpp \
+    model/features/_impl/cellfunctionsensorimpl.cpp \
+    model/features/_impl/cellfunctionweaponimpl.cpp \
+    model/physics/codingphysicalquantities.cpp \
+    model/metadata/symboltable.cpp
 HEADERS += \
-    model/entities/aliencell.h \
-    model/entities/aliencellcluster.h \
     model/physics/physics.h \
     global/global.h \
-    model/entities/alientoken.h \
-    model/entities/aliengrid.h \
-    model/processing/aliencellfunction.h \
-    model/processing/aliencellfunctionfactory.h \
-    model/processing/aliencellfunctionscanner.h \
-    model/entities/alienenergy.h \
     gui/monitoring/simulationmonitor.h \
-    model/alienthread.h \
-    model/processing/aliencellfunctionconstructor.h \
     gui/microeditor/hexedit.h \
     gui/macroeditor/pixeluniverse.h \
     gui/macroeditor/shapeuniverse.h \
@@ -86,13 +87,9 @@ HEADERS += \
     gui/macroeditor.h \
     gui/mainwindow.h \
     gui/microeditor.h \
-    model/entities/aliencellto.h \
-    model/aliensimulator.h \
     gui/microeditor/clusteredit.h \
     gui/microeditor/tokenedit.h \
     gui/macroeditor/markergraphicsitem.h \
-    model/processing/aliencellfunctioncomputer.h \
-    model/processing/aliencellfunctionweapon.h \
     gui/microeditor/celledit.h \
     gui/microeditor/energyedit.h \
     gui/microeditor/tokentab.h \
@@ -107,15 +104,55 @@ HEADERS += \
     gui/dialogs/selectionmultiplyrandomdialog.h \
     gui/dialogs/selectionmultiplyarrangementdialog.h \
     gui/microeditor/cellcomputeredit.h \
-    model/processing/aliencellfunctionsensor.h \
-    model/processing/aliencellfunctionpropulsion.h \
     gui/dialogs/addrectstructuredialog.h \
     gui/dialogs/addhexagonstructuredialog.h \
     gui/assistance/tutorialwindow.h \
-    model/processing/aliencellfunctioncommunicator.h \
     model/simulationsettings.h \
     model/metadatamanager.h \
-    gui/misc/startscreencontroller.h
+    gui/misc/startscreencontroller.h \
+    global/servicelocator.h \
+    model/features/constants.h \
+    model/entities/entityfactory.h \
+    model/entities/_impl/entityfactoryimpl.h \
+    model/entities/cell.h \
+    model/entities/cellto.h \
+    model/entities/token.h \
+    model/entities/grid.h \
+    model/entities/energyparticle.h \
+    model/entities/_impl/cellclusterimpl.h \
+    model/entities/_impl/cellimpl.h \
+    model/features/cellfeature.h \
+    model/features/cellfeaturefactory.h \
+    model/features/energyguidance.h \
+    model/features/cellfunctioncomputer.h \
+    model/features/cellfunction.h \
+    model/features/_impl/energyguidanceimpl.h \
+    model/features/_impl/cellfeaturefactoryimpl.h \
+    model/simulationunit.h \
+    model/simulationcontroller.h \
+    model/entities/cellcluster.h \
+    model/factoryfacade.h \
+    model/_impl/factoryfacadeimpl.h \
+    model/simulationcontext.h \
+    model/definitions.h \
+    model/_impl/simulationcontextimpl.h \
+    model/topology.h \
+    model/cellmap.h \
+    model/energyparticlemap.h \
+    model/serializationfacade.h \
+    model/_impl/serializationfacadeimpl.h \
+    model/features/cellfeatureconstants.h \
+    model/features/_impl/cellfunctioncommunicatorimpl.h \
+    model/features/_impl/cellfunctionconstructorimpl.h \
+    model/features/_impl/cellfunctionpropulsionimpl.h \
+    model/features/_impl/cellfunctionscannerimpl.h \
+    model/features/_impl/cellfunctionsensorimpl.h \
+    model/features/_impl/cellfunctionweaponimpl.h \
+    model/physics/codingphysicalquantities.h \
+    model/features/_impl/cellfunctioncomputerimpl.h \
+    model/metadata/cellmetadata.h \
+    model/metadata/cellclustermetadata.h \
+    model/metadata/symboltable.h
 FORMS += gui/monitoring/simulationmonitor.ui \
     gui/macroeditor.ui \
     gui/mainwindow.ui \
@@ -141,18 +178,20 @@ OTHER_FILES +=
 test {
     message(Tests build)
     QT += testlib
-    TARGET = UnitTests
+    TARGET = Tests
 
     SOURCES -= main.cpp
 
-    HEADERS += tests/testphysics.h \
-        tests/testaliencellcluster.h \
-        tests/testalientoken.h \
-        tests/testsettings.h \
-        tests/testaliencellfunctioncommunicator.h
+    HEADERS += tests/predicates.h \
+        tests/settings.h
 
-
-    SOURCES += tests/testsuite.cpp
+    SOURCES += tests/testsuite.cpp \
+        tests/predicates.cpp \
+        tests/integrationtests/integrationtestreplicator.cpp \
+        tests/integrationtests/integrationtestcomparison.cpp \
+        tests/unittests/unittestphysics.spp \
+        tests/unittests/unittestcellcluster.cpp \
+        tests/unittests/unittestcellfunctioncommunicator.cpp
 
 } else {
     message(Normal build)

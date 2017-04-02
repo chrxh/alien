@@ -1,21 +1,19 @@
 #ifndef SHAPEUNIVERSE_H
 #define SHAPEUNIVERSE_H
 
-#include "model/entities/aliencellto.h"
-
 #include <QGraphicsScene>
 #include <QGraphicsEllipseItem>
 #include <QGraphicsLineItem>
 #include <QMap>
 #include <QVector3D>
 
-class AlienCell;
-class AlienCellCluster;
-class AlienCellGraphicsItem;
-class AlienCellConnectionGraphicsItem;
-class AlienEnergy;
-class AlienEnergyGraphicsItem;
-class AlienGrid;
+#include "model/definitions.h"
+#include "model/entities/cellto.h"
+
+
+class CellGraphicsItem;
+class CellConnectionGraphicsItem;
+class EnergyGraphicsItem;
 class MarkerGraphicsItem;
 class QGraphicsSceneMouseEvent;
 class ShapeUniverse : public QGraphicsScene
@@ -24,29 +22,29 @@ class ShapeUniverse : public QGraphicsScene
 public:
     ShapeUniverse (QObject *parent = 0);
 
-    void universeUpdated (AlienGrid* grid);
-    void cellCreated (AlienCell* cell);
-    void energyParticleCreated (AlienEnergy* e);
+    void universeUpdated (SimulationContext* context);
+    void cellCreated (Cell* cell);
+    void energyParticleCreated (EnergyParticle* e);
     void defocused ();
-    void energyParticleUpdated_Slot (AlienEnergy* e);
-    void getExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es);
-    void delSelection (QList< AlienCell* >& cells, QList< AlienEnergy* >& es);
-    void delExtendedSelection (QList< AlienCellCluster* >& clusters, QList< AlienEnergy* >& es);
+    void energyParticleUpdated_Slot (EnergyParticle* e);
+    void getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es);
+    void delSelection (QList< Cell* >& cells, QList< EnergyParticle* >& es);
+    void delExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es);
     void metadataUpdated ();
     QGraphicsItem* getFocusCenterCell ();
 
 public slots:
-    void reclustered (QList< AlienCellCluster* > clusters);
+    void reclustered (QList< CellCluster* > clusters);
 
 signals:
     void defocus ();                                                //to microeditor
-    void focusCell (AlienCell* cell);                               //to microeditor
-    void focusEnergyParticle (AlienEnergy* e);                      //to microeditor
+    void focusCell (Cell* cell);                               //to microeditor
+    void focusEnergyParticle (EnergyParticle* e);                      //to microeditor
     void focusEnsemble (int numCells, int numEnergyParticles);      //to microeditor
-    void updateCell (QList< AlienCell* > cells,
-                     QList< AlienCellTO > newCellsData,
+    void updateCell (QList< Cell* > cells,
+                     QList< CellTO > newCellsData,
                      bool clusterDataChanged);                      //to simulator
-    void energyParticleUpdated (AlienEnergy* e);                    //to microeditor
+    void energyParticleUpdated (EnergyParticle* e);                    //to microeditor
     void entitiesSelected (int numCells, int numEnergyParticles);   //to microeditor
 
 protected:
@@ -60,28 +58,28 @@ protected:
 private:
 
     //internal methods
-    AlienEnergyGraphicsItem* createEnergyItem (AlienEnergy* e);
-    AlienCellGraphicsItem* createCellItem (AlienCell* cell);
-    void createConnectionItem (AlienCell* cell, AlienCell* otherCell);
+    EnergyGraphicsItem* createEnergyItem (EnergyParticle* e);
+    CellGraphicsItem* createCellItem (Cell* cell);
+    void createConnectionItem (Cell* cell, Cell* otherCell);
     void delConnectionItem (quint64 cellId);
     void unhighlight ();
-    void highlightCell (AlienCell* cell);
-    void highlightEnergyParticle (AlienEnergyGraphicsItem* e);
+    void highlightCell (Cell* cell);
+    void highlightEnergyParticle (EnergyGraphicsItem* e);
     void setCellColorFromMetadata ();
 
     //internal data for display and editing
-    AlienGrid* _grid;
-    QList< AlienCellGraphicsItem* > _focusCells;
-    QList< AlienEnergyGraphicsItem* > _focusEnergyParticles;
-    QMap< quint64, AlienCellGraphicsItem* > _highlightedCells;  //contains the whole clusters when a single cell in focused therein
-    QMap< quint64, AlienEnergyGraphicsItem* > _highlightedEnergyParticles;
-    MarkerGraphicsItem* _marker;
-    AlienCellGraphicsItem* _focusCenterCellItem;
+	SimulationContext* _context = nullptr;
+    QList< CellGraphicsItem* > _focusCells;
+    QList< EnergyGraphicsItem* > _focusEnergyParticles;
+    QMap< quint64, CellGraphicsItem* > _highlightedCells;  //contains the whole clusters when a single cell in focused therein
+    QMap< quint64, EnergyGraphicsItem* > _highlightedEnergyParticles;
+    MarkerGraphicsItem* _marker = nullptr;
+    CellGraphicsItem* _focusCenterCellItem = nullptr;
 
     //associations
-    QMap< quint64, AlienCellGraphicsItem* > _cellItems;
-    QMap< quint64, AlienEnergyGraphicsItem* > _energyItems;
-    QMap< quint64, QMap< quint64, AlienCellConnectionGraphicsItem* > > _connectionItems;
+    QMap< quint64, CellGraphicsItem* > _cellItems;
+    QMap< quint64, EnergyGraphicsItem* > _energyItems;
+    QMap< quint64, QMap< quint64, CellConnectionGraphicsItem* > > _connectionItems;
 
     QVector3D calcCenterOfHighlightedObjects ();
 };

@@ -1,9 +1,9 @@
-#ifndef ALIENCELLCONNECTIONGRAPHICSITEM_H
-#define ALIENCELLCONNECTIONGRAPHICSITEM_H
+#ifndef CELLCONNECTIONGRAPHICSITEM_H
+#define CELLCONNECTIONGRAPHICSITEM_H
 
 #include <QGraphicsItem>
 
-class AlienCellConnectionGraphicsItem : public QGraphicsItem
+class CellConnectionGraphicsItem : public QGraphicsItem
 {
 public:
     enum ConnectionState {
@@ -12,8 +12,8 @@ public:
         B_TO_A_CONNECTION
     };
 
-    AlienCellConnectionGraphicsItem (qreal x1, qreal y1, qreal x2, qreal y2, ConnectionState s, QGraphicsItem* parent = 0);
-    ~AlienCellConnectionGraphicsItem ();
+    CellConnectionGraphicsItem (qreal x1, qreal y1, qreal x2, qreal y2, ConnectionState s, QGraphicsItem* parent = 0);
+    ~CellConnectionGraphicsItem ();
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -26,4 +26,4 @@ private:
     ConnectionState _connectionState;
 };
 
-#endif // ALIENCELLCONNECTIONGRAPHICSITEM_H
+#endif // CELLCONNECTIONGRAPHICSITEM_H

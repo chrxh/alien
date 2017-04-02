@@ -1,30 +1,31 @@
-#include "newsimulationdialog.h"
-#include "ui_newsimulationdialog.h"
+#include <QDebug>
+
+#include "gui/guisettings.h"
+#include "global/global.h"
+#include "model/simulationcontext.h"
 
 #include "simulationparametersdialog.h"
 #include "symboltabledialog.h"
 
-#include "gui/guisettings.h"
-#include "global/global.h"
-#include "model/metadatamanager.h"
+#include "newsimulationdialog.h"
+#include "ui_newsimulationdialog.h"
 
-#include <QDebug>
-
-NewSimulationDialog::NewSimulationDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::NewSimulationDialog)
+NewSimulationDialog::NewSimulationDialog(SimulationContext* context, QWidget *parent)
+	: QDialog(parent)
+	, ui(new Ui::NewSimulationDialog)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
 
-    _simParaDialog = new SimulationParametersDialog();
-    _symTblDialog = new SymbolTableDialog();
+    _simParaDialog = new SimulationParametersDialog(context->getSimulationParameters());
+    _symTblDialog = new SymbolTableDialog(context->getSymbolTable());
 
     //connections
     connect(ui->simulationParametersButton, SIGNAL(clicked()), this, SLOT(simulationParametersButtonClicked()));
     connect(ui->symbolTableButton, SIGNAL(clicked()), this, SLOT(symbolTableButtonClicked()));
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okButtonClicked()));
 }
+
 
 NewSimulationDialog::~NewSimulationDialog()
 {
@@ -33,22 +34,21 @@ NewSimulationDialog::~NewSimulationDialog()
     delete ui;
 }
 
-int NewSimulationDialog::getSizeX ()
+IntVector2D NewSimulationDialog::getSize ()
 {
     bool ok(true);
-    return ui->sizeXEdit->text().toInt(&ok);
-}
-
-int NewSimulationDialog::getSizeY ()
-{
-    bool ok(true);
-    return ui->sizeYEdit->text().toInt(&ok);
+	return{ ui->sizeXEdit->text().toInt(&ok), ui->sizeYEdit->text().toInt(&ok) };
 }
 
 qreal NewSimulationDialog::getEnergy ()
 {
     bool ok(true);
     return ui->energyEdit->text().toDouble(&ok);
+}
+
+SymbolTable const& NewSimulationDialog::getNewSymbolTableRef()
+{
+	return _symTblDialog->getNewSymbolTableRef();
 }
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
@@ -64,7 +64,6 @@ void NewSimulationDialog::symbolTableButtonClicked ()
 void NewSimulationDialog::okButtonClicked ()
 {
     _simParaDialog->updateSimulationParameters();
-    _symTblDialog->updateSymbolTable(&MetadataManager::getGlobalInstance());
 }
 
 

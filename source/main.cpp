@@ -1,20 +1,35 @@
 #include <QApplication>
+#include <QtCore/qmath.h>
+#include <QVector2D>
 
 #include "gui/mainwindow.h"
-#include "model/aliensimulator.h"
-#include "model/entities/aliencellto.h"
-#include "model/metadatamanager.h"
-#include "model/simulationsettings.h"
+#include "model/simulationcontroller.h"
+#include "model/metadata/symboltable.h"
+#include "model/entities/cellto.h"
+#include "model/simulationcontext.h"
+#include "model/config.h"
 
-#include <QtCore/qmath.h>
 
 //QT += webkitwidgets
 
+//Design-Entscheidung:
+//- alle Serialisierung und Deserialisierung sollen von SerializationFacade gesteuert werden
+//- (de)serialisierung elementarer(Qt) Typen in den Methoden (de)serialize(...)
+//- bei Konstruktion Pointer verdrahten
+//- Daten mit init()-Methode initialisieren
+
+//Nächstes Mal:
+
+//Model-Refactoring:
+//- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
+//- suche nach "TODO"
+//- Radiation als Feature
 
 //Potentielle Fehlerquellen:
 //- Serialisierung von int (32 oder 64 Bit)
 //- AlienCellCluster: calcTransform() nach setPosition(...) aufrufen
 //- ShapeUniverse: _grid->correctPosition(pos) nach Positionsänderungen aufrufen
+//- ReadSimulationParameters VOR Clusters lesen
 
 //Optimierung:
 //- bei AlienCellFunctionConstructor: Energie im Vorfeld checken
@@ -34,9 +49,6 @@
 //- große Cluster Verschieben=> werden nicht richtig gelöscht und neu gezeichnet...
 //- Arbeiten mit dem Makro-Editor bei laufender Simulation erzeugt Fehler (weil auf cells zugegriffen werden, die vielleicht nicht mehr existieren)
 //- Fehler bei der Winkelmessung in AlienCellFunctionScanner
-
-//TODO (nächstes Mal):
-//- CellFunction Sensor: nehegelegene Masse ab vorgegebener Größe orten
 
 //TODO (kurzfristig):
 //- Computer-Code-Editor: Meldung, wenn maximale Zeilen überschritten sind
@@ -65,22 +77,20 @@
 //Optional:
 //- Cell-memory im Scanner auslesen und im Constructor erstellen
 
-
 int main(int argc, char *argv[])
 {
     //register types
-    qRegisterMetaType<AlienCellTO>("AlienCellReduced");
-
-    //load default metadata
-    AlienMetadata::loadDefaultMetadata(&MetadataManager::getGlobalInstance());
+    qRegisterMetaType<CellTO>("CellTO");
+//	qRegisterMetaType<SimulationContext>("SimulationContext");
 
     //init main objects
     QApplication a(argc, argv);
-    AlienSimulator simulator(400, 200);
-    MainWindow w(&simulator);
+	SimulationController controller(SimulationController::Threading::EXTRA_THREAD);
+	controller.newUniverse({ 400, 200 }, *controller.getSimulationContext()->getSymbolTable());
+    MainWindow w(&controller);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();
-    return a.exec();
+	return a.exec();
 }
 
