@@ -3,15 +3,16 @@
 #include <QMatrix4x4>
 
 #include "global/servicelocator.h"
+#include "model/entities/cell.h"
+#include "model/entities/cellcluster.h"
+#include "model/entities/energyparticle.h"
+#include "model/features/cellfunction.h"
+#include "model/simulationparameters.h"
 #include "model/config.h"
 #include "model/alienfacade.h"
 #include "model/simulationcontext.h"
 #include "model/topology.h"
 #include "model/energyparticlemap.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/energyparticle.h"
-#include "model/simulationparameters.h"
 #include "gui/guisettings.h"
 #include "gui/editorsettings.h"
 
@@ -27,7 +28,6 @@ ShapeUniverse::ShapeUniverse(QObject *parent)
 {
     setBackgroundBrush(QBrush(QColor(0,0,0x30)));
 	_itemConfig = new CellGraphicsItemConfig();
-	_itemConfig->showCellFunctions = false;
 }
 
 ShapeUniverse::~ShapeUniverse()
@@ -635,12 +635,18 @@ CellGraphicsItem* ShapeUniverse::createCellItem (Cell* cell)
     QVector3D pos(cell->calcPosition());
     bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
     CellGraphicsItem* cellItem = new CellGraphicsItem(_itemConfig, cell, pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE
-		, connectable, cell->getNumToken(), cell->getMetadata().color);
+		, connectable, cell->getNumToken(), cell->getMetadata().color, getCellFunctionString(cell));
     QGraphicsScene::addItem(cellItem);
 
     //register item
     _cellItems[cell->getId()] = cellItem;
     return cellItem;
+}
+
+QString ShapeUniverse::getCellFunctionString(Cell * cell)
+{
+	CellFunction* cellFunction = cell->getFeatures()->findObject<CellFunction>();
+	return Enums::getTypeString(cellFunction->getType());
 }
 
 void ShapeUniverse::createConnectionItem (Cell* cell, Cell* otherCell)

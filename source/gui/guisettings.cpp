@@ -11,7 +11,7 @@ QFont GuiFunctions::getGlobalFont ()
 QFont GuiFunctions::getCellFont()
 {
 	//set font
-	QFont f(GLOBAL_FONT, 3, QFont::Normal);
+	QFont f(GLOBAL_FONT, 2, QFont::Normal);
 	f.setStyleStrategy(QFont::PreferBitmap);
 	return f;
 }

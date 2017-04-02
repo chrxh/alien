@@ -18,6 +18,7 @@ public:
 		return QByteArray();
 	}
 
+
 protected:
     qreal calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const;
 };

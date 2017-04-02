@@ -62,6 +62,7 @@ private:
     //internal methods
     EnergyGraphicsItem* createEnergyItem (EnergyParticle* e);
     CellGraphicsItem* createCellItem (Cell* cell);
+	QString getCellFunctionString(Cell* cell);
     void createConnectionItem (Cell* cell, Cell* otherCell);
     void delConnectionItem (quint64 cellId);
     void unhighlight ();

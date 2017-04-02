@@ -1,5 +1,7 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef CELLFEATURECONSTANTS_H
+#define CELLFEATURECONSTANTS_H
+
+#include "model/definitions.h"
 
 namespace Enums
 {
@@ -15,6 +17,27 @@ namespace Enums
 			_COUNTER
 		};
 	};
+
+	static QString getTypeString(CellFunction::Type type)
+	{
+		if(type == Enums::CellFunction::COMPUTER)
+			return "Computer";
+		else if (type == Enums::CellFunction::PROPULSION)
+			return "Propulsion";
+		else if (type == Enums::CellFunction::SCANNER)
+			return "Scanner";
+		else if (type == Enums::CellFunction::WEAPON)
+			return "Weapon";
+		else if (type == Enums::CellFunction::CONSTRUCTOR)
+			return "Constructor";
+		else if (type == Enums::CellFunction::SENSOR)
+			return "Sensor";
+		else if (type == Enums::CellFunction::COMMUNICATOR)
+			return "Communicator";
+		else
+			return QString();
+	}
+
 
 	struct EnergyGuidance {
 		enum Type {
@@ -207,4 +230,4 @@ namespace Enums
 	};
 }
 
-#endif // CONSTANTS_H
+#endif // CELLFEATURECONSTANTS_H
