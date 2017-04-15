@@ -1,0 +1,958 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\source\gui\dialogs\addenergydialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\addhexagonstructuredialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\addrectstructuredialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\_impl\alienfacadeimpl.cpp">
+      <Filter>Model\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\cellclusterimpl.cpp">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\cellcomputeredit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\macroeditor\cellconnectiongraphicsitem.cpp">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\celledit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\cellfeature.cpp">
+      <Filter>Model\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfeaturefactoryimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\cellfunction.cpp">
+      <Filter>Model\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfunctioncommunicatorimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfunctionweaponimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfunctionsensorimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfunctionscannerimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfunctionpropulsionimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfunctionconstructorimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\cellfunctioncomputerimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\macroeditor\cellgraphicsitem.cpp">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\cellimpl.cpp">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\cellmap.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\cellto.cpp">
+      <Filter>Model\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\clusteredit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\physics\codingphysicalquantities.cpp">
+      <Filter>Model\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\computercodeedit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\config.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\definitions.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\energyedit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\macroeditor\energygraphicsitem.cpp">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\energyguidanceimpl.cpp">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\energyparticleimpl.cpp">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\energyparticlemap.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\entityfactoryimpl.cpp">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\global\global.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\guisettings.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\hexedit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\macroeditor.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\mainwindow.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\macroeditor\markergraphicsitem.cpp">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\metadataedit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\metadatapropertiesedit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_addenergydialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_addenergydialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_addenergydialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_addhexagonstructuredialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_addhexagonstructuredialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_addhexagonstructuredialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_addrectstructuredialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_addrectstructuredialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_addrectstructuredialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cellcomputeredit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cellcomputeredit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_cellcomputeredit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_celledit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_celledit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_celledit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_clusteredit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_clusteredit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_clusteredit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_computercodeedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_computercodeedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_computercodeedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_energyedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_energyedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_energyedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_hexedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_hexedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_hexedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_macroeditor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_macroeditor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_macroeditor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mainwindow.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mainwindow.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_mainwindow.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_metadataedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_metadataedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_metadataedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_metadatapropertiesedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_metadatapropertiesedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_metadatapropertiesedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_microeditor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_microeditor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_microeditor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_newsimulationdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_newsimulationdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_newsimulationdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_pixeluniverse.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_pixeluniverse.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_pixeluniverse.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_selectionmultiplyarrangementdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_selectionmultiplyarrangementdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_selectionmultiplyarrangementdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_selectionmultiplyrandomdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_selectionmultiplyrandomdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_selectionmultiplyrandomdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_shapeuniverse.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_shapeuniverse.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_shapeuniverse.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationcontroller.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationcontroller.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationcontroller.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationmonitor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationmonitor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationmonitor.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationparametersdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationparametersdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationparametersdialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationunit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationunit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationunit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_startscreencontroller.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_startscreencontroller.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_startscreencontroller.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_symboledit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_symboledit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_symboledit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_symboltabledialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_symboltabledialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_symboltabledialog.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_tokenedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_tokenedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_tokenedit.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_tokentab.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_tokentab.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_tokentab.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_tutorialwindow.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_tutorialwindow.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_tutorialwindow.cpp">
+      <Filter>_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\newsimulationdialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\physics\physics.cpp">
+      <Filter>Model\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\macroeditor\pixeluniverse.cpp">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="qrc_ressources.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\selectionmultiplyarrangementdialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\selectionmultiplyrandomdialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\_impl\serializationfacadeimpl.cpp">
+      <Filter>Model\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\global\servicelocator.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\macroeditor\shapeuniverse.cpp">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\_impl\simulationcontextimpl.cpp">
+      <Filter>Model\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\simulationcontroller.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\monitoring\simulationmonitor.cpp">
+      <Filter>Gui\Monitoring</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\simulationparameters.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\simulationparametersdialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\simulationunit.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\misc\startscreencontroller.cpp">
+      <Filter>Gui\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\symboledit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\metadata\symboltable.cpp">
+      <Filter>Model\Metadata</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\symboltabledialog.cpp">
+      <Filter>Gui\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\tokenedit.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\tokenimpl.cpp">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\microeditor\tokentab.cpp">
+      <Filter>Gui\Microeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\topology.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\assistance\tutorialwindow.cpp">
+      <Filter>Gui\Assistance</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\source\model\alienfacade.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\_impl\alienfacadeimpl.h">
+      <Filter>Model\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\cell.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\cellcluster.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\cellclusterimpl.h">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\metadata\cellclustermetadata.h">
+      <Filter>Model\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\macroeditor\cellconnectiongraphicsitem.h">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\cellfeature.h">
+      <Filter>Model\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\cellfeatureconstants.h">
+      <Filter>Model\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\cellfeaturefactory.h">
+      <Filter>Model\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfeaturefactoryimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\cellfunction.h">
+      <Filter>Model\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfunctioncommunicatorimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\cellfunctioncomputer.h">
+      <Filter>Model\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfunctionweaponimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfunctionsensorimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfunctionscannerimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfunctionpropulsionimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfunctionconstructorimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\cellfunctioncomputerimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\macroeditor\cellgraphicsitem.h">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\macroeditor\cellgraphicsitemconfig.h">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\cellimpl.h">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\cellmap.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\metadata\cellmetadata.h">
+      <Filter>Model\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\cellto.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\physics\codingphysicalquantities.h">
+      <Filter>Model\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\config.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\definitions.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\definitions.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\editorsettings.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\macroeditor\energygraphicsitem.h">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\energyguidance.h">
+      <Filter>Model\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\energyguidanceimpl.h">
+      <Filter>Model\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\energyparticle.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\energyparticleimpl.h">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\energyparticlemap.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\metadata\energyparticlemetadata.h">
+      <Filter>Model\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\entityfactory.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\entityfactoryimpl.h">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\global.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\guisettings.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\macroeditor\markergraphicsitem.h">
+      <Filter>Gui\Macroeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\physics\physics.h">
+      <Filter>Model\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\serializationfacade.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\_impl\serializationfacadeimpl.h">
+      <Filter>Model\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\servicelocator.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\simulationcontext.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\_impl\simulationcontextimpl.h">
+      <Filter>Model\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\simulationparameters.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\metadata\symboltable.h">
+      <Filter>Model\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\token.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\tokenimpl.h">
+      <Filter>Model\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\topology.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_addenergydialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_addhexagonstructuredialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_addrectstructuredialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_cellcomputeredit.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_macroeditor.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_mainwindow.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_metadataedit.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_newsimulationdialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_selectionmultiplyarrangementdialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_selectionmultiplyrandomdialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_simulationmonitor.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_simulationparametersdialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_symboledit.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_symboltabledialog.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_tokentab.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_tutorialwindow.h">
+      <Filter>_Ui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\source\gui\dialogs\addenergydialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\addenergydialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\addhexagonstructuredialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\addhexagonstructuredialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\addrectstructuredialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\addrectstructuredialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\cellcomputeredit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\cellcomputeredit.ui">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\celledit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\clusteredit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\computercodeedit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\energyedit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\hexedit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\macroeditor.h">
+      <Filter>Gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\macroeditor.ui">
+      <Filter>Gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\mainwindow.h">
+      <Filter>Gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\mainwindow.ui">
+      <Filter>Gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\metadataedit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\metadataedit.ui">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\metadatapropertiesedit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\newsimulationdialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\newsimulationdialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\macroeditor\pixeluniverse.h">
+      <Filter>Gui\Macroeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\resources\ressources.qrc">
+      <Filter>Resources</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyarrangementdialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyarrangementdialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyrandomdialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyrandomdialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\macroeditor\shapeuniverse.h">
+      <Filter>Gui\Macroeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\simulationcontroller.h">
+      <Filter>Model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\monitoring\simulationmonitor.h">
+      <Filter>Gui\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\monitoring\simulationmonitor.ui">
+      <Filter>Gui\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\simulationparametersdialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\simulationparametersdialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\simulationunit.h">
+      <Filter>Model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\misc\startscreencontroller.h">
+      <Filter>Gui\Misc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\symboledit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\symboledit.ui">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\symboltabledialog.h">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\symboltabledialog.ui">
+      <Filter>Gui\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\tokenedit.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\tokentab.h">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\microeditor\tokentab.ui">
+      <Filter>Gui\Microeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\assistance\tutorialwindow.h">
+      <Filter>Gui\Assistance</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\assistance\tutorialwindow.ui">
+      <Filter>Gui\Assistance</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\source\gui\resources\Icons\add_cell.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\add_cluster.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\add_energy.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\add_token.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\angle.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\branching.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\logo.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\constructor.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\constructor2.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\del_cell.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\del_token.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\editor.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\editor_active.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\microscope.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\microscope_active.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\monitor.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\monitor_active.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\pause.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\play.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\restore_active.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\scanner.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\snapshot.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\step.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\step_back.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\tutorial.html">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\zoom_out.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\zoom_in.png">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{68afede5-5d7d-4db7-aa8e-27e75eca6562}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui">
+      <UniqueIdentifier>{47fb5731-135a-45cb-96c2-17dabdd01fc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{2dd731c4-3a30-4bf6-a2d0-5bca6c67ee07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global">
+      <UniqueIdentifier>{0529f4a1-ef8b-423f-9cff-0cc70723ba55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Assistance">
+      <UniqueIdentifier>{6b1aa77d-d5f0-4133-ae8e-d70427125474}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Dialogs">
+      <UniqueIdentifier>{d16cdb26-d3e1-445a-b5cc-92d808304c2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Macroeditor">
+      <UniqueIdentifier>{84149345-9237-4d47-b641-14dc7df60a87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Microeditor">
+      <UniqueIdentifier>{a7ef51b6-b5e0-4d15-aa20-c60392f162f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Misc">
+      <UniqueIdentifier>{8e45d07f-5a3b-4c3f-a104-52836c1dfeca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Monitoring">
+      <UniqueIdentifier>{c62b95c0-4b02-4878-98cd-a7abedefec11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\_Impl">
+      <UniqueIdentifier>{cc31b7b7-8793-433a-9b78-c3cc1c2d1f83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Entities">
+      <UniqueIdentifier>{b1df8e97-cd10-4272-a4f9-80639ec9b204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Features">
+      <UniqueIdentifier>{19eaad07-5511-410e-84b9-23abb1c58a80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Metadata">
+      <UniqueIdentifier>{5046fd6b-6496-42f6-8d6f-cc1583914ca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Physics">
+      <UniqueIdentifier>{2dd9613a-1efe-4d99-96b5-12cd65be711a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Entities\_Impl">
+      <UniqueIdentifier>{d954b496-65ac-4cd3-9b6c-32aa889b2fc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Features\_Impl">
+      <UniqueIdentifier>{40568fdb-584a-4d29-bc27-9856eae320e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Mocs">
+      <UniqueIdentifier>{3af6226d-ba64-491d-a675-4ba6b57c67d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Ui">
+      <UniqueIdentifier>{05f5e813-713f-4ca8-8ebc-095e3b0e8867}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

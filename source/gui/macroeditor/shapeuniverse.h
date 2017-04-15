@@ -34,6 +34,7 @@ public:
     void delExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es);
     void metadataUpdated ();
     QGraphicsItem* getFocusCenterCell ();
+	void toggleInformation(bool on);
 
 public slots:
     void reclustered (QList< CellCluster* > clusters);

@@ -46,10 +46,12 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     ui->setupUi(this);
 
     //init main objects
-    _microEditor->init(ui->tabClusterWidget2, ui->tabComputerWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
+	MicroEditor::MicroEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabComputerWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
 		, ui->cellEditor2, ui->clusterEditor2, ui->energyEditor2, ui->metadataEditor2, ui->cellComputerEdit
 		, ui->symbolEdit2, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
-		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2);
+		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2
+		, ui->buttonShowInfo };
+    _microEditor->init(microWidgets);
 
     //set font
     setFont(GuiFunctions::getGlobalFont());
@@ -106,6 +108,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     connect(_microEditor, SIGNAL(defocus()), this, SLOT(cellDefocused()));
     connect(_microEditor, SIGNAL(metadataUpdated()), ui->macroEditor, SLOT(metadataUpdated()));
     connect(_microEditor, SIGNAL(numTokenUpdate(int,int,bool)), this, SLOT(numTokenChanged(int,int,bool)));
+	connect(_microEditor, SIGNAL(toggleInformation(bool)), ui->macroEditor, SLOT(toggleInformation(bool)));
 
     //connect signals/slots for actions
     connect(ui->actionPlay, SIGNAL( triggered(bool) ), this, SLOT(runClicked(bool)));

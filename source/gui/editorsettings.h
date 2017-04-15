@@ -1,6 +1,8 @@
 #ifndef EDITORSETTINGS_H
 #define EDITORSETTINGS_H
 
+#include <QIcon>
+
 //macro editor
 const QColor BACKGROUND_COLOR(0x00, 0x00, 0x1b);
 const QColor CELL_COLOR(0x6F,0x90,0xFF,0xA0);
@@ -36,6 +38,9 @@ const QColor CELL_EDIT_DATA_COLOR2(0x60,0x80,0xC0);
 const QColor CELL_EDIT_CURSOR_COLOR(0x6F,0x90,0xFF,0x90);
 const QColor CELL_EDIT_METADATA_COLOR(0xA0,0xFF,0x80);
 const QColor CELL_EDIT_METADATA_CURSOR_COLOR(0xA0,0xFF,0x80, 0x90);
+
+const QString resourceInfoOn("://Icons/info_on.png");
+const QString resourceInfoOff("://Icons/info_off.png");
 
 #endif // EDITORSETTINGS
 
