@@ -78,6 +78,7 @@ public slots:
     void reclustered (QList< CellCluster* > clusters);
     void universeUpdated (SimulationContext* context, bool force);
     void metadataUpdated ();
+	void toggleInformation(bool on);
 
 private slots:
     void updateTimerTimeout ();

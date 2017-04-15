@@ -315,6 +315,13 @@ void MacroEditor::metadataUpdated ()
         _shapeUniverse->metadataUpdated();
 }
 
+void MacroEditor::toggleInformation(bool on)
+{
+	if (_activeScene == SHAPE_SCENE) {
+		_shapeUniverse->toggleInformation(on);
+	}
+}
+
 void MacroEditor::updateTimerTimeout ()
 {
     _screenUpdatePossible = true;

@@ -27,5 +27,7 @@
         <file>tutorial/scanner.png</file>
         <file>tutorial/constructor2.png</file>
         <file>tutorial/angle.png</file>
+        <file>Icons/info_on.png</file>
+        <file>Icons/info_off.png</file>
     </qresource>
 </RCC>

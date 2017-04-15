@@ -292,6 +292,12 @@ QGraphicsItem* ShapeUniverse::getFocusCenterCell ()
     return _focusCenterCellItem;
 }
 
+void ShapeUniverse::toggleInformation(bool on)
+{
+	_itemConfig->showCellFunctions = on;
+	QGraphicsScene::update();
+}
+
 void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
 {
     if( !_context)
