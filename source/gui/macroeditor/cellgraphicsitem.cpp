@@ -136,3 +136,8 @@ void CellGraphicsItem::setDisplayString(QString value)
 	_displayString = value;
 }
 
+void CellGraphicsItem::setBranchNumber(int value)
+{
+	_branchNumber = value;
+}
+

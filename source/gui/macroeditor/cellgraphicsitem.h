@@ -32,6 +32,7 @@ public:
     void setNumToken (int numToken);
     void setColor (quint8 color);
 	void setDisplayString (QString value);
+	void setBranchNumber (int value);
 
 private:
     Cell* _cell;

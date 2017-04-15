@@ -544,7 +544,7 @@ void CellFunctionComputerImpl::deserializePrimitives (QDataStream& stream)
     //load remaining attributes
     stream >> _memory >> _code;
 	_memory = _memory.left(_parameters->CELL_MEMSIZE);
-	_memory.resize(_parameters->TOKEN_MEMSIZE);
+	_memory.resize(_parameters->CELL_MEMSIZE);
 	_code = _code.left(3 * _parameters->CELL_NUM_INSTR);
 }
 

@@ -321,6 +321,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
                 cellItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
                 cellItem->setNumToken(cell->getNumToken());
 				cellItem->setDisplayString(getCellFunctionString(cell));
+				cellItem->setBranchNumber(cell->getBranchNumber());
                 bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
                 cellItem->setConnectable(connectable);
             }
