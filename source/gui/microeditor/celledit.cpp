@@ -1,6 +1,6 @@
 #include "celledit.h"
 
-#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 
