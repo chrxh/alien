@@ -20,7 +20,7 @@
 #include "assistance/tutorialwindow.h"
 #include "misc/startscreencontroller.h"
 #include "gui/guisettings.h"
-#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 #include "model/config.h"
 #include "model/simulationcontroller.h"
 #include "model/simulationcontext.h"

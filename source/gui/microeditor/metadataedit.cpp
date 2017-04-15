@@ -2,7 +2,7 @@
 #include "ui_metadataedit.h"
 
 #include "metadatapropertiesedit.h"
-#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 
 #include <QScrollBar>
 

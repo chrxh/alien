@@ -8,7 +8,7 @@
 #include "model/entities/cell.h"
 #include "macroeditor/pixeluniverse.h"
 #include "macroeditor/shapeuniverse.h"
-#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 #include "gui/guisettings.h"
 
 
