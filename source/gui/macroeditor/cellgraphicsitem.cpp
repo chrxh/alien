@@ -63,15 +63,6 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
     else
         painter->drawEllipse(QPointF(0.0, 0.0), 0.5*GRAPHICS_ITEM_SIZE, 0.5*GRAPHICS_ITEM_SIZE);
 
-	if (_config->showInfo) {
-		auto font = GuiFunctions::getCellFont();
-		painter->setFont(font);
-		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
-		painter->drawText(QRectF(-1.5*GRAPHICS_ITEM_SIZE, 0.2*GRAPHICS_ITEM_SIZE, 3.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, _displayString);
-		painter->setPen(QPen(QBrush(BRANCHNUMBER_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
-		painter->drawText(QRectF(-0.49*GRAPHICS_ITEM_SIZE, -0.47*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, QString::number(_branchNumber));
-	}
-
     //draw token
     if( _numToken > 0 ) {
         if( _focusState == NO_FOCUS )
@@ -92,6 +83,15 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
                 painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), 0.1*GRAPHICS_ITEM_SIZE, 0.1*GRAPHICS_ITEM_SIZE);
         }
     }
+
+	if (_config->showInfo) {
+		auto font = GuiFunctions::getCellFont();
+		painter->setFont(font);
+		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+		painter->drawText(QRectF(-1.5*GRAPHICS_ITEM_SIZE, 0.1*GRAPHICS_ITEM_SIZE, 3.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, _displayString);
+		painter->setPen(QPen(QBrush(BRANCHNUMBER_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+		painter->drawText(QRectF(-0.49*GRAPHICS_ITEM_SIZE, -0.47*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, QString::number(_branchNumber));
+	}
 
 }
 
