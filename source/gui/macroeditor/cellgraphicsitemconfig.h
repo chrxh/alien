@@ -3,7 +3,7 @@
 
 struct CellGraphicsItemConfig
 {
-	bool showCellFunctions = false;
+	bool showInfo = false;
 };
 
 #endif // CELLGRAPHICSITEMCONFIG_H

@@ -597,7 +597,7 @@ void SimulationController::newCell (QVector3D pos)
 	SimulationParameters* paramters = _context->getSimulationParameters();
     Cell* cell = facade->buildFeaturedCell(paramters->NEW_CELL_ENERGY, Enums::CellFunction::COMPUTER
         , _context, paramters->NEW_CELL_MAX_CONNECTION, paramters->NEW_CELL_TOKEN_ACCESS_NUMBER);
-    cell->setTokenAccessNumber(_newCellTokenAccessNumber++);
+    cell->setBranchNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
     cells << cell;
     CellCluster* cluster = facade->buildCellCluster(cells, 0.0, pos, 0, QVector3D(), _context);
@@ -648,7 +648,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
                 newCellData.cellMaxCon = parameters->MAX_CELL_CONNECTIONS;
             cell->setMaxConnections(newCellData.cellMaxCon);
             cell->setTokenBlocked(!newCellData.cellAllowToken);
-            cell->setTokenAccessNumber(newCellData.cellTokenAccessNum);
+            cell->setBranchNumber(newCellData.cellTokenAccessNum);
             facade->changeFeaturesOfCell(cell, newCellData.cellFunctionType, _context);
 //            cell->setCellFunction(CellFunctionFactory::build(newCellData.cellFunctionName, false, _grid));
 

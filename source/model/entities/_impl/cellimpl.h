@@ -55,8 +55,8 @@ public:
     QVector3D getRelPosition () const override;
     void setRelPosition (QVector3D relPos) override;
 
-    int getTokenAccessNumber () const override;
-    void setTokenAccessNumber (int i) override;
+    int getBranchNumber () const override;
+    void setBranchNumber (int i) override;
     bool isTokenBlocked () const override;
     void setTokenBlocked (bool block) override;
     qreal getEnergy() const override;

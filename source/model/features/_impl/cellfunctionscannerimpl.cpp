@@ -151,7 +151,7 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
         e = 255;
     tokenMem[Enums::Scanner::OUT_ENERGY] = e;
     tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = scanCell->getMaxConnections();
-    tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = scanCell->getTokenAccessNumber();
+    tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = scanCell->getBranchNumber();
     CellFunction* scanCellFunction = scanCell->getFeatures()->findObject<CellFunction>();
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<quint8>(scanCellFunction->getType());
     QByteArray data = scanCellFunction->getInternalData();

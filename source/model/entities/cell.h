@@ -50,8 +50,8 @@ public:
     virtual QVector3D getRelPosition () const = 0;
     virtual void setRelPosition (QVector3D relPos) = 0;
 
-    virtual int getTokenAccessNumber () const = 0;
-    virtual void setTokenAccessNumber (int i) = 0;
+    virtual int getBranchNumber () const = 0;
+    virtual void setBranchNumber (int i) = 0;
     virtual bool isTokenBlocked () const = 0;
     virtual void setTokenBlocked (bool block) = 0;
     virtual qreal getEnergy() const = 0;

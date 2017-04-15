@@ -18,7 +18,7 @@ public:
     };
 
     CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color
-		, QString displayString, QGraphicsItem* parent = 0);
+		, QString displayString, int branchNumber, QGraphicsItem* parent = 0);
     ~CellGraphicsItem ();
 
     QRectF boundingRect () const;
@@ -41,6 +41,7 @@ private:
     int _numToken;
     quint8 _color;
 	QString _displayString;
+	int _branchNumber;
 };
 
 #endif // CELLGRAPHICSITEM_H

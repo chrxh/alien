@@ -38,10 +38,11 @@ const QString SCROLLBAR_STYLESHEET = "background-color: #303030; color: #B0B0B0;
 const QColor BUTTON_TEXT_COLOR(0xC2, 0xC2, 0xC2);
 const QColor BUTTON_TEXT_HIGHLIGHT_COLOR(0x90, 0x90, 0xFF);
 const QString GLOBAL_FONT = "Courier New";
-const qreal GRAPHICS_ITEM_SIZE = 10.0;
-const QColor GRAPHICS_ITEM_COLOR(0x90, 0x90, 0x90);
 
-//cell colors
+//cell properties
+const qreal GRAPHICS_ITEM_SIZE = 10.0;
+const QColor CELLFUNCTION_INFO_COLOR(0x40, 0x40, 0x90);
+const QColor BRANCHNUMBER_INFO_COLOR(0x00, 0x00, 0x00);
 const QColor INDIVIDUAL_CELL_COLOR1(0x50, 0x90, 0xFF, 0xB0);
 const QColor INDIVIDUAL_CELL_COLOR2(0xFF, 0x60, 0x40, 0xB0);
 const QColor INDIVIDUAL_CELL_COLOR3(0x70, 0xFF, 0x50, 0xB0);
