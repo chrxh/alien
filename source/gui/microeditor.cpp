@@ -11,7 +11,7 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
-#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 #include "gui/guisettings.h"
 #include "microeditor/tokentab.h"
 #include "microeditor/celledit.h"

@@ -1,6 +1,6 @@
 #include "computercodeedit.h"
 
-#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 #include "gui/guisettings.h"
 
 #include <QKeyEvent>

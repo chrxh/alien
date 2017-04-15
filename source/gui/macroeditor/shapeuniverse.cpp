@@ -14,7 +14,7 @@
 #include "model/topology.h"
 #include "model/energyparticlemap.h"
 #include "gui/guisettings.h"
-#include "gui/editorsettings.h"
+#include "gui/guisettings.h"
 
 #include "cellgraphicsitem.h"
 #include "cellconnectiongraphicsitem.h"

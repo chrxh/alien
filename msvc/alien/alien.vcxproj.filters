@@ -552,9 +552,6 @@
     <ClInclude Include="..\..\source\gui\definitions.h">
       <Filter>Gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\editorsettings.h">
-      <Filter>Gui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\gui\macroeditor\energygraphicsitem.h">
       <Filter>Gui\Macroeditor</Filter>
     </ClInclude>
