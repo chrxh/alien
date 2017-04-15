@@ -111,7 +111,11 @@ QVector3D MacroEditor::getViewCenterPosWithInc ()
     QPointF posView(ui->simulationView->mapToScene(ui->simulationView->width()/2, ui->simulationView->height()/2));
 
     //calc center of view in simulation coordinate
-    QVector3D pos(posView.x()/GRAPHICS_ITEM_SIZE, posView.y() / GRAPHICS_ITEM_SIZE, 0.0);
+    QVector3D pos(posView.x(), posView.y(), 0.0);
+
+	if (_activeScene == SHAPE_SCENE) {
+		pos = pos / GRAPHICS_ITEM_SIZE;
+	}
 
     //add increment
     QVector3D posIncrement(_posIncrement, -_posIncrement, 0.0);
