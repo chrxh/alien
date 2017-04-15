@@ -294,7 +294,7 @@ QGraphicsItem* ShapeUniverse::getFocusCenterCell ()
 
 void ShapeUniverse::toggleInformation(bool on)
 {
-	_itemConfig->showCellFunctions = on;
+	_itemConfig->showInfo = on;
 	QGraphicsScene::update();
 }
 
@@ -642,7 +642,7 @@ CellGraphicsItem* ShapeUniverse::createCellItem (Cell* cell)
     QVector3D pos(cell->calcPosition());
     bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
     CellGraphicsItem* cellItem = new CellGraphicsItem(_itemConfig, cell, pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE
-		, connectable, cell->getNumToken(), cell->getMetadata().color, getCellFunctionString(cell));
+		, connectable, cell->getNumToken(), cell->getMetadata().color, getCellFunctionString(cell), cell->getBranchNumber());
     QGraphicsScene::addItem(cellItem);
 
     //register item
@@ -663,10 +663,10 @@ void ShapeUniverse::createConnectionItem (Cell* cell, Cell* otherCell)
 
     //directed connection?
     CellConnectionGraphicsItem::ConnectionState s = CellConnectionGraphicsItem::NO_DIR_CONNECTION;
-    if( cell->getTokenAccessNumber() == ((otherCell->getTokenAccessNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) && (!cell->isTokenBlocked()) ) {
+    if( cell->getBranchNumber() == ((otherCell->getBranchNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) && (!cell->isTokenBlocked()) ) {
         s = CellConnectionGraphicsItem::B_TO_A_CONNECTION;
     }
-    if( ((cell->getTokenAccessNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber() && (!otherCell->isTokenBlocked()) ) {
+    if( ((cell->getBranchNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getBranchNumber() && (!otherCell->isTokenBlocked()) ) {
         s = CellConnectionGraphicsItem::A_TO_B_CONNECTION;
     }
     CellConnectionGraphicsItem* connectionItem = new CellConnectionGraphicsItem(pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE, otherPos.x() * GRAPHICS_ITEM_SIZE, otherPos.y() * GRAPHICS_ITEM_SIZE, s);

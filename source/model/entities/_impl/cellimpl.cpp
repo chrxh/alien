@@ -342,12 +342,12 @@ void CellImpl::setRelPosition (QVector3D relPos)
 }
 
 
-int CellImpl::getTokenAccessNumber () const
+int CellImpl::getBranchNumber () const
 {
     return _tokenAccessNumber;
 }
 
-void CellImpl::setTokenAccessNumber (int i)
+void CellImpl::setBranchNumber (int i)
 {
     _tokenAccessNumber = i % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
 }

@@ -47,7 +47,7 @@ namespace {
         CellCluster* cluster = baseCell->getCluster();
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
-        newCell->setTokenAccessNumber(tokenAccessNumber);
+        newCell->setBranchNumber(tokenAccessNumber);
 		CellMetadata meta;
 		meta.color = baseCell->getMetadata().color;
         newCell->setMetadata(meta);

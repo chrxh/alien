@@ -98,7 +98,7 @@ CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     to.cellNumCon = cell->getNumConnections();
     to.cellMaxCon = cell->getMaxConnections();
     to.cellAllowToken = !cell->isTokenBlocked();
-    to.cellTokenAccessNum = cell->getTokenAccessNumber();
+    to.cellTokenAccessNum = cell->getBranchNumber();
     CellFunction* cellFunction = cell->getFeatures()->findObject<CellFunction>();
     to.cellFunctionType = cellFunction->getType();
 
