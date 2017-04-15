@@ -47,115 +47,86 @@ MicroEditor::~MicroEditor()
 //    delete ui;
 }
 
-void MicroEditor::init (QTabWidget* tabClusterWidget,
-                        QTabWidget* tabComputerWidget,
-                        QTabWidget* tabTokenWidget,
-                        QTabWidget* tabSymbolsWidget,
-                        CellEdit* cellEditor,
-                        ClusterEdit* clusterEditor,
-                        EnergyEdit* energyEditor,
-                        MetadataEdit* metadataEditor,
-                        CellComputerEdit* cellComputerEdit,
-                        SymbolEdit* symbolEdit,
-                        QTextEdit* selectionEditor,
-                        QToolButton* requestCellButton,
-                        QToolButton* requestEnergyParticleButton,
-                        QToolButton* delEntityButton,
-                        QToolButton* delClusterButton,
-                        QToolButton* addTokenButton,
-                        QToolButton* delTokenButton
-                        )
+void MicroEditor::init (MicroEditorWidgets widgets)
 {
-    _tabClusterWidget = tabClusterWidget;
-    _tabComputerWidget = tabComputerWidget;
-    _tabTokenWidget = tabTokenWidget;
-    _tabSymbolsWidget = tabSymbolsWidget;
-    _cellEditor = cellEditor;
-    _clusterEditor = clusterEditor;
-    _energyEditor = energyEditor;
-    _metadataEditor = metadataEditor;
-    _cellComputerEdit = cellComputerEdit;
-    _symbolEdit = symbolEdit;
-    _selectionEditor = selectionEditor;
-    _requestCellButton = requestCellButton;
-    _requestEnergyParticleButton = requestEnergyParticleButton;
-    _delEntityButton = delEntityButton;
-    _delClusterButton = delClusterButton;
-    _addTokenButton = addTokenButton;
-    _delTokenButton = delTokenButton;
+	_widgets = widgets;
 
     //save tab widgets
-    _tabCluster = _tabClusterWidget->widget(0);
-    _tabCell = _tabClusterWidget->widget(1);
-    _tabParticle = _tabClusterWidget->widget(2);
-    _tabSelection = _tabClusterWidget->widget(3);
-    _tabMeta = _tabClusterWidget->widget(4);
-    _tabComputer = _tabComputerWidget->widget(0);
-    _tabSymbolTable = _tabComputerWidget->widget(1);
+    _tabCluster = _widgets.tabClusterWidget->widget(0);
+    _tabCell = _widgets.tabClusterWidget->widget(1);
+    _tabParticle = _widgets.tabClusterWidget->widget(2);
+    _tabSelection = _widgets.tabClusterWidget->widget(3);
+    _tabMeta = _widgets.tabClusterWidget->widget(4);
+    _tabComputer = _widgets.tabComputerWidget->widget(0);
+    _tabSymbolTable = _widgets.tabComputerWidget->widget(1);
 
     //hide widgets
-    _tabClusterWidget->setVisible(false);
-    _tabComputerWidget->setVisible(false);
-    _tabTokenWidget->setVisible(false);
+	_widgets.tabClusterWidget->setVisible(false);
+	_widgets.tabComputerWidget->setVisible(false);
+	_widgets.tabTokenWidget->setVisible(false);
 
     //set colors
-    _requestCellButton->setStyleSheet(BUTTON_STYLESHEET);
-    _requestEnergyParticleButton->setStyleSheet(BUTTON_STYLESHEET);
-    _delEntityButton->setStyleSheet(BUTTON_STYLESHEET);
-    _delClusterButton->setStyleSheet(BUTTON_STYLESHEET);
-    _addTokenButton->setStyleSheet(BUTTON_STYLESHEET);
-    _delTokenButton->setStyleSheet(BUTTON_STYLESHEET);
+	_widgets.requestCellButton->setStyleSheet(BUTTON_STYLESHEET);
+	_widgets.requestEnergyParticleButton->setStyleSheet(BUTTON_STYLESHEET);
+	_widgets.delEntityButton->setStyleSheet(BUTTON_STYLESHEET);
+	_widgets.delClusterButton->setStyleSheet(BUTTON_STYLESHEET);
+	_widgets.addTokenButton->setStyleSheet(BUTTON_STYLESHEET);
+	_widgets.delTokenButton->setStyleSheet(BUTTON_STYLESHEET);
+	_widgets.buttonShowInfo->setStyleSheet(BUTTON_STYLESHEET);
 
     //set tooltip
-    _requestCellButton->setToolTip("add cell");
-    _requestEnergyParticleButton->setToolTip("add energy particle");
-    _delEntityButton->setToolTip("delete cell/energy particle");
-    _delClusterButton->setToolTip("delete cell cluster");
-    _addTokenButton->setToolTip("add token");
-    _delTokenButton->setToolTip("del token");
+	_widgets.requestCellButton->setToolTip("add cell");
+	_widgets.requestEnergyParticleButton->setToolTip("add energy particle");
+	_widgets.delEntityButton->setToolTip("delete cell/energy particle");
+	_widgets.delClusterButton->setToolTip("delete cell cluster");
+	_widgets.addTokenButton->setToolTip("add token");
+	_widgets.delTokenButton->setToolTip("del token");
+	_widgets.buttonShowInfo->setToolTip("show informations");
 
     //install event filter for parent widget
-    _tabSymbolsWidget->parent()->installEventFilter(this);
+	_widgets.tabSymbolsWidget->parent()->installEventFilter(this);
 
     //establish connections
-    connect(_cellEditor, SIGNAL(cellDataChanged(CellTO)), this, SLOT(changesFromCellEditor(CellTO)));
-    connect(_clusterEditor, SIGNAL(clusterDataChanged(CellTO)), this, SLOT(changesFromClusterEditor(CellTO)));
-    connect(_energyEditor, SIGNAL(energyParticleDataChanged(QVector3D,QVector3D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector3D,QVector3D,qreal)));
-    connect(_requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
-    connect(_requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
-    connect(_delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
-    connect(_delClusterButton, SIGNAL(clicked()), this, SLOT(delExtendedSelectionClicked()));
-    connect(_cellComputerEdit, SIGNAL(changesFromComputerMemoryEditor(QByteArray)), this, SLOT(changesFromComputerMemoryEditor(QByteArray)));
-    connect(_cellComputerEdit, SIGNAL(compileButtonClicked(QString)), this, SLOT(compileButtonClicked(QString)));
-    connect(_addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
-    connect(_delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
-    connect(_tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
-    connect(_metadataEditor, SIGNAL(metadataChanged(QString,QString,quint8,QString)), this, SLOT(changesFromMetadataEditor(QString,QString,quint8,QString)));
-    connect(_symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
+    connect(_widgets.cellEditor, SIGNAL(cellDataChanged(CellTO)), this, SLOT(changesFromCellEditor(CellTO)));
+    connect(_widgets.clusterEditor, SIGNAL(clusterDataChanged(CellTO)), this, SLOT(changesFromClusterEditor(CellTO)));
+    connect(_widgets.energyEditor, SIGNAL(energyParticleDataChanged(QVector3D,QVector3D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector3D,QVector3D,qreal)));
+    connect(_widgets.requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
+    connect(_widgets.requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
+    connect(_widgets.delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
+    connect(_widgets.delClusterButton, SIGNAL(clicked()), this, SLOT(delExtendedSelectionClicked()));
+	connect(_widgets.buttonShowInfo, SIGNAL(clicked()), this, SLOT(buttonShowInfoClicked()));
+	connect(_widgets.cellComputerEdit, SIGNAL(changesFromComputerMemoryEditor(QByteArray)), this, SLOT(changesFromComputerMemoryEditor(QByteArray)));
+    connect(_widgets.cellComputerEdit, SIGNAL(compileButtonClicked(QString)), this, SLOT(compileButtonClicked(QString)));
+    connect(_widgets.addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
+    connect(_widgets.delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
+    connect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
+    connect(_widgets.metadataEditor, SIGNAL(metadataChanged(QString,QString,quint8,QString)), this, SLOT(changesFromMetadataEditor(QString,QString,quint8,QString)));
+    connect(_widgets.symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
 
-    _symbolEdit->loadSymbols(_context->getSymbolTable());
+	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
 }
 
 
 void MicroEditor::update ()
 {
-    _symbolEdit->loadSymbols(_context->getSymbolTable());
+	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
 	changesFromSymbolTableEditor(); //nach reset
 }
 
 void MicroEditor::setVisible (bool visible)
 {
-    _requestCellButton->setVisible(visible);
-    _requestEnergyParticleButton->setVisible(visible);
-    _delEntityButton->setVisible(visible);
-    _delClusterButton->setVisible(visible);
-    _addTokenButton->setVisible(visible);
-    _delTokenButton->setVisible(visible);
+	_widgets.requestCellButton->setVisible(visible);
+	_widgets.requestEnergyParticleButton->setVisible(visible);
+	_widgets.delEntityButton->setVisible(visible);
+	_widgets.delClusterButton->setVisible(visible);
+	_widgets.addTokenButton->setVisible(visible);
+	_widgets.delTokenButton->setVisible(visible);
+	_widgets.buttonShowInfo->setVisible(visible);
 }
 
 bool MicroEditor::isVisible ()
 {
-    return _requestCellButton->isVisible();
+    return _widgets.requestCellButton->isVisible();
 }
 
 bool MicroEditor::eventFilter (QObject * watched, QEvent * event)
@@ -173,52 +144,52 @@ Cell* MicroEditor::getFocusedCell ()
 
 void MicroEditor::computerCompilationReturn (bool error, int line)
 {
-    _cellComputerEdit->setCompilationState(error, line);
+	_widgets.cellComputerEdit->setCompilationState(error, line);
 }
 
 
 void MicroEditor::defocused (bool requestDataUpdate)
 {
-    disconnect(_tabClusterWidget, SIGNAL(currentChanged(int)), 0, 0);
+    disconnect(_widgets.tabClusterWidget, SIGNAL(currentChanged(int)), 0, 0);
 
     if( requestDataUpdate )
         requestUpdate();
 
     //close tabs
     if( _focusCell )
-        _currentClusterTab = _tabClusterWidget->currentIndex();
-    if( _tabClusterWidget->count() > 0 ) {
-        while( _tabClusterWidget->count() > 0 )
-            _tabClusterWidget->removeTab(0);
-        _tabClusterWidget->setVisible(false);
+        _currentClusterTab = _widgets.tabClusterWidget->currentIndex();
+    if(_widgets.tabClusterWidget->count() > 0 ) {
+        while(_widgets.tabClusterWidget->count() > 0 )
+			_widgets.tabClusterWidget->removeTab(0);
+		_widgets.tabClusterWidget->setVisible(false);
     }
-    if( _tabComputerWidget->count() > 0 ) {
-        while( _tabComputerWidget->count() > 0)
-            _tabComputerWidget->removeTab(0);
-        _tabComputerWidget->setVisible(false);
+    if(_widgets.tabComputerWidget->count() > 0 ) {
+        while(_widgets.tabComputerWidget->count() > 0)
+			_widgets.tabComputerWidget->removeTab(0);
+		_widgets.tabComputerWidget->setVisible(false);
     }
-    if( _tabTokenWidget->count() > 0 ) {
-        disconnect(_tabTokenWidget, SIGNAL(currentChanged(int)), 0, 0);  //token widgets will be generated dynamically
-        while( _tabTokenWidget->count() > 0 ) {
-            delete _tabTokenWidget->widget(0);
-            _tabTokenWidget->removeTab(0);
+    if(_widgets.tabTokenWidget->count() > 0 ) {
+        disconnect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), 0, 0);  //token widgets will be generated dynamically
+        while(_widgets.tabTokenWidget->count() > 0 ) {
+            delete _widgets.tabTokenWidget->widget(0);
+			_widgets.tabTokenWidget->removeTab(0);
         }
-        connect(_tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
-        _tabTokenWidget->setVisible(false);
+        connect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
+		_widgets.tabTokenWidget->setVisible(false);
     }
     setTabSymbolsWidgetVisibility();
     _currentTokenTab = 0;
     emit numTokenUpdate(0, 0, _pasteTokenPossible);
 
     //deactivate buttons
-    if( _addTokenButton->isEnabled() )
-        _addTokenButton->setEnabled(false);
-    if( _delTokenButton->isEnabled() )
-        _delTokenButton->setEnabled(false);
-    if( _delEntityButton->isEnabled() )
-        _delEntityButton->setEnabled(false);
-    if( _delClusterButton->isEnabled() )
-        _delClusterButton->setEnabled(false);
+    if(_widgets.addTokenButton->isEnabled() )
+		_widgets.addTokenButton->setEnabled(false);
+    if(_widgets.delTokenButton->isEnabled() )
+		_widgets.delTokenButton->setEnabled(false);
+    if(_widgets.delEntityButton->isEnabled() )
+		_widgets.delEntityButton->setEnabled(false);
+    if(_widgets.delClusterButton->isEnabled() )
+		_widgets.delClusterButton->setEnabled(false);
 
     _focusCell = 0;
     _focusEnergyParticle = 0;
@@ -241,56 +212,56 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 	_context->unlock();
 	CellMetadata cellMeta = getCellMetadata(cell);
 	CellClusterMetadata clusterMeta = getCellClusterMetadata(cell);
-    _clusterEditor->updateCluster(_focusCellReduced);
-    _cellEditor->updateCell(_focusCellReduced);
-	_metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
+	_widgets.clusterEditor->updateCluster(_focusCellReduced);
+	_widgets.cellEditor->updateCell(_focusCellReduced);
+	_widgets.metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
 
     //update data for cell function: computer
     if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
-        _tabComputerWidget->setVisible(true);
-        _tabComputerWidget->insertTab(0, _tabComputer, "cell computer");
-        _tabComputerWidget->insertTab(1, _tabSymbolTable, "symbol table");
+		_widgets.tabComputerWidget->setVisible(true);
+		_widgets.tabComputerWidget->insertTab(0, _tabComputer, "cell computer");
+		_widgets.tabComputerWidget->insertTab(1, _tabSymbolTable, "symbol table");
 
         //update computer widgets
-        _cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
+		_widgets.cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
 
         //load computer code from meta data if available
         if( !cellMeta.computerSourcecode.isEmpty() ) {
-            _cellComputerEdit->updateComputerCode(cellMeta.computerSourcecode);
+			_widgets.cellComputerEdit->updateComputerCode(cellMeta.computerSourcecode);
         }
 
         //otherwise use translated cell data
         else
-            _cellComputerEdit->updateComputerCode(_focusCellReduced.computerCode);
+			_widgets.cellComputerEdit->updateComputerCode(_focusCellReduced.computerCode);
     }
 //    else
 //        _tabTokenWidget->move(10, tabPosY1);
 
     //activate cell cluster tabs
-    _tabClusterWidget->setVisible(true);
-    _tabClusterWidget->insertTab(0, _tabCell, "cell");
-    _tabClusterWidget->insertTab(1, _tabCluster, "cluster");
-    _tabClusterWidget->insertTab(2, _tabMeta, "meta data");
-    _tabClusterWidget->setCurrentIndex(_currentClusterTab);
-    connect(_tabClusterWidget, SIGNAL(currentChanged(int)), this, SLOT(clusterTabChanged(int)));
+	_widgets.tabClusterWidget->setVisible(true);
+	_widgets.tabClusterWidget->insertTab(0, _tabCell, "cell");
+	_widgets.tabClusterWidget->insertTab(1, _tabCluster, "cluster");
+	_widgets.tabClusterWidget->insertTab(2, _tabMeta, "meta data");
+	_widgets.tabClusterWidget->setCurrentIndex(_currentClusterTab);
+    connect(_widgets.tabClusterWidget, SIGNAL(currentChanged(int)), this, SLOT(clusterTabChanged(int)));
 
 
     //generate tab for each token
     int numToken = _focusCellReduced.tokenEnergies.size();
     if( numToken > 0 ) {
-        _tabTokenWidget->setVisible(true);
-        disconnect(_tabTokenWidget, SIGNAL(currentChanged(int)), 0, 0);
+		_widgets.tabTokenWidget->setVisible(true);
+        disconnect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), 0, 0);
         for(int i = 0; i < numToken; ++i) {
-            TokenTab* tokenTab = new TokenTab(_tabTokenWidget);
+            TokenTab* tokenTab = new TokenTab(_widgets.tabTokenWidget);
             connect(tokenTab, SIGNAL(tokenMemoryChanged(QByteArray)), this, SLOT(changesFromTokenMemoryEditor(QByteArray)));
             connect(tokenTab, SIGNAL(tokenPropChanged(qreal)), this, SLOT(changesFromTokenEditor(qreal)));
-            _tabTokenWidget->addTab(tokenTab, QString("token %1").arg(i+1));
+			_widgets.tabTokenWidget->addTab(tokenTab, QString("token %1").arg(i+1));
             tokenTab->update(_context->getSymbolTable(), _focusCellReduced.tokenEnergies[i], _focusCellReduced.tokenData[i]);
         }
-        connect(_tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
+        connect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
 
     }
 	SimulationParameters* parameters = _context->getSimulationParameters();
@@ -300,16 +271,16 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
     setTabSymbolsWidgetVisibility();
 
     //update buttons
-    _delEntityButton->setEnabled(true);
-    _delClusterButton->setEnabled(true);
+	_widgets.delEntityButton->setEnabled(true);
+	_widgets.delClusterButton->setEnabled(true);
     if( numToken < parameters->CELL_TOKENSTACKSIZE)
-        _addTokenButton->setEnabled(true);
+		_widgets.addTokenButton->setEnabled(true);
     else
-        _addTokenButton->setEnabled(false);
+		_widgets.addTokenButton->setEnabled(false);
     if( numToken > 0 )
-        _delTokenButton->setEnabled(true);
+		_widgets.delTokenButton->setEnabled(true);
     else
-        _delTokenButton->setEnabled(false);
+		_widgets.delTokenButton->setEnabled(false);
 }
 
 CellMetadata MicroEditor::getCellMetadata(Cell* cell)
@@ -336,12 +307,12 @@ void MicroEditor::energyParticleFocused (EnergyParticle* e)
     defocused();
 
     //activate tab
-    _tabClusterWidget->setVisible(true);
-    _tabClusterWidget->insertTab(0, _tabParticle, "energy particle");
+	_widgets.tabClusterWidget->setVisible(true);
+	_widgets.tabClusterWidget->insertTab(0, _tabParticle, "energy particle");
 
     //activate widgets
-    _delEntityButton->setEnabled(true);
-    _delClusterButton->setEnabled(true);
+	_widgets.delEntityButton->setEnabled(true);
+	_widgets.delClusterButton->setEnabled(true);
 
     _focusEnergyParticle = e;
     energyParticleUpdated_Slot(e);
@@ -359,7 +330,7 @@ void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
         auto vel = e->getVelocity();
         auto energyValue = e->getEnergy();
         _context->unlock();
-        _energyEditor->updateEnergyParticle(pos, vel, energyValue);
+		_widgets.energyEditor->updateEnergyParticle(pos, vel, energyValue);
     }
 }
 
@@ -388,9 +359,9 @@ void MicroEditor::reclustered (QList< CellCluster* > clusters)
             _context->unlock();
 			CellMetadata cellMeta = getCellMetadata(_focusCell);
 			CellClusterMetadata clusterMeta = getCellClusterMetadata(_focusCell);
-			_clusterEditor->updateCluster(_focusCellReduced);
-            _cellEditor->updateCell(_focusCellReduced);
-			_metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
+			_widgets.clusterEditor->updateCluster(_focusCellReduced);
+			_widgets.cellEditor->updateCell(_focusCellReduced);
+			_widgets.metadataEditor->updateMetadata(clusterMeta.name, cellMeta.name, cellMeta.color, cellMeta.description);
 
             //update computer code editor
             if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
@@ -413,7 +384,7 @@ void MicroEditor::requestUpdate ()
 
          //save edited code from code editor
         if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
-            QString code = _cellComputerEdit->getComputerCode();
+            QString code = _widgets.cellComputerEdit->getComputerCode();
 			CellMetadata meta = getCellMetadata(_focusCell);
 			meta.computerSourcecode = code;
 			setCellMetadata(_focusCell, meta);
@@ -421,22 +392,22 @@ void MicroEditor::requestUpdate ()
 
         //save edited code from cluster editor
         if( _currentClusterTab == 0 )
-            _cellEditor->requestUpdate();
+			_widgets.cellEditor->requestUpdate();
         if( _currentClusterTab == 1 )
-            _clusterEditor->requestUpdate();
+			_widgets.clusterEditor->requestUpdate();
         if( _currentClusterTab == 2 )
-            _metadataEditor->requestUpdate();
+			_widgets.metadataEditor->requestUpdate();
 
         //save token data => see
-        if( _tabTokenWidget->count() > 0 ) {
-            TokenTab* tab = (TokenTab*)_tabTokenWidget->currentWidget();
+        if(_widgets.tabTokenWidget->count() > 0 ) {
+            TokenTab* tab = static_cast<TokenTab*>(_widgets.tabTokenWidget->currentWidget());
             tab->requestUpdate();
         }
     }
 
     //save energy particle data
     if( _focusEnergyParticle ) {
-        _energyEditor->requestUpdate();
+		_widgets.energyEditor->requestUpdate();
     }
 
 }
@@ -458,20 +429,20 @@ void MicroEditor::setCellClusterMetadata(Cell * cell, CellClusterMetadata meta)
 void MicroEditor::entitiesSelected (int numCells, int numEnergyParticles)
 {
     if( (numCells > 0) || (numEnergyParticles > 0) ){
-        _delEntityButton->setEnabled(true);
-        _delClusterButton->setEnabled(true);
+		_widgets.delEntityButton->setEnabled(true);
+		_widgets.delClusterButton->setEnabled(true);
     }
     else {
-        _delEntityButton->setEnabled(false);
-        _delClusterButton->setEnabled(false);
+		_widgets.delEntityButton->setEnabled(false);
+		_widgets.delClusterButton->setEnabled(false);
     }
 
     //active tab if not active
-    if( _tabClusterWidget->currentWidget() != _tabSelection) {
-        _tabClusterWidget->setVisible(true);
-        while( _tabClusterWidget->count() > 0 )
-            _tabClusterWidget->removeTab(0);
-        _tabClusterWidget->insertTab(0, _tabSelection, "selection");
+    if(_widgets.tabClusterWidget->currentWidget() != _tabSelection) {
+		_widgets.tabClusterWidget->setVisible(true);
+        while(_widgets.tabClusterWidget->count() > 0 )
+			_widgets.tabClusterWidget->removeTab(0);
+		_widgets.tabClusterWidget->insertTab(0, _tabSelection, "selection");
     }
 
     //update selection tab
@@ -486,7 +457,7 @@ void MicroEditor::entitiesSelected (int numCells, int numEnergyParticles)
            + colorDataStart + QString("%1").arg(numCells)+colorEnd+parEnd;
     text += parStart+colorTextStart+ "energy particles: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd
            + colorDataStart + QString("%1").arg(numEnergyParticles)+colorEnd+parEnd;
-    _selectionEditor->setText(text);
+	_widgets.selectionEditor->setText(text);
 }
 
 void MicroEditor::addTokenClicked ()
@@ -503,7 +474,7 @@ void MicroEditor::addTokenClicked ()
     invokeUpdateCell(false);
 
     cellFocused(_focusCell);
-    _tabTokenWidget->setCurrentIndex(newTokenTab);
+	_widgets.tabTokenWidget->setCurrentIndex(newTokenTab);
 
     //activate Symbols Widget
     setTabSymbolsWidgetVisibility();
@@ -540,8 +511,8 @@ void MicroEditor::addTokenClicked ()
 void MicroEditor::delTokenClicked ()
 {
     //remove token
-    _focusCellReduced.tokenEnergies.removeAt(_tabTokenWidget->currentIndex());
-    _focusCellReduced.tokenData.removeAt(_tabTokenWidget->currentIndex());
+    _focusCellReduced.tokenEnergies.removeAt(_widgets.tabTokenWidget->currentIndex());
+    _focusCellReduced.tokenData.removeAt(_widgets.tabTokenWidget->currentIndex());
 
     //emit signal to notify other instances => update _focusCell from _focusCellReduced
     invokeUpdateCell(false);
@@ -551,7 +522,7 @@ void MicroEditor::delTokenClicked ()
     if( (newTokenTab > 0) && (newTokenTab == numToken) )
         newTokenTab--;
     cellFocused(_focusCell, false);
-    _tabTokenWidget->setCurrentIndex(newTokenTab);
+	_widgets.tabTokenWidget->setCurrentIndex(newTokenTab);
 
     //update sybols widget
     setTabSymbolsWidgetVisibility();
@@ -607,7 +578,7 @@ void MicroEditor::pasteTokenClicked ()
     invokeUpdateCell(false);
 
     cellFocused(_focusCell);
-    _tabTokenWidget->setCurrentIndex(newTokenTab);
+	_widgets.tabTokenWidget->setCurrentIndex(newTokenTab);
 
     //update Symbols Widget
     setTabSymbolsWidgetVisibility();
@@ -637,16 +608,27 @@ void MicroEditor::delExtendedSelectionClicked ()
     emit delExtendedSelection();
 }
 
+void MicroEditor::buttonShowInfoClicked()
+{
+	if (_widgets.buttonShowInfo->isChecked()) {
+		_widgets.buttonShowInfo->setIcon(QIcon(resourceInfoOn));
+	}
+	else {
+		_widgets.buttonShowInfo->setIcon(QIcon(resourceInfoOff));
+	}
+	emit toggleInformation(_widgets.buttonShowInfo->isChecked());
+}
+
 void MicroEditor::changesFromCellEditor (CellTO newCellProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyCellProperties(newCellProperties);
 
     //close tabs
-    if( _tabComputerWidget->count() > 0 ) {
-        while( _tabComputerWidget->count() > 0)
-            _tabComputerWidget->removeTab(0);
-        _tabComputerWidget->setVisible(false);
+    if(_widgets.tabComputerWidget->count() > 0 ) {
+        while(_widgets.tabComputerWidget->count() > 0)
+			_widgets.tabComputerWidget->removeTab(0);
+		_widgets.tabComputerWidget->setVisible(false);
     }
 
     //update data for cell function: computer
@@ -654,20 +636,20 @@ void MicroEditor::changesFromCellEditor (CellTO newCellProperties)
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
-        _tabComputerWidget->setVisible(true);
-        _tabComputerWidget->insertTab(0, _tabComputer, "cell computer");
-        _tabComputerWidget->insertTab(1, _tabSymbolTable, "symbol table");
-        _cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
+		_widgets.tabComputerWidget->setVisible(true);
+		_widgets.tabComputerWidget->insertTab(0, _tabComputer, "cell computer");
+		_widgets.tabComputerWidget->insertTab(1, _tabSymbolTable, "symbol table");
+		_widgets.cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
 
         //load computer code from meta data if available
 		CellMetadata meta = getCellMetadata(_focusCell);
         if( !meta.computerSourcecode.isEmpty() ) {
-            _cellComputerEdit->updateComputerCode(meta.computerSourcecode);
+			_widgets.cellComputerEdit->updateComputerCode(meta.computerSourcecode);
         }
 
         //otherwise use translated cell data
         else
-            _cellComputerEdit->updateComputerCode(_focusCellReduced.computerCode);
+			_widgets.cellComputerEdit->updateComputerCode(_focusCellReduced.computerCode);
     }
 //    else
 //        _tabTokenWidget->move(10, tabPosY1);
@@ -754,7 +736,7 @@ void MicroEditor::changesFromMetadataEditor(QString clusterName, QString cellNam
 
 void MicroEditor::changesFromSymbolTableEditor ()
 {
-    QWidget* widget = _tabTokenWidget->currentWidget();
+    QWidget* widget = _widgets.tabTokenWidget->currentWidget();
     TokenTab* tokenTab= qobject_cast<TokenTab*>(widget);
     if( tokenTab ) {
 		tokenTab->update(_context->getSymbolTable(), _focusCellReduced.tokenEnergies[_currentTokenTab], _focusCellReduced.tokenData[_currentTokenTab]);
@@ -771,7 +753,7 @@ void MicroEditor::clusterTabChanged (int index)
 void MicroEditor::tokenTabChanged (int index)
 {
     if( _currentTokenTab >= 0 ) {
-        TokenTab* tab = (TokenTab*)_tabTokenWidget->widget(_currentTokenTab);
+        TokenTab* tab = static_cast<TokenTab*>(_widgets.tabTokenWidget->widget(_currentTokenTab));
         if( tab )
             tab->requestUpdate();
     }
@@ -794,7 +776,7 @@ void MicroEditor::compileButtonClicked (QString code)
     //NOTE: widgets are updated via reclustered(...)
 
     //emit signal to notify other instances
-    _cellComputerEdit->expectCellCompilerAnswer();
+	_widgets.cellComputerEdit->expectCellCompilerAnswer();
     invokeUpdateCell(false);
 }
 
@@ -809,15 +791,15 @@ void MicroEditor::invokeUpdateCell (bool clusterDataChanged)
 
 void MicroEditor::setTabSymbolsWidgetVisibility ()
 {
-    if( _tabTokenWidget->isVisible() ) {
-        _tabSymbolsWidget->setGeometry(tabPosX2, _tabClusterWidget->y(), _tabSymbolsWidget->width(), _tabSymbolsWidget->height());
-        _tabSymbolsWidget->setVisible(true);
+    if(_widgets.tabTokenWidget->isVisible() ) {
+		_widgets.tabSymbolsWidget->setGeometry(tabPosX2, _widgets.tabClusterWidget->y(), _widgets.tabSymbolsWidget->width(), _widgets.tabSymbolsWidget->height());
+		_widgets.tabSymbolsWidget->setVisible(true);
     }
-    else if( _tabComputerWidget->isVisible() ) {
-        _tabSymbolsWidget->setGeometry(tabPosX1, _tabClusterWidget->y(), _tabSymbolsWidget->width(), _tabSymbolsWidget->height());
-        _tabSymbolsWidget->setVisible(true);
+    else if(_widgets.tabComputerWidget->isVisible() ) {
+		_widgets.tabSymbolsWidget->setGeometry(tabPosX1, _widgets.tabClusterWidget->y(), _widgets.tabSymbolsWidget->width(), _widgets.tabSymbolsWidget->height());
+		_widgets.tabSymbolsWidget->setVisible(true);
     }
     else
-        _tabSymbolsWidget->setVisible(false);
+		_widgets.tabSymbolsWidget->setVisible(false);
 }
 

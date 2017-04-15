@@ -33,24 +33,29 @@ public:
     MicroEditor(SimulationContext* context, QObject *parent = 0);
     ~MicroEditor();
 
-    void init (QTabWidget* tabClusterWidget,
-               QTabWidget* tabComputerWidget,
-               QTabWidget* tabTokenWidget,
-               QTabWidget* tabSymbolsWidget,
-               CellEdit* cellEditor,
-               ClusterEdit* clusterEditor,
-               EnergyEdit* energyEditor,
-               MetadataEdit* metadataEditor,
-               CellComputerEdit* cellComputerEdit,
-               SymbolEdit* symbolEdit,
-               QTextEdit* selectionEditor,
-               QToolButton* requestCellButton,
-               QToolButton* requestEnergyParticleButton,
-               QToolButton* delEntityButton,
-               QToolButton* delClusterButton,
-               QToolButton* addTokenButton,
-               QToolButton* delTokenButton);
-    void update ();
+
+	struct MicroEditorWidgets {
+		QTabWidget* tabClusterWidget;
+		QTabWidget* tabComputerWidget;
+		QTabWidget* tabTokenWidget;
+		QTabWidget* tabSymbolsWidget;
+		CellEdit* cellEditor;
+		ClusterEdit* clusterEditor;
+		EnergyEdit* energyEditor;
+		MetadataEdit* metadataEditor;
+		CellComputerEdit* cellComputerEdit;
+		SymbolEdit* symbolEdit;
+		QTextEdit* selectionEditor;
+		QToolButton* requestCellButton;
+		QToolButton* requestEnergyParticleButton;
+		QToolButton* delEntityButton;
+		QToolButton* delClusterButton;
+		QToolButton* addTokenButton;
+		QToolButton* delTokenButton;
+		QToolButton* buttonShowInfo;
+	};
+	void init(MicroEditorWidgets widgets);
+	void update();
 
     void setVisible (bool visible);
     bool isVisible ();
@@ -70,20 +75,18 @@ signals:
     void energyParticleUpdated (EnergyParticle* e);                //to macro editor
     void metadataUpdated ();                                    //to macro editor
     void numTokenUpdate (int numToken, int maxToken, bool pasteTokenPossible);  //to main windows
+	void toggleInformation(bool on);
 
 public slots:
     void computerCompilationReturn (bool error, int line);
     void defocused (bool requestDataUpdate = true);
     void cellFocused (Cell* cell, bool requestDataUpdate = true);
 
-
-
 	void energyParticleFocused(EnergyParticle* e);
     void energyParticleUpdated_Slot (EnergyParticle* e);
     void reclustered (QList< CellCluster* > clusters);
     void universeUpdated (SimulationContext* context, bool force);
     void requestUpdate ();
-
 
 	void entitiesSelected(int numCells, int numEnergyParticles);
     void addTokenClicked ();
@@ -92,9 +95,7 @@ public slots:
     void pasteTokenClicked ();
     void delSelectionClicked ();
     void delExtendedSelectionClicked ();
-
-//protected:
-//    void mousePressEvent(QMouseEvent * event);
+	void buttonShowInfoClicked();
 
 private slots:
     void changesFromCellEditor (CellTO newCellProperties);
@@ -122,25 +123,8 @@ private:
 	SimulationContext* _context;
 
     //widgets
-    QTabWidget* _tabClusterWidget;
-    QTabWidget* _tabComputerWidget;
-    QTabWidget* _tabTokenWidget;
-    QTabWidget* _tabSymbolsWidget;
-    CellEdit* _cellEditor;
-    ClusterEdit* _clusterEditor;
-    EnergyEdit* _energyEditor;
-    MetadataEdit* _metadataEditor;
-    CellComputerEdit* _cellComputerEdit;
-    SymbolEdit* _symbolEdit;
-    QTextEdit* _selectionEditor;
-    QToolButton* _requestCellButton;
-    QToolButton* _requestEnergyParticleButton;
-    QToolButton* _delEntityButton;
-    QToolButton* _delClusterButton;
-    QToolButton* _addTokenButton;
-    QToolButton* _delTokenButton;
+	MicroEditorWidgets _widgets;
 
-//    Ui::MicroEditor *ui;
     Cell* _focusCell;
     CellTO _focusCellReduced;
     EnergyParticle* _focusEnergyParticle;
