@@ -7,9 +7,9 @@
 #include "cellgraphicsitem.h"
 
 CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken
-	, quint8 color, QString displayString, QGraphicsItem *parent)
+	, quint8 color, QString displayString, int branchNumber, QGraphicsItem *parent)
     : QGraphicsItem(parent), _config(config), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken)
-	, _color(color), _displayString(displayString)
+	, _color(color), _displayString(displayString), _branchNumber(branchNumber)
 {
     QGraphicsItem::setPos(x, y);
 }
@@ -63,11 +63,13 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
     else
         painter->drawEllipse(QPointF(0.0, 0.0), 0.5*GRAPHICS_ITEM_SIZE, 0.5*GRAPHICS_ITEM_SIZE);
 
-	if (_config->showCellFunctions) {
+	if (_config->showInfo) {
 		auto font = GuiFunctions::getCellFont();
 		painter->setFont(font);
-		painter->setPen(QPen(QBrush(GRAPHICS_ITEM_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
 		painter->drawText(QRectF(-1.5*GRAPHICS_ITEM_SIZE, 0.2*GRAPHICS_ITEM_SIZE, 3.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, _displayString);
+		painter->setPen(QPen(QBrush(BRANCHNUMBER_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+		painter->drawText(QRectF(-0.49*GRAPHICS_ITEM_SIZE, -0.47*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, QString::number(_branchNumber));
 	}
 
     //draw token

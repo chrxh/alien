@@ -540,7 +540,7 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
             int numPlaces = 0;
             for(int j = 0; j < cell->getNumConnections(); ++j) {
                 Cell* otherCell = cell->getConnection(j);
-                if( (((tokenAccessNumber+1) % _parameters->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
+                if( (((tokenAccessNumber+1) % _parameters->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getBranchNumber()) && (!otherCell->isTokenBlocked())
                     && (otherCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) ) {
                     ++numPlaces;
                 }
@@ -569,7 +569,7 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
                     int spreadTokenCounter = 0;
                     for(int j = 0; j < cell->getNumConnections(); ++j) {
                         Cell* otherCell = cell->getConnection(j);
-                        if( (((tokenAccessNumber+1) % _parameters->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getTokenAccessNumber()) && (!otherCell->isTokenBlocked())
+                        if( (((tokenAccessNumber+1) % _parameters->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getBranchNumber()) && (!otherCell->isTokenBlocked())
                             && (otherCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) ) {
                             if( spreadTokenCounter > 0 ) {
                                 spreadTokenCells[spreadTokenCounter] = otherCell;
