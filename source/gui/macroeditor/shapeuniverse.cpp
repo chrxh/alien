@@ -761,7 +761,7 @@ QVector3D ShapeUniverse::calcCenterOfHighlightedObjects ()
     QList< EnergyGraphicsItem* > eItems(_highlightedEnergyParticles.values());
     foreach( EnergyGraphicsItem* eItem, eItems )
         center += QVector3D(eItem->pos().x(), eItem->pos().y(), 0.0);
-    return center/(cellItems.size()+eItems.size());
+    return center/(cellItems.size()+eItems.size())/GRAPHICS_ITEM_SIZE;
 }
 
 
