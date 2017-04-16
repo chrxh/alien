@@ -45,7 +45,7 @@ void SerializationFacadeImpl::serializeSimulationContext(SimulationContext * con
 	quint32 numEnergyParticles = energyParticles.size();
 	stream << numEnergyParticles;
 	foreach(EnergyParticle* e, energyParticles) {
-		e->serializePrimitives(stream);
+		serializeEnergyParticle(e, stream);
 	}
 
 	context->getCellMap()->serializePrimitives(stream);
