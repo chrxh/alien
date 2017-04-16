@@ -24,7 +24,7 @@ CellFunctionComputerImpl::CellFunctionComputerImpl (QByteArray data, SimulationC
 	if (!data.isEmpty()) {
 		int numInstructions = data[0];
 		int minSize = 3 * std::min(numInstructions, context->getSimulationParameters()->CELL_NUM_INSTR);
-		_code = data.left(minSize);
+		_code = data.mid(1, minSize);
 		if (_code.size() != minSize) {
 			_code.clear();
 		}
