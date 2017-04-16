@@ -467,8 +467,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     if( newCell->getNumToken(true) < _parameters->CELL_TOKENSTACKSIZE ) {
 						auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-						auto token = factory->buildToken(_context, _parameters->NEW_TOKEN_ENERGY);
-                        newCell->addToken(token, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
+						auto newToken = factory->buildToken(_context, _parameters->NEW_TOKEN_ENERGY);
+                        newCell->addToken(newToken, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                         token->setEnergy(token->getEnergy() - _parameters->NEW_TOKEN_ENERGY);
                     }
                 }

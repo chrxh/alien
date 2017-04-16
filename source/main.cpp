@@ -19,6 +19,9 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
+//- Bei Tokenübetragung im CellFunctionConstructor: Energie vom Token = 0
+//- zurück klappt nicht
+//- laden von Simulation (mit Replicator) klappt nicht
 
 //Model-Refactoring:
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
