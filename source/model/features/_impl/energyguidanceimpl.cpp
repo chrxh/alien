@@ -19,8 +19,8 @@ CellFeature::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cel
     ProcessingResult processingResult {false, 0};
 	auto& tokenMem = token->getMemoryRef();
 	quint8 cmd = tokenMem[Enums::EnergyGuidance::IN] % 6;
-    qreal valueCell = tokenMem[Enums::EnergyGuidance::IN_VALUE_CELL];
-    qreal valueToken = tokenMem[Enums::EnergyGuidance::IN_VALUE_TOKEN];
+    qreal valueCell = static_cast<quint8>(tokenMem[Enums::EnergyGuidance::IN_VALUE_CELL]);
+    qreal valueToken = static_cast<quint8>(tokenMem[Enums::EnergyGuidance::IN_VALUE_TOKEN]);
     qreal amount = 10.0;
 
     if( cmd == Enums::EnergyGuidanceIn::BALANCE_CELL ) {

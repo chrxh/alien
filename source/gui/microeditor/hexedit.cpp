@@ -212,8 +212,9 @@ void HexEdit::displayData ()
 
     text = parStart;
     for(int i = 0; i < _data.size(); ++i ) {
-        QString s1(QString("%1").arg(_data[i]>>4, 1, 16, QLatin1Char('0')));
-        QString s2(QString("%1").arg(_data[i]&15, 1, 16, QLatin1Char('0')));
+		quint8 byte = _data[i];
+        QString s1(QString("%1").arg(byte >>4, 1, 16, QLatin1Char('0')));
+        QString s2(QString("%1").arg(byte &15, 1, 16, QLatin1Char('0')));
         if( (i%2) == 0 )
             text += "<span style=\"color:"+HEX_EDIT_COLOR1.name()+"\">"+s1.toUpper()+s2.toUpper()+"  "+colorEnd;
         else
