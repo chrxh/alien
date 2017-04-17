@@ -66,6 +66,11 @@
       </property>
       <item>
        <property name="text">
+        <string>mutation probability</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>min distance</string>
        </property>
        <property name="flags">

@@ -27,7 +27,12 @@ private slots:
     void saveButtonClicked ();
 
 private:
-    Ui::SimulationParametersDialog *ui;
+	void setItem(QString key, int matchPos, int value);
+	void setItem(QString key, int matchPos, qreal value);
+	int getItemInt(QString key, int matchPos);
+	qreal getItemReal(QString key, int matchPos);
+
+	Ui::SimulationParametersDialog *ui;
 
     //simulation parameters (not the global ones)
 	SimulationParameters& _simulationParameters;
