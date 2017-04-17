@@ -14,8 +14,8 @@
 CellImpl::CellImpl (SimulationContext* context)
     : _cellMap(context->getCellMap())
 	, _parameters(context->getSimulationParameters())
-	, _tokenStack(context->getSimulationParameters()->CELL_TOKENSTACKSIZE)
-    , _newTokenStack(context->getSimulationParameters()->CELL_TOKENSTACKSIZE)
+	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
+    , _newTokenStack(context->getSimulationParameters()->cellMaxToken)
     , _id(GlobalFunctions::createNewTag())
 {
 
@@ -349,7 +349,7 @@ int CellImpl::getBranchNumber () const
 
 void CellImpl::setBranchNumber (int i)
 {
-    _tokenAccessNumber = i % _parameters->MAX_TOKEN_ACCESS_NUMBERS;
+    _tokenAccessNumber = i % _parameters->cellMaxTokenBranchNumber;
 }
 
 bool CellImpl::isTokenBlocked () const
@@ -460,8 +460,8 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
     quint32 tokenStackPointer;
     stream >> tokenStackPointer;
     _tokenStackPointer = static_cast<quint32>(tokenStackPointer);
-    if (_tokenStackPointer > _parameters->CELL_TOKENSTACKSIZE)
-        _tokenStackPointer = _parameters->CELL_TOKENSTACKSIZE;
+    if (_tokenStackPointer > _parameters->cellMaxToken)
+        _tokenStackPointer = _parameters->cellMaxToken;
     _newTokenStackPointer = 0;
 
 	//remaining data

@@ -29,7 +29,7 @@ CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token,
             //other cell found?
             if( otherCell ) {
                 if( otherCell->getCluster() != cell->getCluster() ) {
-                    qreal energy = otherCell->getEnergy()*_parameters->CELL_WEAPON_STRENGTH+1.0;
+                    qreal energy = otherCell->getEnergy()*_parameters->cellFunctionWeaponStrength+1.0;
                     if( otherCell->getEnergy() > energy ) {
                         otherCell->setEnergy(otherCell->getEnergy()-energy);
                         token->setEnergy(token->getEnergy() + energy/2.0);

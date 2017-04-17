@@ -265,7 +265,7 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 
     }
 	SimulationParameters* parameters = _context->getSimulationParameters();
-    emit numTokenUpdate(numToken, parameters->CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+    emit numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
 
     //update Symbols Widget
     setTabSymbolsWidgetVisibility();
@@ -273,7 +273,7 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
     //update buttons
 	_widgets.delEntityButton->setEnabled(true);
 	_widgets.delClusterButton->setEnabled(true);
-    if( numToken < parameters->CELL_TOKENSTACKSIZE)
+    if( numToken < parameters->cellMaxToken)
 		_widgets.addTokenButton->setEnabled(true);
     else
 		_widgets.addTokenButton->setEnabled(false);
@@ -465,8 +465,8 @@ void MicroEditor::addTokenClicked ()
     //create token (new token is the last token on the stack)
     int newTokenTab = _currentTokenTab+1;
 	SimulationParameters* parameters = _context->getSimulationParameters();
-    _focusCellReduced.tokenEnergies.insert(newTokenTab, parameters->NEW_TOKEN_ENERGY);
-    QByteArray data(parameters->TOKEN_MEMSIZE, 0);
+    _focusCellReduced.tokenEnergies.insert(newTokenTab, parameters->tokenCreationEnergy);
+    QByteArray data(parameters->cellFunctionComputerTokenMemorySize, 0);
     data[0] = _focusCellReduced.cellTokenAccessNum; //set access number for new token
     _focusCellReduced.tokenData.insert(newTokenTab, data);
 
@@ -563,7 +563,7 @@ void MicroEditor::copyTokenClicked ()
     _pasteTokenPossible = true;
     int numToken = _focusCellReduced.tokenEnergies.size();
 	SimulationParameters* parameters = _context->getSimulationParameters();
-	emit numTokenUpdate(numToken, parameters->CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+	emit numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
 }
 
 void MicroEditor::pasteTokenClicked ()

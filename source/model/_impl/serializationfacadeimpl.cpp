@@ -237,7 +237,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	SimulationParameters* parameters = context->getSimulationParameters();
 	for (int i = 0; i < cell->getNumToken(); ++i) {
 		Token* token = deserializeToken(stream, context);
-		if (i < parameters->CELL_TOKENSTACKSIZE)
+		if (i < parameters->cellMaxToken)
 			cell->setToken(i, token);
 		else
 			delete token;
