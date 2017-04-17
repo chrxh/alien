@@ -74,6 +74,9 @@ void SimulationController::startThread()
 
 void SimulationController::terminateThread()
 {
+	if (!_thread) {
+		return;
+	}
 	_thread->quit();
 	if (!_thread->wait(2000)) {
 		_thread->terminate();
