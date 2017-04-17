@@ -50,6 +50,6 @@ TEST_F (IntegrationTestReplicator, testRunSimulation)
         if (cluster->getCellsRef().size() >= replicatorSize)
             ++replicators;
     }
-    ASSERT_TRUE(replicators > 8);
+    ASSERT_TRUE(replicators >= 5);
 }
 
