@@ -7,7 +7,7 @@
 TokenImpl::TokenImpl(SimulationContext * context)
 	: _context(context)
 {
-	_memory = QByteArray(context->getSimulationParameters()->TOKEN_MEMSIZE, 0);
+	_memory = QByteArray(context->getSimulationParameters()->cellFunctionComputerTokenMemorySize, 0);
 }
 
 TokenImpl::TokenImpl(SimulationContext* context, qreal energy, bool randomData)
@@ -15,7 +15,7 @@ TokenImpl::TokenImpl(SimulationContext* context, qreal energy, bool randomData)
 {
 	_energy = energy;
 	if (randomData) {
-		for (int i = 0; i < context->getSimulationParameters()->TOKEN_MEMSIZE; ++i)
+		for (int i = 0; i < context->getSimulationParameters()->cellFunctionComputerTokenMemorySize; ++i)
 			_memory[i] = qrand() % 256;
 	}
 }
@@ -23,13 +23,13 @@ TokenImpl::TokenImpl(SimulationContext* context, qreal energy, bool randomData)
 TokenImpl::TokenImpl(SimulationContext* context, qreal energy, QByteArray const& memory_)
 	: _energy(energy), _context(context)
 {
-	_memory = memory_.left(context->getSimulationParameters()->TOKEN_MEMSIZE);
+	_memory = memory_.left(context->getSimulationParameters()->cellFunctionComputerTokenMemorySize);
 }
 
 TokenImpl* TokenImpl::duplicate() const
 {
 	TokenImpl* newToken(new TokenImpl(_context));
-	for (int i = 0; i < _context->getSimulationParameters()->TOKEN_MEMSIZE; ++i)
+	for (int i = 0; i < _context->getSimulationParameters()->cellFunctionComputerTokenMemorySize; ++i)
 		newToken->_memory[i] = _memory[i];
 	newToken->_energy = _energy;
 
@@ -38,7 +38,7 @@ TokenImpl* TokenImpl::duplicate() const
 
 int TokenImpl::getTokenAccessNumber() const
 {
-	return _memory[0] % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS;
+	return _memory[0] % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
 }
 
 void TokenImpl::setTokenAccessNumber(int i)
@@ -69,7 +69,7 @@ void TokenImpl::serializePrimitives(QDataStream& stream) const
 void TokenImpl::deserializePrimitives(QDataStream& stream)
 {
 	stream >> _memory >> _energy;
-	auto memSize = _context->getSimulationParameters()->TOKEN_MEMSIZE;
+	auto memSize = _context->getSimulationParameters()->cellFunctionComputerTokenMemorySize;
 	_memory = _memory.left(memSize);
 	_memory.resize(memSize);
 }

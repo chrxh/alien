@@ -664,10 +664,10 @@ void ShapeUniverse::createConnectionItem (Cell* cell, Cell* otherCell)
 
     //directed connection?
     CellConnectionGraphicsItem::ConnectionState s = CellConnectionGraphicsItem::NO_DIR_CONNECTION;
-    if( cell->getBranchNumber() == ((otherCell->getBranchNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) && (!cell->isTokenBlocked()) ) {
+    if( cell->getBranchNumber() == ((otherCell->getBranchNumber()+1) % _context->getSimulationParameters()->cellMaxTokenBranchNumber) && (!cell->isTokenBlocked()) ) {
         s = CellConnectionGraphicsItem::B_TO_A_CONNECTION;
     }
-    if( ((cell->getBranchNumber()+1) % _context->getSimulationParameters()->MAX_TOKEN_ACCESS_NUMBERS) == otherCell->getBranchNumber() && (!otherCell->isTokenBlocked()) ) {
+    if( ((cell->getBranchNumber()+1) % _context->getSimulationParameters()->cellMaxTokenBranchNumber) == otherCell->getBranchNumber() && (!otherCell->isTokenBlocked()) ) {
         s = CellConnectionGraphicsItem::A_TO_B_CONNECTION;
     }
     CellConnectionGraphicsItem* connectionItem = new CellConnectionGraphicsItem(pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE, otherPos.x() * GRAPHICS_ITEM_SIZE, otherPos.y() * GRAPHICS_ITEM_SIZE, s);

@@ -10,7 +10,7 @@ AddRectStructureDialog::AddRectStructureDialog(SimulationParameters* simulationP
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
-    ui->energyEdit->setText(QString("%1").arg(simulationParameters->NEW_CELL_ENERGY));
+    ui->energyEdit->setText(QString("%1").arg(simulationParameters->cellCreationEnergy));
 }
 
 AddRectStructureDialog::~AddRectStructureDialog()

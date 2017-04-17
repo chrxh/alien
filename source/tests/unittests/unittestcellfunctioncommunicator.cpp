@@ -84,7 +84,7 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 		//create cluster2 within communication range
 		QList< Cell* > cells;
 		cells << cell;
-		qreal distanceFromCluster1 = _context->getSimulationParameters()->CELL_FUNCTION_COMMUNICATOR_RANGE / 2.0;
+		qreal distanceFromCluster1 = _context->getSimulationParameters()->cellFunctionCommunicatorRange / 2.0;
 		QVector3D pos(500.0 + distanceFromCluster1, 500.0, 0.0);
 		QVector3D vel(0.0, 0.0, 0.0);
 		qreal angle = 0.0;

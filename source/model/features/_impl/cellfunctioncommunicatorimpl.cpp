@@ -126,7 +126,7 @@ QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) 
             return cellFunction && (cellFunction->getType() == Enums::CellFunction::COMMUNICATOR);
         };
     QVector3D cellPos = cell->calcPosition();
-    qreal range = _parameters->CELL_FUNCTION_COMMUNICATOR_RANGE;
+    qreal range = _parameters->cellFunctionCommunicatorRange;
     return _context->getCellMap()->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 

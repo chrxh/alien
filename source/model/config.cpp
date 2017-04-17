@@ -147,36 +147,36 @@ void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
 
 void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 {
-	parameters->MUTATION_PROB = 0.0;
-	parameters->CRIT_CELL_DIST_MIN = 0.3;
-	parameters->CRIT_CELL_DIST_MAX = 1.3;
-	parameters->INTERNAL_TO_KINETIC_ENERGY = 1;
-	parameters->CELL_MAX_FORCE = 0.8;
-	parameters->CELL_MAX_FORCE_DECAY_PROB = 0.2;
-	parameters->MAX_CELL_CONNECTIONS = 6;
-	parameters->CELL_TOKENSTACKSIZE = 9;
-	parameters->MAX_TOKEN_ACCESS_NUMBERS = 6;
-	parameters->NEW_CELL_ENERGY = 100.0;
+	parameters->cellMutationProb = 0.0;
+	parameters->cellMinDistance = 0.3;
+	parameters->cellMaxDistance = 1.3;
+	parameters->cellMass_Reciprocal = 1;
+	parameters->callMaxForce = 0.8;
+	parameters->cellMaxForceDecayProb = 0.2;
+	parameters->cellMaxBonds = 6;
+	parameters->cellMaxToken = 9;
+	parameters->cellMaxTokenBranchNumber = 6;
+	parameters->cellCreationEnergy = 100.0;
 	parameters->NEW_CELL_MAX_CONNECTION = 4;
 	parameters->NEW_CELL_TOKEN_ACCESS_NUMBER = 0;
-	parameters->CRIT_CELL_TRANSFORM_ENERGY = 50.0;
-	parameters->CELL_TRANSFORM_PROB = 0.2;
-	parameters->CLUSTER_FUSION_VEL = 0.4;
+	parameters->cellMinEnergy = 50.0;
+	parameters->cellTransformationProb = 0.2;
+	parameters->cellFusionVelocity = 0.4;
 
-	parameters->CELL_WEAPON_STRENGTH = 0.1;
-	parameters->CELL_NUM_INSTR = 15;
-	parameters->CELL_MEMSIZE = 8;
-	parameters->TOKEN_MEMSIZE = 256;
-	parameters->CELL_FUNCTION_CONSTRUCTOR_OFFSPRING_DIST = 1.0;
-	parameters->CELL_FUNCTION_SENSOR_RANGE = 100.0;
-	parameters->CELL_FUNCTION_COMMUNICATOR_RANGE = 30.0;
+	parameters->cellFunctionWeaponStrength = 0.1;
+	parameters->cellFunctionComputerMaxInstructions = 15;
+	parameters->cellFunctionComputerCellMemorySize = 8;
+	parameters->cellFunctionComputerTokenMemorySize = 256;
+	parameters->cellFunctionConstructorOffspringDistance = 1.0;
+	parameters->cellFunctionSensorRange = 100.0;
+	parameters->cellFunctionCommunicatorRange = 30.0;
 
-	parameters->NEW_TOKEN_ENERGY = 60.0;
-	parameters->MIN_TOKEN_ENERGY = 3.0;
+	parameters->tokenCreationEnergy = 60.0;
+	parameters->tokenMinEnergy = 3.0;
 
-	parameters->RAD_EXPONENT = 1.0;
-	parameters->RAD_FACTOR = 0.0001;
-	parameters->RAD_PROBABILITY = 0.01;
-	parameters->CELL_RAD_ENERGY_VEL_MULT = 1.0;
-	parameters->CELL_RAD_ENERGY_VEL_PERTURB = 0.5;
+	parameters->radiationExponent = 1.0;
+	parameters->radiationFactor = 0.0001;
+	parameters->radiationProb = 0.01;
+	parameters->radiationVelocityMultiplier = 1.0;
+	parameters->radiationVelocityPerturbation = 0.5;
 }

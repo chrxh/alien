@@ -24,49 +24,49 @@ CellFeature::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cel
     qreal amount = 10.0;
 
     if( cmd == Enums::EnergyGuidanceIn::BALANCE_CELL ) {
-        if( cell->getEnergy() > (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell) ) {
+        if( cell->getEnergy() > (_parameters->cellMinEnergy+valueCell) ) {
             cell->setEnergy(cell->getEnergy()-amount);
             token->setEnergy(token->getEnergy() + amount);
         }
-        if( cell->getEnergy() < (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell) ) {
-            if( token->getEnergy() > (_parameters->MIN_TOKEN_ENERGY+valueToken+amount) ) {
+        if( cell->getEnergy() < (_parameters->cellMinEnergy+valueCell) ) {
+            if( token->getEnergy() > (_parameters->tokenMinEnergy+valueToken+amount) ) {
                 cell->setEnergy(cell->getEnergy()+amount);
 				token->setEnergy(token->getEnergy() - amount);
             }
         }
     }
     if( cmd == Enums::EnergyGuidanceIn::BALANCE_TOKEN ) {
-        if( token->getEnergy() > (_parameters->MIN_TOKEN_ENERGY+valueToken) ) {
+        if( token->getEnergy() > (_parameters->tokenMinEnergy+valueToken) ) {
             cell->setEnergy(cell->getEnergy()+amount);
 			token->setEnergy(token->getEnergy() - amount);
 		}
-        if( token->getEnergy() < (_parameters->MIN_TOKEN_ENERGY+valueToken) ) {
-            if( cell->getEnergy() > (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount) ) {
+        if( token->getEnergy() < (_parameters->tokenMinEnergy+valueToken) ) {
+            if( cell->getEnergy() > (_parameters->cellMinEnergy+valueCell+amount) ) {
                 cell->setEnergy(cell->getEnergy()-amount);
 				token->setEnergy(token->getEnergy() + amount);
 			}
         }
     }
     if( cmd == Enums::EnergyGuidanceIn::BALANCE_BOTH ) {
-        if( (token->getEnergy() > (_parameters->MIN_TOKEN_ENERGY+valueToken+amount))
-                && (cell->getEnergy() < (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell)) ) {
+        if( (token->getEnergy() > (_parameters->tokenMinEnergy+valueToken+amount))
+                && (cell->getEnergy() < (_parameters->cellMinEnergy+valueCell)) ) {
             cell->setEnergy(cell->getEnergy()+amount);
 			token->setEnergy(token->getEnergy() - amount);
 		}
-        if( (token->getEnergy() < (_parameters->MIN_TOKEN_ENERGY+valueToken))
-                && (cell->getEnergy() > (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount)) ) {
+        if( (token->getEnergy() < (_parameters->tokenMinEnergy+valueToken))
+                && (cell->getEnergy() > (_parameters->cellMinEnergy+valueCell+amount)) ) {
             cell->setEnergy(cell->getEnergy()-amount);
 			token->setEnergy(token->getEnergy() + amount);
 		}
     }
     if( cmd == Enums::EnergyGuidanceIn::HARVEST_CELL ) {
-        if( cell->getEnergy() > (_parameters->CRIT_CELL_TRANSFORM_ENERGY+valueCell+amount) ) {
+        if( cell->getEnergy() > (_parameters->cellMinEnergy+valueCell+amount) ) {
             cell->setEnergy(cell->getEnergy()-amount);
 			token->setEnergy(token->getEnergy() + amount);
 		}
     }
     if( cmd == Enums::EnergyGuidanceIn::HARVEST_TOKEN ) {
-        if( token->getEnergy() > (_parameters->MIN_TOKEN_ENERGY+valueToken+amount) ) {
+        if( token->getEnergy() > (_parameters->tokenMinEnergy+valueToken+amount) ) {
             cell->setEnergy(cell->getEnergy()+amount);
 			token->setEnergy(token->getEnergy() - amount);
 		}

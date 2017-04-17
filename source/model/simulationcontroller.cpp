@@ -105,8 +105,8 @@ QMap< QString, qreal > SimulationController::getMonitorData ()
     data["energyParticles"] = particles;
     data["token"] = token;
     data["internalEnergy"] = internalEnergy;
-    data["transEnergy"] = _unit->calcTransEnergy() / _context->getSimulationParameters()->INTERNAL_TO_KINETIC_ENERGY;
-    data["rotEnergy"] = _unit->calcRotEnergy()/ _context->getSimulationParameters()->INTERNAL_TO_KINETIC_ENERGY;
+    data["transEnergy"] = _unit->calcTransEnergy() / _context->getSimulationParameters()->cellMass_Reciprocal;
+    data["rotEnergy"] = _unit->calcRotEnergy()/ _context->getSimulationParameters()->cellMass_Reciprocal;
     return data;
 }
 
@@ -598,7 +598,7 @@ void SimulationController::newCell (QVector3D pos)
     _context->lock();
     AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 	SimulationParameters* paramters = _context->getSimulationParameters();
-    Cell* cell = facade->buildFeaturedCell(paramters->NEW_CELL_ENERGY, Enums::CellFunction::COMPUTER
+    Cell* cell = facade->buildFeaturedCell(paramters->cellCreationEnergy, Enums::CellFunction::COMPUTER
         , _context, paramters->NEW_CELL_MAX_CONNECTION, paramters->NEW_CELL_TOKEN_ACCESS_NUMBER);
     cell->setBranchNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
@@ -616,7 +616,7 @@ void SimulationController::newEnergyParticle (QVector3D pos)
     //create energy particle
     _context->lock();
 	auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-    EnergyParticle* energy = factory->buildEnergyParticle(_context->getSimulationParameters()->CRIT_CELL_TRANSFORM_ENERGY/2, pos, QVector3D(), _context);
+    EnergyParticle* energy = factory->buildEnergyParticle(_context->getSimulationParameters()->cellMinEnergy/2, pos, QVector3D(), _context);
 	_context->getEnergyParticleMap()->setParticle(pos, energy);
     _context->getEnergyParticlesRef() << energy;
     _context->unlock();
@@ -647,8 +647,8 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             cell->setAbsPositionAndUpdateMap(newCellData.cellPos);
             cell->setEnergy(newCellData.cellEnergy);
             cell->delAllConnection();
-            if( newCellData.cellMaxCon > parameters->MAX_CELL_CONNECTIONS )
-                newCellData.cellMaxCon = parameters->MAX_CELL_CONNECTIONS;
+            if( newCellData.cellMaxCon > parameters->cellMaxBonds )
+                newCellData.cellMaxCon = parameters->cellMaxBonds;
             cell->setMaxConnections(newCellData.cellMaxCon);
             cell->setTokenBlocked(!newCellData.cellAllowToken);
             cell->setBranchNumber(newCellData.cellTokenAccessNum);
@@ -658,7 +658,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             //update cell computer
             CellFunctionComputer* computer = cell->getFeatures()->findObject<CellFunctionComputer>();
             if( computer ) {
-                for( int i = 0; i < parameters->CELL_MEMSIZE; ++i ) {
+                for( int i = 0; i < parameters->cellFunctionComputerCellMemorySize; ++i ) {
                     computer->getMemoryReference()[i] = newCellData.computerMemory[i];
                 }
                 CellFunctionComputer::CompilationState state
@@ -680,7 +680,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
 
             //searching for nearby clusters
             QVector3D pos = cell->calcPosition();
-            CellClusterSet clusters = _context->getCellMap()->getNearbyClusters(pos, qFloor(parameters->CRIT_CELL_DIST_MAX+1.0));
+            CellClusterSet clusters = _context->getCellMap()->getNearbyClusters(pos, qFloor(parameters->cellMaxDistance+1.0));
 //            if( !clusters.contains(cell->getCluster()) )
             clusters.insert(cell->getCluster());
 
@@ -697,7 +697,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
                     QVector3D displacement = otherCell->calcPosition()-pos;
                     _context->getTopology()->correctDisplacement(displacement);
                     qreal dist = displacement.length();
-                    if (cell != otherCell && dist < parameters->CRIT_CELL_DIST_MAX) {
+                    if (cell != otherCell && dist < parameters->cellMaxDistance) {
 
                         //cells connectable?
                         if( cell->connectable(otherCell)) {

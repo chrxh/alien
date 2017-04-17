@@ -73,8 +73,8 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Typ
 Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const
 {
 	SimulationParameters* parameters = context->getSimulationParameters();
-    int randomMaxConnections = qrand() % (parameters->MAX_CELL_CONNECTIONS+1);
-    int randomTokenAccessNumber = qrand() % parameters->MAX_TOKEN_ACCESS_NUMBERS;
+    int randomMaxConnections = qrand() % (parameters->cellMaxBonds+1);
+    int randomTokenAccessNumber = qrand() % parameters->cellMaxTokenBranchNumber;
     QByteArray randomData(256, 0);
 	for (int i = 0; i < 256; ++i)
 		randomData[i] = qrand() % 256;

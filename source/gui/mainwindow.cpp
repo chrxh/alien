@@ -201,7 +201,7 @@ void MainWindow::newSimulation ()
         //create new simulation
         _simController->newUniverse(d.getSize(), d.getNewSymbolTableRef());
 		SimulationParameters* parameters = _simController->getSimulationContext()->getSimulationParameters();
-        _simController->addRandomEnergy (d.getEnergy(), parameters->CRIT_CELL_TRANSFORM_ENERGY);
+        _simController->addRandomEnergy (d.getEnergy(), parameters->cellMinEnergy);
 
 		updateControllerAndEditors();
     }

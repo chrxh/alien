@@ -58,8 +58,8 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 	//enough energy for cell transformation?
 	qreal p((qreal)qrand() / RAND_MAX);
 	qreal eKin = Physics::kineticEnergy(1, _vel, 0, 0);
-	qreal eNew = _energy - (eKin / _parameters->INTERNAL_TO_KINETIC_ENERGY);
-	if ((eNew >= _parameters->CRIT_CELL_TRANSFORM_ENERGY) && (p < _parameters->CELL_TRANSFORM_PROB)) {
+	qreal eNew = _energy - (eKin / _parameters->cellMass_Reciprocal);
+	if ((eNew >= _parameters->cellMinEnergy) && (p < _parameters->cellTransformationProb)) {
 
 		//look for neighbor cell
 		for (int dx = -2; dx < 3; ++dx) {
