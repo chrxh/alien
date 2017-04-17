@@ -3,6 +3,7 @@
 
 void SimulationParameters::setParameters(SimulationParameters * other)
 {
+	MUTATION_PROB = other->MUTATION_PROB;
 	CRIT_CELL_DIST_MIN = other->CRIT_CELL_DIST_MIN;
 	CRIT_CELL_DIST_MAX = other->CRIT_CELL_DIST_MAX;
 	INTERNAL_TO_KINETIC_ENERGY = other->INTERNAL_TO_KINETIC_ENERGY;
