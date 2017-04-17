@@ -37,7 +37,7 @@ qreal SimulationUnit::calcTransEnergy ()
     qreal transEnergy(0.0);
     foreach(CellCluster* cluster, _context->getClustersRef()) {
 		if (!cluster->isEmpty()) {
-			transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVel(), 0.0, 0.0);
+			transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), 0.0, 0.0);
 		}
     }
     return transEnergy;
@@ -179,7 +179,7 @@ void SimulationUnit::debugCluster (CellCluster* c, int s)
 {
     /*foreach(Cell* cell, c->getCellsRef()) {
         for(int i = 0; i < cell->getNumConnections(); ++i) {
-            QVector3D d = cell->getRelPos()-cell->getConnection(i)->getRelPos();
+            QVector3D d = cell->getRelPosition()-cell->getConnection(i)->getRelPosition();
             if( d.length() > (CRIT_CELL_DIST_MAX+0.1) )
                 qDebug("%d: %f", s, d.length());
         }

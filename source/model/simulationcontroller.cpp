@@ -518,9 +518,9 @@ void SimulationController::setVelocityXExtendedSelection (qreal velX, const QLis
 {
     _context->lock();
     foreach(CellCluster* cluster, clusters) {
-        QVector3D vel = cluster->getVel();
+        QVector3D vel = cluster->getVelocity();
         vel.setX(velX);
-        cluster->setVel(vel);
+        cluster->setVelocity(vel);
     }
     foreach(EnergyParticle* e, es) {
 		auto vel = e->getVelocity();
@@ -534,9 +534,9 @@ void SimulationController::setVelocityYExtendedSelection (qreal velY, const QLis
 {
     _context->lock();
     foreach(CellCluster* cluster, clusters) {
-        QVector3D vel = cluster->getVel();
+        QVector3D vel = cluster->getVelocity();
         vel.setY(velY);
-        cluster->setVel(vel);
+        cluster->setVelocity(vel);
     }
     foreach(EnergyParticle* e, es) {
 		auto vel = e->getVelocity();
@@ -770,7 +770,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             cluster->clearCellsFromMap();
             cluster->setCenterPosition(newCellData.clusterPos);
             cluster->setAngle(newCellData.clusterAngle);
-            cluster->setVel(newCellData.clusterVel);
+            cluster->setVelocity(newCellData.clusterVel);
             cluster->setAngularVel(newCellData.clusterAngVel);
             cluster->updateTransformationMatrix();
             cluster->drawCellsToMap();

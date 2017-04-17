@@ -194,7 +194,7 @@ QVector3D CellImpl::calcNormal (QVector3D outerSpace) const
     for(int i = 0; i < _numConnections; ++i) {
 
         //calculate h (angular distance from outerSpace vector)
-        //QVector3D u = (transform.map(_connectingCells[i]->getRelPos())-transform.map(_relPos)).normalized(); OLD
+        //QVector3D u = (transform.map(_connectingCells[i]->getRelPosition())-transform.map(_relPos)).normalized(); OLD
         QVector3D u = (_connectingCells[i]->calcPosition()- calcPosition()).normalized();
         qreal h = QVector3D::dotProduct(outerSpace, u);
         if( (outerSpace.x()*u.y()-outerSpace.y()*u.x()) < 0.0 )
@@ -220,7 +220,7 @@ QVector3D CellImpl::calcNormal (QVector3D outerSpace) const
 
     //one adjacent cells?
     if( minCell == maxCell ) {
-        //return transform.map(_relPos)-transform.map(minCell->getRelPos()); OLD
+        //return transform.map(_relPos)-transform.map(minCell->getRelPosition()); OLD
         return calcPosition()-minCell->calcPosition();
     }
 

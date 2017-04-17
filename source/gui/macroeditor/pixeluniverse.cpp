@@ -268,7 +268,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
         //update position and velocity
         foreach(CellCluster* cluster, _selectedClusters) {
             cluster->setCenterPosition(cluster->getPosition()+mouseDiff);
-            cluster->setVel((cumMouseDiff)/5.0);
+            cluster->setVelocity((cumMouseDiff)/5.0);
         }
 
         //update selection
@@ -369,7 +369,7 @@ void PixelUniverse::timeout ()
     //set velocity of selected clusters to 0
     foreach(CellCluster* cluster, _selectedClusters) {
         if( _leftMouseButtonPressed )
-            cluster->setVel(QVector3D());
+            cluster->setVelocity(QVector3D());
         if( _rightMouseButtonPressed )
             cluster->setAngularVel(0.0);
     }

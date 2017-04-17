@@ -82,6 +82,12 @@ Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Simulation
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
+Token* AlienFacadeImpl::buildToken(SimulationContext* context, qreal energy) const
+{
+	EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+	return entityFactory->buildToken(context, energy);
+}
+
 CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
 {
     CellTO to;
@@ -90,7 +96,7 @@ CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     CellCluster* cluster = cell->getCluster();
     to.numCells = cluster->getMass();
     to.clusterPos = cluster->getPosition();
-    to.clusterVel = cluster->getVel();
+    to.clusterVel = cluster->getVelocity();
     to.clusterAngle = cluster->getAngle();
     to.clusterAngVel = cluster->getAngularVel();
     to.cellPos = cell->calcPosition();

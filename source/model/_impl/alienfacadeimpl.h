@@ -21,6 +21,8 @@ public:
         , int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const override;
     Cell* buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const override;
 
+	Token* buildToken(SimulationContext* context, qreal energy) const override;
+
     CellTO buildFeaturedCellTO (Cell* cell) const override;
     void changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, SimulationContext* context) const override;
 };

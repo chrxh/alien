@@ -42,11 +42,11 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     }
 
     //calc old kinetic energy
-    qreal eKinOld(Physics::kineticEnergy(cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel()));
+    qreal eKinOld(Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel()));
 
     //calc old tangential velocity
     QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector3D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVel(), cluster->getAngularVel()));
+    QVector3D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVelocity(), cluster->getAngularVel()));
 
     //calc impulse angle
     QVector3D impulse(0.0, 0.0, 0.0);
@@ -79,13 +79,13 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     //calc impact of impulse to cell structure
     QVector3D newVel;
     qreal newAngularVel;
-    Physics::applyImpulse(impulse, rAPp, cluster->getMass(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
+    Physics::applyImpulse(impulse, rAPp, cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
 
     //only for damping: prove if its too much
     if( cmd == Enums::PropIn::DAMP_ROTATION ) {
         if( (cluster->getAngularVel() > 0.0 && newAngularVel < 0.0)
                 || (cluster->getAngularVel() < 0.0 && newAngularVel > 0.0) ) {
-            newVel = cluster->getVel();
+            newVel = cluster->getVelocity();
             newAngularVel = cluster->getAngularVel();
 
             //update return value
@@ -108,7 +108,7 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
 			, tangVel - impulse.normalized() / 4.0, _context);
 
         //update velocities
-        cluster->setVel(newVel);
+        cluster->setVelocity(newVel);
         cluster->setAngularVel(newAngularVel);
         token->setEnergy(token->getEnergy() - (energyDiff+qAbs(energyDiff)));
 

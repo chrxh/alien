@@ -46,8 +46,8 @@ public:
     void setCenterPosition (QVector3D pos, bool updateTransform = true) override;
     qreal getAngle () const override;
     void setAngle (qreal angle, bool updateTransform = true) override;
-    QVector3D getVel () const override;
-    void setVel (QVector3D vel) override;
+    QVector3D getVelocity () const override;
+    void setVelocity (QVector3D vel) override;
     qreal getMass () const override;
     qreal getAngularVel () const override;
     void setAngularVel (qreal vel) override;

@@ -242,7 +242,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
 
         //calc energy difference
         foreach(CellCluster* cluster, fragments) {
-            newEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVel(), cluster->getAngularMass(), cluster->getAngularVel());
+            newEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
         }
         qreal diffEnergy = oldEnergy-newEnergy;
 
@@ -376,7 +376,7 @@ void CellClusterImpl::processingMovement ()
             QVector3D rBPp = centerPos-otherCluster->getPosition();
             _topology->correctDisplacement(rBPp);
             rBPp = Physics::rotateQuarterCounterClockwise(rBPp);
-            QVector3D outerSpace = (otherCluster->getVel()-rBPp*otherCluster->getAngularVel()*degToRad)-(_vel-rAPp*_angularVel*degToRad);
+            QVector3D outerSpace = (otherCluster->getVelocity()-rBPp*otherCluster->getAngularVel()*degToRad)-(_vel-rAPp*_angularVel*degToRad);
 
             //calc center normal vector of the overlapping cells from the other cluster
             QVector3D n;
@@ -394,7 +394,7 @@ void CellClusterImpl::processingMovement ()
             if( n.length() < ALIEN_PRECISION )
                 n.setX(1.0);
 
-            Physics::collision(_vel, otherCluster->getVel(),//, clusterPos, otherClusterPos, centerPos,
+            Physics::collision(_vel, otherCluster->getVelocity(),//, clusterPos, otherClusterPos, centerPos,
                                rAPp, rBPp,
                                _angularVel, otherCluster->getAngularVel(), n,
                                _angularMass, otherCluster->getAngularMass(), mA, mB, vA2, vB2, angularVelA2,
@@ -402,7 +402,7 @@ void CellClusterImpl::processingMovement ()
 
             //set new vectors
             _vel = vA2;
-            otherCluster->setVel(vB2);
+            otherCluster->setVelocity(vB2);
             _angularVel = angularVelA2;
             otherCluster->setAngularVel(angularVelB2);
 
@@ -454,7 +454,7 @@ void CellClusterImpl::processingMovement ()
                 qreal mA = _cells.size();
                 qreal mB = otherCluster->getCellsRef().size();
                 qreal eKinOld1 = Physics::kineticEnergy(mA, _vel, _angularMass, _angularVel);
-                qreal eKinOld2 = Physics::kineticEnergy(mB, otherCluster->getVel(), otherCluster->getAngularMass(), otherCluster->getAngularVel());
+                qreal eKinOld2 = Physics::kineticEnergy(mB, otherCluster->getVelocity(), otherCluster->getAngularMass(), otherCluster->getAngularVel());
 
                 //calculate new center
                 QVector3D center;
@@ -889,7 +889,7 @@ QList< Cell* >& CellClusterImpl::getCellsRef ()
 
 /*QVector3D CellClusterImpl::getCoordinate (Cell* cell)
 {
-    return _transform.map(cell->getRelPos());
+    return _transform.map(cell->getRelPosition());
 }
 */
 
@@ -958,12 +958,12 @@ void CellClusterImpl::setAngle (qreal angle, bool updateTransform)
         updateTransformationMatrix();
 }
 
-QVector3D CellClusterImpl::getVel () const
+QVector3D CellClusterImpl::getVelocity () const
 {
     return _vel;
 }
 
-void CellClusterImpl::setVel (QVector3D vel)
+void CellClusterImpl::setVelocity (QVector3D vel)
 {
     _vel = vel;
 }
