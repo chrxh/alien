@@ -43,8 +43,8 @@ public:
     virtual void setCenterPosition (QVector3D pos, bool updateTransform = true) = 0;
     virtual qreal getAngle () const = 0;  //in degrees
     virtual void setAngle (qreal angle, bool updateTransform = true) = 0;
-    virtual QVector3D getVel () const = 0;
-    virtual void setVel (QVector3D vel) = 0;
+    virtual QVector3D getVelocity () const = 0;
+    virtual void setVelocity (QVector3D vel) = 0;
     virtual qreal getMass () const = 0;
     virtual qreal getAngularVel () const = 0;
     virtual void setAngularVel (qreal vel) = 0;
