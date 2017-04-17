@@ -102,13 +102,13 @@ namespace {
                 quint32 numCells = cluster->getCellsRef().size();
                 out << cluster->getPosition();
                 out << cluster->getAngle();
-                out << cluster->getVel();
+                out << cluster->getVelocity();
                 out << cluster->getAngularVel();
                 out << cluster->getAngularMass();
                 out << numCells;
                 foreach (Cell* cell, cluster->getCellsRef()) {
-                    out << cell->getRelPos();
-                    out << cell->getVel();
+                    out << cell->getRelPosition();
+                    out << cell->getVelocity();
                 }
             }
             file.close();
@@ -168,8 +168,8 @@ namespace {
             CellCluster* cluster = context->getClustersRef().at(i);
 			ASSERT_EQ(ref.clusterPosList.at(i), cluster->getPosition()) 
 				<< createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in pos", ref.clusterPosList.at(i), cluster->getPosition());
-			ASSERT_EQ(ref.clusterVelList.at(i), cluster->getVel()) 
-				<< createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in vel", ref.clusterVelList.at(i), cluster->getVel());
+			ASSERT_EQ(ref.clusterVelList.at(i), cluster->getVelocity()) 
+				<< createVectorDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in vel", ref.clusterVelList.at(i), cluster->getVelocity());
 			ASSERT_EQ(ref.clusterAngleList.at(i), cluster->getAngle()) 
 				<< createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angle", ref.clusterAngleList.at(i), cluster->getAngle());
 			ASSERT_EQ(ref.clusterAnglularVelList.at(i), cluster->getAngularVel()) 
@@ -180,12 +180,12 @@ namespace {
             QList<QVector3D> cellVelList = ref.clusterCellVelList.at(i);
             int minNumCell = qMin(cluster->getCellsRef().size(), cellPosList.size());
             for(int j = 0; j < minNumCell; ++j) {
-				ASSERT_EQ(cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPos())
+				ASSERT_EQ(cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPosition())
 					<< createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
-						, cluster->getCellsRef().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPos());
-				ASSERT_EQ(cellVelList.at(j), cluster->getCellsRef().at(j)->getVel())
+						, cluster->getCellsRef().at(j)->getId(), "in rel pos", cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPosition());
+				ASSERT_EQ(cellVelList.at(j), cluster->getCellsRef().at(j)->getVelocity())
 					<< createVectorDeviationMessageForCell(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId()
-						, cluster->getCellsRef().at(j)->getId(), "in vel", cellVelList.at(j), cluster->getCellsRef().at(j)->getVel());
+						, cluster->getCellsRef().at(j)->getId(), "in vel", cellVelList.at(j), cluster->getCellsRef().at(j)->getVelocity());
             }
         }
     }

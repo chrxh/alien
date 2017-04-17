@@ -2,11 +2,13 @@
 #include "tests/predicates.h"
 
 #include "model/simulationcontext.h"
+#include "model/simulationparameters.h"
 #include "model/config.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
 #include "model/alienfacade.h"
 #include "model/entities/cellcluster.h"
+#include "model/entities/entityfactory.h"
 #include "global/servicelocator.h"
 
 class UnitTestCellCluster : public ::testing::Test
@@ -27,15 +29,15 @@ protected:
 
 UnitTestCellCluster::UnitTestCellCluster()
 {
-	FactoryFacade* facade = ServiceLocator::getInstance().getService<FactoryFacade>();
+	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 
 	_context = facade->buildSimulationContext();
 	_context->init({ 1000, 1000 });
 
 	QList< Cell* > cells;
 	for (int i = 0; i <= 100; ++i) {
-		Cell* cell = facade->buildFeaturedCell(100.0, CellFunctionType::COMPUTER, _context);
-		cell->setRelPos(QVector3D(i, 0.0, 0.0));
+		Cell* cell = facade->buildFeaturedCell(100.0, Enums::CellFunction::COMPUTER, _context);
+		cell->setRelPosition(QVector3D(i, 0.0, 0.0));
 		cells << cell;
 	}
 	QVector3D pos(200.0, 100.0, 0.0);
@@ -56,12 +58,12 @@ UnitTestCellCluster::~UnitTestCellCluster()
 TEST_F (UnitTestCellCluster, testCellVelocityDecomposition)
 {
 	_cluster->setAngularVel(2.0);
-	_cluster->setVel(QVector3D(1.0, -0.5, 0.0));
+	_cluster->setVelocity(QVector3D(1.0, -0.5, 0.0));
 	_cluster->updateCellVel(false);
 	_cluster->updateVel_angularVel_via_cellVelocities();
 	ASSERT_PRED2(predEqualMediumPrecision, _cluster->getAngularVel(), 2.0);
-	ASSERT_PRED2(predEqualMediumPrecision, _cluster->getVel().x(), 1.0);
-	ASSERT_PRED2(predEqualMediumPrecision, _cluster->getVel().y(), -0.5);
+	ASSERT_PRED2(predEqualMediumPrecision, _cluster->getVelocity().x(), 1.0);
+	ASSERT_PRED2(predEqualMediumPrecision, _cluster->getVelocity().y(), -0.5);
 }
 
 TEST_F (UnitTestCellCluster, testNewConnections)
@@ -92,12 +94,13 @@ TEST_F (UnitTestCellCluster, testTokenSpreading)
 	_cell1->newConnection(_cell2);
 	_cell1->newConnection(_cell3);
 	_cell1->newConnection(_cell4);
-	_cell1->setTokenAccessNumber(0);
-	_cell2->setTokenAccessNumber(1);
-	_cell3->setTokenAccessNumber(1);
-	_cell4->setTokenAccessNumber(0);
-	Token* token = new Token(simulationParameters.MIN_TOKEN_ENERGY * 3);
-	_cell1->addToken(token, Cell::ACTIVATE_TOKEN::NOW, Cell::UPDATE_TOKEN_ACCESS_NUMBER::YES);
+	_cell1->setBranchNumber(0);
+	_cell2->setBranchNumber(1);
+	_cell3->setBranchNumber(1);
+	_cell4->setBranchNumber(0);
+	EntityFactory* factory= ServiceLocator::getInstance().getService<EntityFactory>();
+	Token* token = factory->buildToken(_context, _context->getSimulationParameters()->MIN_TOKEN_ENERGY * 3);
+	_cell1->addToken(token, Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::YES);
 	QList< EnergyParticle* > tempEP;
 	bool tempDecomp = false;
 	_cluster->processingToken(tempEP, tempDecomp);
