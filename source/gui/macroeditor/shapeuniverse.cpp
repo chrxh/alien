@@ -8,7 +8,7 @@
 #include "model/entities/energyparticle.h"
 #include "model/features/cellfunction.h"
 #include "model/simulationparameters.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/alienfacade.h"
 #include "model/simulationcontext.h"
 #include "model/topology.h"

@@ -10,7 +10,7 @@
 #include "model/features/energyguidance.h"
 #include "model/features/cellfeaturefactory.h"
 #include "model/metadata/symboltable.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
 #include "model/topology.h"

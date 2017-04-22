@@ -7,7 +7,7 @@
 #include "model/metadata/symboltable.h"
 #include "model/entities/cellto.h"
 #include "model/simulationcontext.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 
 
 //QT += webkitwidgets
