@@ -20,16 +20,24 @@ public:
     qreal calcRotEnergy ();
     qreal calcInternalEnergy ();
 
-public slots:
-    void calcNextTimestep ();
-
 signals:
     void nextTimestepCalculated ();
 
-protected:
-    void debugCluster (CellCluster* c, int s);
+public slots:
+	void calcNextTimestep();
 
-    SimulationContext* _context = nullptr;
+private:
+	void processingEnergyParticles();
+	void processingClusterCompletion();
+	void processingClusterToken();
+	void processingClusterMovement();
+	void processingClusterMutationByChance();
+	void processingClusterDissipation();
+	void processingClusterInit();
+	
+	void debugCluster(CellCluster* c, int s);
+    
+	SimulationContext* _context = nullptr;
 };
 
 #endif // SIMULATIONUNIT_H

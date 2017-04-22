@@ -17,9 +17,10 @@ public:
 
     virtual void processingInit () = 0;
     virtual void processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles) = 0;
-    virtual void processingMovement () = 0;
+	virtual void processingMutationByChance() = 0;
+	virtual void processingMovement() = 0;
     virtual void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose) = 0;
-    virtual void processingFinish () = 0;
+    virtual void processingCompletion () = 0;
 
     virtual void addCell (Cell* cell, QVector3D absPos) = 0;
     virtual void removeCell (Cell* cell, bool maintainCenter = true) = 0;

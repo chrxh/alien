@@ -118,7 +118,6 @@ void CellClusterImpl::drawCellsToMap ()
     }
 }
 
-//step 1:
 //initiate movement of particles
 void CellClusterImpl::processingInit ()
 {
@@ -133,7 +132,7 @@ void CellClusterImpl::processingInit ()
     }
 }
 
-//step 2: dissipation, returns lost energy
+//dissipation, returns lost energy
 void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles)
 {
     updateCellVel();
@@ -256,9 +255,13 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
     }
 }
 
-//step 3:
-//actual movement, fusion and collision
-//set cells to cellMap map
+void CellClusterImpl::processingMutationByChance()
+{
+	foreach(Cell* cell, _cells) {
+		cell->mutationByChance();
+	}
+}
+
 void CellClusterImpl::processingMovement ()
 {
     struct CollisionData {
@@ -267,13 +270,6 @@ void CellClusterImpl::processingMovement ()
         QList< QPair< Cell*, Cell* > > overlappingCellPairs;
     };
 
-    //(gravitational force)
-//    QVector3D f = QVector3D(300.0, 300.0, 0.0)-_pos;
-//    _vel += f/(1.0+f.lengthSquared())*0.05;
-
-    //add velocity
-//    qreal oldAngle = _angle;
-//    QVector3D oldPos = _pos;
     _angle += _angularVel;
     if( _angle > 360.0 )
         _angle -= 360.0;
@@ -288,7 +284,7 @@ void CellClusterImpl::processingMovement ()
     QMap< quint64, CollisionData > clusterCollisionDataMap;
     QMap< quint64, Cell* > idCellMap;
     QMap< quint64, CellCluster* > idClusterMap;
-    foreach( Cell* cell, _cells) {
+    foreach(Cell* cell, _cells) {
         pos = calcPosition(cell, true);
         for(int x = -1; x < 2; ++x)
             for(int y = -1; y < 2; ++y) {
@@ -521,7 +517,6 @@ void CellClusterImpl::processingMovement ()
 
 }
 
-//step 4:
 //token processing
 void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose)
 {
@@ -626,9 +621,8 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
     }
 }
 
-//step 5:
 //activate new token and kill cells which are too close or where too much forces are applied
-void CellClusterImpl::processingFinish ()
+void CellClusterImpl::processingCompletion ()
 {
     qreal maxClusterRadius = qMin(_topology->getSize().x/2.0, _topology->getSize().y/2.0);
     foreach( Cell* cell, _cells) {
@@ -1147,5 +1141,4 @@ void CellClusterImpl::deserializePrimitives(QDataStream& stream)
     //update velocity and angular velocity
     updateVel_angularVel_via_cellVelocities();
 */
-
 
