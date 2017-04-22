@@ -1,6 +1,6 @@
 #include <QFile>
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 #include "physics/physics.h"
 #include "entities/cell.h"
@@ -28,8 +28,7 @@ void SimulationUnit::setContext(SimulationContext* context)
 
 void SimulationUnit::init(uint seed)
 {
-	qsrand(seed);
-	qrand();
+	NumberGenerator::getInstance().setRandomSeed(seed);
 }
 
 qreal SimulationUnit::calcTransEnergy ()

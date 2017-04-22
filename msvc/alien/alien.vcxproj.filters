@@ -100,9 +100,6 @@
     <ClCompile Include="..\..\source\model\entities\_impl\entityfactoryimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\global\global.cpp">
-      <Filter>Global</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\guisettings.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
@@ -460,6 +457,9 @@
     <ClCompile Include="..\..\source\gui\assistance\tutorialwindow.cpp">
       <Filter>Gui\Assistance</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\global\numbergenerator.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\model\alienfacade.h">
@@ -579,9 +579,6 @@
     <ClInclude Include="..\..\source\model\entities\_impl\entityfactoryimpl.h">
       <Filter>Model\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\global\global.h">
-      <Filter>Global</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\gui\guisettings.h">
       <Filter>Gui</Filter>
     </ClInclude>
@@ -668,6 +665,9 @@
     </ClInclude>
     <ClInclude Include="ui_tutorialwindow.h">
       <Filter>_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\numbergenerator.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

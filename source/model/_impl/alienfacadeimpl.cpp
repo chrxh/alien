@@ -1,3 +1,4 @@
+#include "global/numbergenerator.h"
 #include "global/servicelocator.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -73,12 +74,12 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Typ
 Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const
 {
 	SimulationParameters* parameters = context->getSimulationParameters();
-    int randomMaxConnections = qrand() % (parameters->cellMaxBonds+1);
-    int randomTokenAccessNumber = qrand() % parameters->cellMaxTokenBranchNumber;
+    int randomMaxConnections = NumberGenerator::getInstance().random(parameters->cellMaxBonds+1);
+    int randomTokenAccessNumber = NumberGenerator::getInstance().random(parameters->cellMaxTokenBranchNumber);
     QByteArray randomData(256, 0);
 	for (int i = 0; i < 256; ++i)
-		randomData[i] = qrand() % 256;
-    Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(qrand() % Enums::CellFunction::_COUNTER);
+		randomData[i] = NumberGenerator::getInstance().random(256);
+    Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(NumberGenerator::getInstance().random(Enums::CellFunction::_COUNTER));
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 

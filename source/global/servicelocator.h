@@ -18,6 +18,7 @@ public:
 
 private:
     ServiceLocator () {}
+	~ServiceLocator() {}
 
 public:
     ServiceLocator (ServiceLocator const&) = delete;

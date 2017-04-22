@@ -1,7 +1,7 @@
 #include <QScrollBar>
 #include <QSignalMapper>
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 #include "model/metadata/symboltable.h"
 #include "gui/guisettings.h"
