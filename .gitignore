@@ -581,3 +581,4 @@ misc/
 temp/
 *qrc_ressources*
 stable/
+*computation.dat
