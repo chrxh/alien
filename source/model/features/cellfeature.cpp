@@ -25,6 +25,14 @@ CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Ce
     return mergedResult;
 }
 
+void CellFeature::mutate()
+{
+	mutateImpl();
+	if (_nextFeature) {
+		_nextFeature->mutate();
+	}
+}
+
 void CellFeature::serializePrimitives (QDataStream& stream) const
 {
 }

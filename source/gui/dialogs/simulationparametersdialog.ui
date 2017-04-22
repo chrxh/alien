@@ -50,6 +50,12 @@
      <attribute name="headerDefaultSectionSize">
       <number>270</number>
      </attribute>
+     <attribute name="headerHighlightSections">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="headerStretchLastSection">
+      <bool>true</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>key</string>
@@ -67,6 +73,9 @@
       <item>
        <property name="text">
         <string>mutation probability</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
        </property>
       </item>
       <item>
@@ -184,15 +193,7 @@
        </item>
        <item>
         <property name="text">
-         <string>cell memory size</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>token memory size</string>
+         <string>memory size</string>
         </property>
         <property name="flags">
          <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
@@ -256,6 +257,14 @@
       <property name="text">
        <string>token properties</string>
       </property>
+      <item>
+       <property name="text">
+        <string>memory size</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
       <item>
        <property name="text">
         <string>creation energy</string>
