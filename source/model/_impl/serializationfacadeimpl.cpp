@@ -17,7 +17,7 @@
 #include "model/_impl/simulationcontextimpl.h"
 #include "model/simulationparameters.h"
 #include "global/servicelocator.h"
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 namespace
 {
@@ -149,7 +149,7 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
         cells << cell;
         idCellMap[cell->getId()] = cell;
 
-        quint64 newId = GlobalFunctions::createNewTag();
+        quint64 newId = NumberGenerator::getInstance().createNewTag();
         oldNewCellIdMap[cell->getId()] = newId;
         oldIdCellMap[cell->getId()] = cell;
         cell->setId(newId);
@@ -157,7 +157,7 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     quint64 oldClusterId = cluster->getId();
 
     //assigning new cluster id
-    quint64 id = GlobalFunctions::createNewTag();
+    quint64 id = NumberGenerator::getInstance().createNewTag();
     cluster->setId(id);
     oldNewClusterIdMap[oldClusterId] = id;
 
@@ -260,7 +260,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, Simu
 {
 	QMap< quint64, QList< quint64 > > temp;
 	Cell* cell = deserializeFeaturedCell(stream, temp, context);
-	cell->setId(GlobalFunctions::createNewTag());
+	cell->setId(NumberGenerator::getInstance().createNewTag());
 	return cell;
 }
 
@@ -294,7 +294,7 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
 	oldIdEnergyMap[particle->getId()] = particle;
-	particle->setId(GlobalFunctions::createNewTag());
+	particle->setId(NumberGenerator::getInstance().createNewTag());
 	return particle;
 }
 
@@ -306,6 +306,6 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
 	EnergyParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
-	particle->setId(GlobalFunctions::createNewTag());
+	particle->setId(NumberGenerator::getInstance().createNewTag());
 	return particle;
 }

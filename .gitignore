@@ -576,3 +576,8 @@ __pycache__/
 
 *ui_*
 *moc_*
+.ssh/
+misc/
+temp/
+*qrc_ressources*
+stable/

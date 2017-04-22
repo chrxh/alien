@@ -213,7 +213,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\global\global.h" />
+    <ClInclude Include="..\..\source\global\numbergenerator.h" />
     <ClInclude Include="..\..\source\global\servicelocator.h" />
     <CustomBuild Include="..\..\source\gui\assistance\tutorialwindow.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -690,7 +690,7 @@
     <ClInclude Include="ui_tutorialwindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\global\global.cpp" />
+    <ClCompile Include="..\..\source\global\numbergenerator.cpp" />
     <ClCompile Include="..\..\source\global\servicelocator.cpp" />
     <ClCompile Include="..\..\source\gui\assistance\tutorialwindow.cpp" />
     <ClCompile Include="..\..\source\gui\dialogs\addenergydialog.cpp" />
@@ -1510,7 +1510,7 @@
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir="." RccDir="." Qt5Version_x0020_x64="msvc2015_64" />
+      <UserProperties UicDir="." RccDir="." Qt5Version_x0020_x64="$(DefaultQtVersion)" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

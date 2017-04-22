@@ -1,7 +1,7 @@
 #include <QMatrix4x4>
 #include <qmath.h>
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 #include "global/servicelocator.h"
 #include "model/entities/cell.h"
 #include "model/alienfacade.h"
@@ -25,7 +25,7 @@ CellClusterImpl::CellClusterImpl (SimulationContext* context)
     , _topology(context->getTopology())
     , _cellMap(context->getCellMap())
 	, _parameters(context->getSimulationParameters())
-    , _id(GlobalFunctions::createNewTag())
+    , _id(NumberGenerator::getInstance().createNewTag())
 {
     updateTransformationMatrix();
 }
@@ -41,7 +41,7 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D po
     , _angularVel(angularVel)
     , _vel(vel)
     , _cells(cells)
-    , _id(GlobalFunctions::createNewTag())
+    , _id(NumberGenerator::getInstance().createNewTag())
 {
     _topology->correctPosition(_pos);
     foreach(Cell* cell, _cells) {
@@ -83,7 +83,7 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationCo
 	, _parameters(context->getSimulationParameters())
 	, _angle(angle)
     , _cells(cells)
-    , _id(GlobalFunctions::createNewTag())
+    , _id(NumberGenerator::getInstance().createNewTag())
 {
     setCenterPosition(calcCenterPosition(_cells));
 	setRelPositionInCluster(_cells, this);
@@ -205,7 +205,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
 
             //find fragment
             QList< Cell* > component;
-            quint64 tag(GlobalFunctions::createNewTag());
+            quint64 tag(NumberGenerator::getInstance().createNewTag());
             getConnectedComponent(_cells[0], tag, component);
             if( component.size() < size ) {
                 EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -711,7 +711,7 @@ void CellClusterImpl::updateCellVel (bool forceCheck)
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
                     if (a.length() > _parameters->callMaxForce) {
-                        if (GlobalFunctions::random() < _parameters->cellMaxForceDecayProb)
+                        if (NumberGenerator::getInstance().random() < _parameters->cellMaxForceDecayProb)
                             cell->setToBeKilled(true);
                     }
                 }
@@ -813,7 +813,7 @@ QList< CellCluster* > CellClusterImpl::decompose () const
 
         //find fragment
         QList< Cell* > component;
-        quint64 tag(GlobalFunctions::createNewTag());
+        quint64 tag(NumberGenerator::getInstance().createNewTag());
         getConnectedComponent(_cells[0], tag, component);
 
         //remove fragment from clusters
@@ -1018,7 +1018,7 @@ Cell* CellClusterImpl::findNearestCell (QVector3D pos) const
 void CellClusterImpl::getConnectedComponent(Cell* cell, QList< Cell* >& component) const
 {
     component.clear();
-    quint64 tag(GlobalFunctions::createNewTag());
+    quint64 tag(NumberGenerator::getInstance().createNewTag());
     getConnectedComponent(cell, tag, component);
 }
 
@@ -1047,16 +1047,16 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     }*/
 
     //2. step: distribute the radiated energy to energy particles
-    if(GlobalFunctions::random() < radFrequency) {
+    if(NumberGenerator::getInstance().random() < radFrequency) {
         radEnergy = radEnergy / radFrequency;
-        radEnergy = radEnergy *2.0 * (static_cast<qreal>(qrand()) /RAND_MAX);
+        radEnergy = radEnergy *2.0 * NumberGenerator::getInstance().random();
         if( radEnergy > (energy-1.0) )
             radEnergy = energy-1.0;
         energy = energy - radEnergy;
 
         //create energy particle with radEnergy
-        QVector3D velPerturbation((GlobalFunctions::random() - 0.5) * _parameters->radiationVelocityPerturbation,
-                                  (GlobalFunctions::random() - 0.5) * _parameters->radiationVelocityPerturbation, 0.0);
+        QVector3D velPerturbation((NumberGenerator::getInstance().random() - 0.5) * _parameters->radiationVelocityPerturbation,
+                                  (NumberGenerator::getInstance().random() - 0.5) * _parameters->radiationVelocityPerturbation, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
         EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
         energyParticle = factory->buildEnergyParticle(radEnergy

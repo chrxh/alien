@@ -4,7 +4,7 @@
 #include "model/entities/token.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 #include <QString>
 #include <QtCore/qmath.h>
@@ -87,7 +87,7 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
     ProcessingResult processingResult {false, 0};
 	auto& tokenMem = token->getMemoryRef();
 	int n = tokenMem[Enums::Scanner::INOUT_CELL_NUMBER];
-    quint64 tag(GlobalFunctions::createNewTag());
+    quint64 tag(NumberGenerator::getInstance().createNewTag());
     Cell* scanCellPre1 = previousCell;
     Cell* scanCellPre2 = previousCell;
     Cell* scanCell = cell;
@@ -107,7 +107,7 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
         tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::SUCCESS;
 
         //prove whether finished or not
-        tag = GlobalFunctions::createNewTag();
+        tag = NumberGenerator::getInstance().createNewTag();
         Cell* scanCellPreTemp1 = previousCell;
         Cell* scanCellPreTemp2 = previousCell;
         Cell* scanCellTemp = cell;

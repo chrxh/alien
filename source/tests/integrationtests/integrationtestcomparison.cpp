@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <QFile>
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 #include "model/simulationcontroller.h"
 #include "model/simulationcontext.h"
 #include "model/config.h"

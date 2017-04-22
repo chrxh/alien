@@ -1,7 +1,7 @@
 #include <qmath.h>
 
 #include "global/servicelocator.h"
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 #include "model/alienfacade.h"
 #include "model/physics/physics.h"
@@ -23,7 +23,7 @@ EnergyParticleImpl::EnergyParticleImpl(SimulationContext* context)
 	, _cellMap(context->getCellMap())
 	, _energyMap(context->getEnergyParticleMap())
 	, _parameters(context->getSimulationParameters())
-	, _id(GlobalFunctions::createNewTag())
+	, _id(NumberGenerator::getInstance().getInstance().createNewTag())
 {
 
 }
@@ -56,7 +56,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 	}
 
 	//enough energy for cell transformation?
-	qreal p((qreal)qrand() / RAND_MAX);
+	qreal p(NumberGenerator::getInstance().random());
 	qreal eKin = Physics::kineticEnergy(1, _vel, 0, 0);
 	qreal eNew = _energy - (eKin / _parameters->cellMass_Reciprocal);
 	if ((eNew >= _parameters->cellMinEnergy) && (p < _parameters->cellTransformationProb)) {

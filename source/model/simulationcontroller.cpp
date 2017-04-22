@@ -5,7 +5,7 @@
 #include <set>
 #include <vector>
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 #include "global/servicelocator.h"
 #include "model/features/cellfunctioncomputer.h"
 #include "model/entities/entityfactory.h"
@@ -272,13 +272,13 @@ void SimulationController::addRandomEnergy (qreal energy, qreal maxEnergyPerPart
     _context->lock();
 
     while( energy > 0.0 ) {
-        qreal rEnergy = GlobalFunctions::random(0.01, maxEnergyPerParticle);
+        qreal rEnergy = NumberGenerator::getInstance().random(0.01, maxEnergyPerParticle);
         if( rEnergy > energy )
             rEnergy = energy;
-        qreal posX = GlobalFunctions::random(0.0, _context->getTopology()->getSize().x);
-        qreal posY = GlobalFunctions::random(0.0, _context->getTopology()->getSize().x);
-        qreal velX = GlobalFunctions::random(-1.0, 1.0);
-        qreal velY = GlobalFunctions::random(-1.0, 1.0);
+        qreal posX = NumberGenerator::getInstance().random(0.0, _context->getTopology()->getSize().x);
+        qreal posY = NumberGenerator::getInstance().random(0.0, _context->getTopology()->getSize().x);
+        qreal velX = NumberGenerator::getInstance().random(-1.0, 1.0);
+        qreal velY = NumberGenerator::getInstance().random(-1.0, 1.0);
 		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
         EnergyParticle* e = factory->buildEnergyParticle(rEnergy, QVector3D(posX, posY, 0.0), QVector3D(velX, velY, 0.0), _context);
         _context->getEnergyParticlesRef() << e;
