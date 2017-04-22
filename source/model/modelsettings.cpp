@@ -147,7 +147,7 @@ void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
 
 void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 {
-	parameters->cellMutationProb = 0.00001;
+	parameters->cellMutationProb = 0.000002;
 	parameters->cellMinDistance = 0.3;
 	parameters->cellMaxDistance = 1.3;
 	parameters->cellMass_Reciprocal = 1;
