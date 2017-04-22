@@ -33,6 +33,7 @@ private:
 
 	Topology* _topo = nullptr;
 	Cell*** _cellGrid = nullptr;
+	int _gridSize = 0;
 };
 
 Cell * CellMap::getCellFast(IntVector2D const& intPos) const
