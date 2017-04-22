@@ -1,3 +1,4 @@
+#include "global/numbergenerator.h"
 #include "model/config.h"
 #include "model/simulationparameters.h"
 #include "model/simulationcontext.h"
@@ -16,7 +17,7 @@ TokenImpl::TokenImpl(SimulationContext* context, qreal energy, bool randomData)
 	_energy = energy;
 	if (randomData) {
 		for (int i = 0; i < context->getSimulationParameters()->cellFunctionComputerTokenMemorySize; ++i)
-			_memory[i] = qrand() % 256;
+			_memory[i] = NumberGenerator::getInstance().random(256);
 	}
 }
 

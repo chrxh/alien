@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QFont>
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 #include "global/servicelocator.h"
 #include "dialogs/addenergydialog.h"
 #include "dialogs/addrectstructuredialog.h"
@@ -704,18 +704,18 @@ void MainWindow::multiplyRandomExtendedSelection ()
             QList< CellCluster* > newClusters;
             QList< EnergyParticle* > newEnergyParticles;
 			IntVector2D universeSize = _simController->getUniverseSize();
-            QVector3D pos(GlobalFunctions::random(0.0, universeSize.x), GlobalFunctions::random(0.0, universeSize.y), 0.0);
+            QVector3D pos(NumberGenerator::getInstance().getInstance().random(0.0, universeSize.x), NumberGenerator::getInstance().getInstance().random(0.0, universeSize.y), 0.0);
             _simController->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
 
             //randomize angles and velocities if desired
             if( d.randomizeAngle() )
-                _simController->rotateExtendedSelection(GlobalFunctions::random(d.randomizeAngleMin(), d.randomizeAngleMax()), newClusters, newEnergyParticles);
+                _simController->rotateExtendedSelection(NumberGenerator::getInstance().getInstance().random(d.randomizeAngleMin(), d.randomizeAngleMax()), newClusters, newEnergyParticles);
             if( d.randomizeVelX() )
-                _simController->setVelocityXExtendedSelection(GlobalFunctions::random(d.randomizeVelXMin(), d.randomizeVelXMax()), newClusters, newEnergyParticles);
+                _simController->setVelocityXExtendedSelection(NumberGenerator::getInstance().getInstance().random(d.randomizeVelXMin(), d.randomizeVelXMax()), newClusters, newEnergyParticles);
             if( d.randomizeVelY() )
-                _simController->setVelocityYExtendedSelection(GlobalFunctions::random(d.randomizeVelYMin(), d.randomizeVelYMax()), newClusters, newEnergyParticles);
+                _simController->setVelocityYExtendedSelection(NumberGenerator::getInstance().getInstance().random(d.randomizeVelYMin(), d.randomizeVelYMax()), newClusters, newEnergyParticles);
             if( d.randomizeAngVel() )
-                _simController->setAngularVelocityExtendedSelection(GlobalFunctions::random(d.randomizeAngVelMin(), d.randomizeAngVelMax()), newClusters);
+                _simController->setAngularVelocityExtendedSelection(NumberGenerator::getInstance().getInstance().random(d.randomizeAngVelMin(), d.randomizeAngVelMax()), newClusters);
 
             //draw selection
             _simController->drawToMapExtendedSelection(newClusters, newEnergyParticles);

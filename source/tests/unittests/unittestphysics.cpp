@@ -2,7 +2,7 @@
 
 #include "tests/predicates.h"
 #include "model/physics/physics.h"
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 namespace {
 	::testing::AssertionResult predVectorAfterRotation(const char* beforeExpr, const char* afterExpr, const char* expectedExpr

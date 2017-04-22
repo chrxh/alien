@@ -1,6 +1,6 @@
 #include <QtCore/qmath.h>
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
 #include "model/features/cellfeature.h"
@@ -16,7 +16,7 @@ CellImpl::CellImpl (SimulationContext* context)
 	, _parameters(context->getSimulationParameters())
 	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
     , _newTokenStack(context->getSimulationParameters()->cellMaxToken)
-    , _id(GlobalFunctions::createNewTag())
+    , _id(NumberGenerator::getInstance().createNewTag())
 {
 
 }

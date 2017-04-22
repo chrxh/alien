@@ -3,7 +3,7 @@
 #include "model/metadata/symboltable.h"
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 #include "symboledit.h"
 #include "ui_symboledit.h"

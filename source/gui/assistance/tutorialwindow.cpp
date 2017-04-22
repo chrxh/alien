@@ -1,7 +1,7 @@
 #include "tutorialwindow.h"
 #include "ui_tutorialwindow.h"
 
-#include "global/global.h"
+#include "global/numbergenerator.h"
 
 
 TutorialWindow::TutorialWindow(QWidget *parent) :
