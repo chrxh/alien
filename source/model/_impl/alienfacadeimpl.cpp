@@ -13,7 +13,7 @@
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/_impl/simulationcontextimpl.h"
 
 #include "alienfacadeimpl.h"

@@ -21,7 +21,7 @@
 #include "misc/startscreencontroller.h"
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/simulationcontroller.h"
 #include "model/simulationcontext.h"
 #include "model/serializationfacade.h"

@@ -3,7 +3,7 @@
 #include "model/features/cellfeatureconstants.h"
 #include "model/metadata/symboltable.h"
 
-#include "config.h"
+#include "modelsettings.h"
 #include "simulationparameters.h"
 
 void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)

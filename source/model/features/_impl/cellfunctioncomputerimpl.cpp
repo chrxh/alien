@@ -2,7 +2,7 @@
 #include <qdebug.h>
 
 #include "model/simulationcontext.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/metadata/symboltable.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
