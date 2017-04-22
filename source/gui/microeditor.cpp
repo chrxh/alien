@@ -466,7 +466,7 @@ void MicroEditor::addTokenClicked ()
     int newTokenTab = _currentTokenTab+1;
 	SimulationParameters* parameters = _context->getSimulationParameters();
     _focusCellReduced.tokenEnergies.insert(newTokenTab, parameters->tokenCreationEnergy);
-    QByteArray data(parameters->cellFunctionComputerTokenMemorySize, 0);
+    QByteArray data(parameters->tokenMemorySize, 0);
     data[0] = _focusCellReduced.cellTokenAccessNum; //set access number for new token
     _focusCellReduced.tokenData.insert(newTokenTab, data);
 

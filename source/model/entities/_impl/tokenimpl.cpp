@@ -8,7 +8,7 @@
 TokenImpl::TokenImpl(SimulationContext * context)
 	: _context(context)
 {
-	_memory = QByteArray(context->getSimulationParameters()->cellFunctionComputerTokenMemorySize, 0);
+	_memory = QByteArray(context->getSimulationParameters()->tokenMemorySize, 0);
 }
 
 TokenImpl::TokenImpl(SimulationContext* context, qreal energy, bool randomData)
@@ -16,7 +16,7 @@ TokenImpl::TokenImpl(SimulationContext* context, qreal energy, bool randomData)
 {
 	_energy = energy;
 	if (randomData) {
-		for (int i = 0; i < context->getSimulationParameters()->cellFunctionComputerTokenMemorySize; ++i)
+		for (int i = 0; i < context->getSimulationParameters()->tokenMemorySize; ++i)
 			_memory[i] = NumberGenerator::getInstance().random(256);
 	}
 }
@@ -24,13 +24,13 @@ TokenImpl::TokenImpl(SimulationContext* context, qreal energy, bool randomData)
 TokenImpl::TokenImpl(SimulationContext* context, qreal energy, QByteArray const& memory_)
 	: _energy(energy), _context(context)
 {
-	_memory = memory_.left(context->getSimulationParameters()->cellFunctionComputerTokenMemorySize);
+	_memory = memory_.left(context->getSimulationParameters()->tokenMemorySize);
 }
 
 TokenImpl* TokenImpl::duplicate() const
 {
 	TokenImpl* newToken(new TokenImpl(_context));
-	for (int i = 0; i < _context->getSimulationParameters()->cellFunctionComputerTokenMemorySize; ++i)
+	for (int i = 0; i < _context->getSimulationParameters()->tokenMemorySize; ++i)
 		newToken->_memory[i] = _memory[i];
 	newToken->_energy = _energy;
 
@@ -70,7 +70,7 @@ void TokenImpl::serializePrimitives(QDataStream& stream) const
 void TokenImpl::deserializePrimitives(QDataStream& stream)
 {
 	stream >> _memory >> _energy;
-	auto memSize = _context->getSimulationParameters()->cellFunctionComputerTokenMemorySize;
+	auto memSize = _context->getSimulationParameters()->tokenMemorySize;
 	_memory = _memory.left(memSize);
 	_memory.resize(memSize);
 }

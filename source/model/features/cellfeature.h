@@ -16,13 +16,15 @@ public:
         bool decompose;
         EnergyParticle* newEnergyParticle;
     };
-    virtual ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
+    ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
+	void mutate();
 
     virtual void serializePrimitives (QDataStream& stream) const;
     virtual void deserializePrimitives (QDataStream& stream);
 
 protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;
+	virtual void mutateImpl() {};
 
     SimulationContext* _context = nullptr;
     CellFeature* _nextFeature = nullptr;

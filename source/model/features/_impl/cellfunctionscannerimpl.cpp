@@ -1,13 +1,16 @@
-#include "cellfunctionscannerimpl.h"
+#include <QString>
+#include <QtCore/qmath.h>
+
+#include "global/numbergenerator.h"
+#include "model/physics/physics.h"
+#include "model/physics/codingphysicalquantities.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-#include "model/physics/physics.h"
-#include "model/physics/codingphysicalquantities.h"
-#include "global/numbergenerator.h"
+#include "model/simulationcontext.h"
+#include "model/simulationparameters.h"
 
-#include <QString>
-#include <QtCore/qmath.h>
+#include "cellfunctionscannerimpl.h"
 
 CellFunctionScannerImpl::CellFunctionScannerImpl(SimulationContext* context)
     : CellFunction(context)
@@ -156,6 +159,7 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<quint8>(scanCellFunction->getType());
     QByteArray data = scanCellFunction->getInternalData();
 	tokenMem.replace(Enums::Scanner::OUT_CELL_FUNCTION_DATA, data.size(), data);
+	tokenMem.left(_context->getSimulationParameters()->tokenMemorySize);
 
     //scan cluster
     quint32 mass = qFloor(cell->getCluster()->getMass());

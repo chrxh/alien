@@ -33,9 +33,10 @@ protected:
 
 private:
 
+	SimulationParameters* _parameters = nullptr;
+
     bool _newMessageReceived = false;
     MessageData _receivedMessage;
-	SimulationParameters* _parameters = nullptr;
 
     Enums::CommunicatorIn::Type readCommandFromToken (Token* token) const;
     void setListeningChannel (Token* token);
