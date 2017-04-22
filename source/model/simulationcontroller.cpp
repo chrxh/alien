@@ -15,7 +15,7 @@
 #include "model/entities/energyparticle.h"
 #include "model/metadata/symboltable.h"
 #include "model/physics/physics.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "simulationcontext.h"
 #include "simulationparameters.h"
 #include "simulationunit.h"

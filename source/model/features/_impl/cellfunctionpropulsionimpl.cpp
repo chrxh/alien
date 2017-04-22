@@ -8,7 +8,7 @@
 #include "model/entities/entityfactory.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/simulationcontext.h"
 #include "model/simulationparameters.h"
 

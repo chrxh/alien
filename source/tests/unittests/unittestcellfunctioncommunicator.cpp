@@ -8,7 +8,7 @@
 #include "model/physics/codingphysicalquantities.h"
 #include "model/simulationcontext.h"
 #include "model/alienfacade.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/simulationparameters.h"
 
 #include "tests/settings.h"

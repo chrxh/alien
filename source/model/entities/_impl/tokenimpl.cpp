@@ -1,5 +1,5 @@
 #include "global/numbergenerator.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/simulationparameters.h"
 #include "model/simulationcontext.h"
 

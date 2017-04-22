@@ -2,7 +2,7 @@
 #include <QMessageBox>
 
 #include "global/servicelocator.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "model/serializationfacade.h"
 #include "model/metadata/symboltable.h"
 #include "gui/guisettings.h"

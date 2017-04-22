@@ -1,6 +1,6 @@
 #include "cellto.h"
 
-#include "model/config.h"
+#include "model/modelsettings.h"
 
 CellTO::CellTO ()
 {

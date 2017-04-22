@@ -5,7 +5,7 @@
 #include "model/entities/cellcluster.h"
 #include "model/simulationcontroller.h"
 #include "model/simulationcontext.h"
-#include "model/config.h"
+#include "model/modelsettings.h"
 #include "tests/settings.h"
 
 
