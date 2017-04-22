@@ -46,6 +46,8 @@ public:
     void addToken (Token* token, ActivateToken act, UpdateTokenAccessNumber update) override;
     void delAllTokens () override;
     Token* takeTokenFromStack () override;
+	void mutationByChance() override;
+
 
     void setCluster (CellCluster* cluster) override;
     CellCluster* getCluster () const override;

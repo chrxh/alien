@@ -99,7 +99,7 @@ TEST_F (UnitTestCellCluster, testTokenSpreading)
 	_cell3->setBranchNumber(1);
 	_cell4->setBranchNumber(0);
 	EntityFactory* factory= ServiceLocator::getInstance().getService<EntityFactory>();
-	Token* token = factory->buildToken(_context, _context->getSimulationParameters()->MIN_TOKEN_ENERGY * 3);
+	Token* token = factory->buildToken(_context, _context->getSimulationParameters()->tokenMinEnergy * 3);
 	_cell1->addToken(token, Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::YES);
 	QList< EnergyParticle* > tempEP;
 	bool tempDecomp = false;

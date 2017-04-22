@@ -65,6 +65,7 @@ public:
     virtual bool isToBeKilled() const = 0;
     virtual void setToBeKilled (bool toBeKilled) = 0;
     virtual Token* takeTokenFromStack () = 0;
+	virtual void mutationByChance() = 0;
 
 	virtual CellMetadata getMetadata() const = 0;
 	virtual void setMetadata(CellMetadata metadata) = 0;

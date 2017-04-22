@@ -431,6 +431,10 @@ Token* CellImpl::takeTokenFromStack ()
     }
 }
 
+void CellImpl::mutationByChance()
+{
+}
+
 void CellImpl::serializePrimitives (QDataStream& stream) const
 {
     //token

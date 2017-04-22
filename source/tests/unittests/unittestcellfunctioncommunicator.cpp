@@ -118,7 +118,7 @@ TEST_F (TestCellFunctionCommunicator, testSendMessage)
 	//program token
 	quint8 message = 100;
 	quint8 angle = CodingPhysicalQuantities::convertAngleToData(180.0);
-	quint8 distance = _context->getSimulationParameters()->CELL_FUNCTION_COMMUNICATOR_RANGE / 2;
+	quint8 distance = _context->getSimulationParameters()->cellFunctionCommunicatorRange / 2;
 	_token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN)] = static_cast<int>(Enums::CommunicatorIn::SEND_MESSAGE);
 	_token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_CHANNEL)] = channel;
 	_token->getMemoryRef()[static_cast<int>(Enums::Communicator::IN_MESSAGE)] = message;
