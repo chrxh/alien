@@ -433,6 +433,9 @@ Token* CellImpl::takeTokenFromStack ()
 
 void CellImpl::mutationByChance()
 {
+	if (NumberGenerator::getInstance().random() < _parameters->cellMutationProb) {
+		_features->mutate();
+	}
 }
 
 void CellImpl::serializePrimitives (QDataStream& stream) const

@@ -147,7 +147,7 @@ void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
 
 void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 {
-	parameters->cellMutationProb = 0.0;
+	parameters->cellMutationProb = 0.0001;
 	parameters->cellMinDistance = 0.3;
 	parameters->cellMaxDistance = 1.3;
 	parameters->cellMass_Reciprocal = 1;
@@ -157,8 +157,8 @@ void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 	parameters->cellMaxToken = 9;
 	parameters->cellMaxTokenBranchNumber = 6;
 	parameters->cellCreationEnergy = 100.0;
-	parameters->NEW_CELL_MAX_CONNECTION = 4;
-	parameters->NEW_CELL_TOKEN_ACCESS_NUMBER = 0;
+	parameters->cellCreationMaxConnection = 4;
+	parameters->cellCreationTokenAccessNumber = 0;
 	parameters->cellMinEnergy = 50.0;
 	parameters->cellTransformationProb = 0.2;
 	parameters->cellFusionVelocity = 0.4;
@@ -166,7 +166,7 @@ void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 	parameters->cellFunctionWeaponStrength = 0.1;
 	parameters->cellFunctionComputerMaxInstructions = 15;
 	parameters->cellFunctionComputerCellMemorySize = 8;
-	parameters->cellFunctionComputerTokenMemorySize = 256;
+	parameters->tokenMemorySize = 256;
 	parameters->cellFunctionConstructorOffspringDistance = 1.0;
 	parameters->cellFunctionSensorRange = 100.0;
 	parameters->cellFunctionCommunicatorRange = 30.0;

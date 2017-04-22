@@ -13,8 +13,8 @@ void SimulationParameters::setParameters(SimulationParameters * other)
 	cellMaxToken = other->cellMaxToken;
 	cellMaxTokenBranchNumber = other->cellMaxTokenBranchNumber;
 	cellCreationEnergy = other->cellCreationEnergy;
-	NEW_CELL_MAX_CONNECTION = other->NEW_CELL_MAX_CONNECTION;
-	NEW_CELL_TOKEN_ACCESS_NUMBER = other->NEW_CELL_TOKEN_ACCESS_NUMBER;
+	cellCreationMaxConnection = other->cellCreationMaxConnection;
+	cellCreationTokenAccessNumber = other->cellCreationTokenAccessNumber;
 	cellMinEnergy = other->cellMinEnergy;
 	cellTransformationProb = other->cellTransformationProb;
 	cellFusionVelocity = other->cellFusionVelocity;
@@ -22,11 +22,11 @@ void SimulationParameters::setParameters(SimulationParameters * other)
 	cellFunctionWeaponStrength = other->cellFunctionWeaponStrength;
 	cellFunctionComputerMaxInstructions = other->cellFunctionComputerMaxInstructions;
 	cellFunctionComputerCellMemorySize = other->cellFunctionComputerCellMemorySize;
-	cellFunctionComputerTokenMemorySize = other->cellFunctionComputerTokenMemorySize;
 	cellFunctionConstructorOffspringDistance = other->cellFunctionConstructorOffspringDistance;
 	cellFunctionSensorRange = other->cellFunctionSensorRange;
 	cellFunctionCommunicatorRange = other->cellFunctionCommunicatorRange;
 
+	tokenMemorySize = other->tokenMemorySize;
 	tokenCreationEnergy = other->tokenCreationEnergy;
 	tokenMinEnergy = other->tokenMinEnergy;
 
@@ -49,15 +49,15 @@ void SimulationParameters::serializePrimitives(QDataStream & stream)
 	stream << cellMaxToken;
 	stream << cellMaxTokenBranchNumber;
 	stream << cellCreationEnergy;
-	stream << NEW_CELL_MAX_CONNECTION;
-	stream << NEW_CELL_TOKEN_ACCESS_NUMBER;
+	stream << cellCreationMaxConnection;
+	stream << cellCreationTokenAccessNumber;
 	stream << cellMinEnergy;
 	stream << cellTransformationProb;
 	stream << cellFusionVelocity;
 	stream << cellFunctionWeaponStrength;
 	stream << cellFunctionComputerMaxInstructions;
 	stream << cellFunctionComputerCellMemorySize;
-	stream << cellFunctionComputerTokenMemorySize;
+	stream << tokenMemorySize;
 	stream << cellFunctionConstructorOffspringDistance;
 	stream << cellFunctionSensorRange;
 	stream << cellFunctionCommunicatorRange;
@@ -81,15 +81,15 @@ void SimulationParameters::deserializePrimitives(QDataStream & stream)
 	stream >> cellMaxToken;
 	stream >> cellMaxTokenBranchNumber;
 	stream >> cellCreationEnergy;
-	stream >> NEW_CELL_MAX_CONNECTION;
-	stream >> NEW_CELL_TOKEN_ACCESS_NUMBER;
+	stream >> cellCreationMaxConnection;
+	stream >> cellCreationTokenAccessNumber;
 	stream >> cellMinEnergy;
 	stream >> cellTransformationProb;
 	stream >> cellFusionVelocity;
 	stream >> cellFunctionWeaponStrength;
 	stream >> cellFunctionComputerMaxInstructions;
 	stream >> cellFunctionComputerCellMemorySize;
-	stream >> cellFunctionComputerTokenMemorySize;
+	stream >> tokenMemorySize;
 	stream >> cellFunctionConstructorOffspringDistance;
 	stream >> cellFunctionSensorRange;
 	stream >> cellFunctionCommunicatorRange;

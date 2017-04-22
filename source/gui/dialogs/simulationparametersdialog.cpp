@@ -14,6 +14,7 @@ SimulationParametersDialog::SimulationParametersDialog(SimulationParameters* par
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
     ui->treeWidget->expandAll();
+	ui->treeWidget->setColumnWidth(0, 270);
 
     _localSimulationParameters = _simulationParameters;
     setLocalSimulationParametersToWidgets ();
@@ -52,14 +53,14 @@ void SimulationParametersDialog::setLocalSimulationParametersToWidgets ()
     setItem("fusion velocity", 0, _localSimulationParameters.cellFusionVelocity);
 
     setItem("max instructions", 0, _localSimulationParameters.cellFunctionComputerMaxInstructions);
-    setItem("cell memory size", 0, _localSimulationParameters.cellFunctionComputerCellMemorySize);
-    setItem("token memory size", 0, _localSimulationParameters.cellFunctionComputerTokenMemorySize);
+    setItem("memory size", 0, _localSimulationParameters.cellFunctionComputerCellMemorySize);
     setItem("offspring distance", 0, _localSimulationParameters.cellFunctionConstructorOffspringDistance);
     setItem("range", 0, _localSimulationParameters.cellFunctionSensorRange);
     setItem("strength", 0, _localSimulationParameters.cellFunctionWeaponStrength);
     setItem("range", 1, _localSimulationParameters.cellFunctionCommunicatorRange);
 
-    setItem("creation energy", 1, _localSimulationParameters.tokenCreationEnergy);
+	setItem("memory size", 1, _localSimulationParameters.tokenMemorySize);
+	setItem("creation energy", 1, _localSimulationParameters.tokenCreationEnergy);
 	setItem("min energy", 1, _localSimulationParameters.tokenMinEnergy);
 
     setItem("exponent", 0, _localSimulationParameters.radiationExponent);
@@ -86,14 +87,14 @@ void SimulationParametersDialog::getLocalSimulationParametersFromWidgets ()
     _localSimulationParameters.cellFusionVelocity = getItemReal("fusion velocity", 0);
 
     _localSimulationParameters.cellFunctionComputerMaxInstructions = getItemInt("max instructions", 0);
-    _localSimulationParameters.cellFunctionComputerCellMemorySize = getItemInt("cell memory size", 0);
-    _localSimulationParameters.cellFunctionComputerTokenMemorySize = getItemInt("token memory size", 0);
+    _localSimulationParameters.cellFunctionComputerCellMemorySize = getItemInt("memory size", 0);
     _localSimulationParameters.cellFunctionConstructorOffspringDistance = getItemReal("offspring distance", 0);
     _localSimulationParameters.cellFunctionWeaponStrength = getItemReal("strength", 0);
     _localSimulationParameters.cellFunctionSensorRange = getItemReal("range", 0);
     _localSimulationParameters.cellFunctionCommunicatorRange = getItemReal("range", 1);
 
-    _localSimulationParameters.tokenCreationEnergy = getItemReal("creation energy", 1);
+	_localSimulationParameters.tokenMemorySize = getItemInt("memory size", 1);
+	_localSimulationParameters.tokenCreationEnergy = getItemReal("creation energy", 1);
     _localSimulationParameters.tokenMinEnergy = getItemReal("min energy", 1);
 
     _localSimulationParameters.radiationExponent = getItemReal("exponent", 0);

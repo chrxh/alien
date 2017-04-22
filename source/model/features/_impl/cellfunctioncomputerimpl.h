@@ -20,6 +20,8 @@ public:
 
 	QByteArray& getMemoryReference() override;
 
+	void mutateImpl() override;
+
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives (QDataStream& stream) override;
 

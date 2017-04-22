@@ -599,7 +599,7 @@ void SimulationController::newCell (QVector3D pos)
     AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 	SimulationParameters* paramters = _context->getSimulationParameters();
     Cell* cell = facade->buildFeaturedCell(paramters->cellCreationEnergy, Enums::CellFunction::COMPUTER
-        , _context, paramters->NEW_CELL_MAX_CONNECTION, paramters->NEW_CELL_TOKEN_ACCESS_NUMBER);
+        , _context, paramters->cellCreationMaxConnection, paramters->cellCreationTokenAccessNumber);
     cell->setBranchNumber(_newCellTokenAccessNumber++);
     QList< Cell* > cells;
     cells << cell;
