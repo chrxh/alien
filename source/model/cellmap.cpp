@@ -19,6 +19,7 @@ void CellMap::init()
 {
 	deleteCellMap();
 	IntVector2D size = _topo->getSize();
+	_gridSize = size.x;
 	_cellGrid = new Cell**[size.x];
 	for (int x = 0; x < size.x; ++x) {
 		_cellGrid[x] = new Cell*[size.y];
@@ -193,7 +194,7 @@ void CellMap::deserializePrimitives(QDataStream & stream, const QMap<quint64, Ce
 void CellMap::deleteCellMap()
 {
 	if (_cellGrid != nullptr) {
-		int sizeX = _topo->getSize().x;
+		int sizeX = _gridSize;
 		for (int x = 0; x < sizeX; ++x) {
 			delete[] _cellGrid[x];
 		}
