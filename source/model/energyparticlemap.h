@@ -21,10 +21,11 @@ public:
 	void deserializePrimitives(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap);
 
 private:
-	void deleteCellMap();
+	void deleteGrid();
 
 	Topology* _topo = nullptr;
 	EnergyParticle*** _energyGrid = nullptr;
+	int _gridSize = 0;
 };
 
 EnergyParticle * EnergyParticleMap::getParticleFast(IntVector2D const& intPos) const

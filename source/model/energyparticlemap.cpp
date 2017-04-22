@@ -11,14 +11,15 @@ EnergyParticleMap::EnergyParticleMap(Topology* topo)
 
 EnergyParticleMap::~EnergyParticleMap()
 {
-	deleteCellMap();
+	deleteGrid();
 }
 
 
 void EnergyParticleMap::init()
 {
-	deleteCellMap();
+	deleteGrid();
 	IntVector2D size = _topo->getSize();
+	_gridSize = size.x;
 	_energyGrid = new EnergyParticle**[size.x];
 	for (int x = 0; x < size.x; ++x) {
 		_energyGrid[x] = new EnergyParticle*[size.y];
@@ -89,11 +90,10 @@ void EnergyParticleMap::deserializePrimitives (QDataStream & stream, QMap<quint6
 	}
 }
 
-void EnergyParticleMap::deleteCellMap()
+void EnergyParticleMap::deleteGrid()
 {
 	if (_energyGrid) {
-		int sizeX = _topo->getSize().x;
-		for (int x = 0; x < sizeX; ++x) {
+		for (int x = 0; x < _gridSize; ++x) {
 			delete[] _energyGrid[x];
 		}
 		delete[] _energyGrid;
