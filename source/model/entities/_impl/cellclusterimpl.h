@@ -20,9 +20,10 @@ public:
 
     void processingInit () override;
     void processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles) override;
-    void processingMovement () override;
+	void processingMutationByChance() override;
+	void processingMovement() override;
     void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose) override;
-    void processingFinish () override;
+    void processingCompletion () override;
 
     void addCell (Cell* cell, QVector3D absPos) override;
     void removeCell (Cell* cell, bool maintainCenter = true) override;
