@@ -107,7 +107,8 @@ namespace Enums
 			IN_DIST = 16,
 			IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
 			IN_CELL_BRANCH_NO = 18,
-			IN_CELL_FUNCTION = 19,
+			IN_CELL_METADATA = 19,
+			IN_CELL_FUNCTION = 39,
 			IN_CELL_FUNCTION_DATA = 40
 		};
 	};
@@ -178,7 +179,8 @@ namespace Enums
 			OUT_DISTANCE = 16,
 			OUT_CELL_MAX_CONNECTIONS = 17,
 			OUT_CELL_BRANCH_NO = 18,
-			OUT_CELL_FUNCTION = 19,
+			OUT_CELL_METADATA = 19,
+			OUT_CELL_FUNCTION = 39,
 			OUT_CELL_FUNCTION_DATA = 40
 		};
 	};
