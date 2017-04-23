@@ -4,19 +4,19 @@
 #include "global/numbergenerator.h"
 #include "gui/guisettings.h"
 #include "model/simulationparameters.h"
+#include "model/modelsettings.h"
 
 #include "simulationparametersdialog.h"
 #include "ui_simulationparametersdialog.h"
 
 SimulationParametersDialog::SimulationParametersDialog(SimulationParameters* parameters, QWidget *parent)
-	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(*parameters)
+	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _localSimulationParameters(*parameters)
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
     ui->treeWidget->expandAll();
 	ui->treeWidget->setColumnWidth(0, 270);
 
-    _localSimulationParameters = _simulationParameters;
     setLocalSimulationParametersToWidgets ();
 
     //connections
@@ -31,9 +31,9 @@ SimulationParametersDialog::~SimulationParametersDialog()
     delete ui;
 }
 
-void SimulationParametersDialog::updateSimulationParameters ()
+SimulationParameters SimulationParametersDialog::getSimulationParameters ()
 {
-    _simulationParameters = _localSimulationParameters;
+    return _localSimulationParameters;
 }
 
 void SimulationParametersDialog::setLocalSimulationParametersToWidgets ()
@@ -117,18 +117,18 @@ void SimulationParametersDialog::setItem(QString key, int matchPos, qreal value)
 int SimulationParametersDialog::getItemInt(QString key, int matchPos)
 {
 	bool ok(true);
-	return ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(matchPos).toInt(&ok);
+	return ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(1).toInt(&ok);
 }
 
 qreal SimulationParametersDialog::getItemReal(QString key, int matchPos)
 {
 	bool ok(true);
-	return ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(matchPos).toDouble(&ok);
+	return ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(1).toDouble(&ok);
 }
 
 void SimulationParametersDialog::defaultButtonClicked ()
 {
-    _localSimulationParameters = SimulationParameters();
+    ModelData::loadDefaultSimulationParameters(&_localSimulationParameters);
     setLocalSimulationParametersToWidgets();
 }
 

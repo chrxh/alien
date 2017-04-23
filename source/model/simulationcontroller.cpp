@@ -115,7 +115,7 @@ SimulationContext* SimulationController::getSimulationContext()
     return _context;
 }
 
-void SimulationController::newUniverse (IntVector2D size, SymbolTable const& symbolTable)
+void SimulationController::newUniverse (IntVector2D size, SymbolTable const& symbolTable, SimulationParameters const& parameters)
 {
 	_context->lock();
 
@@ -123,6 +123,7 @@ void SimulationController::newUniverse (IntVector2D size, SymbolTable const& sym
 
 	_context->init(size);
 	_context->getSymbolTable()->setTable(symbolTable);
+	*_context->getSimulationParameters() = parameters;
 	_context->getClustersRef().clear();
 	_context->getEnergyParticlesRef().clear();
 

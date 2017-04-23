@@ -30,8 +30,8 @@ AlienFacadeImpl::AlienFacadeImpl ()
 SimulationContext* AlienFacadeImpl::buildSimulationContext() const
 {
 	SimulationContext* context = new SimulationContextImpl();
-	Metadata::loadDefaultSymbolTable(context->getSymbolTable());
-	Metadata::loadDefaultSimulationParameters(context->getSimulationParameters());
+	ModelData::loadDefaultSymbolTable(context->getSymbolTable());
+	ModelData::loadDefaultSimulationParameters(context->getSimulationParameters());
 	return context;
 }
 

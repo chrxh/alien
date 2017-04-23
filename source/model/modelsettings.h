@@ -5,7 +5,7 @@
 
 const qreal ALIEN_PRECISION = 0.0000001;
 
-class Metadata
+class ModelData
 {
 public:
     static void loadDefaultSymbolTable (SymbolTable* meta);
