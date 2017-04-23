@@ -2,7 +2,7 @@
 
 namespace
 {
-	const int MAX_RANDOM_NUMBERS = 100000;
+	const int MAX_RANDOM_NUMBERS = 1234327;
 }
 
 NumberGenerator::NumberGenerator()
