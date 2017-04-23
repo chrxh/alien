@@ -50,6 +50,7 @@ const QColor INDIVIDUAL_CELL_COLOR4(0xFF, 0xBF, 0x50, 0xB0);
 const QColor INDIVIDUAL_CELL_COLOR5(0xBF, 0x50, 0xFF, 0xB0);
 const QColor INDIVIDUAL_CELL_COLOR6(0x50, 0xFF, 0xEF, 0xB0);
 const QColor INDIVIDUAL_CELL_COLOR7(0xBF, 0xBF, 0xBF, 0xB0);
+const int CELL_COLOR_COUNT = 7;
 
 class GuiFunctions
 {

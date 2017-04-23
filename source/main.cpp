@@ -21,6 +21,7 @@
 //Nächstes Mal:
 //- Bug: SimulationParameters bei NewSimulation sind fast alle = 0
 //- Bug: Simulation erzeugen, Radiation factor anpassen, Energie und Replikator reinsetzen, Snapshot, (Starten?) => Absturz!
+//- Renaming: Macroeditor -> VisualEditor, MicroEditor -> TextEditor
 //- Bei Tokenübetragung im CellFunctionConstructor: Energie vom Token = 0
 //- zurück klappt nicht
 //- laden von Simulation (mit Replicator) klappt nicht

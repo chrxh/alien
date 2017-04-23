@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef MODELSETTINGS_H
+#define MODELSETTINGS_H
 
 #include "definitions.h"
 
@@ -12,4 +12,4 @@ public:
 	static void loadDefaultSimulationParameters(SimulationParameters* parameters);
 };
 
-#endif // CONFIG_H
+#endif // MODELSETTINGS_H

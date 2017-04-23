@@ -155,7 +155,9 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
     tokenMem[Enums::Scanner::OUT_ENERGY] = e;
     tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = scanCell->getMaxConnections();
     tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = scanCell->getBranchNumber();
-    CellFunction* scanCellFunction = scanCell->getFeatures()->findObject<CellFunction>();
+	auto metadata = scanCell->getMetadata();
+	tokenMem[Enums::Scanner::OUT_CELL_METADATA] = metadata.color;
+	CellFunction* scanCellFunction = scanCell->getFeatures()->findObject<CellFunction>();
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<quint8>(scanCellFunction->getType());
     QByteArray data = scanCellFunction->getInternalData();
 	tokenMem.replace(Enums::Scanner::OUT_CELL_FUNCTION_DATA, data.size(), data);
