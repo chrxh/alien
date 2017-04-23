@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include "model/definitions.h"
+#include "model/simulationparameters.h"
 
 namespace Ui {
 class NewSimulationDialog;
@@ -22,16 +23,17 @@ public:
     IntVector2D getSize();
     qreal getEnergy();
 	SymbolTable const& getNewSymbolTableRef();
+	SimulationParameters getNewSimulationParameters();
 
 private slots:
     void simulationParametersButtonClicked ();
     void symbolTableButtonClicked ();
-    void okButtonClicked ();
 
 private:
     Ui::NewSimulationDialog *ui;
-    SimulationParametersDialog* _simParaDialog;
     SymbolTableDialog* _symTblDialog;
+
+	SimulationParameters _localParameters;
 };
 
 #endif // NEWSIMULATIONDIALOG_H

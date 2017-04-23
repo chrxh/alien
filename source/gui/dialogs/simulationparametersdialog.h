@@ -16,7 +16,7 @@ public:
     SimulationParametersDialog(SimulationParameters* parameters, QWidget *parent = 0);
     ~SimulationParametersDialog();
 
-    void updateSimulationParameters ();
+	SimulationParameters getSimulationParameters ();
 
 private slots:
     void setLocalSimulationParametersToWidgets ();
@@ -34,8 +34,6 @@ private:
 
 	Ui::SimulationParametersDialog *ui;
 
-    //simulation parameters (not the global ones)
-	SimulationParameters& _simulationParameters;
     SimulationParameters _localSimulationParameters;
 };
 

@@ -27,7 +27,7 @@ public:
     SimulationContext* getSimulationContext ();
 
     //universe manipulation tools
-    void newUniverse (IntVector2D size, SymbolTable const& symbolTable);
+    void newUniverse (IntVector2D size, SymbolTable const& symbolTable, SimulationParameters const& parameters);
     void saveUniverse (QDataStream& stream);
     void loadUniverse (QDataStream& stream);
     IntVector2D getUniverseSize();
