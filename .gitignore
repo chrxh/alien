@@ -582,3 +582,4 @@ temp/
 *qrc_ressources*
 stable/
 *computation.dat
+external/boost_1_64_0

@@ -19,6 +19,8 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
+//- Bug: SimulationParameters bei NewSimulation sind fast alle = 0
+//- Bug: Simulation erzeugen, Radiation factor anpassen, Energie und Replikator reinsetzen, Snapshot, (Starten?) => Absturz!
 //- Bei Tokenübetragung im CellFunctionConstructor: Energie vom Token = 0
 //- zurück klappt nicht
 //- laden von Simulation (mit Replicator) klappt nicht
