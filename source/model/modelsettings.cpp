@@ -147,7 +147,7 @@ void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
 
 void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 {
-	parameters->cellMutationProb = 0.000002;
+	parameters->cellMutationProb = 0.000001;
 	parameters->cellMinDistance = 0.3;
 	parameters->cellMaxDistance = 1.3;
 	parameters->cellMass_Reciprocal = 1;
@@ -175,7 +175,7 @@ void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 	parameters->tokenMinEnergy = 3.0;
 
 	parameters->radiationExponent = 1.0;
-	parameters->radiationFactor = 0.0001;
+	parameters->radiationFactor = 0.0002;
 	parameters->radiationProb = 0.01;
 	parameters->radiationVelocityMultiplier = 1.0;
 	parameters->radiationVelocityPerturbation = 0.5;
