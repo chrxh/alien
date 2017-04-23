@@ -176,7 +176,7 @@ void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 
 	parameters->radiationExponent = 1.0;
 	parameters->radiationFactor = 0.0002;
-	parameters->radiationProb = 0.01;
+	parameters->radiationProb = 0.03;
 	parameters->radiationVelocityMultiplier = 1.0;
 	parameters->radiationVelocityPerturbation = 0.5;
 }
