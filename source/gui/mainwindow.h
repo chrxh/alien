@@ -8,7 +8,7 @@
 class Cell;
 class EnergyParticle;
 class SimulationController;
-class MicroEditor;
+class TextEditor;
 class UniversePixelScene;
 class UniverseShapeScene;
 class SimulationMonitor;
@@ -95,7 +95,7 @@ private:
 	void updateControllerAndEditors();
 
     SimulationController* _simController;
-    MicroEditor* _microEditor;
+    TextEditor* _microEditor;
 
     QTimer* _oneSecondTimer;
     SimulationMonitor* _monitor;

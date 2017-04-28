@@ -16,15 +16,6 @@
     <ClCompile Include="..\..\source\model\entities\_impl\cellclusterimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\cellcomputeredit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\macroeditor\cellconnectiongraphicsitem.cpp">
-      <Filter>Gui\Macroeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\celledit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\features\cellfeature.cpp">
       <Filter>Model\Features</Filter>
     </ClCompile>
@@ -55,9 +46,6 @@
     <ClCompile Include="..\..\source\model\features\_impl\cellfunctioncomputerimpl.cpp">
       <Filter>Model\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\macroeditor\cellgraphicsitem.cpp">
-      <Filter>Gui\Macroeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\entities\_impl\cellimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
     </ClCompile>
@@ -67,23 +55,11 @@
     <ClCompile Include="..\..\source\model\entities\cellto.cpp">
       <Filter>Model\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\clusteredit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\physics\codingphysicalquantities.cpp">
       <Filter>Model\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\computercodeedit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\definitions.cpp">
       <Filter>Model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\energyedit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\macroeditor\energygraphicsitem.cpp">
-      <Filter>Gui\Macroeditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\model\features\_impl\energyguidanceimpl.cpp">
       <Filter>Model\Features\_Impl</Filter>
@@ -100,26 +76,8 @@
     <ClCompile Include="..\..\source\gui\guisettings.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\hexedit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\macroeditor.cpp">
-      <Filter>Gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\mainwindow.cpp">
       <Filter>Gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\macroeditor\markergraphicsitem.cpp">
-      <Filter>Gui\Macroeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\metadataedit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\metadatapropertiesedit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor.cpp">
-      <Filter>Gui\Microeditor</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_addenergydialog.cpp">
       <Filter>_Mocs</Filter>
@@ -388,9 +346,6 @@
     <ClCompile Include="..\..\source\model\physics\physics.cpp">
       <Filter>Model\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\macroeditor\pixeluniverse.cpp">
-      <Filter>Gui\Macroeditor</Filter>
-    </ClCompile>
     <ClCompile Include="qrc_ressources.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
@@ -405,9 +360,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source\global\servicelocator.cpp">
       <Filter>Global</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\macroeditor\shapeuniverse.cpp">
-      <Filter>Gui\Macroeditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\model\_impl\simulationcontextimpl.cpp">
       <Filter>Model\_Impl</Filter>
@@ -430,23 +382,14 @@
     <ClCompile Include="..\..\source\gui\misc\startscreencontroller.cpp">
       <Filter>Gui\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\symboledit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\metadata\symboltable.cpp">
       <Filter>Model\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\dialogs\symboltabledialog.cpp">
       <Filter>Gui\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\tokenedit.cpp">
-      <Filter>Gui\Microeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\entities\_impl\tokenimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\microeditor\tokentab.cpp">
-      <Filter>Gui\Microeditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\model\topology.cpp">
       <Filter>Model</Filter>
@@ -459,6 +402,81 @@
     </ClCompile>
     <ClCompile Include="..\..\source\model\modelsettings.cpp">
       <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\cellconnectiongraphicsitem.cpp">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\cellgraphicsitem.cpp">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\energygraphicsitem.cpp">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\markergraphicsitem.cpp">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\pixeluniverse.cpp">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\shapeuniverse.cpp">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\cellcomputeredit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\celledit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\clusteredit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\computercodeedit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\energyedit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\hexedit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\metadataedit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\metadatapropertiesedit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\symboledit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\tokenedit.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\tokentab.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_visualeditor.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_visualeditor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_visualeditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_texteditor.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_texteditor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_texteditor.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -479,9 +497,6 @@
     </ClInclude>
     <ClInclude Include="..\..\source\model\metadata\cellclustermetadata.h">
       <Filter>Model\Metadata</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\macroeditor\cellconnectiongraphicsitem.h">
-      <Filter>Gui\Macroeditor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\features\cellfeature.h">
       <Filter>Model\Features</Filter>
@@ -522,12 +537,6 @@
     <ClInclude Include="..\..\source\model\features\_impl\cellfunctioncomputerimpl.h">
       <Filter>Model\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\macroeditor\cellgraphicsitem.h">
-      <Filter>Gui\Macroeditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\macroeditor\cellgraphicsitemconfig.h">
-      <Filter>Gui\Macroeditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\entities\_impl\cellimpl.h">
       <Filter>Model\Entities\_Impl</Filter>
     </ClInclude>
@@ -548,9 +557,6 @@
     </ClInclude>
     <ClInclude Include="..\..\source\gui\definitions.h">
       <Filter>Gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\macroeditor\energygraphicsitem.h">
-      <Filter>Gui\Macroeditor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\features\energyguidance.h">
       <Filter>Model\Features</Filter>
@@ -578,9 +584,6 @@
     </ClInclude>
     <ClInclude Include="..\..\source\gui\guisettings.h">
       <Filter>Gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\macroeditor\markergraphicsitem.h">
-      <Filter>Gui\Macroeditor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\physics\physics.h">
       <Filter>Model\Physics</Filter>
@@ -669,6 +672,24 @@
     <ClInclude Include="..\..\source\model\modelsettings.h">
       <Filter>Model</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\cellconnectiongraphicsitem.h">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\cellgraphicsitem.h">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\cellgraphicsitemconfig.h">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\energygraphicsitem.h">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\markergraphicsitem.h">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_visualeditor.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\gui\dialogs\addenergydialog.h">
@@ -689,59 +710,17 @@
     <CustomBuild Include="..\..\source\gui\dialogs\addrectstructuredialog.ui">
       <Filter>Gui\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\cellcomputeredit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\cellcomputeredit.ui">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\celledit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\clusteredit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\computercodeedit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\energyedit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\hexedit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\macroeditor.h">
-      <Filter>Gui</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\macroeditor.ui">
-      <Filter>Gui</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\mainwindow.h">
       <Filter>Gui</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\mainwindow.ui">
       <Filter>Gui</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\metadataedit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\metadataedit.ui">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\metadatapropertiesedit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\newsimulationdialog.h">
       <Filter>Gui\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\newsimulationdialog.ui">
       <Filter>Gui\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\macroeditor\pixeluniverse.h">
-      <Filter>Gui\Macroeditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\resources\ressources.qrc">
       <Filter>Resources</Filter>
@@ -757,9 +736,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyrandomdialog.ui">
       <Filter>Gui\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\macroeditor\shapeuniverse.h">
-      <Filter>Gui\Macroeditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\simulationcontroller.h">
       <Filter>Model</Filter>
@@ -782,32 +758,77 @@
     <CustomBuild Include="..\..\source\gui\misc\startscreencontroller.h">
       <Filter>Gui\Misc</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\symboledit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\symboledit.ui">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\symboltabledialog.h">
       <Filter>Gui\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\symboltabledialog.ui">
       <Filter>Gui\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\tokenedit.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\tokentab.h">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\microeditor\tokentab.ui">
-      <Filter>Gui\Microeditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\assistance\tutorialwindow.h">
       <Filter>Gui\Assistance</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\assistance\tutorialwindow.ui">
       <Filter>Gui\Assistance</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\pixeluniverse.h">
+      <Filter>Gui\Visualeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\shapeuniverse.h">
+      <Filter>Gui\Visualeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\cellcomputeredit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\cellcomputeredit.ui">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\celledit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\clusteredit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\computercodeedit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\energyedit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\hexedit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\metadataedit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\metadataedit.ui">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\metadatapropertiesedit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\symboledit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\symboledit.ui">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\tokenedit.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\tokentab.h">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor\tokentab.ui">
+      <Filter>Gui\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor.h">
+      <Filter>Gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor.ui">
+      <Filter>Gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\texteditor.h">
+      <Filter>Gui</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -912,12 +933,6 @@
     <Filter Include="Gui\Dialogs">
       <UniqueIdentifier>{d16cdb26-d3e1-445a-b5cc-92d808304c2c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Gui\Macroeditor">
-      <UniqueIdentifier>{84149345-9237-4d47-b641-14dc7df60a87}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Gui\Microeditor">
-      <UniqueIdentifier>{a7ef51b6-b5e0-4d15-aa20-c60392f162f5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Gui\Misc">
       <UniqueIdentifier>{8e45d07f-5a3b-4c3f-a104-52836c1dfeca}</UniqueIdentifier>
     </Filter>
@@ -950,6 +965,32 @@
     </Filter>
     <Filter Include="_Ui">
       <UniqueIdentifier>{05f5e813-713f-4ca8-8ebc-095e3b0e8867}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Visualeditor">
+      <UniqueIdentifier>{84149345-9237-4d47-b641-14dc7df60a87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\Texteditor">
+      <UniqueIdentifier>{a7ef51b6-b5e0-4d15-aa20-c60392f162f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files\Tests">
+      <UniqueIdentifier>{c984bb40-6efb-40bd-847e-b2daa0548c7d}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{d82d91f0-83dc-44b5-81ff-cbaf2abff678}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{c2b875e8-7f3b-4036-9993-06cc7fb941f8}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
     </Filter>
   </ItemGroup>
 </Project>

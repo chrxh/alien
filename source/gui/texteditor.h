@@ -8,7 +8,7 @@
 #include "model/definitions.h"
 
 namespace Ui {
-class MicroEditor;
+class TextEditor;
 }
 
 class Cell;
@@ -25,13 +25,13 @@ class QLabel;
 class QTabWidget;
 class QToolButton;
 
-class MicroEditor : public QObject
+class TextEditor : public QObject
 {
     Q_OBJECT
 
 public:
-    MicroEditor(SimulationContext* context, QObject *parent = 0);
-    ~MicroEditor();
+    TextEditor(SimulationContext* context, QObject *parent = 0);
+    ~TextEditor();
 
 
 	struct MicroEditorWidgets {
