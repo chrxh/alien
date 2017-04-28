@@ -9,7 +9,7 @@
 CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken
 	, quint8 color, QString displayString, int branchNumber, QGraphicsItem *parent)
     : QGraphicsItem(parent), _config(config), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken)
-	, _color(color), _displayString(displayString), _branchNumber(branchNumber)
+	, _color(color % CELL_COLOR_COUNT), _displayString(displayString), _branchNumber(branchNumber)
 {
     QGraphicsItem::setPos(x, y);
 }
@@ -128,7 +128,7 @@ void CellGraphicsItem::setNumToken (int numToken)
 
 void CellGraphicsItem::setColor (quint8 color)
 {
-    _color = color;
+    _color = color % CELL_COLOR_COUNT;
 }
 
 void CellGraphicsItem::setDisplayString(QString value)

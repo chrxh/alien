@@ -20,6 +20,7 @@
 
 //Nächstes Mal:
 //- Bug: Simulation erzeugen, Radiation factor anpassen, Energie und Replikator reinsetzen, Snapshot, (Starten?) => Absturz!
+//- Renaming: Macroeditor -> VisualEditor, MicroEditor -> TextEditor
 //- Bei Tokenübetragung im CellFunctionConstructor: Energie vom Token = 0
 //- zurück klappt nicht
 //- laden von Simulation (mit Replicator) klappt nicht
@@ -90,7 +91,8 @@ int main(int argc, char *argv[])
     //init main objects
     QApplication a(argc, argv);
 	SimulationController controller(SimulationController::Threading::EXTRA_THREAD);
-	controller.newUniverse({ 400, 200 }, *controller.getSimulationContext()->getSymbolTable());
+	auto context = controller.getSimulationContext();
+	controller.newUniverse({ 400, 200 }, *context->getSymbolTable(), *context->getSimulationParameters());
     MainWindow w(&controller);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
