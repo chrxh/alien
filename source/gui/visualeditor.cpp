@@ -6,20 +6,20 @@
 #include "model/topology.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
-#include "macroeditor/pixeluniverse.h"
-#include "macroeditor/shapeuniverse.h"
+#include "visualeditor/pixeluniverse.h"
+#include "visualeditor/shapeuniverse.h"
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
 
 
-#include "microeditor.h"
-#include "macroeditor.h"
-#include "ui_macroeditor.h"
+#include "texteditor.h"
+#include "visualeditor.h"
+#include "ui_visualeditor.h"
 
 
-MacroEditor::MacroEditor(QWidget *parent)
+VisualEditor::VisualEditor(QWidget *parent)
 	: QWidget(parent)
-	, ui(new Ui::MacroEditor)
+	, ui(new Ui::VisualEditor)
 	, _activeScene(PIXEL_SCENE)
 	, _pixelUniverse(new PixelUniverse(this))
 	, _shapeUniverse(new ShapeUniverse(this))
@@ -47,12 +47,12 @@ MacroEditor::MacroEditor(QWidget *parent)
 
 }
 
-MacroEditor::~MacroEditor()
+VisualEditor::~VisualEditor()
 {
     delete ui;
 }
 
-void MacroEditor::reset ()
+void VisualEditor::reset ()
 {
     //reset data
     _pixelUniverseInit = false;
@@ -66,7 +66,7 @@ void MacroEditor::reset ()
 }
 
 
-void MacroEditor::setActiveScene (ActiveScene activeScene)
+void VisualEditor::setActiveScene (ActiveScene activeScene)
 {
     _activeScene = activeScene;
     if( _activeScene == PIXEL_SCENE ) {
@@ -105,7 +105,7 @@ void MacroEditor::setActiveScene (ActiveScene activeScene)
     universeUpdated(_context, true);
 }
 
-QVector3D MacroEditor::getViewCenterPosWithInc ()
+QVector3D VisualEditor::getViewCenterPosWithInc ()
 {
     //calc center of view
     QPointF posView(ui->simulationView->mapToScene(ui->simulationView->width()/2, ui->simulationView->height()/2));
@@ -125,14 +125,14 @@ QVector3D MacroEditor::getViewCenterPosWithInc ()
     return pos + posIncrement;
 }
 
-void MacroEditor::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
+void VisualEditor::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
     if( _activeScene == SHAPE_SCENE ) {
         _shapeUniverse->getExtendedSelection(clusters, es);
     }
 }
 
-void MacroEditor::serializeViewMatrix (QDataStream& stream)
+void VisualEditor::serializeViewMatrix (QDataStream& stream)
 {
     //save position of pixel universe
     if( _activeScene == PIXEL_SCENE ) {
@@ -155,7 +155,7 @@ void MacroEditor::serializeViewMatrix (QDataStream& stream)
     stream << _pixelUniverseInit << _shapeUniverseInit;
 }
 
-void MacroEditor::loadViewMatrix (QDataStream& stream)
+void VisualEditor::loadViewMatrix (QDataStream& stream)
 {
     stream >> _pixelUniverseViewMatrix >> _shapeUniverseViewMatrix;
     stream >> _pixelUniversePosX >> _pixelUniversePosY;
@@ -177,39 +177,39 @@ void MacroEditor::loadViewMatrix (QDataStream& stream)
     }
 }
 
-QGraphicsView* MacroEditor::getGraphicsView ()
+QGraphicsView* VisualEditor::getGraphicsView ()
 {
     return ui->simulationView;
 }
 
-qreal MacroEditor::getZoomFactor ()
+qreal VisualEditor::getZoomFactor ()
 {
     return  ui->simulationView->matrix().m11();
 }
 
-void MacroEditor::zoomIn ()
+void VisualEditor::zoomIn ()
 {
     ui->simulationView->scale(2.0,2.0);
 }
 
-void MacroEditor::zoomOut ()
+void VisualEditor::zoomOut ()
 {
     ui->simulationView->scale(0.5,0.5);
 }
 
-void MacroEditor::newCellRequested ()
+void VisualEditor::newCellRequested ()
 {
     //request new cell at pos
     emit requestNewCell(getViewCenterPosWithInc());
 }
 
-void MacroEditor::newEnergyParticleRequested ()
+void VisualEditor::newEnergyParticleRequested ()
 {
     //request new energy particle at pos
     emit requestNewEnergyParticle(getViewCenterPosWithInc());
 }
 
-void MacroEditor::defocused ()
+void VisualEditor::defocused ()
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -217,7 +217,7 @@ void MacroEditor::defocused ()
     }
 }
 
-void MacroEditor::delSelection_Slot ()
+void VisualEditor::delSelection_Slot ()
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -228,7 +228,7 @@ void MacroEditor::delSelection_Slot ()
     }
 }
 
-void MacroEditor::delExtendedSelection_Slot ()
+void VisualEditor::delExtendedSelection_Slot ()
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -239,7 +239,7 @@ void MacroEditor::delExtendedSelection_Slot ()
     }
 }
 
-void MacroEditor::cellCreated (Cell* cell)
+void VisualEditor::cellCreated (Cell* cell)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -247,7 +247,7 @@ void MacroEditor::cellCreated (Cell* cell)
     }
 }
 
-void MacroEditor::energyParticleCreated(EnergyParticle* e)
+void VisualEditor::energyParticleCreated(EnergyParticle* e)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -255,7 +255,7 @@ void MacroEditor::energyParticleCreated(EnergyParticle* e)
     }
 }
 
-void MacroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
+void VisualEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -263,7 +263,7 @@ void MacroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
     }
 }
 
-void MacroEditor::reclustered (QList< CellCluster* > clusters)
+void VisualEditor::reclustered (QList< CellCluster* > clusters)
 {
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
@@ -273,7 +273,7 @@ void MacroEditor::reclustered (QList< CellCluster* > clusters)
         _pixelUniverse->universeUpdated(_context);
 }
 
-void MacroEditor::universeUpdated (SimulationContext* context, bool force)
+void VisualEditor::universeUpdated (SimulationContext* context, bool force)
 {
     if(context)
         _context = context;
@@ -313,25 +313,25 @@ void MacroEditor::universeUpdated (SimulationContext* context, bool force)
     }
 }
 
-void MacroEditor::metadataUpdated ()
+void VisualEditor::metadataUpdated ()
 {
     if( _activeScene == SHAPE_SCENE )
         _shapeUniverse->metadataUpdated();
 }
 
-void MacroEditor::toggleInformation(bool on)
+void VisualEditor::toggleInformation(bool on)
 {
 	if (_activeScene == SHAPE_SCENE) {
 		_shapeUniverse->toggleInformation(on);
 	}
 }
 
-void MacroEditor::updateTimerTimeout ()
+void VisualEditor::updateTimerTimeout ()
 {
     _screenUpdatePossible = true;
 }
 
-void MacroEditor::centerView (SimulationContext* context)
+void VisualEditor::centerView (SimulationContext* context)
 {
     //load size of the universe
 	context->lock();

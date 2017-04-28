@@ -13,22 +13,22 @@
 #include "model/entities/energyparticle.h"
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
-#include "microeditor/tokentab.h"
-#include "microeditor/celledit.h"
-#include "microeditor/clusteredit.h"
-#include "microeditor/energyedit.h"
-#include "microeditor/hexedit.h"
-#include "microeditor/metadataedit.h"
-#include "microeditor/symboledit.h"
-#include "microeditor/cellcomputeredit.h"
+#include "texteditor/tokentab.h"
+#include "texteditor/celledit.h"
+#include "texteditor/clusteredit.h"
+#include "texteditor/energyedit.h"
+#include "texteditor/hexedit.h"
+#include "texteditor/metadataedit.h"
+#include "texteditor/symboledit.h"
+#include "texteditor/cellcomputeredit.h"
 #include "global/servicelocator.h"
 
-#include "microeditor.h"
+#include "texteditor.h"
 
 const int tabPosX1 = 410;
 const int tabPosX2 = 810;
 
-MicroEditor::MicroEditor(SimulationContext* context, QObject *parent)
+TextEditor::TextEditor(SimulationContext* context, QObject *parent)
 	: QObject(parent)
 	, _context(context)
     , _focusCell(0)
@@ -42,12 +42,12 @@ MicroEditor::MicroEditor(SimulationContext* context, QObject *parent)
 
 }
 
-MicroEditor::~MicroEditor()
+TextEditor::~TextEditor()
 {
 //    delete ui;
 }
 
-void MicroEditor::init (MicroEditorWidgets widgets)
+void TextEditor::init (MicroEditorWidgets widgets)
 {
 	_widgets = widgets;
 
@@ -107,13 +107,13 @@ void MicroEditor::init (MicroEditorWidgets widgets)
 }
 
 
-void MicroEditor::update ()
+void TextEditor::update ()
 {
 	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
 	changesFromSymbolTableEditor(); //nach reset
 }
 
-void MicroEditor::setVisible (bool visible)
+void TextEditor::setVisible (bool visible)
 {
 	_widgets.requestCellButton->setVisible(visible);
 	_widgets.requestEnergyParticleButton->setVisible(visible);
@@ -124,12 +124,12 @@ void MicroEditor::setVisible (bool visible)
 	_widgets.buttonShowInfo->setVisible(visible);
 }
 
-bool MicroEditor::isVisible ()
+bool TextEditor::isVisible ()
 {
     return _widgets.requestCellButton->isVisible();
 }
 
-bool MicroEditor::eventFilter (QObject * watched, QEvent * event)
+bool TextEditor::eventFilter (QObject * watched, QEvent * event)
 {
 /*    if( (watched == _tabSymbolsWidget->parent()) && (event->type() == QEvent::Resize) ) {
         setTabSymbolsWidgetVisibility();
@@ -137,18 +137,18 @@ bool MicroEditor::eventFilter (QObject * watched, QEvent * event)
     return QObject::eventFilter(watched, event);
 }
 
-Cell* MicroEditor::getFocusedCell ()
+Cell* TextEditor::getFocusedCell ()
 {
     return _focusCell;
 }
 
-void MicroEditor::computerCompilationReturn (bool error, int line)
+void TextEditor::computerCompilationReturn (bool error, int line)
 {
 	_widgets.cellComputerEdit->setCompilationState(error, line);
 }
 
 
-void MicroEditor::defocused (bool requestDataUpdate)
+void TextEditor::defocused (bool requestDataUpdate)
 {
     disconnect(_widgets.tabClusterWidget, SIGNAL(currentChanged(int)), 0, 0);
 
@@ -195,7 +195,7 @@ void MicroEditor::defocused (bool requestDataUpdate)
     _focusEnergyParticle = 0;
 }
 
-void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
+void TextEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 {
     if( (!isVisible()) || (!_context) || (!cell) )
         return;
@@ -283,7 +283,7 @@ void MicroEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 		_widgets.delTokenButton->setEnabled(false);
 }
 
-CellMetadata MicroEditor::getCellMetadata(Cell* cell)
+CellMetadata TextEditor::getCellMetadata(Cell* cell)
 {
 	_context->lock();
 	CellMetadata meta = cell->getMetadata();
@@ -291,7 +291,7 @@ CellMetadata MicroEditor::getCellMetadata(Cell* cell)
 	return meta;
 }
 
-CellClusterMetadata MicroEditor::getCellClusterMetadata(Cell* cell)
+CellClusterMetadata TextEditor::getCellClusterMetadata(Cell* cell)
 {
 	_context->lock();
 	CellClusterMetadata meta = cell->getCluster()->getMetadata();
@@ -299,7 +299,7 @@ CellClusterMetadata MicroEditor::getCellClusterMetadata(Cell* cell)
 	return meta;
 }
 
-void MicroEditor::energyParticleFocused (EnergyParticle* e)
+void TextEditor::energyParticleFocused (EnergyParticle* e)
 {
     if( (!isVisible()) || (!_context) || (!e) )
         return;
@@ -318,7 +318,7 @@ void MicroEditor::energyParticleFocused (EnergyParticle* e)
     energyParticleUpdated_Slot(e);
 }
 
-void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
+void TextEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 {
     if( !e )
         return;
@@ -335,7 +335,7 @@ void MicroEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 }
 
 
-void MicroEditor::reclustered (QList< CellCluster* > clusters)
+void TextEditor::reclustered (QList< CellCluster* > clusters)
 {
     if( !_context)
         return;
@@ -371,13 +371,13 @@ void MicroEditor::reclustered (QList< CellCluster* > clusters)
     }
 }
 
-void MicroEditor::universeUpdated (SimulationContext* context, bool force)
+void TextEditor::universeUpdated (SimulationContext* context, bool force)
 {
 	_context = context;
     defocused(false);
 }
 
-void MicroEditor::requestUpdate ()
+void TextEditor::requestUpdate ()
 {
     //save cell data
     if( _focusCell ) {
@@ -412,21 +412,21 @@ void MicroEditor::requestUpdate ()
 
 }
 
-void MicroEditor::setCellMetadata(Cell* cell, CellMetadata meta)
+void TextEditor::setCellMetadata(Cell* cell, CellMetadata meta)
 {
 	_context->lock();
 	cell->setMetadata(meta);
 	_context->unlock();
 }
 
-void MicroEditor::setCellClusterMetadata(Cell * cell, CellClusterMetadata meta)
+void TextEditor::setCellClusterMetadata(Cell * cell, CellClusterMetadata meta)
 {
 	_context->lock();
 	cell->getCluster()->setMetadata(meta);
 	_context->unlock();
 }
 
-void MicroEditor::entitiesSelected (int numCells, int numEnergyParticles)
+void TextEditor::entitiesSelected (int numCells, int numEnergyParticles)
 {
     if( (numCells > 0) || (numEnergyParticles > 0) ){
 		_widgets.delEntityButton->setEnabled(true);
@@ -460,7 +460,7 @@ void MicroEditor::entitiesSelected (int numCells, int numEnergyParticles)
 	_widgets.selectionEditor->setText(text);
 }
 
-void MicroEditor::addTokenClicked ()
+void TextEditor::addTokenClicked ()
 {
     //create token (new token is the last token on the stack)
     int newTokenTab = _currentTokenTab+1;
@@ -508,7 +508,7 @@ void MicroEditor::addTokenClicked ()
     invokeUpdateCell(false);*/
 }
 
-void MicroEditor::delTokenClicked ()
+void TextEditor::delTokenClicked ()
 {
     //remove token
     _focusCellReduced.tokenEnergies.removeAt(_widgets.tabTokenWidget->currentIndex());
@@ -555,7 +555,7 @@ void MicroEditor::delTokenClicked ()
     invokeUpdateCell(false);*/
 }
 
-void MicroEditor::copyTokenClicked ()
+void TextEditor::copyTokenClicked ()
 {
     requestUpdate();
     _savedTokenEnergy = _focusCellReduced.tokenEnergies[_currentTokenTab];
@@ -566,7 +566,7 @@ void MicroEditor::copyTokenClicked ()
 	emit numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
 }
 
-void MicroEditor::pasteTokenClicked ()
+void TextEditor::pasteTokenClicked ()
 {
     //create token (new token is the next to current token on the stack)
     int newTokenTab = _currentTokenTab+1;
@@ -584,7 +584,7 @@ void MicroEditor::pasteTokenClicked ()
     setTabSymbolsWidgetVisibility();
 }
 
-void MicroEditor::delSelectionClicked ()
+void TextEditor::delSelectionClicked ()
 {
     if( !_context)
         return;
@@ -596,7 +596,7 @@ void MicroEditor::delSelectionClicked ()
     emit delSelection();
 }
 
-void MicroEditor::delExtendedSelectionClicked ()
+void TextEditor::delExtendedSelectionClicked ()
 {
     if( !_context)
         return;
@@ -608,7 +608,7 @@ void MicroEditor::delExtendedSelectionClicked ()
     emit delExtendedSelection();
 }
 
-void MicroEditor::buttonShowInfoClicked()
+void TextEditor::buttonShowInfoClicked()
 {
 	if (_widgets.buttonShowInfo->isChecked()) {
 		_widgets.buttonShowInfo->setIcon(QIcon(resourceInfoOn));
@@ -619,7 +619,7 @@ void MicroEditor::buttonShowInfoClicked()
 	emit toggleInformation(_widgets.buttonShowInfo->isChecked());
 }
 
-void MicroEditor::changesFromCellEditor (CellTO newCellProperties)
+void TextEditor::changesFromCellEditor (CellTO newCellProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyCellProperties(newCellProperties);
@@ -662,7 +662,7 @@ void MicroEditor::changesFromCellEditor (CellTO newCellProperties)
 
 }
 
-void MicroEditor::changesFromClusterEditor (CellTO newClusterProperties)
+void TextEditor::changesFromClusterEditor (CellTO newClusterProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyClusterProperties(newClusterProperties);
@@ -671,7 +671,7 @@ void MicroEditor::changesFromClusterEditor (CellTO newClusterProperties)
     invokeUpdateCell(true);
 }
 
-void MicroEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue)
+void TextEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue)
 {
     if( (!_context) || (!_focusEnergyParticle) )
         return;
@@ -689,7 +689,7 @@ void MicroEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel,
     emit energyParticleUpdated(_focusEnergyParticle);
 }
 
-void MicroEditor::changesFromTokenEditor (qreal energy)
+void TextEditor::changesFromTokenEditor (qreal energy)
 {
     _focusCellReduced.tokenEnergies[_currentTokenTab] = energy;
 
@@ -697,7 +697,7 @@ void MicroEditor::changesFromTokenEditor (qreal energy)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromComputerMemoryEditor(QByteArray const& data)
+void TextEditor::changesFromComputerMemoryEditor(QByteArray const& data)
 {
     //copy cell memory
     _focusCellReduced.computerMemory = data;
@@ -706,7 +706,7 @@ void MicroEditor::changesFromComputerMemoryEditor(QByteArray const& data)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromTokenMemoryEditor(QByteArray data)
+void TextEditor::changesFromTokenMemoryEditor(QByteArray data)
 {
     //copy token memory
     _focusCellReduced.tokenData[_currentTokenTab] = data;
@@ -715,7 +715,7 @@ void MicroEditor::changesFromTokenMemoryEditor(QByteArray data)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::changesFromMetadataEditor(QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
+void TextEditor::changesFromMetadataEditor(QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
 {
 	{
 		CellMetadata meta = getCellMetadata(_focusCell);
@@ -734,7 +734,7 @@ void MicroEditor::changesFromMetadataEditor(QString clusterName, QString cellNam
     emit metadataUpdated();
 }
 
-void MicroEditor::changesFromSymbolTableEditor ()
+void TextEditor::changesFromSymbolTableEditor ()
 {
     QWidget* widget = _widgets.tabTokenWidget->currentWidget();
     TokenTab* tokenTab= qobject_cast<TokenTab*>(widget);
@@ -744,13 +744,13 @@ void MicroEditor::changesFromSymbolTableEditor ()
 //    _focusCellReduced.tokenData[_currentTokenTab] = data;
 }
 
-void MicroEditor::clusterTabChanged (int index)
+void TextEditor::clusterTabChanged (int index)
 {
     requestUpdate();
     _currentClusterTab = index;
 }
 
-void MicroEditor::tokenTabChanged (int index)
+void TextEditor::tokenTabChanged (int index)
 {
     if( _currentTokenTab >= 0 ) {
         TokenTab* tab = static_cast<TokenTab*>(_widgets.tabTokenWidget->widget(_currentTokenTab));
@@ -760,7 +760,7 @@ void MicroEditor::tokenTabChanged (int index)
     _currentTokenTab = index;
 }
 
-void MicroEditor::compileButtonClicked (QString code)
+void TextEditor::compileButtonClicked (QString code)
 {
     if( (!_context) || (!_focusCell) )
         return;
@@ -780,7 +780,7 @@ void MicroEditor::compileButtonClicked (QString code)
     invokeUpdateCell(false);
 }
 
-void MicroEditor::invokeUpdateCell (bool clusterDataChanged)
+void TextEditor::invokeUpdateCell (bool clusterDataChanged)
 {
     QList< Cell* > cells;
     QList< CellTO > newCellsData;
@@ -789,7 +789,7 @@ void MicroEditor::invokeUpdateCell (bool clusterDataChanged)
     emit updateCell(cells, newCellsData, clusterDataChanged);
 }
 
-void MicroEditor::setTabSymbolsWidgetVisibility ()
+void TextEditor::setTabSymbolsWidgetVisibility ()
 {
     if(_widgets.tabTokenWidget->isVisible() ) {
 		_widgets.tabSymbolsWidget->setGeometry(tabPosX2, _widgets.tabClusterWidget->y(), _widgets.tabSymbolsWidget->width(), _widgets.tabSymbolsWidget->height());

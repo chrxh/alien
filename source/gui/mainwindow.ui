@@ -98,7 +98,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="MacroEditor" name="macroEditor" native="true">
+     <widget class="VisualEditor" name="visualEditor" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -2933,7 +2933,7 @@ p, li { white-space: pre-wrap; }
          </property>
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>400</width>
            <height>15</height>
           </size>
          </property>
@@ -4057,39 +4057,39 @@ p, li { white-space: pre-wrap; }
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>MacroEditor</class>
+   <class>VisualEditor</class>
    <extends>QWidget</extends>
-   <header>gui/macroeditor.h</header>
+   <header>gui/visualeditor.h</header>
   </customwidget>
   <customwidget>
    <class>ClusterEdit</class>
    <extends>QTextEdit</extends>
-   <header>gui/microeditor/clusteredit.h</header>
+   <header>gui/texteditor/clusteredit.h</header>
   </customwidget>
   <customwidget>
    <class>CellEdit</class>
    <extends>QTextEdit</extends>
-   <header>gui/microeditor/celledit.h</header>
+   <header>gui/texteditor/celledit.h</header>
   </customwidget>
   <customwidget>
    <class>EnergyEdit</class>
    <extends>QWidget</extends>
-   <header>gui/microeditor/energyedit.h</header>
+   <header>gui/texteditor/energyedit.h</header>
   </customwidget>
   <customwidget>
    <class>SymbolEdit</class>
    <extends>QWidget</extends>
-   <header>gui/microeditor/symboledit.h</header>
+   <header>gui/texteditor/symboledit.h</header>
   </customwidget>
   <customwidget>
    <class>MetadataEdit</class>
    <extends>QWidget</extends>
-   <header>gui/microeditor/metadataedit.h</header>
+   <header>gui/texteditor/metadataedit.h</header>
   </customwidget>
   <customwidget>
    <class>CellComputerEdit</class>
    <extends>QWidget</extends>
-   <header>gui/microeditor/cellcomputeredit.h</header>
+   <header>gui/texteditor/cellcomputeredit.h</header>
   </customwidget>
  </customwidgets>
  <resources>
