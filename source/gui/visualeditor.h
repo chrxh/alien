@@ -9,7 +9,7 @@
 #include "model/entities/cellto.h"
 
 namespace Ui {
-class MacroEditor;
+class VisualEditor;
 }
 
 class Cell;
@@ -19,7 +19,7 @@ class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
 class QGraphicsView;
-class MacroEditor : public QWidget
+class VisualEditor : public QWidget
 {
     Q_OBJECT
 
@@ -29,8 +29,8 @@ public:
         SHAPE_SCENE
     };
 
-    explicit MacroEditor(QWidget *parent = 0);
-    ~MacroEditor();
+    explicit VisualEditor(QWidget *parent = 0);
+    ~VisualEditor();
 
     void reset ();
 
@@ -86,7 +86,7 @@ private slots:
 private:
     void centerView (SimulationContext* context);
 
-    Ui::MacroEditor *ui;
+    Ui::VisualEditor *ui;
 
     SimulationContext* _context = nullptr;
     ActiveScene _activeScene;
