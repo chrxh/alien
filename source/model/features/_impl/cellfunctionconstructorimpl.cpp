@@ -39,7 +39,7 @@ namespace {
     }
 
     Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
-        , int tokenAccessNumber, int cellType, QByteArray cellFunctionData, SimulationContext* context)
+        , int tokenAccessNumber, quint8 metadata, int cellType, QByteArray cellFunctionData, SimulationContext* context)
     {
         AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
         Cell* newCell = facade->buildFeaturedCell(context->getSimulationParameters()->cellCreationEnergy
@@ -48,9 +48,9 @@ namespace {
         newCell->setMaxConnections(maxConnections);
         newCell->setTokenBlocked(true);
         newCell->setBranchNumber(tokenAccessNumber);
-		CellMetadata meta;
-		meta.color = baseCell->getMetadata().color;
-        newCell->setMetadata(meta);
+		CellMetadata newMetadata;
+		newMetadata.color = metadata;
+        newCell->setMetadata(newMetadata);
         cluster->addCell(newCell, posOfNewCell);
         return newCell;
     }
@@ -364,7 +364,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 if( maxCon > _parameters->cellMaxBonds )
                     maxCon = _parameters->cellMaxBonds;
                 int tokenAccessNumber = tokenMem[Enums::Constr::IN_CELL_BRANCH_NO] % _parameters->cellMaxTokenBranchNumber;
-                Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
+				quint8 metadata = tokenMem[Enums::Constr::IN_CELL_METADATA];
+				Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber, metadata
 					, tokenMem[Enums::Constr::IN_CELL_FUNCTION]
 					, tokenMem.mid(Enums::Constr::IN_CELL_FUNCTION_DATA)
 					, _context);
@@ -564,7 +565,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                     maxCon = _parameters->cellMaxBonds;
                 int tokenAccessNumber = tokenMem[Enums::Constr::IN_CELL_BRANCH_NO]
                         % _parameters->cellMaxTokenBranchNumber;
-                Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber
+				quint8 metadata = tokenMem[Enums::Constr::IN_CELL_METADATA];
+				Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber, metadata
 					, tokenMem[Enums::Constr::IN_CELL_FUNCTION]
 					, tokenMem.mid(Enums::Constr::IN_CELL_FUNCTION_DATA), _context);
 

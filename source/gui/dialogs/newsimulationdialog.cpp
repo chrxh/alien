@@ -13,23 +13,21 @@
 NewSimulationDialog::NewSimulationDialog(SimulationContext* context, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
+	, _localParameters(*context->getSimulationParameters())
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
 
-    _simParaDialog = new SimulationParametersDialog(context->getSimulationParameters());
     _symTblDialog = new SymbolTableDialog(context->getSymbolTable());
 
     //connections
     connect(ui->simulationParametersButton, SIGNAL(clicked()), this, SLOT(simulationParametersButtonClicked()));
     connect(ui->symbolTableButton, SIGNAL(clicked()), this, SLOT(symbolTableButtonClicked()));
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okButtonClicked()));
 }
 
 
 NewSimulationDialog::~NewSimulationDialog()
 {
-    delete _simParaDialog;
     delete _symTblDialog;
     delete ui;
 }
@@ -51,9 +49,17 @@ SymbolTable const& NewSimulationDialog::getNewSymbolTableRef()
 	return _symTblDialog->getNewSymbolTableRef();
 }
 
+SimulationParameters NewSimulationDialog::getNewSimulationParameters()
+{
+	return _localParameters;
+}
+
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
-    _simParaDialog->exec();
+	SimulationParametersDialog d(&_localParameters);
+	if (d.exec()) {
+		_localParameters = d.getSimulationParameters();
+	}
 }
 
 void NewSimulationDialog::symbolTableButtonClicked ()
@@ -61,9 +67,5 @@ void NewSimulationDialog::symbolTableButtonClicked ()
     _symTblDialog->exec();
 }
 
-void NewSimulationDialog::okButtonClicked ()
-{
-    _simParaDialog->updateSimulationParameters();
-}
 
 
