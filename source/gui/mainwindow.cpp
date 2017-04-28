@@ -185,6 +185,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
 //    connect(_startScreen, SIGNAL(startScreenFinished()), ui->actionEditor, SLOT(setEnabled(bool)));
     connect(_startScreen, SIGNAL(startScreenFinished()), SLOT(startScreenFinished()));
     _startScreen->runStartScreen(ui->macroEditor->getGraphicsView());
+	ui->frameLabel->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -902,10 +903,11 @@ void MainWindow::entitiesSelected (int numCells, int numEnergyParticles)
 
 void MainWindow::updateFrameLabel ()
 {
-    ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x")
+	ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x")
 		.arg(_simController->getFrame(), 9, 10, QLatin1Char('0'))
 		.arg(_simController->getFps(), 5, 10, QLatin1Char('0'))
 		.arg(ui->macroEditor->getZoomFactor()));
+
 }
 
 void MainWindow::startScreenFinished ()
@@ -913,6 +915,8 @@ void MainWindow::startScreenFinished ()
     ui->actionEditor->setEnabled(true);
     ui->actionZoomIn->setEnabled(true);
     ui->actionZoomOut->setEnabled(true);
+	ui->frameLabel->setVisible(true);
+	updateFrameLabel();
 }
 
 void MainWindow::changeEvent(QEvent *e)
