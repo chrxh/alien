@@ -6,7 +6,7 @@
 #include "modelsettings.h"
 #include "simulationparameters.h"
 
-void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
+void ModelData::loadDefaultSymbolTable(SymbolTable* symbolTable)
 {
     symbolTable->clearTable();
 
@@ -145,7 +145,7 @@ void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
     symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "["+QString::number(Enums::Communicator::OUT_RECEIVED_DISTANCE)+"]");
 }
 
-void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
+void ModelData::loadDefaultSimulationParameters(SimulationParameters* parameters)
 {
 	parameters->cellMutationProb = 0.000001;
 	parameters->cellMinDistance = 0.3;
@@ -176,7 +176,7 @@ void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 
 	parameters->radiationExponent = 1.0;
 	parameters->radiationFactor = 0.0002;
-	parameters->radiationProb = 0.01;
+	parameters->radiationProb = 0.03;
 	parameters->radiationVelocityMultiplier = 1.0;
 	parameters->radiationVelocityPerturbation = 0.5;
 }
