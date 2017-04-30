@@ -460,6 +460,12 @@
     <ClCompile Include="Debug\moc_simulationcontroller.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\contextfactoryimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\mapcompartmentimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\model\alienfacade.h">
@@ -673,6 +679,15 @@
       <Filter>Model\Context\_Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\context\_impl\torustopologyimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\contextfactory.h">
+      <Filter>Model\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\contextfactoryimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\mapcompartmentimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </ClInclude>
   </ItemGroup>
