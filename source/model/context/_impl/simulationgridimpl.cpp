@@ -12,15 +12,6 @@ void SimulationGridImpl::init(IntVector2D gridSize)
 	}
 }
 
-void SimulationGridImpl::deleteUnits()
-{
-	for (auto const& unitCol : _units) {
-		for (auto const& unit : unitCol) {
-			delete unit;
-		}
-	}
-}
-
 void SimulationGridImpl::registerUnit(IntVector2D gridPos, SimulationUnit * unit)
 {
 	_units[gridPos.x][gridPos.y] = unit;
