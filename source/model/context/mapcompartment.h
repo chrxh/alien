@@ -4,8 +4,11 @@
 #include "model/definitions.h"
 
 class MapCompartment
+	: public QObject
 {
+	Q_OBJECT
 public:
+	MapCompartment(QObject* parent) : QObject(parent) {}
 	virtual ~MapCompartment() {}
 
 	virtual void init(Topology* topology, IntRect mapRect) = 0;

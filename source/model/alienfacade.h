@@ -14,7 +14,7 @@ class AlienFacade
 public:
     virtual ~AlienFacade () {}
 
-	virtual SimulationUnitContext* buildSimulationContext() const = 0;
+	virtual SimulationContext* buildSimulationContext() const = 0;
 	virtual Topology* buildTorusTopology() const = 0;
 
     virtual CellCluster* buildCellCluster (SimulationUnitContext* context) const = 0;

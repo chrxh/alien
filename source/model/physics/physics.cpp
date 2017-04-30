@@ -63,11 +63,9 @@ void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D
     angularVelB2 *= radToDeg;
 }
 
-void Physics::fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp,
-                      /*QVector3D posA, QVector3D posB, QVector3D posP, */qreal angularVelA1,
-                      qreal angularVelB1, QVector3D n, qreal angularMassA, qreal angularMassB, qreal angularMassAB,
-                      qreal massA, qreal massB,
-                      QVector3D& v2, qreal& angularVel2)
+void Physics::fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp, qreal angularVelA1
+	, qreal angularVelB1, QVector3D n, qreal angularMassA, qreal angularMassB, qreal angularMassAB
+	, qreal massA, qreal massB, QVector3D& v2, qreal& angularVel2)
 {
     //calculation of rAPp
     /*QVector3D rAPp = posP-posA;

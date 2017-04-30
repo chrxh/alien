@@ -14,7 +14,7 @@
 #include "model/context/energyparticlemap.h"
 #include "model/context/topology.h"
 #include "model/context/contextfactory.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/simulationcontext.h"
 #include "model/modelsettings.h"
 
 #include "alienfacadeimpl.h"
@@ -28,10 +28,10 @@ AlienFacadeImpl::AlienFacadeImpl ()
     ServiceLocator::getInstance().registerService<AlienFacade>(this);
 }
 
-SimulationUnitContext* AlienFacadeImpl::buildSimulationContext() const
+SimulationContext* AlienFacadeImpl::buildSimulationContext() const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	SimulationUnitContext* context = factory->buildSimulationUnitContext();
+	SimulationContext* context = factory->buildSimulationContext();
 	ModelData::loadDefaultSymbolTable(context->getSymbolTable());
 	ModelData::loadDefaultSimulationParameters(context->getSimulationParameters());
 	return context;

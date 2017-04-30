@@ -27,10 +27,14 @@ class CellMap;
 class EnergyParticleMap;
 class Topology;
 class MapCompartment;
+class SimulationGrid;
+class SimulationThreads;
 class SimulationUnitContext;
+class SimulationContext;
 struct SimulationParameters;
 class SymbolTable;
 class EntityFactory;
+class ContextFactory;
 class AlienFacade;
 class SerializationFacade;
 

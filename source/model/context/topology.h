@@ -4,9 +4,11 @@
 #include "model/definitions.h"
 
 class Topology
+	: public QObject
 {
+	Q_OBJECT
 public:
-
+	Topology(QObject* parent) : QObject(parent) {}
 	virtual ~Topology() {}
 
 	virtual void init(IntVector2D size) = 0;
