@@ -1,10 +1,10 @@
 #include <QtCore/qmath.h>
 
 #include "model/modelsettings.h"
-#include "model/simulationunitcontext.h"
-#include "model/simulationparameters.h"
-#include "model/cellmap.h"
-#include "model/topology.h"
+#include "model/context/simulationunitcontext.h"
+#include "model/context/simulationparameters.h"
+#include "model/context/cellmap.h"
+#include "model/context/topology.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"

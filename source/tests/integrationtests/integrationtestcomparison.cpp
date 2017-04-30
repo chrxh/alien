@@ -3,7 +3,7 @@
 
 #include "global/numbergenerator.h"
 #include "model/simulationcontroller.h"
-#include "model/simulationunitcontext.h"
+#include "model/context/simulationunitcontext.h"
 #include "model/modelsettings.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"

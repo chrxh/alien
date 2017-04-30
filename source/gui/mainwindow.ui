@@ -4059,7 +4059,7 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>VisualEditor</class>
    <extends>QWidget</extends>
-   <header>gui/visualeditor.h</header>
+   <header>gui/visualeditor/visualeditor.h</header>
   </customwidget>
   <customwidget>
    <class>ClusterEdit</class>

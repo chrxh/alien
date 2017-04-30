@@ -9,8 +9,8 @@
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/modelsettings.h"
-#include "model/simulationunitcontext.h"
-#include "model/simulationparameters.h"
+#include "model/context/simulationunitcontext.h"
+#include "model/context/simulationparameters.h"
 
 #include "cellfunctionpropulsionimpl.h"
 

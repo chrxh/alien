@@ -2,17 +2,17 @@
 #include <QTimer>
 #include <QGraphicsItem>
 
-#include "model/simulationunitcontext.h"
-#include "model/topology.h"
+#include "gui/guisettings.h"
+#include "gui/guisettings.h"
+#include "gui/texteditor/texteditor.h"
+#include "model/context/simulationunitcontext.h"
+#include "model/context/topology.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
-#include "visualeditor/pixeluniverse.h"
-#include "visualeditor/shapeuniverse.h"
-#include "gui/guisettings.h"
-#include "gui/guisettings.h"
+#include "pixeluniverse.h"
+#include "shapeuniverse.h"
 
 
-#include "texteditor.h"
 #include "visualeditor.h"
 #include "ui_visualeditor.h"
 

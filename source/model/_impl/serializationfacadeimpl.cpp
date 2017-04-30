@@ -1,5 +1,7 @@
 #include "serializationfacadeimpl.h"
 
+#include "global/servicelocator.h"
+#include "global/numbergenerator.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
@@ -11,13 +13,12 @@
 #include "model/features/cellfeaturefactory.h"
 #include "model/metadata/symboltable.h"
 #include "model/modelsettings.h"
-#include "model/cellmap.h"
-#include "model/energyparticlemap.h"
-#include "model/topology.h"
-#include "model/_impl/simulationunitcontextimpl.h"
-#include "model/simulationparameters.h"
-#include "global/servicelocator.h"
-#include "global/numbergenerator.h"
+#include "model/context/cellmap.h"
+#include "model/context/energyparticlemap.h"
+#include "model/context/topology.h"
+#include "model/context/simulationparameters.h"
+#include "model/context/_impl/simulationunitcontextimpl.h"
+#include "model/alienfacade.h"
 
 namespace
 {
@@ -66,6 +67,10 @@ void SerializationFacadeImpl::deserializeSimulationContext(SimulationUnitContext
 
 	//deserialize map size
 	auto topology = prevContext->getTopology();
+	if (!topology) {
+		AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+		topology = facade->buildTorusTopology();
+	}
 	topology->deserializePrimitives(stream);
 	prevContext->init(topology);
 

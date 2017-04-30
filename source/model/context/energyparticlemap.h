@@ -1,7 +1,7 @@
 #ifndef ENERGYPARTICLEMAP_H
 #define ENERGYPARTICLEMAP_H
 
-#include "definitions.h"
+#include "model/definitions.h"
 
 class EnergyParticleMap
 {

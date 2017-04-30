@@ -1,5 +1,5 @@
 #include "gui/guisettings.h"
-#include "model/simulationparameters.h"
+#include "model/context/simulationparameters.h"
 
 #include "addrectstructuredialog.h"
 #include "ui_addrectstructuredialog.h"

@@ -2,8 +2,8 @@
 #include "model/entities/cell.h"
 #include "model/features/cellfeatureconstants.h"
 #include "model/modelsettings.h"
-#include "model/simulationunitcontext.h"
-#include "model/simulationparameters.h"
+#include "model/context/simulationunitcontext.h"
+#include "model/context/simulationparameters.h"
 
 #include "energyguidanceimpl.h"
 

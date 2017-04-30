@@ -1,7 +1,7 @@
 #ifndef TORUSTOPOLOGY_H
 #define TORUSTOPOLOGY_H
 
-#include "model/topology.h"
+#include "model/context/topology.h"
 
 class TorusTopologyImpl
 	: public Topology

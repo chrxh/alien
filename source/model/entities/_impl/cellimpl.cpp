@@ -5,9 +5,9 @@
 #include "model/entities/token.h"
 #include "model/features/cellfeature.h"
 #include "model/physics/physics.h"
-#include "model/simulationparameters.h"
-#include "model/simulationunitcontext.h"
-#include "model/cellmap.h"
+#include "model/context/simulationparameters.h"
+#include "model/context/simulationunitcontext.h"
+#include "model/context/cellmap.h"
 
 #include "cellimpl.h"
 

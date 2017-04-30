@@ -1,7 +1,7 @@
 #ifndef SIMULATIONPARAMETERS_H
 #define SIMULATIONPARAMETERS_H
 
-#include "definitions.h"
+#include "model/definitions.h"
 
 struct SimulationParameters
 {
