@@ -13,6 +13,7 @@
 #include "model/features/cellfeaturefactory.h"
 #include "model/metadata/symboltable.h"
 #include "model/modelsettings.h"
+#include "model/context/contextfactory.h"
 #include "model/context/cellmap.h"
 #include "model/context/energyparticlemap.h"
 #include "model/context/topology.h"
@@ -68,8 +69,8 @@ void SerializationFacadeImpl::deserializeSimulationContext(SimulationUnitContext
 	//deserialize map size
 	auto topology = prevContext->getTopology();
 	if (!topology) {
-		AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
-		topology = facade->buildTorusTopology();
+		ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
+		topology = factory->buildTorusTopology();
 	}
 	topology->deserializePrimitives(stream);
 	prevContext->init(topology);

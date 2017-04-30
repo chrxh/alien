@@ -1,14 +1,23 @@
 #ifndef MAPCOMPARTMENT_H
 #define MAPCOMPARTMENT_H
 
-#include "definitions.h"
+#include "model/definitions.h"
 
 class MapCompartment
 {
 public:
-	MapCompartment();
-	virtual ~MapCompartment();
+	virtual ~MapCompartment() {}
 
+	virtual void init(Topology* topology, IntRect mapRect) = 0;
+
+	enum class RelativeLocation {
+		UpperLeft, Upper, UpperRight, 
+		Left, Right, 
+		LowerLeft, Lower, LowerRight,
+	};
+	virtual void registerNeighborContext(RelativeLocation location, SimulationUnitContext* context) = 0;
+
+	virtual SimulationUnitContext* getNeighborContext(IntVector2D pos) const = 0;
 
 private:
 };

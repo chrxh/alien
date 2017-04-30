@@ -26,6 +26,7 @@ class SimulationUnit;
 class CellMap;
 class EnergyParticleMap;
 class Topology;
+class MapCompartment;
 class SimulationUnitContext;
 struct SimulationParameters;
 class SymbolTable;
@@ -49,5 +50,11 @@ struct IntVector2D {
 	int x;
 	int y;
 };
+
+struct IntRect {
+	IntVector2D p1;
+	IntVector2D p2;
+};
+
 
 #endif // MODEL_DEFINITIONS_H
