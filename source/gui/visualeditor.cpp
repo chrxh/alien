@@ -2,7 +2,7 @@
 #include <QTimer>
 #include <QGraphicsItem>
 
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/topology.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
@@ -273,7 +273,7 @@ void VisualEditor::reclustered (QList< CellCluster* > clusters)
         _pixelUniverse->universeUpdated(_context);
 }
 
-void VisualEditor::universeUpdated (SimulationContext* context, bool force)
+void VisualEditor::universeUpdated (SimulationUnitContext* context, bool force)
 {
     if(context)
         _context = context;
@@ -331,7 +331,7 @@ void VisualEditor::updateTimerTimeout ()
     _screenUpdatePossible = true;
 }
 
-void VisualEditor::centerView (SimulationContext* context)
+void VisualEditor::centerView (SimulationUnitContext* context)
 {
     //load size of the universe
 	context->lock();

@@ -10,8 +10,8 @@ class TestCellFunctionCommunicator;
 class CellFunctionCommunicatorImpl : public CellFunction
 {
 public:
-    CellFunctionCommunicatorImpl (SimulationContext* context);
-    CellFunctionCommunicatorImpl (QByteArray data, SimulationContext* context);
+    CellFunctionCommunicatorImpl (SimulationUnitContext* context);
+    CellFunctionCommunicatorImpl (QByteArray data, SimulationUnitContext* context);
 
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives (QDataStream& stream) override;

@@ -80,265 +80,247 @@
       <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_addenergydialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_addenergydialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_addenergydialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_addhexagonstructuredialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_addhexagonstructuredialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_addhexagonstructuredialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_addrectstructuredialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_addrectstructuredialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_addrectstructuredialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_cellcomputeredit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_cellcomputeredit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_cellcomputeredit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_celledit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_celledit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_celledit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_clusteredit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_clusteredit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_clusteredit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_computercodeedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_computercodeedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_computercodeedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_energyedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_energyedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_energyedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_hexedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_hexedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_hexedit.cpp">
-      <Filter>_Mocs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_macroeditor.cpp">
-      <Filter>_Mocs</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_macroeditor.cpp">
-      <Filter>_Mocs</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_macroeditor.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_mainwindow.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_mainwindow.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_mainwindow.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_metadataedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_metadataedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_metadataedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_metadatapropertiesedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_metadatapropertiesedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_metadatapropertiesedit.cpp">
-      <Filter>_Mocs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_microeditor.cpp">
-      <Filter>_Mocs</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_microeditor.cpp">
-      <Filter>_Mocs</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_microeditor.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_newsimulationdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_newsimulationdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_newsimulationdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_pixeluniverse.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_pixeluniverse.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_pixeluniverse.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_selectionmultiplyarrangementdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_selectionmultiplyarrangementdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_selectionmultiplyarrangementdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_selectionmultiplyrandomdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_selectionmultiplyrandomdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_selectionmultiplyrandomdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_shapeuniverse.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_shapeuniverse.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_shapeuniverse.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_simulationcontroller.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationcontroller.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_simulationcontroller.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_simulationmonitor.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_simulationmonitor.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationmonitor.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_simulationparametersdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationparametersdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_simulationparametersdialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_simulationunit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationunit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_simulationunit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_startscreencontroller.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_startscreencontroller.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_startscreencontroller.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_symboledit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_symboledit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_symboledit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_symboltabledialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_symboltabledialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_symboltabledialog.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_tokenedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_tokenedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_tokenedit.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_tokentab.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_tokentab.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_tokentab.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_tutorialwindow.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_tutorialwindow.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_tutorialwindow.cpp">
-      <Filter>_Mocs</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\dialogs\newsimulationdialog.cpp">
       <Filter>Gui\Dialogs</Filter>
@@ -457,26 +439,26 @@
     <ClCompile Include="..\..\source\gui\visualeditor.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_visualeditor.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_visualeditor.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_visualeditor.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_texteditor.cpp">
-      <Filter>Generated Files\Tests</Filter>
+    <ClCompile Include="Release\moc_texteditor.cpp">
+      <Filter>Generated Files\_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_visualeditor.cpp">
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_texteditor.cpp">
-      <Filter>Generated Files\Debug</Filter>
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_texteditor.cpp">
-      <Filter>Generated Files\Release</Filter>
+    <ClCompile Include="Debug\moc_visualeditor.cpp">
+      <Filter>Generated Files\_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_texteditor.cpp">
+      <Filter>Generated Files\_Mocs</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_visualeditor.cpp">
+      <Filter>Generated Files\_Mocs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -597,9 +579,6 @@
     <ClInclude Include="..\..\source\global\servicelocator.h">
       <Filter>Global</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\simulationcontext.h">
-      <Filter>Model</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\_impl\simulationcontextimpl.h">
       <Filter>Model\_Impl</Filter>
     </ClInclude>
@@ -619,52 +598,49 @@
       <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="ui_addenergydialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_addhexagonstructuredialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_addrectstructuredialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_cellcomputeredit.h">
-      <Filter>_Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_macroeditor.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_mainwindow.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_metadataedit.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_newsimulationdialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_selectionmultiplyarrangementdialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_selectionmultiplyrandomdialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_simulationmonitor.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_simulationparametersdialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_symboledit.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_symboltabledialog.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_tokentab.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="ui_tutorialwindow.h">
-      <Filter>_Ui</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\global\numbergenerator.h">
       <Filter>Global</Filter>
@@ -687,8 +663,11 @@
     <ClInclude Include="..\..\source\gui\visualeditor\markergraphicsitem.h">
       <Filter>Gui\Visualeditor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\model\simulationunitcontext.h">
+      <Filter>Model</Filter>
+    </ClInclude>
     <ClInclude Include="ui_visualeditor.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -960,12 +939,6 @@
     <Filter Include="Model\Features\_Impl">
       <UniqueIdentifier>{40568fdb-584a-4d29-bc27-9856eae320e1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Mocs">
-      <UniqueIdentifier>{3af6226d-ba64-491d-a675-4ba6b57c67d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Ui">
-      <UniqueIdentifier>{05f5e813-713f-4ca8-8ebc-095e3b0e8867}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Gui\Visualeditor">
       <UniqueIdentifier>{84149345-9237-4d47-b641-14dc7df60a87}</UniqueIdentifier>
     </Filter>
@@ -977,20 +950,11 @@
       <Extensions>moc;h;cpp</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
-    <Filter Include="Generated Files\Tests">
-      <UniqueIdentifier>{c984bb40-6efb-40bd-847e-b2daa0548c7d}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
+    <Filter Include="Generated Files\_Ui">
+      <UniqueIdentifier>{05f5e813-713f-4ca8-8ebc-095e3b0e8867}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{d82d91f0-83dc-44b5-81ff-cbaf2abff678}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
-    <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{c2b875e8-7f3b-4036-9993-06cc7fb941f8}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
+    <Filter Include="Generated Files\_Mocs">
+      <UniqueIdentifier>{3af6226d-ba64-491d-a675-4ba6b57c67d9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

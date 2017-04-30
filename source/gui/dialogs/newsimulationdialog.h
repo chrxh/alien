@@ -17,7 +17,7 @@ class NewSimulationDialog : public QDialog
     Q_OBJECT
 
 public:
-	NewSimulationDialog(SimulationContext* context, QWidget* parent = 0);
+	NewSimulationDialog(SimulationUnitContext* context, QWidget* parent = 0);
     ~NewSimulationDialog();
 
     IntVector2D getSize();

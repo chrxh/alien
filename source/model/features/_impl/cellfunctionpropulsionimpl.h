@@ -6,7 +6,7 @@
 class CellFunctionPropulsionImpl : public CellFunction
 {
 public:
-    CellFunctionPropulsionImpl (SimulationContext* context);
+    CellFunctionPropulsionImpl (SimulationUnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::PROPULSION; }
 

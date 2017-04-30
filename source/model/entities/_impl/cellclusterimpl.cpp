@@ -11,7 +11,7 @@
 #include "model/entities/energyparticle.h"
 #include "model/physics/physics.h"
 #include "model/modelsettings.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/cellmap.h"
 #include "model/topology.h"
 #include "model/simulationparameters.h"
@@ -20,7 +20,7 @@
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
-CellClusterImpl::CellClusterImpl (SimulationContext* context)
+CellClusterImpl::CellClusterImpl (SimulationUnitContext* context)
     : _context(context)
     , _topology(context->getTopology())
     , _cellMap(context->getCellMap())
@@ -31,7 +31,7 @@ CellClusterImpl::CellClusterImpl (SimulationContext* context)
 }
 
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
-    , QVector3D vel, SimulationContext* context)
+    , QVector3D vel, SimulationUnitContext* context)
     : _context(context)
     , _topology(context->getTopology())
     , _cellMap(context->getCellMap())
@@ -76,7 +76,7 @@ namespace
 	}
 }
 
-CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationContext* context)
+CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationUnitContext* context)
     : _context(context)
     , _topology(context->getTopology())
     , _cellMap(context->getCellMap())

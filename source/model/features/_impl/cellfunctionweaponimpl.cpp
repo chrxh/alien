@@ -1,4 +1,4 @@
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/cellmap.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -8,7 +8,7 @@
 
 #include "cellfunctionweaponimpl.h"
 
-CellFunctionWeaponImpl::CellFunctionWeaponImpl (SimulationContext* context)
+CellFunctionWeaponImpl::CellFunctionWeaponImpl (SimulationUnitContext* context)
     : CellFunction(context)
     , _cellMap(context->getCellMap())
 	, _parameters(context->getSimulationParameters())

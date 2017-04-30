@@ -6,7 +6,7 @@
 #include "model/simulationcontroller.h"
 #include "model/metadata/symboltable.h"
 #include "model/entities/cellto.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/modelsettings.h"
 
 
@@ -19,10 +19,6 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
-//- Renaming: Macroeditor -> VisualEditor, MicroEditor -> TextEditor
-//- Bei Tokenübetragung im CellFunctionConstructor: Energie vom Token = 0
-//- zurück klappt nicht
-//- laden von Simulation (mit Replicator) klappt nicht
 
 //Model-Refactoring:
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen

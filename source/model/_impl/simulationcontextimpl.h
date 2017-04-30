@@ -3,10 +3,10 @@
 
 #include <QMutex>
 
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/topology.h"
 
-class SimulationContextImpl : public SimulationContext
+class SimulationContextImpl : public SimulationUnitContext
 {
 public:
 	SimulationContextImpl();

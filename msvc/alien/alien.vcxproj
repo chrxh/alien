@@ -644,7 +644,7 @@
     <ClInclude Include="..\..\source\model\physics\codingphysicalquantities.h" />
     <ClInclude Include="..\..\source\model\physics\physics.h" />
     <ClInclude Include="..\..\source\model\serializationfacade.h" />
-    <ClInclude Include="..\..\source\model\simulationcontext.h" />
+    <ClInclude Include="..\..\source\model\simulationunitcontext.h" />
     <CustomBuild Include="..\..\source\model\simulationcontroller.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing simulationcontroller.h...</Message>

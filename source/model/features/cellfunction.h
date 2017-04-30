@@ -9,7 +9,7 @@
 class CellFunction: public CellFeature
 {
 public:
-    CellFunction (SimulationContext* context) : CellFeature(context) {}
+    CellFunction (SimulationUnitContext* context) : CellFeature(context) {}
     virtual ~CellFunction() {}
 
     //new interface

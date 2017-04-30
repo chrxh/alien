@@ -11,8 +11,8 @@ class CellImpl : public Cell
 {
 public:
 
-    CellImpl (SimulationContext* context);
-    CellImpl (qreal energy, SimulationContext* context, int maxConnections
+    CellImpl (SimulationUnitContext* context);
+    CellImpl (qreal energy, SimulationUnitContext* context, int maxConnections
         , int tokenAccessNumber, QVector3D relPos);
 
     ~CellImpl();

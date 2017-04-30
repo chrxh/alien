@@ -7,12 +7,12 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/simulationparameters.h"
 
 #include "cellfunctionscannerimpl.h"
 
-CellFunctionScannerImpl::CellFunctionScannerImpl(SimulationContext* context)
+CellFunctionScannerImpl::CellFunctionScannerImpl(SimulationUnitContext* context)
     : CellFunction(context)
 {
 }

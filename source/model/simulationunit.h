@@ -8,12 +8,12 @@ class SimulationUnit : public QObject
 {
     Q_OBJECT
 public:
-    SimulationUnit (SimulationContext* context, QObject* parent = 0);
+    SimulationUnit (SimulationUnitContext* context, QObject* parent = 0);
     ~SimulationUnit ();
 
 public slots:
 	void init(uint seed);
-	void setContext(SimulationContext* context);
+	void setContext(SimulationUnitContext* context);
 
 public:
     qreal calcTransEnergy ();
@@ -37,7 +37,7 @@ private:
 	
 	void debugCluster(CellCluster* c, int s);
     
-	SimulationContext* _context = nullptr;
+	SimulationUnitContext* _context = nullptr;
 };
 
 #endif // SIMULATIONUNIT_H
