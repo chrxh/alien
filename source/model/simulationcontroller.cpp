@@ -121,7 +121,10 @@ void SimulationController::newUniverse (IntVector2D size, SymbolTable const& sym
 
 	_frame = 0;
 
-	_context->init(size);
+	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+	auto topology = facade->buildTorusTopology();
+	topology->init(size);
+	_context->init(topology);
 	_context->getSymbolTable()->setTable(symbolTable);
 	*_context->getSimulationParameters() = parameters;
 	_context->getClustersRef().clear();

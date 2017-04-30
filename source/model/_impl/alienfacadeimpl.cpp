@@ -14,9 +14,10 @@
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
 #include "model/modelsettings.h"
-#include "model/_impl/simulationcontextimpl.h"
 
 #include "alienfacadeimpl.h"
+#include "simulationunitcontextimpl.h"
+#include "torustopologyimpl.h"
 
 namespace {
 	AlienFacadeImpl factoryFacadeImpl;
@@ -29,10 +30,15 @@ AlienFacadeImpl::AlienFacadeImpl ()
 
 SimulationUnitContext* AlienFacadeImpl::buildSimulationContext() const
 {
-	SimulationUnitContext* context = new SimulationContextImpl();
+	SimulationUnitContext* context = new SimulationUnitContextImpl();
 	ModelData::loadDefaultSymbolTable(context->getSymbolTable());
 	ModelData::loadDefaultSimulationParameters(context->getSimulationParameters());
 	return context;
+}
+
+Topology * AlienFacadeImpl::buildTorusTopology() const
+{
+	return new TorusTopologyImpl();
 }
 
 CellCluster* AlienFacadeImpl::buildCellCluster (SimulationUnitContext* context) const

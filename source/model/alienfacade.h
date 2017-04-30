@@ -15,6 +15,7 @@ public:
     virtual ~AlienFacade () {}
 
 	virtual SimulationUnitContext* buildSimulationContext() const = 0;
+	virtual Topology* buildTorusTopology() const = 0;
 
     virtual CellCluster* buildCellCluster (SimulationUnitContext* context) const = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel

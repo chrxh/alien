@@ -11,8 +11,7 @@ class SimulationUnitContext
 public:
     virtual ~SimulationUnitContext () {}
 
-	virtual void init(IntVector2D size) = 0;
-	virtual void initWithoutTopology() = 0;
+	virtual void init(Topology* topology) = 0;
 
     virtual void lock () = 0;
     virtual void unlock () = 0;

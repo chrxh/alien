@@ -9,6 +9,7 @@
 #include "model/simulationunitcontext.h"
 #include "model/alienfacade.h"
 #include "model/modelsettings.h"
+#include "model/topology.h"
 #include "model/simulationparameters.h"
 
 #include "tests/settings.h"
@@ -40,7 +41,9 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 
 	_context = facade->buildSimulationContext();
-	_context->init({1000, 1000});
+	auto topology = facade->buildTorusTopology();
+	topology->init({ 1000, 1000 });
+	_context->init(topology);
 
 	{
 		//create cells, cell functions and token for cluster1
