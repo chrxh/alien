@@ -81,8 +81,7 @@ public:
 private:
     friend class CellCluster;
 
-    CellMap* _cellMap = nullptr;
-	SimulationParameters* _parameters = nullptr;
+	SimulationUnitContext* _context = nullptr;
 	CellFeature* _features = nullptr;
 
     QVector<Token*> _tokenStack;

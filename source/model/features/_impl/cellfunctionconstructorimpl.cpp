@@ -25,9 +25,6 @@ using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenAccessNumber;
 
 CellFunctionConstructorImpl::CellFunctionConstructorImpl (SimulationUnitContext* context)
     : CellFunction(context)
-    , _cellMap(context->getCellMap())
-    , _topology(context->getTopology())
-	, _parameters(context->getSimulationParameters())
 {
 }
 
@@ -133,6 +130,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 	auto& tokenMem = token->getMemoryRef();
 	quint8 cmd = tokenMem[Enums::Constr::IN] % 4;
     quint8 opt = tokenMem[Enums::Constr::IN_OPTION] % 7;
+	auto cellMap = _context->getCellMap();
+	auto topology = _context->getTopology();
+	auto parameters = _context->getSimulationParameters();
 
     //do nothing?
     if( cmd == Enums::ConstrIn::DO_NOTHING )
@@ -140,7 +140,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
     //read shift length for construction site from token data
     qreal len = CodingPhysicalQuantities::convertDataToShiftLen(tokenMem[Enums::Constr::IN_DIST]);
-    if( len > _parameters->cellMaxDistance ) {        //length to large?
+    if( len > parameters->cellMaxDistance ) {        //length to large?
         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
         return processingResult;
     }
@@ -178,8 +178,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             qreal minAngleConstrSite = 360.0;
             foreach( Cell* otherCell, constructionSite ) {
                 qreal r = (otherCell->getRelPosition() - constructionCell->getRelPosition()).length();
-                if( _parameters->cellMaxDistance < (2.0*r) ) {
-                    qreal a = qAbs(2.0*qAsin(_parameters->cellMaxDistance/(2.0*r))*radToDeg);
+                if( parameters->cellMaxDistance < (2.0*r) ) {
+                    qreal a = qAbs(2.0*qAsin(parameters->cellMaxDistance/(2.0*r))*radToDeg);
                     if( a < minAngleConstrSite )
                         minAngleConstrSite = a;
                 }
@@ -187,8 +187,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             qreal minAngleConstructor = 360.0;
             foreach( Cell* otherCell, constructor ) {
                 qreal r = (otherCell->getRelPosition() - constructionCell->getRelPosition()).length();
-                if( _parameters->cellMaxDistance < (2.0*r) ) {
-                    qreal a = qAbs(2.0*qAsin(_parameters->cellMaxDistance/(2.0*r))*radToDeg);
+                if( parameters->cellMaxDistance < (2.0*r) ) {
+                    qreal a = qAbs(2.0*qAsin(parameters->cellMaxDistance/(2.0*r))*radToDeg);
                     if( a < minAngleConstructor )
                         minAngleConstructor = a;
                 }
@@ -263,10 +263,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 qreal angularMassNew = cluster->calcAngularMassWithoutUpdate();
                 qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), angularMassNew, angularVelNew);
-                qreal eDiff = (kinEnergyNew-kinEnergyOld)/_parameters->cellMass_Reciprocal;
+                qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //not enough energy?
-                if( token->getEnergy() <= (_parameters->cellCreationEnergy + eDiff + _parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellCreationEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore cluster
@@ -284,7 +284,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
-                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
+                    if( obstacleCheck(cluster, safeMode, cellMap, topology, parameters) ) {
                         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
@@ -332,17 +332,17 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
                 qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
-                qreal eDiff = (kinEnergyNew-kinEnergyOld)/_parameters->cellMass_Reciprocal;
+                qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //energy for possible new token
                 qreal tokenEnergy = 0;
                 if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED ))
-                    tokenEnergy = _parameters->tokenCreationEnergy;
+                    tokenEnergy = parameters->tokenCreationEnergy;
 
                 //not enough energy?
-                if( token->getEnergy() <= (_parameters->cellCreationEnergy + tokenEnergy + eDiff + _parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore construction site
@@ -361,9 +361,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 quint8 maxCon = tokenMem[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
                 if( maxCon < 2 )
                     maxCon = 2;
-                if( maxCon > _parameters->cellMaxBonds )
-                    maxCon = _parameters->cellMaxBonds;
-                int tokenAccessNumber = tokenMem[Enums::Constr::IN_CELL_BRANCH_NO] % _parameters->cellMaxTokenBranchNumber;
+                if( maxCon > parameters->cellMaxBonds )
+                    maxCon = parameters->cellMaxBonds;
+                int tokenAccessNumber = tokenMem[Enums::Constr::IN_CELL_BRANCH_NO] % parameters->cellMaxTokenBranchNumber;
 				quint8 metadata = tokenMem[Enums::Constr::IN_CELL_METADATA];
 				Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber, metadata
 					, tokenMem[Enums::Constr::IN_CELL_FUNCTION]
@@ -373,7 +373,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
-                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
+                    if( obstacleCheck(cluster, safeMode, cellMap, topology, parameters) ) {
                         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
@@ -398,10 +398,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //connect cell with construction site
                 foreach(Cell* otherCell, constructionSite) {
-                    if( (otherCell->getNumConnections() < _parameters->cellMaxBonds)
-                            && (newCell->getNumConnections() < _parameters->cellMaxBonds)
+                    if( (otherCell->getNumConnections() < parameters->cellMaxBonds)
+                            && (newCell->getNumConnections() < parameters->cellMaxBonds)
                             && (otherCell !=constructionCell ) ) {
-                        if (_topology->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (_parameters->cellMaxDistance + ALIEN_PRECISION) ) {
+                        if (topology->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (parameters->cellMaxDistance + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( tokenMem.at(Enums::Constr::IN_CELL_MAX_CONNECTIONS) == 0 ) {
@@ -466,19 +466,19 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //create new token if desired
                 if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
-                    if( newCell->getNumToken(true) < _parameters->cellMaxToken ) {
+                    if( newCell->getNumToken(true) < parameters->cellMaxToken ) {
 						auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-						auto newToken = factory->buildToken(_context, _parameters->tokenCreationEnergy);
+						auto newToken = factory->buildToken(_context, parameters->tokenCreationEnergy);
                         newCell->addToken(newToken, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                        token->setEnergy(token->getEnergy() - _parameters->tokenCreationEnergy);
+                        token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                     }
                 }
                 if( opt == Enums::ConstrInOption::CREATE_DUP_TOKEN ) {
-                    if( newCell->getNumToken(true) < _parameters->cellMaxToken ) {
+                    if( newCell->getNumToken(true) < parameters->cellMaxToken ) {
                         auto dup = token->duplicate();
-                        dup->setEnergy(_parameters->tokenCreationEnergy);
+                        dup->setEnergy(parameters->tokenCreationEnergy);
                         newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                        token->setEnergy(token->getEnergy() - _parameters->tokenCreationEnergy);
+                        token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                     }
                 }
             }
@@ -497,7 +497,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
     else {
 
         //new cell connection possible?
-        if( numCon < _parameters->cellMaxBonds ) {
+        if( numCon < parameters->cellMaxBonds ) {
 
             //is there any connection?
             if( numCon > 0 ) {
@@ -506,7 +506,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 QVector< qreal > angles(numCon);
                 for(int i = 0; i < numCon; ++i) {
                     QVector3D displacement = cluster->calcPosition(cell->getConnection(i),true)-cluster->calcPosition(cell, true);
-                    _topology->correctDisplacement(displacement);
+                    topology->correctDisplacement(displacement);
                     angles[i] = Physics::angleOfVector(displacement);
                 }
                 qSort(angles);
@@ -528,7 +528,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 angleGap = angleGap + CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
                 //calc coordinates for new cell from angle gap and construct cell
-                QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*_parameters->cellFunctionConstructorOffspringDistance;
+                QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringDistance;
                 QVector3D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
@@ -541,17 +541,17 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
                 qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
-                qreal eDiff = (kinEnergyNew-kinEnergyOld)/_parameters->cellMass_Reciprocal;
+                qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //energy for possible new token
                 qreal tokenEnergy = 0;
                 if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN )
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
-                    tokenEnergy = _parameters->tokenCreationEnergy;
+                    tokenEnergy = parameters->tokenCreationEnergy;
 
                 //not enough energy?
-                if( token->getEnergy() <= (_parameters->cellCreationEnergy + tokenEnergy + eDiff + _parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
                     return processingResult;
                 }
@@ -561,10 +561,10 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 quint8 maxCon = tokenMem[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
                 if( maxCon < 1 )
                     maxCon = 1;
-                if( maxCon > _parameters->cellMaxBonds )
-                    maxCon = _parameters->cellMaxBonds;
+                if( maxCon > parameters->cellMaxBonds )
+                    maxCon = parameters->cellMaxBonds;
                 int tokenAccessNumber = tokenMem[Enums::Constr::IN_CELL_BRANCH_NO]
-                        % _parameters->cellMaxTokenBranchNumber;
+                        % parameters->cellMaxTokenBranchNumber;
 				quint8 metadata = tokenMem[Enums::Constr::IN_CELL_METADATA];
 				Cell* newCell = constructNewCell(cell, pos, maxCon, tokenAccessNumber, metadata
 					, tokenMem[Enums::Constr::IN_CELL_FUNCTION]
@@ -573,7 +573,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
-                    if( obstacleCheck(cluster, safeMode, _cellMap, _topology, _parameters) ) {
+                    if( obstacleCheck(cluster, safeMode, cellMap, topology, parameters) ) {
                         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
@@ -636,15 +636,15 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 				auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 				if ((opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
-					auto token = factory->buildToken(_context, _parameters->tokenCreationEnergy);
+					auto token = factory->buildToken(_context, parameters->tokenCreationEnergy);
                     newCell->addToken(token, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                    token->setEnergy(token->getEnergy() - _parameters->tokenCreationEnergy);
+                    token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                 }
                 if( opt == Enums::ConstrInOption::CREATE_DUP_TOKEN ) {
                     auto dup = token->duplicate();
-                    dup->setEnergy(_parameters->tokenCreationEnergy);
+                    dup->setEnergy(parameters->tokenCreationEnergy);
                     newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
-                    token->setEnergy(token->getEnergy() - _parameters->tokenCreationEnergy);
+                    token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                 }
 
             }

@@ -72,9 +72,6 @@ private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
 
     SimulationUnitContext* _context = nullptr;
-    Topology* _topology = nullptr;
-    CellMap* _cellMap = nullptr;
-	SimulationParameters* _parameters = nullptr;
 
     qreal _angle = 0.0;       //in deg
     QVector3D _pos;

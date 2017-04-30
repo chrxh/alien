@@ -36,10 +36,6 @@ private:
 	void collisionWithCell(Cell* cell);
 
 	SimulationUnitContext* _context = nullptr;
-	Topology* _topology = nullptr;
-	CellMap* _cellMap = nullptr;
-	EnergyParticleMap* _energyMap = nullptr;
-	SimulationParameters* _parameters = nullptr;
 
 	qreal _energy = 0.0;
 	QVector3D _pos;

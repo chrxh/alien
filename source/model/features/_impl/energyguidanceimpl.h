@@ -10,9 +10,6 @@ public:
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);
-
-private:
-	SimulationParameters* _parameters = nullptr;
 };
 
 #endif // ENERGYGUIDANCEDECORATORIMPL_H

@@ -14,7 +14,7 @@ public:
 	SimulationUnitContext(QObject* parent) : QObject(parent) {}
 	virtual ~SimulationUnitContext() {}
 	
-	virtual void init(SymbolTable * symbolTable, Topology* topology) = 0;
+	virtual void init(Topology* topology, SymbolTable * symbolTable, SimulationParameters* parameters) = 0;
 
     virtual Topology* getTopology () const = 0;
 	virtual EnergyParticleMap* getEnergyParticleMap() const = 0;

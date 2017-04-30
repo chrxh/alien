@@ -12,7 +12,6 @@ SimulationUnitContextImpl::SimulationUnitContextImpl(QObject* parent)
 {
 	_energyParticleMap = new EnergyParticleMap(this);
 	_cellMap = new CellMap(this);
-	_simulationParameters = new SimulationParameters(this);
 }
 
 SimulationUnitContextImpl::~SimulationUnitContextImpl ()
@@ -20,10 +19,21 @@ SimulationUnitContextImpl::~SimulationUnitContextImpl ()
 	deleteClustersAndEnergyParticles();
 }
 
-void SimulationUnitContextImpl::init(SymbolTable * symbolTable, Topology* topology)
+void SimulationUnitContextImpl::init(Topology* topology, SymbolTable * symbolTable, SimulationParameters* parameters)
 {
-	_symbolTable = symbolTable;
-	_topology = topology;
+	if (_topology != topology) {
+		delete _topology;
+		_topology = topology;
+	}
+	if (_symbolTable != symbolTable) {
+		delete _symbolTable;
+		_symbolTable = symbolTable;
+	}
+	if (_simulationParameters != parameters) {
+		delete _simulationParameters;
+		_simulationParameters = parameters;
+	}
+
 	_energyParticleMap->init(_topology);
 	_cellMap->init(_topology);
 	deleteClustersAndEnergyParticles();

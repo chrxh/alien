@@ -31,7 +31,7 @@ class SimulationGrid;
 class SimulationThreads;
 class SimulationUnitContext;
 class SimulationContext;
-struct SimulationParameters;
+class SimulationParameters;
 class SymbolTable;
 class EntityFactory;
 class ContextFactory;

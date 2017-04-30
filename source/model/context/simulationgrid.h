@@ -13,7 +13,6 @@ public:
 
 	virtual void init(IntVector2D gridSize) = 0;
 
-	virtual void deleteUnits() = 0;
 	virtual void registerUnit(IntVector2D gridPos, SimulationUnit* unit) = 0;
 };
 

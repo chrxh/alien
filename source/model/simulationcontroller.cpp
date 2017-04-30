@@ -18,6 +18,7 @@
 #include "model/modelsettings.h"
 #include "context/contextfactory.h"
 #include "context/simulationcontext.h"
+#include "context/simulationthreads.h"
 #include "context/simulationunitcontext.h"
 #include "context/simulationparameters.h"
 #include "context/energyparticlemap.h"
@@ -80,31 +81,26 @@ SimulationContext* SimulationController::getSimulationContext()
     return _context;
 }
 
-void SimulationController::newUniverse(int maxThreads, IntVector2D gridSize, IntVector2D universeSize, SymbolTable const& symbolTable, SimulationParameters const& parameters)
+void SimulationController::newUniverse(int maxThreads, IntVector2D gridSize, IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters)
 {
-	//TODO: terminate simulation units
-
 	_frame = 0;
-	_context->lock();
-	auto grid = _context->getSimulationGrid();
-	grid->deleteUnits();
+	auto threads = _context->getSimulationThreads();
+	threads->init(maxThreads);
+
+	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
+	auto topology = factory->buildTorusTopology(_context);
+	topology->init(universeSize);
+
+	auto grid = factory->buildSimulationGrid();
+	grid->init(gridSize);
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
 			auto unit = buildSimulationUnit();
 			grid->registerUnit({ x, y }, unit);
 		}
 	}
-	
-	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
-	auto topology = facade->buildTorusTopology();
-	topology->init(size);
-	_context->init(topology);
-	_context->getSymbolTable()->setTable(symbolTable);
-	*_context->getSimulationParameters() = parameters;
-	_context->getClustersRef().clear();
-	_context->getEnergyParticlesRef().clear();
 
-	_context->unlock();
+	_context->init(topology, grid, threads, symbolTable, parameters);
 }
 
 void SimulationController::saveUniverse (QDataStream& stream)

@@ -16,9 +16,6 @@ protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
-    CellMap* _cellMap = nullptr;
-    Topology* _topology = nullptr;
-	SimulationParameters* _parameters = nullptr;
 };
 
 #endif // CELLFUNCTIONCONSTRUCTOR_H
