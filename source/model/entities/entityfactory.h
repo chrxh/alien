@@ -1,9 +1,6 @@
 #ifndef ENTITYFACTORY_H
 #define ENTITYFACTORY_H
 
-#include <QtGlobal>
-#include <QVector3D>
-
 #include "model/definitions.h"
 
 class EntityFactory

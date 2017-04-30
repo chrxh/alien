@@ -8,7 +8,7 @@
 
 namespace
 {
-    EntityFactoryImpl entityFactoryImpl;
+    EntityFactoryImpl instance;
 }
 
 EntityFactoryImpl::EntityFactoryImpl ()

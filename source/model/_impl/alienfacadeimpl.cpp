@@ -13,10 +13,10 @@
 #include "model/context/cellmap.h"
 #include "model/context/energyparticlemap.h"
 #include "model/context/topology.h"
+#include "model/context/contextfactory.h"
+#include "model/context/simulationunitcontext.h"
 #include "model/modelsettings.h"
 
-#include "model/context/_impl/simulationunitcontextimpl.h"
-#include "model/context/_impl/torustopologyimpl.h"
 #include "alienfacadeimpl.h"
 
 namespace {
@@ -30,7 +30,8 @@ AlienFacadeImpl::AlienFacadeImpl ()
 
 SimulationUnitContext* AlienFacadeImpl::buildSimulationContext() const
 {
-	SimulationUnitContext* context = new SimulationUnitContextImpl();
+	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
+	SimulationUnitContext* context = factory->buildSimulationUnitContext();
 	ModelData::loadDefaultSymbolTable(context->getSymbolTable());
 	ModelData::loadDefaultSimulationParameters(context->getSimulationParameters());
 	return context;
@@ -38,7 +39,8 @@ SimulationUnitContext* AlienFacadeImpl::buildSimulationContext() const
 
 Topology * AlienFacadeImpl::buildTorusTopology() const
 {
-	return new TorusTopologyImpl();
+	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
+	return factory->buildTorusTopology();
 }
 
 CellCluster* AlienFacadeImpl::buildCellCluster (SimulationUnitContext* context) const

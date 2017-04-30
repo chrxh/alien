@@ -228,11 +228,14 @@
     <ClInclude Include="..\..\source\global\numbergenerator.h" />
     <ClInclude Include="..\..\source\global\servicelocator.h" />
     <ClInclude Include="..\..\source\model\context\cellmap.h" />
+    <ClInclude Include="..\..\source\model\context\contextfactory.h" />
     <ClInclude Include="..\..\source\model\context\energyparticlemap.h" />
     <ClInclude Include="..\..\source\model\context\mapcompartment.h" />
     <ClInclude Include="..\..\source\model\context\simulationparameters.h" />
     <ClInclude Include="..\..\source\model\context\simulationunitcontext.h" />
     <ClInclude Include="..\..\source\model\context\topology.h" />
+    <ClInclude Include="..\..\source\model\context\_impl\contextfactoryimpl.h" />
+    <ClInclude Include="..\..\source\model\context\_impl\mapcompartmentimpl.h" />
     <ClInclude Include="..\..\source\model\context\_impl\simulationunitcontextimpl.h" />
     <ClInclude Include="..\..\source\model\context\_impl\torustopologyimpl.h" />
     <CustomBuild Include="..\..\source\model\simulationcontroller.h">
@@ -741,6 +744,8 @@
     <ClCompile Include="..\..\source\model\context\cellmap.cpp" />
     <ClCompile Include="..\..\source\model\context\energyparticlemap.cpp" />
     <ClCompile Include="..\..\source\model\context\simulationparameters.cpp" />
+    <ClCompile Include="..\..\source\model\context\_impl\contextfactoryimpl.cpp" />
+    <ClCompile Include="..\..\source\model\context\_impl\mapcompartmentimpl.cpp" />
     <ClCompile Include="..\..\source\model\context\_impl\simulationunitcontextimpl.cpp" />
     <ClCompile Include="..\..\source\model\context\_impl\torustopologyimpl.cpp" />
     <ClCompile Include="..\..\source\model\definitions.cpp" />
