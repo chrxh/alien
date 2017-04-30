@@ -12,8 +12,7 @@
 #include "cellimpl.h"
 
 CellImpl::CellImpl (SimulationUnitContext* context)
-    : _cellMap(context->getCellMap())
-	, _parameters(context->getSimulationParameters())
+    : _context(context)
 	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
     , _newTokenStack(context->getSimulationParameters()->cellMaxToken)
     , _id(NumberGenerator::getInstance().createNewTag())
@@ -324,11 +323,12 @@ void CellImpl::setAbsPosition (QVector3D pos)
 void CellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
 {
     QVector3D oldPos(calcPosition());
-    if( _cellMap->getCell(oldPos) == this )
-        _cellMap->setCell(oldPos, 0);
+	auto cellMap = _context->getCellMap();
+    if(cellMap->getCell(oldPos) == this )
+		cellMap->setCell(oldPos, 0);
     _relPos = _cluster->absToRelPos(pos);
-    if( _cellMap->getCell(pos) == 0 )
-        _cellMap->setCell(pos, this);
+    if(cellMap->getCell(pos) == 0 )
+		cellMap->setCell(pos, this);
 }
 
 QVector3D CellImpl::getRelPosition () const
@@ -349,7 +349,7 @@ int CellImpl::getBranchNumber () const
 
 void CellImpl::setBranchNumber (int i)
 {
-    _tokenAccessNumber = i % _parameters->cellMaxTokenBranchNumber;
+    _tokenAccessNumber = i % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
 }
 
 bool CellImpl::isTokenBlocked () const
@@ -433,7 +433,7 @@ Token* CellImpl::takeTokenFromStack ()
 
 void CellImpl::mutationByChance()
 {
-	if (NumberGenerator::getInstance().random() < _parameters->cellMutationProb) {
+	if (NumberGenerator::getInstance().random() < _context->getSimulationParameters()->cellMutationProb) {
 		_features->mutate();
 	}
 }
@@ -467,8 +467,9 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
     quint32 tokenStackPointer;
     stream >> tokenStackPointer;
     _tokenStackPointer = static_cast<quint32>(tokenStackPointer);
-    if (_tokenStackPointer > _parameters->cellMaxToken)
-        _tokenStackPointer = _parameters->cellMaxToken;
+	auto parameters = _context->getSimulationParameters();
+    if (_tokenStackPointer > parameters->cellMaxToken)
+        _tokenStackPointer = parameters->cellMaxToken;
     _newTokenStackPointer = 0;
 
 	//remaining data

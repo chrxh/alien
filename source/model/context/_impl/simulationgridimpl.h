@@ -12,7 +12,6 @@ public:
 
 	virtual void init(IntVector2D gridSize) override;
 
-	virtual void deleteUnits() override;
 	virtual void registerUnit(IntVector2D gridPos, SimulationUnit* unit) override;
 
 private:

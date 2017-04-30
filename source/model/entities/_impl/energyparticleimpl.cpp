@@ -19,10 +19,6 @@
 
 EnergyParticleImpl::EnergyParticleImpl(SimulationUnitContext* context)
 	: _context(context)
-	, _topology(context->getTopology())
-	, _cellMap(context->getCellMap())
-	, _energyMap(context->getEnergyParticleMap())
-	, _parameters(context->getSimulationParameters())
 	, _id(NumberGenerator::getInstance().getInstance().createNewTag())
 {
 
@@ -40,16 +36,19 @@ EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D ve
 //        cluster is nonzero if particle transforms into cell
 bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 {
-	_energyMap->removeParticleIfPresent(_pos, this);
+	auto cellMap = _context->getCellMap();
+	auto energyMap = _context->getEnergyParticleMap();
+	auto parameters = _context->getSimulationParameters();
+	energyMap->removeParticleIfPresent(_pos, this);
 	move();
 
-	if (EnergyParticle* otherEnergy = _energyMap->getParticle(_pos)) {
+	if (EnergyParticle* otherEnergy = energyMap->getParticle(_pos)) {
 		collisionWithEnergyParticle(otherEnergy);
 		return false;
 	}
 
 	//is there a cell at new position?
-	Cell* cell(_cellMap->getCell(_pos));
+	Cell* cell(cellMap->getCell(_pos));
 	if (cell) {
 		collisionWithCell(cell);
 		return false;
@@ -58,14 +57,14 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 	//enough energy for cell transformation?
 	qreal p(NumberGenerator::getInstance().random());
 	qreal eKin = Physics::kineticEnergy(1, _vel, 0, 0);
-	qreal eNew = _energy - (eKin / _parameters->cellMass_Reciprocal);
-	if ((eNew >= _parameters->cellMinEnergy) && (p < _parameters->cellTransformationProb)) {
+	qreal eNew = _energy - (eKin / parameters->cellMass_Reciprocal);
+	if ((eNew >= parameters->cellMinEnergy) && (p < parameters->cellTransformationProb)) {
 
 		//look for neighbor cell
 		for (int dx = -2; dx < 3; ++dx) {
 			for (int dy = -2; dy < 3; ++dy) {
-				if (_cellMap->getCell(_pos + QVector3D(dx, dy, 0.0))) {
-					_energyMap->setParticle(_pos, this);
+				if (cellMap->getCell(_pos + QVector3D(dx, dy, 0.0))) {
+					energyMap->setParticle(_pos, this);
 					return true;
 				}
 			}
@@ -78,14 +77,14 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 		cells << c;
 		cluster = facade->buildCellCluster(cells, 0.0, _pos, 0.0, _vel, _context);
 		_energy = 0;
-		_cellMap->setCell(_pos, c);
+		cellMap->setCell(_pos, c);
 		CellMetadata meta = c->getMetadata();
 		meta.color = _metadata.color;
 		c->setMetadata(meta);
 		return false;
 	}
 	else {
-		_energyMap->setParticle(_pos, this);
+		energyMap->setParticle(_pos, this);
 	}
 	return true;
 }
@@ -118,7 +117,7 @@ void EnergyParticleImpl::collisionWithEnergyParticle(EnergyParticle* otherEnergy
 void EnergyParticleImpl::move()
 {
 	_pos += _vel;
-	_topology->correctPosition(_pos);
+	_context->getTopology()->correctPosition(_pos);
 }
 
 void EnergyParticleImpl::serializePrimitives(QDataStream& stream) const

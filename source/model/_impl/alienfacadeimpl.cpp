@@ -28,19 +28,19 @@ AlienFacadeImpl::AlienFacadeImpl ()
     ServiceLocator::getInstance().registerService<AlienFacade>(this);
 }
 
-SimulationContext* AlienFacadeImpl::buildSimulationContext() const
+SimulationContext* AlienFacadeImpl::buildSimulationContext(QObject* parent) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	SimulationContext* context = factory->buildSimulationContext();
+	SimulationContext* context = factory->buildSimulationContext(parent);
 	ModelData::loadDefaultSymbolTable(context->getSymbolTable());
 	ModelData::loadDefaultSimulationParameters(context->getSimulationParameters());
 	return context;
 }
 
-Topology * AlienFacadeImpl::buildTorusTopology() const
+Topology * AlienFacadeImpl::buildTorusTopology(QObject* parent) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	return factory->buildTorusTopology();
+	return factory->buildTorusTopology(parent);
 }
 
 CellCluster* AlienFacadeImpl::buildCellCluster (SimulationUnitContext* context) const

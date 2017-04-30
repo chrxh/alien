@@ -13,7 +13,7 @@ public:
 	SimulationUnitContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationUnitContextImpl();
 
-	void init(SymbolTable* symbolTable, Topology* topology) override;
+	void init(Topology* topology, SymbolTable * symbolTable, SimulationParameters* parameters) override;
 
     Topology* getTopology () const override;
     EnergyParticleMap* getEnergyParticleMap () const override;
@@ -33,7 +33,7 @@ private:
     EnergyParticleMap* _energyParticleMap = nullptr;
     CellMap* _cellMap = nullptr;
 	SymbolTable* _symbolTable = nullptr;
-	SimulationParameters* _simulationParameters= nullptr;
+	SimulationParameters* _simulationParameters = nullptr;
 };
 
 #endif // SIMULATIONUNITCONTEXTIMPL_H

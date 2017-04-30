@@ -63,8 +63,6 @@ private:
 
     QByteArray _code;
 	QByteArray _memory;
-	SymbolTable* _symbolTable = nullptr;
-	SimulationParameters* _parameters = nullptr;
 };
 
 #endif // TOKENFUNCTIONCOMPUTERIMPL_H
