@@ -7,9 +7,9 @@
 #include "entities/cellcluster.h"
 #include "entities/energyparticle.h"
 #include "entities/token.h"
+#include "context/simulationunitcontext.h"
 
 #include "simulationunit.h"
-#include "simulationunitcontext.h"
 
 SimulationUnit::SimulationUnit (SimulationUnitContext* context, QObject* parent)
     : QObject(parent)

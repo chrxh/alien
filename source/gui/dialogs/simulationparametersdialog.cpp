@@ -3,7 +3,7 @@
 
 #include "global/numbergenerator.h"
 #include "gui/guisettings.h"
-#include "model/simulationparameters.h"
+#include "model/context/simulationparameters.h"
 #include "model/modelsettings.h"
 
 #include "simulationparametersdialog.h"

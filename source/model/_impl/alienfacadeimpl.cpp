@@ -9,15 +9,15 @@
 #include "model/features/cellfunctioncomputer.h"
 #include "model/features/energyguidance.h"
 #include "model/features/cellfeaturefactory.h"
-#include "model/simulationparameters.h"
-#include "model/cellmap.h"
-#include "model/energyparticlemap.h"
-#include "model/topology.h"
+#include "model/context/simulationparameters.h"
+#include "model/context/cellmap.h"
+#include "model/context/energyparticlemap.h"
+#include "model/context/topology.h"
 #include "model/modelsettings.h"
 
+#include "model/context/_impl/simulationunitcontextimpl.h"
+#include "model/context/_impl/torustopologyimpl.h"
 #include "alienfacadeimpl.h"
-#include "simulationunitcontextimpl.h"
-#include "torustopologyimpl.h"
 
 namespace {
 	AlienFacadeImpl factoryFacadeImpl;

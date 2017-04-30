@@ -1,6 +1,6 @@
 #include "energyparticlemap.h"
 
-#include "model/topology.h"
+#include "model/context/topology.h"
 #include "model/entities/energyparticle.h"
 
 

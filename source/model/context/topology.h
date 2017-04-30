@@ -1,7 +1,7 @@
 #ifndef TOPOLOGY_H
 #define TOPOLOGY_H
 
-#include "definitions.h"
+#include "model/definitions.h"
 
 class Topology
 {

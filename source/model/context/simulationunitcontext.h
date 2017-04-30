@@ -4,7 +4,7 @@
 #include <QList>
 #include <QSize>
 
-#include "definitions.h"
+#include "model/definitions.h"
 
 class SimulationUnitContext
 {

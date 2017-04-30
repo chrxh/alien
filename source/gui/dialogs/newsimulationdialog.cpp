@@ -2,7 +2,7 @@
 
 #include "gui/guisettings.h"
 #include "global/numbergenerator.h"
-#include "model/simulationunitcontext.h"
+#include "model/context/simulationunitcontext.h"
 
 #include "simulationparametersdialog.h"
 #include "symboltabledialog.h"
