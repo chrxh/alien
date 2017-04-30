@@ -4,9 +4,11 @@
 #include "model/definitions.h"
 
 class EnergyParticleMap
+	: public QObject
 {
+	Q_OBJECT
 public:
-	EnergyParticleMap();
+	EnergyParticleMap(QObject* parent = nullptr);
 	virtual ~EnergyParticleMap();
 
 	void init(Topology* topo);

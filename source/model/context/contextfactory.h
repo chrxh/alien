@@ -8,9 +8,12 @@ class ContextFactory
 public:
 	virtual ~ContextFactory() {}
 
-	virtual SimulationUnitContext* buildSimulationUnitContext() const = 0;
-	virtual Topology* buildTorusTopology() const = 0;
-	virtual MapCompartment* buildMapCompartment() const = 0;
+	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const = 0;
+	virtual SimulationUnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const = 0;
+	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const = 0;
+	virtual SimulationThreads* buildSimulationThreads(QObject* parent = nullptr) const = 0;
+	virtual Topology* buildTorusTopology(QObject* parent = nullptr) const = 0;
+	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const = 0;
 };
 
 #endif // CONTEXTFACTORY_H

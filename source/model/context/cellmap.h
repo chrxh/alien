@@ -4,9 +4,11 @@
 #include "model/definitions.h"
 
 class CellMap
+	: public QObject
 {
+	Q_OBJECT
 public:
-	CellMap();
+	CellMap(QObject* parent = nullptr);
 	virtual ~CellMap();
 
 	void init(Topology* topo);

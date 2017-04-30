@@ -9,7 +9,7 @@ public:
     AlienFacadeImpl ();
 	~AlienFacadeImpl() = default;
 
-	SimulationUnitContext* buildSimulationContext() const override;
+	SimulationContext* buildSimulationContext() const override;
 	Topology* buildTorusTopology() const override;
 
     CellCluster* buildCellCluster (SimulationUnitContext* context) const override;

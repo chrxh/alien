@@ -1,7 +1,10 @@
 #include "global/servicelocator.h"
 
 #include "contextfactoryimpl.h"
+#include "simulationcontextimpl.h"
 #include "simulationunitcontextimpl.h"
+#include "simulationgridimpl.h"
+#include "simulationthreadsimpl.h"
 #include "torustopologyimpl.h"
 #include "mapcompartmentimpl.h"
 
@@ -15,17 +18,32 @@ ContextFactoryImpl::ContextFactoryImpl()
 	ServiceLocator::getInstance().registerService<ContextFactory>(this);
 }
 
-SimulationUnitContext * ContextFactoryImpl::buildSimulationUnitContext() const
+SimulationContext * ContextFactoryImpl::buildSimulationContext(QObject* parent) const
 {
-	return new SimulationUnitContextImpl();
+	return new SimulationContextImpl(parent);
 }
 
-Topology * ContextFactoryImpl::buildTorusTopology() const
+SimulationUnitContext * ContextFactoryImpl::buildSimulationUnitContext(QObject* parent) const
 {
-	return new TorusTopologyImpl();
+	return new SimulationUnitContextImpl(parent);
 }
 
-MapCompartment * ContextFactoryImpl::buildMapCompartment() const
+SimulationGrid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
 {
-	return new MapCompartmentImpl();
+	return new SimulationGridImpl(parent);
+}
+
+SimulationThreads * ContextFactoryImpl::buildSimulationThreads(QObject* parent) const
+{
+	return new SimulationThreadsImpl(parent);
+}
+
+Topology * ContextFactoryImpl::buildTorusTopology(QObject* parent) const
+{
+	return new TorusTopologyImpl(parent);
+}
+
+MapCompartment * ContextFactoryImpl::buildMapCompartment(QObject* parent) const
+{
+	return new MapCompartmentImpl(parent);
 }

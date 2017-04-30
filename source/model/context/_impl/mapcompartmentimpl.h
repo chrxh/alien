@@ -7,6 +7,7 @@ class MapCompartmentImpl
 	: public MapCompartment
 {
 public:
+	MapCompartmentImpl(QObject* parent = nullptr);
 	virtual ~MapCompartmentImpl() {}
 
 	virtual void init(Topology* topology, IntRect mapRect) override;

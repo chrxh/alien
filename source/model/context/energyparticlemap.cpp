@@ -4,7 +4,8 @@
 #include "model/entities/energyparticle.h"
 
 
-EnergyParticleMap::EnergyParticleMap()
+EnergyParticleMap::EnergyParticleMap(QObject* parent)
+	: QObject(parent)
 {
 }
 

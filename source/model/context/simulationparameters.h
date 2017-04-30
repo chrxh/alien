@@ -3,8 +3,19 @@
 
 #include "model/definitions.h"
 
-struct SimulationParameters
+class SimulationParameters
+	: public QObject
 {
+	Q_OBJECT
+public:
+	SimulationParameters(QObject* parent = nullptr);
+	virtual ~SimulationParameters() {}
+
+	void setParameters(SimulationParameters* other);
+
+	void serializePrimitives(QDataStream& stream);
+	void deserializePrimitives(QDataStream& stream);
+
 	qreal cellMutationProb = 0.0;
 	qreal cellMinDistance = 0.0;
 	qreal cellMaxDistance = 0.0;
@@ -38,11 +49,6 @@ struct SimulationParameters
 
 	qreal radiationVelocityMultiplier = 0.0;
 	qreal radiationVelocityPerturbation = 0.0;
-
-	void setParameters(SimulationParameters* other);
-
-	void serializePrimitives(QDataStream& stream);
-	void deserializePrimitives(QDataStream& stream);
 };
 
 #endif // SIMULATIONPARAMETERS_H

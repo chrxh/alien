@@ -2,6 +2,11 @@
 
 #include "model/entities/cell.h"
 
+TorusTopologyImpl::TorusTopologyImpl(QObject * parent)
+	: Topology(parent)
+{
+}
+
 void TorusTopologyImpl::init(IntVector2D size)
 {
 	_size = size;
@@ -61,17 +66,6 @@ qreal TorusTopologyImpl::distance(QVector3D fromPoint, QVector3D toPoint) const
 {
 	return displacement(fromPoint, toPoint).length();
 }
-/*
-QVector3D TorusTopologyImpl::displacement(Cell * fromCell, Cell * toCell) const
-{
-return displacement(fromCell->calcPosition(), toCell->calcPosition());
-}
-
-qreal TorusTopologyImpl::distance(Cell * fromCell, Cell * toCell) const
-{
-return displacement(fromCell, toCell).length();
-}
-*/
 
 QVector3D TorusTopologyImpl::correctionIncrement(QVector3D pos1, QVector3D pos2) const
 {
