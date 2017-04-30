@@ -26,7 +26,7 @@ class SimulationUnit;
 class CellMap;
 class EnergyParticleMap;
 class Topology;
-class SimulationContext;
+class SimulationUnitContext;
 struct SimulationParameters;
 class SymbolTable;
 class EntityFactory;

@@ -33,9 +33,7 @@ SimulationContextImpl::~SimulationContextImpl ()
 void SimulationContextImpl::init(IntVector2D size)
 {
 	_topology->init(size);
-	_energyParticleMap->init();
-	_cellMap->init();
-	deleteClustersAndEnergyParticles();
+	initWithoutTopology();
 }
 
 void SimulationContextImpl::initWithoutTopology()

@@ -2,13 +2,13 @@
 #include "model/entities/cell.h"
 #include "model/features/cellfeatureconstants.h"
 #include "model/modelsettings.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/simulationparameters.h"
 
 #include "energyguidanceimpl.h"
 
 
-EnergyGuidanceImpl::EnergyGuidanceImpl (SimulationContext* context)
+EnergyGuidanceImpl::EnergyGuidanceImpl (SimulationUnitContext* context)
     : EnergyGuidance(context), _parameters(context->getSimulationParameters())
 {
 

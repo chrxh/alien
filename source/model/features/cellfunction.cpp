@@ -3,7 +3,7 @@
 
 #include "model/entities/cell.h"
 #include "model/physics/physics.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/topology.h"
 
 #include "cellfunction.h"

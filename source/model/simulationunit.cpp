@@ -9,9 +9,9 @@
 #include "entities/token.h"
 
 #include "simulationunit.h"
-#include "simulationcontext.h"
+#include "simulationunitcontext.h"
 
-SimulationUnit::SimulationUnit (SimulationContext* context, QObject* parent)
+SimulationUnit::SimulationUnit (SimulationUnitContext* context, QObject* parent)
     : QObject(parent)
 	, _context(context)
 {
@@ -21,7 +21,7 @@ SimulationUnit::~SimulationUnit ()
 {
 }
 
-void SimulationUnit::setContext(SimulationContext* context)
+void SimulationUnit::setContext(SimulationUnitContext* context)
 {
 	_context = context;
 }

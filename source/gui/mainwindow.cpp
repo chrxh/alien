@@ -23,7 +23,7 @@
 #include "gui/guisettings.h"
 #include "model/modelsettings.h"
 #include "model/simulationcontroller.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/serializationfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -80,8 +80,8 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     connect(_simController, SIGNAL(energyParticleCreated(EnergyParticle*)), ui->visualEditor, SLOT(energyParticleCreated(EnergyParticle*)));
     connect(_simController, SIGNAL(energyParticleCreated(EnergyParticle*)), _microEditor, SLOT(energyParticleFocused(EnergyParticle*)));
     connect(_simController, SIGNAL(energyParticleCreated(EnergyParticle*)), this, SLOT(energyParticleFocused(EnergyParticle*)));
-    connect(_simController, SIGNAL(universeUpdated(SimulationContext*, bool)), ui->visualEditor, SLOT(universeUpdated(SimulationContext*, bool)));
-    connect(_simController, SIGNAL(universeUpdated(SimulationContext*, bool)), _microEditor, SLOT(universeUpdated(SimulationContext*, bool)));
+    connect(_simController, SIGNAL(universeUpdated(SimulationUnitContext*, bool)), ui->visualEditor, SLOT(universeUpdated(SimulationUnitContext*, bool)));
+    connect(_simController, SIGNAL(universeUpdated(SimulationUnitContext*, bool)), _microEditor, SLOT(universeUpdated(SimulationUnitContext*, bool)));
     connect(_simController, SIGNAL(reclustered(QList<CellCluster*>)), ui->visualEditor, SLOT(reclustered(QList<CellCluster*>)));
     connect(_simController, SIGNAL(reclustered(QList<CellCluster*>)), _microEditor, SLOT(reclustered(QList<CellCluster*>)));
     connect(_simController, SIGNAL(computerCompilationReturn(bool,int)), _microEditor, SLOT(computerCompilationReturn(bool,int)));

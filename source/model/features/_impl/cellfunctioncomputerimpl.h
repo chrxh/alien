@@ -10,8 +10,8 @@
 class CellFunctionComputerImpl: public CellFunctionComputer
 {
 public:
-    CellFunctionComputerImpl (SimulationContext* context);
-    CellFunctionComputerImpl (QByteArray data, SimulationContext* context);
+    CellFunctionComputerImpl (SimulationUnitContext* context);
+    CellFunctionComputerImpl (QByteArray data, SimulationUnitContext* context);
 
 	QByteArray getInternalData () const override;
 

@@ -6,7 +6,7 @@
 class EnergyGuidanceImpl : public EnergyGuidance
 {
 public:
-    EnergyGuidanceImpl (SimulationContext* context);
+    EnergyGuidanceImpl (SimulationUnitContext* context);
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell);

@@ -6,12 +6,12 @@
 #include "model/features/cellfeature.h"
 #include "model/physics/physics.h"
 #include "model/simulationparameters.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/cellmap.h"
 
 #include "cellimpl.h"
 
-CellImpl::CellImpl (SimulationContext* context)
+CellImpl::CellImpl (SimulationUnitContext* context)
     : _cellMap(context->getCellMap())
 	, _parameters(context->getSimulationParameters())
 	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
@@ -21,7 +21,7 @@ CellImpl::CellImpl (SimulationContext* context)
 
 }
 
-CellImpl::CellImpl (qreal energy, SimulationContext* context, int maxConnections, int tokenAccessNumber
+CellImpl::CellImpl (qreal energy, SimulationUnitContext* context, int maxConnections, int tokenAccessNumber
     , QVector3D relPos)
     : CellImpl(context)
 {

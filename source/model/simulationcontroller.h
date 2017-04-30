@@ -24,7 +24,7 @@ public:
 	void terminateThread();
 
     QMap< QString, qreal > getMonitorData ();
-    SimulationContext* getSimulationContext ();
+    SimulationUnitContext* getSimulationContext ();
 
     //universe manipulation tools
     void newUniverse (IntVector2D size, SymbolTable const& symbolTable, SimulationParameters const& parameters);
@@ -75,13 +75,13 @@ public slots:
     void updateUniverse ();
 
 signals:
-    void init (SimulationContext* context);
+    void init (SimulationUnitContext* context);
 	void initUnit(uint seed);
 	void calcNextTimestep();
     void cellCreated (Cell* cell);
     void energyParticleCreated (EnergyParticle* cell);
     void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (SimulationContext* context, bool force);
+    void universeUpdated (SimulationUnitContext* context, bool force);
     void computerCompilationReturn (bool error, int line);
 
 protected slots:
@@ -101,7 +101,7 @@ protected:
 	quint64 _frameFromLastSecond = 0;
 	int _newCellTokenAccessNumber = 0;
 
-    SimulationContext* _context = nullptr;
+    SimulationUnitContext* _context = nullptr;
     SimulationUnit* _unit = nullptr;
     QThread* _thread = nullptr;
 };

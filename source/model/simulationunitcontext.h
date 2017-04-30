@@ -6,10 +6,10 @@
 
 #include "definitions.h"
 
-class SimulationContext
+class SimulationUnitContext
 {
 public:
-    virtual ~SimulationContext () {}
+    virtual ~SimulationUnitContext () {}
 
 	virtual void init(IntVector2D size) = 0;
 	virtual void initWithoutTopology() = 0;

@@ -5,7 +5,7 @@
 #include <QEvent>
 
 #include "model/simulationparameters.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/energyparticlemap.h"
 #include "model/alienfacade.h"
 #include "model/entities/cell.h"
@@ -28,7 +28,7 @@
 const int tabPosX1 = 410;
 const int tabPosX2 = 810;
 
-TextEditor::TextEditor(SimulationContext* context, QObject *parent)
+TextEditor::TextEditor(SimulationUnitContext* context, QObject *parent)
 	: QObject(parent)
 	, _context(context)
     , _focusCell(0)
@@ -371,7 +371,7 @@ void TextEditor::reclustered (QList< CellCluster* > clusters)
     }
 }
 
-void TextEditor::universeUpdated (SimulationContext* context, bool force)
+void TextEditor::universeUpdated (SimulationUnitContext* context, bool force)
 {
 	_context = context;
     defocused(false);
