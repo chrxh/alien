@@ -6,7 +6,7 @@
 class EnergyGuidance: public CellFeature
 {
 public:
-    EnergyGuidance (SimulationContext* context) : CellFeature(context) {}
+    EnergyGuidance (SimulationUnitContext* context) : CellFeature(context) {}
 
     virtual ~EnergyGuidance () {}
 };

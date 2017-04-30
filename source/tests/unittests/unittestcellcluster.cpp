@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "tests/predicates.h"
 
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/simulationparameters.h"
 #include "model/modelsettings.h"
 #include "model/entities/cell.h"
@@ -18,7 +18,7 @@ public:
 	~UnitTestCellCluster();
 
 protected:
-	SimulationContext* _context;
+	SimulationUnitContext* _context;
 	CellCluster* _cluster;
 	Cell* _cell1;
 	Cell* _cell2;

@@ -16,7 +16,7 @@
 #include "model/metadata/symboltable.h"
 #include "model/physics/physics.h"
 #include "model/modelsettings.h"
-#include "simulationcontext.h"
+#include "simulationunitcontext.h"
 #include "simulationparameters.h"
 #include "simulationunit.h"
 #include "energyparticlemap.h"
@@ -110,7 +110,7 @@ QMap< QString, qreal > SimulationController::getMonitorData ()
     return data;
 }
 
-SimulationContext* SimulationController::getSimulationContext()
+SimulationUnitContext* SimulationController::getSimulationContext()
 {
     return _context;
 }

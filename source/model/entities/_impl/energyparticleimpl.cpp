@@ -6,7 +6,7 @@
 #include "model/alienfacade.h"
 #include "model/physics/physics.h"
 #include "model/modelsettings.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/energyparticlemap.h"
 #include "model/cellmap.h"
 #include "model/topology.h"
@@ -17,7 +17,7 @@
 #include "energyparticleimpl.h"
 
 
-EnergyParticleImpl::EnergyParticleImpl(SimulationContext* context)
+EnergyParticleImpl::EnergyParticleImpl(SimulationUnitContext* context)
 	: _context(context)
 	, _topology(context->getTopology())
 	, _cellMap(context->getCellMap())
@@ -28,7 +28,7 @@ EnergyParticleImpl::EnergyParticleImpl(SimulationContext* context)
 
 }
 
-EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, SimulationContext* context)
+EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, SimulationUnitContext* context)
 	: EnergyParticleImpl(context)
 {
 	_energy = energy;

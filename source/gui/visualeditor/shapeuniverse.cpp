@@ -10,7 +10,7 @@
 #include "model/simulationparameters.h"
 #include "model/modelsettings.h"
 #include "model/alienfacade.h"
-#include "model/simulationcontext.h"
+#include "model/simulationunitcontext.h"
 #include "model/topology.h"
 #include "model/energyparticlemap.h"
 #include "gui/guisettings.h"
@@ -36,7 +36,7 @@ ShapeUniverse::~ShapeUniverse()
 }
 
 
-void ShapeUniverse::universeUpdated (SimulationContext* context)
+void ShapeUniverse::universeUpdated (SimulationUnitContext* context)
 {
     _context = context;
     if( !_context)

@@ -27,22 +27,22 @@ AlienFacadeImpl::AlienFacadeImpl ()
     ServiceLocator::getInstance().registerService<AlienFacade>(this);
 }
 
-SimulationContext* AlienFacadeImpl::buildSimulationContext() const
+SimulationUnitContext* AlienFacadeImpl::buildSimulationContext() const
 {
-	SimulationContext* context = new SimulationContextImpl();
+	SimulationUnitContext* context = new SimulationContextImpl();
 	ModelData::loadDefaultSymbolTable(context->getSymbolTable());
 	ModelData::loadDefaultSimulationParameters(context->getSimulationParameters());
 	return context;
 }
 
-CellCluster* AlienFacadeImpl::buildCellCluster (SimulationContext* context) const
+CellCluster* AlienFacadeImpl::buildCellCluster (SimulationUnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     return entityFactory->buildCellCluster(context);
 }
 
 CellCluster* AlienFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
-    , QVector3D vel, SimulationContext* context) const
+    , QVector3D vel, SimulationUnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     return entityFactory->buildCellCluster(cells, angle, pos, angularVel, vel, context);
@@ -50,7 +50,7 @@ CellCluster* AlienFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angl
 
 
 Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, QByteArray data
-    , SimulationContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos) const
+    , SimulationUnitContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
@@ -60,7 +60,7 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Typ
     return cell;
 }
 
-Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, SimulationContext* context
+Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, SimulationUnitContext* context
     , int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -71,7 +71,7 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Typ
     return cell;
 }
 
-Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationContext* context) const
+Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationUnitContext* context) const
 {
 	SimulationParameters* parameters = context->getSimulationParameters();
     int randomMaxConnections = NumberGenerator::getInstance().random(parameters->cellMaxBonds+1);
@@ -83,7 +83,7 @@ Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Simulation
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
-Token* AlienFacadeImpl::buildToken(SimulationContext* context, qreal energy) const
+Token* AlienFacadeImpl::buildToken(SimulationUnitContext* context, qreal energy) const
 {
 	EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	return entityFactory->buildToken(context, energy);
@@ -126,7 +126,7 @@ CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     return to;
 }
 
-void AlienFacadeImpl::changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, SimulationContext* context) const
+void AlienFacadeImpl::changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, SimulationUnitContext* context) const
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();

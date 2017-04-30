@@ -11,24 +11,24 @@ class EntityFactory
 public:
     virtual ~EntityFactory () {}
 
-    virtual CellCluster* buildCellCluster (SimulationContext* context) const = 0;
+    virtual CellCluster* buildCellCluster (SimulationUnitContext* context) const = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos
-        , qreal angularVel, QVector3D vel, SimulationContext* context) const = 0;
+        , qreal angularVel, QVector3D vel, SimulationUnitContext* context) const = 0;
     virtual CellCluster* buildCellClusterFromForeignCells (QList< Cell* > cells, qreal angle
-        , SimulationContext* context) const = 0;
+        , SimulationUnitContext* context) const = 0;
 
-    virtual Cell* buildCell (SimulationContext* context) const = 0;
-    virtual Cell* buildCell (qreal energy, SimulationContext* context, int maxConnections
+    virtual Cell* buildCell (SimulationUnitContext* context) const = 0;
+    virtual Cell* buildCell (qreal energy, SimulationUnitContext* context, int maxConnections
         , int tokenAccessNumber = 0, QVector3D relPos = QVector3D()) const = 0;
     
-    virtual Token* buildToken (SimulationContext* context) const = 0;
-	virtual Token* buildToken (SimulationContext* context, qreal energy) const = 0;
-	virtual Token* buildToken (SimulationContext* context, qreal energy, QByteArray const& memory) const = 0;
-	virtual Token* buildTokenWithRandomData(SimulationContext* context, qreal energy) const = 0;
+    virtual Token* buildToken (SimulationUnitContext* context) const = 0;
+	virtual Token* buildToken (SimulationUnitContext* context, qreal energy) const = 0;
+	virtual Token* buildToken (SimulationUnitContext* context, qreal energy, QByteArray const& memory) const = 0;
+	virtual Token* buildTokenWithRandomData(SimulationUnitContext* context, qreal energy) const = 0;
 
-    virtual EnergyParticle* buildEnergyParticle(SimulationContext* context) const = 0;
+    virtual EnergyParticle* buildEnergyParticle(SimulationUnitContext* context) const = 0;
     virtual EnergyParticle* buildEnergyParticle(qreal energy, QVector3D pos, QVector3D vel
-        , SimulationContext* context) const = 0;
+        , SimulationUnitContext* context) const = 0;
 };
 
 #endif // ENTITYFACTORY_H
