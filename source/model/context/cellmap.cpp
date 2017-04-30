@@ -4,7 +4,8 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 
-CellMap::CellMap()
+CellMap::CellMap(QObject* parent)
+	: QObject(parent)
 {
 }
 

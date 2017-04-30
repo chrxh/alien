@@ -1,22 +1,19 @@
-#ifndef SIMULATIONCONTEXTIMPL_H
-#define SIMULATIONCONTEXTIMPL_H
+#ifndef SIMULATIONUNITCONTEXTIMPL_H
+#define SIMULATIONUNITCONTEXTIMPL_H
 
 #include <QMutex>
 
 #include "model/context/simulationunitcontext.h"
 #include "model/context/topology.h"
 
-class SimulationUnitContextImpl : public SimulationUnitContext
+class SimulationUnitContextImpl
+	: public SimulationUnitContext
 {
 public:
-	SimulationUnitContextImpl();
-	SimulationUnitContextImpl(SymbolTable* symbolTable);
+	SimulationUnitContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationUnitContextImpl();
 
-	void init(Topology* topology) override;
-
-    void lock () override;
-    void unlock () override;
+	void init(SymbolTable* symbolTable, Topology* topology) override;
 
     Topology* getTopology () const override;
     EnergyParticleMap* getEnergyParticleMap () const override;
@@ -26,13 +23,10 @@ public:
 
 	QList<CellCluster*>& getClustersRef() override;
     QList<EnergyParticle*>& getEnergyParticlesRef () override;
-	std::set<quint64> SimulationUnitContextImpl::getAllCellIds() const override;
 
 private:
-	void deleteAll ();
 	void deleteClustersAndEnergyParticles();
 
-    QMutex _mutex;
     QList<CellCluster*> _clusters;
     QList<EnergyParticle*> _energyParticles;
     Topology* _topology = nullptr;
@@ -42,4 +36,4 @@ private:
 	SimulationParameters* _simulationParameters= nullptr;
 };
 
-#endif // SIMULATIONCONTEXTIMPL_H
+#endif // SIMULATIONUNITCONTEXTIMPL_H

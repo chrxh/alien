@@ -1,5 +1,10 @@
 #include "mapcompartmentimpl.h"
 
+MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
+	: MapCompartment(parent)
+{
+}
+
 void MapCompartmentImpl::init(Topology * topology, IntRect mapRect)
 {
 }

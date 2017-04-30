@@ -1,0 +1,23 @@
+#ifndef SIMULATIONCONTEXT_H
+#define SIMULATIONCONTEXT_H
+
+#include "model/definitions.h"
+
+class SimulationContext
+	: public QObject
+{
+	Q_OBJECT
+public:
+	SimulationContext(QObject* parent) : QObject(parent) {}
+	virtual ~SimulationContext() {}
+
+	virtual void lock() = 0;
+	virtual void unlock() = 0;
+
+	virtual Topology* getTopology() const = 0;
+	virtual SimulationGrid* getSimulationGrid() const = 0;
+	virtual SymbolTable* getSymbolTable() const = 0;
+	virtual SimulationParameters* getSimulationParameters() const = 0;
+};
+
+#endif // SIMULATIONCONTEXT_H

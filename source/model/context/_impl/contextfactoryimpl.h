@@ -10,9 +10,12 @@ public:
 	ContextFactoryImpl();
 	virtual ~ContextFactoryImpl() {}
 
-	virtual SimulationUnitContext* buildSimulationUnitContext() const;
-	virtual Topology* buildTorusTopology() const;
-	virtual MapCompartment* buildMapCompartment() const;
+	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const override;
+	virtual SimulationUnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const override;
+	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const override;
+	virtual SimulationThreads* buildSimulationThreads(QObject* parent = nullptr) const override;
+	virtual Topology* buildTorusTopology(QObject* parent = nullptr) const override;
+	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const override;
 };
 
 #endif // CONTEXTFACTORYIMPL_H

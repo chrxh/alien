@@ -14,20 +14,15 @@ class SimulationController  : public QObject
 {
     Q_OBJECT
 public:
-    enum class Threading {
-        NO_EXTRA_THREAD, EXTRA_THREAD
-    };
+    enum class Threading { NO_EXTRA_THREAD, EXTRA_THREAD };
     SimulationController (Threading threading, QObject* parent = 0);
     ~SimulationController ();
 
-	void startThread();
-	void terminateThread();
-
     QMap< QString, qreal > getMonitorData ();
-    SimulationUnitContext* getSimulationContext ();
+    SimulationContext* getSimulationContext ();
 
     //universe manipulation tools
-    void newUniverse (IntVector2D size, SymbolTable const& symbolTable, SimulationParameters const& parameters);
+    void newUniverse (int maxThreads, IntVector2D gridSize, IntVector2D universeSize, SymbolTable const& symbolTable, SimulationParameters const& parameters);
     void saveUniverse (QDataStream& stream);
     void loadUniverse (QDataStream& stream);
     IntVector2D getUniverseSize();
@@ -35,7 +30,7 @@ public:
     void addHexagonStructure (QVector3D center, int numLayers, qreal dist, qreal energy);
     void addRandomEnergy (qreal energy, qreal maxEnergyPerParticle);
 
-    //selection manipulation Tools
+    //selection manipulation tools
     void saveCell (QDataStream& stream, Cell* cell, quint64& clusterId, quint64& cellId);
     void saveExtendedSelection (QDataStream& stream, const QList< CellCluster* >& clusters
 		, const QList< EnergyParticle* >& es, QList< quint64 >& clusterIds, QList< quint64 >& cellIds);
@@ -76,20 +71,21 @@ public slots:
 
 signals:
     void init (SimulationUnitContext* context);
-	void initUnit(uint seed);
 	void calcNextTimestep();
     void cellCreated (Cell* cell);
     void energyParticleCreated (EnergyParticle* cell);
     void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (SimulationUnitContext* context, bool force);
+    void universeUpdated (SimulationContext* context, bool force);
     void computerCompilationReturn (bool error, int line);
 
-protected slots:
+private slots:
     void forceFpsTimerSlot ();
 	void oneSecondTimerSlot();
     void nextTimestepCalculated ();
 
-protected:
+private:
+	SimulationUnit* buildSimulationUnit();
+
 	Threading _threading;
     QTimer* _forceFpsTimer = nullptr;
 	QTimer* _oneSecondTimer = nullptr;
@@ -101,8 +97,7 @@ protected:
 	quint64 _frameFromLastSecond = 0;
 	int _newCellTokenAccessNumber = 0;
 
-    SimulationUnitContext* _context = nullptr;
-    SimulationUnit* _unit = nullptr;
+    SimulationContext* _context = nullptr;
     QThread* _thread = nullptr;
 };
 

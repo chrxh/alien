@@ -1,6 +1,11 @@
 #include "simulationparameters.h"
 
 
+SimulationParameters::SimulationParameters(QObject * parent)
+	: QObject(parent)
+{
+}
+
 void SimulationParameters::setParameters(SimulationParameters * other)
 {
 	cellMutationProb = other->cellMutationProb;

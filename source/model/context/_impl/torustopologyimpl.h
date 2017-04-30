@@ -7,7 +7,7 @@ class TorusTopologyImpl
 	: public Topology
 {
 public:
-
+	TorusTopologyImpl(QObject* parent = nullptr);
 	virtual ~TorusTopologyImpl() {}
 
 	virtual void init(IntVector2D size);
