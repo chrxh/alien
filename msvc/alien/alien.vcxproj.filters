@@ -49,9 +49,6 @@
     <ClCompile Include="..\..\source\model\entities\_impl\cellimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\cellmap.cpp">
-      <Filter>Model</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\entities\cellto.cpp">
       <Filter>Model\Entities</Filter>
     </ClCompile>
@@ -66,9 +63,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source\model\entities\_impl\energyparticleimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\model\energyparticlemap.cpp">
-      <Filter>Model</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\model\entities\_impl\entityfactoryimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
@@ -100,20 +94,11 @@
     <ClCompile Include="..\..\source\global\servicelocator.cpp">
       <Filter>Global</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\simulationcontroller.cpp">
-      <Filter>Model</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\monitoring\simulationmonitor.cpp">
       <Filter>Gui\Monitoring</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\simulationparameters.cpp">
-      <Filter>Model</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\dialogs\simulationparametersdialog.cpp">
       <Filter>Gui\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\model\simulationunit.cpp">
-      <Filter>Model</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\misc\startscreencontroller.cpp">
       <Filter>Gui\Misc</Filter>
@@ -187,18 +172,6 @@
     <ClCompile Include="..\..\source\gui\texteditor\tokentab.cpp">
       <Filter>Gui\Texteditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor.cpp">
-      <Filter>Gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\texteditor.cpp">
-      <Filter>Gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\model\_impl\simulationunitcontextimpl.cpp">
-      <Filter>Model\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\model\_impl\torustopologyimpl.cpp">
-      <Filter>Model\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_addenergydialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -256,12 +229,6 @@
     <ClCompile Include="Debug\moc_simulationparametersdialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_simulationunit.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationcontroller.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_startscreencontroller.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -271,9 +238,6 @@
     <ClCompile Include="Debug\moc_symboltabledialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_texteditor.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_tokenedit.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -281,9 +245,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_tutorialwindow.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_visualeditor.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_addenergydialog.cpp">
@@ -343,12 +304,6 @@
     <ClCompile Include="Release\moc_simulationparametersdialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_simulationunit.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationcontroller.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Release\moc_startscreencontroller.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -358,9 +313,6 @@
     <ClCompile Include="Release\moc_symboltabledialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_texteditor.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Release\moc_tokenedit.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -368,9 +320,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_tutorialwindow.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_visualeditor.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_addenergydialog.cpp">
@@ -430,12 +379,6 @@
     <ClCompile Include="Tests\moc_simulationparametersdialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_simulationunit.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationcontroller.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_startscreencontroller.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -443,9 +386,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_symboltabledialog.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_texteditor.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_tokenedit.cpp">
@@ -457,8 +397,68 @@
     <ClCompile Include="Tests\moc_tutorialwindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\gui\texteditor\texteditor.cpp">
+      <Filter>Gui\Texteditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_texteditor.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_texteditor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_texteditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\visualeditor.cpp">
+      <Filter>Gui\Visualeditor</Filter>
+    </ClCompile>
     <ClCompile Include="Tests\moc_visualeditor.cpp">
-      <Filter>Generated Files</Filter>
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_visualeditor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_visualeditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\cellmap.cpp">
+      <Filter>Model\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\energyparticlemap.cpp">
+      <Filter>Model\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\simulationparameters.cpp">
+      <Filter>Model\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\simulationunitcontextimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\torustopologyimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\simulationcontroller.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationcontroller.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\simulationunit.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationunit.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationunit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationunit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationcontroller.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationcontroller.cpp">
+      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -522,9 +522,6 @@
     <ClInclude Include="..\..\source\model\entities\_impl\cellimpl.h">
       <Filter>Model\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\cellmap.h">
-      <Filter>Model</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\metadata\cellmetadata.h">
       <Filter>Model\Metadata</Filter>
     </ClInclude>
@@ -552,9 +549,6 @@
     <ClInclude Include="..\..\source\model\entities\_impl\energyparticleimpl.h">
       <Filter>Model\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\energyparticlemap.h">
-      <Filter>Model</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\metadata\energyparticlemetadata.h">
       <Filter>Model\Metadata</Filter>
     </ClInclude>
@@ -579,9 +573,6 @@
     <ClInclude Include="..\..\source\global\servicelocator.h">
       <Filter>Global</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\simulationparameters.h">
-      <Filter>Model</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\metadata\symboltable.h">
       <Filter>Model\Metadata</Filter>
     </ClInclude>
@@ -590,9 +581,6 @@
     </ClInclude>
     <ClInclude Include="..\..\source\model\entities\_impl\tokenimpl.h">
       <Filter>Model\Entities\_Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\topology.h">
-      <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="ui_addenergydialog.h">
       <Filter>Generated Files\_Ui</Filter>
@@ -660,17 +648,32 @@
     <ClInclude Include="..\..\source\gui\visualeditor\markergraphicsitem.h">
       <Filter>Gui\Visualeditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\simulationunitcontext.h">
-      <Filter>Model</Filter>
-    </ClInclude>
     <ClInclude Include="ui_visualeditor.h">
-      <Filter>Generated Files\_Ui</Filter>
+      <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\_impl\simulationunitcontextimpl.h">
-      <Filter>Model\_Impl</Filter>
+    <ClInclude Include="..\..\source\model\context\cellmap.h">
+      <Filter>Model\Context</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\_impl\torustopologyimpl.h">
-      <Filter>Model\_Impl</Filter>
+    <ClInclude Include="..\..\source\model\context\energyparticlemap.h">
+      <Filter>Model\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\mapcompartment.h">
+      <Filter>Model\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\simulationparameters.h">
+      <Filter>Model\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\simulationunitcontext.h">
+      <Filter>Model\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\topology.h">
+      <Filter>Model\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\simulationunitcontextimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\torustopologyimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -719,9 +722,6 @@
     <CustomBuild Include="..\..\source\gui\dialogs\selectionmultiplyrandomdialog.ui">
       <Filter>Gui\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\simulationcontroller.h">
-      <Filter>Model</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\monitoring\simulationmonitor.h">
       <Filter>Gui\Monitoring</Filter>
     </CustomBuild>
@@ -733,9 +733,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\simulationparametersdialog.ui">
       <Filter>Gui\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\model\simulationunit.h">
-      <Filter>Model</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\misc\startscreencontroller.h">
       <Filter>Gui\Misc</Filter>
@@ -803,14 +800,20 @@
     <CustomBuild Include="..\..\source\gui\texteditor\tokentab.ui">
       <Filter>Gui\Texteditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor.h">
-      <Filter>Gui</Filter>
+    <CustomBuild Include="..\..\source\gui\texteditor\texteditor.h">
+      <Filter>Gui\Texteditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor.ui">
-      <Filter>Gui</Filter>
+    <CustomBuild Include="..\..\source\gui\visualeditor\visualeditor.h">
+      <Filter>Gui\Visualeditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor.h">
-      <Filter>Gui</Filter>
+    <CustomBuild Include="..\..\source\gui\visualeditor\visualeditor.ui">
+      <Filter>Gui\Visualeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\simulationcontroller.h">
+      <Filter>Model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\simulationunit.h">
+      <Filter>Model</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -955,6 +958,27 @@
     </Filter>
     <Filter Include="Generated Files\_Ui">
       <UniqueIdentifier>{05f5e813-713f-4ca8-8ebc-095e3b0e8867}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files\Tests">
+      <UniqueIdentifier>{62915ff0-8798-44a7-bb45-5f95f73e80de}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{bb398f69-a4a5-4b30-93b7-161eabf8783d}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{0a8cec49-21d1-4317-a25f-5c215ab78129}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Model\Context">
+      <UniqueIdentifier>{66a343a4-e560-4345-a63f-6729519ed8df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Context\_Impl">
+      <UniqueIdentifier>{73abcd22-ec1d-4a01-9a9c-32a35dff734f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

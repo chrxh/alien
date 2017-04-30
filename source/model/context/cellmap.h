@@ -1,7 +1,7 @@
 #ifndef CELLMAP_H
 #define CELLMAP_H
 
-#include "definitions.h"
+#include "model/definitions.h"
 
 class CellMap
 {

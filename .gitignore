@@ -583,3 +583,4 @@ temp/
 stable/
 *computation.dat
 external/boost_1_64_0
+source/tests/testdata/comparison/computation.dat

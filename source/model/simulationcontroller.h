@@ -2,7 +2,7 @@
 #define SIMULATIONCONTROLLER_H
 
 #include "definitions.h"
-#include "entities/cellto.h"
+#include "model/entities/cellto.h"
 
 #include <QObject>
 #include <QVector3D>

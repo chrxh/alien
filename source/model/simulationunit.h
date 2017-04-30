@@ -9,7 +9,7 @@ class SimulationUnit : public QObject
     Q_OBJECT
 public:
     SimulationUnit (SimulationUnitContext* context, QObject* parent = 0);
-    ~SimulationUnit ();
+	virtual ~SimulationUnit ();
 
 public slots:
 	void init(uint seed);

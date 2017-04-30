@@ -6,11 +6,11 @@
 #include "model/entities/token.h"
 #include "model/features/_impl/cellfunctioncommunicatorimpl.h"
 #include "model/physics/codingphysicalquantities.h"
-#include "model/simulationunitcontext.h"
+#include "model/context/simulationunitcontext.h"
 #include "model/alienfacade.h"
 #include "model/modelsettings.h"
-#include "model/topology.h"
-#include "model/simulationparameters.h"
+#include "model/context/topology.h"
+#include "model/context/simulationparameters.h"
 
 #include "tests/settings.h"
 

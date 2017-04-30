@@ -3,8 +3,8 @@
 
 #include "model/entities/cell.h"
 #include "model/physics/physics.h"
-#include "model/simulationunitcontext.h"
-#include "model/topology.h"
+#include "model/context/simulationunitcontext.h"
+#include "model/context/topology.h"
 
 #include "cellfunction.h"
 

@@ -1,7 +1,7 @@
 #include "global/numbergenerator.h"
 #include "model/modelsettings.h"
-#include "model/simulationparameters.h"
-#include "model/simulationunitcontext.h"
+#include "model/context/simulationparameters.h"
+#include "model/context/simulationunitcontext.h"
 
 #include "tokenimpl.h"
 
