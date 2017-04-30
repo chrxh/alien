@@ -129,6 +129,9 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\..\external\boost_1_64_0\stage\lib</AdditionalLibraryDirectories>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
     <ClCompile>
@@ -217,6 +220,9 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\..\external\boost_1_64_0\stage\lib</AdditionalLibraryDirectories>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\global\numbergenerator.h" />
@@ -235,6 +241,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\source\model\_impl\torustopologyimpl.h" />
     <ClInclude Include="ui_visualeditor.h" />
     <CustomBuild Include="..\..\source\gui\assistance\tutorialwindow.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -678,7 +685,7 @@
     <ClInclude Include="..\..\source\model\topology.h" />
     <ClInclude Include="..\..\source\model\_impl\alienfacadeimpl.h" />
     <ClInclude Include="..\..\source\model\_impl\serializationfacadeimpl.h" />
-    <ClInclude Include="..\..\source\model\_impl\simulationcontextimpl.h" />
+    <ClInclude Include="..\..\source\model\_impl\simulationunitcontextimpl.h" />
     <ClInclude Include="ui_addenergydialog.h" />
     <ClInclude Include="ui_addhexagonstructuredialog.h" />
     <ClInclude Include="ui_addrectstructuredialog.h" />
@@ -757,11 +764,11 @@
     <ClCompile Include="..\..\source\model\modelsettings.cpp" />
     <ClCompile Include="..\..\source\model\simulationparameters.cpp" />
     <ClCompile Include="..\..\source\model\simulationunit.cpp" />
-    <ClCompile Include="..\..\source\model\topology.cpp" />
     <ClCompile Include="..\..\source\model\_impl\alienfacadeimpl.cpp" />
     <ClCompile Include="..\..\source\model\_impl\serializationfacadeimpl.cpp" />
-    <ClCompile Include="..\..\source\model\_impl\simulationcontextimpl.cpp" />
-    <ClCompile Include="Debug\moc_addenergydialog.cpp">
+    <ClCompile Include="..\..\source\model\_impl\simulationunitcontextimpl.cpp" />
+    <ClCompile Include="..\..\source\model\_impl\torustopologyimpl.cpp" />
+	    <ClCompile Include="Debug\moc_addenergydialog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -829,10 +836,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Debug\moc_simulationcontroller.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Debug\moc_simulationmonitor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -842,6 +845,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Debug\moc_simulationunit.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationcontroller.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -876,14 +883,6 @@
     <ClCompile Include="Debug\moc_visualeditor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="qrc_ressources.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
-      </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Release\moc_addenergydialog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
@@ -953,10 +952,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Release\moc_simulationcontroller.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Release\moc_simulationmonitor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -966,6 +961,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationunit.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationcontroller.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -1069,10 +1068,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Tests\moc_simulationcontroller.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Tests\moc_simulationmonitor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -1082,6 +1077,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Tests\moc_simulationunit.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationcontroller.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -1116,6 +1115,14 @@
     <ClCompile Include="Tests\moc_visualeditor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="qrc_ressources.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
+      </PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

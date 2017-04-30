@@ -1,15 +1,16 @@
 #include <gtest/gtest.h>
 #include "tests/predicates.h"
 
+#include "global/servicelocator.h"
 #include "model/simulationunitcontext.h"
 #include "model/simulationparameters.h"
 #include "model/modelsettings.h"
+#include "model/alienfacade.h"
+#include "model/topology.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
-#include "model/alienfacade.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/entityfactory.h"
-#include "global/servicelocator.h"
 
 class UnitTestCellCluster : public ::testing::Test
 {
@@ -32,7 +33,9 @@ UnitTestCellCluster::UnitTestCellCluster()
 	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
 
 	_context = facade->buildSimulationContext();
-	_context->init({ 1000, 1000 });
+	auto topology = facade->buildTorusTopology();
+	topology->init({ 1000, 1000 });
+	_context->init(topology);
 
 	QList< Cell* > cells;
 	for (int i = 0; i <= 100; ++i) {

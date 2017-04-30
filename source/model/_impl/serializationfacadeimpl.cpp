@@ -14,7 +14,7 @@
 #include "model/cellmap.h"
 #include "model/energyparticlemap.h"
 #include "model/topology.h"
-#include "model/_impl/simulationcontextimpl.h"
+#include "model/_impl/simulationunitcontextimpl.h"
 #include "model/simulationparameters.h"
 #include "global/servicelocator.h"
 #include "global/numbergenerator.h"
@@ -65,8 +65,9 @@ void SerializationFacadeImpl::deserializeSimulationContext(SimulationUnitContext
 	QMap< quint64, EnergyParticle* > oldIdEnergyMap;
 
 	//deserialize map size
-	prevContext->getTopology()->deserializePrimitives(stream);
-	prevContext->initWithoutTopology();
+	auto topology = prevContext->getTopology();
+	topology->deserializePrimitives(stream);
+	prevContext->init(topology);
 
 	//deserialize clusters
 	quint32 numCluster;

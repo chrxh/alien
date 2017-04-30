@@ -6,10 +6,10 @@
 class CellMap
 {
 public:
-	CellMap(Topology* topo);
+	CellMap();
 	virtual ~CellMap();
 
-	void init();
+	void init(Topology* topo);
 	void clear();
 
 	void setCell(QVector3D pos, Cell* cell);

@@ -9,31 +9,20 @@ public:
 
 	virtual ~Topology() {}
 
-	void init(IntVector2D size);
+	virtual void init(IntVector2D size) = 0;
 
-	IntVector2D getSize() const;
+	virtual IntVector2D getSize() const = 0;
 
-	void correctPosition(QVector3D& pos) const;
-	IntVector2D correctPositionWithIntPrecision(QVector3D const& pos) const;
-	IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const;
-	void correctDisplacement(QVector3D& displacement) const;
-	QVector3D displacement(QVector3D fromPoint, QVector3D toPoint) const;
-    qreal distance(QVector3D fromPoint, QVector3D toPoint) const;
-    QVector3D correctionIncrement (QVector3D pos1, QVector3D pos2) const;
+	virtual void correctPosition(QVector3D& pos) const = 0;
+	virtual IntVector2D correctPositionWithIntPrecision(QVector3D const& pos) const = 0;
+	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const = 0;
+	virtual void correctDisplacement(QVector3D& displacement) const = 0;
+	virtual QVector3D displacement(QVector3D fromPoint, QVector3D toPoint) const = 0;
+	virtual qreal distance(QVector3D fromPoint, QVector3D toPoint) const = 0;
+	virtual QVector3D correctionIncrement (QVector3D pos1, QVector3D pos2) const = 0;
 
-	void serializePrimitives(QDataStream& stream) const;
-	void deserializePrimitives(QDataStream& stream);
-
-private:
-	inline void correctPosition(IntVector2D & pos) const;
-
-	IntVector2D _size { 0, 0 };
+	virtual void serializePrimitives(QDataStream& stream) const = 0;
+	virtual void deserializePrimitives(QDataStream& stream) = 0;
 };
-
-void Topology::correctPosition(IntVector2D & pos) const
-{
-	pos.x = ((pos.x % _size.x) + _size.x) % _size.x;
-	pos.y = ((pos.y % _size.y) + _size.y) % _size.y;
-}
 
 #endif // TOPOLOGY_H

@@ -4,8 +4,7 @@
 #include "model/entities/energyparticle.h"
 
 
-EnergyParticleMap::EnergyParticleMap(Topology* topo)
-	: _topo(topo)
+EnergyParticleMap::EnergyParticleMap()
 {
 }
 
@@ -15,8 +14,9 @@ EnergyParticleMap::~EnergyParticleMap()
 }
 
 
-void EnergyParticleMap::init()
+void EnergyParticleMap::init(Topology* topo)
 {
+	_topo = topo;
 	deleteGrid();
 	IntVector2D size = _topo->getSize();
 	_gridSize = size.x;

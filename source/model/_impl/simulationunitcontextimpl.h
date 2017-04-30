@@ -6,15 +6,14 @@
 #include "model/simulationunitcontext.h"
 #include "model/topology.h"
 
-class SimulationContextImpl : public SimulationUnitContext
+class SimulationUnitContextImpl : public SimulationUnitContext
 {
 public:
-	SimulationContextImpl();
-	SimulationContextImpl(SymbolTable* symbolTable);
-	virtual ~SimulationContextImpl();
+	SimulationUnitContextImpl();
+	SimulationUnitContextImpl(SymbolTable* symbolTable);
+	virtual ~SimulationUnitContextImpl();
 
-	void init(IntVector2D size) override;
-	void initWithoutTopology() override;
+	void init(Topology* topology) override;
 
     void lock () override;
     void unlock () override;
@@ -27,7 +26,7 @@ public:
 
 	QList<CellCluster*>& getClustersRef() override;
     QList<EnergyParticle*>& getEnergyParticlesRef () override;
-	std::set<quint64> SimulationContextImpl::getAllCellIds() const override;
+	std::set<quint64> SimulationUnitContextImpl::getAllCellIds() const override;
 
 private:
 	void deleteAll ();

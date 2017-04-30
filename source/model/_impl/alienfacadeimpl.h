@@ -10,6 +10,7 @@ public:
 	~AlienFacadeImpl() = default;
 
 	SimulationUnitContext* buildSimulationContext() const override;
+	Topology* buildTorusTopology() const override;
 
     CellCluster* buildCellCluster (SimulationUnitContext* context) const override;
     CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel
