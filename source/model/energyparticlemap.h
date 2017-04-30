@@ -6,10 +6,10 @@
 class EnergyParticleMap
 {
 public:
-	EnergyParticleMap(Topology* topo);
+	EnergyParticleMap();
 	virtual ~EnergyParticleMap();
 
-	void init();
+	void init(Topology* topo);
 	void clear();
 	
 	void removeParticleIfPresent(QVector3D pos, EnergyParticle* energy);

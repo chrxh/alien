@@ -4,8 +4,7 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 
-CellMap::CellMap(Topology* topo)
-	: _topo(topo)
+CellMap::CellMap()
 {
 }
 
@@ -15,8 +14,9 @@ CellMap::~CellMap()
 	deleteCellMap();
 }
 
-void CellMap::init()
+void CellMap::init(Topology* topo)
 {
+	_topo = topo;
 	deleteCellMap();
 	IntVector2D size = _topo->getSize();
 	_gridSize = size.x;

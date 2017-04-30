@@ -5,91 +5,84 @@
 #include "model/entities/energyparticle.h"
 #include "model/metadata/symboltable.h"
 
-#include "simulationcontextimpl.h"
+#include "simulationunitcontextimpl.h"
 
-SimulationContextImpl::SimulationContextImpl()
+SimulationUnitContextImpl::SimulationUnitContextImpl()
 {
-	_topology = new Topology();
-	_energyParticleMap = new EnergyParticleMap(_topology);
-	_cellMap = new CellMap(_topology);
+	_energyParticleMap = new EnergyParticleMap();
+	_cellMap = new CellMap();
 	_symbolTable = new SymbolTable();
 	_simulationParameters = new SimulationParameters();
 }
 
-SimulationContextImpl::SimulationContextImpl(SymbolTable * symbolTable)
+SimulationUnitContextImpl::SimulationUnitContextImpl(SymbolTable * symbolTable)
 	: _symbolTable(symbolTable)
 {
-	_topology = new Topology();
-	_energyParticleMap = new EnergyParticleMap(_topology);
-	_cellMap = new CellMap(_topology);
+	_energyParticleMap = new EnergyParticleMap();
+	_cellMap = new CellMap();
 	_simulationParameters = new SimulationParameters();
 }
 
-SimulationContextImpl::~SimulationContextImpl ()
+SimulationUnitContextImpl::~SimulationUnitContextImpl ()
 {
 	deleteAll();
 }
 
-void SimulationContextImpl::init(IntVector2D size)
+void SimulationUnitContextImpl::init(Topology* topology)
 {
-	_topology->init(size);
-	initWithoutTopology();
-}
-
-void SimulationContextImpl::initWithoutTopology()
-{
-	_energyParticleMap->init();
-	_cellMap->init();
+	_topology = topology;
+	_energyParticleMap->init(_topology);
+	_cellMap->init(_topology);
 	deleteClustersAndEnergyParticles();
 }
 
-void SimulationContextImpl::lock ()
+void SimulationUnitContextImpl::lock ()
 {
     _mutex.lock();
 }
 
-void SimulationContextImpl::unlock ()
+void SimulationUnitContextImpl::unlock ()
 {
     _mutex.unlock();
 }
 
 
-Topology* SimulationContextImpl::getTopology () const
+Topology* SimulationUnitContextImpl::getTopology () const
 {
     return _topology;
 }
 
-EnergyParticleMap* SimulationContextImpl::getEnergyParticleMap () const
+EnergyParticleMap* SimulationUnitContextImpl::getEnergyParticleMap () const
 {
     return _energyParticleMap;
 }
 
-CellMap* SimulationContextImpl::getCellMap () const
+CellMap* SimulationUnitContextImpl::getCellMap () const
 {
     return _cellMap;
 }
 
-SymbolTable* SimulationContextImpl::getSymbolTable() const 
+SymbolTable* SimulationUnitContextImpl::getSymbolTable() const 
 {
 	return _symbolTable;
 }
 
-SimulationParameters* SimulationContextImpl::getSimulationParameters() const
+SimulationParameters* SimulationUnitContextImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
 }
 
-QList<CellCluster*>& SimulationContextImpl::getClustersRef ()
+QList<CellCluster*>& SimulationUnitContextImpl::getClustersRef ()
 {
     return _clusters;
 }
 
-QList<EnergyParticle*>& SimulationContextImpl::getEnergyParticlesRef ()
+QList<EnergyParticle*>& SimulationUnitContextImpl::getEnergyParticlesRef ()
 {
     return _energyParticles;
 }
 
-std::set<quint64> SimulationContextImpl::getAllCellIds() const
+std::set<quint64> SimulationUnitContextImpl::getAllCellIds() const
 {
 	QList< quint64 > cellIds;
 	foreach(CellCluster* cluster, _clusters) {
@@ -100,7 +93,7 @@ std::set<quint64> SimulationContextImpl::getAllCellIds() const
 	return cellIdsStdSet;
 }
 
-void SimulationContextImpl::deleteAll()
+void SimulationUnitContextImpl::deleteAll()
 {
 	deleteClustersAndEnergyParticles();
 	delete _cellMap;
@@ -109,7 +102,7 @@ void SimulationContextImpl::deleteAll()
 	delete _simulationParameters;
 }
 
-void SimulationContextImpl::deleteClustersAndEnergyParticles()
+void SimulationUnitContextImpl::deleteClustersAndEnergyParticles()
 {
 	foreach(CellCluster* cluster, _clusters) {
 		delete cluster;

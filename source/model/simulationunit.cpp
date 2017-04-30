@@ -33,6 +33,7 @@ void SimulationUnit::init(uint seed)
 
 qreal SimulationUnit::calcTransEnergy ()
 {
+
     qreal transEnergy(0.0);
     foreach(CellCluster* cluster, _context->getClustersRef()) {
 		if (!cluster->isEmpty()) {
