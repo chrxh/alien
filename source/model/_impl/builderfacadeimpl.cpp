@@ -14,6 +14,7 @@
 #include "model/context/energyparticlemap.h"
 #include "model/context/topology.h"
 #include "model/context/contextfactory.h"
+#include "model/context/mapcompartment.h"
 #include "model/context/simulationthreads.h"
 #include "model/context/simulationgrid.h"
 #include "model/context/simulationcontext.h"
@@ -33,35 +34,51 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
+SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
 	, SimulationParameters* parameters, QObject* parent) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
 	SimulationContext* context = factory->buildSimulationContext(parent);
 
 	auto threads = factory->buildSimulationThreads(context);
-	threads->init(maxThreads);
+	threads->init(maxRunngingThreads);
 
 	auto grid = factory->buildSimulationGrid(context);
-	grid->init(gridSize);
+	grid->init(gridSize, topology);
 
 	parameters->setParent(context);
 	symbolTable->setParent(context);
 	context->init(topology, grid, threads, symbolTable, parameters);
+
+	for (int x = 0; x < gridSize.x; ++x) {
+		for (int y = 0; y < gridSize.y; ++y) {
+			auto unit = buildSimulationUnit({ x,y }, context);
+			grid->registerUnit({ x,y }, unit);
+			threads->registerUnit(unit);
+		}
+	}
+
 	return context;
 }
 
-SimulationUnit * BuilderFacadeImpl::buildSimulationUnit(SimulationContext* context) const
+SimulationUnit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	SimulationUnit* unit = factory->buildSimulationUnit(context);
+	auto grid = context->getSimulationGrid();
+	auto threads = context->getSimulationThreads();
+	auto unit = factory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = factory->buildSimulationUnitContext(unit);
+	auto topology = context->getTopology()->clone(unit);
+	auto compartment = factory->buildMapCompartment(unit);
+	auto cellMap = factory->buildCellMap(unit);
+	auto energyMap = factory->buildEnergyParticleMap(unit);
+	auto symbolTable = context->getSymbolTable()->clone(unit);
+	auto parameters = context->getSimulationParameters()->clone(unit);
+	compartment->init(topology, grid->calcMapRect(gridPos));
+	cellMap->init(topology, compartment);
+	energyMap->init(topology, compartment);
+	unitContext->init(topology, cellMap, energyMap, symbolTable, parameters);
 	unit->init(unitContext);
-
-	auto topology = context->getTopology()->clone();
-	auto symbolTable = context->getSymbolTable()->clone();
-	auto parameters = context->getSimulationParameters()->clone();
-	unitContext->init(topology, symbolTable, parameters);
 
 	return unit;
 }

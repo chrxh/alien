@@ -8,34 +8,29 @@ class CellMap
 {
 	Q_OBJECT
 public:
-	CellMap(QObject* parent = nullptr);
+	CellMap(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CellMap();
 
-	void init(Topology* topo);
-	void clear();
+	virtual void init(Topology* topo, MapCompartment* compartment) = 0;
+	virtual void clear() = 0;
 
-	void setCell(QVector3D pos, Cell* cell);
-	void removeCell(QVector3D pos);
-	void removeCellIfPresent(QVector3D pos, Cell* cell);
-	Cell* getCell(QVector3D pos) const;
+	virtual void setCell(QVector3D pos, Cell* cell) = 0;
+	virtual void removeCell(QVector3D pos) = 0;
+	virtual void removeCellIfPresent(QVector3D pos, Cell* cell) = 0;
+	virtual Cell* getCell(QVector3D pos) const = 0;
 	inline Cell* getCellFast(IntVector2D const& intPos) const;
 
 	//advanced functions
-	CellClusterSet getNearbyClusters(QVector3D const& pos, qreal r) const;
-	CellCluster* getNearbyClusterFast(QVector3D const& pos, qreal r, qreal minMass, qreal maxMass, CellCluster* exclude) const;
+	virtual CellClusterSet getNearbyClusters(QVector3D const& pos, qreal r) const = 0;
+	virtual CellCluster* getNearbyClusterFast(QVector3D const& pos, qreal r, qreal minMass, qreal maxMass, CellCluster* exclude) const = 0;
 	using CellSelectFunction = bool(*)(Cell*);
-	QList< Cell* > getNearbySpecificCells(QVector3D const& pos, qreal r, CellSelectFunction selection) const;
+	virtual QList< Cell* > getNearbySpecificCells(QVector3D const& pos, qreal r, CellSelectFunction selection) const = 0;
 
-	void serializePrimitives(QDataStream& stream) const;
-	void deserializePrimitives(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap);
+	virtual void serializePrimitives(QDataStream& stream) const = 0;
+	virtual void deserializePrimitives(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap) = 0;
 
-private:
-	void deleteCellMap();
-	inline void removeCellIfPresent(int const &x, int const &y, Cell* cell);
-
-	Topology* _topo = nullptr;
+protected:
 	Cell*** _cellGrid = nullptr;
-	int _gridSize = 0;
 };
 
 Cell * CellMap::getCellFast(IntVector2D const& intPos) const
@@ -43,10 +38,5 @@ Cell * CellMap::getCellFast(IntVector2D const& intPos) const
 	return _cellGrid[intPos.x][intPos.y];
 }
 
-void CellMap::removeCellIfPresent(int const &x, int const &y, Cell* cell)
-{
-	if (_cellGrid[x][y] == cell)
-		_cellGrid[x][y] = nullptr;
-}
 
 #endif //CELLMAP_H
