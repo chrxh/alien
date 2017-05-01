@@ -6,6 +6,7 @@
 class SimulationGridImpl
 	: public SimulationGrid
 {
+	Q_OBJECT
 public:
 	SimulationGridImpl(QObject* parent = nullptr);
 	virtual ~SimulationGridImpl();

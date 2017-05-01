@@ -9,8 +9,8 @@ class SimulationUnit
 {
     Q_OBJECT
 public:
-    SimulationUnit (QObject* parent = nullptr);
-	virtual ~SimulationUnit ();
+	SimulationUnit(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~SimulationUnit() {}
 
 public slots:
 	virtual void init(SimulationUnitContext* context) = 0;

@@ -8,8 +8,8 @@ class EnergyParticleMap
 {
 	Q_OBJECT
 public:
-	EnergyParticleMap(QObject* parent = nullptr);
-	virtual ~EnergyParticleMap();
+	EnergyParticleMap(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~EnergyParticleMap() {}
 
 	virtual void init(SpaceMetric* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;

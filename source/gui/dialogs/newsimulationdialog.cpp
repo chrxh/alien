@@ -44,9 +44,9 @@ qreal NewSimulationDialog::getEnergy ()
     return ui->energyEdit->text().toDouble(&ok);
 }
 
-SymbolTable const& NewSimulationDialog::getNewSymbolTableRef()
+SymbolTable* NewSimulationDialog::getNewSymbolTable()
 {
-	return _symTblDialog->getNewSymbolTableRef();
+	return _symTblDialog->getNewSymbolTable();
 }
 
 SimulationParameters* NewSimulationDialog::getNewSimulationParameters()

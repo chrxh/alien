@@ -1,5 +1,5 @@
-#ifndef TORUSTOPOLOGY_H
-#define TORUSTOPOLOGY_H
+#ifndef SPACEMETRICIMPL_H
+#define SPACEMETRICIMPL_H
 
 #include "model/context/spacemetric.h"
 
@@ -38,4 +38,4 @@ void SpaceMetricImpl::correctPosition(IntVector2D & pos) const
 	pos.y = ((pos.y % _size.y) + _size.y) % _size.y;
 }
 
-#endif // TORUSTOPOLOGY_H
+#endif // SPACEMETRICIMPL_H

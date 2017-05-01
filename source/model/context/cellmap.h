@@ -9,7 +9,7 @@ class CellMap
 	Q_OBJECT
 public:
 	CellMap(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~CellMap();
+	virtual ~CellMap() {}
 
 	virtual void init(SpaceMetric* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;

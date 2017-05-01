@@ -30,7 +30,7 @@ class TextEditor : public QObject
     Q_OBJECT
 
 public:
-    TextEditor(SimulationUnitContext* context, QObject *parent = 0);
+    TextEditor(SimulationContext* context, QObject *parent = 0);
     ~TextEditor();
 
 
@@ -85,7 +85,7 @@ public slots:
 	void energyParticleFocused(EnergyParticle* e);
     void energyParticleUpdated_Slot (EnergyParticle* e);
     void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (SimulationUnitContext* context, bool force);
+    void universeUpdated (SimulationContext* context, bool force);
     void requestUpdate ();
 
 	void entitiesSelected(int numCells, int numEnergyParticles);
@@ -120,7 +120,7 @@ private:
     void invokeUpdateCell (bool clusterDataChanged);
     void setTabSymbolsWidgetVisibility ();
 
-	SimulationUnitContext* _context;
+	SimulationContext* _context;
 
     //widgets
 	MicroEditorWidgets _widgets;

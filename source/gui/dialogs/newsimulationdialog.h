@@ -22,7 +22,7 @@ public:
 
     IntVector2D getSize();
     qreal getEnergy();
-	SymbolTable const& getNewSymbolTableRef();
+	SymbolTable* getNewSymbolTable();
 	SimulationParameters* getNewSimulationParameters();
 
 private slots:
