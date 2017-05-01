@@ -51,7 +51,7 @@ public:
 
     void setCluster (CellCluster* cluster) override;
     CellCluster* getCluster () const override;
-    QVector3D calcPosition (bool topologyCorrection = false) const override;
+    QVector3D calcPosition (bool metricCorrection = false) const override;
     void setAbsPosition (QVector3D pos) override;
     void setAbsPositionAndUpdateMap (QVector3D pos) override;
     QVector3D getRelPosition () const override;

@@ -25,7 +25,7 @@ class CellFeature;
 class SimulationUnit;
 class CellMap;
 class EnergyParticleMap;
-class Topology;
+class SpaceMetric;
 class MapCompartment;
 class SimulationGrid;
 class SimulationThreads;

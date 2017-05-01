@@ -15,7 +15,7 @@ public:
 	virtual SimulationUnit* buildSimulationUnit(QObject* parent = nullptr) const override;
 	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const override;
 	virtual SimulationThreads* buildSimulationThreads(QObject* parent = nullptr) const override;
-	virtual Topology* buildTorusTopology(QObject* parent = nullptr) const override;
+	virtual SpaceMetric* buildSpaceMetric(QObject* parent = nullptr) const override;
 	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const override;
 	virtual CellMap* buildCellMap(QObject* parent = nullptr) const override;
 	virtual EnergyParticleMap* buildEnergyParticleMap(QObject* parent = nullptr) const override;

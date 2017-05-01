@@ -5,7 +5,7 @@
 #include "model/entities/token.h"
 #include "model/context/simulationunitcontext.h"
 #include "model/context/cellmap.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/context/simulationparameters.h"
@@ -139,8 +139,8 @@ bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (co
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector3D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
-            Topology* topology = _context->getTopology();
-            QVector3D displacementOfObjectFromReceiver = topology->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
+            SpaceMetric* metric = _context->getTopology();
+            QVector3D displacementOfObjectFromReceiver = metric->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
             communicator->_receivedMessage.angle = CodingPhysicalQuantities::convertAngleToData(angleSeenFromReceiver);

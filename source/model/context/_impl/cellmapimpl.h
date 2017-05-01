@@ -11,7 +11,7 @@ public:
 	CellMapImpl(QObject* parent = nullptr);
 	virtual ~CellMapImpl();
 
-	virtual void init(Topology* topo, MapCompartment* compartment) override;
+	virtual void init(SpaceMetric* topo, MapCompartment* compartment) override;
 	virtual void clear() override;
 
 	virtual void setCell(QVector3D pos, Cell* cell) override;
@@ -33,7 +33,7 @@ private:
 	void deleteCellMap();
 	inline void removeCellIfPresent(int const &x, int const &y, Cell* cell);
 
-	Topology* _topo = nullptr;
+	SpaceMetric* _topo = nullptr;
 	int _gridSize = 0;
 };
 

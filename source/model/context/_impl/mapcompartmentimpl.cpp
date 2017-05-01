@@ -5,12 +5,17 @@ MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 {
 }
 
-void MapCompartmentImpl::init(Topology * topology, IntRect mapRect)
+void MapCompartmentImpl::init(SpaceMetric * metric, IntRect mapRect)
 {
 }
 
 void MapCompartmentImpl::registerNeighborContext(RelativeLocation location, SimulationUnitContext * context)
 {
+}
+
+SimulationUnitContext * MapCompartmentImpl::getNeighborContext(RelativeLocation location) const
+{
+	return nullptr;
 }
 
 SimulationUnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D pos) const

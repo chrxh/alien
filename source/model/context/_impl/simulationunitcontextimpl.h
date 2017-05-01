@@ -4,7 +4,7 @@
 #include <QMutex>
 
 #include "model/context/simulationunitcontext.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 
 class SimulationUnitContextImpl
 	: public SimulationUnitContext
@@ -13,12 +13,12 @@ public:
 	SimulationUnitContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationUnitContextImpl();
 
-	void init(Topology* topology, CellMap* cellMap, EnergyParticleMap* energyMap, SymbolTable* symbolTable, SimulationParameters* parameters) override;
+	void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, SymbolTable* symbolTable, SimulationParameters* parameters) override;
 
 	virtual void lock();
 	virtual void unlock();
 
-    Topology* getTopology () const override;
+    SpaceMetric* getTopology () const override;
     EnergyParticleMap* getEnergyParticleMap () const override;
     CellMap* getCellMap () const override;
 	SymbolTable* getSymbolTable() const override;
@@ -34,7 +34,7 @@ private:
 	
 	QList<CellCluster*> _clusters;
     QList<EnergyParticle*> _energyParticles;
-    Topology* _topology = nullptr;
+    SpaceMetric* _metric = nullptr;
     EnergyParticleMap* _energyParticleMap = nullptr;
     CellMap* _cellMap = nullptr;
 	SymbolTable* _symbolTable = nullptr;

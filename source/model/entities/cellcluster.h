@@ -28,7 +28,7 @@ public:
     virtual void updateAngularMass () = 0;
     virtual void updateRelCoordinates (bool maintainCenter = false) = 0;
     virtual void updateVel_angularVel_via_cellVelocities () = 0;
-    virtual QVector3D calcPosition (const Cell *cell, bool topologyCorrection = false) const = 0;
+    virtual QVector3D calcPosition (const Cell *cell, bool metricCorrection = false) const = 0;
     virtual QVector3D calcCellDistWithoutTorusCorrection (Cell* cell) const = 0;
     virtual QList< CellCluster* > decompose () const = 0;
     virtual qreal calcAngularMassWithNewParticle (QVector3D particlePos) const = 0;
