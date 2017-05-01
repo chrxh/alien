@@ -58,6 +58,24 @@ SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThre
 		}
 	}
 
+	for (int x = 0; x < gridSize.x; ++x) {
+		for (int y = 0; y < gridSize.y; ++y) {
+			auto unitContext = grid->getUnit({ x, y })->getContext();
+			auto compartment = unitContext->getMapCompartment();
+			auto getContextFromDelta = [&](IntVector2D const& delta) {
+				return grid->getUnit({ (x + delta.x + gridSize.x) % gridSize.x, (y + delta.x + gridSize.y) % gridSize.y })->getContext();
+			};
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::UpperLeft, getContextFromDelta({ -1, -1 }));
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::Upper, getContextFromDelta({ 0, -1 }));
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::UpperRight, getContextFromDelta({ +1, -1 }));
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::Left, getContextFromDelta({ -1, 0 }));
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::Right, getContextFromDelta({ +1, 0 }));
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::LowerLeft, getContextFromDelta({ -1, +1 }));
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::Lower, getContextFromDelta({ 0, +1 }));
+			compartment->registerNeighborContext(MapCompartment::RelativeLocation::LowerRight, getContextFromDelta({ +1, +1 }));
+		}
+	}
+
 	return context;
 }
 

@@ -37,7 +37,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
 	, _simController(simController)
-	, _microEditor(new TextEditor(simController->getSimulationContext(), this))
+	, _textEditor(new TextEditor(simController->getSimulationContext(), this))
 	, _oneSecondTimer(new QTimer(this))
     , _monitor(new SimulationMonitor(this))
     , _tutorialWindow(new TutorialWindow(this))
@@ -51,7 +51,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
 		, ui->symbolEdit2, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
 		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2
 		, ui->buttonShowInfo };
-    _microEditor->init(microWidgets);
+    _textEditor->init(microWidgets);
 
     //set font
     setFont(GuiFunctions::getGlobalFont());
@@ -75,40 +75,40 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
 
     //connect coordinators
     connect(_simController, SIGNAL(cellCreated(Cell*)), ui->visualEditor, SLOT(cellCreated(Cell*)));
-    connect(_simController, SIGNAL(cellCreated(Cell*)), _microEditor, SLOT(cellFocused(Cell*)));
+    connect(_simController, SIGNAL(cellCreated(Cell*)), _textEditor, SLOT(cellFocused(Cell*)));
     connect(_simController, SIGNAL(cellCreated(Cell*)), this, SLOT(cellFocused(Cell*)));
     connect(_simController, SIGNAL(energyParticleCreated(EnergyParticle*)), ui->visualEditor, SLOT(energyParticleCreated(EnergyParticle*)));
-    connect(_simController, SIGNAL(energyParticleCreated(EnergyParticle*)), _microEditor, SLOT(energyParticleFocused(EnergyParticle*)));
+    connect(_simController, SIGNAL(energyParticleCreated(EnergyParticle*)), _textEditor, SLOT(energyParticleFocused(EnergyParticle*)));
     connect(_simController, SIGNAL(energyParticleCreated(EnergyParticle*)), this, SLOT(energyParticleFocused(EnergyParticle*)));
-    connect(_simController, SIGNAL(universeUpdated(SimulationUnitContext*, bool)), ui->visualEditor, SLOT(universeUpdated(SimulationUnitContext*, bool)));
-    connect(_simController, SIGNAL(universeUpdated(SimulationUnitContext*, bool)), _microEditor, SLOT(universeUpdated(SimulationUnitContext*, bool)));
+    connect(_simController, SIGNAL(universeUpdated(SimulationContext*, bool)), ui->visualEditor, SLOT(universeUpdated(SimulationContext*, bool)));
+    connect(_simController, SIGNAL(universeUpdated(SimulationContext*, bool)), _textEditor, SLOT(universeUpdated(SimulationContext*, bool)));
     connect(_simController, SIGNAL(reclustered(QList<CellCluster*>)), ui->visualEditor, SLOT(reclustered(QList<CellCluster*>)));
-    connect(_simController, SIGNAL(reclustered(QList<CellCluster*>)), _microEditor, SLOT(reclustered(QList<CellCluster*>)));
-    connect(_simController, SIGNAL(computerCompilationReturn(bool,int)), _microEditor, SLOT(computerCompilationReturn(bool,int)));
+    connect(_simController, SIGNAL(reclustered(QList<CellCluster*>)), _textEditor, SLOT(reclustered(QList<CellCluster*>)));
+    connect(_simController, SIGNAL(computerCompilationReturn(bool,int)), _textEditor, SLOT(computerCompilationReturn(bool,int)));
     connect(ui->visualEditor, SIGNAL(requestNewCell(QVector3D)), _simController, SLOT(newCell(QVector3D)));
     connect(ui->visualEditor, SIGNAL(requestNewEnergyParticle(QVector3D)), _simController, SLOT(newEnergyParticle(QVector3D)));
-    connect(ui->visualEditor, SIGNAL(defocus()), _microEditor, SLOT(defocused()));
+    connect(ui->visualEditor, SIGNAL(defocus()), _textEditor, SLOT(defocused()));
     connect(ui->visualEditor, SIGNAL(defocus()), this, SLOT(cellDefocused()));
-    connect(ui->visualEditor, SIGNAL(focusCell(Cell*)), _microEditor, SLOT(cellFocused(Cell*)));
+    connect(ui->visualEditor, SIGNAL(focusCell(Cell*)), _textEditor, SLOT(cellFocused(Cell*)));
     connect(ui->visualEditor, SIGNAL(focusCell(Cell*)), this, SLOT(cellFocused(Cell*)));
-    connect(ui->visualEditor, SIGNAL(focusEnergyParticle(EnergyParticle*)), _microEditor, SLOT(energyParticleFocused(EnergyParticle*)));
+    connect(ui->visualEditor, SIGNAL(focusEnergyParticle(EnergyParticle*)), _textEditor, SLOT(energyParticleFocused(EnergyParticle*)));
     connect(ui->visualEditor, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), _simController, SLOT(updateCell(QList<Cell*>,QList<CellTO>,bool)));
-    connect(ui->visualEditor, SIGNAL(energyParticleUpdated(EnergyParticle*)), _microEditor, SLOT(energyParticleUpdated_Slot(EnergyParticle*)));
-    connect(ui->visualEditor, SIGNAL(entitiesSelected(int,int)), _microEditor, SLOT(entitiesSelected(int,int)));
+    connect(ui->visualEditor, SIGNAL(energyParticleUpdated(EnergyParticle*)), _textEditor, SLOT(energyParticleUpdated_Slot(EnergyParticle*)));
+    connect(ui->visualEditor, SIGNAL(entitiesSelected(int,int)), _textEditor, SLOT(entitiesSelected(int,int)));
     connect(ui->visualEditor, SIGNAL(entitiesSelected(int,int)), this, SLOT(entitiesSelected(int,int)));
     connect(ui->visualEditor, SIGNAL(delSelection(QList<Cell*>,QList<EnergyParticle*>)), _simController, SLOT(delSelection(QList<Cell*>,QList<EnergyParticle*>)));
     connect(ui->visualEditor, SIGNAL(delExtendedSelection(QList<CellCluster*>,QList<EnergyParticle*>)), _simController, SLOT(delExtendedSelection(QList<CellCluster*>,QList<EnergyParticle*>)));
-    connect(_microEditor, SIGNAL(requestNewCell()), ui->visualEditor, SLOT(newCellRequested()));
-    connect(_microEditor, SIGNAL(requestNewEnergyParticle()), ui->visualEditor, SLOT(newEnergyParticleRequested()));
-    connect(_microEditor, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), _simController, SLOT(updateCell(QList<Cell*>,QList<CellTO>,bool)));
-    connect(_microEditor, SIGNAL(energyParticleUpdated(EnergyParticle*)), ui->visualEditor, SLOT(energyParticleUpdated_Slot(EnergyParticle*)));
-    connect(_microEditor, SIGNAL(delSelection()), ui->visualEditor, SLOT(delSelection_Slot()));
-    connect(_microEditor, SIGNAL(delExtendedSelection()), ui->visualEditor, SLOT(delExtendedSelection_Slot()));
-    connect(_microEditor, SIGNAL(defocus()), ui->visualEditor, SLOT(defocused()));
-    connect(_microEditor, SIGNAL(defocus()), this, SLOT(cellDefocused()));
-    connect(_microEditor, SIGNAL(metadataUpdated()), ui->visualEditor, SLOT(metadataUpdated()));
-    connect(_microEditor, SIGNAL(numTokenUpdate(int,int,bool)), this, SLOT(numTokenChanged(int,int,bool)));
-	connect(_microEditor, SIGNAL(toggleInformation(bool)), ui->visualEditor, SLOT(toggleInformation(bool)));
+    connect(_textEditor, SIGNAL(requestNewCell()), ui->visualEditor, SLOT(newCellRequested()));
+    connect(_textEditor, SIGNAL(requestNewEnergyParticle()), ui->visualEditor, SLOT(newEnergyParticleRequested()));
+    connect(_textEditor, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), _simController, SLOT(updateCell(QList<Cell*>,QList<CellTO>,bool)));
+    connect(_textEditor, SIGNAL(energyParticleUpdated(EnergyParticle*)), ui->visualEditor, SLOT(energyParticleUpdated_Slot(EnergyParticle*)));
+    connect(_textEditor, SIGNAL(delSelection()), ui->visualEditor, SLOT(delSelection_Slot()));
+    connect(_textEditor, SIGNAL(delExtendedSelection()), ui->visualEditor, SLOT(delExtendedSelection_Slot()));
+    connect(_textEditor, SIGNAL(defocus()), ui->visualEditor, SLOT(defocused()));
+    connect(_textEditor, SIGNAL(defocus()), this, SLOT(cellDefocused()));
+    connect(_textEditor, SIGNAL(metadataUpdated()), ui->visualEditor, SLOT(metadataUpdated()));
+    connect(_textEditor, SIGNAL(numTokenUpdate(int,int,bool)), this, SLOT(numTokenChanged(int,int,bool)));
+	connect(_textEditor, SIGNAL(toggleInformation(bool)), ui->visualEditor, SLOT(toggleInformation(bool)));
 
     //connect signals/slots for actions
     connect(ui->actionPlay, SIGNAL( triggered(bool) ), this, SLOT(runClicked(bool)));
@@ -140,10 +140,10 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     connect(ui->actionSave_symbols, SIGNAL(triggered(bool)), this, SLOT(saveSymbols()));
     connect(ui->actionLoad_symbols, SIGNAL(triggered(bool)), this, SLOT(loadSymbols()));
     connect(ui->actionMerge_with, SIGNAL(triggered(bool)), this, SLOT(loadSymbolsWithMerging()));
-    connect(ui->actionNewToken, SIGNAL(triggered(bool)), _microEditor, SLOT(addTokenClicked()));
-    connect(ui->actionDeleteToken, SIGNAL(triggered(bool)), _microEditor, SLOT(delTokenClicked()));
-    connect(ui->actionCopyToken, SIGNAL(triggered(bool)), _microEditor, SLOT(copyTokenClicked()));
-    connect(ui->actionPasteToken, SIGNAL(triggered(bool)), _microEditor, SLOT(pasteTokenClicked()));
+    connect(ui->actionNewToken, SIGNAL(triggered(bool)), _textEditor, SLOT(addTokenClicked()));
+    connect(ui->actionDeleteToken, SIGNAL(triggered(bool)), _textEditor, SLOT(delTokenClicked()));
+    connect(ui->actionCopyToken, SIGNAL(triggered(bool)), _textEditor, SLOT(copyTokenClicked()));
+    connect(ui->actionPasteToken, SIGNAL(triggered(bool)), _textEditor, SLOT(pasteTokenClicked()));
     connect(ui->actionEditSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(editSimulationParameters()));
     connect(ui->actionLoadSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(loadSimulationParameters()));
     connect(ui->actionSaveSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(saveSimulationParameters()));
@@ -152,8 +152,8 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     connect(ui->actionRandom, SIGNAL(triggered(bool)), this, SLOT(multiplyRandomExtendedSelection()));
     connect(ui->actionArrangement, SIGNAL(triggered(bool)), this, SLOT(multiplyArrangementExtendedSelection()));
     connect(ui->actionAboutAlien, SIGNAL(triggered(bool)), this, SLOT(aboutAlien()));
-    connect(ui->actionDeleteCell, SIGNAL(triggered(bool)), _microEditor, SLOT(delSelectionClicked()));
-    connect(ui->actionDeleteExtension, SIGNAL(triggered(bool)), _microEditor, SLOT(delExtendedSelectionClicked()));
+    connect(ui->actionDeleteCell, SIGNAL(triggered(bool)), _textEditor, SLOT(delSelectionClicked()));
+    connect(ui->actionDeleteExtension, SIGNAL(triggered(bool)), _textEditor, SLOT(delExtendedSelectionClicked()));
     connect(ui->actionTutorial, SIGNAL(triggered(bool)), _tutorialWindow, SLOT(setVisible(bool)));
     connect(_tutorialWindow, SIGNAL(closed()), this, SLOT(tutorialClosed()));
 
@@ -169,7 +169,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     _simController->updateUniverse();
 
     //setup micro editor
-    _microEditor->setVisible(false);
+    _textEditor->setVisible(false);
 
     //init widgets
     QFont f = ui->frameLabel->font();
@@ -268,7 +268,7 @@ void MainWindow::runClicked (bool run)
     ui->actionDeleteExtension->setEnabled(false);
 
     _undoUniverserses.clear();
-    _microEditor->requestUpdate();
+    _textEditor->requestUpdate();
     _simController->setRun(run);
 }
 
@@ -282,7 +282,7 @@ void MainWindow::stepForwardClicked ()
     ui->actionCopyCell->setEnabled(false);
     ui->actionDeleteCell->setEnabled(false);
     ui->actionDeleteExtension->setEnabled(false);
-    _microEditor->requestUpdate();
+    _textEditor->requestUpdate();
 
     //save old universe
     QByteArray b;
@@ -419,7 +419,7 @@ void MainWindow::fullscreen (bool triggered)
 void MainWindow::setEditMode (bool editMode)
 {
     if( !editMode )
-        _microEditor->requestUpdate();
+        _textEditor->requestUpdate();
     ui->actionPlay->setChecked(false);
     ui->actionStep->setEnabled(true);
     ui->actionPlay->setIcon(QIcon("://Icons/play.png"));
@@ -439,7 +439,7 @@ void MainWindow::setEditMode (bool editMode)
     }
 
     //update micro editor
-    _microEditor->setVisible(editMode);
+    _textEditor->setVisible(editMode);
 
     //stop running
     _simController->setRun(false);
@@ -464,14 +464,14 @@ void MainWindow::alienMonitorClosed()
 void MainWindow::addCell ()
 {
     ui->visualEditor->newCellRequested();
-    if( !_microEditor->isVisible() )
+    if( !_textEditor->isVisible() )
         _simController->updateUniverse();
 }
 
 void MainWindow::addEnergyParticle ()
 {
     ui->visualEditor->newEnergyParticleRequested();
-    if( !_microEditor->isVisible() )
+    if( !_textEditor->isVisible() )
         _simController->updateUniverse();
 }
 
@@ -487,7 +487,7 @@ void MainWindow::addRandomEnergy ()
 void MainWindow::copyCell ()
 {
     //serialize cell
-    Cell* focusCell = _microEditor->getFocusedCell();
+    Cell* focusCell = _textEditor->getFocusedCell();
     QDataStream out(&_serializedCellData, QIODevice::WriteOnly);
     quint64 clusterId;
     quint64 cellId;
@@ -540,7 +540,7 @@ void MainWindow::loadSymbols ()
 			delete newSymbolTable;
             file.close();
 
-            _microEditor->update();
+            _textEditor->update();
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -584,7 +584,7 @@ void MainWindow::loadSymbolsWithMerging ()
 			delete newSymbolTable;
 			file.close();
 
-            _microEditor->update();
+            _textEditor->update();
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -863,7 +863,7 @@ void MainWindow::numTokenChanged (int numToken, int maxToken, bool pasteTokenPos
 
 void MainWindow::cellFocused (Cell* cell)
 {
-    if( _microEditor->isVisible() ) {
+    if( _textEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);
         ui->actionCopy_cell_extension->setEnabled(true);
         ui->menuMultiplyExtension->setEnabled(true);
@@ -885,7 +885,7 @@ void MainWindow::cellDefocused ()
 
 void MainWindow::energyParticleFocused (EnergyParticle* e)
 {
-    if( _microEditor->isVisible() ) {
+    if( _textEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);
         ui->actionCopy_cell_extension->setEnabled(true);
         ui->menuMultiplyExtension->setEnabled(true);
@@ -953,7 +953,7 @@ void MainWindow::stopSimulation()
 void MainWindow::updateControllerAndEditors()
 {
 	ui->visualEditor->reset();
-	_microEditor->update();
+	_textEditor->update();
 	_simController->updateUniverse();
 }
 

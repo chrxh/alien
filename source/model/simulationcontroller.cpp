@@ -31,9 +31,8 @@
 
 #include "simulationcontroller.h"
 
-SimulationController::SimulationController(Threading threading, QObject* parent)
+SimulationController::SimulationController(QObject* parent)
     : QObject(parent)
-	, _threading(threading)
 {
     _forceFpsTimer = new QTimer(this);
 	_oneSecondTimer = new QTimer(this);

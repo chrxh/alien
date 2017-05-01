@@ -76,7 +76,7 @@ public slots:
     void energyParticleCreated (EnergyParticle* e);
     void energyParticleUpdated_Slot (EnergyParticle* e);
     void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (SimulationUnitContext* context, bool force);
+    void universeUpdated (SimulationContext* context, bool force);
     void metadataUpdated ();
 	void toggleInformation(bool on);
 
@@ -84,11 +84,11 @@ private slots:
     void updateTimerTimeout ();
 
 private:
-    void centerView (SimulationUnitContext* context);
+    void centerView (SimulationContext* context);
 
     Ui::VisualEditor *ui;
 
-    SimulationUnitContext* _context = nullptr;
+    SimulationContext* _context = nullptr;
     ActiveScene _activeScene;
     PixelUniverse* _pixelUniverse;
     ShapeUniverse* _shapeUniverse;

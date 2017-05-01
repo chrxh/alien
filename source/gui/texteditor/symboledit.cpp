@@ -8,21 +8,13 @@
 #include "symboledit.h"
 #include "ui_symboledit.h"
 
-SymbolEdit::SymbolEdit(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::SymbolEdit)
+SymbolEdit::SymbolEdit(QWidget *parent)
+	: QWidget(parent), ui(new Ui::SymbolEdit)
 {
     ui->setupUi(this);
 
     //set color
-//    QPalette p = palette();
-//    p.setColor(QPalette::WindowText, CELL_EDIT_DATA_COLOR1);
-//    p.setColor(QPalette::Text, CELL_EDIT_DATA_COLOR1);
-//    p.setColor(QPalette::Base, QColor(0,0,0));
-//    p.setColor(QPalette::Window, QColor(0,0,0));
-//    setPalette(p);
     setStyleSheet("background-color: #000000");
-//    ui->tableWidget->setPalette(p);
     ui->tableWidget->setStyleSheet(TABLE_STYLESHEET);
     ui->tableWidget->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
     ui->addSymbolButton->setStyleSheet(BUTTON_STYLESHEET);
@@ -31,19 +23,8 @@ SymbolEdit::SymbolEdit(QWidget *parent) :
     p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
     ui->addSymbolButton->setPalette(p);
     ui->delSymbolButton->setPalette(p);
-//    ui->tableWidget->setStyleSheet("background-color: #000000; color: " + CELL_EDIT_DATA_COLOR1.name() + "; font-family: Courier New; font-weight: bold; font-size: 12px");
 
-/*    QTableWidgetItem* item = ui->tableWidget->horizontalHeaderItem(0);
-    item->setForeground(QBrush(QColor(0,0,0)));
-    item->setText("bla");
-    QString styleSheet = "::section {" // "QHeaderView::section {"
-                         "spacing: 10px;"
-                         "background-color: black; }";
-
-    ui->tableWidget->horizontalHeader()->setStyleSheet(styleSheet);
-*/
-    //set font
-//    ui->tableWidget->horizontalHeader()->setFont(GuiFunctions::getGlobalFont());
+	//set font
     ui->tableWidget->setFont(GuiFunctions::getGlobalFont());
 
     //set section length

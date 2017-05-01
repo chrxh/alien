@@ -64,6 +64,7 @@ void TextEditor::init (MicroEditorWidgets widgets)
 	_widgets.tabClusterWidget->setVisible(false);
 	_widgets.tabComputerWidget->setVisible(false);
 	_widgets.tabTokenWidget->setVisible(false);
+	_widgets.tabSymbolsWidget->setVisible(false);
 
     //set colors
 	_widgets.requestCellButton->setStyleSheet(BUTTON_STYLESHEET);
@@ -103,7 +104,7 @@ void TextEditor::init (MicroEditorWidgets widgets)
     connect(_widgets.metadataEditor, SIGNAL(metadataChanged(QString,QString,quint8,QString)), this, SLOT(changesFromMetadataEditor(QString,QString,quint8,QString)));
     connect(_widgets.symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
 
-	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
+//	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
 }
 
 

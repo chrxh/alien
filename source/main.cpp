@@ -20,7 +20,6 @@
 
 //Nächstes Mal:
 //- MapCompartment::registerNeighborContext aufrufen
-//- dependencies in SimulationThreads bestimmen
 
 //Model-Refactoring:
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
@@ -81,13 +80,11 @@
 
 int main(int argc, char *argv[])
 {
-    //register types
     qRegisterMetaType<CellTO>("CellTO");
-//	qRegisterMetaType<SimulationContext>("SimulationContext");
 
     //init main objects
     QApplication a(argc, argv);
-	SimulationController controller(SimulationController::Threading::EXTRA_THREAD);
+	SimulationController controller;
 	auto context = controller.getSimulationContext();
 //	controller.newUniverse({ 400, 200 }, context->getSymbolTable(), *context->getSimulationParameters());
     MainWindow w(&controller);
