@@ -9,7 +9,7 @@ class SimulationContextImpl
 {
 public:
 	SimulationContextImpl(QObject* parent = nullptr);
-	virtual ~SimulationContextImpl() {}
+	virtual ~SimulationContextImpl();
 
 	virtual void init(Topology* topology, SimulationGrid* grid, SimulationThreads* threads, SymbolTable * symbolTable, SimulationParameters* parameters) override;
 

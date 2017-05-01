@@ -43,10 +43,6 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
 	_oneSecondTimer->start(1000);
 }
 
-SimulationController::~SimulationController ()
-{
-}
-
 QMap< QString, qreal > SimulationController::getMonitorData ()
 {
     QMap< QString, qreal > data;
@@ -83,15 +79,6 @@ void SimulationController::newUniverse(SimulationContext* context)
 	_frame = 0;
 	delete _context;
 	_context = context;
-
-	auto grid = _context->getSimulationGrid();
-	IntVector2D gridSize = grid->getSize();
-	for (int x = 0; x < gridSize.x; ++x) {
-		for (int y = 0; y < gridSize.y; ++y) {
-			auto unit = buildAndConnectSimulationUnit();
-			grid->registerUnit({ x, y }, unit);
-		}
-	}
 }
 
 void SimulationController::saveUniverse (QDataStream& stream)
@@ -832,18 +819,4 @@ void SimulationController::nextTimestepCalculated ()
     }*/
 }
 
-SimulationUnit* SimulationController::buildAndConnectSimulationUnit()
-{
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto unit = facade->buildSimulationUnit(_context);
-
-	if (_threading == Threading::EXTRA_THREAD) {
-		connect(this, SIGNAL(calcNextTimestep()), unit, SLOT(calcNextTimestep()));
-		connect(unit, SIGNAL(nextTimestepCalculated()), this, SLOT(nextTimestepCalculated()));
-	}
-	if (_threading == Threading::NO_EXTRA_THREAD) {
-		connect(this, SIGNAL(calcNextTimestep()), unit, SLOT(calcNextTimestep()), Qt::DirectConnection);
-	}
-	return unit;
-}
 
