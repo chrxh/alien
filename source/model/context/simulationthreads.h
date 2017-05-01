@@ -14,6 +14,7 @@ public:
 	virtual void init(int numThreads) = 0;
 
 	virtual void registerUnit(SimulationUnit* unit) = 0;
+	virtual void start() const = 0;
 
 private:
 	int maxRunningThreads = 1;

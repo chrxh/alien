@@ -15,6 +15,9 @@ public:
 
 	void init(Topology* topology, SymbolTable * symbolTable, SimulationParameters* parameters) override;
 
+	virtual void lock();
+	virtual void unlock();
+
     Topology* getTopology () const override;
     EnergyParticleMap* getEnergyParticleMap () const override;
     CellMap* getCellMap () const override;
@@ -27,7 +30,9 @@ public:
 private:
 	void deleteClustersAndEnergyParticles();
 
-    QList<CellCluster*> _clusters;
+	QMutex _mutex;
+	
+	QList<CellCluster*> _clusters;
     QList<EnergyParticle*> _energyParticles;
     Topology* _topology = nullptr;
     EnergyParticleMap* _energyParticleMap = nullptr;

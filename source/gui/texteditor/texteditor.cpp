@@ -10,7 +10,7 @@
 #include "model/context/simulationparameters.h"
 #include "model/context/simulationunitcontext.h"
 #include "model/context/energyparticlemap.h"
-#include "model/alienfacade.h"
+#include "model/builderfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
@@ -206,7 +206,7 @@ void TextEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 
     //update data for cluster editor
     _context->lock();
-    AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+    BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
     _focusCellReduced = facade->buildFeaturedCellTO(cell);
     QList< quint64 > ids = cell->getCluster()->getCellIds();
 	_context->unlock();
@@ -353,7 +353,7 @@ void TextEditor::reclustered (QList< CellCluster* > clusters)
         if( contained ) {
 
             //update data for cluster editor
-            AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+            BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
             _context->lock();
             _focusCellReduced = facade->buildFeaturedCellTO(_focusCell);
             _context->unlock();

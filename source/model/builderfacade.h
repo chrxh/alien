@@ -9,13 +9,15 @@
 
 #include "definitions.h"
 
-class AlienFacade
+class BuilderFacade
 {
 public:
-    virtual ~AlienFacade () {}
+    virtual ~BuilderFacade () {}
 
-	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const = 0;
-	virtual Topology* buildTorusTopology(QObject* parent = nullptr) const = 0;
+	virtual SimulationContext* buildSimulationContext(int maxThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
+		, SimulationParameters* parameters, QObject* parent = nullptr) const = 0;
+	virtual SimulationUnit* buildSimulationUnit(SimulationContext* context) const = 0;
+	virtual Topology* buildTorusTopology(IntVector2D universeSize, QObject* parent = nullptr) const = 0;
 
     virtual CellCluster* buildCellCluster (SimulationUnitContext* context) const = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel

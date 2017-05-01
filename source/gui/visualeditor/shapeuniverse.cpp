@@ -9,7 +9,7 @@
 #include "model/features/cellfunction.h"
 #include "model/context/simulationparameters.h"
 #include "model/modelsettings.h"
-#include "model/alienfacade.h"
+#include "model/builderfacade.h"
 #include "model/context/simulationunitcontext.h"
 #include "model/context/topology.h"
 #include "model/context/energyparticlemap.h"
@@ -565,7 +565,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             QList< CellTO > newCellsData;
 
             //update focused cells
-            AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+            BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
             foreach( CellGraphicsItem* cellItem, _focusCells ) {
 
                 //retrieve cell information

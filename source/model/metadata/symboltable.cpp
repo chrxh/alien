@@ -1,6 +1,7 @@
 #include "symboltable.h"
 
-SymbolTable::SymbolTable()
+SymbolTable::SymbolTable(QObject* parent)
+	: QObject(parent)
 {
 
 }
@@ -9,50 +10,57 @@ SymbolTable::~SymbolTable()
 {
 }
 
+SymbolTable * SymbolTable::clone(QObject * parent) const
+{
+	auto symbolTable = new SymbolTable(parent);
+	symbolTable->_symbolsByKey = _symbolsByKey;
+	return symbolTable;
+}
+
 void SymbolTable::addEntry(QString const& key, QString const& value)
 {
-	_symbolTable[key] = value;
+	_symbolsByKey[key] = value;
 }
 
 void SymbolTable::delEntry(QString const& key)
 {
-	_symbolTable.remove(key);
+	_symbolsByKey.remove(key);
 }
 
 QString SymbolTable::applyTableToCode(QString const& input) const
 {
-	if (_symbolTable.contains(input)) {
-		return _symbolTable[input];
+	if (_symbolsByKey.contains(input)) {
+		return _symbolsByKey[input];
 	}
 	return input;
 }
 
 void SymbolTable::clearTable()
 {
-	_symbolTable.clear();
+	_symbolsByKey.clear();
 }
 
 QMap< QString, QString > const& SymbolTable::getTableConstRef() const
 {
-	return _symbolTable;
+	return _symbolsByKey;
 }
 
 void SymbolTable::setTable(SymbolTable const& table)
 {
-	_symbolTable = table._symbolTable;
+	_symbolsByKey = table._symbolsByKey;
 }
 
 void SymbolTable::mergeTable(SymbolTable const& table)
 {
-	_symbolTable.unite(table._symbolTable);
+	_symbolsByKey.unite(table._symbolsByKey);
 }
 
 void SymbolTable::serializePrimitives(QDataStream& stream) const
 {
-	stream << _symbolTable;
+	stream << _symbolsByKey;
 }
 
 void SymbolTable::deserializePrimitives(QDataStream& stream)
 {
-	stream >> _symbolTable;
+	stream >> _symbolsByKey;
 }

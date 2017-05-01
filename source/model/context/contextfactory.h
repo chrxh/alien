@@ -10,6 +10,7 @@ public:
 
 	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const = 0;
 	virtual SimulationUnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const = 0;
+	virtual SimulationUnit* buildSimulationUnit(QObject* parent = nullptr) const = 0;
 	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const = 0;
 	virtual SimulationThreads* buildSimulationThreads(QObject* parent = nullptr) const = 0;
 	virtual Topology* buildTorusTopology(QObject* parent = nullptr) const = 0;

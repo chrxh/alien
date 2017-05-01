@@ -7,67 +7,63 @@
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/entities/token.h"
-#include "simulationunitcontext.h"
+#include "model/context/simulationunitcontext.h"
 
-#include "simulationunit.h"
+#include "simulationunitimpl.h"
 
-SimulationUnit::SimulationUnit (QObject* parent)
-    : QObject(parent)
+SimulationUnitImpl::SimulationUnitImpl(QObject* parent)
+	: SimulationUnit(parent)
 {
 }
 
-SimulationUnit::~SimulationUnit ()
-{
-}
-
-void SimulationUnit::init(SimulationUnitContext* context)
+void SimulationUnitImpl::init(SimulationUnitContext* context)
 {
 	_context = context;
 }
 
-qreal SimulationUnit::calcTransEnergy ()
+qreal SimulationUnitImpl::calcTransEnergy() const
 {
 
-    qreal transEnergy(0.0);
-    foreach(CellCluster* cluster, _context->getClustersRef()) {
+	qreal transEnergy(0.0);
+	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		if (!cluster->isEmpty()) {
 			transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), 0.0, 0.0);
 		}
-    }
-    return transEnergy;
+	}
+	return transEnergy;
 }
 
-qreal SimulationUnit::calcRotEnergy ()
+qreal SimulationUnitImpl::calcRotEnergy() const
 {
-    qreal rotEnergy(0.0);
+	qreal rotEnergy(0.0);
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		if (cluster->getMass() > 1.0) {
 			rotEnergy += Physics::kineticEnergy(0.0, QVector3D(), cluster->getAngularMass(), cluster->getAngularVel());
 		}
-    }
-    return rotEnergy;
+	}
+	return rotEnergy;
 }
 
-qreal SimulationUnit::calcInternalEnergy ()
+qreal SimulationUnitImpl::calcInternalEnergy() const
 {
-    qreal internalEnergy(0.0);
-    foreach( CellCluster* cluster, _context->getClustersRef() ) {
-        if( !cluster->isEmpty() ) {
-            foreach( Cell* cell, cluster->getCellsRef() ) {
-                internalEnergy += cell->getEnergyIncludingTokens();
-            }
-        }
-    }
-    foreach( EnergyParticle* energyParticle, _context->getEnergyParticlesRef() ) {
-        internalEnergy += energyParticle->getEnergy();
-    }
-    return internalEnergy;
+	qreal internalEnergy(0.0);
+	foreach(CellCluster* cluster, _context->getClustersRef()) {
+		if (!cluster->isEmpty()) {
+			foreach(Cell* cell, cluster->getCellsRef()) {
+				internalEnergy += cell->getEnergyIncludingTokens();
+			}
+		}
+	}
+	foreach(EnergyParticle* energyParticle, _context->getEnergyParticlesRef()) {
+		internalEnergy += energyParticle->getEnergy();
+	}
+	return internalEnergy;
 }
 
 
-void SimulationUnit::calcNextTimestep ()
+void SimulationUnitImpl::calcNextTimestep()
 {
-	
+
 	_context->lock();
 
 	processingClusterInit();
@@ -79,12 +75,12 @@ void SimulationUnit::calcNextTimestep ()
 
 	processingEnergyParticles();
 
-    _context->unlock();
+	_context->unlock();
 
-    emit nextTimestepCalculated();
+	emit nextTimestepCalculated();
 }
 
-void SimulationUnit::processingEnergyParticles()
+void SimulationUnitImpl::processingEnergyParticles()
 {
 	QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());
 	while (p.hasNext()) {
@@ -102,15 +98,14 @@ void SimulationUnit::processingEnergyParticles()
 	}
 }
 
-void SimulationUnit::processingClusterCompletion()
+void SimulationUnitImpl::processingClusterCompletion()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingCompletion();
-		debugCluster(cluster, 5);
 	}
 }
 
-void SimulationUnit::processingClusterToken()
+void SimulationUnitImpl::processingClusterToken()
 {
 	QMutableListIterator<CellCluster*> j(_context->getClustersRef());
 	QList< EnergyParticle* > energyParticles;
@@ -125,14 +120,12 @@ void SimulationUnit::processingClusterToken()
 			bool decompose = false;
 			cluster->processingToken(energyParticles, decompose);
 			_context->getEnergyParticlesRef() << energyParticles;
-			debugCluster(cluster, 4);
 
 			//decompose cluster?
 			if (decompose) {
 				j.remove();
 				QList< CellCluster* > newClusters = cluster->decompose();
 				foreach(CellCluster* newCluster, newClusters) {
-					debugCluster(newCluster, 4);
 					j.insert(newCluster);
 				}
 			}
@@ -140,23 +133,21 @@ void SimulationUnit::processingClusterToken()
 	}
 }
 
-void SimulationUnit::processingClusterMovement()
+void SimulationUnitImpl::processingClusterMovement()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingMovement();
-		debugCluster(cluster, 3);
 	}
 }
 
-void SimulationUnit::processingClusterMutationByChance()
+void SimulationUnitImpl::processingClusterMutationByChance()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingMutationByChance();
-		debugCluster(cluster, 3);
 	}
 }
 
-void SimulationUnit::processingClusterDissipation()
+void SimulationUnitImpl::processingClusterDissipation()
 {
 	QMutableListIterator<CellCluster*> i(_context->getClustersRef());
 	QList< EnergyParticle* > energyParticles;
@@ -168,39 +159,25 @@ void SimulationUnit::processingClusterDissipation()
 		cluster->processingDissipation(fragments, energyParticles);
 		_context->getEnergyParticlesRef() << energyParticles;
 
-		debugCluster(cluster, 2);
 		//new cell cluster fragments?
-//        bool delCluster = false;
+		//        bool delCluster = false;
 		if ((!fragments.empty()) || (cluster->isEmpty())) {
 			//            delCluster = true;
 			delete cluster;
 			i.remove();
 			foreach(CellCluster* cluster2, fragments) {
-				debugCluster(cluster2, 2);
 				i.insert(cluster2);
 			}
 		}
 	}
 }
 
-void SimulationUnit::processingClusterInit()
+void SimulationUnitImpl::processingClusterInit()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingInit();
 	}
 }
-
-void SimulationUnit::debugCluster (CellCluster* c, int s)
-{
-    /*foreach(Cell* cell, c->getCellsRef()) {
-        for(int i = 0; i < cell->getNumConnections(); ++i) {
-            QVector3D d = cell->getRelPosition()-cell->getConnection(i)->getRelPosition();
-            if( d.length() > (CRIT_CELL_DIST_MAX+0.1) )
-                qDebug("%d: %f", s, d.length());
-        }
-    }*/
-}
-
 
 
 

@@ -12,6 +12,13 @@ void TorusTopologyImpl::init(IntVector2D size)
 	_size = size;
 }
 
+Topology * TorusTopologyImpl::clone(QObject * parent) const
+{
+	auto topology = new TorusTopologyImpl(parent);
+	topology->_size = _size;
+	return topology;
+}
+
 IntVector2D TorusTopologyImpl::getSize() const
 {
 	return _size;

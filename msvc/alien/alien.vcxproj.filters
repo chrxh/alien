@@ -10,9 +10,6 @@
     <ClCompile Include="..\..\source\gui\dialogs\addrectstructuredialog.cpp">
       <Filter>Gui\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\_impl\alienfacadeimpl.cpp">
-      <Filter>Model\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\entities\_impl\cellclusterimpl.cpp">
       <Filter>Model\Entities\_Impl</Filter>
     </ClCompile>
@@ -454,18 +451,6 @@
     <ClCompile Include="..\..\source\model\context\_impl\mapcompartmentimpl.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\simulationunit.cpp">
-      <Filter>Model\Context</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationunit.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationunit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationunit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\context\_impl\simulationcontextimpl.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
@@ -541,14 +526,38 @@
     <ClCompile Include="Release\moc_simulationgrid.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\model\_impl\builderfacadeimpl.cpp">
+      <Filter>Model\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_symboltable.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_symboltable.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_symboltable.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\simulationunitimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationunitimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationunitimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationunitimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationparameters.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationparameters.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\model\alienfacade.h">
-      <Filter>Model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\_impl\alienfacadeimpl.h">
-      <Filter>Model\_Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\entities\cell.h">
       <Filter>Model\Entities</Filter>
     </ClInclude>
@@ -654,9 +663,6 @@
     <ClInclude Include="..\..\source\global\servicelocator.h">
       <Filter>Global</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\metadata\symboltable.h">
-      <Filter>Model\Metadata</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\entities\token.h">
       <Filter>Model\Entities</Filter>
     </ClInclude>
@@ -752,6 +758,12 @@
     </ClInclude>
     <ClInclude Include="..\..\source\model\context\_impl\simulationgridimpl.h">
       <Filter>Model\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\_impl\builderfacadeimpl.h">
+      <Filter>Model\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\builderfacade.h">
+      <Filter>Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -921,6 +933,12 @@
       <Filter>Model\Context</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\simulationthreadsimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\metadata\symboltable.h">
+      <Filter>Model\Metadata</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\simulationunitimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>

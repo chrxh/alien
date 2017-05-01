@@ -39,6 +39,16 @@ void SimulationUnitContextImpl::init(Topology* topology, SymbolTable * symbolTab
 	deleteClustersAndEnergyParticles();
 }
 
+void SimulationUnitContextImpl::lock()
+{
+	_mutex.lock();
+}
+
+void SimulationUnitContextImpl::unlock()
+{
+	_mutex.unlock();
+}
+
 Topology* SimulationUnitContextImpl::getTopology () const
 {
     return _topology;

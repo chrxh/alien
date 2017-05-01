@@ -4,11 +4,15 @@
 #include "model/definitions.h"
 
 class SymbolTable
+	: public QObject
 {
+	Q_OBJECT
 public:
 
-	SymbolTable();
+	SymbolTable(QObject* parent = nullptr);
 	virtual ~SymbolTable();
+
+	SymbolTable* clone(QObject* parent = nullptr) const;
 
     void addEntry(QString const& key, QString const& value);
     void delEntry(QString const& key);
@@ -22,7 +26,7 @@ public:
     void deserializePrimitives (QDataStream& stream);
 
 private:
-    QMap<QString,QString> _symbolTable;
+    QMap<QString,QString> _symbolsByKey;
 };
 
 #endif // SYMBOLTABLE_H
