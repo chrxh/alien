@@ -10,6 +10,11 @@ SimulationContextImpl::SimulationContextImpl(QObject * parent)
 {
 }
 
+SimulationContextImpl::~SimulationContextImpl()
+{
+	delete _threads;
+}
+
 void SimulationContextImpl::init(Topology* topology, SimulationGrid* grid, SimulationThreads* threads, SymbolTable * symbolTable, SimulationParameters* parameters)
 {
 	if (_topology != topology) {

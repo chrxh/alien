@@ -16,7 +16,7 @@ class SimulationController  : public QObject
 public:
     enum class Threading { NO_EXTRA_THREAD, EXTRA_THREAD };
     SimulationController (Threading threading, QObject* parent = 0);
-    ~SimulationController ();
+	virtual ~SimulationController() {}
 
     QMap< QString, qreal > getMonitorData ();
     SimulationContext* getSimulationContext ();
@@ -84,8 +84,6 @@ private slots:
     void nextTimestepCalculated ();
 
 private:
-	SimulationUnit* buildAndConnectSimulationUnit();
-
 	Threading _threading;
     QTimer* _forceFpsTimer = nullptr;
 	QTimer* _oneSecondTimer = nullptr;
