@@ -11,23 +11,19 @@ public:
 	EnergyParticleMap(QObject* parent = nullptr);
 	virtual ~EnergyParticleMap();
 
-	void init(Topology* topo);
-	void clear();
+	virtual void init(Topology* topo, MapCompartment* compartment) = 0;
+	virtual void clear() = 0;
 	
-	void removeParticleIfPresent(QVector3D pos, EnergyParticle* energy);
-	void setParticle(QVector3D pos, EnergyParticle* energy);
-	EnergyParticle* getParticle(QVector3D pos) const;
+	virtual void removeParticleIfPresent(QVector3D pos, EnergyParticle* energy) = 0;
+	virtual void setParticle(QVector3D pos, EnergyParticle* energy) = 0;
+	virtual EnergyParticle* getParticle(QVector3D pos) const = 0;
 	inline EnergyParticle* getParticleFast(IntVector2D const& pos) const;
 
-	void serializePrimitives(QDataStream& stream) const;
-	void deserializePrimitives(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap);
+	virtual void serializePrimitives(QDataStream& stream) const = 0;
+	virtual void deserializePrimitives(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap) = 0;
 
-private:
-	void deleteGrid();
-
-	Topology* _topo = nullptr;
+protected:
 	EnergyParticle*** _energyGrid = nullptr;
-	int _gridSize = 0;
 };
 
 EnergyParticle * EnergyParticleMap::getParticleFast(IntVector2D const& intPos) const

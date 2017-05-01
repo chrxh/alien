@@ -13,7 +13,7 @@ public:
 	SimulationUnitContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationUnitContextImpl();
 
-	void init(Topology* topology, SymbolTable * symbolTable, SimulationParameters* parameters) override;
+	void init(Topology* topology, CellMap* cellMap, EnergyParticleMap* energyMap, SymbolTable* symbolTable, SimulationParameters* parameters) override;
 
 	virtual void lock();
 	virtual void unlock();
