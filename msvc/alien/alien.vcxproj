@@ -932,7 +932,6 @@
     <ClCompile Include="..\..\source\gui\visualeditor\pixeluniverse.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\shapeuniverse.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\visualeditor.cpp" />
-    <ClCompile Include="..\..\source\model\context\energyparticlemap.cpp" />
     <ClCompile Include="..\..\source\model\context\simulationparameters.cpp" />
     <ClCompile Include="..\..\source\model\context\_impl\cellmapimpl.cpp" />
     <ClCompile Include="..\..\source\model\context\_impl\contextfactoryimpl.cpp" />
