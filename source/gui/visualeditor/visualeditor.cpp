@@ -265,16 +265,19 @@ void VisualEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 
 void VisualEditor::reclustered (QList< CellCluster* > clusters)
 {
+/*
     //function only in shape scene
     if( _activeScene == SHAPE_SCENE ) {
         _shapeUniverse->reclustered(clusters);
     }
     else
         _pixelUniverse->universeUpdated(_context);
+*/
 }
 
-void VisualEditor::universeUpdated (SimulationUnitContext* context, bool force)
+void VisualEditor::universeUpdated (SimulationContext* context, bool force)
 {
+/*
     if(context)
         _context = context;
     else
@@ -311,6 +314,7 @@ void VisualEditor::universeUpdated (SimulationUnitContext* context, bool force)
                 ui->simulationView->centerOn(cellItem);
         }
     }
+*/
 }
 
 void VisualEditor::metadataUpdated ()
@@ -331,8 +335,9 @@ void VisualEditor::updateTimerTimeout ()
     _screenUpdatePossible = true;
 }
 
-void VisualEditor::centerView (SimulationUnitContext* context)
+void VisualEditor::centerView (SimulationContext* context)
 {
+/*
     //load size of the universe
 	context->lock();
 	SpaceMetric* topo = context->getTopology();
@@ -342,6 +347,7 @@ void VisualEditor::centerView (SimulationUnitContext* context)
 
     //set view position
     ui->simulationView->centerOn(sizeX/2.0*GRAPHICS_ITEM_SIZE, sizeY/2.0*GRAPHICS_ITEM_SIZE);
+*/
 }
 
 

@@ -3597,14 +3597,8 @@ p, li { white-space: pre-wrap; }
      <addaction name="actionSave_symbols"/>
      <addaction name="actionMerge_with"/>
     </widget>
-    <widget class="QMenu" name="menuGeben_Sie_Text_ein">
-     <property name="title">
-      <string>Geben Sie Text ein</string>
-     </property>
-    </widget>
     <addaction name="menuSimulationParameters"/>
     <addaction name="menuSymbolTable"/>
-    <addaction name="menuGeben_Sie_Text_ein"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuSettings"/>
