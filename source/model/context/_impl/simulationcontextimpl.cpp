@@ -1,5 +1,5 @@
 #include "simulationcontextimpl.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/context/simulationgrid.h"
 #include "model/context/simulationthreads.h"
 #include "model/context/simulationparameters.h"
@@ -15,11 +15,11 @@ SimulationContextImpl::~SimulationContextImpl()
 	delete _threads;
 }
 
-void SimulationContextImpl::init(Topology* topology, SimulationGrid* grid, SimulationThreads* threads, SymbolTable * symbolTable, SimulationParameters* parameters)
+void SimulationContextImpl::init(SpaceMetric* metric, SimulationGrid* grid, SimulationThreads* threads, SymbolTable * symbolTable, SimulationParameters* parameters)
 {
-	if (_topology != topology) {
-		delete _topology;
-		_topology = topology;
+	if (_metric != metric) {
+		delete _metric;
+		_metric = metric;
 	}
 	if (_grid != grid) {
 		delete _grid;
@@ -39,9 +39,9 @@ void SimulationContextImpl::init(Topology* topology, SimulationGrid* grid, Simul
 	}
 }
 
-Topology * SimulationContextImpl::getTopology() const
+SpaceMetric * SimulationContextImpl::getTopology() const
 {
-	return _topology;
+	return _metric;
 }
 
 SimulationGrid * SimulationContextImpl::getSimulationGrid() const

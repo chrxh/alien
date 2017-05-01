@@ -15,10 +15,6 @@ public:
 
 	virtual void registerUnit(SimulationUnit* unit) = 0;
 	virtual void start() const = 0;
-
-private:
-	int maxRunningThreads = 1;
-	std::vector<QThread*> _threads;
 };
 
 #endif // SIMULATIONTHREADS_H

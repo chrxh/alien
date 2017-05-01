@@ -23,7 +23,7 @@
 #include "context/simulationparameters.h"
 #include "context/energyparticlemap.h"
 #include "context/cellmap.h"
-#include "context/topology.h"
+#include "context/spacemetric.h"
 #include "context/simulationgrid.h"
 #include "context/simulationunit.h"
 #include "serializationfacade.h"

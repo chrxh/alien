@@ -13,7 +13,7 @@
 #include "model/modelsettings.h"
 #include "model/context/simulationunitcontext.h"
 #include "model/context/cellmap.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/context/simulationparameters.h"
 
 #include "cellclusterimpl.h"
@@ -259,7 +259,7 @@ void CellClusterImpl::processingMovement ()
         QList< QPair< Cell*, Cell* > > overlappingCellPairs;
     };
 	auto parameters = _context->getSimulationParameters();
-	auto topology = _context->getTopology();
+	auto metric = _context->getTopology();
 	auto cellMap = _context->getCellMap();
 
 	_angle += _angularVel;
@@ -268,7 +268,7 @@ void CellClusterImpl::processingMovement ()
     if( _angle < 0.0 )
         _angle += 360.0;
     _pos += _vel;
-    topology->correctPosition(_pos);
+    metric->correctPosition(_pos);
     updateTransformationMatrix();
     QVector3D pos;
 
@@ -286,7 +286,7 @@ void CellClusterImpl::processingMovement ()
 
                         //cell close enough?
                         QVector3D displacement(tempCell->getCluster()->calcPosition(tempCell, true)-pos);
-                        topology->correctDisplacement(displacement);
+                        metric->correctDisplacement(displacement);
                         if( displacement.length() < parameters->cellMaxDistance ) {
                             quint64 clusterId = tempCell->getCluster()->getId();
 
@@ -359,10 +359,10 @@ void CellClusterImpl::processingMovement ()
 
             //calc negative velocity at the center position (later used as outerSpace vector)
             QVector3D rAPp = centerPos-_pos;
-            topology->correctDisplacement(rAPp);
+            metric->correctDisplacement(rAPp);
             rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
             QVector3D rBPp = centerPos-otherCluster->getPosition();
-            topology->correctDisplacement(rBPp);
+            metric->correctDisplacement(rBPp);
             rBPp = Physics::rotateQuarterCounterClockwise(rBPp);
             QVector3D outerSpace = (otherCluster->getVelocity()-rBPp*otherCluster->getAngularVel()*degToRad)-(_vel-rAPp*_angularVel*degToRad);
 
@@ -407,7 +407,7 @@ void CellClusterImpl::processingMovement ()
                 Cell* cell(item.first);
                 Cell* otherCell(item.second);
                 QVector3D displacement(otherCell->getCluster()->calcPosition(otherCell, true)-calcPosition(cell, true));
-                topology->correctDisplacement(displacement);
+                metric->correctDisplacement(displacement);
 
                 //kill cell if too close
                 if( displacement.length() < parameters->cellMinDistance ){
@@ -446,7 +446,7 @@ void CellClusterImpl::processingMovement ()
 
                 //calculate new center
                 QVector3D center;
-                QVector3D correction(topology->correctionIncrement(_pos, otherCluster->getPosition()));
+                QVector3D correction(metric->correctionIncrement(_pos, otherCluster->getPosition()));
                 foreach( Cell* cell, _cells) {
                     cell->setRelPosition(calcPosition(cell));     //store absolute position only temporarily
                     center += cell->getRelPosition();
@@ -471,7 +471,7 @@ void CellClusterImpl::processingMovement ()
                 foreach( Cell* cell, _cells) {
                     cell->setRelPosition(absToRelPos(cell->getRelPosition()));
                 }
-                topology->correctPosition(_pos);
+                metric->correctPosition(_pos);
                 updateTransformationMatrix();
 
                 //calc angular mass, velocity, angular velocity
@@ -617,9 +617,9 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
 //activate new token and kill cells which are too close or where too much forces are applied
 void CellClusterImpl::processingCompletion ()
 {
-	auto topology = _context->getTopology();
+	auto metric = _context->getTopology();
 	auto cellMap = _context->getCellMap();
-	qreal maxClusterRadius = qMin(topology->getSize().x / 2.0, topology->getSize().y / 2.0);
+	qreal maxClusterRadius = qMin(metric->getSize().x / 2.0, metric->getSize().y / 2.0);
     foreach( Cell* cell, _cells) {
 
         //activate tokens
@@ -641,7 +641,7 @@ void CellClusterImpl::processingCompletion ()
 //                        foreach(Cell* otherCell2, otherCluster->getCellsRef()) {
 //                            if( otherCell2 != cell ) {
                                 QVector3D displacement = otherCluster->calcPosition(otherCell, true)-calcPosition(cell, true);
-                                topology->correctDisplacement(displacement);
+                                metric->correctDisplacement(displacement);
                                 if (displacement.length() < _context->getSimulationParameters()->cellMinDistance) {
                                     if( _cells.size() > otherCluster->getCellsRef().size()) {
 //                                        if( otherCell->_protectionCounter == 0 ) {
@@ -782,10 +782,10 @@ void CellClusterImpl::updateVel_angularVel_via_cellVelocities ()
 }
 
 
-QVector3D CellClusterImpl::calcPosition (const Cell* cell, bool topologyCorrection) const
+QVector3D CellClusterImpl::calcPosition (const Cell* cell, bool metricCorrection) const
 {
     QVector3D cellPos(_transform.map(cell->getRelPosition()));
-    if(  topologyCorrection )
+    if(  metricCorrection )
         _context->getTopology()->correctPosition(cellPos);
     return cellPos;
 }
@@ -836,13 +836,13 @@ qreal CellClusterImpl::calcAngularMassWithNewParticle (QVector3D particlePos) co
     center = center / (_cells.size()+1);
 
     //calc new angular mass
-	Topology* topology = _context->getTopology();
+	SpaceMetric* metric = _context->getTopology();
     QVector3D diff = particleRelPos - center;
-	topology->correctDisplacement(diff);
+	metric->correctDisplacement(diff);
     qreal aMass = diff.lengthSquared();
     foreach(Cell* cell, _cells) {
         diff = cell->getRelPosition() - center;
-		topology->correctDisplacement(diff);
+		metric->correctDisplacement(diff);
         aMass = aMass + diff.lengthSquared();
     }
     return aMass;
@@ -860,10 +860,10 @@ qreal CellClusterImpl::calcAngularMassWithoutUpdate () const
 
     //calc new angular mass
     qreal aMass = 0.0;
-	Topology* topology = _context->getTopology();
+	SpaceMetric* metric = _context->getTopology();
 	foreach(Cell* cell, _cells) {
         QVector3D displacement = cell->getRelPosition() - center;
-		topology->correctDisplacement(displacement);
+		metric->correctDisplacement(displacement);
         aMass = aMass + displacement.lengthSquared();
     }
     return aMass;

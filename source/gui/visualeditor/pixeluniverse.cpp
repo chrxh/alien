@@ -7,7 +7,7 @@
 #include "model/context/simulationunitcontext.h"
 #include "model/context/energyparticlemap.h"
 #include "model/context/cellmap.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"

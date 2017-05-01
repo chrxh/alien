@@ -9,7 +9,7 @@
 #include "model/context/simulationunitcontext.h"
 #include "model/builderfacade.h"
 #include "model/modelsettings.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/context/simulationparameters.h"
 
 #include "tests/settings.h"
@@ -41,9 +41,9 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 
 	_context = facade->buildSimulationContext();
-	auto topology = facade->buildTorusTopology();
-	topology->init({ 1000, 1000 });
-	_context->init(topology);
+	auto metric = facade->buildSpaceMetric();
+	metric->init({ 1000, 1000 });
+	_context->init(metric);
 
 	{
 		//create cells, cell functions and token for cluster1

@@ -1,4 +1,4 @@
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/modelsettings.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -15,7 +15,7 @@ CellMapImpl::~CellMapImpl()
 	deleteCellMap();
 }
 
-void CellMapImpl::init(Topology* topo, MapCompartment* compartment)
+void CellMapImpl::init(SpaceMetric* topo, MapCompartment* compartment)
 {
 	_topo = topo;
 	deleteCellMap();

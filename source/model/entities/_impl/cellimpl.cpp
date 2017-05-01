@@ -310,9 +310,9 @@ CellCluster* CellImpl::getCluster() const
     return _cluster;
 }
 
-QVector3D CellImpl::calcPosition (bool topologyCorrection) const
+QVector3D CellImpl::calcPosition (bool metricCorrection) const
 {
-    return _cluster->calcPosition(this, topologyCorrection);
+    return _cluster->calcPosition(this, metricCorrection);
 }
 
 void CellImpl::setAbsPosition (QVector3D pos)

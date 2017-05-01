@@ -12,7 +12,7 @@
 #include "model/context/simulationparameters.h"
 #include "model/context/cellmap.h"
 #include "model/context/energyparticlemap.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/context/contextfactory.h"
 #include "model/context/mapcompartment.h"
 #include "model/context/simulationthreads.h"
@@ -34,7 +34,7 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
+SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
 	, SimulationParameters* parameters, QObject* parent) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
@@ -44,11 +44,11 @@ SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThre
 	threads->init(maxRunngingThreads);
 
 	auto grid = factory->buildSimulationGrid(context);
-	grid->init(gridSize, topology);
+	grid->init(gridSize, metric);
 
 	parameters->setParent(context);
 	symbolTable->setParent(context);
-	context->init(topology, grid, threads, symbolTable, parameters);
+	context->init(metric, grid, threads, symbolTable, parameters);
 
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
@@ -68,27 +68,27 @@ SimulationUnit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Sim
 	auto threads = context->getSimulationThreads();
 	auto unit = factory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = factory->buildSimulationUnitContext(unit);
-	auto topology = context->getTopology()->clone(unit);
+	auto metric = context->getTopology()->clone(unit);
 	auto compartment = factory->buildMapCompartment(unit);
 	auto cellMap = factory->buildCellMap(unit);
 	auto energyMap = factory->buildEnergyParticleMap(unit);
 	auto symbolTable = context->getSymbolTable()->clone(unit);
 	auto parameters = context->getSimulationParameters()->clone(unit);
-	compartment->init(topology, grid->calcMapRect(gridPos));
-	cellMap->init(topology, compartment);
-	energyMap->init(topology, compartment);
-	unitContext->init(topology, cellMap, energyMap, symbolTable, parameters);
+	compartment->init(metric, grid->calcMapRect(gridPos));
+	cellMap->init(metric, compartment);
+	energyMap->init(metric, compartment);
+	unitContext->init(metric, cellMap, energyMap, symbolTable, parameters);
 	unit->init(unitContext);
 
 	return unit;
 }
 
-Topology * BuilderFacadeImpl::buildTorusTopology(IntVector2D universeSize, QObject* parent) const
+SpaceMetric * BuilderFacadeImpl::buildSpaceMetric(IntVector2D universeSize, QObject* parent) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	auto topology = factory->buildTorusTopology(parent);
-	topology->init(universeSize);
-	return topology;
+	auto metric = factory->buildSpaceMetric(parent);
+	metric->init(universeSize);
+	return metric;
 }
 
 CellCluster* BuilderFacadeImpl::buildCellCluster (SimulationUnitContext* context) const

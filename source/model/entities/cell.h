@@ -44,7 +44,7 @@ public:
 
     virtual void setCluster (CellCluster* cluster) = 0;
     virtual CellCluster* getCluster () const = 0;
-    virtual QVector3D calcPosition (bool topologyCorrection = false) const = 0;
+    virtual QVector3D calcPosition (bool metricCorrection = false) const = 0;
     virtual void setAbsPosition (QVector3D pos) = 0;
     virtual void setAbsPositionAndUpdateMap (QVector3D pos) = 0;
     virtual QVector3D getRelPosition () const = 0;

@@ -15,7 +15,7 @@
 #include "model/modelsettings.h"
 #include "model/context/simulationunitcontext.h"
 #include "model/context/cellmap.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/context/simulationparameters.h"
 
 #include "cellfunctionconstructorimpl.h"
@@ -52,7 +52,7 @@ namespace {
         return newCell;
     }
 
-    Cell* obstacleCheck (CellCluster* cluster, bool safeMode, CellMap* cellMap, Topology* topology, SimulationParameters* parameters)
+    Cell* obstacleCheck (CellCluster* cluster, bool safeMode, CellMap* cellMap, SpaceMetric* metric, SimulationParameters* parameters)
     {
         foreach( Cell* cell, cluster->getCellsRef() ) {
             QVector3D pos = cluster->calcPosition(cell, true);
@@ -63,7 +63,7 @@ namespace {
 
                     //obstacle found?
                     if( obstacleCell ) {
-                        if( topology->displacement(obstacleCell->getCluster()->calcPosition(obstacleCell), pos).length() <  parameters->cellMinDistance ) {
+                        if( metric->displacement(obstacleCell->getCluster()->calcPosition(obstacleCell), pos).length() <  parameters->cellMinDistance ) {
                             if( safeMode ) {
                                 if( obstacleCell != cell ) {
                                     cluster->clearCellsFromMap();
@@ -80,7 +80,7 @@ namespace {
                         //check also connected cells
                         for(int i = 0; i < obstacleCell->getNumConnections(); ++i) {
                             Cell* connectedObstacleCell = obstacleCell->getConnection(i);
-                            if( topology->displacement(connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell), pos).length() < parameters->cellMinDistance ) {
+                            if( metric->displacement(connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell), pos).length() < parameters->cellMinDistance ) {
                                 if( safeMode ) {
                                     if( connectedObstacleCell != cell ) {
                                         cluster->clearCellsFromMap();
@@ -131,7 +131,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 	quint8 cmd = tokenMem[Enums::Constr::IN] % 4;
     quint8 opt = tokenMem[Enums::Constr::IN_OPTION] % 7;
 	auto cellMap = _context->getCellMap();
-	auto topology = _context->getTopology();
+	auto metric = _context->getTopology();
 	auto parameters = _context->getSimulationParameters();
 
     //do nothing?
@@ -284,7 +284,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
-                    if( obstacleCheck(cluster, safeMode, cellMap, topology, parameters) ) {
+                    if( obstacleCheck(cluster, safeMode, cellMap, metric, parameters) ) {
                         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
@@ -373,7 +373,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
-                    if( obstacleCheck(cluster, safeMode, cellMap, topology, parameters) ) {
+                    if( obstacleCheck(cluster, safeMode, cellMap, metric, parameters) ) {
                         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
@@ -401,7 +401,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                     if( (otherCell->getNumConnections() < parameters->cellMaxBonds)
                             && (newCell->getNumConnections() < parameters->cellMaxBonds)
                             && (otherCell !=constructionCell ) ) {
-                        if (topology->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (parameters->cellMaxDistance + ALIEN_PRECISION) ) {
+                        if (metric->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (parameters->cellMaxDistance + ALIEN_PRECISION) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( tokenMem.at(Enums::Constr::IN_CELL_MAX_CONNECTIONS) == 0 ) {
@@ -506,7 +506,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 QVector< qreal > angles(numCon);
                 for(int i = 0; i < numCon; ++i) {
                     QVector3D displacement = cluster->calcPosition(cell->getConnection(i),true)-cluster->calcPosition(cell, true);
-                    topology->correctDisplacement(displacement);
+                    metric->correctDisplacement(displacement);
                     angles[i] = Physics::angleOfVector(displacement);
                 }
                 qSort(angles);
@@ -573,7 +573,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //obstacle found?
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
-                    if( obstacleCheck(cluster, safeMode, cellMap, topology, parameters) ) {
+                    if( obstacleCheck(cluster, safeMode, cellMap, metric, parameters) ) {
                         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site

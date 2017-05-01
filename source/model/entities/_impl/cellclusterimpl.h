@@ -31,7 +31,7 @@ public:
     void updateAngularMass () override;
     void updateRelCoordinates (bool maintainCenter = false) override;
     void updateVel_angularVel_via_cellVelocities () override;
-    QVector3D calcPosition (const Cell *cell, bool topologyCorrection = false) const override;
+    QVector3D calcPosition (const Cell *cell, bool metricCorrection = false) const override;
     QVector3D calcCellDistWithoutTorusCorrection (Cell* cell) const override;
     QList< CellCluster* > decompose () const override;
     qreal calcAngularMassWithNewParticle (QVector3D particlePos) const override;

@@ -6,7 +6,7 @@
 #include "simulationunitcontextimpl.h"
 #include "simulationgridimpl.h"
 #include "simulationthreadsimpl.h"
-#include "torustopologyimpl.h"
+#include "spacemetricimpl.h"
 #include "mapcompartmentimpl.h"
 #include "cellmapimpl.h"
 #include "energyparticlemapimpl.h"
@@ -46,9 +46,9 @@ SimulationThreads * ContextFactoryImpl::buildSimulationThreads(QObject* parent) 
 	return new SimulationThreadsImpl(parent);
 }
 
-Topology * ContextFactoryImpl::buildTorusTopology(QObject* parent) const
+SpaceMetric * ContextFactoryImpl::buildSpaceMetric(QObject* parent) const
 {
-	return new TorusTopologyImpl(parent);
+	return new SpaceMetricImpl(parent);
 }
 
 MapCompartment * ContextFactoryImpl::buildMapCompartment(QObject* parent) const

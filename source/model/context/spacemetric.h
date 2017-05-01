@@ -3,16 +3,16 @@
 
 #include "model/definitions.h"
 
-class Topology
+class SpaceMetric
 	: public QObject
 {
 	Q_OBJECT
 public:
-	Topology(QObject* parent) : QObject(parent) {}
-	virtual ~Topology() {}
+	SpaceMetric(QObject* parent) : QObject(parent) {}
+	virtual ~SpaceMetric() {}
 
 	virtual void init(IntVector2D size) = 0;
-	virtual Topology* clone(QObject* parent = nullptr) const = 0;
+	virtual SpaceMetric* clone(QObject* parent = nullptr) const = 0;
 
 	virtual IntVector2D getSize() const = 0;
 

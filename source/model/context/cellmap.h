@@ -11,7 +11,7 @@ public:
 	CellMap(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CellMap();
 
-	virtual void init(Topology* topo, MapCompartment* compartment) = 0;
+	virtual void init(SpaceMetric* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
 
 	virtual void setCell(QVector3D pos, Cell* cell) = 0;

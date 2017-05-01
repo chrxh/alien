@@ -6,7 +6,7 @@
 #include "gui/guisettings.h"
 #include "gui/texteditor/texteditor.h"
 #include "model/context/simulationunitcontext.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
 #include "pixeluniverse.h"
@@ -335,7 +335,7 @@ void VisualEditor::centerView (SimulationUnitContext* context)
 {
     //load size of the universe
 	context->lock();
-	Topology* topo = context->getTopology();
+	SpaceMetric* topo = context->getTopology();
     qreal sizeX = topo->getSize().x;
     qreal sizeY = topo->getSize().y;
 	context->unlock();

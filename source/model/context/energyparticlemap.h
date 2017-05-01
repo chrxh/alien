@@ -11,7 +11,7 @@ public:
 	EnergyParticleMap(QObject* parent = nullptr);
 	virtual ~EnergyParticleMap();
 
-	virtual void init(Topology* topo, MapCompartment* compartment) = 0;
+	virtual void init(SpaceMetric* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
 	
 	virtual void removeParticleIfPresent(QVector3D pos, EnergyParticle* energy) = 0;

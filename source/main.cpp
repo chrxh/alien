@@ -19,6 +19,8 @@
 //- Daten mit init()-Methode initialisieren
 
 //Nächstes Mal:
+//- MapCompartment::registerNeighborContext aufrufen
+//- dependencies in SimulationThreads bestimmen
 
 //Model-Refactoring:
 //- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen

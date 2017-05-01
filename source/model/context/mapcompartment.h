@@ -11,7 +11,7 @@ public:
 	MapCompartment(QObject* parent) : QObject(parent) {}
 	virtual ~MapCompartment() {}
 
-	virtual void init(Topology* topology, IntRect mapRect) = 0;
+	virtual void init(SpaceMetric* metric, IntRect mapRect) = 0;
 
 	enum class RelativeLocation {
 		UpperLeft, Upper, UpperRight, 
@@ -19,7 +19,7 @@ public:
 		LowerLeft, Lower, LowerRight,
 	};
 	virtual void registerNeighborContext(RelativeLocation location, SimulationUnitContext* context) = 0;
-
+	virtual SimulationUnitContext* getNeighborContext(RelativeLocation location) const = 0;
 	virtual SimulationUnitContext* getNeighborContext(IntVector2D pos) const = 0;
 
 private:

@@ -1,30 +1,30 @@
-#include "torustopologyimpl.h"
+#include "spacemetricimpl.h"
 
 #include "model/entities/cell.h"
 
-TorusTopologyImpl::TorusTopologyImpl(QObject * parent)
-	: Topology(parent)
+SpaceMetricImpl::SpaceMetricImpl(QObject * parent)
+	: SpaceMetric(parent)
 {
 }
 
-void TorusTopologyImpl::init(IntVector2D size)
+void SpaceMetricImpl::init(IntVector2D size)
 {
 	_size = size;
 }
 
-Topology * TorusTopologyImpl::clone(QObject * parent) const
+SpaceMetric * SpaceMetricImpl::clone(QObject * parent) const
 {
-	auto topology = new TorusTopologyImpl(parent);
-	topology->_size = _size;
-	return topology;
+	auto metric = new SpaceMetricImpl(parent);
+	metric->_size = _size;
+	return metric;
 }
 
-IntVector2D TorusTopologyImpl::getSize() const
+IntVector2D SpaceMetricImpl::getSize() const
 {
 	return _size;
 }
 
-void TorusTopologyImpl::correctPosition(QVector3D & pos) const
+void SpaceMetricImpl::correctPosition(QVector3D & pos) const
 {
 	IntVector2D intPart{ qFloor(pos.x()), qFloor(pos.y()) };
 	qreal fracPartX = pos.x() - intPart.x;
@@ -34,21 +34,21 @@ void TorusTopologyImpl::correctPosition(QVector3D & pos) const
 	pos.setY(static_cast<qreal>(intPart.y) + fracPartY);
 }
 
-IntVector2D TorusTopologyImpl::correctPositionWithIntPrecision(QVector3D const& pos) const
+IntVector2D SpaceMetricImpl::correctPositionWithIntPrecision(QVector3D const& pos) const
 {
 	IntVector2D intPos{ qFloor(pos.x()), qFloor(pos.y()) };
 	correctPosition(intPos);
 	return intPos;
 }
 
-IntVector2D TorusTopologyImpl::shiftPosition(IntVector2D const & pos, IntVector2D const && shift) const
+IntVector2D SpaceMetricImpl::shiftPosition(IntVector2D const & pos, IntVector2D const && shift) const
 {
 	IntVector2D temp{ pos.x + shift.x, pos.y + shift.y };
 	correctPosition(temp);
 	return temp;
 }
 
-void TorusTopologyImpl::correctDisplacement(QVector3D & displacement) const
+void SpaceMetricImpl::correctDisplacement(QVector3D & displacement) const
 {
 	IntVector2D intDisplacement{ qFloor(displacement.x()), qFloor(displacement.y()) };
 	qreal rx = displacement.x() - static_cast<qreal>(intDisplacement.x);
@@ -62,19 +62,19 @@ void TorusTopologyImpl::correctDisplacement(QVector3D & displacement) const
 	displacement.setY(static_cast<qreal>(intDisplacement.y) + ry);
 }
 
-QVector3D TorusTopologyImpl::displacement(QVector3D fromPoint, QVector3D toPoint) const
+QVector3D SpaceMetricImpl::displacement(QVector3D fromPoint, QVector3D toPoint) const
 {
 	QVector3D d = toPoint - fromPoint;
 	correctDisplacement(d);
 	return d;
 }
 
-qreal TorusTopologyImpl::distance(QVector3D fromPoint, QVector3D toPoint) const
+qreal SpaceMetricImpl::distance(QVector3D fromPoint, QVector3D toPoint) const
 {
 	return displacement(fromPoint, toPoint).length();
 }
 
-QVector3D TorusTopologyImpl::correctionIncrement(QVector3D pos1, QVector3D pos2) const
+QVector3D SpaceMetricImpl::correctionIncrement(QVector3D pos1, QVector3D pos2) const
 {
 	QVector3D correction;
 	if ((pos2.x() - pos1.x()) > (_size.x / 2.0))
@@ -88,12 +88,12 @@ QVector3D TorusTopologyImpl::correctionIncrement(QVector3D pos1, QVector3D pos2)
 	return correction;
 }
 
-void TorusTopologyImpl::serializePrimitives(QDataStream & stream) const
+void SpaceMetricImpl::serializePrimitives(QDataStream & stream) const
 {
 	stream << _size.x << _size.y;
 }
 
-void TorusTopologyImpl::deserializePrimitives(QDataStream & stream)
+void SpaceMetricImpl::deserializePrimitives(QDataStream & stream)
 {
 	stream >> _size.x >> _size.y;
 }
