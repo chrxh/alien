@@ -58,7 +58,7 @@ void SerializationFacadeImpl::serializeSimulationContext(SimulationUnitContext *
 
 void SerializationFacadeImpl::deserializeSimulationContext(SimulationUnitContext* prevContext, QDataStream & stream) const
 {
-	//mapping old ids to new ids
+/*	//mapping old ids to new ids
 	QMap< quint64, quint64 > oldNewCellIdMap;
 	QMap< quint64, quint64 > oldNewClusterIdMap;
 
@@ -95,7 +95,7 @@ void SerializationFacadeImpl::deserializeSimulationContext(SimulationUnitContext
 	prevContext->getCellMap()->deserializePrimitives(stream, oldIdCellMap);
 	prevContext->getEnergyParticleMap()->deserializePrimitives(stream, oldIdEnergyMap);
 	prevContext->getSymbolTable()->deserializePrimitives(stream);
-	prevContext->getSimulationParameters()->deserializePrimitives(stream);
+	prevContext->getSimulationParameters()->deserializePrimitives(stream);*/
 }
 
 void SerializationFacadeImpl::serializeSimulationParameters(SimulationParameters* parameters, QDataStream& stream) const
