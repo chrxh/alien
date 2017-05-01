@@ -11,7 +11,7 @@
 #include "model/modelsettings.h"
 #include "model/builderfacade.h"
 #include "model/context/simulationunitcontext.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/context/energyparticlemap.h"
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
@@ -309,7 +309,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
     unhighlight();
 
     //move graphic cells corresponding to the Cells in "clusters" and delete their connections
-	Topology* topo = _context->getTopology();
+	SpaceMetric* topo = _context->getTopology();
     foreach(CellCluster* cluster, clusters) {
         foreach(Cell* cell, cluster->getCellsRef()) {
 

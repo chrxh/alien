@@ -21,6 +21,8 @@ private:
 
 	int _maxRunningThreads = 1;
 	std::vector<QThread*> _threads;
+	std::map<QThread*, std::vector<QThread*>> _dependencies;
+	std::map<SimulationUnitContext*, QThread*> _threadsByUnits;
 };
 
 #endif // SIMULATIONTHREADSIMPL_H

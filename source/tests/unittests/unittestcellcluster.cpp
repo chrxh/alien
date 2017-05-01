@@ -6,7 +6,7 @@
 #include "model/context/simulationparameters.h"
 #include "model/modelsettings.h"
 #include "model/builderfacade.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
 #include "model/entities/cellcluster.h"
@@ -33,9 +33,9 @@ UnitTestCellCluster::UnitTestCellCluster()
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 
 	_context = facade->buildSimulationContext();
-	auto topology = facade->buildTorusTopology();
-	topology->init({ 1000, 1000 });
-	_context->init(topology);
+	auto metric = facade->buildSpaceMetric();
+	metric->init({ 1000, 1000 });
+	_context->init(metric);
 
 	QList< Cell* > cells;
 	for (int i = 0; i <= 100; ++i) {

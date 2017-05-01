@@ -10,9 +10,9 @@ public:
     BuilderFacadeImpl ();
 	~BuilderFacadeImpl() = default;
 
-	virtual SimulationContext* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
+	virtual SimulationContext* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
 		, SimulationParameters* parameters, QObject* parent = nullptr) const override;
-	virtual Topology* buildTorusTopology(IntVector2D universeSize, QObject* parent = nullptr) const override;
+	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize, QObject* parent = nullptr) const override;
 
 	virtual CellCluster* buildCellCluster (SimulationUnitContext* context) const override;
 	virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel

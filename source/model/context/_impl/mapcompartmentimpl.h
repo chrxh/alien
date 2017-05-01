@@ -10,9 +10,10 @@ public:
 	MapCompartmentImpl(QObject* parent = nullptr);
 	virtual ~MapCompartmentImpl() {}
 
-	virtual void init(Topology* topology, IntRect mapRect) override;
+	virtual void init(SpaceMetric* metric, IntRect mapRect) override;
 
 	virtual void registerNeighborContext(RelativeLocation location, SimulationUnitContext* context) override;
+	virtual SimulationUnitContext* getNeighborContext(RelativeLocation location) const override;
 	virtual SimulationUnitContext* getNeighborContext(IntVector2D pos) const override;
 
 private:

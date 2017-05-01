@@ -16,7 +16,7 @@
 #include "model/context/contextfactory.h"
 #include "model/context/cellmap.h"
 #include "model/context/energyparticlemap.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/context/simulationparameters.h"
 #include "model/context/_impl/simulationunitcontextimpl.h"
 #include "model/builderfacade.h"
@@ -67,13 +67,13 @@ void SerializationFacadeImpl::deserializeSimulationContext(SimulationUnitContext
 	QMap< quint64, EnergyParticle* > oldIdEnergyMap;
 
 	//deserialize map size
-	auto topology = prevContext->getTopology();
-	if (!topology) {
+	auto metric = prevContext->getTopology();
+	if (!metric) {
 		ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-		topology = factory->buildTorusTopology();
+		metric = factory->buildSpaceMetric();
 	}
-	topology->deserializePrimitives(stream);
-	prevContext->init(topology);
+	metric->deserializePrimitives(stream);
+	prevContext->init(metric);
 
 	//deserialize clusters
 	quint32 numCluster;

@@ -1,4 +1,4 @@
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/entities/energyparticle.h"
 
 #include "energyparticlemapimpl.h"
@@ -14,7 +14,7 @@ EnergyParticleMapImpl::~EnergyParticleMapImpl()
 }
 
 
-void EnergyParticleMapImpl::init(Topology* topo, MapCompartment* compartment)
+void EnergyParticleMapImpl::init(SpaceMetric* topo, MapCompartment* compartment)
 {
 	_topo = topo;
 	deleteGrid();

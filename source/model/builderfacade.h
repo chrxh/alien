@@ -14,9 +14,9 @@ class BuilderFacade
 public:
     virtual ~BuilderFacade () {}
 
-	virtual SimulationContext* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
+	virtual SimulationContext* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
 		, SimulationParameters* parameters, QObject* parent = nullptr) const = 0;
-	virtual Topology* buildTorusTopology(IntVector2D universeSize, QObject* parent = nullptr) const = 0;
+	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize, QObject* parent = nullptr) const = 0;
 
     virtual CellCluster* buildCellCluster (SimulationUnitContext* context) const = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel

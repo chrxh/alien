@@ -11,7 +11,7 @@ public:
 	EnergyParticleMapImpl(QObject* parent = nullptr);
 	virtual ~EnergyParticleMapImpl();
 
-	virtual void init(Topology* topo, MapCompartment* compartment) override;
+	virtual void init(SpaceMetric* topo, MapCompartment* compartment) override;
 	virtual void clear() override;
 
 	virtual void removeParticleIfPresent(QVector3D pos, EnergyParticle* energy) override;
@@ -24,7 +24,7 @@ public:
 private:
 	void deleteGrid();
 
-	Topology* _topo = nullptr;
+	SpaceMetric* _topo = nullptr;
 	int _gridSize = 0;
 };
 

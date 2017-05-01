@@ -4,7 +4,7 @@
 #include "model/context/simulationunitcontext.h"
 #include "model/context/simulationparameters.h"
 #include "model/context/cellmap.h"
-#include "model/context/topology.h"
+#include "model/context/spacemetric.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
@@ -25,7 +25,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 	auto& tokenMem = token->getMemoryRef();
 	quint8 cmd = tokenMem[Enums::Sensor::IN] % 5;
 	auto cellMap = _context->getCellMap();
-	auto topology = _context->getTopology();
+	auto metric = _context->getTopology();
 	auto parameters = _context->getSimulationParameters();
 
     if( cmd == Enums::SensorIn::DO_NOTHING ) {
@@ -52,7 +52,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
             tokenMem[Enums::Sensor::OUT_MASS] = CodingPhysicalQuantities::convertURealToData(otherCluster->getMass());
 
             //calc relative angle
-            QVector3D dir  = topology->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
+            QVector3D dir  = metric->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
             qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             tokenMem[Enums::Sensor::INOUT_ANGLE] = CodingPhysicalQuantities::convertAngleToData(relAngle);
@@ -70,7 +70,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                         Cell* scanCell = cellMap->getCell(scanPos);
                         if( scanCell ) {
                             if( scanCell->getCluster() == otherCluster ) {
-                                qreal dist = topology->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
+                                qreal dist = metric->displacement(scanCell->calcPosition(), cell->calcPosition()).length();
                                 tokenMem[Enums::Sensor::OUT_DISTANCE] = CodingPhysicalQuantities::convertURealToData(dist);
                                 return processingResult;
                             }
@@ -135,7 +135,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
                 }
             }
             tokenMem[Enums::Sensor::OUT] = Enums::SensorOut::CLUSTER_FOUND;
-            qreal dist = topology->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
+            qreal dist = metric->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
             tokenMem[Enums::Sensor::OUT_DISTANCE] = CodingPhysicalQuantities::convertURealToData(dist);
             tokenMem[Enums::Sensor::OUT_MASS] = CodingPhysicalQuantities::convertURealToData(largestClusterCell->getCluster()->getMass());
 //            tokenMem[static_cast<int>(SENSOR::INOUT_ANGLE)] = convertURealToData(relAngle);
