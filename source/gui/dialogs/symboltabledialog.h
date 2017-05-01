@@ -18,7 +18,7 @@ public:
 	SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent = 0);
 	~SymbolTableDialog();
 
-    SymbolTable const& getNewSymbolTableRef ();
+    SymbolTable* getNewSymbolTable ();
 
 private slots:
     void symbolTableToWidgets ();
@@ -34,7 +34,7 @@ private:
 	void widgetsToSymbolTable();
 
     Ui::SymbolTableDialog *ui;
-	SymbolTable _symbolTable;
+	SymbolTable* _symbolTable;
 };
 
 #endif // SYMBOLTABLEDIALOG_H

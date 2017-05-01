@@ -24,7 +24,7 @@
 #include "gui/guisettings.h"
 #include "model/modelsettings.h"
 #include "model/simulationcontroller.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/simulationcontext.h"
 #include "model/serializationfacade.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -59,10 +59,10 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     ui->menuView->setFont(GuiFunctions::getGlobalFont());
     ui->menuEdit->setFont(GuiFunctions::getGlobalFont());
     ui->menuSelection->setFont(GuiFunctions::getGlobalFont());
-    ui->menuMetadata->setFont(GuiFunctions::getGlobalFont());
+    ui->menuSettings->setFont(GuiFunctions::getGlobalFont());
     ui->menuHelp->setFont(GuiFunctions::getGlobalFont());
     ui->menuSimulationParameters->setFont(GuiFunctions::getGlobalFont());
-    ui->menuSymbolTable_2->setFont(GuiFunctions::getGlobalFont());
+    ui->menuSymbolTable->setFont(GuiFunctions::getGlobalFont());
     ui->menuAddEnsemble->setFont(GuiFunctions::getGlobalFont());
     ui->menuMultiplyExtension->setFont(GuiFunctions::getGlobalFont());
 
@@ -195,6 +195,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::newSimulation ()
 {
+/*
     NewSimulationDialog d(_simController->getSimulationContext());
     if( d.exec() ) {
 		stopSimulation();
@@ -206,6 +207,7 @@ void MainWindow::newSimulation ()
 
 		updateControllerAndEditors();
     }
+*/
 }
 
 void MainWindow::loadSimulation ()
@@ -356,15 +358,18 @@ void MainWindow::restoreUniverse ()
 
 void MainWindow::editSimulationParameters ()
 {
+/*
     SimulationParametersDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
 		auto newParameters = d.getSimulationParameters();
 		*_simController->getSimulationContext()->getSimulationParameters() = newParameters;
     }
+*/
 }
 
 void MainWindow::loadSimulationParameters ()
 {
+/*
     QString fileName = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -381,10 +386,12 @@ void MainWindow::loadSimulationParameters ()
             msgBox.exec();
         }
     }
+*/
 }
 
 void MainWindow::saveSimulationParameters ()
 {
+/*
     QString fileName = QFileDialog::getSaveFileName(this, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -401,6 +408,7 @@ void MainWindow::saveSimulationParameters ()
             msgBox.exec();
         }
     }
+*/
 }
 
 void MainWindow::fullscreen (bool triggered)
@@ -501,6 +509,7 @@ void MainWindow::pasteCell ()
 
 void MainWindow::editSymbolTable ()
 {
+/*
 	SymbolTable* symbolTable = _simController->getSimulationContext()->getSymbolTable();
 	if (!symbolTable)
 		return;
@@ -508,11 +517,12 @@ void MainWindow::editSymbolTable ()
     if (d.exec()) {
 
         //update symbol table
-		symbolTable->setTable(d.getNewSymbolTableRef());
+		symbolTable->setTable(d.getNewSymbolTable());
 
         //update editor
         _microEditor->update();
     }
+*/
 }
 
 void MainWindow::loadSymbols ()

@@ -6,6 +6,7 @@
 class MapCompartmentImpl
 	: public MapCompartment
 {
+	Q_OBJECT
 public:
 	MapCompartmentImpl(QObject* parent = nullptr);
 	virtual ~MapCompartmentImpl() {}
