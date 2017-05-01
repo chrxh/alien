@@ -35,7 +35,7 @@ class SimulationParameters;
 class SymbolTable;
 class EntityFactory;
 class ContextFactory;
-class AlienFacade;
+class BuilderFacade;
 class SerializationFacade;
 
 struct CellClusterHash

@@ -7,7 +7,7 @@
 #include "model/features/_impl/cellfunctioncommunicatorimpl.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/context/simulationunitcontext.h"
-#include "model/alienfacade.h"
+#include "model/builderfacade.h"
 #include "model/modelsettings.h"
 #include "model/context/topology.h"
 #include "model/context/simulationparameters.h"
@@ -38,7 +38,7 @@ protected:
 
 TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 {
-	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 
 	_context = facade->buildSimulationContext();
 	auto topology = facade->buildTorusTopology();

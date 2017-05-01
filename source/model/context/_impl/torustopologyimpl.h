@@ -11,6 +11,7 @@ public:
 	virtual ~TorusTopologyImpl() {}
 
 	virtual void init(IntVector2D size);
+	virtual Topology* clone(QObject* parent = nullptr) const override;
 
 	virtual IntVector2D getSize() const override;
 

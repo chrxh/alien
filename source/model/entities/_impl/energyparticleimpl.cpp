@@ -3,7 +3,7 @@
 #include "global/servicelocator.h"
 #include "global/numbergenerator.h"
 
-#include "model/alienfacade.h"
+#include "model/builderfacade.h"
 #include "model/physics/physics.h"
 #include "model/modelsettings.h"
 #include "model/context/simulationunitcontext.h"
@@ -72,7 +72,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 
 		//create cell and cluster
 		QList< Cell* > cells;
-		AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+		BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 		Cell* c = facade->buildFeaturedCellWithRandomData(eNew, _context);
 		cells << c;
 		cluster = facade->buildCellCluster(cells, 0.0, _pos, 0.0, _vel, _context);

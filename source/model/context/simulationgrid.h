@@ -14,6 +14,7 @@ public:
 	virtual void init(IntVector2D gridSize) = 0;
 
 	virtual void registerUnit(IntVector2D gridPos, SimulationUnit* unit) = 0;
+	virtual IntVector2D getSize() const = 0;
 };
 
 #endif // SIMULATIONGRID_H

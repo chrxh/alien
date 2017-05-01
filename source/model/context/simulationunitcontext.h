@@ -16,6 +16,9 @@ public:
 	
 	virtual void init(Topology* topology, SymbolTable * symbolTable, SimulationParameters* parameters) = 0;
 
+	virtual void lock() = 0;
+	virtual void unlock() = 0;
+
     virtual Topology* getTopology () const = 0;
 	virtual EnergyParticleMap* getEnergyParticleMap() const = 0;
 	virtual CellMap* getCellMap() const = 0;

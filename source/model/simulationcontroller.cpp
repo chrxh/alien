@@ -27,7 +27,7 @@
 #include "context/simulationgrid.h"
 #include "context/simulationunit.h"
 #include "serializationfacade.h"
-#include "alienfacade.h"
+#include "builderfacade.h"
 
 #include "simulationcontroller.h"
 
@@ -35,11 +35,8 @@ SimulationController::SimulationController(Threading threading, QObject* parent)
     : QObject(parent)
 	, _threading(threading)
 {
-	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
-
     _forceFpsTimer = new QTimer(this);
 	_oneSecondTimer = new QTimer(this);
-	_context = facade->buildSimulationContext(this);
 
 	connect(_oneSecondTimer, SIGNAL(timeout()), this, SLOT(oneSecondTimerSlot()));
     connect(_forceFpsTimer, SIGNAL(timeout()), this, SLOT(forceFpsTimerSlot()));
@@ -81,26 +78,20 @@ SimulationContext* SimulationController::getSimulationContext()
     return _context;
 }
 
-void SimulationController::newUniverse(int maxThreads, IntVector2D gridSize, IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters)
+void SimulationController::newUniverse(SimulationContext* context)
 {
 	_frame = 0;
-	auto threads = _context->getSimulationThreads();
-	threads->init(maxThreads);
+	delete _context;
+	_context = context;
 
-	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	auto topology = factory->buildTorusTopology(_context);
-	topology->init(universeSize);
-
-	auto grid = factory->buildSimulationGrid();
-	grid->init(gridSize);
+	auto grid = _context->getSimulationGrid();
+	IntVector2D gridSize = grid->getSize();
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
-			auto unit = buildSimulationUnit();
+			auto unit = buildAndConnectSimulationUnit();
 			grid->registerUnit({ x, y }, unit);
 		}
 	}
-
-	_context->init(topology, grid, threads, symbolTable, parameters);
 }
 
 void SimulationController::saveUniverse (QDataStream& stream)
@@ -129,9 +120,7 @@ void SimulationController::loadUniverse(QDataStream& stream)
 
 IntVector2D SimulationController::getUniverseSize()
 {
-    _context->lock();
 	IntVector2D size = _context->getTopology()->getSize();
-    _context->unlock();
     return size;
 }
 
@@ -549,15 +538,13 @@ void SimulationController::setAngularVelocityExtendedSelection (qreal angVel, co
 
 QVector3D SimulationController::getCenterPosExtendedSelection (const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es)
 {
-/*
+
     QVector3D center(0.0, 0.0, 0.0);
-    quint32 numCells = 0;
+/*    quint32 numCells = 0;
 
     _context->lock();
     foreach(CellCluster* cluster, clusters) {
         center += cluster->getPosition()*cluster->getMass();
-/ *        foreach(Cell* cell, cluster->getCellsRef())
-            center += cell->calcPosition();* /
         numCells += cluster->getCellsRef().size();
     }
     foreach(EnergyParticle* e, es) {
@@ -565,9 +552,8 @@ QVector3D SimulationController::getCenterPosExtendedSelection (const QList< Cell
     }
     _context->unlock();
 
-    center = center / (qreal)(numCells+es.size());
+    center = center / (qreal)(numCells+es.size());*/
     return center;
-*/
 }
 
 void SimulationController::drawToMapExtendedSelection (const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es)
@@ -846,21 +832,18 @@ void SimulationController::nextTimestepCalculated ()
     }*/
 }
 
-SimulationUnit* SimulationController::buildSimulationUnit()
+SimulationUnit* SimulationController::buildAndConnectSimulationUnit()
 {
-	ContextFactory* facade = ServiceLocator::getInstance().getService<ContextFactory>();
-	SimulationUnit* result = new SimulationUnit(_context);
-	auto unitContext = facade->buildSimulationUnitContext(result);
-	result->init(unitContext);
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	auto unit = facade->buildSimulationUnit(_context);
 
 	if (_threading == Threading::EXTRA_THREAD) {
-		connect(this, SIGNAL(calcNextTimestep()), result, SLOT(calcNextTimestep()));
-		connect(result, SIGNAL(nextTimestepCalculated()), this, SLOT(nextTimestepCalculated()));
+		connect(this, SIGNAL(calcNextTimestep()), unit, SLOT(calcNextTimestep()));
+		connect(unit, SIGNAL(nextTimestepCalculated()), this, SLOT(nextTimestepCalculated()));
 	}
 	if (_threading == Threading::NO_EXTRA_THREAD) {
-		connect(this, SIGNAL(calcNextTimestep()), result, SLOT(calcNextTimestep()), Qt::DirectConnection);
-		result->setParent(this);
+		connect(this, SIGNAL(calcNextTimestep()), unit, SLOT(calcNextTimestep()), Qt::DirectConnection);
 	}
-	return result;
+	return unit;
 }
 

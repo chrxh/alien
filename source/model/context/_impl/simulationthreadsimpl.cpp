@@ -30,6 +30,10 @@ void SimulationThreadsImpl::registerUnit(SimulationUnit * unit)
 	newThread->connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
 	unit->moveToThread(newThread);
 	_threads.push_back(newThread);
+}
+
+void SimulationThreadsImpl::start() const
+{
 	//newThread->start();
 }
 

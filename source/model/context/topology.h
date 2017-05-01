@@ -12,6 +12,7 @@ public:
 	virtual ~Topology() {}
 
 	virtual void init(IntVector2D size) = 0;
+	virtual Topology* clone(QObject* parent = nullptr) const = 0;
 
 	virtual IntVector2D getSize() const = 0;
 

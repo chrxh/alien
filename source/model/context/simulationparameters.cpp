@@ -6,41 +6,43 @@ SimulationParameters::SimulationParameters(QObject * parent)
 {
 }
 
-void SimulationParameters::setParameters(SimulationParameters * other)
+SimulationParameters * SimulationParameters::clone(QObject * parent) const
 {
-	cellMutationProb = other->cellMutationProb;
-	cellMinDistance = other->cellMinDistance;
-	cellMaxDistance = other->cellMaxDistance;
-	cellMass_Reciprocal = other->cellMass_Reciprocal;
-	callMaxForce = other->callMaxForce;
-	cellMaxForceDecayProb = other->cellMaxForceDecayProb;
-	cellMaxBonds = other->cellMaxBonds;
-	cellMaxToken = other->cellMaxToken;
-	cellMaxTokenBranchNumber = other->cellMaxTokenBranchNumber;
-	cellCreationEnergy = other->cellCreationEnergy;
-	cellCreationMaxConnection = other->cellCreationMaxConnection;
-	cellCreationTokenAccessNumber = other->cellCreationTokenAccessNumber;
-	cellMinEnergy = other->cellMinEnergy;
-	cellTransformationProb = other->cellTransformationProb;
-	cellFusionVelocity = other->cellFusionVelocity;
+	auto parameters = new SimulationParameters(parent);
+	parameters->cellMutationProb = cellMutationProb;
+	parameters->cellMinDistance = cellMinDistance;
+	parameters->cellMaxDistance = cellMaxDistance;
+	parameters->cellMass_Reciprocal = cellMass_Reciprocal;
+	parameters->callMaxForce = callMaxForce;
+	parameters->cellMaxForceDecayProb = cellMaxForceDecayProb;
+	parameters->cellMaxBonds = cellMaxBonds;
+	parameters->cellMaxToken = cellMaxToken;
+	parameters->cellMaxTokenBranchNumber = cellMaxTokenBranchNumber;
+	parameters->cellCreationEnergy = cellCreationEnergy;
+	parameters->cellCreationMaxConnection = cellCreationMaxConnection;
+	parameters->cellCreationTokenAccessNumber = cellCreationTokenAccessNumber;
+	parameters->cellMinEnergy = cellMinEnergy;
+	parameters->cellTransformationProb = cellTransformationProb;
+	parameters->cellFusionVelocity = cellFusionVelocity;
 
-	cellFunctionWeaponStrength = other->cellFunctionWeaponStrength;
-	cellFunctionComputerMaxInstructions = other->cellFunctionComputerMaxInstructions;
-	cellFunctionComputerCellMemorySize = other->cellFunctionComputerCellMemorySize;
-	cellFunctionConstructorOffspringDistance = other->cellFunctionConstructorOffspringDistance;
-	cellFunctionSensorRange = other->cellFunctionSensorRange;
-	cellFunctionCommunicatorRange = other->cellFunctionCommunicatorRange;
+	parameters->cellFunctionWeaponStrength = cellFunctionWeaponStrength;
+	parameters->cellFunctionComputerMaxInstructions = cellFunctionComputerMaxInstructions;
+	parameters->cellFunctionComputerCellMemorySize = cellFunctionComputerCellMemorySize;
+	parameters->cellFunctionConstructorOffspringDistance = cellFunctionConstructorOffspringDistance;
+	parameters->cellFunctionSensorRange = cellFunctionSensorRange;
+	parameters->cellFunctionCommunicatorRange = cellFunctionCommunicatorRange;
 
-	tokenMemorySize = other->tokenMemorySize;
-	tokenCreationEnergy = other->tokenCreationEnergy;
-	tokenMinEnergy = other->tokenMinEnergy;
+	parameters->tokenMemorySize = tokenMemorySize;
+	parameters->tokenCreationEnergy = tokenCreationEnergy;
+	parameters->tokenMinEnergy = tokenMinEnergy;
 
-	radiationExponent = other->radiationExponent;
-	radiationFactor = other->radiationFactor;
-	radiationProb = other->radiationProb;
+	parameters->radiationExponent = radiationExponent;
+	parameters->radiationFactor = radiationFactor;
+	parameters->radiationProb = radiationProb;
 
-	radiationVelocityMultiplier = other->radiationVelocityMultiplier;
-	radiationVelocityPerturbation = other->radiationVelocityPerturbation;
+	parameters->radiationVelocityMultiplier = radiationVelocityMultiplier;
+	parameters->radiationVelocityPerturbation = radiationVelocityPerturbation;
+	return parameters;
 }
 
 void SimulationParameters::serializePrimitives(QDataStream & stream)

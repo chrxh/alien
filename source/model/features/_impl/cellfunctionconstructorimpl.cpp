@@ -5,7 +5,7 @@
 #include <QMatrix4x4>
 
 #include "global/servicelocator.h"
-#include "model/alienfacade.h"
+#include "model/builderfacade.h"
 #include "model/entities/entityfactory.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
@@ -38,7 +38,7 @@ namespace {
     Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
         , int tokenAccessNumber, quint8 metadata, int cellType, QByteArray cellFunctionData, SimulationUnitContext* context)
     {
-        AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+        BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
         Cell* newCell = facade->buildFeaturedCell(context->getSimulationParameters()->cellCreationEnergy
 			, convertCellTypeNumberToName(cellType), cellFunctionData, context);
         CellCluster* cluster = baseCell->getCluster();

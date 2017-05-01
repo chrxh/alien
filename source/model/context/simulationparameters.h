@@ -11,7 +11,7 @@ public:
 	SimulationParameters(QObject* parent = nullptr);
 	virtual ~SimulationParameters() {}
 
-	void setParameters(SimulationParameters* other);
+	SimulationParameters* clone(QObject* parent = nullptr) const;
 
 	void serializePrimitives(QDataStream& stream);
 	void deserializePrimitives(QDataStream& stream);

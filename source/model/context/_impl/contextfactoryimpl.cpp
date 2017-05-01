@@ -28,6 +28,11 @@ SimulationUnitContext * ContextFactoryImpl::buildSimulationUnitContext(QObject* 
 	return new SimulationUnitContextImpl(parent);
 }
 
+SimulationUnit * ContextFactoryImpl::buildSimulationUnit(QObject * parent) const
+{
+	return new SimulationUnit(parent);
+}
+
 SimulationGrid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
 {
 	return new SimulationGridImpl(parent);

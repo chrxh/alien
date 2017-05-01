@@ -12,6 +12,7 @@ public:
 
 	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const override;
 	virtual SimulationUnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const override;
+	virtual SimulationUnit* buildSimulationUnit(QObject* parent = nullptr) const override;
 	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const override;
 	virtual SimulationThreads* buildSimulationThreads(QObject* parent = nullptr) const override;
 	virtual Topology* buildTorusTopology(QObject* parent = nullptr) const override;
