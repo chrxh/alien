@@ -47,8 +47,8 @@ void SimulationThreadsImpl::updateDependencies()
 		auto context = threadByContext.first;
 		auto thr = threadByContext.second;
 		auto compartment = context->getMapCompartment();
-		auto getThread = [&](MapCompartment::RelativeLocation location) {
-			return _threadsByContexts[compartment->getNeighborContext(location)];
+		auto getThread = [&](MapCompartment::RelativeLocation rel) {
+			return _threadsByContexts[compartment->getNeighborContext(rel)];
 		};
 		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::UpperLeft));
 		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::Upper));

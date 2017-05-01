@@ -23,7 +23,7 @@ public:
     IntVector2D getSize();
     qreal getEnergy();
 	SymbolTable const& getNewSymbolTableRef();
-	SimulationParameters getNewSimulationParameters();
+	SimulationParameters* getNewSimulationParameters();
 
 private slots:
     void simulationParametersButtonClicked ();
@@ -33,7 +33,7 @@ private:
     Ui::NewSimulationDialog *ui;
     SymbolTableDialog* _symTblDialog;
 
-	SimulationParameters _localParameters;
+	SimulationParameters* _localParameters;
 };
 
 #endif // NEWSIMULATIONDIALOG_H
