@@ -13,7 +13,7 @@
 NewSimulationDialog::NewSimulationDialog(SimulationUnitContext* context, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
-	, _localParameters(*context->getSimulationParameters())
+	, _localParameters(context->getSimulationParameters()->clone())
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
@@ -49,14 +49,14 @@ SymbolTable const& NewSimulationDialog::getNewSymbolTableRef()
 	return _symTblDialog->getNewSymbolTableRef();
 }
 
-SimulationParameters NewSimulationDialog::getNewSimulationParameters()
+SimulationParameters* NewSimulationDialog::getNewSimulationParameters()
 {
 	return _localParameters;
 }
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
-	SimulationParametersDialog d(&_localParameters);
+	SimulationParametersDialog d(_localParameters->clone());
 	if (d.exec()) {
 		_localParameters = d.getSimulationParameters();
 	}

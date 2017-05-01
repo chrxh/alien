@@ -1,5 +1,6 @@
 #include "model/context/cellmap.h"
 #include "model/context/energyparticlemap.h"
+#include "model/context/mapcompartment.h"
 #include "model/context/simulationparameters.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
@@ -45,8 +46,6 @@ void SimulationUnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, Ener
 		_simulationParameters = parameters;
 	}
 
-	_energyParticleMap->init(_metric);
-	_cellMap->init(_metric);
 	deleteClustersAndEnergyParticles();
 }
 

@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 	SimulationController controller(SimulationController::Threading::EXTRA_THREAD);
 	auto context = controller.getSimulationContext();
-	controller.newUniverse({ 400, 200 }, *context->getSymbolTable(), *context->getSimulationParameters());
+//	controller.newUniverse({ 400, 200 }, context->getSymbolTable(), *context->getSimulationParameters());
     MainWindow w(&controller);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
