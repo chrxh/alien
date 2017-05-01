@@ -418,9 +418,6 @@
     <ClCompile Include="Release\moc_visualeditor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\cellmap.cpp">
-      <Filter>Model\Context</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\context\energyparticlemap.cpp">
       <Filter>Model\Context</Filter>
     </ClCompile>
@@ -490,9 +487,6 @@
     <ClCompile Include="Tests\moc_energyparticlemap.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_cellmap.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_simulationthreadsimpl.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -554,6 +548,42 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationparameters.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mapcompartment.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mapcompartment.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\cellmapimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\energyparticlemapimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_cellmapimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cellmapimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cellmapimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_energyparticlemap.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_energyparticlemap.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -939,6 +969,12 @@
       <Filter>Model\Metadata</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\simulationunitimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\cellmapimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\energyparticlemapimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>

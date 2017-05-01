@@ -1,21 +1,21 @@
-#include "cellmap.h"
-#include "topology.h"
+#include "model/context/topology.h"
 #include "model/modelsettings.h"
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 
-CellMap::CellMap(QObject* parent)
-	: QObject(parent)
+#include "cellmapimpl.h"
+
+CellMapImpl::CellMapImpl(QObject* parent /*= nullptr*/)
+	: CellMap(parent)
 {
 }
 
-
-CellMap::~CellMap()
+CellMapImpl::~CellMapImpl()
 {
 	deleteCellMap();
 }
 
-void CellMap::init(Topology* topo)
+void CellMapImpl::init(Topology* topo, MapCompartment* compartment)
 {
 	_topo = topo;
 	deleteCellMap();
@@ -28,7 +28,7 @@ void CellMap::init(Topology* topo)
 	clear();
 }
 
-void CellMap::clear()
+void CellMapImpl::clear()
 {
 	IntVector2D size = _topo->getSize();
 	for (int x = 0; x < size.x; ++x)
@@ -36,13 +36,13 @@ void CellMap::clear()
 			_cellGrid[x][y] = nullptr;
 }
 
-void CellMap::setCell(QVector3D pos, Cell * cell)
+void CellMapImpl::setCell(QVector3D pos, Cell * cell)
 {
 	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
 	_cellGrid[intPos.x][intPos.y] = cell;
 }
 
-void CellMap::removeCell(QVector3D pos)
+void CellMapImpl::removeCell(QVector3D pos)
 {
 	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
 	IntVector2D intPosM = _topo->shiftPosition(intPos, { -1, -1 });
@@ -61,7 +61,7 @@ void CellMap::removeCell(QVector3D pos)
 	_cellGrid[intPosP.x][intPosP.y] = nullptr;
 }
 
-void CellMap::removeCellIfPresent(QVector3D pos, Cell * cell)
+void CellMapImpl::removeCellIfPresent(QVector3D pos, Cell * cell)
 {
 	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
 	IntVector2D intPosM = _topo->shiftPosition(intPos, { -1, -1 });
@@ -80,13 +80,13 @@ void CellMap::removeCellIfPresent(QVector3D pos, Cell * cell)
 	removeCellIfPresent(intPosP.x, intPosP.y, cell);
 }
 
-Cell * CellMap::getCell(QVector3D pos) const
+Cell * CellMapImpl::getCell(QVector3D pos) const
 {
 	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
 	return _cellGrid[intPos.x][intPos.y];
 }
 
-CellClusterSet CellMap::getNearbyClusters(QVector3D const& pos, qreal r) const
+CellClusterSet CellMapImpl::getNearbyClusters(QVector3D const& pos, qreal r) const
 {
 	CellClusterSet clusters;
 	int rc = qCeil(r);
@@ -101,7 +101,7 @@ CellClusterSet CellMap::getNearbyClusters(QVector3D const& pos, qreal r) const
 	return clusters;
 }
 
-CellCluster * CellMap::getNearbyClusterFast(const QVector3D & pos, qreal r, qreal minMass, qreal maxMass, CellCluster * exclude) const
+CellCluster * CellMapImpl::getNearbyClusterFast(const QVector3D & pos, qreal r, qreal minMass, qreal maxMass, CellCluster * exclude) const
 {
 	int step = qCeil(qSqrt(minMass + ALIEN_PRECISION)) + 3;  //horizontal or vertical length of cell cluster >= minDim
 	int rc = qCeil(r);
@@ -138,7 +138,7 @@ CellCluster * CellMap::getNearbyClusterFast(const QVector3D & pos, qreal r, qrea
 	return closestCluster;
 }
 
-QList<Cell*> CellMap::getNearbySpecificCells(const QVector3D & pos, qreal r, CellSelectFunction selection) const
+QList<Cell*> CellMapImpl::getNearbySpecificCells(const QVector3D & pos, qreal r, CellSelectFunction selection) const
 {
 	QList< Cell* > cells;
 	int rCeil = qCeil(r);
@@ -157,7 +157,7 @@ QList<Cell*> CellMap::getNearbySpecificCells(const QVector3D & pos, qreal r, Cel
 	return cells;
 }
 
-void CellMap::serializePrimitives(QDataStream & stream) const
+void CellMapImpl::serializePrimitives(QDataStream & stream) const
 {
 	//determine number of cell entries
 	quint32 numEntries = 0;
@@ -179,7 +179,7 @@ void CellMap::serializePrimitives(QDataStream & stream) const
 		}
 }
 
-void CellMap::deserializePrimitives(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap)
+void CellMapImpl::deserializePrimitives(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap)
 {
 	quint32 numEntries = 0;
 	qint32 x = 0;
@@ -192,7 +192,7 @@ void CellMap::deserializePrimitives(QDataStream & stream, const QMap<quint64, Ce
 	}
 }
 
-void CellMap::deleteCellMap()
+void CellMapImpl::deleteCellMap()
 {
 	if (_cellGrid != nullptr) {
 		int sizeX = _gridSize;

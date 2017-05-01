@@ -10,9 +10,8 @@ public:
     BuilderFacadeImpl ();
 	~BuilderFacadeImpl() = default;
 
-	virtual SimulationContext* buildSimulationContext(int maxThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
+	virtual SimulationContext* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
 		, SimulationParameters* parameters, QObject* parent = nullptr) const override;
-	virtual SimulationUnit* buildSimulationUnit(SimulationContext* context) const override;
 	virtual Topology* buildTorusTopology(IntVector2D universeSize, QObject* parent = nullptr) const override;
 
 	virtual CellCluster* buildCellCluster (SimulationUnitContext* context) const override;
@@ -29,6 +28,9 @@ public:
 
 	virtual CellTO buildFeaturedCellTO (Cell* cell) const override;
 	virtual void changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, SimulationUnitContext* context) const override;
+
+private:
+	SimulationUnit* buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const;
 };
 
 #endif // FACTORYFACADEIMPL_H

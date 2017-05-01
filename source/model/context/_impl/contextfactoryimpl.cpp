@@ -2,11 +2,14 @@
 
 #include "contextfactoryimpl.h"
 #include "simulationcontextimpl.h"
+#include "simulationunitimpl.h"
 #include "simulationunitcontextimpl.h"
 #include "simulationgridimpl.h"
 #include "simulationthreadsimpl.h"
 #include "torustopologyimpl.h"
 #include "mapcompartmentimpl.h"
+#include "cellmapimpl.h"
+#include "energyparticlemapimpl.h"
 
 namespace
 {
@@ -30,7 +33,7 @@ SimulationUnitContext * ContextFactoryImpl::buildSimulationUnitContext(QObject* 
 
 SimulationUnit * ContextFactoryImpl::buildSimulationUnit(QObject * parent) const
 {
-	return new SimulationUnit(parent);
+	return new SimulationUnitImpl(parent);
 }
 
 SimulationGrid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
@@ -51,4 +54,14 @@ Topology * ContextFactoryImpl::buildTorusTopology(QObject* parent) const
 MapCompartment * ContextFactoryImpl::buildMapCompartment(QObject* parent) const
 {
 	return new MapCompartmentImpl(parent);
+}
+
+CellMap * ContextFactoryImpl::buildCellMap(QObject * parent) const
+{
+	return new CellMapImpl(parent);
+}
+
+EnergyParticleMap * ContextFactoryImpl::buildEnergyParticleMap(QObject * parent) const
+{
+	return new EnergyParticleMapImpl(parent);
 }

@@ -15,6 +15,8 @@ public:
 	virtual SimulationThreads* buildSimulationThreads(QObject* parent = nullptr) const = 0;
 	virtual Topology* buildTorusTopology(QObject* parent = nullptr) const = 0;
 	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const = 0;
+	virtual CellMap* buildCellMap(QObject* parent = nullptr) const = 0;
+	virtual EnergyParticleMap* buildEnergyParticleMap(QObject* parent = nullptr) const = 0;
 };
 
 #endif // CONTEXTFACTORY_H
