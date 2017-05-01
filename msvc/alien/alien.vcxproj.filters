@@ -418,9 +418,6 @@
     <ClCompile Include="Release\moc_visualeditor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\energyparticlemap.cpp">
-      <Filter>Model\Context</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\context\simulationparameters.cpp">
       <Filter>Model\Context</Filter>
     </ClCompile>
