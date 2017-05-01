@@ -22,7 +22,7 @@ public:
     SimulationContext* getSimulationContext ();
 
     //universe manipulation tools
-    void newUniverse (int maxThreads, IntVector2D gridSize, IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters);
+    void newUniverse (SimulationContext* context);
     void saveUniverse (QDataStream& stream);
     void loadUniverse (QDataStream& stream);
     IntVector2D getUniverseSize();
@@ -84,7 +84,7 @@ private slots:
     void nextTimestepCalculated ();
 
 private:
-	SimulationUnit* buildSimulationUnit();
+	SimulationUnit* buildAndConnectSimulationUnit();
 
 	Threading _threading;
     QTimer* _forceFpsTimer = nullptr;

@@ -34,16 +34,6 @@ void SimulationContextImpl::init(Topology* topology, SimulationGrid* grid, Simul
 	}
 }
 
-void SimulationContextImpl::lock()
-{
-	_mutex.lock();
-}
-
-void SimulationContextImpl::unlock()
-{
-	_mutex.unlock();
-}
-
 Topology * SimulationContextImpl::getTopology() const
 {
 	return _topology;

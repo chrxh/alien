@@ -14,42 +14,73 @@
 #include "model/context/energyparticlemap.h"
 #include "model/context/topology.h"
 #include "model/context/contextfactory.h"
+#include "model/context/simulationthreads.h"
+#include "model/context/simulationgrid.h"
 #include "model/context/simulationcontext.h"
+#include "model/context/simulationunit.h"
+#include "model/context/simulationunitcontext.h"
+#include "model/metadata/symboltable.h"
 #include "model/modelsettings.h"
 
-#include "alienfacadeimpl.h"
+#include "builderfacadeimpl.h"
 
 namespace {
-	AlienFacadeImpl factoryFacadeImpl;
+	BuilderFacadeImpl factoryFacadeImpl;
 }
 
-AlienFacadeImpl::AlienFacadeImpl ()
+BuilderFacadeImpl::BuilderFacadeImpl ()
 {
-    ServiceLocator::getInstance().registerService<AlienFacade>(this);
+    ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationContext* AlienFacadeImpl::buildSimulationContext(QObject* parent) const
+SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxThreads, IntVector2D gridSize, Topology* topology, SymbolTable* symbolTable
+	, SimulationParameters* parameters, QObject* parent) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
 	SimulationContext* context = factory->buildSimulationContext(parent);
-	ModelData::loadDefaultSymbolTable(context->getSymbolTable());
-	ModelData::loadDefaultSimulationParameters(context->getSimulationParameters());
+
+	auto threads = factory->buildSimulationThreads(context);
+	threads->init(maxThreads);
+
+	auto grid = factory->buildSimulationGrid(context);
+	grid->init(gridSize);
+
+	parameters->setParent(context);
+	symbolTable->setParent(context);
+	context->init(topology, grid, threads, symbolTable, parameters);
 	return context;
 }
 
-Topology * AlienFacadeImpl::buildTorusTopology(QObject* parent) const
+SimulationUnit * BuilderFacadeImpl::buildSimulationUnit(SimulationContext* context) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	return factory->buildTorusTopology(parent);
+	SimulationUnit* unit = factory->buildSimulationUnit(context);
+	auto unitContext = factory->buildSimulationUnitContext(unit);
+	unit->init(unitContext);
+
+	auto topology = context->getTopology()->clone();
+	auto symbolTable = context->getSymbolTable()->clone();
+	auto parameters = context->getSimulationParameters()->clone();
+	unitContext->init(topology, symbolTable, parameters);
+
+	return unit;
 }
 
-CellCluster* AlienFacadeImpl::buildCellCluster (SimulationUnitContext* context) const
+Topology * BuilderFacadeImpl::buildTorusTopology(IntVector2D universeSize, QObject* parent) const
+{
+	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
+	auto topology = factory->buildTorusTopology(parent);
+	topology->init(universeSize);
+	return topology;
+}
+
+CellCluster* BuilderFacadeImpl::buildCellCluster (SimulationUnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     return entityFactory->buildCellCluster(context);
 }
 
-CellCluster* AlienFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
+CellCluster* BuilderFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
     , QVector3D vel, SimulationUnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -57,7 +88,7 @@ CellCluster* AlienFacadeImpl::buildCellCluster (QList< Cell* > cells, qreal angl
 }
 
 
-Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, QByteArray data
+Cell* BuilderFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, QByteArray data
     , SimulationUnitContext* context, int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -68,7 +99,7 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Typ
     return cell;
 }
 
-Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, SimulationUnitContext* context
+Cell* BuilderFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, SimulationUnitContext* context
     , int maxConnections, int tokenAccessNumber, QVector3D relPos) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -79,7 +110,7 @@ Cell* AlienFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::Typ
     return cell;
 }
 
-Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationUnitContext* context) const
+Cell* BuilderFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, SimulationUnitContext* context) const
 {
 	SimulationParameters* parameters = context->getSimulationParameters();
     int randomMaxConnections = NumberGenerator::getInstance().random(parameters->cellMaxBonds+1);
@@ -91,13 +122,13 @@ Cell* AlienFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, Simulation
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 
-Token* AlienFacadeImpl::buildToken(SimulationUnitContext* context, qreal energy) const
+Token* BuilderFacadeImpl::buildToken(SimulationUnitContext* context, qreal energy) const
 {
 	EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	return entityFactory->buildToken(context, energy);
 }
 
-CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
+CellTO BuilderFacadeImpl::buildFeaturedCellTO (Cell* cell) const
 {
     CellTO to;
 
@@ -134,7 +165,7 @@ CellTO AlienFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     return to;
 }
 
-void AlienFacadeImpl::changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, SimulationUnitContext* context) const
+void BuilderFacadeImpl::changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, SimulationUnitContext* context) const
 {
     cell->removeFeatures();
     CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();

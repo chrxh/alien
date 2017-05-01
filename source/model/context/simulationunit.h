@@ -13,31 +13,18 @@ public:
 	virtual ~SimulationUnit ();
 
 public slots:
-	void init(SimulationUnitContext* context);
+	virtual void init(SimulationUnitContext* context) = 0;
 
 public:
-    qreal calcTransEnergy ();
-    qreal calcRotEnergy ();
-    qreal calcInternalEnergy ();
+    virtual qreal calcTransEnergy () const = 0;
+	virtual qreal calcRotEnergy () const = 0;
+	virtual qreal calcInternalEnergy() const = 0;
 
 signals:
     void nextTimestepCalculated ();
 
 public slots:
-	void calcNextTimestep();
-
-private:
-	void processingEnergyParticles();
-	void processingClusterCompletion();
-	void processingClusterToken();
-	void processingClusterMovement();
-	void processingClusterMutationByChance();
-	void processingClusterDissipation();
-	void processingClusterInit();
-	
-	void debugCluster(CellCluster* c, int s);
-    
-	SimulationUnitContext* _context = nullptr;
+	virtual void calcNextTimestep() = 0;
 };
 
 #endif // SIMULATIONUNIT_H

@@ -14,6 +14,7 @@ public:
 	virtual void init(int maxRunningThreads) override;
 
 	virtual void registerUnit(SimulationUnit* unit) override;
+	virtual void start() const override;
 
 private:
 	void terminateThreads();

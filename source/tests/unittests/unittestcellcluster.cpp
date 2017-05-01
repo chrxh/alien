@@ -5,7 +5,7 @@
 #include "model/context/simulationunitcontext.h"
 #include "model/context/simulationparameters.h"
 #include "model/modelsettings.h"
-#include "model/alienfacade.h"
+#include "model/builderfacade.h"
 #include "model/context/topology.h"
 #include "model/entities/cell.h"
 #include "model/entities/token.h"
@@ -30,7 +30,7 @@ protected:
 
 UnitTestCellCluster::UnitTestCellCluster()
 {
-	AlienFacade* facade = ServiceLocator::getInstance().getService<AlienFacade>();
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 
 	_context = facade->buildSimulationContext();
 	auto topology = facade->buildTorusTopology();

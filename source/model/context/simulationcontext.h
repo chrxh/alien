@@ -13,9 +13,6 @@ public:
 
 	virtual void init(Topology* topology, SimulationGrid* grid, SimulationThreads* threads, SymbolTable * symbolTable, SimulationParameters* parameters) = 0;
 
-	virtual void lock() = 0;
-	virtual void unlock() = 0;
-
 	virtual Topology* getTopology() const = 0;
 	virtual SimulationGrid* getSimulationGrid() const = 0;
 	virtual SimulationThreads* getSimulationThreads() const = 0;
