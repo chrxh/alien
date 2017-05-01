@@ -451,58 +451,16 @@
     <ClCompile Include="..\..\source\model\context\_impl\simulationthreadsimpl.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_simulationthreads.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationthreads.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationthreads.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationunitcontext.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_simulationparameters.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationgrid.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationcontext.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_mapcompartment.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_energyparticlemap.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_simulationthreadsimpl.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_simulationunitcontext.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationunitcontext.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_simulationthreadsimpl.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationthreadsimpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationcontext.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationcontext.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationgrid.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationgrid.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\model\_impl\builderfacadeimpl.cpp">
@@ -535,16 +493,22 @@
     <ClCompile Include="Release\moc_simulationparameters.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_mapcompartment.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_mapcompartment.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\context\_impl\cellmapimpl.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\model\context\_impl\energyparticlemapimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\spacemetricimpl.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_cellmapimpl.cpp">
@@ -556,20 +520,20 @@
     <ClCompile Include="Release\moc_cellmapimpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_energyparticlemapimpl.cpp">
+    <ClCompile Include="Tests\moc_mapcompartmentimpl.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_energyparticlemapimpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
+    <ClCompile Include="Tests\moc_simulationcontextimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_energyparticlemapimpl.cpp">
-      <Filter>Generated Files\Release</Filter>
+    <ClCompile Include="Tests\moc_simulationgridimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_energyparticlemap.cpp">
-      <Filter>Generated Files\Debug</Filter>
+    <ClCompile Include="Tests\moc_simulationunitcontextimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_energyparticlemap.cpp">
-      <Filter>Generated Files\Release</Filter>
+    <ClCompile Include="Tests\moc_spacemetricimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_spacemetric.cpp">
       <Filter>Generated Files\Tests</Filter>
@@ -580,8 +544,95 @@
     <ClCompile Include="Release\moc_spacemetric.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\_impl\spacemetricimpl.cpp">
-      <Filter>Model\Context\_Impl</Filter>
+    <ClCompile Include="Tests\moc_simulationunitcontext.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationunitcontext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationunitcontext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationunit.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationunit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationunit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationthreads.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationthreads.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationthreads.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationgrid.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationgrid.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationgrid.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationcontext.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationcontext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationcontext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_mapcompartment.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mapcompartment.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mapcompartment.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_energyparticlemap.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_energyparticlemap.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_energyparticlemap.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_cellmap.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cellmap.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cellmap.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationgridimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationgridimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationcontextimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationcontextimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mapcompartmentimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mapcompartmentimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -765,22 +816,10 @@
     <ClInclude Include="ui_visualeditor.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\context\_impl\simulationunitcontextimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\context\contextfactory.h">
       <Filter>Model\Context</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\context\_impl\contextfactoryimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\context\_impl\mapcompartmentimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\context\_impl\simulationcontextimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\context\_impl\simulationgridimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\_impl\builderfacadeimpl.h">
@@ -788,9 +827,6 @@
     </ClInclude>
     <ClInclude Include="..\..\source\model\builderfacade.h">
       <Filter>Model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\context\_impl\spacemetricimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -973,6 +1009,21 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\spacemetric.h">
       <Filter>Model\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\mapcompartmentimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\simulationcontextimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\simulationgridimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\simulationunitcontextimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\spacemetricimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

@@ -8,7 +8,7 @@
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
 #include "model/context/simulationparameters.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/simulationcontext.h"
 #include "model/context/energyparticlemap.h"
 #include "model/builderfacade.h"
 #include "model/entities/cell.h"
@@ -28,7 +28,7 @@
 const int tabPosX1 = 410;
 const int tabPosX2 = 810;
 
-TextEditor::TextEditor(SimulationUnitContext* context, QObject *parent)
+TextEditor::TextEditor(SimulationContext* context, QObject *parent)
 	: QObject(parent)
 	, _context(context)
     , _focusCell(0)
@@ -197,6 +197,7 @@ void TextEditor::defocused (bool requestDataUpdate)
 
 void TextEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 {
+/*
     if( (!isVisible()) || (!_context) || (!cell) )
         return;
 
@@ -281,22 +282,29 @@ void TextEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 		_widgets.delTokenButton->setEnabled(true);
     else
 		_widgets.delTokenButton->setEnabled(false);
+*/
 }
 
 CellMetadata TextEditor::getCellMetadata(Cell* cell)
 {
+/*
 	_context->lock();
 	CellMetadata meta = cell->getMetadata();
 	_context->unlock();
 	return meta;
+*/
+	return CellMetadata();
 }
 
 CellClusterMetadata TextEditor::getCellClusterMetadata(Cell* cell)
 {
+/*
 	_context->lock();
 	CellClusterMetadata meta = cell->getCluster()->getMetadata();
 	_context->unlock();
 	return meta;
+*/
+	return CellClusterMetadata();
 }
 
 void TextEditor::energyParticleFocused (EnergyParticle* e)
@@ -320,6 +328,7 @@ void TextEditor::energyParticleFocused (EnergyParticle* e)
 
 void TextEditor::energyParticleUpdated_Slot (EnergyParticle* e)
 {
+/*
     if( !e )
         return;
 
@@ -332,11 +341,13 @@ void TextEditor::energyParticleUpdated_Slot (EnergyParticle* e)
         _context->unlock();
 		_widgets.energyEditor->updateEnergyParticle(pos, vel, energyValue);
     }
+*/
 }
 
 
 void TextEditor::reclustered (QList< CellCluster* > clusters)
 {
+/*
     if( !_context)
         return;
     if( _focusCell ) {
@@ -369,9 +380,10 @@ void TextEditor::reclustered (QList< CellCluster* > clusters)
             }
         }
     }
+*/
 }
 
-void TextEditor::universeUpdated (SimulationUnitContext* context, bool force)
+void TextEditor::universeUpdated (SimulationContext* context, bool force)
 {
 	_context = context;
     defocused(false);
@@ -414,16 +426,20 @@ void TextEditor::requestUpdate ()
 
 void TextEditor::setCellMetadata(Cell* cell, CellMetadata meta)
 {
+/*
 	_context->lock();
 	cell->setMetadata(meta);
 	_context->unlock();
+*/
 }
 
 void TextEditor::setCellClusterMetadata(Cell * cell, CellClusterMetadata meta)
 {
+/*
 	_context->lock();
 	cell->getCluster()->setMetadata(meta);
 	_context->unlock();
+*/
 }
 
 void TextEditor::entitiesSelected (int numCells, int numEnergyParticles)
@@ -673,6 +689,7 @@ void TextEditor::changesFromClusterEditor (CellTO newClusterProperties)
 
 void TextEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue)
 {
+/*
     if( (!_context) || (!_focusEnergyParticle) )
         return;
 
@@ -687,6 +704,7 @@ void TextEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, 
 
     //emit signal to notify other instances
     emit energyParticleUpdated(_focusEnergyParticle);
+*/
 }
 
 void TextEditor::changesFromTokenEditor (qreal energy)

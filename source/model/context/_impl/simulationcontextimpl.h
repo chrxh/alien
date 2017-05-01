@@ -7,6 +7,7 @@
 class SimulationContextImpl
 	: public SimulationContext
 {
+	Q_OBJECT
 public:
 	SimulationContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextImpl();

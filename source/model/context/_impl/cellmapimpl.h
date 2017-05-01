@@ -18,7 +18,6 @@ public:
 	virtual void removeCell(QVector3D pos) override;
 	virtual void removeCellIfPresent(QVector3D pos, Cell* cell) override;
 	virtual Cell* getCell(QVector3D pos) const override;
-	inline Cell* getCellFast(IntVector2D const& intPos) const;
 
 	//advanced functions
 	virtual CellClusterSet getNearbyClusters(QVector3D const& pos, qreal r) const override;

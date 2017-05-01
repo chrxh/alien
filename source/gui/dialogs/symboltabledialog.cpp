@@ -13,7 +13,7 @@
 SymbolTableDialog::SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::SymbolTableDialog)
-	, _symbolTable(*symbolTable)
+	, _symbolTable(symbolTable->clone())
 {
     ui->setupUi(this);
     setFont(GuiFunctions::getGlobalFont());
@@ -43,7 +43,7 @@ SymbolTableDialog::~SymbolTableDialog()
     delete ui;
 }
 
-SymbolTable const& SymbolTableDialog::getNewSymbolTableRef()
+SymbolTable* SymbolTableDialog::getNewSymbolTable()
 {
 	widgetsToSymbolTable();
 	return _symbolTable;
@@ -51,11 +51,11 @@ SymbolTable const& SymbolTableDialog::getNewSymbolTableRef()
 
 void SymbolTableDialog::widgetsToSymbolTable ()
 {
-    _symbolTable.clearTable();
+    _symbolTable->clearTable();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
         QTableWidgetItem* item1 = ui->tableWidget->item(i, 0);
         QTableWidgetItem* item2 = ui->tableWidget->item(i, 1);
-        _symbolTable.addEntry(item1->text(), item2->text());
+        _symbolTable->addEntry(item1->text(), item2->text());
     }
 }
 
@@ -66,7 +66,7 @@ void SymbolTableDialog::symbolTableToWidgets()
         ui->tableWidget->removeRow(0);
 
     //create entries in the table
-    QMapIterator< QString, QString > it = _symbolTable.getTableConstRef();
+    QMapIterator< QString, QString > it = _symbolTable->getTableConstRef();
     row = 0;
     while( it.hasNext() ) {
         it.next();
@@ -122,7 +122,7 @@ void SymbolTableDialog::delButtonClicked ()
 
 void SymbolTableDialog::defaultButtonClicked ()
 {
-	_symbolTable = SymbolTable();
+	_symbolTable = new SymbolTable();
     symbolTableToWidgets();
 }
 
@@ -136,7 +136,7 @@ void SymbolTableDialog::loadButtonClicked ()
 
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
-			_symbolTable = *symbolTable;
+			_symbolTable = symbolTable;
 			delete symbolTable;
             symbolTableToWidgets();
             file.close();
@@ -158,11 +158,11 @@ void SymbolTableDialog::saveButtonClicked ()
 
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			QDataStream out(&file);
-			facade->serializeSymbolTable(&_symbolTable, out);
+			facade->serializeSymbolTable(_symbolTable, out);
 			file.close();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The symbol table could not saved.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The symbol table could not saved.");
             msgBox.exec();
         }
     }
@@ -179,14 +179,14 @@ void SymbolTableDialog::mergeWithButtonClicked ()
 			QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
-			_symbolTable.mergeTable(*symbolTable);
+			_symbolTable->mergeTable(*symbolTable);
 			delete symbolTable;
 			file.close();
 
 			symbolTableToWidgets();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified symbol table could not loaded.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
             msgBox.exec();
         }
     }
