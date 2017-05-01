@@ -13,19 +13,21 @@ public:
 	SimulationUnitContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationUnitContextImpl();
 
-	void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, SymbolTable* symbolTable, SimulationParameters* parameters) override;
+	void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
+		, SimulationParameters* parameters) override;
 
 	virtual void lock();
 	virtual void unlock();
 
-    SpaceMetric* getTopology () const override;
-    EnergyParticleMap* getEnergyParticleMap () const override;
-    CellMap* getCellMap () const override;
-	SymbolTable* getSymbolTable() const override;
-	SimulationParameters* getSimulationParameters() const override;
+	virtual SpaceMetric* getTopology () const override;
+	virtual CellMap* getCellMap () const override;
+	virtual EnergyParticleMap* getEnergyParticleMap () const override;
+	virtual MapCompartment* getMapCompartment() const override;
+	virtual SymbolTable* getSymbolTable() const override;
+	virtual SimulationParameters* getSimulationParameters() const override;
 
-	QList<CellCluster*>& getClustersRef() override;
-    QList<EnergyParticle*>& getEnergyParticlesRef () override;
+	virtual QList<CellCluster*>& getClustersRef() override;
+	virtual QList<EnergyParticle*>& getEnergyParticlesRef () override;
 
 private:
 	void deleteClustersAndEnergyParticles();
@@ -35,8 +37,9 @@ private:
 	QList<CellCluster*> _clusters;
     QList<EnergyParticle*> _energyParticles;
     SpaceMetric* _metric = nullptr;
-    EnergyParticleMap* _energyParticleMap = nullptr;
     CellMap* _cellMap = nullptr;
+    EnergyParticleMap* _energyParticleMap = nullptr;
+	MapCompartment* _mapCompartment = nullptr;
 	SymbolTable* _symbolTable = nullptr;
 	SimulationParameters* _simulationParameters = nullptr;
 };

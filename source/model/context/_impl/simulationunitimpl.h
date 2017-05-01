@@ -15,6 +15,7 @@ public slots:
 	virtual void init(SimulationUnitContext* context) override;
 
 public:
+	virtual SimulationUnitContext* getContext() const override;
 	virtual qreal calcTransEnergy() const override;
 	virtual qreal calcRotEnergy() const override;
 	virtual qreal calcInternalEnergy() const override;

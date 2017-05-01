@@ -17,7 +17,8 @@ SimulationUnitContextImpl::~SimulationUnitContextImpl ()
 	deleteClustersAndEnergyParticles();
 }
 
-void SimulationUnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, SymbolTable* symbolTable, SimulationParameters* parameters)
+void SimulationUnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
+	, SimulationParameters* parameters)
 {
 	if (_metric != metric) {
 		delete _metric;
@@ -30,6 +31,10 @@ void SimulationUnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, Ener
 	if (_energyParticleMap != energyMap) {
 		delete _energyParticleMap;
 		_energyParticleMap = energyMap;
+	}
+	if (_mapCompartment != mapCompartment) {
+		delete _mapCompartment;
+		_mapCompartment = mapCompartment;
 	}
 	if (_symbolTable != symbolTable) {
 		delete _symbolTable;
@@ -63,6 +68,11 @@ SpaceMetric* SimulationUnitContextImpl::getTopology () const
 EnergyParticleMap* SimulationUnitContextImpl::getEnergyParticleMap () const
 {
     return _energyParticleMap;
+}
+
+MapCompartment * SimulationUnitContextImpl::getMapCompartment() const
+{
+	return _mapCompartment;
 }
 
 CellMap* SimulationUnitContextImpl::getCellMap () const

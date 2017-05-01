@@ -16,7 +16,8 @@ public slots:
 	virtual void init(SimulationUnitContext* context) = 0;
 
 public:
-    virtual qreal calcTransEnergy () const = 0;
+	virtual SimulationUnitContext* getContext() const = 0;
+	virtual qreal calcTransEnergy() const = 0;
 	virtual qreal calcRotEnergy () const = 0;
 	virtual qreal calcInternalEnergy() const = 0;
 

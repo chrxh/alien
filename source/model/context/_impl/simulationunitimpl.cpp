@@ -80,6 +80,11 @@ void SimulationUnitImpl::calcNextTimestep()
 	emit nextTimestepCalculated();
 }
 
+SimulationUnitContext * SimulationUnitImpl::getContext() const
+{
+	return _context;
+}
+
 void SimulationUnitImpl::processingEnergyParticles()
 {
 	QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());

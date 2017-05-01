@@ -77,7 +77,7 @@ SimulationUnit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Sim
 	compartment->init(metric, grid->calcMapRect(gridPos));
 	cellMap->init(metric, compartment);
 	energyMap->init(metric, compartment);
-	unitContext->init(metric, cellMap, energyMap, symbolTable, parameters);
+	unitContext->init(metric, cellMap, energyMap, compartment, symbolTable, parameters);
 	unit->init(unitContext);
 
 	return unit;
