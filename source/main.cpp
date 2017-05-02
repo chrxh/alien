@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	auto metric = facade->buildSpaceMetric({ 400, 200 });
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	auto context = facade->buildSimulationContext(4, { 3, 3 }, metric, symbols, parameters);
+	auto context = facade->buildSimulationContext(4, { 6, 6 }, metric, symbols, parameters);
 	controller.newUniverse(context);
 
 //	controller.newUniverse({ 400, 200 }, context->getSymbolTable(), *context->getSimulationParameters());
