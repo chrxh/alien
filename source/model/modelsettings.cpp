@@ -6,8 +6,9 @@
 #include "context/SimulationParameters.h"
 #include "ModelSettings.h"
 
-void ModelData::loadDefaultSymbolTable(SymbolTable* symbolTable)
+SymbolTable* ModelSettings::loadDefaultSymbolTable()
 {
+	SymbolTable* symbolTable = new SymbolTable();
     symbolTable->clearTable();
 
     //general variables
@@ -143,10 +144,13 @@ void ModelData::loadDefaultSymbolTable(SymbolTable* symbolTable)
     symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "["+QString::number(Enums::Communicator::OUT_RECEIVED_MESSAGE)+"]");
     symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_ANGLE", "["+QString::number(Enums::Communicator::OUT_RECEIVED_ANGLE)+"]");
     symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "["+QString::number(Enums::Communicator::OUT_RECEIVED_DISTANCE)+"]");
+
+	return symbolTable;
 }
 
-void ModelData::loadDefaultSimulationParameters(SimulationParameters* parameters)
+SimulationParameters* ModelSettings::loadDefaultSimulationParameters()
 {
+	SimulationParameters* parameters = new SimulationParameters();
 	parameters->cellMutationProb = 0.000001;
 	parameters->cellMinDistance = 0.3;
 	parameters->cellMaxDistance = 1.3;
@@ -179,4 +183,6 @@ void ModelData::loadDefaultSimulationParameters(SimulationParameters* parameters
 	parameters->radiationProb = 0.03;
 	parameters->radiationVelocityMultiplier = 1.0;
 	parameters->radiationVelocityPerturbation = 0.5;
+
+	return parameters;
 }
