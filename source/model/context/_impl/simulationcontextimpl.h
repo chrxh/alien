@@ -14,9 +14,9 @@ public:
 
 	virtual void init(SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters) override;
 
-	virtual SpaceMetric* getTopology() const override;
-	virtual UnitGrid* getSimulationGrid() const override;
-	virtual UnitThreadController* getSimulationThreads() const override;
+	virtual SpaceMetric* getSpaceMetric() const override;
+	virtual UnitGrid* getUnitGrid() const override;
+	virtual UnitThreadController* getUnitThreadController() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
 

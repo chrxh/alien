@@ -78,6 +78,7 @@ void SimulationController::newUniverse(SimulationContext* context)
 	_frame = 0;
 	delete _context;
 	_context = context;
+	_context->getUnitThreadController()->start();
 }
 
 void SimulationController::saveUniverse (QDataStream& stream)
@@ -106,7 +107,7 @@ void SimulationController::loadUniverse(QDataStream& stream)
 
 IntVector2D SimulationController::getUniverseSize()
 {
-	IntVector2D size = _context->getTopology()->getSize();
+	IntVector2D size = _context->getSpaceMetric()->getSize();
     return size;
 }
 

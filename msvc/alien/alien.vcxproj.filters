@@ -343,15 +343,6 @@
     <ClCompile Include="Release\moc_visualeditor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_simulationthreads.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationthreads.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationthreads.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_UnitGrid.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -461,15 +452,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SpaceMetric.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_UnitThread.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_UnitThread.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_UnitThread.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_UnitThreadController.cpp">
@@ -645,6 +627,18 @@
     </ClCompile>
     <ClCompile Include="..\..\source\global\NumberGenerator.cpp">
       <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitThread.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\UnitThread.cpp">
+      <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -840,6 +834,9 @@
     <ClInclude Include="..\..\source\global\NumberGenerator.h">
       <Filter>Global</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\DefinitionsImpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\gui\dialogs\addenergydialog.h">
@@ -1007,9 +1004,6 @@
     <CustomBuild Include="..\..\source\model\context\SpaceMetric.h">
       <Filter>Model\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\UnitThread.h">
-      <Filter>Model\Context</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\UnitThreadController.h">
       <Filter>Model\Context</Filter>
     </CustomBuild>
@@ -1039,6 +1033,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\metadata\SymbolTable.h">
       <Filter>Model\Metadata</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\UnitThread.h">
+      <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

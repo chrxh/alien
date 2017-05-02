@@ -1,6 +1,7 @@
 #ifndef UNITTHREADCONTROLLERIMPL_H
 #define UNITTHREADCONTROLLERIMPL_H
 
+#include "DefinitionsImpl.h"
 #include "model/context/UnitThreadController.h"
 
 class UnitThreadControllerImpl
@@ -21,9 +22,8 @@ private:
 	void terminateThreads();
 
 	int _maxRunningThreads = 1;
-	std::vector<QThread*> _threads;
-	std::map<QThread*, std::vector<QThread*>> _dependencies;
-	std::map<UnitContext*, QThread*> _threadsByContexts;
+	std::vector<UnitThread*> _threads;
+	std::map<UnitContext*, UnitThread*> _threadsByContexts;
 };
 
 #endif // UNITTHREADCONTROLLERIMPL_H
