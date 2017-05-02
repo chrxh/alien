@@ -60,10 +60,8 @@ qreal UnitImpl::calcInternalEnergy() const
 	return internalEnergy;
 }
 
-
 void UnitImpl::calcNextTimestep()
 {
-
 	_context->lock();
 
 	processingClusterInit();

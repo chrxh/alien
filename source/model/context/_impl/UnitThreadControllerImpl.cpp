@@ -30,8 +30,8 @@ void UnitThreadControllerImpl::init(int maxRunningThreads)
 void UnitThreadControllerImpl::registerUnit(Unit * unit)
 {
 	auto newThread = new UnitThread(this);
-	connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
 	unit->moveToThread(newThread);
+	connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
 	_threadsByContexts[unit->getContext()] = newThread;
 	
 	auto signal = new SignalWrapper(this);
@@ -84,7 +84,7 @@ void UnitThreadControllerImpl::searchAndExecuteReadyThreads()
 	for (auto const& ts : _threadsAndCalcSignals) {
 		if (ts.thr->isReady()) {
 			ts.signal->emitSignal();
-
+			ts.thr->setState(UnitThread::State::Working);
 		}
 	}
 }
