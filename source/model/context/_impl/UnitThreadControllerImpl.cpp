@@ -49,17 +49,9 @@ void UnitThreadControllerImpl::updateDependencies()
 		auto context = threadByContext.first;
 		auto thr = threadByContext.second;
 		auto compartment = context->getMapCompartment();
-		auto getThread = [&](MapCompartment::RelativeLocation rel) {
-			return _threadsByContexts[compartment->getNeighborContext(rel)];
-		};
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::UpperLeft));
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::Upper));
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::UpperRight));
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::Left));
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::Right));
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::LowerLeft));
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::Lower));
-		thr->addDependency(getThread(MapCompartment::RelativeLocation::LowerRight));
+		for (auto const& neighborContext : compartment->getNeighborContexts()) {
+			thr->addDependency(_threadsByContexts[neighborContext]);
+		}
 	}
 }
 
