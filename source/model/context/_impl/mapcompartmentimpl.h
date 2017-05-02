@@ -18,6 +18,7 @@ public:
 	virtual UnitContext* getNeighborContext(IntVector2D pos) const override;
 
 private:
+	std::map<RelativeLocation, UnitContext*> _contextsByLocations;
 };
 
 #endif // MAPCOMPARTMENTIMPL_H
