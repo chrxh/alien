@@ -8,14 +8,8 @@ UnitGridImpl::UnitGridImpl(QObject * parent)
 {
 }
 
-UnitGridImpl::~UnitGridImpl()
-{
-	deleteUnits();
-}
-
 void UnitGridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
 {
-	deleteUnits();
 
 	if (_metric != metric) {
 		delete _metric;
@@ -50,11 +44,3 @@ IntRect UnitGridImpl::calcMapRect(IntVector2D gridPos) const
 	return{ p1, p2 };
 }
 
-void UnitGridImpl::deleteUnits()
-{
-	for (auto const& unitVec : _units) {
-		for (auto const& unit : unitVec) {
-			delete unit;
-		}
-	}
-}
