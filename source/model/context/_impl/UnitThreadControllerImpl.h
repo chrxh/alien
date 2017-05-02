@@ -1,8 +1,11 @@
 #ifndef UNITTHREADCONTROLLERIMPL_H
 #define UNITTHREADCONTROLLERIMPL_H
 
-#include "DefinitionsImpl.h"
+#include <QSignalMapper>
+
 #include "model/context/UnitThreadController.h"
+
+#include "DefinitionsImpl.h"
 #include "SignalWrapper.h"
 
 class UnitThreadControllerImpl
@@ -18,6 +21,9 @@ public:
 	virtual void registerUnit(Unit* unit) override;
 	virtual void start() override;
 
+private slots:
+	void threadFinishedCalculation(QObject* sender);
+
 private:
 	void updateDependencies();
 	void terminateThreads();
@@ -32,6 +38,7 @@ private:
 	};
 	std::vector<UnitThreadSignal> _threadsAndCalcSignals;
 	std::map<UnitContext*, UnitThread*> _threadsByContexts;
+	QSignalMapper* _signalMapper = nullptr;
 
 };
 
