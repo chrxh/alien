@@ -5,11 +5,11 @@
 
 const qreal ALIEN_PRECISION = 0.0000001;
 
-class ModelData
+class ModelSettings
 {
 public:
-    static void loadDefaultSymbolTable (SymbolTable* meta);
-	static void loadDefaultSimulationParameters(SimulationParameters* parameters);
+    static SymbolTable* loadDefaultSymbolTable();
+	static SimulationParameters* loadDefaultSimulationParameters();
 };
 
 #endif // MODELSETTINGS_H
