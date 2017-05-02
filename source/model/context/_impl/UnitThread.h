@@ -13,12 +13,13 @@ public:
 	virtual ~UnitThread() {}
 
 	void addDependency(UnitThread* unit);
-	
+
+	enum class State { Ready, Working, Finished };
+	void setState(State value);
 	bool isFinished();
 	bool isReady();
 
 private:
-	enum class State { Ready, Working, Finished };
 	State _state = State::Ready;
 	std::vector<UnitThread*> _dependencies;
 };

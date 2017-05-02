@@ -19,10 +19,11 @@ void UnitThreadControllerImpl::init(int maxRunningThreads)
 {
 	terminateThreads();
 	_maxRunningThreads = maxRunningThreads;
-	for (auto const& thr : _threads) {
-		delete thr;
+	for (auto const& ts : _threadsAndCalcSignals) {
+		delete ts.thr;
+		delete ts.signal;
 	}
-	_threads.clear();
+	_threadsAndCalcSignals.clear();
 
 }
 
@@ -31,16 +32,19 @@ void UnitThreadControllerImpl::registerUnit(Unit * unit)
 	auto newThread = new UnitThread(this);
 	connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
 	unit->moveToThread(newThread);
-	_threads.push_back(newThread);
 	_threadsByContexts[unit->getContext()] = newThread;
+	
+	auto signal = new SignalWrapper(this);
+	connect(signal, &SignalWrapper::signal, unit, &Unit::calcNextTimestep);
+
+	_threadsAndCalcSignals.push_back({ newThread , signal });
 }
 
 void UnitThreadControllerImpl::start()
 {
 	updateDependencies();
-	for (auto const& thr : _threads) {
-		thr->start();
-	}
+	startThreads();
+	searchAndExecuteReadyThreads();
 }
 
 void UnitThreadControllerImpl::updateDependencies()
@@ -57,13 +61,30 @@ void UnitThreadControllerImpl::updateDependencies()
 
 void UnitThreadControllerImpl::terminateThreads()
 {
-	for (auto const& thr : _threads) {
-		thr->quit();
+	for (auto const& ts : _threadsAndCalcSignals) {
+		ts.thr->quit();
 	}
-	for (auto const& thr : _threads) {
-		if (!thr->wait(2000)) {
-			thr->terminate();
-			thr->wait();
+	for (auto const& ts : _threadsAndCalcSignals) {
+		if (!ts.thr->wait(2000)) {
+			ts.thr->terminate();
+			ts.thr->wait();
+		}
+	}
+}
+
+void UnitThreadControllerImpl::startThreads()
+{
+	for (auto const& ts : _threadsAndCalcSignals) {
+		ts.thr->start();
+	}
+}
+
+void UnitThreadControllerImpl::searchAndExecuteReadyThreads()
+{
+	for (auto const& ts : _threadsAndCalcSignals) {
+		if (ts.thr->isReady()) {
+			ts.signal->emitSignal();
+
 		}
 	}
 }
