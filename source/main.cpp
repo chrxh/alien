@@ -2,12 +2,15 @@
 #include <QtCore/qmath.h>
 #include <QVector2D>
 
+#include "global/ServiceLocator.h"
 #include "gui/mainwindow.h"
-#include "model/SimulationController.h"
-#include "model/metadata/SymbolTable.h"
-#include "model/entities/CellTO.h"
-#include "model/context/UnitContext.h"
+#include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
+#include "model/SimulationController.h"
+#include "model/context/UnitContext.h"
+#include "model/context/SimulationParameters.h"
+#include "model/entities/CellTO.h"
+#include "model/metadata/SymbolTable.h"
 
 
 //QT += webkitwidgets
@@ -85,7 +88,13 @@ int main(int argc, char *argv[])
     //init main objects
     QApplication a(argc, argv);
 	SimulationController controller;
-	auto context = controller.getSimulationContext();
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	auto metric = facade->buildSpaceMetric({ 400, 200 });
+	auto symbols = ModelSettings::loadDefaultSymbolTable();
+	auto parameters = ModelSettings::loadDefaultSimulationParameters();
+	auto context = facade->buildSimulationContext(4, { 3, 3 }, metric, symbols, parameters);
+	controller.newUniverse(context);
+
 //	controller.newUniverse({ 400, 200 }, context->getSymbolTable(), *context->getSimulationParameters());
     MainWindow w(&controller);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);

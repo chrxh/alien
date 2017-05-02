@@ -128,7 +128,8 @@ qreal SimulationParametersDialog::getItemReal(QString key, int matchPos)
 
 void SimulationParametersDialog::defaultButtonClicked ()
 {
-    ModelData::loadDefaultSimulationParameters(_localSimulationParameters);
+	delete _localSimulationParameters;
+	_localSimulationParameters = ModelSettings::loadDefaultSimulationParameters();
     setLocalSimulationParametersToWidgets();
 }
 
