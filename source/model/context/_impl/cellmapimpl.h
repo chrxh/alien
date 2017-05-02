@@ -15,7 +15,6 @@ public:
 	virtual void clear() override;
 
 	virtual void setCell(QVector3D pos, Cell* cell) override;
-	virtual void removeCell(QVector3D pos) override;
 	virtual void removeCellIfPresent(QVector3D pos, Cell* cell) override;
 	virtual Cell* getCell(QVector3D pos) const override;
 
@@ -30,18 +29,10 @@ public:
 
 private:
 	void deleteCellMap();
-	inline void removeCellIfPresent(int const &x, int const &y, Cell* cell);
 
 	SpaceMetric* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
 	IntVector2D _size = { 0, 0 };
 };
-
-
-void CellMapImpl::removeCellIfPresent(int const &x, int const &y, Cell* cell)
-{
-	if (_cellGrid[x][y] == cell)
-		_cellGrid[x][y] = nullptr;
-}
 
 #endif //CELLMAPIMPL_H
