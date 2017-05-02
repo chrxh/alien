@@ -6,7 +6,7 @@
 #include "model/entities/token.h"
 #include "model/features/_impl/cellfunctioncommunicatorimpl.h"
 #include "model/physics/codingphysicalquantities.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/builderfacade.h"
 #include "model/modelsettings.h"
 #include "model/context/spacemetric.h"
@@ -21,7 +21,7 @@ public:
 	~TestCellFunctionCommunicator();
 
 protected:
-    SimulationUnitContext* _context;
+    UnitContext* _context;
 
     //data for cluster1
     CellCluster* _cluster1;

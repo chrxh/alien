@@ -421,9 +421,6 @@
     <ClCompile Include="..\..\source\model\context\simulationparameters.cpp">
       <Filter>Model\Context</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\_impl\simulationunitcontextimpl.cpp">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\simulationcontroller.cpp">
       <Filter>Model</Filter>
     </ClCompile>
@@ -445,9 +442,6 @@
     <ClCompile Include="..\..\source\model\context\_impl\simulationcontextimpl.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\_impl\simulationgridimpl.cpp">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_simulationparameters.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -461,18 +455,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_symboltable.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\model\context\_impl\simulationunitimpl.cpp">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationunitimpl.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationunitimpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationunitimpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_simulationparameters.cpp">
@@ -514,12 +496,6 @@
     <ClCompile Include="Tests\moc_simulationcontextimpl.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_simulationgridimpl.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationunitcontextimpl.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_spacemetricimpl.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -532,24 +508,6 @@
     <ClCompile Include="Release\moc_spacemetric.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_simulationunitcontext.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationunitcontext.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationunitcontext.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationunit.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationunit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationunit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_simulationthreads.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -557,15 +515,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_simulationthreads.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationgrid.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationgrid.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationgrid.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_simulationcontext.cpp">
@@ -604,12 +553,6 @@
     <ClCompile Include="Release\moc_cellmap.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_simulationgridimpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationgridimpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_simulationcontextimpl.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -632,6 +575,69 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_threadcontrollerimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_grid.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_grid.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_grid.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\gridimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_gridimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_gridimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_gridimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_unit.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_unit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_unit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\unitimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_unitimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_unitimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_unitimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_unitcontext.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_unitcontext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_unitcontext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\unitcontextimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_unitthread.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_unitthread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_unitthread.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -965,16 +971,7 @@
     <CustomBuild Include="..\..\source\model\simulationcontroller.h">
       <Filter>Model</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\simulationunit.h">
-      <Filter>Model\Context</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\simulationunitcontext.h">
-      <Filter>Model\Context</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\simulationparameters.h">
-      <Filter>Model\Context</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\simulationgrid.h">
       <Filter>Model\Context</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\simulationcontext.h">
@@ -992,9 +989,6 @@
     <CustomBuild Include="..\..\source\model\metadata\symboltable.h">
       <Filter>Model\Metadata</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\_impl\simulationunitimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\cellmapimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
@@ -1010,12 +1004,6 @@
     <CustomBuild Include="..\..\source\model\context\_impl\simulationcontextimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\_impl\simulationgridimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\_impl\simulationunitcontextimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\spacemetricimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
@@ -1024,6 +1012,27 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\threadcontrollerimpl.h">
       <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\grid.h">
+      <Filter>Model\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\gridimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\unit.h">
+      <Filter>Model\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\unitimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\unitcontext.h">
+      <Filter>Model\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\unitcontextimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\unitthread.h">
+      <Filter>Model\Context</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

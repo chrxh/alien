@@ -1,17 +1,17 @@
 #include "global/numbergenerator.h"
 #include "model/modelsettings.h"
 #include "model/context/simulationparameters.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 
 #include "tokenimpl.h"
 
-TokenImpl::TokenImpl(SimulationUnitContext * context)
+TokenImpl::TokenImpl(UnitContext * context)
 	: _context(context)
 {
 	_memory = QByteArray(context->getSimulationParameters()->tokenMemorySize, 0);
 }
 
-TokenImpl::TokenImpl(SimulationUnitContext* context, qreal energy, bool randomData)
+TokenImpl::TokenImpl(UnitContext* context, qreal energy, bool randomData)
 	: TokenImpl(context)
 {
 	_energy = energy;
@@ -21,7 +21,7 @@ TokenImpl::TokenImpl(SimulationUnitContext* context, qreal energy, bool randomDa
 	}
 }
 
-TokenImpl::TokenImpl(SimulationUnitContext* context, qreal energy, QByteArray const& memory_)
+TokenImpl::TokenImpl(UnitContext* context, qreal energy, QByteArray const& memory_)
 	: _energy(energy), _context(context)
 {
 	_memory = memory_.left(context->getSimulationParameters()->tokenMemorySize);

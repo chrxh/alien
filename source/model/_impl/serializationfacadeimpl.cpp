@@ -18,7 +18,7 @@
 #include "model/context/energyparticlemap.h"
 #include "model/context/spacemetric.h"
 #include "model/context/simulationparameters.h"
-#include "model/context/_impl/simulationunitcontextimpl.h"
+#include "model/context/_impl/unitcontextimpl.h"
 #include "model/builderfacade.h"
 
 namespace
@@ -32,7 +32,7 @@ SerializationFacadeImpl::SerializationFacadeImpl()
     ServiceLocator::getInstance().registerService<SerializationFacade>(this);
 }
 
-void SerializationFacadeImpl::serializeSimulationContext(SimulationUnitContext * context, QDataStream & stream) const
+void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, QDataStream & stream) const
 {
 	context->getTopology()->serializePrimitives(stream);
 
@@ -56,7 +56,7 @@ void SerializationFacadeImpl::serializeSimulationContext(SimulationUnitContext *
 	context->getSimulationParameters()->serializePrimitives(stream);
 }
 
-void SerializationFacadeImpl::deserializeSimulationContext(SimulationUnitContext* prevContext, QDataStream & stream) const
+void SerializationFacadeImpl::deserializeSimulationContext(UnitContext* prevContext, QDataStream & stream) const
 {
 /*	//mapping old ids to new ids
 	QMap< quint64, quint64 > oldNewCellIdMap;
@@ -136,7 +136,7 @@ void SerializationFacadeImpl::serializeCellCluster(CellCluster* cluster, QDataSt
 
 CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     , QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap
-    , QMap< quint64, Cell* >& oldIdCellMap, SimulationUnitContext* context) const
+    , QMap< quint64, Cell* >& oldIdCellMap, UnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     CellCluster* cluster = entityFactory->buildCellCluster(context);
@@ -193,7 +193,7 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
 }
 
 CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
-    , SimulationUnitContext* context) const
+    , UnitContext* context) const
 {
     QMap< quint64, quint64 > oldNewClusterIdMap;
     QMap< quint64, quint64 > oldNewCellIdMap;
@@ -227,7 +227,7 @@ void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& str
 }
 
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
-	, QMap< quint64, QList< quint64 > >& connectingCells, SimulationUnitContext* context) const
+	, QMap< quint64, QList< quint64 > >& connectingCells, UnitContext* context) const
 {
 	EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
@@ -263,7 +263,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	return cell;
 }
 
-Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, SimulationUnitContext* context) const
+Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, UnitContext* context) const
 {
 	QMap< quint64, QList< quint64 > > temp;
 	Cell* cell = deserializeFeaturedCell(stream, temp, context);
@@ -276,7 +276,7 @@ void SerializationFacadeImpl::serializeToken(Token* token, QDataStream& stream) 
     token->serializePrimitives(stream);
 }
 
-Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream, SimulationUnitContext* context) const
+Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream, UnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     Token* token = entityFactory->buildToken(context);
@@ -292,7 +292,7 @@ void SerializationFacadeImpl::serializeEnergyParticle(EnergyParticle* particle, 
 }
 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
-    , QMap< quint64, EnergyParticle* >& oldIdEnergyMap, SimulationUnitContext* context) const
+    , QMap< quint64, EnergyParticle* >& oldIdEnergyMap, UnitContext* context) const
 {
     EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
     EnergyParticle* particle = factory->buildEnergyParticle(context);
@@ -306,7 +306,7 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
 }
 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
-	, SimulationUnitContext* context) const
+	, UnitContext* context) const
 {
 	QMap< quint64, EnergyParticle* > temp;
 	EnergyParticle* particle = deserializeEnergyParticle(stream, temp, context);

@@ -11,9 +11,9 @@ public:
 	virtual ~ContextFactoryImpl() {}
 
 	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const override;
-	virtual SimulationUnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const override;
-	virtual SimulationUnit* buildSimulationUnit(QObject* parent = nullptr) const override;
-	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const override;
+	virtual UnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const override;
+	virtual Unit* buildSimulationUnit(QObject* parent = nullptr) const override;
+	virtual Grid* buildSimulationGrid(QObject* parent = nullptr) const override;
 	virtual ThreadController* buildSimulationThreads(QObject* parent = nullptr) const override;
 	virtual SpaceMetric* buildSpaceMetric(QObject* parent = nullptr) const override;
 	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const override;

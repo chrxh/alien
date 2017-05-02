@@ -13,9 +13,9 @@ public:
 
 	virtual void init(SpaceMetric* metric, IntRect mapRect) override;
 
-	virtual void registerNeighborContext(RelativeLocation location, SimulationUnitContext* context) override;
-	virtual SimulationUnitContext* getNeighborContext(RelativeLocation location) const override;
-	virtual SimulationUnitContext* getNeighborContext(IntVector2D pos) const override;
+	virtual void registerNeighborContext(RelativeLocation location, UnitContext* context) override;
+	virtual UnitContext* getNeighborContext(RelativeLocation location) const override;
+	virtual UnitContext* getNeighborContext(IntVector2D pos) const override;
 
 private:
 };

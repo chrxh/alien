@@ -3,7 +3,7 @@
 
 #include "global/numbergenerator.h"
 #include "model/simulationcontroller.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/modelsettings.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
@@ -92,7 +92,7 @@ namespace {
         if (!INTEGRATIONTEST_COMPARISON_UPDATE_REF)
             return false;
         QFile file(INTEGRATIONTEST_COMPARISON_REF);
-        SimulationUnitContext* context = simulationController->getSimulationContext();
+        UnitContext* context = simulationController->getSimulationContext();
         bool fileOpened = file.open(QIODevice::WriteOnly);
         if (fileOpened) {
             QDataStream out(&file);
@@ -159,7 +159,7 @@ namespace {
 
     void compareReferenceWithSimulation (SimulationController* simulationController, LoadedReferenceData const& ref)
     {
-        SimulationUnitContext* context = simulationController->getSimulationContext();
+        UnitContext* context = simulationController->getSimulationContext();
         int refNumCluster = ref.clusterPosList.size();
 		ASSERT_EQ(context->getClustersRef().size(), static_cast<int>(refNumCluster))
 			<< "Deviation in number of clusters.";

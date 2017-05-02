@@ -12,17 +12,17 @@ public:
 	SimulationContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextImpl();
 
-	virtual void init(SpaceMetric* metric, SimulationGrid* grid, ThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters) override;
+	virtual void init(SpaceMetric* metric, Grid* grid, ThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters) override;
 
 	virtual SpaceMetric* getTopology() const override;
-	virtual SimulationGrid* getSimulationGrid() const override;
+	virtual Grid* getSimulationGrid() const override;
 	virtual ThreadController* getSimulationThreads() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
 
 private:
 	SpaceMetric* _metric = nullptr;
-	SimulationGrid* _grid = nullptr;
+	Grid* _grid = nullptr;
 	ThreadController* _threads = nullptr;
 	SymbolTable* _symbolTable = nullptr;
 	SimulationParameters* _simulationParameters = nullptr;

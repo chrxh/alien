@@ -9,16 +9,16 @@ void MapCompartmentImpl::init(SpaceMetric * metric, IntRect mapRect)
 {
 }
 
-void MapCompartmentImpl::registerNeighborContext(RelativeLocation location, SimulationUnitContext * context)
+void MapCompartmentImpl::registerNeighborContext(RelativeLocation location, UnitContext * context)
 {
 }
 
-SimulationUnitContext * MapCompartmentImpl::getNeighborContext(RelativeLocation location) const
+UnitContext * MapCompartmentImpl::getNeighborContext(RelativeLocation location) const
 {
 	return nullptr;
 }
 
-SimulationUnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D pos) const
+UnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D pos) const
 {
 	return nullptr;
 }

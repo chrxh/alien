@@ -69,7 +69,7 @@ public slots:
     void updateUniverse ();
 
 signals:
-    void init (SimulationUnitContext* context);
+    void init (UnitContext* context);
 	void calcNextTimestep();
     void cellCreated (Cell* cell);
     void energyParticleCreated (EnergyParticle* cell);

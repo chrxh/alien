@@ -7,9 +7,9 @@ class TokenImpl
 	: public Token
 {
 public:
-	TokenImpl(SimulationUnitContext* context);
-	TokenImpl(SimulationUnitContext* context, qreal energy, bool randomData = false);
-	TokenImpl(SimulationUnitContext* context, qreal energy, QByteArray const& memory);
+	TokenImpl(UnitContext* context);
+	TokenImpl(UnitContext* context, qreal energy, bool randomData = false);
+	TokenImpl(UnitContext* context, qreal energy, QByteArray const& memory);
 
 	TokenImpl* duplicate() const override;
 	int getTokenAccessNumber() const override;        //from memory[0]
@@ -24,7 +24,7 @@ public:
 	void deserializePrimitives(QDataStream& stream) override;
 
 private:
-	SimulationUnitContext* _context = nullptr;
+	UnitContext* _context = nullptr;
 
 	QByteArray _memory;
 	qreal _energy = 0.0;

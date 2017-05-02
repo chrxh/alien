@@ -1,22 +1,22 @@
-#ifndef SIMULATIONUNIT_H
-#define SIMULATIONUNIT_H
+#ifndef UNIT_H
+#define UNIT_H
 
 #include <QThread>
 #include "model/definitions.h"
 
-class SimulationUnit
+class Unit
 	: public QObject
 {
     Q_OBJECT
 public:
-	SimulationUnit(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~SimulationUnit() {}
+	Unit(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~Unit() {}
 
 public slots:
-	virtual void init(SimulationUnitContext* context) = 0;
+	virtual void init(UnitContext* context) = 0;
 
 public:
-	virtual SimulationUnitContext* getContext() const = 0;
+	virtual UnitContext* getContext() const = 0;
 	virtual qreal calcTransEnergy() const = 0;
 	virtual qreal calcRotEnergy () const = 0;
 	virtual qreal calcInternalEnergy() const = 0;
@@ -28,4 +28,4 @@ public slots:
 	virtual void calcNextTimestep() = 0;
 };
 
-#endif // SIMULATIONUNIT_H
+#endif // UNIT_H

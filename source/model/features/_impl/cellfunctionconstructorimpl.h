@@ -8,7 +8,7 @@
 class CellFunctionConstructorImpl : public CellFunction
 {
 public:
-    CellFunctionConstructorImpl (SimulationUnitContext* context);
+    CellFunctionConstructorImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::CONSTRUCTOR; }
 

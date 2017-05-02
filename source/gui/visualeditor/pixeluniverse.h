@@ -15,7 +15,7 @@ public:
     ~PixelUniverse();
 
     void reset ();
-    void universeUpdated (SimulationUnitContext* context);
+    void universeUpdated (UnitContext* context);
 
 protected:
 
@@ -28,7 +28,7 @@ private slots:
     void timeout ();
 
 private:
-	SimulationUnitContext* _context;
+	UnitContext* _context;
     QGraphicsPixmapItem* _pixelMap;
     QImage* _image;
     QTimer* _timer;

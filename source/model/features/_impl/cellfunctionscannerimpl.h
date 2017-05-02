@@ -6,7 +6,7 @@
 class CellFunctionScannerImpl : public CellFunction
 {
 public:
-    CellFunctionScannerImpl (SimulationUnitContext* context);
+    CellFunctionScannerImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::SCANNER; }
 

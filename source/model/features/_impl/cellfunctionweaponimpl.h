@@ -6,7 +6,7 @@
 class CellFunctionWeaponImpl : public CellFunction
 {
 public:
-    CellFunctionWeaponImpl (SimulationUnitContext* context);
+    CellFunctionWeaponImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::WEAPON; }
 

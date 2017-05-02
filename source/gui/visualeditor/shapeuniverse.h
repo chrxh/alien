@@ -24,7 +24,7 @@ public:
     ShapeUniverse (QObject *parent = 0);
 	virtual ~ShapeUniverse();
 
-    void universeUpdated (SimulationUnitContext* context);
+    void universeUpdated (UnitContext* context);
     void cellCreated (Cell* cell);
     void energyParticleCreated (EnergyParticle* e);
     void defocused ();
@@ -72,7 +72,7 @@ private:
     void setCellColorFromMetadata ();
 
     //internal data for display and editing
-	SimulationUnitContext* _context = nullptr;
+	UnitContext* _context = nullptr;
 	CellGraphicsItemConfig* _itemConfig = nullptr;
     QList< CellGraphicsItem* > _focusCells;
     QList< EnergyGraphicsItem* > _focusEnergyParticles;

@@ -13,7 +13,7 @@
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/modelsettings.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/cellmap.h"
 #include "model/context/spacemetric.h"
 #include "model/context/simulationparameters.h"
@@ -23,7 +23,7 @@
 using ACTIVATE_TOKEN = Cell::ActivateToken;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenAccessNumber;
 
-CellFunctionConstructorImpl::CellFunctionConstructorImpl (SimulationUnitContext* context)
+CellFunctionConstructorImpl::CellFunctionConstructorImpl (UnitContext* context)
     : CellFunction(context)
 {
 }
@@ -36,7 +36,7 @@ namespace {
     }
 
     Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
-        , int tokenAccessNumber, quint8 metadata, int cellType, QByteArray cellFunctionData, SimulationUnitContext* context)
+        , int tokenAccessNumber, quint8 metadata, int cellType, QByteArray cellFunctionData, UnitContext* context)
     {
         BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
         Cell* newCell = facade->buildFeaturedCell(context->getSimulationParameters()->cellCreationEnergy

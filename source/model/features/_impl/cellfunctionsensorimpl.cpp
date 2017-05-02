@@ -1,7 +1,7 @@
 #include <QtCore/qmath.h>
 
 #include "model/modelsettings.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/simulationparameters.h"
 #include "model/context/cellmap.h"
 #include "model/context/spacemetric.h"
@@ -13,7 +13,7 @@
 
 #include "cellfunctionsensorimpl.h"
 
-CellFunctionSensorImpl::CellFunctionSensorImpl (SimulationUnitContext* context)
+CellFunctionSensorImpl::CellFunctionSensorImpl (UnitContext* context)
     : CellFunction(context)
 {
 }

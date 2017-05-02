@@ -2,7 +2,7 @@
 #include "tests/predicates.h"
 
 #include "global/servicelocator.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/simulationparameters.h"
 #include "model/modelsettings.h"
 #include "model/builderfacade.h"
@@ -19,7 +19,7 @@ public:
 	~UnitTestCellCluster();
 
 protected:
-	SimulationUnitContext* _context;
+	UnitContext* _context;
 	CellCluster* _cluster;
 	Cell* _cell1;
 	Cell* _cell2;

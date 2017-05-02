@@ -18,9 +18,9 @@ public:
 		Left, Right, 
 		LowerLeft, Lower, LowerRight,
 	};
-	virtual void registerNeighborContext(RelativeLocation location, SimulationUnitContext* context) = 0;
-	virtual SimulationUnitContext* getNeighborContext(RelativeLocation location) const = 0;
-	virtual SimulationUnitContext* getNeighborContext(IntVector2D pos) const = 0;
+	virtual void registerNeighborContext(RelativeLocation location, UnitContext* context) = 0;
+	virtual UnitContext* getNeighborContext(RelativeLocation location) const = 0;
+	virtual UnitContext* getNeighborContext(IntVector2D pos) const = 0;
 
 private:
 };

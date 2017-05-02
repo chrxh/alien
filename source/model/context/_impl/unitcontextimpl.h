@@ -3,15 +3,15 @@
 
 #include <QMutex>
 
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/spacemetric.h"
 
-class SimulationUnitContextImpl
-	: public SimulationUnitContext
+class UnitContextImpl
+	: public UnitContext
 {
 public:
-	SimulationUnitContextImpl(QObject* parent = nullptr);
-	virtual ~SimulationUnitContextImpl();
+	UnitContextImpl(QObject* parent = nullptr);
+	virtual ~UnitContextImpl();
 
 	void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 		, SimulationParameters* parameters) override;

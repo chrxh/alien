@@ -6,13 +6,13 @@
 
 #include "model/definitions.h"
 
-class SimulationUnitContext
+class UnitContext
 	: public QObject
 {
 	Q_OBJECT
 public:
-	SimulationUnitContext(QObject* parent) : QObject(parent) {}
-	virtual ~SimulationUnitContext() {}
+	UnitContext(QObject* parent) : QObject(parent) {}
+	virtual ~UnitContext() {}
 	
 	virtual void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 		, SimulationParameters* parameters) = 0;

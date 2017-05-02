@@ -1,21 +1,21 @@
-#ifndef SIMULATIONUNITIMPL_H
-#define SIMULATIONUNITIMPL_H
+#ifndef UNITIMPL_H
+#define UNITIMPL_H
 
-#include "model/context/simulationunit.h"
+#include "model/context/unit.h"
 
-class SimulationUnitImpl
-	: public SimulationUnit
+class UnitImpl
+	: public Unit
 {
 	Q_OBJECT
 public:
-	SimulationUnitImpl(QObject* parent = nullptr);
-	virtual ~SimulationUnitImpl() {}
+	UnitImpl(QObject* parent = nullptr);
+	virtual ~UnitImpl() {}
 
 public slots:
-	virtual void init(SimulationUnitContext* context) override;
+	virtual void init(UnitContext* context) override;
 
 public:
-	virtual SimulationUnitContext* getContext() const override;
+	virtual UnitContext* getContext() const override;
 	virtual qreal calcTransEnergy() const override;
 	virtual qreal calcRotEnergy() const override;
 	virtual qreal calcInternalEnergy() const override;
@@ -32,7 +32,7 @@ private:
 	void processingClusterDissipation();
 	void processingClusterInit();
 
-	SimulationUnitContext* _context = nullptr;
+	UnitContext* _context = nullptr;
 };
 
-#endif // SIMULATIONUNITIMPL_H
+#endif // UNITIMPL_H

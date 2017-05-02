@@ -5,7 +5,7 @@
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
 #include "gui/texteditor/texteditor.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/spacemetric.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/cell.h"
