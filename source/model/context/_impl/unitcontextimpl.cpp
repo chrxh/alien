@@ -6,19 +6,19 @@
 #include "model/entities/energyparticle.h"
 #include "model/metadata/symboltable.h"
 
-#include "simulationunitcontextimpl.h"
+#include "unitcontextimpl.h"
 
-SimulationUnitContextImpl::SimulationUnitContextImpl(QObject* parent)
-	: SimulationUnitContext(parent)
+UnitContextImpl::UnitContextImpl(QObject* parent)
+	: UnitContext(parent)
 {
 }
 
-SimulationUnitContextImpl::~SimulationUnitContextImpl ()
+UnitContextImpl::~UnitContextImpl ()
 {
 	deleteClustersAndEnergyParticles();
 }
 
-void SimulationUnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
+void UnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 	, SimulationParameters* parameters)
 {
 	if (_metric != metric) {
@@ -49,57 +49,57 @@ void SimulationUnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, Ener
 	deleteClustersAndEnergyParticles();
 }
 
-void SimulationUnitContextImpl::lock()
+void UnitContextImpl::lock()
 {
 	_mutex.lock();
 }
 
-void SimulationUnitContextImpl::unlock()
+void UnitContextImpl::unlock()
 {
 	_mutex.unlock();
 }
 
-SpaceMetric* SimulationUnitContextImpl::getTopology () const
+SpaceMetric* UnitContextImpl::getTopology () const
 {
     return _metric;
 }
 
-EnergyParticleMap* SimulationUnitContextImpl::getEnergyParticleMap () const
+EnergyParticleMap* UnitContextImpl::getEnergyParticleMap () const
 {
     return _energyParticleMap;
 }
 
-MapCompartment * SimulationUnitContextImpl::getMapCompartment() const
+MapCompartment * UnitContextImpl::getMapCompartment() const
 {
 	return _mapCompartment;
 }
 
-CellMap* SimulationUnitContextImpl::getCellMap () const
+CellMap* UnitContextImpl::getCellMap () const
 {
     return _cellMap;
 }
 
-SymbolTable* SimulationUnitContextImpl::getSymbolTable() const 
+SymbolTable* UnitContextImpl::getSymbolTable() const 
 {
 	return _symbolTable;
 }
 
-SimulationParameters* SimulationUnitContextImpl::getSimulationParameters() const
+SimulationParameters* UnitContextImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
 }
 
-QList<CellCluster*>& SimulationUnitContextImpl::getClustersRef ()
+QList<CellCluster*>& UnitContextImpl::getClustersRef ()
 {
     return _clusters;
 }
 
-QList<EnergyParticle*>& SimulationUnitContextImpl::getEnergyParticlesRef ()
+QList<EnergyParticle*>& UnitContextImpl::getEnergyParticlesRef ()
 {
     return _energyParticles;
 }
 
-void SimulationUnitContextImpl::deleteClustersAndEnergyParticles()
+void UnitContextImpl::deleteClustersAndEnergyParticles()
 {
 	foreach(CellCluster* cluster, _clusters) {
 		delete cluster;

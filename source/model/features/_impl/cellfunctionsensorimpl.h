@@ -6,7 +6,7 @@
 class CellFunctionSensorImpl : public CellFunction
 {
 public:
-    CellFunctionSensorImpl (SimulationUnitContext* context);
+    CellFunctionSensorImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::SENSOR; }
 

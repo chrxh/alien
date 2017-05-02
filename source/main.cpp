@@ -6,7 +6,7 @@
 #include "model/simulationcontroller.h"
 #include "model/metadata/symboltable.h"
 #include "model/entities/cellto.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/modelsettings.h"
 
 

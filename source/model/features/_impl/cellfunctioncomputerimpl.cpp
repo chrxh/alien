@@ -2,7 +2,7 @@
 #include <qdebug.h>
 
 #include "global/numbergenerator.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/modelsettings.h"
 #include "model/metadata/symboltable.h"
 #include "model/entities/cell.h"
@@ -11,13 +11,13 @@
 
 #include "cellfunctioncomputerimpl.h"
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (SimulationUnitContext* context)
+CellFunctionComputerImpl::CellFunctionComputerImpl (UnitContext* context)
     : CellFunctionComputer(context)
     , _memory(context->getSimulationParameters()->cellFunctionComputerCellMemorySize, 0)
 {
 }
 
-CellFunctionComputerImpl::CellFunctionComputerImpl (QByteArray data, SimulationUnitContext* context)
+CellFunctionComputerImpl::CellFunctionComputerImpl (QByteArray data, UnitContext* context)
 	: CellFunctionComputerImpl(context)
 {
 	if (!data.isEmpty()) {

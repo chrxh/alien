@@ -9,13 +9,13 @@
 #include "model/physics/physics.h"
 #include "model/physics/codingphysicalquantities.h"
 #include "model/modelsettings.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/simulationparameters.h"
 
 #include "cellfunctionpropulsionimpl.h"
 
 
-CellFunctionPropulsionImpl::CellFunctionPropulsionImpl (SimulationUnitContext* context)
+CellFunctionPropulsionImpl::CellFunctionPropulsionImpl (UnitContext* context)
     : CellFunction(context)
 {
 }

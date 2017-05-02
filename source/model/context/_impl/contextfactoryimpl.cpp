@@ -2,9 +2,9 @@
 
 #include "contextfactoryimpl.h"
 #include "simulationcontextimpl.h"
-#include "simulationunitimpl.h"
-#include "simulationunitcontextimpl.h"
-#include "simulationgridimpl.h"
+#include "unitimpl.h"
+#include "unitcontextimpl.h"
+#include "gridimpl.h"
 #include "threadcontrollerimpl.h"
 #include "spacemetricimpl.h"
 #include "mapcompartmentimpl.h"
@@ -26,19 +26,19 @@ SimulationContext * ContextFactoryImpl::buildSimulationContext(QObject* parent) 
 	return new SimulationContextImpl(parent);
 }
 
-SimulationUnitContext * ContextFactoryImpl::buildSimulationUnitContext(QObject* parent) const
+UnitContext * ContextFactoryImpl::buildSimulationUnitContext(QObject* parent) const
 {
-	return new SimulationUnitContextImpl(parent);
+	return new UnitContextImpl(parent);
 }
 
-SimulationUnit * ContextFactoryImpl::buildSimulationUnit(QObject * parent) const
+Unit * ContextFactoryImpl::buildSimulationUnit(QObject * parent) const
 {
-	return new SimulationUnitImpl(parent);
+	return new UnitImpl(parent);
 }
 
-SimulationGrid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
+Grid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
 {
-	return new SimulationGridImpl(parent);
+	return new GridImpl(parent);
 }
 
 ThreadController * ContextFactoryImpl::buildSimulationThreads(QObject* parent) const

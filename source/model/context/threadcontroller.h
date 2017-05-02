@@ -13,7 +13,7 @@ public:
 
 	virtual void init(int maxRunningThreads) = 0;
 
-	virtual void registerUnit(SimulationUnit* unit) = 0;
+	virtual void registerUnit(Unit* unit) = 0;
 	virtual void start() = 0;
 };
 

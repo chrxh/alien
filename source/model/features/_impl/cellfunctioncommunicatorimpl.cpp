@@ -3,7 +3,7 @@
 #include "model/entities/cell.h"
 #include "model/entities/cellcluster.h"
 #include "model/entities/token.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/cellmap.h"
 #include "model/context/spacemetric.h"
 #include "model/physics/physics.h"
@@ -12,13 +12,13 @@
 
 #include "cellfunctioncommunicatorimpl.h"
 
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(SimulationUnitContext* context)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(UnitContext* context)
     : CellFunction(context), _parameters(context->getSimulationParameters())
 {
 
 }
 
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QByteArray data, SimulationUnitContext* context)
+CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QByteArray data, UnitContext* context)
 	: CellFunction(context), _parameters(context->getSimulationParameters())
 {
     _newMessageReceived = static_cast<bool>(data[0]);

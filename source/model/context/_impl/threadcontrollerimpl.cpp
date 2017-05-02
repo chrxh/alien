@@ -1,7 +1,7 @@
 #include <QThread>
 
-#include "model/context/simulationunit.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unit.h"
+#include "model/context/unitcontext.h"
 #include "model/context/mapcompartment.h"
 #include "threadcontrollerimpl.h"
 
@@ -26,7 +26,7 @@ void ThreadControllerImpl::init(int maxRunningThreads)
 
 }
 
-void ThreadControllerImpl::registerUnit(SimulationUnit * unit)
+void ThreadControllerImpl::registerUnit(Unit * unit)
 {
 	auto newThread = new QThread(this);
 	newThread->connect(newThread, &QThread::finished, unit, &QObject::deleteLater);

@@ -13,7 +13,7 @@ public:
 
 	virtual void init(int maxRunningThreads) override;
 
-	virtual void registerUnit(SimulationUnit* unit) override;
+	virtual void registerUnit(Unit* unit) override;
 	virtual void start() override;
 
 private:
@@ -23,7 +23,7 @@ private:
 	int _maxRunningThreads = 1;
 	std::vector<QThread*> _threads;
 	std::map<QThread*, std::vector<QThread*>> _dependencies;
-	std::map<SimulationUnitContext*, QThread*> _threadsByContexts;
+	std::map<UnitContext*, QThread*> _threadsByContexts;
 };
 
 #endif // THREADCONTROLLERIMPL_H

@@ -6,7 +6,7 @@
 #include "model/builderfacade.h"
 #include "model/physics/physics.h"
 #include "model/modelsettings.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/energyparticlemap.h"
 #include "model/context/cellmap.h"
 #include "model/context/spacemetric.h"
@@ -17,14 +17,14 @@
 #include "energyparticleimpl.h"
 
 
-EnergyParticleImpl::EnergyParticleImpl(SimulationUnitContext* context)
+EnergyParticleImpl::EnergyParticleImpl(UnitContext* context)
 	: _context(context)
 	, _id(NumberGenerator::getInstance().getInstance().createNewTag())
 {
 
 }
 
-EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, SimulationUnitContext* context)
+EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, UnitContext* context)
 	: EnergyParticleImpl(context)
 {
 	_energy = energy;

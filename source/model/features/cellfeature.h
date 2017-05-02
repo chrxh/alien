@@ -8,7 +8,7 @@
 class CellFeature
 {
 public:
-    CellFeature (SimulationUnitContext* context) : _context(context) {}
+    CellFeature (UnitContext* context) : _context(context) {}
     virtual ~CellFeature ();
 
     void registerNextFeature (CellFeature* nextFeature);
@@ -26,7 +26,7 @@ protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;
 	virtual void mutateImpl() {};
 
-    SimulationUnitContext* _context = nullptr;
+    UnitContext* _context = nullptr;
     CellFeature* _nextFeature = nullptr;
 
 public:

@@ -9,9 +9,9 @@ public:
 	virtual ~ContextFactory() {}
 
 	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const = 0;
-	virtual SimulationUnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const = 0;
-	virtual SimulationUnit* buildSimulationUnit(QObject* parent = nullptr) const = 0;
-	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const = 0;
+	virtual UnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const = 0;
+	virtual Unit* buildSimulationUnit(QObject* parent = nullptr) const = 0;
+	virtual Grid* buildSimulationGrid(QObject* parent = nullptr) const = 0;
 	virtual ThreadController* buildSimulationThreads(QObject* parent = nullptr) const = 0;
 	virtual SpaceMetric* buildSpaceMetric(QObject* parent = nullptr) const = 0;
 	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const = 0;

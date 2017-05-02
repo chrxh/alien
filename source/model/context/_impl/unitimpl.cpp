@@ -7,21 +7,21 @@
 #include "model/entities/cellcluster.h"
 #include "model/entities/energyparticle.h"
 #include "model/entities/token.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 
-#include "simulationunitimpl.h"
+#include "unitimpl.h"
 
-SimulationUnitImpl::SimulationUnitImpl(QObject* parent)
-	: SimulationUnit(parent)
+UnitImpl::UnitImpl(QObject* parent)
+	: Unit(parent)
 {
 }
 
-void SimulationUnitImpl::init(SimulationUnitContext* context)
+void UnitImpl::init(UnitContext* context)
 {
 	_context = context;
 }
 
-qreal SimulationUnitImpl::calcTransEnergy() const
+qreal UnitImpl::calcTransEnergy() const
 {
 
 	qreal transEnergy(0.0);
@@ -33,7 +33,7 @@ qreal SimulationUnitImpl::calcTransEnergy() const
 	return transEnergy;
 }
 
-qreal SimulationUnitImpl::calcRotEnergy() const
+qreal UnitImpl::calcRotEnergy() const
 {
 	qreal rotEnergy(0.0);
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
@@ -44,7 +44,7 @@ qreal SimulationUnitImpl::calcRotEnergy() const
 	return rotEnergy;
 }
 
-qreal SimulationUnitImpl::calcInternalEnergy() const
+qreal UnitImpl::calcInternalEnergy() const
 {
 	qreal internalEnergy(0.0);
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
@@ -61,7 +61,7 @@ qreal SimulationUnitImpl::calcInternalEnergy() const
 }
 
 
-void SimulationUnitImpl::calcNextTimestep()
+void UnitImpl::calcNextTimestep()
 {
 
 	_context->lock();
@@ -80,12 +80,12 @@ void SimulationUnitImpl::calcNextTimestep()
 	emit nextTimestepCalculated();
 }
 
-SimulationUnitContext * SimulationUnitImpl::getContext() const
+UnitContext * UnitImpl::getContext() const
 {
 	return _context;
 }
 
-void SimulationUnitImpl::processingEnergyParticles()
+void UnitImpl::processingEnergyParticles()
 {
 	QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());
 	while (p.hasNext()) {
@@ -103,14 +103,14 @@ void SimulationUnitImpl::processingEnergyParticles()
 	}
 }
 
-void SimulationUnitImpl::processingClusterCompletion()
+void UnitImpl::processingClusterCompletion()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingCompletion();
 	}
 }
 
-void SimulationUnitImpl::processingClusterToken()
+void UnitImpl::processingClusterToken()
 {
 	QMutableListIterator<CellCluster*> j(_context->getClustersRef());
 	QList< EnergyParticle* > energyParticles;
@@ -138,21 +138,21 @@ void SimulationUnitImpl::processingClusterToken()
 	}
 }
 
-void SimulationUnitImpl::processingClusterMovement()
+void UnitImpl::processingClusterMovement()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingMovement();
 	}
 }
 
-void SimulationUnitImpl::processingClusterMutationByChance()
+void UnitImpl::processingClusterMutationByChance()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingMutationByChance();
 	}
 }
 
-void SimulationUnitImpl::processingClusterDissipation()
+void UnitImpl::processingClusterDissipation()
 {
 	QMutableListIterator<CellCluster*> i(_context->getClustersRef());
 	QList< EnergyParticle* > energyParticles;
@@ -177,7 +177,7 @@ void SimulationUnitImpl::processingClusterDissipation()
 	}
 }
 
-void SimulationUnitImpl::processingClusterInit()
+void UnitImpl::processingClusterInit()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingInit();

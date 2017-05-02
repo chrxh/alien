@@ -11,8 +11,8 @@ class CellImpl : public Cell
 {
 public:
 
-    CellImpl (SimulationUnitContext* context);
-    CellImpl (qreal energy, SimulationUnitContext* context, int maxConnections
+    CellImpl (UnitContext* context);
+    CellImpl (qreal energy, UnitContext* context, int maxConnections
         , int tokenAccessNumber, QVector3D relPos);
 
     ~CellImpl();
@@ -81,7 +81,7 @@ public:
 private:
     friend class CellCluster;
 
-	SimulationUnitContext* _context = nullptr;
+	UnitContext* _context = nullptr;
 	CellFeature* _features = nullptr;
 
     QVector<Token*> _tokenStack;
