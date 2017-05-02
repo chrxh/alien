@@ -1,9 +1,9 @@
-#include <QThread>
-
 #include "model/context/Unit.h"
 #include "model/context/UnitContext.h"
 #include "model/context/MapCompartment.h"
+
 #include "UnitThreadControllerImpl.h"
+#include "UnitThread.h"
 
 UnitThreadControllerImpl::UnitThreadControllerImpl(QObject * parent)
 	: UnitThreadController(parent)
@@ -28,8 +28,8 @@ void UnitThreadControllerImpl::init(int maxRunningThreads)
 
 void UnitThreadControllerImpl::registerUnit(Unit * unit)
 {
-	auto newThread = new QThread(this);
-	newThread->connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
+	auto newThread = new UnitThread(this);
+	connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
 	unit->moveToThread(newThread);
 	_threads.push_back(newThread);
 	_threadsByContexts[unit->getContext()] = newThread;
@@ -38,7 +38,9 @@ void UnitThreadControllerImpl::registerUnit(Unit * unit)
 void UnitThreadControllerImpl::start()
 {
 	updateDependencies();
-	//newThread->start();
+	for (auto const& thr : _threads) {
+		thr->start();
+	}
 }
 
 void UnitThreadControllerImpl::updateDependencies()
@@ -50,14 +52,14 @@ void UnitThreadControllerImpl::updateDependencies()
 		auto getThread = [&](MapCompartment::RelativeLocation rel) {
 			return _threadsByContexts[compartment->getNeighborContext(rel)];
 		};
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::UpperLeft));
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::Upper));
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::UpperRight));
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::Left));
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::Right));
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::LowerLeft));
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::Lower));
-		_dependencies[thr].push_back(getThread(MapCompartment::RelativeLocation::LowerRight));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::UpperLeft));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::Upper));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::UpperRight));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::Left));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::Right));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::LowerLeft));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::Lower));
+		thr->addDependency(getThread(MapCompartment::RelativeLocation::LowerRight));
 	}
 }
 

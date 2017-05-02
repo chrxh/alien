@@ -1,5 +1,5 @@
-#ifndef UNITGRID_H
-#define UNITGRID_H
+#ifndef GRID_H
+#define GRID_H
 
 #include "model/Definitions.h"
 
@@ -19,4 +19,4 @@ public:
 	virtual IntRect calcMapRect(IntVector2D gridPos) const = 0;
 };
 
-#endif // UNITGRID_H
+#endif // GRID_H

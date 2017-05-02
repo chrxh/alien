@@ -39,17 +39,17 @@ void SimulationContextImpl::init(SpaceMetric* metric, UnitGrid* grid, UnitThread
 	}
 }
 
-SpaceMetric * SimulationContextImpl::getTopology() const
+SpaceMetric * SimulationContextImpl::getSpaceMetric() const
 {
 	return _metric;
 }
 
-UnitGrid * SimulationContextImpl::getSimulationGrid() const
+UnitGrid * SimulationContextImpl::getUnitGrid() const
 {
 	return _grid;
 }
 
-UnitThreadController * SimulationContextImpl::getSimulationThreads() const
+UnitThreadController * SimulationContextImpl::getUnitThreadController() const
 {
 	return _threads;
 }
