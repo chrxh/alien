@@ -14,13 +14,13 @@ void MapCompartmentImpl::registerNeighborContext(RelativeLocation location, Unit
 	_contextsByLocations[location] = context;
 }
 
-UnitContext* MapCompartmentImpl::getNeighborContext(RelativeLocation location) const
+std::vector<UnitContext*> MapCompartmentImpl::getNeighborContexts() const
 {
-	auto contextByLocation = _contextsByLocations.find(location);
-	if (contextByLocation != _contextsByLocations.end()) {
-		return contextByLocation->second;
+	std::vector<UnitContext*> result;
+	for (auto const& contextByLocation : _contextsByLocations) {
+		result.push_back(contextByLocation.second);
 	}
-	return nullptr;
+	return result;
 }
 
 UnitContext* MapCompartmentImpl::getNeighborContext(IntVector2D pos) const
