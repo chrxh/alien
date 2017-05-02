@@ -11,6 +11,16 @@ class UnitThread
 public:
 	UnitThread(QObject* parent) : QThread(parent) {}
 	virtual ~UnitThread() {}
+
+	void addDependency(UnitThread* unit);
+	
+	bool isFinished();
+	bool isReady();
+
+private:
+	enum class State { Ready, Working, Finished };
+	State _state = State::Ready;
+	std::vector<UnitThread*> _dependencies;
 };
 
 #endif // UNITTHREAD_H

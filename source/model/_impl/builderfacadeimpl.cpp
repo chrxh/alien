@@ -82,11 +82,11 @@ SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThre
 Unit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	auto grid = context->getSimulationGrid();
-	auto threads = context->getSimulationThreads();
+	auto grid = context->getUnitGrid();
+	auto threads = context->getUnitThreadController();
 	auto unit = factory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = factory->buildSimulationUnitContext(unit);
-	auto metric = context->getTopology()->clone(unit);
+	auto metric = context->getSpaceMetric()->clone(unit);
 	auto compartment = factory->buildMapCompartment(unit);
 	auto cellMap = factory->buildCellMap(unit);
 	auto energyMap = factory->buildEnergyParticleMap(unit);
