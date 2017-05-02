@@ -28,6 +28,7 @@ private:
 	void updateDependencies();
 	void terminateThreads();
 	void startThreads();
+	void setReadyIfAllUnitsFinished();
 	void searchAndExecuteReadyThreads();
 
 	int _maxRunningThreads = 1;
