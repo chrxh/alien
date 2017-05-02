@@ -14,7 +14,7 @@ public:
 	virtual void init(SpaceMetric* metric, IntRect mapRect) override;
 
 	virtual void registerNeighborContext(RelativeLocation location, UnitContext* context) override;
-	virtual UnitContext* getNeighborContext(RelativeLocation location) const override;
+	virtual std::vector<UnitContext*> getNeighborContexts() const override;
 	virtual UnitContext* getNeighborContext(IntVector2D pos) const override;
 
 private:
