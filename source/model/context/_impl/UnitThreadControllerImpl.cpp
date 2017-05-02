@@ -19,12 +19,14 @@ void UnitThreadControllerImpl::init(int maxRunningThreads)
 {
 	terminateThreads();
 	_maxRunningThreads = maxRunningThreads;
+	delete _signalMapper;
 	for (auto const& ts : _threadsAndCalcSignals) {
 		delete ts.thr;
 		delete ts.signal;
 	}
 	_threadsAndCalcSignals.clear();
-
+	_signalMapper = new QSignalMapper(this);
+	connect(_signalMapper, static_cast<void(QSignalMapper::*)(QObject*)>(&QSignalMapper::mapped), this, &UnitThreadControllerImpl::threadFinishedCalculation);
 }
 
 void UnitThreadControllerImpl::registerUnit(Unit * unit)
@@ -37,6 +39,9 @@ void UnitThreadControllerImpl::registerUnit(Unit * unit)
 	auto signal = new SignalWrapper(this);
 	connect(signal, &SignalWrapper::signal, unit, &Unit::calcNextTimestep);
 
+	connect(unit, &Unit::nextTimestepCalculated, _signalMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
+	_signalMapper->setMapping(unit, newThread);
+
 	_threadsAndCalcSignals.push_back({ newThread , signal });
 }
 
@@ -45,6 +50,14 @@ void UnitThreadControllerImpl::start()
 	updateDependencies();
 	startThreads();
 	searchAndExecuteReadyThreads();
+}
+
+void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
+{
+	if (UnitThread* thr = dynamic_cast<UnitThread*>(sender)) {
+		thr->setState(UnitThread::State::Finished);
+		searchAndExecuteReadyThreads();
+	}
 }
 
 void UnitThreadControllerImpl::updateDependencies()
