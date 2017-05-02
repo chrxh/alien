@@ -1,6 +1,6 @@
-#include "definitions.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/cell.h"
+#include "Definitions.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/Cell.h"
 
 std::size_t CellClusterHash::operator()(CellCluster* const& s) const
 {

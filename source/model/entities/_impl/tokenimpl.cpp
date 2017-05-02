@@ -1,9 +1,9 @@
-#include "global/numbergenerator.h"
-#include "model/modelsettings.h"
-#include "model/context/simulationparameters.h"
-#include "model/context/unitcontext.h"
+#include "global/NumberGenerator.h"
+#include "model/ModelSettings.h"
+#include "model/context/SimulationParameters.h"
+#include "model/context/UnitContext.h"
 
-#include "tokenimpl.h"
+#include "TokenImpl.h"
 
 TokenImpl::TokenImpl(UnitContext * context)
 	: _context(context)

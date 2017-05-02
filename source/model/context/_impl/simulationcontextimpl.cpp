@@ -1,9 +1,9 @@
-#include "simulationcontextimpl.h"
-#include "model/context/spacemetric.h"
-#include "model/context/grid.h"
-#include "model/context/threadcontroller.h"
-#include "model/context/simulationparameters.h"
-#include "model/metadata/symboltable.h"
+#include "SimulationContextImpl.h"
+#include "model/context/SpaceMetric.h"
+#include "model/context/UnitGrid.h"
+#include "model/context/UnitThreadController.h"
+#include "model/context/SimulationParameters.h"
+#include "model/metadata/SymbolTable.h"
 
 SimulationContextImpl::SimulationContextImpl(QObject * parent)
 	: SimulationContext(parent)
@@ -15,7 +15,7 @@ SimulationContextImpl::~SimulationContextImpl()
 	delete _threads;
 }
 
-void SimulationContextImpl::init(SpaceMetric* metric, Grid* grid, ThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters)
+void SimulationContextImpl::init(SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters)
 {
 	if (_metric != metric) {
 		delete _metric;
@@ -44,12 +44,12 @@ SpaceMetric * SimulationContextImpl::getTopology() const
 	return _metric;
 }
 
-Grid * SimulationContextImpl::getSimulationGrid() const
+UnitGrid * SimulationContextImpl::getSimulationGrid() const
 {
 	return _grid;
 }
 
-ThreadController * SimulationContextImpl::getSimulationThreads() const
+UnitThreadController * SimulationContextImpl::getSimulationThreads() const
 {
 	return _threads;
 }

@@ -1,10 +1,10 @@
-#include "global/servicelocator.h"
+#include "global/ServiceLocator.h"
 
-#include "energyparticleimpl.h"
-#include "cellimpl.h"
-#include "cellclusterimpl.h"
-#include "tokenimpl.h"
-#include "entityfactoryimpl.h"
+#include "EnergyParticleImpl.h"
+#include "CellImpl.h"
+#include "CellClusterImpl.h"
+#include "TokenImpl.h"
+#include "EntityFactoryImpl.h"
 
 namespace
 {

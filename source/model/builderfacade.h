@@ -4,10 +4,10 @@
 #include <QtGlobal>
 #include <QVector3D>
 
-#include "model/entities/cellto.h"
-#include "model/features/cellfeatureconstants.h"
+#include "model/entities/CellTO.h"
+#include "model/features/CellFeatureEnums.h"
 
-#include "definitions.h"
+#include "Definitions.h"
 
 class BuilderFacade
 {

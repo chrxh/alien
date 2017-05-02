@@ -4,21 +4,21 @@
 #include <QtAlgorithms>
 #include <QMatrix4x4>
 
-#include "global/servicelocator.h"
-#include "model/builderfacade.h"
-#include "model/entities/entityfactory.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/token.h"
-#include "model/physics/physics.h"
-#include "model/physics/codingphysicalquantities.h"
-#include "model/modelsettings.h"
-#include "model/context/unitcontext.h"
-#include "model/context/cellmap.h"
-#include "model/context/spacemetric.h"
-#include "model/context/simulationparameters.h"
+#include "global/ServiceLocator.h"
+#include "model/BuilderFacade.h"
+#include "model/entities/EntityFactory.h"
+#include "model/entities/Cell.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/Token.h"
+#include "model/physics/Physics.h"
+#include "model/physics/CodingPhysicalQuantities.h"
+#include "model/ModelSettings.h"
+#include "model/context/UnitContext.h"
+#include "model/context/CellMap.h"
+#include "model/context/SpaceMetric.h"
+#include "model/context/SimulationParameters.h"
 
-#include "cellfunctionconstructorimpl.h"
+#include "CellFunctionConstructorImpl.h"
 
 using ACTIVATE_TOKEN = Cell::ActivateToken;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenAccessNumber;

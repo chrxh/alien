@@ -1,12 +1,12 @@
-#include "model/context/cellmap.h"
-#include "model/context/energyparticlemap.h"
-#include "model/context/mapcompartment.h"
-#include "model/context/simulationparameters.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/energyparticle.h"
-#include "model/metadata/symboltable.h"
+#include "model/context/CellMap.h"
+#include "model/context/EnergyParticleMap.h"
+#include "model/context/MapCompartment.h"
+#include "model/context/SimulationParameters.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/EnergyParticle.h"
+#include "model/metadata/SymbolTable.h"
 
-#include "unitcontextimpl.h"
+#include "UnitContextImpl.h"
 
 UnitContextImpl::UnitContextImpl(QObject* parent)
 	: UnitContext(parent)

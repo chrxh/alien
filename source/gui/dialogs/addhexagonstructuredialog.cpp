@@ -1,5 +1,5 @@
 #include "gui/guisettings.h"
-#include "model/context/simulationparameters.h"
+#include "model/context/SimulationParameters.h"
 
 #include "ui_addhexagonstructuredialog.h"
 #include "addhexagonstructuredialog.h"

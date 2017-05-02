@@ -4,8 +4,8 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "model/entities/cellto.h"
-#include "model/definitions.h"
+#include "model/entities/CellTO.h"
+#include "model/Definitions.h"
 
 namespace Ui {
 class TextEditor;

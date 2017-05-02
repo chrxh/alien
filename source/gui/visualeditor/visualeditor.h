@@ -5,8 +5,8 @@
 #include <QVector3D>
 #include <QMatrix>
 
-#include "model/definitions.h"
-#include "model/entities/cellto.h"
+#include "model/Definitions.h"
+#include "model/entities/CellTO.h"
 
 namespace Ui {
 class VisualEditor;

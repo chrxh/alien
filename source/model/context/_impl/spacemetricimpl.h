@@ -1,7 +1,7 @@
 #ifndef SPACEMETRICIMPL_H
 #define SPACEMETRICIMPL_H
 
-#include "model/context/spacemetric.h"
+#include "model/context/SpaceMetric.h"
 
 class SpaceMetricImpl
 	: public SpaceMetric

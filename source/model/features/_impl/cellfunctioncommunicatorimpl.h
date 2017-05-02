@@ -1,13 +1,14 @@
 #ifndef CELLFUNCTIONCOMMUNICATORIMPL_H
 #define CELLFUNCTIONCOMMUNICATORIMPL_H
 
-#include "model/features/cellfunction.h"
+#include "model/features/CellFunction.h"
 
 #include <QVector3D>
 
 class TestCellFunctionCommunicator;
 
-class CellFunctionCommunicatorImpl : public CellFunction
+class CellFunctionCommunicatorImpl
+	: public CellFunction
 {
 public:
     CellFunctionCommunicatorImpl (UnitContext* context);

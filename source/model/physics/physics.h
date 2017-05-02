@@ -1,7 +1,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include "model/modelsettings.h"
+#include "model/ModelSettings.h"
 
 #include <QVector3D>
 #include <cmath>

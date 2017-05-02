@@ -1,8 +1,8 @@
 #include "clusteredit.h"
 
 #include "gui/guisettings.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
+#include "model/entities/Cell.h"
+#include "model/entities/CellCluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "tests/predicates.h"
-#include "model/physics/physics.h"
-#include "global/numbergenerator.h"
+#include "model/physics/Physics.h"
+#include "global/NumberGenerator.h"
 
 namespace {
 	::testing::AssertionResult predVectorAfterRotation(const char* beforeExpr, const char* afterExpr, const char* expectedExpr

@@ -1,4 +1,4 @@
-#include "physics.h"
+#include "Physics.h"
 
 #include <qmath.h>
 #include <QMatrix4x4>

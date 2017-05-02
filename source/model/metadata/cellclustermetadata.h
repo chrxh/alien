@@ -1,7 +1,7 @@
 #ifndef CELLCLUSTERMETADATA_H
 #define CELLCLUSTERMETADATA_H
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 struct CellClusterMetadata
 {

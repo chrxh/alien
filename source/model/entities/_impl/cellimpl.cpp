@@ -1,15 +1,15 @@
 #include <QtCore/qmath.h>
 
-#include "global/numbergenerator.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/token.h"
-#include "model/features/cellfeature.h"
-#include "model/physics/physics.h"
-#include "model/context/simulationparameters.h"
-#include "model/context/unitcontext.h"
-#include "model/context/cellmap.h"
+#include "global/NumberGenerator.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/Token.h"
+#include "model/features/CellFeature.h"
+#include "model/physics/Physics.h"
+#include "model/context/SimulationParameters.h"
+#include "model/context/UnitContext.h"
+#include "model/context/CellMap.h"
 
-#include "cellimpl.h"
+#include "CellImpl.h"
 
 CellImpl::CellImpl (UnitContext* context)
     : _context(context)

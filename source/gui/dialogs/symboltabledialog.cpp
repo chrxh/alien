@@ -1,10 +1,10 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "global/servicelocator.h"
-#include "model/modelsettings.h"
-#include "model/serializationfacade.h"
-#include "model/metadata/symboltable.h"
+#include "global/ServiceLocator.h"
+#include "model/ModelSettings.h"
+#include "model/SerializationFacade.h"
+#include "model/metadata/SymbolTable.h"
 #include "gui/guisettings.h"
 
 #include "symboltabledialog.h"

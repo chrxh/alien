@@ -1,4 +1,4 @@
-#include "cellfeature.h"
+#include "CellFeature.h"
 
 CellFeature::~CellFeature ()
 {

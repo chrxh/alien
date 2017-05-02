@@ -1,9 +1,10 @@
 #ifndef ENERGYGUIDANCEDECORATORIMPL_H
 #define ENERGYGUIDANCEDECORATORIMPL_H
 
-#include "model/features/energyguidance.h"
+#include "model/features/EnergyGuidance.h"
 
-class EnergyGuidanceImpl : public EnergyGuidance
+class EnergyGuidanceImpl
+	: public EnergyGuidance
 {
 public:
     EnergyGuidanceImpl (UnitContext* context);

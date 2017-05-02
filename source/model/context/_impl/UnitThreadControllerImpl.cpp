@@ -1,21 +1,21 @@
 #include <QThread>
 
-#include "model/context/unit.h"
-#include "model/context/unitcontext.h"
-#include "model/context/mapcompartment.h"
-#include "threadcontrollerimpl.h"
+#include "model/context/Unit.h"
+#include "model/context/UnitContext.h"
+#include "model/context/MapCompartment.h"
+#include "UnitThreadControllerImpl.h"
 
-ThreadControllerImpl::ThreadControllerImpl(QObject * parent)
-	: ThreadController(parent)
+UnitThreadControllerImpl::UnitThreadControllerImpl(QObject * parent)
+	: UnitThreadController(parent)
 {
 }
 
-ThreadControllerImpl::~ThreadControllerImpl()
+UnitThreadControllerImpl::~UnitThreadControllerImpl()
 {
 	terminateThreads();
 }
 
-void ThreadControllerImpl::init(int maxRunningThreads)
+void UnitThreadControllerImpl::init(int maxRunningThreads)
 {
 	terminateThreads();
 	_maxRunningThreads = maxRunningThreads;
@@ -26,7 +26,7 @@ void ThreadControllerImpl::init(int maxRunningThreads)
 
 }
 
-void ThreadControllerImpl::registerUnit(Unit * unit)
+void UnitThreadControllerImpl::registerUnit(Unit * unit)
 {
 	auto newThread = new QThread(this);
 	newThread->connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
@@ -35,13 +35,13 @@ void ThreadControllerImpl::registerUnit(Unit * unit)
 	_threadsByContexts[unit->getContext()] = newThread;
 }
 
-void ThreadControllerImpl::start()
+void UnitThreadControllerImpl::start()
 {
 	updateDependencies();
 	//newThread->start();
 }
 
-void ThreadControllerImpl::updateDependencies()
+void UnitThreadControllerImpl::updateDependencies()
 {
 	for (auto const& threadByContext : _threadsByContexts) {
 		auto context = threadByContext.first;
@@ -61,7 +61,7 @@ void ThreadControllerImpl::updateDependencies()
 	}
 }
 
-void ThreadControllerImpl::terminateThreads()
+void UnitThreadControllerImpl::terminateThreads()
 {
 	for (auto const& thr : _threads) {
 		thr->quit();

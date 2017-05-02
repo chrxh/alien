@@ -1,9 +1,10 @@
-#ifndef CELLFUNCTIONWEAPON_H
-#define CELLFUNCTIONWEAPON_H
+#ifndef CELLFUNCTIONWEAPONIMPL_H
+#define CELLFUNCTIONWEAPONIMPL_H
 
-#include "model/features/cellfunction.h"
+#include "model/features/CellFunction.h"
 
-class CellFunctionWeaponImpl : public CellFunction
+class CellFunctionWeaponImpl
+	: public CellFunction
 {
 public:
     CellFunctionWeaponImpl (UnitContext* context);
@@ -14,4 +15,4 @@ protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
 
-#endif // CELLFUNCTIONWEAPON_H
+#endif // CELLFUNCTIONWEAPONIMPL_H
