@@ -1,20 +1,20 @@
 #include <qmath.h>
 
-#include "global/servicelocator.h"
-#include "global/numbergenerator.h"
+#include "global/ServiceLocator.h"
+#include "global/NumberGenerator.h"
 
-#include "model/builderfacade.h"
-#include "model/physics/physics.h"
-#include "model/modelsettings.h"
-#include "model/context/unitcontext.h"
-#include "model/context/energyparticlemap.h"
-#include "model/context/cellmap.h"
-#include "model/context/spacemetric.h"
-#include "model/context/simulationparameters.h"
+#include "model/BuilderFacade.h"
+#include "model/physics/Physics.h"
+#include "model/ModelSettings.h"
+#include "model/context/UnitContext.h"
+#include "model/context/EnergyParticleMap.h"
+#include "model/context/CellMap.h"
+#include "model/context/SpaceMetric.h"
+#include "model/context/SimulationParameters.h"
 
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
-#include "energyparticleimpl.h"
+#include "model/entities/Cell.h"
+#include "model/entities/CellCluster.h"
+#include "EnergyParticleImpl.h"
 
 
 EnergyParticleImpl::EnergyParticleImpl(UnitContext* context)

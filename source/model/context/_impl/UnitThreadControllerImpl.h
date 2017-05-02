@@ -1,15 +1,15 @@
-#ifndef THREADCONTROLLERIMPL_H
-#define THREADCONTROLLERIMPL_H
+#ifndef UNITTHREADCONTROLLERIMPL_H
+#define UNITTHREADCONTROLLERIMPL_H
 
-#include "model/context/threadcontroller.h"
+#include "model/context/UnitThreadController.h"
 
-class ThreadControllerImpl
-	: public ThreadController
+class UnitThreadControllerImpl
+	: public UnitThreadController
 {
 	Q_OBJECT
 public:
-	ThreadControllerImpl(QObject* parent = nullptr);
-	virtual ~ThreadControllerImpl();
+	UnitThreadControllerImpl(QObject* parent = nullptr);
+	virtual ~UnitThreadControllerImpl();
 
 	virtual void init(int maxRunningThreads) override;
 
@@ -26,4 +26,4 @@ private:
 	std::map<UnitContext*, QThread*> _threadsByContexts;
 };
 
-#endif // THREADCONTROLLERIMPL_H
+#endif // UNITTHREADCONTROLLERIMPL_H

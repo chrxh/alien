@@ -1,15 +1,15 @@
-#include "global/servicelocator.h"
+#include "global/ServiceLocator.h"
 
-#include "contextfactoryimpl.h"
-#include "simulationcontextimpl.h"
-#include "unitimpl.h"
-#include "unitcontextimpl.h"
-#include "gridimpl.h"
-#include "threadcontrollerimpl.h"
-#include "spacemetricimpl.h"
-#include "mapcompartmentimpl.h"
-#include "cellmapimpl.h"
-#include "energyparticlemapimpl.h"
+#include "ContextFactoryImpl.h"
+#include "SimulationContextImpl.h"
+#include "UnitImpl.h"
+#include "UnitContextImpl.h"
+#include "UnitGridImpl.h"
+#include "UnitThreadControllerImpl.h"
+#include "SpaceMetricImpl.h"
+#include "MapCompartmentImpl.h"
+#include "CellMapImpl.h"
+#include "EnergyParticleMapImpl.h"
 
 namespace
 {
@@ -36,14 +36,14 @@ Unit * ContextFactoryImpl::buildSimulationUnit(QObject * parent) const
 	return new UnitImpl(parent);
 }
 
-Grid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
+UnitGrid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
 {
-	return new GridImpl(parent);
+	return new UnitGridImpl(parent);
 }
 
-ThreadController * ContextFactoryImpl::buildSimulationThreads(QObject* parent) const
+UnitThreadController * ContextFactoryImpl::buildSimulationThreads(QObject* parent) const
 {
-	return new ThreadControllerImpl(parent);
+	return new UnitThreadControllerImpl(parent);
 }
 
 SpaceMetric * ContextFactoryImpl::buildSpaceMetric(QObject* parent) const

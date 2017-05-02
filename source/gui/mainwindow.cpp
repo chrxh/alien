@@ -6,8 +6,8 @@
 #include <QMessageBox>
 #include <QFont>
 
-#include "global/numbergenerator.h"
-#include "global/servicelocator.h"
+#include "global/NumberGenerator.h"
+#include "global/ServiceLocator.h"
 #include "dialogs/addenergydialog.h"
 #include "dialogs/addrectstructuredialog.h"
 #include "dialogs/addhexagonstructuredialog.h"
@@ -22,13 +22,13 @@
 #include "gui/texteditor/texteditor.h"
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
-#include "model/modelsettings.h"
-#include "model/simulationcontroller.h"
-#include "model/context/simulationcontext.h"
-#include "model/serializationfacade.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
-#include "model/metadata/symboltable.h"
+#include "model/ModelSettings.h"
+#include "model/SimulationController.h"
+#include "model/context/SimulationContext.h"
+#include "model/SerializationFacade.h"
+#include "model/entities/Cell.h"
+#include "model/entities/CellCluster.h"
+#include "model/metadata/SymbolTable.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"

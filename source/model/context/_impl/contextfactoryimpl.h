@@ -1,7 +1,7 @@
 #ifndef CONTEXTFACTORYIMPL_H
 #define CONTEXTFACTORYIMPL_H
 
-#include "model/context/contextfactory.h"
+#include "model/context/ContextFactory.h"
 
 class ContextFactoryImpl
 	: public ContextFactory
@@ -13,8 +13,8 @@ public:
 	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const override;
 	virtual UnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const override;
 	virtual Unit* buildSimulationUnit(QObject* parent = nullptr) const override;
-	virtual Grid* buildSimulationGrid(QObject* parent = nullptr) const override;
-	virtual ThreadController* buildSimulationThreads(QObject* parent = nullptr) const override;
+	virtual UnitGrid* buildSimulationGrid(QObject* parent = nullptr) const override;
+	virtual UnitThreadController* buildSimulationThreads(QObject* parent = nullptr) const override;
 	virtual SpaceMetric* buildSpaceMetric(QObject* parent = nullptr) const override;
 	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const override;
 	virtual CellMap* buildCellMap(QObject* parent = nullptr) const override;

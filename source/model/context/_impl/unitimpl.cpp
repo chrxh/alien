@@ -1,15 +1,15 @@
 #include <QFile>
 
-#include "global/numbergenerator.h"
+#include "global/NumberGenerator.h"
 
-#include "model/physics/physics.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/energyparticle.h"
-#include "model/entities/token.h"
-#include "model/context/unitcontext.h"
+#include "model/physics/Physics.h"
+#include "model/entities/Cell.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/EnergyParticle.h"
+#include "model/entities/Token.h"
+#include "model/context/UnitContext.h"
 
-#include "unitimpl.h"
+#include "UnitImpl.h"
 
 UnitImpl::UnitImpl(QObject* parent)
 	: Unit(parent)

@@ -1,7 +1,7 @@
-#include "model/context/spacemetric.h"
-#include "model/entities/energyparticle.h"
+#include "model/context/SpaceMetric.h"
+#include "model/entities/EnergyParticle.h"
 
-#include "energyparticlemapimpl.h"
+#include "EnergyParticleMapImpl.h"
 
 EnergyParticleMapImpl::EnergyParticleMapImpl(QObject* parent)
 	: EnergyParticleMap(parent)

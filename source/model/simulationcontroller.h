@@ -1,8 +1,8 @@
 #ifndef SIMULATIONCONTROLLER_H
 #define SIMULATIONCONTROLLER_H
 
-#include "definitions.h"
-#include "model/entities/cellto.h"
+#include "Definitions.h"
+#include "model/entities/CellTO.h"
 
 #include <QObject>
 #include <QVector3D>
@@ -10,7 +10,8 @@
 
 class QTimer;
 
-class SimulationController  : public QObject
+class SimulationController
+	: public QObject
 {
     Q_OBJECT
 public:

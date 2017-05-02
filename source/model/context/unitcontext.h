@@ -4,7 +4,7 @@
 #include <QList>
 #include <QSize>
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 class UnitContext
 	: public QObject

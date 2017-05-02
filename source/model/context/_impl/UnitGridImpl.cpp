@@ -1,19 +1,19 @@
-#include "model/context/unit.h"
-#include "model/context/spacemetric.h"
+#include "model/context/Unit.h"
+#include "model/context/SpaceMetric.h"
 
-#include "gridimpl.h"
+#include "UnitGridImpl.h"
 
-GridImpl::GridImpl(QObject * parent)
-	: Grid(parent)
+UnitGridImpl::UnitGridImpl(QObject * parent)
+	: UnitGrid(parent)
 {
 }
 
-GridImpl::~GridImpl()
+UnitGridImpl::~UnitGridImpl()
 {
 	deleteUnits();
 }
 
-void GridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
+void UnitGridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
 {
 	deleteUnits();
 
@@ -27,22 +27,22 @@ void GridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
 	}
 }
 
-void GridImpl::registerUnit(IntVector2D gridPos, Unit * unit)
+void UnitGridImpl::registerUnit(IntVector2D gridPos, Unit * unit)
 {
 	_units[gridPos.x][gridPos.y] = unit;
 }
 
-IntVector2D GridImpl::getSize() const
+IntVector2D UnitGridImpl::getSize() const
 {
 	return _gridSize;
 }
 
-Unit * GridImpl::getUnit(IntVector2D gridPos) const
+Unit * UnitGridImpl::getUnit(IntVector2D gridPos) const
 {
 	return _units[gridPos.x][gridPos.y];
 }
 
-IntRect GridImpl::calcMapRect(IntVector2D gridPos) const
+IntRect UnitGridImpl::calcMapRect(IntVector2D gridPos) const
 {
 	IntVector2D universeSize = _metric->getSize();
 	IntVector2D p1 = { universeSize.x * gridPos.x / _gridSize.x, universeSize.y * gridPos.y / _gridSize.y };
@@ -50,7 +50,7 @@ IntRect GridImpl::calcMapRect(IntVector2D gridPos) const
 	return{ p1, p2 };
 }
 
-void GridImpl::deleteUnits()
+void UnitGridImpl::deleteUnits()
 {
 	for (auto const& unitVec : _units) {
 		for (auto const& unit : unitVec) {

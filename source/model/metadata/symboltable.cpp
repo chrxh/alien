@@ -1,4 +1,4 @@
-#include "symboltable.h"
+#include "SymbolTable.h"
 
 SymbolTable::SymbolTable(QObject* parent)
 	: QObject(parent)

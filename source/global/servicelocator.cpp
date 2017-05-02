@@ -1,4 +1,4 @@
-#include "servicelocator.h"
+#include "ServiceLocator.h"
 
 ServiceLocator& ServiceLocator::getInstance ()
 {

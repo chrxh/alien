@@ -1,9 +1,10 @@
 #ifndef CELLFUNCTIONCOMPUTER_H
 #define CELLFUNCTIONCOMPUTER_H
 
-#include "cellfunction.h"
+#include "CellFunction.h"
 
-class CellFunctionComputer: public CellFunction
+class CellFunctionComputer
+	: public CellFunction
 {
 public:
     CellFunctionComputer (UnitContext* context) : CellFunction(context) {}

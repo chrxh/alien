@@ -1,8 +1,8 @@
 #include <QDebug>
 
 #include "gui/guisettings.h"
-#include "global/numbergenerator.h"
-#include "model/context/unitcontext.h"
+#include "global/NumberGenerator.h"
+#include "model/context/UnitContext.h"
 
 #include "simulationparametersdialog.h"
 #include "symboltabledialog.h"

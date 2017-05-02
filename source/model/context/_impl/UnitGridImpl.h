@@ -1,15 +1,15 @@
-#ifndef SIMULATIONGRIDIMPL_H
-#define SIMULATIONGRIDIMPL_H
+#ifndef UNITGRIDIMPL_H
+#define UNITGRIDIMPL_H
 
-#include "model/context/grid.h"
+#include "model/context/UnitGrid.h"
 
-class GridImpl
-	: public Grid
+class UnitGridImpl
+	: public UnitGrid
 {
 	Q_OBJECT
 public:
-	GridImpl(QObject* parent = nullptr);
-	virtual ~GridImpl();
+	UnitGridImpl(QObject* parent = nullptr);
+	virtual ~UnitGridImpl();
 
 	virtual void init(IntVector2D gridSize, SpaceMetric* metric) override;
 
@@ -26,4 +26,4 @@ private:
 	std::vector<std::vector<Unit*>> _units;
 };
 
-#endif // SIMULATIONGRIDIMPL_H
+#endif // UNITGRIDIMPL_H

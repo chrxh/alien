@@ -1,7 +1,7 @@
 #ifndef CELLTO_H
 #define CELLTO_H
 
-#include "model/features/cellfeatureconstants.h"
+#include "model/features/CellFeatureEnums.h"
 #include <QVector>
 #include <QList>
 #include <QVector3D>

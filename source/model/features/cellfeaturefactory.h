@@ -1,10 +1,10 @@
-#ifndef CELLDECORATORFACTORY_H
-#define CELLDECORATORFACTORY_H
+#ifndef CELLFEATUREFACTORY_H
+#define CELLFEATUREFACTORY_H
 
 #include <QString>
 
-#include "cellfeatureconstants.h"
-#include "model/definitions.h"
+#include "model/Definitions.h"
+#include "CellFeatureEnums.h"
 
 class CellFeatureFactory
 {
@@ -17,4 +17,4 @@ public:
     virtual CellFeature* addEnergyGuidance (Cell* cell, UnitContext* context) const = 0;
 };
 
-#endif // CELLDECORATORFACTORY_H
+#endif // CELLFEATUREFACTORY_H

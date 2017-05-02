@@ -1,4 +1,4 @@
-#include "mapcompartmentimpl.h"
+#include "MapCompartmentImpl.h"
 
 MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 	: MapCompartment(parent)

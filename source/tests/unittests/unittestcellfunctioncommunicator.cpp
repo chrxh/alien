@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 
-#include "global/servicelocator.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/cell.h"
-#include "model/entities/token.h"
-#include "model/features/_impl/cellfunctioncommunicatorimpl.h"
-#include "model/physics/codingphysicalquantities.h"
-#include "model/context/unitcontext.h"
-#include "model/builderfacade.h"
-#include "model/modelsettings.h"
-#include "model/context/spacemetric.h"
-#include "model/context/simulationparameters.h"
+#include "global/ServiceLocator.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/Cell.h"
+#include "model/entities/Token.h"
+#include "model/features/_impl/CellFunctionCommunicatorImpl.h"
+#include "model/physics/CodingPhysicalQuantities.h"
+#include "model/context/UnitContext.h"
+#include "model/BuilderFacade.h"
+#include "model/ModelSettings.h"
+#include "model/context/SpaceMetric.h"
+#include "model/context/SimulationParameters.h"
 
 #include "tests/settings.h"
 

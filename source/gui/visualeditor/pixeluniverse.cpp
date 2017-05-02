@@ -4,13 +4,13 @@
 #include <QMatrix4x4>
 
 #include "gui/guisettings.h"
-#include "model/context/unitcontext.h"
-#include "model/context/energyparticlemap.h"
-#include "model/context/cellmap.h"
-#include "model/context/spacemetric.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/energyparticle.h"
+#include "model/context/UnitContext.h"
+#include "model/context/EnergyParticleMap.h"
+#include "model/context/CellMap.h"
+#include "model/context/SpaceMetric.h"
+#include "model/entities/Cell.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/EnergyParticle.h"
 
 #include "pixeluniverse.h"
 

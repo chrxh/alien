@@ -1,7 +1,7 @@
-#ifndef CELLFEATURECONSTANTS_H
-#define CELLFEATURECONSTANTS_H
+#ifndef CELLFEATUREENUMS_H
+#define CELLFEATUREENUMS_H
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 namespace Enums
 {
@@ -232,4 +232,4 @@ namespace Enums
 	};
 }
 
-#endif // CELLFEATURECONSTANTS_H
+#endif // CELLFEATUREENUMS_H

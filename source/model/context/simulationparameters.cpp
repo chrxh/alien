@@ -1,4 +1,4 @@
-#include "simulationparameters.h"
+#include "SimulationParameters.h"
 
 
 SimulationParameters::SimulationParameters(QObject * parent)

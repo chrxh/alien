@@ -3,7 +3,7 @@
 
 #include <QVector3D>
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 class EnergyParticle
 {

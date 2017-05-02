@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include <QFile>
 
-#include "global/numbergenerator.h"
-#include "model/simulationcontroller.h"
-#include "model/context/unitcontext.h"
-#include "model/modelsettings.h"
-#include "model/entities/cellcluster.h"
-#include "model/entities/cell.h"
+#include "global/NumberGenerator.h"
+#include "model/SimulationController.h"
+#include "model/context/UnitContext.h"
+#include "model/ModelSettings.h"
+#include "model/entities/CellCluster.h"
+#include "model/entities/Cell.h"
 
 #include "tests/settings.h"
 

@@ -1,9 +1,10 @@
 #ifndef CELLFUNCTIONPROPULSION_H
 #define CELLFUNCTIONPROPULSION_H
 
-#include "model/features/cellfunction.h"
+#include "model/features/CellFunction.h"
 
-class CellFunctionPropulsionImpl : public CellFunction
+class CellFunctionPropulsionImpl
+	: public CellFunction
 {
 public:
     CellFunctionPropulsionImpl (UnitContext* context);

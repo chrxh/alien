@@ -7,9 +7,9 @@
 #include <QMap>
 #include <QVector3D>
 
-#include "model/definitions.h"
-#include "model/entities/cellto.h"
-#include "gui/definitions.h"
+#include "model/Definitions.h"
+#include "model/entities/CellTO.h"
+#include "gui/Definitions.h"
 
 
 class CellGraphicsItem;
