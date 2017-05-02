@@ -15,7 +15,6 @@ public:
 	virtual void clear() = 0;
 
 	virtual void setCell(QVector3D pos, Cell* cell) = 0;
-	virtual void removeCell(QVector3D pos) = 0;
 	virtual void removeCellIfPresent(QVector3D pos, Cell* cell) = 0;
 	virtual Cell* getCell(QVector3D pos) const = 0;
 	inline Cell* getCellFast(IntVector2D const& intPos) const;
