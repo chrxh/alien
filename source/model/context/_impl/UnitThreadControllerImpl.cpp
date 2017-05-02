@@ -56,6 +56,7 @@ void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 {
 	if (UnitThread* thr = dynamic_cast<UnitThread*>(sender)) {
 		thr->setState(UnitThread::State::Finished);
+		setReadyIfAllUnitsFinished();
 		searchAndExecuteReadyThreads();
 	}
 }
@@ -89,6 +90,22 @@ void UnitThreadControllerImpl::startThreads()
 {
 	for (auto const& ts : _threadsAndCalcSignals) {
 		ts.thr->start();
+	}
+}
+
+void UnitThreadControllerImpl::setReadyIfAllUnitsFinished()
+{
+	bool allUnitsFinished = true;
+	for (auto const& ts : _threadsAndCalcSignals) {
+		if (!ts.thr->isFinished()) {
+			allUnitsFinished = false;
+			break;
+		}
+	}
+	if (allUnitsFinished) {
+		for (auto const& ts : _threadsAndCalcSignals) {
+			ts.thr->setState(UnitThread::State::Ready);
+		}
 	}
 }
 
