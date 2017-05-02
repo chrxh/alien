@@ -1,15 +1,15 @@
-#ifndef SIMULATIONTHREADSIMPL_H
-#define SIMULATIONTHREADSIMPL_H
+#ifndef THREADCONTROLLERIMPL_H
+#define THREADCONTROLLERIMPL_H
 
-#include "model/context/simulationthreads.h"
+#include "model/context/threadcontroller.h"
 
-class SimulationThreadsImpl
-	: public SimulationThreads
+class ThreadControllerImpl
+	: public ThreadController
 {
 	Q_OBJECT
 public:
-	SimulationThreadsImpl(QObject* parent = nullptr);
-	virtual ~SimulationThreadsImpl();
+	ThreadControllerImpl(QObject* parent = nullptr);
+	virtual ~ThreadControllerImpl();
 
 	virtual void init(int maxRunningThreads) override;
 
@@ -26,4 +26,4 @@ private:
 	std::map<SimulationUnitContext*, QThread*> _threadsByContexts;
 };
 
-#endif // SIMULATIONTHREADSIMPL_H
+#endif // THREADCONTROLLERIMPL_H

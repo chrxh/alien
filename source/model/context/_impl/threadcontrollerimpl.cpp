@@ -3,19 +3,19 @@
 #include "model/context/simulationunit.h"
 #include "model/context/simulationunitcontext.h"
 #include "model/context/mapcompartment.h"
-#include "simulationthreadsimpl.h"
+#include "threadcontrollerimpl.h"
 
-SimulationThreadsImpl::SimulationThreadsImpl(QObject * parent)
-	: SimulationThreads(parent)
+ThreadControllerImpl::ThreadControllerImpl(QObject * parent)
+	: ThreadController(parent)
 {
 }
 
-SimulationThreadsImpl::~SimulationThreadsImpl()
+ThreadControllerImpl::~ThreadControllerImpl()
 {
 	terminateThreads();
 }
 
-void SimulationThreadsImpl::init(int maxRunningThreads)
+void ThreadControllerImpl::init(int maxRunningThreads)
 {
 	terminateThreads();
 	_maxRunningThreads = maxRunningThreads;
@@ -26,7 +26,7 @@ void SimulationThreadsImpl::init(int maxRunningThreads)
 
 }
 
-void SimulationThreadsImpl::registerUnit(SimulationUnit * unit)
+void ThreadControllerImpl::registerUnit(SimulationUnit * unit)
 {
 	auto newThread = new QThread(this);
 	newThread->connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
@@ -35,13 +35,13 @@ void SimulationThreadsImpl::registerUnit(SimulationUnit * unit)
 	_threadsByContexts[unit->getContext()] = newThread;
 }
 
-void SimulationThreadsImpl::start()
+void ThreadControllerImpl::start()
 {
 	updateDependencies();
 	//newThread->start();
 }
 
-void SimulationThreadsImpl::updateDependencies()
+void ThreadControllerImpl::updateDependencies()
 {
 	for (auto const& threadByContext : _threadsByContexts) {
 		auto context = threadByContext.first;
@@ -61,7 +61,7 @@ void SimulationThreadsImpl::updateDependencies()
 	}
 }
 
-void SimulationThreadsImpl::terminateThreads()
+void ThreadControllerImpl::terminateThreads()
 {
 	for (auto const& thr : _threads) {
 		thr->quit();

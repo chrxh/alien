@@ -15,7 +15,7 @@
 #include "model/context/spacemetric.h"
 #include "model/context/contextfactory.h"
 #include "model/context/mapcompartment.h"
-#include "model/context/simulationthreads.h"
+#include "model/context/threadcontroller.h"
 #include "model/context/simulationgrid.h"
 #include "model/context/simulationcontext.h"
 #include "model/context/simulationunit.h"

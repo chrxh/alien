@@ -114,7 +114,7 @@ void CellClusterImpl::processingInit ()
 
         //remove particle from old position
         //-> note that due to numerical effect during fusion position can be slightly changed
-		cellMap->removeCell(_transform.map(cell->getRelPosition()));
+		cellMap->removeCellIfPresent(_transform.map(cell->getRelPosition()), cell);
         if( cell->getProtectionCounter() > 0 )
             cell->setProtectionCounter(cell->getProtectionCounter()-1);
     }
