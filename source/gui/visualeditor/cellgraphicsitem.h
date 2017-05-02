@@ -2,7 +2,7 @@
 #define CELLGRAPHICSITEM_H
 
 #include <QGraphicsItem>
-#include "gui/definitions.h"
+#include "gui/Definitions.h"
 
 class Cell;
 class CellGraphicsItem : public QGraphicsItem

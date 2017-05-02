@@ -1,7 +1,7 @@
 #ifndef CELLMAPIMPL_H
 #define CELLMAPIMPL_H
 
-#include "model/context/cellmap.h"
+#include "model/context/CellMap.h"
 
 class CellMapImpl
 	: public CellMap

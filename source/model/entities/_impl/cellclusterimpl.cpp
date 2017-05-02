@@ -1,22 +1,22 @@
 #include <QMatrix4x4>
 #include <qmath.h>
 
-#include "global/numbergenerator.h"
-#include "global/servicelocator.h"
-#include "model/entities/cell.h"
-#include "model/builderfacade.h"
-#include "model/features/cellfeature.h"
-#include "model/entities/entityfactory.h"
-#include "model/entities/token.h"
-#include "model/entities/energyparticle.h"
-#include "model/physics/physics.h"
-#include "model/modelsettings.h"
-#include "model/context/unitcontext.h"
-#include "model/context/cellmap.h"
-#include "model/context/spacemetric.h"
-#include "model/context/simulationparameters.h"
+#include "global/NumberGenerator.h"
+#include "global/ServiceLocator.h"
+#include "model/entities/Cell.h"
+#include "model/BuilderFacade.h"
+#include "model/features/CellFeature.h"
+#include "model/entities/EntityFactory.h"
+#include "model/entities/Token.h"
+#include "model/entities/EnergyParticle.h"
+#include "model/physics/Physics.h"
+#include "model/ModelSettings.h"
+#include "model/context/UnitContext.h"
+#include "model/context/CellMap.h"
+#include "model/context/SpaceMetric.h"
+#include "model/context/SimulationParameters.h"
 
-#include "cellclusterimpl.h"
+#include "CellClusterImpl.h"
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 

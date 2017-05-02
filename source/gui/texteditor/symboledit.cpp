@@ -1,9 +1,9 @@
 #include <QScrollBar>
 
-#include "model/metadata/symboltable.h"
+#include "model/metadata/SymbolTable.h"
 #include "gui/guisettings.h"
 #include "gui/guisettings.h"
-#include "global/numbergenerator.h"
+#include "global/NumberGenerator.h"
 
 #include "symboledit.h"
 #include "ui_symboledit.h"

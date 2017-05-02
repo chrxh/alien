@@ -3,8 +3,8 @@
 
 #include <QDialog>
 
-#include "model/definitions.h"
-#include "model/metadata/symboltable.h"
+#include "model/Definitions.h"
+#include "model/metadata/SymbolTable.h"
 
 namespace Ui {
 class SymbolTableDialog;

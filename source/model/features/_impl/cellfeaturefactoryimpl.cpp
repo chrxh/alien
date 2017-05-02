@@ -1,16 +1,16 @@
-#include "cellfeaturefactoryimpl.h"
+#include "CellFeatureFactoryImpl.h"
 
-#include "model/entities/cell.h"
-#include "cellfunctioncomputerimpl.h"
-#include "cellfunctionconstructorimpl.h"
-#include "cellfunctionpropulsionimpl.h"
-#include "cellfunctionscannerimpl.h"
-#include "cellfunctionweaponimpl.h"
-#include "cellfunctionsensorimpl.h"
-#include "cellfunctioncommunicatorimpl.h"
-#include "energyguidanceimpl.h"
+#include "model/entities/Cell.h"
+#include "CellFunctionComputerImpl.h"
+#include "CellFunctionConstructorImpl.h"
+#include "CellFunctionPropulsionImpl.h"
+#include "CellFunctionScannerImpl.h"
+#include "CellFunctionWeaponImpl.h"
+#include "CellFunctionSensorImpl.h"
+#include "CellFunctionCommunicatorImpl.h"
+#include "EnergyGuidanceImpl.h"
 
-#include "global/servicelocator.h"
+#include "global/ServiceLocator.h"
 
 namespace {
 	CellFeatureFactoryImpl cellDecoratorFactoryImpl;

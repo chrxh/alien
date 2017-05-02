@@ -1,7 +1,7 @@
 #ifndef ENERGYPARTICLEMAP_H
 #define ENERGYPARTICLEMAP_H
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 class EnergyParticleMap
 	: public QObject

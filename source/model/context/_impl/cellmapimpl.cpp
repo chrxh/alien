@@ -1,9 +1,9 @@
-#include "model/context/spacemetric.h"
-#include "model/modelsettings.h"
-#include "model/entities/cell.h"
-#include "model/entities/cellcluster.h"
+#include "model/context/SpaceMetric.h"
+#include "model/ModelSettings.h"
+#include "model/entities/Cell.h"
+#include "model/entities/CellCluster.h"
 
-#include "cellmapimpl.h"
+#include "CellMapImpl.h"
 
 CellMapImpl::CellMapImpl(QObject* parent /*= nullptr*/)
 	: CellMap(parent)

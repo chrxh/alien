@@ -1,7 +1,7 @@
-#ifndef TOPOLOGY_H
-#define TOPOLOGY_H
+#ifndef SPACEMETRIC_H
+#define SPACEMETRIC_H
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 class SpaceMetric
 	: public QObject
@@ -28,4 +28,4 @@ public:
 	virtual void deserializePrimitives(QDataStream& stream) = 0;
 };
 
-#endif // TOPOLOGY_H
+#endif // SPACEMETRIC_H

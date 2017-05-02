@@ -1,6 +1,6 @@
-#include "spacemetricimpl.h"
+#include "SpaceMetricImpl.h"
 
-#include "model/entities/cell.h"
+#include "model/entities/Cell.h"
 
 SpaceMetricImpl::SpaceMetricImpl(QObject * parent)
 	: SpaceMetric(parent)

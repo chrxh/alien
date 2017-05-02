@@ -3,11 +3,11 @@
 #include <QVector2D>
 
 #include "gui/mainwindow.h"
-#include "model/simulationcontroller.h"
-#include "model/metadata/symboltable.h"
-#include "model/entities/cellto.h"
-#include "model/context/unitcontext.h"
-#include "model/modelsettings.h"
+#include "model/SimulationController.h"
+#include "model/metadata/SymbolTable.h"
+#include "model/entities/CellTO.h"
+#include "model/context/UnitContext.h"
+#include "model/ModelSettings.h"
 
 
 //QT += webkitwidgets

@@ -1,13 +1,14 @@
 #ifndef CELLIMPL_H
 #define CELLIMPL_H
 
-#include "model/entities/cell.h"
+#include "model/entities/Cell.h"
 
 #include <QtGlobal>
 #include <QVector3D>
 #include <QVector>
 
-class CellImpl : public Cell
+class CellImpl
+	: public Cell
 {
 public:
 

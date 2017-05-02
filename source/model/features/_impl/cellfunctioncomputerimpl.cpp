@@ -1,15 +1,15 @@
 #include <QString>
 #include <qdebug.h>
 
-#include "global/numbergenerator.h"
-#include "model/context/unitcontext.h"
-#include "model/modelsettings.h"
-#include "model/metadata/symboltable.h"
-#include "model/entities/cell.h"
-#include "model/entities/token.h"
-#include "model/context/simulationparameters.h"
+#include "global/NumberGenerator.h"
+#include "model/context/UnitContext.h"
+#include "model/ModelSettings.h"
+#include "model/metadata/SymbolTable.h"
+#include "model/entities/Cell.h"
+#include "model/entities/Token.h"
+#include "model/context/SimulationParameters.h"
 
-#include "cellfunctioncomputerimpl.h"
+#include "CellFunctionComputerImpl.h"
 
 CellFunctionComputerImpl::CellFunctionComputerImpl (UnitContext* context)
     : CellFunctionComputer(context)

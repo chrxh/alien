@@ -1,9 +1,10 @@
 #ifndef ENERGYGUIDANCE_H
 #define ENERGYGUIDANCE_H
 
-#include "cellfeature.h"
+#include "CellFeature.h"
 
-class EnergyGuidance: public CellFeature
+class EnergyGuidance
+	: public CellFeature
 {
 public:
     EnergyGuidance (UnitContext* context) : CellFeature(context) {}

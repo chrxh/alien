@@ -1,11 +1,11 @@
-#include "model/entities/token.h"
-#include "model/entities/cell.h"
-#include "model/features/cellfeatureconstants.h"
-#include "model/modelsettings.h"
-#include "model/context/unitcontext.h"
-#include "model/context/simulationparameters.h"
+#include "model/entities/Token.h"
+#include "model/entities/Cell.h"
+#include "model/features/CellFeatureEnums.h"
+#include "model/ModelSettings.h"
+#include "model/context/UnitContext.h"
+#include "model/context/SimulationParameters.h"
 
-#include "energyguidanceimpl.h"
+#include "EnergyGuidanceImpl.h"
 
 
 EnergyGuidanceImpl::EnergyGuidanceImpl (UnitContext* context)

@@ -1,11 +1,12 @@
 #ifndef CELLFUNCTIONCONSTRUCTOR_H
 #define CELLFUNCTIONCONSTRUCTOR_H
 
-#include "model/features/cellfunction.h"
+#include "model/features/CellFunction.h"
 
 #include <QVector3D>
 
-class CellFunctionConstructorImpl : public CellFunction
+class CellFunctionConstructorImpl
+	: public CellFunction
 {
 public:
     CellFunctionConstructorImpl (UnitContext* context);

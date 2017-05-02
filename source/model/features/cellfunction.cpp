@@ -1,12 +1,12 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-#include "model/entities/cell.h"
-#include "model/physics/physics.h"
-#include "model/context/unitcontext.h"
-#include "model/context/spacemetric.h"
+#include "model/entities/Cell.h"
+#include "model/physics/Physics.h"
+#include "model/context/UnitContext.h"
+#include "model/context/SpaceMetric.h"
 
-#include "cellfunction.h"
+#include "CellFunction.h"
 
 
 qreal CellFunction::calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const

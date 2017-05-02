@@ -1,7 +1,7 @@
 #ifndef MAPCOMPARTMENT_H
 #define MAPCOMPARTMENT_H
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 class MapCompartment
 	: public QObject

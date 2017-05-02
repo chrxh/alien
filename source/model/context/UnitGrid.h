@@ -1,15 +1,15 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
-class Grid
+class UnitGrid
 	: public QObject
 {
 	Q_OBJECT
 public:
-	Grid(QObject* parent) : QObject(parent) {}
-	virtual ~Grid() {}
+	UnitGrid(QObject* parent) : QObject(parent) {}
+	virtual ~UnitGrid() {}
 
 	virtual void init(IntVector2D gridSize, SpaceMetric* metric) = 0;
 

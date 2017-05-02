@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 class Token
 {

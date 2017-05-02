@@ -1,11 +1,12 @@
 #ifndef CELLCLUSTERIMPL_H
 #define CELLCLUSTERIMPL_H
 
-#include "model/entities/cellcluster.h"
+#include "model/entities/CellCluster.h"
 
 #include <QMatrix4x4>
 
-class CellClusterImpl : public CellCluster
+class CellClusterImpl
+	: public CellCluster
 {
 public:
     CellClusterImpl (UnitContext* context);

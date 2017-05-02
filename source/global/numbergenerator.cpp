@@ -1,4 +1,4 @@
-#include "numbergenerator.h"
+#include "NumberGenerator.h"
 
 namespace
 {

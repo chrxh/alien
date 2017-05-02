@@ -12,13 +12,13 @@
 #include <set>
 #include <unordered_set>
 
-#include "model/metadata/cellmetadata.h"
-#include "model/metadata/cellclustermetadata.h"
-#include "model/metadata/energyparticlemetadata.h"
+#include "model/metadata/CellMetadata.h"
+#include "model/metadata/CellClusterMetadata.h"
+#include "model/metadata/EnergyParticleMetadata.h"
 
 class Cell;
 class CellCluster;
-class Grid;
+class UnitGrid;
 class EnergyParticle;
 class Token;
 class CellFeature;
@@ -27,8 +27,8 @@ class CellMap;
 class EnergyParticleMap;
 class SpaceMetric;
 class MapCompartment;
-class Grid;
-class ThreadController;
+class UnitGrid;
+class UnitThreadController;
 class UnitContext;
 class SimulationContext;
 class SimulationParameters;

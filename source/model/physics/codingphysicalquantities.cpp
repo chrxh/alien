@@ -1,4 +1,4 @@
-#include "codingphysicalquantities.h"
+#include "CodingPhysicalQuantities.h"
 
 #include <QtCore/qmath.h>
 

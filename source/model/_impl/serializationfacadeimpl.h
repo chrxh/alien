@@ -1,9 +1,10 @@
 #ifndef SERIALIZATIONFACADEIMPL_H
 #define SERIALIZATIONFACADEIMPL_H
 
-#include "model/serializationfacade.h"
+#include "model/SerializationFacade.h"
 
-class SerializationFacadeImpl : public SerializationFacade
+class SerializationFacadeImpl
+	: public SerializationFacade
 {
 public:
 	SerializationFacadeImpl();

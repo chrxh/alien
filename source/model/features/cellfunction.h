@@ -1,12 +1,13 @@
 #ifndef CELLFUNCTION_H
 #define CELLFUNCTION_H
 
-#include "cellfeature.h"
+#include "CellFeature.h"
 
-#include "cellfeatureconstants.h"
-#include "model/definitions.h"
+#include "CellFeatureEnums.h"
+#include "model/Definitions.h"
 
-class CellFunction: public CellFeature
+class CellFunction
+	: public CellFeature
 {
 public:
     CellFunction (UnitContext* context) : CellFeature(context) {}

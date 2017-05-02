@@ -1,7 +1,7 @@
-#ifndef FACTORYFACADEIMPL_H
-#define FACTORYFACADEIMPL_H
+#ifndef BUILDERFACADEIMPL_H
+#define BUILDERFACADEIMPL_H
 
-#include "model/builderfacade.h"
+#include "model/BuilderFacade.h"
 
 class BuilderFacadeImpl
 	: public BuilderFacade
@@ -33,4 +33,4 @@ private:
 	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const;
 };
 
-#endif // FACTORYFACADEIMPL_H
+#endif // BUILDERFACADEIMPL_H

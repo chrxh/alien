@@ -2,7 +2,7 @@
 #define ADDRECTSTRUCTUREDIALOG_H
 
 #include <QDialog>
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 namespace Ui {
 class AddRectStructureDialog;

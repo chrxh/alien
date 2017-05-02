@@ -1,9 +1,10 @@
 #ifndef CELLFUNCTIONSCANNER_H
 #define CELLFUNCTIONSCANNER_H
 
-#include "model/features/cellfunction.h"
+#include "model/features/CellFunction.h"
 
-class CellFunctionScannerImpl : public CellFunction
+class CellFunctionScannerImpl
+	: public CellFunction
 {
 public:
     CellFunctionScannerImpl (UnitContext* context);

@@ -1,7 +1,7 @@
 #ifndef MODELSETTINGS_H
 #define MODELSETTINGS_H
 
-#include "definitions.h"
+#include "Definitions.h"
 
 const qreal ALIEN_PRECISION = 0.0000001;
 

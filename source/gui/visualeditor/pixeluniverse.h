@@ -5,7 +5,7 @@
 #include <QVector3D>
 #include <QTimer>
 
-#include "model/definitions.h"
+#include "model/Definitions.h"
 
 class PixelUniverse : public QGraphicsScene
 {
