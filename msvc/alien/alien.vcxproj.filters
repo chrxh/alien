@@ -448,20 +448,8 @@
     <ClCompile Include="..\..\source\model\context\_impl\simulationgridimpl.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\_impl\simulationthreadsimpl.cpp">
-      <Filter>Model\Context\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_simulationparameters.cpp">
       <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_simulationthreadsimpl.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_simulationthreadsimpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_simulationthreadsimpl.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\model\_impl\builderfacadeimpl.cpp">
       <Filter>Model\_Impl</Filter>
@@ -632,6 +620,18 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_mapcompartmentimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\threadcontrollerimpl.cpp">
+      <Filter>Model\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_threadcontrollerimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_threadcontrollerimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_threadcontrollerimpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -968,9 +968,6 @@
     <CustomBuild Include="..\..\source\model\context\simulationunit.h">
       <Filter>Model\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\simulationthreads.h">
-      <Filter>Model\Context</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\simulationunitcontext.h">
       <Filter>Model\Context</Filter>
     </CustomBuild>
@@ -991,9 +988,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\cellmap.h">
       <Filter>Model\Context</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\model\context\_impl\simulationthreadsimpl.h">
-      <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\metadata\symboltable.h">
       <Filter>Model\Metadata</Filter>
@@ -1023,6 +1017,12 @@
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\spacemetricimpl.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\threadcontroller.h">
+      <Filter>Model\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\threadcontrollerimpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>

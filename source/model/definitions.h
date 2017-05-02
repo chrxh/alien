@@ -28,7 +28,7 @@ class EnergyParticleMap;
 class SpaceMetric;
 class MapCompartment;
 class SimulationGrid;
-class SimulationThreads;
+class ThreadController;
 class SimulationUnitContext;
 class SimulationContext;
 class SimulationParameters;

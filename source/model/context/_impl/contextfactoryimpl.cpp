@@ -5,7 +5,7 @@
 #include "simulationunitimpl.h"
 #include "simulationunitcontextimpl.h"
 #include "simulationgridimpl.h"
-#include "simulationthreadsimpl.h"
+#include "threadcontrollerimpl.h"
 #include "spacemetricimpl.h"
 #include "mapcompartmentimpl.h"
 #include "cellmapimpl.h"
@@ -41,9 +41,9 @@ SimulationGrid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
 	return new SimulationGridImpl(parent);
 }
 
-SimulationThreads * ContextFactoryImpl::buildSimulationThreads(QObject* parent) const
+ThreadController * ContextFactoryImpl::buildSimulationThreads(QObject* parent) const
 {
-	return new SimulationThreadsImpl(parent);
+	return new ThreadControllerImpl(parent);
 }
 
 SpaceMetric * ContextFactoryImpl::buildSpaceMetric(QObject* parent) const
