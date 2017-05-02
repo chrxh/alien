@@ -29,7 +29,17 @@ std::vector<UnitContext*> MapCompartmentImpl::getNeighborContexts() const
 	return result;
 }
 
-UnitContext* MapCompartmentImpl::convertAbsToRelPosition(IntVector2D& pos) const
+bool MapCompartmentImpl::isPointInCompartment(IntVector2D const &) const
+{
+	return false;
+}
+
+UnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D const & pos) const
 {
 	return nullptr;
 }
+
+void MapCompartmentImpl::convertAbsToRelPosition(IntVector2D & pos) const
+{
+}
+
