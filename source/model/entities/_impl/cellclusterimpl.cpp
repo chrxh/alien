@@ -11,7 +11,7 @@
 #include "model/entities/energyparticle.h"
 #include "model/physics/physics.h"
 #include "model/modelsettings.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/cellmap.h"
 #include "model/context/spacemetric.h"
 #include "model/context/simulationparameters.h"
@@ -20,7 +20,7 @@
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
-CellClusterImpl::CellClusterImpl (SimulationUnitContext* context)
+CellClusterImpl::CellClusterImpl (UnitContext* context)
     : _context(context)
     , _id(NumberGenerator::getInstance().createNewTag())
 {
@@ -28,7 +28,7 @@ CellClusterImpl::CellClusterImpl (SimulationUnitContext* context)
 }
 
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
-    , QVector3D vel, SimulationUnitContext* context)
+    , QVector3D vel, UnitContext* context)
     : _context(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
     , _id(NumberGenerator::getInstance().createNewTag())
 {
@@ -65,7 +65,7 @@ namespace
 	}
 }
 
-CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, SimulationUnitContext* context)
+CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, UnitContext* context)
     : _context(context), _angle(angle), _cells(cells)
     , _id(NumberGenerator::getInstance().createNewTag())
 {

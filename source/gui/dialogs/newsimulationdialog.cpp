@@ -2,7 +2,7 @@
 
 #include "gui/guisettings.h"
 #include "global/numbergenerator.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 
 #include "simulationparametersdialog.h"
 #include "symboltabledialog.h"
@@ -10,7 +10,7 @@
 #include "newsimulationdialog.h"
 #include "ui_newsimulationdialog.h"
 
-NewSimulationDialog::NewSimulationDialog(SimulationUnitContext* context, QWidget *parent)
+NewSimulationDialog::NewSimulationDialog(UnitContext* context, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
 	, _localParameters(context->getSimulationParameters()->clone())

@@ -7,8 +7,8 @@ class EnergyParticleImpl
 	: public EnergyParticle
 {
 public:
-	EnergyParticleImpl(SimulationUnitContext* context);
-	EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, SimulationUnitContext* context);
+	EnergyParticleImpl(UnitContext* context);
+	EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, UnitContext* context);
 
 	bool processingMovement(CellCluster*& cluster) override;
 
@@ -35,7 +35,7 @@ private:
 	void collisionWithEnergyParticle(EnergyParticle* otherEnergy);
 	void collisionWithCell(Cell* cell);
 
-	SimulationUnitContext* _context = nullptr;
+	UnitContext* _context = nullptr;
 
 	qreal _energy = 0.0;
 	QVector3D _pos;

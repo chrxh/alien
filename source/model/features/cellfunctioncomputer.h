@@ -6,7 +6,7 @@
 class CellFunctionComputer: public CellFunction
 {
 public:
-    CellFunctionComputer (SimulationUnitContext* context) : CellFunction(context) {}
+    CellFunctionComputer (UnitContext* context) : CellFunction(context) {}
     virtual ~CellFunctionComputer () {}
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::COMPUTER; }

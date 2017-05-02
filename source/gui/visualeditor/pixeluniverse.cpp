@@ -4,7 +4,7 @@
 #include <QMatrix4x4>
 
 #include "gui/guisettings.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/context/energyparticlemap.h"
 #include "model/context/cellmap.h"
 #include "model/context/spacemetric.h"
@@ -46,7 +46,7 @@ void PixelUniverse::reset ()
     update();
 }
 
-void PixelUniverse::universeUpdated (SimulationUnitContext* context)
+void PixelUniverse::universeUpdated (UnitContext* context)
 {
     _context = context;
 

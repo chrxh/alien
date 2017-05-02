@@ -8,9 +8,9 @@
 class CellClusterImpl : public CellCluster
 {
 public:
-    CellClusterImpl (SimulationUnitContext* context);
-    CellClusterImpl (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, SimulationUnitContext* context);
-    CellClusterImpl (QList< Cell* > cells, qreal angle, SimulationUnitContext* context);
+    CellClusterImpl (UnitContext* context);
+    CellClusterImpl (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, UnitContext* context);
+    CellClusterImpl (QList< Cell* > cells, qreal angle, UnitContext* context);
 
     ~CellClusterImpl ();
 
@@ -71,7 +71,7 @@ public:
 private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
 
-    SimulationUnitContext* _context = nullptr;
+    UnitContext* _context = nullptr;
 
     qreal _angle = 0.0;       //in deg
     QVector3D _pos;

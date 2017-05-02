@@ -4,7 +4,7 @@
 
 #include "model/entities/cellcluster.h"
 #include "model/simulationcontroller.h"
-#include "model/context/simulationunitcontext.h"
+#include "model/context/unitcontext.h"
 #include "model/modelsettings.h"
 #include "tests/settings.h"
 
@@ -38,7 +38,7 @@ TEST_F (IntegrationTestReplicator, testRunSimulation)
     _simulationController->loadUniverse(in);
     file.close();
 
-    SimulationUnitContext* context = _simulationController->getSimulationContext();
+    UnitContext* context = _simulationController->getSimulationContext();
     ASSERT_TRUE(!context->getClustersRef().empty());
     int replicatorSize = context->getClustersRef().at(0)->getCellsRef().size();
     for (int time = 0; time < INTEGRATIONTEST_REPLICATOR_TIMESTEPS; ++time) {

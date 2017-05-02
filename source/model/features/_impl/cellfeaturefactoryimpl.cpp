@@ -34,7 +34,7 @@ namespace {
     }
 }
 
-CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, SimulationUnitContext* context) const
+CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
@@ -57,7 +57,7 @@ CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFun
 }
 
 CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data
-    , SimulationUnitContext* context) const
+    , UnitContext* context) const
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
@@ -69,7 +69,7 @@ CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFun
     }
 }
 
-CellFeature* CellFeatureFactoryImpl::addEnergyGuidance (Cell* cell, SimulationUnitContext* context) const
+CellFeature* CellFeatureFactoryImpl::addEnergyGuidance (Cell* cell, UnitContext* context) const
 {
     return registerNewFeature(cell, new EnergyGuidanceImpl(context));
 }
