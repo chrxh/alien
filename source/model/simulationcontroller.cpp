@@ -18,7 +18,7 @@
 #include "model/modelsettings.h"
 #include "context/contextfactory.h"
 #include "context/simulationcontext.h"
-#include "context/simulationthreads.h"
+#include "context/threadcontroller.h"
 #include "context/simulationunitcontext.h"
 #include "context/simulationparameters.h"
 #include "context/energyparticlemap.h"

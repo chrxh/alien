@@ -12,7 +12,7 @@ public:
 	virtual SimulationUnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const = 0;
 	virtual SimulationUnit* buildSimulationUnit(QObject* parent = nullptr) const = 0;
 	virtual SimulationGrid* buildSimulationGrid(QObject* parent = nullptr) const = 0;
-	virtual SimulationThreads* buildSimulationThreads(QObject* parent = nullptr) const = 0;
+	virtual ThreadController* buildSimulationThreads(QObject* parent = nullptr) const = 0;
 	virtual SpaceMetric* buildSpaceMetric(QObject* parent = nullptr) const = 0;
 	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const = 0;
 	virtual CellMap* buildCellMap(QObject* parent = nullptr) const = 0;
