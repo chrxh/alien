@@ -3,6 +3,7 @@
 
 #include "DefinitionsImpl.h"
 #include "model/context/UnitThreadController.h"
+#include "SignalWrapper.h"
 
 class UnitThreadControllerImpl
 	: public UnitThreadController
@@ -20,10 +21,18 @@ public:
 private:
 	void updateDependencies();
 	void terminateThreads();
+	void startThreads();
+	void searchAndExecuteReadyThreads();
 
 	int _maxRunningThreads = 1;
-	std::vector<UnitThread*> _threads;
+
+	struct UnitThreadSignal {
+		UnitThread* thr;
+		SignalWrapper* signal;
+	};
+	std::vector<UnitThreadSignal> _threadsAndCalcSignals;
 	std::map<UnitContext*, UnitThread*> _threadsByContexts;
+
 };
 
 #endif // UNITTHREADCONTROLLERIMPL_H

@@ -7,6 +7,31 @@ void UnitThread::addDependency(UnitThread* unit)
 	}
 }
 
+void UnitThread::setState(State value)
+{
+	switch (value) {
+	case State::Ready: {
+		_state = value;
+	} break;
+	case State::Working: {
+		_state = State::Working;
+		for (auto const& dep : _dependencies) {
+			if (dep->_state == State::Ready) {
+				dep->_state = State::Working;
+			}
+		}
+	} break;
+	case State::Finished: {
+		_state = value;
+		for (auto const& dep : _dependencies) {
+			if (dep->_state == State::Working) {
+				dep->_state = State::Ready;
+			}
+		}
+	} break;
+	}
+}
+
 bool UnitThread::isFinished()
 {
 	return _state == State::Finished;

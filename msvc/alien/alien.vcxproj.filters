@@ -640,6 +640,15 @@
     <ClCompile Include="..\..\source\model\context\_impl\UnitThread.cpp">
       <Filter>Model\Context\_Impl</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\moc_SignalWrapper.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SignalWrapper.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SignalWrapper.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\gui\guisettings.h">
@@ -1035,6 +1044,9 @@
       <Filter>Model\Metadata</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\UnitThread.h">
+      <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\SignalWrapper.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>
