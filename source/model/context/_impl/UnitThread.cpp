@@ -2,7 +2,9 @@
 
 void UnitThread::addDependency(UnitThread* unit)
 {
-	_dependencies.push_back(unit);
+	if (unit) {
+		_dependencies.push_back(unit);
+	}
 }
 
 bool UnitThread::isFinished()

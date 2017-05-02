@@ -63,7 +63,7 @@ SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThre
 			auto unitContext = grid->getUnit({ x, y })->getContext();
 			auto compartment = unitContext->getMapCompartment();
 			auto getContextFromDelta = [&](IntVector2D const& delta) {
-				return grid->getUnit({ (x + delta.x + gridSize.x) % gridSize.x, (y + delta.x + gridSize.y) % gridSize.y })->getContext();
+				return grid->getUnit({ (x + delta.x + gridSize.x) % gridSize.x, (y + delta.y + gridSize.y) % gridSize.y })->getContext();
 			};
 			compartment->registerNeighborContext(MapCompartment::RelativeLocation::UpperLeft, getContextFromDelta({ -1, -1 }));
 			compartment->registerNeighborContext(MapCompartment::RelativeLocation::Upper, getContextFromDelta({ 0, -1 }));
