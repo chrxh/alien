@@ -9,7 +9,7 @@ class UnitGridImpl
 	Q_OBJECT
 public:
 	UnitGridImpl(QObject* parent = nullptr);
-	virtual ~UnitGridImpl();
+	virtual ~UnitGridImpl() {}
 
 	virtual void init(IntVector2D gridSize, SpaceMetric* metric) override;
 
@@ -19,8 +19,6 @@ public:
 	virtual IntRect calcMapRect(IntVector2D gridPos) const override;
 
 private:
-	void deleteUnits();
-
 	SpaceMetric* _metric = nullptr;
 	IntVector2D _gridSize = { 0, 0 };
 	std::vector<std::vector<Unit*>> _units;
