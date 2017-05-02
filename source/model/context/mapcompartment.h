@@ -13,6 +13,7 @@ public:
 
 	virtual void init(SpaceMetric* metric, IntRect mapRect) = 0;
 
+	virtual IntVector2D getSize() const = 0;
 	enum class RelativeLocation {
 		UpperLeft, Upper, UpperRight, 
 		Left, Right, 
@@ -20,7 +21,7 @@ public:
 	};
 	virtual void registerNeighborContext(RelativeLocation location, UnitContext* context) = 0;
 	virtual std::vector<UnitContext*> getNeighborContexts() const = 0;
-	virtual UnitContext* getNeighborContext(IntVector2D pos) const = 0;
+	virtual UnitContext* convertAbsToRelPosition(IntVector2D& pos) const = 0;
 
 private:
 };

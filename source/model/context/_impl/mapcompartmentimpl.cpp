@@ -7,6 +7,12 @@ MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 
 void MapCompartmentImpl::init(SpaceMetric * metric, IntRect mapRect)
 {
+	_rect = mapRect;
+}
+
+IntVector2D MapCompartmentImpl::getSize() const
+{
+	return{ _rect.p2.x - _rect.p1.x, _rect.p2.y - _rect.p1.y };
 }
 
 void MapCompartmentImpl::registerNeighborContext(RelativeLocation location, UnitContext * context)
@@ -23,7 +29,7 @@ std::vector<UnitContext*> MapCompartmentImpl::getNeighborContexts() const
 	return result;
 }
 
-UnitContext* MapCompartmentImpl::getNeighborContext(IntVector2D pos) const
+UnitContext* MapCompartmentImpl::convertAbsToRelPosition(IntVector2D& pos) const
 {
 	return nullptr;
 }
