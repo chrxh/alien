@@ -25,7 +25,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 	auto& tokenMem = token->getMemoryRef();
 	quint8 cmd = tokenMem[Enums::Sensor::IN] % 5;
 	auto cellMap = _context->getCellMap();
-	auto metric = _context->getTopology();
+	auto metric = _context->getSpaceMetric();
 	auto parameters = _context->getSimulationParameters();
 
     if( cmd == Enums::SensorIn::DO_NOTHING ) {

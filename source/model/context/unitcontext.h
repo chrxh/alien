@@ -17,7 +17,7 @@ public:
 	virtual void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 		, SimulationParameters* parameters) = 0;
 
-    virtual SpaceMetric* getTopology () const = 0;
+    virtual SpaceMetric* getSpaceMetric () const = 0;
 	virtual CellMap* getCellMap() const = 0;
 	virtual EnergyParticleMap* getEnergyParticleMap() const = 0;
 	virtual MapCompartment* getMapCompartment() const = 0;
