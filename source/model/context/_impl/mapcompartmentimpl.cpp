@@ -9,7 +9,7 @@ MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 void MapCompartmentImpl::init(SpaceMetric * metric, IntRect mapRect)
 {
 	_rect = mapRect;
-	_size = { _rect.p2.x - _rect.p1.x, _rect.p2.y - _rect.p1.y };
+	_size = { _rect.p2.x - _rect.p1.x + 1, _rect.p2.y - _rect.p1.y + 1};
 }
 
 IntVector2D MapCompartmentImpl::getSize() const
@@ -49,6 +49,6 @@ UnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D const & intPos)
 
 IntVector2D MapCompartmentImpl::convertAbsToRelPosition(IntVector2D const& intPos) const
 {
-	return{ intPos.x - intPos.x / _size.x * _size.x, intPos.y - intPos.x / _size.y * _size.y };
+	return{ intPos.x - intPos.x / _size.x * _size.x, intPos.y - intPos.y / _size.y * _size.y };
 }
 

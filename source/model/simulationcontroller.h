@@ -86,7 +86,9 @@ private slots:
 private:
     QTimer* _forceFpsTimer = nullptr;
 	QTimer* _oneSecondTimer = nullptr;
+/*
 	bool _run = false;
+*/
     int _forceFps = 0;
 	int _fps = 0;
 	bool _calculating = false;

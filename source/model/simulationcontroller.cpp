@@ -78,7 +78,6 @@ void SimulationController::newUniverse(SimulationContext* context)
 	_frame = 0;
 	delete _context;
 	_context = context;
-	_context->getUnitThreadController()->start();
 }
 
 void SimulationController::saveUniverse (QDataStream& stream)
@@ -753,20 +752,24 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
 
 void SimulationController::setRun (bool run)
 {
+/*
     _run = run;
+*/
     if( run ) {
-        _calculating = true;
-        emit calcNextTimestep();
-    }
+		_context->getUnitThreadController()->start();
+	}
 
+/*
     //stop play => inform other corredinators about actual state
     else
         updateUniverse();
+*/
 }
 
 //fps = 0: deactivate forcing
 void SimulationController::forceFps (int fps)
 {
+/*
     _forceFps = fps;
     _forceFpsTimer->stop();
     if( fps > 0 ){
@@ -778,6 +781,7 @@ void SimulationController::forceFps (int fps)
             emit calcNextTimestep();
         }
     }
+*/
 }
 
 void SimulationController::requestNextTimestep ()
@@ -792,12 +796,14 @@ void SimulationController::updateUniverse ()
 
 void SimulationController::forceFpsTimerSlot ()
 {
+/*
     if( _run ) {
         if( !_calculating ) {
             _calculating = true;
             emit calcNextTimestep();
         }
     }
+*/
 }
 
 void SimulationController::oneSecondTimerSlot()
