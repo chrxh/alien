@@ -32,6 +32,7 @@ class UnitThreadController;
 class UnitContext;
 class SimulationContext;
 class SimulationParameters;
+class SimulationController;
 class SymbolTable;
 class EntityFactory;
 class ContextFactory;

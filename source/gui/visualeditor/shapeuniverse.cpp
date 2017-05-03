@@ -13,8 +13,8 @@
 #include "model/context/UnitContext.h"
 #include "model/context/SpaceMetric.h"
 #include "model/context/EnergyParticleMap.h"
-#include "gui/guisettings.h"
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
+#include "gui/GuiSettings.h"
 
 #include "cellgraphicsitem.h"
 #include "cellconnectiongraphicsitem.h"

@@ -20,8 +20,8 @@
 #include "assistance/tutorialwindow.h"
 #include "misc/startscreencontroller.h"
 #include "gui/texteditor/texteditor.h"
-#include "gui/guisettings.h"
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
+#include "gui/GuiSettings.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"
 #include "model/context/SimulationContext.h"
@@ -30,7 +30,7 @@
 #include "model/entities/CellCluster.h"
 #include "model/metadata/SymbolTable.h"
 
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
