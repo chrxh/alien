@@ -12,32 +12,33 @@
 #include "model/context/SpaceMetric.h"
 #include "model/context/SimulationParameters.h"
 
-#include "tests/settings.h"
+#include "tests/TestSettings.h"
 
-class TestCellFunctionCommunicator : public ::testing::Test
+class CellFunctionCommunicatorTest : public ::testing::Test
 {
 public:
-	TestCellFunctionCommunicator();
-	~TestCellFunctionCommunicator();
+	CellFunctionCommunicatorTest();
+	~CellFunctionCommunicatorTest();
 
 protected:
     UnitContext* _context;
 
     //data for cluster1
-    CellCluster* _cluster1;
-    Cell* _cellWithToken;
-    Cell* _cellWithoutToken;
-    CellFunctionCommunicatorImpl* _communicator1a;
-	CellFunctionCommunicatorImpl* _communicator1b;
-    Token* _token;
+    CellCluster* _cluster1 = nullptr;
+    Cell* _cellWithToken = nullptr;
+    Cell* _cellWithoutToken = nullptr;
+    CellFunctionCommunicatorImpl* _communicator1a = nullptr;
+	CellFunctionCommunicatorImpl* _communicator1b = nullptr;
+    Token* _token = nullptr;
 
     //data for cluster2
-    CellCluster* _cluster2;
-	CellFunctionCommunicatorImpl* _communicator2;
+    CellCluster* _cluster2 = nullptr;
+	CellFunctionCommunicatorImpl* _communicator2 = nullptr;
 };
 
-TestCellFunctionCommunicator::TestCellFunctionCommunicator()
+CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()
 {
+/*
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 
 	_context = facade->buildSimulationContext();
@@ -108,8 +109,10 @@ TestCellFunctionCommunicator::TestCellFunctionCommunicator()
 	_communicator2->getNewMessageReceivedRef() = false;
 	for (int i = 0; i < 256; ++i)
 		_token->getMemoryRef()[i] = 0;
+*/
 }
 
+/*
 TEST_F (TestCellFunctionCommunicator, testSendMessage)
 {
 	//setup channel
@@ -157,8 +160,9 @@ TEST_F (TestCellFunctionCommunicator, testSendMessage)
 	s = QString("Wrong number messages sent. Messages sent: %1, should be 1.").arg(numMsg);
 	ASSERT_EQ(numMsg, 1) << s.toLatin1().data();
 }
+*/
 
-TestCellFunctionCommunicator::~TestCellFunctionCommunicator()
+CellFunctionCommunicatorTest::~CellFunctionCommunicatorTest()
 {
 	delete _cluster1;
 	delete _cluster2;

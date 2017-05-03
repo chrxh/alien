@@ -10,12 +10,6 @@
     <ClCompile Include="..\..\source\gui\dialogs\addrectstructuredialog.cpp">
       <Filter>Gui\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\guisettings.cpp">
-      <Filter>Gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\mainwindow.cpp">
-      <Filter>Gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\dialogs\newsimulationdialog.cpp">
       <Filter>Gui\Dialogs</Filter>
     </ClCompile>
@@ -121,9 +115,6 @@
     <ClCompile Include="Debug\moc_hexedit.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_mainwindow.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_metadataedit.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -196,9 +187,6 @@
     <ClCompile Include="Release\moc_hexedit.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_mainwindow.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Release\moc_metadataedit.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -269,9 +257,6 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_hexedit.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_mainwindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_metadataedit.cpp">
@@ -649,11 +634,23 @@
     <ClCompile Include="Release\moc_SignalWrapper.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\gui\GuiSettings.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\MainWindow.cpp">
+      <Filter>Gui</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_mainwindow.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mainwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mainwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\gui\guisettings.h">
-      <Filter>Gui</Filter>
-    </ClInclude>
     <ClInclude Include="ui_addenergydialog.h">
       <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
@@ -846,6 +843,9 @@
     <ClInclude Include="..\..\source\model\context\_impl\DefinitionsImpl.h">
       <Filter>Model\Context\_Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\gui\GuiSettings.h">
+      <Filter>Gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\gui\dialogs\addenergydialog.h">
@@ -865,9 +865,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\addrectstructuredialog.ui">
       <Filter>Gui\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\mainwindow.h">
-      <Filter>Gui</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\mainwindow.ui">
       <Filter>Gui</Filter>
@@ -1048,6 +1045,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\context\_impl\SignalWrapper.h">
       <Filter>Model\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\mainwindow.h">
+      <Filter>Gui</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

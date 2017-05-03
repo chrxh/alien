@@ -1,4 +1,4 @@
-#include "guisettings.h"
+#include "GuiSettings.h"
 
 QFont GuiFunctions::getGlobalFont ()
 {

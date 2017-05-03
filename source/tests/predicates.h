@@ -1,9 +1,10 @@
 #ifndef PREDICATES_H
 #define PREDICATES_H
 
-#include "settings.h"
 #include <QVector3D>
 #include <gtest/gtest.h>
+
+#include "TestSettings.h"
 
 bool predEqualMediumPrecision(qreal a, qreal b);
 bool predEqualLowPrecision(qreal a, qreal b);

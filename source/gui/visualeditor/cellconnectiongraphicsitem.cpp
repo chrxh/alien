@@ -1,7 +1,7 @@
 #include "cellconnectiongraphicsitem.h"
 
-#include "gui/guisettings.h"
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
+#include "gui/GuiSettings.h"
 
 #include <QPainter>
 #include <qmath.h>

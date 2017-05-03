@@ -5,7 +5,7 @@
 
 #include <QVector3D>
 
-class TestCellFunctionCommunicator;
+class CellFunctionCommunicatorTest;
 
 class CellFunctionCommunicatorImpl
 	: public CellFunction

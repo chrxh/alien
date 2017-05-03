@@ -3,7 +3,7 @@
 #include <QVector2D>
 
 #include "global/ServiceLocator.h"
-#include "gui/mainwindow.h"
+#include "gui/MainWindow.h"
 #include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"

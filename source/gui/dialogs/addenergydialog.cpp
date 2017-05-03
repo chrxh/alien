@@ -1,7 +1,7 @@
 #include "addenergydialog.h"
 #include "ui_addenergydialog.h"
 
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
 
 AddEnergyDialog::AddEnergyDialog(QWidget *parent) :
     QDialog(parent),

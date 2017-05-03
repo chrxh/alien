@@ -21,7 +21,7 @@ namespace {
 	::testing::AssertionResult predUnitVectorOfAngle(const char* beforeAngleExpr, const char* beforeVectorExpr, const char* afterAngleExpr
 		, qreal beforeAngle, QVector3D beforeVector, qreal afterAngle)
 	{
-		if (Physics::compareEqualAngle(beforeAngle, afterAngle, TEST_LOW_PRECISION))
+		if (Physics::compareEqualAngle(beforeAngle, afterAngle, FLOATINGPOINT_LOW_PRECISION))
 			return ::testing::AssertionSuccess();
 		else
 			return ::testing::AssertionFailure() << "angle-vector-conversion failed. Angle before: "
@@ -33,7 +33,7 @@ namespace {
 	::testing::AssertionResult predRelativeAngleBetweenVectors(const char* firstVectorExpr, const char* secondVectorExpr, const char* calculatedRelativeAngleExpr
 		, const char* expectedRelativeAngleExpr, QVector3D firstVector, QVector3D secondVector, qreal calculatedRelativeAngle, qreal expectedRelativeAngle)
 	{
-		if (Physics::compareEqualAngle(calculatedRelativeAngle, expectedRelativeAngle, TEST_LOW_PRECISION))
+		if (Physics::compareEqualAngle(calculatedRelativeAngle, expectedRelativeAngle, FLOATINGPOINT_LOW_PRECISION))
 			return ::testing::AssertionSuccess();
 		else
 			return ::testing::AssertionFailure() << "relative angle between vectors is wrongly calculated. First vector: "
@@ -44,7 +44,7 @@ namespace {
 	}
 }
 
-TEST (TestPhysics, testRotateClockwise)
+TEST (PhysicsTest, testRotateClockwise)
 {
     QVector3D v1 = QVector3D(0.0, -1.0, 0.0);
     QVector3D v2 = QVector3D(1.0, 0.0, 0.0);
@@ -60,7 +60,7 @@ TEST (TestPhysics, testRotateClockwise)
 	ASSERT_PRED_FORMAT3(predVectorAfterRotation, v4, v4r, v1);
 }
 
-TEST (TestPhysics, testAngleOfVector)
+TEST (PhysicsTest, testAngleOfVector)
 {
     qreal a = Physics::angleOfVector(QVector3D(0.0, -1.0, 0.0));
 	ASSERT_PRED2(predEqualLowPrecision, a, 0.0);
@@ -72,7 +72,7 @@ TEST (TestPhysics, testAngleOfVector)
 	ASSERT_PRED2(predEqualLowPrecision, a, 270.0);
 }
 
-TEST (TestPhysics, testUnitVectorOfAngle)
+TEST (PhysicsTest, testUnitVectorOfAngle)
 {
     //test angle -> unit vector -> angle conversion
     for(int i = 0; i < 100; ++i) {
@@ -92,7 +92,7 @@ TEST (TestPhysics, testUnitVectorOfAngle)
     }
 }
 
-TEST (TestPhysics, testClockwiseAngleFromFirstToSecondVector)
+TEST (PhysicsTest, testClockwiseAngleFromFirstToSecondVector)
 {
     for(int i = 0; i < 100; ++i) {
         qreal angle = NumberGenerator::getInstance().random(0.0, 360.0);

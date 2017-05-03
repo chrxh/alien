@@ -4,8 +4,8 @@
 #include "global/NumberGenerator.h"
 
 #include "model/metadata/SymbolTable.h"
-#include "gui/guisettings.h"
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
+#include "gui/GuiSettings.h"
 
 #include "hexedit.h"
 #include "tokentab.h"

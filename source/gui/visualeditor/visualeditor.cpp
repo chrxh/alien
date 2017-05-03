@@ -2,8 +2,8 @@
 #include <QTimer>
 #include <QGraphicsItem>
 
-#include "gui/guisettings.h"
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
+#include "gui/GuiSettings.h"
 #include "gui/texteditor/texteditor.h"
 #include "model/context/UnitContext.h"
 #include "model/context/SpaceMetric.h"

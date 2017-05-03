@@ -5,7 +5,7 @@
 #include "model/ModelSettings.h"
 #include "model/SerializationFacade.h"
 #include "model/metadata/SymbolTable.h"
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
 
 #include "symboltabledialog.h"
 #include "ui_symboltabledialog.h"

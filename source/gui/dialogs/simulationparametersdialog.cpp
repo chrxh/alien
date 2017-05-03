@@ -2,7 +2,7 @@
 #include <QMessageBox>
 
 #include "global/NumberGenerator.h"
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
 #include "model/context/SimulationParameters.h"
 #include "model/ModelSettings.h"
 

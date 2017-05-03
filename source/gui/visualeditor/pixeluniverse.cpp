@@ -3,7 +3,7 @@
 #include <QtCore/qmath.h>
 #include <QMatrix4x4>
 
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
 #include "model/context/UnitContext.h"
 #include "model/context/EnergyParticleMap.h"
 #include "model/context/CellMap.h"

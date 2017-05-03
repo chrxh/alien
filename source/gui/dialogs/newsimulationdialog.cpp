@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
 #include "global/NumberGenerator.h"
 #include "model/context/UnitContext.h"
 
