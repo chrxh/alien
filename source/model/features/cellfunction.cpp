@@ -11,7 +11,7 @@
 
 qreal CellFunction::calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const
 {
-	SpaceMetric* topo = _context->getTopology();
+	SpaceMetric* topo = _context->getSpaceMetric();
     QVector3D v1 = topo->displacement(origin->calcPosition(), ref1->calcPosition());
     QVector3D v2 = topo->displacement(origin->calcPosition(), ref2->calcPosition());
     return Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);

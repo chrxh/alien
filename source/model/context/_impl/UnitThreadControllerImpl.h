@@ -2,6 +2,7 @@
 #define UNITTHREADCONTROLLERIMPL_H
 
 #include <QSignalMapper>
+#include "gtest/gtest_prod.h"
 
 #include "model/context/UnitThreadController.h"
 
@@ -41,6 +42,7 @@ private:
 	std::map<UnitContext*, UnitThread*> _threadsByContexts;
 	QSignalMapper* _signalMapper = nullptr;
 
+	FRIEND_TEST(UnitThreadControllerImplTest, testStates);
 };
 
 #endif // UNITTHREADCONTROLLERIMPL_H

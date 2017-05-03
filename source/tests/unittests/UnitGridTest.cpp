@@ -19,13 +19,11 @@ public:
 	~UnitGridTest();
 
 protected:
-	IntVector2D correctUniversePosition(IntVector2D const& pos);
-
 	SimulationController* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	UnitGrid* _grid = nullptr;
-	IntVector2D _gridSize{ 6, 6 };
-	IntVector2D _universeSize{ 1200, 600 };
+	const IntVector2D _gridSize{ 6, 6 };
+	const IntVector2D _universeSize{ 1200, 600 };
 	IntVector2D _compartmentSize;
 };
 
@@ -45,11 +43,6 @@ UnitGridTest::UnitGridTest()
 UnitGridTest::~UnitGridTest()
 {
 	delete _controller;
-}
-
-IntVector2D UnitGridTest::correctUniversePosition(IntVector2D const & pos)
-{
-	return{ ((pos.x % _universeSize.x) + _universeSize.x) % _universeSize.x, ((pos.y % _universeSize.y) + _universeSize.y) % _universeSize.y };
 }
 
 TEST_F(UnitGridTest, testGridSize)

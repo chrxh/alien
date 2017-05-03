@@ -49,7 +49,7 @@ void UnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticle
 	deleteClustersAndEnergyParticles();
 }
 
-SpaceMetric* UnitContextImpl::getTopology () const
+SpaceMetric* UnitContextImpl::getSpaceMetric () const
 {
     return _metric;
 }

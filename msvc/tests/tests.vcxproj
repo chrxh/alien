@@ -243,6 +243,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\tests\integrationtests\ComparisonTest.cpp" />
+    <ClCompile Include="..\..\source\tests\integrationtests\MultithreadingTest.cpp" />
     <ClCompile Include="..\..\source\tests\integrationtests\ReplicatorTest.cpp" />
     <ClCompile Include="..\..\source\tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\tests\Testsuite.cpp" />
@@ -251,6 +252,7 @@
     <ClCompile Include="..\..\source\tests\unittests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\tests\unittests\PhysicsTest.cpp" />
     <ClCompile Include="..\..\source\tests\unittests\UnitGridTest.cpp" />
+    <ClCompile Include="..\..\source\tests\unittests\UnitThreadControllerImplTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\alien\alien.vcxproj">

@@ -34,7 +34,7 @@ SerializationFacadeImpl::SerializationFacadeImpl()
 
 void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, QDataStream & stream) const
 {
-	context->getTopology()->serializePrimitives(stream);
+	context->getSpaceMetric()->serializePrimitives(stream);
 
 	auto const& clusters = context->getClustersRef();
 	quint32 numCluster = clusters.size();

@@ -117,7 +117,7 @@ void EnergyParticleImpl::collisionWithEnergyParticle(EnergyParticle* otherEnergy
 void EnergyParticleImpl::move()
 {
 	_pos += _vel;
-	_context->getTopology()->correctPosition(_pos);
+	_context->getSpaceMetric()->correctPosition(_pos);
 }
 
 void EnergyParticleImpl::serializePrimitives(QDataStream& stream) const
