@@ -14,66 +14,66 @@ EnergyParticleMapImpl::~EnergyParticleMapImpl()
 }
 
 
-void EnergyParticleMapImpl::init(SpaceMetric* topo, MapCompartment* compartment)
+void EnergyParticleMapImpl::init(SpaceMetric* metric, MapCompartment* compartment)
 {
-	_topo = topo;
+	_metric = metric;
+	_compartment = compartment;
 	deleteGrid();
-	IntVector2D size = _topo->getSize();
-	_gridSize = size.x;
-	_energyGrid = new EnergyParticle**[size.x];
-	for (int x = 0; x < size.x; ++x) {
-		_energyGrid[x] = new EnergyParticle*[size.y];
+	_size = _compartment->getSize();
+	_energyGrid = new EnergyParticle**[_size.x];
+	for (int x = 0; x < _size.x; ++x) {
+		_energyGrid[x] = new EnergyParticle*[_size.y];
 	}
 	clear();
 }
 
 void EnergyParticleMapImpl::clear()
 {
-	IntVector2D size = _topo->getSize();
-	for (int x = 0; x < size.x; ++x)
-		for (int y = 0; y < size.y; ++y)
+	for (int x = 0; x < _size.x; ++x)
+		for (int y = 0; y < _size.y; ++y)
 			_energyGrid[x][y] = nullptr;
 }
 
-void EnergyParticleMapImpl::removeParticleIfPresent(QVector3D pos, EnergyParticle * energy)
+void EnergyParticleMapImpl::removeParticleIfPresent(QVector3D pos, EnergyParticle * particleToRemove)
 {
-	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
-	if (_energyGrid[intPos.x][intPos.y] == energy)
-		_energyGrid[intPos.x][intPos.y] = nullptr;
+	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
+	EnergyParticle*& particle = locateParticle(intPos);
+	if (particle == particleToRemove) {
+		particle = nullptr;
+	}
 }
 
-void EnergyParticleMapImpl::setParticle(QVector3D pos, EnergyParticle * energy)
+void EnergyParticleMapImpl::setParticle(QVector3D pos, EnergyParticle * particle)
 {
-	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
-	_energyGrid[intPos.x][intPos.y] = energy;
+	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
+	locateParticle(intPos) = particle;
 }
 
 EnergyParticle * EnergyParticleMapImpl::getParticle(QVector3D pos) const
 {
-	IntVector2D intPos = _topo->correctPositionWithIntPrecision(pos);
-	return _energyGrid[intPos.x][intPos.y];
+	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
+	return locateParticle(intPos);
 }
 
 void EnergyParticleMapImpl::serializePrimitives(QDataStream & stream) const
 {
 	//determine number of energy particle entries
 	quint32 numEntries = 0;
-	IntVector2D size = _topo->getSize();
-	for (int x = 0; x < size.x; ++x)
-		for (int y = 0; y < size.y; ++y)
+	for (int x = 0; x < _size.x; ++x)
+		for (int y = 0; y < _size.y; ++y)
 			if (_energyGrid[x][y])
 				numEntries++;
 	stream << numEntries;
 
 	//write energy particle entries
-	for (qint32 x = 0; x < size.x; ++x)
-		for (qint32 y = 0; y < size.y; ++y) {
+	for (qint32 x = 0; x < _size.x; ++x) {
+		for (qint32 y = 0; y < _size.y; ++y) {
 			EnergyParticle* e = _energyGrid[x][y];
 			if (e) {
 				stream << x << y << e->getId();
 			}
-
 		}
+	}
 }
 
 void EnergyParticleMapImpl::deserializePrimitives(QDataStream & stream, QMap<quint64, EnergyParticle*> const & oldIdEnergyMap)
@@ -93,7 +93,7 @@ void EnergyParticleMapImpl::deserializePrimitives(QDataStream & stream, QMap<qui
 void EnergyParticleMapImpl::deleteGrid()
 {
 	if (_energyGrid) {
-		for (int x = 0; x < _gridSize; ++x) {
+		for (int x = 0; x < _size.x; ++x) {
 			delete[] _energyGrid[x];
 		}
 		delete[] _energyGrid;
