@@ -32,10 +32,11 @@ protected:
 	Cell*** _cellGrid = nullptr;
 };
 
+/****************** inline methods ******************/
+
 Cell * CellMap::getCellFast(IntVector2D const& intPos) const
 {
 	return _cellGrid[intPos.x][intPos.y];
 }
-
 
 #endif //CELLMAP_H

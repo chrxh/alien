@@ -29,10 +29,40 @@ public:
 
 private:
 	void deleteCellMap();
+	inline void setCellHelper(IntVector2D const& intPos, Cell* cell);
+	inline Cell* getCellHelper(IntVector2D const& intPos) const;
 
 	SpaceMetric* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
 	IntVector2D _size = { 0, 0 };
 };
+
+/****************** inline methods ******************/
+
+Cell * CellMapImpl::getCellHelper(IntVector2D const& intPos) const
+{
+	if (_compartment->isPointInCompartment(intPos)) {
+		auto relPos = _compartment->convertAbsToRelPosition(intPos);
+		return _cellGrid[relPos.x][relPos.y];
+	}
+	else {
+		auto cellMap = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap());
+		auto relPos = _compartment->convertAbsToRelPosition(intPos);
+		return cellMap->_cellGrid[relPos.x][relPos.y];
+	}
+}
+
+void CellMapImpl::setCellHelper(IntVector2D const& intPos, Cell* cell)
+{
+	if (_compartment->isPointInCompartment(intPos)) {
+		auto relPos = _compartment->convertAbsToRelPosition(intPos);
+		_cellGrid[relPos.x][relPos.y] = cell;
+	}
+	else {
+		auto cellMap = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap());
+		auto relPos = _compartment->convertAbsToRelPosition(intPos);
+		cellMap->_cellGrid[relPos.x][relPos.y] = cell;
+	}
+}
 
 #endif //CELLMAPIMPL_H
