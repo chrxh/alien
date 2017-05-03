@@ -23,7 +23,7 @@ public:
 	virtual std::vector<UnitContext*> getNeighborContexts() const = 0;
 	virtual bool isPointInCompartment(IntVector2D const&) const = 0;
 	virtual UnitContext* getNeighborContext(IntVector2D const& pos) const = 0;
-	virtual void convertAbsToRelPosition(IntVector2D& pos) const = 0;
+	virtual IntVector2D convertAbsToRelPosition(IntVector2D const& pos) const = 0;
 
 private:
 };

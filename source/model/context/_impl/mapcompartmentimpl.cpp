@@ -39,7 +39,7 @@ UnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D const & pos) co
 	return nullptr;
 }
 
-void MapCompartmentImpl::convertAbsToRelPosition(IntVector2D & pos) const
+IntVector2D MapCompartmentImpl::convertAbsToRelPosition(IntVector2D const& pos) const
 {
 }
 
