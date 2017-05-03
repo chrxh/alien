@@ -1,6 +1,5 @@
 #include "model/context/SpaceMetric.h"
 #include "model/context/UnitContext.h"
-#include "model/context/MapCompartment.h"
 #include "model/ModelSettings.h"
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
