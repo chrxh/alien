@@ -1,4 +1,5 @@
 #include "MapCompartmentImpl.h"
+#include "model/context/UnitContext.h"
 
 MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 	: MapCompartment(parent)
@@ -8,11 +9,12 @@ MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 void MapCompartmentImpl::init(SpaceMetric * metric, IntRect mapRect)
 {
 	_rect = mapRect;
+	_size = { _rect.p2.x - _rect.p1.x, _rect.p2.y - _rect.p1.y };
 }
 
 IntVector2D MapCompartmentImpl::getSize() const
 {
-	return{ _rect.p2.x - _rect.p1.x, _rect.p2.y - _rect.p1.y };
+	return _size;
 }
 
 void MapCompartmentImpl::registerNeighborContext(RelativeLocation location, UnitContext * context)
@@ -29,17 +31,23 @@ std::vector<UnitContext*> MapCompartmentImpl::getNeighborContexts() const
 	return result;
 }
 
-bool MapCompartmentImpl::isPointInCompartment(IntVector2D const &) const
+bool MapCompartmentImpl::isPointInCompartment(IntVector2D const & intPos) const
 {
-	return false;
+	return intPos.x >= _rect.p1.x && intPos.y >= _rect.p1.y && intPos.x <= _rect.p2.x && intPos.y <= _rect.p2.y;
 }
 
-UnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D const & pos) const
+UnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D const & intPos) const
 {
+	for (auto const& contextByLocation : _contextsByLocations) {
+		auto context = contextByLocation.second;
+		if (context->getMapCompartment()->isPointInCompartment(intPos)) {
+			return context;
+		}
+	}
 	return nullptr;
 }
 
-IntVector2D MapCompartmentImpl::convertAbsToRelPosition(IntVector2D const& pos) const
+IntVector2D MapCompartmentImpl::convertAbsToRelPosition(IntVector2D const& intPos) const
 {
 }
 
