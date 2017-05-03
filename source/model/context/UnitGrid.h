@@ -16,7 +16,7 @@ public:
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) = 0;
 	virtual IntVector2D getSize() const = 0;
 	virtual Unit* getUnit(IntVector2D gridPos) const = 0;
-	virtual IntRect calcMapRect(IntVector2D gridPos) const = 0;
+	virtual IntRect calcCompartmentRect(IntVector2D gridPos) const = 0;
 };
 
 #endif // UNITGRID_H

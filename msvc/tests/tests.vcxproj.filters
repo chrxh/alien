@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\source\tests\integrationtests\SimulationComparisonTest.cpp">
-      <Filter>Integrationtests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\tests\integrationtests\SimulationReplicatorTest.cpp">
-      <Filter>Integrationtests</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\tests\unittests\CellClusterTest.cpp">
       <Filter>Unittests</Filter>
     </ClCompile>
@@ -18,6 +12,15 @@
     </ClCompile>
     <ClCompile Include="..\..\source\tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\tests\Testsuite.cpp" />
+    <ClCompile Include="..\..\source\tests\integrationtests\ComparisonTest.cpp">
+      <Filter>Integrationtests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\tests\integrationtests\ReplicatorTest.cpp">
+      <Filter>Integrationtests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\tests\unittests\MapCompartmentTest.cpp">
+      <Filter>Unittests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\tests\TestSettings.h" />

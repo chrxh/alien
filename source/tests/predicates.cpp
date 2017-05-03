@@ -1,5 +1,10 @@
 #include "predicates.h"
 
+bool predEqualIntVector(IntVector2D a, IntVector2D b)
+{
+	return a == b;
+}
+
 bool predEqualMediumPrecision(qreal a, qreal b)
 {
 	return qAbs(a - b) < FLOATINGPOINT_MEDIUM_PRECISION;

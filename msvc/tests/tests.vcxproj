@@ -242,12 +242,13 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\tests\integrationtests\SimulationComparisonTest.cpp" />
-    <ClCompile Include="..\..\source\tests\integrationtests\SimulationReplicatorTest.cpp" />
+    <ClCompile Include="..\..\source\tests\integrationtests\ComparisonTest.cpp" />
+    <ClCompile Include="..\..\source\tests\integrationtests\ReplicatorTest.cpp" />
     <ClCompile Include="..\..\source\tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\tests\Testsuite.cpp" />
     <ClCompile Include="..\..\source\tests\unittests\CellClusterTest.cpp" />
     <ClCompile Include="..\..\source\tests\unittests\CellFunctionCommunicatorTest.cpp" />
+    <ClCompile Include="..\..\source\tests\unittests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\tests\unittests\PhysicsTest.cpp" />
   </ItemGroup>
   <ItemGroup>

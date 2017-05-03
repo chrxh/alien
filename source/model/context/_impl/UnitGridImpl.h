@@ -16,7 +16,7 @@ public:
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) override;
 	virtual IntVector2D getSize() const override;
 	virtual Unit* getUnit(IntVector2D gridPos) const override;
-	virtual IntRect calcMapRect(IntVector2D gridPos) const override;
+	virtual IntRect calcCompartmentRect(IntVector2D gridPos) const override;
 
 private:
 	SpaceMetric* _metric = nullptr;

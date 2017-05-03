@@ -56,6 +56,9 @@ struct IntVector2D {
 	int y;
 };
 
+extern bool operator==(IntVector2D const& vec1, IntVector2D const& vec2);
+extern std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
+
 struct IntRect {
 	IntVector2D p1;
 	IntVector2D p2;
