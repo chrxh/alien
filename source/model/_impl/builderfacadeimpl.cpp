@@ -92,7 +92,7 @@ Unit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationCon
 	auto energyMap = factory->buildEnergyParticleMap(unit);
 	auto symbolTable = context->getSymbolTable()->clone(unit);
 	auto parameters = context->getSimulationParameters()->clone(unit);
-	compartment->init(metric, grid->calcMapRect(gridPos));
+	compartment->init(metric, grid->calcCompartmentRect(gridPos));
 	cellMap->init(metric, compartment);
 	energyMap->init(metric, compartment);
 	unitContext->init(metric, cellMap, energyMap, compartment, symbolTable, parameters);

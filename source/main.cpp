@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 	SimulationController controller;
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto metric = facade->buildSpaceMetric({ 400, 200 });
+	auto metric = facade->buildSpaceMetric({ 600, 600 });
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
 	auto context = facade->buildSimulationContext(4, { 6, 6 }, metric, symbols, parameters, &controller);

@@ -10,6 +10,9 @@ UnitGridImpl::UnitGridImpl(QObject * parent)
 
 void UnitGridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
 {
+	if ((metric->getSize().x % gridSize.x != 0) || (metric->getSize().y % gridSize.y != 0)) {
+		throw std::exception("Universe size is not a multiple of grid size.");
+	}
 
 	if (_metric != metric) {
 		delete _metric;
@@ -36,7 +39,7 @@ Unit * UnitGridImpl::getUnit(IntVector2D gridPos) const
 	return _units[gridPos.x][gridPos.y];
 }
 
-IntRect UnitGridImpl::calcMapRect(IntVector2D gridPos) const
+IntRect UnitGridImpl::calcCompartmentRect(IntVector2D gridPos) const
 {
 	IntVector2D universeSize = _metric->getSize();
 	IntVector2D p1 = { universeSize.x * gridPos.x / _gridSize.x, universeSize.y * gridPos.y / _gridSize.y };

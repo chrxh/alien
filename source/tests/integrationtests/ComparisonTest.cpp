@@ -11,11 +11,11 @@
 #include "tests/TestSettings.h"
 
 
-class SimulationComparisonTest : public ::testing::Test
+class ComparisonTest : public ::testing::Test
 {
 public:
-	SimulationComparisonTest();
-	~SimulationComparisonTest();
+	ComparisonTest();
+	~ComparisonTest();
 
 protected:
 	SimulationController* _simulationController;
@@ -191,12 +191,12 @@ protected:
     }
 }
 */
-SimulationComparisonTest::SimulationComparisonTest()
+ComparisonTest::ComparisonTest()
 {
 	_simulationController = new SimulationController();
 }
 
-SimulationComparisonTest::~SimulationComparisonTest()
+ComparisonTest::~ComparisonTest()
 {
 	delete _simulationController;
 }
