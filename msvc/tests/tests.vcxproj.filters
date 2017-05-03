@@ -21,6 +21,9 @@
     <ClCompile Include="..\..\source\tests\unittests\MapCompartmentTest.cpp">
       <Filter>Unittests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\tests\unittests\UnitGridTest.cpp">
+      <Filter>Unittests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\tests\TestSettings.h" />

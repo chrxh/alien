@@ -250,6 +250,7 @@
     <ClCompile Include="..\..\source\tests\unittests\CellFunctionCommunicatorTest.cpp" />
     <ClCompile Include="..\..\source\tests\unittests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\tests\unittests\PhysicsTest.cpp" />
+    <ClCompile Include="..\..\source\tests\unittests\UnitGridTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\alien\alien.vcxproj">
