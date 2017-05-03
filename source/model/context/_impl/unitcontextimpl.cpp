@@ -49,16 +49,6 @@ void UnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticle
 	deleteClustersAndEnergyParticles();
 }
 
-void UnitContextImpl::lock()
-{
-	_mutex.lock();
-}
-
-void UnitContextImpl::unlock()
-{
-	_mutex.unlock();
-}
-
 SpaceMetric* UnitContextImpl::getTopology () const
 {
     return _metric;

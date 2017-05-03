@@ -16,9 +16,6 @@ public:
 	void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 		, SimulationParameters* parameters) override;
 
-	virtual void lock();
-	virtual void unlock();
-
 	virtual SpaceMetric* getTopology () const override;
 	virtual CellMap* getCellMap () const override;
 	virtual EnergyParticleMap* getEnergyParticleMap () const override;
@@ -32,8 +29,6 @@ public:
 private:
 	void deleteClustersAndEnergyParticles();
 
-	QMutex _mutex;
-	
 	QList<CellCluster*> _clusters;
     QList<EnergyParticle*> _energyParticles;
     SpaceMetric* _metric = nullptr;
