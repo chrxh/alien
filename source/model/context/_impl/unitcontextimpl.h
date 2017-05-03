@@ -16,7 +16,7 @@ public:
 	void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 		, SimulationParameters* parameters) override;
 
-	virtual SpaceMetric* getTopology () const override;
+	virtual SpaceMetric* getSpaceMetric () const override;
 	virtual CellMap* getCellMap () const override;
 	virtual EnergyParticleMap* getEnergyParticleMap () const override;
 	virtual MapCompartment* getMapCompartment() const override;

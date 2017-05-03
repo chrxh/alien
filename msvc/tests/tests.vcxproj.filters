@@ -24,6 +24,12 @@
     <ClCompile Include="..\..\source\tests\unittests\UnitGridTest.cpp">
       <Filter>Unittests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\tests\integrationtests\MultithreadingTest.cpp">
+      <Filter>Integrationtests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\tests\unittests\UnitThreadControllerImplTest.cpp">
+      <Filter>Unittests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\tests\TestSettings.h" />

@@ -131,7 +131,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 	quint8 cmd = tokenMem[Enums::Constr::IN] % 4;
     quint8 opt = tokenMem[Enums::Constr::IN_OPTION] % 7;
 	auto cellMap = _context->getCellMap();
-	auto metric = _context->getTopology();
+	auto metric = _context->getSpaceMetric();
 	auto parameters = _context->getSimulationParameters();
 
     //do nothing?

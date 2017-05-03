@@ -9,7 +9,7 @@ class UnitThread
 {
 	Q_OBJECT
 public:
-	UnitThread(QObject* parent) : QThread(parent) {}
+	UnitThread(QObject* parent = nullptr) : QThread(parent) {}
 	virtual ~UnitThread() {}
 
 	void addDependency(UnitThread* unit);
