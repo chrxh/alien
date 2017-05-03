@@ -1,7 +1,7 @@
 #include "selectionmultiplyarrangementdialog.h"
 #include "ui_selectionmultiplyarrangementdialog.h"
 
-#include "gui/guisettings.h"
+#include "gui/GuiSettings.h"
 
 SelectionMultiplyArrangementDialog::SelectionMultiplyArrangementDialog(QVector3D centerPos, QWidget *parent) :
     QDialog(parent),

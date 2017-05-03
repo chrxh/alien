@@ -5,17 +5,9 @@
 #include <QByteArray>
 #include <QStack>
 
-class Cell;
-class EnergyParticle;
-class SimulationController;
-class TextEditor;
-class UniversePixelScene;
-class UniverseShapeScene;
-class SimulationMonitor;
-class QGraphicsScene;
-class QTimer;
-class TutorialWindow;
-class StartScreenController;
+#include "Definitions.h"
+#include "model/Definitions.h"
+
 namespace Ui {
     class MainWindow;
 }
