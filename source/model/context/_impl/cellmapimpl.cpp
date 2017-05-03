@@ -39,10 +39,10 @@ void CellMapImpl::clear()
 void CellMapImpl::setCell(QVector3D pos, Cell * cell)
 {
 	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
-	setCellHelper(intPos, cell);
+	locateCell(intPos) = cell;
 }
 
-void CellMapImpl::removeCellIfPresent(QVector3D pos, Cell * cell)
+void CellMapImpl::removeCellIfPresent(QVector3D pos, Cell * cellToRemove)
 {
 	IntVector2D intPosC = _metric->correctPositionWithIntPrecision(pos);
 	IntVector2D intPosM = _metric->shiftPosition(intPosC, { -1, -1 });
@@ -69,23 +69,23 @@ void CellMapImpl::removeCellIfPresent(QVector3D pos, Cell * cell)
 		};
 	}
 
-	removeCellIfPresent({ intPosM.x, intPosM.y }, cell);
-	removeCellIfPresent({ intPosC.x, intPosM.y }, cell);
-	removeCellIfPresent({ intPosP.x, intPosM.y }, cell);
+	removeCellIfPresent({ intPosM.x, intPosM.y }, cellToRemove);
+	removeCellIfPresent({ intPosC.x, intPosM.y }, cellToRemove);
+	removeCellIfPresent({ intPosP.x, intPosM.y }, cellToRemove);
 
-	removeCellIfPresent({ intPosM.x, intPosC.y }, cell);
-	removeCellIfPresent({ intPosC.x, intPosC.y }, cell);
-	removeCellIfPresent({ intPosP.x, intPosC.y }, cell);
+	removeCellIfPresent({ intPosM.x, intPosC.y }, cellToRemove);
+	removeCellIfPresent({ intPosC.x, intPosC.y }, cellToRemove);
+	removeCellIfPresent({ intPosP.x, intPosC.y }, cellToRemove);
 
-	removeCellIfPresent({ intPosM.x, intPosP.y }, cell);
-	removeCellIfPresent({ intPosC.x, intPosP.y }, cell);
-	removeCellIfPresent({ intPosP.x, intPosP.y }, cell);
+	removeCellIfPresent({ intPosM.x, intPosP.y }, cellToRemove);
+	removeCellIfPresent({ intPosC.x, intPosP.y }, cellToRemove);
+	removeCellIfPresent({ intPosP.x, intPosP.y }, cellToRemove);
 }
 
 Cell* CellMapImpl::getCell(QVector3D pos) const
 {
 	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
-	return getCellHelper(intPos);
+	return locateCell(intPos);
 }
 
 CellClusterSet CellMapImpl::getNearbyClusters(QVector3D const& pos, qreal r) const
@@ -118,7 +118,7 @@ CellCluster * CellMapImpl::getNearbyClusterFast(const QVector3D & pos, qreal r, 
 	for (int rx = -rc; rx <= rc; rx += step)
 		for (int ry = -rc; ry <= rc; ry += step) {
 			if (static_cast<qreal>(rx*rx + ry*ry) < rs) {
-				Cell* cell = getCellHelper(_metric->shiftPosition(intPos, { rx, ry }));
+				Cell*& cell = locateCell(_metric->shiftPosition(intPos, { rx, ry }));
 				if (cell) {
 					CellCluster* cluster = cell->getCluster();
 					if (cluster != exclude) {
@@ -150,7 +150,7 @@ QList<Cell*> CellMapImpl::getNearbySpecificCells(const QVector3D & pos, qreal r,
 	for (int rx = -rCeil; rx <= rCeil; ++rx)
 		for (int ry = -rCeil; ry <= rCeil; ++ry)
 			if (static_cast<qreal>(rx*rx + ry*ry) < rs) {
-				Cell* cell = getCellHelper(_metric->shiftPosition(intPos, { rx, ry }));
+				Cell*& cell = locateCell(_metric->shiftPosition(intPos, { rx, ry }));
 				if (cell) {
 					if (selection(cell)) {
 						cells << cell;

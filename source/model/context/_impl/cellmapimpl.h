@@ -17,7 +17,7 @@ public:
 	virtual void clear() override;
 
 	virtual void setCell(QVector3D pos, Cell* cell) override;
-	virtual void removeCellIfPresent(QVector3D pos, Cell* cell) override;
+	virtual void removeCellIfPresent(QVector3D pos, Cell* cellToRemove) override;
 	virtual Cell* getCell(QVector3D pos) const override;
 
 	//advanced functions
@@ -31,8 +31,7 @@ public:
 
 private:
 	void deleteCellMap();
-	inline void setCellHelper(IntVector2D const& intPos, Cell* cell);
-	inline Cell* getCellHelper(IntVector2D const& intPos) const;
+	inline Cell*& locateCell(IntVector2D const& intPos) const;
 
 	SpaceMetric* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
@@ -41,7 +40,7 @@ private:
 
 /****************** inline methods ******************/
 
-Cell * CellMapImpl::getCellHelper(IntVector2D const& intPos) const
+Cell*& CellMapImpl::locateCell(IntVector2D const& intPos) const
 {
 	if (_compartment->isPointInCompartment(intPos)) {
 		auto relPos = _compartment->convertAbsToRelPosition(intPos);
@@ -51,19 +50,6 @@ Cell * CellMapImpl::getCellHelper(IntVector2D const& intPos) const
 		auto cellMap = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap());
 		auto relPos = _compartment->convertAbsToRelPosition(intPos);
 		return cellMap->_cellGrid[relPos.x][relPos.y];
-	}
-}
-
-void CellMapImpl::setCellHelper(IntVector2D const& intPos, Cell* cell)
-{
-	if (_compartment->isPointInCompartment(intPos)) {
-		auto relPos = _compartment->convertAbsToRelPosition(intPos);
-		_cellGrid[relPos.x][relPos.y] = cell;
-	}
-	else {
-		auto cellMap = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap());
-		auto relPos = _compartment->convertAbsToRelPosition(intPos);
-		cellMap->_cellGrid[relPos.x][relPos.y] = cell;
 	}
 }
 

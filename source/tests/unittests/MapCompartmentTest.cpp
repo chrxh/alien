@@ -24,7 +24,7 @@ protected:
 	SimulationController* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	UnitGrid* _grid = nullptr;
-	IntVector2D _gridSize{ 6,6 };
+	IntVector2D _gridSize{ 6, 6 };
 	IntVector2D _universeSize{ 1200, 600 };
 	IntVector2D _compartmentSize;
 };
