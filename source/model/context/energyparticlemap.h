@@ -14,8 +14,8 @@ public:
 	virtual void init(SpaceMetric* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
 	
-	virtual void removeParticleIfPresent(QVector3D pos, EnergyParticle* energy) = 0;
-	virtual void setParticle(QVector3D pos, EnergyParticle* energy) = 0;
+	virtual void removeParticleIfPresent(QVector3D pos, EnergyParticle* particleToRemove) = 0;
+	virtual void setParticle(QVector3D pos, EnergyParticle* particle) = 0;
 	virtual EnergyParticle* getParticle(QVector3D pos) const = 0;
 	inline EnergyParticle* getParticleFast(IntVector2D const& pos) const;
 
