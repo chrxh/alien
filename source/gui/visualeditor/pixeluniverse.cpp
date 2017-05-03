@@ -345,9 +345,8 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
                 Cell* cell = itCell.value();
 
                 //apply force
-                cell->setVelocity(cell->getVelocity() + dir*dist*cell->getCluster()->getMass()*0.05);
+                cell->setVelocity(cell->getVelocity() + dir*dist*cell->getCluster()->getMass()*0.05f);
             }
-
             //calc effective velocities of the clusters
             QMapIterator< quint64, CellCluster* > itCluster(clusters);
             while(itCluster.hasNext()) {

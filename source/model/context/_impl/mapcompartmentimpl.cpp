@@ -49,5 +49,6 @@ UnitContext * MapCompartmentImpl::getNeighborContext(IntVector2D const & intPos)
 
 IntVector2D MapCompartmentImpl::convertAbsToRelPosition(IntVector2D const& intPos) const
 {
+	return{ intPos.x - intPos.x / _size.x * _size.x, intPos.y - intPos.x / _size.y * _size.y };
 }
 
