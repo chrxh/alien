@@ -39,6 +39,16 @@ void SimulationContextImpl::init(SpaceMetric* metric, UnitGrid* grid, UnitThread
 	}
 }
 
+void SimulationContextImpl::lock()
+{
+	_mutex.lock();
+}
+
+void SimulationContextImpl::unlock()
+{
+	_mutex.unlock();
+}
+
 SpaceMetric * SimulationContextImpl::getSpaceMetric() const
 {
 	return _metric;
