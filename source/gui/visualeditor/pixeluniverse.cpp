@@ -4,7 +4,7 @@
 #include <QMatrix4x4>
 
 #include "gui/GuiSettings.h"
-#include "model/context/UnitContext.h"
+#include "model/context/SimulationContext.h"
 #include "model/context/EnergyParticleMap.h"
 #include "model/context/CellMap.h"
 #include "model/context/SpaceMetric.h"
@@ -46,16 +46,16 @@ void PixelUniverse::reset ()
     update();
 }
 
-void PixelUniverse::universeUpdated (UnitContext* context)
+void PixelUniverse::universeUpdated (SimulationContext* context)
 {
     _context = context;
+/*
 
     //prepare image
 	context->lock();
-	IntVector2D size = context->getTopology()->getSize();
+	IntVector2D size = context->getSpaceMetric()->getSize();
 	context->unlock();
     if( !_image ) {
-//        _pixelMap = addPixmap(QPixmap());
         _image = new QImage(size.x, size.y, QImage::Format_RGB32);
         setSceneRect(0,0,_image->width(), _image->height());
     }
@@ -154,6 +154,7 @@ void PixelUniverse::universeUpdated (UnitContext* context)
 
     context->unlock();
     _pixelMap->setPixmap(QPixmap::fromImage(*_image));
+*/
 }
 
 void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
@@ -162,6 +163,7 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         return;
 	_context->lock();
 
+/*
     //update mouse buttons
     _leftMouseButtonPressed = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
     _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
@@ -170,7 +172,7 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
     if( (_leftMouseButtonPressed && (!_rightMouseButtonPressed)) || ((!_leftMouseButtonPressed) && _rightMouseButtonPressed)) {
 
         //scan for clusters
-		IntVector2D size = _context->getTopology()->getSize();
+		IntVector2D size = _context->getSpaceMetric()->getSize();
 		CellMap* cellMap = _context->getCellMap();
         QMap< quint64, CellCluster* > clusters;
         QVector3D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
@@ -221,12 +223,14 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
     }
     _context->unlock();
     universeUpdated(_context);
+*/
 }
 
 void PixelUniverse::mouseReleaseEvent (QGraphicsSceneMouseEvent* e)
 {
     if( !_context )
         return;
+/*
 	_context->lock();
 
     //update mouse buttons
@@ -242,6 +246,7 @@ void PixelUniverse::mouseReleaseEvent (QGraphicsSceneMouseEvent* e)
 
 	_context->unlock();
     universeUpdated(_context);
+*/
 }
 
 void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
@@ -249,6 +254,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
     if( !_context)
         return;
 
+/*
     //update mouse buttons and positions
 //    _leftMouseButtonPressed = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 //    _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
@@ -361,6 +367,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
     for(int i = 0; i < MOUSE_HISTORY-1; ++i)
         _lastMouseDiffs[MOUSE_HISTORY-i-1] = _lastMouseDiffs[MOUSE_HISTORY-i-2];
     _lastMouseDiffs[0] = mouseDiff;
+*/
 }
 
 void PixelUniverse::timeout ()

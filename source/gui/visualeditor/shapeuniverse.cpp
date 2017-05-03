@@ -10,7 +10,7 @@
 #include "model/context/SimulationParameters.h"
 #include "model/ModelSettings.h"
 #include "model/BuilderFacade.h"
-#include "model/context/UnitContext.h"
+#include "model/context/SimulationContext.h"
 #include "model/context/SpaceMetric.h"
 #include "model/context/EnergyParticleMap.h"
 #include "gui/GuiSettings.h"
@@ -36,12 +36,13 @@ ShapeUniverse::~ShapeUniverse()
 }
 
 
-void ShapeUniverse::universeUpdated (UnitContext* context)
+void ShapeUniverse::universeUpdated (SimulationContext* context)
 {
     _context = context;
     if( !_context)
         return;
 
+/*
 	_context->lock();
     _focusCells.clear();
     _focusEnergyParticles.clear();
@@ -61,7 +62,7 @@ void ShapeUniverse::universeUpdated (UnitContext* context)
 
     //reset scene
     clear();
-	IntVector2D size = _context->getTopology()->getSize();
+	IntVector2D size = _context->getSpaceMetric()->getSize();
     setSceneRect(0, 0, size.x*GRAPHICS_ITEM_SIZE, size.y*GRAPHICS_ITEM_SIZE);
 
     //draw boundaries
@@ -100,6 +101,7 @@ void ShapeUniverse::universeUpdated (UnitContext* context)
 
     _context->unlock();
     update();
+*/
 }
 
 void ShapeUniverse::cellCreated (Cell* cell)
@@ -162,7 +164,7 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
     if( _energyItems.contains(e->getId()) ) {
         QVector3D pos = e->getPosition();
         EnergyGraphicsItem* eItem = _energyItems[e->getId()];
-		_context->getTopology()->correctPosition(pos);
+		_context->getSpaceMetric()->correctPosition(pos);
         eItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
     }
 	_context->unlock();
@@ -309,7 +311,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
     unhighlight();
 
     //move graphic cells corresponding to the Cells in "clusters" and delete their connections
-	SpaceMetric* topo = _context->getTopology();
+	SpaceMetric* topo = _context->getSpaceMetric();
     foreach(CellCluster* cluster, clusters) {
         foreach(Cell* cell, cluster->getCellsRef()) {
 
@@ -470,8 +472,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
     if( !_context)
         return;
 
-//    _context->lock();
-
+/*
     //mouse buttons
     bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
     bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
@@ -622,7 +623,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             }
         }
     }
-//    _context->unlock();
+*/
 }
 
 EnergyGraphicsItem* ShapeUniverse::createEnergyItem (EnergyParticle* e)
