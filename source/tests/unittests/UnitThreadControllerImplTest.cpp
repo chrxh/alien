@@ -36,9 +36,9 @@ UnitThreadControllerImplTest::UnitThreadControllerImplTest()
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	auto metric = facade->buildSpaceMetric(_universeSize);
-	auto symbols = ModelSettings::loadDefaultSymbolTable();
-	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	_context = facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters);
+	auto symbols = facade->buildDefaultSymbolTable();
+	auto parameters = facade->buildDefaultSimulationParameters();
+	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters));
 	_controller = facade->buildSimulationController(_context);
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 }

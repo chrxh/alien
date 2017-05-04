@@ -14,10 +14,12 @@ class BuilderFacade
 public:
 	virtual ~BuilderFacade() = default;
 
-	virtual SimulationController* buildSimulationController(SimulationContext* context) const = 0;
-	virtual SimulationContext* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
+	virtual SimulationController* buildSimulationController(SimulationContextWrapper* context) const = 0;
+	virtual SimulationContextWrapper* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
 	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize) const = 0;
+	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
+	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
 
     virtual CellCluster* buildCellCluster (UnitContext* context) const = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel

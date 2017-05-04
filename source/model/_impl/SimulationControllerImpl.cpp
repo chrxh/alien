@@ -9,11 +9,7 @@ SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
 
 void SimulationControllerImpl::init(SimulationContext* context)
 {
-	if (_context != context) {
-		delete _context;
-		_context = context;
-		_context->setParent(this);
-	}
+	SET_CHILD(_context, context);
 }
 
 void SimulationControllerImpl::setRun(bool run)
