@@ -35,14 +35,14 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContext * context) const
+SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContextWrapper * context) const
 {
 	auto controller = new SimulationControllerImpl();
-	controller->init(context);
+	controller->init(static_cast<SimulationContext*>(context));
 	return controller;
 }
 
-SimulationContext* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
+SimulationContextWrapper* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
 	, SimulationParameters* parameters) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
@@ -114,6 +114,16 @@ SpaceMetric * BuilderFacadeImpl::buildSpaceMetric(IntVector2D universeSize) cons
 	auto metric = factory->buildSpaceMetric();
 	metric->init(universeSize);
 	return metric;
+}
+
+SymbolTable * BuilderFacadeImpl::buildDefaultSymbolTable() const
+{
+	return ModelSettings::loadDefaultSymbolTable();
+}
+
+SimulationParameters * BuilderFacadeImpl::buildDefaultSimulationParameters() const
+{
+	return ModelSettings::loadDefaultSimulationParameters();
 }
 
 CellCluster* BuilderFacadeImpl::buildCellCluster (UnitContext* context) const

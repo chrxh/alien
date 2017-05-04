@@ -10,10 +10,12 @@ public:
     BuilderFacadeImpl ();
 	virtual ~BuilderFacadeImpl() = default;
 
-	virtual SimulationController* buildSimulationController(SimulationContext* context) const override;
-	virtual SimulationContext* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
+	virtual SimulationController* buildSimulationController(SimulationContextWrapper* context) const override;
+	virtual SimulationContextWrapper* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const override;
 	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize) const override;
+	virtual SymbolTable* buildDefaultSymbolTable() const override;
+	virtual SimulationParameters* buildDefaultSimulationParameters() const override;
 
 	virtual CellCluster* buildCellCluster(UnitContext* context) const override;
 	virtual CellCluster* buildCellCluster(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel

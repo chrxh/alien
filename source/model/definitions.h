@@ -21,6 +21,7 @@ class UnitGrid;
 class UnitThreadController;
 class UnitContext;
 class SimulationContext;
+class SimulationContextWrapper;
 class SimulationParameters;
 class SimulationController;
 class SymbolTable;
