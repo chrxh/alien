@@ -14,8 +14,9 @@ class BuilderFacade
 public:
 	virtual ~BuilderFacade() = default;
 
-	virtual SimulationController* buildSimulationController(SimulationContextHandle* context) const = 0;
-	virtual SimulationContextHandle* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
+	virtual SimulationManipulatorApi* buildSimulationManipulator(SimulationContextApi* context) const = 0;
+	virtual SimulationController* buildSimulationController(SimulationContextApi* context) const = 0;
+	virtual SimulationContextApi* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
 	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize) const = 0;
 	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
