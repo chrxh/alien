@@ -11,7 +11,7 @@ public:
 	UnitImpl(QObject* parent = nullptr);
 	virtual ~UnitImpl() {}
 
-public slots:
+public Q_SLOTS:
 	virtual void init(UnitContext* context) override;
 
 public:
@@ -20,7 +20,7 @@ public:
 	virtual qreal calcRotEnergy() const override;
 	virtual qreal calcInternalEnergy() const override;
 
-public slots:
+public Q_SLOTS:
 	virtual void calcNextTimestep() override;
 
 private:

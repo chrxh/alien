@@ -41,7 +41,7 @@ void EnergyEdit::requestUpdate ()
     updateDisplay();
 
     //inform other instances
-    emit energyParticleDataChanged(_energyParticlePos, _energyParticleVel, _energyParticleValue);
+    Q_EMIT energyParticleDataChanged(_energyParticlePos, _energyParticleVel, _energyParticleValue);
 }
 
 void EnergyEdit::keyPressEvent (QKeyEvent* e)
@@ -217,7 +217,7 @@ void EnergyEdit::keyPressEvent (QKeyEvent* e)
         updateDisplay();
 
         //inform other instances
-        emit energyParticleDataChanged(_energyParticlePos, _energyParticleVel, _energyParticleValue);
+        Q_EMIT energyParticleDataChanged(_energyParticlePos, _energyParticleVel, _energyParticleValue);
     }
 }
 

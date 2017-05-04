@@ -202,7 +202,7 @@ void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray c
 void TokenTab::requestUpdate ()
 {
     ui->tokenEditor->requestUpdate();
-    emit tokenMemoryChanged(_tokenMemory);
+    Q_EMIT tokenMemoryChanged(_tokenMemory);
 }
 
 void TokenTab::tokenMemoryChanged_Slot (int tokenMemPointer)
@@ -214,7 +214,7 @@ void TokenTab::tokenMemoryChanged_Slot (int tokenMemPointer)
             _tokenMemory[tokenMemPointer+i] = newData[i];
         }
     }
-    emit tokenMemoryChanged(_tokenMemory);
+    Q_EMIT tokenMemoryChanged(_tokenMemory);
 }
 
 void TokenTab::tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer)

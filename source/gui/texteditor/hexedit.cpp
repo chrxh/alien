@@ -98,11 +98,11 @@ void HexEdit::keyPressEvent (QKeyEvent* e)
             s1 = "<span style=\"color:"+HEX_EDIT_COLOR2.name()+"\">";
         QTextEdit::textCursor().insertHtml(s1+k+"</span>");
 
-        //read and emit data
+        //read and Q_EMIT data
         QString data = QTextEdit::document()->findBlockByLineNumber(0).text();
         data.remove(" ");
         _data = convertHexStringToByteArray(data);
-        emit dataChanged(_data);
+        Q_EMIT dataChanged(_data);
     }
 
     //arrow keys pressed?
@@ -111,7 +111,7 @@ void HexEdit::keyPressEvent (QKeyEvent* e)
     }
     if( e->key() == Qt::Key_Left ) {
         if( QTextEdit::textCursor().positionInBlock() == 0 )
-            emit cursorReachedBeginning(-1);
+            Q_EMIT cursorReachedBeginning(-1);
         else {
             QTextEdit::moveCursor(QTextCursor::Left);
             QTextEdit::moveCursor(QTextCursor::Left);
@@ -127,7 +127,7 @@ void HexEdit::keyPressEvent (QKeyEvent* e)
         QTextEdit::moveCursor(QTextCursor::Up);
         int pos = QTextEdit::textCursor().positionInBlock();
         if( oldPos == pos )
-            emit cursorReachedBeginning(QTextEdit::textCursor().columnNumber());
+            Q_EMIT cursorReachedBeginning(QTextEdit::textCursor().columnNumber());
 //        if( QTextEdit::textCursor().blockNumber() == 0 )
 //            QTextEdit::moveCursor(QTextCursor::Down);
     }
@@ -136,7 +136,7 @@ void HexEdit::keyPressEvent (QKeyEvent* e)
         QTextEdit::moveCursor(QTextCursor::Down);
         int pos = QTextEdit::textCursor().positionInBlock();
         if( oldPos == pos )
-            emit cursorReachedEnd(QTextEdit::textCursor().columnNumber());
+            Q_EMIT cursorReachedEnd(QTextEdit::textCursor().columnNumber());
     }
 
     //skip the empty space
@@ -146,7 +146,7 @@ void HexEdit::keyPressEvent (QKeyEvent* e)
     if( pos == (_data.size()*3-1) ) {
         QTextEdit::moveCursor(QTextCursor::Left);
         QTextEdit::moveCursor(QTextCursor::Left);
-        emit cursorReachedEnd(0);
+        Q_EMIT cursorReachedEnd(0);
     }
 
     //adapt color of the cursor

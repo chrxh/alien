@@ -16,7 +16,7 @@ public:
     void updateCluster (CellTO cell);
     void requestUpdate ();
 
-signals:
+Q_SIGNALS:
     void clusterDataChanged (CellTO cell);
 
 protected:

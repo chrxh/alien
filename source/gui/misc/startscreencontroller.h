@@ -13,7 +13,7 @@ public:
 
     void runStartScreen (QGraphicsView* view);
 
-signals:
+Q_SIGNALS:
     void startScreenFinished ();
 
 private:
@@ -24,7 +24,7 @@ private:
     void createSceneWithLogo ();
     void turnOffScrollbar ();
 
-private slots:
+private Q_SLOTS:
     void timeout ();
 
 private:

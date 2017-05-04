@@ -12,7 +12,7 @@ public:
 	Unit(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~Unit() {}
 
-public slots:
+public Q_SLOTS:
 	virtual void init(UnitContext* context) = 0;
 
 public:
@@ -21,10 +21,10 @@ public:
 	virtual qreal calcRotEnergy () const = 0;
 	virtual qreal calcInternalEnergy() const = 0;
 
-signals:
+Q_SIGNALS:
     void nextTimestepCalculated ();
 
-public slots:
+public Q_SLOTS:
 	virtual void calcNextTimestep() = 0;
 };
 

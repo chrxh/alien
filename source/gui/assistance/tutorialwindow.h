@@ -15,7 +15,7 @@ public:
      TutorialWindow(QWidget *parent = 0);
     ~TutorialWindow();
     
-signals:
+Q_SIGNALS:
     void closed ();
 
 protected:

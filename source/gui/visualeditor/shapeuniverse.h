@@ -36,10 +36,10 @@ public:
     QGraphicsItem* getFocusCenterCell ();
 	void toggleInformation(bool on);
 
-public slots:
+public Q_SLOTS:
     void reclustered (QList< CellCluster* > clusters);
 
-signals:
+Q_SIGNALS:
     void defocus ();                                                //to microeditor
     void focusCell (Cell* cell);                               //to microeditor
     void focusEnergyParticle (EnergyParticle* e);                      //to microeditor

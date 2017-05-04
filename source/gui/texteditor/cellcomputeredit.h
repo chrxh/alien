@@ -22,11 +22,11 @@ public:
     void setCompilationState (bool error, int line);
     void expectCellCompilerAnswer ();
 
-signals:
+Q_SIGNALS:
     void changesFromComputerMemoryEditor (QByteArray data);
     void compileButtonClicked (QString code);
 
-private slots:
+private Q_SLOTS:
     void compileButtonClicked_Slot ();
     void timerTimeout ();
 

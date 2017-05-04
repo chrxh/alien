@@ -13,7 +13,7 @@ public:
     void update (qreal energy);
     void requestUpdate ();
 
-signals:
+Q_SIGNALS:
     void dataChanged (qreal energy);
 
 protected:

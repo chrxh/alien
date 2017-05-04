@@ -77,7 +77,7 @@ void CellComputerEdit::expectCellCompilerAnswer ()
 
 void CellComputerEdit::compileButtonClicked_Slot ()
 {
-    emit compileButtonClicked(ui->computerCodeEditor2->getCode());
+    Q_EMIT compileButtonClicked(ui->computerCodeEditor2->getCode());
 }
 
 void CellComputerEdit::timerTimeout ()
