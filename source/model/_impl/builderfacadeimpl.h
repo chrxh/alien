@@ -10,8 +10,8 @@ public:
     BuilderFacadeImpl ();
 	virtual ~BuilderFacadeImpl() = default;
 
-	virtual SimulationController* buildSimulationController(SimulationContextWrapper* context) const override;
-	virtual SimulationContextWrapper* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
+	virtual SimulationController* buildSimulationController(SimulationContextHandle* context) const override;
+	virtual SimulationContextHandle* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const override;
 	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize) const override;
 	virtual SymbolTable* buildDefaultSymbolTable() const override;
@@ -27,7 +27,6 @@ public:
 		, int maxConnections = 0, int tokenAccessNumber = 0, QVector3D relPos = QVector3D()) const override;
 	virtual Cell* buildFeaturedCellWithRandomData(qreal energy, UnitContext* context) const override;
 	virtual CellTO buildFeaturedCellTO(Cell* cell) const override;
-	virtual void changeFeaturesOfCell(Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const override;
 
 	virtual Token* buildToken(UnitContext* context, qreal energy) const override;
 

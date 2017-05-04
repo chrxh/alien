@@ -14,8 +14,8 @@ class BuilderFacade
 public:
 	virtual ~BuilderFacade() = default;
 
-	virtual SimulationController* buildSimulationController(SimulationContextWrapper* context) const = 0;
-	virtual SimulationContextWrapper* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
+	virtual SimulationController* buildSimulationController(SimulationContextHandle* context) const = 0;
+	virtual SimulationContextHandle* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
 	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize) const = 0;
 	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
@@ -31,7 +31,6 @@ public:
         , int maxConnections = 0, int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const = 0;
     virtual Cell* buildFeaturedCellWithRandomData (qreal energy, UnitContext* context) const = 0;
     virtual CellTO buildFeaturedCellTO (Cell* cell) const = 0;
-    virtual void changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const = 0;
 
 	virtual Token* buildToken(UnitContext* context, qreal energy) const = 0;
 };
