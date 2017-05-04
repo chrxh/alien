@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <QEventLoop>
+
 #include "global/ServiceLocator.h"
 #include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
@@ -9,6 +11,8 @@
 #include "model/context/Unit.h"
 #include "model/context/UnitContext.h"
 #include "model/context/MapCompartment.h"
+#include "model/context/_impl/UnitThreadControllerImpl.h"
+#include "model/context/_impl/UnitThread.h"
 
 #include "tests/Predicates.h"
 
@@ -21,7 +25,7 @@ public:
 protected:
 	SimulationController* _controller = nullptr;
 	SimulationContext* _context = nullptr;
-	UnitGrid* _grid = nullptr;
+	UnitThreadControllerImpl* _threadController = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
 	IntVector2D _universeSize{ 1200, 600 };
 	IntVector2D _compartmentSize;
@@ -36,11 +40,22 @@ MultithreadingTest::MultithreadingTest()
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
 	_context = facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters, _controller);
 	_controller->newUniverse(_context);
-	_grid = _context->getUnitGrid();
-	_compartmentSize = { _universeSize.x / _gridSize.x, _universeSize.y / _gridSize.y };
+	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 }
 
 MultithreadingTest::~MultithreadingTest()
 {
 	delete _controller;
+}
+
+TEST_F(MultithreadingTest, testThreads)
+{
+	QEventLoop pause;
+	_threadController->connect(_threadController, &UnitThreadController::timestepFinished, &pause, &QEventLoop::quit);
+	_threadController->start();
+	pause.exec();
+
+	for (auto const& threadAndCalcSignal : _threadController->_threadsAndCalcSignals) {
+		ASSERT_TRUE(threadAndCalcSignal.thr->isFinished()) << "One thread is not finished.";
+	}
 }

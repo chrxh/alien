@@ -11,7 +11,7 @@ public:
 	SignalWrapper(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~SignalWrapper() {}
 
-	void emitSignal() { emit signal(); }
+	void emitSignal() { Q_EMIT signal(); }
 
 signals:
 	void signal();
