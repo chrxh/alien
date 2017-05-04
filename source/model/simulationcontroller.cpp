@@ -151,7 +151,7 @@ void SimulationController::addBlockStructure (QVector3D center, int numCellX, in
     _context->unlock();
     QList< CellCluster* > newCluster;
     newCluster << cluster;
-    emit reclustered(newCluster);
+    Q_EMIT reclustered(newCluster);
 */
 }
 
@@ -210,7 +210,7 @@ void SimulationController::addHexagonStructure (QVector3D center, int numLayers,
     _context->unlock();
     QList< CellCluster* > newCluster;
     newCluster << cluster;
-    emit reclustered(newCluster);
+    Q_EMIT reclustered(newCluster);
 */
 }
 
@@ -418,7 +418,7 @@ void SimulationController::delSelection (QList< Cell* > cells, QList< EnergyPart
 
     _context->unlock();
 //???? if( !allNewClusters.isEmpty() )
-    emit reclustered(allNewClusters);
+    Q_EMIT reclustered(allNewClusters);
 */
 }
 
@@ -573,7 +573,7 @@ void SimulationController::newCell (QVector3D pos)
     _context->getClustersRef() << cluster;
     _context->unlock();
 
-    emit cellCreated(cell);
+    Q_EMIT cellCreated(cell);
 */
 }
 
@@ -588,7 +588,7 @@ void SimulationController::newEnergyParticle (QVector3D pos)
     _context->getEnergyParticlesRef() << energy;
     _context->unlock();
 
-    emit energyParticleCreated(energy);
+    Q_EMIT energyParticleCreated(energy);
 */
 }
 
@@ -633,9 +633,9 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
                 CellFunctionComputer::CompilationState state
                     = computer->injectAndCompileInstructionCode(newCellData.computerCode);
                 if( !state.compilationOk )
-                    emit computerCompilationReturn(true, state.errorAtLine);
+                    Q_EMIT computerCompilationReturn(true, state.errorAtLine);
                 else
-                    emit computerCompilationReturn(false, 0);
+                    Q_EMIT computerCompilationReturn(false, 0);
             }
 
 
@@ -721,7 +721,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
         _context->unlock();
 
         //inform other instances about reclustering
-        emit reclustered(changedClusters);
+        Q_EMIT reclustered(changedClusters);
     }
     //update only cluster data
     else {
@@ -745,7 +745,7 @@ void SimulationController::updateCell (QList< Cell* > cells, QList< CellTO > new
             sumNewClusters<< cluster;
         }
         _context->unlock();
-        emit reclustered(sumNewClusters);
+        Q_EMIT reclustered(sumNewClusters);
     }
 */
 }
@@ -778,7 +778,7 @@ void SimulationController::forceFps (int fps)
     else {
         if( _run && (!_calculating) ) {
             _calculating = true;
-            emit calcNextTimestep();
+            Q_EMIT calcNextTimestep();
         }
     }
 */
@@ -786,12 +786,12 @@ void SimulationController::forceFps (int fps)
 
 void SimulationController::requestNextTimestep ()
 {
-    emit calcNextTimestep();
+    Q_EMIT calcNextTimestep();
 }
 
 void SimulationController::updateUniverse ()
 {
-    emit universeUpdated(_context, true);
+    Q_EMIT universeUpdated(_context, true);
 }
 
 void SimulationController::forceFpsTimerSlot ()
@@ -800,7 +800,7 @@ void SimulationController::forceFpsTimerSlot ()
     if( _run ) {
         if( !_calculating ) {
             _calculating = true;
-            emit calcNextTimestep();
+            Q_EMIT calcNextTimestep();
         }
     }
 */
@@ -816,12 +816,12 @@ void SimulationController::nextTimestepCalculated ()
 {
     /*_frame++;
     _calculating = false;
-    emit universeUpdated(_context, false);
+    Q_EMIT universeUpdated(_context, false);
 
     //fps forcing must be deactivate in order to continue with next the frame
     if( _run ) {
         if( _forceFps == 0 )
-            emit calcNextTimestep();
+            Q_EMIT calcNextTimestep();
     }*/
 }
 

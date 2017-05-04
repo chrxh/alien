@@ -24,7 +24,7 @@ protected:
     void mouseReleaseEvent (QGraphicsSceneMouseEvent* e);
     void mouseMoveEvent (QGraphicsSceneMouseEvent* e);
 
-private slots:
+private Q_SLOTS:
     void timeout ();
 
 private:

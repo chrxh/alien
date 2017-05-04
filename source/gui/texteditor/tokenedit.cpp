@@ -44,7 +44,7 @@ void TokenEdit::requestUpdate ()
     qreal energy = generateNumberFromFormattedString(currentText);
 
     //inform other instances
-    emit dataChanged(energy);
+    Q_EMIT dataChanged(energy);
 }
 
 void TokenEdit::keyPressEvent (QKeyEvent* e)
@@ -186,7 +186,7 @@ void TokenEdit::keyPressEvent (QKeyEvent* e)
 
         //inform other instances
         QString currentText = QTextEdit::textCursor().block().text();
-        emit dataChanged(generateNumberFromFormattedString(currentText));
+        Q_EMIT dataChanged(generateNumberFromFormattedString(currentText));
     }
 }
 

@@ -22,13 +22,11 @@ public:
 	virtual void registerUnit(Unit* unit) override;
 	virtual void start() override;
 
-public Q_SLOTS:
-	virtual void calcNextTimestep() override;
-
-private Q_SLOTS:
-	void threadFinishedCalculation(QObject* sender);
+	Q_SLOT virtual void calcNextTimestep() override;
 
 private:
+	Q_SLOT void threadFinishedCalculation(QObject* sender);
+
 	void updateDependencies();
 	void terminateThreads();
 	void startThreads();

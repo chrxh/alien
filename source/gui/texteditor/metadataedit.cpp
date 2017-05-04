@@ -52,13 +52,13 @@ void MetadataEdit::changesFromMetadataPropertiesEditor (QString clusterName, QSt
     _clusterName = clusterName;
     _cellName = cellName;
     _cellColor= cellColor;
-    emit metadataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
+    Q_EMIT metadataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
 }
 
 void MetadataEdit::changesFromMetadataDescriptionEditor ()
 {
     _cellDescription = ui->metadataDescriptionEdit->toPlainText();
-    emit metadataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
+    Q_EMIT metadataChanged(_clusterName, _cellName, _cellColor, _cellDescription);
 }
 
 /*

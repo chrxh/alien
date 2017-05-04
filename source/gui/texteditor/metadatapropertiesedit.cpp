@@ -33,7 +33,7 @@ void MetadataPropertiesEdit::requestUpdate ()
         _cellName = currentText;
 
     //inform other instances
-    emit metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
+    Q_EMIT metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
 }
 
 void MetadataPropertiesEdit::updateDisplay ()
@@ -199,7 +199,7 @@ void MetadataPropertiesEdit::mousePressEvent (QMouseEvent* e)
             _cellColor = 6;
         updateDisplay();
         QTextEdit::clearFocus();
-        emit metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
+        Q_EMIT metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
     }
 
 /*    if( e->y() < 30 )

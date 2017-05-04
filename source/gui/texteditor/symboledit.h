@@ -20,10 +20,10 @@ public:
 
     void loadSymbols (SymbolTable* symbolTable);
 
-signals:
+Q_SIGNALS:
     void symbolTableChanged (); //current symbol table can be obtained from MetadataManager
 
-private slots:
+private Q_SLOTS:
     void addSymbolButtonClicked ();
     void delSymbolButtonClicked ();
     void itemSelectionChanged ();

@@ -12,10 +12,10 @@ public:
     void updateMetadata (QString clusterName, QString cellName, quint8 cellColor);
     void requestUpdate ();
 
-signals:
+Q_SIGNALS:
     void metadataPropertiesChanged (QString clusterName, QString cellName, quint8 cellColor);
 
-private slots:
+private Q_SLOTS:
     void keyPressEvent (QKeyEvent* e);
     void mousePressEvent (QMouseEvent* e);
     void mouseDoubleClickEvent (QMouseEvent* e);

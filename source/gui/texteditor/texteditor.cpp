@@ -180,7 +180,7 @@ void TextEditor::defocused (bool requestDataUpdate)
     }
     setTabSymbolsWidgetVisibility();
     _currentTokenTab = 0;
-    emit numTokenUpdate(0, 0, _pasteTokenPossible);
+    Q_EMIT numTokenUpdate(0, 0, _pasteTokenPossible);
 
     //deactivate buttons
     if(_widgets.addTokenButton->isEnabled() )
@@ -267,7 +267,7 @@ void TextEditor::cellFocused (Cell* cell, bool requestDataUpdate)
 
     }
 	SimulationParameters* parameters = _context->getSimulationParameters();
-    emit numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
+    Q_EMIT numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
 
     //update Symbols Widget
     setTabSymbolsWidgetVisibility();
@@ -487,7 +487,7 @@ void TextEditor::addTokenClicked ()
     data[0] = _focusCellReduced.cellTokenAccessNum; //set access number for new token
     _focusCellReduced.tokenData.insert(newTokenTab, data);
 
-    //emit signal to notify other instances => update _focusCell from _focusCellReduced
+    //Q_EMIT signal to notify other instances => update _focusCell from _focusCellReduced
     invokeUpdateCell(false);
 
     cellFocused(_focusCell);
@@ -519,9 +519,9 @@ void TextEditor::addTokenClicked ()
     ui->delTokenButton->setEnabled(true);
     if( numToken == CELL_TOKENSTACKSIZE )
         ui->addTokenButton->setEnabled(false);
-    emit numTokenUpdate(numToken, CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+    Q_EMIT numTokenUpdate(numToken, CELL_TOKENSTACKSIZE, _pasteTokenPossible);
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);*/
 }
 
@@ -531,7 +531,7 @@ void TextEditor::delTokenClicked ()
     _focusCellReduced.tokenEnergies.removeAt(_widgets.tabTokenWidget->currentIndex());
     _focusCellReduced.tokenData.removeAt(_widgets.tabTokenWidget->currentIndex());
 
-    //emit signal to notify other instances => update _focusCell from _focusCellReduced
+    //Q_EMIT signal to notify other instances => update _focusCell from _focusCellReduced
     invokeUpdateCell(false);
 
     int newTokenTab = _currentTokenTab;
@@ -566,9 +566,9 @@ void TextEditor::delTokenClicked ()
         ui->delTokenButton->setEnabled(false);
         _tabTokenWidget->setVisible(false);
     }
-    emit numTokenUpdate(numToken, CELL_TOKENSTACKSIZE, _pasteTokenPossible);
+    Q_EMIT numTokenUpdate(numToken, CELL_TOKENSTACKSIZE, _pasteTokenPossible);
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);*/
 }
 
@@ -580,7 +580,7 @@ void TextEditor::copyTokenClicked ()
     _pasteTokenPossible = true;
     int numToken = _focusCellReduced.tokenEnergies.size();
 	SimulationParameters* parameters = _context->getSimulationParameters();
-	emit numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
+	Q_EMIT numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
 }
 
 void TextEditor::pasteTokenClicked ()
@@ -591,7 +591,7 @@ void TextEditor::pasteTokenClicked ()
     _savedTokenData[0] = _focusCellReduced.cellTokenAccessNum; //set access number for new token
     _focusCellReduced.tokenData.insert(newTokenTab, _savedTokenData);
 
-    //emit signal to notify other instances => update _focusCell from _focusCellReduced
+    //Q_EMIT signal to notify other instances => update _focusCell from _focusCellReduced
     invokeUpdateCell(false);
 
     cellFocused(_focusCell);
@@ -610,7 +610,7 @@ void TextEditor::delSelectionClicked ()
     defocused(false);
 
     //request deletion
-    emit delSelection();
+    Q_EMIT delSelection();
 }
 
 void TextEditor::delExtendedSelectionClicked ()
@@ -622,7 +622,7 @@ void TextEditor::delExtendedSelectionClicked ()
     defocused(false);
 
     //request deletion
-    emit delExtendedSelection();
+    Q_EMIT delExtendedSelection();
 }
 
 void TextEditor::buttonShowInfoClicked()
@@ -633,7 +633,7 @@ void TextEditor::buttonShowInfoClicked()
 	else {
 		_widgets.buttonShowInfo->setIcon(QIcon(resourceInfoOff));
 	}
-	emit toggleInformation(_widgets.buttonShowInfo->isChecked());
+	Q_EMIT toggleInformation(_widgets.buttonShowInfo->isChecked());
 }
 
 void TextEditor::changesFromCellEditor (CellTO newCellProperties)
@@ -674,7 +674,7 @@ void TextEditor::changesFromCellEditor (CellTO newCellProperties)
     //update Symbols Widget
     setTabSymbolsWidgetVisibility();
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);
 
 }
@@ -684,7 +684,7 @@ void TextEditor::changesFromClusterEditor (CellTO newClusterProperties)
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyClusterProperties(newClusterProperties);
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
     invokeUpdateCell(true);
 }
 
@@ -703,8 +703,8 @@ void TextEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, 
 	_context->getEnergyParticleMap()->setParticle(_focusEnergyParticle->getPosition(), _focusEnergyParticle);
     _context->unlock();
 
-    //emit signal to notify other instances
-    emit energyParticleUpdated(_focusEnergyParticle);
+    //Q_EMIT signal to notify other instances
+    Q_EMIT energyParticleUpdated(_focusEnergyParticle);
 */
 }
 
@@ -712,7 +712,7 @@ void TextEditor::changesFromTokenEditor (qreal energy)
 {
     _focusCellReduced.tokenEnergies[_currentTokenTab] = energy;
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);
 }
 
@@ -721,7 +721,7 @@ void TextEditor::changesFromComputerMemoryEditor(QByteArray const& data)
     //copy cell memory
     _focusCellReduced.computerMemory = data;
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);
 }
 
@@ -730,7 +730,7 @@ void TextEditor::changesFromTokenMemoryEditor(QByteArray data)
     //copy token memory
     _focusCellReduced.tokenData[_currentTokenTab] = data;
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);
 }
 
@@ -749,8 +749,8 @@ void TextEditor::changesFromMetadataEditor(QString clusterName, QString cellName
 		setCellClusterMetadata(_focusCell, meta);
 	}
 
-    //emit signal to notify macro editor
-    emit metadataUpdated();
+    //Q_EMIT signal to notify macro editor
+    Q_EMIT metadataUpdated();
 }
 
 void TextEditor::changesFromSymbolTableEditor ()
@@ -794,7 +794,7 @@ void TextEditor::compileButtonClicked (QString code)
 
     //NOTE: widgets are updated via reclustered(...)
 
-    //emit signal to notify other instances
+    //Q_EMIT signal to notify other instances
 	_widgets.cellComputerEdit->expectCellCompilerAnswer();
     invokeUpdateCell(false);
 }
@@ -805,7 +805,7 @@ void TextEditor::invokeUpdateCell (bool clusterDataChanged)
     QList< CellTO > newCellsData;
     cells << _focusCell;
     newCellsData << _focusCellReduced;
-    emit updateCell(cells, newCellsData, clusterDataChanged);
+    Q_EMIT updateCell(cells, newCellsData, clusterDataChanged);
 }
 
 void TextEditor::setTabSymbolsWidgetVisibility ()

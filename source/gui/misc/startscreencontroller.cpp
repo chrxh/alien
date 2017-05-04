@@ -70,7 +70,7 @@ void StartScreenController::timeout ()
         restoreScene();
         turnOnScrollbarAsNeeded();
         _timer->stop();
-        emit startScreenFinished();
+        Q_EMIT startScreenFinished();
     }
 }
 

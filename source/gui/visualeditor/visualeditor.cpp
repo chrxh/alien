@@ -200,13 +200,13 @@ void VisualEditor::zoomOut ()
 void VisualEditor::newCellRequested ()
 {
     //request new cell at pos
-    emit requestNewCell(getViewCenterPosWithInc());
+    Q_EMIT requestNewCell(getViewCenterPosWithInc());
 }
 
 void VisualEditor::newEnergyParticleRequested ()
 {
     //request new energy particle at pos
-    emit requestNewEnergyParticle(getViewCenterPosWithInc());
+    Q_EMIT requestNewEnergyParticle(getViewCenterPosWithInc());
 }
 
 void VisualEditor::defocused ()
@@ -224,7 +224,7 @@ void VisualEditor::delSelection_Slot ()
         QList< Cell* > cells;
         QList< EnergyParticle* > es;
         _shapeUniverse->delSelection(cells, es);
-        emit delSelection(cells, es);
+        Q_EMIT delSelection(cells, es);
     }
 }
 
@@ -235,7 +235,7 @@ void VisualEditor::delExtendedSelection_Slot ()
         QList< CellCluster* > clusters;
         QList< EnergyParticle* > es;
         _shapeUniverse->delExtendedSelection(clusters, es);
-        emit delExtendedSelection(clusters, es);
+        Q_EMIT delExtendedSelection(clusters, es);
     }
 }
 
