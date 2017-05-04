@@ -35,14 +35,14 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContextWrapper * context) const
+SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContextHandle * context) const
 {
 	auto controller = new SimulationControllerImpl();
 	controller->init(static_cast<SimulationContext*>(context));
 	return controller;
 }
 
-SimulationContextWrapper* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
+SimulationContextHandle* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
 	, SimulationParameters* parameters) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
@@ -216,12 +216,3 @@ CellTO BuilderFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     }
     return to;
 }
-
-void BuilderFacadeImpl::changeFeaturesOfCell (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const
-{
-    cell->removeFeatures();
-    CellFeatureFactory* decoratorFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-    decoratorFactory->addCellFunction(cell, type, context);
-    decoratorFactory->addEnergyGuidance(cell, context);
-}
-

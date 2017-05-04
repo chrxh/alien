@@ -27,6 +27,8 @@
 
 //Model-Refactoring:
 //- Gui benutzt MapManipulator und NICHT SimulationContext
+//- Cell- und Cluster-Erzeugung nicht im BuilderFacade
+//- CellTOs fliegen raus
 //- init bei Cell/Cluster/EnergyParticle
 
 /**************** alte Notizen ******************/

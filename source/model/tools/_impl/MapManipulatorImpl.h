@@ -10,6 +10,8 @@ class MapManipulatorImpl
 public:
 	MapManipulatorImpl(QObject* parent = nullptr) : MapManipulator(parent) {}
 	virtual ~MapManipulatorImpl() = default;
+
+	virtual void addCell(CellDescription desc) override;
 };
 
 #endif // MAPMANIPULATORIMPL_H

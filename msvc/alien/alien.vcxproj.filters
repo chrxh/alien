@@ -439,9 +439,6 @@
     <ClCompile Include="Release\moc_Unit.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\context\SimulationParameters.cpp">
-      <Filter>Model\Context</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\Definitions.cpp">
       <Filter>Model</Filter>
     </ClCompile>
@@ -586,15 +583,6 @@
     <ClCompile Include="Tests\moc_MapManipulatorImpl.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationContextWrapper.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationContextWrapper.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationContextWrapper.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_MapManipulator.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -690,6 +678,21 @@
     </ClCompile>
     <ClCompile Include="Release\moc_MapManipulatorImpl.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContextHandle.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextHandle.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextHandle.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\SimulationParameters.cpp">
+      <Filter>Model\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_CellDescription.cpp">
+      <Filter>Generated Files\Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -897,6 +900,12 @@
     <ClInclude Include="..\..\source\model\tools\_impl\ToolFactoryImpl.h">
       <Filter>Model\Tools\_Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\model\tools\TokenDescription.h">
+      <Filter>Model\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\tools\CellFunctionDescription.h">
+      <Filter>Model\Tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\gui\dialogs\addenergydialog.h">
@@ -1103,14 +1112,17 @@
     <CustomBuild Include="..\..\source\model\_impl\SimulationControllerImpl.h">
       <Filter>Model\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\SimulationContextWrapper.h">
-      <Filter>Model</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\tools\MapManipulator.h">
       <Filter>Model\Tools</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\tools\_impl\MapManipulatorImpl.h">
       <Filter>Model\Tools\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\SimulationContextHandle.h">
+      <Filter>Model\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\tools\CellDescription.h">
+      <Filter>Model\Tools</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
