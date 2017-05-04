@@ -21,13 +21,14 @@ class UnitGrid;
 class UnitThreadController;
 class UnitContext;
 class SimulationContext;
-class SimulationContextHandle;
+class SimulationContextApi;
 class SimulationParameters;
 class SimulationController;
 class SymbolTable;
 class EntityFactory;
 class ContextFactory;
-class MapManipulator;
+class SimulationManipulator;
+class SimulationManipulatorApi;
 class BuilderFacade;
 class SerializationFacade;
 

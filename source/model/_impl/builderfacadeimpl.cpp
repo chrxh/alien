@@ -20,6 +20,8 @@
 #include "model/context/SimulationContext.h"
 #include "model/context/Unit.h"
 #include "model/context/UnitContext.h"
+#include "model/tools/ToolFactory.h"
+#include "model/tools/SimulationManipulator.h"
 #include "model/metadata/SymbolTable.h"
 #include "model/ModelSettings.h"
 #include "model/_impl/SimulationControllerImpl.h"
@@ -35,14 +37,22 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContextHandle * context) const
+SimulationManipulatorApi * BuilderFacadeImpl::buildSimulationManipulator(SimulationContextApi * context) const
+{
+	ToolFactory* factory = ServiceLocator::getInstance().getService<ToolFactory>();
+	auto manipulator = factory->buildSimulationManipulator();
+	manipulator->init(context);
+	return manipulator;
+}
+
+SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContextApi * context) const
 {
 	auto controller = new SimulationControllerImpl();
 	controller->init(static_cast<SimulationContext*>(context));
 	return controller;
 }
 
-SimulationContextHandle* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
+SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
 	, SimulationParameters* parameters) const
 {
 	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
