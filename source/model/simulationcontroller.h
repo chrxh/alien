@@ -11,11 +11,10 @@ public:
 	SimulationController(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~SimulationController() = default;
 
-    virtual void init (SimulationContext* context) = 0;
-    Q_SLOT virtual void setRun (bool run) = 0;
+    virtual void init(SimulationContextHandle* context) = 0;
+    Q_SLOT virtual void setRun(bool run) = 0;
 
-private:
-    SimulationContext* _context = nullptr;
+	virtual MapManipulator* getMapManipulator() const = 0;
 };
 
 #endif // SIMULATIONCONTROLLER_H

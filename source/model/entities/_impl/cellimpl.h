@@ -49,7 +49,6 @@ public:
     Token* takeTokenFromStack () override;
 	void mutationByChance() override;
 
-
     void setCluster (CellCluster* cluster) override;
     CellCluster* getCluster () const override;
     QVector3D calcPosition (bool metricCorrection = false) const override;

@@ -16,13 +16,15 @@ public:
 	~ReplicatorTest();
 
 protected:
-	SimulationController* _simulationController;
+	SimulationController* _simulationController = nullptr;
 };
 
 
 ReplicatorTest::ReplicatorTest()
 {
+/*
 	_simulationController = new SimulationController();
+*/
 }
 
 ReplicatorTest::~ReplicatorTest()
