@@ -1,14 +1,14 @@
 #ifndef SIMULATIONCONTEXT_H
 #define SIMULATIONCONTEXT_H
 
-#include "model/SimulationContextHandle.h"
+#include "model/SimulationContextApi.h"
 
 class SimulationContext
-	: public SimulationContextHandle
+	: public SimulationContextApi
 {
 	Q_OBJECT
 public:
-	SimulationContext(QObject* parent = nullptr) : SimulationContextHandle(parent) {}
+	SimulationContext(QObject* parent = nullptr) : SimulationContextApi(parent) {}
 	virtual ~SimulationContext() = default;
 
 	virtual void init(SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters) = 0;

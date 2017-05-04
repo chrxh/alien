@@ -2,7 +2,7 @@
 #include "model/context/SimulationContext.h"
 #include "model/context/UnitThreadController.h"
 #include "model/tools/ToolFactory.h"
-#include "model/tools/MapManipulator.h"
+#include "model/tools/SimulationManipulator.h"
 
 #include "SimulationControllerImpl.h"
 
@@ -11,12 +11,9 @@ SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
 {
 }
 
-void SimulationControllerImpl::init(SimulationContextHandle* context)
+void SimulationControllerImpl::init(SimulationContextApi* context)
 {
 	SET_CHILD(_context, static_cast<SimulationContext*>(context));
-	ToolFactory* factory = ServiceLocator::getInstance().getService<ToolFactory>();
-	auto manipulator = factory->buildMapManipulator();
-	SET_CHILD(_manipulator, manipulator);
 }
 
 void SimulationControllerImpl::setRun(bool run)
@@ -26,10 +23,6 @@ void SimulationControllerImpl::setRun(bool run)
 	}
 }
 
-MapManipulator * SimulationControllerImpl::getMapManipulator() const
-{
-	return nullptr;
-}
 
 
 
