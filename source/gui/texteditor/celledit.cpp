@@ -38,7 +38,7 @@ void CellEdit::requestUpdate ()
         _cell.cellTokenAccessNum = qRound(generateNumberFromFormattedString(currentText));
 
     //inform other instances
-    emit cellDataChanged(_cell);
+    Q_EMIT cellDataChanged(_cell);
 }
 
 void CellEdit::keyPressEvent (QKeyEvent* e)
@@ -199,7 +199,7 @@ void CellEdit::keyPressEvent (QKeyEvent* e)
             updateDisplay();
 
             //inform other instances
-            emit cellDataChanged(_cell);
+            Q_EMIT cellDataChanged(_cell);
         }
     }
 
@@ -307,7 +307,7 @@ void CellEdit::mousePressEvent(QMouseEvent* e)
         updateDisplay();
 
         //inform other instances
-        emit cellDataChanged(_cell);
+        Q_EMIT cellDataChanged(_cell);
     }
 }
 

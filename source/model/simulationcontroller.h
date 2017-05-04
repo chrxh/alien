@@ -42,7 +42,7 @@ public:
 	int getFrame() const;
 	int getFps() const;
 
-public slots:
+public Q_SLOTS:
     void delSelection (QList< Cell* > cells,
                       QList< EnergyParticle* > es);
     void delExtendedSelection (QList< CellCluster* > clusters,
@@ -56,20 +56,20 @@ public:
     void drawToMapExtendedSelection (const QList< CellCluster* >& clusters, const QList< EnergyParticle* >& es);
 
     //cell/particle manipulation tools
-public slots:
+public Q_SLOTS:
     void newCell (QVector3D pos);
     void newEnergyParticle (QVector3D pos);
     void updateCell (QList< Cell* > cells, QList< CellTO > newCellsData, bool clusterDataChanged);
 
     //misc
-public slots:
+public Q_SLOTS:
     void setRun (bool run);
     void forceFps (int fps);
     void requestNextTimestep ();
 
     void updateUniverse ();
 
-signals:
+Q_SIGNALS:
     void init (UnitContext* context);
 	void calcNextTimestep();
     void cellCreated (Cell* cell);
@@ -78,7 +78,7 @@ signals:
     void universeUpdated (SimulationContext* context, bool force);
     void computerCompilationReturn (bool error, int line);
 
-private slots:
+private Q_SLOTS:
     void forceFpsTimerSlot ();
 	void oneSecondTimerSlot();
     void nextTimestepCalculated ();

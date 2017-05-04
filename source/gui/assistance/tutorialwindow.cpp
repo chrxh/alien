@@ -23,7 +23,7 @@ TutorialWindow::~TutorialWindow()
 bool TutorialWindow::event(QEvent* event)
 {
     if( event->type() == QEvent::Close) {
-        emit closed();
+        Q_EMIT closed();
     }
     QMainWindow::event(event);
     return false;

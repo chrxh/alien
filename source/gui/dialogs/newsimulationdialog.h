@@ -25,7 +25,7 @@ public:
 	SymbolTable* getNewSymbolTable();
 	SimulationParameters* getNewSimulationParameters();
 
-private slots:
+private Q_SLOTS:
     void simulationParametersButtonClicked ();
     void symbolTableButtonClicked ();
 

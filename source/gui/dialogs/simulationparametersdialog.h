@@ -18,7 +18,7 @@ public:
 
 	SimulationParameters* getSimulationParameters ();
 
-private slots:
+private Q_SLOTS:
     void setLocalSimulationParametersToWidgets ();
     void getLocalSimulationParametersFromWidgets ();
 

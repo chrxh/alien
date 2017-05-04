@@ -23,11 +23,11 @@ public:
     void update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray const& tokenData);
     void requestUpdate ();
 
-signals:
+Q_SIGNALS:
     void tokenMemoryChanged (QByteArray data);
     void tokenPropChanged (qreal energy);
 
-private slots:
+private Q_SLOTS:
     void tokenMemoryChanged_Slot (int tokenMemPointer);
     void tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer);
     void tokenMemoryCursorReachedEnd_Slot (int tokenMemPointer);

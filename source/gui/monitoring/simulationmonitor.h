@@ -17,7 +17,7 @@ public:
 
     void update (QMap< QString, qreal > data);
 
-signals:
+Q_SIGNALS:
     void closed ();
 
 protected:

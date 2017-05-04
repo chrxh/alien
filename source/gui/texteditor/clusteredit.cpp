@@ -40,7 +40,7 @@ void ClusterEdit::requestUpdate ()
         _cell.clusterAngVel = generateNumberFromFormattedString(currentText);
 
     //inform other instances
-    emit clusterDataChanged(_cell);
+    Q_EMIT clusterDataChanged(_cell);
 }
 
 void ClusterEdit::keyPressEvent (QKeyEvent* e)

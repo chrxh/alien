@@ -400,7 +400,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
                 _focusEnergyParticles.clear();
                 _focusCells << cellItem;
                 QGraphicsScene::update();
-                emit focusCell(cellItem->getCell());
+                Q_EMIT focusCell(cellItem->getCell());
                 _focusCenterCellItem = cellItem;
             }
             break;
@@ -419,7 +419,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
                 _focusEnergyParticles.clear();
                 _focusEnergyParticles << eItem;
                 QGraphicsScene::update();
-                emit focusEnergyParticle(eItem->getEnergyParticle());
+                Q_EMIT focusEnergyParticle(eItem->getEnergyParticle());
             }
             break;
         }
@@ -438,7 +438,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         unhighlight();
         _focusCells.clear();
         _focusEnergyParticles.clear();
-        emit defocus();
+        Q_EMIT defocus();
         _focusCenterCellItem = 0;
 
         //create marker
@@ -461,7 +461,7 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
         _marker = 0;
 
         if( _focusCells.isEmpty() && _focusEnergyParticles.isEmpty() ) {
-            emit defocus();
+            Q_EMIT defocus();
             _focusCenterCellItem = 0;
         }
     }
@@ -515,7 +515,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             }
 
             _context->unlock();
-            emit entitiesSelected(_focusCells.size(), _focusEnergyParticles.size());
+            Q_EMIT entitiesSelected(_focusCells.size(), _focusEnergyParticles.size());
             QGraphicsScene::update();
         }
         else {
@@ -559,7 +559,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
                 eItem->setPos(particlePos.x()*GRAPHICS_ITEM_SIZE, particlePos.y()*GRAPHICS_ITEM_SIZE);
 
                 //inform other instances about cell cluster changes
-                emit energyParticleUpdated(energy);
+                Q_EMIT energyParticleUpdated(energy);
             }
 
             QList< Cell* > cells;
@@ -615,11 +615,11 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             //sending changes to simulator
             if( !cells.isEmpty() ) {
                 if( leftButton && (!rightButton) )
-                    emit updateCell(cells, newCellsData, false);
+                    Q_EMIT updateCell(cells, newCellsData, false);
                 if( (!leftButton) && rightButton )
-                    emit updateCell(cells, newCellsData, true);
+                    Q_EMIT updateCell(cells, newCellsData, true);
                 if( leftButton && rightButton )
-                    emit updateCell(cells, newCellsData, true);
+                    Q_EMIT updateCell(cells, newCellsData, true);
             }
         }
     }

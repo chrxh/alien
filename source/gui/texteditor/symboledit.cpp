@@ -116,7 +116,7 @@ void SymbolEdit::delSymbolButtonClicked ()
     }
     if( ui->tableWidget->rowCount() == 0 )
         ui->delSymbolButton->setEnabled(false);
-    emit symbolTableChanged();
+    Q_EMIT symbolTableChanged();
 }
 
 void SymbolEdit::itemSelectionChanged ()
@@ -142,7 +142,7 @@ void SymbolEdit::itemContentChanged (QTableWidgetItem* item)
         _symbolTable->addEntry(key, value);
     }
 
-    emit symbolTableChanged();
+    Q_EMIT symbolTableChanged();
 }
 
 

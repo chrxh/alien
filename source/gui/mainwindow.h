@@ -19,7 +19,7 @@ public:
     MainWindow (SimulationController* simulator, QWidget *parent = 0);
     ~MainWindow ();
 
-private slots:
+private Q_SLOTS:
 
     //menu: simulation
     void newSimulation ();

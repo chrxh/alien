@@ -45,7 +45,7 @@ public:
 
     qreal getZoomFactor ();
 
-signals:
+Q_SIGNALS:
     void requestNewCell (QVector3D pos);    //for simulator
     void requestNewEnergyParticle (QVector3D pos);    //for simulator
     void defocus ();                        //for microeditor
@@ -62,7 +62,7 @@ signals:
                          QList< EnergyParticle* > es);               //for simulator
 
 
-public slots:
+public Q_SLOTS:
     void zoomIn ();
     void zoomOut ();
 
@@ -80,7 +80,7 @@ public slots:
     void metadataUpdated ();
 	void toggleInformation(bool on);
 
-private slots:
+private Q_SLOTS:
     void updateTimerTimeout ();
 
 private:

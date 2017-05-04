@@ -63,7 +63,7 @@ public:
 
     Cell* getFocusedCell ();
 
-signals:
+Q_SIGNALS:
     void requestNewCell ();                                     //to macro editor
     void requestNewEnergyParticle ();                           //to macro editor
     void updateCell (QList< Cell* > cells,
@@ -77,7 +77,7 @@ signals:
     void numTokenUpdate (int numToken, int maxToken, bool pasteTokenPossible);  //to main windows
 	void toggleInformation(bool on);
 
-public slots:
+public Q_SLOTS:
     void computerCompilationReturn (bool error, int line);
     void defocused (bool requestDataUpdate = true);
     void cellFocused (Cell* cell, bool requestDataUpdate = true);
@@ -97,7 +97,7 @@ public slots:
     void delExtendedSelectionClicked ();
 	void buttonShowInfoClicked();
 
-private slots:
+private Q_SLOTS:
     void changesFromCellEditor (CellTO newCellProperties);
     void changesFromClusterEditor (CellTO newClusterProperties);
     void changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue);

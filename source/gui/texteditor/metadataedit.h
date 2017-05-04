@@ -18,10 +18,10 @@ public:
     void updateMetadata (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
     void requestUpdate ();
 
-signals:
+Q_SIGNALS:
     void metadataChanged (QString clusterName, QString cellName, quint8 cellColor, QString cellDescription);
 
-private slots:
+private Q_SLOTS:
     void changesFromMetadataPropertiesEditor (QString clusterName, QString cellName, quint8 cellColor);
     void changesFromMetadataDescriptionEditor ();
 

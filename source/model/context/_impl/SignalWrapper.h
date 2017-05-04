@@ -13,7 +13,7 @@ public:
 
 	void emitSignal() { Q_EMIT signal(); }
 
-signals:
+Q_SIGNALS:
 	void signal();
 };
 

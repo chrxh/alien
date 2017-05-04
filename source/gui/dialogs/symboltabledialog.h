@@ -20,7 +20,7 @@ public:
 
     SymbolTable* getNewSymbolTable ();
 
-private slots:
+private Q_SLOTS:
     void symbolTableToWidgets ();
     void itemSelectionChanged ();
     void addButtonClicked ();

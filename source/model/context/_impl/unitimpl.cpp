@@ -71,7 +71,7 @@ void UnitImpl::calcNextTimestep()
 
 	processingEnergyParticles();
 
-	emit nextTimestepCalculated();
+	Q_EMIT nextTimestepCalculated();
 }
 
 UnitContext * UnitImpl::getContext() const

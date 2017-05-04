@@ -23,7 +23,7 @@ protected:
     void mouseDoubleClickEvent (QMouseEvent* e);
     void wheelEvent (QWheelEvent* e);
 
-signals:
+Q_SIGNALS:
     void dataChanged (QByteArray data);
     void cursorReachedBeginning (int newCol);   //newCol = -1: end of previous block
     void cursorReachedEnd (int newCol);

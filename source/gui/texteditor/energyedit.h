@@ -16,7 +16,7 @@ public:
     void updateEnergyParticle (QVector3D pos, QVector3D vel, qreal energy);
     void requestUpdate ();
 
-signals:
+Q_SIGNALS:
     void energyParticleDataChanged (QVector3D pos, QVector3D vel, qreal energyValue);
 
 protected:

@@ -16,7 +16,7 @@ public:
     void updateCell (CellTO cell);
     void requestUpdate ();
 
-signals:
+Q_SIGNALS:
     void cellDataChanged (CellTO cell);
 
 protected:
