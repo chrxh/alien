@@ -27,6 +27,7 @@ class SimulationController;
 class SymbolTable;
 class EntityFactory;
 class ContextFactory;
+class MapManipulator;
 class BuilderFacade;
 class SerializationFacade;
 
