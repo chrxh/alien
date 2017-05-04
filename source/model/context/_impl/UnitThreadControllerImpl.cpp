@@ -54,6 +54,7 @@ void UnitThreadControllerImpl::start()
 
 void UnitThreadControllerImpl::calcNextTimestep()
 {
+	setAllUnitsReady();
 	searchAndExecuteReadyThreads();
 }
 
@@ -63,7 +64,6 @@ void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 	if (UnitThread* thr = dynamic_cast<UnitThread*>(sender)) {
 		thr->setState(UnitThread::State::Finished);
 		if (areAllUnitsFinished()) {
-			setAllUnitsReady();
 			Q_EMIT timestepFinished();
 		}
 		else {
