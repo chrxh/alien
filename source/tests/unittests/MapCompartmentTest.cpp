@@ -36,8 +36,8 @@ MapCompartmentTest::MapCompartmentTest()
 	auto metric = facade->buildSpaceMetric(_universeSize);
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	_context = facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters, _controller);
-	_controller->newUniverse(_context);
+	_context = facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters);
+	_controller = facade->buildSimulationController(_context);
 	_grid = _context->getUnitGrid();
 	_compartmentSize = { _universeSize.x / _gridSize.x, _universeSize.y / _gridSize.y };
 }

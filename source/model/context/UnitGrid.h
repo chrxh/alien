@@ -9,7 +9,7 @@ class UnitGrid
 	Q_OBJECT
 public:
 	UnitGrid(QObject* parent) : QObject(parent) {}
-	virtual ~UnitGrid() {}
+	virtual ~UnitGrid() = default;
 
 	virtual void init(IntVector2D gridSize, SpaceMetric* metric) = 0;
 

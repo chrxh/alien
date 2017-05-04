@@ -12,7 +12,7 @@ class UnitContext
 	Q_OBJECT
 public:
 	UnitContext(QObject* parent) : QObject(parent) {}
-	virtual ~UnitContext() {}
+	virtual ~UnitContext() = default;
 	
 	virtual void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 		, SimulationParameters* parameters) = 0;

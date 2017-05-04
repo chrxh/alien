@@ -21,47 +21,47 @@ ContextFactoryImpl::ContextFactoryImpl()
 	ServiceLocator::getInstance().registerService<ContextFactory>(this);
 }
 
-SimulationContext * ContextFactoryImpl::buildSimulationContext(QObject* parent) const
+SimulationContext * ContextFactoryImpl::buildSimulationContext() const
 {
-	return new SimulationContextImpl(parent);
+	return new SimulationContextImpl();
 }
 
-UnitContext * ContextFactoryImpl::buildSimulationUnitContext(QObject* parent) const
+UnitContext * ContextFactoryImpl::buildSimulationUnitContext() const
 {
-	return new UnitContextImpl(parent);
+	return new UnitContextImpl();
 }
 
-Unit * ContextFactoryImpl::buildSimulationUnit(QObject * parent) const
+Unit * ContextFactoryImpl::buildSimulationUnit() const
 {
-	return new UnitImpl(parent);
+	return new UnitImpl();
 }
 
-UnitGrid * ContextFactoryImpl::buildSimulationGrid(QObject* parent) const
+UnitGrid * ContextFactoryImpl::buildSimulationGrid() const
 {
-	return new UnitGridImpl(parent);
+	return new UnitGridImpl();
 }
 
-UnitThreadController * ContextFactoryImpl::buildSimulationThreads(QObject* parent) const
+UnitThreadController * ContextFactoryImpl::buildSimulationThreads() const
 {
-	return new UnitThreadControllerImpl(parent);
+	return new UnitThreadControllerImpl();
 }
 
-SpaceMetric * ContextFactoryImpl::buildSpaceMetric(QObject* parent) const
+SpaceMetric * ContextFactoryImpl::buildSpaceMetric() const
 {
-	return new SpaceMetricImpl(parent);
+	return new SpaceMetricImpl();
 }
 
-MapCompartment * ContextFactoryImpl::buildMapCompartment(QObject* parent) const
+MapCompartment * ContextFactoryImpl::buildMapCompartment() const
 {
-	return new MapCompartmentImpl(parent);
+	return new MapCompartmentImpl();
 }
 
-CellMap * ContextFactoryImpl::buildCellMap(QObject * parent) const
+CellMap * ContextFactoryImpl::buildCellMap() const
 {
-	return new CellMapImpl(parent);
+	return new CellMapImpl();
 }
 
-EnergyParticleMap * ContextFactoryImpl::buildEnergyParticleMap(QObject * parent) const
+EnergyParticleMap * ContextFactoryImpl::buildEnergyParticleMap() const
 {
-	return new EnergyParticleMapImpl(parent);
+	return new EnergyParticleMapImpl();
 }

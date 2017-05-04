@@ -20,6 +20,7 @@ void CellMapImpl::init(SpaceMetric* metric, MapCompartment* compartment)
 {
 	_metric = metric;
 	_compartment = compartment;
+
 	deleteCellMap();
 	_size = _compartment->getSize();
 	_cellGrid = new Cell**[_size.x];

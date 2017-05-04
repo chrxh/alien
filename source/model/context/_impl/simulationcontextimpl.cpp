@@ -17,26 +17,11 @@ SimulationContextImpl::~SimulationContextImpl()
 
 void SimulationContextImpl::init(SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters)
 {
-	if (_metric != metric) {
-		delete _metric;
-		_metric = metric;
-	}
-	if (_grid != grid) {
-		delete _grid;
-		_grid = grid;
-	}
-	if (_threads != threads) {
-		delete _threads;
-		_threads = threads;
-	}
-	if (_symbolTable != symbolTable) {
-		delete _symbolTable;
-		_symbolTable = symbolTable;
-	}
-	if (_simulationParameters != parameters) {
-		delete _simulationParameters;
-		_simulationParameters = parameters;
-	}
+	SET_CHILD(_metric, metric);
+	SET_CHILD(_grid, grid);
+	SET_CHILD(_threads, threads);
+	SET_CHILD(_symbolTable, symbolTable);
+	SET_CHILD(_simulationParameters, parameters);
 }
 
 void SimulationContextImpl::lock()

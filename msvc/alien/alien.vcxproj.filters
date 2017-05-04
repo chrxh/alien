@@ -520,9 +520,6 @@
     <ClCompile Include="..\..\source\model\ModelSettings.cpp">
       <Filter>Model</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\SimulationController.cpp">
-      <Filter>Model</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_SimulationController.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -640,13 +637,25 @@
     <ClCompile Include="..\..\source\gui\MainWindow.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_mainwindow.cpp">
+    <ClCompile Include="Tests\moc_MainWindow.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_mainwindow.cpp">
+    <ClCompile Include="Debug\moc_MainWindow.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_mainwindow.cpp">
+    <ClCompile Include="Release\moc_MainWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\_impl\SimulationControllerImpl.cpp">
+      <Filter>Model\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationControllerImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationControllerImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -845,6 +854,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\gui\GuiSettings.h">
       <Filter>Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\Definitions.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1046,8 +1058,11 @@
     <CustomBuild Include="..\..\source\model\context\_impl\SignalWrapper.h">
       <Filter>Model\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\mainwindow.h">
+    <CustomBuild Include="..\..\source\gui\MainWindow.h">
       <Filter>Gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\_impl\SimulationControllerImpl.h">
+      <Filter>Model\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

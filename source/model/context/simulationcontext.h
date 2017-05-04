@@ -9,7 +9,7 @@ class SimulationContext
 	Q_OBJECT
 public:
 	SimulationContext(QObject* parent) : QObject(parent) {}
-	virtual ~SimulationContext() {}
+	virtual ~SimulationContext() = default;
 
 	virtual void init(SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads, SymbolTable * symbolTable, SimulationParameters* parameters) = 0;
 

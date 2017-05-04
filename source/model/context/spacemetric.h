@@ -9,7 +9,7 @@ class SpaceMetric
 	Q_OBJECT
 public:
 	SpaceMetric(QObject* parent) : QObject(parent) {}
-	virtual ~SpaceMetric() {}
+	virtual ~SpaceMetric() = default;
 
 	virtual void init(IntVector2D size) = 0;
 	virtual SpaceMetric* clone(QObject* parent = nullptr) const = 0;

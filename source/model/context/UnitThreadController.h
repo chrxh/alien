@@ -9,15 +9,15 @@ class UnitThreadController
 	Q_OBJECT
 public:
 	UnitThreadController(QObject* parent) : QObject(parent) {}
-	virtual ~UnitThreadController() {}
+	virtual ~UnitThreadController() = default;
 
 	virtual void init(int maxRunningThreads) = 0;
 
 	virtual void registerUnit(Unit* unit) = 0;
 	virtual void start() = 0;
 
-	Q_SLOT virtual void calcNextTimestep() = 0;
-	Q_SIGNAL void timestepFinished();
+	Q_SLOT virtual void calculateTimestep() = 0;
+	Q_SIGNAL void timestepCalculated();
 };
 
 #endif // UNITTHREADCONTROLLER_H

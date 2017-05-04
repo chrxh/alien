@@ -37,9 +37,9 @@ void UnitThreadControllerImpl::registerUnit(Unit * unit)
 	_threadsByContexts[unit->getContext()] = newThread;
 	
 	auto signal = new SignalWrapper(this);
-	connect(signal, &SignalWrapper::signal, unit, &Unit::calcNextTimestep);
+	connect(signal, &SignalWrapper::signal, unit, &Unit::calculateTimestep);
 
-	connect(unit, &Unit::nextTimestepCalculated, _signalMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
+	connect(unit, &Unit::timestepCalculated, _signalMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 	_signalMapper->setMapping(unit, newThread);
 
 	_threadsAndCalcSignals.push_back({ newThread , signal });
@@ -52,7 +52,7 @@ void UnitThreadControllerImpl::start()
 	searchAndExecuteReadyThreads();
 }
 
-void UnitThreadControllerImpl::calcNextTimestep()
+void UnitThreadControllerImpl::calculateTimestep()
 {
 	setAllUnitsReady();
 	searchAndExecuteReadyThreads();
@@ -64,7 +64,7 @@ void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 	if (UnitThread* thr = dynamic_cast<UnitThread*>(sender)) {
 		thr->setState(UnitThread::State::Finished);
 		if (areAllUnitsFinished()) {
-			Q_EMIT timestepFinished();
+			Q_EMIT timestepCalculated();
 		}
 		else {
 			searchAndExecuteReadyThreads();

@@ -6,17 +6,17 @@
 class ContextFactory
 {
 public:
-	virtual ~ContextFactory() {}
+	virtual ~ContextFactory() = default;
 
-	virtual SimulationContext* buildSimulationContext(QObject* parent = nullptr) const = 0;
-	virtual UnitContext* buildSimulationUnitContext(QObject* parent = nullptr) const = 0;
-	virtual Unit* buildSimulationUnit(QObject* parent = nullptr) const = 0;
-	virtual UnitGrid* buildSimulationGrid(QObject* parent = nullptr) const = 0;
-	virtual UnitThreadController* buildSimulationThreads(QObject* parent = nullptr) const = 0;
-	virtual SpaceMetric* buildSpaceMetric(QObject* parent = nullptr) const = 0;
-	virtual MapCompartment* buildMapCompartment(QObject* parent = nullptr) const = 0;
-	virtual CellMap* buildCellMap(QObject* parent = nullptr) const = 0;
-	virtual EnergyParticleMap* buildEnergyParticleMap(QObject* parent = nullptr) const = 0;
+	virtual SimulationContext* buildSimulationContext() const = 0;
+	virtual UnitContext* buildSimulationUnitContext() const = 0;
+	virtual Unit* buildSimulationUnit() const = 0;
+	virtual UnitGrid* buildSimulationGrid() const = 0;
+	virtual UnitThreadController* buildSimulationThreads() const = 0;
+	virtual SpaceMetric* buildSpaceMetric() const = 0;
+	virtual MapCompartment* buildMapCompartment() const = 0;
+	virtual CellMap* buildCellMap() const = 0;
+	virtual EnergyParticleMap* buildEnergyParticleMap() const = 0;
 };
 
 #endif // CONTEXTFACTORY_H

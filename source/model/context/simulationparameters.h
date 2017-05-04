@@ -9,7 +9,7 @@ class SimulationParameters
 	Q_OBJECT
 public:
 	SimulationParameters(QObject* parent = nullptr);
-	virtual ~SimulationParameters() {}
+	virtual ~SimulationParameters() = default;
 
 	SimulationParameters* clone(QObject* parent = nullptr) const;
 
