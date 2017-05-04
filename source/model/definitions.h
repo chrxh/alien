@@ -1,17 +1,7 @@
 #ifndef MODEL_DEFINITIONS_H
 #define MODEL_DEFINITIONS_H
 
-#include <QtGlobal>
-#include <QVector3D>
-#include <QSize>
-#include <QMap>
-#include <QSet>
-#include <qmath.h>
-#include <QDataStream>
-
-#include <set>
-#include <unordered_set>
-
+#include "global/Definitions.h"
 #include "model/metadata/CellMetadata.h"
 #include "model/metadata/CellClusterMetadata.h"
 #include "model/metadata/EnergyParticleMetadata.h"

@@ -18,7 +18,7 @@ public:
 	~ComparisonTest();
 
 protected:
-	SimulationController* _simulationController;
+	SimulationController* _simulationController = nullptr;
 };
 
 /*namespace {
@@ -193,7 +193,9 @@ protected:
 */
 ComparisonTest::ComparisonTest()
 {
+/*
 	_simulationController = new SimulationController();
+*/
 }
 
 ComparisonTest::~ComparisonTest()

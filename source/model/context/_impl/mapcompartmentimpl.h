@@ -11,7 +11,7 @@ public:
 	MapCompartmentImpl(QObject* parent = nullptr);
 	virtual ~MapCompartmentImpl() {}
 
-	virtual void init(SpaceMetric* metric, IntRect mapRect) override;
+	virtual void init(IntRect mapRect) override;
 
 	virtual IntVector2D getSize() const override;
 	virtual void registerNeighborContext(RelativeLocation location, UnitContext* context) override;

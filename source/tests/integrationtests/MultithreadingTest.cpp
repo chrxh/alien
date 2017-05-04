@@ -33,13 +33,12 @@ protected:
 
 MultithreadingTest::MultithreadingTest()
 {
-	_controller = new SimulationController();
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	auto metric = facade->buildSpaceMetric(_universeSize);
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	_context = facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters, _controller);
-	_controller->newUniverse(_context);
+	_context = facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters);
+	_controller = facade->buildSimulationController(_context);
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 }
 
@@ -51,7 +50,7 @@ MultithreadingTest::~MultithreadingTest()
 TEST_F(MultithreadingTest, testThreads)
 {
 	QEventLoop pause;
-	_threadController->connect(_threadController, &UnitThreadController::timestepFinished, &pause, &QEventLoop::quit);
+	_threadController->connect(_threadController, &UnitThreadController::timestepCalculated, &pause, &QEventLoop::quit);
 	_threadController->start();
 	pause.exec();
 

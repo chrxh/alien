@@ -8,6 +8,8 @@
 #include "model/entities/EnergyParticle.h"
 #include "model/entities/Token.h"
 #include "model/context/UnitContext.h"
+#include "model/context/SpaceMetric.h"
+#include "model/context/MapCompartment.h"
 
 #include "UnitImpl.h"
 
@@ -18,7 +20,7 @@ UnitImpl::UnitImpl(QObject* parent)
 
 void UnitImpl::init(UnitContext* context)
 {
-	_context = context;
+	SET_CHILD(_context, context);
 }
 
 qreal UnitImpl::calcTransEnergy() const
@@ -60,18 +62,20 @@ qreal UnitImpl::calcInternalEnergy() const
 	return internalEnergy;
 }
 
-void UnitImpl::calcNextTimestep()
+void UnitImpl::calculateTimestep()
 {
-	processingClusterInit();
-	processingClusterDissipation();
-	processingClusterMutationByChance();
-	processingClusterMovement();
-	processingClusterToken();
-	processingClusterCompletion();
+	processingClustersInit();
+	processingClustersDissipation();
+	processingClustersMutationByChance();
+	processingClustersMovement();
+	processingClustersToken();
+	processingClustersCompletion();
+	processingClustersCompartmentAllocation();
 
 	processingEnergyParticles();
+	processingEnergyParticlesCompartmentAllocation();
 
-	Q_EMIT nextTimestepCalculated();
+	Q_EMIT timestepCalculated();
 }
 
 UnitContext * UnitImpl::getContext() const
@@ -79,32 +83,14 @@ UnitContext * UnitImpl::getContext() const
 	return _context;
 }
 
-void UnitImpl::processingEnergyParticles()
-{
-	QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());
-	while (p.hasNext()) {
-		EnergyParticle* e(p.next());
-		CellCluster* cluster(0);
-		if (!e->processingMovement(cluster)) {
-
-			//transform into cell?
-			if (cluster) {
-				_context->getClustersRef() << cluster;
-			}
-			delete e;
-			p.remove();
-		}
-	}
-}
-
-void UnitImpl::processingClusterCompletion()
+void UnitImpl::processingClustersCompletion()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingCompletion();
 	}
 }
 
-void UnitImpl::processingClusterToken()
+void UnitImpl::processingClustersToken()
 {
 	QMutableListIterator<CellCluster*> j(_context->getClustersRef());
 	QList< EnergyParticle* > energyParticles;
@@ -132,21 +118,21 @@ void UnitImpl::processingClusterToken()
 	}
 }
 
-void UnitImpl::processingClusterMovement()
+void UnitImpl::processingClustersMovement()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingMovement();
 	}
 }
 
-void UnitImpl::processingClusterMutationByChance()
+void UnitImpl::processingClustersMutationByChance()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingMutationByChance();
 	}
 }
 
-void UnitImpl::processingClusterDissipation()
+void UnitImpl::processingClustersDissipation()
 {
 	QMutableListIterator<CellCluster*> i(_context->getClustersRef());
 	QList< EnergyParticle* > energyParticles;
@@ -171,12 +157,61 @@ void UnitImpl::processingClusterDissipation()
 	}
 }
 
-void UnitImpl::processingClusterInit()
+void UnitImpl::processingClustersInit()
 {
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		cluster->processingInit();
 	}
 }
 
+void UnitImpl::processingClustersCompartmentAllocation()
+{
+	auto compartment = _context->getMapCompartment();
+	auto spaceMetric = _context->getSpaceMetric();
 
+	QMutableListIterator<CellCluster*> clusterIter(_context->getClustersRef());
+	while (clusterIter.hasNext()) {
+		CellCluster* cluster = clusterIter.next();
+		IntVector2D intPos = spaceMetric->correctPositionWithIntPrecision(cluster->getPosition());
+		if (!compartment->isPointInCompartment(intPos)) {
+			clusterIter.remove();
+			auto otherContext = compartment->getNeighborContext(intPos);
+			otherContext->getClustersRef().push_back(cluster);
+		}
+	}
+}
 
+void UnitImpl::processingEnergyParticles()
+{
+	QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());
+	while (p.hasNext()) {
+		EnergyParticle* e(p.next());
+		CellCluster* cluster(0);
+		if (!e->processingMovement(cluster)) {
+
+			//transform into cell?
+			if (cluster) {
+				_context->getClustersRef() << cluster;
+			}
+			delete e;
+			p.remove();
+		}
+	}
+}
+
+void UnitImpl::processingEnergyParticlesCompartmentAllocation()
+{
+	auto compartment = _context->getMapCompartment();
+	auto spaceMetric = _context->getSpaceMetric();
+
+	QMutableListIterator<EnergyParticle*> particleIter(_context->getEnergyParticlesRef());
+	while (particleIter.hasNext()) {
+		EnergyParticle* particle = particleIter.next();
+		IntVector2D intPos = spaceMetric->correctPositionWithIntPrecision(particle->getPosition());
+		if (!compartment->isPointInCompartment(intPos)) {
+			particleIter.remove();
+			auto otherContext = compartment->getNeighborContext(intPos);
+			otherContext->getEnergyParticlesRef().push_back(particle);
+		}
+	}
+}

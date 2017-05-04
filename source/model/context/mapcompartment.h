@@ -9,9 +9,9 @@ class MapCompartment
 	Q_OBJECT
 public:
 	MapCompartment(QObject* parent) : QObject(parent) {}
-	virtual ~MapCompartment() {}
+	virtual ~MapCompartment() = default;
 
-	virtual void init(SpaceMetric* metric, IntRect mapRect) = 0;
+	virtual void init(IntRect mapRect) = 0;
 
 	virtual IntVector2D getSize() const = 0;
 	enum class RelativeLocation {

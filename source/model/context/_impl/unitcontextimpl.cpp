@@ -21,30 +21,12 @@ UnitContextImpl::~UnitContextImpl ()
 void UnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 	, SimulationParameters* parameters)
 {
-	if (_metric != metric) {
-		delete _metric;
-		_metric = metric;
-	}
-	if (_cellMap != cellMap) {
-		delete _cellMap;
-		_cellMap = cellMap;
-	}
-	if (_energyParticleMap != energyMap) {
-		delete _energyParticleMap;
-		_energyParticleMap = energyMap;
-	}
-	if (_mapCompartment != mapCompartment) {
-		delete _mapCompartment;
-		_mapCompartment = mapCompartment;
-	}
-	if (_symbolTable != symbolTable) {
-		delete _symbolTable;
-		_symbolTable = symbolTable;
-	}
-	if (_simulationParameters != parameters) {
-		delete _simulationParameters;
-		_simulationParameters = parameters;
-	}
+	SET_CHILD(_metric, metric);
+	SET_CHILD(_cellMap, cellMap);
+	SET_CHILD(_energyParticleMap, energyMap);
+	SET_CHILD(_mapCompartment, mapCompartment);
+	SET_CHILD(_symbolTable, symbolTable);
+	SET_CHILD(_simulationParameters, parameters);
 
 	deleteClustersAndEnergyParticles();
 }
