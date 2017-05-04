@@ -1,6 +1,8 @@
 #ifndef GUI_DEFINITIONS_H
 #define GUI_DEFINITIONS_H
 
+#include "global/Definitions.h"
+
 struct CellGraphicsItemConfig;
 class TextEditor;
 class SimulationMonitor;

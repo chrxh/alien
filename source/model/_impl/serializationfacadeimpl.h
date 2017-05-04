@@ -8,7 +8,7 @@ class SerializationFacadeImpl
 {
 public:
 	SerializationFacadeImpl();
-	~SerializationFacadeImpl() = default;
+	virtual ~SerializationFacadeImpl() = default;
 
     void serializeSimulationContext(UnitContext* context, QDataStream& stream) const override;
     void deserializeSimulationContext(UnitContext* prevContext, QDataStream& stream) const override;

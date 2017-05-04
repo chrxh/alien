@@ -10,22 +10,18 @@ class Unit
     Q_OBJECT
 public:
 	Unit(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~Unit() {}
+	virtual ~Unit() = default;
 
-public Q_SLOTS:
 	virtual void init(UnitContext* context) = 0;
+	Q_SLOT virtual void calculateTimestep() = 0;
+	Q_SIGNAL void timestepCalculated ();
 
-public:
 	virtual UnitContext* getContext() const = 0;
 	virtual qreal calcTransEnergy() const = 0;
 	virtual qreal calcRotEnergy () const = 0;
 	virtual qreal calcInternalEnergy() const = 0;
 
-Q_SIGNALS:
-    void nextTimestepCalculated ();
 
-public Q_SLOTS:
-	virtual void calcNextTimestep() = 0;
 };
 
 #endif // UNIT_H

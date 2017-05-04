@@ -37,7 +37,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
 	, _simController(simController)
-	, _textEditor(new TextEditor(simController->getSimulationContext(), this))
+	, _textEditor(new TextEditor(this))
 	, _oneSecondTimer(new QTimer(this))
     , _monitor(new SimulationMonitor(this))
     , _tutorialWindow(new TutorialWindow(this))
@@ -165,9 +165,6 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     connect(ui->fpsForcingButton, SIGNAL(toggled(bool)), this, SLOT(fpsForcingButtonClicked(bool)));
     connect(ui->fpsForcingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(fpsForcingSpinboxClicked()));
 
-    //setup simulator
-    _simController->updateUniverse();
-
     //setup micro editor
     _textEditor->setVisible(false);
 
@@ -220,7 +217,9 @@ void MainWindow::loadSimulation ()
 
             //read simulation data
             QDataStream in(&file);
+/*
             _simController->loadUniverse(in);
+*/
 			file.close();
 
 			updateControllerAndEditors();
@@ -239,7 +238,9 @@ void MainWindow::saveSimulation ()
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
             QDataStream out(&file);
+/*
             _simController->saveUniverse(out);
+*/
             file.close();
         }
         else {
@@ -287,11 +288,15 @@ void MainWindow::stepForwardClicked ()
     //save old universe
     QByteArray b;
     QDataStream out(&b, QIODevice::WriteOnly);
+/*
     _simController->saveUniverse(out);
+*/
     _undoUniverserses.push(b);
 
     //calc next time step
+/*
     _simController->requestNextTimestep();
+*/
 }
 
 void MainWindow::stepBackClicked ()
@@ -308,13 +313,12 @@ void MainWindow::stepBackClicked ()
     QDataStream in(&b, QIODevice::ReadOnly);
 
     //read simulation data
+/*
     _simController->loadUniverse(in);
-
-    //reset coordinators
-//    ui->visualEditor->reset();
 
     //force simulator to update other coordinators
     _simController->updateUniverse();
+	*/
 
     //no step back any more?
     if( _undoUniverserses.isEmpty() )
@@ -328,19 +332,22 @@ void MainWindow::snapshotUniverse ()
     //save old universe
     _snapshot.clear();
     QDataStream out(&_snapshot, QIODevice::WriteOnly);
+/*
     _simController->saveUniverse(out);
+*/
     ui->visualEditor->serializeViewMatrix(out);
 }
 
 void MainWindow::restoreUniverse ()
 {
-//    ui->actionRestore->setEnabled(false);
 
     //load old universe
     QDataStream in(&_snapshot, QIODevice::ReadOnly);
 
     //read simulation data
+/*
     _simController->loadUniverse(in);
+*/
 
     //reset editors
     ui->visualEditor->reset();
@@ -349,7 +356,9 @@ void MainWindow::restoreUniverse ()
     ui->visualEditor->loadViewMatrix(in);
 
     //force simulator to update other coordinators
+/*
     _simController->updateUniverse();
+*/
 
     //hide "step back" button
     _undoUniverserses.clear();
@@ -464,24 +473,30 @@ void MainWindow::alienMonitorClosed()
 void MainWindow::addCell ()
 {
     ui->visualEditor->newCellRequested();
+/*
     if( !_textEditor->isVisible() )
         _simController->updateUniverse();
+*/
 }
 
 void MainWindow::addEnergyParticle ()
 {
     ui->visualEditor->newEnergyParticleRequested();
+/*
     if( !_textEditor->isVisible() )
         _simController->updateUniverse();
+*/
 }
 
 void MainWindow::addRandomEnergy ()
 {
     AddEnergyDialog d;
+/*
     if( d.exec() ) {
         _simController->addRandomEnergy(d.getTotalEnergy(), d.getMaxEnergyPerParticle());
         _simController->updateUniverse();
     }
+*/
 }
 
 void MainWindow::copyCell ()
@@ -491,7 +506,9 @@ void MainWindow::copyCell ()
     QDataStream out(&_serializedCellData, QIODevice::WriteOnly);
     quint64 clusterId;
     quint64 cellId;
+/*
     _simController->saveCell(out, focusCell, clusterId, cellId);
+*/
 
     //set actions
     ui->actionPasteCell->setEnabled(true);
@@ -500,11 +517,12 @@ void MainWindow::copyCell ()
 void MainWindow::pasteCell ()
 {
     QDataStream in(&_serializedCellData, QIODevice::ReadOnly);
+/*
     _simController->loadCell(in, ui->visualEditor->getViewCenterPosWithInc());
-//    MetadataManager::getGlobalInstance().readMetadata(in, oldNewClusterIdMap, oldNewCellIdMap);
 
     //force simulator to update other coordinators
     _simController->updateUniverse();
+*/
 }
 
 void MainWindow::editSymbolTable ()
@@ -532,6 +550,7 @@ void MainWindow::loadSymbols ()
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
 
+/*
             QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* oldSymbolTable = _simController->getSimulationContext()->getSymbolTable();
@@ -539,6 +558,7 @@ void MainWindow::loadSymbols ()
 			oldSymbolTable->setTable(*newSymbolTable);
 			delete newSymbolTable;
             file.close();
+*/
 
             _textEditor->update();
         }
@@ -556,11 +576,13 @@ void MainWindow::saveSymbols ()
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
 
+/*
             QDataStream out(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* symbolTable = _simController->getSimulationContext()->getSymbolTable();
 			facade->serializeSymbolTable(symbolTable, out);
             file.close();
+*/
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The symbol table could not saved.");
@@ -576,6 +598,7 @@ void MainWindow::loadSymbolsWithMerging ()
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
 
+/*
 			QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* oldSymbolTable = _simController->getSimulationContext()->getSymbolTable();
@@ -583,6 +606,7 @@ void MainWindow::loadSymbolsWithMerging ()
 			oldSymbolTable->mergeTable(*newSymbolTable);
 			delete newSymbolTable;
 			file.close();
+*/
 
             _textEditor->update();
         }
@@ -595,25 +619,30 @@ void MainWindow::loadSymbolsWithMerging ()
 
 void MainWindow::addBlockStructure ()
 {
+/*
     AddRectStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
         QVector3D center = ui->visualEditor->getViewCenterPosWithInc();
        _simController->addBlockStructure(center, d.getBlockSizeX(), d.getBlockSizeY(), QVector3D(d.getDistance(), d.getDistance(), 0.0)
 		   , d.getInternalEnergy());
     }
+*/
 }
 
 void MainWindow::addHexagonStructure ()
 {
+/*
     AddHexagonStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
         QVector3D center = ui->visualEditor->getViewCenterPosWithInc();
        _simController->addHexagonStructure(center, d.getLayers(), d.getDistance(), d.getInternalEnergy());
     }
+*/
 }
 
 void MainWindow::loadExtendedSelection ()
 {
+/*
     QString fileName = QFileDialog::getOpenFileName(this, "Load Ensemble", "", "Alien Ensemble (*.ens)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -633,10 +662,12 @@ void MainWindow::loadExtendedSelection ()
             msgBox.exec();
         }
     }
+*/
 }
 
 void MainWindow::saveExtendedSelection ()
 {
+/*
     QString fileName = QFileDialog::getSaveFileName(this, "Save Ensemble", "", "Alien Ensemble (*.ens)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -659,10 +690,12 @@ void MainWindow::saveExtendedSelection ()
             msgBox.exec();
         }
     }
+*/
 }
 
 void MainWindow::copyExtendedSelection ()
 {
+/*
     //get selected clusters and energy particles
     QList< CellCluster* > clusters;
     QList< EnergyParticle* > es;
@@ -676,10 +709,12 @@ void MainWindow::copyExtendedSelection ()
 
     //set actions
     ui->actionPaste_cell_extension->setEnabled(true);
+*/
 }
 
 void MainWindow::pasteExtendedSelection ()
 {
+/*
     QDataStream in(&_serializedEnsembleData, QIODevice::ReadOnly);
     QMap< quint64, quint64 > oldNewCellIdMap;
     QMap< quint64, quint64 > oldNewClusterIdMap;
@@ -689,10 +724,12 @@ void MainWindow::pasteExtendedSelection ()
 
     //force simulator to update other coordinators
     _simController->updateUniverse();
+*/
 }
 
 void MainWindow::multiplyRandomExtendedSelection ()
 {
+/*
     SelectionMultiplyRandomDialog d;
     if( d.exec() ) {
 
@@ -735,10 +772,12 @@ void MainWindow::multiplyRandomExtendedSelection ()
 
         _simController->updateUniverse();
     }
+*/
 }
 
 void MainWindow::multiplyArrangementExtendedSelection ()
 {
+/*
     //get selected clusters and energy particles
     QList< CellCluster* > clusters;
     QList< EnergyParticle* > es;
@@ -796,6 +835,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
 
         _simController->updateUniverse();
     }
+*/
 }
 
 void MainWindow::aboutAlien ()
@@ -811,12 +851,15 @@ void MainWindow::tutorialClosed()
 
 void MainWindow::oneSecondTimeout ()
 {
+/*
     _monitor->update(_simController->getMonitorData());
+*/
 	updateFrameLabel();
 }
 
 void MainWindow::fpsForcingButtonClicked (bool toggled)
 {
+/*
     if( toggled ) {
         _simController->forceFps(ui->fpsForcingSpinBox->value());
         QPalette p = ui->fpsForcingButton->palette();
@@ -829,12 +872,15 @@ void MainWindow::fpsForcingButtonClicked (bool toggled)
         p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
         ui->fpsForcingButton->setPalette(p);
     }
+*/
 }
 
 void MainWindow::fpsForcingSpinboxClicked ()
 {
+/*
     if( ui->fpsForcingButton->isChecked() )
         _simController->forceFps(ui->fpsForcingSpinBox->value());
+*/
 }
 
 void MainWindow::numTokenChanged (int numToken, int maxToken, bool pasteTokenPossible)
@@ -914,11 +960,12 @@ void MainWindow::entitiesSelected (int numCells, int numEnergyParticles)
 
 void MainWindow::updateFrameLabel ()
 {
+/*
 	ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x")
 		.arg(_simController->getFrame(), 9, 10, QLatin1Char('0'))
 		.arg(_simController->getFps(), 5, 10, QLatin1Char('0'))
 		.arg(ui->visualEditor->getZoomFactor()));
-
+*/
 }
 
 void MainWindow::startScreenFinished ()
@@ -952,9 +999,11 @@ void MainWindow::stopSimulation()
 
 void MainWindow::updateControllerAndEditors()
 {
+/*
 	ui->visualEditor->reset();
 	_textEditor->update();
 	_simController->updateUniverse();
+*/
 }
 
 

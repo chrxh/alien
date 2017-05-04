@@ -22,7 +22,7 @@ public:
 	virtual void registerUnit(Unit* unit) override;
 	virtual void start() override;
 
-	Q_SLOT virtual void calcNextTimestep() override;
+	Q_SLOT virtual void calculateTimestep() override;
 
 private:
 	Q_SLOT void threadFinishedCalculation(QObject* sender);

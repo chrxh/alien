@@ -18,6 +18,7 @@ void EnergyParticleMapImpl::init(SpaceMetric* metric, MapCompartment* compartmen
 {
 	_metric = metric;
 	_compartment = compartment;
+
 	deleteGrid();
 	_size = _compartment->getSize();
 	_energyGrid = new EnergyParticle**[_size.x];

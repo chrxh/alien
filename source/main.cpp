@@ -13,37 +13,39 @@
 #include "model/metadata/SymbolTable.h"
 
 
-//QT += webkitwidgets
-
 //Design-Entscheidung:
 //- alle Serialisierung und Deserialisierung sollen von SerializationFacade gesteuert werden
 //- (de)serialisierung elementarer(Qt) Typen in den Methoden (de)serialize(...)
-//- bei Konstruktion Pointer verdrahten
+//- Objekte immer Default-Konstruierbar
 //- Daten mit init()-Methode initialisieren
+//- Factory erstellen Default-konstruierte Objekte
+//- Fassaden erstellen initialisierte und einsatzbereite Objekte
+//- bei QObject-Parameter in init(...) können parents gesetzt werden
+//- parents werden nicht in Fassaden oder Factories übergeben
 
 //Nächstes Mal:
-//- MapCompartment::registerNeighborContext aufrufen
 
 //Model-Refactoring:
-//- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
-//- suche nach "TODO"
-//- Radiation als Feature
+//- Gui benutzt MapManipulator und NICHT SimulationContext
+//- init bei Cell/Cluster/EnergyParticle
 
-//Potentielle Fehlerquellen:
+/**************** alte Notizen ******************/
+//Potentielle Fehlerquellen Alt:
 //- Serialisierung von int (32 oder 64 Bit)
 //- AlienCellCluster: calcTransform() nach setPosition(...) aufrufen
 //- ShapeUniverse: _grid->correctPosition(pos) nach Positionsänderungen aufrufen
 //- ReadSimulationParameters VOR Clusters lesen
 
-//Optimierung:
+//Optimierung Alt:
 //- bei AlienCellFunctionConstructor: Energie im Vorfeld checken
 //- bessere Datenstrukturen für _highlightedCells in ShapeUniverse (nur Cluster abspeichern?)
 
-//Issues:
+//Issues Alt:
 //- bei Pfeile zwischen Zellen im Microeditor berücksichtigen, wenn Branchnumber anders gesetzt wird
 //- Anzeigen, ob schon compiliert ist
+//- Cell-memory im Scanner auslesen und im Constructor erstellen
 
-//Bugs:
+//Bugs Alt:
 //- Farben bei neuen Einträgen in SymbolTable stimmt nicht
 //- Computer-Code-Editor-Bug (wenn man viele Zeilen schreibt, verschwindet der Cursor am unteren Rand)
 //- verschieben überlagerter Cluster im Editor: Map wird falsch aktualisiert
@@ -54,7 +56,11 @@
 //- Arbeiten mit dem Makro-Editor bei laufender Simulation erzeugt Fehler (weil auf cells zugegriffen werden, die vielleicht nicht mehr existieren)
 //- Fehler bei der Winkelmessung in AlienCellFunctionScanner
 
-//TODO (kurzfristig):
+//Refactoring Alt:
+//	- in AlienCellFunctionComputerImpl: getInternalData und getMemoryReference vereinheitlichen
+//	- Radiation als Feature
+
+//Todo Alt (kurzfristig):
 //- Computer-Code-Editor: Meldung, wenn maximale Zeilen überschritten sind
 //- manuelle Änderungen der Geschwindigkeit soll Cluster nicht zerreißen
 //- Editor-Modus: Cell fokussieren, dann Calc Timestep: Verschiebung in der Ansicht vermeiden
@@ -65,7 +71,7 @@
 //- "Bild auf" / "Bild ab" im Mikroeditor zum Wechseln zur nächsten Zelle
 //- AlienCellFunctionConstructur: BUILD_CONNECTION- Modus (d.h. neue Strukturen werden mit anderen überall verbunden)
 
-//TODO (langfristig):
+//Todo Alt (langfristig):
 //- Color-Management
 //- Geschwindigkeitsoptimierung bei vielen Zellen im Editor
 //- abstoßende Kraft implementieren
@@ -78,28 +84,25 @@
 //- AlienSimulator::updateCluster: am Ende nur im Grid eintragen wenn Wert 0 ?
 //- in AlienGrid: setCell, removeEnergy, ... pos über AlienCell* ... auslesen
 
-//Optional:
-//- Cell-memory im Scanner auslesen und im Constructor erstellen
-
 int main(int argc, char *argv[])
 {
     qRegisterMetaType<CellTO>("CellTO");
 
     //init main objects
     QApplication a(argc, argv);
-	SimulationController controller;
+	SimulationController* controller;
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	auto metric = facade->buildSpaceMetric({ 600, 600 });
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	auto context = facade->buildSimulationContext(4, { 6, 6 }, metric, symbols, parameters, &controller);
-	controller.newUniverse(context);
-
-//	controller.newUniverse({ 400, 200 }, context->getSymbolTable(), *context->getSimulationParameters());
-    MainWindow w(&controller);
+	auto context = facade->buildSimulationContext(4, { 6, 6 }, metric, symbols, parameters);
+	controller = facade->buildSimulationController(context);
+    MainWindow w(controller);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();
-	return a.exec();
+	auto result = a.exec();
+	delete controller;
+	return result;
 }
 

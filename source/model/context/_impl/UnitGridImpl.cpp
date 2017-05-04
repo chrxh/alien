@@ -13,11 +13,7 @@ void UnitGridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
 	if ((metric->getSize().x % gridSize.x != 0) || (metric->getSize().y % gridSize.y != 0)) {
 		throw std::exception("Universe size is not a multiple of grid size.");
 	}
-
-	if (_metric != metric) {
-		delete _metric;
-		_metric = metric;
-	}
+	_metric = metric;
 	_gridSize = gridSize;
 	for (int x = 0; x < gridSize.x; ++x) {
 		_units.push_back(std::vector<Unit*>(gridSize.y, nullptr));

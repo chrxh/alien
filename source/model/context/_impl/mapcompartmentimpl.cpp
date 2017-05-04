@@ -6,7 +6,7 @@ MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 {
 }
 
-void MapCompartmentImpl::init(SpaceMetric * metric, IntRect mapRect)
+void MapCompartmentImpl::init(IntRect mapRect)
 {
 	_rect = mapRect;
 	_size = { _rect.p2.x - _rect.p1.x + 1, _rect.p2.y - _rect.p1.y + 1};

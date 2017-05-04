@@ -30,8 +30,8 @@ class TextEditor : public QObject
     Q_OBJECT
 
 public:
-    TextEditor(SimulationContext* context, QObject *parent = 0);
-    ~TextEditor();
+    TextEditor(QObject *parent = 0);
+	virtual ~TextEditor() {}
 
 
 	struct MicroEditorWidgets {
@@ -125,21 +125,21 @@ private:
     //widgets
 	MicroEditorWidgets _widgets;
 
-    Cell* _focusCell;
+    Cell* _focusCell = nullptr;
     CellTO _focusCellReduced;
-    EnergyParticle* _focusEnergyParticle;
-    QWidget* _tabCluster;
-    QWidget* _tabCell;
-    QWidget* _tabParticle;
-    QWidget* _tabSelection;
-    QWidget* _tabMeta;
-    QWidget* _tabComputer;
-    QWidget* _tabSymbolTable;
-    int _currentClusterTab;
-    int _currentTokenTab;
+    EnergyParticle* _focusEnergyParticle = nullptr;
+    QWidget* _tabCluster = nullptr;
+    QWidget* _tabCell = nullptr;
+    QWidget* _tabParticle = nullptr;
+    QWidget* _tabSelection = nullptr;
+    QWidget* _tabMeta = nullptr;
+    QWidget* _tabComputer = nullptr;
+    QWidget* _tabSymbolTable = nullptr;
+    int _currentClusterTab = 0;
+    int _currentTokenTab = 0;
 
-    bool _pasteTokenPossible;
-    qreal _savedTokenEnergy;        //for copying tokens
+    bool _pasteTokenPossible = false;
+    qreal _savedTokenEnergy = 0.0;        //for copying tokens
     QByteArray _savedTokenData;  //for copying tokens
 };
 

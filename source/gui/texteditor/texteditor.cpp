@@ -28,23 +28,9 @@
 const int tabPosX1 = 410;
 const int tabPosX2 = 810;
 
-TextEditor::TextEditor(SimulationContext* context, QObject *parent)
+TextEditor::TextEditor(QObject *parent)
 	: QObject(parent)
-	, _context(context)
-    , _focusCell(0)
-    , _focusEnergyParticle(0)
-    , _currentClusterTab(0)
-    , _currentTokenTab(0)
-    , _pasteTokenPossible(false)
-    , _savedTokenEnergy(0)
 {
-//    ui->setupUi(this);
-
-}
-
-TextEditor::~TextEditor()
-{
-//    delete ui;
 }
 
 void TextEditor::init (MicroEditorWidgets widgets)
