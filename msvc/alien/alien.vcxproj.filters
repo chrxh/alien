@@ -658,6 +658,15 @@
     <ClCompile Include="Release\moc_SimulationControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContextWrapper.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextWrapper.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextWrapper.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui_addenergydialog.h">
@@ -1063,6 +1072,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\_impl\SimulationControllerImpl.h">
       <Filter>Model\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\SimulationContextWrapper.h">
+      <Filter>Model</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
