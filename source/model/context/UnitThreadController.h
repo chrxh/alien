@@ -15,6 +15,12 @@ public:
 
 	virtual void registerUnit(Unit* unit) = 0;
 	virtual void start() = 0;
+
+public slots:
+	virtual void calcNextTimestep() = 0;
+
+signals:
+	void timestepFinished();
 };
 
 #endif // UNITTHREADCONTROLLER_H

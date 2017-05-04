@@ -66,7 +66,7 @@ TEST_F(MapCompartmentTest, testCompartmentRect)
 			IntVector2D rightPointInside = correctUniversePosition({ centerPoint.x + _compartmentSize.x / 2 - 1, centerPoint.y });
 			IntVector2D upperPointInside = correctUniversePosition({ centerPoint.x, centerPoint.y - _compartmentSize.y / 2 });
 			IntVector2D lowerPointInside = correctUniversePosition({ centerPoint.x, centerPoint.y + _compartmentSize.y / 2 - 1 });
-			auto const msgInteriorPoint = "An actual interior point is not contained in unit compartment.";
+			auto const& msgInteriorPoint = "An actual interior point is not contained in unit compartment.";
 			ASSERT_TRUE(compartment->isPointInCompartment(centerPoint)) << msgInteriorPoint;
 			ASSERT_TRUE(compartment->isPointInCompartment(leftPointInside)) << msgInteriorPoint;
 			ASSERT_TRUE(compartment->isPointInCompartment(rightPointInside)) << msgInteriorPoint;
@@ -77,7 +77,7 @@ TEST_F(MapCompartmentTest, testCompartmentRect)
 			IntVector2D rightPointOutside = correctUniversePosition({ centerPoint.x + _compartmentSize.x / 2, centerPoint.y });
 			IntVector2D upperPointOutside = correctUniversePosition({ centerPoint.x, centerPoint.y - _compartmentSize.y / 2  - 1});
 			IntVector2D lowerPointOutside = correctUniversePosition({ centerPoint.x, centerPoint.y + _compartmentSize.y / 2 });
-			auto const msgExteriorPoint = "An actual exterior point is contained in unit compartment.";
+			auto const& msgExteriorPoint = "An actual exterior point is contained in unit compartment.";
 			ASSERT_FALSE(compartment->isPointInCompartment(leftPointOutside)) << msgExteriorPoint;
 			ASSERT_FALSE(compartment->isPointInCompartment(rightPointOutside)) << msgExteriorPoint;
 			ASSERT_FALSE(compartment->isPointInCompartment(upperPointOutside)) << msgExteriorPoint;

@@ -52,12 +52,23 @@ void UnitThreadControllerImpl::start()
 	searchAndExecuteReadyThreads();
 }
 
+void UnitThreadControllerImpl::calcNextTimestep()
+{
+	searchAndExecuteReadyThreads();
+}
+
+
 void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 {
 	if (UnitThread* thr = dynamic_cast<UnitThread*>(sender)) {
 		thr->setState(UnitThread::State::Finished);
-		setReadyIfAllUnitsFinished();
-		searchAndExecuteReadyThreads();
+		if (areAllUnitsFinished()) {
+			setAllUnitsReady();
+			Q_EMIT timestepFinished();
+		}
+		else {
+			searchAndExecuteReadyThreads();
+		}
 	}
 }
 
@@ -93,19 +104,22 @@ void UnitThreadControllerImpl::startThreads()
 	}
 }
 
-void UnitThreadControllerImpl::setReadyIfAllUnitsFinished()
+bool UnitThreadControllerImpl::areAllUnitsFinished()
 {
-	bool allUnitsFinished = true;
+	bool result = true;
 	for (auto const& ts : _threadsAndCalcSignals) {
 		if (!ts.thr->isFinished()) {
-			allUnitsFinished = false;
+			result = false;
 			break;
 		}
 	}
-	if (allUnitsFinished) {
-		for (auto const& ts : _threadsAndCalcSignals) {
-			ts.thr->setState(UnitThread::State::Ready);
-		}
+	return result;
+}
+
+void UnitThreadControllerImpl::setAllUnitsReady()
+{
+	for (auto const& ts : _threadsAndCalcSignals) {
+		ts.thr->setState(UnitThread::State::Ready);
 	}
 }
 

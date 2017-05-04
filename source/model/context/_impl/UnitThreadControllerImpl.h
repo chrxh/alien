@@ -22,6 +22,9 @@ public:
 	virtual void registerUnit(Unit* unit) override;
 	virtual void start() override;
 
+public slots:
+	virtual void calcNextTimestep() override;
+
 private slots:
 	void threadFinishedCalculation(QObject* sender);
 
@@ -29,7 +32,8 @@ private:
 	void updateDependencies();
 	void terminateThreads();
 	void startThreads();
-	void setReadyIfAllUnitsFinished();
+	bool areAllUnitsFinished();
+	void setAllUnitsReady();
 	void searchAndExecuteReadyThreads();
 
 	int _maxRunningThreads = 1;
@@ -43,6 +47,8 @@ private:
 	QSignalMapper* _signalMapper = nullptr;
 
 	FRIEND_TEST(UnitThreadControllerImplTest, testStates);
+	FRIEND_TEST(UnitThreadControllerImplTest, testStatesWithFinished);
+	FRIEND_TEST(MultithreadingTest, testThreads);
 };
 
 #endif // UNITTHREADCONTROLLERIMPL_H
