@@ -14,18 +14,15 @@ TagGeneratorImpl::TagGeneratorImpl()
 
 quint64 TagGeneratorImpl::getNewTag()
 {
-	std::lock_guard<std::mutex> lock(_mutex);
-	return ++_tag;
+	return _tag.fetch_add(1);
 }
 
 quint64 TagGeneratorImpl::getCurrentTag()
 {
-	std::lock_guard<std::mutex> lock(_mutex);
-	return _tag;
+	return _tag.load();
 }
 
 void TagGeneratorImpl::setSeed(quint64 tag)
 {
-	std::lock_guard<std::mutex> lock(_mutex);
-	_tag = tag;
+	_tag.store(tag);
 }
