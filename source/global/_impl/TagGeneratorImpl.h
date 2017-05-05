@@ -1,7 +1,7 @@
 #ifndef TAGGENERATORIMPL_H
 #define TAGGENERATORIMPL_H
 
-#include <mutex>
+#include <atomic>
 
 #include "global/TagGenerator.h"
 
@@ -17,8 +17,7 @@ public:
 	virtual void setSeed(quint64 tag) override;
 
 private:
-	std::mutex _mutex;
-	quint64 _tag = 0;
+	std::atomic<quint64> _tag = 0;
 };
 
 #endif // TAGGENERATORIMPL_H
