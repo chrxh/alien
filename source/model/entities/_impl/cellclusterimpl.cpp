@@ -90,6 +90,14 @@ void CellClusterImpl::clearCellsFromMap ()
     }
 }
 
+void CellClusterImpl::init(UnitContext * context)
+{
+	_context = context;
+	for(auto const& cell : _cells) {
+		cell->init(context);
+	}
+}
+
 void CellClusterImpl::clearCellFromMap (Cell* cell)
 {
 	auto cellMap = _context->getCellMap();

@@ -9,7 +9,9 @@
 class CellCluster
 {
 public:
-    virtual ~CellCluster () {}
+	virtual ~CellCluster() = default;
+
+	virtual void init(UnitContext* context) = 0;
 
     virtual void clearCellsFromMap () = 0;
     virtual void clearCellFromMap (Cell* cell) = 0;

@@ -27,6 +27,11 @@ TokenImpl::TokenImpl(UnitContext* context, qreal energy, QByteArray const& memor
 	_memory = memory_.left(context->getSimulationParameters()->tokenMemorySize);
 }
 
+void TokenImpl::init(UnitContext * context)
+{
+	_context = context;
+}
+
 TokenImpl* TokenImpl::duplicate() const
 {
 	TokenImpl* newToken(new TokenImpl(_context));

@@ -8,7 +8,9 @@
 class Cell
 {
 public:
-    virtual ~Cell() {}
+	virtual ~Cell() = default;
+
+	virtual void init(UnitContext* context) = 0;
 
     virtual void registerFeatures (CellFeature* features) = 0;
     virtual CellFeature* getFeatures () const = 0;
