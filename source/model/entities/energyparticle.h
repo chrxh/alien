@@ -8,7 +8,9 @@
 class EnergyParticle
 {
 public:
-	virtual ~EnergyParticle() {}
+	virtual ~EnergyParticle() = default;
+
+	virtual void init(UnitContext* context) = 0;
 
     virtual bool processingMovement (CellCluster*& cluster) = 0;
 

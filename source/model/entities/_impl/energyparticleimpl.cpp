@@ -32,6 +32,11 @@ EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D ve
 	_vel = vel;
 }
 
+void EnergyParticleImpl::init(UnitContext * context)
+{
+	_context = context;
+}
+
 //return: false = energy is zero
 //        cluster is nonzero if particle transforms into cell
 bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)

@@ -5,6 +5,14 @@ CellFeature::~CellFeature ()
     delete _nextFeature;
 }
 
+void CellFeature::init(UnitContext * context)
+{
+	_context = context;
+	if (_nextFeature) {
+		_nextFeature->init(context);
+	}
+}
+
 void CellFeature::registerNextFeature (CellFeature* nextFeature)
 {
     _nextFeature = nextFeature;
@@ -33,10 +41,3 @@ void CellFeature::mutate()
 	}
 }
 
-void CellFeature::serializePrimitives (QDataStream& stream) const
-{
-}
-
-void CellFeature::deserializePrimitives (QDataStream& stream)
-{
-}

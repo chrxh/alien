@@ -1,3 +1,5 @@
+#include <functional>
+
 #include "model/context/SpaceMetric.h"
 #include "model/context/UnitContext.h"
 #include "model/ModelSettings.h"
@@ -49,23 +51,26 @@ void CellMapImpl::removeCellIfPresent(QVector3D pos, Cell * cellToRemove)
 	IntVector2D intPosM = _metric->shiftPosition(intPosC, { -1, -1 });
 	IntVector2D intPosP = _metric->shiftPosition(intPosC, { +1, +1 });
 
-	auto removeCellIfPresent = [&](IntVector2D && intPos, Cell* cell) {
-		if (_cellGrid[intPos.x][intPos.y] == cell) {
-			_cellGrid[intPos.x][intPos.y] = nullptr;
-		}
-	};
-
+	std::function<void(IntVector2D &&, Cell*)> removeCellIfPresent;
 	if (_compartment->isPointInCompartment(intPosM) && _compartment->isPointInCompartment(intPosP)) {
+		removeCellIfPresent = [&](IntVector2D && intPos, Cell* cell) {
+			if (_cellGrid[intPos.x][intPos.y] == cell) {
+				_cellGrid[intPos.x][intPos.y] = nullptr;
+			}
+		};
 		intPosC = _compartment->convertAbsToRelPosition(intPosC);
 		intPosM = _compartment->convertAbsToRelPosition(intPosM);
 		intPosP = _compartment->convertAbsToRelPosition(intPosP);
 	}
 	else {
-		auto removeCellIfPresent = [&](IntVector2D && intPos, Cell* cell) {
-			auto cellMap = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap());
+		removeCellIfPresent = [&](IntVector2D && intPos, Cell* cell) {
+			Cell*** cellGrid = _cellGrid;
+			if (!_compartment->isPointInCompartment(intPos)) {
+				cellGrid = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap())->_cellGrid;
+			}
 			intPos = _compartment->convertAbsToRelPosition(intPos);
-			if (cellMap->_cellGrid[intPos.x][intPos.y] == cell) {
-				cellMap->_cellGrid[intPos.x][intPos.y] = nullptr;
+			if (cellGrid[intPos.x][intPos.y] == cell) {
+				cellGrid[intPos.x][intPos.y] = nullptr;
 			}
 		};
 	}

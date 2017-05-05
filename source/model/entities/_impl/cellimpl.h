@@ -18,6 +18,8 @@ public:
 
     ~CellImpl();
 
+	virtual void init(UnitContext* context) override;
+
     void registerFeatures (CellFeature* features) override;
     CellFeature* getFeatures () const override;
     void removeFeatures () override;

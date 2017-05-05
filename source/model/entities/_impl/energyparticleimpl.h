@@ -10,6 +10,8 @@ public:
 	EnergyParticleImpl(UnitContext* context);
 	EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, UnitContext* context);
 
+	virtual void init(UnitContext* context) override;
+
 	bool processingMovement(CellCluster*& cluster) override;
 
 	virtual qreal getEnergy() const override;

@@ -11,6 +11,8 @@ public:
     CellFeature (UnitContext* context) : _context(context) {}
     virtual ~CellFeature ();
 
+	virtual void init(UnitContext* context);
+
     void registerNextFeature (CellFeature* nextFeature);
     struct ProcessingResult {
         bool decompose;
@@ -19,8 +21,8 @@ public:
     ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
 	void mutate();
 
-    virtual void serializePrimitives (QDataStream& stream) const;
-    virtual void deserializePrimitives (QDataStream& stream);
+	virtual void serializePrimitives(QDataStream& stream) const {}
+	virtual void deserializePrimitives(QDataStream& stream) {}
 
 protected:
     virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;
@@ -31,10 +33,10 @@ protected:
 
 public:
     template< typename T >
-    T* findObject ();
+    inline T* findObject ();
 };
 
-
+/******************** inline methods ******************/
 template< typename T >
 T* CellFeature::findObject ()
 {
