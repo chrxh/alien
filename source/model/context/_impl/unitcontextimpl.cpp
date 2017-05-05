@@ -1,3 +1,4 @@
+#include "global/RandomNumberGenerator.h"
 #include "model/context/CellMap.h"
 #include "model/context/EnergyParticleMap.h"
 #include "model/context/MapCompartment.h"
@@ -18,9 +19,10 @@ UnitContextImpl::~UnitContextImpl ()
 	deleteClustersAndEnergyParticles();
 }
 
-void UnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
-	, SimulationParameters* parameters)
+void UnitContextImpl::init(RandomNumberGenerator* randomGen, SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap
+	, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters)
 {
+	SET_CHILD(_randomGen, randomGen);
 	SET_CHILD(_metric, metric);
 	SET_CHILD(_cellMap, cellMap);
 	SET_CHILD(_energyParticleMap, energyMap);
@@ -29,6 +31,11 @@ void UnitContextImpl::init(SpaceMetric* metric, CellMap* cellMap, EnergyParticle
 	SET_CHILD(_simulationParameters, parameters);
 
 	deleteClustersAndEnergyParticles();
+}
+
+RandomNumberGenerator * UnitContextImpl::getRandomNumberGenerator() const
+{
+	return _randomGen;
 }
 
 SpaceMetric* UnitContextImpl::getSpaceMetric () const

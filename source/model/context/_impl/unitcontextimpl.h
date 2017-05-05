@@ -13,9 +13,10 @@ public:
 	UnitContextImpl(QObject* parent = nullptr);
 	virtual ~UnitContextImpl();
 
-	void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
-		, SimulationParameters* parameters) override;
+	void init(RandomNumberGenerator* randomGen, SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap
+		, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters) override;
 
+	virtual RandomNumberGenerator* getRandomNumberGenerator() const override;
 	virtual SpaceMetric* getSpaceMetric () const override;
 	virtual CellMap* getCellMap () const override;
 	virtual EnergyParticleMap* getEnergyParticleMap () const override;
@@ -31,7 +32,8 @@ private:
 
 	QList<CellCluster*> _clusters;
     QList<EnergyParticle*> _energyParticles;
-    SpaceMetric* _metric = nullptr;
+	RandomNumberGenerator* _randomGen = nullptr;
+	SpaceMetric* _metric = nullptr;
     CellMap* _cellMap = nullptr;
     EnergyParticleMap* _energyParticleMap = nullptr;
 	MapCompartment* _mapCompartment = nullptr;

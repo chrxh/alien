@@ -386,15 +386,15 @@ QByteArray& CellFunctionComputerImpl::getMemoryReference ()
 void CellFunctionComputerImpl::mutateImpl()
 {
 	auto& generator = NumberGenerator::getInstance();
-	qint8 randomByte = static_cast<qint8>(generator.random(256));
-	if (generator.random(2) == 0) {
+	qint8 randomByte = static_cast<qint8>(generator.getInt(256));
+	if (generator.getInt(2) == 0) {
 		if (!_code.isEmpty()) {
-			_code[generator.random(_code.size())] = randomByte;
+			_code[generator.getInt(_code.size())] = randomByte;
 		}
 	}
 	else {
 		if (!_memory.isEmpty()) {
-			_memory[generator.random(_memory.size())] = randomByte;
+			_memory[generator.getInt(_memory.size())] = randomByte;
 		}
 	}
 }

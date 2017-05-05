@@ -11,10 +11,11 @@ public:
 	UnitContext(QObject* parent = nullptr) : UnitContextApi(parent) {}
 	virtual ~UnitContext() = default;
 	
-	virtual void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
-		, SimulationParameters* parameters) = 0;
+	virtual void init(RandomNumberGenerator* randomGen, SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap
+		, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters) = 0;
 
-    virtual SpaceMetric* getSpaceMetric () const = 0;
+	virtual RandomNumberGenerator* getRandomNumberGenerator() const = 0;
+    virtual SpaceMetric* getSpaceMetric() const = 0;
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;
 };
