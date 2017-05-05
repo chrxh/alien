@@ -6,7 +6,6 @@
 #include <QMessageBox>
 #include <QFont>
 
-#include "global/NumberGenerator.h"
 #include "global/ServiceLocator.h"
 #include "dialogs/addenergydialog.h"
 #include "dialogs/addrectstructuredialog.h"

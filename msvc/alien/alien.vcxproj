@@ -248,7 +248,6 @@
     </CustomBuild>
     <ClInclude Include="..\..\source\global\Definitions.h" />
     <ClInclude Include="..\..\source\global\GlobalFactory.h" />
-    <ClInclude Include="..\..\source\global\NumberGenerator.h" />
     <CustomBuild Include="..\..\source\global\RandomNumberGenerator.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing RandomNumberGenerator.h...</Message>
@@ -1082,7 +1081,6 @@
     <ClInclude Include="ui_tutorialwindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\global\NumberGenerator.cpp" />
     <ClCompile Include="..\..\source\global\ServiceLocator.cpp" />
     <ClCompile Include="..\..\source\global\_impl\GlobalFactoryImpl.cpp" />
     <ClCompile Include="..\..\source\global\_impl\RandomNumberGeneratorImpl.cpp" />

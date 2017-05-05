@@ -1,7 +1,7 @@
 #include <QString>
 #include <qdebug.h>
 
-#include "global/NumberGenerator.h"
+#include "global/RandomNumberGenerator.h"
 #include "model/context/UnitContext.h"
 #include "model/ModelSettings.h"
 #include "model/metadata/SymbolTable.h"
@@ -385,16 +385,16 @@ QByteArray& CellFunctionComputerImpl::getMemoryReference ()
 
 void CellFunctionComputerImpl::mutateImpl()
 {
-	auto& generator = NumberGenerator::getInstance();
-	qint8 randomByte = static_cast<qint8>(generator.getInt(256));
-	if (generator.getInt(2) == 0) {
+	auto randomGen = _context->getRandomNumberGenerator();
+	qint8 randomByte = static_cast<qint8>(randomGen->getInt(256));
+	if (randomGen->getInt(2) == 0) {
 		if (!_code.isEmpty()) {
-			_code[generator.getInt(_code.size())] = randomByte;
+			_code[randomGen->getInt(_code.size())] = randomByte;
 		}
 	}
 	else {
 		if (!_memory.isEmpty()) {
-			_memory[generator.getInt(_memory.size())] = randomByte;
+			_memory[randomGen->getInt(_memory.size())] = randomByte;
 		}
 	}
 }
