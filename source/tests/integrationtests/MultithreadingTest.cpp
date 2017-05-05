@@ -3,6 +3,7 @@
 #include <QEventLoop>
 
 #include "global/ServiceLocator.h"
+#include "global/NumberGenerator.h"
 #include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"
@@ -64,16 +65,18 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	auto access = facade->buildSimulationAccess(_context);
-	CellDescription desc;
-	desc.pos = QVector3D(50, 50, 0);
-	desc.vel = QVector3D(0.5, 0.25, 0);
-	desc.energy = 100;
-	access->addCell(desc);
+	for (int i = 0; i < 10000; ++i) {
+		CellDescription desc;
+		desc.pos = QVector3D(NumberGenerator::getInstance().random(1200), NumberGenerator::getInstance().random(600), 0);
+		desc.vel = QVector3D(NumberGenerator::getInstance().random()-0.5, NumberGenerator::getInstance().random() - 0.5, 0);
+		desc.energy = 100;
+		access->addCell(desc);
+	}
 
 	QEventLoop pause;
 	int timesteps = 0;
 	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
-		if (++timesteps == 2000) {
+		if (++timesteps == 200) {
 			_controller->setRun(false);
 			pause.quit();
 		}

@@ -41,6 +41,7 @@ private:
 
 	QMutex _mutex;
 	int _maxRunningThreads = 1;
+	int _runningThreads = 0;
 	struct UnitThreadSignal {
 		UnitThread* thr;
 		SignalWrapper* calcSignal;
