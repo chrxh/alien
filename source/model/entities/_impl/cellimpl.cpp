@@ -1,8 +1,6 @@
-#include <QtCore/qmath.h>
-
 #include "global/ServiceLocator.h"
 #include "global/TagGenerator.h"
-#include "global/NumberGenerator.h"
+#include "global/RandomNumberGenerator.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/Token.h"
 #include "model/features/CellFeature.h"
@@ -446,7 +444,7 @@ Token* CellImpl::takeTokenFromStack ()
 
 void CellImpl::mutationByChance()
 {
-	if (NumberGenerator::getInstance().getReal() < _context->getSimulationParameters()->cellMutationProb) {
+	if (_context->getRandomNumberGenerator()->getReal() < _context->getSimulationParameters()->cellMutationProb) {
 		_features->mutate();
 	}
 }

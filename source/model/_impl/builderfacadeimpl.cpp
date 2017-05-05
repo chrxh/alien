@@ -1,4 +1,3 @@
-#include "global/NumberGenerator.h"
 #include "global/GlobalFactory.h"
 #include "global/RandomNumberGenerator.h"
 #include "global/ServiceLocator.h"
@@ -180,12 +179,13 @@ Cell* BuilderFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::T
 Cell* BuilderFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, UnitContext* context) const
 {
 	SimulationParameters* parameters = context->getSimulationParameters();
-    int randomMaxConnections = NumberGenerator::getInstance().getInt(parameters->cellMaxBonds+1);
-    int randomTokenAccessNumber = NumberGenerator::getInstance().getInt(parameters->cellMaxTokenBranchNumber);
+    int randomMaxConnections = context->getRandomNumberGenerator()->getInt(parameters->cellMaxBonds+1);
+    int randomTokenAccessNumber = context->getRandomNumberGenerator()->getInt(parameters->cellMaxTokenBranchNumber);
     QByteArray randomData(256, 0);
-	for (int i = 0; i < 256; ++i)
-		randomData[i] = NumberGenerator::getInstance().getInt(256);
-    Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(NumberGenerator::getInstance().getInt(Enums::CellFunction::_COUNTER));
+	for (int i = 0; i < 256; ++i) {
+		randomData[i] = context->getRandomNumberGenerator()->getInt(256);
+	}
+    Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(context->getRandomNumberGenerator()->getInt(Enums::CellFunction::_COUNTER));
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 

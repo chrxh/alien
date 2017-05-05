@@ -1,7 +1,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "global/NumberGenerator.h"
 #include "gui/GuiSettings.h"
 #include "model/context/SimulationParameters.h"
 #include "model/ModelSettings.h"

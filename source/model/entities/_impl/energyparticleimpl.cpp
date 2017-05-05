@@ -2,7 +2,7 @@
 
 #include "global/ServiceLocator.h"
 #include "global/TagGenerator.h"
-#include "global/NumberGenerator.h"
+#include "global/RandomNumberGenerator.h"
 
 #include "model/BuilderFacade.h"
 #include "model/physics/Physics.h"
@@ -61,7 +61,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 	}
 
 	//enough energy for cell transformation?
-	qreal p(NumberGenerator::getInstance().getReal());
+	qreal p(_context->getRandomNumberGenerator()->getReal());
 	qreal eKin = Physics::kineticEnergy(1, _vel, 0, 0);
 	qreal eNew = _energy - (eKin / parameters->cellMass_Reciprocal);
 	if ((eNew >= parameters->cellMinEnergy) && (p < parameters->cellTransformationProb)) {

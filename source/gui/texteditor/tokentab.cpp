@@ -1,8 +1,6 @@
 #include <QScrollBar>
 #include <QSignalMapper>
 
-#include "global/NumberGenerator.h"
-
 #include "model/metadata/SymbolTable.h"
 #include "gui/GuiSettings.h"
 #include "gui/GuiSettings.h"
