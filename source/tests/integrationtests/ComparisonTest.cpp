@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <QFile>
 
-#include "global/NumberGenerator.h"
 #include "model/SimulationController.h"
 #include "model/context/UnitContext.h"
 #include "model/ModelSettings.h"

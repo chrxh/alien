@@ -1,8 +1,31 @@
 #include <gtest/gtest.h>
 
-#include "tests/predicates.h"
+#include "global/ServiceLocator.h"
+#include "global/GlobalFactory.h"
+#include "global/RandomNumberGenerator.h"
 #include "model/physics/Physics.h"
-#include "global/NumberGenerator.h"
+#include "tests/predicates.h"
+
+class PhysicsTest : public ::testing::Test
+{
+public:
+	PhysicsTest();
+	~PhysicsTest();
+
+protected:
+	RandomNumberGenerator* _randomGen = nullptr;
+};
+
+PhysicsTest::PhysicsTest()
+{
+	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	_randomGen = factory->buildRandomNumberGenerator();
+}
+
+PhysicsTest::~PhysicsTest()
+{
+	delete _randomGen;
+}
 
 namespace {
 	::testing::AssertionResult predVectorAfterRotation(const char* beforeExpr, const char* afterExpr, const char* expectedExpr
@@ -44,7 +67,7 @@ namespace {
 	}
 }
 
-TEST (PhysicsTest, testRotateClockwise)
+TEST_F (PhysicsTest, testRotateClockwise)
 {
     QVector3D v1 = QVector3D(0.0, -1.0, 0.0);
     QVector3D v2 = QVector3D(1.0, 0.0, 0.0);
@@ -60,7 +83,7 @@ TEST (PhysicsTest, testRotateClockwise)
 	ASSERT_PRED_FORMAT3(predVectorAfterRotation, v4, v4r, v1);
 }
 
-TEST (PhysicsTest, testAngleOfVector)
+TEST_F(PhysicsTest, testAngleOfVector)
 {
     qreal a = Physics::angleOfVector(QVector3D(0.0, -1.0, 0.0));
 	ASSERT_PRED2(predEqualLowPrecision, a, 0.0);
@@ -72,11 +95,11 @@ TEST (PhysicsTest, testAngleOfVector)
 	ASSERT_PRED2(predEqualLowPrecision, a, 270.0);
 }
 
-TEST (PhysicsTest, testUnitVectorOfAngle)
+TEST_F(PhysicsTest, testUnitVectorOfAngle)
 {
     //test angle -> unit vector -> angle conversion
     for(int i = 0; i < 100; ++i) {
-        qreal angleBefore = NumberGenerator::getInstance().getReal(0.0, 360.0);
+        qreal angleBefore = _randomGen->getReal(0.0, 360.0);
         QVector3D v = Physics::unitVectorOfAngle(angleBefore);
         qreal angleAfter = Physics::angleOfVector(v);
 		ASSERT_PRED_FORMAT3(predUnitVectorOfAngle, angleBefore, v, angleAfter);
@@ -92,11 +115,11 @@ TEST (PhysicsTest, testUnitVectorOfAngle)
     }
 }
 
-TEST (PhysicsTest, testClockwiseAngleFromFirstToSecondVector)
+TEST_F(PhysicsTest, testClockwiseAngleFromFirstToSecondVector)
 {
     for(int i = 0; i < 100; ++i) {
-        qreal angle = NumberGenerator::getInstance().getReal(0.0, 360.0);
-        qreal angleIncrement = NumberGenerator::getInstance().getReal(-180.0, 180.0);
+        qreal angle = _randomGen->getReal(0.0, 360.0);
+        qreal angleIncrement = _randomGen->getReal(-180.0, 180.0);
         QVector3D v1 = Physics::unitVectorOfAngle(angle);
         QVector3D v2 = Physics::unitVectorOfAngle(angle+angleIncrement);
         qreal returnedAngle = Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);
