@@ -29,7 +29,7 @@
 #include "BuilderFacadeImpl.h"
 
 namespace {
-	BuilderFacadeImpl factoryFacadeImpl;
+	BuilderFacadeImpl instance;
 }
 
 BuilderFacadeImpl::BuilderFacadeImpl ()

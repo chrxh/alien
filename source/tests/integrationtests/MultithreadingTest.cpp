@@ -8,6 +8,7 @@
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"
 #include "model/context/SimulationContext.h"
+#include "model/context/SimulationParameters.h"
 #include "model/context/UnitGrid.h"
 #include "model/context/Unit.h"
 #include "model/context/UnitContext.h"
@@ -27,9 +28,10 @@ public:
 protected:
 	SimulationController* _controller = nullptr;
 	SimulationContext* _context = nullptr;
+	SimulationParameters* _parameters = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
-	IntVector2D _universeSize{ 1200, 600 };
+	IntVector2D _universeSize{ 600, 300 };
 	IntVector2D _compartmentSize;
 };
 
@@ -38,8 +40,8 @@ MultithreadingTest::MultithreadingTest()
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	auto metric = facade->buildSpaceMetric(_universeSize);
 	auto symbols = facade->buildDefaultSymbolTable();
-	auto parameters = facade->buildDefaultSimulationParameters();
-	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters));
+	_parameters = facade->buildDefaultSimulationParameters();
+	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, _gridSize, metric, symbols, _parameters));
 	_controller = facade->buildSimulationController(_context);
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 }
@@ -61,13 +63,40 @@ TEST_F(MultithreadingTest, testThreads)
 	}
 }
 
+
 TEST_F(MultithreadingTest, testOneCellMovement)
+{
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	auto access = facade->buildSimulationAccess(_context);
+
+	_parameters->radiationProb = 0.0;
+
+	CellDescription desc;
+	desc.pos = QVector3D(100, 50, 0);
+	desc.vel = QVector3D(1, 0.5, 0);
+	desc.energy = _parameters->cellCreationEnergy;
+	access->addCell(desc);
+
+	QEventLoop pause;
+	int timesteps = 0;
+	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
+		if (++timesteps == 300) {
+			_controller->setRun(false);
+			pause.quit();
+		}
+	});
+	_controller->setRun(true);
+	pause.exec();
+}
+
+
+TEST_F(MultithreadingTest, testManyCellsMovement)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	auto access = facade->buildSimulationAccess(_context);
 	for (int i = 0; i < 10000; ++i) {
 		CellDescription desc;
-		desc.pos = QVector3D(NumberGenerator::getInstance().random(1200), NumberGenerator::getInstance().random(600), 0);
+		desc.pos = QVector3D(NumberGenerator::getInstance().random(_universeSize.x), NumberGenerator::getInstance().random(_universeSize.y), 0);
 		desc.vel = QVector3D(NumberGenerator::getInstance().random()-0.5, NumberGenerator::getInstance().random() - 0.5, 0);
 		desc.energy = 100;
 		access->addCell(desc);
@@ -76,7 +105,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	QEventLoop pause;
 	int timesteps = 0;
 	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
-		if (++timesteps == 200) {
+		if (++timesteps == 50) {
 			_controller->setRun(false);
 			pause.quit();
 		}

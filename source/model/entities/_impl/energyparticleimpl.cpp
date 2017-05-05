@@ -1,6 +1,7 @@
 #include <qmath.h>
 
 #include "global/ServiceLocator.h"
+#include "global/TagGenerator.h"
 #include "global/NumberGenerator.h"
 
 #include "model/BuilderFacade.h"
@@ -19,9 +20,9 @@
 
 EnergyParticleImpl::EnergyParticleImpl(UnitContext* context)
 	: _context(context)
-	, _id(NumberGenerator::getInstance().getInstance().createNewTag())
 {
-
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	_id = tagGen->getNewTag();
 }
 
 EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, UnitContext* context)
