@@ -446,7 +446,7 @@ Token* CellImpl::takeTokenFromStack ()
 
 void CellImpl::mutationByChance()
 {
-	if (NumberGenerator::getInstance().random() < _context->getSimulationParameters()->cellMutationProb) {
+	if (NumberGenerator::getInstance().getReal() < _context->getSimulationParameters()->cellMutationProb) {
 		_features->mutate();
 	}
 }

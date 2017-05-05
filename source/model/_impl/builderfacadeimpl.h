@@ -32,7 +32,7 @@ public:
 	virtual Token* buildToken(UnitContext* context, qreal energy) const override;
 
 private:
-	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const;
+	Unit* buildSimulationUnit(IntVector2D gridPos, int randomSeed, SimulationContext* context) const;
 };
 
 #endif // BUILDERFACADEIMPL_H

@@ -76,7 +76,7 @@ TEST (PhysicsTest, testUnitVectorOfAngle)
 {
     //test angle -> unit vector -> angle conversion
     for(int i = 0; i < 100; ++i) {
-        qreal angleBefore = NumberGenerator::getInstance().random(0.0, 360.0);
+        qreal angleBefore = NumberGenerator::getInstance().getReal(0.0, 360.0);
         QVector3D v = Physics::unitVectorOfAngle(angleBefore);
         qreal angleAfter = Physics::angleOfVector(v);
 		ASSERT_PRED_FORMAT3(predUnitVectorOfAngle, angleBefore, v, angleAfter);
@@ -95,8 +95,8 @@ TEST (PhysicsTest, testUnitVectorOfAngle)
 TEST (PhysicsTest, testClockwiseAngleFromFirstToSecondVector)
 {
     for(int i = 0; i < 100; ++i) {
-        qreal angle = NumberGenerator::getInstance().random(0.0, 360.0);
-        qreal angleIncrement = NumberGenerator::getInstance().random(-180.0, 180.0);
+        qreal angle = NumberGenerator::getInstance().getReal(0.0, 360.0);
+        qreal angleIncrement = NumberGenerator::getInstance().getReal(-180.0, 180.0);
         QVector3D v1 = Physics::unitVectorOfAngle(angle);
         QVector3D v2 = Physics::unitVectorOfAngle(angle+angleIncrement);
         qreal returnedAngle = Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);

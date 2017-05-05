@@ -17,7 +17,7 @@ TokenImpl::TokenImpl(UnitContext* context, qreal energy, bool randomData)
 	_energy = energy;
 	if (randomData) {
 		for (int i = 0; i < context->getSimulationParameters()->tokenMemorySize; ++i)
-			_memory[i] = NumberGenerator::getInstance().random(256);
+			_memory[i] = NumberGenerator::getInstance().getInt(256);
 	}
 }
 

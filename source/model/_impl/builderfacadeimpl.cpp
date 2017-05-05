@@ -1,4 +1,6 @@
 #include "global/NumberGenerator.h"
+#include "global/GlobalFactory.h"
+#include "global/RandomNumberGenerator.h"
 #include "global/ServiceLocator.h"
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
@@ -55,20 +57,20 @@ SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationCo
 SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
 	, SimulationParameters* parameters) const
 {
-	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	SimulationContext* context = factory->buildSimulationContext();
+	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
+	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	SimulationContext* context = contextFactory->buildSimulationContext();
 
-	auto threads = factory->buildSimulationThreads();
+	auto threads = contextFactory->buildSimulationThreads();
+	auto grid = contextFactory->buildSimulationGrid();
+	auto randomGen = globalFactory->buildRandomNumberGenerator();
 	threads->init(maxRunngingThreads);
-
-	auto grid = factory->buildSimulationGrid();
 	grid->init(gridSize, metric);
-
-	context->init(metric, grid, threads, symbolTable, parameters);
+	context->init(randomGen, metric, grid, threads, symbolTable, parameters);
 
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
-			auto unit = buildSimulationUnit({ x,y }, context);
+			auto unit = buildSimulationUnit({ x,y }, randomGen->getInt(), context);
 			grid->registerUnit({ x,y }, unit);
 			threads->registerUnit(unit);
 		}
@@ -95,24 +97,27 @@ SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingT
 	return context;
 }
 
-Unit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const
+Unit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, int randomSeed, SimulationContext* context) const
 {
-	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
+	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
+	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto grid = context->getUnitGrid();
 	auto threads = context->getUnitThreadController();
 
-	auto unit = factory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
-	auto unitContext = factory->buildSimulationUnitContext();
+	auto unit = contextFactory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
+	auto unitContext = contextFactory->buildSimulationUnitContext();
+	auto randomGen = globalFactory->buildRandomNumberGenerator();
 	auto metric = context->getSpaceMetric()->clone();
-	auto compartment = factory->buildMapCompartment();
-	auto cellMap = factory->buildCellMap();
-	auto energyMap = factory->buildEnergyParticleMap();
+	auto compartment = contextFactory->buildMapCompartment();
+	auto cellMap = contextFactory->buildCellMap();
+	auto energyMap = contextFactory->buildEnergyParticleMap();
 	auto symbolTable = context->getSymbolTable()->clone();
 	auto parameters = context->getSimulationParameters()->clone();
 	compartment->init(grid->calcCompartmentRect(gridPos));
 	cellMap->init(metric, compartment);
 	energyMap->init(metric, compartment);
-	unitContext->init(metric, cellMap, energyMap, compartment, symbolTable, parameters);
+	randomGen->setSeed(randomSeed);
+	unitContext->init(randomGen, metric, cellMap, energyMap, compartment, symbolTable, parameters);
 	unit->init(unitContext);
 
 	return unit;
@@ -175,12 +180,12 @@ Cell* BuilderFacadeImpl::buildFeaturedCell (qreal energy, Enums::CellFunction::T
 Cell* BuilderFacadeImpl::buildFeaturedCellWithRandomData (qreal energy, UnitContext* context) const
 {
 	SimulationParameters* parameters = context->getSimulationParameters();
-    int randomMaxConnections = NumberGenerator::getInstance().random(parameters->cellMaxBonds+1);
-    int randomTokenAccessNumber = NumberGenerator::getInstance().random(parameters->cellMaxTokenBranchNumber);
+    int randomMaxConnections = NumberGenerator::getInstance().getInt(parameters->cellMaxBonds+1);
+    int randomTokenAccessNumber = NumberGenerator::getInstance().getInt(parameters->cellMaxTokenBranchNumber);
     QByteArray randomData(256, 0);
 	for (int i = 0; i < 256; ++i)
-		randomData[i] = NumberGenerator::getInstance().random(256);
-    Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(NumberGenerator::getInstance().random(Enums::CellFunction::_COUNTER));
+		randomData[i] = NumberGenerator::getInstance().getInt(256);
+    Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(NumberGenerator::getInstance().getInt(Enums::CellFunction::_COUNTER));
     return buildFeaturedCell(energy, randomCellFunction, randomData, context, randomMaxConnections, randomTokenAccessNumber, QVector3D());
 }
 

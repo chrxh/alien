@@ -24,27 +24,27 @@ NumberGenerator & NumberGenerator::getInstance()
 	return instance;
 }
 
-void NumberGenerator::setRandomSeed(quint32 value)
+void NumberGenerator::setSeed(quint32 value)
 {
 	_currentNumber = value % MAX_RANDOM_NUMBERS;
 }
 
-quint32 NumberGenerator::random(quint32 range)
+quint32 NumberGenerator::getInt(quint32 range)
 {
 	return readRandomNumber() % range;
 }
 
-quint32 NumberGenerator::randomLargeNumbers (quint32 range)
+quint32 NumberGenerator::getLargeInt (quint32 range)
 {
     return static_cast<quint32>((static_cast<qreal>(range) * static_cast<qreal>(readRandomNumber()) / RAND_MAX));
 }
 
-qreal NumberGenerator::random (qreal min, qreal max)
+qreal NumberGenerator::getReal (qreal min, qreal max)
 {
-    return (qreal)randomLargeNumbers((max-min)*1000)/1000.0+min;
+    return (qreal)getLargeInt((max-min)*1000)/1000.0+min;
 }
 
-qreal NumberGenerator::random()
+qreal NumberGenerator::getReal()
 {
 	return static_cast<qreal>(readRandomNumber())/RAND_MAX;
 }

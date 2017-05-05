@@ -712,6 +712,21 @@
     <ClCompile Include="..\..\source\global\_impl\TagGeneratorImpl.cpp">
       <Filter>Global\_Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\global\_impl\RandomNumberGeneratorImpl.cpp">
+      <Filter>Global\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_RandomNumberGenerator.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_RandomNumberGenerator.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_RandomNumberGenerator.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\global\_impl\GlobalFactoryImpl.cpp">
+      <Filter>Global\_Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui_addenergydialog.h">
@@ -928,6 +943,15 @@
       <Filter>Global</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\global\_impl\TagGeneratorImpl.h">
+      <Filter>Global\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\_impl\RandomNumberGeneratorImpl.h">
+      <Filter>Global\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\GlobalFactory.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\_impl\GlobalFactoryImpl.h">
       <Filter>Global\_Impl</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1153,6 +1177,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\UnitContextApi.h">
       <Filter>Model</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\global\RandomNumberGenerator.h">
+      <Filter>Global</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

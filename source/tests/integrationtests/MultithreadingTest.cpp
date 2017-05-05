@@ -96,8 +96,8 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	auto access = facade->buildSimulationAccess(_context);
 	for (int i = 0; i < 10000; ++i) {
 		CellDescription desc;
-		desc.pos = QVector3D(NumberGenerator::getInstance().random(_universeSize.x), NumberGenerator::getInstance().random(_universeSize.y), 0);
-		desc.vel = QVector3D(NumberGenerator::getInstance().random()-0.5, NumberGenerator::getInstance().random() - 0.5, 0);
+		desc.pos = QVector3D(NumberGenerator::getInstance().getInt(_universeSize.x), NumberGenerator::getInstance().getInt(_universeSize.y), 0);
+		desc.vel = QVector3D(NumberGenerator::getInstance().getReal()-0.5, NumberGenerator::getInstance().getReal() - 0.5, 0);
 		desc.energy = 100;
 		access->addCell(desc);
 	}

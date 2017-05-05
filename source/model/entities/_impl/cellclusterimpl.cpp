@@ -711,7 +711,7 @@ void CellClusterImpl::updateCellVel (bool forceCheck)
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
                     if (a.length() > parameters->callMaxForce) {
-                        if (NumberGenerator::getInstance().random() < parameters->cellMaxForceDecayProb)
+                        if (NumberGenerator::getInstance().getReal() < parameters->cellMaxForceDecayProb)
                             cell->setToBeKilled(true);
                     }
                 }
@@ -1051,16 +1051,16 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     }*/
 
     //2. step: distribute the radiated energy to energy particles
-    if(NumberGenerator::getInstance().random() < radFrequency) {
+    if(NumberGenerator::getInstance().getReal() < radFrequency) {
         radEnergy = radEnergy / radFrequency;
-        radEnergy = radEnergy *2.0 * NumberGenerator::getInstance().random();
+        radEnergy = radEnergy *2.0 * NumberGenerator::getInstance().getReal();
         if( radEnergy > (energy-1.0) )
             radEnergy = energy-1.0;
         energy = energy - radEnergy;
 
         //create energy particle with radEnergy
-        QVector3D velPerturbation((NumberGenerator::getInstance().random() - 0.5) * parameters->radiationVelocityPerturbation,
-                                  (NumberGenerator::getInstance().random() - 0.5) * parameters->radiationVelocityPerturbation, 0.0);
+        QVector3D velPerturbation((NumberGenerator::getInstance().getReal() - 0.5) * parameters->radiationVelocityPerturbation,
+                                  (NumberGenerator::getInstance().getReal() - 0.5) * parameters->radiationVelocityPerturbation, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
         EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
         energyParticle = factory->buildEnergyParticle(radEnergy
