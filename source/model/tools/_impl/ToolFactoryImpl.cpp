@@ -13,7 +13,7 @@ ToolFactoryImpl::ToolFactoryImpl()
 	ServiceLocator::getInstance().registerService<ToolFactory>(this);
 }
 
-SimulationAccess * ToolFactoryImpl::buildSimulationManipulator() const
+SimulationAccess * ToolFactoryImpl::buildSimulationAccess() const
 {
 	return new SimulationAccessImpl();
 }

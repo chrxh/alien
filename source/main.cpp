@@ -26,7 +26,7 @@
 //Nächstes Mal:
 
 //Model-Refactoring:
-//- Gui benutzt MapManipulator und NICHT SimulationContext
+//- Gui benutzt SimulationAccess und NICHT SimulationContext
 //- Cell- und Cluster-Erzeugung nicht im BuilderFacade
 //- CellTOs fliegen raus
 //- factory für NumberGenerator und jede Unit kriegt eins
