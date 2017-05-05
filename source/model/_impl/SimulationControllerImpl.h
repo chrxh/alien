@@ -12,9 +12,11 @@ public:
 	virtual ~SimulationControllerImpl() = default;
 
 	virtual void init(SimulationContextApi* context) override;
-	Q_SLOT virtual void setRun(bool run) override;
+	virtual void setRun(bool run) override;
+	virtual void calculateSingleTimestep() override;
 
 private:
+	bool _flagSimulationRunning = false;
 	SimulationContext* _context = nullptr;
 };
 

@@ -1,6 +1,6 @@
 #include "global/ServiceLocator.h"
 
-#include "SimulationManipulatorImpl.h"
+#include "SimulationAccessImpl.h"
 #include "ToolFactoryImpl.h"
 
 namespace
@@ -13,7 +13,7 @@ ToolFactoryImpl::ToolFactoryImpl()
 	ServiceLocator::getInstance().registerService<ToolFactory>(this);
 }
 
-SimulationManipulator * ToolFactoryImpl::buildSimulationManipulator() const
+SimulationAccess * ToolFactoryImpl::buildSimulationManipulator() const
 {
-	return new SimulationManipulatorImpl();
+	return new SimulationAccessImpl();
 }

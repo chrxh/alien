@@ -161,9 +161,8 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
 {
     if( !_context )
         return;
-	_context->lock();
+/*	_context->lock();
 
-/*
     //update mouse buttons
     _leftMouseButtonPressed = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
     _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);

@@ -16,8 +16,9 @@ public:
 
 	enum class State { Ready, Working, Finished };
 	void setState(State value);
-	bool isFinished();
 	bool isReady();
+	bool isWorking();
+	bool isFinished();
 
 private:
 	State _state = State::Ready;

@@ -29,6 +29,7 @@
 //- Gui benutzt MapManipulator und NICHT SimulationContext
 //- Cell- und Cluster-Erzeugung nicht im BuilderFacade
 //- CellTOs fliegen raus
+//- factory für NumberGenerator und jede Unit kriegt eins
 //- init bei Cell/Cluster/EnergyParticle
 
 /**************** alte Notizen ******************/

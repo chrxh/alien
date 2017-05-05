@@ -22,11 +22,22 @@ void UnitThreadControllerImpl::init(int maxRunningThreads)
 	delete _signalMapper;
 	for (auto const& ts : _threadsAndCalcSignals) {
 		delete ts.thr;
-		delete ts.signal;
+		delete ts.calcSignal;
 	}
 	_threadsAndCalcSignals.clear();
 	_signalMapper = new QSignalMapper(this);
 	connect(_signalMapper, static_cast<void(QSignalMapper::*)(QObject*)>(&QSignalMapper::mapped), this, &UnitThreadControllerImpl::threadFinishedCalculation);
+}
+
+
+void UnitThreadControllerImpl::lock()
+{
+	_mutex.lock();
+}
+
+void UnitThreadControllerImpl::unlock()
+{
+	_mutex.unlock();
 }
 
 void UnitThreadControllerImpl::registerUnit(Unit * unit)
@@ -48,14 +59,19 @@ void UnitThreadControllerImpl::registerUnit(Unit * unit)
 void UnitThreadControllerImpl::start()
 {
 	updateDependencies();
+	setAllUnitsReady();
 	startThreads();
-	searchAndExecuteReadyThreads();
 }
 
-void UnitThreadControllerImpl::calculateTimestep()
+bool UnitThreadControllerImpl::calculateTimestep()
 {
-	setAllUnitsReady();
-	searchAndExecuteReadyThreads();
+	if (isNoThreadWorking()) {
+		setAllUnitsReady();
+		lock();
+		searchAndExecuteReadyThreads();
+		return true;
+	}
+	return false;
 }
 
 
@@ -63,7 +79,8 @@ void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 {
 	if (UnitThread* thr = dynamic_cast<UnitThread*>(sender)) {
 		thr->setState(UnitThread::State::Finished);
-		if (areAllUnitsFinished()) {
+		if (areAllThreadsFinished()) {
+			unlock();
 			Q_EMIT timestepCalculated();
 		}
 		else {
@@ -104,11 +121,23 @@ void UnitThreadControllerImpl::startThreads()
 	}
 }
 
-bool UnitThreadControllerImpl::areAllUnitsFinished()
+bool UnitThreadControllerImpl::areAllThreadsFinished()
 {
 	bool result = true;
 	for (auto const& ts : _threadsAndCalcSignals) {
 		if (!ts.thr->isFinished()) {
+			result = false;
+			break;
+		}
+	}
+	return result;
+}
+
+bool UnitThreadControllerImpl::isNoThreadWorking()
+{
+	bool result = true;
+	for (auto const& ts : _threadsAndCalcSignals) {
+		if (ts.thr->isWorking()) {
 			result = false;
 			break;
 		}
@@ -127,7 +156,7 @@ void UnitThreadControllerImpl::searchAndExecuteReadyThreads()
 {
 	for (auto const& ts : _threadsAndCalcSignals) {
 		if (ts.thr->isReady()) {
-			ts.signal->emitSignal();
+			ts.calcSignal->emitSignal();
 			ts.thr->setState(UnitThread::State::Working);
 		}
 	}

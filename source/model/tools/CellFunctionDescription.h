@@ -6,8 +6,8 @@
 
 struct CellFunctionDescription
 {
-	Enums::CellFunction::Type cellFunctionType;
-	QByteArray cellFunctionData;
+	Enums::CellFunction::Type type;
+	QByteArray data;
 };
 
 #endif // CELLFUNCTIONDESCRIPTION_H

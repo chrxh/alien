@@ -10,7 +10,7 @@ public:
 	ToolFactoryImpl();
 	virtual ~ToolFactoryImpl() = default;
 
-	virtual SimulationManipulator* buildSimulationManipulator() const override;
+	virtual SimulationAccess* buildSimulationManipulator() const override;
 };
 
 #endif // TOOLFACTORYIMPL_H

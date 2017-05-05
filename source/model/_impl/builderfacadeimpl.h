@@ -10,7 +10,7 @@ public:
     BuilderFacadeImpl ();
 	virtual ~BuilderFacadeImpl() = default;
 
-	virtual SimulationManipulatorApi* buildSimulationManipulator(SimulationContextApi* context) const override;
+	virtual SimulationAccessApi* buildSimulationManipulator(SimulationContextApi* context) const override;
 	virtual SimulationController* buildSimulationController(SimulationContextApi* context) const override;
 	virtual SimulationContextApi* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const override;
