@@ -700,6 +700,15 @@
     <ClCompile Include="Release\moc_SimulationAccessImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\moc_UnitContextApi.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitContextApi.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitContextApi.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui_addenergydialog.h">
@@ -1132,6 +1141,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\model\tools\_impl\SimulationAccessImpl.h">
       <Filter>Model\Tools\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\UnitContextApi.h">
+      <Filter>Model</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
