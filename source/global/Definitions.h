@@ -6,6 +6,7 @@
 #include <QSize>
 #include <QMap>
 #include <QSet>
+#include <QList>
 #include <qmath.h>
 #include <QDataStream>
 

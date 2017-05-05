@@ -1,31 +1,22 @@
-#ifndef SIMULATIONUNITCONTEXT_H
-#define SIMULATIONUNITCONTEXT_H
+#ifndef UNITCONTEXT_H
+#define UNITCONTEXT_H
 
-#include <QList>
-#include <QSize>
-
-#include "model/Definitions.h"
+#include "model/UnitContextApi.h"
 
 class UnitContext
-	: public QObject
+	: public UnitContextApi
 {
 	Q_OBJECT
 public:
-	UnitContext(QObject* parent) : QObject(parent) {}
+	UnitContext(QObject* parent = nullptr) : UnitContextApi(parent) {}
 	virtual ~UnitContext() = default;
 	
 	virtual void init(SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap, MapCompartment* mapCompartment, SymbolTable* symbolTable
 		, SimulationParameters* parameters) = 0;
 
     virtual SpaceMetric* getSpaceMetric () const = 0;
-	virtual CellMap* getCellMap() const = 0;
-	virtual EnergyParticleMap* getEnergyParticleMap() const = 0;
-	virtual MapCompartment* getMapCompartment() const = 0;
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;
-
-	virtual QList<CellCluster*>& getClustersRef() = 0;
-    virtual QList<EnergyParticle*>& getEnergyParticlesRef () = 0;
 };
 
-#endif // SIMULATIONUNITCONTEXT_H
+#endif // UNITCONTEXT_H

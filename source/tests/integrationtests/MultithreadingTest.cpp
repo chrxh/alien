@@ -73,12 +73,12 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	QEventLoop pause;
 	int timesteps = 0;
 	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
-		if (++timesteps == 200) {
+		if (++timesteps == 2000) {
+			_controller->setRun(false);
 			pause.quit();
 		}
 	});
 	_controller->setRun(true);
 	pause.exec();
-	_controller->setRun(false);
 }
 
