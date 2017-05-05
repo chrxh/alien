@@ -1,8 +1,6 @@
 #include "tutorialwindow.h"
 #include "ui_tutorialwindow.h"
 
-#include "global/NumberGenerator.h"
-
 
 TutorialWindow::TutorialWindow(QWidget *parent) :
     QMainWindow(parent),

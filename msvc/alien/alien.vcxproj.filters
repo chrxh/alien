@@ -523,9 +523,6 @@
     <ClCompile Include="..\..\source\global\ServiceLocator.cpp">
       <Filter>Global</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\global\NumberGenerator.cpp">
-      <Filter>Global</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_UnitThread.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -913,9 +910,6 @@
       <Filter>Model\Physics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\global\ServiceLocator.h">
-      <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\global\NumberGenerator.h">
       <Filter>Global</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\context\_impl\DefinitionsImpl.h">

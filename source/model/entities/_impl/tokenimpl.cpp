@@ -1,4 +1,4 @@
-#include "global/NumberGenerator.h"
+#include "global/RandomNumberGenerator.h"
 #include "model/ModelSettings.h"
 #include "model/context/SimulationParameters.h"
 #include "model/context/UnitContext.h"
@@ -17,7 +17,7 @@ TokenImpl::TokenImpl(UnitContext* context, qreal energy, bool randomData)
 	_energy = energy;
 	if (randomData) {
 		for (int i = 0; i < context->getSimulationParameters()->tokenMemorySize; ++i)
-			_memory[i] = NumberGenerator::getInstance().getInt(256);
+			_memory[i] = context->getRandomNumberGenerator()->getInt(256);
 	}
 }
 

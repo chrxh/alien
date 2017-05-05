@@ -1,9 +1,9 @@
 #include <QMatrix4x4>
 #include <qmath.h>
 
-#include "global/NumberGenerator.h"
 #include "global/TagGenerator.h"
 #include "global/ServiceLocator.h"
+#include "global/RandomNumberGenerator.h"
 #include "model/entities/Cell.h"
 #include "model/BuilderFacade.h"
 #include "model/features/CellFeature.h"
@@ -711,7 +711,7 @@ void CellClusterImpl::updateCellVel (bool forceCheck)
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
                     if (a.length() > parameters->callMaxForce) {
-                        if (NumberGenerator::getInstance().getReal() < parameters->cellMaxForceDecayProb)
+                        if (_context->getRandomNumberGenerator()->getReal() < parameters->cellMaxForceDecayProb)
                             cell->setToBeKilled(true);
                     }
                 }
@@ -1039,6 +1039,7 @@ void CellClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QLis
 void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const
 {
 	auto parameters = _context->getSimulationParameters();
+	auto randomGen = _context->getRandomNumberGenerator();
 	energyParticle = 0;
 
     //1. step: calculate thermal radiation via power law (Stefan-Boltzmann law in 2D: Power ~ T^3)
@@ -1051,16 +1052,16 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     }*/
 
     //2. step: distribute the radiated energy to energy particles
-    if(NumberGenerator::getInstance().getReal() < radFrequency) {
+    if(randomGen->getReal() < radFrequency) {
         radEnergy = radEnergy / radFrequency;
-        radEnergy = radEnergy *2.0 * NumberGenerator::getInstance().getReal();
+        radEnergy = radEnergy *2.0 * randomGen->getReal();
         if( radEnergy > (energy-1.0) )
             radEnergy = energy-1.0;
         energy = energy - radEnergy;
 
         //create energy particle with radEnergy
-        QVector3D velPerturbation((NumberGenerator::getInstance().getReal() - 0.5) * parameters->radiationVelocityPerturbation,
-                                  (NumberGenerator::getInstance().getReal() - 0.5) * parameters->radiationVelocityPerturbation, 0.0);
+        QVector3D velPerturbation((randomGen->getReal() - 0.5) * parameters->radiationVelocityPerturbation,
+                                  (randomGen->getReal() - 0.5) * parameters->radiationVelocityPerturbation, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
         EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
         energyParticle = factory->buildEnergyParticle(radEnergy

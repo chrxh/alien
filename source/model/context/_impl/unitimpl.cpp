@@ -1,7 +1,3 @@
-#include <QFile>
-
-#include "global/NumberGenerator.h"
-
 #include "model/physics/Physics.h"
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
