@@ -24,29 +24,6 @@ NumberGenerator & NumberGenerator::getInstance()
 	return instance;
 }
 
-quint64 NumberGenerator::createNewTag ()
-{
-    _mutex.lock();
-    quint64 tag = ++_tag;
-    _mutex.unlock();
-    return tag;
-}
-
-quint64 NumberGenerator::getTag ()
-{
-    _mutex.lock();
-    quint64 tag = _tag;
-    _mutex.unlock();
-    return tag;
-}
-
-void NumberGenerator::setTag (quint64 tag)
-{
-    _mutex.lock();
-    _tag = tag;
-    _mutex.unlock();
-}
-
 void NumberGenerator::setRandomSeed(quint32 value)
 {
 	_currentNumber = value % MAX_RANDOM_NUMBERS;

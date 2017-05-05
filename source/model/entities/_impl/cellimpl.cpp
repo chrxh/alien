@@ -1,5 +1,7 @@
 #include <QtCore/qmath.h>
 
+#include "global/ServiceLocator.h"
+#include "global/TagGenerator.h"
 #include "global/NumberGenerator.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/Token.h"
@@ -15,9 +17,9 @@ CellImpl::CellImpl (UnitContext* context)
     : _context(context)
 	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
     , _newTokenStack(context->getSimulationParameters()->cellMaxToken)
-    , _id(NumberGenerator::getInstance().createNewTag())
 {
-
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	_id = tagGen->getNewTag();
 }
 
 CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenAccessNumber
