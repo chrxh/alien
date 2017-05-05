@@ -63,12 +63,12 @@ TEST_F(MultithreadingTest, testThreads)
 TEST_F(MultithreadingTest, testOneCellMovement)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto manipulator = facade->buildSimulationManipulator(_context);
+	auto access = facade->buildSimulationAccess(_context);
 	CellDescription desc;
 	desc.pos = QVector3D(50, 50, 0);
 	desc.vel = QVector3D(0.5, 0.25, 0);
 	desc.energy = 100;
-	manipulator->addCell(desc);
+	access->addCell(desc);
 
 	QEventLoop pause;
 	int timesteps = 0;
