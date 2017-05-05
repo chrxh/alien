@@ -15,6 +15,9 @@ public:
 
 	virtual void addCell(CellDescription desc) override;
 
+	virtual std::vector<UnitContextApi*> getAndLockData(IntRect rect) override;
+	virtual void unlock() override;
+
 private:
 	SimulationContext* _context = nullptr;
 };
