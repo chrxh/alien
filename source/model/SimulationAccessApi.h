@@ -15,6 +15,9 @@ public:
 	virtual void init(SimulationContextApi* context) = 0;
 
 	virtual void addCell(CellDescription desc) = 0;
+
+	virtual std::vector<UnitContextApi*> getAndLockData(IntRect rect) = 0;
+	virtual void unlock() = 0;
 };
 
 #endif // SIMULATIONACCESSAPI_H
