@@ -13,6 +13,7 @@
 #include "model/context/MapCompartment.h"
 #include "model/context/_impl/UnitThreadControllerImpl.h"
 #include "model/context/_impl/UnitThread.h"
+#include "model/SimulationAccessApi.h"
 
 #include "tests/Predicates.h"
 
@@ -50,11 +51,34 @@ MultithreadingTest::~MultithreadingTest()
 TEST_F(MultithreadingTest, testThreads)
 {
 	QEventLoop pause;
-	_threadController->connect(_threadController, &UnitThreadController::timestepCalculated, &pause, &QEventLoop::quit);
-	_threadController->start();
+	_controller->connect(_controller, &SimulationController::timestepCalculated, &pause, &QEventLoop::quit);
+	_controller->calculateSingleTimestep();
 	pause.exec();
 
 	for (auto const& threadAndCalcSignal : _threadController->_threadsAndCalcSignals) {
 		ASSERT_TRUE(threadAndCalcSignal.thr->isFinished()) << "One thread is not finished.";
 	}
 }
+
+TEST_F(MultithreadingTest, testOneCellMovement)
+{
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	auto manipulator = facade->buildSimulationManipulator(_context);
+	CellDescription desc;
+	desc.pos = QVector3D(50, 50, 0);
+	desc.vel = QVector3D(0.5, 0.25, 0);
+	desc.energy = 100;
+	manipulator->addCell(desc);
+
+	QEventLoop pause;
+	int timesteps = 0;
+	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
+		if (++timesteps == 200) {
+			pause.quit();
+		}
+	});
+	_controller->setRun(true);
+	pause.exec();
+	_controller->setRun(false);
+}
+

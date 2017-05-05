@@ -27,8 +27,8 @@ class SimulationController;
 class SymbolTable;
 class EntityFactory;
 class ContextFactory;
-class SimulationManipulator;
-class SimulationManipulatorApi;
+class SimulationAccess;
+class SimulationAccessApi;
 class BuilderFacade;
 class SerializationFacade;
 

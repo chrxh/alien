@@ -32,11 +32,6 @@ void UnitThread::setState(State value)
 	}
 }
 
-bool UnitThread::isFinished()
-{
-	return _state == State::Finished;
-}
-
 bool UnitThread::isReady()
 {
 	bool result = (_state == State::Ready);
@@ -45,3 +40,14 @@ bool UnitThread::isReady()
 	}
 	return result;
 }
+
+bool UnitThread::isWorking()
+{
+	return _state == State::Working;
+}
+
+bool UnitThread::isFinished()
+{
+	return _state == State::Finished;
+}
+
