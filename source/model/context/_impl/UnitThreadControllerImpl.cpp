@@ -79,6 +79,7 @@ void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 {
 	if (UnitThread* thr = dynamic_cast<UnitThread*>(sender)) {
 		thr->setState(UnitThread::State::Finished);
+		--_runningThreads;
 		if (areAllThreadsFinished()) {
 			unlock();
 			Q_EMIT timestepCalculated();
@@ -160,6 +161,9 @@ void UnitThreadControllerImpl::searchAndExecuteReadyThreads()
 		if (ts.thr->isReady()) {
 			ts.calcSignal->emitSignal();
 			ts.thr->setState(UnitThread::State::Working);
+			if (++_runningThreads == _maxRunningThreads) {
+				return;
+			}
 		}
 	}
 }
