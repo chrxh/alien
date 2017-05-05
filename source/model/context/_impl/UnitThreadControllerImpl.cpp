@@ -112,6 +112,8 @@ void UnitThreadControllerImpl::terminateThreads()
 			ts.thr->wait();
 		}
 	}
+	_mutex.tryLock();
+	_mutex.unlock();
 }
 
 void UnitThreadControllerImpl::startThreads()
