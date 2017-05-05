@@ -7,11 +7,14 @@
 #include <QMap>
 #include <QSet>
 #include <QList>
-#include <qmath.h>
 #include <QDataStream>
+#include <qmath.h>
 
 #include <set>
 #include <unordered_set>
+
+class RandomNumberGenerator;
+class TagGenerator;
 
 #define SET_CHILD(oldChild, newChild)\
 	if (oldChild != newChild) { \

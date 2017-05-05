@@ -61,7 +61,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 	}
 
 	//enough energy for cell transformation?
-	qreal p(NumberGenerator::getInstance().random());
+	qreal p(NumberGenerator::getInstance().getReal());
 	qreal eKin = Physics::kineticEnergy(1, _vel, 0, 0);
 	qreal eNew = _energy - (eKin / parameters->cellMass_Reciprocal);
 	if ((eNew >= parameters->cellMinEnergy) && (p < parameters->cellTransformationProb)) {

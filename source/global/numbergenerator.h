@@ -9,11 +9,11 @@ class NumberGenerator
 public:
 	static NumberGenerator& getInstance();
 
-	void setRandomSeed(quint32 value);
-	quint32 random(quint32 range);
-	quint32 randomLargeNumbers (quint32 range);
-    qreal random (qreal min, qreal max);
-	qreal random ();
+	void setSeed(quint32 value);
+	quint32 getInt(quint32 range);
+	quint32 getLargeInt (quint32 range);
+    qreal getReal (qreal min, qreal max);
+	qreal getReal ();
 
 private:
 	NumberGenerator();
