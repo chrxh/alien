@@ -55,7 +55,7 @@ TEST_F(MapCompartmentTest, testCompartmentRect)
 {
 	for (int x = 0; x < _gridSize.x; ++x) {
 		for (int y = 0; y < _gridSize.y; ++y) {
-			auto unit = _grid->getUnit({ x, y });
+			auto unit = _grid->getUnitOfGridPos({ x, y });
 			auto unitContext = unit->getContext();
 			auto compartment = unitContext->getMapCompartment();
 			ASSERT_PRED2(predEqualIntVector, _compartmentSize, compartment->getSize()) << "Compartment size does not match.";
@@ -89,7 +89,7 @@ TEST_F(MapCompartmentTest, testCoordinateConversion)
 {
 	for (int x = 0; x < _gridSize.x; ++x) {
 		for (int y = 0; y < _gridSize.y; ++y) {
-			auto unit = _grid->getUnit({ x, y });
+			auto unit = _grid->getUnitOfGridPos({ x, y });
 			auto unitContext = unit->getContext();
 			auto compartment = unitContext->getMapCompartment();
 
@@ -118,7 +118,7 @@ TEST_F(MapCompartmentTest, testNeighborContext)
 	std::vector<std::vector<UnitContext*>> contexts(_gridSize.x, std::vector<UnitContext*>(_gridSize.y));
 	for (int x = 0; x < _gridSize.x; ++x) {
 		for (int y = 0; y < _gridSize.y; ++y) {
-			contexts[x][y] = _grid->getUnit({ x, y })->getContext();
+			contexts[x][y] = _grid->getUnitOfGridPos({ x, y })->getContext();
 		}
 	}
 	for (int x = 0; x < _gridSize.x; ++x) {

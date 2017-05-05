@@ -13,10 +13,13 @@ public:
 
 	virtual void init(int maxRunningThreads) = 0;
 
+	virtual void lock() = 0;
+	virtual void unlock() = 0;
+
 	virtual void registerUnit(Unit* unit) = 0;
 	virtual void start() = 0;
 
-	Q_SLOT virtual void calculateTimestep() = 0;
+	Q_SLOT virtual bool calculateTimestep() = 0;
 	Q_SIGNAL void timestepCalculated();
 };
 

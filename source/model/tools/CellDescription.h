@@ -7,14 +7,13 @@
 
 struct CellDescription
 {
-	qreal clusterAngle = 0.0;
-	qreal clusterAngVel = 0.0;
-	QVector3D cellPos;
-	qreal cellEnergy = 0.0;
-	int cellNumCon = 0;
-	int cellMaxCon = 0;
-	bool cellAllowToken = true;
-	int cellTokenAccessNum = 0;
+	QVector3D pos;
+	QVector3D vel;
+	qreal energy = 0.0;
+	int numConnections = 0;
+	int maxConnections = 0;
+	bool allowToken = true;
+	int tokenAccessNumber = 0;
 	CellMetadata metadata;
 
 	CellFunctionDescription cellFunction;

@@ -109,6 +109,7 @@ void ShapeUniverse::cellCreated (Cell* cell)
     if( (!_context) || (!cell) )
         return;
 
+/*
 	_context->lock();
     createCellItem(cell);
 
@@ -122,6 +123,7 @@ void ShapeUniverse::cellCreated (Cell* cell)
     highlightCell(cell);
 
 	_context->unlock();
+*/
     QGraphicsScene::update();
 }
 
@@ -130,6 +132,7 @@ void ShapeUniverse::energyParticleCreated (EnergyParticle* e)
     if( (!_context) || (!e) )
         return;
 
+/*
 	_context->lock();
     _focusCells.clear();
     _focusEnergyParticles.clear();
@@ -143,6 +146,7 @@ void ShapeUniverse::energyParticleCreated (EnergyParticle* e)
     highlightEnergyParticle(eItem);
 
 	_context->unlock();
+*/
     QGraphicsScene::update();
 }
 
@@ -159,6 +163,7 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
 {
     if( !_context)
         return;
+/*
 	_context->lock();
 
     if( _energyItems.contains(e->getId()) ) {
@@ -168,6 +173,7 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
         eItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
     }
 	_context->unlock();
+*/
 
     QGraphicsScene::update();
 }
@@ -175,6 +181,7 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
 void ShapeUniverse::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
     //extract selected cluster
+/*
 	_context->lock();
     QMap< quint64, CellCluster* > idClusterMap;
     QList< CellGraphicsItem* > highlightedCells = _highlightedCells.values();
@@ -190,10 +197,12 @@ void ShapeUniverse::getExtendedSelection (QList< CellCluster* >& clusters, QList
     foreach (EnergyGraphicsItem* eItem, highlightedEs) {
         es << eItem->getEnergyParticle();
     }
+*/
 }
 
 void ShapeUniverse::delSelection (QList< Cell* >& cells, QList< EnergyParticle* >& es)
 {
+/*
 	_context->lock();
 
     //remove highlighting (has to be done first since the cells will be deleted in the following!!!)
@@ -221,11 +230,13 @@ void ShapeUniverse::delSelection (QList< Cell* >& cells, QList< EnergyParticle* 
     }
     _focusEnergyParticles.clear();
 	_context->unlock();
+*/
     QGraphicsScene::update();
 }
 
 void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
 {
+/*
     _context->lock();
 
     //identify all cells and their clusters which should be deleted
@@ -277,14 +288,17 @@ void ShapeUniverse::delExtendedSelection (QList< CellCluster* >& clusters, QList
     _highlightedEnergyParticles.clear();
     _context->unlock();
     QGraphicsScene::update();
+*/
 }
 
 void ShapeUniverse::metadataUpdated ()
 {
+/*
     //set cell colors
     _context->lock();
     setCellColorFromMetadata();
     _context->unlock();
+*/
 
     QGraphicsScene::update();
 }
@@ -305,6 +319,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
     if( !_context)
         return;
 
+/*
     _context->lock();
 
      //remove hightlighting
@@ -373,6 +388,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
         highlightEnergyParticle(eItem);
 
     _context->unlock();
+*/
     QGraphicsScene::update();
 }
 
@@ -381,6 +397,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
 {
     if( !_context )
         return;
+/*
     _context->lock();
 
     bool _clickedOnSomething = false;
@@ -425,14 +442,14 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         }
     }
 
-/*    if( temp == 1 ) {
+/ *    if( temp == 1 ) {
         qDebug("h: %d", _highlightedCells.size());
         unhighlight();
         QGraphicsScene::update();
         _context->unlock();
         return;
     }
-*/
+* /
     //nothing clicked? => defocus
     if( !_clickedOnSomething ) {
         unhighlight();
@@ -452,6 +469,7 @@ void ShapeUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
     }
 
     _context->unlock();
+*/
 }
 
 void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)

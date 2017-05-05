@@ -21,7 +21,7 @@
 #include "model/context/Unit.h"
 #include "model/context/UnitContext.h"
 #include "model/tools/ToolFactory.h"
-#include "model/tools/SimulationManipulator.h"
+#include "model/tools/SimulationAccess.h"
 #include "model/metadata/SymbolTable.h"
 #include "model/ModelSettings.h"
 #include "model/_impl/SimulationControllerImpl.h"
@@ -37,7 +37,7 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationManipulatorApi * BuilderFacadeImpl::buildSimulationManipulator(SimulationContextApi * context) const
+SimulationAccessApi * BuilderFacadeImpl::buildSimulationManipulator(SimulationContextApi * context) const
 {
 	ToolFactory* factory = ServiceLocator::getInstance().getService<ToolFactory>();
 	auto manipulator = factory->buildSimulationManipulator();
@@ -76,10 +76,10 @@ SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingT
 
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
-			auto unitContext = grid->getUnit({ x, y })->getContext();
+			auto unitContext = grid->getUnitOfGridPos({ x, y })->getContext();
 			auto compartment = unitContext->getMapCompartment();
 			auto getContextFromDelta = [&](IntVector2D const& delta) {
-				return grid->getUnit({ (x + delta.x + gridSize.x) % gridSize.x, (y + delta.y + gridSize.y) % gridSize.y })->getContext();
+				return grid->getUnitOfGridPos({ (x + delta.x + gridSize.x) % gridSize.x, (y + delta.y + gridSize.y) % gridSize.y })->getContext();
 			};
 			compartment->registerNeighborContext(MapCompartment::RelativeLocation::UpperLeft, getContextFromDelta({ -1, -1 }));
 			compartment->registerNeighborContext(MapCompartment::RelativeLocation::Upper, getContextFromDelta({ 0, -1 }));

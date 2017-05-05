@@ -2,6 +2,7 @@
 #define UNITTHREADCONTROLLERIMPL_H
 
 #include <QSignalMapper>
+#include <QMutex>
 #include "gtest/gtest_prod.h"
 
 #include "model/context/UnitThreadController.h"
@@ -19,10 +20,13 @@ public:
 
 	virtual void init(int maxRunningThreads) override;
 
+	virtual void lock() override;
+	virtual void unlock() override;
+
 	virtual void registerUnit(Unit* unit) override;
 	virtual void start() override;
 
-	Q_SLOT virtual void calculateTimestep() override;
+	Q_SLOT virtual bool calculateTimestep() override;
 
 private:
 	Q_SLOT void threadFinishedCalculation(QObject* sender);
@@ -30,15 +34,16 @@ private:
 	void updateDependencies();
 	void terminateThreads();
 	void startThreads();
-	bool areAllUnitsFinished();
+	bool areAllThreadsFinished();
+	bool isNoThreadWorking();
 	void setAllUnitsReady();
 	void searchAndExecuteReadyThreads();
 
+	QMutex _mutex;
 	int _maxRunningThreads = 1;
-
 	struct UnitThreadSignal {
 		UnitThread* thr;
-		SignalWrapper* signal;
+		SignalWrapper* calcSignal;
 	};
 	std::vector<UnitThreadSignal> _threadsAndCalcSignals;
 	std::map<UnitContext*, UnitThread*> _threadsByContexts;
