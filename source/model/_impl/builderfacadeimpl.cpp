@@ -37,12 +37,12 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationAccessApi * BuilderFacadeImpl::buildSimulationManipulator(SimulationContextApi * context) const
+SimulationAccessApi * BuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
 {
 	ToolFactory* factory = ServiceLocator::getInstance().getService<ToolFactory>();
-	auto manipulator = factory->buildSimulationManipulator();
-	manipulator->init(context);
-	return manipulator;
+	auto access = factory->buildSimulationAccess();
+	access->init(context);
+	return access;
 }
 
 SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContextApi * context) const

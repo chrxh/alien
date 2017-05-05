@@ -8,7 +8,7 @@ class ToolFactory
 public:
 	virtual ~ToolFactory() = default;
 
-	virtual SimulationAccess* buildSimulationManipulator() const = 0;
+	virtual SimulationAccess* buildSimulationAccess() const = 0;
 };
 
 #endif // TOOLFACTORY_H
