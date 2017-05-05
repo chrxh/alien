@@ -177,6 +177,7 @@ void UnitImpl::processingClustersCompartmentAllocation()
 			clusterIter.remove();
 			auto otherContext = compartment->getNeighborContext(intPos);
 			otherContext->getClustersRef().push_back(cluster);
+			cluster->init(otherContext);
 		}
 	}
 }
@@ -212,6 +213,7 @@ void UnitImpl::processingEnergyParticlesCompartmentAllocation()
 			particleIter.remove();
 			auto otherContext = compartment->getNeighborContext(intPos);
 			otherContext->getEnergyParticlesRef().push_back(particle);
+			particle->init(otherContext);
 		}
 	}
 }

@@ -8,7 +8,9 @@
 class Token
 {
 public:
-	virtual ~Token() {}
+	virtual ~Token() = default;
+
+	virtual void init(UnitContext* context) = 0;
 
     virtual Token* duplicate () const = 0;
 	virtual int getTokenAccessNumber() const = 0;
