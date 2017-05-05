@@ -709,6 +709,9 @@
     <ClCompile Include="Release\moc_UnitContextApi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\global\_impl\TagGeneratorImpl.cpp">
+      <Filter>Global\_Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui_addenergydialog.h">
@@ -920,6 +923,12 @@
     </ClInclude>
     <ClInclude Include="..\..\source\model\tools\CellFunctionDescription.h">
       <Filter>Model\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\TagGenerator.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\_impl\TagGeneratorImpl.h">
+      <Filter>Global\_Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1315,6 +1324,9 @@
     </Filter>
     <Filter Include="Model\Tools\_Impl">
       <UniqueIdentifier>{8b6d074d-acf9-467e-93f0-0f2a133dff20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global\_Impl">
+      <UniqueIdentifier>{3bef27ce-59bc-4bec-929c-712af7d468b1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

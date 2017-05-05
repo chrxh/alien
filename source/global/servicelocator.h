@@ -2,7 +2,8 @@
 #define SERVICELOCATOR_H
 
 #include <QString>
-#include <QMap>
+#include <map>
+#include <mutex>
 #include <typeinfo>
 
 class ServiceLocator
@@ -25,7 +26,8 @@ public:
     void operator= (ServiceLocator const&) = delete;
 
 private:
-    QMap< size_t, void* > _services;
+    std::map< size_t, void* > _services;
+	std::mutex _mutex;
 };
 
 
@@ -39,11 +41,13 @@ void ServiceLocator::registerService (T* service)
 template< typename T >
 T* ServiceLocator::getService ()
 {
+	std::lock_guard<std::mutex> lock(_mutex);
     size_t hashCode = typeid(T).hash_code();
-    if( _services.contains(hashCode) )
-        return static_cast< T* >(_services[hashCode]);
-    else
-        return static_cast< T* >(0);
+	auto serviceIter = _services.find(hashCode);
+	if (serviceIter != _services.end()) {
+		return static_cast<T*>(serviceIter->second);
+	}
+    return static_cast<T*>(nullptr);
 }
 
 #endif // SERVICELOCATOR_H

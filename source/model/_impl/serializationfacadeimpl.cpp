@@ -1,7 +1,7 @@
 #include "SerializationFacadeImpl.h"
 
 #include "global/ServiceLocator.h"
-#include "global/NumberGenerator.h"
+#include "global/TagGenerator.h"
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/EnergyParticle.h"
@@ -138,8 +138,9 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     , QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap
     , QMap< quint64, Cell* >& oldIdCellMap, UnitContext* context) const
 {
-    EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
-    CellCluster* cluster = entityFactory->buildCellCluster(context);
+    auto entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	CellCluster* cluster = entityFactory->buildCellCluster(context);
     cluster->deserializePrimitives(stream);
 
     //read data and reconstructing structures
@@ -156,7 +157,7 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
         cells << cell;
         idCellMap[cell->getId()] = cell;
 
-        quint64 newId = NumberGenerator::getInstance().createNewTag();
+        quint64 newId = tagGen->getNewTag();
         oldNewCellIdMap[cell->getId()] = newId;
         oldIdCellMap[cell->getId()] = cell;
         cell->setId(newId);
@@ -164,7 +165,7 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     quint64 oldClusterId = cluster->getId();
 
     //assigning new cluster id
-    quint64 id = NumberGenerator::getInstance().createNewTag();
+    quint64 id = tagGen->getNewTag();
     cluster->setId(id);
     oldNewClusterIdMap[oldClusterId] = id;
 
@@ -265,9 +266,10 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, UnitContext* context) const
 {
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
 	QMap< quint64, QList< quint64 > > temp;
 	Cell* cell = deserializeFeaturedCell(stream, temp, context);
-	cell->setId(NumberGenerator::getInstance().createNewTag());
+	cell->setId(tagGen->getNewTag());
 	return cell;
 }
 
@@ -294,25 +296,27 @@ void SerializationFacadeImpl::serializeEnergyParticle(EnergyParticle* particle, 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
     , QMap< quint64, EnergyParticle* >& oldIdEnergyMap, UnitContext* context) const
 {
-    EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
-    EnergyParticle* particle = factory->buildEnergyParticle(context);
+    auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	EnergyParticle* particle = factory->buildEnergyParticle(context);
     particle->deserializePrimitives(stream);
 	EnergyParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
 	oldIdEnergyMap[particle->getId()] = particle;
-	particle->setId(NumberGenerator::getInstance().createNewTag());
+	particle->setId(tagGen->getNewTag());
 	return particle;
 }
 
 EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
 	, UnitContext* context) const
 {
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
 	QMap< quint64, EnergyParticle* > temp;
 	EnergyParticle* particle = deserializeEnergyParticle(stream, temp, context);
 	EnergyParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
-	particle->setId(NumberGenerator::getInstance().createNewTag());
+	particle->setId(tagGen->getNewTag());
 	return particle;
 }

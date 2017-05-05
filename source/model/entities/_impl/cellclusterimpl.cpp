@@ -2,6 +2,7 @@
 #include <qmath.h>
 
 #include "global/NumberGenerator.h"
+#include "global/TagGenerator.h"
 #include "global/ServiceLocator.h"
 #include "model/entities/Cell.h"
 #include "model/BuilderFacade.h"
@@ -20,25 +21,24 @@
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
-CellClusterImpl::CellClusterImpl (UnitContext* context)
-    : _context(context)
-    , _id(NumberGenerator::getInstance().createNewTag())
-{
-    updateTransformationMatrix();
-}
-
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel
     , QVector3D vel, UnitContext* context)
     : _context(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
-    , _id(NumberGenerator::getInstance().createNewTag())
 {
-    _context->getSpaceMetric()->correctPosition(_pos);
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	_id = tagGen->getNewTag();
+	_context->getSpaceMetric()->correctPosition(_pos);
     foreach(Cell* cell, _cells) {
         cell->setCluster(this);
     }
     updateTransformationMatrix();
     updateRelCoordinates();
     updateAngularMass();
+}
+
+CellClusterImpl::CellClusterImpl(UnitContext* context)
+	: CellClusterImpl(QList<Cell*>(), 0.0, QVector3D(), 0.0, QVector3D(), context)
+{
 }
 
 namespace
@@ -67,8 +67,9 @@ namespace
 
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, UnitContext* context)
     : _context(context), _angle(angle), _cells(cells)
-    , _id(NumberGenerator::getInstance().createNewTag())
 {
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	_id = tagGen->getNewTag();
     setCenterPosition(calcCenterPosition(_cells));
 	setRelPositionInCluster(_cells, this);
     updateAngularMass();
@@ -201,7 +202,8 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
 
             //find fragment
             QList< Cell* > component;
-            quint64 tag(NumberGenerator::getInstance().createNewTag());
+			auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+			quint64 tag = tagGen->getNewTag();
             getConnectedComponent(_cells[0], tag, component);
             if( component.size() < size ) {
                 EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -805,13 +807,14 @@ QVector3D CellClusterImpl::calcCellDistWithoutTorusCorrection (Cell* cell) const
 
 QList< CellCluster* > CellClusterImpl::decompose () const
 {
-    QList< CellCluster* > fragments;
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	QList< CellCluster* > fragments;
     while( !_cells.isEmpty() ) {
 
 
         //find fragment
         QList< Cell* > component;
-        quint64 tag(NumberGenerator::getInstance().createNewTag());
+        quint64 tag(tagGen->getNewTag());
         getConnectedComponent(_cells[0], tag, component);
 
         //remove fragment from clusters
@@ -1018,8 +1021,8 @@ Cell* CellClusterImpl::findNearestCell (QVector3D pos) const
 void CellClusterImpl::getConnectedComponent(Cell* cell, QList< Cell* >& component) const
 {
     component.clear();
-    quint64 tag(NumberGenerator::getInstance().createNewTag());
-    getConnectedComponent(cell, tag, component);
+	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+    getConnectedComponent(cell, tagGen->getNewTag(), component);
 }
 
 void CellClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const
