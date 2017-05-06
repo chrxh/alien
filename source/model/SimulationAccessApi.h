@@ -2,7 +2,7 @@
 #define SIMULATIONACCESSAPI_H
 
 #include "model/Definitions.h"
-#include "model/tools/CellDescription.h"
+#include "model/tools/Descriptions.h"
 
 class SimulationAccessApi
 	: public QObject
