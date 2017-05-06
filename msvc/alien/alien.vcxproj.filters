@@ -927,12 +927,6 @@
     <ClInclude Include="..\..\source\model\tools\_impl\ToolFactoryImpl.h">
       <Filter>Model\Tools\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\tools\TokenDescription.h">
-      <Filter>Model\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\tools\CellFunctionDescription.h">
-      <Filter>Model\Tools</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\global\TagGenerator.h">
       <Filter>Global</Filter>
     </ClInclude>
@@ -1154,9 +1148,6 @@
     <CustomBuild Include="..\..\source\model\_impl\SimulationControllerImpl.h">
       <Filter>Model\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\tools\CellDescription.h">
-      <Filter>Model\Tools</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\SimulationContextApi.h">
       <Filter>Model</Filter>
     </CustomBuild>
@@ -1174,6 +1165,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\global\RandomNumberGenerator.h">
       <Filter>Global</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\tools\Descriptions.h">
+      <Filter>Model\Tools</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
