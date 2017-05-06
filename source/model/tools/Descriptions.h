@@ -2,8 +2,19 @@
 #define CELLDESCRIPTION_H
 
 #include "model/Definitions.h"
-#include "TokenDescription.h"
-#include "CellFunctionDescription.h"
+#include "model/features/CellFeatureEnums.h"
+
+struct CellFunctionDescription
+{
+	Enums::CellFunction::Type type;
+	QByteArray data;
+};
+
+struct TokenDescription
+{
+	qreal energy;
+	QByteArray data;
+};
 
 struct CellDescription
 {

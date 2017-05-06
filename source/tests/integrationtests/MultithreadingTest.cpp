@@ -104,13 +104,14 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 		desc.pos = QVector3D(_randomGen->getInt(_universeSize.x), _randomGen->getInt(_universeSize.y), 0);
 		desc.vel = QVector3D(_randomGen->getReal()-0.5, _randomGen->getReal() - 0.5, 0);
 		desc.energy = 100;
+		desc.maxConnections = 4;
 		access->addCell(desc);
 	}
 
 	QEventLoop pause;
 	int timesteps = 0;
 	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
-		if (++timesteps == 50) {
+		if (++timesteps == 200) {
 			_controller->setRun(false);
 			pause.quit();
 		}
