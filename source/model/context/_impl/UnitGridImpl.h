@@ -24,7 +24,7 @@ private:
 
 	SpaceMetric* _metric = nullptr;
 	IntVector2D _gridSize = { 0, 0 };
-	std::vector<std::vector<Unit*>> _units;
+	vector<vector<Unit*>> _units;
 };
 
 #endif // UNITGRIDIMPL_H

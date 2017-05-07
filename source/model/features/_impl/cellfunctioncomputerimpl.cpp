@@ -432,7 +432,7 @@ CellFeature::ProcessingResult CellFunctionComputerImpl::processImpl (Token* toke
     ProcessingResult processingResult {false, 0};
 
 	auto parameters = _context->getSimulationParameters();
-	std::vector<bool> condTable(parameters->cellFunctionComputerMaxInstructions);
+	vector<bool> condTable(parameters->cellFunctionComputerMaxInstructions);
     int condPointer(0);
     int bytePos = 0;
     while( bytePos < _code.size() ) {

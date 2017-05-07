@@ -2,9 +2,9 @@
 #define SERVICELOCATOR_H
 
 #include <QString>
-#include <map>
 #include <mutex>
 #include <typeinfo>
+#include "Definitions.h"
 
 class ServiceLocator
 {
@@ -26,7 +26,7 @@ public:
     void operator= (ServiceLocator const&) = delete;
 
 private:
-    std::map< size_t, void* > _services;
+    map< size_t, void* > _services;
 	std::mutex _mutex;
 };
 

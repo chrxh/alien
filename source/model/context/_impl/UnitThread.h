@@ -22,7 +22,7 @@ public:
 
 private:
 	State _state = State::Ready;
-	std::vector<UnitThread*> _dependencies;
+	vector<UnitThread*> _dependencies;
 };
 
 #endif // UNITTHREAD_H

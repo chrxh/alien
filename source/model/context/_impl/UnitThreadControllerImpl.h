@@ -46,8 +46,8 @@ private:
 		UnitThread* thr;
 		SignalWrapper* calcSignal;
 	};
-	std::vector<UnitThreadSignal> _threadsAndCalcSignals;
-	std::map<UnitContext*, UnitThread*> _threadsByContexts;
+	vector<UnitThreadSignal> _threadsAndCalcSignals;
+	map<UnitContext*, UnitThread*> _threadsByContexts;
 	QSignalMapper* _signalMapper = nullptr;
 
 	FRIEND_TEST(UnitThreadControllerImplTest, testStates);

@@ -27,8 +27,13 @@ class SimulationController;
 class SymbolTable;
 class EntityFactory;
 class ContextFactory;
+struct DataDescription;
+struct DataLightDescription;
+template<typename DataDescriptionType>
 class SimulationAccess;
-class SimulationAccessApi;
+using SimulationFullAccess = SimulationAccess<DataDescription>;
+using SimulationLightAccess = SimulationAccess<DataLightDescription>;
+
 class BuilderFacade;
 class SerializationFacade;
 

@@ -10,23 +10,23 @@ public:
 	NumberGeneratorImpl(QObject* parent = nullptr);
 	virtual ~NumberGeneratorImpl() = default;
 
-	virtual void init(std::uint32_t arraySize, std::uint16_t threadId) override;
+	virtual void init(uint32_t arraySize, uint16_t threadId) override;
 
-	virtual quint32 getRandomInt() override;
-	virtual quint32 getRandomInt(quint32 range) override;
-	virtual quint32 getLargeRandomInt(quint32 range) override;
-	virtual qreal getRandomReal(qreal min, qreal max) override;
-	virtual qreal getRandomReal() override;
+	virtual uint32_t getRandomInt() override;
+	virtual uint32_t getRandomInt(uint32_t range) override;
+	virtual uint32_t getLargeRandomInt(uint32_t range) override;
+	virtual double getRandomReal(double min, double max) override;
+	virtual double getRandomReal() override;
 
-	virtual quint64 getTag() override;
+	virtual uint64_t getTag() override;
 
 private:
 	quint32 getNumberFromArray();
 
 	int _index = 0;
-	std::vector<std::uint32_t> _arrayOfRandomNumbers;
-	std::uint64_t _runningNumber = 0;
-	std::uint64_t _threadId = 0;
+	vector<uint32_t> _arrayOfRandomNumbers;
+	uint64_t _runningNumber = 0;
+	uint64_t _threadId = 0;
 };
 
 #endif // RANDOMNUMBERGENERATORIMPL_H
