@@ -43,6 +43,16 @@ double NumberGeneratorImpl::getRandomReal()
 	return static_cast<qreal>(getNumberFromArray()) / RAND_MAX;
 }
 
+QByteArray NumberGeneratorImpl::getRandomArray(int length)
+{
+	QByteArray bytes;
+	for (int i = 0; i < length; ++i) {
+		bytes[i] =getRandomInt(256);
+	}
+
+	return std::move(bytes);
+}
+
 uint64_t NumberGeneratorImpl::getTag()
 {
 	return _threadId | _runningNumber++;

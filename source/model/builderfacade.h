@@ -24,22 +24,6 @@ public:
 	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize) const = 0;
 	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
-
-	/************** deprecated *************/
-/*
-    virtual CellCluster* buildCellCluster (UnitContext* context) const = 0;
-    virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel
-		, UnitContext* context) const = 0;
-
-    virtual Cell* buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, QByteArray data, UnitContext* context
-        , int maxConnections = 0, int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const = 0;
-    virtual Cell* buildFeaturedCell (qreal energy, Enums::CellFunction::Type type, UnitContext* context
-        , int maxConnections = 0, int tokenAccessNumber = 0 , QVector3D relPos = QVector3D()) const = 0;
-    virtual Cell* buildFeaturedCellWithRandomData (qreal energy, UnitContext* context) const = 0;
-    virtual CellTO buildFeaturedCellTO (Cell* cell) const = 0;
-
-	virtual Token* buildToken(UnitContext* context, qreal energy) const = 0;
-*/
 };
 
 #endif // FACTORYFACADE_H

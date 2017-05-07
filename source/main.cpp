@@ -28,10 +28,7 @@
 //- Tools in Access umbenennen
 
 //Model-Refactoring:
-//- Gui benutzt SimulationAccess und NICHT SimulationContext
-//- Cell- und Cluster-Erzeugung nicht im BuilderFacade
-//- CellTOs fliegen raus
-//- factory für NumberGenerator und jede Unit kriegt eins
+//- Serialisierungs-Framework benutzt Descriptions
 //- init bei Cell/Cluster/EnergyParticle
 
 /**************** alte Notizen ******************/

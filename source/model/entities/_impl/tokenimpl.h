@@ -8,7 +8,6 @@ class TokenImpl
 {
 public:
 	TokenImpl(UnitContext* context);
-	TokenImpl(UnitContext* context, qreal energy, bool randomData = false);
 	TokenImpl(UnitContext* context, qreal energy, QByteArray const& memory);
 
 	virtual void init(UnitContext* context) override;

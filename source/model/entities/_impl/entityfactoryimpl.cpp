@@ -17,37 +17,6 @@ EntityFactoryImpl::EntityFactoryImpl ()
     ServiceLocator::getInstance().registerService<EntityFactory>(this);
 }
 
-CellCluster* EntityFactoryImpl::buildCellCluster (UnitContext* context) const
-{
-    return new CellClusterImpl(context);
-}
-
-CellCluster* EntityFactoryImpl::buildCellClusterFromForeignCells (QList< Cell* > cells
-    , qreal angle, UnitContext* context) const
-{
-    return new CellClusterImpl(cells, angle, context);
-}
-
-Cell* EntityFactoryImpl::buildCell (UnitContext* context) const
-{
-    return new CellImpl(context);
-}
-
-Token* EntityFactoryImpl::buildToken (UnitContext* context) const
-{
-    return new TokenImpl(context);
-}
-
-Token * EntityFactoryImpl::buildTokenWithRandomData(UnitContext* context, qreal energy) const
-{
-	return new TokenImpl(context, energy, true);
-}
-
-EnergyParticle* EntityFactoryImpl::buildEnergyParticle(UnitContext* context) const
-{
-    return new EnergyParticleImpl(context);
-}
-
 CellCluster* EntityFactoryImpl::build(CellClusterDescription const& desc, UnitContext* context) const
 {
 	list<Cell*> cells;

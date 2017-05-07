@@ -11,20 +11,10 @@ TokenImpl::TokenImpl(UnitContext * context)
 	_memory = QByteArray(context->getSimulationParameters()->tokenMemorySize, 0);
 }
 
-TokenImpl::TokenImpl(UnitContext* context, qreal energy, bool randomData)
-	: TokenImpl(context)
-{
-	_energy = energy;
-	if (randomData) {
-		for (int i = 0; i < context->getSimulationParameters()->tokenMemorySize; ++i)
-			_memory[i] = context->getNumberGenerator()->getRandomInt(256);
-	}
-}
-
-TokenImpl::TokenImpl(UnitContext* context, qreal energy, QByteArray const& memory_)
+TokenImpl::TokenImpl(UnitContext* context, qreal energy, QByteArray const& memory)
 	: _energy(energy), _context(context)
 {
-	_memory = memory_.left(context->getSimulationParameters()->tokenMemorySize);
+	_memory = memory.left(context->getSimulationParameters()->tokenMemorySize);
 }
 
 void TokenImpl::init(UnitContext * context)
