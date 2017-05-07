@@ -2,15 +2,22 @@
 #define SIMULATIONACCESS_H
 
 #include "model/Definitions.h"
-#include "model/SimulationAccessApi.h"
 
+template<typename DataDescriptionType>
 class SimulationAccess
-	: public SimulationAccessApi
 {
-	Q_OBJECT
 public:
-	SimulationAccess(QObject* parent = nullptr) : SimulationAccessApi(parent) {}
 	virtual ~SimulationAccess() = default;
+
+	virtual void init(SimulationContextApi* context) = 0;
+
+	virtual void addData(DataDescriptionType const &desc) = 0;
+	virtual void removeData(DataDescriptionType const &desc) = 0;
+	virtual void updateData(DataDescriptionType const &desc) = 0;
+
+	virtual void requestData(IntRect rect) = 0;
+	Q_SIGNAL void dataReadyToRetrieve();
+	virtual DataDescriptionType const& retrieveData() = 0;
 };
 
 #endif // SIMULATIONACCESS_H

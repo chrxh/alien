@@ -8,47 +8,47 @@ NumberGeneratorImpl::NumberGeneratorImpl(QObject * parent)
 {
 }
 
-void NumberGeneratorImpl::init(std::uint32_t arraySize, std::uint16_t threadId)
+void NumberGeneratorImpl::init(uint32_t arraySize, uint16_t threadId)
 {
-	_threadId = static_cast<std::uint64_t>(threadId) << 48;
+	_threadId = static_cast<uint64_t>(threadId) << 48;
 	_arrayOfRandomNumbers.clear();
 	_runningNumber = 0;
-	for (std::uint32_t i = 0; i < arraySize; ++i) {
+	for (uint32_t i = 0; i < arraySize; ++i) {
 		_arrayOfRandomNumbers.push_back(qrand());
 	}
 }
 
-quint32 NumberGeneratorImpl::getRandomInt()
+uint32_t NumberGeneratorImpl::getRandomInt()
 {
 	return getNumberFromArray();
 }
 
-quint32 NumberGeneratorImpl::getRandomInt(quint32 range)
+uint32_t NumberGeneratorImpl::getRandomInt(uint32_t range)
 {
 	return getNumberFromArray() % range;
 }
 
-quint32 NumberGeneratorImpl::getLargeRandomInt(quint32 range)
+uint32_t NumberGeneratorImpl::getLargeRandomInt(uint32_t range)
 {
-	return static_cast<quint32>((static_cast<qreal>(range) * static_cast<qreal>(getNumberFromArray()) / RAND_MAX));
+	return static_cast<uint32_t>((static_cast<qreal>(range) * static_cast<qreal>(getNumberFromArray()) / RAND_MAX));
 }
 
-qreal NumberGeneratorImpl::getRandomReal(qreal min, qreal max)
+double NumberGeneratorImpl::getRandomReal(double min, double max)
 {
 	return (qreal)getLargeRandomInt((max - min) * 1000) / 1000.0 + min;
 }
 
-qreal NumberGeneratorImpl::getRandomReal()
+double NumberGeneratorImpl::getRandomReal()
 {
 	return static_cast<qreal>(getNumberFromArray()) / RAND_MAX;
 }
 
-quint64 NumberGeneratorImpl::getTag()
+uint64_t NumberGeneratorImpl::getTag()
 {
 	return _threadId | _runningNumber++;
 }
 
-quint32 NumberGeneratorImpl::getNumberFromArray()
+uint32_t NumberGeneratorImpl::getNumberFromArray()
 {
 	_index = (_index + 1) % _arrayOfRandomNumbers.size();
 	return _arrayOfRandomNumbers[_index];

@@ -115,7 +115,7 @@ TEST_F(MapCompartmentTest, testCoordinateConversion)
 
 TEST_F(MapCompartmentTest, testNeighborContext)
 {
-	std::vector<std::vector<UnitContext*>> contexts(_gridSize.x, std::vector<UnitContext*>(_gridSize.y));
+	vector<vector<UnitContext*>> contexts(_gridSize.x, vector<UnitContext*>(_gridSize.y));
 	for (int x = 0; x < _gridSize.x; ++x) {
 		for (int y = 0; y < _gridSize.y; ++y) {
 			contexts[x][y] = _grid->getUnitOfGridPos({ x, y })->getContext();

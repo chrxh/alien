@@ -11,15 +11,15 @@ public:
 	NumberGenerator(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~NumberGenerator() = default;
 
-	virtual void init(std::uint32_t arraySize, std::uint16_t threadId) = 0;
+	virtual void init(uint32_t arraySize, uint16_t threadId) = 0;
 
-	virtual quint32 getRandomInt() = 0;
-	virtual quint32 getRandomInt(quint32 range) = 0;
-	virtual quint32 getLargeRandomInt(quint32 range) = 0;
-	virtual qreal getRandomReal(qreal min, qreal max) = 0;
-	virtual qreal getRandomReal() = 0;
+	virtual uint32_t getRandomInt() = 0;
+	virtual uint32_t getRandomInt(uint32_t range) = 0;
+	virtual uint32_t getLargeRandomInt(uint32_t range) = 0;
+	virtual double getRandomReal(double min, double max) = 0;
+	virtual double getRandomReal() = 0;
 
-	virtual quint64 getTag() = 0;
+	virtual uint64_t getTag() = 0;
 };
 
 #endif // RANDOMNUMBERGENERATOR_H

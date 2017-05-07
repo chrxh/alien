@@ -10,7 +10,8 @@ public:
 	AccessPortsFactoryImpl();
 	virtual ~AccessPortsFactoryImpl() = default;
 
-	virtual SimulationAccess* buildSimulationAccess() const override;
+	virtual SimulationFullAccess* buildSimulationFullAccess(QObject* parent = nullptr) const override;
+	virtual SimulationLightAccess* buildSimulationLightAccess(QObject* parent = nullptr) const override;
 };
 
 #endif // TOOLFACTORYIMPL_H

@@ -22,9 +22,9 @@ void MapCompartmentImpl::registerNeighborContext(RelativeLocation location, Unit
 	_contextsByLocations[location] = context;
 }
 
-std::vector<UnitContext*> MapCompartmentImpl::getNeighborContexts() const
+vector<UnitContext*> MapCompartmentImpl::getNeighborContexts() const
 {
-	std::vector<UnitContext*> result;
+	vector<UnitContext*> result;
 	for (auto const& contextByLocation : _contextsByLocations) {
 		result.push_back(contextByLocation.second);
 	}

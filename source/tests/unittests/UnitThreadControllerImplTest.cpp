@@ -55,7 +55,7 @@ TEST_F(UnitThreadControllerImplTest, testStates)
 		ASSERT_TRUE(threadAndCalcSignal.thr->isReady());
 		ASSERT_FALSE(threadAndCalcSignal.thr->isFinished());
 	}
-	std::vector<int> indexOfWorkingThreads;
+	vector<int> indexOfWorkingThreads;
 	int index = 0;
 	for (auto const& threadAndCalcSignal : _threadController->_threadsAndCalcSignals) {
 		if (threadAndCalcSignal.thr->isReady()) {
@@ -85,7 +85,7 @@ TEST_F(UnitThreadControllerImplTest, testStatesWithFinished)
 	_threadController->_threadsAndCalcSignals[3].thr->setState(UnitThread::State::Finished);
 	_threadController->_threadsAndCalcSignals[24].thr->setState(UnitThread::State::Finished);
 
-	std::vector<int> indexOfWorkingThreads;
+	vector<int> indexOfWorkingThreads;
 	int index = 0;
 	for (auto const& threadAndCalcSignal : _threadController->_threadsAndCalcSignals) {
 		if (threadAndCalcSignal.thr->isReady()) {
