@@ -14,10 +14,7 @@ public:
 	virtual void addData(DataDescriptionType const &desc) = 0;
 	virtual void removeData(DataDescriptionType const &desc) = 0;
 	virtual void updateData(DataDescriptionType const &desc) = 0;
-
-	virtual void requestData(IntRect rect) = 0;
-	Q_SIGNAL void dataReadyToRetrieve();
-	virtual DataDescriptionType const& retrieveData() = 0;
+	virtual void getData(IntRect rect, DataDescriptionType& result) = 0;
 };
 
 #endif // SIMULATIONACCESS_H

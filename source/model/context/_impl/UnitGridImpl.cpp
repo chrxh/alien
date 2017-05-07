@@ -37,10 +37,14 @@ Unit * UnitGridImpl::getUnitOfGridPos(IntVector2D gridPos) const
 
 Unit * UnitGridImpl::getUnitOfMapPos(QVector3D pos) const
 {
+	return getUnitOfGridPos(getGridPosOfMapPos(pos));
+}
+
+IntVector2D UnitGridImpl::getGridPosOfMapPos(QVector3D pos) const
+{
 	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
 	IntVector2D compartmentSize = calcCompartmentSize();
-	IntVector2D gridPos = { intPos.x / compartmentSize.x, intPos.y / compartmentSize.y };
-	return getUnitOfGridPos(gridPos);
+	return { intPos.x / compartmentSize.x, intPos.y / compartmentSize.y };
 }
 
 IntRect UnitGridImpl::calcCompartmentRect(IntVector2D gridPos) const
