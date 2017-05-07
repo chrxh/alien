@@ -4,7 +4,7 @@
 
 #include "global/ServiceLocator.h"
 #include "global/GlobalFactory.h"
-#include "global/RandomNumberGenerator.h"
+#include "global/NumberGenerator.h"
 #include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"
@@ -31,7 +31,7 @@ protected:
 	SimulationContext* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
-	RandomNumberGenerator* _randomGen = nullptr;
+	NumberGenerator* _numberGen = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
 	IntVector2D _universeSize{ 600, 300 };
 	IntVector2D _compartmentSize;
@@ -47,13 +47,14 @@ MultithreadingTest::MultithreadingTest()
 	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, _gridSize, metric, symbols, _parameters));
 	_controller = facade->buildSimulationController(_context);
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
-	_randomGen = factory->buildRandomNumberGenerator();
+	_numberGen = factory->buildRandomNumberGenerator();
+	_numberGen->init(123123, 0);
 }
 
 MultithreadingTest::~MultithreadingTest()
 {
 	delete _controller;
-	delete _randomGen;
+	delete _numberGen;
 }
 
 TEST_F(MultithreadingTest, testThreads)
@@ -101,8 +102,8 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	auto access = facade->buildSimulationAccess(_context);
 	for (int i = 0; i < 10000; ++i) {
 		CellDescription desc;
-		desc.pos = QVector3D(_randomGen->getInt(_universeSize.x), _randomGen->getInt(_universeSize.y), 0);
-		desc.vel = QVector3D(_randomGen->getReal()-0.5, _randomGen->getReal() - 0.5, 0);
+		desc.pos = QVector3D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y), 0);
+		desc.vel = QVector3D(_numberGen->getRandomReal()-0.5, _numberGen->getRandomReal() - 0.5, 0);
 		desc.energy = 100;
 		desc.maxConnections = 4;
 		access->addCell(desc);

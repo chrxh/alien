@@ -1,8 +1,8 @@
 #include "global/ServiceLocator.h"
 #include "model/context/SimulationContext.h"
 #include "model/context/UnitThreadController.h"
-#include "model/tools/ToolFactory.h"
-#include "model/tools/SimulationAccess.h"
+#include "model/AccessPorts/AccessPortsFactory.h"
+#include "model/AccessPorts/SimulationAccess.h"
 
 #include "SimulationControllerImpl.h"
 

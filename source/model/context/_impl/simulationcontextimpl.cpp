@@ -1,4 +1,4 @@
-#include "global/RandomNumberGenerator.h"
+#include "global/NumberGenerator.h"
 #include "model/context/SpaceMetric.h"
 #include "model/context/UnitGrid.h"
 #include "model/context/UnitThreadController.h"
@@ -17,10 +17,10 @@ SimulationContextImpl::~SimulationContextImpl()
 	delete _threads;
 }
 
-void SimulationContextImpl::init(RandomNumberGenerator* randomGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
+void SimulationContextImpl::init(NumberGenerator* numberGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
 	, SymbolTable * symbolTable, SimulationParameters* parameters)
 {
-	SET_CHILD(_randomGen, randomGen);
+	SET_CHILD(_numberGen, numberGen);
 	SET_CHILD(_metric, metric);
 	SET_CHILD(_grid, grid);
 	SET_CHILD(_threads, threads);

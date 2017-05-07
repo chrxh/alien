@@ -1,8 +1,7 @@
 #include <qmath.h>
 
 #include "global/ServiceLocator.h"
-#include "global/TagGenerator.h"
-#include "global/RandomNumberGenerator.h"
+#include "global/NumberGenerator.h"
 
 #include "model/BuilderFacade.h"
 #include "model/physics/Physics.h"
@@ -21,8 +20,7 @@
 EnergyParticleImpl::EnergyParticleImpl(UnitContext* context)
 	: _context(context)
 {
-	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	_id = tagGen->getNewTag();
+	_id = _context->getNumberGenerator()->getTag();
 }
 
 EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, UnitContext* context)
@@ -61,7 +59,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 	}
 
 	//enough energy for cell transformation?
-	qreal p(_context->getRandomNumberGenerator()->getReal());
+	qreal p(_context->getNumberGenerator()->getRandomReal());
 	qreal eKin = Physics::kineticEnergy(1, _vel, 0, 0);
 	qreal eNew = _energy - (eKin / parameters->cellMass_Reciprocal);
 	if ((eNew >= parameters->cellMinEnergy) && (p < parameters->cellTransformationProb)) {

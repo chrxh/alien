@@ -1,6 +1,5 @@
 #include "global/ServiceLocator.h"
-#include "global/TagGenerator.h"
-#include "global/RandomNumberGenerator.h"
+#include "global/NumberGenerator.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/Token.h"
 #include "model/features/CellFeature.h"
@@ -16,8 +15,7 @@ CellImpl::CellImpl (UnitContext* context)
 	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
     , _newTokenStack(context->getSimulationParameters()->cellMaxToken)
 {
-	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	_id = tagGen->getNewTag();
+	_id = _context->getNumberGenerator()->getTag();
 }
 
 CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenAccessNumber
@@ -444,7 +442,7 @@ Token* CellImpl::takeTokenFromStack ()
 
 void CellImpl::mutationByChance()
 {
-	if (_context->getRandomNumberGenerator()->getReal() < _context->getSimulationParameters()->cellMutationProb) {
+	if (_context->getNumberGenerator()->getRandomReal() < _context->getSimulationParameters()->cellMutationProb) {
 		_features->mutate();
 	}
 }

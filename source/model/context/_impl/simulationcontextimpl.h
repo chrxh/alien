@@ -11,7 +11,7 @@ public:
 	SimulationContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextImpl();
 
-	virtual void init(RandomNumberGenerator* randomGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
+	virtual void init(NumberGenerator* numberGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters* parameters) override;
 
 	virtual SpaceMetric* getSpaceMetric() const override;
@@ -21,7 +21,7 @@ public:
 	virtual SimulationParameters* getSimulationParameters() const override;
 
 private:
-	RandomNumberGenerator* _randomGen = nullptr;
+	NumberGenerator* _numberGen = nullptr;
 	SpaceMetric* _metric = nullptr;
 	UnitGrid* _grid = nullptr;
 	UnitThreadController* _threads = nullptr;
