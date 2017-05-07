@@ -1,9 +1,8 @@
 #include <QMatrix4x4>
 #include <qmath.h>
 
-#include "global/TagGenerator.h"
 #include "global/ServiceLocator.h"
-#include "global/RandomNumberGenerator.h"
+#include "global/NumberGenerator.h"
 #include "model/entities/Cell.h"
 #include "model/BuilderFacade.h"
 #include "model/features/CellFeature.h"
@@ -25,8 +24,7 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector3D po
     , QVector3D vel, UnitContext* context)
     : _context(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
 {
-	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	_id = tagGen->getNewTag();
+	_id = _context->getNumberGenerator()->getTag();
 	_context->getSpaceMetric()->correctPosition(_pos);
     foreach(Cell* cell, _cells) {
         cell->setCluster(this);
@@ -68,8 +66,7 @@ namespace
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, UnitContext* context)
     : _context(context), _angle(angle), _cells(cells)
 {
-	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	_id = tagGen->getNewTag();
+	_id = _context->getNumberGenerator()->getTag();
     setCenterPosition(calcCenterPosition(_cells));
 	setRelPositionInCluster(_cells, this);
     updateAngularMass();
@@ -202,8 +199,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
 
             //find fragment
             QList< Cell* > component;
-			auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-			quint64 tag = tagGen->getNewTag();
+			quint64 tag = _context->getNumberGenerator()->getTag();
             getConnectedComponent(_cells[0], tag, component);
             if( component.size() < size ) {
                 EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -711,7 +707,7 @@ void CellClusterImpl::updateCellVel (bool forceCheck)
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
                     if (a.length() > parameters->callMaxForce) {
-                        if (_context->getRandomNumberGenerator()->getReal() < parameters->cellMaxForceDecayProb)
+                        if (_context->getNumberGenerator()->getRandomReal() < parameters->cellMaxForceDecayProb)
                             cell->setToBeKilled(true);
                     }
                 }
@@ -807,14 +803,14 @@ QVector3D CellClusterImpl::calcCellDistWithoutTorusCorrection (Cell* cell) const
 
 QList< CellCluster* > CellClusterImpl::decompose () const
 {
-	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	auto numberGen = _context->getNumberGenerator();
 	QList< CellCluster* > fragments;
     while( !_cells.isEmpty() ) {
 
 
         //find fragment
         QList< Cell* > component;
-        quint64 tag(tagGen->getNewTag());
+        quint64 tag(numberGen->getTag());
         getConnectedComponent(_cells[0], tag, component);
 
         //remove fragment from clusters
@@ -1022,7 +1018,7 @@ void CellClusterImpl::getConnectedComponent(Cell* cell, QList< Cell* >& componen
 {
     component.clear();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-    getConnectedComponent(cell, tagGen->getNewTag(), component);
+    getConnectedComponent(cell, _context->getNumberGenerator()->getTag(), component);
 }
 
 void CellClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const
@@ -1039,7 +1035,7 @@ void CellClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QLis
 void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const
 {
 	auto parameters = _context->getSimulationParameters();
-	auto randomGen = _context->getRandomNumberGenerator();
+	auto numberGen = _context->getNumberGenerator();
 	energyParticle = 0;
 
     //1. step: calculate thermal radiation via power law (Stefan-Boltzmann law in 2D: Power ~ T^3)
@@ -1052,16 +1048,16 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     }*/
 
     //2. step: distribute the radiated energy to energy particles
-    if(randomGen->getReal() < radFrequency) {
+    if(numberGen->getRandomReal() < radFrequency) {
         radEnergy = radEnergy / radFrequency;
-        radEnergy = radEnergy *2.0 * randomGen->getReal();
+        radEnergy = radEnergy *2.0 * numberGen->getRandomReal();
         if( radEnergy > (energy-1.0) )
             radEnergy = energy-1.0;
         energy = energy - radEnergy;
 
         //create energy particle with radEnergy
-        QVector3D velPerturbation((randomGen->getReal() - 0.5) * parameters->radiationVelocityPerturbation,
-                                  (randomGen->getReal() - 0.5) * parameters->radiationVelocityPerturbation, 0.0);
+        QVector3D velPerturbation((numberGen->getRandomReal() - 0.5) * parameters->radiationVelocityPerturbation,
+                                  (numberGen->getRandomReal() - 0.5) * parameters->radiationVelocityPerturbation, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
         EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
         energyParticle = factory->buildEnergyParticle(radEnergy

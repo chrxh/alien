@@ -1,7 +1,7 @@
 #ifndef SIMULATIONACCESSIMPL_H
 #define SIMULATIONACCESSIMPL_H
 
-#include "model/tools/SimulationAccess.h"
+#include "model/AccessPorts/SimulationAccess.h"
 
 class SimulationAccessImpl
 	: public SimulationAccess
@@ -14,9 +14,6 @@ public:
 	virtual void init(SimulationContextApi* context) override;
 
 	virtual void addCell(CellDescription desc) override;
-
-	virtual std::vector<UnitContextApi*> getAndLockData(IntRect rect) override;
-	virtual void unlock() override;
 
 private:
 	SimulationContext* _context = nullptr;

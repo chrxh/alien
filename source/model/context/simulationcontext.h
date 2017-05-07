@@ -11,7 +11,7 @@ public:
 	SimulationContext(QObject* parent = nullptr) : SimulationContextApi(parent) {}
 	virtual ~SimulationContext() = default;
 
-	virtual void init(RandomNumberGenerator* randomGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
+	virtual void init(NumberGenerator* numberGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters* parameters) = 0;
 
 	virtual UnitGrid* getUnitGrid() const = 0;

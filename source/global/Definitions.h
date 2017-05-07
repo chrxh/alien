@@ -13,7 +13,7 @@
 #include <set>
 #include <unordered_set>
 
-class RandomNumberGenerator;
+class NumberGenerator;
 class TagGenerator;
 
 #define SET_CHILD(oldChild, newChild)\

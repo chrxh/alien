@@ -2,7 +2,7 @@
 #include <QtCore/qmath.h>
 
 #include "global/ServiceLocator.h"
-#include "global/TagGenerator.h"
+#include "global/NumberGenerator.h"
 #include "model/physics/Physics.h"
 #include "model/physics/CodingPhysicalQuantities.h"
 #include "model/entities/Cell.h"
@@ -88,11 +88,11 @@ namespace {
 
 CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
-	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
+	auto numberGen = _context->getNumberGenerator();
 	ProcessingResult processingResult{ false, 0 };
 	auto& tokenMem = token->getMemoryRef();
 	int n = tokenMem[Enums::Scanner::INOUT_CELL_NUMBER];
-    quint64 tag(tagGen->getNewTag());
+    quint64 tag(numberGen->getTag());
     Cell* scanCellPre1 = previousCell;
     Cell* scanCellPre2 = previousCell;
     Cell* scanCell = cell;
@@ -112,7 +112,7 @@ CellFeature::ProcessingResult CellFunctionScannerImpl::processImpl (Token* token
         tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::SUCCESS;
 
         //prove whether finished or not
-        tag = tagGen->getNewTag();
+        tag = numberGen->getTag();
         Cell* scanCellPreTemp1 = previousCell;
         Cell* scanCellPreTemp2 = previousCell;
         Cell* scanCellTemp = cell;

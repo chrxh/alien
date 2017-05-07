@@ -8,7 +8,7 @@ class GlobalFactory
 public:
 	virtual ~GlobalFactory() = default;
 
-	virtual RandomNumberGenerator* buildRandomNumberGenerator() const = 0;
+	virtual NumberGenerator* buildRandomNumberGenerator() const = 0;
 };
 
 #endif // GLOBALFACTORY_H

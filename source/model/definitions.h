@@ -30,7 +30,6 @@ class ContextFactory;
 class SimulationAccess;
 class SimulationAccessApi;
 class BuilderFacade;
-class UnitContextApi;
 class SerializationFacade;
 
 struct CellClusterHash

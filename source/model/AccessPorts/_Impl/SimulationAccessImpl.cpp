@@ -35,11 +35,3 @@ void SimulationAccessImpl::addCell(CellDescription desc)
 	_context->getUnitThreadController()->unlock();
 }
 
-std::vector<UnitContextApi*> SimulationAccessImpl::getAndLockData(IntRect rect)
-{
-	return std::vector<UnitContextApi*>();
-}
-
-void SimulationAccessImpl::unlock()
-{
-}
