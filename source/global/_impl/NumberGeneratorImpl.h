@@ -17,6 +17,7 @@ public:
 	virtual uint32_t getLargeRandomInt(uint32_t range) override;
 	virtual double getRandomReal(double min, double max) override;
 	virtual double getRandomReal() override;
+	virtual QByteArray getRandomArray(int length) override;
 
 	virtual uint64_t getTag() override;
 

@@ -205,8 +205,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
             getConnectedComponent(_cells[0], tag, component);
             if( component.size() < size ) {
                 EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
-                CellCluster* part = factory->buildCellClusterFromForeignCells(
-                    component, _angle, _context);
+                CellCluster* part = new CellClusterImpl(component, _angle, _context);
                 fragments << part;
 
                 //remove fragment from cluster
@@ -497,7 +496,9 @@ void CellClusterImpl::processingMovement ()
                         //create token?
                         if( (cell->getNumToken() < parameters->cellMaxToken) && (eDiff > parameters->tokenMinEnergy) ) {
 							auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-                            auto token = factory->buildTokenWithRandomData(_context, eDiff);
+							int tokenMemSize = _context->getSimulationParameters()->tokenMemorySize;
+							auto desc = TokenDescription().setEnergy(eDiff).setData(_context->getNumberGenerator()->getRandomArray(tokenMemSize));
+                            auto token = factory->build(desc, _context);
                             cell->addToken(token, Cell::ActivateToken::NOW, Cell::UpdateTokenAccessNumber::YES);
                         }
                         //if not add to internal cell energy
