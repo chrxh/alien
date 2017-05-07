@@ -167,10 +167,12 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
             qreal kinEnergy = Physics::kineticEnergy(1.0, cell->getVelocity(), 0.0, 0.0);
             qreal internalEnergy = cell->getEnergyIncludingTokens();
             EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
-            qreal energyForParticle = internalEnergy
-                + kinEnergy / parameters->cellMass_Reciprocal;
-            energyParticle = factory->buildEnergyParticle(
-                energyForParticle, calcPosition(cell, true), cell->getVelocity(), _context);
+            qreal energyForParticle = internalEnergy + kinEnergy / parameters->cellMass_Reciprocal;
+
+			QVector3D pos = calcPosition(cell, true);
+			QVector3D vel = cell->getVelocity();
+			auto desc = EnergyParticleDescription().setEnergy(energyForParticle).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+            energyParticle = factory->build(desc, _context);
 			EnergyParticleMetadata metadata;
 			metadata.color = cell->getMetadata().color;
             energyParticle->setMetadata(metadata);
@@ -1060,10 +1062,11 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
                                   (numberGen->getRandomReal() - 0.5) * parameters->radiationVelocityPerturbation, 0.0);
         QVector3D posPerturbation = velPerturbation.normalized();
         EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
-        energyParticle = factory->buildEnergyParticle(radEnergy
-            , calcPosition(originCell) + posPerturbation
-            , originCell->getVelocity() * parameters->radiationVelocityMultiplier + velPerturbation
-            , _context);
+
+		QVector3D pos = calcPosition(originCell) + posPerturbation;
+		QVector3D vel = originCell->getVelocity() * parameters->radiationVelocityMultiplier + velPerturbation;
+		auto desc = EnergyParticleDescription().setEnergy(radEnergy).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+        energyParticle = factory->build(desc, _context);
 		EnergyParticleMetadata metadata;
 		metadata.color = originCell->getMetadata().color;
         energyParticle->setMetadata(metadata);

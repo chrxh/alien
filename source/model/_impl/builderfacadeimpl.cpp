@@ -154,6 +154,7 @@ SimulationParameters * BuilderFacadeImpl::buildDefaultSimulationParameters() con
 	return ModelSettings::loadDefaultSimulationParameters();
 }
 
+/*
 CellCluster* BuilderFacadeImpl::buildCellCluster (UnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -245,3 +246,4 @@ CellTO BuilderFacadeImpl::buildFeaturedCellTO (Cell* cell) const
     }
     return to;
 }
+*/

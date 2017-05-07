@@ -366,7 +366,7 @@ bool CellImpl::isTokenBlocked () const
     return _blockToken;
 }
 
-void CellImpl::setTokenBlocked (bool block)
+void CellImpl::setFlagTokenBlocked (bool block)
 {
     _blockToken = block;
 }
