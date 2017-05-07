@@ -21,7 +21,7 @@
 #include "model/context/SimulationContext.h"
 #include "model/context/Unit.h"
 #include "model/context/UnitContext.h"
-#include "model/AccessPorts/AccessPortsFactory.h"
+#include "model/AccessPorts/AccessPortFactory.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/metadata/SymbolTable.h"
 #include "model/ModelSettings.h"
@@ -40,7 +40,7 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
 
 SimulationFullAccess * BuilderFacadeImpl::buildSimulationFullAccess(SimulationContextApi * context) const
 {
-	AccessPortsFactory* factory = ServiceLocator::getInstance().getService<AccessPortsFactory>();
+	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
 	auto access = factory->buildSimulationFullAccess();
 	access->init(context);
 	return access;
@@ -48,7 +48,7 @@ SimulationFullAccess * BuilderFacadeImpl::buildSimulationFullAccess(SimulationCo
 
 SimulationLightAccess * BuilderFacadeImpl::buildSimulationLightAccess(SimulationContextApi * context) const
 {
-	AccessPortsFactory* factory = ServiceLocator::getInstance().getService<AccessPortsFactory>();
+	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
 	auto access = factory->buildSimulationLightAccess();
 	access->init(context);
 	return access;
