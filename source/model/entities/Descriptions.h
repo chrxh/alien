@@ -1,19 +1,14 @@
-#ifndef DESCRIPTIONS_H
-#define DESCRIPTIONS_H
+#ifndef ENTITIES_DESCRIPTIONS_H
+#define ENTITIES_DESCRIPTIONS_H
 
-#include "model/Definitions.h"
-#include "model/features/CellFeatureEnums.h"
-
-struct CellFunctionDescription
-{
-	Enums::CellFunction::Type type;
-	QByteArray data;
-};
+#include "model/features/Descriptions.h"
 
 struct TokenDescription
 {
 	double energy;
 	QByteArray data;
+
+	TokenDescription& setEnergy(double value) { energy = value; return *this; }
 };
 
 struct CellDescription
@@ -22,14 +17,18 @@ struct CellDescription
 	QVector2D relPos;
 	double energy = 0.0;
 	int maxConnections = 0;
-	bool allowToken = true;
+	bool tokenBlocked = false;
 	int tokenAccessNumber = 0;
 	CellMetadata metadata;
 	CellFunctionDescription cellFunction;
 	vector<TokenDescription> tokens;
 
-	CellDescription& setEnergy(double e) { energy = e; return *this; }
-	CellDescription& setMaxConnections(int c) { maxConnections = c; return *this; }
+	CellDescription& setEnergy(double value) { energy = value; return *this; }
+	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
+	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
+	CellDescription& setTokenAccessNumber(int value) { tokenAccessNumber = value; return *this; }
+	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
+	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction = value; return *this; }
 };
 
 struct CellClusterDescription
@@ -55,6 +54,10 @@ struct EnergyParticleDescription
 	QVector2D vel;
 	double energy = 0.0;
 	EnergyParticleMetadata metadata;
+
+	EnergyParticleDescription& setPos(QVector2D const& p) { pos = p; return *this; }
+	EnergyParticleDescription& setVel(QVector2D const& v) { vel = v; return *this; }
+	EnergyParticleDescription& setEnergy(double e) { energy = e; return *this; }
 };
 
 struct DataDescription
@@ -66,4 +69,4 @@ struct DataDescription
 	DataDescription& addEnergyParticle(EnergyParticleDescription const& e) { particles.push_back(e); return *this; }
 };
 
-#endif // DESCRIPTIONS_H
+#endif // ENTITIES_DESCRIPTIONS_H

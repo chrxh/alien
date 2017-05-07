@@ -279,7 +279,6 @@
     </CustomBuild>
     <ClInclude Include="..\..\source\global\_impl\GlobalFactoryImpl.h" />
     <ClInclude Include="..\..\source\global\_impl\NumberGeneratorImpl.h" />
-    <ClInclude Include="..\..\source\model\AccessPorts\Descriptions.h" />
     <CustomBuild Include="..\..\source\model\AccessPorts\SimulationAccess.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
       </Message>
@@ -321,7 +320,6 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </Command>
     </CustomBuild>
-    <ClInclude Include="..\..\source\model\AccessPorts\LightDescriptions.h" />
     <ClInclude Include="..\..\source\model\AccessPorts\_Impl\AccessPortFactoryImpl.h" />
     <ClInclude Include="..\..\source\model\BuilderFacade.h" />
     <ClInclude Include="..\..\source\model\context\ContextFactory.h" />
@@ -585,10 +583,13 @@
     <ClInclude Include="..\..\source\model\entities\Cell.h" />
     <ClInclude Include="..\..\source\model\entities\CellCluster.h" />
     <ClInclude Include="..\..\source\model\entities\CellTO.h" />
+    <ClInclude Include="..\..\source\model\entities\Descriptions.h" />
     <ClInclude Include="..\..\source\model\entities\EntityFactory.h" />
+    <ClInclude Include="..\..\source\model\entities\LightDescriptions.h" />
     <ClInclude Include="..\..\source\model\entities\Token.h" />
     <ClInclude Include="..\..\source\model\features\CellFeature.h" />
     <ClInclude Include="..\..\source\model\features\CellFunction.h" />
+    <ClInclude Include="..\..\source\model\features\Descriptions.h" />
     <ClInclude Include="..\..\source\model\features\_impl\CellFunctionCommunicatorImpl.h" />
     <CustomBuild Include="..\..\source\model\metadata\SymbolTable.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing SymbolTable.h...</Message>

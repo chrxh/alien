@@ -2,6 +2,7 @@
 #define ENERGYPARTICLEIMPL_H
 
 #include "model/entities/EnergyParticle.h"
+#include "model/entities/Descriptions.h"
 
 class EnergyParticleImpl
 	: public EnergyParticle
@@ -36,6 +37,8 @@ private:
 	void move();
 	void collisionWithEnergyParticle(EnergyParticle* otherEnergy);
 	void collisionWithCell(Cell* cell);
+
+	CellDescription getRandomCellDesciption(double energy) const;
 
 	UnitContext* _context = nullptr;
 

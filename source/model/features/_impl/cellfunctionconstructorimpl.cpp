@@ -38,18 +38,15 @@ namespace {
     Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
         , int tokenAccessNumber, quint8 metadata, int cellType, QByteArray cellFunctionData, UnitContext* context)
     {
-        BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-        Cell* newCell = facade->buildFeaturedCell(context->getSimulationParameters()->cellCreationEnergy
-			, convertCellTypeNumberToName(cellType), cellFunctionData, context);
-        CellCluster* cluster = baseCell->getCluster();
-        newCell->setMaxConnections(maxConnections);
-        newCell->setTokenBlocked(true);
-        newCell->setBranchNumber(tokenAccessNumber);
-		CellMetadata newMetadata;
-		newMetadata.color = metadata;
-        newCell->setMetadata(newMetadata);
-        cluster->addCell(newCell, posOfNewCell);
-        return newCell;
+		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
+		CellMetadata meta;
+		meta.color = metadata;
+		auto desc = CellDescription().setEnergy(context->getSimulationParameters()->cellCreationEnergy).setMaxConnections(maxConnections)
+			.setTokenAccessNumber(tokenAccessNumber).setFlagTokenBlocked(true).setMetadata(meta)
+			.setCellFunction(CellFunctionDescription().setType(convertCellTypeNumberToName(cellType)).setData(cellFunctionData));
+		auto cell = factory->build(desc, context);
+		baseCell->getCluster()->addCell(cell, posOfNewCell);
+		return cell;
     }
 
     Cell* obstacleCheck (CellCluster* cluster, bool safeMode, CellMap* cellMap, SpaceMetric* metric, SimulationParameters* parameters)
@@ -438,14 +435,14 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 cluster->setAngularVel(angularVelNew);
 
                 //allow token access to old "construction cell"
-                constructionCell->setTokenBlocked(false);
+                constructionCell->setFlagTokenBlocked(false);
 
                 //finish construction site?
                 if( (opt == Enums::ConstrInOption::FINISH_NO_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
-                    newCell->setTokenBlocked(false);
+                    newCell->setFlagTokenBlocked(false);
 
                 //separate construction site?
                 if( opt == Enums::ConstrInOption::FINISH_WITH_SEP ) {
@@ -468,7 +465,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     if( newCell->getNumToken(true) < parameters->cellMaxToken ) {
 						auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-						auto newToken = factory->buildToken(_context, parameters->tokenCreationEnergy);
+						auto desc = TokenDescription().setEnergy(parameters->tokenCreationEnergy);
+						auto newToken = factory->build(desc, _context);
                         newCell->addToken(newToken, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                         token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                     }
@@ -614,7 +612,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
-                    newCell->setTokenBlocked(false);
+                    newCell->setFlagTokenBlocked(false);
 
                 //separate construction site?
                 if( opt == Enums::ConstrInOption::FINISH_WITH_SEP ) {
@@ -636,7 +634,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 				auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 				if ((opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
-					auto token = factory->buildToken(_context, parameters->tokenCreationEnergy);
+					auto desc = TokenDescription().setEnergy(parameters->tokenCreationEnergy);
+					auto token = factory->build(desc, _context);
                     newCell->addToken(token, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
                     token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                 }

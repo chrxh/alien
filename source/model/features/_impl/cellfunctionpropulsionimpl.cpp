@@ -104,9 +104,10 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
 
         //create energy particle with difference energy
 		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-		processingResult.newEnergyParticle = factory->buildEnergyParticle(qAbs(energyDiff)
-			, cluster->calcPosition(cell, _context) - impulse.normalized()
-			, tangVel - impulse.normalized() / 4.0, _context);
+		QVector3D pos = cluster->calcPosition(cell, _context) - impulse.normalized();
+		QVector3D vel = tangVel - impulse.normalized() / 4.0;
+		auto desc = EnergyParticleDescription().setEnergy(qAbs(energyDiff)).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+		processingResult.newEnergyParticle = factory->build(desc, _context);
 
         //update velocities
         cluster->setVelocity(newVel);

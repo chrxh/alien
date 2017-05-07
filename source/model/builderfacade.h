@@ -6,8 +6,8 @@
 
 #include "model/entities/CellTO.h"
 #include "model/features/CellFeatureEnums.h"
-#include "model/AccessPorts/Descriptions.h"
-#include "model/AccessPorts/LightDescriptions.h"
+#include "model/entities/Descriptions.h"
+#include "model/entities/LightDescriptions.h"
 
 #include "Definitions.h"
 
@@ -26,6 +26,7 @@ public:
 	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
 
 	/************** deprecated *************/
+/*
     virtual CellCluster* buildCellCluster (UnitContext* context) const = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel
 		, UnitContext* context) const = 0;
@@ -38,6 +39,7 @@ public:
     virtual CellTO buildFeaturedCellTO (Cell* cell) const = 0;
 
 	virtual Token* buildToken(UnitContext* context, qreal energy) const = 0;
+*/
 };
 
 #endif // FACTORYFACADE_H
