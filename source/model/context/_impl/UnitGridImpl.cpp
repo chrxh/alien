@@ -16,7 +16,7 @@ void UnitGridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
 	_metric = metric;
 	_gridSize = gridSize;
 	for (int x = 0; x < gridSize.x; ++x) {
-		_units.push_back(std::vector<Unit*>(gridSize.y, nullptr));
+		_units.push_back(vector<Unit*>(gridSize.y, nullptr));
 	}
 }
 

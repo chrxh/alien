@@ -16,7 +16,7 @@
 #include "model/context/MapCompartment.h"
 #include "model/context/_impl/UnitThreadControllerImpl.h"
 #include "model/context/_impl/UnitThread.h"
-#include "model/SimulationAccessApi.h"
+#include "model/AccessPorts/SimulationAccess.h"
 
 #include "tests/Predicates.h"
 
@@ -73,15 +73,15 @@ TEST_F(MultithreadingTest, testThreads)
 TEST_F(MultithreadingTest, testOneCellMovement)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto access = facade->buildSimulationAccess(_context);
+	auto access = facade->buildSimulationFullAccess(_context);
 
 	_parameters->radiationProb = 0.0;
 
-	CellDescription desc;
-	desc.pos = QVector3D(100, 50, 0);
-	desc.vel = QVector3D(1, 0.5, 0);
-	desc.energy = _parameters->cellCreationEnergy;
-	access->addCell(desc);
+
+	DataDescription desc;
+	desc.addCellCluster(CellClusterDescription().setPos(QVector2D(100, 50)).setVel(QVector2D(1, 0.5))
+		.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy)));
+	access->addData(desc);
 
 	QEventLoop pause;
 	int timesteps = 0;
@@ -99,15 +99,14 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 TEST_F(MultithreadingTest, testManyCellsMovement)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto access = facade->buildSimulationAccess(_context);
+	auto access = facade->buildSimulationFullAccess(_context);
+	DataDescription desc;
 	for (int i = 0; i < 10000; ++i) {
-		CellDescription desc;
-		desc.pos = QVector3D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y), 0);
-		desc.vel = QVector3D(_numberGen->getRandomReal()-0.5, _numberGen->getRandomReal() - 0.5, 0);
-		desc.energy = 100;
-		desc.maxConnections = 4;
-		access->addCell(desc);
+		desc.addCellCluster(CellClusterDescription().setPos(QVector2D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y)))
+			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5))
+			.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
 	}
+	access->addData(desc);
 
 	QEventLoop pause;
 	int timesteps = 0;

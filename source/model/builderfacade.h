@@ -6,6 +6,8 @@
 
 #include "model/entities/CellTO.h"
 #include "model/features/CellFeatureEnums.h"
+#include "model/AccessPorts/Descriptions.h"
+#include "model/AccessPorts/LightDescriptions.h"
 
 #include "Definitions.h"
 
@@ -14,14 +16,16 @@ class BuilderFacade
 public:
 	virtual ~BuilderFacade() = default;
 
-	virtual SimulationAccessApi* buildSimulationAccess(SimulationContextApi* context) const = 0;
-	virtual SimulationController* buildSimulationController(SimulationContextApi* context) const = 0;
 	virtual SimulationContextApi* buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
+	virtual SimulationFullAccess* buildSimulationFullAccess(SimulationContextApi* context) const = 0;
+	virtual SimulationLightAccess* buildSimulationLightAccess(SimulationContextApi* context) const = 0;
+	virtual SimulationController* buildSimulationController(SimulationContextApi* context) const = 0;
 	virtual SpaceMetric* buildSpaceMetric(IntVector2D universeSize) const = 0;
 	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
 
+	/************** deprecated *************/
     virtual CellCluster* buildCellCluster (UnitContext* context) const = 0;
     virtual CellCluster* buildCellCluster (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel
 		, UnitContext* context) const = 0;

@@ -1,5 +1,6 @@
 #include "global/ServiceLocator.h"
-
+#include "model/AccessPorts/Descriptions.h"
+#include "model/AccessPorts/LightDescriptions.h"
 #include "SimulationAccessImpl.h"
 #include "AccessPortsFactoryImpl.h"
 
@@ -13,7 +14,12 @@ AccessPortsFactoryImpl::AccessPortsFactoryImpl()
 	ServiceLocator::getInstance().registerService<AccessPortsFactory>(this);
 }
 
-SimulationAccess * AccessPortsFactoryImpl::buildSimulationAccess() const
+SimulationFullAccess * AccessPortsFactoryImpl::buildSimulationFullAccess(QObject* parent /*= nullptr*/) const
 {
-	return new SimulationAccessImpl();
+	return new SimulationAccessImpl<DataDescription>(parent);
+}
+
+SimulationLightAccess * AccessPortsFactoryImpl::buildSimulationLightAccess(QObject* parent /*= nullptr*/) const
+{
+	return new SimulationAccessImpl<DataLightDescription>(parent);
 }
