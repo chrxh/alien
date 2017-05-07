@@ -10,7 +10,7 @@ public:
 	GlobalFactoryImpl();
 	virtual ~GlobalFactoryImpl() = default;
 
-	virtual RandomNumberGenerator* buildRandomNumberGenerator() const override;
+	virtual NumberGenerator* buildRandomNumberGenerator() const override;
 };
 
 #endif // GLOBALFACTORYIMPL_H

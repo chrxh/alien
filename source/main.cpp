@@ -22,8 +22,10 @@
 //- Fassaden erstellen initialisierte und einsatzbereite Objekte
 //- bei QObject-Parameter in init(...) können parents gesetzt werden
 //- parents werden nicht in Fassaden oder Factories übergeben
+//- jeglicher Zugriff auf die Simulation (z.B. Serialisierung, Gui, ...) erfolgt über SimulationAccessApi
 
 //Nächstes Mal:
+//- Tools in Access umbenennen
 
 //Model-Refactoring:
 //- Gui benutzt SimulationAccess und NICHT SimulationContext

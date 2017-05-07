@@ -2,7 +2,7 @@
 
 #include "global/ServiceLocator.h"
 #include "global/GlobalFactory.h"
-#include "global/RandomNumberGenerator.h"
+#include "global/NumberGenerator.h"
 #include "model/physics/Physics.h"
 #include "tests/predicates.h"
 
@@ -13,18 +13,19 @@ public:
 	~PhysicsTest();
 
 protected:
-	RandomNumberGenerator* _randomGen = nullptr;
+	NumberGenerator* _numberGen = nullptr;
 };
 
 PhysicsTest::PhysicsTest()
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_randomGen = factory->buildRandomNumberGenerator();
+	_numberGen = factory->buildRandomNumberGenerator();
+	_numberGen->init(123123, 0);
 }
 
 PhysicsTest::~PhysicsTest()
 {
-	delete _randomGen;
+	delete _numberGen;
 }
 
 namespace {
@@ -99,7 +100,7 @@ TEST_F(PhysicsTest, testUnitVectorOfAngle)
 {
     //test angle -> unit vector -> angle conversion
     for(int i = 0; i < 100; ++i) {
-        qreal angleBefore = _randomGen->getReal(0.0, 360.0);
+        qreal angleBefore = _numberGen->getRandomReal(0.0, 360.0);
         QVector3D v = Physics::unitVectorOfAngle(angleBefore);
         qreal angleAfter = Physics::angleOfVector(v);
 		ASSERT_PRED_FORMAT3(predUnitVectorOfAngle, angleBefore, v, angleAfter);
@@ -118,8 +119,8 @@ TEST_F(PhysicsTest, testUnitVectorOfAngle)
 TEST_F(PhysicsTest, testClockwiseAngleFromFirstToSecondVector)
 {
     for(int i = 0; i < 100; ++i) {
-        qreal angle = _randomGen->getReal(0.0, 360.0);
-        qreal angleIncrement = _randomGen->getReal(-180.0, 180.0);
+        qreal angle = _numberGen->getRandomReal(0.0, 360.0);
+        qreal angleIncrement = _numberGen->getRandomReal(-180.0, 180.0);
         QVector3D v1 = Physics::unitVectorOfAngle(angle);
         QVector3D v2 = Physics::unitVectorOfAngle(angle+angleIncrement);
         qreal returnedAngle = Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);

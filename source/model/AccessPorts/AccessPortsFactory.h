@@ -3,10 +3,10 @@
 
 #include "model/Definitions.h"
 
-class ToolFactory
+class AccessPortsFactory
 {
 public:
-	virtual ~ToolFactory() = default;
+	virtual ~AccessPortsFactory() = default;
 
 	virtual SimulationAccess* buildSimulationAccess() const = 0;
 };
