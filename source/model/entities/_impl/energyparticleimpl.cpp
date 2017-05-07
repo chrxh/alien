@@ -3,7 +3,6 @@
 #include "global/ServiceLocator.h"
 #include "global/NumberGenerator.h"
 
-#include "model/BuilderFacade.h"
 #include "model/physics/Physics.h"
 #include "model/ModelSettings.h"
 #include "model/context/UnitContext.h"
@@ -14,6 +13,7 @@
 
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
+#include "model/entities/EntityFactory.h"
 #include "EnergyParticleImpl.h"
 
 
@@ -76,15 +76,14 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 
 		//create cell and cluster
 		QList< Cell* > cells;
-		BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-		Cell* c = facade->buildFeaturedCellWithRandomData(eNew, _context);
-		cells << c;
-		cluster = facade->buildCellCluster(cells, 0.0, _pos, 0.0, _vel, _context);
-		_energy = 0;
-		cellMap->setCell(_pos, c);
-		CellMetadata meta = c->getMetadata();
+		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
+		CellMetadata meta;
 		meta.color = _metadata.color;
-		c->setMetadata(meta);
+		auto desc = CellClusterDescription().setPos(QVector2D(_pos.x(), _pos.y())).setVel(QVector2D(_vel.x(), _vel.y()))
+			.addCell(getRandomCellDesciption(eNew).setMetadata(meta));
+		cluster = factory->build(desc, _context);
+		_energy = 0;
+		cluster->drawCellsToMap();
 		return false;
 	}
 	else {
@@ -105,6 +104,20 @@ void EnergyParticleImpl::collisionWithCell(Cell* cell)
 	cell->setEnergy(cell->getEnergy() + _energy);
 	*/
 	_energy = 0;
+}
+
+CellDescription EnergyParticleImpl::getRandomCellDesciption(double energy) const
+{
+	auto parameters = _context->getSimulationParameters();
+	int randomMaxConnections = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxBonds + 1);
+	int randomTokenAccessNumber = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxTokenBranchNumber);
+	QByteArray randomData(256, 0);
+	for (int i = 0; i < 256; ++i) {
+		randomData[i] = _context->getNumberGenerator()->getRandomInt(256);
+	}
+	Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(_context->getNumberGenerator()->getRandomInt(Enums::CellFunction::_COUNTER));
+	return CellDescription().setEnergy(energy).setCellFunction(CellFunctionDescription().setType(randomCellFunction).setData(randomData))
+		.setMaxConnections(randomMaxConnections).setTokenAccessNumber(randomTokenAccessNumber);
 }
 
 void EnergyParticleImpl::collisionWithEnergyParticle(EnergyParticle* otherEnergy)

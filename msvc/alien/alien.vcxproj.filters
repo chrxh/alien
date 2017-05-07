@@ -891,17 +891,20 @@
     <ClInclude Include="..\..\source\global\_impl\NumberGeneratorImpl.h">
       <Filter>Global\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\AccessPorts\Descriptions.h">
-      <Filter>Model\AccessPorts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\model\AccessPorts\LightDescriptions.h">
-      <Filter>Model\AccessPorts</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\AccessPorts\AccessPortFactory.h">
       <Filter>Model\AccessPorts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\AccessPorts\_Impl\AccessPortFactoryImpl.h">
       <Filter>Model\AccessPorts\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\Descriptions.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\LightDescriptions.h">
+      <Filter>Model\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\Descriptions.h">
+      <Filter>Model\Features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

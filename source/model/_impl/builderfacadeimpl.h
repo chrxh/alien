@@ -19,6 +19,7 @@ public:
 	virtual SymbolTable* buildDefaultSymbolTable() const override;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const override;
 
+/*
 	virtual CellCluster* buildCellCluster(UnitContext* context) const override;
 	virtual CellCluster* buildCellCluster(QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel
 		, UnitContext* context) const override;
@@ -31,6 +32,7 @@ public:
 	virtual CellTO buildFeaturedCellTO(Cell* cell) const override;
 
 	virtual Token* buildToken(UnitContext* context, qreal energy) const override;
+*/
 
 private:
 	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const;

@@ -40,8 +40,7 @@ public:
     virtual void setToken (int i, Token* token) = 0;
     enum class ActivateToken { NOW, LATER };
     enum class UpdateTokenAccessNumber { YES, NO };
-    virtual void addToken (Token* token, ActivateToken act = ActivateToken::NOW
-        , UpdateTokenAccessNumber update = UpdateTokenAccessNumber::YES) = 0;
+    virtual void addToken (Token* token, ActivateToken act = ActivateToken::NOW, UpdateTokenAccessNumber update = UpdateTokenAccessNumber::YES) = 0;
     virtual void delAllTokens () = 0;
 
     virtual void setCluster (CellCluster* cluster) = 0;
@@ -55,7 +54,7 @@ public:
     virtual int getBranchNumber () const = 0;
     virtual void setBranchNumber (int i) = 0;
     virtual bool isTokenBlocked () const = 0;
-    virtual void setTokenBlocked (bool block) = 0;
+    virtual void setFlagTokenBlocked (bool block) = 0;
     virtual qreal getEnergy() const = 0;
     virtual qreal getEnergyIncludingTokens() const = 0;
     virtual void setEnergy (qreal i) = 0;

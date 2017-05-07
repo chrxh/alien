@@ -1,7 +1,7 @@
 #include "global/ServiceLocator.h"
-#include "model/AccessPorts/Descriptions.h"
-#include "model/AccessPorts/LightDescriptions.h"
-#include "model/AccessPorts/AccessPortFactory.h"
+#include "model/entities/Descriptions.h"
+#include "model/entities/LightDescriptions.h"
+#include "model/entities/EntityFactory.h"
 #include "model/context/SimulationContext.h"
 #include "model/context/UnitContext.h"
 #include "model/context/UnitThreadController.h"
@@ -23,19 +23,19 @@ void SimulationAccessImpl<DataDescriptionType>::init(SimulationContextApi * cont
 template<typename DataDescriptionType>
 void SimulationAccessImpl<DataDescriptionType>::addData(DataDescriptionType const& desc)
 {
-	AccessPortFactory* portFactory = ServiceLocator::getInstance().getService<AccessPortFactory>();
+	EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 
 	_context->getUnitThreadController()->lock();
 	auto grid = _context->getUnitGrid();
-	for (auto const& clusterdesc : desc.clusters) {
-		auto unitContext = grid->getUnitOfMapPos(clusterdesc.pos)->getContext();
-		auto cluster = portFactory->buildFromDescription(clusterdesc, unitContext);
+	for (auto const& clusterDesc : desc.clusters) {
+		auto unitContext = grid->getUnitOfMapPos(clusterDesc.pos)->getContext();
+		auto cluster = factory->build(clusterDesc, unitContext);
 		cluster->drawCellsToMap();
 		unitContext->getClustersRef().push_back(cluster);
 	}
 	for (auto const& particleDesc : desc.particles) {
 		auto unitContext = grid->getUnitOfMapPos(particleDesc.pos)->getContext();
-		auto particle = portFactory->buildFromDescription(particleDesc, unitContext);
+		auto particle = factory->build(particleDesc, unitContext);
 		unitContext->getEnergyParticlesRef().push_back(particle);
 	}
 	_context->getUnitThreadController()->unlock();

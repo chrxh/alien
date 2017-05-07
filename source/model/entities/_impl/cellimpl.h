@@ -46,7 +46,7 @@ public:
     int getNumToken (bool newTokenStackPointer = false) const override;
     Token* getToken (int i) const override;
     void setToken (int i, Token* token) override;
-    void addToken (Token* token, ActivateToken act, UpdateTokenAccessNumber update) override;
+	void addToken(Token* token, ActivateToken act = ActivateToken::NOW, UpdateTokenAccessNumber update = UpdateTokenAccessNumber::YES) override;
     void delAllTokens () override;
     Token* takeTokenFromStack () override;
 	void mutationByChance() override;
@@ -62,7 +62,7 @@ public:
     int getBranchNumber () const override;
     void setBranchNumber (int i) override;
     bool isTokenBlocked () const override;
-    void setTokenBlocked (bool block) override;
+    void setFlagTokenBlocked (bool block) override;
     qreal getEnergy() const override;
     qreal getEnergyIncludingTokens() const override;
     void setEnergy (qreal i) override;
