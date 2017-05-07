@@ -17,6 +17,7 @@ public:
 	virtual IntVector2D getSize() const = 0;
 	virtual Unit* getUnitOfGridPos(IntVector2D gridPos) const = 0;
 	virtual Unit* getUnitOfMapPos(QVector3D pos) const = 0;
+	virtual IntVector2D getGridPosOfMapPos(QVector3D pos) const = 0;
 	virtual IntRect calcCompartmentRect(IntVector2D gridPos) const = 0;
 };
 
