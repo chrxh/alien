@@ -9,6 +9,7 @@ struct TokenDescription
 	QByteArray data;
 
 	TokenDescription& setEnergy(double value) { energy = value; return *this; }
+	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
 };
 
 struct CellDescription
