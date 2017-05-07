@@ -11,6 +11,8 @@ NumberGeneratorImpl::NumberGeneratorImpl(QObject * parent)
 void NumberGeneratorImpl::init(std::uint32_t arraySize, std::uint16_t threadId)
 {
 	_threadId = static_cast<std::uint64_t>(threadId) << 48;
+	_arrayOfRandomNumbers.clear();
+	_runningNumber = 0;
 	for (std::uint32_t i = 0; i < arraySize; ++i) {
 		_arrayOfRandomNumbers.push_back(qrand());
 	}
