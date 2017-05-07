@@ -12,6 +12,7 @@ public:
 	virtual ~SimulationController() = default;
 
     virtual void init(SimulationContextApi* context) = 0;
+
     virtual void setRun(bool run) = 0;
 	virtual void calculateSingleTimestep() = 0;
 
