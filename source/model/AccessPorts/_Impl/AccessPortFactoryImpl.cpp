@@ -12,13 +12,9 @@ AccessPortFactoryImpl::AccessPortFactoryImpl()
 	ServiceLocator::getInstance().registerService<AccessPortFactory>(this);
 }
 
-SimulationFullAccess * AccessPortFactoryImpl::buildSimulationFullAccess() const
+SimulationAccess * AccessPortFactoryImpl::buildSimulationAccess() const
 {
-	return new SimulationAccessImpl<DataDescription>();
+	return new SimulationAccessImpl();
 }
 
-SimulationLightAccess * AccessPortFactoryImpl::buildSimulationLightAccess() const
-{
-	return new SimulationAccessImpl<DataLightDescription>();
-}
 

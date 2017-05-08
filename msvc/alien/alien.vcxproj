@@ -262,6 +262,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DALIEN_EXPORTS -DNDEBUG "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\source\global\Editable.h" />
     <ClInclude Include="..\..\source\global\ServiceLocator.h" />
     <CustomBuild Include="..\..\source\gui\MainWindow.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -580,7 +581,6 @@
     <ClInclude Include="..\..\source\model\entities\CellTO.h" />
     <ClInclude Include="..\..\source\model\entities\Descriptions.h" />
     <ClInclude Include="..\..\source\model\entities\EntityFactory.h" />
-    <ClInclude Include="..\..\source\model\entities\LightDescriptions.h" />
     <ClInclude Include="..\..\source\model\entities\Token.h" />
     <ClInclude Include="..\..\source\model\features\CellFeature.h" />
     <ClInclude Include="..\..\source\model\features\CellFunction.h" />
