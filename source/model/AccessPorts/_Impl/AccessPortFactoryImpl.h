@@ -10,8 +10,7 @@ public:
 	AccessPortFactoryImpl();
 	virtual ~AccessPortFactoryImpl() = default;
 
-	virtual SimulationFullAccess* buildSimulationFullAccess() const override;
-	virtual SimulationLightAccess* buildSimulationLightAccess() const override;
+	virtual SimulationAccess* buildSimulationAccess() const override;
 };
 
 #endif // ACCESSPORTFACTORYIMPL_H

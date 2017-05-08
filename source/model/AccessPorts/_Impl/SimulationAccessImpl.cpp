@@ -1,6 +1,5 @@
 #include "global/ServiceLocator.h"
 #include "model/entities/Descriptions.h"
-#include "model/entities/LightDescriptions.h"
 #include "model/entities/EntityFactory.h"
 #include "model/context/SimulationContext.h"
 #include "model/context/UnitContext.h"
@@ -11,90 +10,77 @@
 
 #include "SimulationAccessImpl.h"
 
-template class SimulationAccessImpl<DataDescription>;
-template class SimulationAccessImpl<DataLightDescription>;
 
-template<typename DataDescriptionType>
-SimulationAccessImpl<DataDescriptionType>::~SimulationAccessImpl()
+SimulationAccessImpl::~SimulationAccessImpl()
 {
 	if (_registered) {
 		_context->getUnitThreadController()->unregisterObserver(this);
 	}
 }
 
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::init(SimulationContextApi * context)
+void SimulationAccessImpl::init(SimulationContextApi * context)
 {
 	_context = static_cast<SimulationContext*>(context);
 	_context->getUnitThreadController()->registerObserver(this);
 	_registered = true;
 }
 
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::addData(DataDescriptionType const& desc)
+void SimulationAccessImpl::updateData(DataDescription const & desc)
 {
-	_dataToAdd.clusters.insert(_dataToAdd.clusters.end(), desc.clusters.begin(), desc.clusters.end());
-	_dataToAdd.particles.insert(_dataToAdd.particles.end(), desc.particles.begin(), desc.particles.end());
+	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
+	_dataToUpdate.particles.insert(_dataToUpdate.particles.end(), desc.particles.begin(), desc.particles.end());
 }
 
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::removeData(DataDescriptionType const & desc)
-{
-}
-
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::updateData(DataDescriptionType const & desc)
-{
-}
-
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::requireData(IntRect rect)
+void SimulationAccessImpl::requireData(IntRect rect)
 {
 	_dataRequired = true;
 	_requiredRect = rect;
 }
 
-template<typename DataDescriptionType>
-DataDescriptionType const& SimulationAccessImpl<DataDescriptionType>::retrieveData()
+DataDescription const& SimulationAccessImpl::retrieveData()
 {
 	_dataRequired = false;
 	return _dataCollected;
 }
 
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::unregister()
+void SimulationAccessImpl::unregister()
 {
 	_registered = false;
 }
 
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::accessToUnits()
+void SimulationAccessImpl::accessToUnits()
 {
-	callBackAddData();
+	callBackUpdateData();
 	callBackGetData();
 }
 
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::callBackAddData()
+void SimulationAccessImpl::callBackUpdateData()
 {
 	EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 
 	auto grid = _context->getUnitGrid();
-	for (auto const& clusterDesc : _dataToAdd.clusters) {
-		auto unitContext = grid->getUnitOfMapPos(clusterDesc.pos)->getContext();
-		auto cluster = factory->build(clusterDesc, unitContext);
-		unitContext->getClustersRef().push_back(cluster);
+
+	for (auto const& clusterDesc : _dataToUpdate.clusters) {
+		if (clusterDesc.isAdded()) {
+			auto const& clusterDescVal = clusterDesc.getValue();
+			auto unitContext = grid->getUnitOfMapPos(clusterDescVal.pos.getValue())->getContext();
+			auto cluster = factory->build(clusterDescVal, unitContext);
+			unitContext->getClustersRef().push_back(cluster);
+		}
 	}
-	for (auto const& particleDesc : _dataToAdd.particles) {
-		auto unitContext = grid->getUnitOfMapPos(particleDesc.pos)->getContext();
-		auto particle = factory->build(particleDesc, unitContext);
-		unitContext->getEnergyParticlesRef().push_back(particle);
+	for (auto const& particleDesc : _dataToUpdate.particles) {
+		if (particleDesc.isAdded()) {
+			auto const& particleDescVel = particleDesc.getValue();
+			auto unitContext = grid->getUnitOfMapPos(particleDescVel.pos.getValue())->getContext();
+			auto particle = factory->build(particleDescVel, unitContext);
+			unitContext->getEnergyParticlesRef().push_back(particle);
+		}
 	}
-	_dataToAdd = DataDescriptionType();
+
+	_dataToUpdate = DataDescription();
 }
 
-template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::callBackGetData()
+void SimulationAccessImpl::callBackGetData()
 {
 	if (!_dataRequired) {
 		return;
@@ -103,4 +89,10 @@ void SimulationAccessImpl<DataDescriptionType>::callBackGetData()
 	auto grid = _context->getUnitGrid();
 	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D());
 	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D());
+	IntVector2D gridPos;
+	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
+		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
+
+		}
+	}
 }
