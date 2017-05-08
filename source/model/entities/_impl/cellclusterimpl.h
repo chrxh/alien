@@ -75,6 +75,7 @@ public:
 
 private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
+	bool isTimestampFitting() const;
 	inline QVector2D applyTransformation(QVector2D pos) const;
 	inline QVector2D applyTransformation(QMatrix4x4 const& transform, QVector2D pos) const;
 	inline QVector2D applyInverseTransformation(QVector2D pos) const;
@@ -87,11 +88,11 @@ private:
     QVector2D _vel;
     QMatrix4x4 _transform;
     qreal _angularMass = 0.0;
-
+	
     QList<Cell*> _cells;
-
+	
     quint64 _id = 0;
-
+	uint64_t _timestamp = 0;
 	CellClusterMetadata _meta;
 };
 

@@ -21,6 +21,7 @@ EnergyParticleImpl::EnergyParticleImpl(UnitContext* context)
 	: _context(context)
 {
 	_id = _context->getNumberGenerator()->getTag();
+	_timestamp = _context->getTimestamp();
 }
 
 EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context)
@@ -31,7 +32,7 @@ EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D ve
 	_vel = vel;
 }
 
-void EnergyParticleImpl::init(UnitContext * context)
+void EnergyParticleImpl::setContext(UnitContext * context)
 {
 	_context = context;
 }
@@ -40,6 +41,11 @@ void EnergyParticleImpl::init(UnitContext * context)
 //        cluster is nonzero if particle transforms into cell
 bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 {
+	if (!isTimestampFitting()) {
+		return true;
+	}
+	++_timestamp;
+
 	auto cellMap = _context->getCellMap();
 	auto energyMap = _context->getEnergyParticleMap();
 	auto parameters = _context->getSimulationParameters();
@@ -104,6 +110,11 @@ void EnergyParticleImpl::collisionWithCell(Cell* cell)
 	cell->setEnergy(cell->getEnergy() + _energy);
 	*/
 	_energy = 0;
+}
+
+bool EnergyParticleImpl::isTimestampFitting() const
+{
+	return _timestamp == _context->getTimestamp();
 }
 
 CellDescription EnergyParticleImpl::getRandomCellDesciption(double energy) const

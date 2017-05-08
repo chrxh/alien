@@ -24,6 +24,9 @@ public:
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
 
+	virtual uint64_t getTimestamp() const override;
+	virtual void incTimestamp() override;
+
 	virtual QList<CellCluster*>& getClustersRef() override;
 	virtual QList<EnergyParticle*>& getEnergyParticlesRef () override;
 
@@ -39,6 +42,8 @@ private:
 	MapCompartment* _mapCompartment = nullptr;
 	SymbolTable* _symbolTable = nullptr;
 	SimulationParameters* _simulationParameters = nullptr;
+
+	uint64_t _timestamp = 0;
 };
 
 #endif // SIMULATIONUNITCONTEXTIMPL_H

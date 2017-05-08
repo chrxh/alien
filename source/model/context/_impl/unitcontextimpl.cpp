@@ -68,6 +68,16 @@ SimulationParameters* UnitContextImpl::getSimulationParameters() const
 	return _simulationParameters;
 }
 
+uint64_t UnitContextImpl::getTimestamp() const
+{
+	return _timestamp;
+}
+
+void UnitContextImpl::incTimestamp() 
+{
+	++_timestamp;
+}
+
 QList<CellCluster*>& UnitContextImpl::getClustersRef ()
 {
     return _clusters;
