@@ -79,7 +79,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 
 
 	DataDescription desc;
-	desc.addCellCluster(CellClusterDescription().setPos(QVector2D(100, 50)).setVel(QVector2D(1, 0.5))
+	desc.addCellCluster(CellClusterDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
 		.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy)));
 	access->addData(desc);
 
@@ -102,8 +102,8 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	auto access = facade->buildSimulationFullAccess(_context);
 	DataDescription desc;
 	for (int i = 0; i < 10000; ++i) {
-		desc.addCellCluster(CellClusterDescription().setPos(QVector2D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y)))
-			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5))
+		desc.addCellCluster(CellClusterDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
+			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5 ))
 			.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
 	}
 	access->addData(desc);
