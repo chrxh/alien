@@ -124,7 +124,7 @@ void UnitThreadControllerImpl::startThreads()
 	}
 }
 
-bool UnitThreadControllerImpl::areAllThreadsFinished()
+bool UnitThreadControllerImpl::areAllThreadsFinished() const
 {
 	bool result = true;
 	for (auto const& ts : _threadsAndCalcSignals) {
@@ -136,7 +136,7 @@ bool UnitThreadControllerImpl::areAllThreadsFinished()
 	return result;
 }
 
-bool UnitThreadControllerImpl::isNoThreadWorking()
+bool UnitThreadControllerImpl::isNoThreadWorking() const
 {
 	bool result = true;
 	for (auto const& ts : _threadsAndCalcSignals) {
@@ -168,7 +168,7 @@ void UnitThreadControllerImpl::searchAndExecuteReadyThreads()
 	}
 }
 
-void UnitThreadControllerImpl::notifyObservers()
+void UnitThreadControllerImpl::notifyObservers() const
 {
 	for (auto const &observer : _observers) {
 		observer->accessToUnits();

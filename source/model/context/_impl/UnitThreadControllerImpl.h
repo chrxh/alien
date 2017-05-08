@@ -28,17 +28,18 @@ public:
 
 	Q_SLOT virtual bool calculateTimestep() override;
 
+	virtual bool isNoThreadWorking() const override;
+
 private:
 	Q_SLOT void threadFinishedCalculation(QObject* sender);
 
 	void updateDependencies();
 	void terminateThreads();
 	void startThreads();
-	bool areAllThreadsFinished();
-	bool isNoThreadWorking();
+	bool areAllThreadsFinished() const;
 	void setAllUnitsReady();
 	void searchAndExecuteReadyThreads();
-	void notifyObservers();
+	void notifyObservers() const;
 
 	int _maxRunningThreads = 1;
 	int _runningThreads = 0;

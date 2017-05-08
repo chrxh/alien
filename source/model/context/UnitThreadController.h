@@ -21,6 +21,8 @@ public:
 
 	Q_SLOT virtual bool calculateTimestep() = 0;
 	Q_SIGNAL void timestepCalculated();
+
+	virtual bool isNoThreadWorking() const = 0;
 };
 
 #endif // UNITTHREADCONTROLLER_H

@@ -1,11 +1,13 @@
 #include "global/ServiceLocator.h"
 #include "model/entities/Descriptions.h"
 #include "model/entities/EntityFactory.h"
+#include "model/entities/CellCluster.h"
 #include "model/context/SimulationContext.h"
 #include "model/context/UnitContext.h"
 #include "model/context/UnitThreadController.h"
 #include "model/context/UnitGrid.h"
 #include "model/context/Unit.h"
+#include "model/context/SpaceMetric.h"
 #include "model/entities/CellCluster.h"
 
 #include "SimulationAccessImpl.h"
@@ -35,6 +37,9 @@ void SimulationAccessImpl::requireData(IntRect rect)
 {
 	_dataRequired = true;
 	_requiredRect = rect;
+	if (_context->getUnitThreadController()->isNoThreadWorking()) {
+		accessToUnits();
+	}
 }
 
 DataDescription const& SimulationAccessImpl::retrieveData()
@@ -77,7 +82,7 @@ void SimulationAccessImpl::callBackUpdateData()
 		}
 	}
 
-	_dataToUpdate = DataDescription();
+	_dataToUpdate.clear();
 }
 
 void SimulationAccessImpl::callBackGetData()
@@ -92,7 +97,19 @@ void SimulationAccessImpl::callBackGetData()
 	IntVector2D gridPos;
 	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
 		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
+			getDataFromUnit(grid->getUnitOfGridPos(gridPos));
+		}
+	}
+}
 
+void SimulationAccessImpl::getDataFromUnit(Unit * unit)
+{
+	auto const& clusters = unit->getContext()->getClustersRef();
+	auto metric = unit->getContext()->getSpaceMetric();
+	for (auto const& cluster : clusters) {
+		auto pos = metric->correctPositionWithIntPrecision(cluster->getPosition());
+		if (_requiredRect.isContained(pos)) {
+			_dataCollected.clusters.push_back(cluster->getDescription());
 		}
 	}
 }

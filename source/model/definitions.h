@@ -68,6 +68,11 @@ extern std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
 struct IntRect {
 	IntVector2D p1;
 	IntVector2D p2;
+
+	bool isContained(IntVector2D p)
+	{
+		return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y;
+	}
 };
 
 

@@ -10,7 +10,7 @@ public:
 	TokenImpl(UnitContext* context);
 	TokenImpl(UnitContext* context, qreal energy, QByteArray const& memory);
 
-	virtual void init(UnitContext* context) override;
+	virtual void setContext(UnitContext* context) override;
 
 	TokenImpl* duplicate() const override;
 	int getTokenAccessNumber() const override;        //from memory[0]
