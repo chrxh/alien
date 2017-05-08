@@ -26,12 +26,16 @@ public:
 	virtual void unregister() override;
 	virtual void accessToUnits() override;
 private:
-	void addDataCallBack();
+	void callBackAddData();
+	void callBackGetData();
 
 	SimulationContext* _context = nullptr;
 	bool _registered = false;
+
+	bool _dataRequired = false;
+	IntVector2D _requiredRect;
+	DataDescriptionType _dataCollected;
 	DataDescriptionType _dataToAdd;
-	DataDescriptionType _dataToRetrieve;
 };
 
 #endif // SIMULATIONACCESSIMPL_H

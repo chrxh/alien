@@ -50,17 +50,15 @@ void SimulationAccessImpl<DataDescriptionType>::updateData(DataDescriptionType c
 template<typename DataDescriptionType>
 void SimulationAccessImpl<DataDescriptionType>::requireData(IntRect rect)
 {
+	_dataRequired = true;
+	_requiredRect = rect;
 }
 
 template<typename DataDescriptionType>
 DataDescriptionType const& SimulationAccessImpl<DataDescriptionType>::retrieveData()
 {
-/*
-	auto grid = _context->getUnitGrid();
-	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(QVector3D(rect.p1.x, rect.p1.y, 0));
-	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(QVector3D(rect.p2.x, rect.p2.y, 0));
-*/
-	return _dataToRetrieve;
+	_dataRequired = false;
+	return _dataCollected;
 }
 
 template<typename DataDescriptionType>
@@ -72,11 +70,12 @@ void SimulationAccessImpl<DataDescriptionType>::unregister()
 template<typename DataDescriptionType>
 void SimulationAccessImpl<DataDescriptionType>::accessToUnits()
 {
-	addDataCallBack();
+	callBackAddData();
+	callBackGetData()
 }
 
 template<typename DataDescriptionType>
-void SimulationAccessImpl<DataDescriptionType>::addDataCallBack()
+void SimulationAccessImpl<DataDescriptionType>::callBackAddData()
 {
 	EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 
@@ -92,4 +91,16 @@ void SimulationAccessImpl<DataDescriptionType>::addDataCallBack()
 		unitContext->getEnergyParticlesRef().push_back(particle);
 	}
 	_dataToAdd = DataDescriptionType();
+}
+
+template<typename DataDescriptionType>
+void SimulationAccessImpl<DataDescriptionType>::callBackGetData()
+{
+	if (!_dataRequired) {
+		return false;
+	}
+
+	auto grid = _context->getUnitGrid();
+	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(QVector3D(rect.p1.x, rect.p1.y, 0));
+	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(QVector3D(rect.p2.x, rect.p2.y, 0));
 }
