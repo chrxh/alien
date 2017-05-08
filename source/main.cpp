@@ -23,6 +23,8 @@
 //- bei QObject-Parameter in init(...) können parents gesetzt werden
 //- parents werden nicht in Fassaden oder Factories übergeben
 //- jeglicher Zugriff auf die Simulation (z.B. Serialisierung, Gui, ...) erfolgt über SimulationAccessApi
+//- Zugriff ist asynchron
+//- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
 //- Tools in Access umbenennen

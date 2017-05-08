@@ -1,6 +1,7 @@
 #include "model/context/Unit.h"
 #include "model/context/UnitContext.h"
 #include "model/context/MapCompartment.h"
+#include "model/context/UnitObserver.h"
 
 #include "UnitThreadControllerImpl.h"
 #include "UnitThread.h"
@@ -13,6 +14,9 @@ UnitThreadControllerImpl::UnitThreadControllerImpl(QObject * parent)
 UnitThreadControllerImpl::~UnitThreadControllerImpl()
 {
 	terminateThreads();
+	for (auto const &observer : _observers) {
+		observer->unregister();
+	}
 }
 
 void UnitThreadControllerImpl::init(int maxRunningThreads)
@@ -27,17 +31,6 @@ void UnitThreadControllerImpl::init(int maxRunningThreads)
 	_threadsAndCalcSignals.clear();
 	_signalMapper = new QSignalMapper(this);
 	connect(_signalMapper, static_cast<void(QSignalMapper::*)(QObject*)>(&QSignalMapper::mapped), this, &UnitThreadControllerImpl::threadFinishedCalculation);
-}
-
-
-void UnitThreadControllerImpl::lock()
-{
-	_mutex.lock();
-}
-
-void UnitThreadControllerImpl::unlock()
-{
-	_mutex.unlock();
 }
 
 void UnitThreadControllerImpl::registerUnit(Unit * unit)
@@ -63,11 +56,20 @@ void UnitThreadControllerImpl::start()
 	startThreads();
 }
 
+void UnitThreadControllerImpl::registerObserver(UnitObserver * observer)
+{
+	_observers.push_back(observer);
+}
+
+void UnitThreadControllerImpl::unregisterObserver(UnitObserver * observer)
+{
+	_observers.erase(std::remove(_observers.begin(), _observers.end(), observer), _observers.end());
+}
+
 bool UnitThreadControllerImpl::calculateTimestep()
 {
 	if (isNoThreadWorking()) {
 		setAllUnitsReady();
-		lock();
 		searchAndExecuteReadyThreads();
 		return true;
 	}
@@ -81,7 +83,7 @@ void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 		thr->setState(UnitThread::State::Finished);
 		--_runningThreads;
 		if (areAllThreadsFinished()) {
-			unlock();
+			notifyObservers();
 			Q_EMIT timestepCalculated();
 		}
 		else {
@@ -113,8 +115,6 @@ void UnitThreadControllerImpl::terminateThreads()
 			ts.thr->wait();
 		}
 	}
-	_mutex.tryLock();
-	_mutex.unlock();
 }
 
 void UnitThreadControllerImpl::startThreads()
@@ -165,5 +165,12 @@ void UnitThreadControllerImpl::searchAndExecuteReadyThreads()
 				return;
 			}
 		}
+	}
+}
+
+void UnitThreadControllerImpl::notifyObservers()
+{
+	for (auto const &observer : _observers) {
+		observer->accessToUnits();
 	}
 }

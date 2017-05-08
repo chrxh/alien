@@ -8,7 +8,7 @@
 class EntityFactory
 {
 public:
-    virtual ~EntityFactory () {}
+	virtual ~EntityFactory() = default;
 
 	virtual CellCluster* build(CellClusterDescription const& desc, UnitContext* context) const = 0;
 	virtual Cell* build(CellDescription const& desc, UnitContext* context) const = 0;
