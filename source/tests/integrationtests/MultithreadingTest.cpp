@@ -27,6 +27,8 @@ public:
 	~MultithreadingTest();
 
 protected:
+	void runSimulation(int timesteps);
+
 	SimulationController* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
@@ -57,6 +59,20 @@ MultithreadingTest::~MultithreadingTest()
 	delete _numberGen;
 }
 
+void MultithreadingTest::runSimulation(int timesteps)
+{
+	QEventLoop pause;
+	int t = 0;
+	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
+		if (++t == timesteps) {
+			_controller->setRun(false);
+			pause.quit();
+		}
+	});
+	_controller->setRun(true);
+	pause.exec();
+}
+
 TEST_F(MultithreadingTest, testThreads)
 {
 	QEventLoop pause;
@@ -82,20 +98,14 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 		.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy)));
 	access->updateData(desc);
 
-	QEventLoop pause;
-	int timesteps = 0;
-	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
-		if (++timesteps == 300) {
-			_controller->setRun(false);
-			pause.quit();
-		}
-	});
-	_controller->setRun(true);
-	pause.exec();
-	access->requireData({ {0, 0}, {_universeSize.x - 1, _universeSize.y - 1} });
-	auto const& data = access->retrieveData();
+	runSimulation(300);
 
+	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
+	access->requireData(rect);
+	auto const& data = access->retrieveData();
 	ASSERT_EQ(1, data.clusters.size()) << "Wrong number of clusters.";
+	auto const& cluster = data.clusters[0].getValue();
+	ASSERT_PRED_FORMAT2(predEqualVectorMediumPrecision, QVector2D(400, 200), cluster.pos.getValue());
 }
 
 
@@ -111,15 +121,6 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	}
 	access->updateData(desc);
 
-	QEventLoop pause;
-	int timesteps = 0;
-	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
-		if (++timesteps == 200) {
-			_controller->setRun(false);
-			pause.quit();
-		}
-	});
-	_controller->setRun(true);
-	pause.exec();
+	runSimulation(300);
 }
 

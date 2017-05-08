@@ -10,7 +10,7 @@ class EnergyParticle
 public:
 	virtual ~EnergyParticle() = default;
 
-	virtual void init(UnitContext* context) = 0;
+	virtual void setContext(UnitContext* context) = 0;
 
     virtual bool processingMovement (CellCluster*& cluster) = 0;
 
