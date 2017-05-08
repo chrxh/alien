@@ -11,7 +11,7 @@ public:
 	EnergyParticleImpl(UnitContext* context);
 	EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
-	virtual void init(UnitContext* context) override;
+	virtual void setContext(UnitContext* context) override;
 
 	bool processingMovement(CellCluster*& cluster) override;
 
@@ -37,6 +37,7 @@ private:
 	void move();
 	void collisionWithEnergyParticle(EnergyParticle* otherEnergy);
 	void collisionWithCell(Cell* cell);
+	bool isTimestampFitting() const;
 
 	CellDescription getRandomCellDesciption(double energy) const;
 
@@ -46,6 +47,7 @@ private:
 	QVector2D _pos;
 	QVector2D _vel;
 	quint64 _id = 0;
+	uint64_t _timestamp = 0;
 	EnergyParticleMetadata _metadata;
 };
 

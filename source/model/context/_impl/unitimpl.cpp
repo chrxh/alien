@@ -71,6 +71,8 @@ void UnitImpl::calculateTimestep()
 	processingEnergyParticles();
 	processingEnergyParticlesCompartmentAllocation();
 
+	_context->incTimestamp();
+
 	Q_EMIT timestepCalculated();
 }
 
@@ -209,7 +211,7 @@ void UnitImpl::processingEnergyParticlesCompartmentAllocation()
 			particleIter.remove();
 			auto otherContext = compartment->getNeighborContext(intPos);
 			otherContext->getEnergyParticlesRef().push_back(particle);
-			particle->init(otherContext);
+			particle->setContext(otherContext);
 		}
 	}
 }

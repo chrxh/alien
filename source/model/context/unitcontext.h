@@ -22,6 +22,9 @@ public:
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;
 
+	virtual uint64_t getTimestamp() const = 0;
+	virtual void incTimestamp() = 0;
+
 	virtual QList<CellCluster*>& getClustersRef() = 0;
 	virtual QList<EnergyParticle*>& getEnergyParticlesRef() = 0;
 };

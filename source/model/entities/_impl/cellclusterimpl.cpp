@@ -26,6 +26,7 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector2D po
 {
 	_id = _context->getNumberGenerator()->getTag();
 	_context->getSpaceMetric()->correctPosition(_pos);
+	_timestamp = _context->getTimestamp();
     foreach(Cell* cell, _cells) {
         cell->setCluster(this);
     }
@@ -67,7 +68,8 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, UnitContext*
     : _context(context), _angle(angle), _cells(cells)
 {
 	_id = _context->getNumberGenerator()->getTag();
-    setCenterPosition(calcCenterPosition(_cells));
+	_timestamp = _context->getTimestamp();
+	setCenterPosition(calcCenterPosition(_cells));
 	setRelPositionInCluster(_cells, this);
     updateAngularMass();
     updateVel_angularVel_via_cellVelocities();
@@ -124,6 +126,10 @@ void CellClusterImpl::drawCellsToMap ()
 //initiate movement of particles
 void CellClusterImpl::processingInit ()
 {
+	if (!isTimestampFitting()) {
+		return;
+	}
+
     //clear cells
 	auto cellMap = _context->getCellMap();
 	foreach(Cell* cell, _cells) {
@@ -139,7 +145,11 @@ void CellClusterImpl::processingInit ()
 //dissipation, returns lost energy
 void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles)
 {
-    updateCellVel();
+	if (!isTimestampFitting()) {
+		return;
+	}
+	
+	updateCellVel();
 	auto parameters = _context->getSimulationParameters();
 
     //determine energies (the new kinetic energy will be calculated later)
@@ -263,6 +273,10 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
 
 void CellClusterImpl::processingMutationByChance()
 {
+	if (!isTimestampFitting()) {
+		return;
+	}
+	
 	foreach(Cell* cell, _cells) {
 		cell->mutationByChance();
 	}
@@ -270,7 +284,11 @@ void CellClusterImpl::processingMutationByChance()
 
 void CellClusterImpl::processingMovement ()
 {
-    struct CollisionData {
+	if (!isTimestampFitting()) {
+		return;
+	}
+	
+	struct CollisionData {
         int movementState = 0;  //0: will do nothing, 1: collision, 2: fusion
         CellSet overlappingCells;
         QList< QPair< Cell*, Cell* > > overlappingCellPairs;
@@ -531,6 +549,10 @@ void CellClusterImpl::processingMovement ()
 //token processing
 void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose)
 {
+	if (!isTimestampFitting()) {
+		return;
+	}
+
 	auto parameters = _context->getSimulationParameters();
 	vector<Token*> spreadToken(parameters->cellMaxBonds);
     vector<Cell*> spreadTokenCells(parameters->cellMaxBonds);
@@ -636,6 +658,11 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
 //activate new token and kill cells which are too close or where too much forces are applied
 void CellClusterImpl::processingCompletion ()
 {
+	if (!isTimestampFitting()) {
+		return;
+	}
+	++_timestamp;
+
 	auto metric = _context->getSpaceMetric();
 	auto cellMap = _context->getCellMap();
 	qreal maxClusterRadius = qMin(metric->getSize().x / 2.0, metric->getSize().y / 2.0);
@@ -1083,6 +1110,11 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
 		metadata.color = originCell->getMetadata().color;
         energyParticle->setMetadata(metadata);
     }
+}
+
+bool CellClusterImpl::isTimestampFitting() const
+{
+	return _timestamp == _context->getTimestamp();
 }
 
 CellClusterMetadata CellClusterImpl::getMetadata() const

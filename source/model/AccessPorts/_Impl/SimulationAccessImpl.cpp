@@ -31,6 +31,9 @@ void SimulationAccessImpl::updateData(DataDescription const & desc)
 {
 	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
 	_dataToUpdate.particles.insert(_dataToUpdate.particles.end(), desc.particles.begin(), desc.particles.end());
+	if (_context->getUnitThreadController()->isNoThreadWorking()) {
+		accessToUnits();
+	}
 }
 
 void SimulationAccessImpl::requireData(IntRect rect)
