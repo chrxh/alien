@@ -5,69 +5,81 @@
 
 struct TokenDescription
 {
-	double energy;
-	QByteArray data;
+	Editable<double> energy;
+	Editable<QByteArray> data;
 
-	TokenDescription& setEnergy(double value) { energy = value; return *this; }
-	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
+	TokenDescription& setEnergy(double value) { energy.init(value); return *this; }
+	TokenDescription& setData(QByteArray const &value) { data.init(value); return *this; }
 };
 
 struct CellDescription
 {
 	uint64_t id = 0.0;
-	QVector2D relPos;
-	double energy = 0.0;
-	int maxConnections = 0;
-	bool tokenBlocked = false;
-	int tokenAccessNumber = 0;
-	CellMetadata metadata;
-	CellFunctionDescription cellFunction;
-	vector<TokenDescription> tokens;
+	Editable<QVector2D> relPos;
+	Editable<double> energy = 0.0;
+	Editable<int> maxConnections = 0;
+	Editable<bool> tokenBlocked = false;
+	Editable<int> tokenAccessNumber = 0;
+	Editable<CellMetadata> metadata;
+	Editable<CellFunctionDescription> cellFunction;
+	vector<EditableVec<TokenDescription>> tokens;
 
-	CellDescription& setEnergy(double value) { energy = value; return *this; }
-	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
-	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
-	CellDescription& setTokenAccessNumber(int value) { tokenAccessNumber = value; return *this; }
-	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
-	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction = value; return *this; }
+	CellDescription& setEnergy(double value) { energy.init(value); return *this; }
+	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
+	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
+	CellDescription& setTokenAccessNumber(int value) { tokenAccessNumber.init(value); return *this; }
+	CellDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
+	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction.init(value); return *this; }
 };
 
 struct CellClusterDescription
 {
 	uint64_t id = 0.0;
-	QVector2D pos;
-	QVector2D vel;
-	double angle = 0.0;
-	double angularVel = 0.0;
-	CellClusterMetadata metadata;
-	vector<CellDescription> cells;
-	vector<pair<uint64_t, uint64_t>> cellConnections;
+	Editable<QVector2D> pos;
+	Editable<QVector2D> vel;
+	Editable<double> angle = 0.0;
+	Editable<double> angularVel = 0.0;
+	Editable<CellClusterMetadata> metadata;
+	vector<EditableVec<CellDescription>> cells;
+	vector<EditableVec<pair<uint64_t, uint64_t>>> cellConnections;
 
-	CellClusterDescription& setPos(QVector2D const& p) { pos = p; return *this; }
-	CellClusterDescription& setVel(QVector2D const& v) { vel = v; return *this; }
-	CellClusterDescription& addCell(CellDescription const& c) { cells.push_back(c); return *this; }
+	CellClusterDescription& setPos(QVector2D const& p) { pos.init(p); return *this; }
+	CellClusterDescription& setVel(QVector2D const& v) { vel.init(v); return *this; }
+	CellClusterDescription& addCell(CellDescription const& c)
+	{
+		cells.push_back(EditableVec<CellDescription>(EditableVecState::Added, c));
+		return *this;
+	}
 };
 
 struct EnergyParticleDescription
 {
 	uint64_t id = 0.0;
-	QVector2D pos;
-	QVector2D vel;
-	double energy = 0.0;
-	EnergyParticleMetadata metadata;
+	Editable<QVector2D> pos;
+	Editable<QVector2D> vel;
+	Editable<double> energy = 0.0;
+	Editable<EnergyParticleMetadata> metadata;
 
-	EnergyParticleDescription& setPos(QVector2D const& p) { pos = p; return *this; }
-	EnergyParticleDescription& setVel(QVector2D const& v) { vel = v; return *this; }
-	EnergyParticleDescription& setEnergy(double e) { energy = e; return *this; }
+	EnergyParticleDescription& setPos(QVector2D const& p) { pos.init(p); return *this; }
+	EnergyParticleDescription& setVel(QVector2D const& v) { vel.init(v); return *this; }
+	EnergyParticleDescription& setEnergy(double e) { energy.init(e); return *this; }
 };
 
 struct DataDescription
 {
-	vector<CellClusterDescription> clusters;
-	vector<EnergyParticleDescription> particles;
+	vector<EditableVec<CellClusterDescription>> clusters;
+	vector<EditableVec<EnergyParticleDescription>> particles;
 
-	DataDescription& addCellCluster(CellClusterDescription const& c) { clusters.push_back(c); return *this; }
-	DataDescription& addEnergyParticle(EnergyParticleDescription const& e) { particles.push_back(e); return *this; }
+	DataDescription& addCellCluster(CellClusterDescription const& c)
+	{
+		clusters.push_back(EditableVec<CellClusterDescription>(EditableVecState::Added, c));
+		return *this;
+	}
+	DataDescription& addEnergyParticle(EnergyParticleDescription const& e)
+	{
+		particles.push_back(EditableVec<EnergyParticleDescription>(EditableVecState::Added, e));
+		return *this;
+	}
 };
 
 #endif // ENTITIES_DESCRIPTIONS_H

@@ -73,7 +73,7 @@ TEST_F(MultithreadingTest, testThreads)
 TEST_F(MultithreadingTest, testOneCellMovement)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto access = facade->buildSimulationFullAccess(_context);
+	auto access = facade->buildSimulationAccess(_context);
 
 	_parameters->radiationProb = 0.0;
 
@@ -81,7 +81,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	DataDescription desc;
 	desc.addCellCluster(CellClusterDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
 		.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy)));
-	access->addData(desc);
+	access->updateData(desc);
 
 	QEventLoop pause;
 	int timesteps = 0;
@@ -99,14 +99,14 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 TEST_F(MultithreadingTest, testManyCellsMovement)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto access = facade->buildSimulationFullAccess(_context);
+	auto access = facade->buildSimulationAccess(_context);
 	DataDescription desc;
 	for (int i = 0; i < 10000; ++i) {
 		desc.addCellCluster(CellClusterDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
 			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5 ))
 			.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
 	}
-	access->addData(desc);
+	access->updateData(desc);
 
 	QEventLoop pause;
 	int timesteps = 0;

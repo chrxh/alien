@@ -520,9 +520,6 @@
     <ClCompile Include="..\..\source\model\physics\Physics.cpp">
       <Filter>Model\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\global\ServiceLocator.cpp">
-      <Filter>Global</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_UnitThread.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -693,6 +690,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_SimulationAccess.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\global\ServiceLocator.cpp">
+      <Filter>Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -909,14 +909,14 @@
     <ClInclude Include="..\..\source\model\entities\Descriptions.h">
       <Filter>Model\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\entities\LightDescriptions.h">
-      <Filter>Model\Entities</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\features\Descriptions.h">
       <Filter>Model\Features</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\model\context\UnitObserver.h">
       <Filter>Model\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\global\Editable.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -38,18 +38,10 @@ BuilderFacadeImpl::BuilderFacadeImpl ()
     ServiceLocator::getInstance().registerService<BuilderFacade>(this);
 }
 
-SimulationFullAccess * BuilderFacadeImpl::buildSimulationFullAccess(SimulationContextApi * context) const
+SimulationAccess * BuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
-	auto access = factory->buildSimulationFullAccess();
-	access->init(context);
-	return access;
-}
-
-SimulationLightAccess * BuilderFacadeImpl::buildSimulationLightAccess(SimulationContextApi * context) const
-{
-	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
-	auto access = factory->buildSimulationLightAccess();
+	auto access = factory->buildSimulationAccess();
 	access->init(context);
 	return access;
 }

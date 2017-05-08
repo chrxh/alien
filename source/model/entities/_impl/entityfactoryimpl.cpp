@@ -22,53 +22,57 @@ CellCluster* EntityFactoryImpl::build(CellClusterDescription const& desc, UnitCo
 	list<Cell*> cells;
 	map<uint64_t, Cell*> cellsByIds;
 	for (auto const &cellDesc : desc.cells) {
-		auto cell = build(cellDesc, context);
+		auto cell = build(cellDesc.getValue(), context);
 		cells.push_back(cell);
-		cellsByIds[cellDesc.id] = cell;
+		cellsByIds[cellDesc.getValue().id] = cell;
 	}
 	for (auto const &connection : desc.cellConnections) {
-		uint64_t id1 = connection.first;
-		uint64_t id2 = connection.second;
+		auto const& conValue = connection.getValue();
+		uint64_t id1 = conValue.first;
+		uint64_t id2 = conValue.second;
 		Cell* cell1 = cellsByIds[id1];
 		Cell* cell2 = cellsByIds[id2];
 		cell1->newConnection(cell2);
 	}
-	return new CellClusterImpl(QList<Cell*>::fromStdList(cells), desc.angle, desc.pos, desc.angularVel, desc.vel, context);
+	return new CellClusterImpl(QList<Cell*>::fromStdList(cells), desc.angle.getValue(), desc.pos.getValue()
+		, desc.angularVel.getValue(), desc.vel.getValue(), context);
 }
 
 Cell * EntityFactoryImpl::build(CellDescription const & desc, UnitContext * context) const
 {
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-	auto cell = new CellImpl(desc.energy, context, desc.maxConnections, desc.tokenAccessNumber, desc.relPos);
-	cell->setFlagTokenBlocked(desc.tokenBlocked);
-	cell->setMetadata(desc.metadata);
-	featureFactory->addCellFunction(cell, desc.cellFunction.type, desc.cellFunction.data, context);
+	auto const& energy = desc.energy.getValue();
+	auto const& maxConnections = desc.maxConnections.getValueOrDefault(0);
+	auto const& tokenAccessNumber = desc.tokenAccessNumber.getValueOrDefault(0);
+	auto const& relPos = desc.relPos.getValueOrDefault({ 0.0, 0.0 });
+	auto cell = new CellImpl(energy, context, maxConnections, tokenAccessNumber, relPos);
+	cell->setFlagTokenBlocked(desc.tokenBlocked.getValueOrDefault(false));
+	cell->setMetadata(desc.metadata.getValueOrDefault(CellMetadata()));
+
+	auto const& cellFunction = desc.cellFunction.getValueOrDefault(CellFunctionDescription());
+	featureFactory->addCellFunction(cell, cellFunction.type, cellFunction.data, context);
 	featureFactory->addEnergyGuidance(cell, context);
 	for (auto const& tokenDesc : desc.tokens) {
-		cell->addToken(build(tokenDesc, context));
+		cell->addToken(build(tokenDesc.getValue(), context));
 	}
 	return cell;
 }
 
 Token * EntityFactoryImpl::build(TokenDescription const & desc, UnitContext * context) const
 {
-	return new TokenImpl(context, desc.energy, desc.data);
-}
-
-CellCluster * EntityFactoryImpl::build(CellClusterLightDescription const & desc, UnitContext * context) const
-{
-	return nullptr;
+	auto const& data = desc.data.getValueOrDefault(QByteArray());
+	auto const& energy = desc.energy.getValue();
+	return new TokenImpl(context, energy, data);
 }
 
 EnergyParticle* EntityFactoryImpl::build(EnergyParticleDescription const& desc, UnitContext* context) const
 {
-	auto particle = new EnergyParticleImpl(desc.energy, desc.pos, desc.vel, context);
-	particle->setMetadata(desc.metadata);
+	auto const& pos = desc.pos.getValue();
+	auto const&vel = desc.vel.getValueOrDefault({ 0.0, 0.0 });
+	auto particle = new EnergyParticleImpl(desc.energy.getValue(), pos, vel, context);
+	auto const& metadata = desc.metadata.getValueOrDefault(EnergyParticleMetadata());
+	particle->setMetadata(metadata);
 	return particle;
 }
 
-EnergyParticle * EntityFactoryImpl::build(EnergyParticleLightDescription const & desc, UnitContext * context) const
-{
-	return new EnergyParticleImpl(desc.energy, desc.pos, desc.vel, context);
-}
 

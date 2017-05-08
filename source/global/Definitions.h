@@ -17,6 +17,8 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include "Editable.h"
+
 class NumberGenerator;
 class TagGenerator;
 
