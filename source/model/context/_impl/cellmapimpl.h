@@ -16,15 +16,15 @@ public:
 	virtual void init(SpaceMetric* metric, MapCompartment* compartment) override;
 	virtual void clear() override;
 
-	virtual void setCell(QVector3D pos, Cell* cell) override;
-	virtual void removeCellIfPresent(QVector3D pos, Cell* cellToRemove) override;
-	virtual Cell* getCell(QVector3D pos) const override;
+	virtual void setCell(QVector2D pos, Cell* cell) override;
+	virtual void removeCellIfPresent(QVector2D pos, Cell* cellToRemove) override;
+	virtual Cell* getCell(QVector2D pos) const override;
 
 	//advanced functions
-	virtual CellClusterSet getNearbyClusters(QVector3D const& pos, qreal r) const override;
-	virtual CellCluster* getNearbyClusterFast(QVector3D const& pos, qreal r, qreal minMass, qreal maxMass, CellCluster* exclude) const override;
+	virtual CellClusterSet getNearbyClusters(QVector2D const& pos, qreal r) const override;
+	virtual CellCluster* getNearbyClusterFast(QVector2D const& pos, qreal r, qreal minMass, qreal maxMass, CellCluster* exclude) const override;
 	using CellSelectFunction = bool(*)(Cell*);
-	virtual QList< Cell* > getNearbySpecificCells(QVector3D const& pos, qreal r, CellSelectFunction selection) const override;
+	virtual QList< Cell* > getNearbySpecificCells(QVector2D const& pos, qreal r, CellSelectFunction selection) const override;
 
 	virtual void serializePrimitives(QDataStream& stream) const override;
 	virtual void deserializePrimitives(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap) override;

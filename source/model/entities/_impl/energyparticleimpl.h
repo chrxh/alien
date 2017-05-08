@@ -9,7 +9,7 @@ class EnergyParticleImpl
 {
 public:
 	EnergyParticleImpl(UnitContext* context);
-	EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, UnitContext* context);
+	EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
 	virtual void init(UnitContext* context) override;
 
@@ -18,11 +18,11 @@ public:
 	virtual qreal getEnergy() const override;
 	virtual void setEnergy(qreal value) override;
 
-	virtual QVector3D getPosition() const override;
-	virtual void setPosition(QVector3D value) override;
+	virtual QVector2D getPosition() const override;
+	virtual void setPosition(QVector2D value) override;
 
-	virtual QVector3D getVelocity() const override;
-	virtual void setVelocity(QVector3D value) override;
+	virtual QVector2D getVelocity() const override;
+	virtual void setVelocity(QVector2D value) override;
 
 	virtual quint64 getId() const override;
 	virtual void setId(quint64 value) override;
@@ -43,8 +43,8 @@ private:
 	UnitContext* _context = nullptr;
 
 	qreal _energy = 0.0;
-	QVector3D _pos;
-	QVector3D _vel;
+	QVector2D _pos;
+	QVector2D _vel;
 	quint64 _id = 0;
 	EnergyParticleMetadata _metadata;
 };

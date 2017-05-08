@@ -41,11 +41,11 @@ CellClusterTest::CellClusterTest()
 	QList< Cell* > cells;
 	for (int i = 0; i <= 100; ++i) {
 		Cell* cell = facade->buildFeaturedCell(100.0, Enums::CellFunction::COMPUTER, _context);
-		cell->setRelPosition(QVector3D(i, 0.0, 0.0));
+		cell->setRelPosition(QVector2D(i, 0.0, 0.0));
 		cells << cell;
 	}
-	QVector3D pos(200.0, 100.0, 0.0);
-	_cluster = facade->buildCellCluster(cells, 0.0, pos, 0.0, QVector3D(), _context);
+	QVector2D pos(200.0, 100.0, 0.0);
+	_cluster = facade->buildCellCluster(cells, 0.0, pos, 0.0, QVector2D(), _context);
 	_cell1 = _cluster->getCellsRef().at(0);
 	_cell2 = _cluster->getCellsRef().at(1);
 	_cell3 = _cluster->getCellsRef().at(2);
@@ -64,7 +64,7 @@ CellClusterTest::~CellClusterTest()
 TEST_F (UnitTestCellCluster, testCellVelocityDecomposition)
 {
 	_cluster->setAngularVel(2.0);
-	_cluster->setVelocity(QVector3D(1.0, -0.5, 0.0));
+	_cluster->setVelocity(QVector2D(1.0, -0.5, 0.0));
 	_cluster->updateCellVel(false);
 	_cluster->updateVel_angularVel_via_cellVelocities();
 	ASSERT_PRED2(predEqualMediumPrecision, _cluster->getAngularVel(), 2.0);

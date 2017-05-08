@@ -100,7 +100,7 @@ public Q_SLOTS:
 private Q_SLOTS:
     void changesFromCellEditor (CellTO newCellProperties);
     void changesFromClusterEditor (CellTO newClusterProperties);
-    void changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue);
+    void changesFromEnergyParticleEditor (QVector2D pos, QVector2D vel, qreal energyValue);
     void changesFromTokenEditor (qreal energy);
     void changesFromComputerMemoryEditor (QByteArray const& data);
     void changesFromTokenMemoryEditor (QByteArray data);

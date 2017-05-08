@@ -19,7 +19,7 @@ CellImpl::CellImpl (UnitContext* context)
 }
 
 CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenAccessNumber
-    , QVector3D relPos)
+    , QVector2D relPos)
     : CellImpl(context)
 {
     _relPos = relPos;
@@ -184,7 +184,7 @@ void CellImpl::setConnection (int i, Cell* cell)
     _connectingCells[i] = cell;
 }
 
-QVector3D CellImpl::calcNormal (QVector3D outerSpace) const
+QVector2D CellImpl::calcNormal (QVector2D outerSpace) const
 {
     if( _numConnections < 2 ) {
         return outerSpace.normalized();
@@ -192,19 +192,19 @@ QVector3D CellImpl::calcNormal (QVector3D outerSpace) const
 
     //find adjacent cells to the outerSpace vector
     outerSpace.normalize();
-    Cell* minCell(0);
-    Cell* maxCell(0);
-    QVector3D minVector(0.0, 0.0, 0.0);
-    QVector3D maxVector(0.0, 0.0, 0.0);
+    Cell* minCell = nullptr;
+    Cell* maxCell = nullptr;
+    QVector2D minVector;
+    QVector2D maxVector;
     qreal minH(0.0);
     qreal maxH(0.0);
 
     for(int i = 0; i < _numConnections; ++i) {
 
         //calculate h (angular distance from outerSpace vector)
-        //QVector3D u = (transform.map(_connectingCells[i]->getRelPosition())-transform.map(_relPos)).normalized(); OLD
-        QVector3D u = (_connectingCells[i]->calcPosition()- calcPosition()).normalized();
-        qreal h = QVector3D::dotProduct(outerSpace, u);
+        //QVector2D u = (transform.map(_connectingCells[i]->getRelPosition())-transform.map(_relPos)).normalized(); OLD
+        QVector2D u = (_connectingCells[i]->calcPosition()- calcPosition()).normalized();
+        qreal h = QVector2D::dotProduct(outerSpace, u);
         if( (outerSpace.x()*u.y()-outerSpace.y()*u.x()) < 0.0 )
             h = -2 - h;
 
@@ -319,19 +319,19 @@ CellCluster* CellImpl::getCluster() const
     return _cluster;
 }
 
-QVector3D CellImpl::calcPosition (bool metricCorrection) const
+QVector2D CellImpl::calcPosition (bool metricCorrection) const
 {
     return _cluster->calcPosition(this, metricCorrection);
 }
 
-void CellImpl::setAbsPosition (QVector3D pos)
+void CellImpl::setAbsPosition (QVector2D pos)
 {
     _relPos = _cluster->absToRelPos(pos);
 }
 
-void CellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
+void CellImpl::setAbsPositionAndUpdateMap (QVector2D pos)
 {
-    QVector3D oldPos(calcPosition());
+    QVector2D oldPos(calcPosition());
 	auto cellMap = _context->getCellMap();
     if(cellMap->getCell(oldPos) == this )
 		cellMap->setCell(oldPos, 0);
@@ -340,12 +340,12 @@ void CellImpl::setAbsPositionAndUpdateMap (QVector3D pos)
 		cellMap->setCell(pos, this);
 }
 
-QVector3D CellImpl::getRelPosition () const
+QVector2D CellImpl::getRelPosition () const
 {
     return _relPos;
 }
 
-void CellImpl::setRelPosition (QVector3D relPos)
+void CellImpl::setRelPosition (QVector2D relPos)
 {
     _relPos = relPos;
 }
@@ -391,12 +391,12 @@ void CellImpl::setEnergy (qreal i)
     _energy = i;
 }
 
-QVector3D CellImpl::getVelocity () const
+QVector2D CellImpl::getVelocity () const
 {
     return _vel;
 }
 
-void CellImpl::setVelocity (QVector3D vel)
+void CellImpl::setVelocity (QVector2D vel)
 {
     _vel = vel;
 }

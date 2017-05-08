@@ -3,7 +3,7 @@
 
 #include "model/features/CellFunction.h"
 
-#include <QVector3D>
+#include <QVector2D>
 
 class CellFunctionCommunicatorTest;
 
@@ -46,7 +46,7 @@ private:
     int sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend, Cell* senderCell, Cell* senderPreviousCell) const;
     QList< Cell* > findNearbyCommunicator (Cell* cell) const;
     bool sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend, Cell* senderCell, Cell* senderPreviousCell, Cell* receiverCell) const;
-    QVector3D calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend, Cell* senderCell, Cell* senderPreviousCell) const;
+    QVector2D calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend, Cell* senderCell, Cell* senderPreviousCell) const;
 
     void receiveMessage (Token* token,Cell* receiverCell, Cell* receiverPreviousCell);
     void calcReceivedMessageAngle (Cell* receiverCell, Cell* receiverPreviousCell);

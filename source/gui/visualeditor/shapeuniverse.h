@@ -5,7 +5,7 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsLineItem>
 #include <QMap>
-#include <QVector3D>
+#include <QVector2D>
 
 #include "model/Definitions.h"
 #include "model/entities/CellTO.h"
@@ -86,7 +86,7 @@ private:
     QMap< quint64, EnergyGraphicsItem* > _energyItems;
     QMap< quint64, QMap< quint64, CellConnectionGraphicsItem* > > _connectionItems;
 
-    QVector3D calcCenterOfHighlightedObjects ();
+    QVector2D calcCenterOfHighlightedObjects ();
 };
 
 #endif // SHAPEUNIVERSE_H

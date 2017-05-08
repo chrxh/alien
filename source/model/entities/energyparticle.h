@@ -1,7 +1,7 @@
 #ifndef ENERGYPARTICLE_H
 #define ENERGYPARTICLE_H
 
-#include <QVector3D>
+#include <QVector2D>
 
 #include "model/Definitions.h"
 
@@ -17,11 +17,11 @@ public:
 	virtual qreal getEnergy() const = 0;
 	virtual void setEnergy(qreal value) = 0;
 
-	virtual QVector3D getPosition () const = 0;
-	virtual void setPosition(QVector3D value) = 0;
+	virtual QVector2D getPosition () const = 0;
+	virtual void setPosition(QVector2D value) = 0;
 
-	virtual QVector3D getVelocity() const = 0;
-	virtual void setVelocity(QVector3D value) = 0;
+	virtual QVector2D getVelocity() const = 0;
+	virtual void setVelocity(QVector2D value) = 0;
 
 	virtual quint64 getId() const = 0;
 	virtual void setId(quint64 value) = 0;

@@ -16,9 +16,9 @@ public:
 	virtual void init(SpaceMetric* metric, MapCompartment* compartment) override;
 	virtual void clear() override;
 
-	virtual void removeParticleIfPresent(QVector3D pos, EnergyParticle* particleToRemove) override;
-	virtual void setParticle(QVector3D pos, EnergyParticle* particle) override;
-	virtual EnergyParticle* getParticle(QVector3D pos) const override;
+	virtual void removeParticleIfPresent(QVector2D pos, EnergyParticle* particleToRemove) override;
+	virtual void setParticle(QVector2D pos, EnergyParticle* particle) override;
+	virtual EnergyParticle* getParticle(QVector2D pos) const override;
 
 	virtual void serializePrimitives(QDataStream& stream) const override;
 	virtual void deserializePrimitives(QDataStream& stream, QMap<quint64, EnergyParticle*> const& oldIdEnergyMap) override;

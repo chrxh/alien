@@ -36,7 +36,7 @@ qreal UnitImpl::calcRotEnergy() const
 	qreal rotEnergy(0.0);
 	foreach(CellCluster* cluster, _context->getClustersRef()) {
 		if (cluster->getMass() > 1.0) {
-			rotEnergy += Physics::kineticEnergy(0.0, QVector3D(), cluster->getAngularMass(), cluster->getAngularVel());
+			rotEnergy += Physics::kineticEnergy(0.0, QVector2D(), cluster->getAngularMass(), cluster->getAngularVel());
 		}
 	}
 	return rotEnergy;

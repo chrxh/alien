@@ -16,13 +16,13 @@ public:
 
 	virtual IntVector2D getSize() const = 0;
 
-	virtual void correctPosition(QVector3D& pos) const = 0;
-	virtual IntVector2D correctPositionWithIntPrecision(QVector3D const& pos) const = 0;
+	virtual void correctPosition(QVector2D& pos) const = 0;
+	virtual IntVector2D correctPositionWithIntPrecision(QVector2D const& pos) const = 0;
 	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const = 0;
-	virtual void correctDisplacement(QVector3D& displacement) const = 0;
-	virtual QVector3D displacement(QVector3D fromPoint, QVector3D toPoint) const = 0;
-	virtual qreal distance(QVector3D fromPoint, QVector3D toPoint) const = 0;
-	virtual QVector3D correctionIncrement (QVector3D pos1, QVector3D pos2) const = 0;
+	virtual void correctDisplacement(QVector2D& displacement) const = 0;
+	virtual QVector2D displacement(QVector2D fromPoint, QVector2D toPoint) const = 0;
+	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const = 0;
+	virtual QVector2D correctionIncrement (QVector2D pos1, QVector2D pos2) const = 0;
 
 	virtual void serializePrimitives(QDataStream& stream) const = 0;
 	virtual void deserializePrimitives(QDataStream& stream) = 0;

@@ -21,10 +21,10 @@ CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token,
 
 	auto& tokenMem = token->getMemoryRef();
     tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::NO_TARGET;
-    QVector3D pos = cell->getCluster()->calcPosition(cell);
+    QVector2D pos = cell->getCluster()->calcPosition(cell);
     for(int x = -2; x < 3; ++x)
         for(int y = -2; y < 3; ++y) {
-            QVector3D searchPos(pos.x()+x, pos.y()+y, 0.0);
+            QVector2D searchPos(pos.x()+x, pos.y()+y);
             Cell* otherCell = cellMap->getCell(searchPos);
 
             //other cell found?

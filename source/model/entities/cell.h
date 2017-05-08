@@ -1,7 +1,7 @@
 #ifndef CELL_H
 #define CELL_H
 
-#include <QVector3D>
+#include <QVector2D>
 
 #include "model/Definitions.h"
 
@@ -28,7 +28,7 @@ public:
     virtual void setMaxConnections (int maxConnections) = 0;
     virtual Cell* getConnection (int i) const = 0;
     virtual void setConnection (int i, Cell* cell) = 0;
-    virtual QVector3D calcNormal (QVector3D outerSpace) const = 0;
+    virtual QVector2D calcNormal (QVector2D outerSpace) const = 0;
 
     virtual void activatingNewTokens () = 0;
     virtual const quint64& getId () const = 0;
@@ -45,11 +45,11 @@ public:
 
     virtual void setCluster (CellCluster* cluster) = 0;
     virtual CellCluster* getCluster () const = 0;
-    virtual QVector3D calcPosition (bool metricCorrection = false) const = 0;
-    virtual void setAbsPosition (QVector3D pos) = 0;
-    virtual void setAbsPositionAndUpdateMap (QVector3D pos) = 0;
-    virtual QVector3D getRelPosition () const = 0;
-    virtual void setRelPosition (QVector3D relPos) = 0;
+    virtual QVector2D calcPosition (bool metricCorrection = false) const = 0;
+    virtual void setAbsPosition (QVector2D pos) = 0;
+    virtual void setAbsPositionAndUpdateMap (QVector2D pos) = 0;
+    virtual QVector2D getRelPosition () const = 0;
+    virtual void setRelPosition (QVector2D relPos) = 0;
 
     virtual int getBranchNumber () const = 0;
     virtual void setBranchNumber (int i) = 0;
@@ -59,8 +59,8 @@ public:
     virtual qreal getEnergyIncludingTokens() const = 0;
     virtual void setEnergy (qreal i) = 0;
 
-    virtual QVector3D getVelocity () const = 0;
-    virtual void setVelocity (QVector3D vel) = 0;
+    virtual QVector2D getVelocity () const = 0;
+    virtual void setVelocity (QVector2D vel) = 0;
     virtual int getProtectionCounter () const = 0;
     virtual void setProtectionCounter (int counter) = 0;
     virtual bool isToBeKilled() const = 0;
