@@ -77,7 +77,6 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 
 	_parameters->radiationProb = 0.0;
 
-
 	DataDescription desc;
 	desc.addCellCluster(CellClusterDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
 		.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy)));
@@ -93,6 +92,10 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	});
 	_controller->setRun(true);
 	pause.exec();
+	access->requireData({ {0, 0}, _universeSize });
+	auto const& data = access->retrieveData();
+
+	ASSERT_EQ(1, data.clusters.size()) << "Wrong number of clusters.";
 }
 
 

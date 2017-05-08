@@ -5,13 +5,16 @@
 #include <QVector2D>
 
 #include "model/Definitions.h"
+#include "Descriptions.h"
 
 class CellCluster
 {
 public:
 	virtual ~CellCluster() = default;
 
-	virtual void init(UnitContext* context) = 0;
+	virtual void setContext(UnitContext* context) = 0;
+
+	virtual CellClusterDescription getDescription() const = 0;
 
     virtual void clearCellsFromMap () = 0;
     virtual void clearCellFromMap (Cell* cell) = 0;

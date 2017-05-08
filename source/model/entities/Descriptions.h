@@ -43,8 +43,11 @@ struct CellClusterDescription
 	vector<EditableVec<CellDescription>> cells;
 	vector<EditableVec<pair<uint64_t, uint64_t>>> cellConnections;
 
-	CellClusterDescription& setPos(QVector2D const& p) { pos.init(p); return *this; }
-	CellClusterDescription& setVel(QVector2D const& v) { vel.init(v); return *this; }
+	CellClusterDescription& setId(uint64_t value) { id = value; return *this; }
+	CellClusterDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
+	CellClusterDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
+	CellClusterDescription& setAngle(double value) { angle.init(value); return *this; }
+	CellClusterDescription& setAngularVel(double value) { angularVel.init(value); return *this; }
 	CellClusterDescription& addCell(CellDescription const& c)
 	{
 		cells.push_back(EditableVec<CellDescription>(EditableVecState::Added, c));
@@ -79,6 +82,11 @@ struct DataDescription
 	{
 		particles.push_back(EditableVec<EnergyParticleDescription>(EditableVecState::Added, e));
 		return *this;
+	}
+	void clear()
+	{
+		clusters.clear();
+		particles.clear();
 	}
 };
 
