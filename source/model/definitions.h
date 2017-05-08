@@ -53,6 +53,16 @@ typedef std::unordered_set<Cell*, CellHash> CellSet;
 struct IntVector2D {
 	int x;
 	int y;
+
+	IntVector2D() : x(0), y(0) { }
+	IntVector2D(std::initializer_list<int> l)
+	{
+		auto it = l.begin();
+		x = *it++;
+		y = *it;
+	}
+	IntVector2D(QVector2D const& vec) : x(static_cast<int>(vec.x())), y(static_cast<int>(vec.y())) { }
+	QVector2D toQVector2D()	{ return QVector2D(x, y); }
 };
 
 extern bool operator==(IntVector2D const& vec1, IntVector2D const& vec2);
