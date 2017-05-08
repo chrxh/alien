@@ -20,11 +20,11 @@ public:
 
 	virtual void init(int maxRunningThreads) override;
 
-	virtual void lock() override;
-	virtual void unlock() override;
-
 	virtual void registerUnit(Unit* unit) override;
 	virtual void start() override;
+
+	virtual void registerObserver(UnitObserver* observer) override;
+	virtual void unregisterObserver(UnitObserver* observer) override;
 
 	Q_SLOT virtual bool calculateTimestep() override;
 
@@ -38,8 +38,8 @@ private:
 	bool isNoThreadWorking();
 	void setAllUnitsReady();
 	void searchAndExecuteReadyThreads();
+	void notifyObservers();
 
-	QMutex _mutex;
 	int _maxRunningThreads = 1;
 	int _runningThreads = 0;
 	struct UnitThreadSignal {
@@ -49,6 +49,8 @@ private:
 	vector<UnitThreadSignal> _threadsAndCalcSignals;
 	map<UnitContext*, UnitThread*> _threadsByContexts;
 	QSignalMapper* _signalMapper = nullptr;
+
+	vector<UnitObserver*> _observers;
 
 	FRIEND_TEST(UnitThreadControllerImplTest, testStates);
 	FRIEND_TEST(UnitThreadControllerImplTest, testStatesWithFinished);

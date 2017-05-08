@@ -34,11 +34,11 @@ using std::unordered_set;
 using std::unordered_map;
 using std::pair;
 
-#define SET_CHILD(oldChild, newChild)\
-	if (oldChild != newChild) { \
-		delete oldChild; \
-		oldChild = newChild; \
-		oldChild->setParent(this); \
+#define SET_CHILD(previousChild, newChild)\
+	if (previousChild != newChild) { \
+		delete previousChild; \
+		previousChild = newChild; \
+		previousChild->setParent(this); \
 	}
 
 #endif // GLOBAL_DEFINITIONS_H

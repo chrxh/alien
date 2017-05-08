@@ -9,7 +9,7 @@ class EntityFactoryImpl
 public:
 
     EntityFactoryImpl ();
-    ~EntityFactoryImpl () {}
+	virtual ~EntityFactoryImpl() = default;
 
 	virtual CellCluster* build(CellClusterDescription const& desc, UnitContext* context) const override;
 	virtual Cell* build(CellDescription const& desc, UnitContext* context) const override;

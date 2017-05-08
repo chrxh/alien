@@ -25,6 +25,7 @@ class SimulationContextApi;
 class SimulationParameters;
 class SimulationController;
 class SymbolTable;
+class UnitObserver;
 class EntityFactory;
 class ContextFactory;
 struct DataDescription;
