@@ -2,7 +2,7 @@
 #define ENERGYEDIT_H
 
 #include <QTextEdit>
-#include <QVector3D>
+#include <QVector2D>
 
 #include "model/entities/CellTO.h"
 
@@ -13,11 +13,11 @@ class EnergyEdit : public QTextEdit
 public:
     explicit EnergyEdit(QWidget *parent = 0);
 
-    void updateEnergyParticle (QVector3D pos, QVector3D vel, qreal energy);
+    void updateEnergyParticle (QVector2D pos, QVector2D vel, qreal energy);
     void requestUpdate ();
 
 Q_SIGNALS:
-    void energyParticleDataChanged (QVector3D pos, QVector3D vel, qreal energyValue);
+    void energyParticleDataChanged (QVector2D pos, QVector2D vel, qreal energyValue);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -33,8 +33,8 @@ private:
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 
-    QVector3D _energyParticlePos;
-    QVector3D _energyParticleVel;
+    QVector2D _energyParticlePos;
+    QVector2D _energyParticleVel;
     qreal _energyParticleValue;
 };
 

@@ -45,14 +45,14 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     qreal eKinOld(Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel()));
 
     //calc old tangential velocity
-    QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector3D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVelocity(), cluster->getAngularVel()));
+    QVector2D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
+    QVector2D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVelocity(), cluster->getAngularVel()));
 
     //calc impulse angle
-    QVector3D impulse(0.0, 0.0, 0.0);
+    QVector2D impulse;
     if( cmd == Enums::PropIn::BY_ANGLE ) {
         qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition())+cluster->getAngle()+ angle)*degToRad;
-        impulse = QVector3D(qSin(thrustAngle), -qCos(thrustAngle), 0.0)*power;
+        impulse = QVector2D(qSin(thrustAngle), -qCos(thrustAngle))*power;
     }
     if( cmd == Enums::PropIn::FROM_CENTER ) {
         impulse = cellRelPos.normalized()*power;
@@ -61,7 +61,7 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
         impulse = -cellRelPos.normalized()*power;
     }
 
-    QVector3D rAPp = cellRelPos;
+    QVector2D rAPp = cellRelPos;
     rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
     if( cmd == Enums::PropIn::ROTATION_CLOCKWISE ) {
         impulse = -rAPp.normalized()*power;
@@ -77,7 +77,7 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
     }
 
     //calc impact of impulse to cell structure
-    QVector3D newVel;
+    QVector2D newVel;
     qreal newAngularVel;
     Physics::applyImpulse(impulse, rAPp, cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
 
@@ -104,8 +104,8 @@ CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* to
 
         //create energy particle with difference energy
 		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-		QVector3D pos = cluster->calcPosition(cell, _context) - impulse.normalized();
-		QVector3D vel = tangVel - impulse.normalized() / 4.0;
+		QVector2D pos = cluster->calcPosition(cell, _context) - impulse.normalized();
+		QVector2D vel = tangVel - impulse.normalized() / 4.0;
 		auto desc = EnergyParticleDescription().setEnergy(qAbs(energyDiff)).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
 		processingResult.newEnergyParticle = factory->build(desc, _context);
 

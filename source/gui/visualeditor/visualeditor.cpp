@@ -105,20 +105,20 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
     universeUpdated(_context, true);
 }
 
-QVector3D VisualEditor::getViewCenterPosWithInc ()
+QVector2D VisualEditor::getViewCenterPosWithInc ()
 {
     //calc center of view
     QPointF posView(ui->simulationView->mapToScene(ui->simulationView->width()/2, ui->simulationView->height()/2));
 
     //calc center of view in simulation coordinate
-    QVector3D pos(posView.x(), posView.y(), 0.0);
+    QVector2D pos(posView.x(), posView.y());
 
 	if (_activeScene == SHAPE_SCENE) {
 		pos = pos / GRAPHICS_ITEM_SIZE;
 	}
 
     //add increment
-    QVector3D posIncrement(_posIncrement, -_posIncrement, 0.0);
+    QVector2D posIncrement(_posIncrement, -_posIncrement);
     _posIncrement = _posIncrement + 1.0;
     if( _posIncrement > 9.0)
         _posIncrement = 0.0;

@@ -36,11 +36,11 @@ protected:
 
     struct LoadedReferenceData {
         bool success = false;
-        QList<QList<QVector3D>> clusterCellPosList;
-        QList<QList<QVector3D>> clusterCellVelList;
-        QList<QVector3D> clusterPosList;
+        QList<QList<QVector2D>> clusterCellPosList;
+        QList<QList<QVector2D>> clusterCellVelList;
+        QList<QVector2D> clusterPosList;
         QList<qreal> clusterAngleList;
-        QList<QVector3D> clusterVelList;
+        QList<QVector2D> clusterVelList;
         QList<qreal> clusterAnglularVelList;
         QList<qreal> clusterAnglularMassList;
     };
@@ -56,11 +56,11 @@ protected:
         quint32 numCluster;
         in >> numCluster;
         for(int i = 0; i < numCluster; ++i) {
-            QList<QVector3D> cellPosList;
-            QList<QVector3D> cellVelList;
-            QVector3D pos;
+            QList<QVector2D> cellPosList;
+            QList<QVector2D> cellVelList;
+            QVector2D pos;
             qreal angle;
-            QVector3D vel;
+            QVector2D vel;
             qreal angularVel;
             qreal angularMass;
             quint32 numCell;
@@ -72,8 +72,8 @@ protected:
             ref.clusterAnglularMassList << angularMass;
             in >> numCell;
             for(int i = 0; i < numCell; ++i) {
-                QVector3D pos;
-                QVector3D vel;
+                QVector2D pos;
+                QVector2D vel;
                 in >> pos >> vel;
                 cellPosList << pos;
                 cellVelList << vel;
@@ -133,7 +133,7 @@ protected:
         return msg.toLatin1().data();
     }
 
-    char const* createVectorDeviationMessageForCluster (int time, int clusterId, QString what, QVector3D ref, QVector3D comp)
+    char const* createVectorDeviationMessageForCluster (int time, int clusterId, QString what, QVector2D ref, QVector2D comp)
     {
         QString msg = QString("Deviation at time ") + QString::number(time);
         msg += QString(" in cluster ") + QString::number(clusterId) + QString(" ") + what;
@@ -144,7 +144,7 @@ protected:
         return msg.toLatin1().data();
     }
 
-    char const* createVectorDeviationMessageForCell (int time, int clusterId, int cellId, QString what, QVector3D ref, QVector3D comp)
+    char const* createVectorDeviationMessageForCell (int time, int clusterId, int cellId, QString what, QVector2D ref, QVector2D comp)
     {
         QString msg = QString("Deviation at time ") + QString::number(time);
         msg += QString(" in cluster ") + QString::number(clusterId);
@@ -175,8 +175,8 @@ protected:
 				<< createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular vel", ref.clusterAnglularVelList.at(i), cluster->getAngularVel());
 			ASSERT_EQ(ref.clusterAnglularMassList.at(i), cluster->getAngularMass()) 
 				<< createValueDeviationMessageForCluster(INTEGRATIONTEST_COMPARISON_TIMESTEPS, cluster->getId(), "in angular mass", ref.clusterAnglularMassList.at(i), cluster->getAngularMass());
-            QList<QVector3D> cellPosList = ref.clusterCellPosList.at(i);
-            QList<QVector3D> cellVelList = ref.clusterCellVelList.at(i);
+            QList<QVector2D> cellPosList = ref.clusterCellPosList.at(i);
+            QList<QVector2D> cellVelList = ref.clusterCellVelList.at(i);
             int minNumCell = qMin(cluster->getCellsRef().size(), cellPosList.size());
             for(int j = 0; j < minNumCell; ++j) {
 				ASSERT_EQ(cellPosList.at(j), cluster->getCellsRef().at(j)->getRelPosition())

@@ -35,7 +35,7 @@ namespace {
         return static_cast< Enums::CellFunction::Type >(type);
     }
 
-    Cell* constructNewCell (Cell* baseCell, QVector3D posOfNewCell, int maxConnections
+    Cell* constructNewCell (Cell* baseCell, QVector2D posOfNewCell, int maxConnections
         , int tokenAccessNumber, quint8 metadata, int cellType, QByteArray cellFunctionData, UnitContext* context)
     {
 		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -52,11 +52,11 @@ namespace {
     Cell* obstacleCheck (CellCluster* cluster, bool safeMode, CellMap* cellMap, SpaceMetric* metric, SimulationParameters* parameters)
     {
         foreach( Cell* cell, cluster->getCellsRef() ) {
-            QVector3D pos = cluster->calcPosition(cell, true);
+            QVector2D pos = cluster->calcPosition(cell, true);
 
             for(int dx = -1; dx < 2; ++dx ) {
                 for(int dy = -1; dy < 2; ++dy ) {
-                    Cell* obstacleCell = cellMap->getCell(pos+QVector3D(dx,dy,0.0));
+                    Cell* obstacleCell = cellMap->getCell(pos+QVector2D(dx, dy));
 
                     //obstacle found?
                     if( obstacleCell ) {
@@ -152,7 +152,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
     }
 
     //save relative position of cells
-    QList< QVector3D > relPosCells;
+    QList< QVector2D > relPosCells;
     foreach( Cell* otherCell, cluster->getCellsRef() )
         relPosCells << otherCell->getRelPosition();
 
@@ -244,10 +244,12 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
             //apply rigid transformation to construction site and constructor
             cluster->clearCellsFromMap();
-            foreach( Cell* otherCell, constructionSite )
-                otherCell->setRelPosition(transformConstrSite.map(otherCell->getRelPosition()));
-            foreach( Cell* otherCell, constructor )
-                otherCell->setRelPosition(transformConstructor.map(otherCell->getRelPosition()));
+			foreach(Cell* otherCell, constructionSite) {
+				otherCell->setRelPosition(transformConstrSite.map(QVector3D(otherCell->getRelPosition())).toVector2D());
+			}
+			foreach(Cell* otherCell, constructor) {
+				otherCell->setRelPosition(transformConstructor.map(QVector3D(otherCell->getRelPosition())).toVector2D());
+			}
 
             //only rotation?
             if( performRotationOnly ) {
@@ -308,9 +310,9 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             else {
 
                 //calc translation vector for construction site
-                QVector3D transOld = constructionCell->getRelPosition() - cell->getRelPosition();
-                QVector3D trans = transOld.normalized() * len;
-                QVector3D transFinish(0.0, 0.0, 0.0);
+                QVector2D transOld = constructionCell->getRelPosition() - cell->getRelPosition();
+                QVector2D trans = transOld.normalized() * len;
+                QVector2D transFinish;
                 if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
@@ -322,7 +324,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                     otherCell->setRelPosition(otherCell->getRelPosition() + trans + transFinish);
 
                 //calc position for new cell
-                QVector3D pos = cluster->relToAbsPos(cell->getRelPosition() + transOld + transFinish);
+                QVector2D pos = cluster->relToAbsPos(cell->getRelPosition() + transOld + transFinish);
 
                 //estimate expended energy for new cell
                 qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
@@ -503,7 +505,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 //find biggest angle gap for new cell
                 QVector< qreal > angles(numCon);
                 for(int i = 0; i < numCon; ++i) {
-                    QVector3D displacement = cluster->calcPosition(cell->getConnection(i),true)-cluster->calcPosition(cell, true);
+                    QVector2D displacement = cluster->calcPosition(cell->getConnection(i),true)-cluster->calcPosition(cell, true);
                     metric->correctDisplacement(displacement);
                     angles[i] = Physics::angleOfVector(displacement);
                 }
@@ -526,8 +528,8 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 angleGap = angleGap + CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
                 //calc coordinates for new cell from angle gap and construct cell
-                QVector3D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringDistance;
-                QVector3D pos = cluster->calcPosition(cell)+angleGapPos;
+                QVector2D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringDistance;
+                QVector2D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )

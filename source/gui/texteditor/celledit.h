@@ -2,7 +2,7 @@
 #define CELLEDIT_H
 
 #include <QTextEdit>
-#include <QVector3D>
+#include <QVector2D>
 
 #include "model/entities/CellTO.h"
 

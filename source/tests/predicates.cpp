@@ -15,7 +15,7 @@ bool predEqualLowPrecision(qreal a, qreal b)
 	return qAbs(a - b) < FLOATINGPOINT_LOW_PRECISION;
 }
 
-::testing::AssertionResult predEqualVectorMediumPrecision(const char* a_expr, const char* b_expr, QVector3D a, QVector3D b)
+::testing::AssertionResult predEqualVectorMediumPrecision(const char* a_expr, const char* b_expr, QVector2D a, QVector2D b)
 {
 	if ((a - b).length() < FLOATINGPOINT_MEDIUM_PRECISION)
 		return ::testing::AssertionSuccess();

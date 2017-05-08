@@ -39,13 +39,13 @@ void CellMapImpl::clear()
 			_cellGrid[x][y] = nullptr;
 }
 
-void CellMapImpl::setCell(QVector3D pos, Cell * cell)
+void CellMapImpl::setCell(QVector2D pos, Cell * cell)
 {
 	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
 	locateCell(intPos) = cell;
 }
 
-void CellMapImpl::removeCellIfPresent(QVector3D pos, Cell * cellToRemove)
+void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 {
 	IntVector2D intPosC = _metric->correctPositionWithIntPrecision(pos);
 	IntVector2D intPosM = _metric->shiftPosition(intPosC, { -1, -1 });
@@ -88,20 +88,20 @@ void CellMapImpl::removeCellIfPresent(QVector3D pos, Cell * cellToRemove)
 	removeCellIfPresent({ intPosP.x, intPosP.y }, cellToRemove);
 }
 
-Cell* CellMapImpl::getCell(QVector3D pos) const
+Cell* CellMapImpl::getCell(QVector2D pos) const
 {
 	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
 	return locateCell(intPos);
 }
 
-CellClusterSet CellMapImpl::getNearbyClusters(QVector3D const& pos, qreal r) const
+CellClusterSet CellMapImpl::getNearbyClusters(QVector2D const& pos, qreal r) const
 {
 	CellClusterSet clusters;
 	int rc = qCeil(r);
 	for (int rx = pos.x() - rc; rx < pos.x() + rc + 1; ++rx)
 		for (int ry = pos.y() - rc; ry < pos.y() + rc + 1; ++ry) {
-			if (QVector3D(static_cast<qreal>(rx) - pos.x(), static_cast<qreal>(ry) - pos.y(), 0).length() < r + ALIEN_PRECISION) {
-				Cell* cell = getCell(QVector3D(rx, ry, 0));
+			if (QVector2D(static_cast<qreal>(rx) - pos.x(), static_cast<qreal>(ry) - pos.y()).length() < r + ALIEN_PRECISION) {
+				Cell* cell = getCell(QVector2D(rx, ry));
 				if (cell) {
 					clusters.insert(cell->getCluster());
 				}
@@ -110,7 +110,7 @@ CellClusterSet CellMapImpl::getNearbyClusters(QVector3D const& pos, qreal r) con
 	return clusters;
 }
 
-CellCluster * CellMapImpl::getNearbyClusterFast(const QVector3D & pos, qreal r, qreal minMass, qreal maxMass, CellCluster * exclude) const
+CellCluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, qreal minMass, qreal maxMass, CellCluster * exclude) const
 {
 	int step = qCeil(qSqrt(minMass + ALIEN_PRECISION)) + 3;  //horizontal or vertical length of cell cluster >= minDim
 	int rc = qCeil(r);
@@ -147,7 +147,7 @@ CellCluster * CellMapImpl::getNearbyClusterFast(const QVector3D & pos, qreal r, 
 	return closestCluster;
 }
 
-QList<Cell*> CellMapImpl::getNearbySpecificCells(const QVector3D & pos, qreal r, CellSelectFunction selection) const
+QList<Cell*> CellMapImpl::getNearbySpecificCells(const QVector2D & pos, qreal r, CellSelectFunction selection) const
 {
 	QList< Cell* > cells;
 	int rCeil = qCeil(r);

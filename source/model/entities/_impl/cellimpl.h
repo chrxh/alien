@@ -4,7 +4,7 @@
 #include "model/entities/Cell.h"
 
 #include <QtGlobal>
-#include <QVector3D>
+#include <QVector2D>
 #include <QVector>
 
 class CellImpl
@@ -14,7 +14,7 @@ public:
 
     CellImpl (UnitContext* context);
     CellImpl (qreal energy, UnitContext* context, int maxConnections
-        , int tokenAccessNumber, QVector3D relPos);
+        , int tokenAccessNumber, QVector2D relPos);
 
     ~CellImpl();
 
@@ -36,7 +36,7 @@ public:
     void setMaxConnections (int maxConnections) override;
     Cell* getConnection (int i) const override;
     void setConnection (int i, Cell* cell) override;
-    QVector3D calcNormal (QVector3D outerSpace) const override;
+    QVector2D calcNormal (QVector2D outerSpace) const override;
 
     void activatingNewTokens () override;
     const quint64& getId () const override;
@@ -53,11 +53,11 @@ public:
 
     void setCluster (CellCluster* cluster) override;
     CellCluster* getCluster () const override;
-    QVector3D calcPosition (bool metricCorrection = false) const override;
-    void setAbsPosition (QVector3D pos) override;
-    void setAbsPositionAndUpdateMap (QVector3D pos) override;
-    QVector3D getRelPosition () const override;
-    void setRelPosition (QVector3D relPos) override;
+    QVector2D calcPosition (bool metricCorrection = false) const override;
+    void setAbsPosition (QVector2D pos) override;
+    void setAbsPositionAndUpdateMap (QVector2D pos) override;
+    QVector2D getRelPosition () const override;
+    void setRelPosition (QVector2D relPos) override;
 
     int getBranchNumber () const override;
     void setBranchNumber (int i) override;
@@ -67,8 +67,8 @@ public:
     qreal getEnergyIncludingTokens() const override;
     void setEnergy (qreal i) override;
 
-    QVector3D getVelocity () const override;
-    void setVelocity (QVector3D vel) override;
+    QVector2D getVelocity () const override;
+    void setVelocity (QVector2D vel) override;
     int getProtectionCounter () const override;
     void setProtectionCounter (int counter) override;
     bool isToBeKilled() const override;
@@ -95,7 +95,7 @@ private:
     quint64 _tag = 0;
     quint64 _id = 0;
     int _protectionCounter = 0;
-    QVector3D _relPos;
+    QVector2D _relPos;
     CellCluster* _cluster = nullptr;
     qreal _energy = 0.0;
 
@@ -106,7 +106,7 @@ private:
     int _tokenAccessNumber = 0;
     bool _blockToken = false;
 
-    QVector3D _vel;
+    QVector2D _vel;
 
 	CellMetadata _metadata;
 };

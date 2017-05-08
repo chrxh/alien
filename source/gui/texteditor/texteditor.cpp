@@ -76,7 +76,7 @@ void TextEditor::init (MicroEditorWidgets widgets)
     //establish connections
     connect(_widgets.cellEditor, SIGNAL(cellDataChanged(CellTO)), this, SLOT(changesFromCellEditor(CellTO)));
     connect(_widgets.clusterEditor, SIGNAL(clusterDataChanged(CellTO)), this, SLOT(changesFromClusterEditor(CellTO)));
-    connect(_widgets.energyEditor, SIGNAL(energyParticleDataChanged(QVector3D,QVector3D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector3D,QVector3D,qreal)));
+    connect(_widgets.energyEditor, SIGNAL(energyParticleDataChanged(QVector2D,QVector2D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector2D,QVector2D,qreal)));
     connect(_widgets.requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
     connect(_widgets.requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
     connect(_widgets.delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
@@ -674,7 +674,7 @@ void TextEditor::changesFromClusterEditor (CellTO newClusterProperties)
     invokeUpdateCell(true);
 }
 
-void TextEditor::changesFromEnergyParticleEditor (QVector3D pos, QVector3D vel, qreal energyValue)
+void TextEditor::changesFromEnergyParticleEditor (QVector2D pos, QVector2D vel, qreal energyValue)
 {
 /*
     if( (!_context) || (!_focusEnergyParticle) )

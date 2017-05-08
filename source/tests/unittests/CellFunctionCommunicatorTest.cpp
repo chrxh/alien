@@ -52,11 +52,11 @@ CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()
 		int maxConnections = 0;
 		int tokenAccessNumber = 0;
 
-		QVector3D relPos = QVector3D();
+		QVector2D relPos = QVector2D();
 		_cellWithToken = facade->buildFeaturedCell(cellEnergy, Enums::CellFunction::COMMUNICATOR, _context, maxConnections, tokenAccessNumber, relPos);
 		_communicator1a = _cellWithToken->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
-		relPos = QVector3D(0.0, 1.0, 0.0);
+		relPos = QVector2D(0.0, 1.0, 0.0);
 		_cellWithoutToken = facade->buildFeaturedCell(cellEnergy, Enums::CellFunction::COMMUNICATOR, _context, maxConnections, tokenAccessNumber, relPos);
 		_communicator1b = _cellWithoutToken->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
@@ -68,8 +68,8 @@ CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()
 		QList< Cell* > cells;
 		cells << _cellWithToken;
 		cells << _cellWithoutToken;
-		QVector3D pos(500.0, 500.0, 0.0);
-		QVector3D vel(0.0, 0.0, 0.0);
+		QVector2D pos(500.0, 500.0, 0.0);
+		QVector2D vel(0.0, 0.0, 0.0);
 		qreal angle = 0.0;
 		qreal angularVel = 0.0;
 		_cluster1 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _context);
@@ -81,7 +81,7 @@ CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()
 		int maxConnections = 0;
 		int tokenAccessNumber = 0;
 
-		QVector3D relPos = QVector3D();
+		QVector2D relPos = QVector2D();
 		Cell* cell = facade->buildFeaturedCell(cellEnergy, Enums::CellFunction::COMMUNICATOR, _context, maxConnections, tokenAccessNumber, relPos);
 		_communicator2 = cell->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
 
@@ -89,8 +89,8 @@ CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()
 		QList< Cell* > cells;
 		cells << cell;
 		qreal distanceFromCluster1 = _context->getSimulationParameters()->cellFunctionCommunicatorRange / 2.0;
-		QVector3D pos(500.0 + distanceFromCluster1, 500.0, 0.0);
-		QVector3D vel(0.0, 0.0, 0.0);
+		QVector2D pos(500.0 + distanceFromCluster1, 500.0, 0.0);
+		QVector2D vel(0.0, 0.0, 0.0);
 		qreal angle = 0.0;
 		qreal angularVel = 0.0;
 		_cluster2 = facade->buildCellCluster(cells, angle, pos, angularVel, vel, _context);

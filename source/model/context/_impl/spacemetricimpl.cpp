@@ -24,7 +24,7 @@ IntVector2D SpaceMetricImpl::getSize() const
 	return _size;
 }
 
-void SpaceMetricImpl::correctPosition(QVector3D & pos) const
+void SpaceMetricImpl::correctPosition(QVector2D & pos) const
 {
 	IntVector2D intPart{ qFloor(pos.x()), qFloor(pos.y()) };
 	qreal fracPartX = pos.x() - intPart.x;
@@ -34,7 +34,7 @@ void SpaceMetricImpl::correctPosition(QVector3D & pos) const
 	pos.setY(static_cast<qreal>(intPart.y) + fracPartY);
 }
 
-IntVector2D SpaceMetricImpl::correctPositionWithIntPrecision(QVector3D const& pos) const
+IntVector2D SpaceMetricImpl::correctPositionWithIntPrecision(QVector2D const& pos) const
 {
 	IntVector2D intPos{ qFloor(pos.x()), qFloor(pos.y()) };
 	correctPosition(intPos);
@@ -48,7 +48,7 @@ IntVector2D SpaceMetricImpl::shiftPosition(IntVector2D const & pos, IntVector2D 
 	return temp;
 }
 
-void SpaceMetricImpl::correctDisplacement(QVector3D & displacement) const
+void SpaceMetricImpl::correctDisplacement(QVector2D & displacement) const
 {
 	IntVector2D intDisplacement{ qFloor(displacement.x()), qFloor(displacement.y()) };
 	qreal rx = displacement.x() - static_cast<qreal>(intDisplacement.x);
@@ -62,21 +62,21 @@ void SpaceMetricImpl::correctDisplacement(QVector3D & displacement) const
 	displacement.setY(static_cast<qreal>(intDisplacement.y) + ry);
 }
 
-QVector3D SpaceMetricImpl::displacement(QVector3D fromPoint, QVector3D toPoint) const
+QVector2D SpaceMetricImpl::displacement(QVector2D fromPoint, QVector2D toPoint) const
 {
-	QVector3D d = toPoint - fromPoint;
+	QVector2D d = toPoint - fromPoint;
 	correctDisplacement(d);
 	return d;
 }
 
-qreal SpaceMetricImpl::distance(QVector3D fromPoint, QVector3D toPoint) const
+qreal SpaceMetricImpl::distance(QVector2D fromPoint, QVector2D toPoint) const
 {
 	return displacement(fromPoint, toPoint).length();
 }
 
-QVector3D SpaceMetricImpl::correctionIncrement(QVector3D pos1, QVector3D pos2) const
+QVector2D SpaceMetricImpl::correctionIncrement(QVector2D pos1, QVector2D pos2) const
 {
-	QVector3D correction;
+	QVector2D correction;
 	if ((pos2.x() - pos1.x()) > (_size.x / 2.0))
 		correction.setX(-_size.x);
 	if ((pos1.x() - pos2.x()) > (_size.x / 2.0))

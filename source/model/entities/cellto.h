@@ -4,7 +4,7 @@
 #include "model/features/CellFeatureEnums.h"
 #include <QVector>
 #include <QList>
-#include <QVector3D>
+#include <QVector2D>
 #include <QString>
 
 class Cell;
@@ -19,11 +19,11 @@ struct CellTO  //TO = Transfer Object
 
     //cell properties
 	int numCells = 0;
-    QVector3D clusterPos;
-    QVector3D clusterVel;
+    QVector2D clusterPos;
+    QVector2D clusterVel;
     qreal clusterAngle = 0.0;
     qreal clusterAngVel = 0.0;
-    QVector3D cellPos;
+    QVector2D cellPos;
     qreal cellEnergy = 0.0;
     int cellNumCon = 0;
     int cellMaxCon = 0;

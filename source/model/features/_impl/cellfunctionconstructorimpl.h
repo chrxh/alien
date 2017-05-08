@@ -3,7 +3,7 @@
 
 #include "model/features/CellFunction.h"
 
-#include <QVector3D>
+#include <QVector2D>
 
 class CellFunctionConstructorImpl
 	: public CellFunction

@@ -3,7 +3,7 @@
 
 #include "gui/GuiSettings.h"
 
-SelectionMultiplyArrangementDialog::SelectionMultiplyArrangementDialog(QVector3D centerPos, QWidget *parent) :
+SelectionMultiplyArrangementDialog::SelectionMultiplyArrangementDialog(QVector2D centerPos, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SelectionMultiplyArrangementDialog)
 {

@@ -2,7 +2,7 @@
 #define MACROEDITOR_H
 
 #include <QWidget>
-#include <QVector3D>
+#include <QVector2D>
 #include <QMatrix>
 
 #include "model/Definitions.h"
@@ -35,7 +35,7 @@ public:
     void reset ();
 
     void setActiveScene (ActiveScene activeScene);
-    QVector3D getViewCenterPosWithInc ();
+    QVector2D getViewCenterPosWithInc ();
     void getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es);
 
     void serializeViewMatrix (QDataStream& stream);
@@ -46,8 +46,8 @@ public:
     qreal getZoomFactor ();
 
 Q_SIGNALS:
-    void requestNewCell (QVector3D pos);    //for simulator
-    void requestNewEnergyParticle (QVector3D pos);    //for simulator
+    void requestNewCell (QVector2D pos);    //for simulator
+    void requestNewEnergyParticle (QVector2D pos);    //for simulator
     void defocus ();                        //for microeditor
     void focusCell (Cell* cell);       //for microeditor
     void focusEnergyParticle (EnergyParticle* e);       //for microeditor

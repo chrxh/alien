@@ -4,11 +4,11 @@
 #include <QMatrix4x4>
 
 //calculate collision of two moving and rotating rigid bodies
-void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp,
-                         /*QVector3D posA, QVector3D posB, QVector3D posP, */qreal angularVelA1,
-                         qreal angularVelB1, QVector3D n, qreal angularMassA, qreal angularMassB,
+void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp,
+                         /*QVector2D posA, QVector2D posB, QVector2D posP, */qreal angularVelA1,
+                         qreal angularVelB1, QVector2D n, qreal angularMassA, qreal angularMassB,
                          qreal massA, qreal massB,
-                         QVector3D& vA2, QVector3D& vB2, qreal& angularVelA2, qreal& angularVelB2)
+                         QVector2D& vA2, QVector2D& vB2, qreal& angularVelA2, qreal& angularVelB2)
 {
     angularVelA1 *= degToRad;
     angularVelB1 *= degToRad;
@@ -18,8 +18,8 @@ void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D
     if( (qAbs(angularMassB) <= ALIEN_PRECISION) )
         angularVelB1 = 0.0;
 
-    QVector3D vAB = vA1-rAPp*angularVelA1-(vB1-rBPp*angularVelB1);
-    if( QVector3D::dotProduct(vAB,n) > 0.0 ) {
+    QVector2D vAB = vA1-rAPp*angularVelA1-(vB1-rBPp*angularVelB1);
+    if( QVector2D::dotProduct(vAB,n) > 0.0 ) {
         vA2 = vA1;
         angularVelA2 = angularVelA1;
         vB2 = vB1;
@@ -27,32 +27,32 @@ void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D
     }
     else {
         if( (qAbs(angularMassA) > ALIEN_PRECISION) && (qAbs(angularMassB) > ALIEN_PRECISION) ) {
-            qreal j=-2.0*QVector3D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
-                    +QVector3D::dotProduct(rAPp,n)*QVector3D::dotProduct(rAPp,n)/angularMassA
-                    +QVector3D::dotProduct(rBPp,n)*QVector3D::dotProduct(rBPp,n)/angularMassB);
+            qreal j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
+                    +QVector2D::dotProduct(rAPp,n)*QVector2D::dotProduct(rAPp,n)/angularMassA
+                    +QVector2D::dotProduct(rBPp,n)*QVector2D::dotProduct(rBPp,n)/angularMassB);
             vA2 = vA1 + j/massA*n;
-            angularVelA2 = angularVelA1-QVector3D::dotProduct(rAPp,n)*j/angularMassA;
+            angularVelA2 = angularVelA1-QVector2D::dotProduct(rAPp,n)*j/angularMassA;
             vB2 = vB1 - j/massB*n;
-            angularVelB2 = angularVelB1+QVector3D::dotProduct(rBPp,n)*j/angularMassB;
+            angularVelB2 = angularVelB1+QVector2D::dotProduct(rBPp,n)*j/angularMassB;
         }
         if( (qAbs(angularMassA) <= ALIEN_PRECISION) && (qAbs(angularMassB) > ALIEN_PRECISION) ) {
-            qreal j=-2.0*QVector3D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
-                    +QVector3D::dotProduct(rBPp,n)*QVector3D::dotProduct(rBPp,n)/angularMassB);
+            qreal j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
+                    +QVector2D::dotProduct(rBPp,n)*QVector2D::dotProduct(rBPp,n)/angularMassB);
             vA2 = vA1 + j/massA*n;
             angularVelA2 = angularVelA1;
             vB2 = vB1 - j/massB*n;
-            angularVelB2 = angularVelB1+QVector3D::dotProduct(rBPp,n)*j/angularMassB;
+            angularVelB2 = angularVelB1+QVector2D::dotProduct(rBPp,n)*j/angularMassB;
         }
         if( (qAbs(angularMassA) > ALIEN_PRECISION) && (qAbs(angularMassB) <= ALIEN_PRECISION) ) {
-            qreal j=-2.0*QVector3D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
-                    +QVector3D::dotProduct(rAPp,n)*QVector3D::dotProduct(rAPp,n)/angularMassA);
+            qreal j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
+                    +QVector2D::dotProduct(rAPp,n)*QVector2D::dotProduct(rAPp,n)/angularMassA);
             vA2 = vA1 + j/massA*n;
-            angularVelA2 = angularVelA1-QVector3D::dotProduct(rAPp,n)*j/angularMassA;
+            angularVelA2 = angularVelA1-QVector2D::dotProduct(rAPp,n)*j/angularMassA;
             vB2 = vB1 - j/massB*n;
             angularVelB2 = angularVelB1;
         }
         if( (qAbs(angularMassA) <= ALIEN_PRECISION) && (qAbs(angularMassB) <= ALIEN_PRECISION) ) {
-            qreal j=-2.0*QVector3D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB));
+            qreal j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB));
             vA2 = vA1 + j/massA*n;
             angularVelA2 = angularVelA1;
             vB2 = vB1 - j/massB*n;
@@ -63,22 +63,22 @@ void Physics::collision (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D
     angularVelB2 *= radToDeg;
 }
 
-void Physics::fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rBPp, qreal angularVelA1
-	, qreal angularVelB1, QVector3D n, qreal angularMassA, qreal angularMassB, qreal angularMassAB
-	, qreal massA, qreal massB, QVector3D& v2, qreal& angularVel2)
+void Physics::fusion (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp, qreal angularVelA1
+	, qreal angularVelB1, QVector2D n, qreal angularMassA, qreal angularMassB, qreal angularMassAB
+	, qreal massA, qreal massB, QVector2D& v2, qreal& angularVel2)
 {
     //calculation of rAPp
-    /*QVector3D rAPp = posP-posA;
+    /*QVector2D rAPp = posP-posA;
     qreal temp = rAPp.x();
     rAPp.setX(rAPp.y());
     rAPp.setY(-temp);
-    QVector3D rBPp = posP-posB;
+    QVector2D rBPp = posP-posB;
     temp = rBPp.x();
     rBPp.setX(rBPp.y());
     rBPp.setY(-temp);*/
 
-    QVector3D vA2;
-    QVector3D vB2;
+    QVector2D vA2;
+    QVector2D vB2;
     qreal angularVelA2(0.0);
     qreal angularVelB2(0.0);
 
@@ -92,9 +92,9 @@ void Physics::fusion (QVector3D vA1, QVector3D vB1, QVector3D rAPp, QVector3D rB
 
 
 //calculate velocity and angular velocity for new center via energies
-void Physics::changeCenterOfMass (qreal mass, QVector3D vel, qreal angularVel, qreal oldAngularMass,
-                              qreal newAngularMass, QVector3D centerDiff,
-                              QVector3D& newVel, qreal& newAngularVel)
+void Physics::changeCenterOfMass (qreal mass, QVector2D vel, qreal angularVel, qreal oldAngularMass,
+                              qreal newAngularMass, QVector2D centerDiff,
+                              QVector2D& newVel, qreal& newAngularVel)
 {
     newAngularVel = angularVel;
     newVel = tangentialVelocity(centerDiff, vel, angularVel);
@@ -107,13 +107,13 @@ void Physics::changeCenterOfMass (qreal mass, QVector3D vel, qreal angularVel, q
 }
 
 //remember that the coordinate system in a computer system is mirrored at the x-axis...
-QVector3D Physics::tangentialVelocity (QVector3D r, QVector3D vel, qreal angularVel)
+QVector2D Physics::tangentialVelocity (QVector2D r, QVector2D vel, qreal angularVel)
 {
     return vel - angularVel*rotateQuarterCounterClockwise(r)*degToRad;
 }
 
 
-qreal Physics::kineticEnergy (qreal mass, QVector3D vel, qreal angularMass, qreal angularVel)
+qreal Physics::kineticEnergy (qreal mass, QVector2D vel, qreal angularMass, qreal angularVel)
 {
     angularVel *= degToRad;
     return 0.5*angularMass*angularVel*angularVel+0.5*mass*vel.lengthSquared();
@@ -142,7 +142,7 @@ qreal Physics::newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass,
     }
 }
 
-qreal Physics::angularMomentum (QVector3D r, QVector3D v)
+qreal Physics::angularMomentum (QVector2D r, QVector2D v)
 {
     return r.x()*v.y()-r.y()*v.x();     //we only calc the 3rd component of the 3D cross product
 }
@@ -155,20 +155,20 @@ qreal Physics::angularVelocity (qreal angularMomentum, qreal angularMass)
         return angularMomentum/angularMass*radToDeg;
 }
 
-void Physics::applyImpulse (QVector3D impulse, QVector3D rAPp, qreal mass, QVector3D vel, qreal angularMass, qreal angularVel, QVector3D& newVel, qreal& newAngularVel)
+void Physics::applyImpulse (QVector2D impulse, QVector2D rAPp, qreal mass, QVector2D vel, qreal angularMass, qreal angularVel, QVector2D& newVel, qreal& newAngularVel)
 {
     newVel = vel + impulse/mass;
-    newAngularVel = angularVel - QVector3D::dotProduct(rAPp, impulse)/angularMass*radToDeg;
+    newAngularVel = angularVel - QVector2D::dotProduct(rAPp, impulse)/angularMass*radToDeg;
 }
 
-QVector3D Physics::rotateClockwise (QVector3D v, qreal angle)
+QVector2D Physics::rotateClockwise (QVector2D v, qreal angle)
 {
     QMatrix4x4 transform;
     transform.rotate(angle, 0.0, 0.0, 1.0);
-    return transform.map(v);
+    return transform.map(QVector3D(v)).toVector2D();
 }
 
-QVector3D Physics::rotateQuarterCounterClockwise (QVector3D v)
+QVector2D Physics::rotateQuarterCounterClockwise (QVector2D v)
 {
 
     //90 degree counterclockwise rotation of vector r
@@ -178,7 +178,7 @@ QVector3D Physics::rotateQuarterCounterClockwise (QVector3D v)
     return v;
 }
 
-qreal Physics::angleOfVector (QVector3D v)
+qreal Physics::angleOfVector (QVector2D v)
 {
     qreal angle(0.0);
     qreal angleSin(qAsin(-v.y()/v.length())*radToDeg);
@@ -189,9 +189,9 @@ qreal Physics::angleOfVector (QVector3D v)
     return angle;
 }
 
-QVector3D Physics::unitVectorOfAngle (qreal angle)
+QVector2D Physics::unitVectorOfAngle (qreal angle)
 {
-    return QVector3D(qSin(angle*degToRad),-qCos(angle*degToRad), 0.0);
+    return QVector2D(qSin(angle*degToRad),-qCos(angle*degToRad));
 }
 
 bool Physics::compareEqualAngle (qreal angle1, qreal angle2, qreal precision)
@@ -215,7 +215,7 @@ qreal Physics::subtractAngle (qreal angleMinuend, qreal angleSubtrahend)
     return angleDiff;
 }
 
-qreal Physics::clockwiseAngleFromFirstToSecondVector (QVector3D v1, QVector3D v2)
+qreal Physics::clockwiseAngleFromFirstToSecondVector (QVector2D v1, QVector2D v2)
 {
     qreal a1 = Physics::angleOfVector(v1);
     qreal a2 = Physics::angleOfVector(v2);

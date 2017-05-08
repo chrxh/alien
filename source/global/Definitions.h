@@ -2,7 +2,7 @@
 #define GLOBAL_DEFINITIONS_H
 
 #include <QtGlobal>
-#include <QVector3D>
+#include <QVector2D>
 #include <QVector2D>
 #include <QSize>
 #include <QMap>

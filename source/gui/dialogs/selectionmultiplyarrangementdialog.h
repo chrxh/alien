@@ -2,7 +2,7 @@
 #define SELECTIONMULTIPLYARRANGEMENTDIALOG_H
 
 #include <QDialog>
-#include <QVector3D>
+#include <QVector2D>
 
 namespace Ui {
 class SelectionMultiplyArrangementDialog;
@@ -13,7 +13,7 @@ class SelectionMultiplyArrangementDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SelectionMultiplyArrangementDialog (QVector3D centerPos, QWidget *parent = 0);
+    explicit SelectionMultiplyArrangementDialog (QVector2D centerPos, QWidget *parent = 0);
     ~SelectionMultiplyArrangementDialog();
 
     qreal getInitialPosX ();

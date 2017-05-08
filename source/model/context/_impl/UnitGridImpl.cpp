@@ -35,12 +35,12 @@ Unit * UnitGridImpl::getUnitOfGridPos(IntVector2D gridPos) const
 	return _units[gridPos.x][gridPos.y];
 }
 
-Unit * UnitGridImpl::getUnitOfMapPos(QVector3D pos) const
+Unit * UnitGridImpl::getUnitOfMapPos(QVector2D pos) const
 {
 	return getUnitOfGridPos(getGridPosOfMapPos(pos));
 }
 
-IntVector2D UnitGridImpl::getGridPosOfMapPos(QVector3D pos) const
+IntVector2D UnitGridImpl::getGridPosOfMapPos(QVector2D pos) const
 {
 	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
 	IntVector2D compartmentSize = calcCompartmentSize();

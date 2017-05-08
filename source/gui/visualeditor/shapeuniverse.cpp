@@ -167,7 +167,7 @@ void ShapeUniverse::energyParticleUpdated_Slot (EnergyParticle* e)
 	_context->lock();
 
     if( _energyItems.contains(e->getId()) ) {
-        QVector3D pos = e->getPosition();
+        QVector2D pos = e->getPosition();
         EnergyGraphicsItem* eItem = _energyItems[e->getId()];
 		_context->getSpaceMetric()->correctPosition(pos);
         eItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
@@ -332,7 +332,7 @@ void ShapeUniverse::reclustered (QList< CellCluster* > clusters)
 
             //move cell
             if( _cellItems.contains(cell->getId()) ) {
-                QVector3D pos = cell->calcPosition();
+                QVector2D pos = cell->calcPosition();
                 CellGraphicsItem* cellItem = _cellItems[cell->getId()];
                 topo->correctPosition(pos);
                 cellItem->setPos(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
@@ -540,11 +540,11 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
             QPointF lastPos = e->lastScenePos();
             QPointF pos = e->scenePos();
-            QVector3D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y(), 0.0);
+            QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y(), 0.0);
 			delta = delta / GRAPHICS_ITEM_SIZE;
 
             //calc rotation matrix (used when both mouse buttons are pressed)
-            QVector3D center = calcCenterOfHighlightedObjects();
+            QVector2D center = calcCenterOfHighlightedObjects();
             qreal angleDelta = delta.y()*20.0;
             QMatrix4x4 transform;
             transform.setToIdentity();
@@ -647,7 +647,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 EnergyGraphicsItem* ShapeUniverse::createEnergyItem (EnergyParticle* e)
 {
     //create item
-    QVector3D pos(e->getPosition());
+    QVector2D pos(e->getPosition());
     EnergyGraphicsItem* eItem = new EnergyGraphicsItem(e, pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE);
     QGraphicsScene::addItem(eItem);
 
@@ -659,7 +659,7 @@ EnergyGraphicsItem* ShapeUniverse::createEnergyItem (EnergyParticle* e)
 CellGraphicsItem* ShapeUniverse::createCellItem (Cell* cell)
 {
     //create item
-    QVector3D pos(cell->calcPosition());
+    QVector2D pos(cell->calcPosition());
     bool connectable = (cell->getNumConnections() < cell->getMaxConnections());
     CellGraphicsItem* cellItem = new CellGraphicsItem(_itemConfig, cell, pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE
 		, connectable, cell->getNumToken(), cell->getMetadata().color, getCellFunctionString(cell), cell->getBranchNumber());
@@ -678,8 +678,8 @@ QString ShapeUniverse::getCellFunctionString(Cell * cell)
 
 void ShapeUniverse::createConnectionItem (Cell* cell, Cell* otherCell)
 {
-    QVector3D pos(cell->getCluster()->calcPosition(cell));
-    QVector3D otherPos(otherCell->getCluster()->calcPosition(otherCell));
+    QVector2D pos(cell->getCluster()->calcPosition(cell));
+    QVector2D otherPos(otherCell->getCluster()->calcPosition(otherCell));
 
     //directed connection?
     CellConnectionGraphicsItem::ConnectionState s = CellConnectionGraphicsItem::NO_DIR_CONNECTION;
@@ -771,15 +771,15 @@ void ShapeUniverse::setCellColorFromMetadata ()
     }
 }
 
-QVector3D ShapeUniverse::calcCenterOfHighlightedObjects ()
+QVector2D ShapeUniverse::calcCenterOfHighlightedObjects ()
 {
-    QVector3D center;
+    QVector2D center;
     QList< CellGraphicsItem* > cellItems(_highlightedCells.values());
     foreach( CellGraphicsItem* cellItem, cellItems )
-        center += QVector3D(cellItem->pos().x(), cellItem->pos().y(), 0.0);
+        center += QVector2D(cellItem->pos().x(), cellItem->pos().y());
     QList< EnergyGraphicsItem* > eItems(_highlightedEnergyParticles.values());
     foreach( EnergyGraphicsItem* eItem, eItems )
-        center += QVector3D(eItem->pos().x(), eItem->pos().y(), 0.0);
+        center += QVector2D(eItem->pos().x(), eItem->pos().y());
     return center/(cellItems.size()+eItems.size())/GRAPHICS_ITEM_SIZE;
 }
 
