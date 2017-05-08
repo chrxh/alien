@@ -84,8 +84,8 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     connect(_simController, SIGNAL(reclustered(QList<CellCluster*>)), ui->visualEditor, SLOT(reclustered(QList<CellCluster*>)));
     connect(_simController, SIGNAL(reclustered(QList<CellCluster*>)), _textEditor, SLOT(reclustered(QList<CellCluster*>)));
     connect(_simController, SIGNAL(computerCompilationReturn(bool,int)), _textEditor, SLOT(computerCompilationReturn(bool,int)));
-    connect(ui->visualEditor, SIGNAL(requestNewCell(QVector3D)), _simController, SLOT(newCell(QVector3D)));
-    connect(ui->visualEditor, SIGNAL(requestNewEnergyParticle(QVector3D)), _simController, SLOT(newEnergyParticle(QVector3D)));
+    connect(ui->visualEditor, SIGNAL(requestNewCell(QVector2D)), _simController, SLOT(newCell(QVector2D)));
+    connect(ui->visualEditor, SIGNAL(requestNewEnergyParticle(QVector2D)), _simController, SLOT(newEnergyParticle(QVector2D)));
     connect(ui->visualEditor, SIGNAL(defocus()), _textEditor, SLOT(defocused()));
     connect(ui->visualEditor, SIGNAL(defocus()), this, SLOT(cellDefocused()));
     connect(ui->visualEditor, SIGNAL(focusCell(Cell*)), _textEditor, SLOT(cellFocused(Cell*)));
@@ -621,8 +621,8 @@ void MainWindow::addBlockStructure ()
 /*
     AddRectStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
-        QVector3D center = ui->visualEditor->getViewCenterPosWithInc();
-       _simController->addBlockStructure(center, d.getBlockSizeX(), d.getBlockSizeY(), QVector3D(d.getDistance(), d.getDistance(), 0.0)
+        QVector2D center = ui->visualEditor->getViewCenterPosWithInc();
+       _simController->addBlockStructure(center, d.getBlockSizeX(), d.getBlockSizeY(), QVector2D(d.getDistance(), d.getDistance(), 0.0)
 		   , d.getInternalEnergy());
     }
 */
@@ -633,7 +633,7 @@ void MainWindow::addHexagonStructure ()
 /*
     AddHexagonStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
-        QVector3D center = ui->visualEditor->getViewCenterPosWithInc();
+        QVector2D center = ui->visualEditor->getViewCenterPosWithInc();
        _simController->addHexagonStructure(center, d.getLayers(), d.getDistance(), d.getInternalEnergy());
     }
 */
@@ -752,7 +752,7 @@ void MainWindow::multiplyRandomExtendedSelection ()
             QList< CellCluster* > newClusters;
             QList< EnergyParticle* > newEnergyParticles;
 			IntVector2D universeSize = _simController->getUniverseSize();
-            QVector3D pos(NumberGenerator::getInstance().getInstance().random(0.0, universeSize.x), NumberGenerator::getInstance().getInstance().random(0.0, universeSize.y), 0.0);
+            QVector2D pos(NumberGenerator::getInstance().getInstance().random(0.0, universeSize.x), NumberGenerator::getInstance().getInstance().random(0.0, universeSize.y), 0.0);
             _simController->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
 
             //randomize angles and velocities if desired
@@ -783,7 +783,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
     ui->visualEditor->getExtendedSelection(clusters, es);
 
     //celc center
-    QVector3D centerPos = _simController->getCenterPosExtendedSelection(clusters, es);
+    QVector2D centerPos = _simController->getCenterPosExtendedSelection(clusters, es);
     SelectionMultiplyArrangementDialog d(centerPos);
     if( d.exec() ) {
 
@@ -802,7 +802,7 @@ void MainWindow::multiplyArrangementExtendedSelection ()
                 QMap< quint64, quint64 > oldNewClusterIdMap;
                 QList< CellCluster* > newClusters;
                 QList< EnergyParticle* > newEnergyParticles;
-                QVector3D pos(d.getInitialPosX() + (qreal)i*d.getHorizontalInterval(),
+                QVector2D pos(d.getInitialPosX() + (qreal)i*d.getHorizontalInterval(),
                               d.getInitialPosY() + (qreal)j*d.getVerticalInterval(), 0.0);
                 _simController->loadExtendedSelection(in, pos, newClusters, newEnergyParticles, oldNewClusterIdMap, oldNewCellIdMap, false);
 

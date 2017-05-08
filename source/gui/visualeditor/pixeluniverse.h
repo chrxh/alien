@@ -2,7 +2,7 @@
 #define PIXELUNIVERSE_H
 
 #include <QGraphicsScene>
-#include <QVector3D>
+#include <QVector2D>
 #include <QTimer>
 
 #include "model/Definitions.h"
@@ -34,8 +34,8 @@ private:
     QTimer* _timer;
 
     QList< CellCluster* > _selectedClusters;
-    QVector3D _selectionPos;
-    QVector< QVector3D > _lastMouseDiffs;
+    QVector2D _selectionPos;
+    QVector< QVector2D > _lastMouseDiffs;
     bool _leftMouseButtonPressed;
     bool _rightMouseButtonPressed;
 };

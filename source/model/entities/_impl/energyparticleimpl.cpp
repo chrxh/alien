@@ -23,7 +23,7 @@ EnergyParticleImpl::EnergyParticleImpl(UnitContext* context)
 	_id = _context->getNumberGenerator()->getTag();
 }
 
-EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector3D pos, QVector3D vel, UnitContext* context)
+EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context)
 	: EnergyParticleImpl(context)
 {
 	_energy = energy;
@@ -67,7 +67,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 		//look for neighbor cell
 		for (int dx = -2; dx < 3; ++dx) {
 			for (int dy = -2; dy < 3; ++dy) {
-				if (cellMap->getCell(_pos + QVector3D(dx, dy, 0.0))) {
+				if (cellMap->getCell(_pos + QVector2D(dx, dy))) {
 					energyMap->setParticle(_pos, this);
 					return true;
 				}
@@ -157,22 +157,22 @@ void EnergyParticleImpl::setEnergy(qreal value)
 	_energy = value;
 }
 
-QVector3D EnergyParticleImpl::getPosition() const
+QVector2D EnergyParticleImpl::getPosition() const
 {
 	return _pos;
 }
 
-void EnergyParticleImpl::setPosition(QVector3D value)
+void EnergyParticleImpl::setPosition(QVector2D value)
 {
 	_pos = value;
 }
 
-QVector3D EnergyParticleImpl::getVelocity() const
+QVector2D EnergyParticleImpl::getVelocity() const
 {
 	return _vel;
 }
 
-void EnergyParticleImpl::setVelocity(QVector3D value)
+void EnergyParticleImpl::setVelocity(QVector2D value)
 {
 	_vel = value;
 }

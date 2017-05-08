@@ -41,7 +41,7 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 
     //scanning vicinity?
     if( cmd == Enums::SensorIn::SEARCH_VICINITY ) {
-        QVector3D cellPos = cell->calcPosition(_context);
+        QVector2D cellPos = cell->calcPosition(_context);
 //        auto time1 = high_resolution_clock::now();
         CellCluster* otherCluster = cellMap->getNearbyClusterFast(cellPos, parameters->cellFunctionSensorRange
             , minMassReal, maxMassReal, cluster);
@@ -52,14 +52,14 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
             tokenMem[Enums::Sensor::OUT_MASS] = CodingPhysicalQuantities::convertURealToData(otherCluster->getMass());
 
             //calc relative angle
-            QVector3D dir  = metric->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
+            QVector2D dir  = metric->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
             qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition());
             qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             tokenMem[Enums::Sensor::INOUT_ANGLE] = CodingPhysicalQuantities::convertAngleToData(relAngle);
 
             //calc distance by scanning along beam
-            QVector3D beamPos = cell->calcPosition(true);
-            QVector3D scanPos;
+            QVector2D beamPos = cell->calcPosition(true);
+            QVector2D scanPos;
             for(int d = 1; d < parameters->cellFunctionSensorRange; d += 2) {
                 beamPos += 2.0*dir;
                 for(int rx = -1; rx < 2; ++rx)
@@ -85,8 +85,8 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
     }
 
     //scanning in a particular direction?
-    QVector3D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector3D dir(0.0, 0.0, 0.0);
+    QVector2D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
+    QVector2D dir;
     if( cmd == Enums::SensorIn::SEARCH_BY_ANGLE ) {
         qreal relAngle = CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Sensor::INOUT_ANGLE]);
         qreal angle = Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition()) + cluster->getAngle() + relAngle;
@@ -101,8 +101,8 @@ CellFeature::ProcessingResult CellFunctionSensorImpl::processImpl (Token* token,
 
     //scan along beam
     QList< Cell* > hitListCell;
-    QVector3D beamPos = cell->calcPosition(true);
-    QVector3D scanPos;
+    QVector2D beamPos = cell->calcPosition(true);
+    QVector2D scanPos;
     for(int d = 1; d < parameters->cellFunctionSensorRange; d += 2) {
         beamPos += 2.0*dir;
         for(int rx = -1; rx < 2; ++rx)

@@ -2,7 +2,7 @@
 #define FACTORYFACADE_H
 
 #include <QtGlobal>
-#include <QVector3D>
+#include <QVector2D>
 
 #include "model/entities/CellTO.h"
 #include "model/features/CellFeatureEnums.h"

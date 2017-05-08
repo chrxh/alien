@@ -33,7 +33,7 @@ private:
 	bool _registered = false;
 
 	bool _dataRequired = false;
-	IntVector2D _requiredRect;
+	IntRect _requiredRect;
 	DataDescriptionType _dataCollected;
 	DataDescriptionType _dataToAdd;
 };

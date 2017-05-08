@@ -16,8 +16,8 @@ public:
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) override;
 	virtual IntVector2D getSize() const override;
 	virtual Unit* getUnitOfGridPos(IntVector2D gridPos) const override;
-	virtual Unit* getUnitOfMapPos(QVector3D pos) const override;
-	virtual IntVector2D getGridPosOfMapPos(QVector3D pos) const override;
+	virtual Unit* getUnitOfMapPos(QVector2D pos) const override;
+	virtual IntVector2D getGridPosOfMapPos(QVector2D pos) const override;
 	virtual IntRect calcCompartmentRect(IntVector2D gridPos) const override;
 
 private:

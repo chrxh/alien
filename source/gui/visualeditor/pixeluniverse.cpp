@@ -147,7 +147,7 @@ void PixelUniverse::universeUpdated (SimulationContext* context)
     //draw selected clusters
     foreach(CellCluster* cluster, _selectedClusters) {
         foreach(Cell* cell, cluster->getCellsRef()) {
-            QVector3D pos = cell->calcPosition(true);
+            QVector2D pos = cell->calcPosition(true);
             _image->setPixel(pos.x(), pos.y(), 0xBFBFBF);
         }
     }
@@ -174,10 +174,10 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
 		IntVector2D size = _context->getSpaceMetric()->getSize();
 		CellMap* cellMap = _context->getCellMap();
         QMap< quint64, CellCluster* > clusters;
-        QVector3D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
+        QVector2D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
         for(int rx = -5; rx < 6; ++rx )
             for(int ry = -5; ry < 6; ++ry ) {
-                QVector3D scanPos = mousePos + QVector3D(rx,ry,0.0);
+                QVector2D scanPos = mousePos + QVector2D(rx,ry,0.0);
                 if( (scanPos.x() >= 0.0) && (scanPos.x() < size.x)
                     && (scanPos.y() >= 0.0) && (scanPos.y() < size.y) ) {
                     Cell* cell = cellMap->getCell(scanPos);
@@ -193,7 +193,7 @@ void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
         }
 
         //calc center
-        QVector3D center;
+        QVector2D center;
         int numCells = 0;
         foreach(CellCluster* cluster, clusters) {
             foreach(Cell* cell, cluster->getCellsRef()) {
@@ -257,10 +257,10 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
     //update mouse buttons and positions
 //    _leftMouseButtonPressed = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 //    _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
-    QVector3D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
-    QVector3D lastMousePos(e->lastScenePos().x(), e->lastScenePos().y(), 0.0);
-    QVector3D mouseDiff = mousePos - lastMousePos;
-    QVector3D cumMouseDiff = mouseDiff;
+    QVector2D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
+    QVector2D lastMousePos(e->lastScenePos().x(), e->lastScenePos().y(), 0.0);
+    QVector2D mouseDiff = mousePos - lastMousePos;
+    QVector2D cumMouseDiff = mouseDiff;
     for(int i = 0; i < MOUSE_HISTORY; ++i) {
         cumMouseDiff += _lastMouseDiffs[i];
     }
@@ -296,7 +296,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
 
         //2. step: rotate cluster around common center
         //calc center
-        QVector3D center;
+        QVector2D center;
         int numCells = 0;
         foreach(CellCluster* cluster, _selectedClusters) {
             foreach(Cell* cell, cluster->getCellsRef()) {
@@ -325,7 +325,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
 			CellMap* cellMap = _context->getCellMap();
 
             //calc distance vector and length
-            QVector3D dir = mouseDiff.normalized();
+            QVector2D dir = mouseDiff.normalized();
             qreal dist = mouseDiff.length();
 
             //scan mouse path for clusters
@@ -334,7 +334,7 @@ void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
             for(int d = 0; d < qFloor(dist)+1; ++d ) {
                 for(int rx = -5; rx < 6; ++rx )
                     for(int ry = -5; ry < 6; ++ry ) {
-                        QVector3D scanPos = mousePos + dir*d + QVector3D(rx,ry,0.0);
+                        QVector2D scanPos = mousePos + dir*d + QVector2D(rx,ry,0.0);
                         Cell* cell = cellMap->getCell(scanPos);
                         if( cell) {
                             clusters[cell->getCluster()->getId()] = cell->getCluster();
@@ -374,7 +374,7 @@ void PixelUniverse::timeout ()
     //set velocity of selected clusters to 0
     foreach(CellCluster* cluster, _selectedClusters) {
         if( _leftMouseButtonPressed )
-            cluster->setVelocity(QVector3D());
+            cluster->setVelocity(QVector2D());
         if( _rightMouseButtonPressed )
             cluster->setAngularVel(0.0);
     }

@@ -10,7 +10,7 @@ class CellClusterImpl
 {
 public:
     CellClusterImpl (UnitContext* context);
-    CellClusterImpl (QList< Cell* > cells, qreal angle, QVector3D pos, qreal angularVel, QVector3D vel, UnitContext* context);
+    CellClusterImpl (QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
     CellClusterImpl (QList< Cell* > cells, qreal angle, UnitContext* context);
 
     ~CellClusterImpl ();
@@ -28,16 +28,16 @@ public:
     void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose) override;
     void processingCompletion () override;
 
-    void addCell (Cell* cell, QVector3D absPos) override;
+    void addCell (Cell* cell, QVector2D absPos) override;
     void removeCell (Cell* cell, bool maintainCenter = true) override;
     void updateCellVel (bool forceCheck = true) override;
     void updateAngularMass () override;
     void updateRelCoordinates (bool maintainCenter = false) override;
     void updateVel_angularVel_via_cellVelocities () override;
-    QVector3D calcPosition (const Cell *cell, bool metricCorrection = false) const override;
-    QVector3D calcCellDistWithoutTorusCorrection (Cell* cell) const override;
+    QVector2D calcPosition (const Cell *cell, bool metricCorrection = false) const override;
+    QVector2D calcCellDistWithoutTorusCorrection (Cell* cell) const override;
     QList< CellCluster* > decompose () const override;
-    qreal calcAngularMassWithNewParticle (QVector3D particlePos) const override;
+    qreal calcAngularMassWithNewParticle (QVector2D particlePos) const override;
     qreal calcAngularMassWithoutUpdate () const override;
 
     bool isEmpty() const override;
@@ -46,22 +46,22 @@ public:
     const quint64& getId () const override;
     void setId (quint64 id) override;
     QList< quint64 > getCellIds () const override;
-    QVector3D getPosition () const override;
-    void setCenterPosition (QVector3D pos, bool updateTransform = true) override;
+    QVector2D getPosition () const override;
+    void setCenterPosition (QVector2D pos, bool updateTransform = true) override;
     qreal getAngle () const override;
     void setAngle (qreal angle, bool updateTransform = true) override;
-    QVector3D getVelocity () const override;
-    void setVelocity (QVector3D vel) override;
+    QVector2D getVelocity () const override;
+    void setVelocity (QVector2D vel) override;
     qreal getMass () const override;
     qreal getAngularVel () const override;
     void setAngularVel (qreal vel) override;
     qreal getAngularMass () const override;
     void updateTransformationMatrix () override;
-    QVector3D relToAbsPos (QVector3D relPos) const override;
-    QVector3D absToRelPos (QVector3D absPos) const override;
+    QVector2D relToAbsPos (QVector2D relPos) const override;
+    QVector2D absToRelPos (QVector2D absPos) const override;
 
-    void findNearestCells (QVector3D pos, Cell*& cell1, Cell*& cell2) const override;
-    Cell* findNearestCell (QVector3D pos) const override;
+    void findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell2) const override;
+    Cell* findNearestCell (QVector2D pos) const override;
     void getConnectedComponent(Cell* cell, QList< Cell* >& component) const override;
     void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const override;
 
@@ -73,13 +73,16 @@ public:
 
 private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
+	inline QVector2D applyTransformation(QVector2D pos) const;
+	inline QVector2D applyTransformation(QMatrix4x4 const& transform, QVector2D pos) const;
+	inline QVector2D applyInverseTransformation(QVector2D pos) const;
 
     UnitContext* _context = nullptr;
 
     qreal _angle = 0.0;       //in deg
-    QVector3D _pos;
+    QVector2D _pos;
     qreal _angularVel = 0.0;  //in deg
-    QVector3D _vel;
+    QVector2D _vel;
     QMatrix4x4 _transform;
     qreal _angularMass = 0.0;
 
@@ -90,5 +93,21 @@ private:
 	CellClusterMetadata _meta;
 };
 
+/********************* inline methods ******************/
+
+QVector2D CellClusterImpl::applyTransformation(QVector2D pos) const
+{
+	return _transform.map(QVector3D(pos)).toVector2D();
+}
+
+QVector2D CellClusterImpl::applyTransformation(QMatrix4x4 const & transform, QVector2D pos) const
+{
+	return QVector2D();
+}
+
+QVector2D CellClusterImpl::applyInverseTransformation(QVector2D pos) const
+{
+	return _transform.inverted().map(QVector3D(pos)).toVector2D();
+}
 
 #endif // CELLCLUSTERIMPL_H

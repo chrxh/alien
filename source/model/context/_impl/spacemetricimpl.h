@@ -15,13 +15,13 @@ public:
 
 	virtual IntVector2D getSize() const override;
 
-	virtual void correctPosition(QVector3D& pos) const override;
-	virtual IntVector2D correctPositionWithIntPrecision(QVector3D const& pos) const override;
+	virtual void correctPosition(QVector2D& pos) const override;
+	virtual IntVector2D correctPositionWithIntPrecision(QVector2D const& pos) const override;
 	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const override;
-	virtual void correctDisplacement(QVector3D& displacement) const override;
-	virtual QVector3D displacement(QVector3D fromPoint, QVector3D toPoint) const override;
-	virtual qreal distance(QVector3D fromPoint, QVector3D toPoint) const override;
-	virtual QVector3D correctionIncrement(QVector3D pos1, QVector3D pos2) const override;
+	virtual void correctDisplacement(QVector2D& displacement) const override;
+	virtual QVector2D displacement(QVector2D fromPoint, QVector2D toPoint) const override;
+	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const override;
+	virtual QVector2D correctionIncrement(QVector2D pos1, QVector2D pos2) const override;
 
 	virtual void serializePrimitives(QDataStream& stream) const override;
 	virtual void deserializePrimitives(QDataStream& stream) override;

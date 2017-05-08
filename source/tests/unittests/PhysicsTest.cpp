@@ -30,7 +30,7 @@ PhysicsTest::~PhysicsTest()
 
 namespace {
 	::testing::AssertionResult predVectorAfterRotation(const char* beforeExpr, const char* afterExpr, const char* expectedExpr
-		, QVector3D before, QVector3D after, QVector3D expected)
+		, QVector2D before, QVector2D after, QVector2D expected)
 	{
 		::testing::AssertionResult result = predEqualVectorMediumPrecision(afterExpr, expectedExpr, after, expected);
 		if (result)
@@ -43,7 +43,7 @@ namespace {
 	}
 
 	::testing::AssertionResult predUnitVectorOfAngle(const char* beforeAngleExpr, const char* beforeVectorExpr, const char* afterAngleExpr
-		, qreal beforeAngle, QVector3D beforeVector, qreal afterAngle)
+		, qreal beforeAngle, QVector2D beforeVector, qreal afterAngle)
 	{
 		if (Physics::compareEqualAngle(beforeAngle, afterAngle, FLOATINGPOINT_LOW_PRECISION))
 			return ::testing::AssertionSuccess();
@@ -55,7 +55,7 @@ namespace {
 	}
 
 	::testing::AssertionResult predRelativeAngleBetweenVectors(const char* firstVectorExpr, const char* secondVectorExpr, const char* calculatedRelativeAngleExpr
-		, const char* expectedRelativeAngleExpr, QVector3D firstVector, QVector3D secondVector, qreal calculatedRelativeAngle, qreal expectedRelativeAngle)
+		, const char* expectedRelativeAngleExpr, QVector2D firstVector, QVector2D secondVector, qreal calculatedRelativeAngle, qreal expectedRelativeAngle)
 	{
 		if (Physics::compareEqualAngle(calculatedRelativeAngle, expectedRelativeAngle, FLOATINGPOINT_LOW_PRECISION))
 			return ::testing::AssertionSuccess();
@@ -70,14 +70,14 @@ namespace {
 
 TEST_F (PhysicsTest, testRotateClockwise)
 {
-    QVector3D v1 = QVector3D(0.0, -1.0, 0.0);
-    QVector3D v2 = QVector3D(1.0, 0.0, 0.0);
-    QVector3D v3 = QVector3D(0.0, 1.0, 0.0);
-    QVector3D v4 = QVector3D(-1.0, 0.0, 0.0);
-    QVector3D v1r = Physics::rotateClockwise(v1, 90.0);
-    QVector3D v2r = Physics::rotateClockwise(v2, 90.0);
-    QVector3D v3r = Physics::rotateClockwise(v3, 90.0);
-    QVector3D v4r = Physics::rotateClockwise(v4, 90.0);
+    QVector2D v1 = QVector2D(0.0, -1.0);
+    QVector2D v2 = QVector2D(1.0, 0.0);
+    QVector2D v3 = QVector2D(0.0, 1.0);
+    QVector2D v4 = QVector2D(-1.0, 0.0);
+    QVector2D v1r = Physics::rotateClockwise(v1, 90.0);
+    QVector2D v2r = Physics::rotateClockwise(v2, 90.0);
+    QVector2D v3r = Physics::rotateClockwise(v3, 90.0);
+    QVector2D v4r = Physics::rotateClockwise(v4, 90.0);
 	ASSERT_PRED_FORMAT3(predVectorAfterRotation, v1, v1r, v2);
 	ASSERT_PRED_FORMAT3(predVectorAfterRotation, v2, v2r, v3);
 	ASSERT_PRED_FORMAT3(predVectorAfterRotation, v3, v3r, v4);
@@ -86,13 +86,13 @@ TEST_F (PhysicsTest, testRotateClockwise)
 
 TEST_F(PhysicsTest, testAngleOfVector)
 {
-    qreal a = Physics::angleOfVector(QVector3D(0.0, -1.0, 0.0));
+    qreal a = Physics::angleOfVector(QVector2D(0.0, -1.0));
 	ASSERT_PRED2(predEqualLowPrecision, a, 0.0);
-    a = Physics::angleOfVector(QVector3D(1.0, 0.0, 0.0));
+    a = Physics::angleOfVector(QVector2D(1.0, 0.0));
 	ASSERT_PRED2(predEqualLowPrecision, a, 90.0);
-    a = Physics::angleOfVector(QVector3D(0.0, 1.0, 0.0));
+    a = Physics::angleOfVector(QVector2D(0.0, 1.0));
 	ASSERT_PRED2(predEqualLowPrecision, a, 180.0);
-    a = Physics::angleOfVector(QVector3D(-1.0, 0.0, 0.0));
+    a = Physics::angleOfVector(QVector2D(-1.0, 0.0));
 	ASSERT_PRED2(predEqualLowPrecision, a, 270.0);
 }
 
@@ -101,16 +101,16 @@ TEST_F(PhysicsTest, testUnitVectorOfAngle)
     //test angle -> unit vector -> angle conversion
     for(int i = 0; i < 100; ++i) {
         qreal angleBefore = _numberGen->getRandomReal(0.0, 360.0);
-        QVector3D v = Physics::unitVectorOfAngle(angleBefore);
+        QVector2D v = Physics::unitVectorOfAngle(angleBefore);
         qreal angleAfter = Physics::angleOfVector(v);
 		ASSERT_PRED_FORMAT3(predUnitVectorOfAngle, angleBefore, v, angleAfter);
     }
 
     //test overrun
     for(qreal a = 0.0; a < 360.0; a += 10.0) {
-        QVector3D v1 = Physics::unitVectorOfAngle(a);
-        QVector3D v2 = Physics::unitVectorOfAngle(a+360.0);
-        QVector3D v3 = Physics::unitVectorOfAngle(a-360.0);
+        QVector2D v1 = Physics::unitVectorOfAngle(a);
+        QVector2D v2 = Physics::unitVectorOfAngle(a+360.0);
+        QVector2D v3 = Physics::unitVectorOfAngle(a-360.0);
 		ASSERT_PRED_FORMAT2(predEqualVectorMediumPrecision, v1, v2);
 		ASSERT_PRED_FORMAT2(predEqualVectorMediumPrecision, v2, v3);
     }
@@ -121,8 +121,8 @@ TEST_F(PhysicsTest, testClockwiseAngleFromFirstToSecondVector)
     for(int i = 0; i < 100; ++i) {
         qreal angle = _numberGen->getRandomReal(0.0, 360.0);
         qreal angleIncrement = _numberGen->getRandomReal(-180.0, 180.0);
-        QVector3D v1 = Physics::unitVectorOfAngle(angle);
-        QVector3D v2 = Physics::unitVectorOfAngle(angle+angleIncrement);
+        QVector2D v1 = Physics::unitVectorOfAngle(angle);
+        QVector2D v2 = Physics::unitVectorOfAngle(angle+angleIncrement);
         qreal returnedAngle = Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);
 		ASSERT_PRED_FORMAT4(predRelativeAngleBetweenVectors, v1, v2, returnedAngle, angleIncrement);
     }

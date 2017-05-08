@@ -15,7 +15,7 @@ EnergyEdit::EnergyEdit(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void EnergyEdit::updateEnergyParticle (QVector3D pos, QVector3D vel, qreal energy)
+void EnergyEdit::updateEnergyParticle (QVector2D pos, QVector2D vel, qreal energy)
 {
     _energyParticlePos = pos;
     _energyParticleVel = vel;
