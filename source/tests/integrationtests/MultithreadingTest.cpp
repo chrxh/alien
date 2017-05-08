@@ -92,7 +92,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	});
 	_controller->setRun(true);
 	pause.exec();
-	access->requireData({ {0, 0}, _universeSize });
+	access->requireData({ {0, 0}, {_universeSize.x - 1, _universeSize.y - 1} });
 	auto const& data = access->retrieveData();
 
 	ASSERT_EQ(1, data.clusters.size()) << "Wrong number of clusters.";
