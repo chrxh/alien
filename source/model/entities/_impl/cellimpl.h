@@ -18,7 +18,9 @@ public:
 
     ~CellImpl();
 
-	virtual void init(UnitContext* context) override;
+	virtual void setContext(UnitContext* context) override;
+
+	virtual CellDescription getDescription() const override;
 
     void registerFeatures (CellFeature* features) override;
     CellFeature* getFeatures () const override;

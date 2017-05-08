@@ -5,11 +5,11 @@ CellFeature::~CellFeature ()
     delete _nextFeature;
 }
 
-void CellFeature::init(UnitContext * context)
+void CellFeature::setContext(UnitContext * context)
 {
 	_context = context;
 	if (_nextFeature) {
-		_nextFeature->init(context);
+		_nextFeature->setContext(context);
 	}
 }
 

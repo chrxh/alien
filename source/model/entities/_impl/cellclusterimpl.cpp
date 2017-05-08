@@ -88,12 +88,22 @@ void CellClusterImpl::clearCellsFromMap ()
     }
 }
 
-void CellClusterImpl::init(UnitContext * context)
+void CellClusterImpl::setContext(UnitContext * context)
 {
 	_context = context;
 	for(auto const& cell : _cells) {
-		cell->init(context);
+		cell->setContext(context);
 	}
+}
+
+CellClusterDescription CellClusterImpl::getDescription() const
+{
+	CellClusterDescription result;
+	result.setId(_id).setPos(_pos).setVel(_pos).setAngle(_angle).setAngularVel(_angularVel);
+	for (auto const& cell : _cells) {
+		result.addCell(cell->getDescription());
+	}
+	return result;
 }
 
 void CellClusterImpl::clearCellFromMap (Cell* cell)

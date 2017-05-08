@@ -27,6 +27,8 @@ private:
 	void callBackUpdateData();
 	void callBackGetData();
 
+	void getDataFromUnit(Unit* unit);
+
 	SimulationContext* _context = nullptr;
 	bool _registered = false;
 

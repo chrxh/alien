@@ -15,7 +15,9 @@ public:
 
     ~CellClusterImpl ();
 
-	virtual void init(UnitContext* context) override;
+	virtual void setContext(UnitContext* context) override;
+
+	virtual CellClusterDescription getDescription() const override;
 
     void clearCellsFromMap () override;
     void clearCellFromMap (Cell* cell) override;

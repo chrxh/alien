@@ -39,15 +39,20 @@ CellImpl::~CellImpl()
     delete _features;
 }
 
-void CellImpl::init(UnitContext * context)
+void CellImpl::setContext(UnitContext * context)
 {
 	_context = context;
 	for (int i = 0; i < _tokenStackPointer; ++i) {
-		_tokenStack[i]->init(context);
+		_tokenStack[i]->setContext(context);
 	}
 	if (_features) {
-		_features->init(context);
+		_features->setContext(context);
 	}
+}
+
+CellDescription CellImpl::getDescription() const
+{
+	return CellDescription();
 }
 
 void CellImpl::registerFeatures (CellFeature* features)

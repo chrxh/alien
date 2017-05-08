@@ -11,7 +11,7 @@ public:
     CellFeature (UnitContext* context) : _context(context) {}
     virtual ~CellFeature ();
 
-	virtual void init(UnitContext* context);
+	virtual void setContext(UnitContext* context);
 
     void registerNextFeature (CellFeature* nextFeature);
     struct ProcessingResult {

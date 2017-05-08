@@ -173,7 +173,7 @@ void UnitImpl::processingClustersCompartmentAllocation()
 			clusterIter.remove();
 			auto otherContext = compartment->getNeighborContext(intPos);
 			otherContext->getClustersRef().push_back(cluster);
-			cluster->init(otherContext);
+			cluster->setContext(otherContext);
 		}
 	}
 }
