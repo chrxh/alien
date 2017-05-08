@@ -79,7 +79,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		CellMetadata meta;
 		meta.color = _metadata.color;
-		auto desc = CellClusterDescription().setPos(QVector2D(_pos.x(), _pos.y())).setVel(QVector2D(_vel.x(), _vel.y()))
+		auto desc = CellClusterDescription().setPos(_pos).setVel(_vel)
 			.addCell(getRandomCellDesciption(eNew).setMetadata(meta));
 		cluster = factory->build(desc, _context);
 		_energy = 0;
