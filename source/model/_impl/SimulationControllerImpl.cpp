@@ -35,6 +35,11 @@ void SimulationControllerImpl::calculateSingleTimestep()
 	_context->getUnitThreadController()->calculateTimestep();
 }
 
+SimulationContextApi * SimulationControllerImpl::getContext() const
+{
+	return _context;
+}
+
 
 
 

@@ -27,6 +27,11 @@ void SimulationAccessImpl::init(SimulationContextApi * context)
 	_registered = true;
 }
 
+IntVector2D SimulationAccessImpl::getUniverseSize() const
+{
+	return _context->getSpaceMetric()->getSize();
+}
+
 void SimulationAccessImpl::updateData(DataDescription const & desc)
 {
 	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
@@ -103,6 +108,8 @@ void SimulationAccessImpl::callBackGetData()
 			getDataFromUnit(grid->getUnitOfGridPos(gridPos));
 		}
 	}
+
+	Q_EMIT dataReadyToRetrieve();
 }
 
 void SimulationAccessImpl::getDataFromUnit(Unit * unit)

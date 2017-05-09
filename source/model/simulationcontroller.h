@@ -12,9 +12,9 @@ public:
 	virtual ~SimulationController() = default;
 
     virtual void init(SimulationContextApi* context) = 0;
-
     virtual void setRun(bool run) = 0;
 	virtual void calculateSingleTimestep() = 0;
+	virtual SimulationContextApi* getContext() const = 0;
 
 	Q_SIGNAL void timestepCalculated();
 };

@@ -16,8 +16,9 @@ public:
 
 	virtual void init(SimulationContextApi* context) override;
 
+	virtual IntVector2D getUniverseSize() const override;
+	
 	virtual void updateData(DataDescription const &desc) override;
-
 	virtual void requireData(IntRect rect) override;
 	virtual DataDescription const& retrieveData() override;
 

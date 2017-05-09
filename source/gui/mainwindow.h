@@ -87,7 +87,7 @@ private:
 	void updateControllerAndEditors();
 
     SimulationController* _simController;
-    TextEditor* _textEditor;
+	TextEditor* _textEditor;
 
     QTimer* _oneSecondTimer;
     SimulationMonitor* _monitor;

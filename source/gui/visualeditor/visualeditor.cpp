@@ -5,10 +5,9 @@
 #include "gui/GuiSettings.h"
 #include "gui/GuiSettings.h"
 #include "gui/texteditor/texteditor.h"
+#include "model/AccessPorts/SimulationAccess.h"
 #include "model/context/UnitContext.h"
 #include "model/context/SpaceMetric.h"
-#include "model/entities/CellCluster.h"
-#include "model/entities/Cell.h"
 #include "pixeluniverse.h"
 #include "shapeuniverse.h"
 
@@ -20,7 +19,7 @@
 VisualEditor::VisualEditor(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::VisualEditor)
-	, _activeScene(PIXEL_SCENE)
+	, _activeScene(PixelScene)
 	, _pixelUniverse(new PixelUniverse(this))
 	, _shapeUniverse(new ShapeUniverse(this))
 {
@@ -28,23 +27,6 @@ VisualEditor::VisualEditor(QWidget *parent)
 
     ui->simulationView->horizontalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
     ui->simulationView->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
-
-    //start with pixel scene by default
-    ui->simulationView->setScene(_pixelUniverse);
-
-    //connect signals
-    connect(_shapeUniverse, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)), this, SIGNAL(updateCell(QList<Cell*>,QList<CellTO>,bool)));
-    connect(_shapeUniverse, SIGNAL(defocus()), this, SIGNAL(defocus()), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(focusCell(Cell*)), this, SIGNAL(focusCell(Cell*)), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(focusEnergyParticle(EnergyParticle*)), this, SIGNAL(focusEnergyParticle(EnergyParticle*)), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(energyParticleUpdated(EnergyParticle*)), this, SIGNAL(energyParticleUpdated(EnergyParticle*)), Qt::QueuedConnection);
-    connect(_shapeUniverse, SIGNAL(entitiesSelected(int,int)), this, SIGNAL(entitiesSelected(int,int)));
-
-    //set up timer
-    _updateTimer = new QTimer(this);
-    connect(_updateTimer, SIGNAL(timeout()), this, SLOT(updateTimerTimeout()));
-    _updateTimer->start(30);
-
 }
 
 VisualEditor::~VisualEditor()
@@ -52,16 +34,20 @@ VisualEditor::~VisualEditor()
     delete ui;
 }
 
+void VisualEditor::init(SimulationController* controller)
+{
+	_controller = controller;
+	_pixelUniverse->init(controller);
+	ui->simulationView->setScene(_pixelUniverse);
+}
+
 void VisualEditor::reset ()
 {
-    //reset data
     _pixelUniverseInit = false;
     _shapeUniverseInit = false;
     _pixelUniverseViewMatrix = QMatrix();
     _shapeUniverseViewMatrix = QMatrix();
     ui->simulationView->setTransform(QTransform());
-
-    //reset subobjects
     _pixelUniverse->reset();
 }
 
@@ -69,7 +55,7 @@ void VisualEditor::reset ()
 void VisualEditor::setActiveScene (ActiveScene activeScene)
 {
     _activeScene = activeScene;
-    if( _activeScene == PIXEL_SCENE ) {
+    if( _activeScene == PixelScene ) {
 
         //save position of shape universe
         _shapeUniverseViewMatrix = ui->simulationView->matrix();
@@ -84,7 +70,7 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
         ui->simulationView->horizontalScrollBar()->setValue(_pixelUniversePosX);
         ui->simulationView->verticalScrollBar()->setValue(_pixelUniversePosY);
     }
-    if( _activeScene == SHAPE_SCENE ) {
+    if( _activeScene == ShapeScene ) {
 
         //save position
         _pixelUniverseViewMatrix = ui->simulationView->matrix();
@@ -102,7 +88,6 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 
     //update scene
     _screenUpdatePossible = true;
-    universeUpdated(_context, true);
 }
 
 QVector2D VisualEditor::getViewCenterPosWithInc ()
@@ -113,7 +98,7 @@ QVector2D VisualEditor::getViewCenterPosWithInc ()
     //calc center of view in simulation coordinate
     QVector2D pos(posView.x(), posView.y());
 
-	if (_activeScene == SHAPE_SCENE) {
+	if (_activeScene == ShapeScene) {
 		pos = pos / GRAPHICS_ITEM_SIZE;
 	}
 
@@ -125,24 +110,17 @@ QVector2D VisualEditor::getViewCenterPosWithInc ()
     return pos + posIncrement;
 }
 
-void VisualEditor::getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es)
-{
-    if( _activeScene == SHAPE_SCENE ) {
-        _shapeUniverse->getExtendedSelection(clusters, es);
-    }
-}
-
 void VisualEditor::serializeViewMatrix (QDataStream& stream)
 {
     //save position of pixel universe
-    if( _activeScene == PIXEL_SCENE ) {
+    if( _activeScene == PixelScene ) {
         _pixelUniverseViewMatrix = ui->simulationView->matrix();
         _pixelUniversePosX = ui->simulationView->horizontalScrollBar()->value();
         _pixelUniversePosY = ui->simulationView->verticalScrollBar()->value();
     }
 
     //save position of shape universe
-    if( _activeScene == SHAPE_SCENE ) {
+    if( _activeScene == ShapeScene ) {
         _shapeUniverseViewMatrix = ui->simulationView->matrix();
         _shapeUniversePosX = ui->simulationView->horizontalScrollBar()->value();
         _shapeUniversePosY = ui->simulationView->verticalScrollBar()->value();
@@ -163,14 +141,14 @@ void VisualEditor::loadViewMatrix (QDataStream& stream)
     stream >> _pixelUniverseInit >> _shapeUniverseInit;
 
     //load position of pixel universe
-    if( _activeScene == PIXEL_SCENE ) {
+    if( _activeScene == PixelScene ) {
         ui->simulationView->setMatrix(_pixelUniverseViewMatrix);
         ui->simulationView->horizontalScrollBar()->setValue(_pixelUniversePosX);
         ui->simulationView->verticalScrollBar()->setValue(_pixelUniversePosY);
     }
 
     //load position of shape universe
-    if( _activeScene == SHAPE_SCENE ) {
+    if( _activeScene == ShapeScene ) {
         ui->simulationView->setMatrix(_shapeUniverseViewMatrix);
         ui->simulationView->horizontalScrollBar()->setValue(_shapeUniversePosX);
         ui->simulationView->verticalScrollBar()->setValue(_shapeUniversePosY);
@@ -197,87 +175,10 @@ void VisualEditor::zoomOut ()
     ui->simulationView->scale(0.5,0.5);
 }
 
-void VisualEditor::newCellRequested ()
-{
-    //request new cell at pos
-    Q_EMIT requestNewCell(getViewCenterPosWithInc());
-}
 
-void VisualEditor::newEnergyParticleRequested ()
+/*void VisualEditor::universeUpdated (SimulationContext* context, bool force)
 {
-    //request new energy particle at pos
-    Q_EMIT requestNewEnergyParticle(getViewCenterPosWithInc());
-}
 
-void VisualEditor::defocused ()
-{
-    //function only in shape scene
-    if( _activeScene == SHAPE_SCENE ) {
-        _shapeUniverse->defocused();
-    }
-}
-
-void VisualEditor::delSelection_Slot ()
-{
-    //function only in shape scene
-    if( _activeScene == SHAPE_SCENE ) {
-        QList< Cell* > cells;
-        QList< EnergyParticle* > es;
-        _shapeUniverse->delSelection(cells, es);
-        Q_EMIT delSelection(cells, es);
-    }
-}
-
-void VisualEditor::delExtendedSelection_Slot ()
-{
-    //function only in shape scene
-    if( _activeScene == SHAPE_SCENE ) {
-        QList< CellCluster* > clusters;
-        QList< EnergyParticle* > es;
-        _shapeUniverse->delExtendedSelection(clusters, es);
-        Q_EMIT delExtendedSelection(clusters, es);
-    }
-}
-
-void VisualEditor::cellCreated (Cell* cell)
-{
-    //function only in shape scene
-    if( _activeScene == SHAPE_SCENE ) {
-        _shapeUniverse->cellCreated(cell);
-    }
-}
-
-void VisualEditor::energyParticleCreated(EnergyParticle* e)
-{
-    //function only in shape scene
-    if( _activeScene == SHAPE_SCENE ) {
-        _shapeUniverse->energyParticleCreated(e);
-    }
-}
-
-void VisualEditor::energyParticleUpdated_Slot (EnergyParticle* e)
-{
-    //function only in shape scene
-    if( _activeScene == SHAPE_SCENE ) {
-        _shapeUniverse->energyParticleUpdated_Slot(e);
-    }
-}
-
-void VisualEditor::reclustered (QList< CellCluster* > clusters)
-{
-/*
-    //function only in shape scene
-    if( _activeScene == SHAPE_SCENE ) {
-        _shapeUniverse->reclustered(clusters);
-    }
-    else
-        _pixelUniverse->universeUpdated(_context);
-*/
-}
-
-void VisualEditor::universeUpdated (SimulationContext* context, bool force)
-{
-/*
     if(context)
         _context = context;
     else
@@ -314,40 +215,22 @@ void VisualEditor::universeUpdated (SimulationContext* context, bool force)
                 ui->simulationView->centerOn(cellItem);
         }
     }
-*/
+
 }
+*/
 
 void VisualEditor::metadataUpdated ()
 {
-    if( _activeScene == SHAPE_SCENE )
+    if( _activeScene == ShapeScene )
         _shapeUniverse->metadataUpdated();
 }
 
 void VisualEditor::toggleInformation(bool on)
 {
-	if (_activeScene == SHAPE_SCENE) {
+	if (_activeScene == ShapeScene) {
 		_shapeUniverse->toggleInformation(on);
 	}
 }
 
-void VisualEditor::updateTimerTimeout ()
-{
-    _screenUpdatePossible = true;
-}
-
-void VisualEditor::centerView (SimulationContext* context)
-{
-/*
-    //load size of the universe
-	context->lock();
-	SpaceMetric* topo = context->getTopology();
-    qreal sizeX = topo->getSize().x;
-    qreal sizeY = topo->getSize().y;
-	context->unlock();
-
-    //set view position
-    ui->simulationView->centerOn(sizeX/2.0*GRAPHICS_ITEM_SIZE, sizeY/2.0*GRAPHICS_ITEM_SIZE);
-*/
-}
 
 
