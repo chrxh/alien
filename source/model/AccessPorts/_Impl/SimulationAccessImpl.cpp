@@ -99,6 +99,7 @@ void SimulationAccessImpl::callBackGetData()
 		return;
 	}
 
+	_dataCollected.clear();
 	auto grid = _context->getUnitGrid();
 	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D());
 	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D());
