@@ -4,6 +4,7 @@
 #include <QVector2D>
 
 #include "model/Definitions.h"
+#include "model/entities/Descriptions.h"
 
 class EnergyParticle
 {
@@ -11,6 +12,8 @@ public:
 	virtual ~EnergyParticle() = default;
 
 	virtual void setContext(UnitContext* context) = 0;
+
+	virtual EnergyParticleDescription getDescription() const = 0;
 
     virtual bool processingMovement (CellCluster*& cluster) = 0;
 

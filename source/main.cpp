@@ -30,7 +30,7 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- Tools in Access umbenennen
+//- getValueOrDefault implementieren
 
 //Model-Refactoring:
 //- Serialisierungs-Framework benutzt Descriptions

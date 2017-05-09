@@ -2,6 +2,7 @@
 #include "model/entities/Descriptions.h"
 #include "model/entities/EntityFactory.h"
 #include "model/entities/CellCluster.h"
+#include "model/entities/EnergyParticle.h"
 #include "model/context/SimulationContext.h"
 #include "model/context/UnitContext.h"
 #include "model/context/UnitThreadController.h"
@@ -64,7 +65,7 @@ void SimulationAccessImpl::unregister()
 void SimulationAccessImpl::accessToUnits()
 {
 	callBackUpdateData();
-	callBackGetData();
+	callBackCollectData();
 }
 
 void SimulationAccessImpl::callBackUpdateData()
@@ -93,7 +94,7 @@ void SimulationAccessImpl::callBackUpdateData()
 	_dataToUpdate.clear();
 }
 
-void SimulationAccessImpl::callBackGetData()
+void SimulationAccessImpl::callBackCollectData()
 {
 	if (!_dataRequired) {
 		return;
@@ -106,21 +107,39 @@ void SimulationAccessImpl::callBackGetData()
 	IntVector2D gridPos;
 	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
 		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
-			getDataFromUnit(grid->getUnitOfGridPos(gridPos));
+			collectDataFromUnit(grid->getUnitOfGridPos(gridPos));
 		}
 	}
 
 	Q_EMIT dataReadyToRetrieve();
 }
 
-void SimulationAccessImpl::getDataFromUnit(Unit * unit)
+void SimulationAccessImpl::collectDataFromUnit(Unit * unit)
 {
-	auto const& clusters = unit->getContext()->getClustersRef();
+	collectClustersFromUnit(unit);
+	collectParticlesFromUnit(unit);
+}
+
+void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
+{
 	auto metric = unit->getContext()->getSpaceMetric();
+	auto const& clusters = unit->getContext()->getClustersRef();
 	for (auto const& cluster : clusters) {
 		auto pos = metric->correctPositionWithIntPrecision(cluster->getPosition());
 		if (_requiredRect.isContained(pos)) {
-			_dataCollected.clusters.push_back(cluster->getDescription());
+			_dataCollected.clusters.emplace_back(cluster->getDescription());
+		}
+	}
+}
+
+void SimulationAccessImpl::collectParticlesFromUnit(Unit * unit)
+{
+	auto metric = unit->getContext()->getSpaceMetric();
+	auto const& particles = unit->getContext()->getEnergyParticlesRef();
+	for (auto const& particle : particles) {
+		auto pos = metric->correctPositionWithIntPrecision(particle->getPosition());
+		if (_requiredRect.isContained(pos)) {
+			_dataCollected.particles.emplace_back(particle->getDescription());
 		}
 	}
 }

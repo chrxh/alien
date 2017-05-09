@@ -21,6 +21,7 @@ public:
 	}
 
 	bool isModified() const { return _initialValue != _value; }
+	bool isInitialized() const { return _value->is_initialized(); }
 	T const& getValue() const { return _value.get(); }
 	T const& getValueOr(T const& d) const { return _value.get_value_or(d); }
 	T const& getInitialValue() const { return _initialValue.get(); }

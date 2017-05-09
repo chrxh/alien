@@ -178,62 +178,93 @@ Q_SLOT void PixelUniverse::retrieveAndDisplayData()
 
 	_image->fill(UNIVERSE_COLOR);
 	displayClusters(dataDesc);
+	displayparticles(dataDesc);
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));
+}
+
+namespace
+{
+	uint32_t calcCellColor(CellMetadata const& meta, double energy)
+	{
+		uint8_t r = 0;
+		uint8_t g = 0;
+		uint8_t b = 0;
+		auto const& color = meta.color;
+		if (color == 0) {
+			r = INDIVIDUAL_CELL_COLOR1.red();
+			g = INDIVIDUAL_CELL_COLOR1.green();
+			b = INDIVIDUAL_CELL_COLOR1.blue();
+		}
+		if (color == 1) {
+			r = INDIVIDUAL_CELL_COLOR2.red();
+			g = INDIVIDUAL_CELL_COLOR2.green();
+			b = INDIVIDUAL_CELL_COLOR2.blue();
+		}
+		if (color == 2) {
+			r = INDIVIDUAL_CELL_COLOR3.red();
+			g = INDIVIDUAL_CELL_COLOR3.green();
+			b = INDIVIDUAL_CELL_COLOR3.blue();
+		}
+		if (color == 3) {
+			r = INDIVIDUAL_CELL_COLOR4.red();
+			g = INDIVIDUAL_CELL_COLOR4.green();
+			b = INDIVIDUAL_CELL_COLOR4.blue();
+		}
+		if (color == 4) {
+			r = INDIVIDUAL_CELL_COLOR5.red();
+			g = INDIVIDUAL_CELL_COLOR5.green();
+			b = INDIVIDUAL_CELL_COLOR5.blue();
+		}
+		if (color == 5) {
+			r = INDIVIDUAL_CELL_COLOR6.red();
+			g = INDIVIDUAL_CELL_COLOR6.green();
+			b = INDIVIDUAL_CELL_COLOR6.blue();
+		}
+		if (color == 6) {
+			r = INDIVIDUAL_CELL_COLOR7.red();
+			g = INDIVIDUAL_CELL_COLOR7.green();
+			b = INDIVIDUAL_CELL_COLOR7.blue();
+		}
+		quint32 e = energy / 2.0 + 20.0;
+		if (e > 150) {
+			e = 150;
+		}
+		r = r*e / 150;
+		g = g*e / 150;
+		b = b*e / 150;
+		return (r << 16) | (g << 8) | b;
+	}
+
+	uint32_t calcParticleColor(double energy)
+	{
+		quint32 e = (energy + 10)*5;
+		if (e > 150) {
+			e = 150;
+		}
+		return (e << 16) | 0x30;
+	}
 }
 
 void PixelUniverse::displayClusters(DataDescription const& data) const
 {
-	uint8_t r = 0;
-	uint8_t g = 0;
-	uint8_t b = 0;
 	for (auto const& clusterTracker : data.clusters) {
 		auto const& clusterDesc = clusterTracker.getValue();
 		for (auto const& cellTracker : clusterDesc.cells) {
 			auto const& cellDesc = cellTracker.getValue();
 			auto const& pos = cellDesc.pos.getValue();
-			auto const& color = cellDesc.metadata.getValue().color;
-			if (color == 0) {
-				r = INDIVIDUAL_CELL_COLOR1.red();
-				g = INDIVIDUAL_CELL_COLOR1.green();
-				b = INDIVIDUAL_CELL_COLOR1.blue();
-			}
-			if (color == 1) {
-				r = INDIVIDUAL_CELL_COLOR2.red();
-				g = INDIVIDUAL_CELL_COLOR2.green();
-				b = INDIVIDUAL_CELL_COLOR2.blue();
-			}
-			if (color == 2) {
-				r = INDIVIDUAL_CELL_COLOR3.red();
-				g = INDIVIDUAL_CELL_COLOR3.green();
-				b = INDIVIDUAL_CELL_COLOR3.blue();
-			}
-			if (color == 3) {
-				r = INDIVIDUAL_CELL_COLOR4.red();
-				g = INDIVIDUAL_CELL_COLOR4.green();
-				b = INDIVIDUAL_CELL_COLOR4.blue();
-			}
-			if (color == 4) {
-				r = INDIVIDUAL_CELL_COLOR5.red();
-				g = INDIVIDUAL_CELL_COLOR5.green();
-				b = INDIVIDUAL_CELL_COLOR5.blue();
-			}
-			if (color == 5) {
-				r = INDIVIDUAL_CELL_COLOR6.red();
-				g = INDIVIDUAL_CELL_COLOR6.green();
-				b = INDIVIDUAL_CELL_COLOR6.blue();
-			}
-			if (color == 6) {
-				r = INDIVIDUAL_CELL_COLOR7.red();
-				g = INDIVIDUAL_CELL_COLOR7.green();
-				b = INDIVIDUAL_CELL_COLOR7.blue();
-			}
-			quint32 e = cellDesc.energy.getValue() / 2.0 + 20.0;
-			if (e > 150)
-				e = 150;
-			r = r*e / 150;
-			g = g*e / 150;
-			b = b*e / 150;
-			_image->setPixel(pos.x(), pos.y(), (r << 16) | (g << 8) | b);
+			auto const& meta = cellDesc.metadata.getValue();
+			auto const& energy = cellDesc.energy.getValue();
+			_image->setPixel(pos.x(), pos.y(), calcCellColor(meta, energy));
 		}
+	}
+}
+
+void PixelUniverse::displayparticles(DataDescription const & data) const
+{
+	for (auto const& particleTracker : data.particles) {
+		auto const& particleDesc = particleTracker.getValue();
+		auto const& pos = particleDesc.pos.getValue();
+		auto const& energy = particleDesc.energy.getValue();
+		_image->setPixel(pos.x(), pos.y(), calcParticleColor(energy));
 	}
 }

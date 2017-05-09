@@ -73,6 +73,7 @@ struct EnergyParticleDescription
 	Tracker<double> energy;
 	Tracker<EnergyParticleMetadata> metadata;
 
+	EnergyParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	EnergyParticleDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
 	EnergyParticleDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
 	EnergyParticleDescription& setEnergy(double value) { energy.init(value); return *this; }
