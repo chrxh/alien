@@ -14,30 +14,20 @@ public:
     PixelUniverse(QObject* parent=0);
     ~PixelUniverse();
 
+	virtual void init(SimulationController* controller);
+
     void reset ();
-    void universeUpdated (SimulationContext* context);
-
-protected:
-
-    //events
-    void mousePressEvent (QGraphicsSceneMouseEvent* e);
-    void mouseReleaseEvent (QGraphicsSceneMouseEvent* e);
-    void mouseMoveEvent (QGraphicsSceneMouseEvent* e);
-
-private Q_SLOTS:
-    void timeout ();
 
 private:
-	SimulationContext* _context;
-    QGraphicsPixmapItem* _pixelMap;
-    QImage* _image;
-    QTimer* _timer;
+    Q_SLOT void requestData();
+	Q_SLOT void retrieveAndDisplayData();
 
-    QList< CellCluster* > _selectedClusters;
-    QVector2D _selectionPos;
-    QVector< QVector2D > _lastMouseDiffs;
-    bool _leftMouseButtonPressed;
-    bool _rightMouseButtonPressed;
+	void displayClusters(DataDescription const& data) const;
+
+	SimulationAccess* _simAccess = nullptr;
+    QGraphicsPixmapItem* _pixmap = nullptr;
+    QImage* _image = nullptr;
+
 };
 
 #endif // PIXELUNIVERSE_H

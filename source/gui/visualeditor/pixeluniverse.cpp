@@ -3,7 +3,11 @@
 #include <QtCore/qmath.h>
 #include <QMatrix4x4>
 
+#include "global/ServiceLocator.h"
 #include "gui/GuiSettings.h"
+#include "model/AccessPorts/SimulationAccess.h"
+#include "model/BuilderFacade.h"
+#include "model/SimulationController.h"
 #include "model/context/SimulationContext.h"
 #include "model/context/EnergyParticleMap.h"
 #include "model/context/CellMap.h"
@@ -17,39 +21,44 @@
 const int MOUSE_HISTORY = 10;
 
 PixelUniverse::PixelUniverse(QObject* parent)
-    : _pixelMap(0), _image(0), _timer(0), _lastMouseDiffs(MOUSE_HISTORY),
-      _leftMouseButtonPressed(false), _rightMouseButtonPressed(false)
 {
-    setBackgroundBrush(QBrush(QColor(0,0,0)));
-    _pixelMap = addPixmap(QPixmap());
-//    _pixelMap->setScale(_zoom);
+	setBackgroundBrush(QBrush(BACKGROUND_COLOR));
+    _pixmap = addPixmap(QPixmap());
     update();
-
-    _timer = new QTimer(this);
-    connect(_timer, SIGNAL(timeout()), this, SLOT(timeout()));
-    _timer->start(500);
 }
 
 PixelUniverse::~PixelUniverse()
 {
-    if( _image )
-        delete _image;
+	delete _image;
+}
+
+void PixelUniverse::init(SimulationController* controller)
+{
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	_simAccess = facade->buildSimulationAccess(controller->getContext());
+
+	IntVector2D size = _simAccess->getUniverseSize();
+	if (!_image) {
+		_image = new QImage(size.x, size.y, QImage::Format_RGB32);
+		setSceneRect(0, 0, _image->width(), _image->height());
+	}
+
+	connect(controller, &SimulationController::timestepCalculated, this, &PixelUniverse::requestData);
+	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
+
+	requestData();
 }
 
 void PixelUniverse::reset ()
 {
-    if( _image )
-        delete _image;
-    _image = 0;
-//    delete _pixelMap;
-//    _pixelMap = addPixmap(QPixmap());
+    delete _image;
+    _image = nullptr;
     update();
 }
 
-void PixelUniverse::universeUpdated (SimulationContext* context)
+/*void PixelUniverse::universeUpdated (SimulationContext* context)
 {
-    _context = context;
-/*
+	_context = context;
 
     //prepare image
 	context->lock();
@@ -154,229 +163,32 @@ void PixelUniverse::universeUpdated (SimulationContext* context)
 
     context->unlock();
     _pixelMap->setPixmap(QPixmap::fromImage(*_image));
-*/
-}
 
-void PixelUniverse::mousePressEvent (QGraphicsSceneMouseEvent* e)
+}*/
+
+Q_SLOT void PixelUniverse::requestData()
 {
-    if( !_context )
-        return;
-/*	_context->lock();
-
-    //update mouse buttons
-    _leftMouseButtonPressed = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
-    _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
-
-    //left xor right button pressed?
-    if( (_leftMouseButtonPressed && (!_rightMouseButtonPressed)) || ((!_leftMouseButtonPressed) && _rightMouseButtonPressed)) {
-
-        //scan for clusters
-		IntVector2D size = _context->getSpaceMetric()->getSize();
-		CellMap* cellMap = _context->getCellMap();
-        QMap< quint64, CellCluster* > clusters;
-        QVector2D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
-        for(int rx = -5; rx < 6; ++rx )
-            for(int ry = -5; ry < 6; ++ry ) {
-                QVector2D scanPos = mousePos + QVector2D(rx,ry,0.0);
-                if( (scanPos.x() >= 0.0) && (scanPos.x() < size.x)
-                    && (scanPos.y() >= 0.0) && (scanPos.y() < size.y) ) {
-                    Cell* cell = cellMap->getCell(scanPos);
-                    if( cell)
-                        clusters[cell->getCluster()->getId()] = cell->getCluster();
-                }
-            }
-
-        //remove clusters from simulation (temporarily)
-        foreach(CellCluster* cluster, clusters) {
-            _context->getClustersRef().removeOne(cluster);
-            cluster->clearCellsFromMap();
-        }
-
-        //calc center
-        QVector2D center;
-        int numCells = 0;
-        foreach(CellCluster* cluster, clusters) {
-            foreach(Cell* cell, cluster->getCellsRef()) {
-                center += cell->calcPosition();
-            }
-            numCells += cluster->getCellsRef().size();
-        }
-        center = center / numCells;
-
-        //move to selected clusters
-        _selectedClusters = clusters.values();
-        _selectionPos.setX(center.x());
-        _selectionPos.setY(center.y());
-		_context->getTopology()->correctPosition(_selectionPos);
-    }
-
-    //both buttons pressed?
-    if( _leftMouseButtonPressed && _rightMouseButtonPressed ) {
-
-        //move selected clusters to simulation
-        foreach(CellCluster* cluster, _selectedClusters) {
-            cluster->drawCellsToMap();
-        }
-		_context->getClustersRef() << _selectedClusters;
-        _selectedClusters.clear();
-    }
-    _context->unlock();
-    universeUpdated(_context);
-*/
+	IntVector2D size = _simAccess->getUniverseSize();
+	_simAccess->requireData({ {0, 0}, {size.x - 1, size.y - 1} });
 }
 
-void PixelUniverse::mouseReleaseEvent (QGraphicsSceneMouseEvent* e)
+Q_SLOT void PixelUniverse::retrieveAndDisplayData()
 {
-    if( !_context )
-        return;
-/*
-	_context->lock();
+	auto const& dataDesc = _simAccess->retrieveData();
 
-    //update mouse buttons
-    _leftMouseButtonPressed = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
-    _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
-
-    //move selected clusters to simulation
-    foreach(CellCluster* cluster, _selectedClusters) {
-        cluster->drawCellsToMap();
-    }
-	_context->getClustersRef() << _selectedClusters;
-    _selectedClusters.clear();
-
-	_context->unlock();
-    universeUpdated(_context);
-*/
+	_image->fill(UNIVERSE_COLOR);
+	displayClusters(dataDesc);
+	_pixmap->setPixmap(QPixmap::fromImage(*_image));
 }
 
-void PixelUniverse::mouseMoveEvent (QGraphicsSceneMouseEvent* e)
+void PixelUniverse::displayClusters(DataDescription const& data) const
 {
-    if( !_context)
-        return;
-
-/*
-    //update mouse buttons and positions
-//    _leftMouseButtonPressed = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
-//    _rightMouseButtonPressed = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
-    QVector2D mousePos(e->scenePos().x(), e->scenePos().y(), 0.0);
-    QVector2D lastMousePos(e->lastScenePos().x(), e->lastScenePos().y(), 0.0);
-    QVector2D mouseDiff = mousePos - lastMousePos;
-    QVector2D cumMouseDiff = mouseDiff;
-    for(int i = 0; i < MOUSE_HISTORY; ++i) {
-        cumMouseDiff += _lastMouseDiffs[i];
-    }
-    cumMouseDiff = cumMouseDiff / MOUSE_HISTORY;
-
-    //only left button pressed? => move selected clusters
-    if( _leftMouseButtonPressed && (!_rightMouseButtonPressed) ) {
-		_context->lock();
-
-        //update position and velocity
-        foreach(CellCluster* cluster, _selectedClusters) {
-            cluster->setCenterPosition(cluster->getPosition()+mouseDiff);
-            cluster->setVelocity((cumMouseDiff)/5.0);
-        }
-
-        //update selection
-        _selectionPos +=mouseDiff;
-		_context->getTopology()->correctPosition(_selectionPos);
-
-		_context->unlock();
-        universeUpdated(_context);
-    }
-
-    //only right button pressed? => rotate selected clusters
-    if( (!_leftMouseButtonPressed) && _rightMouseButtonPressed ) {
-		_context->lock();
-
-        //1. step: rotate each cluster around own center
-        foreach(CellCluster* cluster, _selectedClusters) {
-            cluster->setAngle(cluster->getAngle()+mouseDiff.x()+mouseDiff.y());
-            cluster->setAngularVel((cumMouseDiff.x() + cumMouseDiff.y())/3.0);
-        }
-
-        //2. step: rotate cluster around common center
-        //calc center
-        QVector2D center;
-        int numCells = 0;
-        foreach(CellCluster* cluster, _selectedClusters) {
-            foreach(Cell* cell, cluster->getCellsRef()) {
-                center += cell->calcPosition();
-            }
-            numCells += cluster->getCellsRef().size();
-        }
-        center = center / numCells;
-        QMatrix4x4 transform;
-        transform.setToIdentity();
-        transform.translate(center);
-        transform.rotate(mouseDiff.x()+mouseDiff.y(), 0.0, 0.0, 1.0);
-        transform.translate(-center);
-        foreach(CellCluster* cluster, _selectedClusters) {
-            cluster->setCenterPosition(transform.map(cluster->getPosition()));
-        }
-
-		_context->unlock();
-        universeUpdated(_context);
-    }
-
-    //both buttons pressed? => apply forces along mouse path
-    if( _leftMouseButtonPressed && _rightMouseButtonPressed ) {
-        if( mousePos != lastMousePos ) {
-			_context->lock();
-			CellMap* cellMap = _context->getCellMap();
-
-            //calc distance vector and length
-            QVector2D dir = mouseDiff.normalized();
-            qreal dist = mouseDiff.length();
-
-            //scan mouse path for clusters
-            QMap< quint64, CellCluster* > clusters;
-            QMap< quint64, Cell* > cells;
-            for(int d = 0; d < qFloor(dist)+1; ++d ) {
-                for(int rx = -5; rx < 6; ++rx )
-                    for(int ry = -5; ry < 6; ++ry ) {
-                        QVector2D scanPos = mousePos + dir*d + QVector2D(rx,ry,0.0);
-                        Cell* cell = cellMap->getCell(scanPos);
-                        if( cell) {
-                            clusters[cell->getCluster()->getId()] = cell->getCluster();
-                            cells[cell->getCluster()->getId()] = cell;
-                        }
-                    }
-            }
-
-            //apply forces to all encountered cells
-            QMapIterator< quint64, Cell* > itCell(cells);
-            while(itCell.hasNext()) {
-                itCell.next();
-                Cell* cell = itCell.value();
-
-                //apply force
-                cell->setVelocity(cell->getVelocity() + dir*dist*cell->getCluster()->getMass()*0.05f);
-            }
-            //calc effective velocities of the clusters
-            QMapIterator< quint64, CellCluster* > itCluster(clusters);
-            while(itCluster.hasNext()) {
-                itCluster.next();
-                CellCluster* cluster = itCluster.value();
-                cluster->updateVel_angularVel_via_cellVelocities();
-                cluster->updateCellVel(false);
-            }
-			_context->unlock();
-        }
-    }
-    for(int i = 0; i < MOUSE_HISTORY-1; ++i)
-        _lastMouseDiffs[MOUSE_HISTORY-i-1] = _lastMouseDiffs[MOUSE_HISTORY-i-2];
-    _lastMouseDiffs[0] = mouseDiff;
-*/
+	for (auto const& clusterTracker : data.clusters) {
+		auto const& clusterDesc = clusterTracker.getValue();
+		for (auto const& cellTracker : clusterDesc.cells) {
+			auto const& cellDesc = cellTracker.getValue();
+			auto const& pos = cellDesc.pos.getValue();
+			_image->setPixel(pos.x(), pos.y(), 0xFFFFFF);
+		}
+	}
 }
-
-void PixelUniverse::timeout ()
-{
-    //set velocity of selected clusters to 0
-    foreach(CellCluster* cluster, _selectedClusters) {
-        if( _leftMouseButtonPressed )
-            cluster->setVelocity(QVector2D());
-        if( _rightMouseButtonPressed )
-            cluster->setAngularVel(0.0);
-    }
-}
-

@@ -6,37 +6,30 @@
 #include <QMatrix>
 
 #include "model/Definitions.h"
-#include "model/entities/CellTO.h"
+#include "gui/Definitions.h"
 
 namespace Ui {
 class VisualEditor;
 }
 
-class Cell;
-class CellCluster;
-class EnergyParticle;
-class MetadataManager;
-class PixelUniverse;
-class ShapeUniverse;
-class QGraphicsView;
 class VisualEditor : public QWidget
 {
     Q_OBJECT
-
 public:
     enum ActiveScene {
-        PIXEL_SCENE,
-        SHAPE_SCENE
+        PixelScene,
+        ShapeScene
     };
 
-    explicit VisualEditor(QWidget *parent = 0);
-    ~VisualEditor();
+    VisualEditor(QWidget *parent = 0);
+    virtual ~VisualEditor();
+
+	void init(SimulationController* controller);
 
     void reset ();
 
     void setActiveScene (ActiveScene activeScene);
     QVector2D getViewCenterPosWithInc ();
-    void getExtendedSelection (QList< CellCluster* >& clusters, QList< EnergyParticle* >& es);
 
     void serializeViewMatrix (QDataStream& stream);
     void loadViewMatrix (QDataStream& stream);
@@ -45,50 +38,17 @@ public:
 
     qreal getZoomFactor ();
 
-Q_SIGNALS:
-    void requestNewCell (QVector2D pos);    //for simulator
-    void requestNewEnergyParticle (QVector2D pos);    //for simulator
-    void defocus ();                        //for microeditor
-    void focusCell (Cell* cell);       //for microeditor
-    void focusEnergyParticle (EnergyParticle* e);       //for microeditor
-    void updateCell (QList< Cell* > cells,
-                     QList< CellTO > newCellsData,
-                     bool clusterDataChanged);      //for simulator
-    void energyParticleUpdated (EnergyParticle* e); //for microeditor
-    void entitiesSelected (int numCells, int numEnergyParticles);   //for microeditor
-    void delSelection (QList< Cell* > cells,
-                      QList< EnergyParticle* > es);               //for simulator
-    void delExtendedSelection (QList< CellCluster* > clusters,
-                         QList< EnergyParticle* > es);               //for simulator
-
-
 public Q_SLOTS:
     void zoomIn ();
     void zoomOut ();
 
-    void newCellRequested ();
-    void newEnergyParticleRequested ();
-
-    void defocused ();
-    void delSelection_Slot ();
-    void delExtendedSelection_Slot ();
-    void cellCreated (Cell* cell);
-    void energyParticleCreated (EnergyParticle* e);
-    void energyParticleUpdated_Slot (EnergyParticle* e);
-    void reclustered (QList< CellCluster* > clusters);
-    void universeUpdated (SimulationContext* context, bool force);
     void metadataUpdated ();
 	void toggleInformation(bool on);
 
-private Q_SLOTS:
-    void updateTimerTimeout ();
-
 private:
-    void centerView (SimulationContext* context);
-
     Ui::VisualEditor *ui;
 
-    SimulationContext* _context = nullptr;
+	SimulationController* _controller = nullptr;
     ActiveScene _activeScene;
     PixelUniverse* _pixelUniverse;
     ShapeUniverse* _shapeUniverse;
