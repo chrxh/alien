@@ -26,9 +26,11 @@ public:
 	virtual void accessToUnits() override;
 private:
 	void callBackUpdateData();
-	void callBackGetData();
+	void callBackCollectData();
 
-	void getDataFromUnit(Unit* unit);
+	void collectDataFromUnit(Unit* unit);
+	void collectClustersFromUnit(Unit* unit);
+	void collectParticlesFromUnit(Unit* unit);
 
 	SimulationContext* _context = nullptr;
 	bool _registered = false;

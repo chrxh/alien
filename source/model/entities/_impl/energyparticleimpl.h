@@ -13,7 +13,9 @@ public:
 
 	virtual void setContext(UnitContext* context) override;
 
-	bool processingMovement(CellCluster*& cluster) override;
+	virtual EnergyParticleDescription getDescription() const override;
+
+	virtual bool processingMovement(CellCluster*& cluster) override;
 
 	virtual qreal getEnergy() const override;
 	virtual void setEnergy(qreal value) override;

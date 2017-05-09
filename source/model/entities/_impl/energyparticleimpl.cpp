@@ -37,6 +37,13 @@ void EnergyParticleImpl::setContext(UnitContext * context)
 	_context = context;
 }
 
+EnergyParticleDescription EnergyParticleImpl::getDescription() const
+{
+	EnergyParticleDescription result;
+	result.setId(_id).setPos(_pos).setEnergy(_energy);
+	return result;
+}
+
 //return: false = energy is zero
 //        cluster is nonzero if particle transforms into cell
 bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)

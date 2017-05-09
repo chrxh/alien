@@ -23,6 +23,7 @@ private:
 	Q_SLOT void retrieveAndDisplayData();
 
 	void displayClusters(DataDescription const& data) const;
+	void displayparticles(DataDescription const& data) const;
 
 	SimulationAccess* _simAccess = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;
