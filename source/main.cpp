@@ -3,7 +3,10 @@
 #include <QVector2D>
 
 #include "global/ServiceLocator.h"
+#include "global/GlobalFactory.h"
+#include "global/NumberGenerator.h"
 #include "gui/MainWindow.h"
+#include "model/AccessPorts/SimulationAccess.h"
 #include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"
@@ -97,11 +100,26 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 	SimulationController* controller;
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto metric = facade->buildSpaceMetric({ 600, 600 });
+	IntVector2D size = { 600, 600 };
+	auto metric = facade->buildSpaceMetric(size);
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
 	auto context = facade->buildSimulationContext(4, { 6, 6 }, metric, symbols, parameters);
 	controller = facade->buildSimulationController(context);
+
+	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	auto numberGen = factory->buildRandomNumberGenerator();
+	numberGen->init(123123, 0);
+
+	auto access = facade->buildSimulationAccess(context);
+	DataDescription desc;
+	for (int i = 0; i < 10000; ++i) {
+		desc.addCellCluster(CellClusterDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
+			.setVel(QVector2D(numberGen->getRandomReal() - 0.5, numberGen->getRandomReal() - 0.5))
+			.addCell(CellDescription().setEnergy(parameters->cellCreationEnergy).setMaxConnections(4)));
+	}
+	access->updateData(desc);
+
     MainWindow w(controller);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
