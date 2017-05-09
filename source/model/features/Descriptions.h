@@ -6,11 +6,11 @@
 
 struct CellFunctionDescription
 {
-	Tracker<Enums::CellFunction::Type> type;
-	Tracker<QByteArray> data;
+	Enums::CellFunction::Type type = Enums::CellFunction::COMPUTER;
+	QByteArray data;
 
-	CellFunctionDescription& setType(Enums::CellFunction::Type value) { type.init(value); return *this; }
-	CellFunctionDescription& setData(QByteArray const &value) { data.init(value); return *this; }
+	CellFunctionDescription& setType(Enums::CellFunction::Type value) { type = value; return *this; }
+	CellFunctionDescription& setData(QByteArray const &value) { data = value; return *this; }
 };
 
 #endif // FEATURE_DESCRIPTIONS_H

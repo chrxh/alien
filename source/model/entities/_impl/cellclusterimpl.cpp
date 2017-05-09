@@ -103,7 +103,7 @@ CellClusterDescription CellClusterImpl::getDescription() const
 	CellClusterDescription result;
 	result.setId(_id).setPos(_pos).setVel(_pos).setAngle(_angle).setAngularVel(_angularVel);
 	for (auto const& cell : _cells) {
-		result.addCell(cell->getDescription());
+		result.retainCell(cell->getDescription());
 	}
 	return result;
 }

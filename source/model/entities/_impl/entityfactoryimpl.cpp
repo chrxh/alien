@@ -44,24 +44,25 @@ Cell * EntityFactoryImpl::build(CellDescription const & desc, UnitContext * cont
 	auto const& energy = desc.energy.getValue();
 	auto const& maxConnections = desc.maxConnections.getValueOr(0);
 	auto const& tokenAccessNumber = desc.tokenAccessNumber.getValueOr(0);
-	auto const& relPos = desc.relPos.getValueOr({ 0.0, 0.0 });
+	auto const& relPos = desc.pos.getValueOr({ 0.0, 0.0 });
 	auto cell = new CellImpl(energy, context, maxConnections, tokenAccessNumber, relPos);
 	cell->setFlagTokenBlocked(desc.tokenBlocked.getValueOr(false));
 	cell->setMetadata(desc.metadata.getValueOr(CellMetadata()));
 
 	auto const& cellFunction = desc.cellFunction.getValueOr(CellFunctionDescription());
-	featureFactory->addCellFunction(cell, cellFunction.type.getValueOr(Enums::CellFunction::COMPUTER), cellFunction.data.getValueOr(QByteArray()), context);
+	featureFactory->addCellFunction(cell, cellFunction.type, cellFunction.data, context);
 	featureFactory->addEnergyGuidance(cell, context);
-	for (auto const& tokenDesc : desc.tokens) {
-		cell->addToken(build(tokenDesc.getValue(), context));
+	auto const& tokensDesc = desc.tokens.getValueOr(vector<TokenDescription>());
+	for (auto const& tokenDesc : tokensDesc) {
+		cell->addToken(build(tokenDesc, context));
 	}
 	return cell;
 }
 
 Token * EntityFactoryImpl::build(TokenDescription const & desc, UnitContext * context) const
 {
-	auto const& data = desc.data.getValueOr(QByteArray());
-	auto const& energy = desc.energy.getValue();
+	auto const& data = desc.data;
+	auto const& energy = desc.energy;
 	return new TokenImpl(context, energy, data);
 }
 
