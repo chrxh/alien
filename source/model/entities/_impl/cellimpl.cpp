@@ -54,7 +54,7 @@ CellDescription CellImpl::getDescription() const
 {
 	CellDescription result;
 	result.setId(_id).setPos(calcPosition(true)).setMaxConnections(_maxConnections).setTokenAccessNumber(_tokenAccessNumber)
-		.setEnergy(_energy);
+		.setEnergy(_energy).setMetadata(_metadata);
 	return result;
 }
 
