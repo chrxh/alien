@@ -35,14 +35,14 @@ public:
 };
 
 enum class TrackerElementState {
-	Deleted, Maintained, Added
+	Deleted, Retained, Added
 };
 
 template<typename T>
 class TrackerElement
 {
 private:
-	TrackerElementState _state = TrackerElementState::Maintained;
+	TrackerElementState _state = TrackerElementState::Retained;
 	T _value;
 
 public:

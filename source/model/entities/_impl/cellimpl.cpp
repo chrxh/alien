@@ -52,7 +52,10 @@ void CellImpl::setContext(UnitContext * context)
 
 CellDescription CellImpl::getDescription() const
 {
-	return CellDescription();
+	CellDescription result;
+	result.setId(_id).setPos(calcPosition(true)).setMaxConnections(_maxConnections).setTokenAccessNumber(_tokenAccessNumber)
+		.setEnergy(_energy);
+	return result;
 }
 
 void CellImpl::registerFeatures (CellFeature* features)
@@ -324,7 +327,7 @@ CellCluster* CellImpl::getCluster() const
     return _cluster;
 }
 
-QVector2D CellImpl::calcPosition (bool metricCorrection) const
+QVector2D CellImpl::calcPosition (bool metricCorrection /*= false*/) const
 {
     return _cluster->calcPosition(this, metricCorrection);
 }
