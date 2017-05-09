@@ -8,6 +8,10 @@ class TextEditor;
 class SimulationMonitor;
 class TutorialWindow;
 class StartScreenController;
+class MetadataManager;
+class PixelUniverse;
+class ShapeUniverse;
+class QGraphicsView;
 
 
 #endif // GUI_DEFINITIONS_H

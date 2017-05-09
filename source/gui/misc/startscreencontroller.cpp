@@ -47,7 +47,7 @@ void StartScreenController::saveSceneAndView (QGraphicsView* view)
 
 void StartScreenController::createSceneWithLogo ()
 {
-    _startScene->setBackgroundBrush(QBrush(BACKGROUND_COLOR));
+    _startScene->setBackgroundBrush(QBrush(UNIVERSE_COLOR));
     QPixmap logo("://tutorial/logo.png");
     _logoItem =_startScene->addPixmap(logo);
     _view->setMatrix(QMatrix());

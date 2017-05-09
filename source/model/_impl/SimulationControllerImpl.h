@@ -14,6 +14,7 @@ public:
 	virtual void init(SimulationContextApi* context) override;
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
+	virtual SimulationContextApi* getContext() const override;
 
 private:
 	bool _flagSimulationRunning = false;
