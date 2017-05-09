@@ -32,6 +32,7 @@
 //Model-Refactoring:
 //- Serialisierungs-Framework benutzt Descriptions
 //- init bei Cell/Cluster/EnergyParticle
+//- C-Arrays durch Vector ersetzen (z.B. CellImpl, CellMap,...)
 
 /**************** alte Notizen ******************/
 //Potentielle Fehlerquellen Alt:
