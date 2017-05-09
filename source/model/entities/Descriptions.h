@@ -5,8 +5,8 @@
 
 struct TokenDescription
 {
-	Editable<double> energy;
-	Editable<QByteArray> data;
+	Tracker<double> energy;
+	Tracker<QByteArray> data;
 
 	TokenDescription& setEnergy(double value) { energy.init(value); return *this; }
 	TokenDescription& setData(QByteArray const &value) { data.init(value); return *this; }
@@ -15,14 +15,15 @@ struct TokenDescription
 struct CellDescription
 {
 	uint64_t id = 0.0;
-	Editable<QVector2D> relPos;
-	Editable<double> energy = 0.0;
-	Editable<int> maxConnections = 0;
-	Editable<bool> tokenBlocked = false;
-	Editable<int> tokenAccessNumber = 0;
-	Editable<CellMetadata> metadata;
-	Editable<CellFunctionDescription> cellFunction;
-	vector<EditableVec<TokenDescription>> tokens;
+
+	Tracker<QVector2D> relPos;
+	Tracker<double> energy = 0.0;
+	Tracker<int> maxConnections = 0;
+	Tracker<bool> tokenBlocked = false;
+	Tracker<int> tokenAccessNumber = 0;
+	Tracker<CellMetadata> metadata;
+	Tracker<CellFunctionDescription> cellFunction;
+	vector<TrackerElement<TokenDescription>> tokens;
 
 	CellDescription& setEnergy(double value) { energy.init(value); return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
@@ -34,14 +35,15 @@ struct CellDescription
 
 struct CellClusterDescription
 {
-	uint64_t id = 0.0;
-	Editable<QVector2D> pos;
-	Editable<QVector2D> vel;
-	Editable<double> angle = 0.0;
-	Editable<double> angularVel = 0.0;
-	Editable<CellClusterMetadata> metadata;
-	vector<EditableVec<CellDescription>> cells;
-	vector<EditableVec<pair<uint64_t, uint64_t>>> cellConnections;
+	uint64_t id = 0;
+
+	Tracker<QVector2D> pos;
+	Tracker<QVector2D> vel;
+	Tracker<double> angle;
+	Tracker<double> angularVel;
+	Tracker<CellClusterMetadata> metadata;
+	vector<TrackerElement<CellDescription>> cells;
+	vector<TrackerElement<pair<uint64_t, uint64_t>>> cellConnections;
 
 	CellClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	CellClusterDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
@@ -50,37 +52,38 @@ struct CellClusterDescription
 	CellClusterDescription& setAngularVel(double value) { angularVel.init(value); return *this; }
 	CellClusterDescription& addCell(CellDescription const& c)
 	{
-		cells.push_back(EditableVec<CellDescription>(EditableVecState::Added, c));
+		cells.push_back(TrackerElement<CellDescription>(c, TrackerElementState::Added));
 		return *this;
 	}
 };
 
 struct EnergyParticleDescription
 {
-	uint64_t id = 0.0;
-	Editable<QVector2D> pos;
-	Editable<QVector2D> vel;
-	Editable<double> energy = 0.0;
-	Editable<EnergyParticleMetadata> metadata;
+	uint64_t id = 0;
 
-	EnergyParticleDescription& setPos(QVector2D const& p) { pos.init(p); return *this; }
-	EnergyParticleDescription& setVel(QVector2D const& v) { vel.init(v); return *this; }
-	EnergyParticleDescription& setEnergy(double e) { energy.init(e); return *this; }
+	Tracker<QVector2D> pos;
+	Tracker<QVector2D> vel;
+	Tracker<double> energy;
+	Tracker<EnergyParticleMetadata> metadata;
+
+	EnergyParticleDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
+	EnergyParticleDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
+	EnergyParticleDescription& setEnergy(double value) { energy.init(value); return *this; }
 };
 
 struct DataDescription
 {
-	vector<EditableVec<CellClusterDescription>> clusters;
-	vector<EditableVec<EnergyParticleDescription>> particles;
+	vector<TrackerElement<CellClusterDescription>> clusters;
+	vector<TrackerElement<EnergyParticleDescription>> particles;
 
-	DataDescription& addCellCluster(CellClusterDescription const& c)
+	DataDescription& addCellCluster(CellClusterDescription const& value)
 	{
-		clusters.push_back(EditableVec<CellClusterDescription>(EditableVecState::Added, c));
+		clusters.push_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
-	DataDescription& addEnergyParticle(EnergyParticleDescription const& e)
+	DataDescription& addEnergyParticle(EnergyParticleDescription const& value)
 	{
-		particles.push_back(EditableVec<EnergyParticleDescription>(EditableVecState::Added, e));
+		particles.push_back(TrackerElement<EnergyParticleDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
 	void clear()
