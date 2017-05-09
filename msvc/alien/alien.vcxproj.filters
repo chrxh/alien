@@ -915,7 +915,7 @@
     <ClInclude Include="..\..\source\model\context\UnitObserver.h">
       <Filter>Model\Context</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\global\Editable.h">
+    <ClInclude Include="..\..\source\global\Tracker.h">
       <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
