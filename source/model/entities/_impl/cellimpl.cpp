@@ -1,5 +1,5 @@
-#include "global/ServiceLocator.h"
-#include "global/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "Base/NumberGenerator.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/Token.h"
 #include "model/features/CellFeature.h"

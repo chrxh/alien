@@ -2,9 +2,9 @@
 
 #include <QEventLoop>
 
-#include "global/ServiceLocator.h"
-#include "global/GlobalFactory.h"
-#include "global/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "Base/GlobalFactory.h"
+#include "Base/NumberGenerator.h"
 #include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"

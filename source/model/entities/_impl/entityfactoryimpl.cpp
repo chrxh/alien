@@ -1,4 +1,4 @@
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "model/features/CellFeatureFactory.h"
 
 #include "EnergyParticleImpl.h"

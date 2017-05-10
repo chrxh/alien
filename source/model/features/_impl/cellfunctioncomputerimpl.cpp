@@ -1,7 +1,7 @@
 #include <QString>
 #include <qdebug.h>
 
-#include "global/NumberGenerator.h"
+#include "Base/NumberGenerator.h"
 #include "model/context/UnitContext.h"
 #include "model/ModelSettings.h"
 #include "model/metadata/SymbolTable.h"

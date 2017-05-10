@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QFont>
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "dialogs/addenergydialog.h"
 #include "dialogs/addrectstructuredialog.h"
 #include "dialogs/addhexagonstructuredialog.h"

@@ -1,7 +1,7 @@
 #include <qmath.h>
 
-#include "global/ServiceLocator.h"
-#include "global/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "Base/NumberGenerator.h"
 
 #include "model/physics/Physics.h"
 #include "model/ModelSettings.h"

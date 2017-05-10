@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "global/ServiceLocator.h"
-#include "global/GlobalFactory.h"
-#include "global/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "Base/GlobalFactory.h"
+#include "Base/NumberGenerator.h"
 
 class NumberGeneratorTest : public ::testing::Test
 {
