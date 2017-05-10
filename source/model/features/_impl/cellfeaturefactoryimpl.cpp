@@ -10,7 +10,7 @@
 #include "CellFunctionCommunicatorImpl.h"
 #include "EnergyGuidanceImpl.h"
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 
 namespace {
 	CellFeatureFactoryImpl cellDecoratorFactoryImpl;

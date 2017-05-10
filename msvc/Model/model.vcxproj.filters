@@ -1,0 +1,619 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\source\model\_impl\BuilderFacadeImpl.cpp">
+      <Filter>Source Files\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\_impl\SerializationFacadeImpl.cpp">
+      <Filter>Source Files\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\CellTO.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\CellClusterImpl.cpp">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\CellImpl.cpp">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\EnergyParticleImpl.cpp">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\EntityFactoryImpl.cpp">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\entities\_impl\TokenImpl.cpp">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\CellFeature.cpp">
+      <Filter>Source Files\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\CellFunction.cpp">
+      <Filter>Source Files\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFeatureFactoryImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFunctionCommunicatorImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFunctionComputerImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFunctionConstructorImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFunctionPropulsionImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFunctionScannerImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFunctionSensorImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\CellFunctionWeaponImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\features\_impl\EnergyGuidanceImpl.cpp">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\physics\CodingPhysicalQuantities.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\physics\Physics.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\AccessPorts\_Impl\AccessPortFactoryImpl.cpp">
+      <Filter>Source Files\AccessPorts\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\AccessPorts\_Impl\SimulationAccessImpl.cpp">
+      <Filter>Source Files\AccessPorts\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationAccess.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationAccess.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationAccess.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationController.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_cellmap.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cellmap.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cellmap.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_energyparticlemap.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_energyparticlemap.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_energyparticlemap.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_MapCompartment.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MapCompartment.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MapCompartment.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContext.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\simulationparameters.cpp">
+      <Filter>Source Files\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_simulationparameters.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_simulationparameters.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_simulationparameters.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_spacemetric.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_spacemetric.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_spacemetric.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_Unit.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_Unit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_Unit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitContext.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitContext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitGrid.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitGrid.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitGrid.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitThreadController.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitThreadController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitThreadController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\CellMapImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_cellmapimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cellmapimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cellmapimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\contextfactoryimpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\energyparticlemapimpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_energyparticlemapimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\MapCompartmentImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_MapCompartmentImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MapCompartmentImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MapCompartmentImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SignalWrapper.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SignalWrapper.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SignalWrapper.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\SimulationContextImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContextImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\spacemetricimpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\UnitContextImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\UnitGridImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitGridImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitGridImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitGridImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\UnitImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_unitimpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_unitimpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_unitimpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\UnitThread.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitThread.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\context\_impl\UnitThreadControllerImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitThreadControllerImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UnitThreadControllerImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitThreadControllerImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\metadata\SymbolTable.cpp">
+      <Filter>Source Files\Metadata</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SymbolTable.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SymbolTable.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SymbolTable.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\_impl\SimulationControllerImpl.cpp">
+      <Filter>Source Files\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationControllerImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationControllerImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationControllerImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\Definitions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\model\ModelSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\source\model\_impl\BuilderFacadeImpl.h">
+      <Filter>Source Files\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\_impl\SerializationFacadeImpl.h">
+      <Filter>Source Files\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\Cell.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\CellCluster.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\CellTO.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\EnergyParticle.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\EntityFactory.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\Token.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\CellClusterImpl.h">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\CellImpl.h">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\EnergyParticleImpl.h">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\EntityFactoryImpl.h">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\_impl\TokenImpl.h">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\CellFeature.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\CellFeatureEnums.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\CellFeatureFactory.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\CellFunction.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\CellFunctionComputer.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\EnergyGuidance.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFeatureFactoryImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFunctionCommunicatorImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFunctionComputerImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFunctionConstructorImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFunctionPropulsionImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFunctionScannerImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFunctionSensorImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\CellFunctionWeaponImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\_impl\EnergyGuidanceImpl.h">
+      <Filter>Source Files\Features\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\metadata\CellClusterMetadata.h">
+      <Filter>Source Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\metadata\CellMetadata.h">
+      <Filter>Source Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\metadata\EnergyParticleMetadata.h">
+      <Filter>Source Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\physics\CodingPhysicalQuantities.h">
+      <Filter>Source Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\physics\physics.h">
+      <Filter>Source Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\AccessPorts\AccessPortFactory.h">
+      <Filter>Source Files\AccessPorts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\AccessPorts\_Impl\AccessPortFactoryImpl.h">
+      <Filter>Source Files\AccessPorts\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\entities\Descriptions.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\features\Descriptions.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\AccessPorts\_Impl\SimulationAccessImpl.h">
+      <Filter>Source Files\AccessPorts\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\contextfactory.h">
+      <Filter>Source Files\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\UnitObserver.h">
+      <Filter>Source Files\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\contextfactoryimpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\DefinitionsImpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\spacemetricimpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\context\_impl\UnitContextImpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\BuilderFacade.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\Definitions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\ModelSettings.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\SerializationFacade.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\source\model\AccessPorts\SimulationAccess.h">
+      <Filter>Source Files\AccessPorts</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\cellmap.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\energyparticlemap.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\MapCompartment.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\SimulationContext.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\simulationparameters.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\spacemetric.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\Unit.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\UnitContext.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\UnitGrid.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\UnitThreadController.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\cellmapimpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\energyparticlemapimpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\MapCompartmentImpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\SignalWrapper.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\SimulationContextImpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\UnitGrid.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\UnitGridImpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\unitimpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\UnitThread.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\_impl\UnitThreadControllerImpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\metadata\SymbolTable.h">
+      <Filter>Source Files\Metadata</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\_impl\SimulationControllerImpl.h">
+      <Filter>Source Files\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\SimulationContextApi.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\SimulationController.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files\Tests">
+      <UniqueIdentifier>{1082b4b5-1c03-4457-b60e-b3829db96481}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{d26d17fc-60d0-4cdc-8bd3-f738b1762bd7}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{f9d0de32-398c-42aa-acb1-14846ee0c441}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{e2a3578b-787f-4ebe-a066-e4317a3fea10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\_Impl">
+      <UniqueIdentifier>{cc31b7b7-8793-433a-9b78-c3cc1c2d1f83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AccessPorts">
+      <UniqueIdentifier>{afb40b3b-6c4a-4e90-bcec-39cac78ef3d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AccessPorts\_Impl">
+      <UniqueIdentifier>{56f350e8-42bb-4c19-8360-8a1bf2224e65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Context">
+      <UniqueIdentifier>{66a343a4-e560-4345-a63f-6729519ed8df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Context\_Impl">
+      <UniqueIdentifier>{73abcd22-ec1d-4a01-9a9c-32a35dff734f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Entities">
+      <UniqueIdentifier>{b1df8e97-cd10-4272-a4f9-80639ec9b204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Entities\_Impl">
+      <UniqueIdentifier>{d954b496-65ac-4cd3-9b6c-32aa889b2fc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Features">
+      <UniqueIdentifier>{19eaad07-5511-410e-84b9-23abb1c58a80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Features\_Impl">
+      <UniqueIdentifier>{40568fdb-584a-4d29-bc27-9856eae320e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Metadata">
+      <UniqueIdentifier>{5046fd6b-6496-42f6-8d6f-cc1583914ca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics">
+      <UniqueIdentifier>{2dd9613a-1efe-4d99-96b5-12cd65be711a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

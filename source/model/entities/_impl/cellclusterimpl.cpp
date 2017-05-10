@@ -1,8 +1,8 @@
 #include <QMatrix4x4>
 #include <qmath.h>
 
-#include "global/ServiceLocator.h"
-#include "global/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "Base/NumberGenerator.h"
 #include "model/entities/Cell.h"
 #include "model/BuilderFacade.h"
 #include "model/features/CellFeature.h"

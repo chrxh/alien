@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "model/BuilderFacade.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"
