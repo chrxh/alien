@@ -91,12 +91,12 @@ void ViewportController::saveScenePos(ActiveScene activeScene)
 
 void ViewportController::loadScenePos(ActiveScene activeScene)
 {
-	if (_activeScene == ActiveScene::PixelScene) {
+	if (activeScene == ActiveScene::PixelScene) {
 		_view->setMatrix(_pixelSceneViewMatrix);
 		_view->horizontalScrollBar()->setValue(_pixelSceneScrollbarPos.x);
-		_view->verticalScrollBar()->setValue(_pixelSceneScrollbarPos.x);
+		_view->verticalScrollBar()->setValue(_pixelSceneScrollbarPos.y);
 	}
-	if (_activeScene == ActiveScene::ShapeScene) {
+	if (activeScene == ActiveScene::ShapeScene) {
 		_view->setMatrix(_shapeSceneViewMatrix);
 		_view->horizontalScrollBar()->setValue(_shapeSceneScrollbarPos.x);
 		_view->verticalScrollBar()->setValue(_shapeSceneScrollbarPos.y);
