@@ -1,5 +1,5 @@
 #include "Base/NumberGenerator.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/context/SimulationParameters.h"
 #include "model/context/UnitContext.h"
 

@@ -8,7 +8,7 @@
 #include "gui/MainWindow.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/BuilderFacade.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/SimulationController.h"
 #include "model/context/UnitContext.h"
 #include "model/context/SimulationParameters.h"

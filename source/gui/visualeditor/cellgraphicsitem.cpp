@@ -1,7 +1,7 @@
 #include <QPainter>
 
-#include "gui/GuiSettings.h"
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
+#include "gui/Settings.h"
 
 #include "cellgraphicsitemconfig.h"
 #include "cellgraphicsitem.h"
@@ -85,7 +85,7 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
     }
 
 	if (_config->showInfo) {
-		auto font = GuiFunctions::getCellFont();
+		auto font = GuiSettings::getCellFont();
 		painter->setFont(font);
 		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
 		painter->drawText(QRectF(-1.5*GRAPHICS_ITEM_SIZE, 0.1*GRAPHICS_ITEM_SIZE, 3.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, _displayString);

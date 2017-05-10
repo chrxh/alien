@@ -270,9 +270,6 @@
     <ClCompile Include="Release\moc_visualeditor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\guisettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -298,6 +295,9 @@
       <Filter>Resources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -451,7 +451,7 @@
     <CustomBuild Include="..\..\source\gui\MainWindow.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\mainwindow.ui">
+    <CustomBuild Include="..\..\source\gui\MainWindow.ui">
       <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -596,16 +596,16 @@
     <ClInclude Include="..\..\source\gui\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\GuiSettings.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_mainwindow.h">
-      <Filter>Generated Files\_Ui</Filter>
-    </ClInclude>
     <ClInclude Include="ui_addhexagonstructuredialog.h">
       <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\Settings.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_MainWindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

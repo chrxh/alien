@@ -4,7 +4,7 @@
 #include "model/entities/CellCluster.h"
 #include "model/entities/Token.h"
 #include "model/context/SimulationParameters.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 
 #include "CellFunctionWeaponImpl.h"
 

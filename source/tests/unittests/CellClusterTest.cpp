@@ -4,7 +4,7 @@
 #include "Base/ServiceLocator.h"
 #include "model/context/UnitContext.h"
 #include "model/context/SimulationParameters.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/BuilderFacade.h"
 #include "model/context/SpaceMetric.h"
 #include "model/entities/Cell.h"

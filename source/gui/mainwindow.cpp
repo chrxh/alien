@@ -19,10 +19,10 @@
 #include "assistance/tutorialwindow.h"
 #include "misc/startscreencontroller.h"
 #include "gui/texteditor/texteditor.h"
-#include "gui/GuiSettings.h"
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
+#include "gui/Settings.h"
 #include "gui/visualeditor/ViewportController.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/SimulationController.h"
 #include "model/context/SimulationContext.h"
 #include "model/SerializationFacade.h"
@@ -56,17 +56,17 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
 	ui->visualEditor->init(simController);
 
     //set font
-    setFont(GuiFunctions::getGlobalFont());
-    ui->menuSimulation->setFont(GuiFunctions::getGlobalFont());
-    ui->menuView->setFont(GuiFunctions::getGlobalFont());
-    ui->menuEdit->setFont(GuiFunctions::getGlobalFont());
-    ui->menuSelection->setFont(GuiFunctions::getGlobalFont());
-    ui->menuSettings->setFont(GuiFunctions::getGlobalFont());
-    ui->menuHelp->setFont(GuiFunctions::getGlobalFont());
-    ui->menuSimulationParameters->setFont(GuiFunctions::getGlobalFont());
-    ui->menuSymbolTable->setFont(GuiFunctions::getGlobalFont());
-    ui->menuAddEnsemble->setFont(GuiFunctions::getGlobalFont());
-    ui->menuMultiplyExtension->setFont(GuiFunctions::getGlobalFont());
+    setFont(GuiSettings::getGlobalFont());
+    ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
+    ui->menuView->setFont(GuiSettings::getGlobalFont());
+    ui->menuEdit->setFont(GuiSettings::getGlobalFont());
+    ui->menuSelection->setFont(GuiSettings::getGlobalFont());
+    ui->menuSettings->setFont(GuiSettings::getGlobalFont());
+    ui->menuHelp->setFont(GuiSettings::getGlobalFont());
+    ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
+    ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
+    ui->menuAddEnsemble->setFont(GuiSettings::getGlobalFont());
+    ui->menuMultiplyExtension->setFont(GuiSettings::getGlobalFont());
 
     //set color
     ui->fpsForcingButton->setStyleSheet(BUTTON_STYLESHEET);

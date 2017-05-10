@@ -2,7 +2,7 @@
 
 #include "model/context/SpaceMetric.h"
 #include "model/context/UnitContext.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
 

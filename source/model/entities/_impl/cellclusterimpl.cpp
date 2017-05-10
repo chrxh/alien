@@ -10,7 +10,7 @@
 #include "model/entities/Token.h"
 #include "model/entities/EnergyParticle.h"
 #include "model/physics/Physics.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/context/UnitContext.h"
 #include "model/context/CellMap.h"
 #include "model/context/SpaceMetric.h"

@@ -2,10 +2,10 @@
 #include <QMessageBox>
 
 #include "Base/ServiceLocator.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/SerializationFacade.h"
 #include "model/metadata/SymbolTable.h"
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 
 #include "symboltabledialog.h"
 #include "ui_symboltabledialog.h"
@@ -16,14 +16,14 @@ SymbolTableDialog::SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent)
 	, _symbolTable(symbolTable->clone())
 {
     ui->setupUi(this);
-    setFont(GuiFunctions::getGlobalFont());
+    setFont(GuiSettings::getGlobalFont());
 
     //create headers
     ui->tableWidget->horizontalHeader()->resizeSection(0, 400);
-    ui->tableWidget->horizontalHeaderItem(0)->setFont(GuiFunctions::getGlobalFont());
+    ui->tableWidget->horizontalHeaderItem(0)->setFont(GuiSettings::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft);
     ui->tableWidget->horizontalHeader()->resizeSection(1, 100);
-    ui->tableWidget->horizontalHeaderItem(1)->setFont(GuiFunctions::getGlobalFont());
+    ui->tableWidget->horizontalHeaderItem(1)->setFont(GuiSettings::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(1)->setTextAlignment(Qt::AlignLeft);
 
     symbolTableToWidgets();
