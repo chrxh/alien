@@ -45,10 +45,10 @@
     <ClCompile Include="..\..\source\Base\_Impl\NumberGeneratorImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Base\DefinitionsGlobal.cpp">
+    <ClCompile Include="..\..\source\Base\ServiceLocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Base\ServiceLocator.cpp">
+    <ClCompile Include="..\..\source\Base\Definitions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
