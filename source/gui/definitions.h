@@ -12,6 +12,8 @@ class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
 class QGraphicsView;
+class ViewportController;
+enum class ActiveScene;
 
 
 #endif // GUI_DEFINITIONS_H

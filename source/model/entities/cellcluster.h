@@ -14,7 +14,7 @@ public:
 
 	virtual void setContext(UnitContext* context) = 0;
 
-	virtual CellClusterDescription getDescription() const = 0;
+	virtual CellClusterDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
 
     virtual void clearCellsFromMap () = 0;
     virtual void clearCellFromMap (Cell* cell) = 0;

@@ -12,7 +12,7 @@ class PixelUniverse : public QGraphicsScene
     Q_OBJECT
 public:
     PixelUniverse(QObject* parent=0);
-    ~PixelUniverse();
+    virtual ~PixelUniverse();
 
 	virtual void init(SimulationController* controller);
 

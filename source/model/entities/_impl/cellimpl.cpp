@@ -58,6 +58,12 @@ CellDescription CellImpl::getDescription() const
 	return result;
 }
 
+void CellImpl::getDescription(CellDescription & desc) const
+{
+	desc.setId(_id).setPos(calcPosition(true)).setMaxConnections(_maxConnections).setTokenAccessNumber(_tokenAccessNumber)
+		.setEnergy(_energy).setMetadata(_metadata);
+}
+
 void CellImpl::registerFeatures (CellFeature* features)
 {
     _features = features;

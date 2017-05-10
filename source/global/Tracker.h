@@ -56,6 +56,7 @@ public:
 	TrackerElement& setAsDeleted() { _state = TrackerElementState::Deleted; return *this; }
 	TrackerElement& setAsAdded() { _state = TrackerElementState::Added; return *this; }
 	T const& getValue() const { return _value; }
+	T & getValue() { return _value; }
 	TrackerElement& setValue(T const& v) { _value = v; return *this; }
 };
 

@@ -42,10 +42,11 @@ void SimulationAccessImpl::updateData(DataDescription const & desc)
 	}
 }
 
-void SimulationAccessImpl::requireData(IntRect rect)
+void SimulationAccessImpl::requireData(IntRect rect, ResolveDescription const& resolveDesc)
 {
 	_dataRequired = true;
 	_requiredRect = rect;
+	_resolveDesc = resolveDesc;
 	if (_context->getUnitThreadController()->isNoThreadWorking()) {
 		accessToUnits();
 	}
@@ -127,7 +128,7 @@ void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 	for (auto const& cluster : clusters) {
 		auto pos = metric->correctPositionWithIntPrecision(cluster->getPosition());
 		if (_requiredRect.isContained(pos)) {
-			_dataCollected.clusters.emplace_back(cluster->getDescription());
+			_dataCollected.clusters.emplace_back(cluster->getDescription(_resolveDesc));
 		}
 	}
 }
