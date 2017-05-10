@@ -1,15 +1,15 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#include "definitions.h"
+#include "Definitions.h"
 
 const qreal ALIEN_PRECISION = 0.0000001;
 
-class Metadata
+class ModelSettings
 {
 public:
-    static void loadDefaultSymbolTable (SymbolTable* meta);
-	static void loadDefaultSimulationParameters(SimulationParameters* parameters);
+    static SymbolTable* loadDefaultSymbolTable();
+	static SimulationParameters* loadDefaultSimulationParameters();
 };
 
-#endif // CONFIG_H
+#endif // SETTINGS_H

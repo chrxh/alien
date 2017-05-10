@@ -1,6 +1,6 @@
-#include "settings.h"
+#include "Settings.h"
 
-QFont GuiFunctions::getGlobalFont ()
+QFont GuiSettings::getGlobalFont ()
 {
     //set font
     QFont f(GLOBAL_FONT, 8, QFont::Bold);
@@ -8,7 +8,7 @@ QFont GuiFunctions::getGlobalFont ()
     return f;
 }
 
-QFont GuiFunctions::getCellFont()
+QFont GuiSettings::getCellFont()
 {
 	//set font
 	QFont f(GLOBAL_FONT, 2, QFont::Normal);

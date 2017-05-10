@@ -6,7 +6,7 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "model/BuilderFacade.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/SimulationController.h"
 #include "model/context/SimulationContext.h"
 #include "model/context/SimulationParameters.h"

@@ -3,7 +3,7 @@
 
 #include "Base/NumberGenerator.h"
 #include "model/context/UnitContext.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/metadata/SymbolTable.h"
 #include "model/entities/Cell.h"
 #include "model/entities/Token.h"

@@ -1,7 +1,7 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 #include "ViewportController.h"
 
 void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* shapeScene, ActiveScene activeScene)

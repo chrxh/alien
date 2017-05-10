@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 #include "model/context/UnitContext.h"
 
 #include "simulationparametersdialog.h"
@@ -15,7 +15,7 @@ NewSimulationDialog::NewSimulationDialog(UnitContext* context, QWidget *parent)
 	, _localParameters(context->getSimulationParameters()->clone())
 {
     ui->setupUi(this);
-    setFont(GuiFunctions::getGlobalFont());
+    setFont(GuiSettings::getGlobalFont());
 
     _symTblDialog = new SymbolTableDialog(context->getSymbolTable());
 

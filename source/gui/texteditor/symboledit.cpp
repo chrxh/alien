@@ -1,8 +1,8 @@
 #include <QScrollBar>
 
 #include "model/metadata/SymbolTable.h"
-#include "gui/GuiSettings.h"
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
+#include "gui/Settings.h"
 
 #include "symboledit.h"
 #include "ui_symboledit.h"
@@ -24,7 +24,7 @@ SymbolEdit::SymbolEdit(QWidget *parent)
     ui->delSymbolButton->setPalette(p);
 
 	//set font
-    ui->tableWidget->setFont(GuiFunctions::getGlobalFont());
+    ui->tableWidget->setFont(GuiSettings::getGlobalFont());
 
     //set section length
     ui->tableWidget->horizontalHeader()->resizeSection(0, 285);

@@ -4,7 +4,7 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/BuilderFacade.h"
 #include "model/SimulationController.h"

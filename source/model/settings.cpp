@@ -1,13 +1,14 @@
 #include <QtGlobal>
 
-#include "model/features/cellfeatureconstants.h"
-#include "model/metadata/symboltable.h"
+#include "model/features/CellFeatureEnums.h"
+#include "model/metadata/SymbolTable.h"
 
-#include "settings.h"
-#include "simulationparameters.h"
+#include "context/SimulationParameters.h"
+#include "Settings.h"
 
-void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
+SymbolTable* ModelSettings::loadDefaultSymbolTable()
 {
+	SymbolTable* symbolTable = new SymbolTable();
     symbolTable->clearTable();
 
     //general variables
@@ -143,11 +144,14 @@ void Metadata::loadDefaultSymbolTable(SymbolTable* symbolTable)
     symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "["+QString::number(Enums::Communicator::OUT_RECEIVED_MESSAGE)+"]");
     symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_ANGLE", "["+QString::number(Enums::Communicator::OUT_RECEIVED_ANGLE)+"]");
     symbolTable->addEntry("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "["+QString::number(Enums::Communicator::OUT_RECEIVED_DISTANCE)+"]");
+
+	return symbolTable;
 }
 
-void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
+SimulationParameters* ModelSettings::loadDefaultSimulationParameters()
 {
-	parameters->cellMutationProb = 0.0;
+	SimulationParameters* parameters = new SimulationParameters();
+	parameters->cellMutationProb = 0.000001;
 	parameters->cellMinDistance = 0.3;
 	parameters->cellMaxDistance = 1.3;
 	parameters->cellMass_Reciprocal = 1;
@@ -157,8 +161,8 @@ void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 	parameters->cellMaxToken = 9;
 	parameters->cellMaxTokenBranchNumber = 6;
 	parameters->cellCreationEnergy = 100.0;
-	parameters->NEW_CELL_MAX_CONNECTION = 4;
-	parameters->NEW_CELL_TOKEN_ACCESS_NUMBER = 0;
+	parameters->cellCreationMaxConnection = 4;
+	parameters->cellCreationTokenAccessNumber = 0;
 	parameters->cellMinEnergy = 50.0;
 	parameters->cellTransformationProb = 0.2;
 	parameters->cellFusionVelocity = 0.4;
@@ -166,17 +170,19 @@ void Metadata::loadDefaultSimulationParameters(SimulationParameters* parameters)
 	parameters->cellFunctionWeaponStrength = 0.1;
 	parameters->cellFunctionComputerMaxInstructions = 15;
 	parameters->cellFunctionComputerCellMemorySize = 8;
-	parameters->cellFunctionComputerTokenMemorySize = 256;
 	parameters->cellFunctionConstructorOffspringDistance = 1.0;
 	parameters->cellFunctionSensorRange = 100.0;
 	parameters->cellFunctionCommunicatorRange = 30.0;
 
+	parameters->tokenMemorySize = 256;
 	parameters->tokenCreationEnergy = 60.0;
 	parameters->tokenMinEnergy = 3.0;
 
 	parameters->radiationExponent = 1.0;
-	parameters->radiationFactor = 0.0001;
-	parameters->radiationProb = 0.01;
+	parameters->radiationFactor = 0.0002;
+	parameters->radiationProb = 0.03;
 	parameters->radiationVelocityMultiplier = 1.0;
 	parameters->radiationVelocityPerturbation = 0.5;
+
+	return parameters;
 }
