@@ -19,7 +19,7 @@ public:
 	virtual IntVector2D getUniverseSize() const override;
 	
 	virtual void updateData(DataDescription const &desc) override;
-	virtual void requireData(IntRect rect) override;
+	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	virtual DataDescription const& retrieveData() override;
 
 	virtual void unregister() override;
@@ -37,6 +37,7 @@ private:
 
 	bool _dataRequired = false;
 	IntRect _requiredRect;
+	ResolveDescription _resolveDesc;
 	DataDescription _dataCollected;
 	DataDescription _dataToUpdate;
 };

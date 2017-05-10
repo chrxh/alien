@@ -14,6 +14,7 @@ public:
 	virtual void setContext(UnitContext* context) = 0;
 
 	virtual CellDescription getDescription() const = 0;
+	virtual void getDescription(CellDescription& desc) const = 0;
 
     virtual void registerFeatures (CellFeature* features) = 0;
     virtual CellFeature* getFeatures () const = 0;
