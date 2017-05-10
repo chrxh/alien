@@ -1,4 +1,4 @@
-#include "global/NumberGenerator.h"
+#include "Base/NumberGenerator.h"
 #include "model/context/SpaceMetric.h"
 #include "model/context/UnitGrid.h"
 #include "model/context/UnitThreadController.h"

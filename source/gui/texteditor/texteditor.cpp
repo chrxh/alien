@@ -4,7 +4,7 @@
 #include <QTextEdit>
 #include <QEvent>
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "gui/GuiSettings.h"
 #include "gui/GuiSettings.h"
 #include "model/context/SimulationParameters.h"

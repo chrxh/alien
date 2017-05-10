@@ -1,7 +1,7 @@
 #include "SerializationFacadeImpl.h"
 
-#include "global/ServiceLocator.h"
-#include "global/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "Base/NumberGenerator.h"
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/EnergyParticle.h"

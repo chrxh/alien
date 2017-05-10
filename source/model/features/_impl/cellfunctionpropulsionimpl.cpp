@@ -1,6 +1,6 @@
 #include <QtCore/qmath.h>
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "model/entities/Cell.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/EnergyParticle.h"

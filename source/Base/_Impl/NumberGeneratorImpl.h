@@ -1,7 +1,7 @@
-#ifndef RANDOMNUMBERGENERATORIMPL_H
-#define RANDOMNUMBERGENERATORIMPL_H
+#ifndef NUMBERGENERATORIMPL_H
+#define NUMBERGENERATORIMPL_H
 
-#include "global/NumberGenerator.h"
+#include "Base/NumberGenerator.h"
 
 class NumberGeneratorImpl
 	: public NumberGenerator
@@ -30,4 +30,4 @@ private:
 	uint64_t _threadId = 0;
 };
 
-#endif // RANDOMNUMBERGENERATORIMPL_H
+#endif // NUMBERGENERATORIMPL_H

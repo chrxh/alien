@@ -1,4 +1,4 @@
-#include "global/NumberGenerator.h"
+#include "Base/NumberGenerator.h"
 #include "model/context/CellMap.h"
 #include "model/context/EnergyParticleMap.h"
 #include "model/context/MapCompartment.h"

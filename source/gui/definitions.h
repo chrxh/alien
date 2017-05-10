@@ -1,7 +1,7 @@
 #ifndef GUI_DEFINITIONS_H
 #define GUI_DEFINITIONS_H
 
-#include "global/Definitions.h"
+#include "Base/Definitions.h"
 
 struct CellGraphicsItemConfig;
 class TextEditor;

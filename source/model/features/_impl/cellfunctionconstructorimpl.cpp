@@ -4,7 +4,7 @@
 #include <QtAlgorithms>
 #include <QMatrix4x4>
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "model/BuilderFacade.h"
 #include "model/entities/EntityFactory.h"
 #include "model/entities/Cell.h"

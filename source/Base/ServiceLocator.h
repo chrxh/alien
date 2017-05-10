@@ -6,7 +6,7 @@
 #include <typeinfo>
 #include "Definitions.h"
 
-class ServiceLocator
+class BASE_EXPORT ServiceLocator
 {
 public:
     static ServiceLocator& getInstance ();

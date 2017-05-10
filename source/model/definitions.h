@@ -1,7 +1,7 @@
 #ifndef MODEL_DEFINITIONS_H
 #define MODEL_DEFINITIONS_H
 
-#include "global/Definitions.h"
+#include "Base/Definitions.h"
 #include "model/metadata/CellMetadata.h"
 #include "model/metadata/CellClusterMetadata.h"
 #include "model/metadata/EnergyParticleMetadata.h"

@@ -1,4 +1,4 @@
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 
 #include "GlobalFactoryImpl.h"
 #include "NumberGeneratorImpl.h"

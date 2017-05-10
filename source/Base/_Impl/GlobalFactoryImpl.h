@@ -1,7 +1,7 @@
 #ifndef GLOBALFACTORYIMPL_H
 #define GLOBALFACTORYIMPL_H
 
-#include "global/GlobalFactory.h"
+#include "Base/GlobalFactory.h"
 
 class GlobalFactoryImpl
 	: public GlobalFactory

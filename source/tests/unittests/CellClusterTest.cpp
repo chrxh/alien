@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "tests/predicates.h"
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "model/context/UnitContext.h"
 #include "model/context/SimulationParameters.h"
 #include "model/ModelSettings.h"

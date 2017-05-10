@@ -17,6 +17,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include "DllExport.h"
 #include "Tracker.h"
 
 class NumberGenerator;
@@ -49,10 +50,15 @@ struct IntVector2D {
 	}
 	IntVector2D(QVector2D const& vec) : x(static_cast<int>(vec.x())), y(static_cast<int>(vec.y())) { }
 	QVector2D toQVector2D() { return QVector2D(x, y); }
+	bool operator==(IntVector2D const& vec)
+	{
+		return x == vec.x && y == vec.y;
+	}
+
 };
 
-extern bool operator==(IntVector2D const& vec1, IntVector2D const& vec2);
-extern std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
+BASE_EXPORT std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
+
 
 struct IntRect {
 	IntVector2D p1;

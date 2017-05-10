@@ -3,7 +3,7 @@
 #include <QtCore/qmath.h>
 #include <QMatrix4x4>
 
-#include "global/ServiceLocator.h"
+#include "Base/ServiceLocator.h"
 #include "gui/GuiSettings.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/BuilderFacade.h"

@@ -2,7 +2,6 @@
 #include <thread>
 #include "NumberGeneratorImpl.h"
 
-
 NumberGeneratorImpl::NumberGeneratorImpl(QObject * parent)
 	: NumberGenerator(parent)
 {
