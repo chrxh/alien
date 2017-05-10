@@ -2,7 +2,7 @@
 #include <QTimer>
 #include <QGraphicsItem>
 
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 #include "gui/texteditor/texteditor.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/context/UnitContext.h"

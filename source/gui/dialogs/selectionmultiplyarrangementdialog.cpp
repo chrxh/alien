@@ -1,14 +1,14 @@
 #include "selectionmultiplyarrangementdialog.h"
 #include "ui_selectionmultiplyarrangementdialog.h"
 
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 
 SelectionMultiplyArrangementDialog::SelectionMultiplyArrangementDialog(QVector2D centerPos, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SelectionMultiplyArrangementDialog)
 {
     ui->setupUi(this);
-    setFont(GuiFunctions::getGlobalFont());
+    setFont(GuiSettings::getGlobalFont());
 
     ui->initialPosXEdit->setText(QString("%1").arg(centerPos.x()));
     ui->initialPosYEdit->setText(QString("%1").arg(centerPos.y()));

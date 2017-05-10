@@ -1,14 +1,14 @@
 #include "addenergydialog.h"
 #include "ui_addenergydialog.h"
 
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 
 AddEnergyDialog::AddEnergyDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddEnergyDialog)
 {
     ui->setupUi(this);
-    setFont(GuiFunctions::getGlobalFont());
+    setFont(GuiSettings::getGlobalFont());
 }
 
 AddEnergyDialog::~AddEnergyDialog()

@@ -27,7 +27,7 @@
     <ClCompile Include="..\..\source\gui\dialogs\selectionmultiplyrandomdialog.cpp" />
     <ClCompile Include="..\..\source\gui\dialogs\simulationparametersdialog.cpp" />
     <ClCompile Include="..\..\source\gui\dialogs\symboltabledialog.cpp" />
-    <ClCompile Include="..\..\source\gui\guisettings.cpp" />
+    <ClCompile Include="..\..\source\gui\Settings.cpp" />
     <ClCompile Include="..\..\source\gui\Main.cpp" />
     <ClCompile Include="..\..\source\gui\MainWindow.cpp" />
     <ClCompile Include="..\..\source\gui\misc\startscreencontroller.cpp" />
@@ -502,7 +502,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\mainwindow.ui">
+    <CustomBuild Include="..\..\source\gui\MainWindow.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\ui_%(Filename).h;%(Outputs)</Outputs>
@@ -845,7 +845,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\gui\Definitions.h" />
-    <ClInclude Include="..\..\source\gui\GuiSettings.h" />
+    <ClInclude Include="..\..\source\gui\Settings.h" />
     <CustomBuild Include="..\..\source\gui\MainWindow.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing MainWindow.h...</Message>
@@ -870,7 +870,7 @@
     <ClInclude Include="..\..\source\gui\visualeditor\energygraphicsitem.h" />
     <ClInclude Include="..\..\source\gui\visualeditor\markergraphicsitem.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ui_mainwindow.h" />
+    <ClInclude Include="ui_MainWindow.h" />
     <ClInclude Include="ui_visualeditor.h" />
     <CustomBuild Include="..\..\source\gui\visualeditor\visualeditor.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

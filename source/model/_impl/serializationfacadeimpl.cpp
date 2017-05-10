@@ -12,7 +12,7 @@
 #include "model/features/EnergyGuidance.h"
 #include "model/features/CellFeatureFactory.h"
 #include "model/metadata/SymbolTable.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/context/ContextFactory.h"
 #include "model/context/CellMap.h"
 #include "model/context/EnergyParticleMap.h"

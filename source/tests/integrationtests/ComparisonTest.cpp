@@ -3,7 +3,7 @@
 
 #include "model/SimulationController.h"
 #include "model/context/UnitContext.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/entities/CellCluster.h"
 #include "model/entities/Cell.h"
 

@@ -1,6 +1,6 @@
 #include "markergraphicsitem.h"
 
-#include "gui/GuiSettings.h"
+#include "gui/Settings.h"
 
 #include <QPainter>
 

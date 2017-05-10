@@ -295,15 +295,6 @@
     <ClCompile Include="Release\moc_UnitThreadControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\model\metadata\SymbolTable.cpp">
       <Filter>Source Files\Metadata</Filter>
     </ClCompile>
@@ -331,8 +322,17 @@
     <ClCompile Include="..\..\source\model\Definitions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\ModelSettings.cpp">
+    <ClCompile Include="..\..\source\model\Settings.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -474,10 +474,10 @@
     <ClInclude Include="..\..\source\model\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\ModelSettings.h">
+    <ClInclude Include="..\..\source\model\SerializationFacade.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\SerializationFacade.h">
+    <ClInclude Include="..\..\source\model\Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -551,11 +551,11 @@
     <CustomBuild Include="..\..\source\model\_impl\SimulationControllerImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\SimulationContextApi.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\model\SimulationController.h">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\model\context\SimulationContextApi.h">
+      <Filter>Source Files\Context</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

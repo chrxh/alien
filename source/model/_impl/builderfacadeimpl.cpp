@@ -24,7 +24,7 @@
 #include "model/AccessPorts/AccessPortFactory.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/metadata/SymbolTable.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/_impl/SimulationControllerImpl.h"
 
 #include "BuilderFacadeImpl.h"

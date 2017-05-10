@@ -8,7 +8,7 @@
 #include "model/physics/CodingPhysicalQuantities.h"
 #include "model/context/UnitContext.h"
 #include "model/BuilderFacade.h"
-#include "model/ModelSettings.h"
+#include "model/Settings.h"
 #include "model/context/SpaceMetric.h"
 #include "model/context/SimulationParameters.h"
 
