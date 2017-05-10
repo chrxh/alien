@@ -52,14 +52,24 @@ struct CellClusterDescription
 	CellClusterDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
 	CellClusterDescription& setAngle(double value) { angle.init(value); return *this; }
 	CellClusterDescription& setAngularVel(double value) { angularVel.init(value); return *this; }
-	CellClusterDescription& addCell(CellDescription const& c)
+	CellClusterDescription& addCell(CellDescription const& value)
 	{
-		cells.emplace_back(TrackerElement<CellDescription>(c, TrackerElementState::Added));
+		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
-	CellClusterDescription& retainCell(CellDescription const& c)
+	CellDescription& test(CellDescription & value)
 	{
-		cells.emplace_back(TrackerElement<CellDescription>(c, TrackerElementState::Retained));
+		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Retained));
+		return value;
+	}
+	CellClusterDescription& retainCell(CellDescription const& value)
+	{
+		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Retained));
+		return *this;
+	}
+	CellClusterDescription& retainConnection(pair<uint64_t, uint64_t> const& value)
+	{
+		cellConnections.emplace_back(TrackerElement<pair<uint64_t, uint64_t>>(value, TrackerElementState::Retained));
 		return *this;
 	}
 };
@@ -86,12 +96,12 @@ struct DataDescription
 
 	DataDescription& addCellCluster(CellClusterDescription const& value)
 	{
-		clusters.push_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Added));
+		clusters.emplace_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
 	DataDescription& addEnergyParticle(EnergyParticleDescription const& value)
 	{
-		particles.push_back(TrackerElement<EnergyParticleDescription>(value, TrackerElementState::Added));
+		particles.emplace_back(TrackerElement<EnergyParticleDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
 	void clear()
@@ -99,6 +109,11 @@ struct DataDescription
 		clusters.clear();
 		particles.clear();
 	}
+};
+
+struct ResolveDescription
+{
+	bool resolveCellLinks = false;
 };
 
 #endif // ENTITIES_DESCRIPTIONS_H

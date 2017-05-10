@@ -2,6 +2,7 @@
 #define SIMULATIONACCESS_H
 
 #include "model/Definitions.h"
+#include "model/entities/Descriptions.h"
 
 class SimulationAccess
 	: public QObject
@@ -16,7 +17,7 @@ public:
 	virtual IntVector2D getUniverseSize() const = 0;
 
 	virtual void updateData(DataDescription const &desc) = 0;
-	virtual void requireData(IntRect rect) = 0;
+	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual DataDescription const& retrieveData() = 0;
 };

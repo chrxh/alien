@@ -101,7 +101,8 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	runSimulation(300);
 
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
-	access->requireData(rect);
+	ResolveDescription resolveDesc;
+	access->requireData(rect, resolveDesc);
 	auto const& data = access->retrieveData();
 	ASSERT_EQ(1, data.clusters.size()) << "Wrong number of clusters.";
 	auto const& cluster = data.clusters[0].getValue();

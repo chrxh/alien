@@ -21,6 +21,7 @@
 #include "gui/texteditor/texteditor.h"
 #include "gui/GuiSettings.h"
 #include "gui/GuiSettings.h"
+#include "gui/visualeditor/ViewportController.h"
 #include "model/ModelSettings.h"
 #include "model/SimulationController.h"
 #include "model/context/SimulationContext.h"
@@ -296,9 +297,8 @@ void MainWindow::snapshotUniverse ()
     QDataStream out(&_snapshot, QIODevice::WriteOnly);
 /*
     _simController->saveUniverse(out);
-*/
     ui->visualEditor->serializeViewMatrix(out);
-}
+*/}
 
 void MainWindow::restoreUniverse ()
 {
@@ -309,7 +309,6 @@ void MainWindow::restoreUniverse ()
     //read simulation data
 /*
     _simController->loadUniverse(in);
-*/
 
     //reset editors
     ui->visualEditor->reset();
@@ -318,7 +317,6 @@ void MainWindow::restoreUniverse ()
     ui->visualEditor->loadViewMatrix(in);
 
     //force simulator to update other coordinators
-/*
     _simController->updateUniverse();
 */
 
@@ -395,16 +393,13 @@ void MainWindow::setEditMode (bool editMode)
     ui->actionStep->setEnabled(true);
     ui->actionPlay->setIcon(QIcon("://Icons/play.png"));
 
-    //update menubar
-//    ui->actionLoad_cell_extension->setEnabled(editMode);
-
     //update macro editor and button
     if( editMode) {
-        ui->visualEditor->setActiveScene(VisualEditor::ShapeScene);
+        ui->visualEditor->setActiveScene(ActiveScene::ShapeScene);
         ui->actionEditor->setIcon(QIcon("://Icons/microscope_active.png"));
     }
     else {
-        ui->visualEditor->setActiveScene(VisualEditor::PixelScene);
+        ui->visualEditor->setActiveScene(ActiveScene::PixelScene);
         ui->actionEditor->setIcon(QIcon("://Icons/microscope.png"));
         cellDefocused();
     }

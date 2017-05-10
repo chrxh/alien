@@ -98,12 +98,22 @@ void CellClusterImpl::setContext(UnitContext * context)
 	}
 }
 
-CellClusterDescription CellClusterImpl::getDescription() const
+CellClusterDescription CellClusterImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
 	CellClusterDescription result;
 	result.setId(_id).setPos(_pos).setVel(_pos).setAngle(_angle).setAngularVel(_angularVel);
 	for (auto const& cell : _cells) {
 		result.retainCell(cell->getDescription());
+	}
+
+	if (resolveDescription.resolveCellLinks) {
+		uint64_t id;
+		for (auto const& cell : _cells) {
+			id = cell->getId();
+			for (int i = 0; i < cell->getNumConnections(); ++i) {
+				result.retainConnection({ id, cell->getConnection(i)->getId() });
+			}
+		}
 	}
 	return result;
 }

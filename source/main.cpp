@@ -31,6 +31,7 @@
 
 //Nächstes Mal:
 //- getValueOrDefault implementieren
+//- config an SimulationAccess::requireData übergeben, welche Daten geholt werden sollen
 
 //Model-Refactoring:
 //- Serialisierungs-Framework benutzt Descriptions
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
 
 	auto access = facade->buildSimulationAccess(context);
 	DataDescription desc;
-	for (int i = 0; i < 10000; ++i) {
+	for (int i = 0; i < 100000; ++i) {
 		desc.addCellCluster(CellClusterDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
 			.setVel(QVector2D(numberGen->getRandomReal() - 0.5, numberGen->getRandomReal() - 0.5))
 			.addCell(CellDescription().setEnergy(parameters->cellCreationEnergy).setMaxConnections(4)));
