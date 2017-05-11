@@ -20,6 +20,7 @@ public:
     void reset ();
 
 private:
+	void requestAllData();
     Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
 
