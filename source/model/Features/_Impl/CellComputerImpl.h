@@ -5,10 +5,10 @@
 #include <QChar>
 #include <QVector>
 
-#include "model/Features/CellFunctionComputer.h"
+#include "model/Features/CellComputer.h"
 
 class CellComputerImpl
-	: public CellFunctionComputer
+	: public CellComputer
 {
 public:
     CellComputerImpl (UnitContext* context);

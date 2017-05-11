@@ -420,9 +420,6 @@
     <ClInclude Include="..\..\source\model\Features\CellFunction.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\CellFunctionComputer.h">
-      <Filter>Source Files\Features</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\model\Features\Descriptions.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
@@ -479,6 +476,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\model\_Impl\SerializationFacadeImpl.h">
       <Filter>Source Files\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\Features\CellComputer.h">
+      <Filter>Source Files\Features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

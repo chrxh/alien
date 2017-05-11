@@ -3,12 +3,12 @@
 
 #include "CellFunction.h"
 
-class CellFunctionComputer
+class CellComputer
 	: public CellFunction
 {
 public:
-    CellFunctionComputer (UnitContext* context) : CellFunction(context) {}
-    virtual ~CellFunctionComputer () {}
+    CellComputer (UnitContext* context) : CellFunction(context) {}
+    virtual ~CellComputer () {}
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::COMPUTER; }
 

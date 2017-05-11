@@ -8,7 +8,7 @@
 #include "model/Entities/Token.h"
 #include "model/Entities/EntityFactory.h"
 #include "model/Features/CellFunction.h"
-#include "model/Features/CellFunctionComputer.h"
+#include "model/Features/CellComputer.h"
 #include "model/Features/EnergyGuidance.h"
 #include "model/Features/CellFeatureFactory.h"
 #include "model/Metadata/SymbolTable.h"
