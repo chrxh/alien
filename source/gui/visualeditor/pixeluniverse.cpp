@@ -46,7 +46,7 @@ void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewpor
 	connect(controller, &SimulationController::timestepCalculated, this, &PixelUniverse::requestData);
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 
-	requestData();
+	requestAllData();
 }
 
 void PixelUniverse::reset ()
@@ -56,9 +56,15 @@ void PixelUniverse::reset ()
     update();
 }
 
-Q_SLOT void PixelUniverse::requestData()
+void PixelUniverse::requestAllData()
 {
 	IntVector2D size = _simAccess->getUniverseSize();
+	ResolveDescription resolveDesc;
+	_simAccess->requireData({ {0, 0}, size }, resolveDesc);
+}
+
+Q_SLOT void PixelUniverse::requestData()
+{
 	ResolveDescription resolveDesc;
 	IntRect rect = _viewport->getRect();
 	_simAccess->requireData(rect, resolveDesc);
