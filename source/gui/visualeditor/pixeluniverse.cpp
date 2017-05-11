@@ -5,6 +5,7 @@
 
 #include "Base/ServiceLocator.h"
 #include "gui/Settings.h"
+#include "gui/visualeditor/ViewportInfo.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/BuilderFacade.h"
 #include "model/SimulationController.h"
@@ -18,8 +19,6 @@
 
 #include "pixeluniverse.h"
 
-const int MOUSE_HISTORY = 10;
-
 PixelUniverse::PixelUniverse(QObject* parent)
 {
 	setBackgroundBrush(QBrush(BACKGROUND_COLOR));
@@ -32,15 +31,16 @@ PixelUniverse::~PixelUniverse()
 	delete _image;
 }
 
-void PixelUniverse::init(SimulationController* controller)
+void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewport)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	_simAccess = facade->buildSimulationAccess(controller->getContext());
+	_viewport = viewport;
 
 	IntVector2D size = _simAccess->getUniverseSize();
 	if (!_image) {
 		_image = new QImage(size.x, size.y, QImage::Format_RGB32);
-		setSceneRect(0, 0, _image->width(), _image->height());
+		QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
 	}
 
 	connect(controller, &SimulationController::timestepCalculated, this, &PixelUniverse::requestData);
@@ -60,7 +60,8 @@ Q_SLOT void PixelUniverse::requestData()
 {
 	IntVector2D size = _simAccess->getUniverseSize();
 	ResolveDescription resolveDesc;
-	_simAccess->requireData({ {0, 0}, {size.x/4 - 1, size.y/4 - 1} }, resolveDesc);
+	IntRect rect = _viewport->getRect();
+	_simAccess->requireData(rect, resolveDesc);
 }
 
 Q_SLOT void PixelUniverse::retrieveAndDisplayData()

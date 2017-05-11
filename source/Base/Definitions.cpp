@@ -22,6 +22,23 @@ QVector2D IntVector2D::toQVector2D()
 	return QVector2D(x, y); 
 }
 
+IntVector2D & IntVector2D::restrictToRect(IntRect const & rect)
+{
+	if (x < rect.p1.x) {
+		x = rect.p1.x;
+	}
+	if (y < rect.p1.y) {
+		y = rect.p1.y;
+	}
+	if (x > rect.p2.x) {
+		x = rect.p2.x;
+	}
+	if (y > rect.p2.y) {
+		y = rect.p2.y;
+	}
+	return *this;
+}
+
 bool IntVector2D::operator==(IntVector2D const & vec)
 {
 	return x == vec.x && y == vec.y;
@@ -33,7 +50,21 @@ std::ostream& operator << (std::ostream& os, const IntVector2D& vec)
 	return os;
 }
 
-bool IntRect::isContained(IntVector2D p)
+
+IntRect::IntRect(std::initializer_list<IntVector2D> l)
+{
+	auto it = l.begin();
+	p1 = *it++;
+	p2 = *it;
+}
+
+IntRect::IntRect(QRectF const &rect)
+	: p1({ static_cast<int>(rect.left()), static_cast<int>(rect.top()) })
+	, p2({ static_cast<int>(rect.right()), static_cast<int>(rect.bottom()) })
+{
+}
+
+bool IntRect::isContained(IntVector2D const &p)
 {
 	return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y;
 }
