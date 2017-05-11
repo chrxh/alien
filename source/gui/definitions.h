@@ -12,6 +12,7 @@ class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
 class QGraphicsView;
+class ViewportInfo;
 class ViewportController;
 enum class ActiveScene;
 

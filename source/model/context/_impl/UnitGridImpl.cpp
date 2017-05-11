@@ -42,7 +42,9 @@ Unit * UnitGridImpl::getUnitOfMapPos(QVector2D pos) const
 
 IntVector2D UnitGridImpl::getGridPosOfMapPos(QVector2D pos) const
 {
-	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
+	IntVector2D intPos = pos;// _metric->correctPositionWithIntPrecision(pos);
+	auto size = _metric->getSize();
+	intPos.restrictToRect({ { 0, 0 }, { size.x - 1, size.y - 1 } });
 	IntVector2D compartmentSize = calcCompartmentSize();
 	return { intPos.x / compartmentSize.x, intPos.y / compartmentSize.y };
 }

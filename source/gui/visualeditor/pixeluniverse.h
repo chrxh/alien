@@ -5,6 +5,7 @@
 #include <QVector2D>
 #include <QTimer>
 
+#include "gui/Definitions.h"
 #include "model/Definitions.h"
 
 class PixelUniverse : public QGraphicsScene
@@ -14,7 +15,7 @@ public:
     PixelUniverse(QObject* parent=0);
     virtual ~PixelUniverse();
 
-	virtual void init(SimulationController* controller);
+	virtual void init(SimulationController* controller, ViewportInfo* viewport);
 
     void reset ();
 
@@ -26,6 +27,7 @@ private:
 	void displayparticles(DataDescription const& data) const;
 
 	SimulationAccess* _simAccess = nullptr;
+	ViewportInfo* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;
     QImage* _image = nullptr;
 

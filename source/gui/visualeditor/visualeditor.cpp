@@ -36,8 +36,8 @@ VisualEditor::~VisualEditor()
 void VisualEditor::init(SimulationController* controller)
 {
 	_controller = controller;
-	_pixelUniverse->init(controller);
 	_viewport->init(ui->simulationView, _pixelUniverse, _shapeUniverse, ActiveScene::PixelScene);
+	_pixelUniverse->init(controller, _viewport);
 }
 
 void VisualEditor::reset ()
