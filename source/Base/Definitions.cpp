@@ -64,7 +64,3 @@ IntRect::IntRect(QRectF const &rect)
 {
 }
 
-bool IntRect::isContained(IntVector2D const &p)
-{
-	return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y;
-}

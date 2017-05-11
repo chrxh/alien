@@ -112,9 +112,9 @@ int main(int argc, char *argv[])
 
 	auto access = facade->buildSimulationAccess(context);
 	DataDescription desc;
-	for (int i = 0; i < 100000; ++i) {
+	for (int i = 0; i < 30000; ++i) {
 		desc.addCellCluster(CellClusterDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
-			.setVel(QVector2D(numberGen->getRandomReal() - 0.5, numberGen->getRandomReal() - 0.5))
+			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
 			.addCell(CellDescription().setEnergy(parameters->cellCreationEnergy).setMaxConnections(4)));
 	}
 	access->updateData(desc);
