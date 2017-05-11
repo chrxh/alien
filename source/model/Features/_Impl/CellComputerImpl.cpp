@@ -12,7 +12,7 @@
 #include "CellComputerImpl.h"
 
 CellComputerImpl::CellComputerImpl (UnitContext* context)
-    : CellFunctionComputer(context)
+    : CellComputer(context)
     , _memory(context->getSimulationParameters()->cellFunctionComputerCellMemorySize, 0)
 {
 }
@@ -131,7 +131,7 @@ QString CellComputerImpl::decompileInstructionCode () const
     return text;
 }
 
-CellFunctionComputer::CompilationState CellComputerImpl::injectAndCompileInstructionCode (QString sourceCode)
+CellComputer::CompilationState CellComputerImpl::injectAndCompileInstructionCode (QString sourceCode)
 {
     State state = State::LOOKING_FOR_INSTR_START;
 
