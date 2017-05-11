@@ -53,8 +53,8 @@ SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationCo
 	return controller;
 }
 
-SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, SpaceMetric* metric, SymbolTable* symbolTable
-	, SimulationParameters* parameters) const
+SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
+	, SymbolTable* symbolTable, SimulationParameters* parameters) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -63,6 +63,8 @@ SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingT
 	auto threads = contextFactory->buildSimulationThreads();
 	auto grid = contextFactory->buildSimulationGrid();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
+	auto metric = contextFactory->buildSpaceMetric();
+	metric->init(universeSize);
 	threads->init(maxRunngingThreads);
 	grid->init(gridSize, metric);
 	context->init(numberGen, metric, grid, threads, symbolTable, parameters);
@@ -126,14 +128,6 @@ Unit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationCon
 	unit->init(unitContext);
 
 	return unit;
-}
-
-SpaceMetric * BuilderFacadeImpl::buildSpaceMetric(IntVector2D universeSize) const
-{
-	ContextFactory* factory = ServiceLocator::getInstance().getService<ContextFactory>();
-	auto metric = factory->buildSpaceMetric();
-	metric->init(universeSize);
-	return metric;
 }
 
 SymbolTable * BuilderFacadeImpl::buildDefaultSymbolTable() const

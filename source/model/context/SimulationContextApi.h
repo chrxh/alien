@@ -11,7 +11,6 @@ public:
 	SimulationContextApi(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~SimulationContextApi() = default;
 
-	virtual SpaceMetric* getSpaceMetric() const = 0;
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;
 };
