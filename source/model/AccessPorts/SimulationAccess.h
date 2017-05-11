@@ -14,8 +14,6 @@ public:
 
 	virtual void init(SimulationContextApi* context) = 0;
 
-	virtual IntVector2D getUniverseSize() const = 0;
-
 	virtual void updateData(DataDescription const &desc) = 0;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
 	Q_SIGNAL void dataReadyToRetrieve();

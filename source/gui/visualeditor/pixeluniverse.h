@@ -28,6 +28,7 @@ private:
 	void displayparticles(DataDescription const& data) const;
 
 	SimulationAccess* _simAccess = nullptr;
+	SimulationContextApi* _context = nullptr;
 	ViewportInfo* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;
     QImage* _image = nullptr;

@@ -34,11 +34,12 @@ PixelUniverse::~PixelUniverse()
 void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewport)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	_simAccess = facade->buildSimulationAccess(controller->getContext());
+	_context = controller->getContext();
+	_simAccess = facade->buildSimulationAccess(_context);
 	_viewport = viewport;
 
-	IntVector2D size = _simAccess->getUniverseSize();
 	if (!_image) {
+		IntVector2D size = _context->getSpaceMetric()->getSize();
 		_image = new QImage(size.x, size.y, QImage::Format_RGB32);
 		QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
 	}
@@ -58,7 +59,7 @@ void PixelUniverse::reset ()
 
 void PixelUniverse::requestAllData()
 {
-	IntVector2D size = _simAccess->getUniverseSize();
+	IntVector2D size = _context->getSpaceMetric()->getSize();
 	ResolveDescription resolveDesc;
 	_simAccess->requireData({ {0, 0}, size }, resolveDesc);
 }
@@ -159,10 +160,14 @@ void PixelUniverse::displayClusters(DataDescription const& data) const
 
 void PixelUniverse::displayparticles(DataDescription const & data) const
 {
+	auto space = _context->getSpaceMetric();
+	IntVector2D size = space->getSize();
+	IntRect rect = { {0, 0}, {size.x - 1, size.y - 1} };
 	for (auto const& particleTracker : data.particles) {
 		auto const& particleDesc = particleTracker.getValue();
 		auto const& pos = particleDesc.pos.getValue();
 		auto const& energy = particleDesc.energy.getValue();
-		_image->setPixel(pos.x(), pos.y(), calcParticleColor(energy));
+		auto intPos = space->correctPositionWithIntPrecision(pos);
+		_image->setPixel(intPos.x, intPos.y, calcParticleColor(energy));
 	}
 }
