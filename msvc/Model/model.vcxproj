@@ -584,7 +584,7 @@
     <ClInclude Include="..\..\source\model\Features\CellFeatureEnums.h" />
     <ClInclude Include="..\..\source\model\Features\CellFeatureFactory.h" />
     <ClInclude Include="..\..\source\model\Features\CellFunction.h" />
-    <ClInclude Include="..\..\source\model\Features\CellFunctionComputer.h" />
+    <ClInclude Include="..\..\source\model\Features\CellComputer.h" />
     <ClInclude Include="..\..\source\model\Features\Descriptions.h" />
     <ClInclude Include="..\..\source\model\Features\EnergyGuidance.h" />
     <ClInclude Include="..\..\source\model\Features\_Impl\CellFeatureFactoryImpl.h" />
