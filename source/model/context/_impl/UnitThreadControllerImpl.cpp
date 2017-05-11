@@ -14,6 +14,9 @@ UnitThreadControllerImpl::UnitThreadControllerImpl(QObject * parent)
 UnitThreadControllerImpl::~UnitThreadControllerImpl()
 {
 	terminateThreads();
+	for (auto const& ts : _threadsAndCalcSignals) {
+		delete ts.unit;
+	}
 	for (auto const &observer : _observers) {
 		observer->unregister();
 	}
@@ -37,7 +40,6 @@ void UnitThreadControllerImpl::registerUnit(Unit * unit)
 {
 	auto newThread = new UnitThread(this);
 	unit->moveToThread(newThread);
-	connect(newThread, &QThread::finished, unit, &QObject::deleteLater);
 	_threadsByContexts[unit->getContext()] = newThread;
 	
 	auto signal = new SignalWrapper(this);
@@ -46,7 +48,7 @@ void UnitThreadControllerImpl::registerUnit(Unit * unit)
 	connect(unit, &Unit::timestepCalculated, _signalMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 	_signalMapper->setMapping(unit, newThread);
 
-	_threadsAndCalcSignals.push_back({ newThread , signal });
+	_threadsAndCalcSignals.push_back({ unit, newThread, signal });
 }
 
 void UnitThreadControllerImpl::start()

@@ -9,7 +9,7 @@ class UnitGridImpl
 	Q_OBJECT
 public:
 	UnitGridImpl(QObject* parent = nullptr);
-	virtual ~UnitGridImpl() {}
+	virtual ~UnitGridImpl();
 
 	virtual void init(IntVector2D gridSize, SpaceMetric* metric) override;
 
