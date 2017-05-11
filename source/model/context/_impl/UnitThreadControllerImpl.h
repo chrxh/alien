@@ -44,6 +44,7 @@ private:
 	int _maxRunningThreads = 1;
 	int _runningThreads = 0;
 	struct UnitThreadSignal {
+		Unit* unit;
 		UnitThread* thr;
 		SignalWrapper* calcSignal;
 	};

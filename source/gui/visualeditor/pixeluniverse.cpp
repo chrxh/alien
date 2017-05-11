@@ -35,8 +35,9 @@ void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewpor
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	_context = controller->getContext();
-	_simAccess = facade->buildSimulationAccess(_context);
 	_viewport = viewport;
+	auto simAccess = facade->buildSimulationAccess(_context);
+	SET_CHILD(_simAccess, simAccess);
 
 	if (!_image) {
 		IntVector2D size = _context->getSpaceMetric()->getSize();

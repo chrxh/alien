@@ -8,6 +8,10 @@ UnitGridImpl::UnitGridImpl(QObject * parent)
 {
 }
 
+UnitGridImpl::~UnitGridImpl()
+{
+}
+
 void UnitGridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
 {
 	if ((metric->getSize().x % gridSize.x != 0) || (metric->getSize().y % gridSize.y != 0)) {

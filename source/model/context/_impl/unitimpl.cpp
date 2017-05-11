@@ -14,6 +14,10 @@ UnitImpl::UnitImpl(QObject* parent)
 {
 }
 
+UnitImpl::~UnitImpl()
+{
+}
+
 void UnitImpl::init(UnitContext* context)
 {
 	SET_CHILD(_context, context);
