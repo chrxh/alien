@@ -2,9 +2,9 @@
 #define SIMULATIONACCESSIMPL_H
 
 #include "model/AccessPorts/SimulationAccess.h"
-#include "model/context/SimulationContext.h"
-#include "model/context/UnitObserver.h"
-#include "model/entities/Descriptions.h"
+#include "model/Context/SimulationContext.h"
+#include "model/Context/UnitObserver.h"
+#include "model/Entities/Descriptions.h"
 
 class SimulationAccessImpl
 	: public SimulationAccess

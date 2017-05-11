@@ -1,6 +1,6 @@
 #include "Base/ServiceLocator.h"
-#include "model/context/SimulationContext.h"
-#include "model/context/UnitThreadController.h"
+#include "model/Context/SimulationContext.h"
+#include "model/Context/UnitThreadController.h"
 
 #include "SimulationControllerImpl.h"
 

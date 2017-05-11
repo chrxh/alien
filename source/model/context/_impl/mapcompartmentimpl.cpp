@@ -1,5 +1,5 @@
 #include "MapCompartmentImpl.h"
-#include "model/context/UnitContext.h"
+#include "model/Context/UnitContext.h"
 
 MapCompartmentImpl::MapCompartmentImpl(QObject * parent)
 	: MapCompartment(parent)

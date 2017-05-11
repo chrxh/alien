@@ -5,14 +5,14 @@
 #include <QChar>
 #include <QVector>
 
-#include "model/features/CellFunctionComputer.h"
+#include "model/Features/CellFunctionComputer.h"
 
-class CellFunctionComputerImpl
+class CellComputerImpl
 	: public CellFunctionComputer
 {
 public:
-    CellFunctionComputerImpl (UnitContext* context);
-    CellFunctionComputerImpl (QByteArray data, UnitContext* context);
+    CellComputerImpl (UnitContext* context);
+    CellComputerImpl (QByteArray data, UnitContext* context);
 
 	QByteArray getInternalData () const override;
 

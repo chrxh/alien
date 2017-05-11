@@ -2,7 +2,7 @@
 #define FEATURE_DESCRIPTIONS_H
 
 #include "model/Definitions.h"
-#include "model/features/CellFeatureEnums.h"
+#include "model/Features/CellFeatureEnums.h"
 
 struct CellFunctionDescription
 {

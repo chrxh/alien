@@ -1,5 +1,5 @@
-#include "model/context/SpaceMetric.h"
-#include "model/entities/EnergyParticle.h"
+#include "model/Context/SpaceMetric.h"
+#include "model/Entities/EnergyParticle.h"
 
 #include "EnergyParticleMapImpl.h"
 

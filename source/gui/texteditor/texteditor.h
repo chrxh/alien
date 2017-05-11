@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "model/entities/CellTO.h"
+#include "model/Entities/CellTO.h"
 #include "model/Definitions.h"
 
 namespace Ui {

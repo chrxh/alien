@@ -1,7 +1,7 @@
 #ifndef CELLCLUSTERIMPL_H
 #define CELLCLUSTERIMPL_H
 
-#include "model/entities/CellCluster.h"
+#include "model/Entities/CellCluster.h"
 
 #include <QMatrix4x4>
 

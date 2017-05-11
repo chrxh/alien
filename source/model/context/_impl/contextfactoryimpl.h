@@ -1,7 +1,7 @@
 #ifndef CONTEXTFACTORYIMPL_H
 #define CONTEXTFACTORYIMPL_H
 
-#include "model/context/ContextFactory.h"
+#include "model/Context/ContextFactory.h"
 
 class ContextFactoryImpl
 	: public ContextFactory

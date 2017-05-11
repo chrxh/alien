@@ -4,9 +4,9 @@
 #include <QtGlobal>
 #include <QVector2D>
 
-#include "model/entities/CellTO.h"
-#include "model/features/CellFeatureEnums.h"
-#include "model/entities/Descriptions.h"
+#include "model/Entities/CellTO.h"
+#include "model/Features/CellFeatureEnums.h"
+#include "model/Entities/Descriptions.h"
 
 #include "Definitions.h"
 

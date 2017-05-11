@@ -4,7 +4,7 @@
 #include <QDialog>
 
 #include "model/Definitions.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Context/SimulationParameters.h"
 
 namespace Ui {
 class NewSimulationDialog;

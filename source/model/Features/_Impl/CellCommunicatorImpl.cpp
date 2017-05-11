@@ -1,24 +1,24 @@
 #include <QString>
 
-#include "model/entities/Cell.h"
-#include "model/entities/CellCluster.h"
-#include "model/entities/Token.h"
-#include "model/context/UnitContext.h"
-#include "model/context/CellMap.h"
-#include "model/context/SpaceMetric.h"
-#include "model/physics/Physics.h"
-#include "model/physics/CodingPhysicalQuantities.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Entities/Cell.h"
+#include "model/Entities/CellCluster.h"
+#include "model/Entities/Token.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/CellMap.h"
+#include "model/Context/SpaceMetric.h"
+#include "model/Physics/Physics.h"
+#include "model/Physics/PhysicalQuantityConverter.h"
+#include "model/Context/SimulationParameters.h"
 
-#include "CellFunctionCommunicatorImpl.h"
+#include "CellCommunicatorImpl.h"
 
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl(UnitContext* context)
+CellCommunicatorImpl::CellCommunicatorImpl(UnitContext* context)
     : CellFunction(context), _parameters(context->getSimulationParameters())
 {
 
 }
 
-CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QByteArray data, UnitContext* context)
+CellCommunicatorImpl::CellCommunicatorImpl (QByteArray data, UnitContext* context)
 	: CellFunction(context), _parameters(context->getSimulationParameters())
 {
     _newMessageReceived = static_cast<bool>(data[0]);
@@ -28,17 +28,17 @@ CellFunctionCommunicatorImpl::CellFunctionCommunicatorImpl (QByteArray data, Uni
     _receivedMessage.distance = data[4];
 }
 
-bool & CellFunctionCommunicatorImpl::getNewMessageReceivedRef()
+bool & CellCommunicatorImpl::getNewMessageReceivedRef()
 {
 	return _newMessageReceived;
 }
 
-CellFunctionCommunicatorImpl::MessageData & CellFunctionCommunicatorImpl::getReceivedMessageRef()
+CellCommunicatorImpl::MessageData & CellCommunicatorImpl::getReceivedMessageRef()
 {
 	return _receivedMessage;
 }
 
-CellFeature::ProcessingResult CellFunctionCommunicatorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellCommunicatorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     Enums::CommunicatorIn::Type cmd = readCommandFromToken(token);
@@ -51,7 +51,7 @@ CellFeature::ProcessingResult CellFunctionCommunicatorImpl::processImpl (Token* 
     return processingResult;
 }
 
-void CellFunctionCommunicatorImpl::serializePrimitives (QDataStream& stream) const
+void CellCommunicatorImpl::serializePrimitives (QDataStream& stream) const
 {
     stream << _newMessageReceived
            << _receivedMessage.channel
@@ -60,7 +60,7 @@ void CellFunctionCommunicatorImpl::serializePrimitives (QDataStream& stream) con
            << _receivedMessage.distance;
 }
 
-void CellFunctionCommunicatorImpl::deserializePrimitives (QDataStream& stream)
+void CellCommunicatorImpl::deserializePrimitives (QDataStream& stream)
 {
     stream >> _newMessageReceived
            >> _receivedMessage.channel
@@ -71,7 +71,7 @@ void CellFunctionCommunicatorImpl::deserializePrimitives (QDataStream& stream)
 
 
 
-QByteArray CellFunctionCommunicatorImpl::getInternalData () const
+QByteArray CellCommunicatorImpl::getInternalData () const
 {
 	QByteArray data(5, 0);
     data[0] = static_cast<quint8>(_newMessageReceived);
@@ -82,18 +82,18 @@ QByteArray CellFunctionCommunicatorImpl::getInternalData () const
 	return data;
 }
 
-Enums::CommunicatorIn::Type CellFunctionCommunicatorImpl::readCommandFromToken (Token* token) const
+Enums::CommunicatorIn::Type CellCommunicatorImpl::readCommandFromToken (Token* token) const
 {
     return static_cast<Enums::CommunicatorIn::Type>(token->getMemoryRef()[Enums::Communicator::IN] % 4);
 }
 
-void CellFunctionCommunicatorImpl::setListeningChannel (Token* token)
+void CellCommunicatorImpl::setListeningChannel (Token* token)
 {
     _receivedMessage.channel = token->getMemoryRef()[Enums::Communicator::IN_CHANNEL];
 }
 
 
-void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token, Cell* cell, Cell* previousCell) const
+void CellCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token, Cell* cell, Cell* previousCell) const
 {
     MessageData messageDataToSend;
     messageDataToSend.channel = token->getMemoryRef()[Enums::Communicator::IN_CHANNEL];
@@ -101,10 +101,10 @@ void CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndUpdateToke
     messageDataToSend.angle = token->getMemoryRef()[Enums::Communicator::IN_ANGLE];
     messageDataToSend.distance = token->getMemoryRef()[Enums::Communicator::IN_DISTANCE];
     int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageDataToSend, cell, previousCell);
-    token->getMemoryRef()[Enums::Communicator::OUT_SENT_NUM_MESSAGE] = CodingPhysicalQuantities::convertIntToData(numMsg);
+    token->getMemoryRef()[Enums::Communicator::OUT_SENT_NUM_MESSAGE] = PhysicalQuantityConverter::convertIntToData(numMsg);
 }
 
-int CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
+int CellCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
                                                                             Cell* senderCell,
                                                                             Cell* senderPreviousCell) const
 {
@@ -117,7 +117,7 @@ int CellFunctionCommunicatorImpl::sendMessageToNearbyCommunicatorsAndReturnNumbe
     return numMsg;
 }
 
-QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) const
+QList< Cell* > CellCommunicatorImpl::findNearbyCommunicator(Cell* cell) const
 {
     CellMap::CellSelectFunction cellSelectCommunicatorFunction =
         [](Cell* cell)
@@ -130,12 +130,12 @@ QList< Cell* > CellFunctionCommunicatorImpl::findNearbyCommunicator(Cell* cell) 
     return _context->getCellMap()->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 
-bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
+bool CellCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
                                                                        Cell* senderCell,
                                                                        Cell* senderPreviousCell,
                                                                        Cell* receiverCell) const
 {
-    CellFunctionCommunicatorImpl* communicator = receiverCell->getFeatures()->findObject<CellFunctionCommunicatorImpl>();
+    CellCommunicatorImpl* communicator = receiverCell->getFeatures()->findObject<CellCommunicatorImpl>();
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector2D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
@@ -143,8 +143,8 @@ bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (co
             QVector2D displacementOfObjectFromReceiver = metric->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
-            communicator->_receivedMessage.angle = CodingPhysicalQuantities::convertAngleToData(angleSeenFromReceiver);
-            communicator->_receivedMessage.distance = CodingPhysicalQuantities::convertURealToData(distanceSeenFromReceiver);
+            communicator->_receivedMessage.angle = PhysicalQuantityConverter::convertAngleToData(angleSeenFromReceiver);
+            communicator->_receivedMessage.distance = PhysicalQuantityConverter::convertURealToData(distanceSeenFromReceiver);
             communicator->_receivedMessage.message = messageDataToSend.message;
             communicator->_newMessageReceived = true;
             return true;
@@ -153,17 +153,17 @@ bool CellFunctionCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (co
     return false;
 }
 
-QVector2D CellFunctionCommunicatorImpl::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend
+QVector2D CellCommunicatorImpl::calcDisplacementOfObjectFromSender (const MessageData& messageDataToSend
 	, Cell* senderCell, Cell* senderPreviousCell) const
 {
     QVector2D displacementFromSender = senderPreviousCell->calcPosition() - senderCell->calcPosition();
     displacementFromSender.normalize();
-    displacementFromSender = Physics::rotateClockwise(displacementFromSender, CodingPhysicalQuantities::convertDataToAngle(messageDataToSend.angle));
-    displacementFromSender = displacementFromSender * CodingPhysicalQuantities::convertDataToUReal(messageDataToSend.distance);
+    displacementFromSender = Physics::rotateClockwise(displacementFromSender, PhysicalQuantityConverter::convertDataToAngle(messageDataToSend.angle));
+    displacementFromSender = displacementFromSender * PhysicalQuantityConverter::convertDataToUReal(messageDataToSend.distance);
     return displacementFromSender;
 }
 
-void CellFunctionCommunicatorImpl::receiveMessage (Token* token, Cell* receiverCell, Cell* receiverPreviousCell)
+void CellCommunicatorImpl::receiveMessage (Token* token, Cell* receiverCell, Cell* receiverPreviousCell)
 {
 	QByteArray& tokenMem = token->getMemoryRef();
 	if (_newMessageReceived) {
@@ -180,12 +180,12 @@ void CellFunctionCommunicatorImpl::receiveMessage (Token* token, Cell* receiverC
 	}
 }
 
-void CellFunctionCommunicatorImpl::calcReceivedMessageAngle (Cell* receiverCell,
+void CellCommunicatorImpl::calcReceivedMessageAngle (Cell* receiverCell,
                                                               Cell* receiverPreviousCell)
 {
     QVector2D displacement = receiverPreviousCell->calcPosition() - receiverCell->calcPosition();
     qreal localAngle = Physics::angleOfVector(displacement);
-    qreal messageAngle = CodingPhysicalQuantities::convertDataToAngle(_receivedMessage.angle);
+    qreal messageAngle = PhysicalQuantityConverter::convertDataToAngle(_receivedMessage.angle);
     qreal relAngle = Physics::subtractAngle(messageAngle, localAngle);
-    _receivedMessage.angle = CodingPhysicalQuantities::convertAngleToData(relAngle);
+    _receivedMessage.angle = PhysicalQuantityConverter::convertAngleToData(relAngle);
 }

@@ -2,9 +2,9 @@
 #include <QFile>
 #include <gtest/gtest.h>
 
-#include "model/entities/CellCluster.h"
+#include "model/Entities/CellCluster.h"
 #include "model/SimulationController.h"
-#include "model/context/UnitContext.h"
+#include "model/Context/UnitContext.h"
 #include "model/Settings.h"
 #include "tests/TestSettings.h"
 

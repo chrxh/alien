@@ -3,17 +3,17 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 
-#include "model/physics/Physics.h"
+#include "model/Physics/Physics.h"
 #include "model/Settings.h"
-#include "model/context/UnitContext.h"
-#include "model/context/EnergyParticleMap.h"
-#include "model/context/CellMap.h"
-#include "model/context/SpaceMetric.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/EnergyParticleMap.h"
+#include "model/Context/CellMap.h"
+#include "model/Context/SpaceMetric.h"
+#include "model/Context/SimulationParameters.h"
 
-#include "model/entities/Cell.h"
-#include "model/entities/CellCluster.h"
-#include "model/entities/EntityFactory.h"
+#include "model/Entities/Cell.h"
+#include "model/Entities/CellCluster.h"
+#include "model/Entities/EntityFactory.h"
 #include "EnergyParticleImpl.h"
 
 

@@ -1,13 +1,13 @@
 #ifndef CELLFUNCTIONSCANNER_H
 #define CELLFUNCTIONSCANNER_H
 
-#include "model/features/CellFunction.h"
+#include "model/Features/CellFunction.h"
 
-class CellFunctionScannerImpl
+class CellScannerImpl
 	: public CellFunction
 {
 public:
-    CellFunctionScannerImpl (UnitContext* context);
+    CellScannerImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::SCANNER; }
 

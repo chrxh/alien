@@ -1,19 +1,19 @@
-#include "model/context/UnitContext.h"
-#include "model/context/CellMap.h"
-#include "model/entities/Cell.h"
-#include "model/entities/CellCluster.h"
-#include "model/entities/Token.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/CellMap.h"
+#include "model/Entities/Cell.h"
+#include "model/Entities/CellCluster.h"
+#include "model/Entities/Token.h"
+#include "model/Context/SimulationParameters.h"
 #include "model/Settings.h"
 
-#include "CellFunctionWeaponImpl.h"
+#include "CellWeaponImpl.h"
 
-CellFunctionWeaponImpl::CellFunctionWeaponImpl (UnitContext* context)
+CellWeaponImpl::CellWeaponImpl (UnitContext* context)
     : CellFunction(context)
 {
 }
 
-CellFeature::ProcessingResult CellFunctionWeaponImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellWeaponImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
 	auto cellMap = _context->getCellMap();

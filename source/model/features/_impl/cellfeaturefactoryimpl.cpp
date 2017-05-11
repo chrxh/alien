@@ -1,13 +1,13 @@
 #include "CellFeatureFactoryImpl.h"
 
-#include "model/entities/Cell.h"
-#include "CellFunctionComputerImpl.h"
-#include "CellFunctionConstructorImpl.h"
-#include "CellFunctionPropulsionImpl.h"
-#include "CellFunctionScannerImpl.h"
-#include "CellFunctionWeaponImpl.h"
-#include "CellFunctionSensorImpl.h"
-#include "CellFunctionCommunicatorImpl.h"
+#include "model/Entities/Cell.h"
+#include "CellComputerImpl.h"
+#include "CellConstructorImpl.h"
+#include "CellPropulsionImpl.h"
+#include "CellScannerImpl.h"
+#include "CellWeaponImpl.h"
+#include "CellSensorImpl.h"
+#include "CellCommunicatorImpl.h"
 #include "EnergyGuidanceImpl.h"
 
 #include "Base/ServiceLocator.h"
@@ -38,19 +38,19 @@ CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFun
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
-            return registerNewFeature(cell, new CellFunctionComputerImpl(context));
+            return registerNewFeature(cell, new CellComputerImpl(context));
         case Enums::CellFunction::PROPULSION :
-            return registerNewFeature(cell, new CellFunctionPropulsionImpl(context));
+            return registerNewFeature(cell, new CellPropulsionImpl(context));
         case Enums::CellFunction::SCANNER :
-            return registerNewFeature(cell, new CellFunctionScannerImpl(context));
+            return registerNewFeature(cell, new CellScannerImpl(context));
         case Enums::CellFunction::WEAPON :
-            return registerNewFeature(cell, new CellFunctionWeaponImpl(context));
+            return registerNewFeature(cell, new CellWeaponImpl(context));
         case Enums::CellFunction::CONSTRUCTOR :
-            return registerNewFeature(cell, new CellFunctionConstructorImpl(context));
+            return registerNewFeature(cell, new CellConstructorImpl(context));
         case Enums::CellFunction::SENSOR :
-            return registerNewFeature(cell, new CellFunctionSensorImpl(context));
+            return registerNewFeature(cell, new CellSensorImpl(context));
         case Enums::CellFunction::COMMUNICATOR :
-            return registerNewFeature(cell, new CellFunctionCommunicatorImpl(context));
+            return registerNewFeature(cell, new CellCommunicatorImpl(context));
         default:
             return nullptr;
     }
@@ -61,9 +61,9 @@ CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFun
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
-            return registerNewFeature(cell, new CellFunctionComputerImpl(data, context));
+            return registerNewFeature(cell, new CellComputerImpl(data, context));
         case Enums::CellFunction::COMMUNICATOR :
-            return registerNewFeature(cell, new CellFunctionCommunicatorImpl(data, context));
+            return registerNewFeature(cell, new CellCommunicatorImpl(data, context));
         default:
             return addCellFunction(cell, type, context);
     }

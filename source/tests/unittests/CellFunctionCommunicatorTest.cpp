@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "model/entities/CellCluster.h"
-#include "model/entities/Cell.h"
-#include "model/entities/Token.h"
-#include "model/features/_impl/CellFunctionCommunicatorImpl.h"
-#include "model/physics/CodingPhysicalQuantities.h"
-#include "model/context/UnitContext.h"
+#include "model/Entities/CellCluster.h"
+#include "model/Entities/Cell.h"
+#include "model/Entities/Token.h"
+#include "model/Features/_Impl/CellCommunicatorImpl.h"
+#include "model/Physics/PhysicalQuantityConverter.h"
+#include "model/Context/UnitContext.h"
 #include "model/BuilderFacade.h"
 #include "model/Settings.h"
-#include "model/context/SpaceMetric.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Context/SpaceMetric.h"
+#include "model/Context/SimulationParameters.h"
 
 #include "tests/TestSettings.h"
 
@@ -27,13 +27,13 @@ protected:
     CellCluster* _cluster1 = nullptr;
     Cell* _cellWithToken = nullptr;
     Cell* _cellWithoutToken = nullptr;
-    CellFunctionCommunicatorImpl* _communicator1a = nullptr;
-	CellFunctionCommunicatorImpl* _communicator1b = nullptr;
+    CellCommunicatorImpl* _communicator1a = nullptr;
+	CellCommunicatorImpl* _communicator1b = nullptr;
     Token* _token = nullptr;
 
     //data for cluster2
     CellCluster* _cluster2 = nullptr;
-	CellFunctionCommunicatorImpl* _communicator2 = nullptr;
+	CellCommunicatorImpl* _communicator2 = nullptr;
 };
 
 CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()

@@ -1,21 +1,21 @@
 #include <QtCore/qmath.h>
 
 #include "Base/ServiceLocator.h"
-#include "model/entities/Cell.h"
-#include "model/entities/CellCluster.h"
-#include "model/entities/EnergyParticle.h"
-#include "model/entities/Token.h"
-#include "model/entities/EntityFactory.h"
-#include "model/physics/Physics.h"
-#include "model/physics/CodingPhysicalQuantities.h"
+#include "model/Entities/Cell.h"
+#include "model/Entities/CellCluster.h"
+#include "model/Entities/EnergyParticle.h"
+#include "model/Entities/Token.h"
+#include "model/Entities/EntityFactory.h"
+#include "model/Physics/Physics.h"
+#include "model/Physics/PhysicalQuantityConverter.h"
 #include "model/Settings.h"
-#include "model/context/UnitContext.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/SimulationParameters.h"
 
-#include "CellFunctionPropulsionImpl.h"
+#include "CellPropulsionImpl.h"
 
 
-CellFunctionPropulsionImpl::CellFunctionPropulsionImpl (UnitContext* context)
+CellPropulsionImpl::CellPropulsionImpl (UnitContext* context)
     : CellFunction(context)
 {
 }
@@ -27,13 +27,13 @@ namespace {
     }
 }
 
-CellFeature::ProcessingResult CellFunctionPropulsionImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellPropulsionImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
     quint8 cmd = tokenMem[Enums::Prop::IN] % 7;
-    qreal angle = CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
+    qreal angle = PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
     qreal power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
     if( cmd == Enums::PropIn::DO_NOTHING ) {

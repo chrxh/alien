@@ -2,7 +2,7 @@
 #define ACCESSPORTFACTORY_H
 
 #include "model/Definitions.h"
-#include "model/entities/Descriptions.h"
+#include "model/Entities/Descriptions.h"
 
 class AccessPortFactory
 {

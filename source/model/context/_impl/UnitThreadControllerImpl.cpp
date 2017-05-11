@@ -1,7 +1,7 @@
-#include "model/context/Unit.h"
-#include "model/context/UnitContext.h"
-#include "model/context/MapCompartment.h"
-#include "model/context/UnitObserver.h"
+#include "model/Context/Unit.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/MapCompartment.h"
+#include "model/Context/UnitObserver.h"
 
 #include "UnitThreadControllerImpl.h"
 #include "UnitThread.h"

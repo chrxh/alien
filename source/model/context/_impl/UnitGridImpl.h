@@ -1,7 +1,7 @@
 #ifndef UNITGRIDIMPL_H
 #define UNITGRIDIMPL_H
 
-#include "model/context/UnitGrid.h"
+#include "model/Context/UnitGrid.h"
 
 class UnitGridImpl
 	: public UnitGrid

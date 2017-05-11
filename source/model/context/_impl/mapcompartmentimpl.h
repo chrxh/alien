@@ -1,7 +1,7 @@
 #ifndef MAPCOMPARTMENTIMPL_H
 #define MAPCOMPARTMENTIMPL_H
 
-#include "model/context/MapCompartment.h"
+#include "model/Context/MapCompartment.h"
 
 class MapCompartmentImpl
 	: public MapCompartment

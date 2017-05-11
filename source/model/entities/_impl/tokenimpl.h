@@ -1,7 +1,7 @@
 #ifndef TOKENIMPL_H
 #define TOKENIMPL_H
 
-#include "model/entities/Token.h"
+#include "model/Entities/Token.h"
 
 class TokenImpl
 	: public Token

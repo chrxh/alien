@@ -243,20 +243,6 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\tests\integrationtests\ComparisonTest.cpp" />
-    <ClCompile Include="..\..\source\tests\integrationtests\MultithreadingTest.cpp" />
-    <ClCompile Include="..\..\source\tests\integrationtests\ReplicatorTest.cpp" />
-    <ClCompile Include="..\..\source\tests\Predicates.cpp" />
-    <ClCompile Include="..\..\source\tests\Testsuite.cpp" />
-    <ClCompile Include="..\..\source\tests\unittests\CellClusterTest.cpp" />
-    <ClCompile Include="..\..\source\tests\unittests\CellFunctionCommunicatorTest.cpp" />
-    <ClCompile Include="..\..\source\tests\unittests\MapCompartmentTest.cpp" />
-    <ClCompile Include="..\..\source\tests\unittests\NumberGeneratorTest.cpp" />
-    <ClCompile Include="..\..\source\tests\unittests\PhysicsTest.cpp" />
-    <ClCompile Include="..\..\source\tests\unittests\UnitGridTest.cpp" />
-    <ClCompile Include="..\..\source\tests\unittests\UnitThreadControllerImplTest.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Base\Base.vcxproj">
       <Project>{21bb3377-a473-473c-a064-396ec67979ab}</Project>
     </ProjectReference>
@@ -265,8 +251,22 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\tests\Predicates.h" />
-    <ClInclude Include="..\..\source\tests\TestSettings.h" />
+    <ClCompile Include="..\..\source\Tests\Integrationtests\ComparisonTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Integrationtests\MultithreadingTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Integrationtests\ReplicatorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
+    <ClCompile Include="..\..\source\Tests\Testsuite.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\CellClusterTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\CellFunctionCommunicatorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\MapCompartmentTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\NumberGeneratorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\PhysicsTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\UnitGridTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\UnitThreadControllerImplTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\source\Tests\Predicates.h" />
+    <ClInclude Include="..\..\source\Tests\TestSettings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

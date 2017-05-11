@@ -8,7 +8,7 @@
 #include <QVector2D>
 
 #include "model/Definitions.h"
-#include "model/entities/CellTO.h"
+#include "model/Entities/CellTO.h"
 #include "gui/Definitions.h"
 
 
