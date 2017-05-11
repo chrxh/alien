@@ -28,11 +28,6 @@ void SimulationAccessImpl::init(SimulationContextApi * context)
 	_registered = true;
 }
 
-IntVector2D SimulationAccessImpl::getUniverseSize() const
-{
-	return _context->getSpaceMetric()->getSize();
-}
-
 void SimulationAccessImpl::updateData(DataDescription const & desc)
 {
 	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
