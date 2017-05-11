@@ -606,7 +606,7 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_MainWindow.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

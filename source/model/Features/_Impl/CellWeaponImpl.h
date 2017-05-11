@@ -1,13 +1,13 @@
 #ifndef CELLFUNCTIONWEAPONIMPL_H
 #define CELLFUNCTIONWEAPONIMPL_H
 
-#include "model/features/CellFunction.h"
+#include "model/Features/CellFunction.h"
 
-class CellFunctionWeaponImpl
+class CellWeaponImpl
 	: public CellFunction
 {
 public:
-    CellFunctionWeaponImpl (UnitContext* context);
+    CellWeaponImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::WEAPON; }
 

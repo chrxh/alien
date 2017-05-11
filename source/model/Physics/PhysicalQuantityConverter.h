@@ -3,7 +3,7 @@
 
 #include <QtGlobal>
 
-class CodingPhysicalQuantities
+class PhysicalQuantityConverter
 {
 public:
 	//Notice: all angles below are in DEG

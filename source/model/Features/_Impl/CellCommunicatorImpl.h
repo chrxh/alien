@@ -1,18 +1,18 @@
 #ifndef CELLFUNCTIONCOMMUNICATORIMPL_H
 #define CELLFUNCTIONCOMMUNICATORIMPL_H
 
-#include "model/features/CellFunction.h"
+#include "model/Features/CellFunction.h"
 
 #include <QVector2D>
 
 class CellFunctionCommunicatorTest;
 
-class CellFunctionCommunicatorImpl
+class CellCommunicatorImpl
 	: public CellFunction
 {
 public:
-    CellFunctionCommunicatorImpl (UnitContext* context);
-    CellFunctionCommunicatorImpl (QByteArray data, UnitContext* context);
+    CellCommunicatorImpl (UnitContext* context);
+    CellCommunicatorImpl (QByteArray data, UnitContext* context);
 
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives (QDataStream& stream) override;

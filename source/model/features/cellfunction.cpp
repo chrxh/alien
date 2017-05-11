@@ -1,10 +1,10 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-#include "model/entities/Cell.h"
-#include "model/physics/Physics.h"
-#include "model/context/UnitContext.h"
-#include "model/context/SpaceMetric.h"
+#include "model/Entities/Cell.h"
+#include "model/Physics/Physics.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/SpaceMetric.h"
 
 #include "CellFunction.h"
 

@@ -6,24 +6,24 @@
 
 #include "Base/ServiceLocator.h"
 #include "model/BuilderFacade.h"
-#include "model/entities/EntityFactory.h"
-#include "model/entities/Cell.h"
-#include "model/entities/CellCluster.h"
-#include "model/entities/Token.h"
-#include "model/physics/Physics.h"
-#include "model/physics/CodingPhysicalQuantities.h"
+#include "model/Entities/EntityFactory.h"
+#include "model/Entities/Cell.h"
+#include "model/Entities/CellCluster.h"
+#include "model/Entities/Token.h"
+#include "model/Physics/Physics.h"
+#include "model/Physics/PhysicalQuantityConverter.h"
 #include "model/Settings.h"
-#include "model/context/UnitContext.h"
-#include "model/context/CellMap.h"
-#include "model/context/SpaceMetric.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/CellMap.h"
+#include "model/Context/SpaceMetric.h"
+#include "model/Context/SimulationParameters.h"
 
-#include "CellFunctionConstructorImpl.h"
+#include "CellConstructorImpl.h"
 
 using ACTIVATE_TOKEN = Cell::ActivateToken;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenAccessNumber;
 
-CellFunctionConstructorImpl::CellFunctionConstructorImpl (UnitContext* context)
+CellConstructorImpl::CellConstructorImpl (UnitContext* context)
     : CellFunction(context)
 {
 }
@@ -120,7 +120,7 @@ namespace {
     }
 }
 
-CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeature::ProcessingResult CellConstructorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     CellCluster* cluster(cell->getCluster());
@@ -136,7 +136,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
         return processingResult;
 
     //read shift length for construction site from token data
-    qreal len = CodingPhysicalQuantities::convertDataToShiftLen(tokenMem[Enums::Constr::IN_DIST]);
+    qreal len = PhysicalQuantityConverter::convertDataToShiftLen(tokenMem[Enums::Constr::IN_DIST]);
     if( len > parameters->cellMaxDistance ) {        //length to large?
         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
         return processingResult;
@@ -192,7 +192,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
             }
 
             //read desired rotation angle from token
-            qreal angleSum = CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
+            qreal angleSum = PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
             //calc angular masses with respect to "constructionCell"
             qreal angMassConstrSite = 0.0;
@@ -302,7 +302,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
 
                 //update token data
                 tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS_ROT;
-                tokenMem[Enums::Constr::INOUT_ANGLE] = CodingPhysicalQuantities::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
+                tokenMem[Enums::Constr::INOUT_ANGLE] = PhysicalQuantityConverter::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
                 cluster->drawCellsToMap();
             }
 
@@ -525,7 +525,7 @@ CellFeature::ProcessingResult CellFunctionConstructorImpl::processImpl (Token* t
                 }
 
                 //calc start angle
-                angleGap = angleGap + CodingPhysicalQuantities::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
+                angleGap = angleGap + PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
                 //calc coordinates for new cell from angle gap and construct cell
                 QVector2D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringDistance;

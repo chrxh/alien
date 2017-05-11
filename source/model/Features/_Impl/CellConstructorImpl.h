@@ -1,15 +1,15 @@
 #ifndef CELLFUNCTIONCONSTRUCTOR_H
 #define CELLFUNCTIONCONSTRUCTOR_H
 
-#include "model/features/CellFunction.h"
+#include "model/Features/CellFunction.h"
 
 #include <QVector2D>
 
-class CellFunctionConstructorImpl
+class CellConstructorImpl
 	: public CellFunction
 {
 public:
-    CellFunctionConstructorImpl (UnitContext* context);
+    CellConstructorImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::CONSTRUCTOR; }
 

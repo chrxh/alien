@@ -1,13 +1,13 @@
 #ifndef CELLFUNCTIONPROPULSION_H
 #define CELLFUNCTIONPROPULSION_H
 
-#include "model/features/CellFunction.h"
+#include "model/Features/CellFunction.h"
 
-class CellFunctionPropulsionImpl
+class CellPropulsionImpl
 	: public CellFunction
 {
 public:
-    CellFunctionPropulsionImpl (UnitContext* context);
+    CellPropulsionImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::PROPULSION; }
 
