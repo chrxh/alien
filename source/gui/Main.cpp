@@ -30,8 +30,7 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- getValueOrDefault implementieren
-//- config an SimulationAccess::requireData übergeben, welche Daten geholt werden sollen
+//- UnitGrid::getGridPosOfMapPos auch ohne TopologyCorrections für RequiredRect bei SimulationAccess
 
 //Model-Refactoring:
 //- Serialisierungs-Framework benutzt Descriptions

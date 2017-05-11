@@ -1,5 +1,5 @@
-#ifndef GLOBAL_DEFINITIONS_H
-#define GLOBAL_DEFINITIONS_H
+#ifndef BASE_DEFINITIONS_H
+#define BASE_DEFINITIONS_H
 
 #include <QtGlobal>
 #include <QVector2D>
@@ -37,6 +37,7 @@ using std::unordered_set;
 using std::unordered_map;
 using std::pair;
 
+class IntRect;
 struct BASE_EXPORT IntVector2D {
 	int x;
 	int y;
@@ -45,6 +46,7 @@ struct BASE_EXPORT IntVector2D {
 	IntVector2D(std::initializer_list<int> l);
 	IntVector2D(QVector2D const& vec);
 	QVector2D toQVector2D();
+	IntVector2D& restrictToRect(IntRect const& rect);
 	bool operator==(IntVector2D const& vec);
 };
 
@@ -54,7 +56,10 @@ struct BASE_EXPORT IntRect {
 	IntVector2D p1;
 	IntVector2D p2;
 
-	bool isContained(IntVector2D p);
+	IntRect() = default;
+	IntRect(std::initializer_list<IntVector2D> l);
+	IntRect(QRectF const& rect);
+	bool isContained(IntVector2D const& p);
 };
 
 
@@ -65,4 +70,4 @@ struct BASE_EXPORT IntRect {
 		previousChild->setParent(this); \
 	}
 
-#endif // GLOBAL_DEFINITIONS_H
+#endif // BASE_DEFINITIONS_H

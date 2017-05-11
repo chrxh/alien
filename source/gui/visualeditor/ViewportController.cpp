@@ -37,7 +37,9 @@ ActiveScene ViewportController::getActiveScene() const
 
 QRectF ViewportController::getRect() const
 {
-	return _view->sceneRect();
+	auto p1 = _view->mapToScene(0, 0);
+	auto p2 = _view->mapToScene(_view->width(), _view->height());
+	return{ p1, p2 };
 }
 
 QVector2D ViewportController::getCenter() const
