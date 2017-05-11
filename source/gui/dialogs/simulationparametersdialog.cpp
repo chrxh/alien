@@ -2,7 +2,7 @@
 #include <QMessageBox>
 
 #include "gui/Settings.h"
-#include "model/context/SimulationParameters.h"
+#include "model/Context/SimulationParameters.h"
 #include "model/Settings.h"
 
 #include "simulationparametersdialog.h"

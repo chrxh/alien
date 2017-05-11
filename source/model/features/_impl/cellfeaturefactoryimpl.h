@@ -1,7 +1,7 @@
 #ifndef CELLFEATUREFACTORYIMPL_H
 #define CELLFEATUREFACTORYIMPL_H
 
-#include "model/features/CellFeatureFactory.h"
+#include "model/Features/CellFeatureFactory.h"
 
 class CellFeatureFactoryImpl
 	: public CellFeatureFactory

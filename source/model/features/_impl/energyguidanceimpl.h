@@ -1,7 +1,7 @@
 #ifndef ENERGYGUIDANCEDECORATORIMPL_H
 #define ENERGYGUIDANCEDECORATORIMPL_H
 
-#include "model/features/EnergyGuidance.h"
+#include "model/Features/EnergyGuidance.h"
 
 class EnergyGuidanceImpl
 	: public EnergyGuidance

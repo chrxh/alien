@@ -1,5 +1,5 @@
-#include "model/context/Unit.h"
-#include "model/context/SpaceMetric.h"
+#include "model/Context/Unit.h"
+#include "model/Context/SpaceMetric.h"
 
 #include "UnitGridImpl.h"
 

@@ -4,11 +4,11 @@
 #include "model/BuilderFacade.h"
 #include "model/Settings.h"
 #include "model/SimulationController.h"
-#include "model/context/SimulationContext.h"
-#include "model/context/UnitGrid.h"
-#include "model/context/Unit.h"
-#include "model/context/UnitContext.h"
-#include "model/context/MapCompartment.h"
+#include "model/Context/SimulationContext.h"
+#include "model/Context/UnitGrid.h"
+#include "model/Context/Unit.h"
+#include "model/Context/UnitContext.h"
+#include "model/Context/MapCompartment.h"
 
 #include "tests/Predicates.h"
 

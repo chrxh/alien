@@ -1,13 +1,13 @@
 #ifndef CELLFUNCTIONSENSOR_H
 #define CELLFUNCTIONSENSOR_H
 
-#include "model/features/CellFunction.h"
+#include "model/Features/CellFunction.h"
 
-class CellFunctionSensorImpl
+class CellSensorImpl
 	: public CellFunction
 {
 public:
-    CellFunctionSensorImpl (UnitContext* context);
+    CellSensorImpl (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::SENSOR; }
 

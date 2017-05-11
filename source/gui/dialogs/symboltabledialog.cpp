@@ -4,7 +4,7 @@
 #include "Base/ServiceLocator.h"
 #include "model/Settings.h"
 #include "model/SerializationFacade.h"
-#include "model/metadata/SymbolTable.h"
+#include "model/Metadata/SymbolTable.h"
 #include "gui/Settings.h"
 
 #include "symboltabledialog.h"

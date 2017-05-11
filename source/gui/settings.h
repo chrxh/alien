@@ -1,5 +1,5 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef GUI_SETTINGS_H
+#define GUI_SETTINGS_H
 
 #include <QColor>
 #include <QFont>
@@ -60,4 +60,4 @@ public:
 	static QFont getCellFont();
 };
 
-#endif // SETTINGS_H
+#endif // GUI_SETTINGS_H
