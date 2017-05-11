@@ -102,10 +102,9 @@ int main(int argc, char *argv[])
 	SimulationController* controller;
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	IntVector2D size = { 600, 600 };
-	auto metric = facade->buildSpaceMetric(size);
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	auto context = facade->buildSimulationContext(4, { 6, 6 }, metric, symbols, parameters);
+	auto context = facade->buildSimulationContext(4, { 6, 6 }, size, symbols, parameters);
 	controller = facade->buildSimulationController(context);
 
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();

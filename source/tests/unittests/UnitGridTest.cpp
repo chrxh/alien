@@ -30,10 +30,9 @@ protected:
 UnitGridTest::UnitGridTest()
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto metric = facade->buildSpaceMetric(_universeSize);
 	auto symbols = facade->buildDefaultSymbolTable();
 	auto parameters = facade->buildDefaultSimulationParameters();
-	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, _gridSize, metric, symbols, parameters));
+	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, _gridSize, _universeSize, symbols, parameters));
 	_controller = facade->buildSimulationController(_context);
 	_grid = _context->getUnitGrid();
 	_compartmentSize = { _universeSize.x / _gridSize.x, _universeSize.y / _gridSize.y };

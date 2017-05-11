@@ -14,6 +14,7 @@ public:
 	virtual void init(NumberGenerator* numberGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters* parameters) = 0;
 
+	virtual SpaceMetric* getSpaceMetric() const = 0;
 	virtual UnitGrid* getUnitGrid() const = 0;
 	virtual UnitThreadController* getUnitThreadController() const = 0;
 };
