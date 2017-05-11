@@ -30,7 +30,7 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- UnitGrid::getGridPosOfMapPos auch ohne TopologyCorrections für RequiredRect bei SimulationAccess
+//- SimulationContext in BuilderFacadeImpl::buildSimulationController erstellen
 
 //Model-Refactoring:
 //- Serialisierungs-Framework benutzt Descriptions
@@ -98,13 +98,12 @@ int main(int argc, char *argv[])
 
     //init main objects
     QApplication a(argc, argv);
-	SimulationController* controller;
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	IntVector2D size = { 600, 600 };
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
 	auto context = facade->buildSimulationContext(4, { 6, 6 }, size, symbols, parameters);
-	controller = facade->buildSimulationController(context);
+	auto controller = facade->buildSimulationController(context);
 
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
@@ -124,6 +123,7 @@ int main(int argc, char *argv[])
 
     w.show();
 	auto result = a.exec();
+	delete access;
 	delete controller;
 	return result;
 }
