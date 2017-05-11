@@ -37,7 +37,7 @@ using std::unordered_set;
 using std::unordered_map;
 using std::pair;
 
-class IntRect;
+struct IntRect;
 struct BASE_EXPORT IntVector2D {
 	int x;
 	int y;

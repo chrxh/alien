@@ -3,7 +3,7 @@
 
 #include <QtCore/qglobal.h>
 
-#ifndef BASE_STATIC
+#ifndef ALIEN_STATIC
 	#ifdef BASE_LIB
 	# define BASE_EXPORT Q_DECL_EXPORT
 	#else
