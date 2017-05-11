@@ -6,6 +6,7 @@
 #include <QVector2D>
 #include <QSize>
 #include <QMap>
+#include <QRectF>
 #include <QSet>
 #include <QList>
 #include <QDataStream>
@@ -17,8 +18,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "DllExport.h"
-#include "Tracker.h"
+#include "blabla_global.h"
 
 class NumberGenerator;
 class TagGenerator;
@@ -37,8 +37,9 @@ using std::unordered_set;
 using std::unordered_map;
 using std::pair;
 
-struct IntRect;
-struct BASE_EXPORT IntVector2D {
+class IntRect;
+class BLABLA_EXPORT IntVector2D {
+public:
 	int x;
 	int y;
 
@@ -50,9 +51,10 @@ struct BASE_EXPORT IntVector2D {
 	bool operator==(IntVector2D const& vec);
 };
 
-BASE_EXPORT std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
+BLABLA_EXPORT std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
 
-struct BASE_EXPORT IntRect {
+class BLABLA_EXPORT IntRect {
+public:
 	IntVector2D p1;
 	IntVector2D p2;
 
@@ -62,12 +64,5 @@ struct BASE_EXPORT IntRect {
 	bool isContained(IntVector2D const& p);
 };
 
-
-#define SET_CHILD(previousChild, newChild)\
-	if (previousChild != newChild) { \
-		delete previousChild; \
-		previousChild = newChild; \
-		previousChild->setParent(this); \
-	}
 
 #endif // BASE_DEFINITIONS_H
