@@ -64,6 +64,7 @@ qreal UnitImpl::calcInternalEnergy() const
 
 void UnitImpl::calculateTimestep()
 {
+
 	processingClustersInit();
 	processingClustersDissipation();
 	processingClustersMutationByChance();
