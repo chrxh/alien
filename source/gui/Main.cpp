@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	IntVector2D size = { 6*67, 6*33 };
+	IntVector2D size = { 6*67*2, 6*33*2 };
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
 	auto context = facade->buildSimulationContext(4, { 6, 6 }, size, symbols, parameters);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
 	auto access = facade->buildSimulationAccess(context);
 	DataDescription desc;
-	for (int i = 0; i < 20000; ++i) {
+	for (int i = 0; i < 80000; ++i) {
 /*
 		desc.addCellCluster(CellClusterDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
 			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
