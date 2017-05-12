@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 	IntVector2D size = { 6*67, 6*33 };
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	auto context = facade->buildSimulationContext(1, { 1, 1 }, size, symbols, parameters);
+	auto context = facade->buildSimulationContext(4, { 6, 6 }, size, symbols, parameters);
 	auto controller = facade->buildSimulationController(context);
 
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
