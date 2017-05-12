@@ -70,12 +70,14 @@ void UnitImpl::calculateTimestep()
 	processingClustersMovement();
 	processingClustersToken();
 	processingClustersCompletion();
-	processingClustersCompartmentAllocation();
+	processingParticlesMovement();
 
-	processingEnergyParticles();
-	processingEnergyParticlesCompartmentAllocation();
-
+	incClustersTimestamp();
+	incParticlesTimestamp();
 	_context->incTimestamp();
+
+	processingParticlesCompartmentAllocation();
+	processingClustersCompartmentAllocation();
 
 	Q_EMIT timestepCalculated();
 }
@@ -184,7 +186,7 @@ void UnitImpl::processingClustersCompartmentAllocation()
 	}
 }
 
-void UnitImpl::processingEnergyParticles()
+void UnitImpl::processingParticlesMovement()
 {
 	QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());
 	while (p.hasNext()) {
@@ -202,7 +204,21 @@ void UnitImpl::processingEnergyParticles()
 	}
 }
 
-void UnitImpl::processingEnergyParticlesCompartmentAllocation()
+void UnitImpl::incClustersTimestamp()
+{
+	for(auto const& cluster : _context->getClustersRef()) {
+		cluster->incTimestampIfFit();
+	}
+}
+
+void UnitImpl::incParticlesTimestamp()
+{
+	for (auto const& particle : _context->getEnergyParticlesRef()) {
+		particle->incTimestampIfFit();
+	}
+}
+
+void UnitImpl::processingParticlesCompartmentAllocation()
 {
 	auto compartment = _context->getMapCompartment();
 	auto spaceMetric = _context->getSpaceMetric();

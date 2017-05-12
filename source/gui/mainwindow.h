@@ -76,7 +76,7 @@ private Q_SLOTS:
     void energyParticleFocused (EnergyParticle* e);
     void entitiesSelected(int numCells, int numEnergyParticles);
 
-    void updateFrameLabel ();
+	void updateFrameLabel();
     void startScreenFinished ();
 
 private:
@@ -93,6 +93,10 @@ private:
     SimulationMonitor* _monitor;
     TutorialWindow* _tutorialWindow;
     StartScreenController* _startScreen;
+	struct Framedata {
+		int fps = 0;
+		int frame = 0;
+	} _framedata;
 
     QByteArray _serializedEnsembleData;
     QByteArray _serializedCellData;

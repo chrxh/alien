@@ -22,11 +22,10 @@ const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel
     , QVector2D vel, UnitContext* context)
-    : _context(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
+    : CellCluster(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
 {
 	_id = _context->getNumberGenerator()->getTag();
 	_context->getSpaceMetric()->correctPosition(_pos);
-	_timestamp = _context->getTimestamp();
     foreach(Cell* cell, _cells) {
         cell->setCluster(this);
     }
@@ -65,10 +64,9 @@ namespace
 }
 
 CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, UnitContext* context)
-    : _context(context), _angle(angle), _cells(cells)
+    : CellCluster(context), _angle(angle), _cells(cells)
 {
 	_id = _context->getNumberGenerator()->getTag();
-	_timestamp = _context->getTimestamp();
 	setCenterPosition(calcCenterPosition(_cells));
 	setRelPositionInCluster(_cells, this);
     updateAngularMass();
@@ -671,7 +669,6 @@ void CellClusterImpl::processingCompletion ()
 	if (!isTimestampFitting()) {
 		return;
 	}
-	++_timestamp;
 
 	auto metric = _context->getSpaceMetric();
 	auto cellMap = _context->getCellMap();
@@ -1120,11 +1117,6 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
 		metadata.color = originCell->getMetadata().color;
         energyParticle->setMetadata(metadata);
     }
-}
-
-bool CellClusterImpl::isTimestampFitting() const
-{
-	return _timestamp == _context->getTimestamp();
 }
 
 CellClusterMetadata CellClusterImpl::getMetadata() const

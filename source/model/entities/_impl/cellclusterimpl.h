@@ -1,9 +1,9 @@
 #ifndef CELLCLUSTERIMPL_H
 #define CELLCLUSTERIMPL_H
 
-#include "model/Entities/CellCluster.h"
-
 #include <QMatrix4x4>
+
+#include "model/Entities/CellCluster.h"
 
 class CellClusterImpl
 	: public CellCluster
@@ -75,12 +75,9 @@ public:
 
 private:
     void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
-	bool isTimestampFitting() const;
 	inline QVector2D applyTransformation(QVector2D pos) const;
 	inline QVector2D applyTransformation(QMatrix4x4 const& transform, QVector2D pos) const;
 	inline QVector2D applyInverseTransformation(QVector2D pos) const;
-
-    UnitContext* _context = nullptr;
 
     qreal _angle = 0.0;       //in deg
     QVector2D _pos;
@@ -92,7 +89,6 @@ private:
     QList<Cell*> _cells;
 	
     quint64 _id = 0;
-	uint64_t _timestamp = 0;
 	CellClusterMetadata _meta;
 };
 

@@ -54,6 +54,14 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     _textEditor->init(microWidgets);
 
 	ui->visualEditor->init(simController);
+	connect(_simController, &SimulationController::updateFps, [this](int value) {
+		_framedata.fps = value;
+		updateFrameLabel();
+	});
+	connect(_simController, &SimulationController::timestepCalculated, [this]() {
+		_framedata.frame++;
+		updateFrameLabel();
+	});
 
     //set font
     setFont(GuiSettings::getGlobalFont());
@@ -917,12 +925,10 @@ void MainWindow::entitiesSelected (int numCells, int numEnergyParticles)
 
 void MainWindow::updateFrameLabel ()
 {
-/*
 	ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x")
-		.arg(_simController->getFrame(), 9, 10, QLatin1Char('0'))
-		.arg(_simController->getFps(), 5, 10, QLatin1Char('0'))
+		.arg(_framedata.frame, 9, 10, QLatin1Char('0'))
+		.arg(_framedata.fps, 5, 10, QLatin1Char('0'))
 		.arg(ui->visualEditor->getZoomFactor()));
-*/
 }
 
 void MainWindow::startScreenFinished ()

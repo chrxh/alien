@@ -5,13 +5,14 @@
 
 #include "model/Definitions.h"
 #include "model/Entities/Descriptions.h"
+#include "Timestamp.h"
 
 class EnergyParticle
+	: public Timestamp
 {
 public:
+	EnergyParticle(UnitContext* context) : Timestamp(context) {}
 	virtual ~EnergyParticle() = default;
-
-	virtual void setContext(UnitContext* context) = 0;
 
 	virtual EnergyParticleDescription getDescription() const = 0;
 

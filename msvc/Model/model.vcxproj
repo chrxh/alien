@@ -234,6 +234,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\model\AccessPorts\AccessPortFactory.h" />
+    <ClInclude Include="..\..\source\model\Entities\Timestamp.h" />
     <ClInclude Include="..\..\source\model\_Impl\BuilderFacadeImpl.h" />
     <ClInclude Include="..\..\source\model\_Impl\SerializationFacadeImpl.h" />
     <CustomBuild Include="..\..\source\model\_Impl\SimulationControllerImpl.h">
@@ -649,6 +650,7 @@
     <ClCompile Include="..\..\source\model\Context\_Impl\UnitThreadControllerImpl.cpp" />
     <ClCompile Include="..\..\source\model\Definitions.cpp" />
     <ClCompile Include="..\..\source\model\Entities\CellTO.cpp" />
+    <ClCompile Include="..\..\source\model\Entities\Timestamp.cpp" />
     <ClCompile Include="..\..\source\model\Entities\_Impl\CellClusterImpl.cpp" />
     <ClCompile Include="..\..\source\model\Entities\_Impl\CellImpl.cpp" />
     <ClCompile Include="..\..\source\model\Entities\_Impl\EnergyParticleImpl.cpp" />

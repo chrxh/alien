@@ -26,10 +26,13 @@ private:
 	void processingClustersMovement();
 	void processingClustersToken();
 	void processingClustersCompletion();
-	void processingClustersCompartmentAllocation();
+	void processingParticlesMovement();
 
-	void processingEnergyParticles();
-	void processingEnergyParticlesCompartmentAllocation();
+	void incClustersTimestamp();
+	void incParticlesTimestamp();
+
+	void processingClustersCompartmentAllocation();
+	void processingParticlesCompartmentAllocation();
 
 	UnitContext* _context = nullptr;
 };

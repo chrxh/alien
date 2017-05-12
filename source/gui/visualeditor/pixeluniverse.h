@@ -25,7 +25,7 @@ private:
 	Q_SLOT void retrieveAndDisplayData();
 
 	void displayClusters(DataDescription const& data) const;
-	void displayparticles(DataDescription const& data) const;
+	void displayParticles(DataDescription const& data) const;
 
 	SimulationAccess* _simAccess = nullptr;
 	SimulationContextApi* _context = nullptr;

@@ -334,6 +334,9 @@
     <ClCompile Include="Release\moc_SimulationControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\model\Entities\Timestamp.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\model\AccessPorts\AccessPortFactory.h">
@@ -479,6 +482,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\model\Features\CellComputer.h">
       <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\model\Entities\Timestamp.h">
+      <Filter>Source Files\Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

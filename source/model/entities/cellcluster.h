@@ -5,14 +5,15 @@
 #include <QVector2D>
 
 #include "model/Definitions.h"
+#include "Timestamp.h"
 #include "Descriptions.h"
 
 class CellCluster
+	: public Timestamp
 {
 public:
+	CellCluster(UnitContext* context) : Timestamp(context) {}
 	virtual ~CellCluster() = default;
-
-	virtual void setContext(UnitContext* context) = 0;
 
 	virtual CellClusterDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
 
