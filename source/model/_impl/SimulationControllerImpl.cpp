@@ -1,3 +1,5 @@
+#include <QTimer>
+
 #include "Base/ServiceLocator.h"
 #include "model/Context/SimulationContext.h"
 #include "model/Context/UnitThreadController.h"
@@ -6,7 +8,10 @@
 
 SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
 	: SimulationController(parent)
+	, _oneSecondTimer(new QTimer(this))
 {
+	connect(_oneSecondTimer, &QTimer::timeout, this, &SimulationControllerImpl::oneSecondTimerTimeout);
+	_oneSecondTimer->start(1000);
 }
 
 void SimulationControllerImpl::init(SimulationContextApi* context)
@@ -17,6 +22,7 @@ void SimulationControllerImpl::init(SimulationContextApi* context)
 		if (_flagSimulationRunning) {
 			_context->getUnitThreadController()->calculateTimestep();
 		}
+		++_fps;
 	});
 
 	_context->getUnitThreadController()->start();
@@ -38,6 +44,12 @@ void SimulationControllerImpl::calculateSingleTimestep()
 SimulationContextApi * SimulationControllerImpl::getContext() const
 {
 	return _context;
+}
+
+Q_SLOT void SimulationControllerImpl::oneSecondTimerTimeout()
+{
+	Q_EMIT updateFps(_fps);
+	_fps = 0;
 }
 
 

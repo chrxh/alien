@@ -17,8 +17,13 @@ public:
 	virtual SimulationContextApi* getContext() const override;
 
 private:
+	Q_SLOT void oneSecondTimerTimeout();
+
 	bool _flagSimulationRunning = false;
 	SimulationContext* _context = nullptr;
+
+	QTimer* _oneSecondTimer = nullptr;
+	int _fps = 0;
 };
 
 #endif // SIMULATIONCONTROLLERIMPL_H
