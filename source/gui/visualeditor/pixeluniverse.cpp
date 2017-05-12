@@ -78,7 +78,7 @@ Q_SLOT void PixelUniverse::retrieveAndDisplayData()
 
 	_image->fill(UNIVERSE_COLOR);
 	displayClusters(dataDesc);
-	displayparticles(dataDesc);
+	displayParticles(dataDesc);
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));
 }
 
@@ -147,6 +147,7 @@ namespace
 
 void PixelUniverse::displayClusters(DataDescription const& data) const
 {
+	auto space = _context->getSpaceMetric();
 	for (auto const& clusterTracker : data.clusters) {
 		auto const& clusterDesc = clusterTracker.getValue();
 		for (auto const& cellTracker : clusterDesc.cells) {
@@ -154,16 +155,15 @@ void PixelUniverse::displayClusters(DataDescription const& data) const
 			auto const& pos = cellDesc.pos.getValue();
 			auto const& meta = cellDesc.metadata.getValue();
 			auto const& energy = cellDesc.energy.getValue();
-			_image->setPixel(pos.x(), pos.y(), calcCellColor(meta, energy));
+			auto intPos = space->correctPositionWithIntPrecision(pos);
+			_image->setPixel(intPos.x, intPos.y, calcCellColor(meta, energy));
 		}
 	}
 }
 
-void PixelUniverse::displayparticles(DataDescription const & data) const
+void PixelUniverse::displayParticles(DataDescription const & data) const
 {
 	auto space = _context->getSpaceMetric();
-	IntVector2D size = space->getSize();
-	IntRect rect = { {0, 0}, {size.x - 1, size.y - 1} };
 	for (auto const& particleTracker : data.particles) {
 		auto const& particleDesc = particleTracker.getValue();
 		auto const& pos = particleDesc.pos.getValue();

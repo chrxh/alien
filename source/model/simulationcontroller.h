@@ -17,6 +17,7 @@ public:
 	virtual SimulationContextApi* getContext() const = 0;
 
 	Q_SIGNAL void timestepCalculated();
+	Q_SIGNAL void updateFps(int value);
 };
 
 #endif // SIMULATIONCONTROLLER_H
