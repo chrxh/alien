@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\source\model\AccessPorts\_Impl\AccessPortFactoryImpl.cpp">
+    <ClCompile Include="..\..\source\Model\AccessPorts\_Impl\AccessPortFactoryImpl.cpp">
       <Filter>Source Files\AccessPorts\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\AccessPorts\_Impl\SimulationAccessImpl.cpp">
+    <ClCompile Include="..\..\source\Model\AccessPorts\_Impl\SimulationAccessImpl.cpp">
       <Filter>Source Files\AccessPorts\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SimulationAccess.cpp">
@@ -25,19 +25,19 @@
     <ClCompile Include="Release\moc_SimulationController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Definitions.cpp">
+    <ClCompile Include="..\..\source\Model\Definitions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Settings.cpp">
+    <ClCompile Include="..\..\source\Model\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Physics\PhysicalQuantityConverter.cpp">
+    <ClCompile Include="..\..\source\Model\Physics\PhysicalQuantityConverter.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Physics\Physics.cpp">
+    <ClCompile Include="..\..\source\Model\Physics\Physics.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Metadata\SymbolTable.cpp">
+    <ClCompile Include="..\..\source\Model\Metadata\SymbolTable.cpp">
       <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SymbolTable.cpp">
@@ -49,55 +49,55 @@
     <ClCompile Include="Release\moc_SymbolTable.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Entities\CellTO.cpp">
+    <ClCompile Include="..\..\source\Model\Entities\CellTO.cpp">
       <Filter>Source Files\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Entities\_Impl\CellClusterImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\CellClusterImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Entities\_Impl\CellImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\CellImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Entities\_Impl\EnergyParticleImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\EnergyParticleImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Entities\_Impl\EntityFactoryImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\EntityFactoryImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Entities\_Impl\TokenImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\TokenImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\CellFeature.cpp">
+    <ClCompile Include="..\..\source\Model\Features\CellFeature.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\CellFunction.cpp">
+    <ClCompile Include="..\..\source\Model\Features\CellFunction.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellFeatureFactoryImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellFeatureFactoryImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\EnergyGuidanceImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\EnergyGuidanceImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellCommunicatorImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellCommunicatorImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellComputerImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellComputerImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellConstructorImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellConstructorImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellPropulsionImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellPropulsionImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellScannerImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellScannerImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellSensorImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellSensorImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Features\_Impl\CellWeaponImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Features\_Impl\CellWeaponImpl.cpp">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_CellMap.cpp">
@@ -145,7 +145,7 @@
     <ClCompile Include="Release\moc_SimulationContextApi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\SimulationParameters.cpp">
+    <ClCompile Include="..\..\source\Model\Context\SimulationParameters.cpp">
       <Filter>Source Files\Context</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SimulationParameters.cpp">
@@ -202,7 +202,7 @@
     <ClCompile Include="Release\moc_UnitThreadController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\CellMapImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\CellMapImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_CellMapImpl.cpp">
@@ -214,10 +214,10 @@
     <ClCompile Include="Release\moc_CellMapImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\ContextFactoryImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\ContextFactoryImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\EnergyParticleMapImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\EnergyParticleMapImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_EnergyParticleMapImpl.cpp">
@@ -229,7 +229,7 @@
     <ClCompile Include="Release\moc_EnergyParticleMapImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\MapCompartmentImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\MapCompartmentImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_MapCompartmentImpl.cpp">
@@ -250,7 +250,7 @@
     <ClCompile Include="Release\moc_SignalWrapper.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\SimulationContextImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\SimulationContextImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SimulationContextImpl.cpp">
@@ -262,13 +262,13 @@
     <ClCompile Include="Release\moc_SimulationContextImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\SpaceMetricImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\SpaceMetricImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\UnitContextImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\UnitContextImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\UnitGridImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\UnitGridImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_UnitGridImpl.cpp">
@@ -280,7 +280,7 @@
     <ClCompile Include="Release\moc_UnitGridImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\UnitImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\UnitImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_UnitImpl.cpp">
@@ -292,7 +292,7 @@
     <ClCompile Include="Release\moc_UnitImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\UnitThread.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\UnitThread.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_UnitThread.cpp">
@@ -304,7 +304,7 @@
     <ClCompile Include="Release\moc_UnitThread.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Context\_Impl\UnitThreadControllerImpl.cpp">
+    <ClCompile Include="..\..\source\Model\Context\_Impl\UnitThreadControllerImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_UnitThreadControllerImpl.cpp">
@@ -316,13 +316,13 @@
     <ClCompile Include="Release\moc_UnitThreadControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\_Impl\BuilderFacadeImpl.cpp">
+    <ClCompile Include="..\..\source\Model\_Impl\BuilderFacadeImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\_Impl\SerializationFacadeImpl.cpp">
+    <ClCompile Include="..\..\source\Model\_Impl\SerializationFacadeImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\_Impl\SimulationControllerImpl.cpp">
+    <ClCompile Include="..\..\source\Model\_Impl\SimulationControllerImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SimulationControllerImpl.cpp">
@@ -334,233 +334,233 @@
     <ClCompile Include="Release\moc_SimulationControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\model\Entities\Timestamp.cpp">
+    <ClCompile Include="..\..\source\Model\Entities\Timestamp.cpp">
       <Filter>Source Files\Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\model\AccessPorts\AccessPortFactory.h">
+    <ClInclude Include="..\..\source\Model\AccessPorts\AccessPortFactory.h">
       <Filter>Source Files\AccessPorts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\AccessPorts\_Impl\AccessPortFactoryImpl.h">
+    <ClInclude Include="..\..\source\Model\AccessPorts\_Impl\AccessPortFactoryImpl.h">
       <Filter>Source Files\AccessPorts\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\AccessPorts\_Impl\SimulationAccessImpl.h">
+    <ClInclude Include="..\..\source\Model\AccessPorts\_Impl\SimulationAccessImpl.h">
       <Filter>Source Files\AccessPorts\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\BuilderFacade.h">
+    <ClInclude Include="..\..\source\Model\BuilderFacade.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Definitions.h">
+    <ClInclude Include="..\..\source\Model\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Settings.h">
+    <ClInclude Include="..\..\source\Model\Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\SerializationFacade.h">
+    <ClInclude Include="..\..\source\Model\SerializationFacade.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Physics\PhysicalQuantityConverter.h">
+    <ClInclude Include="..\..\source\Model\Physics\PhysicalQuantityConverter.h">
       <Filter>Source Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Physics\Physics.h">
+    <ClInclude Include="..\..\source\Model\Physics\Physics.h">
       <Filter>Source Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Metadata\CellClusterMetadata.h">
+    <ClInclude Include="..\..\source\Model\Metadata\CellClusterMetadata.h">
       <Filter>Source Files\Metadata</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Metadata\CellMetadata.h">
+    <ClInclude Include="..\..\source\Model\Metadata\CellMetadata.h">
       <Filter>Source Files\Metadata</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Metadata\EnergyParticleMetadata.h">
+    <ClInclude Include="..\..\source\Model\Metadata\EnergyParticleMetadata.h">
       <Filter>Source Files\Metadata</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\Cell.h">
+    <ClInclude Include="..\..\source\Model\Entities\Cell.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\CellCluster.h">
+    <ClInclude Include="..\..\source\Model\Entities\CellCluster.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\CellTO.h">
+    <ClInclude Include="..\..\source\Model\Entities\CellTO.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\Descriptions.h">
+    <ClInclude Include="..\..\source\Model\Entities\Descriptions.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\EnergyParticle.h">
+    <ClInclude Include="..\..\source\Model\Entities\EnergyParticle.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\EntityFactory.h">
+    <ClInclude Include="..\..\source\Model\Entities\EntityFactory.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\Token.h">
+    <ClInclude Include="..\..\source\Model\Entities\Token.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\_Impl\CellClusterImpl.h">
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\CellClusterImpl.h">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\_Impl\CellImpl.h">
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\CellImpl.h">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\_Impl\EnergyParticleImpl.h">
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\EnergyParticleImpl.h">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\_Impl\EntityFactoryImpl.h">
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\EntityFactoryImpl.h">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\_Impl\TokenImpl.h">
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\TokenImpl.h">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\CellFeature.h">
+    <ClInclude Include="..\..\source\Model\Features\CellFeature.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\CellFeatureEnums.h">
+    <ClInclude Include="..\..\source\Model\Features\CellFeatureEnums.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\CellFeatureFactory.h">
+    <ClInclude Include="..\..\source\Model\Features\CellFeatureFactory.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\CellFunction.h">
+    <ClInclude Include="..\..\source\Model\Features\CellFunction.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\Descriptions.h">
+    <ClInclude Include="..\..\source\Model\Features\Descriptions.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\EnergyGuidance.h">
+    <ClInclude Include="..\..\source\Model\Features\EnergyGuidance.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\CellFeatureFactoryImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\CellFeatureFactoryImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\EnergyGuidanceImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\EnergyGuidanceImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\features\_impl\CellCommunicatorImpl.h">
+    <ClInclude Include="..\..\source\Model\features\_impl\CellCommunicatorImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\CellComputerImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\CellComputerImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\CellConstructorImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\CellConstructorImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\CellPropulsionImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\CellPropulsionImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\CellScannerImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\CellScannerImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\CellSensorImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\CellSensorImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\_Impl\CellWeaponImpl.h">
+    <ClInclude Include="..\..\source\Model\Features\_Impl\CellWeaponImpl.h">
       <Filter>Source Files\Features\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Context\ContextFactory.h">
+    <ClInclude Include="..\..\source\Model\Context\ContextFactory.h">
       <Filter>Source Files\Context</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Context\UnitObserver.h">
+    <ClInclude Include="..\..\source\Model\Context\UnitObserver.h">
       <Filter>Source Files\Context</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Context\_Impl\ContextFactoryImpl.h">
+    <ClInclude Include="..\..\source\Model\Context\_Impl\ContextFactoryImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Context\_Impl\DefinitionsImpl.h">
+    <ClInclude Include="..\..\source\Model\Context\_Impl\DefinitionsImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Context\_Impl\SpaceMetricImpl.h">
+    <ClInclude Include="..\..\source\Model\Context\_Impl\SpaceMetricImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Context\_Impl\UnitContextImpl.h">
+    <ClInclude Include="..\..\source\Model\Context\_Impl\UnitContextImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\_Impl\BuilderFacadeImpl.h">
+    <ClInclude Include="..\..\source\Model\_Impl\BuilderFacadeImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\_Impl\SerializationFacadeImpl.h">
+    <ClInclude Include="..\..\source\Model\_Impl\SerializationFacadeImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Features\CellComputer.h">
+    <ClInclude Include="..\..\source\Model\Features\CellComputer.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\model\Entities\Timestamp.h">
+    <ClInclude Include="..\..\source\Model\Entities\Timestamp.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\source\model\AccessPorts\SimulationAccess.h">
+    <CustomBuild Include="..\..\source\Model\AccessPorts\SimulationAccess.h">
       <Filter>Source Files\AccessPorts</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\SimulationController.h">
+    <CustomBuild Include="..\..\source\Model\SimulationController.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Metadata\SymbolTable.h">
+    <CustomBuild Include="..\..\source\Model\Metadata\SymbolTable.h">
       <Filter>Source Files\Metadata</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\CellMap.h">
+    <CustomBuild Include="..\..\source\Model\Context\CellMap.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\EnergyParticleMap.h">
+    <CustomBuild Include="..\..\source\Model\Context\EnergyParticleMap.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\MapCompartment.h">
+    <CustomBuild Include="..\..\source\Model\Context\MapCompartment.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\SimulationContext.h">
+    <CustomBuild Include="..\..\source\Model\Context\SimulationContext.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\SimulationContextApi.h">
+    <CustomBuild Include="..\..\source\Model\Context\SimulationContextApi.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\SimulationParameters.h">
+    <CustomBuild Include="..\..\source\Model\Context\SimulationParameters.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\SpaceMetric.h">
+    <CustomBuild Include="..\..\source\Model\Context\SpaceMetric.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\Unit.h">
+    <CustomBuild Include="..\..\source\Model\Context\Unit.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\UnitContext.h">
+    <CustomBuild Include="..\..\source\Model\Context\UnitContext.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\UnitGrid.h">
+    <CustomBuild Include="..\..\source\Model\Context\UnitGrid.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\UnitThreadController.h">
+    <CustomBuild Include="..\..\source\Model\Context\UnitThreadController.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\CellMapImpl.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\CellMapImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\EnergyParticleMapImpl.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\EnergyParticleMapImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\MapCompartmentImpl.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\MapCompartmentImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\SignalWrapper.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\SignalWrapper.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\SimulationContextImpl.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\SimulationContextImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\UnitGrid.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitGrid.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\UnitGridImpl.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitGridImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\UnitImpl.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\UnitThread.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitThread.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\Context\_Impl\UnitThreadControllerImpl.h">
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitThreadControllerImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\model\_Impl\SimulationControllerImpl.h">
+    <CustomBuild Include="..\..\source\Model\_Impl\SimulationControllerImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>
