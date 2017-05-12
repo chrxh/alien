@@ -77,6 +77,7 @@ Q_SLOT void PixelUniverse::retrieveAndDisplayData()
 	auto const& dataDesc = _simAccess->retrieveData();
 
 	_image->fill(UNIVERSE_COLOR);
+
 	displayClusters(dataDesc);
 	displayParticles(dataDesc);
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));

@@ -49,7 +49,6 @@ void SimulationAccessImpl::requireData(IntRect rect, ResolveDescription const& r
 
 DataDescription const& SimulationAccessImpl::retrieveData()
 {
-	_dataRequired = false;
 	return _dataCollected;
 }
 
@@ -96,6 +95,7 @@ void SimulationAccessImpl::callBackCollectData()
 		return;
 	}
 
+	_dataRequired = false;
 	_dataCollected.clear();
 	auto grid = _context->getUnitGrid();
 	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D());
