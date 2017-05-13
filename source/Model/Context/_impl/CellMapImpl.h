@@ -42,9 +42,11 @@ private:
 
 Cell*& CellMapImpl::locateCell(IntVector2D const& intPos) const
 {
+/*
 	//TEMP
 	return _cellGrid[intPos.x][intPos.y];
-/*	if (_compartment->isPointInCompartment(intPos)) {
+*/
+	if (_compartment->isPointInCompartment(intPos)) {
 		auto relPos = _compartment->convertAbsToRelPosition(intPos);
 		return _cellGrid[relPos.x][relPos.y];
 	}
@@ -52,7 +54,7 @@ Cell*& CellMapImpl::locateCell(IntVector2D const& intPos) const
 		auto cellMap = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap());
 		auto relPos = _compartment->convertAbsToRelPosition(intPos);
 		return cellMap->_cellGrid[relPos.x][relPos.y];
-	}*/
+	}
 }
 
 #endif //CELLMAPIMPL_H
