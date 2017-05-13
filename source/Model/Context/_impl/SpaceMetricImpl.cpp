@@ -36,7 +36,15 @@ void SpaceMetricImpl::correctPosition(QVector2D & pos) const
 
 IntVector2D SpaceMetricImpl::correctPositionWithIntPrecision(QVector2D const& pos) const
 {
-	IntVector2D intPos{ qFloor(pos.x()), qFloor(pos.y()) };
+	IntVector2D intPos;
+	intPos.x = static_cast<int>(pos.x());
+	if (intPos.x < 0) {
+		--intPos.x;
+	}
+	intPos.y = static_cast<int>(pos.y());
+	if (intPos.y < 0) {
+		--intPos.y;
+	}
 	correctPosition(intPos);
 	return intPos;
 }
