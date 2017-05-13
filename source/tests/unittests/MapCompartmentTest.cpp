@@ -103,11 +103,18 @@ TEST_F(MapCompartmentTest, testCoordinateConversion)
 			IntVector2D expectedRightPointRel = { _compartmentSize.x - 1, _compartmentSize.y / 2 };
 			IntVector2D expectedUpperPointRel = { _compartmentSize.x / 2, 0 };
 			IntVector2D expectedLowerPointRel = { _compartmentSize.x / 2, _compartmentSize.y - 1 };
-			ASSERT_PRED2(predEqualIntVector, expectedCenterPointRel, compartment->convertAbsToRelPosition(centerPointAbs));
-			ASSERT_PRED2(predEqualIntVector, expectedLeftPointRel, compartment->convertAbsToRelPosition(leftPointAbs));
-			ASSERT_PRED2(predEqualIntVector, expectedRightPointRel, compartment->convertAbsToRelPosition(rightPointAbs));
-			ASSERT_PRED2(predEqualIntVector, expectedUpperPointRel, compartment->convertAbsToRelPosition(upperPointAbs));
-			ASSERT_PRED2(predEqualIntVector, expectedLowerPointRel, compartment->convertAbsToRelPosition(lowerPointAbs));
+
+			compartment->convertAbsToRelPosition(centerPointAbs);
+			compartment->convertAbsToRelPosition(leftPointAbs);
+			compartment->convertAbsToRelPosition(rightPointAbs);
+			compartment->convertAbsToRelPosition(upperPointAbs);
+			compartment->convertAbsToRelPosition(lowerPointAbs);
+
+			ASSERT_PRED2(predEqualIntVector, expectedCenterPointRel, centerPointAbs);
+			ASSERT_PRED2(predEqualIntVector, expectedLeftPointRel, leftPointAbs);
+			ASSERT_PRED2(predEqualIntVector, expectedRightPointRel, rightPointAbs);
+			ASSERT_PRED2(predEqualIntVector, expectedUpperPointRel, upperPointAbs);
+			ASSERT_PRED2(predEqualIntVector, expectedLowerPointRel, lowerPointAbs);
 		}
 	}
 }

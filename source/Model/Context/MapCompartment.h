@@ -23,9 +23,19 @@ public:
 	virtual vector<UnitContext*> getNeighborContexts() const = 0;
 	virtual bool isPointInCompartment(IntVector2D const& intPos) const = 0;
 	virtual UnitContext* getNeighborContext(IntVector2D const& intPos) const = 0;
-	virtual IntVector2D convertAbsToRelPosition(IntVector2D const& intPos) const = 0;
 
-private:
+	inline void convertAbsToRelPosition(IntVector2D & intPos) const;
+
+protected:
+	IntVector2D _size;
 };
+
+/****************** inline methods ********************/
+void MapCompartment::convertAbsToRelPosition(IntVector2D & intPos) const
+{
+	intPos.x = intPos.x - intPos.x / _size.x * _size.x;
+	intPos.y = intPos.y - intPos.y / _size.y * _size.y;
+}
+
 
 #endif // MAPCOMPARTMENT_H
