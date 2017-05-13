@@ -53,7 +53,7 @@ SpaceMetric * ContextFactoryImpl::buildSpaceMetric() const
 
 MapCompartment * ContextFactoryImpl::buildMapCompartment() const
 {
-	return new MapCompartmentImpl();
+	return new MapCompartment();
 }
 
 CellMap * ContextFactoryImpl::buildCellMap() const
