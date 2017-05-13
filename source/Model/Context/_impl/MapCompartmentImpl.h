@@ -18,11 +18,9 @@ public:
 	virtual vector<UnitContext*> getNeighborContexts() const override;
 	virtual bool isPointInCompartment(IntVector2D const& intPos) const override;
 	virtual UnitContext* getNeighborContext(IntVector2D const& intPos) const override;
-	virtual IntVector2D convertAbsToRelPosition(IntVector2D const& intPos) const override;
 
 private:
 	IntRect _rect;
-	IntVector2D _size;
 	map<RelativeLocation, UnitContext*> _contextsByLocations;
 };
 

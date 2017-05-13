@@ -31,7 +31,7 @@ public:
 
 private:
 	void deleteCellMap();
-	inline Cell*& locateCell(IntVector2D const& intPos) const;
+	inline Cell*& locateCell(IntVector2D & intPos) const;
 
 	SpaceMetric* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
@@ -40,20 +40,20 @@ private:
 
 /****************** inline methods ******************/
 
-Cell*& CellMapImpl::locateCell(IntVector2D const& intPos) const
+Cell*& CellMapImpl::locateCell(IntVector2D & intPos) const
 {
 /*
 	//TEMP
 	return _cellGrid[intPos.x][intPos.y];
 */
 	if (_compartment->isPointInCompartment(intPos)) {
-		auto relPos = _compartment->convertAbsToRelPosition(intPos);
-		return _cellGrid[relPos.x][relPos.y];
+		_compartment->convertAbsToRelPosition(intPos);
+		return _cellGrid[intPos.x][intPos.y];
 	}
 	else {
 		auto cellMap = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPos)->getCellMap());
-		auto relPos = _compartment->convertAbsToRelPosition(intPos);
-		return cellMap->_cellGrid[relPos.x][relPos.y];
+		_compartment->convertAbsToRelPosition(intPos);
+		return cellMap->_cellGrid[intPos.x][intPos.y];
 	}
 }
 

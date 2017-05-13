@@ -25,7 +25,7 @@ public:
 
 private:
 	void deleteGrid();
-	inline EnergyParticle*& locateParticle(IntVector2D const& intPos) const;
+	inline EnergyParticle*& locateParticle(IntVector2D & intPos) const;
 
 	SpaceMetric* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
@@ -34,16 +34,16 @@ private:
 
 /****************** inline methods ******************/
 
-EnergyParticle*& EnergyParticleMapImpl::locateParticle(IntVector2D const& intPos) const
+EnergyParticle*& EnergyParticleMapImpl::locateParticle(IntVector2D & intPos) const
 {
 	if (_compartment->isPointInCompartment(intPos)) {
-		auto relPos = _compartment->convertAbsToRelPosition(intPos);
-		return _energyGrid[relPos.x][relPos.y];
+		_compartment->convertAbsToRelPosition(intPos);
+		return _energyGrid[intPos.x][intPos.y];
 	}
 	else {
 		auto energyMap = static_cast<EnergyParticleMapImpl*>(_compartment->getNeighborContext(intPos)->getEnergyParticleMap());
-		auto relPos = _compartment->convertAbsToRelPosition(intPos);
-		return energyMap->_energyGrid[relPos.x][relPos.y];
+		_compartment->convertAbsToRelPosition(intPos);
+		return energyMap->_energyGrid[intPos.x][intPos.y];
 	}
 }
 
