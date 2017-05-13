@@ -35,8 +35,8 @@ protected:
 	UnitThreadControllerImpl* _threadController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
+	int _threads = 4;
 	IntVector2D _universeSize{ 600, 300 };
-	IntVector2D _compartmentSize;
 };
 
 MultithreadingTest::MultithreadingTest()
@@ -45,7 +45,7 @@ MultithreadingTest::MultithreadingTest()
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
-	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, _gridSize, _universeSize, symbols, _parameters));
+	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(_threads, _gridSize, _universeSize, symbols, _parameters));
 	_controller = facade->buildSimulationController(_context);
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 	_numberGen = factory->buildRandomNumberGenerator();
