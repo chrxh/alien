@@ -68,6 +68,9 @@
     <ClCompile Include="..\..\source\Tests\Integrationtests\ReplicatorTest.cpp">
       <Filter>Source Files\Integrationtests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Tests\integrationtests\Benchmark.cpp">
+      <Filter>Source Files\Integrationtests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Tests\Predicates.h">
