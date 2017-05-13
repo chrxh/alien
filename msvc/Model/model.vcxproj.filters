@@ -217,18 +217,6 @@
     <ClCompile Include="Release\moc_EnergyParticleMapImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Model\Context\_Impl\MapCompartmentImpl.cpp">
-      <Filter>Source Files\Context\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_MapCompartmentImpl.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_MapCompartmentImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_MapCompartmentImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_SignalWrapper.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -531,9 +519,6 @@
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\_Impl\EnergyParticleMapImpl.h">
-      <Filter>Source Files\Context\_Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\_Impl\MapCompartmentImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\_Impl\SignalWrapper.h">
