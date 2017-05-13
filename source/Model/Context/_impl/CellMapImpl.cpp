@@ -47,6 +47,7 @@ void CellMapImpl::setCell(QVector2D pos, Cell * cell)
 
 void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 {
+	//TEMP
 	IntVector2D intPosC = _metric->correctPositionWithIntPrecision(pos);
 	intPosC = _compartment->convertAbsToRelPosition(intPosC);
 	Cell*** cellGrid = _cellGrid;
@@ -103,7 +104,9 @@ void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 Cell* CellMapImpl::getCell(QVector2D pos) const
 {
 	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
-	return locateCell(intPos);
+//	return locateCell(intPos);
+//TEMP
+	return _cellGrid[intPos.x][intPos.y];
 }
 
 CellClusterSet CellMapImpl::getNearbyClusters(QVector2D const& pos, qreal r) const
