@@ -48,6 +48,17 @@ void CellMapImpl::setCell(QVector2D pos, Cell * cell)
 void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 {
 	IntVector2D intPosC = _metric->correctPositionWithIntPrecision(pos);
+	intPosC = _compartment->convertAbsToRelPosition(intPosC);
+	Cell*** cellGrid = _cellGrid;
+	if (!_compartment->isPointInCompartment(intPosC)) {
+		cellGrid = static_cast<CellMapImpl*>(_compartment->getNeighborContext(intPosC)->getCellMap())->_cellGrid;
+	}
+	if (_cellGrid[intPosC.x][intPosC.y] == cellToRemove) {
+		_cellGrid[intPosC.x][intPosC.y] = nullptr;
+	}
+
+	/*
+	IntVector2D intPosC = _metric->correctPositionWithIntPrecision(pos);
 	IntVector2D intPosM = _metric->shiftPosition(intPosC, { -1, -1 });
 	IntVector2D intPosP = _metric->shiftPosition(intPosC, { +1, +1 });
 
@@ -86,6 +97,7 @@ void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 	removeCellIfPresent({ intPosM.x, intPosP.y }, cellToRemove);
 	removeCellIfPresent({ intPosC.x, intPosP.y }, cellToRemove);
 	removeCellIfPresent({ intPosP.x, intPosP.y }, cellToRemove);
+*/
 }
 
 Cell* CellMapImpl::getCell(QVector2D pos) const
