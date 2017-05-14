@@ -7,7 +7,6 @@
 #include "UnitGridImpl.h"
 #include "UnitThreadControllerImpl.h"
 #include "SpaceMetricImpl.h"
-#include "MapCompartmentImpl.h"
 #include "CellMapImpl.h"
 #include "EnergyParticleMapImpl.h"
 
