@@ -31,6 +31,7 @@ class ContextFactory;
 struct DataDescription;
 struct DataLightDescription;
 class SimulationAccess;
+class QTimer;
 
 class BuilderFacade;
 class SerializationFacade;
