@@ -1,3 +1,5 @@
+#include <QRectF>
+
 #include "Definitions.h"
 
 IntVector2D::IntVector2D()
