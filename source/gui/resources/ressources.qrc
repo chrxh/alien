@@ -20,7 +20,6 @@
         <file>Icons/restore_active.png</file>
         <file>Icons/microscope.png</file>
         <file>Icons/microscope_active.png</file>
-        <file>tutorial/tutorial.html</file>
         <file>tutorial/logo.png</file>
         <file>tutorial/branching.png</file>
         <file>tutorial/constructor.png</file>
@@ -29,5 +28,6 @@
         <file>tutorial/angle.png</file>
         <file>Icons/info_on.png</file>
         <file>Icons/info_off.png</file>
+        <file>tutorial/tutorial.html</file>
     </qresource>
 </RCC>
