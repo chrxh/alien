@@ -1,6 +1,7 @@
 #ifndef SIMULATIONCONTROLLERIMPL_H
 #define SIMULATIONCONTROLLERIMPL_H
 
+#include <QTime>
 #include "model/SimulationController.h"
 
 class SimulationControllerImpl
@@ -24,6 +25,9 @@ private:
 
 	QTimer* _oneSecondTimer = nullptr;
 	int _fps = 0;
+	QTime _timeSinceLastStart;
+	int _displayedFramesSinceLastStart = 0;
+
 };
 
 #endif // SIMULATIONCONTROLLERIMPL_H
