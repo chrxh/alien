@@ -54,7 +54,7 @@ Benchmark::~Benchmark()
 void Benchmark::createTestData(SimulationAccess * access)
 {
 	DataDescription desc;
-	for (int i = 0; i < 20000; ++i) {
+	for (int i = 0; i < 40000; ++i) {
 		desc.addEnergyParticle(EnergyParticleDescription().setPos(QVector2D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y)))
 			.setVel(QVector2D(_numberGen->getRandomReal()*2.0 - 1.0, _numberGen->getRandomReal()*2.0 - 1.0))
 			.setEnergy(50));
@@ -92,7 +92,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto context = static_cast<SimulationContext*>(facade->buildSimulationContext(1, { 6, 6 }, _universeSize, _symbols, _parameters));
+	auto context = static_cast<SimulationContext*>(facade->buildSimulationContext(1, { 12, 6 }, _universeSize, _symbols, _parameters));
 	auto controller = facade->buildSimulationController(context);
 	auto access = facade->buildSimulationAccess(context);
 
@@ -105,7 +105,20 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 TEST_F(Benchmark, benchmarkFourThread)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	auto context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, { 6, 6 }, _universeSize, _symbols, _parameters));
+	auto context = static_cast<SimulationContext*>(facade->buildSimulationContext(4, { 12, 6 }, _universeSize, _symbols, _parameters));
+	auto controller = facade->buildSimulationController(context);
+	auto access = facade->buildSimulationAccess(context);
+
+	createTestData(access);
+	runSimulation(300, controller);
+
+	delete controller;
+}
+
+TEST_F(Benchmark, benchmarkEightThread)
+{
+	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	auto context = static_cast<SimulationContext*>(facade->buildSimulationContext(8, { 12, 6 }, _universeSize, _symbols, _parameters));
 	auto controller = facade->buildSimulationController(context);
 	auto access = facade->buildSimulationAccess(context);
 

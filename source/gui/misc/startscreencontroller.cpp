@@ -4,7 +4,7 @@
 #include <QTimer>
 #include <QGraphicsItem>
 
-const int LOGO_DURATION_MS = 3000;
+const int LOGO_DURATION_MS = 1000;
 const int LOGO_OPACITY_STEPS = 100;
 
 StartScreenController::StartScreenController(QObject *parent)

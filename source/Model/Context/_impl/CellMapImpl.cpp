@@ -61,24 +61,20 @@ void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 */
 
 	IntVector2D intPosC = _metric->correctPositionWithIntPrecision(pos);
-/*
 	IntVector2D intPosM = _metric->shiftPosition(intPosC, { -1, -1 });
 	IntVector2D intPosP = _metric->shiftPosition(intPosC, { +1, +1 });
-*/
 
 	std::function<void(IntVector2D &&, Cell*)> removeCellIfPresent;
-//	if (_compartment->isPointInCompartment(intPosM) && _compartment->isPointInCompartment(intPosP)) {
-	if (_compartment->isPointInCompartment(intPosC)) {
+	if (_compartment->isPointInCompartment(intPosM) && _compartment->isPointInCompartment(intPosP)) {
+//	if (_compartment->isPointInCompartment(intPosC)) {
 		removeCellIfPresent = [&](IntVector2D && intPos, Cell* cell) {
 			if (_cellGrid[intPos.x][intPos.y] == cell) {
 				_cellGrid[intPos.x][intPos.y] = nullptr;
 			}
 		};
 		_compartment->convertAbsToRelPosition(intPosC);
-/*
 		_compartment->convertAbsToRelPosition(intPosM);
 		_compartment->convertAbsToRelPosition(intPosP);
-*/
 	}
 	else {
 		removeCellIfPresent = [&](IntVector2D && intPos, Cell* cell) {
@@ -93,21 +89,17 @@ void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 		};
 	}
 
-/*
 	removeCellIfPresent({ intPosM.x, intPosM.y }, cellToRemove);
 	removeCellIfPresent({ intPosC.x, intPosM.y }, cellToRemove);
 	removeCellIfPresent({ intPosP.x, intPosM.y }, cellToRemove);
 
 	removeCellIfPresent({ intPosM.x, intPosC.y }, cellToRemove);
-*/
 	removeCellIfPresent({ intPosC.x, intPosC.y }, cellToRemove);
-/*
 	removeCellIfPresent({ intPosP.x, intPosC.y }, cellToRemove);
 
 	removeCellIfPresent({ intPosM.x, intPosP.y }, cellToRemove);
 	removeCellIfPresent({ intPosC.x, intPosP.y }, cellToRemove);
 	removeCellIfPresent({ intPosP.x, intPosP.y }, cellToRemove);
-*/
 }
 
 Cell* CellMapImpl::getCell(QVector2D pos) const
