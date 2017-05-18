@@ -87,7 +87,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     connect(ui->actionPlay, SIGNAL( triggered(bool) ), this, SLOT(runClicked(bool)));
     connect(ui->actionStep, SIGNAL( triggered(bool) ), this, SLOT(stepForwardClicked()));
     connect(ui->actionStepBack, SIGNAL( triggered(bool) ), this, SLOT(stepBackClicked()));
-    connect(ui->actionEditor, SIGNAL(triggered(bool)), this, SLOT(setEditMode(bool)));
+    connect(ui->actionEditor, SIGNAL(triggered(bool)), this, SLOT(setVisualMode(bool)));
     connect(ui->actionZoomIn, SIGNAL(triggered(bool)), ui->visualEditor, SLOT(zoomIn()));
     connect(ui->actionZoomIn, SIGNAL(triggered(bool)), this, SLOT(updateFrameLabel()));
     connect(ui->actionZoomOut, SIGNAL(triggered(bool)), ui->visualEditor, SLOT(zoomOut()));
@@ -393,7 +393,7 @@ void MainWindow::fullscreen (bool triggered)
     QMainWindow::setWindowState(QMainWindow::windowState() ^ Qt::WindowFullScreen);
 }
 
-void MainWindow::setEditMode (bool editMode)
+void MainWindow::setVisualMode (bool editMode)
 {
     if( !editMode )
         _textEditor->requestUpdate();

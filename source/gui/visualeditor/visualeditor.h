@@ -31,8 +31,6 @@ public Q_SLOTS:
     void zoomIn ();
     void zoomOut ();
 
-	void toggleInformation(bool on);
-
 private:
     Ui::VisualEditor *ui;
 
