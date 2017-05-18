@@ -16,8 +16,9 @@ public:
 	virtual void calculateSingleTimestep() = 0;
 	virtual SimulationContextApi* getContext() const = 0;
 
-	Q_SIGNAL void timestepCalculated();
-	Q_SIGNAL void updateFps(int value);
+	Q_SIGNAL void nextFrameCalculated();
+	Q_SIGNAL void nextTimestepCalculated();
+	Q_SIGNAL void updateTimestepsPerSecond(int value);
 };
 
 #endif // SIMULATIONCONTROLLER_H

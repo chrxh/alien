@@ -62,7 +62,7 @@ void MultithreadingTest::runSimulation(int timesteps)
 {
 	QEventLoop pause;
 	int t = 0;
-	_controller->connect(_controller, &SimulationController::timestepCalculated, [&]() {
+	_controller->connect(_controller, &SimulationController::nextTimestepCalculated, [&]() {
 		if (++t == timesteps) {
 			_controller->setRun(false);
 			pause.quit();
@@ -75,7 +75,7 @@ void MultithreadingTest::runSimulation(int timesteps)
 TEST_F(MultithreadingTest, testThreads)
 {
 	QEventLoop pause;
-	_controller->connect(_controller, &SimulationController::timestepCalculated, &pause, &QEventLoop::quit);
+	_controller->connect(_controller, &SimulationController::nextTimestepCalculated, &pause, &QEventLoop::quit);
 	_controller->calculateSingleTimestep();
 	pause.exec();
 

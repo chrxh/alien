@@ -24,7 +24,7 @@ private:
 	SimulationContext* _context = nullptr;
 
 	QTimer* _oneSecondTimer = nullptr;
-	int _fps = 0;
+	int _timestepsPerSecond = 0;
 	QTime _timeSinceLastStart;
 	int _displayedFramesSinceLastStart = 0;
 
