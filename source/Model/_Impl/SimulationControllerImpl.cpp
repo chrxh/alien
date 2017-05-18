@@ -23,19 +23,19 @@ void SimulationControllerImpl::init(SimulationContextApi* context)
 {
 	SET_CHILD(_context, static_cast<SimulationContext*>(context));
 	connect(_context->getUnitThreadController(), &UnitThreadController::timestepCalculated, [this]() {
-		++_fps;
+		++_timestepsPerSecond;
 		if (_flagSimulationRunning) {
 			_context->getUnitThreadController()->calculateTimestep();
 			if (_timeSinceLastStart.elapsed() > (1000.0 / displayFps)*_displayedFramesSinceLastStart) {
 				++_displayedFramesSinceLastStart;
-				Q_EMIT timestepCalculated();
+				Q_EMIT nextFrameCalculated();
 			}
 		}
 		else {
-			Q_EMIT timestepCalculated();
+			Q_EMIT nextFrameCalculated();
 		}
+		Q_EMIT nextTimestepCalculated();
 	});
-
 	_context->getUnitThreadController()->start();
 }
 
@@ -62,8 +62,8 @@ SimulationContextApi * SimulationControllerImpl::getContext() const
 
 Q_SLOT void SimulationControllerImpl::oneSecondTimerTimeout()
 {
-	Q_EMIT updateFps(_fps);
-	_fps = 0;
+	Q_EMIT updateTimestepsPerSecond(_timestepsPerSecond);
+	_timestepsPerSecond = 0;
 }
 
 
