@@ -8,7 +8,7 @@
 
 namespace
 {
-	const double displayFps = 30.0;
+	const double displayFps = 25.0;
 }
 
 SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
