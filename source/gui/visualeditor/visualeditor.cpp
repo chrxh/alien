@@ -35,17 +35,11 @@ VisualEditor::~VisualEditor()
 
 void VisualEditor::init(SimulationController* controller)
 {
+	_pixelUniverseInit = false;
+	_shapeUniverseInit = false;
 	_controller = controller;
 	_viewport->init(ui->simulationView, _pixelUniverse, _shapeUniverse, ActiveScene::PixelScene);
 	_pixelUniverse->init(controller, _viewport);
-}
-
-void VisualEditor::reset ()
-{
-    _pixelUniverseInit = false;
-    _shapeUniverseInit = false;
-	_viewport->initViewMatrices();
-    _pixelUniverse->reset();
 }
 
 

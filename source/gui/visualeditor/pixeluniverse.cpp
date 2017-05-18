@@ -39,23 +39,15 @@ void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewpor
 	auto simAccess = facade->buildSimulationAccess(_context);
 	SET_CHILD(_simAccess, simAccess);
 
-	if (!_image) {
-		IntVector2D size = _context->getSpaceMetric()->getSize();
-		_image = new QImage(size.x, size.y, QImage::Format_RGB32);
-		QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
-	}
+	delete _image;
+	IntVector2D size = _context->getSpaceMetric()->getSize();
+	_image = new QImage(size.x, size.y, QImage::Format_RGB32);
+	QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
 
 	connect(controller, &SimulationController::timestepCalculated, this, &PixelUniverse::requestData);
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 
 	requestAllData();
-}
-
-void PixelUniverse::reset ()
-{
-    delete _image;
-    _image = nullptr;
-    update();
 }
 
 void PixelUniverse::requestAllData()

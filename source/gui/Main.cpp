@@ -100,14 +100,13 @@ int main(int argc, char *argv[])
 	IntVector2D size = { 12*33*3, 12*17*3 };
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-	auto context = facade->buildSimulationContext(8, { 12, 6 }, size, symbols, parameters);
-	auto controller = facade->buildSimulationController(context);
+	auto controller = facade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
 
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
 	numberGen->init(123123, 0);
 
-	auto access = facade->buildSimulationAccess(context);
+	auto access = facade->buildSimulationAccess(controller->getContext());
 	DataDescription desc;
 	for (int i = 0; i < 20000*9; ++i) {
 /*
