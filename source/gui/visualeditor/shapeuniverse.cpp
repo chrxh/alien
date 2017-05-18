@@ -32,6 +32,12 @@ ShapeUniverse::~ShapeUniverse()
 {
 }
 
+void ShapeUniverse::init(SimulationController * controller, ViewportInfo * viewport)
+{
+	_viewport = viewport;
+
+}
+
 
 
 

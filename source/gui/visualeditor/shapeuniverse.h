@@ -16,8 +16,13 @@ class ShapeUniverse : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    ShapeUniverse (QObject *parent = 0);
+    ShapeUniverse (QObject *parent = nullptr);
 	virtual ~ShapeUniverse();
+
+	virtual void init(SimulationController* controller, ViewportInfo* viewport);
+
+private:
+	ViewportInfo* _viewport = nullptr;
 
 };
 

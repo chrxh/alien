@@ -12,12 +12,10 @@ class PixelUniverse : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    PixelUniverse(QObject* parent=0);
+    PixelUniverse(QObject* parent = nullptr);
     virtual ~PixelUniverse();
 
 	virtual void init(SimulationController* controller, ViewportInfo* viewport);
-
-    void reset ();
 
 private:
 	void requestAllData();

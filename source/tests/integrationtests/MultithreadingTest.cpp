@@ -45,8 +45,8 @@ MultithreadingTest::MultithreadingTest()
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
-	_context = static_cast<SimulationContext*>(facade->buildSimulationContext(_threads, _gridSize, _universeSize, symbols, _parameters));
-	_controller = facade->buildSimulationController(_context);
+	_controller = facade->buildSimulationController(_threads, _gridSize, _universeSize, symbols, _parameters);
+	_context = static_cast<SimulationContext*>(_controller->getContext());
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 	_numberGen = factory->buildRandomNumberGenerator();
 	_numberGen->init(123123, 0);

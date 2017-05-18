@@ -46,14 +46,7 @@ SimulationAccess * BuilderFacadeImpl::buildSimulationAccess(SimulationContextApi
 	return access;
 }
 
-SimulationController * BuilderFacadeImpl::buildSimulationController(SimulationContextApi * context) const
-{
-	auto controller = new SimulationControllerImpl();
-	controller->init(static_cast<SimulationContext*>(context));
-	return controller;
-}
-
-SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
+SimulationController* BuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 	, SymbolTable* symbolTable, SimulationParameters* parameters) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
@@ -95,7 +88,10 @@ SimulationContextApi* BuilderFacadeImpl::buildSimulationContext(int maxRunngingT
 		}
 	}
 
-	return context;
+	auto controller = new SimulationControllerImpl();
+	controller->init(static_cast<SimulationContext*>(context));
+
+	return controller;
 }
 
 namespace
