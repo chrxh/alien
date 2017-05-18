@@ -44,7 +44,7 @@ void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewpor
 	_image = new QImage(size.x, size.y, QImage::Format_RGB32);
 	QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
 
-	connect(controller, &SimulationController::timestepCalculated, this, &PixelUniverse::requestData);
+	connect(controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 
 	requestAllData();

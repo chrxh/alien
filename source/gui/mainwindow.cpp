@@ -54,11 +54,11 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
     _textEditor->init(microWidgets);
 
 	ui->visualEditor->init(simController);
-	connect(_simController, &SimulationController::updateFps, [this](int value) {
+	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
 		_framedata.fps = value;
 		updateFrameLabel();
 	});
-	connect(_simController, &SimulationController::timestepCalculated, [this]() {
+	connect(_simController, &SimulationController::nextFrameCalculated, [this]() {
 		_framedata.frame++;
 		updateFrameLabel();
 	});

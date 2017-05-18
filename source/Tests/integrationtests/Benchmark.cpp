@@ -33,7 +33,7 @@ protected:
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 	SymbolTable* _symbols = nullptr;
-	IntVector2D _universeSize{ 1200, 600 };
+	IntVector2D _universeSize{ 12 * 33 * 3, 12 * 17 * 3 };
 };
 
 Benchmark::Benchmark()
@@ -54,7 +54,7 @@ Benchmark::~Benchmark()
 void Benchmark::createTestData(SimulationAccess * access)
 {
 	DataDescription desc;
-	for (int i = 0; i < 40000; ++i) {
+	for (int i = 0; i < 20000 * 9; ++i) {
 		desc.addEnergyParticle(EnergyParticleDescription().setPos(QVector2D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y)))
 			.setVel(QVector2D(_numberGen->getRandomReal()*2.0 - 1.0, _numberGen->getRandomReal()*2.0 - 1.0))
 			.setEnergy(50));
@@ -66,7 +66,7 @@ void Benchmark::runSimulation(int timesteps, SimulationController* controller)
 {
 	QEventLoop pause;
 	int t = 0;
-	controller->connect(controller, &SimulationController::timestepCalculated, [&]() {
+	controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
 		if (++t == timesteps) {
 			controller->setRun(false);
 			pause.quit();
@@ -83,7 +83,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(300, controller);
+	runSimulation(200, controller);
 
 	delete controller;
 }
@@ -95,7 +95,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(300, controller);
+	runSimulation(200, controller);
 
 	delete controller;
 }
@@ -107,7 +107,7 @@ TEST_F(Benchmark, benchmarkFourThread)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(300, controller);
+	runSimulation(200, controller);
 
 	delete controller;
 }
@@ -119,7 +119,7 @@ TEST_F(Benchmark, benchmarkEightThread)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(300, controller);
+	runSimulation(200, controller);
 
 	delete controller;
 }
