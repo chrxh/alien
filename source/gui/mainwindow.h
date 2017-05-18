@@ -30,28 +30,30 @@ private Q_SLOTS:
     void stepBackClicked ();
     void snapshotUniverse ();
     void restoreUniverse ();
-    void editSimulationParameters ();
-    void loadSimulationParameters ();
-    void saveSimulationParameters ();
+
+	//menu: settings
+	void editSimulationParameters();
+	void loadSimulationParameters();
+	void saveSimulationParameters();
+	void editSymbolTable();
+	void loadSymbols();
+	void saveSymbols();
+	void loadSymbolsWithMerging();
 
     //menu: view
-    void fullscreen (bool triggered);
-    void setEditMode (bool editMode);
+    void setVisualMode (bool shapeUniverse);
     void alienMonitorTriggered (bool on);
     void alienMonitorClosed();
+    void fullscreen (bool triggered);
 
-    //menu: edit
+    //menu: particle
     void addCell ();
     void addEnergyParticle ();
     void addRandomEnergy ();
     void copyCell ();
     void pasteCell ();
-    void editSymbolTable ();
-    void loadSymbols ();
-    void saveSymbols ();
-    void loadSymbolsWithMerging ();
 
-    //menu: selection
+    //menu: ensemble
     void addBlockStructure ();
     void addHexagonStructure ();
     void loadExtendedSelection ();
