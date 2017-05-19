@@ -38,8 +38,10 @@ void VisualEditor::init(SimulationController* controller)
 	_pixelUniverseInit = false;
 	_shapeUniverseInit = false;
 	_controller = controller;
-	_viewport->init(ui->simulationView, _pixelUniverse, _shapeUniverse, ActiveScene::PixelScene);
 	_pixelUniverse->init(controller, _viewport);
+	_shapeUniverse->init(controller, _viewport);
+	_viewport->init(ui->simulationView, _pixelUniverse, _shapeUniverse, ActiveScene::PixelScene);
+	setActiveScene(ActiveScene::PixelScene);
 }
 
 
@@ -47,6 +49,12 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 {
 	_viewport->setActiveScene(activeScene);
     _screenUpdatePossible = true;
+	if (activeScene == ActiveScene::PixelScene) {
+		_pixelUniverse->setActive();
+	}
+	if (activeScene == ActiveScene::ShapeScene) {
+		_shapeUniverse->setActive();
+	}
 }
 
 QVector2D VisualEditor::getViewCenterWithIncrement ()

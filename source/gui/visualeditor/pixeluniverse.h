@@ -16,9 +16,9 @@ public:
     virtual ~PixelUniverse();
 
 	virtual void init(SimulationController* controller, ViewportInfo* viewport);
+	virtual void setActive();
 
 private:
-	void requestAllData();
     Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
 
