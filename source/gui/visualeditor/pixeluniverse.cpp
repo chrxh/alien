@@ -9,7 +9,7 @@
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/BuilderFacade.h"
 #include "model/SimulationController.h"
-#include "model/Context/SimulationContext.h"
+#include "model/Context/SimulationContextApi.h"
 #include "model/Context/EnergyParticleMap.h"
 #include "model/Context/CellMap.h"
 #include "model/Context/SpaceMetric.h"
@@ -47,24 +47,23 @@ void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewpor
 	connect(controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 
-	requestAllData();
 }
 
-void PixelUniverse::requestAllData()
+void PixelUniverse::setActive()
 {
 	IntVector2D size = _context->getSpaceMetric()->getSize();
 	ResolveDescription resolveDesc;
-	_simAccess->requireData({ {0, 0}, size }, resolveDesc);
+	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
 }
 
-Q_SLOT void PixelUniverse::requestData()
+void PixelUniverse::requestData()
 {
 	ResolveDescription resolveDesc;
 	IntRect rect = _viewport->getRect();
 	_simAccess->requireData(rect, resolveDesc);
 }
 
-Q_SLOT void PixelUniverse::retrieveAndDisplayData()
+void PixelUniverse::retrieveAndDisplayData()
 {
 	auto const& dataDesc = _simAccess->retrieveData();
 

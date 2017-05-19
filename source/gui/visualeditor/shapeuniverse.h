@@ -20,10 +20,14 @@ public:
 	virtual ~ShapeUniverse();
 
 	virtual void init(SimulationController* controller, ViewportInfo* viewport);
+	virtual void setActive();
 
 private:
-	ViewportInfo* _viewport = nullptr;
+	void retrieveAndDisplayData();
 
+	SimulationAccess* _simAccess = nullptr;
+	SimulationContextApi* _context = nullptr;
+	ViewportInfo* _viewport = nullptr;
 };
 
 #endif // SHAPEUNIVERSE_H
