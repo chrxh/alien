@@ -32,7 +32,8 @@ struct DataDescription;
 struct DataLightDescription;
 class SimulationAccess;
 class QTimer;
-
+class CellDescription;
+class CellClusterDescription;
 class BuilderFacade;
 class SerializationFacade;
 

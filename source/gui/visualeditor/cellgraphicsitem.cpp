@@ -1,21 +1,18 @@
 #include <QPainter>
 
+#include "Model/Entities/Descriptions.h"
+
 #include "gui/Settings.h"
 #include "gui/Settings.h"
 
 #include "cellgraphicsitemconfig.h"
 #include "cellgraphicsitem.h"
 
-CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken
-	, quint8 color, QString displayString, int branchNumber, QGraphicsItem *parent)
-    : QGraphicsItem(parent), _config(config), _cell(cell), _connectable(connectable), _focusState(NO_FOCUS), _numToken(numToken)
-	, _color(color % CELL_COLOR_COUNT), _displayString(displayString), _branchNumber(branchNumber)
+CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
+    : QGraphicsItem(parent), _config(config)
 {
-    QGraphicsItem::setPos(x, y);
-}
-
-CellGraphicsItem::~CellGraphicsItem()
-{
+	auto pos = desc.pos.getValue();
+    QGraphicsItem::setPos(pos.x, pos.y);
 }
 
 QRectF CellGraphicsItem::boundingRect () const
