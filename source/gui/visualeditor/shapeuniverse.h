@@ -11,7 +11,6 @@
 #include "model/Entities/CellTO.h"
 #include "gui/Definitions.h"
 
-
 class ShapeUniverse : public QGraphicsScene
 {
     Q_OBJECT
@@ -28,6 +27,8 @@ private:
 	SimulationAccess* _simAccess = nullptr;
 	SimulationContextApi* _context = nullptr;
 	ViewportInfo* _viewport = nullptr;
+
+	GraphicsItems* _items = nullptr;
 };
 
 #endif // SHAPEUNIVERSE_H

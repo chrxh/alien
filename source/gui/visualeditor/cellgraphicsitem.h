@@ -2,10 +2,12 @@
 #define CELLGRAPHICSITEM_H
 
 #include <QGraphicsItem>
+
+#include "Model/Definitions.h"
 #include "gui/Definitions.h"
 
-class Cell;
-class CellGraphicsItem : public QGraphicsItem
+class CellGraphicsItem
+	: public QGraphicsItem
 {
 public:
     enum FocusState {
@@ -17,9 +19,8 @@ public:
         Type = UserType + 1
     };
 
-    CellGraphicsItem (CellGraphicsItemConfig* config, Cell* cell, qreal x, qreal y, bool connectable, int numToken, quint8 color
-		, QString displayString, int branchNumber, QGraphicsItem* parent = 0);
-    ~CellGraphicsItem ();
+    CellGraphicsItem (CellGraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent = nullptr);
+    ~CellGraphicsItem () = default;
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
