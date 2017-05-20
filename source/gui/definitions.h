@@ -13,6 +13,7 @@ class PixelUniverse;
 class ShapeUniverse;
 class QGraphicsView;
 class QGraphicsScene;
+class GraphicsItems;
 class ViewportInfo;
 class ViewportController;
 enum class ActiveScene;

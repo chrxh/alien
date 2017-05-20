@@ -10,6 +10,7 @@
 #include "model/Context/SimulationContextApi.h"
 #include "model/Context/SpaceMetric.h"
 
+#include "GraphicsItems.h"
 #include "ShapeUniverse.h"
 
 ShapeUniverse::ShapeUniverse(QObject *parent)
@@ -28,7 +29,9 @@ void ShapeUniverse::init(SimulationController * controller, ViewportInfo * viewp
 	_context = controller->getContext();
 	_viewport = viewport;
 	auto simAccess = facade->buildSimulationAccess(_context);
+	auto items = new GraphicsItems();
 	SET_CHILD(_simAccess, simAccess);
+	SET_CHILD(_items, items);
 
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
 }

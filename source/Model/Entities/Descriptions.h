@@ -18,6 +18,7 @@ struct CellDescription
 
 	Tracker<QVector2D> pos;
 	Tracker<double> energy;
+	Tracker<int> numConnections;
 	Tracker<int> maxConnections;
 	Tracker<bool> tokenBlocked;
 	Tracker<int> tokenAccessNumber;
