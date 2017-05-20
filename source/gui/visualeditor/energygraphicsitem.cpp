@@ -1,24 +1,16 @@
-#include "energygraphicsitem.h"
-
-#include "gui/Settings.h"
-#include "gui/Settings.h"
-
 #include <QPainter>
 
-EnergyGraphicsItem::EnergyGraphicsItem (QGraphicsItem* parent)
-    : QGraphicsItem(parent), _e(0), _focusState(NO_FOCUS)
-{
-    QGraphicsItem::setPos(0.0, 0.0);
-}
+#include "Model/Entities/Descriptions.h"
+#include "gui/Settings.h"
+#include "gui/Settings.h"
 
-EnergyGraphicsItem::EnergyGraphicsItem (EnergyParticle* e, qreal x, qreal y, QGraphicsItem* parent)
-    : QGraphicsItem(parent), _e(e), _focusState(NO_FOCUS)
-{
-    QGraphicsItem::setPos(x, y);
-}
+#include "energygraphicsitem.h"
 
-EnergyGraphicsItem::~EnergyGraphicsItem ()
+EnergyGraphicsItem::EnergyGraphicsItem (EnergyParticleDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
+    : QGraphicsItem(parent), _focusState(NO_FOCUS)
 {
+	auto pos = desc.pos.getValue()*GRAPHICS_ITEM_SIZE;
+    QGraphicsItem::setPos(pos.x(), pos.y());
 }
 
 QRectF EnergyGraphicsItem::boundingRect () const
@@ -48,11 +40,6 @@ int EnergyGraphicsItem::type() const
 void EnergyGraphicsItem::setFocusState (FocusState focusState)
 {
     _focusState = focusState;
-}
-
-EnergyParticle* EnergyGraphicsItem::getEnergyParticle ()
-{
-    return _e;
 }
 
 

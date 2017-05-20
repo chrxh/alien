@@ -3,7 +3,6 @@
 #include "Model/Entities/Descriptions.h"
 
 #include "gui/Settings.h"
-#include "gui/Settings.h"
 
 #include "cellgraphicsitemconfig.h"
 #include "cellgraphicsitem.h"
@@ -11,8 +10,8 @@
 CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
     : QGraphicsItem(parent), _config(config)
 {
-	auto pos = desc.pos.getValue();
-    QGraphicsItem::setPos(pos.x, pos.y);
+	auto pos = desc.pos.getValue()*GRAPHICS_ITEM_SIZE;
+    QGraphicsItem::setPos(pos.x(), pos.y());
 }
 
 QRectF CellGraphicsItem::boundingRect () const
@@ -96,11 +95,6 @@ int CellGraphicsItem::type() const
 {
     // enables the use of qgraphicsitem_cast with this item.
     return Type;
-}
-
-Cell* CellGraphicsItem::getCell ()
-{
-    return _cell;
 }
 
 void CellGraphicsItem::setConnectable (bool connectable)

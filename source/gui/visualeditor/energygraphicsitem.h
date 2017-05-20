@@ -3,8 +3,10 @@
 
 #include <QGraphicsItem>
 
-class EnergyParticle;
-class EnergyGraphicsItem : public QGraphicsItem
+#include "Model/Definitions.h"
+
+class EnergyGraphicsItem
+	: public QGraphicsItem
 {
 public:
     enum FocusState {
@@ -16,19 +18,16 @@ public:
         Type = UserType + 2
     };
 
-    EnergyGraphicsItem (QGraphicsItem* parent = 0);
-    EnergyGraphicsItem (EnergyParticle* e, qreal x, qreal y, QGraphicsItem* parent = 0);
-    ~EnergyGraphicsItem ();
+    EnergyGraphicsItem(EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
+	~EnergyGraphicsItem() = default;
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     int type() const;
 
     void setFocusState (FocusState focusState);
-    EnergyParticle* getEnergyParticle ();
 
 private:
-    EnergyParticle* _e;
     FocusState _focusState;
 };
 

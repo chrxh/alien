@@ -17,6 +17,7 @@ public:
 
 	virtual void init(SimulationController* controller, ViewportInfo* viewport);
 	virtual void setActive();
+	virtual void setInactive();
 
 private:
     Q_SLOT void requestData();
@@ -26,7 +27,7 @@ private:
 	void displayParticles(DataDescription const& data) const;
 
 	SimulationAccess* _simAccess = nullptr;
-	SimulationContextApi* _context = nullptr;
+	SimulationController* _controller = nullptr;
 	ViewportInfo* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;
     QImage* _image = nullptr;

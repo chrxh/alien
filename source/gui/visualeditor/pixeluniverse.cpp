@@ -34,26 +34,32 @@ PixelUniverse::~PixelUniverse()
 void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewport)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
-	_context = controller->getContext();
+	_controller = controller;
 	_viewport = viewport;
-	auto simAccess = facade->buildSimulationAccess(_context);
+	auto simAccess = facade->buildSimulationAccess(_controller->getContext());
 	SET_CHILD(_simAccess, simAccess);
 
 	delete _image;
-	IntVector2D size = _context->getSpaceMetric()->getSize();
+	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_image = new QImage(size.x, size.y, QImage::Format_RGB32);
 	QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
 
-	connect(controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 
 }
 
 void PixelUniverse::setActive()
 {
-	IntVector2D size = _context->getSpaceMetric()->getSize();
+	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
+
+	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	ResolveDescription resolveDesc;
 	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
+}
+
+void PixelUniverse::setInactive()
+{
+	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
 }
 
 void PixelUniverse::requestData()
@@ -65,12 +71,12 @@ void PixelUniverse::requestData()
 
 void PixelUniverse::retrieveAndDisplayData()
 {
-	auto const& dataDesc = _simAccess->retrieveData();
+	auto const& data = _simAccess->retrieveData();
 
 	_image->fill(UNIVERSE_COLOR);
 
-	displayClusters(dataDesc);
-	displayParticles(dataDesc);
+	displayClusters(data);
+	displayParticles(data);
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));
 }
 
@@ -139,7 +145,7 @@ namespace
 
 void PixelUniverse::displayClusters(DataDescription const& data) const
 {
-	auto space = _context->getSpaceMetric();
+	auto space = _controller->getContext()->getSpaceMetric();
 	for (auto const& clusterTracker : data.clusters) {
 		auto const& clusterDesc = clusterTracker.getValue();
 		for (auto const& cellTracker : clusterDesc.cells) {
@@ -155,7 +161,7 @@ void PixelUniverse::displayClusters(DataDescription const& data) const
 
 void PixelUniverse::displayParticles(DataDescription const & data) const
 {
-	auto space = _context->getSpaceMetric();
+	auto space = _controller->getContext()->getSpaceMetric();
 	for (auto const& particleTracker : data.particles) {
 		auto const& particleDesc = particleTracker.getValue();
 		auto const& pos = particleDesc.pos.getValue();
