@@ -20,15 +20,17 @@ public:
 
 	virtual void init(SimulationController* controller, ViewportInfo* viewport);
 	virtual void setActive();
+	virtual void setInactive();
+	virtual void requestData();
 
 private:
 	void retrieveAndDisplayData();
 
 	SimulationAccess* _simAccess = nullptr;
-	SimulationContextApi* _context = nullptr;
+	SimulationController* _controller = nullptr;
 	ViewportInfo* _viewport = nullptr;
 
-	GraphicsItems* _items = nullptr;
+	GraphicsItemManager* _items = nullptr;
 };
 
 #endif // SHAPEUNIVERSE_H

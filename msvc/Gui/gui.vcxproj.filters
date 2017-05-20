@@ -300,13 +300,13 @@
     <ClCompile Include="..\..\source\gui\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\GraphicsItems.cpp">
+    <ClCompile Include="..\..\source\gui\visualeditor\GraphicsItemManager.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_GraphicsItems.cpp">
+    <ClCompile Include="Debug\moc_GraphicsItemManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_GraphicsItems.cpp">
+    <ClCompile Include="Release\moc_GraphicsItemManager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -463,7 +463,7 @@
     <CustomBuild Include="..\..\source\gui\MainWindow.ui">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItems.h">
+    <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItemManager.h">
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
   </ItemGroup>

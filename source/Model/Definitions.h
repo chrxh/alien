@@ -30,10 +30,11 @@ class EntityFactory;
 class ContextFactory;
 struct DataDescription;
 struct DataLightDescription;
+struct CellClusterDescription;
+struct CellDescription;
+struct EnergyParticleDescription;
 class SimulationAccess;
 class QTimer;
-class CellDescription;
-class CellClusterDescription;
 class BuilderFacade;
 class SerializationFacade;
 
