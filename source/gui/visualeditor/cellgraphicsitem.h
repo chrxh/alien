@@ -26,7 +26,6 @@ public:
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     int type() const;
 
-    Cell* getCell ();
     void setConnectable (bool connectable);
     FocusState getFocusState ();
     void setFocusState (FocusState focusState);
@@ -36,7 +35,6 @@ public:
 	void setBranchNumber (int value);
 
 private:
-    Cell* _cell;
 	CellGraphicsItemConfig* _config = nullptr;
     bool _connectable = false;
     FocusState _focusState;
