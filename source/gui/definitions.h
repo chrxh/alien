@@ -3,7 +3,9 @@
 
 #include "Base/Definitions.h"
 
-struct CellGraphicsItemConfig;
+class CellGraphicsItem;
+class ParticleGraphicsItem;
+struct GraphicsItemConfig;
 class TextEditor;
 class SimulationMonitor;
 class TutorialWindow;
