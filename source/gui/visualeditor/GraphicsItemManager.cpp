@@ -2,20 +2,24 @@
 
 #include "Model/Entities/Descriptions.h"
 #include "Gui/settings.h"
+#include "Gui/visualeditor/ViewportInterface.h"
 
 #include "GraphicsItemManager.h"
 #include "cellgraphicsitem.h"
 #include "ParticleGraphicsItem.h"
 
-void GraphicsItemManager::init(QGraphicsScene * scene)
+void GraphicsItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport)
 {
 	_scene = scene;
+	_viewport = viewport;
 }
 
 void GraphicsItemManager::activate(IntVector2D size)
 {
 	_scene->clear();
 	_scene->setSceneRect(0, 0, size.x*GRAPHICS_ITEM_SIZE, size.y*GRAPHICS_ITEM_SIZE);
+	_cellsByIds.clear();
+	_particlesByIds.clear();
 }
 
 template<typename ItemType, typename DescriptionType>
@@ -41,6 +45,8 @@ void GraphicsItemManager::updateItems(vector<TrackerElement<DescriptionType>> co
 
 void GraphicsItemManager::update(DataDescription const &desc)
 {
+	_viewport->setModeToNoUpdate();
+
 	unordered_map<uint64_t, CellGraphicsItem*> newCellsByIds;
 	for (auto const &clusterT : desc.clusters) {
 		auto const &cluster = clusterT.getValue();
@@ -51,12 +57,12 @@ void GraphicsItemManager::update(DataDescription const &desc)
 	}
 	_cellsByIds = newCellsByIds;
 
-
 	unordered_map<uint64_t, ParticleGraphicsItem*> newParticlesByIds;
 	updateItems(desc.particles, _particlesByIds, newParticlesByIds);
 	for (auto const& particleById : _particlesByIds) {
 		delete particleById.second;
 	}
-
 	_particlesByIds = newParticlesByIds;
+
+	_viewport->setModeToUpdate();
 }

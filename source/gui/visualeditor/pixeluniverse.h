@@ -15,7 +15,7 @@ public:
     PixelUniverse(QObject* parent = nullptr);
     virtual ~PixelUniverse();
 
-	virtual void init(SimulationController* controller, ViewportInfo* viewport);
+	virtual void init(SimulationController* controller, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 
@@ -28,7 +28,7 @@ private:
 
 	SimulationAccess* _simAccess = nullptr;
 	SimulationController* _controller = nullptr;
-	ViewportInfo* _viewport = nullptr;
+	ViewportInterface* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;
     QImage* _image = nullptr;
 

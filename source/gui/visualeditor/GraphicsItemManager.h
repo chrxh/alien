@@ -14,7 +14,7 @@ public:
 	GraphicsItemManager(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~GraphicsItemManager() = default;
 
-	virtual void init(QGraphicsScene* scene);
+	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport);
 
 	virtual void activate(IntVector2D size);
 	virtual void update(DataDescription const &desc);
@@ -25,6 +25,7 @@ private:
 		, unordered_map<uint64_t, ItemType*>& newItemsByIds);
 		
 	QGraphicsScene* _scene = nullptr;
+	ViewportInterface* _viewport = nullptr;
 	GraphicsItemConfig _config;
 
 	unordered_map<uint64_t, CellGraphicsItem*> _cellsByIds;

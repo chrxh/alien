@@ -14,6 +14,17 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	initViewMatrices();
 }
 
+void ViewportController::setModeToUpdate()
+{
+	_view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+}
+
+void ViewportController::setModeToNoUpdate()
+{
+	_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+	_view->update();
+}
+
 void ViewportController::initViewMatrices()
 {
 	_pixelSceneViewMatrix = QMatrix();

@@ -18,7 +18,7 @@ public:
     ShapeUniverse (QObject *parent = nullptr);
 	virtual ~ShapeUniverse();
 
-	virtual void init(SimulationController* controller, ViewportInfo* viewport);
+	virtual void init(SimulationController* controller, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 	virtual void requestData();
@@ -28,7 +28,7 @@ private:
 
 	SimulationAccess* _simAccess = nullptr;
 	SimulationController* _controller = nullptr;
-	ViewportInfo* _viewport = nullptr;
+	ViewportInterface* _viewport = nullptr;
 
 	GraphicsItemManager* _items = nullptr;
 };
