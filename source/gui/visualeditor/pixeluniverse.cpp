@@ -5,7 +5,7 @@
 
 #include "Base/ServiceLocator.h"
 #include "gui/Settings.h"
-#include "gui/visualeditor/ViewportInfo.h"
+#include "gui/visualeditor/ViewportInterface.h"
 #include "model/AccessPorts/SimulationAccess.h"
 #include "model/BuilderFacade.h"
 #include "model/SimulationController.h"
@@ -31,7 +31,7 @@ PixelUniverse::~PixelUniverse()
 	delete _image;
 }
 
-void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewport)
+void PixelUniverse::init(SimulationController* controller, ViewportInterface* viewport)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	_controller = controller;
