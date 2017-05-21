@@ -16,7 +16,7 @@ class ShapeUniverse;
 class QGraphicsView;
 class QGraphicsScene;
 class GraphicsItemManager;
-class ViewportInfo;
+class ViewportInterface;
 class ViewportController;
 enum class ActiveScene;
 

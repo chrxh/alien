@@ -4,7 +4,7 @@
 
 #include "Base/ServiceLocator.h"
 #include "Gui/Settings.h"
-#include "Gui/visualeditor/ViewportInfo.h"
+#include "Gui/visualeditor/ViewportInterface.h"
 #include "Model/SimulationController.h"
 #include "Model/BuilderFacade.h"
 #include "Model/AccessPorts/SimulationAccess.h"
@@ -24,7 +24,7 @@ ShapeUniverse::~ShapeUniverse()
 {
 }
 
-void ShapeUniverse::init(SimulationController * controller, ViewportInfo * viewport)
+void ShapeUniverse::init(SimulationController * controller, ViewportInterface * viewport)
 {
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
 	_controller = controller;
@@ -37,7 +37,7 @@ void ShapeUniverse::init(SimulationController * controller, ViewportInfo * viewp
 
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
 
-	items->init(this);
+	items->init(this, viewport);
 }
 
 void ShapeUniverse::activate()

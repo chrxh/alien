@@ -249,15 +249,6 @@
     <ClCompile Include="Release\moc_ViewportController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ViewportInfo.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ViewportInfo.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ViewportInfo.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\visualeditor.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
@@ -308,6 +299,15 @@
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.cpp">
       <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\ViewportInterface.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ViewportInterface.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ViewportInterface.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -448,9 +448,6 @@
     <CustomBuild Include="..\..\source\gui\visualeditor\ViewportController.h">
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\ViewportInfo.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\visualeditor.h">
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
@@ -464,6 +461,9 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItemManager.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\ViewportInterface.h">
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
   </ItemGroup>
