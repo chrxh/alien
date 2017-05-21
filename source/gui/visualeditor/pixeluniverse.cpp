@@ -48,7 +48,7 @@ void PixelUniverse::init(SimulationController* controller, ViewportInfo* viewpor
 
 }
 
-void PixelUniverse::setActive()
+void PixelUniverse::activate()
 {
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
 
@@ -57,7 +57,7 @@ void PixelUniverse::setActive()
 	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
 }
 
-void PixelUniverse::setInactive()
+void PixelUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
 }

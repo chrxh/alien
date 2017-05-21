@@ -19,8 +19,10 @@ public:
         Type = UserType + 1
     };
 
-    CellGraphicsItem (CellGraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent = nullptr);
+    CellGraphicsItem (GraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent = nullptr);
     ~CellGraphicsItem () = default;
+
+	void update(CellDescription const& desc);
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -35,13 +37,13 @@ public:
 	void setBranchNumber (int value);
 
 private:
-	CellGraphicsItemConfig* _config = nullptr;
+	GraphicsItemConfig* _config = nullptr;
     bool _connectable = false;
-    FocusState _focusState;
-    int _numToken;
-    quint8 _color;
+    FocusState _focusState = FocusState::NO_FOCUS;
+    int _numToken = 0;
+    quint8 _color = 0;
 	QString _displayString;
-	int _branchNumber;
+	int _branchNumber = 0;
 };
 
 #endif // CELLGRAPHICSITEM_H

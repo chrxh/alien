@@ -40,17 +40,17 @@ void ShapeUniverse::init(SimulationController * controller, ViewportInfo * viewp
 	items->init(this);
 }
 
-void ShapeUniverse::setActive()
+void ShapeUniverse::activate()
 {
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
-	_items->setActive(size);
+	_items->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
 	ResolveDescription resolveDesc;
 	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
 }
 
-void ShapeUniverse::setInactive()
+void ShapeUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
 }
@@ -65,7 +65,7 @@ void ShapeUniverse::requestData()
 void ShapeUniverse::retrieveAndDisplayData()
 {
 	auto const& data = _simAccess->retrieveData();
-	_items->buildItems(data);
+	_items->update(data);
 }
 
 

@@ -19,8 +19,8 @@ public:
 	virtual ~ShapeUniverse();
 
 	virtual void init(SimulationController* controller, ViewportInfo* viewport);
-	virtual void setActive();
-	virtual void setInactive();
+	virtual void activate();
+	virtual void deactivate();
 	virtual void requestData();
 
 private:

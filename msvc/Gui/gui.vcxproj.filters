@@ -219,9 +219,6 @@
     <ClCompile Include="..\..\source\gui\visualeditor\cellgraphicsitem.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\energygraphicsitem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\markergraphicsitem.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
@@ -308,6 +305,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_GraphicsItemManager.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -557,12 +557,6 @@
     <ClInclude Include="..\..\source\gui\visualeditor\cellgraphicsitem.h">
       <Filter>Source Files\Visualeditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\cellgraphicsitemconfig.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\energygraphicsitem.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\gui\visualeditor\markergraphicsitem.h">
       <Filter>Source Files\Visualeditor</Filter>
     </ClInclude>
@@ -619,6 +613,12 @@
     </ClInclude>
     <ClInclude Include="ui_MainWindow.h">
       <Filter>Generated Files\_Ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\GraphicsItemConfig.h">
+      <Filter>Source Files\Visualeditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,8 +4,9 @@
 #include <QGraphicsItem>
 
 #include "Model/Definitions.h"
+#include "Gui/Definitions.h"
 
-class EnergyGraphicsItem
+class ParticleGraphicsItem
 	: public QGraphicsItem
 {
 public:
@@ -18,8 +19,10 @@ public:
         Type = UserType + 2
     };
 
-    EnergyGraphicsItem(EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
-	~EnergyGraphicsItem() = default;
+    ParticleGraphicsItem(GraphicsItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
+	~ParticleGraphicsItem() = default;
+
+	void update(EnergyParticleDescription const& desc);
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

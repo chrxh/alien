@@ -4,14 +4,19 @@
 
 #include "gui/Settings.h"
 
-#include "cellgraphicsitemconfig.h"
+#include "GraphicsItemConfig.h"
 #include "cellgraphicsitem.h"
 
-CellGraphicsItem::CellGraphicsItem (CellGraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
+CellGraphicsItem::CellGraphicsItem (GraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
     : QGraphicsItem(parent), _config(config)
 {
+	update(desc);
+}
+
+void CellGraphicsItem::update(CellDescription const & desc)
+{
 	auto pos = desc.pos.getValue()*GRAPHICS_ITEM_SIZE;
-    QGraphicsItem::setPos(pos.x(), pos.y());
+	QGraphicsItem::setPos(pos.x(), pos.y());
 }
 
 QRectF CellGraphicsItem::boundingRect () const
@@ -80,7 +85,7 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
         }
     }
 
-	if (_config->showInfo) {
+	if (_config->showCellInfo) {
 		auto font = GuiSettings::getCellFont();
 		painter->setFont(font);
 		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
