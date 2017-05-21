@@ -39,6 +39,10 @@ QRectF ViewportController::getRect() const
 {
 	auto p1 = _view->mapToScene(0, 0);
 	auto p2 = _view->mapToScene(_view->width(), _view->height());
+	if (_activeScene == ActiveScene::ShapeScene) {
+		p1 = p1 / GRAPHICS_ITEM_SIZE;
+		p2 = p2 / GRAPHICS_ITEM_SIZE;
+	}
 	return{ p1, p2 };
 }
 

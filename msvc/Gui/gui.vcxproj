@@ -46,7 +46,7 @@
     <ClCompile Include="..\..\source\gui\texteditor\tokentab.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\cellconnectiongraphicsitem.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\cellgraphicsitem.cpp" />
-    <ClCompile Include="..\..\source\gui\visualeditor\energygraphicsitem.cpp" />
+    <ClCompile Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\GraphicsItemManager.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\markergraphicsitem.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\pixeluniverse.cpp" />
@@ -892,8 +892,8 @@
     </CustomBuild>
     <ClInclude Include="..\..\source\gui\visualeditor\cellconnectiongraphicsitem.h" />
     <ClInclude Include="..\..\source\gui\visualeditor\cellgraphicsitem.h" />
-    <ClInclude Include="..\..\source\gui\visualeditor\cellgraphicsitemconfig.h" />
-    <ClInclude Include="..\..\source\gui\visualeditor\energygraphicsitem.h" />
+    <ClInclude Include="..\..\source\gui\visualeditor\GraphicsItemConfig.h" />
+    <ClInclude Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.h" />
     <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItemManager.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing GraphicsItemManager.h...</Message>

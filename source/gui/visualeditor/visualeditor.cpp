@@ -50,12 +50,12 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 	_viewport->setActiveScene(activeScene);
     _screenUpdatePossible = true;
 	if (activeScene == ActiveScene::PixelScene) {
-		_shapeUniverse->setInactive();
-		_pixelUniverse->setActive();
+		_shapeUniverse->deactivate();
+		_pixelUniverse->activate();
 	}
 	if (activeScene == ActiveScene::ShapeScene) {
-		_pixelUniverse->setInactive();
-		_shapeUniverse->setActive();
+		_pixelUniverse->deactivate();
+		_shapeUniverse->activate();
 	}
 }
 
