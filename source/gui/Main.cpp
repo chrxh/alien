@@ -6,14 +6,15 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "gui/MainWindow.h"
-#include "model/AccessPorts/SimulationAccess.h"
-#include "model/ModelBuilderFacade.h"
-#include "model/Settings.h"
-#include "model/SimulationController.h"
-#include "model/Context/UnitContext.h"
-#include "model/Context/SimulationParameters.h"
-#include "model/Entities/CellTO.h"
-#include "model/Metadata/SymbolTable.h"
+#include "Model/AccessPorts/SimulationAccess.h"
+#include "Model/ModelBuilderFacade.h"
+#include "Model/Settings.h"
+#include "Model/SimulationController.h"
+#include "Model/Context/UnitContext.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/Entities/CellTO.h"
+#include "Model/Metadata/SymbolTable.h"
+#include "ModelGpu/ModelGpuBuilderFacade.h"
 
 
 //Design-Entscheidung:
@@ -96,6 +97,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+	ModelGpuBuilderFacade* gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+
+
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	IntVector2D size = { 12*33*3, 12*17*3 };
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
