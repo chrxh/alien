@@ -5,7 +5,7 @@
 
 const qreal ALIEN_PRECISION = 0.0000001;
 
-class ModelSettings
+class MODEL_EXPORT ModelSettings
 {
 public:
     static SymbolTable* loadDefaultSymbolTable();

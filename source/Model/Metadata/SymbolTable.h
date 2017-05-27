@@ -3,7 +3,7 @@
 
 #include "model/Definitions.h"
 
-class SymbolTable
+class MODEL_EXPORT SymbolTable
 	: public QObject
 {
 	Q_OBJECT

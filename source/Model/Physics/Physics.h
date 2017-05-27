@@ -9,7 +9,7 @@
 constexpr qreal degToRad = 3.14159265358979/180.0;
 constexpr qreal radToDeg = 180.0/3.14159265358979;
 
-class Physics
+class MODEL_EXPORT Physics
 {
 public:
     //Notice: all angles below are in DEG

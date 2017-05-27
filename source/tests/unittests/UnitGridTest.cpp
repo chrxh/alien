@@ -29,7 +29,7 @@ protected:
 
 UnitGridTest::UnitGridTest()
 {
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	auto parameters = facade->buildDefaultSimulationParameters();
 
