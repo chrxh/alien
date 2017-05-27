@@ -7,7 +7,7 @@
 #include "gui/Settings.h"
 #include "gui/visualeditor/ViewportInterface.h"
 #include "model/AccessPorts/SimulationAccess.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/SimulationController.h"
 #include "model/Context/SimulationContextApi.h"
 #include "model/Context/EnergyParticleMap.h"
@@ -33,7 +33,7 @@ PixelUniverse::~PixelUniverse()
 
 void PixelUniverse::init(SimulationController* controller, ViewportInterface* viewport)
 {
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
 	auto simAccess = facade->buildSimulationAccess(_controller->getContext());

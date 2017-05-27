@@ -4,7 +4,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 #include "model/Entities/Cell.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/Features/CellFeature.h"
 #include "model/Entities/EntityFactory.h"
 #include "model/Entities/Token.h"

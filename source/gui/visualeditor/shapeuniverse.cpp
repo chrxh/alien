@@ -6,7 +6,7 @@
 #include "Gui/Settings.h"
 #include "Gui/visualeditor/ViewportInterface.h"
 #include "Model/SimulationController.h"
-#include "Model/BuilderFacade.h"
+#include "Model/ModelBuilderFacade.h"
 #include "Model/AccessPorts/SimulationAccess.h"
 #include "model/Context/SimulationContextApi.h"
 #include "model/Context/SpaceMetric.h"
@@ -26,7 +26,7 @@ ShapeUniverse::~ShapeUniverse()
 
 void ShapeUniverse::init(SimulationController * controller, ViewportInterface * viewport)
 {
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
 

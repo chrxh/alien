@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/Settings.h"
 #include "model/SimulationController.h"
 #include "model/Context/SimulationContext.h"
