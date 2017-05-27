@@ -10,7 +10,7 @@
 #include "model/Context/SimulationParameters.h"
 #include "model/Context/SimulationContext.h"
 #include "model/Context/EnergyParticleMap.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/Entities/Cell.h"
 #include "model/Entities/CellCluster.h"
 #include "model/Entities/EnergyParticle.h"

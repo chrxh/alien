@@ -1,8 +1,5 @@
-#ifndef FACTORYFACADE_H
-#define FACTORYFACADE_H
-
-#include <QtGlobal>
-#include <QVector2D>
+#ifndef MODELBUILDERFACADE_H
+#define MODELBUILDERFACADE_H
 
 #include "model/Entities/CellTO.h"
 #include "model/Features/CellFeatureEnums.h"
@@ -10,10 +7,10 @@
 
 #include "Definitions.h"
 
-class BuilderFacade
+class ModelBuilderFacade
 {
 public:
-	virtual ~BuilderFacade() = default;
+	virtual ~ModelBuilderFacade() = default;
 
 	virtual SimulationController* buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
@@ -22,4 +19,4 @@ public:
 	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
 };
 
-#endif // FACTORYFACADE_H
+#endif // MODELBUILDERFACADE_H

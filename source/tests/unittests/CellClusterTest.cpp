@@ -5,7 +5,7 @@
 #include "model/Context/UnitContext.h"
 #include "model/Context/SimulationParameters.h"
 #include "model/Settings.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/Context/SpaceMetric.h"
 #include "model/Entities/Cell.h"
 #include "model/Entities/Token.h"

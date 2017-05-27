@@ -27,18 +27,18 @@
 #include "model/Settings.h"
 #include "model/_Impl/SimulationControllerImpl.h"
 
-#include "BuilderFacadeImpl.h"
+#include "ModelBuilderFacadeImpl.h"
 
 namespace {
-	BuilderFacadeImpl instance;
+	ModelBuilderFacadeImpl instance;
 }
 
-BuilderFacadeImpl::BuilderFacadeImpl ()
+ModelBuilderFacadeImpl::ModelBuilderFacadeImpl ()
 {
-    ServiceLocator::getInstance().registerService<BuilderFacade>(this);
+    ServiceLocator::getInstance().registerService<ModelBuilderFacade>(this);
 }
 
-SimulationAccess * BuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
+SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
 	auto access = factory->buildSimulationAccess();
@@ -46,7 +46,7 @@ SimulationAccess * BuilderFacadeImpl::buildSimulationAccess(SimulationContextApi
 	return access;
 }
 
-SimulationController* BuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
+SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 	, SymbolTable* symbolTable, SimulationParameters* parameters) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
@@ -99,7 +99,7 @@ namespace
 	const int ARRAY_SIZE_FOR_RANDOM_NUMBERS = 234327;
 }
 
-Unit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const
+Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -126,12 +126,12 @@ Unit * BuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationCon
 	return unit;
 }
 
-SymbolTable * BuilderFacadeImpl::buildDefaultSymbolTable() const
+SymbolTable * ModelBuilderFacadeImpl::buildDefaultSymbolTable() const
 {
 	return ModelSettings::loadDefaultSymbolTable();
 }
 
-SimulationParameters * BuilderFacadeImpl::buildDefaultSimulationParameters() const
+SimulationParameters * ModelBuilderFacadeImpl::buildDefaultSimulationParameters() const
 {
 	return ModelSettings::loadDefaultSimulationParameters();
 }

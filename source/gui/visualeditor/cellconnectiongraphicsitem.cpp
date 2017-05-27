@@ -1,20 +1,26 @@
 #include "cellconnectiongraphicsitem.h"
 
+#include "Model/Entities/Descriptions.h"
 #include "gui/Settings.h"
 #include "gui/Settings.h"
 
 #include <QPainter>
 #include <qmath.h>
 
+CellConnectionGraphicsItem::CellConnectionGraphicsItem(CellDescription const & cell1, CellDescription const & cell2, ConnectionState s, QGraphicsItem * parent)
+	: QGraphicsItem(parent)
+{
+	auto const &pos1 = cell1.pos.getValue();
+	auto const &pos2 = cell2.pos.getValue();
+	_dx = pos2.x() - pos1.x();
+	_dy = pos2.y() - pos1.y();
+}
+
 CellConnectionGraphicsItem::CellConnectionGraphicsItem (qreal x1, qreal y1, qreal x2, qreal y2, ConnectionState s, QGraphicsItem* parent)
     : QGraphicsItem(parent), _dx(x2-x1), _dy(y2-y1), _connectionState(s)
 {
     QGraphicsItem::setPos(x1, y1);
     QGraphicsItem::setZValue(-1.0);
-}
-
-CellConnectionGraphicsItem::~CellConnectionGraphicsItem ()
-{
 }
 
 QRectF CellConnectionGraphicsItem::boundingRect () const

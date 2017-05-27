@@ -7,7 +7,7 @@
 #include "model/Features/_Impl/CellCommunicatorImpl.h"
 #include "model/Physics/PhysicalQuantityConverter.h"
 #include "model/Context/UnitContext.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/Settings.h"
 #include "model/Context/SpaceMetric.h"
 #include "model/Context/SimulationParameters.h"
