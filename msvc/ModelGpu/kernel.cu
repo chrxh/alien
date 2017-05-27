@@ -297,6 +297,7 @@ __global__ void movement_Kernel(Cluster* __restrict__ clusters, int * __restrict
 	}
 }
 
+/*
 int main()
 {
 	cudaSetDevice(0);
@@ -368,3 +369,4 @@ int main()
 	cudaFree(map.map1);
 	return 0;
 }
+*/
