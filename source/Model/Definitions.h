@@ -35,7 +35,7 @@ struct CellDescription;
 struct EnergyParticleDescription;
 class SimulationAccess;
 class QTimer;
-class BuilderFacade;
+class ModelBuilderFacade;
 class SerializationFacade;
 
 struct CellClusterHash

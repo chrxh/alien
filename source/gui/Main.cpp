@@ -7,7 +7,7 @@
 #include "Base/NumberGenerator.h"
 #include "gui/MainWindow.h"
 #include "model/AccessPorts/SimulationAccess.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/Settings.h"
 #include "model/SimulationController.h"
 #include "model/Context/UnitContext.h"
@@ -96,7 +96,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	IntVector2D size = { 12*33*3, 12*17*3 };
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();

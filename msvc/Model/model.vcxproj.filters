@@ -307,9 +307,6 @@
     <ClCompile Include="Release\moc_SimulationAccess.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Model\_Impl\BuilderFacadeImpl.cpp">
-      <Filter>Source Files\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\_Impl\SerializationFacadeImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
@@ -325,6 +322,9 @@
     <ClCompile Include="Release\moc_SimulationControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Model\_Impl\ModelBuilderFacadeImpl.cpp">
+      <Filter>Source Files\_Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Settings.h">
@@ -334,9 +334,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Definitions.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\BuilderFacade.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Physics\Physics.h">
@@ -468,10 +465,13 @@
     <ClInclude Include="..\..\source\Model\AccessPorts\AccessPortFactory.h">
       <Filter>Source Files\AccessPorts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\_Impl\BuilderFacadeImpl.h">
+    <ClInclude Include="..\..\source\Model\_Impl\SerializationFacadeImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\_Impl\SerializationFacadeImpl.h">
+    <ClInclude Include="..\..\source\Model\ModelBuilderFacade.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\_Impl\ModelBuilderFacadeImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
   </ItemGroup>

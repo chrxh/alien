@@ -5,6 +5,7 @@
 
 class CellGraphicsItem;
 class ParticleGraphicsItem;
+class CellConnectionGraphicsItem;
 struct GraphicsItemConfig;
 class TextEditor;
 class SimulationMonitor;

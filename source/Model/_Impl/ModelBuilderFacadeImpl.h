@@ -1,14 +1,14 @@
 #ifndef BUILDERFACADEIMPL_H
 #define BUILDERFACADEIMPL_H
 
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 
-class BuilderFacadeImpl
-	: public BuilderFacade
+class ModelBuilderFacadeImpl
+	: public ModelBuilderFacade
 {
 public:
-    BuilderFacadeImpl ();
-	virtual ~BuilderFacadeImpl() = default;
+    ModelBuilderFacadeImpl ();
+	virtual ~ModelBuilderFacadeImpl() = default;
 
 	virtual SimulationController* buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const override;

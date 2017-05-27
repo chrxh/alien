@@ -20,16 +20,17 @@ public:
 	virtual void update(DataDescription const &desc);
 
 private:
-	template<typename ItemType, typename DescriptionType>
-	void updateItems(vector<TrackerElement<DescriptionType>> const &desc, unordered_map<uint64_t, ItemType*>& itemsByIds
-		, unordered_map<uint64_t, ItemType*>& newItemsByIds);
+	template<typename IdType, typename ItemType, typename DescriptionType>
+	void updateItems(vector<TrackerElement<DescriptionType>> const &desc, map<IdType, ItemType*>& itemsByIds
+		, map<IdType, ItemType*>& newItemsByIds);
 		
 	QGraphicsScene* _scene = nullptr;
 	ViewportInterface* _viewport = nullptr;
 	GraphicsItemConfig _config;
 
-	unordered_map<uint64_t, CellGraphicsItem*> _cellsByIds;
-	unordered_map<uint64_t, ParticleGraphicsItem*> _particlesByIds;
+	map<uint64_t, CellGraphicsItem*> _cellsByIds;
+	map<uint64_t, ParticleGraphicsItem*> _particlesByIds;
+	map<unordered_set<uint64_t>, CellConnectionGraphicsItem*> _connectionsByIds;
 };
 
 #endif // GRAPHICSITEMMANAGER_H

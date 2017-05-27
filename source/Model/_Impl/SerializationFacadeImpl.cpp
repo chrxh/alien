@@ -19,7 +19,7 @@
 #include "model/Context/SpaceMetric.h"
 #include "model/Context/SimulationParameters.h"
 #include "model/Context/_Impl/UnitContextImpl.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 
 namespace
 {

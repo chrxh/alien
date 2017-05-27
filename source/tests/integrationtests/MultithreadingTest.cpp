@@ -5,7 +5,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "model/BuilderFacade.h"
+#include "model/ModelBuilderFacade.h"
 #include "model/Settings.h"
 #include "model/SimulationController.h"
 #include "model/Context/SimulationContext.h"
