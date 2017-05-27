@@ -10,7 +10,7 @@
 #include "DefinitionsImpl.h"
 #include "SignalWrapper.h"
 
-class UnitThreadControllerImpl
+class MODEL_EXPORT UnitThreadControllerImpl
 	: public UnitThreadController
 {
 	Q_OBJECT

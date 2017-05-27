@@ -41,7 +41,7 @@ protected:
 
 MultithreadingTest::MultithreadingTest()
 {
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
@@ -87,7 +87,7 @@ TEST_F(MultithreadingTest, testThreads)
 
 TEST_F(MultithreadingTest, testOneCellMovement)
 {
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto access = facade->buildSimulationAccess(_context);
 
 	_parameters->radiationProb = 0.0;
@@ -111,7 +111,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 
 TEST_F(MultithreadingTest, testManyCellsMovement)
 {
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto access = facade->buildSimulationAccess(_context);
 	DataDescription desc;
 	for (int i = 0; i < 10000; ++i) {

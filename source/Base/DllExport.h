@@ -1,5 +1,5 @@
-#ifndef BASE_GLOBAL_H
-#define BASE_GLOBAL_H
+#ifndef BASE_DLLEXPORT_H
+#define BASE_DLLEXPORT_H
 
 #include <QtCore/qglobal.h>
 
@@ -13,4 +13,4 @@
 	# define BASE_EXPORT
 #endif
 
-#endif // BASE_GLOBAL_H
+#endif // BASE_DLLEXPORT_H
