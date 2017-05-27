@@ -3,7 +3,7 @@
 
 #include "model/Definitions.h"
 
-class UnitThreadController
+class MODEL_EXPORT UnitThreadController
 	: public QObject
 {
 	Q_OBJECT

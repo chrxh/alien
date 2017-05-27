@@ -4,7 +4,7 @@
 #include "model/Definitions.h"
 #include "model/Entities/Descriptions.h"
 
-class SimulationAccess
+class MODEL_EXPORT SimulationAccess
 	: public QObject
 {
 	Q_OBJECT

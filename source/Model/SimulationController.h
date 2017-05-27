@@ -3,7 +3,7 @@
 
 #include "Definitions.h"
 
-class SimulationController
+class MODEL_EXPORT SimulationController
 	: public QObject
 {
     Q_OBJECT

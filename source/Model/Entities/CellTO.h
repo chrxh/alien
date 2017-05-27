@@ -8,7 +8,7 @@
 #include <QString>
 
 class Cell;
-struct CellTO  //TO = Transfer Object
+struct MODEL_EXPORT CellTO  //TO = Transfer Object
 {
 
     CellTO ();

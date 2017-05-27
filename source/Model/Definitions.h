@@ -6,6 +6,8 @@
 #include "model/Metadata/CellClusterMetadata.h"
 #include "model/Metadata/EnergyParticleMetadata.h"
 
+#include "DllExport.h"
+
 class Cell;
 class CellCluster;
 class UnitGrid;

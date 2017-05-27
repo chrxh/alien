@@ -474,6 +474,9 @@
     <ClInclude Include="..\..\source\Model\_Impl\ModelBuilderFacadeImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Model\DllExport.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\SimulationController.h">

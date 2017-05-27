@@ -4,7 +4,7 @@
 #include <QThread>
 #include "model/Definitions.h"
 
-class UnitThread
+class MODEL_EXPORT UnitThread
 	: public QThread
 {
 	Q_OBJECT

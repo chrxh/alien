@@ -30,7 +30,7 @@ protected:
 
 CellClusterTest::CellClusterTest()
 {
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 
 /*
 	_context = facade->buildSimulationContext();
