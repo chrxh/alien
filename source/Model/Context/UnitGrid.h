@@ -1,7 +1,7 @@
 #ifndef UNITGRID_H
 #define UNITGRID_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class UnitGrid
 	: public QObject

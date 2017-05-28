@@ -1,7 +1,7 @@
 #ifndef CONTEXTFACTORY_H
 #define CONTEXTFACTORY_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class ContextFactory
 {

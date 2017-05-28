@@ -1,7 +1,7 @@
 #ifndef CELLFUNCTIONPROPULSION_H
 #define CELLFUNCTIONPROPULSION_H
 
-#include "model/Features/CellFunction.h"
+#include "Model/Features/CellFunction.h"
 
 class CellPropulsionImpl
 	: public CellFunction

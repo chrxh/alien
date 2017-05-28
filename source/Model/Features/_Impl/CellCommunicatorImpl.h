@@ -1,7 +1,7 @@
 #ifndef CELLFUNCTIONCOMMUNICATORIMPL_H
 #define CELLFUNCTIONCOMMUNICATORIMPL_H
 
-#include "model/Features/CellFunction.h"
+#include "Model/Features/CellFunction.h"
 
 #include <QVector2D>
 

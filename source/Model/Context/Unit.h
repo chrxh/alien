@@ -2,7 +2,7 @@
 #define UNIT_H
 
 #include <QThread>
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class Unit
 	: public QObject

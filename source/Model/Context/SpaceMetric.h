@@ -1,5 +1,4 @@
-#ifndef SPACEMETRIC_H
-#define SPACEMETRIC_H
+#pragma once
 
 #include "Model/SpaceMetricApi.h"
 
@@ -25,4 +24,3 @@ public:
 	virtual void deserializePrimitives(QDataStream& stream) = 0;
 };
 
-#endif // SPACEMETRIC_H

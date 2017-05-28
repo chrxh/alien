@@ -3,7 +3,7 @@
 
 #include <QDataStream>
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class CellFeature
 {

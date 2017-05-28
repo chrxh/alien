@@ -1,8 +1,8 @@
 #ifndef FEATURE_DESCRIPTIONS_H
 #define FEATURE_DESCRIPTIONS_H
 
-#include "model/Definitions.h"
-#include "model/Features/CellFeatureEnums.h"
+#include "Model/Definitions.h"
+#include "Model/Features/CellFeatureEnums.h"
 
 struct CellFunctionDescription
 {

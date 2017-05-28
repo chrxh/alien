@@ -1,9 +1,9 @@
 #ifndef CELLMAPIMPL_H
 #define CELLMAPIMPL_H
 
-#include "model/Context/CellMap.h"
-#include "model/Context/MapCompartment.h"
-#include "model/Context/UnitContext.h"
+#include "Model/Context/CellMap.h"
+#include "Model/Context/MapCompartment.h"
+#include "Model/Context/UnitContext.h"
 
 class CellMapImpl
 	: public CellMap

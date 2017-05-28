@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "model/ModelBuilderFacade.h"
-#include "model/Settings.h"
-#include "model/SimulationController.h"
-#include "model/Context/SimulationContext.h"
-#include "model/Context/Unit.h"
-#include "model/Context/UnitContext.h"
-#include "model/Context/MapCompartment.h"
-#include "model/Context/_Impl/UnitThreadControllerImpl.h"
-#include "model/Context/_Impl/UnitThread.h"
+#include "Model/ModelBuilderFacade.h"
+#include "Model/Settings.h"
+#include "Model/SimulationController.h"
+#include "Model/Context/SimulationContext.h"
+#include "Model/Context/Unit.h"
+#include "Model/Context/UnitContext.h"
+#include "Model/Context/MapCompartment.h"
+#include "Model/Context/_Impl/UnitThreadControllerImpl.h"
+#include "Model/Context/_Impl/UnitThread.h"
 
 #include "tests/Predicates.h"
 

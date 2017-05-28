@@ -1,8 +1,8 @@
 #ifndef MAPCOMPARTMENT_H
 #define MAPCOMPARTMENT_H
 
-#include "model/Definitions.h"
-#include "model/Context/UnitContext.h"
+#include "Model/Definitions.h"
+#include "Model/Context/UnitContext.h"
 
 class MapCompartment
 	: public QObject

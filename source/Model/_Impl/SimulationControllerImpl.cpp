@@ -1,8 +1,8 @@
 #include <QTimer>
 
 #include "Base/ServiceLocator.h"
-#include "model/Context/SimulationContext.h"
-#include "model/Context/UnitThreadController.h"
+#include "Model/Context/SimulationContext.h"
+#include "Model/Context/UnitThreadController.h"
 
 #include "SimulationControllerImpl.h"
 

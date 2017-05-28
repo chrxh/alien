@@ -1,10 +1,10 @@
 #ifndef SIMULATIONACCESSIMPL_H
 #define SIMULATIONACCESSIMPL_H
 
-#include "model/AccessPorts/SimulationAccess.h"
-#include "model/Context/SimulationContext.h"
-#include "model/Context/UnitObserver.h"
-#include "model/Entities/Descriptions.h"
+#include "Model/AccessPorts/SimulationAccess.h"
+#include "Model/Context/SimulationContext.h"
+#include "Model/Context/UnitObserver.h"
+#include "Model/Entities/Descriptions.h"
 
 class SimulationAccessImpl
 	: public SimulationAccess

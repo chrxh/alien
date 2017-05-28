@@ -6,7 +6,7 @@
 #include <QTimer>
 
 #include "gui/Definitions.h"
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class PixelUniverse : public QGraphicsScene
 {
