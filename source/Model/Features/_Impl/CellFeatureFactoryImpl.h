@@ -7,7 +7,6 @@ class CellFeatureFactoryImpl
 	: public CellFeatureFactory
 {
 public:
-    CellFeatureFactoryImpl ();
     ~CellFeatureFactoryImpl () {}
 
     CellFeature* addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const override;

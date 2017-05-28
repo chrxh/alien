@@ -3,7 +3,7 @@
 
 #include "model/Definitions.h"
 
-class MODEL_EXPORT SymbolTable
+class SymbolTable
 	: public QObject
 {
 	Q_OBJECT
@@ -12,18 +12,18 @@ public:
 	SymbolTable(QObject* parent = nullptr);
 	virtual ~SymbolTable();
 
-	SymbolTable* clone(QObject* parent = nullptr) const;
+	virtual SymbolTable* clone(QObject* parent = nullptr) const;
 
-    void addEntry(QString const& key, QString const& value);
-    void delEntry(QString const& key);
-    QString applyTableToCode(QString const& input) const;
-    void clearTable();
-    QMap< QString, QString > const& getTableConstRef () const;
-    void setTable(SymbolTable const& table);
-	void mergeTable(SymbolTable const& table);
+	virtual void addEntry(QString const& key, QString const& value);
+	virtual void delEntry(QString const& key);
+	virtual QString applyTableToCode(QString const& input) const;
+	virtual void clearTable();
+	virtual QMap< QString, QString > const& getTableConstRef () const;
+	virtual void setTable(SymbolTable const& table);
+	virtual void mergeTable(SymbolTable const& table);
 
-    void serializePrimitives (QDataStream& stream) const;
-    void deserializePrimitives (QDataStream& stream);
+	virtual void serializePrimitives (QDataStream& stream) const;
+	virtual void deserializePrimitives (QDataStream& stream);
 
 private:
     QMap<QString,QString> _symbolsByKey;

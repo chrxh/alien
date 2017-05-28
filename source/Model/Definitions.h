@@ -1,5 +1,5 @@
-#ifndef DEFINITIONS_H
-#define DEFINITIONS_H
+#ifndef MODEL_DEFINITIONS_H
+#define MODEL_DEFINITIONS_H
 
 #include "Base/Definitions.h"
 #include "model/Metadata/CellMetadata.h"
@@ -53,4 +53,4 @@ struct CellHash
 typedef std::unordered_set<Cell*, CellHash> CellSet;
 
 
-#endif // DEFINITIONS_H
+#endif // MODEL_DEFINITIONS_H

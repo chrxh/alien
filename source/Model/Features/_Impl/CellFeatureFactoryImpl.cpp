@@ -10,17 +10,6 @@
 #include "CellCommunicatorImpl.h"
 #include "EnergyGuidanceImpl.h"
 
-#include "Base/ServiceLocator.h"
-
-namespace {
-	CellFeatureFactoryImpl cellDecoratorFactoryImpl;
-}
-
-CellFeatureFactoryImpl::CellFeatureFactoryImpl ()
-{
-    ServiceLocator::getInstance().registerService<CellFeatureFactory>(this);
-}
-
 namespace {
     CellFeature* registerNewFeature (Cell* cell, CellFeature* newFeature)
     {

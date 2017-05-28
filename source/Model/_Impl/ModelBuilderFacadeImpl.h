@@ -7,7 +7,6 @@ class ModelBuilderFacadeImpl
 	: public ModelBuilderFacade
 {
 public:
-    ModelBuilderFacadeImpl ();
 	virtual ~ModelBuilderFacadeImpl() = default;
 
 	virtual SimulationController* buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize

@@ -1,6 +1,7 @@
 #ifndef DEFINITIONS_H
-#define DEFINITIONS_H
+#define MODEL_GPU_DEFINITIONS_H
 
 #include "Base/Definitions.h"
+#include "DllExport.h"
 
-#endif // DEFINITIONS_H
+#endif // MODEL_GPU_DEFINITIONS_H

@@ -16,6 +16,10 @@
 #include "Model/Metadata/SymbolTable.h"
 #include "ModelGpu/ModelGpuBuilderFacade.h"
 
+#include "Model/ModelServices.h"
+
+#include "ModelGpu/ModelGpuServices.h"
+
 
 //Design-Entscheidung:
 //- alle Serialisierung und Deserialisierung sollen von SerializationFacade gesteuert werden
@@ -96,7 +100,10 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+	ModelServices modelServices;
+	ModelGpuServices modelGpuServices;
+	
+	QApplication a(argc, argv);
 
 	ModelGpuBuilderFacade* gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
@@ -104,7 +111,7 @@ int main(int argc, char *argv[])
 	auto symbols = ModelSettings::loadDefaultSymbolTable();
 	auto parameters = ModelSettings::loadDefaultSimulationParameters();
 
-//	auto gpuController = gpuFacade->buildSimulationController(size, symbols, parameters);
+	auto gpuController = gpuFacade->buildSimulationController(size, symbols, parameters);
 
 	auto controller = cpuFacade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
 

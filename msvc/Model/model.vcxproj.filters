@@ -325,6 +325,9 @@
     <ClCompile Include="..\..\source\Model\_Impl\ModelBuilderFacadeImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Model\ModelServices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Settings.h">
@@ -477,6 +480,9 @@
     <ClInclude Include="..\..\source\Model\DllExport.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Model\ModelServices.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\SimulationController.h">
@@ -608,6 +614,11 @@
     </Filter>
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{2dd9613a-1efe-4d99-96b5-12cd65be711a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+      <ParseFiles>true</ParseFiles>
     </Filter>
   </ItemGroup>
 </Project>

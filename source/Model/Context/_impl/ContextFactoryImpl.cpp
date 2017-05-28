@@ -1,5 +1,3 @@
-#include "Base/ServiceLocator.h"
-
 #include "ContextFactoryImpl.h"
 #include "SimulationContextImpl.h"
 #include "UnitImpl.h"
@@ -9,16 +7,6 @@
 #include "SpaceMetricImpl.h"
 #include "CellMapImpl.h"
 #include "EnergyParticleMapImpl.h"
-
-namespace
-{
-	ContextFactoryImpl instance;
-}
-
-ContextFactoryImpl::ContextFactoryImpl()
-{
-	ServiceLocator::getInstance().registerService<ContextFactory>(this);
-}
 
 SimulationContext * ContextFactoryImpl::buildSimulationContext() const
 {
