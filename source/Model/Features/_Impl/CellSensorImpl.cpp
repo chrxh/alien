@@ -1,15 +1,15 @@
 #include <QtCore/qmath.h>
 
-#include "model/Settings.h"
-#include "model/Context/UnitContext.h"
-#include "model/Context/SimulationParameters.h"
-#include "model/Context/CellMap.h"
-#include "model/Context/SpaceMetric.h"
-#include "model/Entities/Cell.h"
-#include "model/Entities/CellCluster.h"
-#include "model/Entities/Token.h"
-#include "model/Physics/Physics.h"
-#include "model/Physics/PhysicalQuantityConverter.h"
+#include "Model/Settings.h"
+#include "Model/Context/UnitContext.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/CellMap.h"
+#include "Model/Context/SpaceMetric.h"
+#include "Model/Entities/Cell.h"
+#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Token.h"
+#include "Model/Physics/Physics.h"
+#include "Model/Physics/PhysicalQuantityConverter.h"
 
 #include "CellSensorImpl.h"
 

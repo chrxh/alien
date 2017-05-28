@@ -3,13 +3,13 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
-#include "model/Physics/Physics.h"
-#include "model/Physics/PhysicalQuantityConverter.h"
-#include "model/Entities/Cell.h"
-#include "model/Entities/CellCluster.h"
-#include "model/Entities/Token.h"
-#include "model/Context/UnitContext.h"
-#include "model/Context/SimulationParameters.h"
+#include "Model/Physics/Physics.h"
+#include "Model/Physics/PhysicalQuantityConverter.h"
+#include "Model/Entities/Cell.h"
+#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Token.h"
+#include "Model/Context/UnitContext.h"
+#include "Model/Context/SimulationParameters.h"
 
 #include "CellScannerImpl.h"
 

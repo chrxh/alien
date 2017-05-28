@@ -1,6 +1,6 @@
 #include "Base/ServiceLocator.h"
 
-#include "model/Features/CellFeatureFactory.h"
+#include "Model/Features/CellFeatureFactory.h"
 
 #include "EnergyParticleImpl.h"
 #include "CellImpl.h"

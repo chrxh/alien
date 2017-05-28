@@ -3,7 +3,7 @@
 
 #include <QMatrix4x4>
 
-#include "model/Entities/CellCluster.h"
+#include "Model/Entities/CellCluster.h"
 
 class CellClusterImpl
 	: public CellCluster

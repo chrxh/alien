@@ -5,7 +5,7 @@
 #include <QChar>
 #include <QVector>
 
-#include "model/Features/CellComputer.h"
+#include "Model/Features/CellComputer.h"
 
 class CellComputerImpl
 	: public CellComputer

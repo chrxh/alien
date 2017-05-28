@@ -1,7 +1,7 @@
 #include <QtGlobal>
 
-#include "model/Features/CellFeatureEnums.h"
-#include "model/Metadata/SymbolTable.h"
+#include "Model/Features/CellFeatureEnums.h"
+#include "Model/Metadata/SymbolTable.h"
 
 #include "Context/SimulationParameters.h"
 #include "Settings.h"

@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 #include "CellFeatureEnums.h"
 
 class CellFeatureFactory

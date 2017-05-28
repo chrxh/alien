@@ -1,7 +1,7 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class SymbolTable
 	: public QObject

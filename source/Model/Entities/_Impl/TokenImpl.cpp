@@ -1,7 +1,7 @@
 #include "Base/NumberGenerator.h"
-#include "model/Settings.h"
-#include "model/Context/SimulationParameters.h"
-#include "model/Context/UnitContext.h"
+#include "Model/Settings.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/UnitContext.h"
 
 #include "TokenImpl.h"
 

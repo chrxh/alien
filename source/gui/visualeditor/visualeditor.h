@@ -4,7 +4,7 @@
 #include <QVector2D>
 #include <QMatrix>
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 #include "gui/Definitions.h"
 
 namespace Ui {

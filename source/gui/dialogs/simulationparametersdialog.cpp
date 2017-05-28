@@ -2,8 +2,8 @@
 #include <QMessageBox>
 
 #include "gui/Settings.h"
-#include "model/Context/SimulationParameters.h"
-#include "model/Settings.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/Settings.h"
 
 #include "simulationparametersdialog.h"
 #include "ui_simulationparametersdialog.h"

@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QMap>
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 namespace Ui {
     class TokenTab;

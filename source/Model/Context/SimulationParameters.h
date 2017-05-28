@@ -1,7 +1,7 @@
 #ifndef SIMULATIONPARAMETERS_H
 #define SIMULATIONPARAMETERS_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class MODEL_EXPORT SimulationParameters
 	: public QObject

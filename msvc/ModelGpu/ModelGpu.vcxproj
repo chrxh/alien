@@ -207,6 +207,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h" />
     <ClInclude Include="..\..\source\ModelGpu\_Impl\DefinitionsImpl.h" />
     <ClInclude Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.h" />
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.h" />
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationContextGpuImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SimulationContextGpuImpl.h...</Message>
@@ -243,6 +244,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.cpp" />
+    <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationContextGpuImpl.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationControllerGpuImpl.cpp" />
     <ClCompile Include="Debug\moc_SimulationContextGpuImpl.cpp">

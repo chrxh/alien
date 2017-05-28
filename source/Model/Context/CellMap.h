@@ -1,7 +1,7 @@
 #ifndef CELLMAP_H
 #define CELLMAP_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class CellMap
 	: public QObject

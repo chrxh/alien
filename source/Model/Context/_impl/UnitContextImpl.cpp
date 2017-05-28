@@ -1,11 +1,11 @@
 #include "Base/NumberGenerator.h"
-#include "model/Context/CellMap.h"
-#include "model/Context/EnergyParticleMap.h"
-#include "model/Context/MapCompartment.h"
-#include "model/Context/SimulationParameters.h"
-#include "model/Entities/CellCluster.h"
-#include "model/Entities/EnergyParticle.h"
-#include "model/Metadata/SymbolTable.h"
+#include "Model/Context/CellMap.h"
+#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/MapCompartment.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/EnergyParticle.h"
+#include "Model/Metadata/SymbolTable.h"
 
 #include "UnitContextImpl.h"
 

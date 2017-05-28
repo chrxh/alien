@@ -2,7 +2,7 @@
 #define ADDHEXAGONSTRUCTUREDIALOG_H
 
 #include <QDialog>
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 namespace Ui {
 class AddHexagonStructureDialog;

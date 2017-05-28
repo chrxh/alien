@@ -1,10 +1,10 @@
-#include "model/Context/UnitContext.h"
-#include "model/Context/CellMap.h"
-#include "model/Entities/Cell.h"
-#include "model/Entities/CellCluster.h"
-#include "model/Entities/Token.h"
-#include "model/Context/SimulationParameters.h"
-#include "model/Settings.h"
+#include "Model/Context/UnitContext.h"
+#include "Model/Context/CellMap.h"
+#include "Model/Entities/Cell.h"
+#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Token.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/Settings.h"
 
 #include "CellWeaponImpl.h"
 

@@ -1,7 +1,7 @@
 #ifndef ENTITIES_DESCRIPTIONS_H
 #define ENTITIES_DESCRIPTIONS_H
 
-#include "model/Features/Descriptions.h"
+#include "Model/Features/Descriptions.h"
 
 struct TokenDescription
 {

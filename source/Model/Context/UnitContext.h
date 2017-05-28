@@ -1,7 +1,7 @@
 #ifndef UNITCONTEXT_H
 #define UNITCONTEXT_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class UnitContext
 	: public QObject

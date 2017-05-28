@@ -4,7 +4,7 @@
 #include "CellFeature.h"
 
 #include "CellFeatureEnums.h"
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class CellFunction
 	: public CellFeature

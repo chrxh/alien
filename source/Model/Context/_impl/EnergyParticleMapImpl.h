@@ -1,9 +1,9 @@
 #ifndef ENERGYPARTICLEMAPIMPL_H
 #define ENERGYPARTICLEMAPIMPL_H
 
-#include "model/Context/EnergyParticleMap.h"
-#include "model/Context/MapCompartment.h"
-#include "model/Context/UnitContext.h"
+#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/MapCompartment.h"
+#include "Model/Context/UnitContext.h"
 
 class EnergyParticleMapImpl
 	: public EnergyParticleMap

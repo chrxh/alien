@@ -1,7 +1,7 @@
 #ifndef CELLIMPL_H
 #define CELLIMPL_H
 
-#include "model/Entities/Cell.h"
+#include "Model/Entities/Cell.h"
 
 #include <QtGlobal>
 #include <QVector2D>

@@ -1,7 +1,7 @@
 #ifndef CELLFUNCTIONSCANNER_H
 #define CELLFUNCTIONSCANNER_H
 
-#include "model/Features/CellFunction.h"
+#include "Model/Features/CellFunction.h"
 
 class CellScannerImpl
 	: public CellFunction

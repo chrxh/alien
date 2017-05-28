@@ -1,7 +1,7 @@
 #ifndef ENTITYFACTORY_H
 #define ENTITYFACTORY_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 #include "Descriptions.h"
 
 class EntityFactory

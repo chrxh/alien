@@ -1,10 +1,10 @@
 #include <functional>
 
-#include "model/Context/SpaceMetric.h"
-#include "model/Context/UnitContext.h"
-#include "model/Settings.h"
-#include "model/Entities/Cell.h"
-#include "model/Entities/CellCluster.h"
+#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/UnitContext.h"
+#include "Model/Settings.h"
+#include "Model/Entities/Cell.h"
+#include "Model/Entities/CellCluster.h"
 
 #include "CellMapImpl.h"
 

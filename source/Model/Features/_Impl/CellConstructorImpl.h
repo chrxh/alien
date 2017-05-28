@@ -1,7 +1,7 @@
 #ifndef CELLFUNCTIONCONSTRUCTOR_H
 #define CELLFUNCTIONCONSTRUCTOR_H
 
-#include "model/Features/CellFunction.h"
+#include "Model/Features/CellFunction.h"
 
 #include <QVector2D>
 

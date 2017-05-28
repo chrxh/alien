@@ -2,7 +2,7 @@
 #define SIMULATIONCONTROLLERIMPL_H
 
 #include <QTime>
-#include "model/SimulationController.h"
+#include "Model/SimulationController.h"
 
 class SimulationControllerImpl
 	: public SimulationController

@@ -1,7 +1,7 @@
 #ifndef UNITTHREADCONTROLLER_H
 #define UNITTHREADCONTROLLER_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class MODEL_EXPORT UnitThreadController
 	: public QObject

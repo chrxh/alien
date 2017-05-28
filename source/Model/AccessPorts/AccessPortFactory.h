@@ -1,8 +1,8 @@
 #ifndef ACCESSPORTFACTORY_H
 #define ACCESSPORTFACTORY_H
 
-#include "model/Definitions.h"
-#include "model/Entities/Descriptions.h"
+#include "Model/Definitions.h"
+#include "Model/Entities/Descriptions.h"
 
 class AccessPortFactory
 {

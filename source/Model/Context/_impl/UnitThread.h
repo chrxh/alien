@@ -2,7 +2,7 @@
 #define UNITTHREAD_H
 
 #include <QThread>
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class MODEL_EXPORT UnitThread
 	: public QThread

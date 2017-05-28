@@ -1,7 +1,7 @@
 #ifndef BUILDERFACADEIMPL_H
 #define BUILDERFACADEIMPL_H
 
-#include "model/ModelBuilderFacade.h"
+#include "Model/ModelBuilderFacade.h"
 
 class ModelBuilderFacadeImpl
 	: public ModelBuilderFacade

@@ -1,9 +1,9 @@
 #include "Base/NumberGenerator.h"
-#include "model/Context/SpaceMetric.h"
-#include "model/Context/UnitGrid.h"
-#include "model/Context/UnitThreadController.h"
-#include "model/Context/SimulationParameters.h"
-#include "model/Metadata/SymbolTable.h"
+#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/UnitGrid.h"
+#include "Model/Context/UnitThreadController.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/Metadata/SymbolTable.h"
 
 #include "SimulationContextImpl.h"
 

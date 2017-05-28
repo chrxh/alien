@@ -1,9 +1,9 @@
 #ifndef MODELBUILDERFACADE_H
 #define MODELBUILDERFACADE_H
 
-#include "model/Entities/CellTO.h"
-#include "model/Features/CellFeatureEnums.h"
-#include "model/Entities/Descriptions.h"
+#include "Model/Entities/CellTO.h"
+#include "Model/Features/CellFeatureEnums.h"
+#include "Model/Entities/Descriptions.h"
 
 #include "Definitions.h"
 

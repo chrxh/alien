@@ -1,20 +1,23 @@
 #include "SimulationContextGpuImpl.h"
 
-void SimulationContextGpuImpl::init(SpaceMetric *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
+void SimulationContextGpuImpl::init(SpaceMetricApi *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
 {
+	_metric = metric;
+	_symbolTable = symbolTable;
+	_parameters = parameters;
 }
 
 SpaceMetricApi * SimulationContextGpuImpl::getSpaceMetric() const
 {
-	return nullptr;
+	return _metric;
 }
 
 SymbolTable * SimulationContextGpuImpl::getSymbolTable() const
 {
-	return nullptr;
+	return _symbolTable;
 }
 
 SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
 {
-	return nullptr;
+	return _parameters;
 }
