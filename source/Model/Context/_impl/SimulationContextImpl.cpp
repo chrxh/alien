@@ -28,7 +28,7 @@ void SimulationContextImpl::init(NumberGenerator* numberGen, SpaceMetric* metric
 	SET_CHILD(_simulationParameters, parameters);
 }
 
-SpaceMetric * SimulationContextImpl::getSpaceMetric() const
+SpaceMetricApi * SimulationContextImpl::getSpaceMetric() const
 {
 	return _metric;
 }

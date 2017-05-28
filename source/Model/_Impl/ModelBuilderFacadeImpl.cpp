@@ -29,14 +29,6 @@
 
 #include "ModelBuilderFacadeImpl.h"
 
-SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
-{
-	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
-	auto access = factory->buildSimulationAccess();
-	access->init(context);
-	return access;
-}
-
 SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 	, SymbolTable* symbolTable, SimulationParameters* parameters) const
 {
@@ -85,6 +77,14 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	return controller;
 }
 
+SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
+{
+	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
+	auto access = factory->buildSimulationAccess();
+	access->init(context);
+	return access;
+}
+
 namespace
 {
 	const int ARRAY_SIZE_FOR_RANDOM_NUMBERS = 234327;
@@ -100,7 +100,7 @@ Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simulati
 	auto unit = contextFactory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = contextFactory->buildSimulationUnitContext();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
-	auto metric = context->getSpaceMetric()->clone();
+	auto metric = static_cast<SpaceMetric*>(context->getSpaceMetric())->clone();
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();
