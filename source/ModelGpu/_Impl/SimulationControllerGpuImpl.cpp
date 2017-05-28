@@ -16,5 +16,5 @@ void SimulationControllerGpuImpl::calculateSingleTimestep()
 
 SimulationContextApi * SimulationControllerGpuImpl::getContext() const
 {
-	return nullptr;
+	return _context;
 }
