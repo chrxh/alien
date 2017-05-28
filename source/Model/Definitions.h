@@ -17,6 +17,7 @@ class CellFeature;
 class Unit;
 class CellMap;
 class EnergyParticleMap;
+class SpaceMetricApi;
 class SpaceMetric;
 class MapCompartment;
 class UnitGrid;
