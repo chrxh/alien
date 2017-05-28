@@ -1,5 +1,4 @@
-#ifndef MODELGPUBUILDERFACADE_H
-#define MODELGPUBUILDERFACADE_H
+#pragma once
 
 #include "Model/Definitions.h"
 #include "Definitions.h"
@@ -14,4 +13,3 @@ public:
 
 };
 
-#endif // MODELGPUBUILDERFACADE_H

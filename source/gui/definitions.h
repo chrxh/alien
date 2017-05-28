@@ -19,7 +19,9 @@ class QGraphicsScene;
 class GraphicsItemManager;
 class ViewportInterface;
 class ViewportController;
-enum class ActiveScene;
+enum class ActiveScene {
+	PixelScene, ShapeScene
+};
 
 
 #endif // GUI_DEFINITIONS_H

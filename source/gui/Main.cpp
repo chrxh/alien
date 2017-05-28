@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 	}
 	access->updateData(desc);
 
-    MainWindow w(controller);
+    MainWindow w(controller, access);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();
