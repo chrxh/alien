@@ -31,26 +31,24 @@ PixelUniverse::~PixelUniverse()
 	delete _image;
 }
 
-void PixelUniverse::init(SimulationController* controller, ViewportInterface* viewport)
+void PixelUniverse::init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
-	auto simAccess = facade->buildSimulationAccess(_controller->getContext());
-	SET_CHILD(_simAccess, simAccess);
+	_simAccess = access;
 
 	delete _image;
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_image = new QImage(size.x, size.y, QImage::Format_RGB32);
 	QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
 
-	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
-
 }
 
 void PixelUniverse::activate()
 {
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
+	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	ResolveDescription resolveDesc;
@@ -60,6 +58,7 @@ void PixelUniverse::activate()
 void PixelUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
+	disconnect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 }
 
 void PixelUniverse::requestData()

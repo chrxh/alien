@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    MainWindow (SimulationController* simulator, QWidget *parent = 0);
+    MainWindow (SimulationController* simulator, SimulationAccess* access, QWidget *parent = 0);
     ~MainWindow ();
 
 private Q_SLOTS:
