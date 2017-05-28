@@ -3,7 +3,7 @@
 
 #include "model/Definitions.h"
 
-class SimulationContextApi
+class MODEL_EXPORT SimulationContextApi
 	: public QObject
 {
 Q_OBJECT
