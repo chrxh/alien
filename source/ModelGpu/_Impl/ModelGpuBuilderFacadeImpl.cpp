@@ -1,8 +1,12 @@
+#include "SimulationControllerGpuImpl.h"
+
 #include "ModelGpuBuilderFacadeImpl.h"
 
 SimulationController * ModelGpuBuilderFacadeImpl::buildSimulationController(IntVector2D universeSize, SymbolTable * symbolTable, SimulationParameters * parameters) const
 {
-	return nullptr;
+	auto controller = new SimulationControllerGpuImpl();
+	return controller;
+
 }
 
 SimulationAccess * ModelGpuBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const

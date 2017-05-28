@@ -1,23 +1,20 @@
 #ifndef SPACEMETRIC_H
 #define SPACEMETRIC_H
 
-#include "model/Definitions.h"
+#include "Model/SpaceMetricApi.h"
 
 class SpaceMetric
-	: public QObject
+	: public SpaceMetricApi
 {
 	Q_OBJECT
 public:
-	SpaceMetric(QObject* parent) : QObject(parent) {}
+	SpaceMetric(QObject* parent = nullptr) : SpaceMetricApi(parent) {}
 	virtual ~SpaceMetric() = default;
 
 	virtual void init(IntVector2D size) = 0;
 	virtual SpaceMetric* clone(QObject* parent = nullptr) const = 0;
 
-	virtual IntVector2D getSize() const = 0;
-
 	virtual void correctPosition(QVector2D& pos) const = 0;
-	virtual IntVector2D correctPositionWithIntPrecision(QVector2D const& pos) const = 0;
 	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const = 0;
 	virtual void correctDisplacement(QVector2D& displacement) const = 0;
 	virtual QVector2D displacement(QVector2D fromPoint, QVector2D toPoint) const = 0;
