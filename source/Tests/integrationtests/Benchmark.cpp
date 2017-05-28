@@ -85,6 +85,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 	createTestData(access);
 	runSimulation(20, controller);
 
+	delete access;
 	delete controller;
 }
 
@@ -97,6 +98,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 	createTestData(access);
 	runSimulation(20, controller);
 
+	delete access;
 	delete controller;
 }
 
@@ -109,6 +111,7 @@ TEST_F(Benchmark, benchmarkFourThread)
 	createTestData(access);
 	runSimulation(20, controller);
 
+	delete access;
 	delete controller;
 }
 
@@ -121,5 +124,6 @@ TEST_F(Benchmark, benchmarkEightThread)
 	createTestData(access);
 	runSimulation(20, controller);
 
+	delete access;
 	delete controller;
 }
