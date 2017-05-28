@@ -1,14 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Source Files">
       <UniqueIdentifier>{8b764653-cbe9-4735-84de-574686f4e801}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\_Impl">
       <UniqueIdentifier>{51fd42e9-88f4-406a-a0ff-bb8846c4b507}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+      <ParseFiles>true</ParseFiles>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -21,10 +23,24 @@
     <ClInclude Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\DllExport.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

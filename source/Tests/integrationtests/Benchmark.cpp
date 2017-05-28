@@ -83,7 +83,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(200, controller);
+	runSimulation(20, controller);
 
 	delete controller;
 }
@@ -95,7 +95,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(200, controller);
+	runSimulation(20, controller);
 
 	delete controller;
 }
@@ -107,7 +107,7 @@ TEST_F(Benchmark, benchmarkFourThread)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(200, controller);
+	runSimulation(20, controller);
 
 	delete controller;
 }
@@ -119,7 +119,7 @@ TEST_F(Benchmark, benchmarkEightThread)
 	auto access = facade->buildSimulationAccess(controller->getContext());
 
 	createTestData(access);
-	runSimulation(200, controller);
+	runSimulation(20, controller);
 
 	delete controller;
 }

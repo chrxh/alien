@@ -7,7 +7,6 @@ class ContextFactoryImpl
 	: public ContextFactory
 {
 public:
-	ContextFactoryImpl();
 	virtual ~ContextFactoryImpl() {}
 
 	virtual SimulationContext* buildSimulationContext() const override;

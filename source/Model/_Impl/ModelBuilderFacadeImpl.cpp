@@ -29,15 +29,6 @@
 
 #include "ModelBuilderFacadeImpl.h"
 
-namespace {
-	ModelBuilderFacadeImpl instance;
-}
-
-ModelBuilderFacadeImpl::ModelBuilderFacadeImpl ()
-{
-    ServiceLocator::getInstance().registerService<ModelBuilderFacade>(this);
-}
-
 SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();

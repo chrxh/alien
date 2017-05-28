@@ -7,7 +7,6 @@ class ModelGpuBuilderFacadeImpl
 	: public ModelGpuBuilderFacade
 {
 public:
-	ModelGpuBuilderFacadeImpl();
 	virtual ~ModelGpuBuilderFacadeImpl() = default;
 
 	virtual SimulationController* buildSimulationController(IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters) const override;

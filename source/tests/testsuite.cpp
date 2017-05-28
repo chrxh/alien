@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <QApplication>
 
+#include "Model/modelservices.h"
+
 /*
 #include "unittests/testphysics.h"
 #include "unittests/testcellcluster.h"
@@ -14,6 +16,8 @@
 // Ex.: SquareRoot*
 
 int main(int argc, char** argv) {
+	ModelServices _modelServices;
+
     QApplication app(argc, argv);
 
 	::testing::InitGoogleTest(&argc, argv);

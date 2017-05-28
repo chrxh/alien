@@ -5,6 +5,7 @@
 #include "model/Settings.h"
 #include "model/SerializationFacade.h"
 #include "model/Metadata/SymbolTable.h"
+#include "Model/ModelBuilderFacade.h"
 #include "gui/Settings.h"
 
 #include "symboltabledialog.h"
@@ -122,7 +123,9 @@ void SymbolTableDialog::delButtonClicked ()
 
 void SymbolTableDialog::defaultButtonClicked ()
 {
-	_symbolTable = new SymbolTable();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+
+	_symbolTable = facade->buildDefaultSymbolTable();
     symbolTableToWidgets();
 }
 
