@@ -33,7 +33,7 @@
 #include "MainWindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
+MainWindow::MainWindow(SimulationController* simController, SimulationAccess* access, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
 	, _simController(simController)
@@ -53,7 +53,7 @@ MainWindow::MainWindow(SimulationController* simController, QWidget *parent)
 		, ui->buttonShowInfo };
     _textEditor->init(microWidgets);
 
-	ui->visualEditor->init(simController);
+	ui->visualEditor->init(simController, access);
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
 		_framedata.fps = value;
 		updateFrameLabel();

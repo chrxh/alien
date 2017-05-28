@@ -1,5 +1,4 @@
-#ifndef MACROEDITOR_H
-#define MACROEDITOR_H
+#pragma once
 
 #include <QWidget>
 #include <QVector2D>
@@ -19,7 +18,7 @@ public:
     VisualEditor(QWidget *parent = 0);
     virtual ~VisualEditor();
 
-	void init(SimulationController* controller);
+	void init(SimulationController* controller, SimulationAccess* access);
     void reset();
 
 	void setActiveScene(ActiveScene activeScene);
@@ -39,6 +38,8 @@ private:
     ShapeUniverse* _shapeUniverse = nullptr;
 	ViewportController* _viewport = nullptr;
 
+	ActiveScene _activeScene = ActiveScene::PixelScene;
+
     bool _pixelUniverseInit = false;
     bool _shapeUniverseInit = false;
 
@@ -46,12 +47,6 @@ private:
 
     bool _screenUpdatePossible = true;
 };
-
-#endif // MACROEDITOR_H
-
-
-
-
 
 
 

@@ -33,20 +33,21 @@ VisualEditor::~VisualEditor()
     delete ui;
 }
 
-void VisualEditor::init(SimulationController* controller)
+void VisualEditor::init(SimulationController* controller, SimulationAccess* access)
 {
 	_pixelUniverseInit = false;
 	_shapeUniverseInit = false;
 	_controller = controller;
-	_pixelUniverse->init(controller, _viewport);
-	_shapeUniverse->init(controller, _viewport);
+	_pixelUniverse->init(controller, access, _viewport);
+	_shapeUniverse->init(controller, access, _viewport);
 	_viewport->init(ui->simulationView, _pixelUniverse, _shapeUniverse, ActiveScene::PixelScene);
-	setActiveScene(ActiveScene::PixelScene);
+	setActiveScene(_activeScene);
 }
 
 
 void VisualEditor::setActiveScene (ActiveScene activeScene)
 {
+	_activeScene = activeScene;
 	_viewport->setActiveScene(activeScene);
     _screenUpdatePossible = true;
 	if (activeScene == ActiveScene::PixelScene) {

@@ -15,7 +15,7 @@ public:
     PixelUniverse(QObject* parent = nullptr);
     virtual ~PixelUniverse();
 
-	virtual void init(SimulationController* controller, ViewportInterface* viewport);
+	virtual void init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 

@@ -24,18 +24,15 @@ ShapeUniverse::~ShapeUniverse()
 {
 }
 
-void ShapeUniverse::init(SimulationController * controller, ViewportInterface * viewport)
+void ShapeUniverse::init(SimulationController * controller, SimulationAccess* access, ViewportInterface * viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
 
-	auto simAccess = facade->buildSimulationAccess(_controller->getContext());
+	_simAccess = access;
 	auto items = new GraphicsItemManager();
-	SET_CHILD(_simAccess, simAccess);
 	SET_CHILD(_items, items);
-
-	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
 
 	items->init(this, viewport);
 }
@@ -46,6 +43,8 @@ void ShapeUniverse::activate()
 	_items->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
+	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
+
 	ResolveDescription resolveDesc;
 	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
 }
@@ -53,6 +52,7 @@ void ShapeUniverse::activate()
 void ShapeUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
+	disconnect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
 }
 
 void ShapeUniverse::requestData()

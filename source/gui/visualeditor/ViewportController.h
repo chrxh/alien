@@ -4,10 +4,6 @@
 #include <QMatrix>
 #include "ViewportInterface.h"
 
-enum class ActiveScene {
-	PixelScene, ShapeScene
-};
-
 class ViewportController
 	: public ViewportInterface
 {
