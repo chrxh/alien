@@ -23,6 +23,7 @@ void SimulationControllerImpl::init(SimulationContextApi* context)
 {
 	SET_CHILD(_context, static_cast<SimulationContext*>(context));
 	connect(_context->getUnitThreadController(), &UnitThreadController::timestepCalculated, [this]() {
+		Q_EMIT nextTimestepCalculated();
 		++_timestepsPerSecond;
 		if (_flagSimulationRunning) {
 			_context->getUnitThreadController()->calculateTimestep();
@@ -34,7 +35,6 @@ void SimulationControllerImpl::init(SimulationContextApi* context)
 		else {
 			Q_EMIT nextFrameCalculated();
 		}
-		Q_EMIT nextTimestepCalculated();
 	});
 	_context->getUnitThreadController()->start();
 }
