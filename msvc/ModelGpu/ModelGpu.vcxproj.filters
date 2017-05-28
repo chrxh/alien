@@ -81,16 +81,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="kernel.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationControllerGpuImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationContextGpuImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\..\source\ModelGpu\_Impl\KernelFunctions.cu">
+      <Filter>Source Files\_Impl</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>
