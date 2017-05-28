@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Model/SimulationController.h"
+#include "DefinitionsImpl.h"
 
 class SimulationControllerGpuImpl
 	: public SimulationController
@@ -15,4 +16,6 @@ public:
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContextApi* getContext() const override;
 
+private:
+	SimulationContextGpuImpl *_context = nullptr;
 };

@@ -5,6 +5,7 @@
 class SimulationContextGpuImpl
 	: public SimulationContextApi
 {
+	Q_OBJECT
 public:
 	SimulationContextGpuImpl(QObject* parent = nullptr) : SimulationContextApi(parent) {}
 	virtual ~SimulationContextGpuImpl() = default;
