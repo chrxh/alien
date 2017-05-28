@@ -7,8 +7,8 @@
 #include <QMap>
 #include <QVector2D>
 
-#include "model/Definitions.h"
-#include "model/Entities/CellTO.h"
+#include "Model/Definitions.h"
+#include "Model/Entities/CellTO.h"
 #include "gui/Definitions.h"
 
 class ShapeUniverse : public QGraphicsScene

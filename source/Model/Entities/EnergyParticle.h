@@ -3,8 +3,8 @@
 
 #include <QVector2D>
 
-#include "model/Definitions.h"
-#include "model/Entities/Descriptions.h"
+#include "Model/Definitions.h"
+#include "Model/Entities/Descriptions.h"
 #include "Timestamp.h"
 
 class EnergyParticle

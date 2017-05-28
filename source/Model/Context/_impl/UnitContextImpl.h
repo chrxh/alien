@@ -3,8 +3,8 @@
 
 #include <QMutex>
 
-#include "model/Context/UnitContext.h"
-#include "model/Context/SpaceMetric.h"
+#include "Model/Context/UnitContext.h"
+#include "Model/Context/SpaceMetric.h"
 
 class UnitContextImpl
 	: public UnitContext

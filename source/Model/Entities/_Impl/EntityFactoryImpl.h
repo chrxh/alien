@@ -1,7 +1,7 @@
 #ifndef CELLFACTORYIMPL_H
 #define CELLFACTORYIMPL_H
 
-#include "model/Entities/EntityFactory.h"
+#include "Model/Entities/EntityFactory.h"
 
 class EntityFactoryImpl
 	: public EntityFactory

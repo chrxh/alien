@@ -5,7 +5,7 @@
 #include <QMutex>
 #include "gtest/gtest_prod.h"
 
-#include "model/Context/UnitThreadController.h"
+#include "Model/Context/UnitThreadController.h"
 
 #include "DefinitionsImpl.h"
 #include "SignalWrapper.h"

@@ -1,7 +1,7 @@
 #ifndef CELLFUNCTIONWEAPONIMPL_H
 #define CELLFUNCTIONWEAPONIMPL_H
 
-#include "model/Features/CellFunction.h"
+#include "Model/Features/CellFunction.h"
 
 class CellWeaponImpl
 	: public CellFunction

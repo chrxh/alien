@@ -2,9 +2,9 @@
 #define MODEL_DEFINITIONS_H
 
 #include "Base/Definitions.h"
-#include "model/Metadata/CellMetadata.h"
-#include "model/Metadata/CellClusterMetadata.h"
-#include "model/Metadata/EnergyParticleMetadata.h"
+#include "Model/Metadata/CellMetadata.h"
+#include "Model/Metadata/CellClusterMetadata.h"
+#include "Model/Metadata/EnergyParticleMetadata.h"
 
 #include "DllExport.h"
 

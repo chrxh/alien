@@ -1,7 +1,7 @@
 #ifndef SIMULATIONCONTEXTIMPL_H
 #define SIMULATIONCONTEXTIMPL_H
 
-#include "model/Context/SimulationContext.h"
+#include "Model/Context/SimulationContext.h"
 
 class SimulationContextImpl
 	: public SimulationContext

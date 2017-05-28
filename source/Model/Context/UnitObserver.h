@@ -1,7 +1,7 @@
 #ifndef UNITOBSERVER_H
 #define UNITOBSERVER_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class UnitObserver
 {

@@ -1,8 +1,8 @@
 #ifndef ENERGYPARTICLEIMPL_H
 #define ENERGYPARTICLEIMPL_H
 
-#include "model/Entities/EnergyParticle.h"
-#include "model/Entities/Descriptions.h"
+#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Descriptions.h"
 
 class EnergyParticleImpl
 	: public EnergyParticle

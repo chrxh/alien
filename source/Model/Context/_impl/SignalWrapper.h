@@ -1,7 +1,7 @@
 #ifndef SIGNALWRAPPER_H
 #define SIGNALWRAPPER_H
 
-#include "model/Definitions.h"
+#include "Model/Definitions.h"
 
 class SignalWrapper
 	: public QObject

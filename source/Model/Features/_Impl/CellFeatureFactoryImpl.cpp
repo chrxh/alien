@@ -1,6 +1,6 @@
 #include "CellFeatureFactoryImpl.h"
 
-#include "model/Entities/Cell.h"
+#include "Model/Entities/Cell.h"
 #include "CellComputerImpl.h"
 #include "CellConstructorImpl.h"
 #include "CellPropulsionImpl.h"

@@ -47,6 +47,9 @@
     <ClInclude Include="..\..\source\ModelGpu\_Impl\DefinitionsImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.h">
+      <Filter>Source Files\_Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.cpp">
@@ -72,6 +75,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_SimulationContextGpuImpl.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.cpp">
+      <Filter>Source Files\_Impl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
