@@ -21,17 +21,6 @@
 #include "model/Context/_Impl/UnitContextImpl.h"
 #include "model/ModelBuilderFacade.h"
 
-namespace
-{
-	SerializationFacadeImpl serializationFacadeImpl;
-}
-
-
-SerializationFacadeImpl::SerializationFacadeImpl()
-{
-    ServiceLocator::getInstance().registerService<SerializationFacade>(this);
-}
-
 void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, QDataStream & stream) const
 {
 	context->getSpaceMetric()->serializePrimitives(stream);

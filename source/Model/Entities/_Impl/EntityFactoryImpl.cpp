@@ -1,4 +1,5 @@
 #include "Base/ServiceLocator.h"
+
 #include "model/Features/CellFeatureFactory.h"
 
 #include "EnergyParticleImpl.h"
@@ -6,16 +7,6 @@
 #include "CellClusterImpl.h"
 #include "TokenImpl.h"
 #include "EntityFactoryImpl.h"
-
-namespace
-{
-    EntityFactoryImpl instance;
-}
-
-EntityFactoryImpl::EntityFactoryImpl ()
-{
-    ServiceLocator::getInstance().registerService<EntityFactory>(this);
-}
 
 CellCluster* EntityFactoryImpl::build(CellClusterDescription const& desc, UnitContext* context) const
 {

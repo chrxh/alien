@@ -11,6 +11,7 @@ public:
 
 	virtual SimulationController* buildSimulationController(IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
 	virtual SimulationAccess* buildSimulationAccess(SimulationContextApi* context) const = 0;
+
 };
 
 #endif // MODELGPUBUILDERFACADE_H

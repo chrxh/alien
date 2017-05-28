@@ -9,7 +9,6 @@
 
 #include "tests/TestSettings.h"
 
-
 class ComparisonTest : public ::testing::Test
 {
 public:
