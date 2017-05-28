@@ -1,10 +1,15 @@
+#include "Model/SpaceMetricApi.h"
+#include "Model/Metadata/SymbolTable.h"
+#include "Model/Context/SimulationParameters.h"
+#include "Model/SpaceMetricApi.h"
+
 #include "SimulationContextGpuImpl.h"
 
 void SimulationContextGpuImpl::init(SpaceMetricApi *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
 {
-	_metric = metric;
-	_symbolTable = symbolTable;
-	_parameters = parameters;
+	SET_CHILD(_metric, metric);
+	SET_CHILD(_symbolTable, symbolTable);
+	SET_CHILD(_parameters, parameters);
 }
 
 SpaceMetricApi * SimulationContextGpuImpl::getSpaceMetric() const

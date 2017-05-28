@@ -107,12 +107,15 @@ int main(int argc, char *argv[])
 
 	ModelGpuBuilderFacade* gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto symbols = cpuFacade->buildDefaultSymbolTable();
+	auto parameters = cpuFacade->buildDefaultSimulationParameters();
 	IntVector2D size = { 12*33*3, 12*17*3 };
-	auto symbols = ModelSettings::loadDefaultSymbolTable();
-	auto parameters = ModelSettings::loadDefaultSimulationParameters();
-
 	auto gpuController = gpuFacade->buildSimulationController(size, symbols, parameters);
+	auto gpuAccess = gpuFacade->buildSimulationAccess(gpuController->getContext());
 
+
+
+/*
 	auto controller = cpuFacade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
 
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -122,24 +125,20 @@ int main(int argc, char *argv[])
 	auto access = cpuFacade->buildSimulationAccess(controller->getContext());
 	DataDescription desc;
 	for (int i = 0; i < 20000*9; ++i) {
-/*
-		desc.addCellCluster(CellClusterDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
-			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
-			.addCell(CellDescription().setEnergy(parameters->cellCreationEnergy).setMaxConnections(4)));
-*/
 		desc.addEnergyParticle(EnergyParticleDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
 			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
 			.setEnergy(50));
 	}
 	access->updateData(desc);
+*/
 
-    MainWindow w(controller, access);
+    MainWindow w(gpuController, gpuAccess);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();
 	auto result = a.exec();
-	delete access;
-	delete controller;
+	delete gpuAccess;
+	delete gpuController;
 	return result;
 }
 
