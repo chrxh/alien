@@ -1,12 +1,13 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include <helper_cuda.h>
 
 #include <stdio.h>
+#include <functional>
 
 #define DEG_TO_RAD 3.1415926535897932384626433832795/180.0
 #define numThreadsPerBlock 32
 #define numBlocks (32 * 5) /*160*/
-#define numThreads (numThreadsPerBlock * numBlocks)
 #define numClusters (numBlocks * 500)
 #define layers 2
 
@@ -28,14 +29,6 @@ struct SharedMemory
 	}
 };
 
-void evaluate()
-{
-	cudaError_t err = cudaGetLastError();
-	if (err != cudaSuccess) {
-		fprintf(stderr, "Error code: %s\n", cudaGetErrorString(err));
-	}
-}
-
 template<class T>
 class ArrayController
 {
@@ -46,11 +39,11 @@ private:
 
 public:
 
+	ArrayController() = default;
 	ArrayController(int size)
 		: _size(size)
 	{
 		cudaMallocManaged(&_data, sizeof(T) * size);
-		evaluate();
 	}
 
 	void free()
@@ -297,75 +290,78 @@ __global__ void movement_Kernel(Cluster* __restrict__ clusters, int * __restrict
 	}
 }
 
-void calcNextTimestepGpu()
+struct CudaData
 {
-	cudaSetDevice(0);
-	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 1024 * 1024 * 124);
-
-	Config config{ size };
-
+	cudaStream_t stream;
+	Config config;
+	Cluster* clusters;
 	CellMap map;
+	ArrayController<Cluster> clustersAC;
+	ArrayController<Cell> cellsAC;
+	ArrayController<CellMapEntry> cellMapInfoAC1;
+	ArrayController<CellMapEntry> cellMapInfoAC2;
+
+} cudaData;
+
+void init_Cuda()
+{
+	cudaStreamCreate(&cudaData.stream);
+	cudaSetDevice(0);
+
+	cudaData.config = { size };
 	size_t mapSize = size.x * size.y * sizeof(int) * layers;
-	cudaMallocManaged(&map.map1, mapSize);
-	cudaMallocManaged(&map.map2, mapSize);
+	cudaMallocManaged(&cudaData.map.map1, mapSize);
+	cudaMallocManaged(&cudaData.map.map2, mapSize);
 	for (int i = 0; i < size.x * size.y * layers; ++i) {
-		map.map1[i] = -1;
-		map.map1[i] = -1;
-		map.map2[i] = -1;
-		map.map2[i] = -1;
+		cudaData.map.map1[i] = -1;
+		cudaData.map.map1[i] = -1;
+		cudaData.map.map2[i] = -1;
+		cudaData.map.map2[i] = -1;
 	}
 	int cellsPerCluster = 32;
-	ArrayController<Cluster> clustersAC(numClusters * 2);
-	ArrayController<Cell> cellsAC(numClusters * cellsPerCluster * 2);
-	ArrayController<CellMapEntry> cellMapInfoAC1(numClusters * cellsPerCluster * 2);
-	ArrayController<CellMapEntry> cellMapInfoAC2(numClusters * cellsPerCluster * 2);
+	cudaData.clustersAC = ArrayController<Cluster>(numClusters * 2);
+	cudaData.cellsAC = ArrayController<Cell>(numClusters * cellsPerCluster * 2);
+	cudaData.cellMapInfoAC1 = ArrayController<CellMapEntry>(numClusters * cellsPerCluster * 2);
+	cudaData.cellMapInfoAC2 = ArrayController<CellMapEntry>(numClusters * cellsPerCluster * 2);
 
-	Cluster* clusters = clustersAC.getArray(numClusters);
+	cudaData.clusters = cudaData.clustersAC.getArray(numClusters);
 	for (int i = 0; i < numClusters; ++i) {
-		clusters[i].pos = { random(size.x), random(size.y) };
-		clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
-		clusters[i].angle = random(360.0f);
-		clusters[i].angularVel = random(10.0f) - 5.0f;
-		clusters[i].numCells = cellsPerCluster;
+		cudaData.clusters[i].pos = { random(size.x), random(size.y) };
+		cudaData.clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
+		cudaData.clusters[i].angle = random(360.0f);
+		cudaData.clusters[i].angularVel = random(10.0f) - 5.0f;
+		cudaData.clusters[i].numCells = cellsPerCluster;
 
-		clusters[i].cells = cellsAC.getArray(cellsPerCluster);
+		cudaData.clusters[i].cells = cudaData.cellsAC.getArray(cellsPerCluster);
 		for (int j = 0; j < cellsPerCluster; ++j) {
-			clusters[i].cells[j].relPos = { j - 20.0f, j - 20.0f };
+			cudaData.clusters[i].cells[j].relPos = { j - 20.0f, j - 20.0f };
 		}
 
 	}
+}
 
-	printf("%f, %f\n", clusters[320].pos.x, clusters[320].vel.x);
+int step = 0;
+void calcNextTimestep_Cuda()
+{
+	movement_Kernel <<<numBlocks, numThreadsPerBlock, 0, cudaData.stream>>> (cudaData.clusters, cudaData.map.map1, cudaData.map.map2, cudaData.cellMapInfoAC1
+		, cudaData.cellMapInfoAC2, cudaData.config);
+	checkCudaErrors(cudaGetLastError());
+	cudaDeviceSynchronize();
 
-	cudaEvent_t start, stop;
-	cudaEventCreate(&start);
-	cudaEventCreate(&stop);
+	printf("calc: %d\n", ++step);
+}
 
-	cudaEventRecord(start, 0);
-
-	for (int p = 0; p < 1000; ++p) {
-		movement_Kernel << <numBlocks, numThreadsPerBlock >> > (clusters, map.map1, map.map2, cellMapInfoAC1, cellMapInfoAC2, config);
-		evaluate();
-		cudaDeviceSynchronize();
-	}
-
-
-	cudaEventRecord(stop, 0);
-	cudaEventSynchronize(stop);
-	float elapsedTime;
-	cudaEventElapsedTime(&elapsedTime, start, stop);
-	printf("Elapsed: %f\n", elapsedTime);
-
-	printf(" = %f\n", clusters[320].pos.x);
-
+void end_Cuda()
+{
+	cudaDeviceSynchronize();
 	cudaDeviceReset();
 
-	cellMapInfoAC2.free();
-	cellMapInfoAC1.free();
-	cellsAC.free();
-	clustersAC.free();
-	cudaFree(map.map1);
-	cudaFree(map.map1);
+	cudaData.cellMapInfoAC2.free();
+	cudaData.cellMapInfoAC1.free();
+	cudaData.cellsAC.free();
+	cudaData.clustersAC.free();
+	cudaFree(cudaData.map.map1);
+	cudaFree(cudaData.map.map1);
 }
 
 /*
