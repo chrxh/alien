@@ -2,3 +2,4 @@
 
 class SimulationControllerGpuImpl;
 class SimulationContextGpuImpl;
+class GpuWorker;
