@@ -79,6 +79,15 @@
     <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\_Impl\GpuWorker.cpp">
+      <Filter>Source Files\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GpuWorker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_GpuWorker.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationControllerGpuImpl.h">
@@ -87,9 +96,12 @@
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationContextGpuImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelGpu\_Impl\GpuWorker.h">
+      <Filter>Source Files\_Impl</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\source\ModelGpu\_Impl\KernelFunctions.cu">
+    <CudaCompile Include="..\..\source\ModelGpu\_Impl\CudaFunctions.cu">
       <Filter>Source Files\_Impl</Filter>
     </CudaCompile>
   </ItemGroup>
