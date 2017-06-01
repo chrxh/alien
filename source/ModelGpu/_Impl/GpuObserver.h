@@ -1,11 +1,10 @@
 #pragma once
 
-class UnitObserver
+class GpuObserver
 {
 public:
-	virtual ~UnitObserver() = default;
+	virtual ~GpuObserver() = default;
 
 	virtual void unregister() = 0;
 	virtual void accessToUnits() = 0;
 };
-
