@@ -1,43 +1,59 @@
-#include "GpuWorker.h"
+#include <QTimer>
+
 #include "SimulationContextGpuImpl.h"
 #include "SimulationControllerGpuImpl.h"
 
 
-SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
-	: SimulationController(parent)
+namespace
 {
-	_worker = new GpuWorker;
-	_worker->moveToThread(&_thread);
-	connect(&_thread, &QThread::finished, _worker, &QObject::deleteLater);
-	connect(this, &SimulationControllerGpuImpl::calculateTimestepWithGpu, _worker, &GpuWorker::calculateTimestep);
-	connect(_worker, &GpuWorker::timestepCalculated, this, &SimulationControllerGpuImpl::nextTimestepCalculatedWithGpu);
-	_thread.start();
+	const double displayFps = 25.0;
 }
 
-SimulationControllerGpuImpl::~SimulationControllerGpuImpl()
+SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
+	: SimulationController(parent)
+	, _oneSecondTimer(new QTimer(this))
 {
-	_thread.quit();
-	_thread.wait();
+	connect(_oneSecondTimer, &QTimer::timeout, this, &SimulationControllerGpuImpl::oneSecondTimerTimeout);
+	_oneSecondTimer->start(1000);
 }
 
 void SimulationControllerGpuImpl::init(SimulationContextApi * context)
 {
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
-	_worker->init();
+	connect(_context, &SimulationContextGpuImpl::timestepCalculated, [this]() {
+		Q_EMIT nextTimestepCalculated();
+		++_timestepsPerSecond;
+		if (_flagSimulationRunning) {
+			if (_timeSinceLastStart.elapsed() > (1000.0 / displayFps)*_displayedFramesSinceLastStart) {
+				++_displayedFramesSinceLastStart;
+				Q_EMIT nextFrameCalculated();
+			}
+			_context->notifyObserver();
+			_context->calculateTimestep();
+		}
+		else {
+			Q_EMIT nextFrameCalculated();
+			_context->notifyObserver();
+		}
+	});
+
 }
 
 
 void SimulationControllerGpuImpl::setRun(bool run)
 {
+	_displayedFramesSinceLastStart = 0;
 	_flagSimulationRunning = run;
 	if (run) {
-		Q_EMIT calculateTimestepWithGpu();
+		_timeSinceLastStart.restart();
+		_context->calculateTimestep();
 	}
 }
 
 void SimulationControllerGpuImpl::calculateSingleTimestep()
 {
-	Q_EMIT calculateTimestepWithGpu();
+	_timeSinceLastStart.restart();
+	_context->calculateTimestep();
 }
 
 SimulationContextApi * SimulationControllerGpuImpl::getContext() const
@@ -45,10 +61,8 @@ SimulationContextApi * SimulationControllerGpuImpl::getContext() const
 	return _context;
 }
 
-void SimulationControllerGpuImpl::nextTimestepCalculatedWithGpu()
+Q_SLOT void SimulationControllerGpuImpl::oneSecondTimerTimeout()
 {
-	Q_EMIT nextTimestepCalculated();
-	if (_flagSimulationRunning) {
-		Q_EMIT calculateTimestepWithGpu();
-	}
+	Q_EMIT updateTimestepsPerSecond(_timestepsPerSecond);
+	_timestepsPerSecond = 0;
 }

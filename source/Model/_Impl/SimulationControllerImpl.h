@@ -20,14 +20,13 @@ public:
 private:
 	Q_SLOT void oneSecondTimerTimeout();
 
-	bool _flagSimulationRunning = false;
 	SimulationContext* _context = nullptr;
 
+	bool _flagSimulationRunning = false;
 	QTimer* _oneSecondTimer = nullptr;
 	int _timestepsPerSecond = 0;
 	QTime _timeSinceLastStart;
 	int _displayedFramesSinceLastStart = 0;
-
 };
 
 #endif // SIMULATIONCONTROLLERIMPL_H

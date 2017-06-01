@@ -5,11 +5,14 @@
 #include <stdio.h>
 #include <functional>
 
+#include "CudaFunctions.cuh"
+
+
 #define DEG_TO_RAD 3.1415926535897932384626433832795/180.0
-#define numThreadsPerBlock 32
-#define numBlocks (32 * 5) /*160*/
-#define numClusters (numBlocks * 500)
-#define layers 2
+#define NUM_THREADS_PER_BLOCK 32
+#define NUM_BLOCKS (32 * 5) /*160*/
+#define NUM_CLUSTERS (NUM_BLOCKS * 500)
+#define LAYERS 2
 
 static const int2 size = { 1000, 1000 };
 
@@ -93,21 +96,6 @@ __device__ void tiling_Kernel(int numEntities, int division, int numDivisions, i
 	endIndex = startIndex + length - 1;
 }
 
-struct Cell
-{
-	double2 relPos;
-};
-
-struct Cluster
-{
-	double2 pos;
-	double2 vel;
-	double angle;
-	double angularVel;
-	int numCells;
-	Cell* cells;
-};
-
 struct CellMapEntry
 {
 	int clusterIndex;
@@ -162,7 +150,7 @@ __device__ int readCellMapEntry_Kernel(int2 posInt, int clusterIndex, int * __re
 	auto mapEntry = posInt.x + posInt.y * config.size.x;
 	auto slice = config.size.x*config.size.y;
 
-	for (int i = 0; i < layers; ++i) {
+	for (int i = 0; i < LAYERS; ++i) {
 		auto index = map[mapEntry + i * slice];
 		if (index != -1) {
 			if (cellMapEntryArray[index].clusterIndex != clusterIndex) {
@@ -217,17 +205,17 @@ __device__ int readCellMapEntries_Kernel(int2 posInt, int clusterIndex, int * __
 	return -1;
 }
 
-__device__ void movement_Kernel(Cluster* __restrict__ clusters, int clusterIndex, int * __restrict__ oldMap, int * __restrict__ newMap
+__device__ void movement_Kernel(ClusterCuda* __restrict__ clusters, int clusterIndex, int * __restrict__ oldMap, int * __restrict__ newMap
 	, ArrayController<CellMapEntry> const& oldCellMapEntryAC, ArrayController<CellMapEntry> const& newCellMapEntryAC, Config const &config)
 {
-	Cluster cluster = clusters[clusterIndex];
+	ClusterCuda cluster = clusters[clusterIndex];
 	if (threadIdx.x >= cluster.numCells) {
 		return;
 	}
 
 	int startCellIndex;
 	int endCellIndex;
-	tiling_Kernel(cluster.numCells, threadIdx.x, numThreadsPerBlock, startCellIndex, endCellIndex);
+	tiling_Kernel(cluster.numCells, threadIdx.x, NUM_THREADS_PER_BLOCK, startCellIndex, endCellIndex);
 
 	__shared__ double rotMatrix[2][2];
 	if (threadIdx.x == 0) {
@@ -242,7 +230,7 @@ __device__ void movement_Kernel(Cluster* __restrict__ clusters, int clusterIndex
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		Cell* cell = &cluster.cells[cellIndex];
+		CellCuda* cell = &cluster.cells[cellIndex];
 		double2 relPos = cell->relPos;
 		relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
 		double2 absPos = { relPos.x + cluster.pos.x, relPos.y + cluster.pos.y };
@@ -261,7 +249,7 @@ __device__ void movement_Kernel(Cluster* __restrict__ clusters, int clusterIndex
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		Cell* cell = &cluster.cells[cellIndex];
+		CellCuda* cell = &cluster.cells[cellIndex];
 		double2 relPos = cell->relPos;
 		relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
 		double2 absPos = { relPos.x + cluster.pos.x, relPos.y + cluster.pos.y };
@@ -273,17 +261,17 @@ __device__ void movement_Kernel(Cluster* __restrict__ clusters, int clusterIndex
 }
 
 
-__global__ void movement_Kernel(Cluster* __restrict__ clusters, int * __restrict__ oldMap, int * __restrict__ newMap
+__global__ void movement_Kernel(ClusterCuda* __restrict__ clusters, int * __restrict__ oldMap, int * __restrict__ newMap
 	, ArrayController<CellMapEntry> oldCellMapEntryAC, ArrayController<CellMapEntry> newCellMapEntryAC, Config const config)
 {
 	int blockIndex = blockIdx.x;
-	if (blockIndex >= numClusters) {
+	if (blockIndex >= NUM_CLUSTERS) {
 		return;
 	}
 
 	int startClusterIndex;
 	int endClusterIndex;
-	tiling_Kernel(numClusters, blockIndex, numBlocks, startClusterIndex, endClusterIndex);
+	tiling_Kernel(NUM_CLUSTERS, blockIndex, NUM_BLOCKS, startClusterIndex, endClusterIndex);
 
 	for (int clusterIndex = startClusterIndex; clusterIndex <= endClusterIndex; ++clusterIndex) {
 		movement_Kernel(clusters, clusterIndex, oldMap, newMap, oldCellMapEntryAC, newCellMapEntryAC, config);
@@ -294,10 +282,10 @@ struct CudaData
 {
 	cudaStream_t stream;
 	Config config;
-	Cluster* clusters;
+	ClusterCuda* clusters;
 	CellMap map;
-	ArrayController<Cluster> clustersAC;
-	ArrayController<Cell> cellsAC;
+	ArrayController<ClusterCuda> clustersAC;
+	ArrayController<CellCuda> cellsAC;
 	ArrayController<CellMapEntry> cellMapInfoAC1;
 	ArrayController<CellMapEntry> cellMapInfoAC2;
 
@@ -309,23 +297,23 @@ void init_Cuda()
 	cudaSetDevice(0);
 
 	cudaData.config = { size };
-	size_t mapSize = size.x * size.y * sizeof(int) * layers;
+	size_t mapSize = size.x * size.y * sizeof(int) * LAYERS;
 	cudaMallocManaged(&cudaData.map.map1, mapSize);
 	cudaMallocManaged(&cudaData.map.map2, mapSize);
-	for (int i = 0; i < size.x * size.y * layers; ++i) {
+	for (int i = 0; i < size.x * size.y * LAYERS; ++i) {
 		cudaData.map.map1[i] = -1;
 		cudaData.map.map1[i] = -1;
 		cudaData.map.map2[i] = -1;
 		cudaData.map.map2[i] = -1;
 	}
 	int cellsPerCluster = 32;
-	cudaData.clustersAC = ArrayController<Cluster>(numClusters * 2);
-	cudaData.cellsAC = ArrayController<Cell>(numClusters * cellsPerCluster * 2);
-	cudaData.cellMapInfoAC1 = ArrayController<CellMapEntry>(numClusters * cellsPerCluster * 2);
-	cudaData.cellMapInfoAC2 = ArrayController<CellMapEntry>(numClusters * cellsPerCluster * 2);
+	cudaData.clustersAC = ArrayController<ClusterCuda>(NUM_CLUSTERS * 2);
+	cudaData.cellsAC = ArrayController<CellCuda>(NUM_CLUSTERS * cellsPerCluster * 2);
+	cudaData.cellMapInfoAC1 = ArrayController<CellMapEntry>(NUM_CLUSTERS * cellsPerCluster * 2);
+	cudaData.cellMapInfoAC2 = ArrayController<CellMapEntry>(NUM_CLUSTERS * cellsPerCluster * 2);
 
-	cudaData.clusters = cudaData.clustersAC.getArray(numClusters);
-	for (int i = 0; i < numClusters; ++i) {
+	cudaData.clusters = cudaData.clustersAC.getArray(NUM_CLUSTERS);
+	for (int i = 0; i < NUM_CLUSTERS; ++i) {
 		cudaData.clusters[i].pos = { random(size.x), random(size.y) };
 		cudaData.clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
 		cudaData.clusters[i].angle = random(360.0f);
@@ -340,16 +328,20 @@ void init_Cuda()
 	}
 }
 
-int step = 0;
 void calcNextTimestep_Cuda()
 {
-	movement_Kernel <<<numBlocks, numThreadsPerBlock, 0, cudaData.stream>>> (cudaData.clusters, cudaData.map.map1, cudaData.map.map2, cudaData.cellMapInfoAC1
+	movement_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaData.stream>>> (cudaData.clusters, cudaData.map.map1, cudaData.map.map2, cudaData.cellMapInfoAC1
 		, cudaData.cellMapInfoAC2, cudaData.config);
 	checkCudaErrors(cudaGetLastError());
 	cudaDeviceSynchronize();
-
-	printf("calc: %d\n", ++step);
 }
+
+void getData_Cuda(int& numClusters, ClusterCuda*& clusters)
+{
+	numClusters = NUM_CLUSTERS;
+	clusters = cudaData.clusters;
+}
+
 
 void end_Cuda()
 {

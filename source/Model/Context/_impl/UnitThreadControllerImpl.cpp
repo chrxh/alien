@@ -13,13 +13,7 @@ UnitThreadControllerImpl::UnitThreadControllerImpl(QObject * parent)
 
 UnitThreadControllerImpl::~UnitThreadControllerImpl()
 {
-	terminateThreads();
-	for (auto const& ts : _threadsAndCalcSignals) {
-		delete ts.unit;
-	}
-	for (auto const &observer : _observers) {
-		observer->unregister();
-	}
+	init(0);
 }
 
 void UnitThreadControllerImpl::init(int maxRunningThreads)
@@ -29,7 +23,11 @@ void UnitThreadControllerImpl::init(int maxRunningThreads)
 	delete _signalMapper;
 	for (auto const& ts : _threadsAndCalcSignals) {
 		delete ts.thr;
+		delete ts.unit;
 		delete ts.calcSignal;
+	}
+	for (auto const &observer : _observers) {
+		observer->unregister();
 	}
 	_threadsAndCalcSignals.clear();
 	_signalMapper = new QSignalMapper(this);

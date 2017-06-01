@@ -50,6 +50,12 @@
     <ClInclude Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\CudaFunctions.cuh">
+      <Filter>Source Files\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\GpuObserver.h">
+      <Filter>Source Files\_Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.cpp">
