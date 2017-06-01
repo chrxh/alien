@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QThread>
+#include <QTime>
 
 #include "Model/SimulationController.h"
 #include "DefinitionsImpl.h"
@@ -11,7 +11,7 @@ class SimulationControllerGpuImpl
 	Q_OBJECT
 public:
 	SimulationControllerGpuImpl(QObject* parent = nullptr);
-	virtual ~SimulationControllerGpuImpl();
+	virtual ~SimulationControllerGpuImpl() = default;
 
 	virtual void init(SimulationContextApi* context) override;
 	virtual void setRun(bool run) override;
@@ -19,13 +19,13 @@ public:
 	virtual SimulationContextApi* getContext() const override;
 
 private:
-	Q_SIGNAL void calculateTimestepWithGpu();
-	Q_SLOT void nextTimestepCalculatedWithGpu();
+	Q_SLOT void oneSecondTimerTimeout();
 
 	SimulationContextGpuImpl *_context = nullptr;
 
-	QThread _thread;
-	GpuWorker* _worker = nullptr;
-
 	bool _flagSimulationRunning = false;
+	QTimer* _oneSecondTimer = nullptr;
+	int _timestepsPerSecond = 0;
+	QTime _timeSinceLastStart;
+	int _displayedFramesSinceLastStart = 0;
 };

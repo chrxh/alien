@@ -1,7 +1,4 @@
-#ifndef UNITOBSERVER_H
-#define UNITOBSERVER_H
-
-#include "Model/Definitions.h"
+#pragma once
 
 class UnitObserver
 {
@@ -12,4 +9,3 @@ public:
 	virtual void accessToUnits() = 0;
 };
 
-#endif // UNITOBSERVER_H
