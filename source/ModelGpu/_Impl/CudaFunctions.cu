@@ -11,10 +11,8 @@
 #define DEG_TO_RAD 3.1415926535897932384626433832795/180.0
 #define NUM_THREADS_PER_BLOCK 32
 #define NUM_BLOCKS (32 * 5) /*160*/
-#define NUM_CLUSTERS (NUM_BLOCKS * 500)
+#define NUM_CLUSTERS (NUM_BLOCKS * 50)
 #define LAYERS 2
-
-static const int2 size = { 1000, 1000 };
 
 template<class T>
 struct SharedMemory
@@ -291,7 +289,7 @@ struct CudaData
 
 } cudaData;
 
-void init_Cuda()
+void init_Cuda(int2 size)
 {
 	cudaStreamCreate(&cudaData.stream);
 	cudaSetDevice(0);
@@ -336,7 +334,7 @@ void calcNextTimestep_Cuda()
 	cudaDeviceSynchronize();
 }
 
-void getData_Cuda(int& numClusters, ClusterCuda*& clusters)
+void getDataRef_Cuda(int& numClusters, ClusterCuda*& clusters)
 {
 	numClusters = NUM_CLUSTERS;
 	clusters = cudaData.clusters;

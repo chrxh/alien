@@ -1,5 +1,7 @@
 #include <functional>
 
+#include "Model/SpaceMetricApi.h"
+
 #include "GpuWorker.h"
 #include "CudaFunctions.cuh"
 
@@ -8,9 +10,10 @@ GpuWorker::~GpuWorker()
 	end_Cuda();
 }
 
-void GpuWorker::init()
+void GpuWorker::init(SpaceMetricApi* metric)
 {
-	init_Cuda();
+	auto size = metric->getSize();
+	init_Cuda({ size.x, size.y });
 }
 
 void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolveDesc, DataDescription & result) const
@@ -18,7 +21,7 @@ void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolve
 	int numCLusters;
 	ClusterCuda* clusters;
 	result.clear();
-	getData_Cuda(numCLusters, clusters);
+	getDataRef_Cuda(numCLusters, clusters);
 	for (int i = 0; i < numCLusters; ++i) {
 		CellClusterDescription clusterDesc;
 		for (int j = 0; j < clusters[i].numCells; ++j) {
