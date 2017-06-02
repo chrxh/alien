@@ -25,6 +25,10 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_dataRequired = true;
 	_requiredRect = rect;
 	_resolveDesc = resolveDesc;
+
+	if(!_context->isGpuThreadWorking()) {
+		accessToUnits();
+	}
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()

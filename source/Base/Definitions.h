@@ -59,10 +59,10 @@ struct BASE_EXPORT IntRect {
 	IntRect() = default;
 	IntRect(std::initializer_list<IntVector2D> l);
 	IntRect(QRectF const& rect);
-	inline bool isContained(IntVector2D const& p);
+	inline bool isContained(IntVector2D const& p) const;
 };
 
-bool IntRect::isContained(IntVector2D const &p)
+bool IntRect::isContained(IntVector2D const &p) const
 {
 	return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y;
 }

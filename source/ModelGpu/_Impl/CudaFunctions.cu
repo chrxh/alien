@@ -11,7 +11,7 @@
 #define DEG_TO_RAD 3.1415926535897932384626433832795/180.0
 #define NUM_THREADS_PER_BLOCK 32
 #define NUM_BLOCKS (32 * 5) /*160*/
-#define NUM_CLUSTERS (NUM_BLOCKS * 50)
+#define NUM_CLUSTERS (NUM_BLOCKS * 500)
 #define LAYERS 2
 
 template<class T>
@@ -233,6 +233,7 @@ __device__ void movement_Kernel(ClusterCuda* __restrict__ clusters, int clusterI
 		relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
 		double2 absPos = { relPos.x + cluster.pos.x, relPos.y + cluster.pos.y };
 		int2 absPosInt = { (int)absPos.x , (int)absPos.y };
+		cell->absPos = absPos;
 
 		readCellMapEntries_Kernel(absPosInt, clusterIndex, oldMap, oldCellMapEntryAC, config);
 	}

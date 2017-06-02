@@ -22,7 +22,8 @@ public:
 	virtual void registerObserver(GpuObserver* observer);
 	virtual void unregisterObserver(GpuObserver* observer);
 	virtual void notifyObserver();
-	virtual GpuWorker* getGpuWorker();
+	virtual GpuWorker* getGpuWorker() const;
+	virtual bool isGpuThreadWorking() const;
 
 	void calculateTimestep();
 	Q_SIGNAL void timestepCalculated();
@@ -37,6 +38,7 @@ private:
 
 	QThread _thread;
 	GpuWorker* _worker = nullptr;
+	bool _gpuThreadWorking = false;
 
 	vector<GpuObserver*> _observers;
 };
