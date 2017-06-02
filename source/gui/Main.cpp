@@ -105,15 +105,14 @@ int main(int argc, char *argv[])
 	
 	QApplication a(argc, argv);
 
+
 	ModelGpuBuilderFacade* gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
-	IntVector2D size = { 12*33*3, 12*17*3 };
-	auto gpuController = gpuFacade->buildSimulationController(size, symbols, parameters);
-	auto gpuAccess = gpuFacade->buildSimulationAccess(gpuController->getContext());
-
-
+	IntVector2D size = { 12*33*3*3, 12*17*3*3 };
+	auto controller = gpuFacade->buildSimulationController(size, symbols, parameters);
+	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
 
 /*
 	auto controller = cpuFacade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
@@ -132,13 +131,13 @@ int main(int argc, char *argv[])
 	access->updateData(desc);
 */
 
-    MainWindow w(gpuController, gpuAccess);
+    MainWindow w(controller, access);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
     w.show();
 	auto result = a.exec();
-	delete gpuAccess;
-	delete gpuController;
+	delete access;
+	delete controller;
 	return result;
 }
 
