@@ -1,5 +1,6 @@
 #include <QTimer>
 
+#include "GpuThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationControllerGpuImpl.h"
 
@@ -20,7 +21,7 @@ SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nul
 void SimulationControllerGpuImpl::init(SimulationContextApi * context)
 {
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
-	connect(_context, &SimulationContextGpuImpl::timestepCalculated, [this]() {
+	connect(_context->getGpuThreadController(), &GpuThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
 		++_timestepsPerSecond;
 		if (_flagSimulationRunning) {
@@ -28,12 +29,10 @@ void SimulationControllerGpuImpl::init(SimulationContextApi * context)
 				++_displayedFramesSinceLastStart;
 				Q_EMIT nextFrameCalculated();
 			}
-			_context->notifyObserver();
-			_context->calculateTimestep();
+			_context->getGpuThreadController()->calculateTimestep();
 		}
 		else {
 			Q_EMIT nextFrameCalculated();
-			_context->notifyObserver();
 		}
 	});
 
@@ -46,14 +45,14 @@ void SimulationControllerGpuImpl::setRun(bool run)
 	_flagSimulationRunning = run;
 	if (run) {
 		_timeSinceLastStart.restart();
-		_context->calculateTimestep();
+		_context->getGpuThreadController()->calculateTimestep();
 	}
 }
 
 void SimulationControllerGpuImpl::calculateSingleTimestep()
 {
 	_timeSinceLastStart.restart();
-	_context->calculateTimestep();
+	_context->getGpuThreadController()->calculateTimestep();
 }
 
 SimulationContextApi * SimulationControllerGpuImpl::getContext() const
