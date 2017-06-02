@@ -32,7 +32,7 @@ void SimulationContextGpuImpl::init(SpaceMetricApi *metric, SymbolTable *symbolT
 	SET_CHILD(_metric, metric);
 	SET_CHILD(_symbolTable, symbolTable);
 	SET_CHILD(_parameters, parameters);
-	_worker->init();
+	_worker->init(metric);
 }
 
 SpaceMetricApi * SimulationContextGpuImpl::getSpaceMetric() const

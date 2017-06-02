@@ -14,7 +14,8 @@ SimulationController * ModelGpuBuilderFacadeImpl::buildSimulationController(IntV
 	auto context = new SimulationContextGpuImpl();
 	auto contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 
-	SpaceMetricApi* metric = contextFactory->buildSpaceMetric();
+	SpaceMetric* metric = static_cast<SpaceMetric*>(contextFactory->buildSpaceMetric());
+	metric->init(universeSize);
 	context->init(metric, symbolTable, parameters);
 
 	auto controller = new SimulationControllerGpuImpl();
