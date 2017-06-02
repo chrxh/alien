@@ -94,6 +94,15 @@
     <ClCompile Include="Release\moc_GpuWorker.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\_Impl\GpuThreadController.cpp">
+      <Filter>Source Files\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GpuThreadController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_GpuThreadController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationControllerGpuImpl.h">
@@ -103,6 +112,9 @@
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\GpuWorker.h">
+      <Filter>Source Files\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelGpu\_Impl\GpuThreadController.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>

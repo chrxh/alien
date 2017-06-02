@@ -5,26 +5,16 @@
 
 #include "GpuWorker.h"
 #include "GpuObserver.h"
+#include "GpuThreadController.h"
 #include "SimulationContextGpuImpl.h"
 
 SimulationContextGpuImpl::SimulationContextGpuImpl(QObject* parent /*= nullptr*/)
 	: SimulationContextApi(parent)
 {
-	_worker = new GpuWorker;
-	_worker->moveToThread(&_thread);
-	connect(this, &SimulationContextGpuImpl::calculateTimestepWithGpu, _worker, &GpuWorker::calculateTimestep);
-	connect(_worker, &GpuWorker::timestepCalculated, this, &SimulationContextGpuImpl::timestepCalculatedWithGpu);
-	_thread.start();
 }
 
 SimulationContextGpuImpl::~SimulationContextGpuImpl()
 {
-	_thread.quit();
-	_thread.wait();
-	delete _worker;
-	for (auto const &observer : _observers) {
-		observer->unregister();
-	}
 }
 
 void SimulationContextGpuImpl::init(SpaceMetricApi *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
@@ -32,7 +22,10 @@ void SimulationContextGpuImpl::init(SpaceMetricApi *metric, SymbolTable *symbolT
 	SET_CHILD(_metric, metric);
 	SET_CHILD(_symbolTable, symbolTable);
 	SET_CHILD(_parameters, parameters);
-	_worker->init(metric);
+
+	auto threadController = new GpuThreadController;
+	SET_CHILD(_threadController, threadController);
+	_threadController->init(metric);
 }
 
 SpaceMetricApi * SimulationContextGpuImpl::getSpaceMetric() const
@@ -50,42 +43,8 @@ SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
 	return _parameters;
 }
 
-void SimulationContextGpuImpl::registerObserver(GpuObserver * observer)
+GpuThreadController * SimulationContextGpuImpl::getGpuThreadController() const
 {
-	_observers.push_back(observer);
-}
-
-void SimulationContextGpuImpl::unregisterObserver(GpuObserver * observer)
-{
-	_observers.erase(std::remove(_observers.begin(), _observers.end(), observer), _observers.end());
-}
-
-void SimulationContextGpuImpl::notifyObserver()
-{
-	for (auto const &observer : _observers) {
-		observer->accessToUnits();
-	}
-}
-
-GpuWorker * SimulationContextGpuImpl::getGpuWorker() const
-{
-	return _worker;
-}
-
-bool SimulationContextGpuImpl::isGpuThreadWorking() const
-{
-	return _gpuThreadWorking;
-}
-
-void SimulationContextGpuImpl::calculateTimestep()
-{
-	_gpuThreadWorking = true;
-	Q_EMIT calculateTimestepWithGpu();
-}
-
-void SimulationContextGpuImpl::timestepCalculatedWithGpu()
-{
-	_gpuThreadWorking = false;
-	Q_EMIT timestepCalculated();
+	return _threadController;
 }
 

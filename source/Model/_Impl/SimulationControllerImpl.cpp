@@ -26,11 +26,11 @@ void SimulationControllerImpl::init(SimulationContextApi* context)
 		Q_EMIT nextTimestepCalculated();
 		++_timestepsPerSecond;
 		if (_flagSimulationRunning) {
-			_context->getUnitThreadController()->calculateTimestep();
 			if (_timeSinceLastStart.elapsed() > (1000.0 / displayFps)*_displayedFramesSinceLastStart) {
 				++_displayedFramesSinceLastStart;
 				Q_EMIT nextFrameCalculated();
 			}
+			_context->getUnitThreadController()->calculateTimestep();
 		}
 		else {
 			Q_EMIT nextFrameCalculated();

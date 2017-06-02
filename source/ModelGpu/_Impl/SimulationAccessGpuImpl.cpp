@@ -1,18 +1,19 @@
 #include "GpuWorker.h"
+#include "GpuThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
 
 SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 {
 	if (_registered) {
-		_context->unregisterObserver(this);
+		_context->getGpuThreadController()->unregisterObserver(this);
 	}
 }
 
 void SimulationAccessGpuImpl::init(SimulationContextApi * context)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(context);
-	_context->registerObserver(this);
+	_context->getGpuThreadController()->registerObserver(this);
 	_registered = true;
 }
 
@@ -26,7 +27,7 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_requiredRect = rect;
 	_resolveDesc = resolveDesc;
 
-	if(!_context->isGpuThreadWorking()) {
+	if(!_context->getGpuThreadController()->isGpuThreadWorking()) {
 		accessToUnits();
 	}
 }
@@ -48,7 +49,7 @@ void SimulationAccessGpuImpl::accessToUnits()
 	}
 
 	_dataRequired = false;
-	_context->getGpuWorker()->getData(_requiredRect, _resolveDesc, _dataCollected);
+	_context->getGpuThreadController()->getGpuWorker()->getData(_requiredRect, _resolveDesc, _dataCollected);
 
 	Q_EMIT dataReadyToRetrieve();
 }
