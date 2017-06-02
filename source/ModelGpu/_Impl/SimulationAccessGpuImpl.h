@@ -28,6 +28,7 @@ private:
 	SimulationContextGpuImpl* _context = nullptr;
 	bool _registered = false;
 
+	bool _dataRequired = false;
 	IntRect _requiredRect;
 	ResolveDescription _resolveDesc;
 	DataDescription _dataCollected;
