@@ -24,8 +24,10 @@ void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolve
 	getDataRef_Cuda(numCLusters, clusters);
 	for (int i = 0; i < numCLusters; ++i) {
 		CellClusterDescription clusterDesc;
+		if (rect.isContained({ (int)clusters[i].pos.x, (int)clusters[i].pos.y }))
 		for (int j = 0; j < clusters[i].numCells; ++j) {
-			clusterDesc.addCell(CellDescription().setPos({ (float)clusters[i].pos.x, (float)clusters[i].pos.y }).setMetadata(CellMetadata()).setEnergy(100.0f));
+			auto pos = clusters[i].cells[j].absPos;
+			clusterDesc.addCell(CellDescription().setPos({ (float)pos.x, (float)pos.y }).setMetadata(CellMetadata()).setEnergy(100.0f));
 		}
 		result.addCellCluster(clusterDesc);
 	}

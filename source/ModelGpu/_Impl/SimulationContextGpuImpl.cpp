@@ -67,18 +67,25 @@ void SimulationContextGpuImpl::notifyObserver()
 	}
 }
 
-GpuWorker * SimulationContextGpuImpl::getGpuWorker()
+GpuWorker * SimulationContextGpuImpl::getGpuWorker() const
 {
 	return _worker;
 }
 
+bool SimulationContextGpuImpl::isGpuThreadWorking() const
+{
+	return _gpuThreadWorking;
+}
+
 void SimulationContextGpuImpl::calculateTimestep()
 {
+	_gpuThreadWorking = true;
 	Q_EMIT calculateTimestepWithGpu();
 }
 
 void SimulationContextGpuImpl::timestepCalculatedWithGpu()
 {
+	_gpuThreadWorking = false;
 	Q_EMIT timestepCalculated();
 }
 
