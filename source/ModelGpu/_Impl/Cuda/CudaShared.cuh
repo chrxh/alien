@@ -22,4 +22,3 @@ extern void init_Cuda(int2 size);
 extern void calcNextTimestep_Cuda();
 extern void getDataRef_Cuda(int& numClusters, ClusterCuda*& clusters);
 extern void end_Cuda();
-
