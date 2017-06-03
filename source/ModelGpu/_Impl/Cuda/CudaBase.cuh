@@ -9,6 +9,14 @@ double random(double max)
 	return ((double)rand() / RAND_MAX) * max;
 }
 
+template<typename T>
+void swap(T &a, T &b)
+{
+	T temp = a;
+	a = b;
+	b = temp;
+}
+
 template<class T>
 struct SharedMemory
 {
