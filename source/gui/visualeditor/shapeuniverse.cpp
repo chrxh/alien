@@ -43,7 +43,7 @@ void ShapeUniverse::activate()
 	_items->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
+	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	ResolveDescription resolveDesc;
 	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);

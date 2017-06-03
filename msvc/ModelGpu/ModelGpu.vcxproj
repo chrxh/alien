@@ -202,7 +202,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\DllExport.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuBuilderFacade.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h" />
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\CudaFunctions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaBase.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaDeviceFunctions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaShared.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\_Impl\DefinitionsImpl.h" />
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\GpuWorker.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -318,7 +320,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\source\ModelGpu\_Impl\CudaFunctions.cu" />
+    <CudaCompile Include="..\..\source\ModelGpu\_Impl\Cuda\CudaMain.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

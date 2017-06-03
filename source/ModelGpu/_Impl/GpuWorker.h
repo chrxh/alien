@@ -13,7 +13,7 @@ public:
 	virtual ~GpuWorker();
 
 	virtual void init(SpaceMetricApi* metric);
-	virtual void getData(IntRect const &rect, ResolveDescription const &resolveDesc, DataDescription &result) const;
+	virtual void getData(IntRect const &rect, ResolveDescription const &resolveDesc, DataDescription &result);
 
 	Q_SLOT void calculateTimestep();
 	Q_SIGNAL void timestepCalculated();

@@ -48,7 +48,7 @@ void PixelUniverse::init(SimulationController* controller, SimulationAccess* acc
 void PixelUniverse::activate()
 {
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
+	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	ResolveDescription resolveDesc;
