@@ -64,7 +64,7 @@ void GpuThreadController::calculateTimestep()
 void GpuThreadController::timestepCalculatedWithGpu()
 {
 	_gpuThreadWorking = false;
-	Q_EMIT timestepCalculated();
 	notifyObserver();
+	Q_EMIT timestepCalculated();
 }
 

@@ -7,7 +7,7 @@
 
 namespace
 {
-	const double displayFps = 2.0;
+	const double displayFps = 5.0;
 }
 
 SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)

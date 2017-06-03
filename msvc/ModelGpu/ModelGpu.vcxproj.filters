@@ -27,6 +27,9 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Source Files\_Impl\Cuda">
+      <UniqueIdentifier>{7c3e939f-08cf-4336-a997-e2d0d6676c59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuBuilderFacade.h">
@@ -50,11 +53,17 @@
     <ClInclude Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\CudaFunctions.cuh">
-      <Filter>Source Files\_Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\_Impl\GpuObserver.h">
       <Filter>Source Files\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaShared.cuh">
+      <Filter>Source Files\_Impl\Cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaBase.cuh">
+      <Filter>Source Files\_Impl\Cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaDeviceFunctions.cuh">
+      <Filter>Source Files\_Impl\Cuda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -119,8 +128,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\source\ModelGpu\_Impl\CudaFunctions.cu">
-      <Filter>Source Files\_Impl</Filter>
+    <CudaCompile Include="..\..\source\ModelGpu\_Impl\Cuda\CudaMain.cu">
+      <Filter>Source Files\_Impl\Cuda</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>
