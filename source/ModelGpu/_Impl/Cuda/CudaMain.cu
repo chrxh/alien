@@ -60,7 +60,9 @@ void calcNextTimestep_Cuda()
 	checkCudaErrors(cudaGetLastError());
 
 	swap(cudaData.clustersAC1, cudaData.clustersAC2);
+	swap(cudaData.cellsAC1, cudaData.cellsAC2);
 	cudaData.clustersAC2.reset();
+	cudaData.cellsAC2.reset();
 }
 
 void getDataRef_Cuda(int& numClusters, ClusterCuda*& clusters)
