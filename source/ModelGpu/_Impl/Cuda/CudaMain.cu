@@ -46,6 +46,7 @@ void init_Cuda(int2 size)
 		for (int j = 0; j < cellsPerCluster; ++j) {
 			CellCuda *cell = &clusters[i].cells[j];
 			cell->relPos = { j - 20.0f, j - 20.0f };
+			cell->absPos = clusters[i].pos;
 			cell->cluster = &clusters[i];
 			cell->nextTimestep = nullptr;
 			if (j > 0 && j < cellsPerCluster - 1) {
