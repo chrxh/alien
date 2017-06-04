@@ -2,7 +2,7 @@
 
 #include <cuda_runtime.h>
 
-#define DEG_TO_RAD 3.1415926535897932384626433832795/180.0
+#include "CudaConstants.cuh"
 
 double random(double max)
 {
