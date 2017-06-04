@@ -5,7 +5,7 @@
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
-#define LAYERS 2
+#include "CudaConstants.cuh"
 
 struct CudaData
 {
@@ -47,72 +47,70 @@ __device__ void angleCorrection_Kernel(double &angle)
 	angle = (double)intPart + fracPart;
 }
 
-__device__ CellCuda* readCellMapEntry_Kernel(int2 posInt, int clusterIndex, CellCuda ** __restrict__ map, int2 const &size)
+__device__ CellCuda* readCellMapHelper_Kernel(int2 posInt, ClusterCuda *cluster, CellCuda ** __restrict__ map, int2 const &size)
 {
 	mapCorrection_Kernel(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;
 	auto slice = size.x*size.y;
 
 	for (int i = 0; i < LAYERS; ++i) {
-		auto index = map[mapEntry + i * slice];
-		if (index != nullptr) {
-			return index;
-			/*
-			if (cellMapEntryArray[index].clusterIndex != clusterIndex) {
-			return index;
+		auto cell = map[mapEntry + i * slice];
+		if (cell != nullptr) {
+			if (cell->cluster != cluster) {
+				return cell;
 			}
-			*/
 		}
 	}
 	return nullptr;
 }
 
-__device__ CellCuda* readCellMapEntries_Kernel(int2 posInt, int clusterIndex, CellCuda ** __restrict__ map, int2 const &size)
+__device__ CellCuda* readCellMap_Kernel(int2 posInt, ClusterCuda *cluster, CellCuda ** __restrict__ map, int2 const &size)
 {
 	--posInt.x;
 	--posInt.y;
-	auto index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	auto cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.x;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.x;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.y;
 	posInt.x -= 2;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.y;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.y;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.y;
 	posInt.x -= 2;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.y;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 
 	++posInt.y;
-	index = readCellMapEntry_Kernel(posInt, clusterIndex, map, size);
-	if (index) { return index; }
+	cell = readCellMapHelper_Kernel(posInt, cluster, map, size);
+	if (cell) { return cell; }
 	return nullptr;
 }
 
 __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 {
-	ClusterCuda cluster = data.clustersAC1.getEntireArrayKernel()[clusterIndex];
+	ClusterCuda *clusterPtr = &data.clustersAC1.getEntireArrayKernel()[clusterIndex];
+	ClusterCuda cluster = *clusterPtr;
 	if (threadIdx.x >= cluster.numCells) {
 		return;
 	}
@@ -124,6 +122,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 
 	__shared__ double rotMatrix[2][2];
 	__shared__ CellCuda* newCells;
+	__shared__ ClusterCuda* newCluster;
 	if (threadIdx.x == 0) {
 		double sinAngle = __sinf(cluster.angle*DEG_TO_RAD);
 		double cosAngle = __cosf(cluster.angle*DEG_TO_RAD);
@@ -132,20 +131,37 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 		rotMatrix[1][0] = -sinAngle;
 		rotMatrix[1][1] = cosAngle;
 		newCells = data.cellsAC2.getArrayKernel(cluster.numCells);
+		newCluster = data.clustersAC2.getElementKernel();
 	}
 
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellCuda cell = cluster.cells[cellIndex];
+
+		CellCuda *cellPtr = &cluster.cells[cellIndex];
+		CellCuda *newCellPtr = &newCells[cellIndex];
+		CellCuda cell = *cellPtr;
 		double2 relPos = cell.relPos;
 		relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
 		double2 absPos = { relPos.x + cluster.pos.x, relPos.y + cluster.pos.y };
 		int2 absPosInt = { (int)absPos.x , (int)absPos.y };
 		cell.absPos = absPos;
-		newCells[cellIndex] = cell;
+		cell.cluster = newCluster;
+		*newCellPtr = cell;
 
-		readCellMapEntries_Kernel(absPosInt, clusterIndex, data.map1, size);
+		cellPtr->nextTimestep = newCellPtr;
+
+		CellCuda* otherCell = readCellMap_Kernel(absPosInt, clusterPtr, data.map1, size);
+	}
+	
+	__syncthreads();
+
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellCuda* newCellPtr = &newCells[cellIndex];
+		int numConnections = newCellPtr->numConnections;
+		for (int i = 0; i < numConnections; ++i) {
+			newCellPtr->connections[i] = newCellPtr->connections[i]->nextTimestep;
+		}
 	}
 
 	if (threadIdx.x == 0) {
@@ -155,7 +171,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 		mapCorrection_Kernel(cluster.pos, size);
 		cluster.cells = newCells;
 
-		*data.clustersAC2.getElementKernel() = cluster;
+		*newCluster = cluster;
 	}
 	__syncthreads();
 }
