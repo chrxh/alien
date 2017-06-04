@@ -164,75 +164,73 @@ __device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, dou
 
 __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 {
-	ClusterCuda *clusterPtr = &data.clustersAC1.getEntireArrayKernel()[clusterIndex];
-	ClusterCuda cluster = *clusterPtr;
-	if (threadIdx.x >= cluster.numCells) {
+	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArrayKernel()[clusterIndex];
+	ClusterCuda clusterCopy = *oldCluster;
+	if (threadIdx.x >= clusterCopy.numCells) {
 		return;
 	}
-	__shared__ ClusterCuda *newClusterPtr;
-	__shared__ CellCuda *newCellsPtr;
+	__shared__ ClusterCuda *newCluster;
+	__shared__ CellCuda *newCells;
 
 	int2 size = data.size;
 	int startCellIndex;
 	int endCellIndex;
-	tiling_Kernel(cluster.numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+	tiling_Kernel(clusterCopy.numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 	__shared__ double rotMatrix[2][2];
 	if (threadIdx.x == 0) {
-		double sinAngle = __sinf(cluster.angle*DEG_TO_RAD);
-		double cosAngle = __cosf(cluster.angle*DEG_TO_RAD);
+		double sinAngle = __sinf(clusterCopy.angle*DEG_TO_RAD);
+		double cosAngle = __cosf(clusterCopy.angle*DEG_TO_RAD);
 		rotMatrix[0][0] = cosAngle;
 		rotMatrix[0][1] = sinAngle;
 		rotMatrix[1][0] = -sinAngle;
 		rotMatrix[1][1] = cosAngle;
-		newCellsPtr = data.cellsAC2.getArrayKernel(cluster.numCells);
-		newClusterPtr = data.clustersAC2.getElementKernel();
+		newCells = data.cellsAC2.getArrayKernel(clusterCopy.numCells);
+		newCluster = data.clustersAC2.getElementKernel();
 
-		cluster.angle += cluster.angularVel;
-		angleCorrection_Kernel(cluster.angle);
-		cluster.pos = { cluster.pos.x + cluster.vel.x, cluster.pos.y + cluster.vel.y };
-		mapCorrection_Kernel(cluster.pos, size);
-		cluster.cells = newCellsPtr;
+		clusterCopy.angle += clusterCopy.angularVel;
+		angleCorrection_Kernel(clusterCopy.angle);
+		clusterCopy.pos = { clusterCopy.pos.x + clusterCopy.vel.x, clusterCopy.pos.y + clusterCopy.vel.y };
+		mapCorrection_Kernel(clusterCopy.pos, size);
+		clusterCopy.cells = newCells;
 
-		*newClusterPtr = cluster;
+		*newCluster = clusterCopy;
 	}
 
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		double2 absPos = cluster.cells[cellIndex].absPos;
+		double2 absPos = clusterCopy.cells[cellIndex].absPos;
 		int2 absPosInt = { (int)absPos.x , (int)absPos.y };
 
-		CellCuda* collidingCell = readCellMap_Kernel(absPosInt, clusterPtr, data.map1, size);
+		CellCuda* collidingCell = readCellMap_Kernel(absPosInt, oldCluster, data.map1, size);
 //		calcCollision(clusterPtr, collidingCell);
-
 	}
 
 	__syncthreads();
 
-
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 
-		CellCuda *cellPtr = &clusterPtr->cells[cellIndex];
-		CellCuda *newCellPtr = &newCellsPtr[cellIndex];
-		CellCuda cell = *cellPtr;
-		double2 relPos = cell.relPos;
+		CellCuda *oldCell = &oldCluster->cells[cellIndex];
+		CellCuda *newCell = &newCells[cellIndex];
+		CellCuda cellCopy = *oldCell;
+		double2 relPos = cellCopy.relPos;
 		relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
-		double2 absPos = { relPos.x + cluster.pos.x, relPos.y + cluster.pos.y };
-		cell.absPos = absPos;
-		cell.cluster = newClusterPtr;
-		*newCellPtr = cell;
+		double2 absPos = { relPos.x + clusterCopy.pos.x, relPos.y + clusterCopy.pos.y };
+		cellCopy.absPos = absPos;
+		cellCopy.cluster = newCluster;
+		*newCell = cellCopy;
 
-		cellPtr->nextTimestep = newCellPtr;
+		oldCell->nextTimestep = newCell;
 	}
 	
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellCuda* newCellPtr = &newCellsPtr[cellIndex];
-		int numConnections = newCellPtr->numConnections;
+		CellCuda* newCell = &newCells[cellIndex];
+		int numConnections = newCell->numConnections;
 		for (int i = 0; i < numConnections; ++i) {
-			newCellPtr->connections[i] = newCellPtr->connections[i]->nextTimestep;
+			newCell->connections[i] = newCell->connections[i]->nextTimestep;
 		}
 	}
 	__syncthreads();
