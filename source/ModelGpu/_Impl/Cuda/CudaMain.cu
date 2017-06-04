@@ -5,13 +5,10 @@
 #include <stdio.h>
 #include <functional>
 
-#include "CudaShared.cuh"
 #include "CudaBase.cuh"
+#include "CudaConstants.cuh"
+#include "CudaShared.cuh"
 #include "CudaDeviceFunctions.cuh"
-
-#define NUM_THREADS_PER_BLOCK 32
-#define NUM_BLOCKS (32 * 5) /*160*/
-#define NUM_CLUSTERS (NUM_BLOCKS * 50)
 
 cudaStream_t cudaStream;
 CudaData cudaData;
@@ -37,7 +34,7 @@ void init_Cuda(int2 size)
 	cudaData.clustersAC2 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 2);
 	cudaData.cellsAC2 = ArrayController<CellCuda>(NUM_CLUSTERS * cellsPerCluster * 2);
 
-	auto clusters = cudaData.clustersAC2.getArray(NUM_CLUSTERS);
+	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
 		clusters[i].pos = { random(size.x), random(size.y) };
 		clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
@@ -47,7 +44,23 @@ void init_Cuda(int2 size)
 
 		clusters[i].cells = cudaData.cellsAC1.getArray(cellsPerCluster);
 		for (int j = 0; j < cellsPerCluster; ++j) {
-			clusters[i].cells[j].relPos = { j - 20.0f, j - 20.0f };
+			CellCuda *cell = &clusters[i].cells[j];
+			cell->relPos = { j - 20.0f, j - 20.0f };
+			cell->cluster = &clusters[i];
+			cell->nextTimestep = nullptr;
+			if (j > 0 && j < cellsPerCluster - 1) {
+				cell->numConnections = 2;
+				cell->connections[0] = &clusters[i].cells[j - 1];
+				cell->connections[1] = &clusters[i].cells[j + 1];
+			}
+			if (j == 0) {
+				cell->numConnections = 1;
+				cell->connections[0] = &clusters[i].cells[j + 1];
+			}
+			if (j == cellsPerCluster - 1) {
+				cell->numConnections = 1;
+				cell->connections[0] = &clusters[i].cells[j - 1];
+			}
 		}
 
 	}

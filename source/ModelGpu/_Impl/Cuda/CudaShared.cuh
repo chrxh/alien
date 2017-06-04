@@ -2,10 +2,19 @@
 
 #include <cuda_runtime.h>
 
+#include "CudaConstants.cuh"
+
+
+struct ClusterCuda;
 struct CellCuda
 {
+	ClusterCuda* cluster;
 	double2 relPos;
 	double2 absPos;
+	int numConnections;
+	CellCuda* connections[MAX_CELL_CONNECTIONS];
+
+	CellCuda* nextTimestep;
 };
 
 struct ClusterCuda
