@@ -25,8 +25,6 @@ void init_Cuda(int2 size)
 	size_t mapSize = size.x * size.y * sizeof(CellCuda*) * LAYERS;
 	cudaMallocManaged(&cudaData.map1, mapSize);
 	cudaMallocManaged(&cudaData.map2, mapSize);
-	cudaMallocManaged(&cudaData.numClusters1, sizeof(int));
-	cudaMallocManaged(&cudaData.numClusters2, sizeof(int));
 	for (int i = 0; i < size.x * size.y * LAYERS; ++i) {
 		cudaData.map1[i] = nullptr;
 		cudaData.map1[i] = nullptr;
@@ -34,25 +32,22 @@ void init_Cuda(int2 size)
 		cudaData.map2[i] = nullptr;
 	}
 	int cellsPerCluster = 32;
-	*cudaData.numClusters1 = NUM_CLUSTERS;
-	*cudaData.numClusters2 = 0;
 	cudaData.clustersAC1 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 2);
 	cudaData.cellsAC1 = ArrayController<CellCuda>(NUM_CLUSTERS * cellsPerCluster * 2);
 	cudaData.clustersAC2 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 2);
 	cudaData.cellsAC2 = ArrayController<CellCuda>(NUM_CLUSTERS * cellsPerCluster * 2);
 
-	cudaData.clusters1 = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
-	cudaData.clusters2 = cudaData.clustersAC2.getArray(NUM_CLUSTERS);
+	auto clusters = cudaData.clustersAC2.getArray(NUM_CLUSTERS);
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
-		cudaData.clusters1[i].pos = { random(size.x), random(size.y) };
-		cudaData.clusters1[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
-		cudaData.clusters1[i].angle = random(360.0f);
-		cudaData.clusters1[i].angularVel = random(10.0f) - 5.0f;
-		cudaData.clusters1[i].numCells = cellsPerCluster;
+		clusters[i].pos = { random(size.x), random(size.y) };
+		clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
+		clusters[i].angle = random(360.0f);
+		clusters[i].angularVel = random(10.0f) - 5.0f;
+		clusters[i].numCells = cellsPerCluster;
 
-		cudaData.clusters1[i].cells = cudaData.cellsAC1.getArray(cellsPerCluster);
+		clusters[i].cells = cudaData.cellsAC1.getArray(cellsPerCluster);
 		for (int j = 0; j < cellsPerCluster; ++j) {
-			cudaData.clusters1[i].cells[j].relPos = { j - 20.0f, j - 20.0f };
+			clusters[i].cells[j].relPos = { j - 20.0f, j - 20.0f };
 		}
 
 	}
@@ -64,14 +59,14 @@ void calcNextTimestep_Cuda()
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	swap(cudaData.clusters1, cudaData.clusters2);
-	*cudaData.numClusters2 = 0;
+	swap(cudaData.clustersAC1, cudaData.clustersAC2);
+	cudaData.clustersAC2.reset();
 }
 
 void getDataRef_Cuda(int& numClusters, ClusterCuda*& clusters)
 {
-	numClusters = *cudaData.numClusters1;
-	clusters = cudaData.clusters1;
+	numClusters = cudaData.clustersAC1.getNumEntries();
+	clusters = cudaData.clustersAC1.getEntireArray();
 }
 
 

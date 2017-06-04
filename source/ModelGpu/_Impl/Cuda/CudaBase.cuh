@@ -38,7 +38,7 @@ class ArrayController
 {
 private:
 	int _size;
-	int _lastEntry = 0;
+	int *_numEntries = nullptr;
 	T* _data;
 
 public:
@@ -48,33 +48,55 @@ public:
 		: _size(size)
 	{
 		cudaMallocManaged(&_data, sizeof(T) * size);
+		cudaMallocManaged(&_numEntries, sizeof(int));
 	}
 
 	void free()
 	{
 		cudaFree(_data);
+		cudaFree(_numEntries);
 	}
 
+	void reset()
+	{
+		*_numEntries = 0;
+	}
+	
 	T* getArray(int size)
 	{
-		auto result = _lastEntry;
-		_lastEntry += size;
+		auto result = *_numEntries;
+		*_numEntries += size;
 		return &_data[result];
+	}
+
+	int getNumEntries() const
+	{
+		return *_numEntries;
+	}
+
+	T* getEntireArray() const
+	{
+		return _data;
 	}
 
 	__device__ T* getArrayKernel(int size)
 	{
-		auto result = _lastEntry;
-		_lastEntry += size;
-		return &_data[result];
+		int oldIndex = atomicAdd(_numEntries, size);
+		return &_data[oldIndex];
 	}
 
 	__device__ T* getElementKernel()
 	{
-		return &_data[_lastEntry++];
+		int oldIndex = atomicAdd(_numEntries, 1);
+		return &_data[oldIndex];
 	}
 
-	__device__ T* getDataKernel() const
+	__device__ int getNumEntriesKernel() const
+	{
+		return *_numEntries;
+	}
+
+	__device__ T* getEntireArrayKernel() const
 	{
 		return _data;
 	}
