@@ -14,14 +14,9 @@ struct CudaData
 	CellCuda **map1;
 	CellCuda **map2;
 
-	int *numClusters1;
-	ClusterCuda *clusters1;
-	int *numClusters2;
-	ClusterCuda *clusters2;
-
 	ArrayController<ClusterCuda> clustersAC1;
-	ArrayController<CellCuda> cellsAC1;
 	ArrayController<ClusterCuda> clustersAC2;
+	ArrayController<CellCuda> cellsAC1;
 	ArrayController<CellCuda> cellsAC2;
 
 };
@@ -119,7 +114,7 @@ __device__ int ii = 4;
 
 __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 {
-	ClusterCuda cluster = data.clusters1[clusterIndex];
+	ClusterCuda cluster = data.clustersAC1.getEntireArrayKernel()[clusterIndex];
 	if (threadIdx.x >= cluster.numCells) {
 		return;
 	}
@@ -158,8 +153,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 		cluster.pos = { cluster.pos.x + cluster.vel.x, cluster.pos.y + cluster.vel.y };
 		mapCorrection_Kernel(cluster.pos, size);
 
-		int newClusterIndex = atomicAdd((int*)data.numClusters2, 1);
-		data.clusters2[newClusterIndex] = cluster;
+		*data.clustersAC2.getElementKernel() = cluster;
 	}
 	__syncthreads();
 
@@ -180,12 +174,13 @@ __global__ void movement_Kernel(CudaData data)
 {
 
 	int blockIndex = blockIdx.x;
-	if (blockIndex >= *data.numClusters1) {
+	int numClusters = data.clustersAC1.getNumEntriesKernel();
+	if (blockIndex >= numClusters) {
 		return;
 	}
 	int startClusterIndex;
 	int endClusterIndex;
-	tiling_Kernel(*data.numClusters1, blockIndex, gridDim.x, startClusterIndex, endClusterIndex);
+	tiling_Kernel(numClusters, blockIndex, gridDim.x, startClusterIndex, endClusterIndex);
 
 	for (int clusterIndex = startClusterIndex; clusterIndex <= endClusterIndex; ++clusterIndex) {
 		movement_Kernel(data, clusterIndex);
