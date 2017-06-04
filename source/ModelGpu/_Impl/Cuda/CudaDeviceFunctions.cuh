@@ -110,8 +110,6 @@ __device__ CellCuda* readCellMapEntries_Kernel(int2 posInt, int clusterIndex, Ce
 	return nullptr;
 }
 
-__device__ int ii = 4;
-
 __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 {
 	ClusterCuda cluster = data.clustersAC1.getEntireArrayKernel()[clusterIndex];
@@ -125,6 +123,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 	tiling_Kernel(cluster.numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 	__shared__ double rotMatrix[2][2];
+	__shared__ CellCuda* newCells;
 	if (threadIdx.x == 0) {
 		double sinAngle = __sinf(cluster.angle*DEG_TO_RAD);
 		double cosAngle = __cosf(cluster.angle*DEG_TO_RAD);
@@ -132,17 +131,19 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 		rotMatrix[0][1] = sinAngle;
 		rotMatrix[1][0] = -sinAngle;
 		rotMatrix[1][1] = cosAngle;
+		newCells = data.cellsAC2.getArrayKernel(cluster.numCells);
 	}
 
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellCuda* cell = &cluster.cells[cellIndex];
-		double2 relPos = cell->relPos;
+		CellCuda cell = cluster.cells[cellIndex];
+		double2 relPos = cell.relPos;
 		relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
 		double2 absPos = { relPos.x + cluster.pos.x, relPos.y + cluster.pos.y };
 		int2 absPosInt = { (int)absPos.x , (int)absPos.y };
-		cell->absPos = absPos;
+		cell.absPos = absPos;
+		newCells[cellIndex] = cell;
 
 		readCellMapEntries_Kernel(absPosInt, clusterIndex, data.map1, size);
 	}
@@ -152,19 +153,9 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 		angleCorrection_Kernel(cluster.angle);
 		cluster.pos = { cluster.pos.x + cluster.vel.x, cluster.pos.y + cluster.vel.y };
 		mapCorrection_Kernel(cluster.pos, size);
+		cluster.cells = newCells;
 
 		*data.clustersAC2.getElementKernel() = cluster;
-	}
-	__syncthreads();
-
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellCuda* cell = &cluster.cells[cellIndex];
-		double2 relPos = cell->relPos;
-		relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
-		double2 absPos = { relPos.x + cluster.pos.x, relPos.y + cluster.pos.y };
-		int2 absPosInt = { (int)absPos.x , (int)absPos.y };
-		mapCorrection_Kernel(absPosInt, size);
-		//		newMap[absPosInt.x + absPosInt.y * config.size.x] = 1;
 	}
 	__syncthreads();
 }
