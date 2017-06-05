@@ -28,14 +28,15 @@ void init_Cuda(int2 size)
 		cudaData.map2[i] = nullptr;
 		cudaData.map2[i] = nullptr;
 	}
-	int cellsPerCluster = 32;
-	cudaData.clustersAC1 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 2);
-	cudaData.cellsAC1 = ArrayController<CellCuda>(NUM_CLUSTERS * cellsPerCluster * 2);
-	cudaData.clustersAC2 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 2);
-	cudaData.cellsAC2 = ArrayController<CellCuda>(NUM_CLUSTERS * cellsPerCluster * 2);
+	int maxCellsPerCluster = 32;
+	cudaData.clustersAC1 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 1.1);
+	cudaData.clustersAC2 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 1.1);
+	cudaData.cellsAC1 = ArrayController<CellCuda>(NUM_CLUSTERS * maxCellsPerCluster * 1.1);
+	cudaData.cellsAC2 = ArrayController<CellCuda>(NUM_CLUSTERS * maxCellsPerCluster * 1.1);
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
+		int cellsPerCluster = (rand() % (maxCellsPerCluster)) + 1;
 		clusters[i].pos = { random(size.x), random(size.y) };
 		clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
 		clusters[i].angle = random(360.0f);
@@ -49,16 +50,17 @@ void init_Cuda(int2 size)
 			cell->absPos = clusters[i].pos;
 			cell->cluster = &clusters[i];
 			cell->nextTimestep = nullptr;
+			cell->numConnections = 0;
 			if (j > 0 && j < cellsPerCluster - 1) {
 				cell->numConnections = 2;
 				cell->connections[0] = &clusters[i].cells[j - 1];
 				cell->connections[1] = &clusters[i].cells[j + 1];
 			}
-			if (j == 0) {
+			if (j == 0 && j < cellsPerCluster - 1) {
 				cell->numConnections = 1;
 				cell->connections[0] = &clusters[i].cells[j + 1];
 			}
-			if (j == cellsPerCluster - 1) {
+			if (j == cellsPerCluster - 1 && j > 0) {
 				cell->numConnections = 1;
 				cell->connections[0] = &clusters[i].cells[j - 1];
 			}
@@ -70,6 +72,8 @@ void init_Cuda(int2 size)
 void calcNextTimestep_Cuda()
 {
 	movement_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaData);
+	cudaDeviceSynchronize();
+	clearOldMap_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >>> (cudaData);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
