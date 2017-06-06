@@ -68,6 +68,9 @@
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaConstants.cuh">
       <Filter>Source Files\_Impl\Cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaCollision.cuh">
+      <Filter>Source Files\_Impl\Cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.cpp">
