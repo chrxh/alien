@@ -28,11 +28,11 @@ void init_Cuda(int2 size)
 		cudaData.map2[i] = nullptr;
 		cudaData.map2[i] = nullptr;
 	}
-	int maxCellsPerCluster = 32;
-	cudaData.clustersAC1 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 1.1);
-	cudaData.clustersAC2 = ArrayController<ClusterCuda>(NUM_CLUSTERS * 1.1);
-	cudaData.cellsAC1 = ArrayController<CellCuda>(NUM_CLUSTERS * maxCellsPerCluster * 1.1);
-	cudaData.cellsAC2 = ArrayController<CellCuda>(NUM_CLUSTERS * maxCellsPerCluster * 1.1);
+	int maxCellsPerCluster = 64;
+	cudaData.clustersAC1 = ArrayController<ClusterCuda>(static_cast<int>(NUM_CLUSTERS * 1.1));
+	cudaData.clustersAC2 = ArrayController<ClusterCuda>(static_cast<int>(NUM_CLUSTERS * 1.1));
+	cudaData.cellsAC1 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * maxCellsPerCluster * 1.1));
+	cudaData.cellsAC2 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * maxCellsPerCluster * 1.1));
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
