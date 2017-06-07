@@ -48,60 +48,64 @@ __device__ void angleCorrection_Kernel(double &angle)
 	angle = (double)intPart + fracPart;
 }
 
-__device__ CellCuda* updateCollisionData_Kernel(int2 posInt, ClusterCuda *cluster, CellCuda ** __restrict__ map, int2 const &size)
+__device__ void updateCollisionData_Kernel(int2 posInt, ClusterCuda *cluster, CellCuda ** __restrict__ map, int2 const &size
+	, CollisionData &collisionData)
 {
 	mapCorrection_Kernel(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;
-	auto slice = size.x*size.y;
+//	auto slice = size.x*size.y;
 
-	for (int i = 0; i < LAYERS; ++i) {
-		auto cell = map[mapEntry + i * slice];
+//	for (int i = 0; i < LAYERS; ++i) {
+		auto cell = map[mapEntry/* + i * slice*/];
 		if (cell != nullptr) {
 			if (cell->cluster != cluster) {
-				return cell;
+				auto entry = collisionData.getOrCreateEntry(cell->cluster);
+				calcCollision(cluster, cell, entry->velDelta, entry->angularVelDelta);
 			}
 		}
-	}
-	return nullptr;
+//	}
 }
 
 __device__ bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map, int2 const &size)
 {
-	return true;
+	mapCorrection_Kernel(posInt, size);
+	auto mapEntry = posInt.x + posInt.y * size.x;
+	return map[mapEntry] == cell;
+
 }
 
-__device__ void collectCollisionData_Kernel(int2 posInt, ClusterCuda *cluster, CellCuda ** __restrict__ map, int2 const &size
-	, CollisionData collisionData[], int &numCollisions)
+__device__ void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
 {
+	ClusterCuda *cluster = cell->cluster;
+	auto absPos = cell->absPos;
+	auto map = data.map1;
+	auto size = data.size;
+	int2 posInt = { (int)absPos.x , (int)absPos.y };
+	if (!isCellPresentAtMap_Kernel(posInt, cell, map, size)) {
+		return;
+	}
+
 	--posInt.x;
 	--posInt.y;
-	auto cell = updateCollisionData_Kernel(posInt, cluster, map, size);
-
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 	++posInt.x;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
-
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 	++posInt.x;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 
 	++posInt.y;
 	posInt.x -= 2;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
-
-	++posInt.y;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
-
-	++posInt.y;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
+	posInt.y += 2;
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 
 	++posInt.y;
 	posInt.x -= 2;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
-
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 	++posInt.y;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
-
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 	++posInt.y;
-	cell = updateCollisionData_Kernel(posInt, cluster, map, size);
+	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 }
 
 __device__ void setCellToMap_Kernel(int2 const &posInt, CellCuda *cell, CellCuda ** __restrict__ map, int2 const &size)
@@ -116,8 +120,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 	__shared__ ClusterCuda *newCluster;
 	__shared__ CellCuda *newCells;
 	__shared__ double rotMatrix[2][2];
-	__shared__ int numCollisions;
-	__shared__ CollisionData collisionData[MAX_COLLIDING_CLUSTERS];
+	__shared__ CollisionData collisionData;
 
 	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArrayKernel()[clusterIndex];
 	int startCellIndex;
@@ -139,7 +142,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 			newCells = data.cellsAC2.getArrayKernel(clusterCopy.numCells);
 			newCluster = data.clustersAC2.getElementKernel();
 
-			numCollisions = 0;
+			collisionData.init();
 		}
 	}
 	
@@ -148,10 +151,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CellCuda *oldCell = &oldCluster->cells[cellIndex];
-			double2 absPos = oldCell->absPos;
-			int2 absPosInt = { (int)absPos.x , (int)absPos.y };
-
-			collectCollisionData_Kernel(absPosInt, oldCluster, data.map1, size, collisionData, numCollisions);
+			collectCollisionData_Kernel(data, oldCell, collisionData);
 		}
 	}
 

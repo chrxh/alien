@@ -1,14 +1,50 @@
 #pragma once
 
+#include <cuda_runtime.h>
+
 #include "CudaShared.cuh"
 #include "CudaBase.cuh"
 #include "CudaConstants.cuh"
 
-struct CollisionData
+struct CollisionEntry
 {
 	ClusterCuda* collidingCluster;
 	double2 velDelta;
-	double angVelDelta;
+	double angularVelDelta;
+};
+
+class CollisionData
+{
+private:
+	unsigned int numCollisions;
+	CollisionEntry collisionEntries[MAX_COLLIDING_CLUSTERS];
+
+public:
+	__device__ void init()
+	{
+		numCollisions = 0;
+	}
+
+	__device__ int getNumCollisions()
+	{
+		return numCollisions;
+	}
+
+	__device__ CollisionEntry* getOrCreateEntry(ClusterCuda* collidingCluster)
+	{
+		for (int i = 0; i < numCollisions; ++i) {
+			if (collisionEntries[i].collidingCluster == collidingCluster) {
+				return &collisionEntries[i];
+			}
+		}
+		auto entry = atomicInc(&numCollisions, MAX_COLLIDING_CLUSTERS);
+		auto &result = collisionEntries[entry];
+		result.collidingCluster = collidingCluster;
+		result.velDelta = { 0.0, 0.0 };
+		result.angularVelDelta = 0;
+		return &result;
+	}
+
 };
 
 __device__ void rotateQuarterCounterClockwise(double2 &v)
@@ -18,50 +54,59 @@ __device__ void rotateQuarterCounterClockwise(double2 &v)
 	v.y = -temp;
 }
 
-__device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, double2 &resultVel, double &resultAngularVel
-	, double2 &resultCollidingVel, double &resultCollidingAngularVel)
+__device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, double2 &velDelta, double &angVelDelta)
 {
-	double2 pos = cluster->pos;
-	double2 vel = cluster->vel;
-	double angularVel = cluster->angularVel * DEG_TO_RAD;
-	double angularMass = 1.0;
+	double2 posA = cluster->pos;
+	double2 velA = cluster->vel;
+	double angVelA = cluster->angularVel * DEG_TO_RAD;
+	double angMassA = 1.0;
 
 	ClusterCuda *collidingCluster = collidingCell->cluster;
-	double2 collidingPos = collidingCluster->pos;
-	double2 collidingVel = collidingCluster->vel;
-	double collidingAngularVel = collidingCluster->angularVel * DEG_TO_RAD;
-	double collidingAngularMass = 1.0;
+	double2 posB = collidingCluster->pos;
+	double2 velB = collidingCluster->vel;
+	double angVelB = collidingCluster->angularVel * DEG_TO_RAD;
+	double angMassB = 1.0;
 
-	double2 rAPp = { collidingCell->absPos.x - pos.x, collidingCell->absPos.y - pos.y };
+	double2 rAPp = { collidingCell->absPos.x - posA.x, collidingCell->absPos.y - posA.y };
 	rotateQuarterCounterClockwise(rAPp);
-	double2 rBPp = { collidingCell->absPos.x - collidingPos.x, collidingCell->absPos.y - collidingPos.y };
+	double2 rBPp = { collidingCell->absPos.x - posB.x, collidingCell->absPos.y - posB.y };
 	rotateQuarterCounterClockwise(rBPp);
 	double2 vAB = {
-		-(collidingVel.x - rBPp.x*collidingAngularVel) + (vel.x - rAPp.x*angularVel)
-		, -(collidingVel.y - rBPp.y*collidingAngularVel) + (vel.y - rAPp.y*angularVel)
+		-(velB.x - rBPp.x*angVelB) + (velA.x - rAPp.x*angVelA)
+		, -(velB.y - rBPp.y*angVelB) + (velA.y - rAPp.y*angVelA)
 	};
 
-	double scale = sqrt(vAB.x*vAB.x + vAB.y*vAB.y);
+	double vAB_sqrt = sqrt(vAB.x*vAB.x + vAB.y*vAB.y);
 	double2 n;
-	if (scale < FP_PRECISION) {
+	if (vAB_sqrt < FP_PRECISION) {
 		n.x = 1.0;
 	}
 	else {
-		n = { -vAB.x / scale, -vAB.y / scale };
+		n = { -vAB.x / vAB_sqrt, -vAB.y / vAB_sqrt };
 	}
 
-	if (angularMass < FP_PRECISION) {
-		angularVel = 0.0;
+	if (angMassA < FP_PRECISION) {
+		angVelA = 0.0;
 	}
-	if (collidingAngularMass < FP_PRECISION) {
-		collidingAngularVel = 0.0;
+	if (angMassB < FP_PRECISION) {
+		angVelB = 0.0;
 	}
 
-	if (vAB.x * n.x + vAB.y * n.y > 0.0) {
-		resultVel = vel;
-		resultAngularVel = angularVel;
-		resultCollidingVel = collidingVel;
-		resultCollidingAngularVel = collidingAngularVel;
+	double vAB_dot_n = vAB.x * n.x + vAB.y * n.y;
+	if (vAB_dot_n > 0.0) {
+		return;
 	}
+
+	if (angMassA > FP_PRECISION && angMassB > FP_PRECISION) {
+		double massA = static_cast<double>(cluster->numCells);
+		double massB = static_cast<double>(collidingCluster->numCells);
+		double rAPp_dot_n = rAPp.x * n.x + rAPp.y * n.y;
+		double rBPp_dot_n = rBPp.x * n.x + rBPp.y * n.y;
+		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0/massA + 1.0/massB)
+			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
+		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
+		angVelDelta -= rAPp_dot_n * j / angMassA;
+	}
+
 
 }
