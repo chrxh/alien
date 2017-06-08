@@ -59,8 +59,8 @@ __device__ void updateCollisionData_Kernel(int2 posInt, ClusterCuda *cluster, Ce
 		auto cell = map[mapEntry/* + i * slice*/];
 		if (cell != nullptr) {
 			if (cell->cluster != cluster) {
-				auto entry = collisionData.getOrCreateEntry(cell->cluster);
-				calcCollision(cluster, cell, entry->velDelta, entry->angularVelDelta);
+				atomicAdd(&collisionData.numCollisions, 1);
+				calcCollision(cluster, cell, collisionData);
 			}
 		}
 //	}
@@ -158,9 +158,18 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 	__syncthreads();
 
 	if (threadIdx.x == 0) {
+
+		if (collisionData.numCollisions > 0) {
+			double numCollisions = static_cast<double>(collisionData.numCollisions);
+			clusterCopy.vel.x += collisionData.velDelta.x / numCollisions;
+			clusterCopy.vel.y += collisionData.velDelta.y / numCollisions;
+			clusterCopy.angularVel += collisionData.angularVelDelta / numCollisions;
+		}
+
 		clusterCopy.angle += clusterCopy.angularVel;
 		angleCorrection_Kernel(clusterCopy.angle);
-		clusterCopy.pos = { clusterCopy.pos.x + clusterCopy.vel.x, clusterCopy.pos.y + clusterCopy.vel.y };
+		clusterCopy.pos.x += clusterCopy.vel.x;
+		clusterCopy.pos.y += clusterCopy.vel.y;
 		mapCorrection_Kernel(clusterCopy.pos, size);
 		clusterCopy.cells = newCells;
 		*newCluster = clusterCopy;
