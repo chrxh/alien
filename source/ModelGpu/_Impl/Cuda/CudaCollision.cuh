@@ -97,16 +97,37 @@ __device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, dou
 		return;
 	}
 
+	double massA = static_cast<double>(cluster->numCells);
+	double massB = static_cast<double>(collidingCluster->numCells);
+	double rAPp_dot_n = rAPp.x * n.x + rAPp.y * n.y;
+	double rBPp_dot_n = rBPp.x * n.x + rBPp.y * n.y;
+
 	if (angMassA > FP_PRECISION && angMassB > FP_PRECISION) {
-		double massA = static_cast<double>(cluster->numCells);
-		double massB = static_cast<double>(collidingCluster->numCells);
-		double rAPp_dot_n = rAPp.x * n.x + rAPp.y * n.y;
-		double rBPp_dot_n = rBPp.x * n.x + rBPp.y * n.y;
 		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0/massA + 1.0/massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
 		angVelDelta -= rAPp_dot_n * j / angMassA;
 	}
 
+	if (angMassA <= FP_PRECISION && angMassB > FP_PRECISION) {
+		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0 / massA + 1.0 / massB)
+			 + rBPp_dot_n * rBPp_dot_n / angMassB);
+
+		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
+	}
+
+	if (angMassA > FP_PRECISION && angMassB <= FP_PRECISION) {
+		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0 / massA + 1.0 / massB)
+			+ rAPp_dot_n * rAPp_dot_n / angMassA);
+
+		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
+		angVelDelta -= rAPp_dot_n * j / angMassA;
+	}
+
+	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
+		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0 / massA + 1.0 / massB));
+
+		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
+	}
 
 }
