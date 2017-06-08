@@ -36,7 +36,7 @@ void init_Cuda(int2 size)
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
-		int cellsPerCluster = (rand() % (maxCellsPerCluster)) + 1;
+		int cellsPerCluster = 64;// (rand() % (maxCellsPerCluster)) + 1;
 		clusters[i].pos = { random(size.x), random(size.y) };
 		clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
 		clusters[i].angle = random(360.0f);
@@ -71,10 +71,12 @@ void init_Cuda(int2 size)
 
 void calcNextTimestep_Cuda()
 {
+
 	movement_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaData);
 	cudaDeviceSynchronize();
 	clearOldMap_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >>> (cudaData);
 	cudaDeviceSynchronize();
+
 	checkCudaErrors(cudaGetLastError());
 
 	swap(cudaData.clustersAC1, cudaData.clustersAC2);

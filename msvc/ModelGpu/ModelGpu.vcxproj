@@ -130,7 +130,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>$(SolutionDir)\..\..\external\boost_1_64_0;$(ProjectDir)\..\..\source;.</Include>
-      <CodeGeneration>compute_60,sm_60</CodeGeneration>
+      <CodeGeneration>compute_20,sm_20</CodeGeneration>
     </CudaCompile>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
