@@ -6,45 +6,18 @@
 #include "CudaBase.cuh"
 #include "CudaConstants.cuh"
 
-struct CollisionEntry
+struct CollisionData
 {
-	ClusterCuda* collidingCluster;
+	int numCollisions;
 	double2 velDelta;
 	double angularVelDelta;
-};
 
-class CollisionData
-{
-private:
-	unsigned int numCollisions;
-	CollisionEntry collisionEntries[MAX_COLLIDING_CLUSTERS];
-
-public:
 	__device__ void init()
 	{
 		numCollisions = 0;
+		velDelta = { 0.0, 0.0 };
+		angularVelDelta = 0.0;
 	}
-
-	__device__ int getNumCollisions()
-	{
-		return numCollisions;
-	}
-
-	__device__ CollisionEntry* getOrCreateEntry(ClusterCuda* collidingCluster)
-	{
-		for (int i = 0; i < numCollisions; ++i) {
-			if (collisionEntries[i].collidingCluster == collidingCluster) {
-				return &collisionEntries[i];
-			}
-		}
-		auto entry = atomicInc(&numCollisions, MAX_COLLIDING_CLUSTERS);
-		auto &result = collisionEntries[entry];
-		result.collidingCluster = collidingCluster;
-		result.velDelta = { 0.0, 0.0 };
-		result.angularVelDelta = 0;
-		return &result;
-	}
-
 };
 
 __device__ void rotateQuarterCounterClockwise(double2 &v)
@@ -54,7 +27,7 @@ __device__ void rotateQuarterCounterClockwise(double2 &v)
 	v.y = -temp;
 }
 
-__device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, double2 &velDelta, double &angVelDelta)
+__device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, CollisionData &collisionData)
 {
 	double2 posA = cluster->pos;
 	double2 velA = cluster->vel;
@@ -105,29 +78,34 @@ __device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, dou
 	if (angMassA > FP_PRECISION && angMassB > FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0/massA + 1.0/massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
-		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
-		angVelDelta -= rAPp_dot_n * j / angMassA;
+
+		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+		atomicAdd(&collisionData.angularVelDelta, -rAPp_dot_n * j / angMassA);
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB > FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0 / massA + 1.0 / massB)
 			 + rBPp_dot_n * rBPp_dot_n / angMassB);
 
-		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
+		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 	}
 
 	if (angMassA > FP_PRECISION && angMassB <= FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA);
 
-		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
-		angVelDelta -= rAPp_dot_n * j / angMassA;
+		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+		atomicAdd(&collisionData.angularVelDelta, -rAPp_dot_n * j / angMassA);
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((n.x*n.x + n.y*n.y) * (1.0 / massA + 1.0 / massB));
 
-		velDelta = { velDelta.x + j / massA * n.x, velDelta.y + j / massA * n.y };
+		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 	}
 
 }
