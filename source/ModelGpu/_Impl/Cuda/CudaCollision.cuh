@@ -32,13 +32,13 @@ __device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, Col
 	double2 posA = cluster->pos;
 	double2 velA = cluster->vel;
 	double angVelA = cluster->angularVel * DEG_TO_RAD;
-	double angMassA = 1.0;
+	double angMassA = 100.0;
 
 	ClusterCuda *collidingCluster = collidingCell->cluster;
 	double2 posB = collidingCluster->pos;
 	double2 velB = collidingCluster->vel;
 	double angVelB = collidingCluster->angularVel * DEG_TO_RAD;
-	double angMassB = 1.0;
+	double angMassB = 100.0;
 
 	double2 rAPp = { collidingCell->absPos.x - posA.x, collidingCell->absPos.y - posA.y };
 	rotateQuarterCounterClockwise(rAPp);

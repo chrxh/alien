@@ -46,7 +46,7 @@ void init_Cuda(int2 size)
 		clusters[i].cells = cudaData.cellsAC1.getArray(cellsPerCluster);
 		for (int j = 0; j < cellsPerCluster; ++j) {
 			CellCuda *cell = &clusters[i].cells[j];
-			cell->relPos = { j - 20.0f, j - 20.0f };
+			cell->relPos = { j - 31.5f, j - 31.5f };
 			cell->absPos = clusters[i].pos;
 			cell->cluster = &clusters[i];
 			cell->nextTimestep = nullptr;
@@ -81,6 +81,7 @@ void calcNextTimestep_Cuda()
 
 	swap(cudaData.clustersAC1, cudaData.clustersAC2);
 	swap(cudaData.cellsAC1, cudaData.cellsAC2);
+	swap(cudaData.map1, cudaData.map2);
 	cudaData.clustersAC2.reset();
 	cudaData.cellsAC2.reset();
 }
