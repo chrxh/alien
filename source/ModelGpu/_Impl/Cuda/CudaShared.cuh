@@ -12,7 +12,7 @@ struct CellCuda
 	double2 relPos;
 	double2 absPos;
 	int numConnections;
-	CellCuda* connections[MAX_CELL_CONNECTIONS];
+	CellCuda* connections[CELL_MAX_BONDS];
 
 	CellCuda* nextTimestep;
 };
