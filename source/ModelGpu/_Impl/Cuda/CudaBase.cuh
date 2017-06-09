@@ -99,24 +99,24 @@ public:
 		return _data;
 	}
 
-	__device__ T* getArrayKernel(int size)
+	__device__ T* getArray_Kernel(int size)
 	{
 		int oldIndex = atomicAdd(_numEntries, size);
 		return &_data[oldIndex];
 	}
 
-	__device__ T* getElementKernel()
+	__device__ T* getElement_Kernel()
 	{
 		int oldIndex = atomicAdd(_numEntries, 1);
 		return &_data[oldIndex];
 	}
 
-	__device__ int getNumEntriesKernel() const
+	__device__ int getNumEntries_Kernel() const
 	{
 		return *_numEntries;
 	}
 
-	__device__ T* getEntireArrayKernel() const
+	__device__ T* getEntireArray_Kernel() const
 	{
 		return _data;
 	}

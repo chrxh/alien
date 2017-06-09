@@ -65,7 +65,8 @@ void init_Cuda(int2 size)
 				cell->connections[0] = &clusters[i].cells[j - 1];
 			}
 		}
-
+		clusters[i].updateAngularMass();
+		clusters[i].updateRelPos();
 	}
 }
 
