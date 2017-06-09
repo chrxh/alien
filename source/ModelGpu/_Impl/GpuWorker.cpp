@@ -1,8 +1,8 @@
 #include <functional>
+#include <QThread>
 
 #include "Model/SpaceMetricApi.h"
-
-#include "Cuda/CudaShared.cuh"
+#include "ModelGpu/_Impl/Cuda/CudaShared.cuh"
 
 #include "GpuWorker.h"
 
@@ -35,11 +35,9 @@ void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolve
 	}
 }
 
-#include <QThread>
-
 void GpuWorker::calculateTimestep()
 {
 	calcNextTimestep_Cuda();
-	QThread::msleep(20);
+//	QThread::msleep(20);
 	Q_EMIT timestepCalculated();
 }

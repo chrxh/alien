@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
-	IntVector2D size = { 12*33*3, 12*17*3 };
+	IntVector2D size = { 12*33*3*3, 12*17*3*3 };
 	auto controller = gpuFacade->buildSimulationController(size, symbols, parameters);
 	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
 

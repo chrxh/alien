@@ -12,7 +12,7 @@ struct CollisionData
 	double2 velDelta;
 	double angularVelDelta;
 
-	__device__ void init()
+	__device__ inline void init_Kernel()
 	{
 		numCollisions = 0;
 		velDelta = { 0.0, 0.0 };
@@ -20,30 +20,30 @@ struct CollisionData
 	}
 };
 
-__device__ void rotateQuarterCounterClockwise(double2 &v)
+__device__ inline void rotateQuarterCounterClockwise_Kernel(double2 &v)
 {
 	double temp = v.x;
 	v.x = v.y;
 	v.y = -temp;
 }
 
-__device__ void calcCollision(ClusterCuda *cluster, CellCuda *collidingCell, CollisionData &collisionData)
+__device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *collidingCell, CollisionData &collisionData)
 {
 	double2 posA = cluster->pos;
 	double2 velA = cluster->vel;
 	double angVelA = cluster->angularVel * DEG_TO_RAD;
-	double angMassA = 100.0;
+	double angMassA = cluster->angularMass;
 
 	ClusterCuda *collidingCluster = collidingCell->cluster;
 	double2 posB = collidingCluster->pos;
 	double2 velB = collidingCluster->vel;
 	double angVelB = collidingCluster->angularVel * DEG_TO_RAD;
-	double angMassB = 100.0;
+	double angMassB = collidingCluster->angularMass;
 
 	double2 rAPp = { collidingCell->absPos.x - posA.x, collidingCell->absPos.y - posA.y };
-	rotateQuarterCounterClockwise(rAPp);
+	rotateQuarterCounterClockwise_Kernel(rAPp);
 	double2 rBPp = { collidingCell->absPos.x - posB.x, collidingCell->absPos.y - posB.y };
-	rotateQuarterCounterClockwise(rBPp);
+	rotateQuarterCounterClockwise_Kernel(rBPp);
 	double2 vAB = {
 		-(velB.x - rBPp.x*angVelB) + (velA.x - rAPp.x*angVelA)
 		, -(velB.y - rBPp.y*angVelB) + (velA.y - rAPp.y*angVelA)
