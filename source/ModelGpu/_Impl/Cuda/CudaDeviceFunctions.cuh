@@ -48,7 +48,7 @@ __device__ void angleCorrection_Kernel(double &angle)
 	angle = (double)intPart + fracPart;
 }
 
-__device__ void updateCollisionData_Kernel(int2 posInt, ClusterCuda *cluster, CellCuda ** __restrict__ map, int2 const &size
+__device__ inline void updateCollisionData_Kernel(int2 posInt, ClusterCuda *cluster, CellCuda ** __restrict__ map, int2 const &size
 	, CollisionData &collisionData)
 {
 	mapCorrection_Kernel(posInt, size);
@@ -59,14 +59,15 @@ __device__ void updateCollisionData_Kernel(int2 posInt, ClusterCuda *cluster, Ce
 		auto cell = map[mapEntry/* + i * slice*/];
 		if (cell != nullptr) {
 			if (cell->cluster != cluster) {
+//				if(cell->absPos)
 				atomicAdd(&collisionData.numCollisions, 1);
-				calcCollision(cluster, cell, collisionData);
+				calcCollision_Kernel(cluster, cell, collisionData);
 			}
 		}
 //	}
 }
 
-__device__ bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map, int2 const &size)
+__device__ inline bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map, int2 const &size)
 {
 	mapCorrection_Kernel(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;
@@ -74,7 +75,7 @@ __device__ bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda *cell, CellCuda 
 
 }
 
-__device__ void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
+__device__ inline void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
 {
 	ClusterCuda *cluster = cell->cluster;
 	auto absPos = cell->absPos;
@@ -108,13 +109,13 @@ __device__ void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell
 	updateCollisionData_Kernel(posInt, cluster, map, size, collisionData);
 }
 
-__device__ void setCellToMap_Kernel(int2 const &posInt, CellCuda *cell, CellCuda ** __restrict__ map, int2 const &size)
+__device__ void inline setCellToMap_Kernel(int2 const &posInt, CellCuda *cell, CellCuda ** __restrict__ map, int2 const &size)
 {
 	auto mapEntry = posInt.x + posInt.y * size.x;
 	map[mapEntry] = cell;
 }
 
-__device__ void movement_Kernel(CudaData &data, int clusterIndex)
+__device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 {
 	__shared__ ClusterCuda clusterCopy;
 	__shared__ ClusterCuda *newCluster;
@@ -122,7 +123,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 	__shared__ double rotMatrix[2][2];
 	__shared__ CollisionData collisionData;
 
-	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArrayKernel()[clusterIndex];
+	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray_Kernel()[clusterIndex];
 	int startCellIndex;
 	int endCellIndex;
 	int2 size = data.size;
@@ -139,10 +140,10 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 			rotMatrix[0][1] = sinAngle;
 			rotMatrix[1][0] = -sinAngle;
 			rotMatrix[1][1] = cosAngle;
-			newCells = data.cellsAC2.getArrayKernel(clusterCopy.numCells);
-			newCluster = data.clustersAC2.getElementKernel();
+			newCells = data.cellsAC2.getArray_Kernel(clusterCopy.numCells);
+			newCluster = data.clustersAC2.getElement_Kernel();
 
-			collisionData.init();
+			collisionData.init_Kernel();
 		}
 	}
 	
@@ -214,7 +215,7 @@ __device__ void movement_Kernel(CudaData &data, int clusterIndex)
 __global__ void movement_Kernel(CudaData data)
 {
 	int blockIndex = blockIdx.x;
-	int numClusters = data.clustersAC1.getNumEntriesKernel();
+	int numClusters = data.clustersAC1.getNumEntries_Kernel();
 	if (blockIndex >= numClusters) {
 		return;
 	}
@@ -229,7 +230,7 @@ __global__ void movement_Kernel(CudaData data)
 
 __device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
 {
-	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArrayKernel()[clusterIndex];
+	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray_Kernel()[clusterIndex];
 
 	int startCellIndex;
 	int endCellIndex;
@@ -249,7 +250,7 @@ __device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
 __global__ void clearOldMap_Kernel(CudaData data)
 {
 	int blockIndex = blockIdx.x;
-	int numClusters = data.clustersAC1.getNumEntriesKernel();
+	int numClusters = data.clustersAC1.getNumEntries_Kernel();
 	if (blockIndex >= numClusters) {
 		return;
 	}
