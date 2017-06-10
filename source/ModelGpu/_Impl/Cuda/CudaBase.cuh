@@ -99,7 +99,7 @@ public:
 	}
 };
 
-__device__ inline void tiling_Kernel(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)
+__device__ __inline__ void tiling_Kernel(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)
 {
 	int entitiesByDivisions = numEntities / numDivisions;
 	int remainder = numEntities % numDivisions;
@@ -111,7 +111,7 @@ __device__ inline void tiling_Kernel(int numEntities, int division, int numDivis
 	endIndex = startIndex + length - 1;
 }
 
-__device__ inline void normalizeVector(double2 &vec)
+__device__ __inline__ void normalize(double2 &vec)
 {
 	double length = sqrt(vec.x*vec.x + vec.y*vec.y);
 	if (length > FP_PRECISION) {
@@ -122,3 +122,34 @@ __device__ inline void normalizeVector(double2 &vec)
 		vec = { 1.0, 0.0 };
 	}
 }
+
+__host__ __device__ __inline__ double dot(double2 const &p, double2 const &q)
+{
+	return p.x*q.x + p.y*q.y;
+}
+
+__host__ __device__ __inline__ double2 minus(double2 const &p)
+{
+	return{ -p.x, -p.y };
+}
+
+__host__ __device__ __inline__ double2 mul(double2 const &p, double r)
+{
+	return{ p.x * r, p.y * r };
+}
+
+__host__ __device__ __inline__ double2 div(double2 const &p, double r)
+{
+	return{ p.x / r, p.y / r };
+}
+
+__host__ __device__ __inline__ double2 add(double2 const &p, double2 const &q)
+{
+	return{ p.x + q.x, p.y + q.y };
+}
+
+__host__ __device__ __inline__ double2 sub(double2 const &p, double2 const &q)
+{
+	return{ p.x - q.x, p.y - q.y };
+}
+

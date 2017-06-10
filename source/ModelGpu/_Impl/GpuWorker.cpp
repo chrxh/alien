@@ -38,6 +38,6 @@ void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolve
 void GpuWorker::calculateTimestep()
 {
 	calcNextTimestep_Cuda();
-//	QThread::msleep(20);
+	QThread::msleep(20);
 	Q_EMIT timestepCalculated();
 }
