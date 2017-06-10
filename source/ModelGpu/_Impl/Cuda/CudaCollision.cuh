@@ -22,15 +22,16 @@ struct CollisionData
 	}
 };
 
-__device__ inline void rotateQuarterCounterClockwise_Kernel(double2 &v)
+__device__ __inline__ void rotateQuarterCounterClockwise_Kernel(double2 &v)
 {
 	double temp = v.x;
 	v.x = v.y;
 	v.y = -temp;
 }
 
-__device__ inline double2 calcNormalToCell_Kernel(CellCuda *cell, double2 outward)
+__device__ __inline__ double2 calcNormalToCell_Kernel(CellCuda *cell, double2 outward)
 {
+	normalize(outward);
 	if (cell->numConnections < 2) {
 		return outward;
 	}
@@ -44,6 +45,7 @@ __device__ inline double2 calcNormalToCell_Kernel(CellCuda *cell, double2 outwar
 
 	for (int i = 0; i < cell->numConnections; ++i) {
 
+		//calculate h (angular distance from outward vector)
 		double2 u = sub(cell->connections[i]->absPos, cell->absPos);
 		normalize(u);
 		double h = dot(outward, u);
@@ -51,12 +53,12 @@ __device__ inline double2 calcNormalToCell_Kernel(CellCuda *cell, double2 outwar
 			h = -2 - h;
 		}
 
-		if ((!minCell) || (h < min_h)) {
+		if (!minCell || h < min_h) {
 			minCell = cell->connections[i];
 			minVector = u;
 			min_h = h;
 		}
-		if ((!maxCell) || (h > max_h)) {
+		if (!maxCell || h > max_h) {
 			maxCell = cell->connections[i];
 			maxVector = u;
 			max_h = h;
@@ -64,7 +66,7 @@ __device__ inline double2 calcNormalToCell_Kernel(CellCuda *cell, double2 outwar
 	}
 
 	//no adjacent cells?
-	if ((!minCell) && (!maxCell)) {
+	if (!minCell && !maxCell) {
 		return outward;
 	}
 
@@ -84,7 +86,7 @@ __device__ inline double2 calcNormalToCell_Kernel(CellCuda *cell, double2 outwar
 	normalize(result);
 	return result;
 }
-__device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *collidingCell, CollisionData &collisionData)
+__device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *collidingCell, CollisionData &collisionData, int2 const& size, bool reverse)
 {
 	double2 posA = cluster->pos;
 	double2 velA = cluster->vel;
@@ -97,14 +99,15 @@ __device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *coll
 	double angVelB = collidingCluster->angularVel * DEG_TO_RAD;
 	double angMassB = collidingCluster->angularMass;
 
-	double2 rAPp = { collidingCell->absPos.x - posA.x, collidingCell->absPos.y - posA.y };
+	double2 rAPp = sub(collidingCell->absPos, posA);
+	mapDisplacementCorrection_Kernel(rAPp, size);
 	rotateQuarterCounterClockwise_Kernel(rAPp);
-	double2 rBPp = { collidingCell->absPos.x - posB.x, collidingCell->absPos.y - posB.y };
+	double2 rBPp = sub(collidingCell->absPos, posB);
+	mapDisplacementCorrection_Kernel(rBPp, size);
 	rotateQuarterCounterClockwise_Kernel(rBPp);
 	double2 vAB = sub(sub(velA, mul(rAPp, angVelA)), sub(velB, mul(rBPp, angVelB)));
 
-	double2 outward = { -vAB.x, -vAB.y };
-	normalize(outward);
+	double2 outward = minus(vAB);
 	double2 n = calcNormalToCell_Kernel(collidingCell, outward);
 
 	if (angMassA < FP_PRECISION) {
@@ -125,61 +128,68 @@ __device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *coll
 	double rBPp_dot_n = dot(rBPp, n);
 
 	if (angMassA > FP_PRECISION && angMassB > FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / (dot(n, n) * (1.0/massA + 1.0/massB)
+		double j = -2.0*vAB_dot_n / ((1.0/massA + 1.0/massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 
+		if (reverse) {
+			j = -j;
+		}
 		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
 		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
-		atomicAdd(&collisionData.angularVelDelta, -rAPp_dot_n * j / angMassA);
+		atomicAdd(&collisionData.angularVelDelta, (rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB > FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / (dot(n, n) * (1.0 / massA + 1.0 / massB)
+		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			 + rBPp_dot_n * rBPp_dot_n / angMassB);
 
+		if (reverse) {
+			j = -j;
+		}
 		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
 		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 	}
 
 	if (angMassA > FP_PRECISION && angMassB <= FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / (dot(n, n) * (1.0 / massA + 1.0 / massB)
+		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA);
 
+		if (reverse) {
+			j = -j;
+		}
 		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
 		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
-		atomicAdd(&collisionData.angularVelDelta, -rAPp_dot_n * j / angMassA);
+		atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / (dot(n, n) * (1.0 / massA + 1.0 / massB));
+		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB));
 
+		if (reverse) {
+			j = -j;
+		}
 		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
 		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 	}
 
 }
 
-__device__ inline void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map
+__device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map
 	, int2 const &size, CollisionData &collisionData)
 {
-	mapPosCorrection(posInt, size);
-	auto mapEntry = posInt.x + posInt.y * size.x;
-	//	auto slice = size.x*size.y;
-
-	//	for (int i = 0; i < LAYERS; ++i) {
-	auto mapCell = map[mapEntry/* + i * slice*/];
+	auto mapCell = getCellFromMap(posInt, map, size);
 	if (mapCell != nullptr) {
 		if (mapCell->cluster != cell->cluster) {
 			if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE) {
-				atomicAdd(&collisionData.numCollisions, 1);
-				calcCollision_Kernel(cell->cluster, mapCell, collisionData);
+				atomicAdd(&collisionData.numCollisions, 2);
+				calcCollision_Kernel(cell->cluster, mapCell, collisionData, size, false);
+				calcCollision_Kernel(mapCell->cluster, cell, collisionData, size, true);
 			}
 		}
 	}
-	//	}
 }
 
-__device__ inline void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
+__device__ __inline__ void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
 {
 	auto absPos = cell->absPos;
 	auto map = data.map1;
