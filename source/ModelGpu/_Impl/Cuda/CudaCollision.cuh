@@ -5,6 +5,8 @@
 #include "CudaShared.cuh"
 #include "CudaBase.cuh"
 #include "CudaConstants.cuh"
+#include "CudaMap.cuh"
+#include "CudaSimulationData.cuh"
 
 struct CollisionData
 {
@@ -108,4 +110,57 @@ __device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *coll
 		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 	}
 
+}
+
+__device__ inline void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map
+	, int2 const &size, CollisionData &collisionData)
+{
+	mapPosCorrection_Kernel(posInt, size);
+	auto mapEntry = posInt.x + posInt.y * size.x;
+	//	auto slice = size.x*size.y;
+
+	//	for (int i = 0; i < LAYERS; ++i) {
+	auto mapCell = map[mapEntry/* + i * slice*/];
+	if (mapCell != nullptr) {
+		if (mapCell->cluster != cell->cluster) {
+			if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE) {
+				atomicAdd(&collisionData.numCollisions, 1);
+				calcCollision_Kernel(cell->cluster, mapCell, collisionData);
+			}
+		}
+	}
+	//	}
+}
+
+__device__ inline void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
+{
+	auto absPos = cell->absPos;
+	auto map = data.map1;
+	auto size = data.size;
+	int2 posInt = { (int)absPos.x , (int)absPos.y };
+	if (!isCellPresentAtMap_Kernel(posInt, cell, map, size)) {
+		return;
+	}
+
+	--posInt.x;
+	--posInt.y;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
+	++posInt.x;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
+	++posInt.x;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
+
+	++posInt.y;
+	posInt.x -= 2;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
+	posInt.y += 2;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
+
+	++posInt.y;
+	posInt.x -= 2;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
+	++posInt.y;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
+	++posInt.y;
+	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
 }
