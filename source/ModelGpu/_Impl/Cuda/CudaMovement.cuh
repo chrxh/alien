@@ -30,7 +30,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 	__shared__ double rotMatrix[2][2];
 	__shared__ CollisionData collisionData;
 
-	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray_Kernel()[clusterIndex];
+	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	int startCellIndex;
 	int endCellIndex;
 	int2 size = data.size;
@@ -78,7 +78,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 		angleCorrection_Kernel(clusterCopy.angle);
 		clusterCopy.pos.x += clusterCopy.vel.x;
 		clusterCopy.pos.y += clusterCopy.vel.y;
-		mapPosCorrection_Kernel(clusterCopy.pos, size);
+		mapPosCorrection(clusterCopy.pos, size);
 		clusterCopy.cells = newCells;
 		*newCluster = clusterCopy;
 	}
@@ -93,11 +93,10 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 			double2 absPos;
 			absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
 			absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
-			mapPosCorrection_Kernel(absPos, size);
 			cellCopy.absPos = absPos;
 			cellCopy.cluster = newCluster;
 			*newCell = cellCopy;
-			setCellToMap_Kernel({ (int)absPos.x, (int)absPos.y }, newCell, data.map2, size);
+			setCellToMap({ (int)absPos.x, (int)absPos.y }, newCell, data.map2, size);
 
 			oldCell->nextTimestep = newCell;
 		}
@@ -122,7 +121,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 __global__ void movement_Kernel(CudaData data)
 {
 	int blockIndex = blockIdx.x;
-	int numClusters = data.clustersAC1.getNumEntries_Kernel();
+	int numClusters = data.clustersAC1.getNumEntries();
 	if (blockIndex >= numClusters) {
 		return;
 	}
@@ -137,7 +136,7 @@ __global__ void movement_Kernel(CudaData data)
 
 __device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
 {
-	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray_Kernel()[clusterIndex];
+	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 
 	int startCellIndex;
 	int endCellIndex;
@@ -150,14 +149,14 @@ __device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
 	tiling_Kernel(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		double2 absPos = oldCluster->cells[cellIndex].absPos;
-		setCellToMap_Kernel({ (int)absPos.x, (int)absPos.y }, nullptr, data.map1, size);
+		setCellToMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, nullptr, data.map1, size);
 	}
 }
 
 __global__ void clearOldMap_Kernel(CudaData data)
 {
 	int blockIndex = blockIdx.x;
-	int numClusters = data.clustersAC1.getNumEntries_Kernel();
+	int numClusters = data.clustersAC1.getNumEntries();
 	if (blockIndex >= numClusters) {
 		return;
 	}

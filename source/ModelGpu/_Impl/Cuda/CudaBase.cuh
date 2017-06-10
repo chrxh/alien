@@ -24,19 +24,6 @@ static __inline__ __device__ double atomicAdd(double *address, double val) {
 #endif
 
 
-double random(double max)
-{
-	return ((double)rand() / RAND_MAX) * max;
-}
-
-template<typename T>
-void swap(T &a, T &b)
-{
-	T temp = a;
-	a = b;
-	b = temp;
-}
-
 template<class T>
 struct SharedMemory
 {
@@ -77,52 +64,42 @@ public:
 		cudaFree(_numEntries);
 	}
 
-	void reset()
+	__host__ __device__ __inline__ void reset()
 	{
 		*_numEntries = 0;
 	}
-	
+
 	T* getArray(int size)
 	{
-		auto result = *_numEntries;
+		int oldIndex = *_numEntries;
 		*_numEntries += size;
-		return &_data[result];
+		return &_data[oldIndex];
 	}
 
-	int getNumEntries() const
-	{
-		return *_numEntries;
-	}
-
-	T* getEntireArray() const
-	{
-		return _data;
-	}
-
-	__device__ T* getArray_Kernel(int size)
+	__device__ __inline__ T* getArray_Kernel(int size)
 	{
 		int oldIndex = atomicAdd(_numEntries, size);
 		return &_data[oldIndex];
 	}
 
-	__device__ T* getElement_Kernel()
+	__device__ inline T* getElement_Kernel()
 	{
 		int oldIndex = atomicAdd(_numEntries, 1);
 		return &_data[oldIndex];
 	}
 
-	__device__ int getNumEntries_Kernel() const
+	__host__ __device__ __inline__ int getNumEntries() const
 	{
 		return *_numEntries;
 	}
 
-	__device__ T* getEntireArray_Kernel() const
+	__host__ __device__ __inline__ T* getEntireArray() const
 	{
 		return _data;
 	}
 };
 
-__device__ void tiling_Kernel(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)
+__device__ inline void tiling_Kernel(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)
 {
 	int entitiesByDivisions = numEntities / numDivisions;
 	int remainder = numEntities % numDivisions;
@@ -132,4 +109,16 @@ __device__ void tiling_Kernel(int numEntities, int division, int numDivisions, i
 		(entitiesByDivisions + 1) * division
 		: (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (division - remainder);
 	endIndex = startIndex + length - 1;
+}
+
+__device__ inline void normalizeVector(double2 &vec)
+{
+	double length = sqrt(vec.x*vec.x + vec.y*vec.y);
+	if (length > FP_PRECISION) {
+		vec = { vec.x / length, vec.y / length };
+	}
+	else
+	{
+		vec = { 1.0, 0.0 };
+	}
 }
