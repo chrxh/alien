@@ -48,8 +48,8 @@ void updateAbsPos(ClusterCuda *cluster)
 	double sinAngle = sin(cluster->angle*DEG_TO_RAD);
 	double cosAngle = cos(cluster->angle*DEG_TO_RAD);
 	rotMatrix[0][0] = cosAngle;
-	rotMatrix[0][1] = sinAngle;
-	rotMatrix[1][0] = -sinAngle;
+	rotMatrix[0][1] = -sinAngle;
+	rotMatrix[1][0] = sinAngle;
 	rotMatrix[1][1] = cosAngle;
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto &relPos = cluster->cells[i].relPos;
