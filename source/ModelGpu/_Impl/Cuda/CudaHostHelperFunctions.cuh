@@ -20,7 +20,7 @@ void updateAngularMass(ClusterCuda* cluster)
 	cluster->angularMass = 0.0;
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto relPos = cluster->cells[i].relPos;
-		cluster->angularMass += relPos.x*relPos.x + relPos.y*relPos.y;
+		cluster->angularMass += dot(relPos, relPos);
 	}
 }
 

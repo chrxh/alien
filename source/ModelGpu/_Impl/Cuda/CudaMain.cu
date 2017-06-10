@@ -14,6 +14,40 @@
 cudaStream_t cudaStream;
 CudaData cudaData;
 
+void createCluster(ClusterCuda* cluster, double2 pos, double2 vel, double angle, double angVel, int cellsPerCluster, int2 const &size)
+{
+	cluster->pos = pos;/*{ random(size.x), random(size.y) };*/
+	cluster->vel = vel;/*{ random(1.0f) - 0.5f, random(1.0) - 0.5f };*/
+	cluster->angle = angle;/*random(360.0f);*/
+	cluster->angularVel = angVel;/*random(0.1f) - 0.2f;*/
+	cluster->numCells = cellsPerCluster;
+	cluster->cells = cudaData.cellsAC1.getArray(cellsPerCluster);
+
+	for (int j = 0; j < cellsPerCluster; ++j) {
+		CellCuda *cell = &cluster->cells[j];
+		cell->relPos = { j - 31.5f, 0 };
+		cell->cluster = cluster;
+		cell->nextTimestep = nullptr;
+		cell->numConnections = 0;
+		if (j > 0 && j < cellsPerCluster - 1) {
+			cell->numConnections = 2;
+			cell->connections[0] = &cluster->cells[j - 1];
+			cell->connections[1] = &cluster->cells[j + 1];
+		}
+		if (j == 0 && j < cellsPerCluster - 1) {
+			cell->numConnections = 1;
+			cell->connections[0] = &cluster->cells[j + 1];
+		}
+		if (j == cellsPerCluster - 1 && j > 0) {
+			cell->numConnections = 1;
+			cell->connections[0] = &cluster->cells[j - 1];
+		}
+	}
+	centerCluster(cluster);
+	updateAbsPos(cluster);
+	updateAngularMass(cluster);
+}
+
 void init_Cuda(int2 size)
 {
 	cudaStreamCreate(&cudaStream);
@@ -36,38 +70,11 @@ void init_Cuda(int2 size)
 	cudaData.cellsAC2 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * maxCellsPerCluster * 1.1));
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
+
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
-		int cellsPerCluster = 64;// (rand() % (maxCellsPerCluster)) + 1;
-
-		clusters[i].vel = { random(1.0f) - 0.5f, random(1.0) - 0.5f };
-		clusters[i].angle = random(360.0f);
-		clusters[i].angularVel = random(10.0f) - 5.0f;
-		clusters[i].numCells = cellsPerCluster;
-		clusters[i].cells = cudaData.cellsAC1.getArray(cellsPerCluster);
-
+		createCluster(&clusters[i], { random(size.x), random(size.y) }, { random(1.0f) - 0.5f, random(1.0) - 0.5f }, random(360.0f), random(0.1f) - 0.2f, 64, size);
 		do {
 			clusters[i].pos = { random(size.x), random(size.y) };
-			for (int j = 0; j < cellsPerCluster; ++j) {
-				CellCuda *cell = &clusters[i].cells[j];
-				cell->relPos = { j - 31.5f, j - 31.5f };
-				cell->cluster = &clusters[i];
-				cell->nextTimestep = nullptr;
-				cell->numConnections = 0;
-				if (j > 0 && j < cellsPerCluster - 1) {
-					cell->numConnections = 2;
-					cell->connections[0] = &clusters[i].cells[j - 1];
-					cell->connections[1] = &clusters[i].cells[j + 1];
-				}
-				if (j == 0 && j < cellsPerCluster - 1) {
-					cell->numConnections = 1;
-					cell->connections[0] = &clusters[i].cells[j + 1];
-				}
-				if (j == cellsPerCluster - 1 && j > 0) {
-					cell->numConnections = 1;
-					cell->connections[0] = &clusters[i].cells[j - 1];
-				}
-			}
-
 			centerCluster(&clusters[i]);
 			updateAbsPos(&clusters[i]);
 
