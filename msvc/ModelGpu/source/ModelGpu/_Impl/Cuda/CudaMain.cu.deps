@@ -393,7 +393,7 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaConstants.cuh
 c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaShared.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
-c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaDeviceFunctions.cuh
+c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaMovement.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
 c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaCollision.cuh
@@ -401,3 +401,4 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaMap.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaSimulationData.cuh
+c:\users\christian\documents\alle wichtigen dateien\artificial life\alien\source\modelgpu\_impl\cuda\CudaHostHelperFunctions.cuh

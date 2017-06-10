@@ -90,9 +90,9 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 			CellCuda *oldCell = &oldCluster->cells[cellIndex];
 			CellCuda *newCell = &newCells[cellIndex];
 			CellCuda cellCopy = *oldCell;
-			double2 relPos = cellCopy.relPos;
-			relPos = { relPos.x*rotMatrix[0][0] + relPos.y*rotMatrix[0][1], relPos.x*rotMatrix[1][0] + relPos.y*rotMatrix[1][1] };
-			double2 absPos = { relPos.x + clusterCopy.pos.x, relPos.y + clusterCopy.pos.y };
+			double2 absPos;
+			absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
+			absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
 			mapPosCorrection_Kernel(absPos, size);
 			cellCopy.absPos = absPos;
 			cellCopy.cluster = newCluster;
