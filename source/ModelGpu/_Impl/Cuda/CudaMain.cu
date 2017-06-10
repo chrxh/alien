@@ -9,6 +9,7 @@
 #include "CudaConstants.cuh"
 #include "CudaShared.cuh"
 #include "CudaMovement.cuh"
+#include "CudaHostHelperFunctions.cuh"
 
 cudaStream_t cudaStream;
 CudaData cudaData;
@@ -65,8 +66,14 @@ void init_Cuda(int2 size)
 				cell->connections[0] = &clusters[i].cells[j - 1];
 			}
 		}
-		clusters[i].updateAngularMass();
-		clusters[i].updateRelPos();
+
+		updateAngularMass(&clusters[i]);
+		updateRelPos(&clusters[i]);
+
+		for (int j = 0; j < cellsPerCluster; ++j) {
+			CellCuda *cell = &clusters[i].cells[j];
+			updateAbsPos(cell);
+		}
 	}
 }
 

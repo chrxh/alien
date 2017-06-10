@@ -25,9 +25,6 @@ struct ClusterCuda
 	double angularMass;
 	int numCells;
 	CellCuda* cells;
-
-	inline void updateAngularMass();
-	inline void updateRelPos();
 };
 
 extern void init_Cuda(int2 size);
@@ -36,30 +33,3 @@ extern void getDataRef_Cuda(int& numClusters, ClusterCuda*& clusters);
 extern void end_Cuda();
 
 
-//***** implementations *******
-
-void ClusterCuda::updateAngularMass()
-{
-	angularMass = 0.0;
-	for (int i = 0; i < numCells; ++i) {
-		auto relPos = cells[i].relPos;
-		angularMass += relPos.x*relPos.x + relPos.y*relPos.y;
-	}
-}
-
-void ClusterCuda::updateRelPos()
-{
-	double2 center = { 0.0, 0.0 };
-	for (int i = 0; i < numCells; ++i) {
-		auto const &relPos = cells[i].relPos;
-		center.x += relPos.x;
-		center.y += relPos.y;
-	}
-	center.x /= static_cast<double>(numCells);
-	center.y /= static_cast<double>(numCells);
-	for (int i = 0; i < numCells; ++i) {
-		auto &relPos = cells[i].relPos;
-		relPos.x -= center.x;
-		relPos.y -= center.y;
-	}
-}
