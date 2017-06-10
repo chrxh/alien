@@ -2,7 +2,7 @@
 
 #define NUM_THREADS_PER_BLOCK 64
 #define NUM_BLOCKS 64
-#define NUM_CLUSTERS 160000/64
+#define NUM_CLUSTERS 50/*160000/64*/
 
 #define LAYERS 2
 #define CELL_MAX_BONDS 6
