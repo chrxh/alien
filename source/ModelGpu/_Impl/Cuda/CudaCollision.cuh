@@ -132,11 +132,15 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 
 		if (reverse) {
-			j = -j;
+			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
+			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
+			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
 		}
-		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
-		atomicAdd(&collisionData.angularVelDelta, (rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
+		else {
+			atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
+			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+		}
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB > FP_PRECISION) {
@@ -154,12 +158,12 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA);
 
+		atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
 		if (reverse) {
 			j = -j;
 		}
 		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
 		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
-		atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
@@ -174,13 +178,29 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 
 }
 
-__device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map
+__device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** map
 	, int2 const &size, CollisionData &collisionData)
 {
 	auto mapCell = getCellFromMap(posInt, map, size);
 	if (mapCell != nullptr) {
 		if (mapCell->cluster != cell->cluster) {
-			if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE) {
+			if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE*CELL_MAX_DISTANCE) {
+
+				//*****
+/*
+				auto absPos = mapCell->absPos;
+				int2 posInt = { static_cast<int>(absPos.x) , static_cast<int>(absPos.y) };
+				mapPosCorrection(posInt, size);
+				auto mapEntry = posInt.x + posInt.y * size.x;
+				bool test = map[mapEntry] == mapCell;
+
+				if(test)
+					printf("+\n");
+				else
+					printf("-\n");
+*/
+				//*****
+
 				atomicAdd(&collisionData.numCollisions, 2);
 				calcCollision_Kernel(cell->cluster, mapCell, collisionData, size, false);
 				calcCollision_Kernel(mapCell->cluster, cell, collisionData, size, true);
@@ -194,7 +214,7 @@ __device__ __inline__ void collectCollisionData_Kernel(CudaData const &data, Cel
 	auto absPos = cell->absPos;
 	auto map = data.map1;
 	auto size = data.size;
-	int2 posInt = { (int)absPos.x , (int)absPos.y };
+	int2 posInt = { static_cast<int>(absPos.x) , static_cast<int>(absPos.y) };
 	if (!isCellPresentAtMap_Kernel(posInt, cell, map, size)) {
 		return;
 	}
@@ -210,14 +230,14 @@ __device__ __inline__ void collectCollisionData_Kernel(CudaData const &data, Cel
 	++posInt.y;
 	posInt.x -= 2;
 	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
-	posInt.y += 2;
+	posInt.x += 2;
 	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
 
 	++posInt.y;
 	posInt.x -= 2;
 	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
-	++posInt.y;
+	++posInt.x;
 	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
-	++posInt.y;
+	++posInt.x;
 	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
 }
