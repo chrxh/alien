@@ -44,8 +44,8 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 			double sinAngle = __sinf(clusterCopy.angle*DEG_TO_RAD);
 			double cosAngle = __cosf(clusterCopy.angle*DEG_TO_RAD);
 			rotMatrix[0][0] = cosAngle;
-			rotMatrix[0][1] = sinAngle;
-			rotMatrix[1][0] = -sinAngle;
+			rotMatrix[0][1] = -sinAngle;
+			rotMatrix[1][0] = sinAngle;
 			rotMatrix[1][1] = cosAngle;
 			newCells = data.cellsAC2.getArray_Kernel(clusterCopy.numCells);
 			newCluster = data.clustersAC2.getElement_Kernel();
@@ -68,6 +68,9 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 	if (threadIdx.x == 0) {
 
 		if (collisionData.numCollisions > 0) {
+/*
+			printf("%d, %d \n", clusterIndex, collisionData.numCollisions);
+*/
 			double numCollisions = static_cast<double>(collisionData.numCollisions);
 			clusterCopy.vel = add(clusterCopy.vel, div(collisionData.velDelta, numCollisions));
 			clusterCopy.angularVel += collisionData.angularVelDelta / numCollisions;
@@ -94,7 +97,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 			cellCopy.absPos = absPos;
 			cellCopy.cluster = newCluster;
 			*newCell = cellCopy;
-			setCellToMap({ (int)absPos.x, (int)absPos.y }, newCell, data.map2, size);
+			setCellToMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, data.map2, size);
 
 			oldCell->nextTimestep = newCell;
 		}

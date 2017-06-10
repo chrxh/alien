@@ -59,8 +59,6 @@ void init_Cuda(int2 size)
 	cudaMallocManaged(&cudaData.map2, mapSize);
 	for (int i = 0; i < size.x * size.y * LAYERS; ++i) {
 		cudaData.map1[i] = nullptr;
-		cudaData.map1[i] = nullptr;
-		cudaData.map2[i] = nullptr;
 		cudaData.map2[i] = nullptr;
 	}
 	int maxCellsPerCluster = 64;
@@ -70,7 +68,12 @@ void init_Cuda(int2 size)
 	cudaData.cellsAC2 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * maxCellsPerCluster * 1.1));
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
+	createCluster(&clusters[0], { 1500, 1200 }, { 0, 0 }, 90, 0, 64, size);
+	createCluster(&clusters[1], { 1550, 1250 }, { -0.5, 0 }, 90, 0.0, 64, size);
+	drawClusterToMap(&clusters[0], &cudaData);
+	drawClusterToMap(&clusters[1], &cudaData);
 
+/*
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
 		createCluster(&clusters[i], { random(size.x), random(size.y) }, { random(1.0f) - 0.5f, random(1.0) - 0.5f }, random(360.0f), random(0.1f) - 0.2f, 64, size);
 		do {
@@ -83,6 +86,7 @@ void init_Cuda(int2 size)
 		drawClusterToMap(&clusters[i], &cudaData);
 		updateAngularMass(&clusters[i]);
 	}
+*/
 }
 
 void calcNextTimestep_Cuda()
@@ -94,7 +98,13 @@ void calcNextTimestep_Cuda()
 	cudaDeviceSynchronize();
 
 	checkCudaErrors(cudaGetLastError());
-
+	//****
+	if (cudaData.clustersAC2.getEntireArray()[0].vel.x != -0.5 && cudaData.clustersAC2.getEntireArray()[1].vel.x != -0.5) {
+		ClusterCuda temp1 = cudaData.clustersAC2.getEntireArray()[0];
+		ClusterCuda temp2 = cudaData.clustersAC2.getEntireArray()[1];
+		int dummy = 0;
+	}
+	//****
 	swap(cudaData.clustersAC1, cudaData.clustersAC2);
 	swap(cudaData.cellsAC1, cudaData.cellsAC2);
 	swap(cudaData.map1, cudaData.map2);

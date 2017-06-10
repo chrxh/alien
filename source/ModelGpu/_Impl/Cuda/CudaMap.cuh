@@ -19,7 +19,7 @@ __device__ void mapDisplacementCorrection_Kernel(double2 &disp, int2 const &size
 {
 }
 
-__device__ inline bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda * __restrict__ cell, CellCuda ** __restrict__ map, int2 const &size)
+__device__ inline bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda * cell, CellCuda ** map, int2 const &size)
 {
 	mapPosCorrection(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;
