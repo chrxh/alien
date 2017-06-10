@@ -8,7 +8,7 @@
 #include "CudaBase.cuh"
 #include "CudaConstants.cuh"
 #include "CudaShared.cuh"
-#include "CudaDeviceFunctions.cuh"
+#include "CudaMovement.cuh"
 
 cudaStream_t cudaStream;
 CudaData cudaData;

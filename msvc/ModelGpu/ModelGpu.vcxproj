@@ -209,8 +209,10 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaBase.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaCollision.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaConstants.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaDeviceFunctions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaMovement.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaMap.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaShared.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaSimulationData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\_Impl\DefinitionsImpl.h" />
     <CustomBuild Include="..\..\source\ModelGpu\_Impl\GpuWorker.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
