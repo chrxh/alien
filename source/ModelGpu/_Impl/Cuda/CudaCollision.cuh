@@ -29,6 +29,10 @@ __device__ inline void rotateQuarterCounterClockwise_Kernel(double2 &v)
 	v.y = -temp;
 }
 
+__device__ inline double2 calcNormal_Kernel(CellCuda *cell, double2 outward)
+{
+	return outward;
+}
 __device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *collidingCell, CollisionData &collisionData)
 {
 	double2 posA = cluster->pos;
@@ -51,14 +55,9 @@ __device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *coll
 		, -(velB.y - rBPp.y*angVelB) + (velA.y - rAPp.y*angVelA)
 	};
 
-	double vAB_sqrt = sqrt(vAB.x*vAB.x + vAB.y*vAB.y);
-	double2 n;
-	if (vAB_sqrt < FP_PRECISION) {
-		n.x = 1.0;
-	}
-	else {
-		n = { -vAB.x / vAB_sqrt, -vAB.y / vAB_sqrt };
-	}
+	double2 outward = { -vAB.x, -vAB.y };
+	normalizeVector(outward);
+	double2 n = calcNormal_Kernel(collidingCell, outward);
 
 	if (angMassA < FP_PRECISION) {
 		angVelA = 0.0;
@@ -115,7 +114,7 @@ __device__ inline void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *coll
 __device__ inline void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** __restrict__ map
 	, int2 const &size, CollisionData &collisionData)
 {
-	mapPosCorrection_Kernel(posInt, size);
+	mapPosCorrection(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;
 	//	auto slice = size.x*size.y;
 
