@@ -57,13 +57,19 @@
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaBase.cuh">
       <Filter>Source Files\_Impl\Cuda</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaDeviceFunctions.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaConstants.cuh">
       <Filter>Source Files\_Impl\Cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaCollision.cuh">
+      <Filter>Source Files\_Impl\Cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaMap.cuh">
+      <Filter>Source Files\_Impl\Cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaSimulationData.cuh">
+      <Filter>Source Files\_Impl\Cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaMovement.cuh">
       <Filter>Source Files\_Impl\Cuda</Filter>
     </ClInclude>
   </ItemGroup>
