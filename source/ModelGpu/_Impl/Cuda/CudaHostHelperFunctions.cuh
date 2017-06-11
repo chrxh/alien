@@ -86,6 +86,6 @@ void drawClusterToMap(ClusterCuda* cluster, CudaData* data)
 {
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto &absPos = cluster->cells[i].absPos;
-		setCellToMap({ static_cast<int>(absPos.x),static_cast<int>(absPos.y + 1) }, &cluster->cells[i], data->map1, data->size);
+		setCellToMap({ static_cast<int>(absPos.x),static_cast<int>(absPos.y) }, &cluster->cells[i], data->map1, data->size);
 	}
 }

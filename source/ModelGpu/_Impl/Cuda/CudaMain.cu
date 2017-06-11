@@ -69,7 +69,7 @@ void init_Cuda(int2 size)
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
 	createCluster(&clusters[0], { 1500, 1200 }, { 0, 0 }, 90, 0, 64, size);
-	createCluster(&clusters[1], { 1550, 1250 }, { -0.5, 0 }, 90, 0.0, 64, size);
+	createCluster(&clusters[1], { 1540, 1250 }, { -0.5, 0 }, 70, 0.0, 64, size);
 	drawClusterToMap(&clusters[0], &cudaData);
 	drawClusterToMap(&clusters[1], &cudaData);
 
