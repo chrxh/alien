@@ -131,15 +131,15 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 		double j = -2.0*vAB_dot_n / ((1.0/massA + 1.0/massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 
-		if (reverse) {
-			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
-			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
-			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		}
-		else {
+		if (!reverse) {
 			atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
 			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
 			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+		}
+		else {
+			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
+			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
+			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
 		}
 	}
 
@@ -147,33 +147,43 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			 + rBPp_dot_n * rBPp_dot_n / angMassB);
 
-		if (reverse) {
-			j = -j;
+		if (!reverse) {
+			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 		}
-		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+		else {
+			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
+			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
+			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
+		}
 	}
 
 	if (angMassA > FP_PRECISION && angMassB <= FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA);
 
-		atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
-		if (reverse) {
-			j = -j;
+		if (!reverse) {
+			atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
+			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 		}
-		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+		else {
+			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
+			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
+		}
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB));
 
-		if (reverse) {
-			j = -j;
+		if (!reverse) {
+			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
+			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
 		}
-		atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-		atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+		else {
+			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
+			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
+		}
 	}
 
 }
