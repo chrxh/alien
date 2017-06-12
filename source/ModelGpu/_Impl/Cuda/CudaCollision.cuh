@@ -132,9 +132,12 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 
 		if (!reverse) {
-			atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
-			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
+			double temp = -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG;
+			atomicAdd(&collisionData.angularVelDelta, temp);
+			temp = j / massA * n.x;
+			atomicAdd(&collisionData.velDelta.x, temp);
+			temp = j / massA * n.y;
+			atomicAdd(&collisionData.velDelta.y, temp);
 		}
 		else {
 			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
@@ -211,9 +214,9 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cel
 */
 				//*****
 
-				atomicAdd(&collisionData.numCollisions, 2);
+				atomicAdd(&collisionData.numCollisions, 1);
 				calcCollision_Kernel(cell->cluster, mapCell, collisionData, size, false);
-				calcCollision_Kernel(mapCell->cluster, cell, collisionData, size, true);
+//				calcCollision_Kernel(mapCell->cluster, cell, collisionData, size, true);
 			}
 		}
 	}

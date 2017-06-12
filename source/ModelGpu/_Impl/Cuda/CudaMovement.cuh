@@ -68,9 +68,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 	if (threadIdx.x == 0) {
 
 		if (collisionData.numCollisions > 0) {
-/*
-			printf("%d, %d \n", clusterIndex, collisionData.numCollisions);
-*/
+			printf("%d, %d; pos: %f, %f \n", clusterIndex, collisionData.numCollisions, clusterCopy.pos.x, clusterCopy.pos.y);
 			double numCollisions = static_cast<double>(collisionData.numCollisions);
 			clusterCopy.vel = add(clusterCopy.vel, div(collisionData.velDelta, numCollisions));
 			clusterCopy.angularVel += collisionData.angularVelDelta / numCollisions;
