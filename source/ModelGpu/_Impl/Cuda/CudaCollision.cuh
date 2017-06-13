@@ -245,7 +245,7 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cel
 
 				atomicAdd(&entry->numCollisions, 1);
 				atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
-				atomicAdd(&entry->collisionPos.x, mapCell->absPos.y);
+				atomicAdd(&entry->collisionPos.y, mapCell->absPos.y);
 				double2 outward = calcOutwardVector_Kernel(cell, mapCell, size);
 				double2 n = calcNormalToCell_Kernel(mapCell, outward);
 				atomicAdd(&entry->normalVec.x, n.x);
