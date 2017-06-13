@@ -67,12 +67,19 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 
 	if (threadIdx.x == 0) {
 
-		if (collisionData.numCollisions > 0) {
+/*
 			printf("%d, %d; pos: %f, %f \n", clusterIndex, collisionData.numCollisions, clusterCopy.pos.x, clusterCopy.pos.y);
-			double numCollisions = static_cast<double>(collisionData.numCollisions);
-			clusterCopy.vel = add(clusterCopy.vel, div(collisionData.velDelta, numCollisions));
-			clusterCopy.angularVel += collisionData.angularVelDelta / numCollisions;
+*/
+		for (int i = 0; i < collisionData.numEntries; ++i) {
+			CollisionEntry* entry = &collisionData.entries[i];
+			double numCollisions = static_cast<double>(entry->numCollisions);
+			entry->collisionPos.x /= numCollisions;
+			entry->collisionPos.y /= numCollisions;
+			entry->normalVec.x /= numCollisions;
+			entry->normalVec.y /= numCollisions;
+			calcCollision_Kernel(&clusterCopy, entry, size);
 		}
+
 
 		clusterCopy.angle += clusterCopy.angularVel;
 		angleCorrection_Kernel(clusterCopy.angle);
