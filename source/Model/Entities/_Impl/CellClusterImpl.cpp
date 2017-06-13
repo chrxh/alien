@@ -407,12 +407,12 @@ void CellClusterImpl::processingMovement ()
             QVector2D rBPp = centerPos-otherCluster->getPosition();
             metric->correctDisplacement(rBPp);
             rBPp = Physics::rotateQuarterCounterClockwise(rBPp);
-            QVector2D collisionPointVel = (otherCluster->getVelocity()-rBPp*otherCluster->getAngularVel()*degToRad)-(_vel-rAPp*_angularVel*degToRad);
+            QVector2D outwardVector = (otherCluster->getVelocity()-rBPp*otherCluster->getAngularVel()*degToRad)-(_vel-rAPp*_angularVel*degToRad);
 
             //calc center normal vector of the overlapping cells from the other cluster
             QVector2D n;
             for (Cell* otherCell : collisionData.overlappingCells) {
-                n = n + otherCell->calcNormal(collisionPointVel).normalized();
+                n = n + otherCell->calcNormal(outwardVector).normalized();
             }
 
             //calc new vectors

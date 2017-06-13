@@ -8,17 +8,49 @@
 #include "CudaMap.cuh"
 #include "CudaSimulationData.cuh"
 
-struct CollisionData
+struct CollisionEntry
 {
+	ClusterCuda* cluster;
 	int numCollisions;
-	double2 velDelta;
-	double angularVelDelta;
+	double2 collisionPos;
+	double2 normalVec;
+};
 
-	__device__ inline void init_Kernel()
+class CollisionData
+{
+public:
+	
+	int numEntries;
+	CollisionEntry entries[MAX_COLLIDING_CLUSTERS];
+
+	__device__ void init_Kernel()
 	{
-		numCollisions = 0;
-		velDelta = { 0.0, 0.0 };
-		angularVelDelta = 0.0;
+		numEntries = 0;
+	}
+
+	__device__ CollisionEntry* getOrCreateEntry(ClusterCuda* cluster)
+	{
+		int old;
+		int curr;
+		do {
+			for (int i = 0; i < numEntries; ++i) {
+				if (entries[i].cluster = cluster) {
+					return &entries[i];
+				}
+			}
+			
+			old = numEntries;
+			curr = atomicCAS(&numEntries, old, (old + 1) % MAX_COLLIDING_CLUSTERS);
+			if (old == curr) {
+				auto result = &entries[numEntries];
+				result->cluster = cluster;
+				result->numCollisions = 0;
+				result->collisionPos = { 0, 0 };
+				result->normalVec = { 0, 0 };
+				return result;
+			}
+
+		} while (true);
 	}
 };
 
@@ -86,29 +118,28 @@ __device__ __inline__ double2 calcNormalToCell_Kernel(CellCuda *cell, double2 ou
 	normalize(result);
 	return result;
 }
-__device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *collidingCell, CollisionData &collisionData, int2 const& size, bool reverse)
+__device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, CollisionEntry *collisionEntry, int2 const& size)
 {
-	double2 posA = cluster->pos;
-	double2 velA = cluster->vel;
-	double angVelA = cluster->angularVel * DEG_TO_RAD;
-	double angMassA = cluster->angularMass;
+	double2 posA = clusterA->pos;
+	double2 velA = clusterA->vel;
+	double angVelA = clusterA->angularVel * DEG_TO_RAD;
+	double angMassA = clusterA->angularMass;
 
-	ClusterCuda *collidingCluster = collidingCell->cluster;
-	double2 posB = collidingCluster->pos;
-	double2 velB = collidingCluster->vel;
-	double angVelB = collidingCluster->angularVel * DEG_TO_RAD;
-	double angMassB = collidingCluster->angularMass;
+	ClusterCuda *clusterB = collisionEntry->cluster;
+	double2 posB = clusterB->pos;
+	double2 velB = clusterB->vel;
+	double angVelB = clusterB->angularVel * DEG_TO_RAD;
+	double angMassB = clusterB->angularMass;
 
-	double2 rAPp = sub(collidingCell->absPos, posA);
+	double2 rAPp = sub(collisionEntry->collisionPos, posA);
 	mapDisplacementCorrection_Kernel(rAPp, size);
 	rotateQuarterCounterClockwise_Kernel(rAPp);
-	double2 rBPp = sub(collidingCell->absPos, posB);
+	double2 rBPp = sub(collisionEntry->collisionPos, posB);
 	mapDisplacementCorrection_Kernel(rBPp, size);
 	rotateQuarterCounterClockwise_Kernel(rBPp);
 	double2 vAB = sub(sub(velA, mul(rAPp, angVelA)), sub(velB, mul(rBPp, angVelB)));
 
-	double2 outward = minus(vAB);
-	double2 n = calcNormalToCell_Kernel(collidingCell, outward);
+	double2 n = collisionEntry->normalVec;
 
 	if (angMassA < FP_PRECISION) {
 		angVelA = 0.0;
@@ -122,8 +153,8 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 		return;
 	}
 
-	double massA = static_cast<double>(cluster->numCells);
-	double massB = static_cast<double>(collidingCluster->numCells);
+	double massA = static_cast<double>(clusterA->numCells);
+	double massB = static_cast<double>(clusterB->numCells);
 	double rAPp_dot_n = dot(rAPp, n);
 	double rBPp_dot_n = dot(rBPp, n);
 
@@ -131,64 +162,74 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *cluster, CellCuda *
 		double j = -2.0*vAB_dot_n / ((1.0/massA + 1.0/massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 
-		if (!reverse) {
-			double temp = -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG;
-			atomicAdd(&collisionData.angularVelDelta, temp);
-			temp = j / massA * n.x;
-			atomicAdd(&collisionData.velDelta.x, temp);
-			temp = j / massA * n.y;
-			atomicAdd(&collisionData.velDelta.y, temp);
-		}
-		else {
+		atomicAdd(&clusterA->angularVel, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
+		atomicAdd(&clusterA->vel.x, j / massA * n.x);
+		atomicAdd(&clusterA->vel.y, j / massA * n.y);
+/*
 			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
 			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
 			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		}
+*/
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB > FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			 + rBPp_dot_n * rBPp_dot_n / angMassB);
 
-		if (!reverse) {
-			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
-		}
-		else {
+			atomicAdd(&clusterA->vel.x, j / massA * n.x);
+			atomicAdd(&clusterA->vel.y, j / massA * n.y);
+/*
 			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
 			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
 			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		}
+*/
 	}
 
 	if (angMassA > FP_PRECISION && angMassB <= FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA);
 
-		if (!reverse) {
-			atomicAdd(&collisionData.angularVelDelta, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
-			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
-		}
-		else {
+		atomicAdd(&clusterA->angularVel, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
+		atomicAdd(&clusterA->vel.x, j / massA * n.x);
+		atomicAdd(&clusterA->vel.y, j / massA * n.y);
+/*
 			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
 			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		}
+*/
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
 		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB));
 
-		if (!reverse) {
-			atomicAdd(&collisionData.velDelta.x, j / massA * n.x);
-			atomicAdd(&collisionData.velDelta.y, j / massA * n.y);
-		}
-		else {
+		atomicAdd(&clusterA->vel.x, j / massA * n.x);
+		atomicAdd(&clusterA->vel.y, j / massA * n.y);
+/*
 			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
 			atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		}
+*/
 	}
 
+}
+
+__device__ __inline__ double2 calcOutwardVector_Kernel(CellCuda* cellA, CellCuda* cellB, int2 const &size)
+{
+	ClusterCuda* clusterA = cellA->cluster;
+	double2 posA = clusterA->pos;
+	double2 velA = clusterA->vel;
+	double angVelA = clusterA->angularVel * DEG_TO_RAD;
+
+	ClusterCuda* clusterB = cellB->cluster;
+	double2 posB = clusterB->pos;
+	double2 velB = clusterB->vel;
+	double angVelB = clusterB->angularVel * DEG_TO_RAD;
+
+	double2 rAPp = sub(cellB->absPos, posA);
+	mapDisplacementCorrection_Kernel(rAPp, size);
+	rotateQuarterCounterClockwise_Kernel(rAPp);
+	double2 rBPp = sub(cellB->absPos, posB);
+	mapDisplacementCorrection_Kernel(rBPp, size);
+	rotateQuarterCounterClockwise_Kernel(rBPp);
+	return sub(sub(velB, mul(rBPp, angVelB)), sub(velA, mul(rAPp, angVelA)));
 }
 
 __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** map
@@ -196,26 +237,21 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cel
 {
 	auto mapCell = getCellFromMap(posInt, map, size);
 	if (mapCell != nullptr) {
-		if (mapCell->cluster != cell->cluster) {
+		ClusterCuda* mapCluster = mapCell->cluster;
+		if (mapCluster != cell->cluster) {
 			if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE*CELL_MAX_DISTANCE) {
 
-				//*****
-/*
-				auto absPos = mapCell->absPos;
-				int2 posInt = { static_cast<int>(absPos.x) , static_cast<int>(absPos.y) };
-				mapPosCorrection(posInt, size);
-				auto mapEntry = posInt.x + posInt.y * size.x;
-				bool test = map[mapEntry] == mapCell;
+				CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
 
-				if(test)
-					printf("+\n");
-				else
-					printf("-\n");
-*/
-				//*****
+				atomicAdd(&entry->numCollisions, 1);
+				atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
+				atomicAdd(&entry->collisionPos.x, mapCell->absPos.y);
+				double2 outward = calcOutwardVector_Kernel(cell, mapCell, size);
+				double2 n = calcNormalToCell_Kernel(mapCell, outward);
+				atomicAdd(&entry->normalVec.x, n.x);
+				atomicAdd(&entry->normalVec.y, n.y);
 
-				atomicAdd(&collisionData.numCollisions, 1);
-				calcCollision_Kernel(cell->cluster, mapCell, collisionData, size, false);
+//				calcCollision_Kernel(mapCluster, mapCell, collisionData, size, false);
 //				calcCollision_Kernel(mapCell->cluster, cell, collisionData, size, true);
 			}
 		}
