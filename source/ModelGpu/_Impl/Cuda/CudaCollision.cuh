@@ -245,13 +245,23 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cel
 
 				CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
 
-				atomicAdd(&entry->numCollisions, 1);
+				atomicAdd(&entry->numCollisions, 2);
 				atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
 				atomicAdd(&entry->collisionPos.y, mapCell->absPos.y);
+				atomicAdd(&entry->collisionPos.x, cell->absPos.x);
+				atomicAdd(&entry->collisionPos.y, cell->absPos.y);
+
 				double2 outward = calcOutwardVector_Kernel(cell, mapCell, size);
 				double2 n = calcNormalToCell_Kernel(mapCell, outward);
 				atomicAdd(&entry->normalVec.x, n.x);
 				atomicAdd(&entry->normalVec.y, n.y);
+
+				outward = calcOutwardVector_Kernel(mapCell, cell, size);
+				n = minus(calcNormalToCell_Kernel(cell, outward));
+				atomicAdd(&entry->normalVec.x, n.x);
+				atomicAdd(&entry->normalVec.y, n.y);
+
+				cell->protectionCounter = PROTECTION_TIMESTEPS;
 
 //				calcCollision_Kernel(mapCluster, mapCell, collisionData, size, false);
 //				calcCollision_Kernel(mapCell->cluster, cell, collisionData, size, true);
@@ -262,6 +272,10 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cel
 
 __device__ __inline__ void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
 {
+	if (cell->protectionCounter > 0) {
+		return;
+	}
+
 	auto absPos = cell->absPos;
 	auto map = data.map1;
 	auto size = data.size;

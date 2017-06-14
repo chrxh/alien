@@ -14,6 +14,7 @@ struct CellCuda
 	int numConnections;
 	CellCuda* connections[CELL_MAX_BONDS];
 	CellCuda* nextTimestep;
+	int protectionCounter;
 };
 
 struct ClusterCuda
