@@ -14,12 +14,12 @@ __device__ void angleCorrection_Kernel(int &angle)
 	angle = ((angle % 360) + 360) % 360;
 }
 
-__device__ void angleCorrection_Kernel(double &angle)
+__device__ void angleCorrection_Kernel(float &angle)
 {
 	int intPart = (int)angle;
-	double fracPart = angle - intPart;
+	float fracPart = angle - intPart;
 	angleCorrection_Kernel(intPart);
-	angle = (double)intPart + fracPart;
+	angle = (float)intPart + fracPart;
 }
 
 __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
@@ -27,7 +27,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 	__shared__ ClusterCuda clusterCopy;
 	__shared__ ClusterCuda *newCluster;
 	__shared__ CellCuda *newCells;
-	__shared__ double rotMatrix[2][2];
+	__shared__ float rotMatrix[2][2];
 	__shared__ CollisionData collisionData;
 
 	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
@@ -41,8 +41,8 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 
 		if (threadIdx.x == 0) {
 			clusterCopy = *oldCluster;
-			double sinAngle = __sinf(clusterCopy.angle*DEG_TO_RAD);
-			double cosAngle = __cosf(clusterCopy.angle*DEG_TO_RAD);
+			float sinAngle = __sinf(clusterCopy.angle*DEG_TO_RAD);
+			float cosAngle = __cosf(clusterCopy.angle*DEG_TO_RAD);
 			rotMatrix[0][0] = cosAngle;
 			rotMatrix[0][1] = -sinAngle;
 			rotMatrix[1][0] = sinAngle;
@@ -73,7 +73,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 */
 		for (int i = 0; i < collisionData.numEntries; ++i) {
 			CollisionEntry* entry = &collisionData.entries[i];
-			double numCollisions = static_cast<double>(entry->numCollisions);
+			float numCollisions = static_cast<float>(entry->numCollisions);
 			entry->collisionPos.x /= numCollisions;
 			entry->collisionPos.y /= numCollisions;
 			entry->normalVec.x /= numCollisions;
@@ -96,7 +96,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 			CellCuda *oldCell = &oldCluster->cells[cellIndex];
 			CellCuda *newCell = &newCells[cellIndex];
 			CellCuda cellCopy = *oldCell;
-			double2 absPos;
+			float2 absPos;
 			absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
 			absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
 			cellCopy.absPos = absPos;
@@ -157,7 +157,7 @@ __device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
 
 	tiling_Kernel(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		double2 absPos = oldCluster->cells[cellIndex].absPos;
+		float2 absPos = oldCluster->cells[cellIndex].absPos;
 		setCellToMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, nullptr, data.map1, size);
 	}
 }

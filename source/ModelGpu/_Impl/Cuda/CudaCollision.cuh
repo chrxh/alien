@@ -12,8 +12,8 @@ struct CollisionEntry
 {
 	ClusterCuda* cluster;
 	int numCollisions;
-	double2 collisionPos;
-	double2 normalVec;
+	float2 collisionPos;
+	float2 normalVec;
 };
 
 class CollisionData
@@ -54,14 +54,14 @@ public:
 	}
 };
 
-__device__ __inline__ void rotateQuarterCounterClockwise_Kernel(double2 &v)
+__device__ __inline__ void rotateQuarterCounterClockwise_Kernel(float2 &v)
 {
-	double temp = v.x;
+	float temp = v.x;
 	v.x = v.y;
 	v.y = -temp;
 }
 
-__device__ __inline__ double2 calcNormalToCell_Kernel(CellCuda *cell, double2 outward)
+__device__ __inline__ float2 calcNormalToCell_Kernel(CellCuda *cell, float2 outward)
 {
 	normalize(outward);
 	if (cell->numConnections < 2) {
@@ -70,17 +70,17 @@ __device__ __inline__ double2 calcNormalToCell_Kernel(CellCuda *cell, double2 ou
 
 	CellCuda* minCell = nullptr;
 	CellCuda* maxCell = nullptr;
-	double2 minVector;
-	double2 maxVector;
-	double min_h = 0.0;	//h = angular distance from outward vector
-	double max_h = 0.0;
+	float2 minVector;
+	float2 maxVector;
+	float min_h = 0.0;	//h = angular distance from outward vector
+	float max_h = 0.0;
 
 	for (int i = 0; i < cell->numConnections; ++i) {
 
 		//calculate h (angular distance from outward vector)
-		double2 u = sub(cell->connections[i]->absPos, cell->absPos);
+		float2 u = sub(cell->connections[i]->absPos, cell->absPos);
 		normalize(u);
-		double h = dot(outward, u);
+		float h = dot(outward, u);
 		if (outward.x*u.y - outward.y*u.x < 0.0) {
 			h = -2 - h;
 		}
@@ -108,7 +108,7 @@ __device__ __inline__ double2 calcNormalToCell_Kernel(CellCuda *cell, double2 ou
 	}
 
 	//calc normal vectors
-	double temp = maxVector.x;
+	float temp = maxVector.x;
 	maxVector.x = maxVector.y;
 	maxVector.y = -temp;
 	temp = minVector.x;
@@ -120,26 +120,26 @@ __device__ __inline__ double2 calcNormalToCell_Kernel(CellCuda *cell, double2 ou
 }
 __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, CollisionEntry *collisionEntry, int2 const& size)
 {
-	double2 posA = clusterA->pos;
-	double2 velA = clusterA->vel;
-	double angVelA = clusterA->angularVel * DEG_TO_RAD;
-	double angMassA = clusterA->angularMass;
+	float2 posA = clusterA->pos;
+	float2 velA = clusterA->vel;
+	float angVelA = clusterA->angularVel * DEG_TO_RAD;
+	float angMassA = clusterA->angularMass;
 
 	ClusterCuda *clusterB = collisionEntry->cluster;
-	double2 posB = clusterB->pos;
-	double2 velB = clusterB->vel;
-	double angVelB = clusterB->angularVel * DEG_TO_RAD;
-	double angMassB = clusterB->angularMass;
+	float2 posB = clusterB->pos;
+	float2 velB = clusterB->vel;
+	float angVelB = clusterB->angularVel * DEG_TO_RAD;
+	float angMassB = clusterB->angularMass;
 
-	double2 rAPp = sub(collisionEntry->collisionPos, posA);
+	float2 rAPp = sub(collisionEntry->collisionPos, posA);
 	mapDisplacementCorrection_Kernel(rAPp, size);
 	rotateQuarterCounterClockwise_Kernel(rAPp);
-	double2 rBPp = sub(collisionEntry->collisionPos, posB);
+	float2 rBPp = sub(collisionEntry->collisionPos, posB);
 	mapDisplacementCorrection_Kernel(rBPp, size);
 	rotateQuarterCounterClockwise_Kernel(rBPp);
-	double2 vAB = sub(sub(velA, mul(rAPp, angVelA)), sub(velB, mul(rBPp, angVelB)));
+	float2 vAB = sub(sub(velA, mul(rAPp, angVelA)), sub(velB, mul(rBPp, angVelB)));
 
-	double2 n = collisionEntry->normalVec;
+	float2 n = collisionEntry->normalVec;
 
 	if (angMassA < FP_PRECISION) {
 		angVelA = 0.0;
@@ -148,18 +148,18 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, Collision
 		angVelB = 0.0;
 	}
 
-	double vAB_dot_n = dot(vAB, n);
+	float vAB_dot_n = dot(vAB, n);
 	if (vAB_dot_n > 0.0) {
 		return;
 	}
 
-	double massA = static_cast<double>(clusterA->numCells);
-	double massB = static_cast<double>(clusterB->numCells);
-	double rAPp_dot_n = dot(rAPp, n);
-	double rBPp_dot_n = dot(rBPp, n);
+	float massA = static_cast<float>(clusterA->numCells);
+	float massB = static_cast<float>(clusterB->numCells);
+	float rAPp_dot_n = dot(rAPp, n);
+	float rBPp_dot_n = dot(rBPp, n);
 
 	if (angMassA > FP_PRECISION && angMassB > FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / ((1.0/massA + 1.0/massB)
+		float j = -2.0*vAB_dot_n / ((1.0/massA + 1.0/massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 
 
@@ -175,7 +175,7 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, Collision
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB > FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
+		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			 + rBPp_dot_n * rBPp_dot_n / angMassB);
 
 			atomicAdd(&clusterA->vel.x, j / massA * n.x);
@@ -188,7 +188,7 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, Collision
 	}
 
 	if (angMassA > FP_PRECISION && angMassB <= FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
+		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA);
 
 		atomicAdd(&clusterA->angularVel, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
@@ -201,7 +201,7 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, Collision
 	}
 
 	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
-		double j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB));
+		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB));
 
 		atomicAdd(&clusterA->vel.x, j / massA * n.x);
 		atomicAdd(&clusterA->vel.y, j / massA * n.y);
@@ -213,22 +213,22 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, Collision
 
 }
 
-__device__ __inline__ double2 calcOutwardVector_Kernel(CellCuda* cellA, CellCuda* cellB, int2 const &size)
+__device__ __inline__ float2 calcOutwardVector_Kernel(CellCuda* cellA, CellCuda* cellB, int2 const &size)
 {
 	ClusterCuda* clusterA = cellA->cluster;
-	double2 posA = clusterA->pos;
-	double2 velA = clusterA->vel;
-	double angVelA = clusterA->angularVel * DEG_TO_RAD;
+	float2 posA = clusterA->pos;
+	float2 velA = clusterA->vel;
+	float angVelA = clusterA->angularVel * DEG_TO_RAD;
 
 	ClusterCuda* clusterB = cellB->cluster;
-	double2 posB = clusterB->pos;
-	double2 velB = clusterB->vel;
-	double angVelB = clusterB->angularVel * DEG_TO_RAD;
+	float2 posB = clusterB->pos;
+	float2 velB = clusterB->vel;
+	float angVelB = clusterB->angularVel * DEG_TO_RAD;
 
-	double2 rAPp = sub(cellB->absPos, posA);
+	float2 rAPp = sub(cellB->absPos, posA);
 	mapDisplacementCorrection_Kernel(rAPp, size);
 	rotateQuarterCounterClockwise_Kernel(rAPp);
-	double2 rBPp = sub(cellB->absPos, posB);
+	float2 rBPp = sub(cellB->absPos, posB);
 	mapDisplacementCorrection_Kernel(rBPp, size);
 	rotateQuarterCounterClockwise_Kernel(rBPp);
 	return sub(sub(velB, mul(rBPp, angVelB)), sub(velA, mul(rAPp, angVelA)));
@@ -251,8 +251,8 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cel
 				atomicAdd(&entry->collisionPos.x, cell->absPos.x);
 				atomicAdd(&entry->collisionPos.y, cell->absPos.y);
 
-				double2 outward = calcOutwardVector_Kernel(cell, mapCell, size);
-				double2 n = calcNormalToCell_Kernel(mapCell, outward);
+				float2 outward = calcOutwardVector_Kernel(cell, mapCell, size);
+				float2 n = calcNormalToCell_Kernel(mapCell, outward);
 				atomicAdd(&entry->normalVec.x, n.x);
 				atomicAdd(&entry->normalVec.y, n.y);
 

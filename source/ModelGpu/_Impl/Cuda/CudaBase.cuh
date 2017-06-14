@@ -111,9 +111,9 @@ __device__ __inline__ void tiling_Kernel(int numEntities, int division, int numD
 	endIndex = startIndex + length - 1;
 }
 
-__device__ __inline__ void normalize(double2 &vec)
+__device__ __inline__ void normalize(float2 &vec)
 {
-	double length = sqrt(vec.x*vec.x + vec.y*vec.y);
+	float length = sqrt(vec.x*vec.x + vec.y*vec.y);
 	if (length > FP_PRECISION) {
 		vec = { vec.x / length, vec.y / length };
 	}
@@ -123,32 +123,32 @@ __device__ __inline__ void normalize(double2 &vec)
 	}
 }
 
-__host__ __device__ __inline__ double dot(double2 const &p, double2 const &q)
+__host__ __device__ __inline__ float dot(float2 const &p, float2 const &q)
 {
 	return p.x*q.x + p.y*q.y;
 }
 
-__host__ __device__ __inline__ double2 minus(double2 const &p)
+__host__ __device__ __inline__ float2 minus(float2 const &p)
 {
 	return{ -p.x, -p.y };
 }
 
-__host__ __device__ __inline__ double2 mul(double2 const &p, double r)
+__host__ __device__ __inline__ float2 mul(float2 const &p, float r)
 {
 	return{ p.x * r, p.y * r };
 }
 
-__host__ __device__ __inline__ double2 div(double2 const &p, double r)
+__host__ __device__ __inline__ float2 div(float2 const &p, float r)
 {
 	return{ p.x / r, p.y / r };
 }
 
-__host__ __device__ __inline__ double2 add(double2 const &p, double2 const &q)
+__host__ __device__ __inline__ float2 add(float2 const &p, float2 const &q)
 {
 	return{ p.x + q.x, p.y + q.y };
 }
 
-__host__ __device__ __inline__ double2 sub(double2 const &p, double2 const &q)
+__host__ __device__ __inline__ float2 sub(float2 const &p, float2 const &q)
 {
 	return{ p.x - q.x, p.y - q.y };
 }
