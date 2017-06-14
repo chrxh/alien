@@ -69,7 +69,7 @@ void init_Cuda(int2 size)
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
 	createCluster(&clusters[0], { 1500.5, 1200 }, { 0.001, 0 }, 90, 0, 64, size);
-	createCluster(&clusters[1], { 1550.5, 1240 }, { -0.2, 0 }, 80, 0.0, 64, size);
+	createCluster(&clusters[1], { 1570.5, 1220 }, { -0.2, 0 }, 00, 0.0, 64, size);
 	drawClusterToMap(&clusters[0], &cudaData);
 	drawClusterToMap(&clusters[1], &cudaData);
 
@@ -100,11 +100,13 @@ void calcNextTimestep_Cuda()
 
 	checkCudaErrors(cudaGetLastError());
 	//****
+/*
 	if (abs(cudaData.clustersAC2.getEntireArray()[0].vel.x+0.2) > 0.0002 && abs(cudaData.clustersAC2.getEntireArray()[1].vel.x + 0.2) > 0.0002) {
 		ClusterCuda temp1 = cudaData.clustersAC2.getEntireArray()[0];
 		ClusterCuda temp2 = cudaData.clustersAC2.getEntireArray()[1];
 		int dummy = 0;
 	}
+*/
 	//****
 	swap(cudaData.clustersAC1, cudaData.clustersAC2);
 	swap(cudaData.cellsAC1, cudaData.cellsAC2);

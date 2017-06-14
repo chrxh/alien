@@ -63,6 +63,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 		}
 	}
 
+
 	__syncthreads();
 
 	if (threadIdx.x == 0) {

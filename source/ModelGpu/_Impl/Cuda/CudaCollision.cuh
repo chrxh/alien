@@ -42,7 +42,7 @@ public:
 			old = numEntries;
 			curr = atomicCAS(&numEntries, old, (old + 1) % MAX_COLLIDING_CLUSTERS);
 			if (old == curr) {
-				auto result = &entries[numEntries];
+				auto result = &entries[old];
 				result->cluster = cluster;
 				result->numCollisions = 0;
 				result->collisionPos = { 0, 0 };
@@ -162,9 +162,11 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, Collision
 		double j = -2.0*vAB_dot_n / ((1.0/massA + 1.0/massB)
 			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
 
+
 		atomicAdd(&clusterA->angularVel, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
 		atomicAdd(&clusterA->vel.x, j / massA * n.x);
 		atomicAdd(&clusterA->vel.y, j / massA * n.y);
+
 /*
 			atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
 			atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
