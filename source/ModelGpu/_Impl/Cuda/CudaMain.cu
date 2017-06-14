@@ -14,7 +14,7 @@
 cudaStream_t cudaStream;
 CudaData cudaData;
 
-void createCluster(ClusterCuda* cluster, double2 pos, double2 vel, double angle, double angVel, int2 clusterSize, int2 const &size)
+void createCluster(ClusterCuda* cluster, float2 pos, float2 vel, float angle, float angVel, int2 clusterSize, int2 const &size)
 {
 	cluster->pos = pos;
 	cluster->vel = vel;
@@ -26,7 +26,7 @@ void createCluster(ClusterCuda* cluster, double2 pos, double2 vel, double angle,
 	for (int x = 0; x < clusterSize.x; ++x) {
 		for (int y = 0; y < clusterSize.y; ++y) {
 			CellCuda *cell = &cluster->cells[x + y*clusterSize.x];
-			cell->relPos = { static_cast<double>(x), static_cast<double>(y) };
+			cell->relPos = { static_cast<float>(x), static_cast<float>(y) };
 			cell->cluster = cluster;
 			cell->nextTimestep = nullptr;
 			cell->protectionCounter = 0;

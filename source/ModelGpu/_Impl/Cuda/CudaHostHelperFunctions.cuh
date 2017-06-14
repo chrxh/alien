@@ -2,9 +2,9 @@
 
 #include "CudaShared.cuh"
 
-double random(double max)
+float random(float max)
 {
-	return ((double)rand() / RAND_MAX) * max;
+	return ((float)rand() / RAND_MAX) * max;
 }
 
 template<typename T>
@@ -26,14 +26,14 @@ void updateAngularMass(ClusterCuda* cluster)
 
 void centerCluster(ClusterCuda* cluster)
 {
-	double2 center = { 0.0, 0.0 };
+	float2 center = { 0.0, 0.0 };
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto const &relPos = cluster->cells[i].relPos;
 		center.x += relPos.x;
 		center.y += relPos.y;
 	}
-	center.x /= static_cast<double>(cluster->numCells);
-	center.y /= static_cast<double>(cluster->numCells);
+	center.x /= static_cast<float>(cluster->numCells);
+	center.y /= static_cast<float>(cluster->numCells);
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto &relPos = cluster->cells[i].relPos;
 		relPos.x -= center.x;
@@ -44,9 +44,9 @@ void centerCluster(ClusterCuda* cluster)
 void updateAbsPos(ClusterCuda *cluster)
 {
 
-	double rotMatrix[2][2];
-	double sinAngle = sin(cluster->angle*DEG_TO_RAD);
-	double cosAngle = cos(cluster->angle*DEG_TO_RAD);
+	float rotMatrix[2][2];
+	float sinAngle = sinf(cluster->angle*DEG_TO_RAD);
+	float cosAngle = cosf(cluster->angle*DEG_TO_RAD);
 	rotMatrix[0][0] = cosAngle;
 	rotMatrix[0][1] = -sinAngle;
 	rotMatrix[1][0] = sinAngle;
