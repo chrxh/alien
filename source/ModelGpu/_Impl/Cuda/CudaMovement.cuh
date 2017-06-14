@@ -81,7 +81,6 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 			calcCollision_Kernel(&clusterCopy, entry, size);
 		}
 
-
 		clusterCopy.angle += clusterCopy.angularVel;
 		angleCorrection_Kernel(clusterCopy.angle);
 		clusterCopy.pos = add(clusterCopy.pos, clusterCopy.vel);
@@ -102,6 +101,9 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 			absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
 			cellCopy.absPos = absPos;
 			cellCopy.cluster = newCluster;
+			if (cellCopy.protectionCounter > 0) {
+				--cellCopy.protectionCounter;
+			}
 			*newCell = cellCopy;
 			setCellToMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, data.map2, size);
 
