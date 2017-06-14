@@ -9,8 +9,8 @@ struct ClusterCuda;
 struct CellCuda
 {
 	ClusterCuda* cluster;
-	double2 relPos;
-	double2 absPos;
+	float2 relPos;
+	float2 absPos;
 	int numConnections;
 	CellCuda* connections[CELL_MAX_BONDS];
 	CellCuda* nextTimestep;
@@ -19,11 +19,11 @@ struct CellCuda
 
 struct ClusterCuda
 {
-	double2 pos;
-	double2 vel;
-	double angle;
-	double angularVel;
-	double angularMass;
+	float2 pos;
+	float2 vel;
+	float angle;
+	float angularVel;
+	float angularMass;
 	int numCells;
 	CellCuda* cells;
 };
