@@ -8,7 +8,7 @@
 #include "Model/SimulationController.h"
 #include "Model/ModelBuilderFacade.h"
 #include "Model/AccessPorts/SimulationAccess.h"
-#include "Model/SimulationContextApi.h"
+#include "Model/Context/SimulationContextApi.h"
 #include "Model/SpaceMetricApi.h"
 
 #include "GraphicsItemManager.h"

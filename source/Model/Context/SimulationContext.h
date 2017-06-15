@@ -1,7 +1,7 @@
 #ifndef SIMULATIONCONTEXT_H
 #define SIMULATIONCONTEXT_H
 
-#include "Model/SimulationContextApi.h"
+#include "Model/Context/SimulationContextApi.h"
 
 class SimulationContext
 	: public SimulationContextApi

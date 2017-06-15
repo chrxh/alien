@@ -319,15 +319,6 @@
     <ClCompile Include="..\..\source\Model\ModelServices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_SpaceMetricApi.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -335,6 +326,15 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SpaceMetricApi.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextApi.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextApi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -563,11 +563,11 @@
     <CustomBuild Include="..\..\source\Model\_Impl\SimulationControllerImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\SimulationContextApi.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Model\SpaceMetricApi.h">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Context\SimulationContextApi.h">
+      <Filter>Source Files\Context</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -626,11 +626,6 @@
     </Filter>
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{2dd9613a-1efe-4d99-96b5-12cd65be711a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h</Extensions>
-      <ParseFiles>true</ParseFiles>
     </Filter>
   </ItemGroup>
 </Project>
