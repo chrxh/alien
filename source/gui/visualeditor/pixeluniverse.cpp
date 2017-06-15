@@ -51,8 +51,7 @@ void PixelUniverse::activate()
 	connect(_simAccess, &SimulationAccess::imageReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
-	ResolveDescription resolveDesc;
-	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
+	_simAccess->requireImage({ { 0, 0 }, size }, _image);
 }
 
 void PixelUniverse::deactivate()
