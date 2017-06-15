@@ -19,7 +19,7 @@ __device__ void mapDisplacementCorrection_Kernel(float2 &disp, int2 const &size)
 {
 }
 
-__device__ inline bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda * cell, CellCuda ** map, int2 const &size)
+__device__ inline bool isCellPresentAtMap_Kernel(int2 posInt, CudaCell * cell, CudaCell ** map, int2 const &size)
 {
 	mapPosCorrection(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;
@@ -27,14 +27,14 @@ __device__ inline bool isCellPresentAtMap_Kernel(int2 posInt, CellCuda * cell, C
 
 }
 
-__host__ __device__ CellCuda* getCellFromMap(int2 posInt, CellCuda ** __restrict__ map, int2 const &size)
+__host__ __device__ CudaCell* getCellFromMap(int2 posInt, CudaCell ** __restrict__ map, int2 const &size)
 {
 	mapPosCorrection(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;
 	return map[mapEntry];
 }
 
-__host__ __device__ void inline setCellToMap(int2 posInt, CellCuda * __restrict__ cell, CellCuda ** __restrict__ map, int2 const &size)
+__host__ __device__ void inline setCellToMap(int2 posInt, CudaCell * __restrict__ cell, CudaCell ** __restrict__ map, int2 const &size)
 {
 	mapPosCorrection(posInt, size);
 	auto mapEntry = posInt.x + posInt.y * size.x;

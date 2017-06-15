@@ -2,20 +2,7 @@
 
 #include "CudaShared.cuh"
 
-float random(float max)
-{
-	return ((float)rand() / RAND_MAX) * max;
-}
-
-template<typename T>
-void swap(T &a, T &b)
-{
-	T temp = a;
-	a = b;
-	b = temp;
-}
-
-void updateAngularMass(ClusterCuda* cluster)
+void updateAngularMass(CudaCellCluster* cluster)
 {
 	cluster->angularMass = 0.0;
 	for (int i = 0; i < cluster->numCells; ++i) {
@@ -24,7 +11,7 @@ void updateAngularMass(ClusterCuda* cluster)
 	}
 }
 
-void centerCluster(ClusterCuda* cluster)
+void centerCluster(CudaCellCluster* cluster)
 {
 	float2 center = { 0.0, 0.0 };
 	for (int i = 0; i < cluster->numCells; ++i) {
@@ -41,7 +28,7 @@ void centerCluster(ClusterCuda* cluster)
 	}
 }
 
-void updateAbsPos(ClusterCuda *cluster)
+void updateAbsPos(CudaCellCluster *cluster)
 {
 
 	float rotMatrix[2][2];
@@ -59,7 +46,7 @@ void updateAbsPos(ClusterCuda *cluster)
 	};
 }
 
-bool isClusterPositionFree(ClusterCuda* cluster, CudaData* data)
+bool isClusterPositionFree(CudaCellCluster* cluster, CudaData* data)
 {
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto &absPos = cluster->cells[i].absPos;
@@ -82,7 +69,7 @@ bool isClusterPositionFree(ClusterCuda* cluster, CudaData* data)
 	return true;
 }
 
-void drawClusterToMap(ClusterCuda* cluster, CudaData* data)
+void drawClusterToMap(CudaCellCluster* cluster, CudaData* data)
 {
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto &absPos = cluster->cells[i].absPos;

@@ -18,6 +18,7 @@ public:
 
 	virtual void updateData(DataDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
+	virtual void requireImage(IntRect rect, QImage* target) override;
 	virtual DataDescription const& retrieveData() override;
 
 	virtual void unregister() override;

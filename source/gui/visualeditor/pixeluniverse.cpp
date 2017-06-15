@@ -48,7 +48,7 @@ void PixelUniverse::init(SimulationController* controller, SimulationAccess* acc
 void PixelUniverse::activate()
 {
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
+	connect(_simAccess, &SimulationAccess::imageReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	ResolveDescription resolveDesc;
@@ -58,24 +58,30 @@ void PixelUniverse::activate()
 void PixelUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	disconnect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
+	disconnect(_simAccess, &SimulationAccess::imageReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
 }
 
 void PixelUniverse::requestData()
 {
+/*
 	ResolveDescription resolveDesc;
 	IntRect rect = _viewport->getRect();
 	_simAccess->requireData(rect, resolveDesc);
+*/
+	IntRect rect = _viewport->getRect();
+	_simAccess->requireImage(rect, _image);
 }
 
 void PixelUniverse::retrieveAndDisplayData()
 {
+/*
 	auto const& data = _simAccess->retrieveData();
 
 	_image->fill(UNIVERSE_COLOR);
 
 	displayClusters(data);
 	displayParticles(data);
+*/
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));
 }
 
@@ -152,7 +158,7 @@ void PixelUniverse::displayClusters(DataDescription const& data) const
 			auto const& pos = cellDesc.pos.getValue();
 			auto const& meta = cellDesc.metadata.getValue();
 			auto const& energy = cellDesc.energy.getValue();
-			auto intPos = space->correctPositionWithIntPrecision(pos);
+			auto intPos = space->correctPositionAndConvertToIntVector(pos);
 			_image->setPixel(intPos.x, intPos.y, calcCellColor(meta, energy));
 		}
 	}
@@ -165,7 +171,7 @@ void PixelUniverse::displayParticles(DataDescription const & data) const
 		auto const& particleDesc = particleTracker.getValue();
 		auto const& pos = particleDesc.pos.getValue();
 		auto const& energy = particleDesc.energy.getValue();
-		auto intPos = space->correctPositionWithIntPrecision(pos);
+		auto intPos = space->correctPositionAndConvertToIntVector(pos);
 		_image->setPixel(intPos.x, intPos.y, calcParticleColor(energy));
 	}
 }

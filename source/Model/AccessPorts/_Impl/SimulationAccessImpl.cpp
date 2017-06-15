@@ -47,6 +47,10 @@ void SimulationAccessImpl::requireData(IntRect rect, ResolveDescription const& r
 	}
 }
 
+void SimulationAccessImpl::requireImage(IntRect rect, QImage * target)
+{
+}
+
 DataDescription const& SimulationAccessImpl::retrieveData()
 {
 	return _dataCollected;
@@ -121,7 +125,7 @@ void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 	auto metric = unit->getContext()->getSpaceMetric();
 	auto const& clusters = unit->getContext()->getClustersRef();
 	for (auto const& cluster : clusters) {
-		auto pos = metric->correctPositionWithIntPrecision(cluster->getPosition());
+		auto pos = metric->correctPositionAndConvertToIntVector(cluster->getPosition());
 		if (_requiredRect.isContained(pos)) {
 			_dataCollected.clusters.emplace_back(cluster->getDescription(_resolveDesc));
 		}
@@ -133,7 +137,7 @@ void SimulationAccessImpl::collectParticlesFromUnit(Unit * unit)
 	auto metric = unit->getContext()->getSpaceMetric();
 	auto const& particles = unit->getContext()->getEnergyParticlesRef();
 	for (auto const& particle : particles) {
-		auto pos = metric->correctPositionWithIntPrecision(particle->getPosition());
+		auto pos = metric->correctPositionAndConvertToIntVector(particle->getPosition());
 		if (_requiredRect.isContained(pos)) {
 			_dataCollected.particles.emplace_back(particle->getDescription());
 		}

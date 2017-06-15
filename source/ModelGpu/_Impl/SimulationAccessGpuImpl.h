@@ -19,6 +19,7 @@ public:
 
 	virtual void updateData(DataDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
+	virtual void requireImage(IntRect rect, QImage* target) override;
 	virtual DataDescription const& retrieveData() override;
 
 	virtual void unregister() override;
@@ -29,8 +30,12 @@ private:
 	bool _registered = false;
 
 	bool _dataRequired = false;
+	bool _imageRequired = false;
+
 	IntRect _requiredRect;
 	ResolveDescription _resolveDesc;
+	QImage* _requiredImage = nullptr;
+
 	DataDescription _dataCollected;
 };
 

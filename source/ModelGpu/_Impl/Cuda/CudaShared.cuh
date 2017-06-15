@@ -4,20 +4,30 @@
 
 #include "CudaConstants.cuh"
 
-
-struct ClusterCuda;
-struct CellCuda
+struct CudaLightCell
 {
-	ClusterCuda* cluster;
+	float2 absPos;
+};
+
+struct CudaLightCellCluster
+{
+	CudaLightCell* cells;
+};
+
+
+struct CudaCellCluster;
+struct CudaCell
+{
+	CudaCellCluster* cluster;
 	float2 relPos;
 	float2 absPos;
 	int numConnections;
-	CellCuda* connections[CELL_MAX_BONDS];
-	CellCuda* nextTimestep;
+	CudaCell* connections[CELL_MAX_BONDS];
+	CudaCell* nextTimestep;
 	int protectionCounter;
 };
 
-struct ClusterCuda
+struct CudaCellCluster
 {
 	float2 pos;
 	float2 vel;
@@ -25,12 +35,12 @@ struct ClusterCuda
 	float angularVel;
 	float angularMass;
 	int numCells;
-	CellCuda* cells;
+	CudaCell* cells;
 };
 
-extern void init_Cuda(int2 size);
-extern void calcNextTimestep_Cuda();
-extern void getDataRef_Cuda(int& numClusters, ClusterCuda*& clusters);
-extern void end_Cuda();
+extern void cudaInit(int2 const &size);
+extern void cudaCalcNextTimestep();
+extern void cudaGetSimulationDataRef(int& numClusters, CudaCellCluster*& clusters);
+extern void cudaShutdown();
 
 
