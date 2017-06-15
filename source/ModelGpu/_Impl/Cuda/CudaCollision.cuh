@@ -10,7 +10,7 @@
 
 struct CollisionEntry
 {
-	ClusterCuda* cluster;
+	CudaCellCluster* cluster;
 	int numCollisions;
 	float2 collisionPos;
 	float2 normalVec;
@@ -28,7 +28,7 @@ public:
 		numEntries = 0;
 	}
 
-	__device__ CollisionEntry* getOrCreateEntry(ClusterCuda* cluster)
+	__device__ CollisionEntry* getOrCreateEntry(CudaCellCluster* cluster)
 	{
 		int old;
 		int curr;
@@ -61,15 +61,15 @@ __device__ __inline__ void rotateQuarterCounterClockwise_Kernel(float2 &v)
 	v.y = -temp;
 }
 
-__device__ __inline__ float2 calcNormalToCell_Kernel(CellCuda *cell, float2 outward)
+__device__ __inline__ float2 calcNormalToCell_Kernel(CudaCell *cell, float2 outward)
 {
 	normalize(outward);
 	if (cell->numConnections < 2) {
 		return outward;
 	}
 
-	CellCuda* minCell = nullptr;
-	CellCuda* maxCell = nullptr;
+	CudaCell* minCell = nullptr;
+	CudaCell* maxCell = nullptr;
 	float2 minVector;
 	float2 maxVector;
 	float min_h = 0.0;	//h = angular distance from outward vector
@@ -118,14 +118,14 @@ __device__ __inline__ float2 calcNormalToCell_Kernel(CellCuda *cell, float2 outw
 	normalize(result);
 	return result;
 }
-__device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, CollisionEntry *collisionEntry, int2 const& size)
+__device__ __inline__ void calcCollision_Kernel(CudaCellCluster *clusterA, CollisionEntry *collisionEntry, int2 const& size)
 {
 	float2 posA = clusterA->pos;
 	float2 velA = clusterA->vel;
 	float angVelA = clusterA->angularVel * DEG_TO_RAD;
 	float angMassA = clusterA->angularMass;
 
-	ClusterCuda *clusterB = collisionEntry->cluster;
+	CudaCellCluster *clusterB = collisionEntry->cluster;
 	float2 posB = clusterB->pos;
 	float2 velB = clusterB->vel;
 	float angVelB = clusterB->angularVel * DEG_TO_RAD;
@@ -213,14 +213,14 @@ __device__ __inline__ void calcCollision_Kernel(ClusterCuda *clusterA, Collision
 
 }
 
-__device__ __inline__ float2 calcOutwardVector_Kernel(CellCuda* cellA, CellCuda* cellB, int2 const &size)
+__device__ __inline__ float2 calcOutwardVector_Kernel(CudaCell* cellA, CudaCell* cellB, int2 const &size)
 {
-	ClusterCuda* clusterA = cellA->cluster;
+	CudaCellCluster* clusterA = cellA->cluster;
 	float2 posA = clusterA->pos;
 	float2 velA = clusterA->vel;
 	float angVelA = clusterA->angularVel * DEG_TO_RAD;
 
-	ClusterCuda* clusterB = cellB->cluster;
+	CudaCellCluster* clusterB = cellB->cluster;
 	float2 posB = clusterB->pos;
 	float2 velB = clusterB->vel;
 	float angVelB = clusterB->angularVel * DEG_TO_RAD;
@@ -234,12 +234,12 @@ __device__ __inline__ float2 calcOutwardVector_Kernel(CellCuda* cellA, CellCuda*
 	return sub(sub(velB, mul(rBPp, angVelB)), sub(velA, mul(rAPp, angVelA)));
 }
 
-__device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cell, CellCuda ** map
+__device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CudaCell *cell, CudaCell ** map
 	, int2 const &size, CollisionData &collisionData)
 {
 	auto mapCell = getCellFromMap(posInt, map, size);
 	if (mapCell != nullptr) {
-		ClusterCuda* mapCluster = mapCell->cluster;
+		CudaCellCluster* mapCluster = mapCell->cluster;
 		if (mapCluster != cell->cluster) {
 			if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE*CELL_MAX_DISTANCE) {
 
@@ -270,7 +270,7 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellCuda *cel
 	}
 }
 
-__device__ __inline__ void collectCollisionData_Kernel(CudaData const &data, CellCuda *cell, CollisionData &collisionData)
+__device__ __inline__ void collectCollisionData_Kernel(CudaData const &data, CudaCell *cell, CollisionData &collisionData)
 {
 	if (cell->protectionCounter > 0) {
 		return;

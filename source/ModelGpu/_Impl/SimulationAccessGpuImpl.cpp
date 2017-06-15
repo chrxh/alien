@@ -32,6 +32,17 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	}
 }
 
+void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
+{
+	_imageRequired = true;
+	_requiredRect = rect;
+	_requiredImage = target;
+
+	if (!_context->getGpuThreadController()->isGpuThreadWorking()) {
+		accessToUnits();
+	}
+}
+
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
 {
 	return _dataCollected;
@@ -44,13 +55,20 @@ void SimulationAccessGpuImpl::unregister()
 
 void SimulationAccessGpuImpl::accessToUnits()
 {
-	if (!_dataRequired) {
-		return;
+	if (_dataRequired) {
+
+		_dataRequired = false;
+		_context->getGpuThreadController()->getGpuWorker()->getData(_requiredRect, _resolveDesc, _dataCollected);
+
+		Q_EMIT dataReadyToRetrieve();
 	}
 
-	_dataRequired = false;
-	_context->getGpuThreadController()->getGpuWorker()->getData(_requiredRect, _resolveDesc, _dataCollected);
+	if (_imageRequired) {
 
-	Q_EMIT dataReadyToRetrieve();
+		_imageRequired = false;
+		_context->getGpuThreadController()->getGpuWorker()->getImage(_requiredRect, _requiredImage);
+
+		Q_EMIT imageReadyToRetrieve();
+	}
 }
 
