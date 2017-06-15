@@ -65,8 +65,8 @@ void init_Cuda(int2 size)
 	}
 	cudaData.clustersAC1 = ArrayController<ClusterCuda>(static_cast<int>(NUM_CLUSTERS * 1.1));
 	cudaData.clustersAC2 = ArrayController<ClusterCuda>(static_cast<int>(NUM_CLUSTERS * 1.1));
-	cudaData.cellsAC1 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * 400 * 1.1));
-	cudaData.cellsAC2 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * 400 * 1.1));
+	cudaData.cellsAC1 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * 30*30 * 1.1));
+	cudaData.cellsAC2 = ArrayController<CellCuda>(static_cast<int>(NUM_CLUSTERS * 30*30 * 1.1));
 
 	auto clusters = cudaData.clustersAC1.getArray(NUM_CLUSTERS);
 
