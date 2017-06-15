@@ -13,7 +13,7 @@
 
 namespace {
 	cudaStream_t cudaStream;
-	CudaData *cudaData;
+	CudaDataManager *cudaDataManager;
 }
 
 void createCluster(CudaCellCluster* cluster, float2 pos, float2 vel, float angle, float angVel, int2 clusterSize, int2 const &size)
@@ -23,7 +23,7 @@ void createCluster(CudaCellCluster* cluster, float2 pos, float2 vel, float angle
 	cluster->angle = angle;
 	cluster->angularVel = angVel;
 	cluster->numCells = clusterSize.x * clusterSize.y;
-	cluster->cells = cudaData->cellsAC1.getArray(clusterSize.x*clusterSize.y);
+	cluster->cells = cudaDataManager->data.cellsAC1.getArray(clusterSize.x*clusterSize.y);
 
 	for (int x = 0; x < clusterSize.x; ++x) {
 		for (int y = 0; y < clusterSize.y; ++y) {
@@ -57,24 +57,9 @@ void cudaInit(int2 const &size)
 	cudaStreamCreate(&cudaStream);
 	cudaSetDevice(0);
 
-	cudaData = new CudaData();
+	cudaDataManager = new CudaDataManager(size);
 	
-	cudaData->size = size;
-	cudaData->clustersAC1 = ArrayController<CudaCellCluster>(static_cast<int>(NUM_CLUSTERS * 1.1));
-	cudaData->clustersAC2 = ArrayController<CudaCellCluster>(static_cast<int>(NUM_CLUSTERS * 1.1));
-	cudaData->cellsAC1 = ArrayController<CudaCell>(static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
-	cudaData->cellsAC2 = ArrayController<CudaCell>(static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
-	size_t mapSize = size.x * size.y * sizeof(CudaCell*);
-	cudaMallocManaged(&cudaData->map1, mapSize);
-	cudaMallocManaged(&cudaData->map2, mapSize);
-	checkCudaErrors(cudaGetLastError());
-	for (int i = 0; i < size.x * size.y; ++i) {
-		cudaData->map1[i] = nullptr;
-		cudaData->map2[i] = nullptr;
-	}
-
-
-	auto clusters = cudaData->clustersAC1.getArray(NUM_CLUSTERS);
+	auto clusters = cudaDataManager->data.clustersAC1.getArray(NUM_CLUSTERS);
 
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
 		createCluster(&clusters[i], { 0.0f, 0.0f }, { random(0.5f) - 0.25f, random(0.5f) - 0.25f }, random(360.0f), random(0.2f) - 0.1f, { rand() % 20 + 1, rand() % 20 + 1 }, size);
@@ -83,9 +68,9 @@ void cudaInit(int2 const &size)
 			centerCluster(&clusters[i]);
 			updateAbsPos(&clusters[i]);
 
-		} while (!isClusterPositionFree(&clusters[i], cudaData));
+		} while (!isClusterPositionFree(&clusters[i], &cudaDataManager->data));
 
-		drawClusterToMap(&clusters[i], cudaData);
+		drawClusterToMap(&clusters[i], &cudaDataManager->data);
 		updateAngularMass(&clusters[i]);
 	}
 
@@ -95,21 +80,21 @@ void cudaInit(int2 const &size)
 void cudaCalcNextTimestep()
 {
 
-	movement_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (*cudaData);
+	movement_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaDataManager->data);
 	cudaDeviceSynchronize();
-	clearOldMap_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (*cudaData);
+	clearOldMap_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaDataManager->data);
 	cudaDeviceSynchronize();
 
 	checkCudaErrors(cudaGetLastError());
 	
-	cudaData->swapData();
-	cudaData->prepareTargetData();
+	cudaDataManager->swapData();
+	cudaDataManager->prepareTargetData();
 }
 
 void cudaGetSimulationDataRef(int& numClusters, CudaCellCluster*& clusters)
 {
-	numClusters = cudaData->clustersAC1.getNumEntries();
-	clusters = cudaData->clustersAC1.getEntireArray();
+	numClusters = cudaDataManager->data.clustersAC1.getNumEntries();
+	clusters = cudaDataManager->data.clustersAC1.getEntireArray();
 }
 
 
@@ -118,14 +103,6 @@ void cudaShutdown()
 	cudaDeviceSynchronize();
 	cudaDeviceReset();
 
-	cudaData->cellsAC1.free();
-	cudaData->clustersAC1.free();
-	cudaData->cellsAC2.free();
-	cudaData->clustersAC2.free();
-
-	cudaFree(cudaData->map1);
-	cudaFree(cudaData->map2);
-
-	delete cudaData;
+	delete cudaDataManager;
 }
 

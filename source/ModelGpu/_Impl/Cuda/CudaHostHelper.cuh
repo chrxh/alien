@@ -2,6 +2,56 @@
 
 #include "CudaShared.cuh"
 
+class CudaDataManager
+{
+public:
+	CudaData data;
+
+	CudaDataManager(int2 const &size)
+	{
+		data.size = size;
+		data.clustersAC1 = ArrayController<CudaCellCluster>(static_cast<int>(NUM_CLUSTERS * 1.1));
+		data.clustersAC2 = ArrayController<CudaCellCluster>(static_cast<int>(NUM_CLUSTERS * 1.1));
+		data.cellsAC1 = ArrayController<CudaCell>(static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
+		data.cellsAC2 = ArrayController<CudaCell>(static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
+
+		size_t mapSize = size.x * size.y * sizeof(CudaCell*);
+		cudaMallocManaged(&data.map1, mapSize);
+		cudaMallocManaged(&data.map2, mapSize);
+		checkCudaErrors(cudaGetLastError());
+		for (int i = 0; i < size.x * size.y; ++i) {
+			data.map1[i] = nullptr;
+			data.map2[i] = nullptr;
+		}
+
+	}
+
+	~CudaDataManager()
+	{
+		data.cellsAC1.free();
+		data.clustersAC1.free();
+		data.cellsAC2.free();
+		data.clustersAC2.free();
+
+		cudaFree(data.map1);
+		cudaFree(data.map2);
+	}
+
+	void swapData()
+	{
+		swap(data.clustersAC1, data.clustersAC2);
+		swap(data.cellsAC1, data.cellsAC2);
+		swap(data.map1, data.map2);
+	}
+
+	void prepareTargetData()
+	{
+		data.clustersAC2.reset();
+		data.cellsAC2.reset();
+	}
+
+};
+
 void updateAngularMass(CudaCellCluster* cluster)
 {
 	cluster->angularMass = 0.0;
