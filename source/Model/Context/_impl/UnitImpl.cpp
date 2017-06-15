@@ -177,7 +177,7 @@ void UnitImpl::processingClustersCompartmentAllocation()
 	QMutableListIterator<CellCluster*> clusterIter(_context->getClustersRef());
 	while (clusterIter.hasNext()) {
 		CellCluster* cluster = clusterIter.next();
-		IntVector2D intPos = spaceMetric->correctPositionWithIntPrecision(cluster->getPosition());
+		IntVector2D intPos = spaceMetric->correctPositionAndConvertToIntVector(cluster->getPosition());
 		if (!compartment->isPointInCompartment(intPos)) {
 			clusterIter.remove();
 			auto otherContext = compartment->getNeighborContext(intPos);
@@ -227,7 +227,7 @@ void UnitImpl::processingParticlesCompartmentAllocation()
 	QMutableListIterator<EnergyParticle*> particleIter(_context->getEnergyParticlesRef());
 	while (particleIter.hasNext()) {
 		EnergyParticle* particle = particleIter.next();
-		IntVector2D intPos = spaceMetric->correctPositionWithIntPrecision(particle->getPosition());
+		IntVector2D intPos = spaceMetric->correctPositionAndConvertToIntVector(particle->getPosition());
 		if (!compartment->isPointInCompartment(intPos)) {
 			particleIter.remove();
 			auto otherContext = compartment->getNeighborContext(intPos);

@@ -37,7 +37,7 @@ void EnergyParticleMapImpl::clear()
 
 void EnergyParticleMapImpl::removeParticleIfPresent(QVector2D pos, EnergyParticle * particleToRemove)
 {
-	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
+	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
 	EnergyParticle*& particle = locateParticle(intPos);
 	if (particle == particleToRemove) {
 		particle = nullptr;
@@ -46,13 +46,13 @@ void EnergyParticleMapImpl::removeParticleIfPresent(QVector2D pos, EnergyParticl
 
 void EnergyParticleMapImpl::setParticle(QVector2D pos, EnergyParticle * particle)
 {
-	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
+	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
 	locateParticle(intPos) = particle;
 }
 
 EnergyParticle * EnergyParticleMapImpl::getParticle(QVector2D pos) const
 {
-	IntVector2D intPos = _metric->correctPositionWithIntPrecision(pos);
+	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
 	return locateParticle(intPos);
 }
 

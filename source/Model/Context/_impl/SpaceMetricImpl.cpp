@@ -29,12 +29,17 @@ void SpaceMetricImpl::correctPosition(QVector2D & pos) const
 	IntVector2D intPart{ qFloor(pos.x()), qFloor(pos.y()) };
 	qreal fracPartX = pos.x() - intPart.x;
 	qreal fracPartY = pos.y() - intPart.y;
-	correctPosition(intPart);
+	correctPositionInline(intPart);
 	pos.setX(static_cast<qreal>(intPart.x) + fracPartX);
 	pos.setY(static_cast<qreal>(intPart.y) + fracPartY);
 }
 
-IntVector2D SpaceMetricImpl::correctPositionWithIntPrecision(QVector2D const& pos) const
+void SpaceMetricImpl::correctPosition(IntVector2D & pos) const
+{
+	correctPositionInline(pos);
+}
+
+IntVector2D SpaceMetricImpl::correctPositionAndConvertToIntVector(QVector2D const& pos) const
 {
 	IntVector2D intPos;
 	intPos.x = static_cast<int>(pos.x());
@@ -45,14 +50,14 @@ IntVector2D SpaceMetricImpl::correctPositionWithIntPrecision(QVector2D const& po
 	if (intPos.y < 0) {
 		--intPos.y;
 	}
-	correctPosition(intPos);
+	correctPositionInline(intPos);
 	return intPos;
 }
 
 IntVector2D SpaceMetricImpl::shiftPosition(IntVector2D const & pos, IntVector2D const && shift) const
 {
 	IntVector2D temp{ pos.x + shift.x, pos.y + shift.y };
-	correctPosition(temp);
+	correctPositionInline(temp);
 	return temp;
 }
 
@@ -63,7 +68,7 @@ void SpaceMetricImpl::correctDisplacement(QVector2D & displacement) const
 	qreal ry = displacement.y() - static_cast<qreal>(intDisplacement.y);
 	intDisplacement.x += _size.x / 2;
 	intDisplacement.y += _size.y / 2;
-	correctPosition(intDisplacement);
+	correctPositionInline(intDisplacement);
 	intDisplacement.x -= _size.x / 2;
 	intDisplacement.y -= _size.y / 2;
 	displacement.setX(static_cast<qreal>(intDisplacement.x) + rx);

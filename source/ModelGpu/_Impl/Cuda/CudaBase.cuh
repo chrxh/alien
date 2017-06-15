@@ -56,6 +56,7 @@ public:
 	{
 		cudaMallocManaged(&_data, sizeof(T) * size);
 		cudaMallocManaged(&_numEntries, sizeof(int));
+		checkCudaErrors(cudaGetLastError());
 	}
 
 	void free()
@@ -153,3 +154,15 @@ __host__ __device__ __inline__ float2 sub(float2 const &p, float2 const &q)
 	return{ p.x - q.x, p.y - q.y };
 }
 
+float random(float max)
+{
+	return ((float)rand() / RAND_MAX) * max;
+}
+
+template<typename T>
+void swap(T &a, T &b)
+{
+	T temp = a;
+	a = b;
+	b = temp;
+}

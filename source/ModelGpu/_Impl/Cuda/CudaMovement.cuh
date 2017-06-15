@@ -24,13 +24,13 @@ __device__ void angleCorrection_Kernel(float &angle)
 
 __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 {
-	__shared__ ClusterCuda clusterCopy;
-	__shared__ ClusterCuda *newCluster;
-	__shared__ CellCuda *newCells;
+	__shared__ CudaCellCluster clusterCopy;
+	__shared__ CudaCellCluster *newCluster;
+	__shared__ CudaCell *newCells;
 	__shared__ float rotMatrix[2][2];
 	__shared__ CollisionData collisionData;
 
-	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+	CudaCellCluster *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	int startCellIndex;
 	int endCellIndex;
 	int2 size = data.size;
@@ -58,7 +58,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellCuda *oldCell = &oldCluster->cells[cellIndex];
+			CudaCell *oldCell = &oldCluster->cells[cellIndex];
 			collectCollisionData_Kernel(data, oldCell, collisionData);
 		}
 	}
@@ -93,9 +93,9 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellCuda *oldCell = &oldCluster->cells[cellIndex];
-			CellCuda *newCell = &newCells[cellIndex];
-			CellCuda cellCopy = *oldCell;
+			CudaCell *oldCell = &oldCluster->cells[cellIndex];
+			CudaCell *newCell = &newCells[cellIndex];
+			CudaCell cellCopy = *oldCell;
 			float2 absPos;
 			absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
 			absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
@@ -115,7 +115,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellCuda* newCell = &newCells[cellIndex];
+			CudaCell* newCell = &newCells[cellIndex];
 			int numConnections = newCell->numConnections;
 			for (int i = 0; i < numConnections; ++i) {
 				newCell->connections[i] = newCell->connections[i]->nextTimestep;
@@ -145,7 +145,7 @@ __global__ void movement_Kernel(CudaData data)
 
 __device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
 {
-	ClusterCuda *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+	CudaCellCluster *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 
 	int startCellIndex;
 	int endCellIndex;
