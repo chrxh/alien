@@ -9,7 +9,7 @@
 #include "Model/AccessPorts/SimulationAccess.h"
 #include "Model/ModelBuilderFacade.h"
 #include "Model/SimulationController.h"
-#include "Model/SimulationContextApi.h"
+#include "Model/Context/SimulationContextApi.h"
 #include "Model/Context/EnergyParticleMap.h"
 #include "Model/Context/CellMap.h"
 #include "Model/SpaceMetricApi.h"
