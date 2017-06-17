@@ -16,7 +16,7 @@ public:
 	virtual ~GpuWorker();
 
 	virtual void init(SpaceMetricApi* metric);
-	virtual void requireData();
+	virtual void requireAndLockData();
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual CudaDataForAccess retrieveData();
 	virtual void unlockData();
