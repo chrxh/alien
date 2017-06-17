@@ -19,11 +19,15 @@ public:
 	virtual SimulationContextApi* getContext() const override;
 
 private:
-	Q_SLOT void nextFrameTimerTimeout();
+	Q_SLOT void oneSecondTimerTimeout();
+	Q_SLOT void frameTimerTimeout();
 
 	SimulationContextGpuImpl *_context = nullptr;
 
 	RunningMode _mode = RunningMode::DoNothing;
 	QTime _timeSinceLastStart;
-	QTimer* _nextFrameTimer = nullptr;
+	int _timestepsPerSecond = 0;
+	int _displayedFramesSinceLastStart = 0;
+	QTimer* _frameTimer = nullptr;
+	QTimer* _oneSecondTimer = nullptr;
 };

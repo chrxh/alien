@@ -7,15 +7,19 @@
 
 namespace
 {
-	const double displayFps = 20.0;
+	const int updateFrameInMilliSec = 50.0;
 }
 
 SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
 	: SimulationController(parent)
-	, _nextFrameTimer(new QTimer(this))
+	, _oneSecondTimer(new QTimer(this))
+	, _frameTimer(new QTimer(this))
 {
-	connect(_nextFrameTimer, &QTimer::timeout, this, &SimulationControllerGpuImpl::nextFrameTimerTimeout);
-	_nextFrameTimer->start(displayFps);
+	connect(_oneSecondTimer, &QTimer::timeout, this, &SimulationControllerGpuImpl::oneSecondTimerTimeout);
+	connect(_frameTimer, &QTimer::timeout, this, &SimulationControllerGpuImpl::frameTimerTimeout);
+
+	_oneSecondTimer->start(1000);
+	_frameTimer->start(updateFrameInMilliSec);
 }
 
 void SimulationControllerGpuImpl::init(SimulationContextApi * context)
@@ -23,23 +27,24 @@ void SimulationControllerGpuImpl::init(SimulationContextApi * context)
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
 	connect(_context->getGpuThreadController(), &GpuThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
-		int elapsedTime = _timeSinceLastStart.elapsed();
-		if(elapsedTime == 0) {
-			elapsedTime = 1;
+		++_timestepsPerSecond;
+		if (_mode == RunningMode::OpenEndedSimulation) {
+			if (_timeSinceLastStart.elapsed() > updateFrameInMilliSec*_displayedFramesSinceLastStart) {
+				++_displayedFramesSinceLastStart;
+			}
 		}
-		Q_EMIT updateTimestepsPerSecond(1000 / elapsedTime);
-		_timeSinceLastStart.restart();
 
 		if (_mode != RunningMode::OpenEndedSimulation) {
 			Q_EMIT nextFrameCalculated();
 			_mode = RunningMode::DoNothing;
 		}
+
 	});
 }
 
 void SimulationControllerGpuImpl::setRun(bool run)
 {
-	nextFrameTimerTimeout();
+	_displayedFramesSinceLastStart = 0;
 	if (run) {
 		_mode = RunningMode::OpenEndedSimulation;
 		_timeSinceLastStart.restart();
@@ -62,7 +67,13 @@ SimulationContextApi * SimulationControllerGpuImpl::getContext() const
 	return _context;
 }
 
-void SimulationControllerGpuImpl::nextFrameTimerTimeout()
+void SimulationControllerGpuImpl::oneSecondTimerTimeout()
+{
+	Q_EMIT updateTimestepsPerSecond(_timestepsPerSecond);
+	_timestepsPerSecond = 0;
+}
+
+void SimulationControllerGpuImpl::frameTimerTimeout()
 {
 	if (_mode != RunningMode::DoNothing) {
 		Q_EMIT nextFrameCalculated();
