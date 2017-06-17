@@ -1,3 +1,7 @@
+#include <QImage>
+
+#include "Model/SpaceMetricApi.h"
+
 #include "GpuWorker.h"
 #include "GpuThreadController.h"
 #include "SimulationContextGpuImpl.h"
@@ -9,9 +13,9 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 
 void SimulationAccessGpuImpl::init(SimulationContextApi * context)
 {
-	auto _context = static_cast<SimulationContextGpuImpl*>(context);
-	_worker = _context->getGpuThreadController()->getGpuWorker();
-	connect(_worker, &GpuWorker::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
+	_context = static_cast<SimulationContextGpuImpl*>(context);
+	auto worker = _context->getGpuThreadController()->getGpuWorker();
+	connect(worker, &GpuWorker::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }
 
 void SimulationAccessGpuImpl::updateData(DataDescription const & desc)
@@ -32,7 +36,8 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredRect = rect;
 	_requiredImage = target;
 
-	_worker->requireData();
+	auto worker = _context->getGpuThreadController()->getGpuWorker();
+	worker->requireData();
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -42,11 +47,29 @@ DataDescription const & SimulationAccessGpuImpl::retrieveData()
 
 void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 {
-	auto cudaData = _worker->retrieveData();
-	if (_imageRequired) {
-		//todo: create image
+	auto worker = _context->getGpuThreadController()->getGpuWorker();
+	auto metric = _context->getSpaceMetric();
 
-		Q_EMIT imageReadyToRetrieve();
+	if (_imageRequired) {
+		_imageRequired = false;
+
+		auto cudaData = worker->lockAndRetrieveData();
+
+		_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
+
+		for (int i = 0; i < cudaData.numCells; ++i) {
+			CudaCell& cell = cudaData.cells[i];
+			float2 pos = cell.absPos;
+			IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
+			if (_requiredRect.isContained(intPos)) {
+				metric->correctPosition(intPos);
+				_requiredImage->setPixel(intPos.x, intPos.y, 0xFF);
+			}
+		}
+
+		worker->unlockData();
+
+		Q_EMIT imageReady();
 	}
 }
 

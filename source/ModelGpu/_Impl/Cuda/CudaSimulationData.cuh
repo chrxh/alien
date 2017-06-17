@@ -9,8 +9,6 @@ struct CudaSimulation
 
 	ArrayController<CudaCellCluster> clustersAC1;
 	ArrayController<CudaCellCluster> clustersAC2;
-	ArrayController<CudaCellCluster> clustersAC3;
 	ArrayController<CudaCell> cellsAC1;
 	ArrayController<CudaCell> cellsAC2;
-	ArrayController<CudaCell> cellsAC3;
 };
