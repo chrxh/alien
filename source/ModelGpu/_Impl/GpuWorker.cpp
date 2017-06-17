@@ -1,5 +1,4 @@
 #include <functional>
-#include <QThread>
 #include <QImage>
 
 #include "Model/SpaceMetricApi.h"
@@ -19,24 +18,50 @@ void GpuWorker::init(SpaceMetricApi* metric)
 	cudaInit({ size.x, size.y });
 }
 
+void GpuWorker::requireData()
+{
+}
+
+CudaData GpuWorker::retrieveData()
+{
+	return CudaData();
+}
+
+/*
 void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolveDesc, DataDescription & result)
 {
-	int numCLusters;
-	CudaCellCluster* clusters;
 	result.clear();
-	cudaGetSimulationDataRef(numCLusters, clusters);
-	for (int i = 0; i < numCLusters; ++i) {
+	CudaData data = cudaGetDataRef();
+	
+	for (int i = 0; i < data.numClusters; ++i) {
 		CellClusterDescription clusterDesc;
-		CudaCellCluster temp = clusters[i];
-		if (rect.isContained({ static_cast<int>(clusters[i].pos.x), static_cast<int>(clusters[i].pos.y) }))
-		for (int j = 0; j < clusters[i].numCells; ++j) {
-			auto pos = clusters[i].cells[j].absPos;
+		CudaCellCluster temp = data.clusters[i];
+		if (rect.isContained({ static_cast<int>(data.clusters[i].pos.x), static_cast<int>(data.clusters[i].pos.y) }))
+		for (int j = 0; j < data.clusters[i].numCells; ++j) {
+			auto pos = data.clusters[i].cells[j].absPos;
 			clusterDesc.addCell(CellDescription().setPos({ static_cast<float>(pos.x), static_cast<float>(pos.y) }).setMetadata(CellMetadata()).setEnergy(100.0f));
 		}
 		result.addCellCluster(clusterDesc);
 	}
 }
+*/
 
+bool GpuWorker::isSimulationRunning()
+{
+	return _simRunning;
+}
+
+RunningMode GpuWorker::getMode()
+{
+	return _mode;
+}
+
+void GpuWorker::setMode(RunningMode mode)
+{
+	_mode = mode;
+}
+
+/*
 const QColor UNIVERSE_COLOR(0x00, 0x00, 0x1b);
 
 void GpuWorker::getImage(IntRect const & rect, QImage * image)
@@ -45,7 +70,7 @@ void GpuWorker::getImage(IntRect const & rect, QImage * image)
 
 	int numCLusters;
 	CudaCellCluster* clusters;
-	cudaGetSimulationDataRef(numCLusters, clusters);
+	cudaGetClustersRef(numCLusters, clusters);
 	for (int i = 0; i < numCLusters; ++i) {
 		CellClusterDescription clusterDesc;
 		CudaCellCluster temp = clusters[i];
@@ -58,10 +83,14 @@ void GpuWorker::getImage(IntRect const & rect, QImage * image)
 			}
 	}
 }
+*/
 
-void GpuWorker::calculateTimestep()
+void GpuWorker::runSimulation()
 {
-	cudaCalcNextTimestep();
-//	QThread::msleep(20);
-	Q_EMIT timestepCalculated();
+	_simRunning = true;
+	do {
+		cudaCalcNextTimestep();
+		Q_EMIT timestepCalculated();
+	} while (_mode == RunningMode::OpenEnd);
+	_simRunning = false;
 }

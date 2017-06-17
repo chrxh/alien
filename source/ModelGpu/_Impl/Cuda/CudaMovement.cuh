@@ -22,7 +22,7 @@ __device__ void angleCorrection_Kernel(float &angle)
 	angle = (float)intPart + fracPart;
 }
 
-__device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
+__device__ void inline movement_Kernel(CudaSimulation &data, int clusterIndex)
 {
 	__shared__ CudaCellCluster clusterCopy;
 	__shared__ CudaCellCluster *newCluster;
@@ -127,7 +127,7 @@ __device__ void inline movement_Kernel(CudaData &data, int clusterIndex)
 }
 
 
-__global__ void movement_Kernel(CudaData data)
+__global__ void movement_Kernel(CudaSimulation data)
 {
 	int blockIndex = blockIdx.x;
 	int numClusters = data.clustersAC1.getNumEntries();
@@ -143,7 +143,7 @@ __global__ void movement_Kernel(CudaData data)
 	}
 }
 
-__device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
+__device__ void clearOldMap_Kernel(CudaSimulation const &data, int clusterIndex)
 {
 	CudaCellCluster *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 
@@ -162,7 +162,7 @@ __device__ void clearOldMap_Kernel(CudaData const &data, int clusterIndex)
 	}
 }
 
-__global__ void clearOldMap_Kernel(CudaData data)
+__global__ void clearOldMap_Kernel(CudaSimulation data)
 {
 	int blockIndex = blockIdx.x;
 	int numClusters = data.clustersAC1.getNumEntries();
@@ -177,3 +177,4 @@ __global__ void clearOldMap_Kernel(CudaData data)
 		clearOldMap_Kernel(data, clusterIndex);
 	}
 }
+

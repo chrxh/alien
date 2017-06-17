@@ -15,17 +15,13 @@ public:
 
 	void init(SpaceMetricApi *metric);
 
-	virtual void registerObserver(GpuObserver* observer);
-	virtual void unregisterObserver(GpuObserver* observer);
-	virtual void notifyObserver();
 	virtual GpuWorker* getGpuWorker() const;
-	virtual bool isGpuThreadWorking() const;
 
-	void calculateTimestep();
+	void runSimulation(bool run);
 	Q_SIGNAL void timestepCalculated();
 
 private:
-	Q_SIGNAL void calculateTimestepWithGpu();
+	Q_SIGNAL void runSimulationWithGpu();
 	Q_SLOT void timestepCalculatedWithGpu();
 
 	SpaceMetricApi *_metric = nullptr;
@@ -33,6 +29,4 @@ private:
 	QThread _thread;
 	GpuWorker* _worker = nullptr;
 	bool _gpuThreadWorking = false;
-
-	vector<GpuObserver*> _observers;
 };

@@ -5,16 +5,13 @@
 
 SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 {
-	if (_registered) {
-		_context->getGpuThreadController()->unregisterObserver(this);
-	}
 }
 
 void SimulationAccessGpuImpl::init(SimulationContextApi * context)
 {
-	_context = static_cast<SimulationContextGpuImpl*>(context);
-	_context->getGpuThreadController()->registerObserver(this);
-	_registered = true;
+	auto _context = static_cast<SimulationContextGpuImpl*>(context);
+	_worker = _context->getGpuThreadController()->getGpuWorker();
+	connect(_worker, &GpuWorker::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }
 
 void SimulationAccessGpuImpl::updateData(DataDescription const & desc)
@@ -27,9 +24,6 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_requiredRect = rect;
 	_resolveDesc = resolveDesc;
 
-	if(!_context->getGpuThreadController()->isGpuThreadWorking()) {
-		accessToUnits();
-	}
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
@@ -38,9 +32,7 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredRect = rect;
 	_requiredImage = target;
 
-	if (!_context->getGpuThreadController()->isGpuThreadWorking()) {
-		accessToUnits();
-	}
+	_worker->requireData();
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -48,25 +40,11 @@ DataDescription const & SimulationAccessGpuImpl::retrieveData()
 	return _dataCollected;
 }
 
-void SimulationAccessGpuImpl::unregister()
+void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 {
-	_registered = false;
-}
-
-void SimulationAccessGpuImpl::accessToUnits()
-{
-	if (_dataRequired) {
-
-		_dataRequired = false;
-		_context->getGpuThreadController()->getGpuWorker()->getData(_requiredRect, _resolveDesc, _dataCollected);
-
-		Q_EMIT dataReadyToRetrieve();
-	}
-
+	auto cudaData = _worker->retrieveData();
 	if (_imageRequired) {
-
-		_imageRequired = false;
-		_context->getGpuThreadController()->getGpuWorker()->getImage(_requiredRect, _requiredImage);
+		//todo: create image
 
 		Q_EMIT imageReadyToRetrieve();
 	}
