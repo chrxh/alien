@@ -9,7 +9,6 @@
 
 class SimulationAccessGpuImpl
 	: public SimulationAccess
-	, public GpuObserver
 {
 public:
 	SimulationAccessGpuImpl(QObject* parent = nullptr) : SimulationAccess(parent) {}
@@ -22,12 +21,10 @@ public:
 	virtual void requireImage(IntRect rect, QImage* target) override;
 	virtual DataDescription const& retrieveData() override;
 
-	virtual void unregister() override;
-	virtual void accessToUnits() override;
-	
 private:
-	SimulationContextGpuImpl* _context = nullptr;
-	bool _registered = false;
+	Q_SLOT void dataReadyToRetrieveFromGpu();
+
+	GpuWorker* _worker = nullptr;
 
 	bool _dataRequired = false;
 	bool _imageRequired = false;
