@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mutex>
+#include <atomic>
 #include <QObject>
 
 #include "Model/Entities/Descriptions.h"
@@ -33,6 +33,6 @@ private:
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;
 	bool _requireData = false;
-	std::mutex _mutex;
+	std::atomic_int _mutex = 0;
 	CudaDataForAccess _cudaData;
 };

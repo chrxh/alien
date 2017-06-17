@@ -31,7 +31,7 @@ CudaDataForAccess GpuWorker::retrieveData()
 
 void GpuWorker::unlockData()
 {
-	_mutex.unlock();
+	_mutex = 0;
 }
 
 /*
@@ -93,7 +93,7 @@ void GpuWorker::runSimulation()
 	do {
 		cudaCalcNextTimestep();
 		Q_EMIT timestepCalculated();
-		if (_requireData && _mutex.try_lock()) {
+		if (_requireData && _mutex.fetch_or(1) == 0) {
 			_cudaData = cudaGetData();
 			_requireData = false;
 			Q_EMIT dataReadyToRetrieve();
