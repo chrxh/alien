@@ -48,7 +48,7 @@ void PixelUniverse::init(SimulationController* controller, SimulationAccess* acc
 void PixelUniverse::activate()
 {
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	connect(_simAccess, &SimulationAccess::imageReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
+	connect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_simAccess->requireImage({ { 0, 0 }, size }, _image);
@@ -57,7 +57,7 @@ void PixelUniverse::activate()
 void PixelUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	disconnect(_simAccess, &SimulationAccess::imageReadyToRetrieve, this, &PixelUniverse::retrieveAndDisplayData);
+	disconnect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverse::retrieveAndDisplayData);
 }
 
 void PixelUniverse::requestData()
