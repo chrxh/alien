@@ -17,7 +17,8 @@ public:
 
 	virtual GpuWorker* getGpuWorker() const;
 
-	void runSimulation(bool run);
+	void calculate(RunningMode mode);
+
 	Q_SIGNAL void timestepCalculated();
 
 private:
