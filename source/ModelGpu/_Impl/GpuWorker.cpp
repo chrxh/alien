@@ -18,9 +18,10 @@ void GpuWorker::init(SpaceMetricApi* metric)
 	cudaInit({ size.x, size.y });
 }
 
-void GpuWorker::requireData()
+void GpuWorker::requireAndLockData()
 {
 	_requireData = true;
+	//data will be locked later in GpuWorker::runSimulation()
 }
 
 CudaDataForAccess GpuWorker::retrieveData()
