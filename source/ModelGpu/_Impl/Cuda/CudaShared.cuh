@@ -4,17 +4,6 @@
 
 #include "CudaConstants.cuh"
 
-struct CudaLightCell
-{
-	float2 absPos;
-};
-
-struct CudaLightCellCluster
-{
-	CudaLightCell* cells;
-};
-
-
 struct CudaCellCluster;
 struct CudaCell
 {
@@ -38,9 +27,15 @@ struct CudaCellCluster
 	CudaCell* cells;
 };
 
+struct CudaData
+{
+	int numClusters;
+	CudaCellCluster* clusters;
+};
+
 extern void cudaInit(int2 const &size);
 extern void cudaCalcNextTimestep();
-extern void cudaGetSimulationDataRef(int& numClusters, CudaCellCluster*& clusters);
+extern CudaData cudaGetDataRef();
 extern void cudaShutdown();
 
 

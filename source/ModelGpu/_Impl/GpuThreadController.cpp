@@ -8,19 +8,20 @@ GpuThreadController::GpuThreadController(QObject* parent /*= nullptr*/)
 {
 	_worker = new GpuWorker;
 	_worker->moveToThread(&_thread);
-	connect(this, &GpuThreadController::calculateTimestepWithGpu, _worker, &GpuWorker::calculateTimestep);
+	connect(this, &GpuThreadController::runSimulationWithGpu, _worker, &GpuWorker::runSimulation);
 	connect(_worker, &GpuWorker::timestepCalculated, this, &GpuThreadController::timestepCalculatedWithGpu);
 	_thread.start();
 }
 
 GpuThreadController::~GpuThreadController()
 {
+	_worker->setMode(RunningMode::StopAfterNextTimestep);
 	_thread.quit();
-	_thread.wait();
-	delete _worker;
-	for (auto const &observer : _observers) {
-		observer->unregister();
+	if (!_thread.wait(2000)) {
+		_thread.terminate();
+		_thread.wait();
 	}
+	delete _worker;
 }
 
 void GpuThreadController::init(SpaceMetricApi *metric)
@@ -28,43 +29,26 @@ void GpuThreadController::init(SpaceMetricApi *metric)
 	_worker->init(metric);
 }
 
-void GpuThreadController::registerObserver(GpuObserver * observer)
-{
-	_observers.push_back(observer);
-}
-
-void GpuThreadController::unregisterObserver(GpuObserver * observer)
-{
-	_observers.erase(std::remove(_observers.begin(), _observers.end(), observer), _observers.end());
-}
-
-void GpuThreadController::notifyObserver()
-{
-	for (auto const &observer : _observers) {
-		observer->accessToUnits();
-	}
-}
-
 GpuWorker * GpuThreadController::getGpuWorker() const
 {
 	return _worker;
 }
 
-bool GpuThreadController::isGpuThreadWorking() const
+void GpuThreadController::runSimulation(bool run)
 {
-	return _gpuThreadWorking;
-}
-
-void GpuThreadController::calculateTimestep()
-{
-	_gpuThreadWorking = true;
-	Q_EMIT calculateTimestepWithGpu();
+	if (run) {
+		_worker->setMode(RunningMode::OpenEnd);
+		if (!_worker->isSimulationRunning()) {
+			Q_EMIT runSimulationWithGpu();
+		}
+	}
+	else {
+		_worker->setMode(RunningMode::StopAfterNextTimestep);
+	}
 }
 
 void GpuThreadController::timestepCalculatedWithGpu()
 {
-	_gpuThreadWorking = false;
-	notifyObserver();
 	Q_EMIT timestepCalculated();
 }
 

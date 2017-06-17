@@ -270,7 +270,7 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CudaCell *cel
 	}
 }
 
-__device__ __inline__ void collectCollisionData_Kernel(CudaData const &data, CudaCell *cell, CollisionData &collisionData)
+__device__ __inline__ void collectCollisionData_Kernel(CudaSimulation const &data, CudaCell *cell, CollisionData &collisionData)
 {
 	if (cell->protectionCounter > 0) {
 		return;

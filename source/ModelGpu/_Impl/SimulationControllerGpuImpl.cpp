@@ -29,7 +29,6 @@ void SimulationControllerGpuImpl::init(SimulationContextApi * context)
 				++_displayedFramesSinceLastStart;
 				Q_EMIT nextFrameCalculated();
 			}
-			_context->getGpuThreadController()->calculateTimestep();
 		}
 		else {
 			Q_EMIT nextFrameCalculated();
@@ -45,14 +44,14 @@ void SimulationControllerGpuImpl::setRun(bool run)
 	_flagSimulationRunning = run;
 	if (run) {
 		_timeSinceLastStart.restart();
-		_context->getGpuThreadController()->calculateTimestep();
+		_context->getGpuThreadController()->runSimulation(true);
 	}
 }
 
 void SimulationControllerGpuImpl::calculateSingleTimestep()
 {
 	_timeSinceLastStart.restart();
-	_context->getGpuThreadController()->calculateTimestep();
+	_context->getGpuThreadController()->runSimulation(false);
 }
 
 SimulationContextApi * SimulationControllerGpuImpl::getContext() const

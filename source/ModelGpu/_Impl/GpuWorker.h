@@ -3,6 +3,8 @@
 #include <QObject>
 
 #include "Model/Entities/Descriptions.h"
+#include "Cuda/CudaShared.cuh"
+#include "DefinitionsImpl.h"
 
 class GpuWorker
 	: public QObject
@@ -13,12 +15,20 @@ public:
 	virtual ~GpuWorker();
 
 	virtual void init(SpaceMetricApi* metric);
-	virtual void getData(IntRect const &rect, ResolveDescription const &resolveDesc, DataDescription &result);
-	virtual void getImage(IntRect const &rect, QImage* target);
+	virtual void requireData();
+	Q_SIGNAL void dataReadyToRetrieve();
+	virtual CudaData retrieveData();
 
-	Q_SLOT void calculateTimestep();
+	virtual bool isSimulationRunning();
+	virtual RunningMode getMode();
+	virtual void setMode(RunningMode mode);
+
+	Q_SLOT void runSimulation();
 	Q_SIGNAL void timestepCalculated();
 
 private:
 	SpaceMetricApi* _metric;
+
+	bool _simRunning = false;
+	RunningMode _mode = RunningMode::StopAfterNextTimestep;
 };
