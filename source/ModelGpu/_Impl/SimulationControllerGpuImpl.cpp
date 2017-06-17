@@ -7,7 +7,7 @@
 
 namespace
 {
-	const int updateFrameInMilliSec = 30.0;
+	const int updateFrameInMilliSec = 25.0;
 }
 
 SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
