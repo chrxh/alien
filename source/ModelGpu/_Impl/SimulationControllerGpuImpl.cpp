@@ -12,10 +12,10 @@ namespace
 
 SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
 	: SimulationController(parent)
-	, _oneSecondTimer(new QTimer(this))
+	, _nextFrameTimer(new QTimer(this))
 {
-	connect(_oneSecondTimer, &QTimer::timeout, this, &SimulationControllerGpuImpl::oneSecondTimerTimeout);
-	_oneSecondTimer->start(1000);
+	connect(_nextFrameTimer, &QTimer::timeout, this, &SimulationControllerGpuImpl::nextFrameTimerTimeout);
+	_nextFrameTimer->start(displayFps);
 }
 
 void SimulationControllerGpuImpl::init(SimulationContextApi * context)
@@ -23,35 +23,38 @@ void SimulationControllerGpuImpl::init(SimulationContextApi * context)
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
 	connect(_context->getGpuThreadController(), &GpuThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
-		++_timestepsPerSecond;
-		if (_flagSimulationRunning) {
-			if (_timeSinceLastStart.elapsed() > (1000.0 / displayFps)*_displayedFramesSinceLastStart) {
-				++_displayedFramesSinceLastStart;
-				Q_EMIT nextFrameCalculated();
-			}
+		int elapsedTime = _timeSinceLastStart.elapsed();
+		if(elapsedTime == 0) {
+			elapsedTime = 1;
 		}
-		else {
+		Q_EMIT updateTimestepsPerSecond(1000 / elapsedTime);
+		_timeSinceLastStart.restart();
+
+		if (_mode != RunningMode::OpenEndedSimulation) {
 			Q_EMIT nextFrameCalculated();
+			_mode = RunningMode::DoNothing;
 		}
 	});
-
 }
-
 
 void SimulationControllerGpuImpl::setRun(bool run)
 {
-	_displayedFramesSinceLastStart = 0;
-	_flagSimulationRunning = run;
+	nextFrameTimerTimeout();
 	if (run) {
+		_mode = RunningMode::OpenEndedSimulation;
 		_timeSinceLastStart.restart();
-		_context->getGpuThreadController()->runSimulation(true);
 	}
+	else {
+		_mode = RunningMode::DoNothing;
+	}
+	_context->getGpuThreadController()->calculate(_mode);
 }
 
 void SimulationControllerGpuImpl::calculateSingleTimestep()
 {
+	_mode = RunningMode::CalcSingleTimestep;
 	_timeSinceLastStart.restart();
-	_context->getGpuThreadController()->runSimulation(false);
+	_context->getGpuThreadController()->calculate(_mode);
 }
 
 SimulationContextApi * SimulationControllerGpuImpl::getContext() const
@@ -59,8 +62,9 @@ SimulationContextApi * SimulationControllerGpuImpl::getContext() const
 	return _context;
 }
 
-Q_SLOT void SimulationControllerGpuImpl::oneSecondTimerTimeout()
+void SimulationControllerGpuImpl::nextFrameTimerTimeout()
 {
-	Q_EMIT updateTimestepsPerSecond(_timestepsPerSecond);
-	_timestepsPerSecond = 0;
+	if (_mode != RunningMode::DoNothing) {
+		Q_EMIT nextFrameCalculated();
+	}
 }

@@ -51,14 +51,9 @@ bool GpuWorker::isSimulationRunning()
 	return _simRunning;
 }
 
-RunningMode GpuWorker::getMode()
+void GpuWorker::setFlagStopAfterNextTimestep(bool value)
 {
-	return _mode;
-}
-
-void GpuWorker::setMode(RunningMode mode)
-{
-	_mode = mode;
+	_stopAfterNextTimestep = value;
 }
 
 /*
@@ -91,6 +86,6 @@ void GpuWorker::runSimulation()
 	do {
 		cudaCalcNextTimestep();
 		Q_EMIT timestepCalculated();
-	} while (_mode == RunningMode::OpenEnd);
+	} while (!_stopAfterNextTimestep);
 	_simRunning = false;
 }

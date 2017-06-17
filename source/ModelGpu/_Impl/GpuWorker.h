@@ -20,8 +20,7 @@ public:
 	virtual CudaData retrieveData();
 
 	virtual bool isSimulationRunning();
-	virtual RunningMode getMode();
-	virtual void setMode(RunningMode mode);
+	virtual void setFlagStopAfterNextTimestep(bool value);
 
 	Q_SLOT void runSimulation();
 	Q_SIGNAL void timestepCalculated();
@@ -30,5 +29,5 @@ private:
 	SpaceMetricApi* _metric;
 
 	bool _simRunning = false;
-	RunningMode _mode = RunningMode::StopAfterNextTimestep;
+	bool _stopAfterNextTimestep = true;
 };
