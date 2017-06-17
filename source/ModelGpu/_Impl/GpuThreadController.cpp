@@ -15,7 +15,7 @@ GpuThreadController::GpuThreadController(QObject* parent /*= nullptr*/)
 
 GpuThreadController::~GpuThreadController()
 {
-	_worker->setMode(RunningMode::StopAfterNextTimestep);
+	_worker->setFlagStopAfterNextTimestep(RunningMode::CalcSingleTimestep);
 	_thread.quit();
 	if (!_thread.wait(2000)) {
 		_thread.terminate();
@@ -34,16 +34,22 @@ GpuWorker * GpuThreadController::getGpuWorker() const
 	return _worker;
 }
 
-void GpuThreadController::runSimulation(bool run)
+void GpuThreadController::calculate(RunningMode mode)
 {
-	if (run) {
-		_worker->setMode(RunningMode::OpenEnd);
+	if (mode == RunningMode::CalcSingleTimestep) {
+		_worker->setFlagStopAfterNextTimestep(true);
 		if (!_worker->isSimulationRunning()) {
 			Q_EMIT runSimulationWithGpu();
 		}
 	}
-	else {
-		_worker->setMode(RunningMode::StopAfterNextTimestep);
+	if (mode == RunningMode::OpenEndedSimulation) {
+		_worker->setFlagStopAfterNextTimestep(false);
+		if (!_worker->isSimulationRunning()) {
+			Q_EMIT runSimulationWithGpu();
+		}
+	}
+	if (mode == RunningMode::DoNothing) {
+		_worker->setFlagStopAfterNextTimestep(true);
 	}
 }
 

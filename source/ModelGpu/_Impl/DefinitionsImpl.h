@@ -6,4 +6,4 @@ class GpuWorker;
 class GpuObserver;
 class GpuThreadController;
 	
-enum RunningMode { StopAfterNextTimestep, OpenEnd };
+enum RunningMode { DoNothing, CalcSingleTimestep, OpenEndedSimulation };
