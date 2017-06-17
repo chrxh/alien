@@ -27,15 +27,15 @@ struct CudaCellCluster
 	CudaCell* cells;
 };
 
-struct CudaData
+struct CudaDataForAccess
 {
-	int numClusters;
-	CudaCellCluster* clusters;
+	int numCells;
+	CudaCell* cells;
 };
 
 extern void cudaInit(int2 const &size);
 extern void cudaCalcNextTimestep();
-extern CudaData cudaGetDataRef();
+extern CudaDataForAccess cudaGetData();
 extern void cudaShutdown();
 
 

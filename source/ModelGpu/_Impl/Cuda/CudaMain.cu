@@ -79,6 +79,7 @@ void cudaInit(int2 const &size)
 
 void cudaCalcNextTimestep()
 {
+	cudaSimulationManager->prepareTargetData();
 
 	movement_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaSimulationManager->data);
 	cudaDeviceSynchronize();
@@ -88,15 +89,11 @@ void cudaCalcNextTimestep()
 	checkCudaErrors(cudaGetLastError());
 	
 	cudaSimulationManager->swapData();
-	cudaSimulationManager->prepareTargetData();
 }
 
-CudaData cudaGetDataRef()
+CudaDataForAccess cudaGetData()
 {
-	CudaData result;
-	result.numClusters = cudaSimulationManager->data.clustersAC1.getNumEntries();
-	result.clusters = cudaSimulationManager->data.clustersAC1.getEntireArray();
-	return result;
+	return cudaSimulationManager->getDataForAccess();
 }
 
 

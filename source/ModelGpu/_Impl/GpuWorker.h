@@ -17,7 +17,8 @@ public:
 	virtual void init(SpaceMetricApi* metric);
 	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
-	virtual CudaData retrieveData();
+	virtual CudaDataForAccess lockAndRetrieveData();
+	virtual void unlockData();
 
 	virtual bool isSimulationRunning();
 	virtual void setFlagStopAfterNextTimestep(bool value);
@@ -30,4 +31,7 @@ private:
 
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;
+	bool _requireData = false;
+	bool _lockData = false;
+	CudaDataForAccess _cudaData;
 };

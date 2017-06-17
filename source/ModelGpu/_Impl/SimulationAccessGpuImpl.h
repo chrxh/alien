@@ -24,7 +24,7 @@ public:
 private:
 	Q_SLOT void dataReadyToRetrieveFromGpu();
 
-	GpuWorker* _worker = nullptr;
+	SimulationContextGpuImpl* _context = nullptr;
 
 	bool _dataRequired = false;
 	bool _imageRequired = false;
