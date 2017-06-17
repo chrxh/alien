@@ -37,7 +37,7 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredImage = target;
 
 	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	worker->requireData();
+	worker->requireAndLockData();
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
