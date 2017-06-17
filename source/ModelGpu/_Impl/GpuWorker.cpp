@@ -23,14 +23,14 @@ void GpuWorker::requireData()
 	_requireData = true;
 }
 
-CudaDataForAccess GpuWorker::lockAndRetrieveData()
+CudaDataForAccess GpuWorker::retrieveData()
 {
 	return _cudaData;
 }
 
 void GpuWorker::unlockData()
 {
-	_lockData = false;
+	_mutex.unlock();
 }
 
 /*
@@ -92,8 +92,7 @@ void GpuWorker::runSimulation()
 	do {
 		cudaCalcNextTimestep();
 		Q_EMIT timestepCalculated();
-		if (_requireData && !_lockData) {
-			_lockData = true;	//TODO: mit mutex.trylock?
+		if (_requireData && _mutex.try_lock()) {
 			_cudaData = cudaGetData();
 			_requireData = false;
 			Q_EMIT dataReadyToRetrieve();
