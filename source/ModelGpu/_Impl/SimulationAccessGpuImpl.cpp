@@ -53,7 +53,7 @@ void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 	if (_imageRequired) {
 		_imageRequired = false;
 
-		auto cudaData = worker->lockAndRetrieveData();
+		auto cudaData = worker->retrieveData();
 
 		_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
 

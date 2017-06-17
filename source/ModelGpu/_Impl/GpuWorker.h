@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <QObject>
 
 #include "Model/Entities/Descriptions.h"
@@ -17,7 +18,7 @@ public:
 	virtual void init(SpaceMetricApi* metric);
 	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
-	virtual CudaDataForAccess lockAndRetrieveData();
+	virtual CudaDataForAccess retrieveData();
 	virtual void unlockData();
 
 	virtual bool isSimulationRunning();
@@ -32,6 +33,6 @@ private:
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;
 	bool _requireData = false;
-	bool _lockData = false;
+	std::mutex _mutex;
 	CudaDataForAccess _cudaData;
 };
