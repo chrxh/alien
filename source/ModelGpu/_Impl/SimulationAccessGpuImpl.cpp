@@ -47,11 +47,11 @@ DataDescription const & SimulationAccessGpuImpl::retrieveData()
 
 void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 {
-	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	auto metric = _context->getSpaceMetric();
 
 	if (_imageRequired) {
 		_imageRequired = false;
+		auto worker = _context->getGpuThreadController()->getGpuWorker();
+		auto metric = _context->getSpaceMetric();
 
 		auto cudaData = worker->retrieveData();
 
@@ -67,9 +67,9 @@ void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 			}
 		}
 
-		worker->unlockData();
-
 		Q_EMIT imageReady();
+
+		worker->unlockData();
 	}
 }
 
