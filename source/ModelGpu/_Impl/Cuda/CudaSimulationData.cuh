@@ -11,4 +11,8 @@ struct CudaSimulation
 	ArrayController<CudaCellCluster> clustersAC2;
 	ArrayController<CudaCell> cellsAC1;
 	ArrayController<CudaCell> cellsAC2;
+	ArrayController<CudaEnergyParticle> particleAC1;
+	ArrayController<CudaEnergyParticle> particleAC2;
+
+	CudaRandomNumberGenerator randomGen;
 };

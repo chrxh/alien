@@ -62,7 +62,7 @@ void cudaInit(int2 const &size)
 	auto clusters = cudaSimulationManager->data.clustersAC1.getArray(NUM_CLUSTERS);
 
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
-		createCluster(&clusters[i], { 0.0f, 0.0f }, { random(0.5f) - 0.25f, random(0.5f) - 0.25f }, random(360.0f), random(0.2f) - 0.1f, { rand() % 20 + 1, rand() % 20 + 1 }, size);
+		createCluster(&clusters[i], { 0.0f, 0.0f }, { random(1.0f) - 0.5f, random(1.0f) - 0.5f }, random(360.0f), random(0.4f) - 0.2f, { rand() % 20 + 1, rand() % 20 + 1 }, size);
 		do {
 			clusters[i].pos = { random(static_cast<float>(size.x)), random(static_cast<float>(size.y)) };
 			centerCluster(&clusters[i]);

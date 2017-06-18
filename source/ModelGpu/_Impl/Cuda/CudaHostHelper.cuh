@@ -15,11 +15,8 @@ public:
 
 		data.clustersAC1 = ArrayController<CudaCellCluster>(static_cast<int>(NUM_CLUSTERS * 1.1));
 		data.clustersAC2 = ArrayController<CudaCellCluster>(static_cast<int>(NUM_CLUSTERS * 1.1));
-//		data.clustersAC3 = ArrayController<CudaCellCluster>(static_cast<int>(NUM_CLUSTERS * 1.1));
 		data.cellsAC1 = ArrayController<CudaCell>(static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
 		data.cellsAC2 = ArrayController<CudaCell>(static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
-//		data.cellsAC3 = ArrayController<CudaCell>(static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
-
 
 		size_t mapSize = size.x * size.y * sizeof(CudaCell*);
 		cudaMallocManaged(&data.map1, mapSize);
@@ -33,6 +30,7 @@ public:
 			data.map2[i] = nullptr;
 		}
 
+		data.randomGen.init(RANDOM_NUMBER_BLOCK_SIZE);
 	}
 
 	~CudaSimulationManager()
@@ -41,9 +39,9 @@ public:
 		data.clustersAC2.free();
 		data.cellsAC1.free();
 		data.cellsAC2.free();
-
 		cudaFree(data.map1);
 		cudaFree(data.map2);
+		data.randomGen.free();
 
 		free(cellsForAccess);
 	}

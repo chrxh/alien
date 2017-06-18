@@ -40,12 +40,39 @@ struct SharedMemory
 	}
 };
 
+class CudaRandomNumberGenerator
+{
+private:
+	int *_currentIndex;
+	int *_array;
+
+public:
+
+	void init(int size)
+	{
+		cudaMallocManaged(&_currentIndex, sizeof(int));
+		cudaMallocManaged(&_array, sizeof(int)*size);
+		checkCudaErrors(cudaGetLastError());
+		*_currentIndex = 0;
+
+		for (int i = 0; i < size; ++i) {
+			_array[i] = rand();
+		}
+	}
+
+	void free()
+	{
+		cudaFree(_currentIndex);
+		cudaFree(_array);
+	}
+};
+
 template<class T>
 class ArrayController
 {
 private:
 	int _size;
-	int *_numEntries = nullptr;
+	int *_numEntries;
 	T* _data;
 
 public:
