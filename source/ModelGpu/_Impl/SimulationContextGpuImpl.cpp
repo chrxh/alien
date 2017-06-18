@@ -4,7 +4,6 @@
 #include "Model/SpaceMetricApi.h"
 
 #include "GpuWorker.h"
-#include "GpuObserver.h"
 #include "GpuThreadController.h"
 #include "SimulationContextGpuImpl.h"
 
