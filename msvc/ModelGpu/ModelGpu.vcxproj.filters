@@ -48,9 +48,6 @@
     <ClInclude Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\GpuObserver.h">
-      <Filter>Source Files\_Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaBase.cuh">
       <Filter>Source Files\_Impl\Cuda</Filter>
     </ClInclude>

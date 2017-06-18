@@ -5,8 +5,6 @@
 #include "Model/Context/UnitObserver.h"
 #include "Model/Entities/Descriptions.h"
 
-#include "GpuObserver.h"
-
 class SimulationAccessGpuImpl
 	: public SimulationAccess
 {

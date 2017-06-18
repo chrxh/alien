@@ -1,5 +1,4 @@
 #include "GpuWorker.h"
-#include "GpuObserver.h"
 
 #include "GpuThreadController.h"
 
