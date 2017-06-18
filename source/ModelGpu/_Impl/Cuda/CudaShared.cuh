@@ -4,6 +4,13 @@
 
 #include "CudaConstants.cuh"
 
+struct CudaEnergyParticle
+{
+	float energy;
+	float2 pos;
+	float2 vel;
+};
+
 struct CudaCellCluster;
 struct CudaCell
 {
