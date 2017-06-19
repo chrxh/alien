@@ -38,6 +38,8 @@ struct CudaDataForAccess
 {
 	int numCells;
 	CudaCell* cells;
+	int numParticles;
+	CudaEnergyParticle* particles;
 };
 
 extern void cudaInit(int2 const &size);
