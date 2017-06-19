@@ -9,20 +9,21 @@
 #include "CudaCollision.cuh"
 #include "CudaMap.cuh"
 
-__device__ void angleCorrection_Kernel(int &angle)
+__device__ void createNewParticle(CudaSimulation &data, float2 &pos)
 {
-	angle = ((angle % 360) + 360) % 360;
+	auto particle = data.particlesAC2.getElement_Kernel();
+	particle->pos = pos;
+	particle->vel = { data.randomGen.random()-0.5f, data.randomGen.random() - 0.5f };
 }
 
-__device__ void angleCorrection_Kernel(float &angle)
+__device__ void cellRadiation(CudaSimulation &data, CudaCell *oldCell)
 {
-	int intPart = (int)angle;
-	float fracPart = angle - intPart;
-	angleCorrection_Kernel(intPart);
-	angle = (float)intPart + fracPart;
+	if (data.randomGen.random() < 0.001) {
+		createNewParticle(data, oldCell->absPos);
+	}
 }
 
-__device__ void inline movement_Kernel(CudaSimulation &data, int clusterIndex)
+__device__ void clusterMovement(CudaSimulation &data, int clusterIndex)
 {
 	__shared__ CudaCellCluster clusterCopy;
 	__shared__ CudaCellCluster *newCluster;
@@ -37,7 +38,7 @@ __device__ void inline movement_Kernel(CudaSimulation &data, int clusterIndex)
 	int oldNumCells = oldCluster->numCells;
 	if (threadIdx.x < oldNumCells) {
 
-		tiling_Kernel(oldCluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+		calcPartition(oldCluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 		if (threadIdx.x == 0) {
 			clusterCopy = *oldCluster;
@@ -60,15 +61,10 @@ __device__ void inline movement_Kernel(CudaSimulation &data, int clusterIndex)
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CudaCell *oldCell = &oldCluster->cells[cellIndex];
 
-			if (data.randomGen.random() < 0.1) {
-				auto particle = data.particlesAC2.getElement_Kernel();
-				particle->pos = oldCell->absPos;
-
-			}
+			cellRadiation(data, oldCell);
 			collectCollisionData_Kernel(data, oldCell, collisionData);
 		}
 	}
-
 
 	__syncthreads();
 
@@ -132,55 +128,41 @@ __device__ void inline movement_Kernel(CudaSimulation &data, int clusterIndex)
 	__syncthreads();
 }
 
-
-__global__ void movement_Kernel(CudaSimulation data)
+__global__ void clusterMovement(CudaSimulation data)
 {
-	int blockIndex = blockIdx.x;
-	int numClusters = data.clustersAC1.getNumEntries();
-	if (blockIndex >= numClusters) {
-		return;
-	}
-	int startClusterIndex;
-	int endClusterIndex;
-	tiling_Kernel(numClusters, blockIndex, gridDim.x, startClusterIndex, endClusterIndex);
-
-	for (int clusterIndex = startClusterIndex; clusterIndex <= endClusterIndex; ++clusterIndex) {
-		movement_Kernel(data, clusterIndex);
-	}
-}
-
-__device__ void clearOldMap_Kernel(CudaSimulation const &data, int clusterIndex)
-{
-	CudaCellCluster *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
-
-	int startCellIndex;
-	int endCellIndex;
-	int2 size = data.size;
-	int oldNumCells = oldCluster->numCells;
-	if (threadIdx.x >= oldNumCells) {
+	int indexResource = blockIdx.x;
+	int numEntities = data.clustersAC1.getNumEntries();
+	if (indexResource >= numEntities) {
 		return;
 	}
 
-	tiling_Kernel(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		float2 absPos = oldCluster->cells[cellIndex].absPos;
-		setCellToMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, nullptr, data.map1, size);
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
+	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+		clusterMovement(data, clusterIndex);
 	}
 }
 
-__global__ void clearOldMap_Kernel(CudaSimulation data)
+__device__ void particleMovement(CudaSimulation &data, int particleIndex)
 {
-	int blockIndex = blockIdx.x;
-	int numClusters = data.clustersAC1.getNumEntries();
-	if (blockIndex >= numClusters) {
+	CudaEnergyParticle *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
+	CudaEnergyParticle *newParticle = data.particlesAC2.getElement_Kernel();
+	newParticle->pos = add(oldParticle->pos, oldParticle->vel);
+	newParticle->vel = oldParticle->vel;
+}
+
+__global__ void particleMovement(CudaSimulation data)
+{
+	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
+	int numEntities = data.particlesAC1.getNumEntries();
+	if (indexResource >= numEntities) {
 		return;
 	}
-	int startClusterIndex;
-	int endClusterIndex;
-	tiling_Kernel(numClusters, blockIndex, gridDim.x, startClusterIndex, endClusterIndex);
-
-	for (int clusterIndex = startClusterIndex; clusterIndex <= endClusterIndex; ++clusterIndex) {
-		clearOldMap_Kernel(data, clusterIndex);
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
+	for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
+		particleMovement(data, particleIndex);
 	}
 }
-
