@@ -59,11 +59,21 @@ void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 
 		for (int i = 0; i < cudaData.numCells; ++i) {
 			CudaCell& cell = cudaData.cells[i];
-			float2 pos = cell.absPos;
+			float2& pos = cell.absPos;
 			IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 			if (_requiredRect.isContained(intPos)) {
 				metric->correctPosition(intPos);
 				_requiredImage->setPixel(intPos.x, intPos.y, 0xFF);
+			}
+		}
+
+		for (int i = 0; i < cudaData.numParticles; ++i) {
+			CudaEnergyParticle& particle = cudaData.particles[i];
+			float2& pos = particle.pos;
+			IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
+			if (_requiredRect.isContained(intPos)) {
+				metric->correctPosition(intPos);
+				_requiredImage->setPixel(intPos.x, intPos.y, 0x902020);
 			}
 		}
 
