@@ -7,7 +7,7 @@ class CudaSimulationManager
 public:
 	CudaSimulation data;
 
-	CudaCell* cellsForAccess;
+	CudaDataForAccess access;
 
 	CudaSimulationManager(int2 const &size)
 	{
@@ -17,15 +17,16 @@ public:
 		data.clustersAC2 = ArrayController<CudaCellCluster>(MAX_CELLCLUSTERS);
 		data.cellsAC1 = ArrayController<CudaCell>(MAX_CELLS);
 		data.cellsAC2 = ArrayController<CudaCell>(MAX_CELLS);
-		data.particleAC1 = ArrayController<CudaEnergyParticle>(MAX_ENERGY_PARTICLES);
-		data.particleAC2 = ArrayController<CudaEnergyParticle>(MAX_ENERGY_PARTICLES);
+		data.particlesAC1 = ArrayController<CudaEnergyParticle>(MAX_ENERGY_PARTICLES);
+		data.particlesAC2 = ArrayController<CudaEnergyParticle>(MAX_ENERGY_PARTICLES);
 
 		size_t mapSize = size.x * size.y * sizeof(CudaCell*);
 		cudaMallocManaged(&data.map1, mapSize);
 		cudaMallocManaged(&data.map2, mapSize);
 		checkCudaErrors(cudaGetLastError());
 
-		cellsForAccess = (CudaCell*)malloc(sizeof(CudaCell) * static_cast<int>(NUM_CLUSTERS * 30 * 30 * 1.1));
+		access.cells = static_cast<CudaCell*>(malloc(sizeof(CudaCell) * static_cast<int>(MAX_CELLS)));
+		access.particles = static_cast<CudaEnergyParticle*>(malloc(sizeof(CudaEnergyParticle) * static_cast<int>(MAX_ENERGY_PARTICLES)));
 
 		for (int i = 0; i < size.x * size.y; ++i) {
 			data.map1[i] = nullptr;
@@ -41,20 +42,22 @@ public:
 		data.clustersAC2.free();
 		data.cellsAC1.free();
 		data.cellsAC2.free();
-		data.particleAC1.free();
-		data.particleAC2.free();
+		data.particlesAC1.free();
+		data.particlesAC2.free();
 
 		cudaFree(data.map1);
 		cudaFree(data.map2);
 		data.randomGen.free();
 
-		free(cellsForAccess);
+		free(access.cells);
+		free(access.particles);
 	}
 
 	void swapData()
 	{
 		swap(data.clustersAC1, data.clustersAC2);
 		swap(data.cellsAC1, data.cellsAC2);
+		swap(data.particlesAC1, data.particlesAC2);
 		swap(data.map1, data.map2);
 	}
 
@@ -62,15 +65,16 @@ public:
 	{
 		data.clustersAC2.reset();
 		data.cellsAC2.reset();
+		data.particlesAC2.reset();
 	}
 
 	CudaDataForAccess getDataForAccess()
 	{
-		CudaDataForAccess result;
-		result.numCells = data.cellsAC2.getNumEntries();
-		cudaMemcpy(cellsForAccess, data.cellsAC2.getEntireArray(), sizeof(CudaCell) * data.cellsAC2.getNumEntries(), cudaMemcpyDeviceToHost);
-		result.cells = cellsForAccess;
-		return result;
+		access.numCells = data.cellsAC2.getNumEntries();
+		cudaMemcpy(access.cells, data.cellsAC2.getEntireArray(), sizeof(CudaCell) * data.cellsAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		access.numParticles = data.particlesAC2.getNumEntries();
+		cudaMemcpy(access.particles, data.particlesAC2.getEntireArray(), sizeof(CudaEnergyParticle) * data.particlesAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		return access;
 	}
 };
 

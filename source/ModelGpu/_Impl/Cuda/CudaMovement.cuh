@@ -59,6 +59,12 @@ __device__ void inline movement_Kernel(CudaSimulation &data, int clusterIndex)
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CudaCell *oldCell = &oldCluster->cells[cellIndex];
+
+			if (data.randomGen.random() < 0.1) {
+				auto particle = data.particlesAC2.getElement_Kernel();
+				particle->pos = oldCell->absPos;
+
+			}
 			collectCollisionData_Kernel(data, oldCell, collisionData);
 		}
 	}

@@ -45,19 +45,39 @@ class CudaRandomNumberGenerator
 private:
 	int *_currentIndex;
 	int *_array;
+	int _warpSize;
+	int _size;
 
 public:
 
 	void init(int size)
 	{
-		cudaMallocManaged(&_currentIndex, sizeof(int));
+		_size = size;
+		int device;
+		cudaDeviceProp prop;
+		cudaGetDevice(&device);
+		cudaGetDeviceProperties(&prop, device);
+
+		_warpSize = prop.warpSize;
+		cudaMallocManaged(&_currentIndex, sizeof(int)*_warpSize);
 		cudaMallocManaged(&_array, sizeof(int)*size);
 		checkCudaErrors(cudaGetLastError());
-		*_currentIndex = 0;
+
+		for (int i = 0; i < _warpSize; ++i) {
+			_currentIndex[i] = i*_warpSize;
+		}
 
 		for (int i = 0; i < size; ++i) {
 			_array[i] = rand();
 		}
+	}
+
+	__host__ __device__ __inline__ float random()
+	{
+		int& index = _currentIndex[threadIdx.x % _warpSize];
+		int number = _array[index];
+		index = (index + 1) % _size;
+		return static_cast<float>(number) / RAND_MAX;
 	}
 
 	void free()
