@@ -130,7 +130,7 @@ public:
 		return &_data[oldIndex];
 	}
 
-	__device__ inline T* getElement_Kernel()
+	__device__ __inline__ T* getElement_Kernel()
 	{
 		int oldIndex = atomicAdd(_numEntries, 1);
 		return &_data[oldIndex];
@@ -147,7 +147,7 @@ public:
 	}
 };
 
-__device__ __inline__ void tiling_Kernel(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)
+__device__ __inline__ void calcPartition(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)
 {
 	int entitiesByDivisions = numEntities / numDivisions;
 	int remainder = numEntities % numDivisions;
