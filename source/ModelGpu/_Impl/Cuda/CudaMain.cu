@@ -81,7 +81,9 @@ void cudaCalcNextTimestep()
 {
 	cudaSimulationManager->prepareTargetData();
 
-	movement_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaSimulationManager->data);
+	clusterMovement <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaSimulationManager->data);
+	cudaDeviceSynchronize();
+	particleMovement << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (cudaSimulationManager->data);
 	cudaDeviceSynchronize();
 	clearOldMap_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaSimulationManager->data);
 	cudaDeviceSynchronize();
