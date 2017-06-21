@@ -1,6 +1,6 @@
 #pragma once
 
-#include <atomic>
+#include <mutex>
 #include <QObject>
 
 #include "Model/Entities/Descriptions.h"
@@ -16,9 +16,10 @@ public:
 	virtual ~GpuWorker();
 
 	virtual void init(SpaceMetricApi* metric);
-	virtual void requireAndLockData();
+	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual CudaDataForAccess retrieveData();
+	virtual void lockData();
 	virtual void unlockData();
 
 	virtual bool isSimulationRunning();
@@ -33,6 +34,6 @@ private:
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;
 	bool _requireData = false;
-	std::atomic_int _mutex = 0;
+	std::mutex _mutex;
 	CudaDataForAccess _cudaData;
 };

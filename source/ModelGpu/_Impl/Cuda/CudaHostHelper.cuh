@@ -72,8 +72,10 @@ public:
 	{
 		access.numCells = data.cellsAC2.getNumEntries();
 		cudaMemcpy(access.cells, data.cellsAC2.getEntireArray(), sizeof(CudaCell) * data.cellsAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		checkCudaErrors(cudaGetLastError());
 		access.numParticles = data.particlesAC2.getNumEntries();
 		cudaMemcpy(access.particles, data.particlesAC2.getEntireArray(), sizeof(CudaEnergyParticle) * data.particlesAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		checkCudaErrors(cudaGetLastError());
 		return access;
 	}
 };
