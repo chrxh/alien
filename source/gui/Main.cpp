@@ -35,6 +35,7 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
+//- Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 //- Optimierung: CellMapImpl::locateCell und CellMapImpl::removeCellIfPresent
 //- SimulationContext in BuilderFacadeImpl::buildSimulationController erstellen
 
