@@ -33,6 +33,7 @@ void createCluster(CudaCellCluster* cluster, float2 pos, float2 vel, float angle
 			cell->nextTimestep = nullptr;
 			cell->protectionCounter = 0;
 			cell->numConnections = 0;
+			cell->setProtectionCounterForNextTimestep = false;
 			if (x > 0) {
 				cell->connections[cell->numConnections++] = &cluster->cells[x - 1 + y * clusterSize.x];
 			}

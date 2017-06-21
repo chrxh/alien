@@ -238,34 +238,36 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CudaCell *cel
 	, int2 const &size, CollisionData &collisionData)
 {
 	auto mapCell = getCellFromMap(posInt, map, size);
-	if (mapCell != nullptr) {
-		CudaCellCluster* mapCluster = mapCell->cluster;
-		if (mapCluster != cell->cluster) {
-			if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE*CELL_MAX_DISTANCE) {
+	if (!mapCell) {
+		return;
+	}
+	if (mapCell->protectionCounter > 0) {
+		return;
+	}
+	CudaCellCluster* mapCluster = mapCell->cluster;
+	if (mapCluster != cell->cluster) {
+		if (mapDistanceSquared_Kernel(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE*CELL_MAX_DISTANCE) {
 
-				CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
+			CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
 
-				atomicAdd(&entry->numCollisions, 2);
-				atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
-				atomicAdd(&entry->collisionPos.y, mapCell->absPos.y);
-				atomicAdd(&entry->collisionPos.x, cell->absPos.x);
-				atomicAdd(&entry->collisionPos.y, cell->absPos.y);
+			atomicAdd(&entry->numCollisions, 2);
+			atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
+			atomicAdd(&entry->collisionPos.y, mapCell->absPos.y);
+			atomicAdd(&entry->collisionPos.x, cell->absPos.x);
+			atomicAdd(&entry->collisionPos.y, cell->absPos.y);
 
-				float2 outward = calcOutwardVector_Kernel(cell, mapCell, size);
-				float2 n = calcNormalToCell_Kernel(mapCell, outward);
-				atomicAdd(&entry->normalVec.x, n.x);
-				atomicAdd(&entry->normalVec.y, n.y);
+			float2 outward = calcOutwardVector_Kernel(cell, mapCell, size);
+			float2 n = calcNormalToCell_Kernel(mapCell, outward);
+			atomicAdd(&entry->normalVec.x, n.x);
+			atomicAdd(&entry->normalVec.y, n.y);
 
-				outward = calcOutwardVector_Kernel(mapCell, cell, size);
-				n = minus(calcNormalToCell_Kernel(cell, outward));
-				atomicAdd(&entry->normalVec.x, n.x);
-				atomicAdd(&entry->normalVec.y, n.y);
+			outward = calcOutwardVector_Kernel(mapCell, cell, size);
+			n = minus(calcNormalToCell_Kernel(cell, outward));
+			atomicAdd(&entry->normalVec.x, n.x);
+			atomicAdd(&entry->normalVec.y, n.y);
 
-				cell->protectionCounter = PROTECTION_TIMESTEPS;
-
-//				calcCollision_Kernel(mapCluster, mapCell, collisionData, size, false);
-//				calcCollision_Kernel(mapCell->cluster, cell, collisionData, size, true);
-			}
+//			cell->protectionCounter = PROTECTION_TIMESTEPS;
+			cell->setProtectionCounterForNextTimestep = true;
 		}
 	}
 }
