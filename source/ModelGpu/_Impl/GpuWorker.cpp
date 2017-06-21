@@ -18,7 +18,7 @@ void GpuWorker::init(SpaceMetricApi* metric)
 	cudaInit({ size.x, size.y });
 }
 
-void GpuWorker::requireAndLockData()
+void GpuWorker::requireData()
 {
 	_requireData = true;
 	//data will be locked later in GpuWorker::runSimulation()
@@ -29,9 +29,14 @@ CudaDataForAccess GpuWorker::retrieveData()
 	return _cudaData;
 }
 
+void GpuWorker::lockData()
+{
+	_mutex.lock();
+}
+
 void GpuWorker::unlockData()
 {
-	_mutex = 0;
+	_mutex.unlock();
 }
 
 /*
@@ -93,9 +98,10 @@ void GpuWorker::runSimulation()
 	do {
 		cudaCalcNextTimestep();
 		Q_EMIT timestepCalculated();
-		if (_requireData && _mutex.fetch_or(1) == 0) {
+		if (_requireData && _mutex.try_lock()) {
 			_cudaData = cudaGetData();
 			_requireData = false;
+			_mutex.unlock();
 			Q_EMIT dataReadyToRetrieve();
 		}
 	} while (!_stopAfterNextTimestep);

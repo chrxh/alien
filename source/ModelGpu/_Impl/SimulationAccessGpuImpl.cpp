@@ -37,7 +37,7 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredImage = target;
 
 	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	worker->requireAndLockData();
+	worker->requireData();
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -57,6 +57,7 @@ void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 
 		_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
 
+		worker->lockData();
 		for (int i = 0; i < cudaData.numCells; ++i) {
 			CudaCell& cell = cudaData.cells[i];
 			float2& pos = cell.absPos;
@@ -76,10 +77,10 @@ void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 				_requiredImage->setPixel(intPos.x, intPos.y, 0x902020);
 			}
 		}
+		worker->unlockData();
 
 		Q_EMIT imageReady();
 
-		worker->unlockData();
 	}
 }
 
