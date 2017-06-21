@@ -11,9 +11,11 @@
 
 __device__ void createNewParticle(CudaSimulation &data, float2 &pos)
 {
+/*
 	auto particle = data.particlesAC2.getElement_Kernel();
 	particle->pos = pos;
 	particle->vel = { data.randomGen.random()-0.5f, data.randomGen.random() - 0.5f };
+*/
 }
 
 __device__ void cellRadiation(CudaSimulation &data, CudaCell *oldCell)
@@ -106,6 +108,10 @@ __device__ void clusterMovement(CudaSimulation &data, int clusterIndex)
 			if (cellCopy.protectionCounter > 0) {
 				--cellCopy.protectionCounter;
 			}
+			if (cellCopy.setProtectionCounterForNextTimestep) {
+				cellCopy.protectionCounter = PROTECTION_TIMESTEPS;
+				cellCopy.setProtectionCounterForNextTimestep = false;
+			}
 			*newCell = cellCopy;
 			setCellToMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, data.map2, size);
 
@@ -149,6 +155,7 @@ __device__ void particleMovement(CudaSimulation &data, int particleIndex)
 	CudaEnergyParticle *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
 	CudaEnergyParticle *newParticle = data.particlesAC2.getElement_Kernel();
 	newParticle->pos = add(oldParticle->pos, oldParticle->vel);
+	mapPosCorrection(newParticle->pos, data.size);
 	newParticle->vel = oldParticle->vel;
 }
 

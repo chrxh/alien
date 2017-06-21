@@ -21,6 +21,7 @@ struct CudaCell
 	CudaCell* connections[CELL_MAX_BONDS];
 	CudaCell* nextTimestep;
 	int protectionCounter;
+	bool setProtectionCounterForNextTimestep;
 };
 
 struct CudaCellCluster
