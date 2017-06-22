@@ -1,13 +1,13 @@
 #include <QTimer>
 
-#include "GpuThreadController.h"
+#include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationControllerGpuImpl.h"
 
 
 namespace
 {
-	const int updateFrameInMilliSec = 30.0;
+	const int updateFrameInMilliSec = 50.0;
 }
 
 SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
@@ -25,7 +25,7 @@ SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nul
 void SimulationControllerGpuImpl::init(SimulationContextApi * context)
 {
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
-	connect(_context->getGpuThreadController(), &GpuThreadController::timestepCalculated, [this]() {
+	connect(_context->getGpuThreadController(), &ThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
 		++_timestepsPerSecond;
 		if (_mode == RunningMode::OpenEndedSimulation) {

@@ -2,39 +2,38 @@
 #include <QImage>
 
 #include "Model/SpaceMetricApi.h"
-#include "ModelGpu/_Impl/Cuda/CudaShared.cuh"
+#include "ModelGpu/_Impl/Cuda/CudaInterface.cuh"
 
-#include "GpuWorker.h"
+#include "WorkerForGpu.h"
 
-GpuWorker::~GpuWorker()
+WorkerForGpu::~WorkerForGpu()
 {
 	cudaShutdown();
 }
 
-void GpuWorker::init(SpaceMetricApi* metric)
+void WorkerForGpu::init(SpaceMetricApi* metric)
 {
 	_metric = metric;
 	auto size = metric->getSize();
 	cudaInit({ size.x, size.y });
 }
 
-void GpuWorker::requireData()
+void WorkerForGpu::requireData()
 {
 	_requireData = true;
-	//data will be locked later in GpuWorker::runSimulation()
 }
 
-CudaDataForAccess GpuWorker::retrieveData()
+DataForAccess WorkerForGpu::retrieveData()
 {
 	return _cudaData;
 }
 
-void GpuWorker::lockData()
+void WorkerForGpu::lockData()
 {
 	_mutex.lock();
 }
 
-void GpuWorker::unlockData()
+void WorkerForGpu::unlockData()
 {
 	_mutex.unlock();
 }
@@ -58,12 +57,12 @@ void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolve
 }
 */
 
-bool GpuWorker::isSimulationRunning()
+bool WorkerForGpu::isSimulationRunning()
 {
 	return _simRunning;
 }
 
-void GpuWorker::setFlagStopAfterNextTimestep(bool value)
+void WorkerForGpu::setFlagStopAfterNextTimestep(bool value)
 {
 	_stopAfterNextTimestep = value;
 }
@@ -92,7 +91,7 @@ void GpuWorker::getImage(IntRect const & rect, QImage * image)
 }
 */
 
-void GpuWorker::runSimulation()
+void WorkerForGpu::runSimulation()
 {
 	_simRunning = true;
 	do {

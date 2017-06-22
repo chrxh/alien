@@ -3,8 +3,8 @@
 #include "Model/Context/SimulationParameters.h"
 #include "Model/SpaceMetricApi.h"
 
-#include "GpuWorker.h"
-#include "GpuThreadController.h"
+#include "WorkerForGpu.h"
+#include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 
 SimulationContextGpuImpl::SimulationContextGpuImpl(QObject* parent /*= nullptr*/)
@@ -22,7 +22,7 @@ void SimulationContextGpuImpl::init(SpaceMetricApi *metric, SymbolTable *symbolT
 	SET_CHILD(_symbolTable, symbolTable);
 	SET_CHILD(_parameters, parameters);
 
-	auto threadController = new GpuThreadController;
+	auto threadController = new ThreadController;
 	SET_CHILD(_threadController, threadController);
 	_threadController->init(metric);
 }
@@ -42,7 +42,7 @@ SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
 	return _parameters;
 }
 
-GpuThreadController * SimulationContextGpuImpl::getGpuThreadController() const
+ThreadController * SimulationContextGpuImpl::getGpuThreadController() const
 {
 	return _threadController;
 }

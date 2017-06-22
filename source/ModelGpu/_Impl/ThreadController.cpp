@@ -1,18 +1,18 @@
-#include "GpuWorker.h"
+#include "WorkerForGpu.h"
 
-#include "GpuThreadController.h"
+#include "ThreadController.h"
 
-GpuThreadController::GpuThreadController(QObject* parent /*= nullptr*/)
+ThreadController::ThreadController(QObject* parent /*= nullptr*/)
 	: QObject(parent)
 {
-	_worker = new GpuWorker;
+	_worker = new WorkerForGpu;
 	_worker->moveToThread(&_thread);
-	connect(this, &GpuThreadController::runSimulationWithGpu, _worker, &GpuWorker::runSimulation);
-	connect(_worker, &GpuWorker::timestepCalculated, this, &GpuThreadController::timestepCalculatedWithGpu);
+	connect(this, &ThreadController::runSimulationWithGpu, _worker, &WorkerForGpu::runSimulation);
+	connect(_worker, &WorkerForGpu::timestepCalculated, this, &ThreadController::timestepCalculatedWithGpu);
 	_thread.start();
 }
 
-GpuThreadController::~GpuThreadController()
+ThreadController::~ThreadController()
 {
 	_worker->setFlagStopAfterNextTimestep(RunningMode::CalcSingleTimestep);
 	_thread.quit();
@@ -23,17 +23,17 @@ GpuThreadController::~GpuThreadController()
 	delete _worker;
 }
 
-void GpuThreadController::init(SpaceMetricApi *metric)
+void ThreadController::init(SpaceMetricApi *metric)
 {
 	_worker->init(metric);
 }
 
-GpuWorker * GpuThreadController::getGpuWorker() const
+WorkerForGpu * ThreadController::getGpuWorker() const
 {
 	return _worker;
 }
 
-void GpuThreadController::calculate(RunningMode mode)
+void ThreadController::calculate(RunningMode mode)
 {
 	if (mode == RunningMode::CalcSingleTimestep) {
 		_worker->setFlagStopAfterNextTimestep(true);
@@ -52,7 +52,7 @@ void GpuThreadController::calculate(RunningMode mode)
 	}
 }
 
-void GpuThreadController::timestepCalculatedWithGpu()
+void ThreadController::timestepCalculatedWithGpu()
 {
 	Q_EMIT timestepCalculated();
 }
