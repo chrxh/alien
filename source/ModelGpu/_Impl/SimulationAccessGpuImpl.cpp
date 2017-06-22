@@ -2,8 +2,8 @@
 
 #include "Model/SpaceMetricApi.h"
 
-#include "GpuWorker.h"
-#include "GpuThreadController.h"
+#include "WorkerForGpu.h"
+#include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
 
@@ -15,7 +15,7 @@ void SimulationAccessGpuImpl::init(SimulationContextApi * context)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(context);
 	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	connect(worker, &GpuWorker::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
+	connect(worker, &WorkerForGpu::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }
 
 void SimulationAccessGpuImpl::updateData(DataDescription const & desc)
@@ -58,23 +58,23 @@ void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 		_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
 
 		worker->lockData();
-		for (int i = 0; i < cudaData.numCells; ++i) {
-			CudaCell& cell = cudaData.cells[i];
-			float2& pos = cell.absPos;
-			IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-			if (_requiredRect.isContained(intPos)) {
-				metric->correctPosition(intPos);
-				_requiredImage->setPixel(intPos.x, intPos.y, 0xFF);
-			}
-		}
-
 		for (int i = 0; i < cudaData.numParticles; ++i) {
-			CudaEnergyParticle& particle = cudaData.particles[i];
+			ParticleData& particle = cudaData.particles[i];
 			float2& pos = particle.pos;
 			IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 			if (_requiredRect.isContained(intPos)) {
 				metric->correctPosition(intPos);
 				_requiredImage->setPixel(intPos.x, intPos.y, 0x902020);
+			}
+		}
+
+		for (int i = 0; i < cudaData.numCells; ++i) {
+			CellData& cell = cudaData.cells[i];
+			float2& pos = cell.absPos;
+			IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
+			if (_requiredRect.isContained(intPos)) {
+				metric->correctPosition(intPos);
+				_requiredImage->setPixel(intPos.x, intPos.y, 0xFF);
 			}
 		}
 		worker->unlockData();

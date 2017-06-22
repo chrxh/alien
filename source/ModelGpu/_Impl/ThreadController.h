@@ -5,17 +5,17 @@
 #include "Model/Definitions.h"
 #include "DefinitionsImpl.h"
 
-class GpuThreadController
+class ThreadController
 	: public QObject
 {
 	Q_OBJECT
 public:
-	GpuThreadController(QObject* parent = nullptr);
-	virtual ~GpuThreadController();
+	ThreadController(QObject* parent = nullptr);
+	virtual ~ThreadController();
 
 	void init(SpaceMetricApi *metric);
 
-	virtual GpuWorker* getGpuWorker() const;
+	virtual WorkerForGpu* getGpuWorker() const;
 
 	void calculate(RunningMode mode);
 
@@ -28,6 +28,6 @@ private:
 	SpaceMetricApi *_metric = nullptr;
 
 	QThread _thread;
-	GpuWorker* _worker = nullptr;
+	WorkerForGpu* _worker = nullptr;
 	bool _gpuThreadWorking = false;
 };

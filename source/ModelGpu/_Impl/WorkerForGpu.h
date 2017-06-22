@@ -4,21 +4,21 @@
 #include <QObject>
 
 #include "Model/Entities/Descriptions.h"
-#include "Cuda/CudaShared.cuh"
+#include "Cuda/CudaInterface.cuh"
 #include "DefinitionsImpl.h"
 
-class GpuWorker
+class WorkerForGpu
 	: public QObject
 {
 	Q_OBJECT
 public:
-	GpuWorker(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~GpuWorker();
+	WorkerForGpu(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~WorkerForGpu();
 
 	virtual void init(SpaceMetricApi* metric);
 	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
-	virtual CudaDataForAccess retrieveData();
+	virtual DataForAccess retrieveData();
 	virtual void lockData();
 	virtual void unlockData();
 
@@ -35,5 +35,5 @@ private:
 	bool _stopAfterNextTimestep = true;
 	bool _requireData = false;
 	std::mutex _mutex;
-	CudaDataForAccess _cudaData;
+	DataForAccess _cudaData;
 };

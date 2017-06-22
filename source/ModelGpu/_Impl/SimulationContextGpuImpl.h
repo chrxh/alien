@@ -18,11 +18,11 @@ public:
 	virtual SpaceMetricApi* getSpaceMetric() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
-	virtual GpuThreadController* getGpuThreadController() const;
+	virtual ThreadController* getGpuThreadController() const;
 
 private:
 	SpaceMetricApi *_metric = nullptr;
 	SymbolTable *_symbolTable = nullptr;
 	SimulationParameters *_parameters = nullptr;
-	GpuThreadController *_threadController = nullptr;
+	ThreadController *_threadController = nullptr;
 };
