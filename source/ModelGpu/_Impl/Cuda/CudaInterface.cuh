@@ -2,29 +2,30 @@
 
 #include <cuda_runtime.h>
 
-#include "CudaConstants.cuh"
+#include "Constants.cuh"
 
-struct CudaEnergyParticle
+struct ParticleData
 {
 	float energy;
 	float2 pos;
 	float2 vel;
 };
 
-struct CudaCellCluster;
-struct CudaCell
+struct CellClusterData;
+struct CellData
 {
-	CudaCellCluster* cluster;
+	CellClusterData* cluster;
 	float2 relPos;
 	float2 absPos;
+	float energy;
 	int numConnections;
-	CudaCell* connections[CELL_MAX_BONDS];
-	CudaCell* nextTimestep;
+	CellData* connections[CELL_MAX_BONDS];
+	CellData* nextTimestep;
 	int protectionCounter;
 	bool setProtectionCounterForNextTimestep;
 };
 
-struct CudaCellCluster
+struct CellClusterData
 {
 	float2 pos;
 	float2 vel;
@@ -32,20 +33,20 @@ struct CudaCellCluster
 	float angularVel;
 	float angularMass;
 	int numCells;
-	CudaCell* cells;
+	CellData* cells;
 };
 
-struct CudaDataForAccess
+struct DataForAccess
 {
 	int numCells;
-	CudaCell* cells;
+	CellData* cells;
 	int numParticles;
-	CudaEnergyParticle* particles;
+	ParticleData* particles;
 };
 
 extern void cudaInit(int2 const &size);
 extern void cudaCalcNextTimestep();
-extern CudaDataForAccess cudaGetData();
+extern DataForAccess cudaGetData();
 extern void cudaShutdown();
 
 

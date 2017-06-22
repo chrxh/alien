@@ -5,18 +5,18 @@
 #include <stdio.h>
 #include <functional>
 
-#include "CudaBase.cuh"
-#include "CudaConstants.cuh"
-#include "CudaShared.cuh"
-#include "CudaMovement.cuh"
-#include "CudaHostHelper.cuh"
+#include "Base.cuh"
+#include "Constants.cuh"
+#include "CudaInterface.cuh"
+#include "Simulation.cuh"
+#include "HostHelper.cuh"
 
 namespace {
 	cudaStream_t cudaStream;
 	CudaSimulationManager *cudaSimulationManager;
 }
 
-void createCluster(CudaCellCluster* cluster, float2 pos, float2 vel, float angle, float angVel, int2 clusterSize, int2 const &size)
+void createCluster(CellClusterData* cluster, float2 pos, float2 vel, float angle, float angVel, float energy, int2 clusterSize, int2 const &size)
 {
 	cluster->pos = pos;
 	cluster->vel = vel;
@@ -27,12 +27,13 @@ void createCluster(CudaCellCluster* cluster, float2 pos, float2 vel, float angle
 
 	for (int x = 0; x < clusterSize.x; ++x) {
 		for (int y = 0; y < clusterSize.y; ++y) {
-			CudaCell *cell = &cluster->cells[x + y*clusterSize.x];
+			CellData *cell = &cluster->cells[x + y*clusterSize.x];
 			cell->relPos = { static_cast<float>(x), static_cast<float>(y) };
 			cell->cluster = cluster;
 			cell->nextTimestep = nullptr;
 			cell->protectionCounter = 0;
 			cell->numConnections = 0;
+			cell->energy = energy;
 			cell->setProtectionCounterForNextTimestep = false;
 			if (x > 0) {
 				cell->connections[cell->numConnections++] = &cluster->cells[x - 1 + y * clusterSize.x];
@@ -63,7 +64,7 @@ void cudaInit(int2 const &size)
 	auto clusters = cudaSimulationManager->data.clustersAC1.getArray(NUM_CLUSTERS);
 
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
-		createCluster(&clusters[i], { 0.0f, 0.0f }, { random(1.0f) - 0.5f, random(1.0f) - 0.5f }, random(360.0f), random(0.4f) - 0.2f, { rand() % 20 + 1, rand() % 20 + 1 }, size);
+		createCluster(&clusters[i], { 0.0f, 0.0f }, { random(1.0f) - 0.5f, random(1.0f) - 0.5f }, random(360.0f), random(0.4f) - 0.2f, 100.0, { rand() % 20 + 1, rand() % 20 + 1 }, size);
 		do {
 			clusters[i].pos = { random(static_cast<float>(size.x)), random(static_cast<float>(size.y)) };
 			centerCluster(&clusters[i]);
@@ -86,7 +87,7 @@ void cudaCalcNextTimestep()
 	cudaDeviceSynchronize();
 	particleMovement << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (cudaSimulationManager->data);
 	cudaDeviceSynchronize();
-	clearOldMap_Kernel <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaSimulationManager->data);
+	clearMaps <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (cudaSimulationManager->data);
 	cudaDeviceSynchronize();
 
 	checkCudaErrors(cudaGetLastError());
@@ -94,7 +95,7 @@ void cudaCalcNextTimestep()
 	cudaSimulationManager->swapData();
 }
 
-CudaDataForAccess cudaGetData()
+DataForAccess cudaGetData()
 {
 	return cudaSimulationManager->getDataForAccess();
 }

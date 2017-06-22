@@ -1,8 +1,10 @@
 #pragma once
 
 #include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <helper_cuda.h>
 
-#include "CudaConstants.cuh"
+#include "Constants.cuh"
 
 
 #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
@@ -70,6 +72,14 @@ public:
 		for (int i = 0; i < size; ++i) {
 			_array[i] = rand();
 		}
+	}
+
+	__host__ __device__ __inline__ float random(float maxVal)
+	{
+		int& index = _currentIndex[threadIdx.x % _warpSize];
+		int number = _array[index];
+		index = (index + 1) % _size;
+		return maxVal* static_cast<float>(number) / RAND_MAX;
 	}
 
 	__host__ __device__ __inline__ float random()
@@ -199,6 +209,11 @@ __host__ __device__ __inline__ float2 add(float2 const &p, float2 const &q)
 __host__ __device__ __inline__ float2 sub(float2 const &p, float2 const &q)
 {
 	return{ p.x - q.x, p.y - q.y };
+}
+
+__host__ __device__ __inline__ int2 toInt2(float2 const &p)
+{
+	return{ static_cast<int>(p.x), static_cast<int>(p.y) };
 }
 
 float random(float max)

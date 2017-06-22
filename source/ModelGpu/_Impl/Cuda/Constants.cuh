@@ -1,10 +1,12 @@
 #pragma once
 
-//domain specific constants
+//simulation specific constants
 #define CELL_MAX_BONDS 6
 #define CELL_MAX_DISTANCE 1.3
 #define MAX_COLLIDING_CLUSTERS 10
 #define PROTECTION_TIMESTEPS 60
+#define RADIATION_PROB 0.03
+
 #define NUM_CLUSTERS 5000/*160000/100*/
 
 //math constants
@@ -16,7 +18,7 @@
 #define NUM_BLOCKS 64
 #define MAX_CELLCLUSTERS 6000
 #define MAX_CELLS 1000000
-#define MAX_ENERGY_PARTICLES 1000000
+#define MAX_ENERGY_PARTICLES 10000000
 #define FP_PRECISION 0.00001
 #define RANDOM_NUMBER_BLOCK_SIZE 123127
 
