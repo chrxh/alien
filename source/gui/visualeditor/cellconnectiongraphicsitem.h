@@ -4,6 +4,7 @@
 #include <QGraphicsItem>
 
 #include "Model/Definitions.h"
+#include "Gui/Definitions.h"
 
 class CellConnectionGraphicsItem : public QGraphicsItem
 {
@@ -14,9 +15,10 @@ public:
         B_TO_A_CONNECTION
     };
 
-	CellConnectionGraphicsItem(CellDescription const &cell1, CellDescription const &cell2, ConnectionState s, QGraphicsItem* parent = nullptr);
-	CellConnectionGraphicsItem(qreal x1, qreal y1, qreal x2, qreal y2, ConnectionState s, QGraphicsItem* parent = nullptr);
+	CellConnectionGraphicsItem(GraphicsItemConfig *config, CellDescription const &cell1, CellDescription const &cell2, QGraphicsItem *parent = nullptr);
 	~CellConnectionGraphicsItem() = default;
+
+	void update(CellDescription const &cell1, CellDescription const &cell2);
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
