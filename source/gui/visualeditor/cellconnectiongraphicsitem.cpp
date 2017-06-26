@@ -10,14 +10,8 @@
 CellConnectionGraphicsItem::CellConnectionGraphicsItem(GraphicsItemConfig* config, CellDescription const & cell1, CellDescription const & cell2, QGraphicsItem * parent)
 	: QGraphicsItem(parent)
 {
-	auto const &pos1 = cell1.pos.getValue();
-	auto const &pos2 = cell2.pos.getValue();
-	_dx = (pos2.x() - pos1.x()) * GRAPHICS_ITEM_SIZE;
-	_dy = (pos2.y() - pos1.y()) * GRAPHICS_ITEM_SIZE;
-
-	QGraphicsItem::setPos(pos1.x() * GRAPHICS_ITEM_SIZE, pos2.y() * GRAPHICS_ITEM_SIZE);
 	QGraphicsItem::setZValue(-1.0);
-	_connectionState = ConnectionState::NO_DIR_CONNECTION;
+	update(cell1, cell2);
 }
 
 /*
@@ -31,6 +25,13 @@ CellConnectionGraphicsItem::CellConnectionGraphicsItem (qreal x1, qreal y1, qrea
 
 void CellConnectionGraphicsItem::update(CellDescription const & cell1, CellDescription const & cell2)
 {
+	auto const &pos1 = cell1.pos.getValue();
+	auto const &pos2 = cell2.pos.getValue();
+	_dx = (pos2.x() - pos1.x()) * GRAPHICS_ITEM_SIZE;
+	_dy = (pos2.y() - pos1.y()) * GRAPHICS_ITEM_SIZE;
+
+	QGraphicsItem::setPos(pos1.x() * GRAPHICS_ITEM_SIZE, pos1.y() * GRAPHICS_ITEM_SIZE);
+	_connectionState = ConnectionState::NO_DIR_CONNECTION;
 }
 
 QRectF CellConnectionGraphicsItem::boundingRect () const
