@@ -7,20 +7,30 @@
 #include <QPainter>
 #include <qmath.h>
 
-CellConnectionGraphicsItem::CellConnectionGraphicsItem(CellDescription const & cell1, CellDescription const & cell2, ConnectionState s, QGraphicsItem * parent)
+CellConnectionGraphicsItem::CellConnectionGraphicsItem(GraphicsItemConfig* config, CellDescription const & cell1, CellDescription const & cell2, QGraphicsItem * parent)
 	: QGraphicsItem(parent)
 {
 	auto const &pos1 = cell1.pos.getValue();
 	auto const &pos2 = cell2.pos.getValue();
-	_dx = pos2.x() - pos1.x();
-	_dy = pos2.y() - pos1.y();
+	_dx = (pos2.x() - pos1.x()) * GRAPHICS_ITEM_SIZE;
+	_dy = (pos2.y() - pos1.y()) * GRAPHICS_ITEM_SIZE;
+
+	QGraphicsItem::setPos(pos1.x() * GRAPHICS_ITEM_SIZE, pos2.y() * GRAPHICS_ITEM_SIZE);
+	QGraphicsItem::setZValue(-1.0);
+	_connectionState = ConnectionState::NO_DIR_CONNECTION;
 }
 
+/*
 CellConnectionGraphicsItem::CellConnectionGraphicsItem (qreal x1, qreal y1, qreal x2, qreal y2, ConnectionState s, QGraphicsItem* parent)
     : QGraphicsItem(parent), _dx(x2-x1), _dy(y2-y1), _connectionState(s)
 {
     QGraphicsItem::setPos(x1, y1);
     QGraphicsItem::setZValue(-1.0);
+}
+*/
+
+void CellConnectionGraphicsItem::update(CellDescription const & cell1, CellDescription const & cell2)
+{
 }
 
 QRectF CellConnectionGraphicsItem::boundingRect () const
