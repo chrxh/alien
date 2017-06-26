@@ -14,11 +14,12 @@
 #include "Model/Context/SimulationParameters.h"
 #include "Model/Entities/CellTO.h"
 #include "Model/Metadata/SymbolTable.h"
-#include "ModelGpu/ModelGpuBuilderFacade.h"
-
 #include "Model/ModelServices.h"
 
+/*
+#include "ModelGpu/ModelGpuBuilderFacade.h"
 #include "ModelGpu/ModelGpuServices.h"
+*/
 
 
 //Design-Entscheidung:
@@ -102,23 +103,25 @@
 int main(int argc, char *argv[])
 {
 	ModelServices modelServices;
+/*
 	ModelGpuServices modelGpuServices;
+*/
 	
 	QApplication a(argc, argv);
 
-
-
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	ModelGpuBuilderFacade* gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
-	IntVector2D size = { 12*33*3*3, 12*17*3*3 };
+	IntVector2D size = { 12 * 33 * 3 /** 3*/, 12 * 17 * 3 /** 3*/ };
+
+/*
+	ModelGpuBuilderFacade* gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	auto controller = gpuFacade->buildSimulationController(size, symbols, parameters);
 	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
 
+*/
 
 
-/*
 	auto controller = cpuFacade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
 
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -133,7 +136,6 @@ int main(int argc, char *argv[])
 			.setEnergy(50));
 	}
 	access->updateData(desc);
-*/
 
 
     MainWindow w(controller, access);

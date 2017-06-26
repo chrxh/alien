@@ -46,6 +46,7 @@ void ShapeUniverse::activate()
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	ResolveDescription resolveDesc;
+	resolveDesc.resolveCellLinks = true;
 	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
 }
 
