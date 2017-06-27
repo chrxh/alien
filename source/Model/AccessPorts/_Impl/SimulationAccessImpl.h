@@ -26,6 +26,11 @@ public:
 private:
 	void callBackUpdateData();
 	void callBackCollectData();
+	void callBackDrawImage();
+
+	void drawImageFromUnit(Unit* unit);
+	void drawClustersFromUnit(Unit* unit);
+	void drawParticlesFromUnit(Unit* unit);
 
 	void collectDataFromUnit(Unit* unit);
 	void collectClustersFromUnit(Unit* unit);
@@ -37,6 +42,10 @@ private:
 	bool _dataRequired = false;
 	IntRect _requiredRect;
 	ResolveDescription _resolveDesc;
+
+	bool _imageRequired = false;
+	QImage* _requiredImage = nullptr;
+
 	DataDescription _dataCollected;
 	DataDescription _dataToUpdate;
 };
