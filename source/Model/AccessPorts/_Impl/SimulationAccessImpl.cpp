@@ -1,7 +1,10 @@
+#include <QImage>
+
 #include "Base/ServiceLocator.h"
 #include "Model/Entities/Descriptions.h"
 #include "Model/Entities/EntityFactory.h"
 #include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cell.h"
 #include "Model/Entities/EnergyParticle.h"
 #include "Model/Context/SimulationContext.h"
 #include "Model/Context/UnitContext.h"
@@ -49,6 +52,12 @@ void SimulationAccessImpl::requireData(IntRect rect, ResolveDescription const& r
 
 void SimulationAccessImpl::requireImage(IntRect rect, QImage * target)
 {
+	_imageRequired = true;
+	_requiredRect = rect;
+	_requiredImage = target;
+	if (_context->getUnitThreadController()->isNoThreadWorking()) {
+		accessToUnits();
+	}
 }
 
 DataDescription const& SimulationAccessImpl::retrieveData()
@@ -65,6 +74,7 @@ void SimulationAccessImpl::accessToUnits()
 {
 	callBackUpdateData();
 	callBackCollectData();
+	callBackDrawImage();
 }
 
 void SimulationAccessImpl::callBackUpdateData()
@@ -112,6 +122,60 @@ void SimulationAccessImpl::callBackCollectData()
 	}
 
 	Q_EMIT dataReadyToRetrieve();
+}
+
+void SimulationAccessImpl::callBackDrawImage()
+{
+	if (!_imageRequired) {
+		return;
+	}
+	_imageRequired = false;
+
+	_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
+
+	auto grid = _context->getUnitGrid();
+	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D());
+	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D());
+	IntVector2D gridPos;
+	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
+		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
+			drawImageFromUnit(grid->getUnitOfGridPos(gridPos));
+		}
+	}
+
+	Q_EMIT imageReady();
+}
+
+void SimulationAccessImpl::drawImageFromUnit(Unit * unit)
+{
+	drawClustersFromUnit(unit);
+	drawParticlesFromUnit(unit);
+}
+
+void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
+{
+	auto metric = unit->getContext()->getSpaceMetric();
+	auto const &clusters = unit->getContext()->getClustersRef();
+	for (auto const &cluster : clusters) {
+		for (auto const &cell : cluster->getCellsRef()) {
+			auto pos = metric->correctPositionAndConvertToIntVector(cell->calcPosition(true));
+			if (_requiredRect.isContained(pos)) {
+				_requiredImage->setPixel(pos.x, pos.y, 0xFF);
+			}
+		}
+	}
+}
+
+void SimulationAccessImpl::drawParticlesFromUnit(Unit * unit)
+{
+	auto metric = unit->getContext()->getSpaceMetric();
+	auto const &particles = unit->getContext()->getEnergyParticlesRef();
+	for (auto const &particle : particles) {
+		auto pos = metric->correctPositionAndConvertToIntVector(particle->getPosition());
+		if (_requiredRect.isContained(pos)) {
+			_requiredImage->setPixel(pos.x, pos.y, 0x902020);
+		}
+	}
 }
 
 void SimulationAccessImpl::collectDataFromUnit(Unit * unit)
