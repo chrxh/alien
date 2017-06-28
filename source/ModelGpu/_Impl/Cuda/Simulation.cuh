@@ -9,17 +9,26 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 
-__device__ void createNewParticle(SimulationData &data, float2 &pos)
+__device__ void createNewParticle(SimulationData &data, CellData *oldCell)
 {
 	auto particle = data.particlesAC2.getElement_Kernel();
+	auto &pos = oldCell->absPos;
 	particle->pos = { pos.x + data.randomGen.random(2.0f) - 1.0f, pos.y + data.randomGen.random(2.0f) - 1.0f };
-	particle->vel = { data.randomGen.random()-0.5f, data.randomGen.random() - 0.5f };
+	particle->vel = { (data.randomGen.random()-0.5f) * RADIATION_VELOCITY_PERTURBATION, (data.randomGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
+	float radiationEnergy = powf(oldCell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
+	radiationEnergy = radiationEnergy / RADIATION_PROB;
+	radiationEnergy = 2 * radiationEnergy * data.randomGen.random();
+	if (radiationEnergy > oldCell->energy - 1) {
+		radiationEnergy = oldCell->energy - 1;
+	}
+	particle->energy = radiationEnergy;
+	oldCell->energy -= radiationEnergy;
 }
 
 __device__ void cellRadiation(SimulationData &data, CellData *oldCell)
 {
 	if (data.randomGen.random() < RADIATION_PROB) {
-		createNewParticle(data, oldCell->absPos);
+		createNewParticle(data, oldCell);
 	}
 }
 
