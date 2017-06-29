@@ -92,8 +92,8 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 		angleCorrection(clusterCopy.angle);
 		clusterCopy.pos = add(clusterCopy.pos, clusterCopy.vel);
 		mapPosCorrection(clusterCopy.pos, size);
+		clusterCopy.numCells = 0;
 		clusterCopy.cells = newCells;
-		*newCluster = clusterCopy;
 	}
 
 	__syncthreads();
@@ -101,8 +101,12 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CellData *oldCell = &oldCluster->cells[cellIndex];
-			CellData *newCell = &newCells[cellIndex];
 			CellData cellCopy = *oldCell;
+
+			if (cellCopy.energy < CELL_MIN_ENERGY) {
+				continue;
+			}
+
 			float2 absPos;
 			absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
 			absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
@@ -115,6 +119,8 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 				cellCopy.protectionCounter = PROTECTION_TIMESTEPS;
 				cellCopy.setProtectionCounterForNextTimestep = false;
 			}
+			int newCellIndex = atomicAdd(&clusterCopy.numCells, 1);
+			CellData *newCell = &newCells[newCellIndex];
 			*newCell = cellCopy;
 			setToMap<CellData>({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, data.cellMap2, size);
 
@@ -123,6 +129,10 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 	}
 
 	__syncthreads();
+
+	if (threadIdx.x == 0) {
+		*newCluster = clusterCopy;
+	}
 
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {

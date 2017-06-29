@@ -3,6 +3,7 @@
 //simulation specific constants
 #define CELL_MAX_BONDS 6
 #define CELL_MAX_DISTANCE 1.3
+#define CELL_MIN_ENERGY 50.0
 #define RADIATION_PROB 0.03
 #define RADIATION_EXPONENT 1.0
 #define RADIATION_FACTOR 0.0002
