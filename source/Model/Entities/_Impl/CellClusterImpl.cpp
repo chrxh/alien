@@ -101,17 +101,7 @@ CellClusterDescription CellClusterImpl::getDescription(ResolveDescription const&
 	CellClusterDescription result;
 	result.setId(_id).setPos(_pos).setVel(_pos).setAngle(_angle).setAngularVel(_angularVel);
 	for (auto const& cell : _cells) {
-		result.retainCell(cell->getDescription());
-	}
-
-	if (resolveDescription.resolveCellLinks) {
-		uint64_t id;
-		for (auto const& cell : _cells) {
-			id = cell->getId();
-			for (int i = 0; i < cell->getNumConnections(); ++i) {
-				result.retainConnection({ id, cell->getConnection(i)->getId() });
-			}
-		}
+		result.retainCell(cell->getDescription(resolveDescription));
 	}
 	return result;
 }

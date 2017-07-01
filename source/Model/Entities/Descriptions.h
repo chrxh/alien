@@ -18,8 +18,8 @@ struct CellDescription
 
 	Tracker<QVector2D> pos;
 	Tracker<double> energy;
-	Tracker<int> numConnections;
 	Tracker<int> maxConnections;
+	Tracker<vector<uint64_t>> connectingCells;
 	Tracker<bool> tokenBlocked;
 	Tracker<int> tokenAccessNumber;
 	Tracker<CellMetadata> metadata;
@@ -29,8 +29,8 @@ struct CellDescription
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
 	CellDescription& setEnergy(double value) { energy.init(value); return *this; }
-	CellDescription& setNumConnections(int value) { numConnections.init(value); return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
+	CellDescription& setConnectingCells(vector<uint64_t> const& value) { connectingCells.init(value); return *this; }
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
 	CellDescription& setTokenAccessNumber(int value) { tokenAccessNumber.init(value); return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
@@ -47,7 +47,6 @@ struct CellClusterDescription
 	Tracker<double> angularVel;
 	Tracker<CellClusterMetadata> metadata;
 	vector<TrackerElement<CellDescription>> cells;
-	vector<TrackerElement<pair<uint64_t, uint64_t>>> cellConnections;
 
 	CellClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	CellClusterDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
@@ -67,11 +66,6 @@ struct CellClusterDescription
 	CellClusterDescription& retainCell(CellDescription const& value)
 	{
 		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Retained));
-		return *this;
-	}
-	CellClusterDescription& retainConnection(pair<uint64_t, uint64_t> const& value)
-	{
-		cellConnections.emplace_back(TrackerElement<pair<uint64_t, uint64_t>>(value, TrackerElementState::Retained));
 		return *this;
 	}
 };

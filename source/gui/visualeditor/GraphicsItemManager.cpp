@@ -44,35 +44,36 @@ void GraphicsItemManager::updateEntities(vector<TrackerElement<DescriptionType>>
 	}
 }
 
-void GraphicsItemManager::updateConnections(vector<TrackerElement<pair<uint64_t, uint64_t>>> const &desc
+void GraphicsItemManager::updateConnections(vector<TrackerElement<CellDescription>> const &desc
 	, map<uint64_t, CellDescription> const &cellsByIds
 	, map<set<uint64_t>, CellConnectionGraphicsItem*>& connectionsByIds
 	, map<set<uint64_t>, CellConnectionGraphicsItem*>& newConnectionsByIds)
 {
-	for (auto const &connectionT : desc) {
-		pair<uint64_t, uint64_t> const &connectionD = connectionT.getValue();
-		auto firstCellIt = cellsByIds.find(connectionD.first);
-		auto secondCellIt = cellsByIds.find(connectionD.second);
-		if (firstCellIt == cellsByIds.end() || secondCellIt == cellsByIds.end()) {
-			continue;
-		}
-		set<uint64_t> id;
-		id.insert(connectionD.first);
-		id.insert(connectionD.second);
-		if (newConnectionsByIds.find(id) != newConnectionsByIds.end()) {
-			continue;
-		}
-		auto connectionIt = connectionsByIds.find(id);
-		if (connectionIt != connectionsByIds.end()) {
-			CellConnectionGraphicsItem* connection = connectionIt->second;
-			connection->update(firstCellIt->second, secondCellIt->second);
-			newConnectionsByIds[id] = connection;
-			connectionsByIds.erase(connectionIt);
-		}
-		else {
-			CellConnectionGraphicsItem* newConnection = new CellConnectionGraphicsItem(&_config, firstCellIt->second, secondCellIt->second);
-			_scene->addItem(newConnection);
-			newConnectionsByIds[id] = newConnection;
+	for (auto const &cellT : desc) {
+		auto const &cellD = cellT.getValue();
+		for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
+			auto cellIt = cellsByIds.find(connectingCellId);
+			if (cellIt == cellsByIds.end()) {
+				continue;
+			}
+			set<uint64_t> id;
+			id.insert(cellD.id);
+			id.insert(connectingCellId);
+			if (newConnectionsByIds.find(id) != newConnectionsByIds.end()) {
+				continue;
+			}
+			auto connectionIt = connectionsByIds.find(id);
+			if (connectionIt != connectionsByIds.end()) {
+				CellConnectionGraphicsItem* connection = connectionIt->second;
+				connection->update(cellD, cellIt->second);
+				newConnectionsByIds[id] = connection;
+				connectionsByIds.erase(connectionIt);
+			}
+			else {
+				CellConnectionGraphicsItem* newConnection = new CellConnectionGraphicsItem(&_config, cellD, cellIt->second);
+				_scene->addItem(newConnection);
+				newConnectionsByIds[id] = newConnection;
+			}
 		}
 	}
 }
@@ -103,7 +104,7 @@ void GraphicsItemManager::update(DataDescription const &desc)
 	for (auto const &clusterT : desc.clusters) {
 		auto const &cluster = clusterT.getValue();
 		updateEntities(cluster.cells, _cellsByIds, newCellsByIds);
-		updateConnections(cluster.cellConnections, cellDescByIds, _connectionsByIds, newConnectionsByIds);
+		updateConnections(cluster.cells, cellDescByIds, _connectionsByIds, newConnectionsByIds);
 	}
 	for (auto const& cellById : _cellsByIds) {
 		delete cellById.second;

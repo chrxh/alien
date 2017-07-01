@@ -18,14 +18,10 @@ void CellGraphicsItem::update(CellDescription const & desc)
 	auto pos = desc.pos.getValue()*GRAPHICS_ITEM_SIZE;
 	QGraphicsItem::setPos(pos.x(), pos.y());
 
-	if (desc.tokens.isInitialized()) {
-		_numToken = desc.tokens.getValue().size();
-	}
-	if (desc.metadata.isInitialized()) {
-		_color = desc.metadata.getValue().color;
-	}
+	_numToken = desc.tokens.getValueOrDefault().size();
+	_color = desc.metadata.getValueOrDefault().color;
 	_branchNumber = desc.tokenAccessNumber.getValueOr(0);
-	auto numConnections = desc.numConnections.getValueOr(0);
+	auto numConnections = desc.connectingCells.getValueOrDefault().size();
 	auto maxConnections = desc.maxConnections.getValueOr(0);
 	_connectable = (numConnections < maxConnections);
 }
