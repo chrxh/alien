@@ -23,7 +23,7 @@ private:
 	template<typename IdType, typename ItemType, typename DescriptionType>
 	void updateEntities(vector<TrackerElement<DescriptionType>> const &desc, map<IdType, ItemType*>& itemsByIds
 		, map<IdType, ItemType*>& newItemsByIds);
-	void updateConnections(vector<TrackerElement<pair<uint64_t, uint64_t>>> const &desc
+	void updateConnections(vector<TrackerElement<CellDescription>> const &desc
 		, map<uint64_t, CellDescription> const &cellsByIds
 		, map<set<uint64_t>, CellConnectionGraphicsItem*>& connectionsByIds
 		, map<set<uint64_t>, CellConnectionGraphicsItem*>& newConnectionsByIds);
