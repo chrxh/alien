@@ -12,19 +12,26 @@ CellCluster* EntityFactoryImpl::build(CellClusterDescription const& desc, UnitCo
 {
 	list<Cell*> cells;
 	map<uint64_t, Cell*> cellsByIds;
-	for (auto const &cellDesc : desc.cells) {
-		auto cell = build(cellDesc.getValue(), context);
+	for (auto const &cellT : desc.cells) {
+		auto cell = build(cellT.getValue(), context);
 		cells.push_back(cell);
-		cellsByIds[cellDesc.getValue().id] = cell;
+		cellsByIds[cellT.getValue().id] = cell;
 	}
-	for (auto const &connection : desc.cellConnections) {
-		auto const& conValue = connection.getValue();
-		uint64_t id1 = conValue.first;
-		uint64_t id2 = conValue.second;
-		Cell* cell1 = cellsByIds[id1];
-		Cell* cell2 = cellsByIds[id2];
-		cell1->newConnection(cell2);
+
+	for (auto const &cellT : desc.cells) {
+		auto cellD = cellT.getValue();
+		if (!cellD.connectingCells.isInitialized()) {
+			continue;
+		}
+		for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
+			Cell* cell1 = cellsByIds[cellD.id];
+			Cell* cell2 = cellsByIds[connectingCellId];
+			if (!cell1->isConnectedTo(cell2)) {
+				cell1->newConnection(cell2);
+			}
+		}
 	}
+
 	return new CellClusterImpl(QList<Cell*>::fromStdList(cells), desc.angle.getValueOr(0.0), desc.pos.getValue()
 		, desc.angularVel.getValueOr(0.0), desc.vel.getValueOr(QVector2D()), context);
 }

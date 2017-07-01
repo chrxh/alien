@@ -50,18 +50,19 @@ void CellImpl::setContext(UnitContext * context)
 	}
 }
 
-CellDescription CellImpl::getDescription() const
+CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
 	CellDescription result;
-	result.setId(_id).setPos(calcPosition()).setNumConnections(_numConnections).setMaxConnections(_maxConnections)
+	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections)
 		.setTokenAccessNumber(_tokenAccessNumber).setEnergy(_energy).setMetadata(_metadata);
+	if (resolveDescription.resolveCellLinks) {
+		vector<uint64_t> connectingCells(_numConnections);
+		for (int i = 0; i < _numConnections; ++i) {
+			connectingCells.push_back(_connectingCells[i]->getId());
+		}
+		result.setConnectingCells(connectingCells);
+	}
 	return result;
-}
-
-void CellImpl::getDescription(CellDescription & desc) const
-{
-	desc.setId(_id).setPos(calcPosition(true)).setMaxConnections(_maxConnections).setTokenAccessNumber(_tokenAccessNumber)
-		.setEnergy(_energy).setMetadata(_metadata);
 }
 
 void CellImpl::registerFeatures (CellFeature* features)

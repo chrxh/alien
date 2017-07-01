@@ -24,6 +24,7 @@ public:
 	bool isInitialized() const { return _value.is_initialized(); }
 	T const& getValue() const { return _value.get(); }
 	T const& getValueOr(T const& d) const { return _value.get_value_or(d); }
+	T const& getValueOrDefault() const { return _value.get_value_or(T()); }
 	T const& getInitialValue() const { return _initialValue.get(); }
 	Tracker& setValue(T const& v)
 	{
