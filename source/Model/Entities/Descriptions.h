@@ -29,6 +29,7 @@ struct CellDescription
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
 	CellDescription& setEnergy(double value) { energy.init(value); return *this; }
+	CellDescription& setNumConnections(int value) { numConnections.init(value); return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
 	CellDescription& setTokenAccessNumber(int value) { tokenAccessNumber.init(value); return *this; }
