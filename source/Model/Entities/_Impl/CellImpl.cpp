@@ -53,8 +53,8 @@ void CellImpl::setContext(UnitContext * context)
 CellDescription CellImpl::getDescription() const
 {
 	CellDescription result;
-	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections).setTokenAccessNumber(_tokenAccessNumber)
-		.setEnergy(_energy).setMetadata(_metadata);
+	result.setId(_id).setPos(calcPosition()).setNumConnections(_numConnections).setMaxConnections(_maxConnections)
+		.setTokenAccessNumber(_tokenAccessNumber).setEnergy(_energy).setMetadata(_metadata);
 	return result;
 }
 
