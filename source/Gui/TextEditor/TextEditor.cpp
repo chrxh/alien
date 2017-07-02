@@ -14,16 +14,16 @@
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/CellCluster.h"
 #include "Model/Entities/EnergyParticle.h"
-#include "TokenTabT.h"
-#include "CellEditT.h"
-#include "ClusterEditT.h"
-#include "EnergyEditT.h"
-#include "HexEditT.h"
-#include "MetadataEditT.h"
-#include "SymbolEditT.h"
-#include "CellComputerEditT.h"
+#include "TokenTab.h"
+#include "CellEdit.h"
+#include "ClusterEdit.h"
+#include "EnergyEdit.h"
+#include "HexEdit.h"
+#include "MetadataEdit.h"
+#include "SymbolEdit.h"
+#include "CellComputerEdit.h"
 
-#include "TextEditorT.h"
+#include "TextEditor.h"
 
 const int tabPosX1 = 410;
 const int tabPosX2 = 810;

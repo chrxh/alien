@@ -1,10 +1,11 @@
-#include "TokenEditT.h"
-
-#include "gui/Settings.h"
-
 #include <QKeyEvent>
 #include <QTextBlock>
 #include <qmath.h>
+
+#include "gui/Settings.h"
+
+#include "TokenEdit.h"
+
 
 TokenEdit::TokenEdit(QWidget *parent)
     : QTextEdit(parent)

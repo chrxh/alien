@@ -1,4 +1,4 @@
-#include "CellEditT.h"
+#include "CellEdit.h"
 
 #include "gui/Settings.h"
 #include "Model/Entities/Cell.h"
