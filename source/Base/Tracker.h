@@ -20,6 +20,9 @@ public:
 		_value = v;
 	}
 
+	T* operator->() { return _value.get(); }
+	T const* operator->() const { return _value->get; }
+
 	bool isModified() const { return _initialValue != _value; }
 	bool isInitialized() const { return _value.is_initialized(); }
 	T const& getValue() const { return _value.get(); }
@@ -51,6 +54,9 @@ public:
 	TrackerElement() = delete;
 	TrackerElement(T const &v) : _value(v) {}
 	TrackerElement(T const &v, TrackerElementState s) : _state(s), _value(v) {}
+
+	T* operator->() { return &_value; }
+	T const * operator->() const { return &_value; }
 
 	bool isDeleted() const { return _state == TrackerElementState::Deleted; }
 	bool isAdded() const { return _state == TrackerElementState::Added; }

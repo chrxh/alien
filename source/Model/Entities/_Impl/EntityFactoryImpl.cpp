@@ -41,7 +41,7 @@ Cell * EntityFactoryImpl::build(CellDescription const & desc, UnitContext * cont
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
 	auto const& energy = desc.energy.getValue();
 	auto const& maxConnections = desc.maxConnections.getValueOr(0);
-	auto const& tokenAccessNumber = desc.tokenAccessNumber.getValueOr(0);
+	auto const& tokenAccessNumber = desc.tokenBranchNumber.getValueOr(0);
 	auto const& relPos = desc.pos.getValueOr({ 0.0, 0.0 });
 	auto cell = new CellImpl(energy, context, maxConnections, tokenAccessNumber, relPos);
 	cell->setFlagTokenBlocked(desc.tokenBlocked.getValueOr(false));

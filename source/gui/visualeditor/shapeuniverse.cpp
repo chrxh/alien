@@ -34,7 +34,7 @@ void ShapeUniverse::init(SimulationController * controller, SimulationAccess* ac
 	auto items = new GraphicsItemManager();
 	SET_CHILD(_items, items);
 
-	items->init(this, viewport);
+	items->init(this, viewport, _controller->getContext()->getSimulationParameters());
 }
 
 void ShapeUniverse::activate()

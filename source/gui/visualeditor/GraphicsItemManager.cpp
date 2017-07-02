@@ -9,10 +9,16 @@
 #include "ParticleGraphicsItem.h"
 #include "cellconnectiongraphicsitem.h"
 
-void GraphicsItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport)
+void GraphicsItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters* parameters)
 {
+	auto config = new GraphicsItemConfig();
+
 	_scene = scene;
 	_viewport = viewport;
+	_parameters = parameters;
+	SET_CHILD(_config, config);
+
+	_config->init(parameters);
 }
 
 void GraphicsItemManager::activate(IntVector2D size)
@@ -37,7 +43,7 @@ void GraphicsItemManager::updateEntities(vector<TrackerElement<DescriptionType>>
 			itemsByIds.erase(it);
 		}
 		else {
-			ItemType* newItem = new ItemType(&_config, descElement);
+			ItemType* newItem = new ItemType(_config, descElement);
 			_scene->addItem(newItem);
 			newItemsByIds[descElement.id] = newItem;
 		}
@@ -70,7 +76,7 @@ void GraphicsItemManager::updateConnections(vector<TrackerElement<CellDescriptio
 				connectionsByIds.erase(connectionIt);
 			}
 			else {
-				CellConnectionGraphicsItem* newConnection = new CellConnectionGraphicsItem(&_config, cellD, cellIt->second);
+				CellConnectionGraphicsItem* newConnection = new CellConnectionGraphicsItem(_config, cellD, cellIt->second);
 				_scene->addItem(newConnection);
 				newConnectionsByIds[id] = newConnection;
 			}

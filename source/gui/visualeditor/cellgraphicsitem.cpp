@@ -15,12 +15,12 @@ CellGraphicsItem::CellGraphicsItem (GraphicsItemConfig* config, CellDescription 
 
 void CellGraphicsItem::update(CellDescription const & desc)
 {
-	auto pos = desc.pos.getValue()*GRAPHICS_ITEM_SIZE;
+	auto pos = desc.pos.getValueOrDefault()*GRAPHICS_ITEM_SIZE;
 	QGraphicsItem::setPos(pos.x(), pos.y());
 
 	_numToken = desc.tokens.getValueOrDefault().size();
 	_color = desc.metadata.getValueOrDefault().color;
-	_branchNumber = desc.tokenAccessNumber.getValueOr(0);
+	_branchNumber = desc.tokenBranchNumber.getValueOr(0);
 	auto numConnections = desc.connectingCells.getValueOrDefault().size();
 	auto maxConnections = desc.maxConnections.getValueOr(0);
 	_connectable = (numConnections < maxConnections);
@@ -92,7 +92,7 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
         }
     }
 
-	if (_config->showCellInfo) {
+	if (_config->isShowCellInfo()) {
 		auto font = GuiSettings::getCellFont();
 		painter->setFont(font);
 		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
