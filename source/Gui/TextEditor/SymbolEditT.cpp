@@ -4,8 +4,8 @@
 #include "gui/Settings.h"
 #include "gui/Settings.h"
 
-#include "symboledit.h"
-#include "ui_symboledit.h"
+#include "SymbolEditT.h"
+#include "ui_SymbolEditT.h"
 
 SymbolEdit::SymbolEdit(QWidget *parent)
 	: QWidget(parent), ui(new Ui::SymbolEdit)

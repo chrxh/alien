@@ -1,4 +1,4 @@
-#include "energyedit.h"
+#include "EnergyEditT.h"
 
 #include "gui/Settings.h"
 #include "Model/Entities/Cell.h"
