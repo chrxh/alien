@@ -5,8 +5,8 @@
 #include "gui/Settings.h"
 #include "gui/Settings.h"
 
-#include "HexEditT.h"
-#include "TokenTabT.h"
+#include "HexEdit.h"
+#include "TokenTab.h"
 #include "ui_TokenTab.h"
 
 TokenTab::TokenTab(QWidget *parent) :

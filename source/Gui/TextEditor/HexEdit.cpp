@@ -1,4 +1,4 @@
-#include "HexEditT.h"
+#include "HexEdit.h"
 
 #include"gui/Settings.h"
 

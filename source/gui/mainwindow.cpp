@@ -18,7 +18,7 @@
 #include "monitoring/simulationmonitor.h"
 #include "assistance/tutorialwindow.h"
 #include "misc/startscreencontroller.h"
-#include "gui/texteditor/TextEditorT.h"
+#include "gui/texteditor/TextEditor.h"
 #include "gui/Settings.h"
 #include "gui/Settings.h"
 #include "gui/visualeditor/ViewportController.h"

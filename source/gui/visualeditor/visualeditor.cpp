@@ -3,7 +3,7 @@
 #include <QGraphicsItem>
 
 #include "gui/Settings.h"
-#include "gui/texteditor/TextEditorT.h"
+#include "gui/texteditor/TextEditor.h"
 #include "Model/AccessPorts/SimulationAccess.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/SpaceMetric.h"

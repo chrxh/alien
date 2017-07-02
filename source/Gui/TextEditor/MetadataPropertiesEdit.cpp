@@ -1,4 +1,4 @@
-#include "MetadataPropertiesEditT.h"
+#include "MetadataPropertiesEdit.h"
 
 #include "gui/Settings.h"
 #include "gui/Settings.h"

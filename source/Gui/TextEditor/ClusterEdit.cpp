@@ -1,4 +1,4 @@
-#include "ClusterEditT.h"
+#include "ClusterEdit.h"
 
 #include "gui/Settings.h"
 #include "Model/Entities/Cell.h"

@@ -1,10 +1,10 @@
-#include "MetadataEditT.h"
-#include "ui_MetadataEditT.h"
-
-#include "MetadataPropertiesEditT.h"
-#include "gui/Settings.h"
-
 #include <QScrollBar>
+
+#include "Gui/Settings.h"
+#include "MetadataPropertiesEdit.h"
+
+#include "MetadataEdit.h"
+#include "ui_MetadataEdit.h"
 
 MetadataEdit::MetadataEdit(QWidget *parent) :
     QWidget(parent),
