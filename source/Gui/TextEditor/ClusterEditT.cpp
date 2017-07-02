@@ -1,53 +1,49 @@
-#include "tokenedit.h"
+#include "ClusterEditT.h"
 
 #include "gui/Settings.h"
+#include "Model/Entities/Cell.h"
+#include "Model/Entities/CellCluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>
+#include <QTextLayout>
 #include <qmath.h>
 
-TokenEdit::TokenEdit(QWidget *parent)
-    : QTextEdit(parent)
+ClusterEdit::ClusterEdit(QWidget *parent) :
+    QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-TokenEdit::~TokenEdit()
+void ClusterEdit::updateCluster (CellTO cell)
 {
-
+    _cell = cell;
+    updateDisplay();
 }
 
-void TokenEdit::update (qreal energy)
+void ClusterEdit::requestUpdate ()
 {
-    //define auxilliary strings
-    QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
-    QString parEnd = "</p>";
-    QString colorCaptionStart = "<span style=\"color:"+CELL_EDIT_CAPTION_COLOR1.name()+"\">";
-    QString colorTextStart = "<span style=\"color:"+CELL_EDIT_TEXT_COLOR1.name()+"\">";
-    QString colorEnd = "</span>";
-    QString text;
-
-    //set cursor color
-    QPalette p(QTextEdit::palette());
-    p.setColor(QPalette::Text, CELL_EDIT_CURSOR_COLOR);
-    QTextEdit::setPalette(p);
-
-    //create string of display
-    text = parStart+colorTextStart+ "internal energy: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(energy)+parEnd;
-    QTextEdit::setText(text);
-}
-
-void TokenEdit::requestUpdate ()
-{
+    int row = QTextEdit::textCursor().blockNumber();
     QString currentText = QTextEdit::textCursor().block().text();
-    qreal energy = generateNumberFromFormattedString(currentText);
+
+    if( row == 1 )
+        _cell.clusterPos.setX(generateNumberFromFormattedString(currentText));
+    if( row == 2 )
+        _cell.clusterPos.setY(generateNumberFromFormattedString(currentText));
+    if( row == 3 )
+        _cell.clusterVel.setX(generateNumberFromFormattedString(currentText));
+    if( row == 4 )
+        _cell.clusterVel.setY(generateNumberFromFormattedString(currentText));
+    if( row == 5 )
+        _cell.clusterAngle = generateNumberFromFormattedString(currentText);
+    if( row == 6 )
+        _cell.clusterAngVel = generateNumberFromFormattedString(currentText);
 
     //inform other instances
-    Q_EMIT dataChanged(energy);
+    Q_EMIT clusterDataChanged(_cell);
 }
 
-void TokenEdit::keyPressEvent (QKeyEvent* e)
+void ClusterEdit::keyPressEvent (QKeyEvent* e)
 {
     //auxilliary data
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
@@ -56,6 +52,10 @@ void TokenEdit::keyPressEvent (QKeyEvent* e)
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
     int rowLen = QTextEdit::document()->findBlockByNumber(row).length();
+
+    //request update?
+    if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
+        requestUpdate();
 
     //typing number?
     QString k;
@@ -82,17 +82,9 @@ void TokenEdit::keyPressEvent (QKeyEvent* e)
 
     //check for end of line in the case typing number or period
     if( (!k.isEmpty()) || (e->key() == Qt::Key_Period) ) {
-        if( QTextEdit::textCursor().block().text().length() > 36 )
+        if( rowLen > 37 )
             return;
     }
-
-    //typing left button?
-    if( (col > 24) && (e->key() == Qt::Key_Left) )
-        QTextEdit::keyPressEvent(e);
-
-    //typing right button?
-    if( (col < rowLen-1) && (e->key() == Qt::Key_Right) )
-        QTextEdit::keyPressEvent(e);
 
     //insert number
     if( !k.isEmpty() ) {
@@ -128,7 +120,7 @@ void TokenEdit::keyPressEvent (QKeyEvent* e)
 
             //removes other dots and recolor the characters from old dot to line end
             int n = rowLen-s-1;   //number of characters from dot to line end
-            QString t = QTextEdit::document()->findBlockByLineNumber(row).text().right(n).remove('.');
+            QString t = QTextEdit::document()->findBlockByLineNumber(row).text().right(n).remove('.');//.left(s-col);
             QTextCursor c = QTextEdit::textCursor();
             c.movePosition(QTextCursor::Left,QTextCursor::MoveAnchor, col-s);
             for( int i = 0; i < n; ++i )
@@ -137,6 +129,13 @@ void TokenEdit::keyPressEvent (QKeyEvent* e)
             c.insertHtml(colorData2Start+"."+t.right(n-col+s)+colorEnd);
             for( int i = 0; i < n-col+s; ++i )
                 QTextEdit::moveCursor(QTextCursor::Left);
+        }
+    }
+
+    //typing minus
+    if( e->key() == Qt::Key_Minus ) {
+        if( (row >= 3) && (row <= 6) ) {
+            QTextEdit::textCursor().insertHtml("-");
         }
     }
 
@@ -182,41 +181,114 @@ void TokenEdit::keyPressEvent (QKeyEvent* e)
             QTextEdit::keyPressEvent(e);
     }
 
-    if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return) ) {
+    //typing left button?
+    if( (col > 24) && (e->key() == Qt::Key_Left) )
+        QTextEdit::keyPressEvent(e);
 
-        //inform other instances
-        QString currentText = QTextEdit::textCursor().block().text();
-        Q_EMIT dataChanged(generateNumberFromFormattedString(currentText));
+    //typing right button?
+    if( (col < rowLen-1) && (e->key() == Qt::Key_Right) )
+        QTextEdit::keyPressEvent(e);
+
+    //typing down button?
+    if( e->key() == Qt::Key_Down ) {
+        if( (row > 0) && (row < 6) )
+            QTextEdit::keyPressEvent(e);
+    }
+
+    //typing up button?
+    if( e->key() == Qt::Key_Up ) {
+        if( (row > 1) && (row < 7) )
+            QTextEdit::keyPressEvent(e);
     }
 }
 
-void TokenEdit::mousePressEvent(QMouseEvent* e)
+void ClusterEdit::mousePressEvent(QMouseEvent* e)
 {
     QTextEdit::mousePressEvent(e);
-
-    //move cursor to correct position
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
-    if( (row == 0) && (col < 24) ) {
+
+    //move cursor to correct position
+    if( (row == 0) ) {
+        QTextEdit::moveCursor(QTextCursor::Down);
         QTextEdit::moveCursor(QTextCursor::StartOfBlock);
         QTextEdit::moveCursor(QTextCursor::NextWord);
         QTextEdit::moveCursor(QTextCursor::NextWord);
         QTextEdit::moveCursor(QTextCursor::NextWord);
     }
+    if( ((row >= 1) && (row <= 4)) || (row == 6) ) {
+        if( col < 24 ) {
+            QTextEdit::moveCursor(QTextCursor::StartOfBlock);
+            QTextEdit::moveCursor(QTextCursor::NextWord);
+            QTextEdit::moveCursor(QTextCursor::NextWord);
+            QTextEdit::moveCursor(QTextCursor::NextWord);
+        }
+    }
+    if( row == 5 ) {
+        if( col < 24 ) {
+            QTextEdit::moveCursor(QTextCursor::StartOfBlock);
+            QTextEdit::moveCursor(QTextCursor::NextWord);
+            QTextEdit::moveCursor(QTextCursor::NextWord);
+        }
+    }
 }
 
-void TokenEdit::mouseDoubleClickEvent (QMouseEvent* e)
+void ClusterEdit::mouseDoubleClickEvent (QMouseEvent* e)
 {
     QTextEdit::clearFocus();
 }
 
-void TokenEdit::wheelEvent (QWheelEvent* e)
+void ClusterEdit::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
-qreal TokenEdit::generateNumberFromFormattedString (QString s)
+void ClusterEdit::updateDisplay ()
+{
+    int col = QTextEdit::textCursor().columnNumber();
+    int row = QTextEdit::textCursor().blockNumber();
+
+    //define auxilliary strings
+    QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
+    QString parEnd = "</p>";
+    QString colorCaptionStart = "<span style=\"color:"+CELL_EDIT_CAPTION_COLOR1.name()+"\">";
+    QString colorTextStart = "<span style=\"color:"+CELL_EDIT_TEXT_COLOR1.name()+"\">";
+    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
+    QString colorEnd = "</span>";
+    QString text;
+
+    //set cursor color
+    QPalette p(QTextEdit::palette());
+    p.setColor(QPalette::Text, CELL_EDIT_CURSOR_COLOR);
+    QTextEdit::setPalette(p);
+
+    //create string of display
+    text = parStart+colorTextStart+ "number of cells: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += colorDataStart+QString("%1").arg(_cell.numCells)+colorEnd+parEnd;
+    text += parStart+colorTextStart+ "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += generateFormattedRealString(_cell.clusterPos.x())+parEnd;
+    text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += generateFormattedRealString(_cell.clusterPos.y())+parEnd;
+    text += parStart+colorTextStart+ "velocity x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += generateFormattedRealString(_cell.clusterVel.x())+parEnd;
+    text += parStart+colorTextStart+ "velocity y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += generateFormattedRealString(_cell.clusterVel.y())+parEnd;
+    text += parStart+colorTextStart+ "angle: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += generateFormattedRealString(_cell.clusterAngle)+parEnd;
+    text += parStart+colorTextStart+ "angular vel: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += generateFormattedRealString(_cell.clusterAngVel)+parEnd;
+
+    QTextEdit::setText(text);
+
+    //restore cursor
+    for( int i = 0; i < row; ++i )
+        QTextEdit::moveCursor(QTextCursor::NextBlock);
+    for( int i = 0; i < col; ++i )
+        QTextEdit::moveCursor(QTextCursor::Right);
+}
+
+qreal ClusterEdit::generateNumberFromFormattedString (QString s)
 {
     int i = s.indexOf(':');
     if( i >= 0 ) {
@@ -231,13 +303,27 @@ qreal TokenEdit::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString TokenEdit::generateFormattedRealString (qreal r)
+QString ClusterEdit::generateFormattedRealString (QString s)
 {
-    //define auxilliary strings
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
     QString colorEnd = "</span>";
+    QString iS, reS;
+    int i = s.indexOf(".");
+    if( i == -1 )
+        iS = s;
+    else {
+        iS = s.left(i);
+        reS = s.remove(0,i+1);
+    }
+    return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
+}
 
+QString ClusterEdit::generateFormattedRealString (qreal r)
+{
+    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
+    QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
+    QString colorEnd = "</span>";
     bool negativeSign = false;
     if( r < 0.0 ) {
         r = -r;
@@ -253,7 +339,4 @@ QString TokenEdit::generateFormattedRealString (qreal r)
     else
         return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
 }
-
-
-
 

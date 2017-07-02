@@ -1,4 +1,4 @@
-#include "computercodeedit.h"
+#include "ComputerCodeEditR.h"
 
 #include "gui/Settings.h"
 #include "gui/Settings.h"

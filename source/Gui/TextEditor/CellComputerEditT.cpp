@@ -1,5 +1,5 @@
-#include "cellcomputeredit.h"
-#include "ui_cellcomputeredit.h"
+#include "CellComputerEditT.h"
+#include "ui_CellComputerEditT.h"
 
 #include "gui/Settings.h"
 #include "gui/Settings.h"
