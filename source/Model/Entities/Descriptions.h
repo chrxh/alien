@@ -21,7 +21,7 @@ struct CellDescription
 	Tracker<int> maxConnections;
 	Tracker<vector<uint64_t>> connectingCells;
 	Tracker<bool> tokenBlocked;
-	Tracker<int> tokenAccessNumber;
+	Tracker<int> tokenBranchNumber;
 	Tracker<CellMetadata> metadata;
 	Tracker<CellFunctionDescription> cellFunction;
 	Tracker<vector<TokenDescription>> tokens;
@@ -32,7 +32,7 @@ struct CellDescription
 	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
 	CellDescription& setConnectingCells(vector<uint64_t> const& value) { connectingCells.init(value); return *this; }
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
-	CellDescription& setTokenAccessNumber(int value) { tokenAccessNumber.init(value); return *this; }
+	CellDescription& setTokenAccessNumber(int value) { tokenBranchNumber.init(value); return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
 	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction.init(value); return *this; }
 };

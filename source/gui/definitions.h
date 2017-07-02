@@ -6,7 +6,7 @@
 class CellGraphicsItem;
 class ParticleGraphicsItem;
 class CellConnectionGraphicsItem;
-struct GraphicsItemConfig;
+class GraphicsItemConfig;
 class TextEditor;
 class SimulationMonitor;
 class TutorialWindow;

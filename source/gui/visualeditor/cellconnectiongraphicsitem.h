@@ -1,5 +1,4 @@
-#ifndef CELLCONNECTIONGRAPHICSITEM_H
-#define CELLCONNECTIONGRAPHICSITEM_H
+#pragma once
 
 #include <QGraphicsItem>
 
@@ -26,9 +25,10 @@ public:
     void setConnectionState (ConnectionState connectionState);
 
 private:
+	GraphicsItemConfig* _config;
+
     qreal _dx = 0.0;
     qreal _dy = 0.0;
 	ConnectionState _connectionState = ConnectionState::NO_DIR_CONNECTION;
 };
 
-#endif // CELLCONNECTIONGRAPHICSITEM_H
