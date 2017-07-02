@@ -14,7 +14,7 @@ public:
 	GraphicsItemManager(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~GraphicsItemManager() = default;
 
-	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport);
+	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport, SimulationParameters* parameters);
 
 	virtual void activate(IntVector2D size);
 	virtual void update(DataDescription const &desc);
@@ -29,9 +29,10 @@ private:
 		, map<set<uint64_t>, CellConnectionGraphicsItem*>& newConnectionsByIds);
 
 		
-	QGraphicsScene* _scene = nullptr;
-	ViewportInterface* _viewport = nullptr;
-	GraphicsItemConfig _config;
+	QGraphicsScene *_scene = nullptr;
+	ViewportInterface *_viewport = nullptr;
+	SimulationParameters *_parameters = nullptr;
+	GraphicsItemConfig *_config = nullptr;
 
 	map<uint64_t, CellGraphicsItem*> _cellsByIds;
 	map<uint64_t, ParticleGraphicsItem*> _particlesByIds;

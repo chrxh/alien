@@ -2,12 +2,11 @@
 
 #include "Model/Entities/Descriptions.h"
 #include "gui/Settings.h"
-#include "gui/Settings.h"
 
 #include "ParticleGraphicsItem.h"
 
 ParticleGraphicsItem::ParticleGraphicsItem (GraphicsItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
-    : QGraphicsItem(parent), _focusState(NO_FOCUS)
+    : QGraphicsItem(parent)
 {
 	update(desc);
 }

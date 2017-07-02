@@ -1,5 +1,4 @@
-#ifndef ENERGYGRAPHICSITEM_H
-#define ENERGYGRAPHICSITEM_H
+#pragma once
 
 #include <QGraphicsItem>
 
@@ -19,7 +18,7 @@ public:
         Type = UserType + 2
     };
 
-    ParticleGraphicsItem(GraphicsItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
+	ParticleGraphicsItem(GraphicsItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
 	~ParticleGraphicsItem() = default;
 
 	void update(EnergyParticleDescription const& desc);
@@ -31,7 +30,6 @@ public:
     void setFocusState (FocusState focusState);
 
 private:
-    FocusState _focusState;
+	FocusState _focusState = FocusState::NO_FOCUS;
 };
 
-#endif // ENERGYGRAPHICSITEM_H

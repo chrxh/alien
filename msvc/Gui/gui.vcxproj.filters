@@ -309,6 +309,15 @@
     <ClCompile Include="Release\moc_ViewportInterface.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\GraphicsItemConfig.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GraphicsItemConfig.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_GraphicsItemConfig.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -466,6 +475,9 @@
     <CustomBuild Include="..\..\source\gui\visualeditor\ViewportInterface.h">
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItemConfig.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\gui\resources\tutorial\angle.png">
@@ -615,9 +627,6 @@
       <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\GraphicsItemConfig.h">
       <Filter>Source Files\Visualeditor</Filter>
     </ClInclude>
   </ItemGroup>

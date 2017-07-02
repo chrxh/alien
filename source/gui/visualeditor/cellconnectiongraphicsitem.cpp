@@ -1,14 +1,14 @@
-#include "cellconnectiongraphicsitem.h"
-
-#include "Model/Entities/Descriptions.h"
-#include "gui/Settings.h"
-#include "gui/Settings.h"
-
 #include <QPainter>
 #include <qmath.h>
 
+#include "Model/Entities/Descriptions.h"
+#include "Gui/Settings.h"
+
+#include "GraphicsItemConfig.h"
+#include "cellconnectiongraphicsitem.h"
+
 CellConnectionGraphicsItem::CellConnectionGraphicsItem(GraphicsItemConfig* config, CellDescription const & cell1, CellDescription const & cell2, QGraphicsItem * parent)
-	: QGraphicsItem(parent)
+	: QGraphicsItem(parent), _config(config)
 {
 	QGraphicsItem::setZValue(-1.0);
 	update(cell1, cell2);
@@ -31,7 +31,19 @@ void CellConnectionGraphicsItem::update(CellDescription const & cell1, CellDescr
 	_dy = (pos2.y() - pos1.y()) * GRAPHICS_ITEM_SIZE;
 
 	QGraphicsItem::setPos(pos1.x() * GRAPHICS_ITEM_SIZE, pos1.y() * GRAPHICS_ITEM_SIZE);
-	_connectionState = ConnectionState::NO_DIR_CONNECTION;
+
+	auto branchNumber1 = cell1.tokenBranchNumber.getValueOr(0);
+	auto branchNumber2 = cell2.tokenBranchNumber.getValueOr(0);
+	auto maxBranchNumber = _config->getSimulationParameters()->cellMaxTokenBranchNumber;
+	if (branchNumber1 == (branchNumber2 + 1) % maxBranchNumber) {
+		_connectionState = ConnectionState::B_TO_A_CONNECTION;
+	}
+	else if (branchNumber2 == (branchNumber1 + 1) % maxBranchNumber) {
+		_connectionState = ConnectionState::B_TO_A_CONNECTION;
+	}
+	else {
+		_connectionState = ConnectionState::NO_DIR_CONNECTION;
+	}
 }
 
 QRectF CellConnectionGraphicsItem::boundingRect () const
