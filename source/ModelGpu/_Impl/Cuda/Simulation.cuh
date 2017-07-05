@@ -9,6 +9,13 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 
+__shared__ CellClusterData clusterCopy;
+__shared__ CellClusterData *oldCluster;
+__shared__ CellClusterData *newCluster;
+__shared__ CellData *newCells;
+__shared__ float rotMatrix[2][2];
+__shared__ CollisionData collisionData;
+
 __device__ void createNewParticle(SimulationData &data, CellData *oldCell)
 {
 	auto particle = data.particlesAC2.getElement_Kernel();
@@ -31,15 +38,6 @@ __device__ void cellRadiation(SimulationData &data, CellData *oldCell)
 		createNewParticle(data, oldCell);
 	}
 }
-
-
-__shared__ CellClusterData clusterCopy;
-__shared__ CellClusterData *oldCluster;
-__shared__ CellClusterData *newCluster;
-__shared__ CellData *newCells;
-__shared__ float rotMatrix[2][2];
-__shared__ CollisionData collisionData;
-
 
 __device__ void performCollision(SimulationData &data)
 {
@@ -71,13 +69,40 @@ __device__ void calcRotationMatrix()
 	rotMatrix[1][1] = cosAngle;
 }
 
-__device__ void prepareClusterMovement(SimulationData &data)
+__device__ void copyCluster(SimulationData &data)
 {
 	clusterCopy = *oldCluster;
 	newCells = data.cellsAC2.getArray_Kernel(clusterCopy.numCells);
 	newCluster = data.clustersAC2.getElement_Kernel();
-	calcRotationMatrix();
-	collisionData.init();
+}
+
+__device__ void copyAndMoveCells(SimulationData &data, int &cellIndex)
+{
+	CellData *oldCell = &oldCluster->cells[cellIndex];
+	CellData cellCopy = *oldCell;
+
+	if (cellCopy.energy < CELL_MIN_ENERGY) {
+		return;
+	}
+
+	float2 absPos;
+	absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
+	absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
+	cellCopy.absPos = absPos;
+	cellCopy.cluster = newCluster;
+	if (cellCopy.protectionCounter > 0) {
+		--cellCopy.protectionCounter;
+	}
+	if (cellCopy.setProtectionCounterForNextTimestep) {
+		cellCopy.protectionCounter = PROTECTION_TIMESTEPS;
+		cellCopy.setProtectionCounterForNextTimestep = false;
+	}
+	int newCellIndex = atomicAdd(&clusterCopy.numCells, 1);
+	CellData *newCell = &newCells[newCellIndex];
+	*newCell = cellCopy;
+	setToMap<CellData>({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, data.cellMap2, data.size);
+
+	oldCell->nextTimestep = newCell;
 }
 
 __device__ void clusterMovement(SimulationData &data, int clusterIndex)
@@ -86,14 +111,15 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 	oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	int startCellIndex;
 	int endCellIndex;
-	int2 size = data.size;
 	int oldNumCells = oldCluster->numCells;
 	if (threadIdx.x < oldNumCells) {
 
 		calcPartition(oldCluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 		if (threadIdx.x == 0) {
-			prepareClusterMovement(data);
+			copyCluster(data);
+			calcRotationMatrix();
+			collisionData.init();
 		}
 	}
 	
@@ -118,31 +144,7 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellData *oldCell = &oldCluster->cells[cellIndex];
-			CellData cellCopy = *oldCell;
-
-			if (cellCopy.energy < CELL_MIN_ENERGY) {
-				continue;
-			}
-
-			float2 absPos;
-			absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
-			absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
-			cellCopy.absPos = absPos;
-			cellCopy.cluster = newCluster;
-			if (cellCopy.protectionCounter > 0) {
-				--cellCopy.protectionCounter;
-			}
-			if (cellCopy.setProtectionCounterForNextTimestep) {
-				cellCopy.protectionCounter = PROTECTION_TIMESTEPS;
-				cellCopy.setProtectionCounterForNextTimestep = false;
-			}
-			int newCellIndex = atomicAdd(&clusterCopy.numCells, 1);
-			CellData *newCell = &newCells[newCellIndex];
-			*newCell = cellCopy;
-			setToMap<CellData>({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, data.cellMap2, size);
-
-			oldCell->nextTimestep = newCell;
+			copyAndMoveCells(data, cellIndex);
 		}
 	}
 
