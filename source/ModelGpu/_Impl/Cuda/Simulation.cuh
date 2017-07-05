@@ -32,15 +32,58 @@ __device__ void cellRadiation(SimulationData &data, CellData *oldCell)
 	}
 }
 
+
+__shared__ CellClusterData clusterCopy;
+__shared__ CellClusterData *oldCluster;
+__shared__ CellClusterData *newCluster;
+__shared__ CellData *newCells;
+__shared__ float rotMatrix[2][2];
+__shared__ CollisionData collisionData;
+
+
+__device__ void performCollision(SimulationData &data)
+{
+	for (int i = 0; i < collisionData.numEntries; ++i) {
+		CollisionEntry* entry = &collisionData.entries[i];
+		float numCollisions = static_cast<float>(entry->numCollisions);
+		entry->collisionPos.x /= numCollisions;
+		entry->collisionPos.y /= numCollisions;
+		entry->normalVec.x /= numCollisions;
+		entry->normalVec.y /= numCollisions;
+		calcCollision(&clusterCopy, entry, data.size);
+	}
+
+	clusterCopy.angle += clusterCopy.angularVel;
+	angleCorrection(clusterCopy.angle);
+	clusterCopy.pos = add(clusterCopy.pos, clusterCopy.vel);
+	mapPosCorrection(clusterCopy.pos, data.size);
+	clusterCopy.numCells = 0;
+	clusterCopy.cells = newCells;
+}
+
+__device__ void calcRotationMatrix()
+{
+	float sinAngle = __sinf(clusterCopy.angle*DEG_TO_RAD);
+	float cosAngle = __cosf(clusterCopy.angle*DEG_TO_RAD);
+	rotMatrix[0][0] = cosAngle;
+	rotMatrix[0][1] = -sinAngle;
+	rotMatrix[1][0] = sinAngle;
+	rotMatrix[1][1] = cosAngle;
+}
+
+__device__ void prepareClusterMovement(SimulationData &data)
+{
+	clusterCopy = *oldCluster;
+	newCells = data.cellsAC2.getArray_Kernel(clusterCopy.numCells);
+	newCluster = data.clustersAC2.getElement_Kernel();
+	calcRotationMatrix();
+	collisionData.init();
+}
+
 __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 {
-	__shared__ CellClusterData clusterCopy;
-	__shared__ CellClusterData *newCluster;
-	__shared__ CellData *newCells;
-	__shared__ float rotMatrix[2][2];
-	__shared__ CollisionData collisionData;
 
-	CellClusterData *oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+	oldCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	int startCellIndex;
 	int endCellIndex;
 	int2 size = data.size;
@@ -50,17 +93,7 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 		calcPartition(oldCluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 		if (threadIdx.x == 0) {
-			clusterCopy = *oldCluster;
-			float sinAngle = __sinf(clusterCopy.angle*DEG_TO_RAD);
-			float cosAngle = __cosf(clusterCopy.angle*DEG_TO_RAD);
-			rotMatrix[0][0] = cosAngle;
-			rotMatrix[0][1] = -sinAngle;
-			rotMatrix[1][0] = sinAngle;
-			rotMatrix[1][1] = cosAngle;
-			newCells = data.cellsAC2.getArray_Kernel(clusterCopy.numCells);
-			newCluster = data.clustersAC2.getElement_Kernel();
-
-			collisionData.init_Kernel();
+			prepareClusterMovement(data);
 		}
 	}
 	
@@ -78,22 +111,7 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 	__syncthreads();
 
 	if (threadIdx.x == 0) {
-		for (int i = 0; i < collisionData.numEntries; ++i) {
-			CollisionEntry* entry = &collisionData.entries[i];
-			float numCollisions = static_cast<float>(entry->numCollisions);
-			entry->collisionPos.x /= numCollisions;
-			entry->collisionPos.y /= numCollisions;
-			entry->normalVec.x /= numCollisions;
-			entry->normalVec.y /= numCollisions;
-			calcCollision(&clusterCopy, entry, size);
-		}
-
-		clusterCopy.angle += clusterCopy.angularVel;
-		angleCorrection(clusterCopy.angle);
-		clusterCopy.pos = add(clusterCopy.pos, clusterCopy.vel);
-		mapPosCorrection(clusterCopy.pos, size);
-		clusterCopy.numCells = 0;
-		clusterCopy.cells = newCells;
+		performCollision(data);
 	}
 
 	__syncthreads();
