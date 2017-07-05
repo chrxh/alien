@@ -24,7 +24,7 @@ public:
 	int numEntries;
 	CollisionEntry entries[MAX_COLLIDING_CLUSTERS];
 
-	__device__ void init_Kernel()
+	__device__ void init()
 	{
 		numEntries = 0;
 	}
