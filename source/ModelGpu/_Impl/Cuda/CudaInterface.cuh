@@ -40,6 +40,8 @@ struct CellClusterData
 
 struct DataForAccess
 {
+	int numClusters;
+	CellClusterData* clusters;
 	int numCells;
 	CellData* cells;
 	int numParticles;
