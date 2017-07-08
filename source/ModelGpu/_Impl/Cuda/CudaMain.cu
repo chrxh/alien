@@ -61,6 +61,10 @@ DataForAccess cudaGetData()
 	return simulationManager->getDataForAccess();
 }
 
+void cudaDataCorrection()
+{
+	simulationManager->dataCorrection();
+}
 
 void cudaShutdown()
 {
