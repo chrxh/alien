@@ -22,6 +22,7 @@ __device__ void createNewParticle(SimulationData &data, CellData *oldCell)
 	auto &pos = oldCell->absPos;
 	particle->id = data.numberGen.newId_Kernel();
 	particle->pos = { pos.x + data.numberGen.random(2.0f) - 1.0f, pos.y + data.numberGen.random(2.0f) - 1.0f };
+	mapPosCorrection(particle->pos, data.size);
 	particle->vel = { (data.numberGen.random()-0.5f) * RADIATION_VELOCITY_PERTURBATION, (data.numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
 	float radiationEnergy = powf(oldCell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
 	radiationEnergy = radiationEnergy / RADIATION_PROB;
