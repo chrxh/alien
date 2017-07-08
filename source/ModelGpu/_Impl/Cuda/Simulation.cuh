@@ -20,11 +20,12 @@ __device__ void createNewParticle(SimulationData &data, CellData *oldCell)
 {
 	auto particle = data.particlesAC2.getElement_Kernel();
 	auto &pos = oldCell->absPos;
-	particle->pos = { pos.x + data.randomGen.random(2.0f) - 1.0f, pos.y + data.randomGen.random(2.0f) - 1.0f };
-	particle->vel = { (data.randomGen.random()-0.5f) * RADIATION_VELOCITY_PERTURBATION, (data.randomGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
+	particle->id = data.numberGen.newId_Kernel();
+	particle->pos = { pos.x + data.numberGen.random(2.0f) - 1.0f, pos.y + data.numberGen.random(2.0f) - 1.0f };
+	particle->vel = { (data.numberGen.random()-0.5f) * RADIATION_VELOCITY_PERTURBATION, (data.numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
 	float radiationEnergy = powf(oldCell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
 	radiationEnergy = radiationEnergy / RADIATION_PROB;
-	radiationEnergy = 2 * radiationEnergy * data.randomGen.random();
+	radiationEnergy = 2 * radiationEnergy * data.numberGen.random();
 	if (radiationEnergy > oldCell->energy - 1) {
 		radiationEnergy = oldCell->energy - 1;
 	}
@@ -34,7 +35,7 @@ __device__ void createNewParticle(SimulationData &data, CellData *oldCell)
 
 __device__ void cellRadiation(SimulationData &data, CellData *oldCell)
 {
-	if (data.randomGen.random() < RADIATION_PROB) {
+	if (data.numberGen.random() < RADIATION_PROB) {
 		createNewParticle(data, oldCell);
 	}
 }

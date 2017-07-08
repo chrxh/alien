@@ -4,13 +4,13 @@
 #include "SimulationData.cuh"
 #include "Map.cuh"
 
-class CudaSimulationManager
+class SimulationManager
 {
 public:
 	SimulationData data;
 	DataForAccess access;
 
-	CudaSimulationManager(int2 const &size)
+	SimulationManager(int2 const &size)
 	{
 		data.size = size;
 
@@ -37,10 +37,10 @@ public:
 			data.particleMap2[i] = nullptr;
 		}
 
-		data.randomGen.init(RANDOM_NUMBER_BLOCK_SIZE);
+		data.numberGen.init(RANDOM_NUMBER_BLOCK_SIZE);
 	}
 
-	~CudaSimulationManager()
+	~SimulationManager()
 	{
 		data.clustersAC1.free();
 		data.clustersAC2.free();
@@ -53,7 +53,7 @@ public:
 		cudaFree(data.cellMap2);
 		cudaFree(data.particleMap1);
 		cudaFree(data.particleMap2);
-		data.randomGen.free();
+		data.numberGen.free();
 
 		free(access.cells);
 		free(access.particles);
@@ -160,4 +160,43 @@ void drawClusterToMap(CellClusterData* cluster, SimulationData* data)
 		auto &absPos = cluster->cells[i].absPos;
 		setToMap({ static_cast<int>(absPos.x),static_cast<int>(absPos.y) }, &cluster->cells[i], data->cellMap1, data->size);
 	}
+}
+
+void createCluster(SimulationData &data, CellClusterData* cluster, float2 pos, float2 vel, float angle, float angVel, float energy, int2 clusterSize, int2 const &size)
+{
+	cluster->pos = pos;
+	cluster->vel = vel;
+	cluster->angle = angle;
+	cluster->angularVel = angVel;
+	cluster->numCells = clusterSize.x * clusterSize.y;
+	cluster->cells = data.cellsAC1.getArray(clusterSize.x*clusterSize.y);
+
+	for (int x = 0; x < clusterSize.x; ++x) {
+		for (int y = 0; y < clusterSize.y; ++y) {
+			CellData *cell = &cluster->cells[x + y*clusterSize.x];
+			cell->id = data.numberGen.newId();
+			cell->relPos = { static_cast<float>(x), static_cast<float>(y) };
+			cell->cluster = cluster;
+			cell->nextTimestep = nullptr;
+			cell->protectionCounter = 0;
+			cell->numConnections = 0;
+			cell->energy = energy;
+			cell->setProtectionCounterForNextTimestep = false;
+			if (x > 0) {
+				cell->connections[cell->numConnections++] = &cluster->cells[x - 1 + y * clusterSize.x];
+			}
+			if (y > 0) {
+				cell->connections[cell->numConnections++] = &cluster->cells[x + (y - 1) * clusterSize.x];
+			}
+			if (x < clusterSize.x - 1) {
+				cell->connections[cell->numConnections++] = &cluster->cells[x + 1 + y * clusterSize.x];
+			}
+			if (y < clusterSize.y - 1) {
+				cell->connections[cell->numConnections++] = &cluster->cells[x + (y + 1) * clusterSize.x];
+			}
+		}
+	}
+	centerCluster(cluster);
+	updateAbsPos(cluster);
+	updateAngularMass(cluster);
 }
