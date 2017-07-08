@@ -57,6 +57,9 @@ void GraphicsItemManager::updateConnections(vector<TrackerElement<CellDescriptio
 {
 	for (auto const &cellT : desc) {
 		auto const &cellD = cellT.getValue();
+		if (!cellD.connectingCells.isInitialized()) {
+			continue;
+		}
 		for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
 			auto cellIt = cellsByIds.find(connectingCellId);
 			if (cellIt == cellsByIds.end()) {

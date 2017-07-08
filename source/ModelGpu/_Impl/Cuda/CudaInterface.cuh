@@ -51,6 +51,7 @@ struct DataForAccess
 extern void cudaInit(int2 const &size);
 extern void cudaCalcNextTimestep();
 extern DataForAccess cudaGetData();
+extern void cudaDataCorrection();
 extern void cudaShutdown();
 
 

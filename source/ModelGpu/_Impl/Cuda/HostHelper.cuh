@@ -88,7 +88,27 @@ public:
 		access.numParticles = data.particlesAC2.getNumEntries();
 		cudaMemcpy(access.particles, data.particlesAC2.getEntireArray(), sizeof(ParticleData) * data.particlesAC2.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
+
 		return access;
+	}
+
+	void dataCorrection()
+	{
+		auto cellPtrCorrection = access.cells - data.cellsAC2.getEntireArray();
+		for (int i = 0; i < access.numClusters; ++i) {
+			auto cellIndex = access.clusters[i].cells - data.cellsAC2.getEntireArray();
+			access.clusters[i].cells = access.cells + cellIndex;
+
+		}
+
+		for (int i = 0; i < access.numCells; ++i) {
+			auto &cell = access.cells[i];
+			for (int j = 0; j < cell.numConnections; ++j) {
+				auto cellIndex = cell.connections[j] - data.cellsAC2.getEntireArray();
+				cell.connections[j] = access.cells + cellIndex;
+			}
+		}
+
 	}
 };
 
