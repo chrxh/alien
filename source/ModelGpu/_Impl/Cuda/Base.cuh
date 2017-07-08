@@ -78,17 +78,17 @@ public:
 		*_currentId = 0;
 	}
 
-	__host__ __device__ __inline__ float random(float maxVal)
+	__device__ __inline__ float random(float maxVal)
 	{
-		int& index = _currentIndex[threadIdx.x % _warpSize];
+		int &index = _currentIndex[threadIdx.x % _warpSize];
 		int number = _array[index];
 		index = (index + 1) % _size;
 		return maxVal* static_cast<float>(number) / RAND_MAX;
 	}
 
-	__host__ __device__ __inline__ float random()
+	__device__ __inline__ float random()
 	{
-		int& index = _currentIndex[threadIdx.x % _warpSize];
+		int &index = _currentIndex[threadIdx.x % _warpSize];
 		int number = _array[index];
 		index = (index + 1) % _size;
 		return static_cast<float>(number) / RAND_MAX;

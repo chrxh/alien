@@ -28,9 +28,9 @@ DataForAccess WorkerForGpu::retrieveData()
 	return _cudaData;
 }
 
-void WorkerForGpu::correctionForRetrievedData()
+void WorkerForGpu::ptrCorrectionForRetrievedData()
 {
-	cudaDataCorrection();
+	cudaDataPtrCorrection();
 }
 
 void WorkerForGpu::lockData()

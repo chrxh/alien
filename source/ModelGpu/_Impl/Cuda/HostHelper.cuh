@@ -92,7 +92,7 @@ public:
 		return access;
 	}
 
-	void dataCorrection()
+	void dataPtrCorrection()
 	{
 		auto cellPtrCorrection = access.cells - data.cellsAC2.getEntireArray();
 		for (int i = 0; i < access.numClusters; ++i) {

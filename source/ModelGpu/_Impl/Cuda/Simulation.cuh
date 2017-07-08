@@ -194,9 +194,9 @@ __device__ void particleMovement(SimulationData &data, int particleIndex)
 		return;
 	}
 	ParticleData *newParticle = data.particlesAC2.getElement_Kernel();
-	newParticle->pos = add(oldParticle->pos, oldParticle->vel);
+	*newParticle = *oldParticle;
+	newParticle->pos = add(newParticle->pos, newParticle->vel);
 	mapPosCorrection(newParticle->pos, data.size);
-	newParticle->vel = oldParticle->vel;
 }
 
 __global__ void particleMovement(SimulationData data)
