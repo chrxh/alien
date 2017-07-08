@@ -19,7 +19,7 @@ public:
 	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual DataForAccess retrieveData();
-	virtual void correctionForRetrievedData();
+	virtual void ptrCorrectionForRetrievedData();
 	virtual void lockData();
 	virtual void unlockData();
 
