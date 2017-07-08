@@ -42,13 +42,15 @@ struct SharedMemory
 	}
 };
 
-class CudaRandomNumberGenerator
+class CudaNumberGenerator
 {
 private:
 	int *_currentIndex;
 	int *_array;
 	int _warpSize;
 	int _size;
+
+	uint64_t *_currentId;
 
 public:
 
@@ -63,6 +65,7 @@ public:
 		_warpSize = prop.warpSize;
 		cudaMallocManaged(&_currentIndex, sizeof(int)*_warpSize);
 		cudaMallocManaged(&_array, sizeof(int)*size);
+		cudaMallocManaged(&_currentId, sizeof(uint64_t));
 		checkCudaErrors(cudaGetLastError());
 
 		for (int i = 0; i < _warpSize; ++i) {
@@ -72,6 +75,7 @@ public:
 		for (int i = 0; i < size; ++i) {
 			_array[i] = rand();
 		}
+		*_currentId = 0;
 	}
 
 	__host__ __device__ __inline__ float random(float maxVal)
@@ -90,8 +94,19 @@ public:
 		return static_cast<float>(number) / RAND_MAX;
 	}
 
+	__host__ __inline__ uint64_t newId()
+	{
+		return (*_currentId)++;
+	}
+
+	__device__ __inline__ uint64_t newId_Kernel()
+	{
+		return atomicAdd(_currentId, 1);
+	}
+
 	void free()
 	{
+		cudaFree(_currentId);
 		cudaFree(_currentIndex);
 		cudaFree(_array);
 	}

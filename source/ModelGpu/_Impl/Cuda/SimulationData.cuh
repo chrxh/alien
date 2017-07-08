@@ -21,6 +21,6 @@ struct SimulationData
 	ArrayController<ParticleData> particlesAC1;
 	ArrayController<ParticleData> particlesAC2;
 
-	CudaRandomNumberGenerator randomGen;
+	CudaNumberGenerator numberGen;
 };
 
