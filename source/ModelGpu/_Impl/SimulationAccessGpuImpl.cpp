@@ -104,7 +104,7 @@ void SimulationAccessGpuImpl::createData()
 	DataForAccess cudaData = worker->retrieveData();
 
 	worker->lockData();
-	worker->correctionForRetrievedData();
+	worker->ptrCorrectionForRetrievedData();
 
 	for (int i = 0; i < cudaData.numClusters; ++i) {
 		CellClusterDescription clusterDesc;
