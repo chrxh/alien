@@ -28,6 +28,11 @@ DataForAccess WorkerForGpu::retrieveData()
 	return _cudaData;
 }
 
+void WorkerForGpu::correctionForRetrievedData()
+{
+	cudaDataCorrection();
+}
+
 void WorkerForGpu::lockData()
 {
 	_mutex.lock();

@@ -21,6 +21,8 @@ public:
 
 private:
 	Q_SLOT void dataReadyToRetrieveFromGpu();
+	void createImage();
+	void createData();
 
 	SimulationContextGpuImpl* _context = nullptr;
 
