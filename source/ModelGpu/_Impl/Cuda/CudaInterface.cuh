@@ -6,6 +6,7 @@
 
 struct ParticleData
 {
+	uint64_t id;
 	float energy;
 	float2 pos;
 	float2 vel;
@@ -14,6 +15,7 @@ struct ParticleData
 struct CellClusterData;
 struct CellData
 {
+	uint64_t id;
 	CellClusterData* cluster;
 	float2 relPos;
 	float2 absPos;
