@@ -28,6 +28,8 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_requiredRect = rect;
 	_resolveDesc = resolveDesc;
 
+	auto worker = _context->getGpuThreadController()->getGpuWorker();
+	worker->requireData();
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)

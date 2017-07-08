@@ -27,6 +27,7 @@ public:
 		cudaMallocManaged(&data.particleMap2, size.x * size.y * sizeof(ParticleData*));
 		checkCudaErrors(cudaGetLastError());
 
+		access.clusters = static_cast<CellClusterData*>(malloc(sizeof(CellClusterData) * static_cast<int>(MAX_CELLCLUSTERS)));
 		access.cells = static_cast<CellData*>(malloc(sizeof(CellData) * static_cast<int>(MAX_CELLS)));
 		access.particles = static_cast<ParticleData*>(malloc(sizeof(ParticleData) * static_cast<int>(MAX_ENERGY_PARTICLES)));
 
@@ -55,6 +56,7 @@ public:
 		cudaFree(data.particleMap2);
 		data.numberGen.free();
 
+		free(access.clusters);
 		free(access.cells);
 		free(access.particles);
 	}
@@ -77,6 +79,9 @@ public:
 
 	DataForAccess getDataForAccess()
 	{
+		access.numClusters = data.clustersAC2.getNumEntries();
+		cudaMemcpy(access.clusters, data.clustersAC2.getEntireArray(), sizeof(CellClusterData) * data.clustersAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		checkCudaErrors(cudaGetLastError());
 		access.numCells = data.cellsAC2.getNumEntries();
 		cudaMemcpy(access.cells, data.cellsAC2.getEntireArray(), sizeof(CellData) * data.cellsAC2.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
