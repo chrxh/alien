@@ -58,7 +58,7 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 		_framedata.fps = value;
 		updateFrameLabel();
 	});
-	connect(_simController, &SimulationController::nextFrameCalculated, [this]() {
+	connect(_simController, &SimulationController::nextTimestepCalculated, [this]() {
 		_framedata.frame++;
 		updateFrameLabel();
 	});
