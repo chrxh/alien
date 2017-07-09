@@ -155,7 +155,7 @@ public:
 		return &_data[oldIndex];
 	}
 
-	__device__ __inline__ T* getElement_Kernel()
+	__device__ __inline__ T* getElement()
 	{
 		int oldIndex = atomicAdd(_numEntries, 1);
 		return &_data[oldIndex];

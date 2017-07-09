@@ -16,28 +16,28 @@ __shared__ CellData *newCells;
 __shared__ float rotMatrix[2][2];
 __shared__ CollisionData collisionData;
 
-__device__ void createNewParticle(SimulationData &data, CellData *oldCell)
+__device__ void createNewParticle(SimulationData &data, CellData *cell)
 {
-	auto particle = data.particlesAC2.getElement_Kernel();
-	auto &pos = oldCell->absPos;
+	auto particle = data.particlesAC2.getElement();
+	auto &pos = cell->absPos;
 	particle->id = data.numberGen.newId_Kernel();
 	particle->pos = { pos.x + data.numberGen.random(2.0f) - 1.0f, pos.y + data.numberGen.random(2.0f) - 1.0f };
 	mapPosCorrection(particle->pos, data.size);
 	particle->vel = { (data.numberGen.random()-0.5f) * RADIATION_VELOCITY_PERTURBATION, (data.numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
-	float radiationEnergy = powf(oldCell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
+	float radiationEnergy = powf(cell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
 	radiationEnergy = radiationEnergy / RADIATION_PROB;
 	radiationEnergy = 2 * radiationEnergy * data.numberGen.random();
-	if (radiationEnergy > oldCell->energy - 1) {
-		radiationEnergy = oldCell->energy - 1;
+	if (radiationEnergy > cell->energy - 1) {
+		radiationEnergy = cell->energy - 1;
 	}
 	particle->energy = radiationEnergy;
-	oldCell->energy -= radiationEnergy;
+	cell->energy -= radiationEnergy;
 }
 
-__device__ void cellRadiation(SimulationData &data, CellData *oldCell)
+__device__ void cellRadiation(SimulationData &data, CellData *cell)
 {
 	if (data.numberGen.random() < RADIATION_PROB) {
-		createNewParticle(data, oldCell);
+		createNewParticle(data, cell);
 	}
 }
 
@@ -75,10 +75,10 @@ __device__ void copyCluster(SimulationData &data)
 {
 	clusterCopy = *oldCluster;
 	newCells = data.cellsAC2.getArray_Kernel(clusterCopy.numCells);
-	newCluster = data.clustersAC2.getElement_Kernel();
+	newCluster = data.clustersAC2.getElement();
 }
 
-__device__ void copyAndMoveCells(SimulationData &data, int &cellIndex)
+__device__  CellData* copyMoveAndReturnCell(SimulationData &data, int &cellIndex)
 {
 	CellData *oldCell = &oldCluster->cells[cellIndex];
 	CellData cellCopy = *oldCell;
@@ -101,6 +101,7 @@ __device__ void copyAndMoveCells(SimulationData &data, int &cellIndex)
 	setToMap<CellData>({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, data.cellMap2, data.size);
 
 	oldCell->nextTimestep = newCell;
+	return newCell;
 }
 
 __device__ void clusterMovement(SimulationData &data, int clusterIndex)
@@ -126,8 +127,6 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CellData *oldCell = &oldCluster->cells[cellIndex];
-
-			cellRadiation(data, oldCell);
 			collectCollisionData(data, oldCell, collisionData);
 		}
 	}
@@ -142,7 +141,8 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			copyAndMoveCells(data, cellIndex);
+			CellData *newCell = copyMoveAndReturnCell(data, cellIndex);
+			cellRadiation(data, newCell);
 		}
 	}
 
@@ -190,7 +190,7 @@ __device__ void particleMovement(SimulationData &data, int particleIndex)
 		atomicAdd(&nextCell->energy, oldParticle->energy);
 		return;
 	}
-	ParticleData *newParticle = data.particlesAC2.getElement_Kernel();
+	ParticleData *newParticle = data.particlesAC2.getElement();
 	*newParticle = *oldParticle;
 	newParticle->pos = add(newParticle->pos, newParticle->vel);
 	mapPosCorrection(newParticle->pos, data.size);
