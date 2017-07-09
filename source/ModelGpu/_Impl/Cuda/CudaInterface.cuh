@@ -25,6 +25,7 @@ struct CellData
 	CellData* nextTimestep;
 	int protectionCounter;
 	bool setProtectionCounterForNextTimestep;
+	bool alive;
 };
 
 struct CellClusterData
