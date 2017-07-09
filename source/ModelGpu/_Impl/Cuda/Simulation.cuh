@@ -83,10 +83,6 @@ __device__ void copyAndMoveCells(SimulationData &data, int &cellIndex)
 	CellData *oldCell = &oldCluster->cells[cellIndex];
 	CellData cellCopy = *oldCell;
 
-	if (cellCopy.energy < CELL_MIN_ENERGY) {
-		return;
-	}
-
 	float2 absPos;
 	absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterCopy.pos.x;
 	absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterCopy.pos.y;
