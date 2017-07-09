@@ -207,6 +207,7 @@ void createCluster(SimulationData &data, CellClusterData* cluster, float2 pos, f
 			cell->numConnections = 0;
 			cell->energy = energy;
 			cell->setProtectionCounterForNextTimestep = false;
+			cell->alive = true;
 			if (x > 0) {
 				cell->connections[cell->numConnections++] = &cluster->cells[x - 1 + y * clusterSize.x];
 			}

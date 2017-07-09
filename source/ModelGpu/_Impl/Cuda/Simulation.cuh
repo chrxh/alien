@@ -15,6 +15,7 @@ __shared__ CellClusterData *newCluster;
 __shared__ CellData *newCells;
 __shared__ float rotMatrix[2][2];
 __shared__ CollisionData collisionData;
+__shared__ bool atLeastOneCellDestroyed;
 
 __device__ void createNewParticle(SimulationData &data, CellData *cell)
 {
@@ -38,6 +39,9 @@ __device__ void cellRadiation(SimulationData &data, CellData *cell)
 {
 	if (data.numberGen.random() < RADIATION_PROB) {
 		createNewParticle(data, cell);
+	}
+	if (cell->energy < CELL_MIN_ENERGY) {
+		cell->alive = false;
 	}
 }
 
@@ -104,6 +108,15 @@ __device__  CellData* copyMoveAndReturnCell(SimulationData &data, int &cellIndex
 	return newCell;
 }
 
+__device__ void correctCellConnections(int cellIndex)
+{
+	CellData* newCell = &newCells[cellIndex];
+	int numConnections = newCell->numConnections;
+	for (int i = 0; i < numConnections; ++i) {
+		newCell->connections[i] = newCell->connections[i]->nextTimestep;
+	}
+}
+
 __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 {
 
@@ -118,6 +131,7 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 		if (threadIdx.x == 0) {
 			copyCluster(data);
 			calcRotationMatrix();
+			atLeastOneCellDestroyed = false;
 			collisionData.init();
 		}
 	}
@@ -128,6 +142,9 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CellData *oldCell = &oldCluster->cells[cellIndex];
 			collectCollisionData(data, oldCell, collisionData);
+			if (!oldCell->alive) {
+				atLeastOneCellDestroyed = true;
+			}
 		}
 	}
 
@@ -135,6 +152,12 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 
 	if (threadIdx.x == 0) {
 		performCollision(data);
+	}
+
+	__syncthreads();
+
+	if (atLeastOneCellDestroyed) {
+
 	}
 
 	__syncthreads();
@@ -154,11 +177,7 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 
 	if (threadIdx.x < oldNumCells) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellData* newCell = &newCells[cellIndex];
-			int numConnections = newCell->numConnections;
-			for (int i = 0; i < numConnections; ++i) {
-				newCell->connections[i] = newCell->connections[i]->nextTimestep;
-			}
+			correctCellConnections(cellIndex);
 		}
 	}
 
