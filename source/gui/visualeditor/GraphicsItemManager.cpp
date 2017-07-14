@@ -150,4 +150,4 @@ void GraphicsItemManager::update(DataDescription const &desc)
 void GraphicsItemManager::setSelection(list<QGraphicsItem*> const &items)
 {
 	_selectedItems.set(items, _clusterIdsByCellIds, _cellsByIds);
-}
+	_scene->update();}

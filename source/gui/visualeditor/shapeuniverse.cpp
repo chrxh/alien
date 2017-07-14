@@ -73,6 +73,6 @@ void ShapeUniverse::retrieveAndDisplayData()
 void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	_items->setSelection(QGraphicsScene::items(e->scenePos()).toStdList());
-	QGraphicsScene::update();}
+}
 
 
