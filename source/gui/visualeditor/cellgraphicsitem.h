@@ -28,6 +28,7 @@ public:
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     int type() const;
 
+	uint64_t getId() const;
     void setConnectable (bool connectable);
     FocusState getFocusState ();
     void setFocusState (FocusState focusState);
@@ -44,6 +45,7 @@ private:
     quint8 _color = 0;
 	QString _displayString;
 	int _branchNumber = 0;
+	uint64_t _id = 0;
 };
 
 #endif // CELLGRAPHICSITEM_H
