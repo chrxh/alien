@@ -16,8 +16,10 @@
 #include "Model/Metadata/SymbolTable.h"
 #include "Model/ModelServices.h"
 
+/*
 #include "ModelGpu/ModelGpuBuilderFacade.h"
 #include "ModelGpu/ModelGpuServices.h"
+*/
 
 
 //Design-Entscheidung:
@@ -102,29 +104,27 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
+/*
 	ModelServices modelServices;
 	ModelGpuServices modelGpuServices;
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
 	IntVector2D size = { 12 * 33 * 3 * 3, 12 * 17 * 3 * 3 };
-
 	ModelGpuBuilderFacade* gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	auto controller = gpuFacade->buildSimulationController(size, symbols, parameters);
 	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
+*/
 
-/*
 	ModelServices modelServices;
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
-
 	IntVector2D size = { 12 * 33 * 3, 12 * 17 * 3 };
 	auto controller = cpuFacade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
 	numberGen->init(123123, 0);
-
 	auto access = cpuFacade->buildSimulationAccess(controller->getContext());
 	DataDescription desc;
 	for (int i = 0; i < 20000*9; ++i) {
@@ -134,7 +134,6 @@ int main(int argc, char *argv[])
 	}
 	access->updateData(desc);
 
-*/
 
     MainWindow w(controller, access);
     w.setWindowState(w.windowState() | Qt::WindowFullScreen);

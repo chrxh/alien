@@ -51,6 +51,7 @@
     <ClCompile Include="..\..\source\gui\visualeditor\GraphicsItemManager.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\markergraphicsitem.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\pixeluniverse.cpp" />
+    <ClCompile Include="..\..\source\Gui\VisualEditor\SelectedItems.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\shapeuniverse.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\ViewportController.cpp" />
     <ClCompile Include="..\..\source\gui\visualeditor\ViewportInterface.cpp" />
@@ -310,9 +311,6 @@
     </ProjectReference>
     <ProjectReference Include="..\Base\Base.vcxproj">
       <Project>{21bb3377-a473-473c-a064-396ec67979ab}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\ModelGpu\ModelGpu.vcxproj">
-      <Project>{2a5d1c28-f6ee-4a46-9c5d-b393990d335b}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Model\model.vcxproj">
       <Project>{046b2f85-571f-35cc-b683-6c420049404b}</Project>
@@ -922,6 +920,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
+    <ClInclude Include="..\..\source\Gui\VisualEditor\SelectedItems.h" />
     <ClInclude Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.h" />
     <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItemManager.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

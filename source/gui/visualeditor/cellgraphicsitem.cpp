@@ -24,6 +24,7 @@ void CellGraphicsItem::update(CellDescription const & desc)
 	auto numConnections = desc.connectingCells.getValueOrDefault().size();
 	auto maxConnections = desc.maxConnections.getValueOr(0);
 	_connectable = (numConnections < maxConnections);
+	_id = desc.id;
 }
 
 QRectF CellGraphicsItem::boundingRect () const
@@ -107,6 +108,11 @@ int CellGraphicsItem::type() const
 {
     // enables the use of qgraphicsitem_cast with this item.
     return Type;
+}
+
+uint64_t CellGraphicsItem::getId() const
+{
+	return _id;
 }
 
 void CellGraphicsItem::setConnectable (bool connectable)

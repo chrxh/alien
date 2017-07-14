@@ -99,6 +99,18 @@ namespace
 			}
 		}
 	}
+
+	void getClusterIdsByCellIds(DataDescription const &desc, map<uint64_t, uint64_t> &result)
+	{
+		for (auto const &clusterT : desc.clusters) {
+			auto const &cluster = clusterT.getValue();
+			for (auto const &cellT : cluster.cells) {
+				auto const &cell = cellT.getValue();
+				result[cell.id] = cluster.id;
+			}
+		}
+	}
+
 }
 
 void GraphicsItemManager::update(DataDescription const &desc)
@@ -107,6 +119,7 @@ void GraphicsItemManager::update(DataDescription const &desc)
 
 	map<uint64_t, CellDescription> cellDescByIds;
 	getCellsByIds(desc, cellDescByIds);
+	getClusterIdsByCellIds(desc, _clusterIdsByCellIds);
 
 	map<uint64_t, CellGraphicsItem*> newCellsByIds;
 	map<set<uint64_t>, CellConnectionGraphicsItem*> newConnectionsByIds;
@@ -132,4 +145,9 @@ void GraphicsItemManager::update(DataDescription const &desc)
 	_particlesByIds = newParticlesByIds;
 
 	_viewport->setModeToUpdate();
+}
+
+void GraphicsItemManager::setSelection(list<QGraphicsItem*> const &items)
+{
+	_selectedItems.set(items, _clusterIdsByCellIds, _cellsByIds);
 }
