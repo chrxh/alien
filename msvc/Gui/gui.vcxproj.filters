@@ -318,6 +318,9 @@
     <ClCompile Include="Release\moc_TokenTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\VisualEditor\SelectedItems.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -628,6 +631,9 @@
     </ClInclude>
     <ClInclude Include="ui_TokenTab.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\VisualEditor\SelectedItems.h">
+      <Filter>Source Files\Visualeditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

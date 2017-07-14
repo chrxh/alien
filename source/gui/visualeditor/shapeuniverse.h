@@ -23,6 +23,8 @@ public:
 	virtual void deactivate();
 	virtual void requestData();
 
+protected:
+	void mousePressEvent(QGraphicsSceneMouseEvent* e);
 private:
 	void retrieveAndDisplayData();
 

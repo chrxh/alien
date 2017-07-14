@@ -14,6 +14,7 @@ class StartScreenController;
 class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
+class QGraphicsItem;
 class QGraphicsView;
 class QGraphicsScene;
 class GraphicsItemManager;
