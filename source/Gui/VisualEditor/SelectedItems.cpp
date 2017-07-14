@@ -35,7 +35,7 @@ void SelectedItems::set(list<QGraphicsItem*> const &items, map<uint64_t, uint64_
 		if (auto cellItem = qgraphicsitem_cast<CellGraphicsItem*>(item)) {
 			_cells.push_back(cellItem);
 			auto clusterItems = getClusterOfCell(cellItem, clusterIdsByCellIds, cellsByIds);
-			_cells.insert(_cells.end(), clusterItems.begin(), clusterItems.end());
+			_clusters.insert(_clusters.end(), clusterItems.begin(), clusterItems.end());
 		}
 		if (auto particleItem = qgraphicsitem_cast<ParticleGraphicsItem*>(item)) {
 			_particles.push_back(particleItem);
