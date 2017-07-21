@@ -151,13 +151,19 @@ void ItemManager::update(DataDescription const &desc)
 
 void ItemManager::setSelection(list<QGraphicsItem*> const &items)
 {
-	_selectedItems->set(items, _clusterIdsByCellIds, _cellsByIds);
+	_selectedItems->update(items, _clusterIdsByCellIds, _cellsByIds);
 	_scene->update();
 }
 
-void ItemManager::moveSelection(QVector2D const & delta)
+void ItemManager::moveSelection(QVector2D const &delta)
 {
 	_viewport->setModeToNoUpdate();
 	_selectedItems->move(delta);
+	for (set<uint64_t> connectionId : _selectedItems->getConnectionIds()) {
+		auto connectionIdIt = connectionId.begin();
+		auto const &cellDesc1 = _cellsByIds.at(*(connectionIdIt++))->getDescription();
+		auto const &cellDesc2 = _cellsByIds.at(*connectionIdIt)->getDescription();
+		_connectionsByIds.at(connectionId)->update(cellDesc1, cellDesc2);
+	}
 	_viewport->setModeToUpdate();
 };

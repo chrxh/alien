@@ -12,5 +12,8 @@ public:
 	AbstractItem(QGraphicsItem *parent = nullptr) : QGraphicsItem(parent) {}
 	virtual ~AbstractItem() = default;
 
-	virtual void move(QVector2D const &delta);
+	virtual void moveBy(QVector2D const &delta);
+
+protected:
+	virtual void updateDescription() {}
 };

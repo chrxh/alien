@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Model/Entities/Descriptions.h"
+
 #include "AbstractItem.h"
 
 class CellItem
@@ -24,8 +26,9 @@ public:
 	virtual void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 	virtual int type() const;
 
+	virtual CellDescription const& getDescription() const;
 	virtual uint64_t getId() const;
-	virtual std::vector<uint64_t> getConnectedIds() const;
+	virtual vector<uint64_t> getConnectedIds() const;
 	virtual void setConnectable(bool connectable);
 	virtual FocusState getFocusState ();
 	virtual void setFocusState (FocusState focusState);
@@ -33,6 +36,9 @@ public:
 	virtual void setColor (quint8 color);
 	virtual void setDisplayString (QString value);
 	virtual void setBranchNumber (int value);
+
+protected:
+	virtual void updateDescription() override;
 
 private:
 	ItemConfig *_config = nullptr;
@@ -42,6 +48,5 @@ private:
     quint8 _color = 0;
 	QString _displayString;
 	int _branchNumber = 0;
-	uint64_t _id = 0;
-	std::vector<uint64_t> _connectedIds;
+	CellDescription _desc;
 };

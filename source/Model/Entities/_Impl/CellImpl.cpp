@@ -58,7 +58,7 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 	if (resolveDescription.resolveCellLinks) {
 		vector<uint64_t> connectingCells(_numConnections);
 		for (int i = 0; i < _numConnections; ++i) {
-			connectingCells.push_back(_connectingCells[i]->getId());
+			connectingCells[i] = _connectingCells[i]->getId();
 		}
 		result.setConnectingCells(connectingCells);
 	}
