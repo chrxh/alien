@@ -24,7 +24,9 @@ public:
 	virtual void requestData();
 
 protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent* e);
+	void mousePressEvent(QGraphicsSceneMouseEvent* e);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+
 private:
 	void retrieveAndDisplayData();
 
@@ -32,7 +34,7 @@ private:
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
 
-	GraphicsItemManager* _items = nullptr;
+	ItemManager* _items = nullptr;
 };
 
 #endif // SHAPEUNIVERSE_H

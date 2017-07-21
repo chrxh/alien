@@ -1,12 +1,9 @@
 #pragma once
 
-#include <QGraphicsItem>
+#include "AbstractItem.h"
 
-#include "Model/Definitions.h"
-#include "Gui/Definitions.h"
-
-class ParticleGraphicsItem
-	: public QGraphicsItem
+class ParticleItem
+	: public AbstractItem
 {
 public:
     enum FocusState {
@@ -18,8 +15,8 @@ public:
         Type = UserType + 2
     };
 
-	ParticleGraphicsItem(GraphicsItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
-	~ParticleGraphicsItem() = default;
+	ParticleItem(ItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
+	virtual ~ParticleItem() = default;
 
 	void update(EnergyParticleDescription const& desc);
 

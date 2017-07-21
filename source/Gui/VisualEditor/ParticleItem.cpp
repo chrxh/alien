@@ -3,26 +3,26 @@
 #include "Model/Entities/Descriptions.h"
 #include "gui/Settings.h"
 
-#include "ParticleGraphicsItem.h"
+#include "ParticleItem.h"
 
-ParticleGraphicsItem::ParticleGraphicsItem (GraphicsItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
-    : QGraphicsItem(parent)
+ParticleItem::ParticleItem (ItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
+    : AbstractItem(parent)
 {
 	update(desc);
 }
 
-void ParticleGraphicsItem::update(EnergyParticleDescription const & desc)
+void ParticleItem::update(EnergyParticleDescription const & desc)
 {
-	auto pos = desc.pos.getValue()*GRAPHICS_ITEM_SIZE;
-	QGraphicsItem::setPos(pos.x(), pos.y());
+	auto pos = desc.pos.getValue();
+	QGraphicsItem::setPos(QPointF(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE));
 }
 
-QRectF ParticleGraphicsItem::boundingRect () const
+QRectF ParticleItem::boundingRect () const
 {
     return QRectF(-0.4*GRAPHICS_ITEM_SIZE, -0.4*GRAPHICS_ITEM_SIZE, 0.8*GRAPHICS_ITEM_SIZE, 0.8*GRAPHICS_ITEM_SIZE);
 }
 
-void ParticleGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void ParticleItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if( _focusState == NO_FOCUS ) {
         painter->setPen(QPen(QBrush(QColor(0,0,0,0)), 0.03));
@@ -36,12 +36,12 @@ void ParticleGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsI
     }
 }
 
-int ParticleGraphicsItem::type() const
+int ParticleItem::type() const
 {
     return Type;
 }
 
-void ParticleGraphicsItem::setFocusState (FocusState focusState)
+void ParticleItem::setFocusState (FocusState focusState)
 {
     _focusState = focusState;
 }

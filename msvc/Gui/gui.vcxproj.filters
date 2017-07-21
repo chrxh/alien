@@ -105,15 +105,6 @@
     <ClCompile Include="Release\moc_simulationmonitor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\cellconnectiongraphicsitem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\cellgraphicsitem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\markergraphicsitem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\pixeluniverse.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
@@ -180,18 +171,6 @@
     <ClCompile Include="..\..\source\gui\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\GraphicsItemManager.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_GraphicsItemManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_GraphicsItemManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ViewportInterface.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
@@ -199,15 +178,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_ViewportInterface.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\GraphicsItemConfig.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_GraphicsItemConfig.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_GraphicsItemConfig.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\CellComputerEdit.cpp">
@@ -321,6 +291,45 @@
     <ClCompile Include="..\..\source\Gui\VisualEditor\SelectedItems.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_SelectedItems.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SelectedItems.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\VisualEditor\AbstractItem.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\CellConnectionItem.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\CellItem.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\ParticleItem.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\ItemConfig.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ItemConfig.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ItemConfig.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\ItemManager.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ItemManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ItemManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\MarkerItem.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -424,13 +433,7 @@
     <CustomBuild Include="..\..\source\gui\MainWindow.ui">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItemManager.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ViewportInterface.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\GraphicsItemConfig.h">
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\CellComputerEdit.h">
@@ -480,6 +483,15 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\TokenTab.h">
       <Filter>Source Files\Texteditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\VisualEditor\SelectedItems.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\ItemConfig.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\ItemManager.h">
+      <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -566,15 +578,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\gui\visualeditor\cellconnectiongraphicsitem.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\cellgraphicsitem.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\markergraphicsitem.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClInclude>
     <ClInclude Include="ui_newsimulationdialog.h">
       <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
@@ -617,9 +620,6 @@
     <ClInclude Include="ui_MainWindow.h">
       <Filter>Generated Files\_Ui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\ParticleGraphicsItem.h">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClInclude>
     <ClInclude Include="ui_CellComputerEdit.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -632,7 +632,19 @@
     <ClInclude Include="ui_TokenTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\VisualEditor\SelectedItems.h">
+    <ClInclude Include="..\..\source\Gui\VisualEditor\AbstractItem.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\CellConnectionItem.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\CellItem.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\ParticleItem.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\gui\visualeditor\MarkerItem.h">
       <Filter>Source Files\Visualeditor</Filter>
     </ClInclude>
   </ItemGroup>

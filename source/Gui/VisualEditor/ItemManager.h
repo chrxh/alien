@@ -4,16 +4,16 @@
 #include "gui/Definitions.h"
 #include "Model/Definitions.h"
 
-#include "GraphicsItemConfig.h"
+#include "ItemConfig.h"
 #include "SelectedItems.h"
 
-class GraphicsItemManager
+class ItemManager
 	: public QObject
 {
 	Q_OBJECT
 public:
-	GraphicsItemManager(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~GraphicsItemManager() = default;
+	ItemManager(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~ItemManager() = default;
 
 	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport, SimulationParameters* parameters);
 
@@ -21,6 +21,7 @@ public:
 	virtual void update(DataDescription const &desc);
 
 	virtual void setSelection(list<QGraphicsItem*> const &items);
+	virtual void moveSelection(QVector2D const &delta);
 
 private:
 	template<typename IdType, typename ItemType, typename DescriptionType>
@@ -28,19 +29,19 @@ private:
 		, map<IdType, ItemType*>& newItemsByIds);
 	void updateConnections(vector<TrackerElement<CellDescription>> const &desc
 		, map<uint64_t, CellDescription> const &cellsByIds
-		, map<set<uint64_t>, CellConnectionGraphicsItem*>& connectionsByIds
-		, map<set<uint64_t>, CellConnectionGraphicsItem*>& newConnectionsByIds);
+		, map<set<uint64_t>, CellConnectionItem*>& connectionsByIds
+		, map<set<uint64_t>, CellConnectionItem*>& newConnectionsByIds);
 		
 	QGraphicsScene *_scene = nullptr;
 	ViewportInterface *_viewport = nullptr;
 	SimulationParameters *_parameters = nullptr;
-	GraphicsItemConfig *_config = nullptr;
+	ItemConfig *_config = nullptr;
+	SelectedItems* _selectedItems = nullptr;
 
-	map<uint64_t, CellGraphicsItem*> _cellsByIds;
-	map<uint64_t, ParticleGraphicsItem*> _particlesByIds;
-	map<set<uint64_t>, CellConnectionGraphicsItem*> _connectionsByIds;
+	map<uint64_t, CellItem*> _cellsByIds;
+	map<uint64_t, ParticleItem*> _particlesByIds;
+	map<set<uint64_t>, CellConnectionItem*> _connectionsByIds;
 	map<uint64_t, uint64_t> _clusterIdsByCellIds;
-	SelectedItems _selectedItems;
 };
 
 #endif // GRAPHICSITEMMANAGER_H
