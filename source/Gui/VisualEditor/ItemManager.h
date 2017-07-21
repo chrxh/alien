@@ -1,8 +1,7 @@
-#ifndef GRAPHICSITEMMANAGER_H
-#define GRAPHICSITEMMANAGER_H
+#pragma once
 
-#include "gui/Definitions.h"
 #include "Model/Definitions.h"
+#include "Gui/Definitions.h"
 
 #include "ItemConfig.h"
 #include "SelectedItems.h"
@@ -18,7 +17,7 @@ public:
 	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport, SimulationParameters* parameters);
 
 	virtual void activate(IntVector2D size);
-	virtual void update(DataDescription const &desc);
+	virtual void update(DataDescription const &data);
 
 	virtual void setSelection(list<QGraphicsItem*> const &items);
 	virtual void moveSelection(QVector2D const &delta);
@@ -37,6 +36,7 @@ private:
 	SimulationParameters *_parameters = nullptr;
 	ItemConfig *_config = nullptr;
 	SelectedItems* _selectedItems = nullptr;
+	DescriptionManager* _descManager = nullptr;
 
 	map<uint64_t, CellItem*> _cellsByIds;
 	map<uint64_t, ParticleItem*> _particlesByIds;
@@ -44,4 +44,3 @@ private:
 	map<uint64_t, uint64_t> _clusterIdsByCellIds;
 };
 
-#endif // GRAPHICSITEMMANAGER_H

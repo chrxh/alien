@@ -40,6 +40,7 @@ class SimulationAccess;
 class QTimer;
 class ModelBuilderFacade;
 class SerializationFacade;
+class CellConnector;
 
 struct CellClusterHash
 {

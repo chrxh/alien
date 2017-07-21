@@ -26,15 +26,11 @@ public:
 	virtual void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 	virtual int type() const;
 
-	virtual CellDescription const& getDescription() const;
 	virtual uint64_t getId() const;
 	virtual vector<uint64_t> getConnectedIds() const;
 	virtual FocusState getFocusState ();
 	virtual void setFocusState (FocusState focusState);
 	virtual void setDisplayString (QString value);
-
-protected:
-	virtual void updateDescription() override;
 
 private:
 	int getBranchNumber() const;
