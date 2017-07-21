@@ -2,7 +2,8 @@
 
 #include "Gui/Settings.h"
 
-void AbstractItem::move(QVector2D const & delta)
+void AbstractItem::moveBy(QVector2D const & delta)
 {
 	QGraphicsItem::moveBy(delta.x(), delta.y());
+	updateDescription();
 }
