@@ -29,24 +29,21 @@ public:
 	virtual CellDescription const& getDescription() const;
 	virtual uint64_t getId() const;
 	virtual vector<uint64_t> getConnectedIds() const;
-	virtual void setConnectable(bool connectable);
 	virtual FocusState getFocusState ();
 	virtual void setFocusState (FocusState focusState);
-	virtual void setNumToken (int numToken);
-	virtual void setColor (quint8 color);
 	virtual void setDisplayString (QString value);
-	virtual void setBranchNumber (int value);
 
 protected:
 	virtual void updateDescription() override;
 
 private:
+	int getBranchNumber() const;
+	int getNumToken() const;
+	bool isConnectable() const;
+	uint8_t getColorCode() const;
+
 	ItemConfig *_config = nullptr;
-    bool _connectable = false;
     FocusState _focusState = FocusState::NO_FOCUS;
-    int _numToken = 0;
-    quint8 _color = 0;
 	QString _displayString;
-	int _branchNumber = 0;
 	CellDescription _desc;
 };
