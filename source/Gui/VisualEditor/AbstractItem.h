@@ -13,7 +13,4 @@ public:
 	virtual ~AbstractItem() = default;
 
 	virtual void moveBy(QVector2D const &delta);
-
-protected:
-	virtual void updateDescription() {}
 };

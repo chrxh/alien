@@ -18,6 +18,7 @@ class QGraphicsItem;
 class QGraphicsView;
 class QGraphicsScene;
 class ItemManager;
+class DescriptionManager;
 class ViewportInterface;
 class ViewportController;
 enum class ActiveScene {

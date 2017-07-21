@@ -85,6 +85,11 @@ SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationConte
 	return access;
 }
 
+CellConnector * ModelBuilderFacadeImpl::buildCellConnector() const
+{
+	return nullptr;
+}
+
 namespace
 {
 	const int ARRAY_SIZE_FOR_RANDOM_NUMBERS = 234327;

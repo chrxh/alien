@@ -102,11 +102,6 @@ int CellItem::type() const
     return Type;
 }
 
-CellDescription const& CellItem::getDescription() const
-{
-	return _desc;
-}
-
 uint64_t CellItem::getId() const
 {
 	return _desc.id;
@@ -130,12 +125,6 @@ void CellItem::setFocusState (FocusState focusState)
 void CellItem::setDisplayString(QString value)
 {
 	_displayString = value;
-}
-
-void CellItem::updateDescription()
-{
-	QPointF pos = QGraphicsItem::scenePos();
-	_desc.pos.setValue(QVector2D(pos.x()/GRAPHICS_ITEM_SIZE, pos.y() / GRAPHICS_ITEM_SIZE));
 }
 
 int CellItem::getBranchNumber() const

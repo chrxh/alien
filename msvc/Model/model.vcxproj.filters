@@ -492,6 +492,9 @@
     <ClInclude Include="..\..\source\Model\ModelServices.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Model\Context\CellConnector.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\SimulationController.h">

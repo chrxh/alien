@@ -330,6 +330,15 @@
     <ClCompile Include="..\..\source\gui\visualeditor\MarkerItem.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_DescriptionManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DescriptionManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\VisualEditor\DescriptionManager.cpp">
+      <Filter>Source Files\Visualeditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -491,6 +500,9 @@
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ItemManager.h">
+      <Filter>Source Files\Visualeditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\VisualEditor\DescriptionManager.h">
       <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -5,6 +5,7 @@
 #include "Gui/visualeditor/ViewportInterface.h"
 
 #include "ItemManager.h"
+#include "DescriptionManager.h"
 #include "CellItem.h"
 #include "ParticleItem.h"
 #include "CellConnectionItem.h"
@@ -13,12 +14,14 @@ void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, Simu
 {
 	auto config = new ItemConfig();
 	auto selectedItems = new SelectedItems();
+	auto descManager = new DescriptionManager();
 
 	_scene = scene;
 	_viewport = viewport;
 	_parameters = parameters;
 	SET_CHILD(_config, config);
 	SET_CHILD(_selectedItems, selectedItems);
+	SET_CHILD(_descManager, descManager);
 
 	_config->init(parameters);
 }
@@ -115,17 +118,18 @@ namespace
 
 }
 
-void ItemManager::update(DataDescription const &desc)
+void ItemManager::update(DataDescription const &data)
 {
+	_descManager->setData(data);
 	_viewport->setModeToNoUpdate();
 
 	map<uint64_t, CellDescription> cellDescByIds;
-	getCellsByIds(desc, cellDescByIds);
-	getClusterIdsByCellIds(desc, _clusterIdsByCellIds);
+	getCellsByIds(data, cellDescByIds);
+	getClusterIdsByCellIds(data, _clusterIdsByCellIds);
 
 	map<uint64_t, CellItem*> newCellsByIds;
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
-	for (auto const &clusterT : desc.clusters) {
+	for (auto const &clusterT : data.clusters) {
 		auto const &cluster = clusterT.getValue();
 		updateEntities(cluster.cells, _cellsByIds, newCellsByIds);
 		updateConnections(cluster.cells, cellDescByIds, _connectionsByIds, newConnectionsByIds);
@@ -140,7 +144,7 @@ void ItemManager::update(DataDescription const &desc)
 	_connectionsByIds = newConnectionsByIds;
 
 	map<uint64_t, ParticleItem*> newParticlesByIds;
-	updateEntities(desc.particles, _particlesByIds, newParticlesByIds);
+	updateEntities(data.particles, _particlesByIds, newParticlesByIds);
 	for (auto const& particleById : _particlesByIds) {
 		delete particleById.second;
 	}
@@ -158,12 +162,18 @@ void ItemManager::setSelection(list<QGraphicsItem*> const &items)
 void ItemManager::moveSelection(QVector2D const &delta)
 {
 	_viewport->setModeToNoUpdate();
+	//1. change cell descriptions of selection
+	//2. reconnect cells
+	//3. move graphic items
+	//4. update connections
 	_selectedItems->move(delta);
+/*
 	for (set<uint64_t> connectionId : _selectedItems->getConnectionIds()) {
 		auto connectionIdIt = connectionId.begin();
 		auto const &cellDesc1 = _cellsByIds.at(*(connectionIdIt++))->getDescription();
 		auto const &cellDesc2 = _cellsByIds.at(*connectionIdIt)->getDescription();
 		_connectionsByIds.at(connectionId)->update(cellDesc1, cellDesc2);
 	}
+*/
 	_viewport->setModeToUpdate();
 };
