@@ -4,11 +4,11 @@
 #include "Model/Entities/Descriptions.h"
 #include "Gui/Settings.h"
 
-#include "GraphicsItemConfig.h"
-#include "cellconnectiongraphicsitem.h"
+#include "ItemConfig.h"
+#include "CellConnectionItem.h"
 
-CellConnectionGraphicsItem::CellConnectionGraphicsItem(GraphicsItemConfig* config, CellDescription const & cell1, CellDescription const & cell2, QGraphicsItem * parent)
-	: QGraphicsItem(parent), _config(config)
+CellConnectionItem::CellConnectionItem(ItemConfig* config, CellDescription const & cell1, CellDescription const & cell2, QGraphicsItem * parent)
+	: AbstractItem(parent), _config(config)
 {
 	QGraphicsItem::setZValue(-1.0);
 	update(cell1, cell2);
@@ -23,14 +23,14 @@ CellConnectionGraphicsItem::CellConnectionGraphicsItem (qreal x1, qreal y1, qrea
 }
 */
 
-void CellConnectionGraphicsItem::update(CellDescription const & cell1, CellDescription const & cell2)
+void CellConnectionItem::update(CellDescription const & cell1, CellDescription const & cell2)
 {
 	auto const &pos1 = cell1.pos.getValue();
 	auto const &pos2 = cell2.pos.getValue();
 	_dx = (pos2.x() - pos1.x()) * GRAPHICS_ITEM_SIZE;
 	_dy = (pos2.y() - pos1.y()) * GRAPHICS_ITEM_SIZE;
 
-	QGraphicsItem::setPos(pos1.x() * GRAPHICS_ITEM_SIZE, pos1.y() * GRAPHICS_ITEM_SIZE);
+	QGraphicsItem::setPos(QPointF(pos1.x()*GRAPHICS_ITEM_SIZE, pos1.y()*GRAPHICS_ITEM_SIZE));
 
 	auto branchNumber1 = cell1.tokenBranchNumber.getValueOr(0);
 	auto branchNumber2 = cell2.tokenBranchNumber.getValueOr(0);
@@ -46,7 +46,7 @@ void CellConnectionGraphicsItem::update(CellDescription const & cell1, CellDescr
 	}
 }
 
-QRectF CellConnectionGraphicsItem::boundingRect () const
+QRectF CellConnectionItem::boundingRect () const
 {
     qreal minX = qMin(0.0, _dx);
     qreal minY = qMin(0.0, _dy);
@@ -55,7 +55,7 @@ QRectF CellConnectionGraphicsItem::boundingRect () const
     return QRectF(minX, minY, (maxX-minX), (maxY-minY));
 }
 
-void CellConnectionGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void CellConnectionItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if( _connectionState == NO_DIR_CONNECTION )
         painter->setPen(QPen(QBrush(LINE_INACTIVE_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
@@ -93,7 +93,7 @@ void CellConnectionGraphicsItem::paint (QPainter *painter, const QStyleOptionGra
     }
 }
 
-void CellConnectionGraphicsItem::setConnectionState (ConnectionState connectionState)
+void CellConnectionItem::setConnectionState (ConnectionState connectionState)
 {
     _connectionState = connectionState;
 }

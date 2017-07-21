@@ -1,11 +1,9 @@
 #pragma once
 
-#include <QGraphicsItem>
+#include "AbstractItem.h"
 
-#include "Model/Definitions.h"
-#include "Gui/Definitions.h"
-
-class CellConnectionGraphicsItem : public QGraphicsItem
+class CellConnectionItem
+	: public AbstractItem
 {
 public:
     enum ConnectionState {
@@ -14,8 +12,8 @@ public:
         B_TO_A_CONNECTION
     };
 
-	CellConnectionGraphicsItem(GraphicsItemConfig *config, CellDescription const &cell1, CellDescription const &cell2, QGraphicsItem *parent = nullptr);
-	~CellConnectionGraphicsItem() = default;
+	CellConnectionItem(ItemConfig *config, CellDescription const &cell1, CellDescription const &cell2, QGraphicsItem *parent = nullptr);
+	virtual ~CellConnectionItem() = default;
 
 	void update(CellDescription const &cell1, CellDescription const &cell2);
 
@@ -25,7 +23,7 @@ public:
     void setConnectionState (ConnectionState connectionState);
 
 private:
-	GraphicsItemConfig* _config;
+	ItemConfig* _config;
 
     qreal _dx = 0.0;
     qreal _dy = 0.0;

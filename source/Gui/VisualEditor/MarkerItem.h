@@ -3,11 +3,12 @@
 
 #include <QGraphicsItem>
 
-class MarkerGraphicsItem : public QGraphicsItem
+class MarkerItem 
+	: public QGraphicsItem
 {
 public:
-    MarkerGraphicsItem (qreal x1, qreal y1, qreal x2, qreal y2, QGraphicsItem* parent = 0);
-    ~MarkerGraphicsItem ();
+    MarkerItem (qreal x1, qreal y1, qreal x2, qreal y2, QGraphicsItem* parent = 0);
+    virtual ~MarkerItem () = default;
 
     void setEndPos(qreal x, qreal y);
 

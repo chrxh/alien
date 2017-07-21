@@ -3,10 +3,10 @@
 
 #include "Base/Definitions.h"
 
-class CellGraphicsItem;
-class ParticleGraphicsItem;
-class CellConnectionGraphicsItem;
-class GraphicsItemConfig;
+class CellItem;
+class ParticleItem;
+class CellConnectionItem;
+class ItemConfig;
 class TextEditor;
 class SimulationMonitor;
 class TutorialWindow;
@@ -17,7 +17,7 @@ class ShapeUniverse;
 class QGraphicsItem;
 class QGraphicsView;
 class QGraphicsScene;
-class GraphicsItemManager;
+class ItemManager;
 class ViewportInterface;
 class ViewportController;
 enum class ActiveScene {

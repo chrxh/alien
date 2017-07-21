@@ -4,13 +4,13 @@
 
 #include "Model/Context/SimulationParameters.h"
 
-class GraphicsItemConfig
+class ItemConfig
 	: public QObject
 {
 	Q_OBJECT
 public:
-	GraphicsItemConfig(QObject* parent = nullptr) : QObject(parent) {}
-	~GraphicsItemConfig() = default;
+	ItemConfig(QObject* parent = nullptr) : QObject(parent) {}
+	~ItemConfig() = default;
 
 	void init(SimulationParameters* parameters);
 

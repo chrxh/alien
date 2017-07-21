@@ -1,17 +1,17 @@
 #include <QGraphicsItem>
 
 #include "SelectedItems.h"
-#include "cellgraphicsitem.h"
-#include "particlegraphicsitem.h"
+#include "CellItem.h"
+#include "ParticleItem.h"
 
 namespace
 {
-	list<CellGraphicsItem*> getClusterOfCell(CellGraphicsItem *cell, map<uint64_t, uint64_t> const &clusterIdsByCellIds
-		, map<uint64_t, CellGraphicsItem*> const &cellsByIds)
+	list<CellItem*> getClusterOfCell(CellItem *cell, map<uint64_t, uint64_t> const &clusterIdsByCellIds
+		, map<uint64_t, CellItem*> const &cellsByIds)
 	{
 		uint64_t clusterId = clusterIdsByCellIds.at(cell->getId());
 		
-		list<CellGraphicsItem*> result;
+		list<CellItem*> result;
 		for (auto clusterIdByCellId : clusterIdsByCellIds) {
 			if (clusterIdByCellId.second == clusterId) {
 				uint64_t cellId = clusterIdByCellId.first;
@@ -23,7 +23,7 @@ namespace
 }
 
 void SelectedItems::set(list<QGraphicsItem*> const &items, map<uint64_t, uint64_t> const &clusterIdsByCellIds
-	, map<uint64_t, CellGraphicsItem*> const &cellsByIds)
+	, map<uint64_t, CellItem*> const &cellsByIds)
 {
 	unhighlightItems();
 
@@ -32,12 +32,12 @@ void SelectedItems::set(list<QGraphicsItem*> const &items, map<uint64_t, uint64_
 	_particles.clear();
 
 	for (auto item : items) {
-		if (auto cellItem = qgraphicsitem_cast<CellGraphicsItem*>(item)) {
+		if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
 			_cells.push_back(cellItem);
 			auto clusterItems = getClusterOfCell(cellItem, clusterIdsByCellIds, cellsByIds);
 			_clusters.insert(_clusters.end(), clusterItems.begin(), clusterItems.end());
 		}
-		if (auto particleItem = qgraphicsitem_cast<ParticleGraphicsItem*>(item)) {
+		if (auto particleItem = qgraphicsitem_cast<ParticleItem*>(item)) {
 			_particles.push_back(particleItem);
 		}
 	}
@@ -45,25 +45,35 @@ void SelectedItems::set(list<QGraphicsItem*> const &items, map<uint64_t, uint64_
 	highlightItems();
 }
 
+void SelectedItems::move(QVector2D const &delta)
+{
+	for (auto item : _cells) {
+		item->move(delta);
+	}
+	for (auto item : _particles) {
+		item->move(delta);
+	}
+}
+
 void SelectedItems::unhighlightItems()
 {
 	for (auto cellItem : _clusters) {
-		cellItem->setFocusState(CellGraphicsItem::NO_FOCUS);
+		cellItem->setFocusState(CellItem::NO_FOCUS);
 	}
 	for (auto particleItem : _particles) {
-		particleItem->setFocusState(ParticleGraphicsItem::NO_FOCUS);
+		particleItem->setFocusState(ParticleItem::NO_FOCUS);
 	}
 }
 
 void SelectedItems::highlightItems()
 {
 	for (auto cellItem : _clusters) {
-		cellItem->setFocusState(CellGraphicsItem::FOCUS_CLUSTER);
+		cellItem->setFocusState(CellItem::FOCUS_CLUSTER);
 	}
 	for (auto cellItem : _cells) {
-		cellItem->setFocusState(CellGraphicsItem::FOCUS_CELL);
+		cellItem->setFocusState(CellItem::FOCUS_CELL);
 	}
 	for (auto particleItem : _particles) {
-		particleItem->setFocusState(ParticleGraphicsItem::FOCUS);
+		particleItem->setFocusState(ParticleItem::FOCUS);
 	}
 }

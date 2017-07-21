@@ -2,21 +2,21 @@
 
 #include "Model/Entities/Descriptions.h"
 
-#include "gui/Settings.h"
+#include "Gui/Settings.h"
 
-#include "GraphicsItemConfig.h"
-#include "cellgraphicsitem.h"
+#include "ItemConfig.h"
+#include "CellItem.h"
 
-CellGraphicsItem::CellGraphicsItem (GraphicsItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
-    : QGraphicsItem(parent), _config(config)
+CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
+    : AbstractItem(parent), _config(config)
 {
 	update(desc);
 }
 
-void CellGraphicsItem::update(CellDescription const & desc)
+void CellItem::update(CellDescription const & desc)
 {
-	auto pos = desc.pos.getValueOrDefault()*GRAPHICS_ITEM_SIZE;
-	QGraphicsItem::setPos(pos.x(), pos.y());
+	auto pos = desc.pos.getValueOrDefault();
+	QGraphicsItem::setPos(QPointF(pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE));
 
 	_numToken = desc.tokens.getValueOrDefault().size();
 	_color = desc.metadata.getValueOrDefault().color;
@@ -27,22 +27,18 @@ void CellGraphicsItem::update(CellDescription const & desc)
 	_id = desc.id;
 }
 
-QRectF CellGraphicsItem::boundingRect () const
+QRectF CellItem::boundingRect () const
 {
     return QRectF(-0.5*GRAPHICS_ITEM_SIZE, -0.5*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE);
 }
 
-void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     //set pen color depending on whether the cell is on focus or not
     if( _focusState == NO_FOCUS ) {
-
-        //no pen
         painter->setPen(QPen(QBrush(QColor(0,0,0,0)), 0.03 * GRAPHICS_ITEM_SIZE));
     }
     else {
-
-        //pen
         painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
     }
 
@@ -104,48 +100,53 @@ void CellGraphicsItem::paint (QPainter *painter, const QStyleOptionGraphicsItem 
 
 }
 
-int CellGraphicsItem::type() const
+int CellItem::type() const
 {
     // enables the use of qgraphicsitem_cast with this item.
     return Type;
 }
 
-uint64_t CellGraphicsItem::getId() const
+uint64_t CellItem::getId() const
 {
 	return _id;
 }
 
-void CellGraphicsItem::setConnectable (bool connectable)
+std::vector<uint64_t> CellItem::getConnectedIds() const
+{
+	return std::vector<uint64_t>();
+}
+
+void CellItem::setConnectable (bool connectable)
 {
     _connectable = connectable;
 }
 
-CellGraphicsItem::FocusState CellGraphicsItem::getFocusState ()
+CellItem::FocusState CellItem::getFocusState ()
 {
     return _focusState;
 }
 
-void CellGraphicsItem::setFocusState (FocusState focusState)
+void CellItem::setFocusState (FocusState focusState)
 {
     _focusState = focusState;
 }
 
-void CellGraphicsItem::setNumToken (int numToken)
+void CellItem::setNumToken (int numToken)
 {
     _numToken = numToken;
 }
 
-void CellGraphicsItem::setColor (quint8 color)
+void CellItem::setColor (quint8 color)
 {
     _color = color % CELL_COLOR_COUNT;
 }
 
-void CellGraphicsItem::setDisplayString(QString value)
+void CellItem::setDisplayString(QString value)
 {
 	_displayString = value;
 }
 
-void CellGraphicsItem::setBranchNumber(int value)
+void CellItem::setBranchNumber(int value)
 {
 	_branchNumber = value;
 }

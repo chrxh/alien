@@ -11,7 +11,7 @@
 #include "Model/Context/SimulationContextApi.h"
 #include "Model/SpaceMetricApi.h"
 
-#include "GraphicsItemManager.h"
+#include "ItemManager.h"
 #include "ShapeUniverse.h"
 
 ShapeUniverse::ShapeUniverse(QObject *parent)
@@ -31,7 +31,7 @@ void ShapeUniverse::init(SimulationController * controller, SimulationAccess* ac
 	_viewport = viewport;
 
 	_simAccess = access;
-	auto items = new GraphicsItemManager();
+	auto items = new ItemManager();
 	SET_CHILD(_items, items);
 
 	items->init(this, viewport, _controller->getContext()->getSimulationParameters());
@@ -74,5 +74,9 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	_items->setSelection(QGraphicsScene::items(e->scenePos()).toStdList());
 }
+
+void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e){	bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);	
+	if (leftButton) {		auto lastPos = e->lastScenePos();		auto pos = e->scenePos();		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());		_items->moveSelection(delta);	}}
+
 
 
