@@ -22,7 +22,7 @@ namespace
 	}
 }
 
-void SelectedItems::set(list<QGraphicsItem*> const &items, map<uint64_t, uint64_t> const &clusterIdsByCellIds
+void SelectedItems::update(list<QGraphicsItem*> const &items, map<uint64_t, uint64_t> const &clusterIdsByCellIds
 	, map<uint64_t, CellItem*> const &cellsByIds)
 {
 	unhighlightItems();
@@ -48,11 +48,23 @@ void SelectedItems::set(list<QGraphicsItem*> const &items, map<uint64_t, uint64_
 void SelectedItems::move(QVector2D const &delta)
 {
 	for (auto item : _cells) {
-		item->move(delta);
+		item->moveBy(delta);
 	}
 	for (auto item : _particles) {
-		item->move(delta);
+		item->moveBy(delta);
 	}
+}
+
+vector<set<uint64_t>> SelectedItems::getConnectionIds() const
+{
+	vector<set<uint64_t>> result;
+	for (auto cellItem : _cells) {
+		uint64_t id = cellItem->getId();
+		for (uint64_t connectedId : cellItem->getConnectedIds()) {
+			result.push_back({ id, connectedId });
+		}
+	}
+	return result;
 }
 
 void SelectedItems::unhighlightItems()

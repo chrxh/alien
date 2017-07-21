@@ -13,8 +13,9 @@ CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsIt
 	update(desc);
 }
 
-void CellItem::update(CellDescription const & desc)
+void CellItem::update(CellDescription const &desc)
 {
+	_desc = desc;
 	auto pos = desc.pos.getValueOrDefault();
 	QGraphicsItem::setPos(QPointF(pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE));
 
@@ -24,7 +25,6 @@ void CellItem::update(CellDescription const & desc)
 	auto numConnections = desc.connectingCells.getValueOrDefault().size();
 	auto maxConnections = desc.maxConnections.getValueOr(0);
 	_connectable = (numConnections < maxConnections);
-	_id = desc.id;
 }
 
 QRectF CellItem::boundingRect () const
@@ -106,14 +106,19 @@ int CellItem::type() const
     return Type;
 }
 
-uint64_t CellItem::getId() const
+CellDescription const& CellItem::getDescription() const
 {
-	return _id;
+	return _desc;
 }
 
-std::vector<uint64_t> CellItem::getConnectedIds() const
+uint64_t CellItem::getId() const
 {
-	return std::vector<uint64_t>();
+	return _desc.id;
+}
+
+vector<uint64_t> CellItem::getConnectedIds() const
+{
+	return _desc.connectingCells.getValueOrDefault();
 }
 
 void CellItem::setConnectable (bool connectable)
@@ -149,5 +154,11 @@ void CellItem::setDisplayString(QString value)
 void CellItem::setBranchNumber(int value)
 {
 	_branchNumber = value;
+}
+
+void CellItem::updateDescription()
+{
+	QPointF pos = QGraphicsItem::scenePos();
+	_desc.pos.setValue(QVector2D(pos.x()/GRAPHICS_ITEM_SIZE, pos.y() / GRAPHICS_ITEM_SIZE));
 }
 

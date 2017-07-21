@@ -10,9 +10,11 @@ public:
 	SelectedItems(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~SelectedItems() = default;
 
-	virtual void set(list<QGraphicsItem*> const &items, map<uint64_t, uint64_t> const &clusterIdsByCellIds
+	virtual void update(list<QGraphicsItem*> const &items, map<uint64_t, uint64_t> const &clusterIdsByCellIds
 		, map<uint64_t, CellItem*> const &cellsByIds);
 	virtual void move(QVector2D const &delta);
+	virtual vector<set<uint64_t>> getConnectionIds() const;
+
 
 private:
 	void unhighlightItems();
