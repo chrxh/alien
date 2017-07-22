@@ -13,6 +13,7 @@
 
 #include "ItemManager.h"
 #include "ShapeUniverse.h"
+#include "VisualDescription.h"
 
 ShapeUniverse::ShapeUniverse(QObject *parent)
 	: QGraphicsScene(parent)
@@ -29,10 +30,12 @@ void ShapeUniverse::init(SimulationController * controller, SimulationAccess* ac
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
-
 	_simAccess = access;
+
 	auto items = new ItemManager();
+	auto descManager = new VisualDescription();
 	SET_CHILD(_items, items);
+	SET_CHILD(_visualDesc, descManager);
 
 	items->init(this, viewport, _controller->getContext()->getSimulationParameters());
 }
@@ -72,11 +75,22 @@ void ShapeUniverse::retrieveAndDisplayData()
 
 void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
-	_items->setSelection(QGraphicsScene::items(e->scenePos()).toStdList());
+
+//	_items->setSelection(QGraphicsScene::items(e->scenePos()).toStdList());
 }
 
-void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e){	bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);	
-	if (leftButton) {		auto lastPos = e->lastScenePos();		auto pos = e->scenePos();		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());		_items->moveSelection(delta);	}}
+void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+{
+	bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
+	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
+	
+	if (leftButton) {
+		auto lastPos = e->lastScenePos();
+		auto pos = e->scenePos();
+		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
+		_items->moveSelection(delta);
+	}
+}
 
 
 

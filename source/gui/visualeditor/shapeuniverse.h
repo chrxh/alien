@@ -35,6 +35,7 @@ private:
 	ViewportInterface* _viewport = nullptr;
 
 	ItemManager* _items = nullptr;
+	VisualDescription* _visualDesc = nullptr;
 };
 
 #endif // SHAPEUNIVERSE_H
