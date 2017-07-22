@@ -55,41 +55,47 @@ void ItemManager::updateEntities(vector<TrackerElement<DescriptionType>> const &
 	}
 }
 
-void ItemManager::updateConnections(vector<TrackerElement<CellDescription>> const &desc
-	, map<uint64_t, CellDescription> const &cellsByIds
-	, map<set<uint64_t>, CellConnectionItem*>& connectionsByIds
-	, map<set<uint64_t>, CellConnectionItem*>& newConnectionsByIds)
+void ItemManager::updateConnections(DataDescription const &data
+	, map<uint64_t, CellDescription> const &cellsByIds)
 {
-	for (auto const &cellT : desc) {
-		auto const &cellD = cellT.getValue();
-		if (!cellD.connectingCells.isInitialized()) {
-			continue;
-		}
-		for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
-			auto cellIt = cellsByIds.find(connectingCellId);
-			if (cellIt == cellsByIds.end()) {
+	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
+	for (auto const &clusterT : data.clusters) {
+		auto const &cluster = clusterT.getValue();
+		for (auto const &cellT : cluster.cells) {
+			auto const &cellD = cellT.getValue();
+			if (!cellD.connectingCells.isInitialized()) {
 				continue;
 			}
-			set<uint64_t> id;
-			id.insert(cellD.id);
-			id.insert(connectingCellId);
-			if (newConnectionsByIds.find(id) != newConnectionsByIds.end()) {
-				continue;
-			}
-			auto connectionIt = connectionsByIds.find(id);
-			if (connectionIt != connectionsByIds.end()) {
-				CellConnectionItem* connection = connectionIt->second;
-				connection->update(cellD, cellIt->second);
-				newConnectionsByIds[id] = connection;
-				connectionsByIds.erase(connectionIt);
-			}
-			else {
-				CellConnectionItem* newConnection = new CellConnectionItem(_config, cellD, cellIt->second);
-				_scene->addItem(newConnection);
-				newConnectionsByIds[id] = newConnection;
+			for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
+				auto cellIt = cellsByIds.find(connectingCellId);
+				if (cellIt == cellsByIds.end()) {
+					continue;
+				}
+				set<uint64_t> id;
+				id.insert(cellD.id);
+				id.insert(connectingCellId);
+				if (newConnectionsByIds.find(id) != newConnectionsByIds.end()) {
+					continue;
+				}
+				auto connectionIt = _connectionsByIds.find(id);
+				if (connectionIt != _connectionsByIds.end()) {
+					CellConnectionItem* connection = connectionIt->second;
+					connection->update(cellD, cellIt->second);
+					newConnectionsByIds[id] = connection;
+					_connectionsByIds.erase(connectionIt);
+				}
+				else {
+					CellConnectionItem* newConnection = new CellConnectionItem(_config, cellD, cellIt->second);
+					_scene->addItem(newConnection);
+					newConnectionsByIds[id] = newConnection;
+				}
 			}
 		}
 	}
+	for (auto const& connectionById : _connectionsByIds) {
+		delete connectionById.second;
+	}
+	_connectionsByIds = newConnectionsByIds;
 }
 
 namespace
@@ -128,20 +134,16 @@ void ItemManager::update(DataDescription const &data)
 	getClusterIdsByCellIds(data, _clusterIdsByCellIds);
 
 	map<uint64_t, CellItem*> newCellsByIds;
-	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
 	for (auto const &clusterT : data.clusters) {
 		auto const &cluster = clusterT.getValue();
 		updateEntities(cluster.cells, _cellsByIds, newCellsByIds);
-		updateConnections(cluster.cells, cellDescByIds, _connectionsByIds, newConnectionsByIds);
 	}
 	for (auto const& cellById : _cellsByIds) {
 		delete cellById.second;
 	}
-	for (auto const& connectionById : _connectionsByIds) {
-		delete connectionById.second;
-	}
 	_cellsByIds = newCellsByIds;
-	_connectionsByIds = newConnectionsByIds;
+
+	updateConnections(data, cellDescByIds);
 
 	map<uint64_t, ParticleItem*> newParticlesByIds;
 	updateEntities(data.particles, _particlesByIds, newParticlesByIds);
@@ -162,9 +164,9 @@ void ItemManager::setSelection(list<QGraphicsItem*> const &items)
 void ItemManager::moveSelection(QVector2D const &delta)
 {
 	_viewport->setModeToNoUpdate();
-	//1. change cell descriptions of selection
-	//2. reconnect cells
-	//3. move graphic items
+	//1. SelectedItems: change cell descriptions of selection
+	//2. SelectedItems: move graphic items
+	//3. reconnect cells
 	//4. update connections
 	_selectedItems->move(delta);
 /*
@@ -175,5 +177,8 @@ void ItemManager::moveSelection(QVector2D const &delta)
 		_connectionsByIds.at(connectionId)->update(cellDesc1, cellDesc2);
 	}
 */
+	map<uint64_t, CellDescription> cellDescByIds;
+	getCellsByIds(_descManager->getDataRef(), cellDescByIds);	//<-- should be done by DescManager
+	updateConnections(_descManager->getDataRef(), cellDescByIds);
 	_viewport->setModeToUpdate();
 };

@@ -26,10 +26,8 @@ private:
 	template<typename IdType, typename ItemType, typename DescriptionType>
 	void updateEntities(vector<TrackerElement<DescriptionType>> const &desc, map<IdType, ItemType*>& itemsByIds
 		, map<IdType, ItemType*>& newItemsByIds);
-	void updateConnections(vector<TrackerElement<CellDescription>> const &desc
-		, map<uint64_t, CellDescription> const &cellsByIds
-		, map<set<uint64_t>, CellConnectionItem*>& connectionsByIds
-		, map<set<uint64_t>, CellConnectionItem*>& newConnectionsByIds);
+	void updateConnections(DataDescription const &data
+		, map<uint64_t, CellDescription> const &cellsByIds);
 		
 	QGraphicsScene *_scene = nullptr;
 	ViewportInterface *_viewport = nullptr;
