@@ -17,24 +17,17 @@ public:
 	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport, SimulationParameters* parameters);
 
 	virtual void activate(IntVector2D size);
-	virtual void update(DataDescription const &data);
-
-	virtual void setSelection(list<QGraphicsItem*> const &items);
-	virtual void moveSelection(QVector2D const &delta);
+	virtual void update(VisualDescription* visualDesc);
 
 private:
-	template<typename IdType, typename ItemType, typename DescriptionType>
-	void updateEntities(vector<TrackerElement<DescriptionType>> const &desc, map<IdType, ItemType*>& itemsByIds
-		, map<IdType, ItemType*>& newItemsByIds);
-	void updateConnections(DataDescription const &data
-		, map<uint64_t, CellDescription> const &cellsByIds);
+	void updateCells(DataDescription const &data);
+	void updateConnections(DataDescription const &data, map<uint64_t, CellDescription> const &cellsByIds);
+	void updateParticles(DataDescription const &data);
 		
 	QGraphicsScene *_scene = nullptr;
 	ViewportInterface *_viewport = nullptr;
 	SimulationParameters *_parameters = nullptr;
 	ItemConfig *_config = nullptr;
-	SelectedItems* _selectedItems = nullptr;
-	DescriptionManager* _descManager = nullptr;
 
 	map<uint64_t, CellItem*> _cellsByIds;
 	map<uint64_t, ParticleItem*> _particlesByIds;

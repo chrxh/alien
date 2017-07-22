@@ -5,7 +5,7 @@
 #include "Gui/visualeditor/ViewportInterface.h"
 
 #include "ItemManager.h"
-#include "DescriptionManager.h"
+#include "VisualDescription.h"
 #include "CellItem.h"
 #include "ParticleItem.h"
 #include "CellConnectionItem.h"
@@ -13,15 +13,11 @@
 void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters* parameters)
 {
 	auto config = new ItemConfig();
-	auto selectedItems = new SelectedItems();
-	auto descManager = new DescriptionManager();
 
 	_scene = scene;
 	_viewport = viewport;
 	_parameters = parameters;
 	SET_CHILD(_config, config);
-	SET_CHILD(_selectedItems, selectedItems);
-	SET_CHILD(_descManager, descManager);
 
 	_config->init(parameters);
 }
@@ -34,29 +30,58 @@ void ItemManager::activate(IntVector2D size)
 	_particlesByIds.clear();
 }
 
-template<typename IdType, typename ItemType, typename DescriptionType>
-void ItemManager::updateEntities(vector<TrackerElement<DescriptionType>> const &desc
-	, map<IdType, ItemType*>& itemsByIds, map<IdType, ItemType*>& newItemsByIds)
+void ItemManager::updateCells(DataDescription const &data)
 {
-	for (auto const &descElementT : desc) {
-		auto const &descElement = descElementT.getValue();
-		auto it = itemsByIds.find(descElement.id);
-		if (it != itemsByIds.end()) {
-			auto item = it->second;
-			item->update(descElement);
-			newItemsByIds[descElement.id] = item;
-			itemsByIds.erase(it);
-		}
-		else {
-			ItemType* newItem = new ItemType(_config, descElement);
-			_scene->addItem(newItem);
-			newItemsByIds[descElement.id] = newItem;
+	map<uint64_t, CellItem*> newCellsByIds;
+	for (auto const &clusterT : data.clusters) {
+		auto const &cluster = clusterT.getValue();
+		for (auto const &cellT : cluster.cells) {
+			auto const &cell = cellT.getValue();
+			auto it = _cellsByIds.find(cell.id);
+			if (it != _cellsByIds.end()) {
+				auto item = it->second;
+				item->update(cell);
+				newCellsByIds[cell.id] = item;
+				_cellsByIds.erase(it);
+			}
+			else {
+				CellItem* item = new CellItem(_config, cell);
+				_scene->addItem(item);
+				newCellsByIds[cell.id] = item;
+			}
 		}
 	}
+	for (auto const& cellById : _cellsByIds) {
+		delete cellById.second;
+	}
+	_cellsByIds = newCellsByIds;
 }
 
-void ItemManager::updateConnections(DataDescription const &data
-	, map<uint64_t, CellDescription> const &cellsByIds)
+void ItemManager::updateParticles(DataDescription const &data)
+{
+	map<uint64_t, ParticleItem*> newParticlesByIds;
+	for (auto const &particleT : data.particles) {
+		auto const &particle = particleT.getValue();
+		auto it = _particlesByIds.find(particle.id);
+		if (it != _particlesByIds.end()) {
+			auto item = it->second;
+			item->update(particle);
+			newParticlesByIds[particle.id] = item;
+			_particlesByIds.erase(it);
+		}
+		else {
+			ParticleItem* newParticle = new ParticleItem(_config, particle);
+			_scene->addItem(newParticle);
+			newParticlesByIds[particle.id] = newParticle;
+		}
+	}
+	for (auto const& particleById : _particlesByIds) {
+		delete particleById.second;
+	}
+	_particlesByIds = newParticlesByIds;
+}
+
+void ItemManager::updateConnections(DataDescription const &data, map<uint64_t, CellDescription> const &cellDescsByIds)
 {
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
 	for (auto const &clusterT : data.clusters) {
@@ -67,8 +92,8 @@ void ItemManager::updateConnections(DataDescription const &data
 				continue;
 			}
 			for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
-				auto cellIt = cellsByIds.find(connectingCellId);
-				if (cellIt == cellsByIds.end()) {
+				auto cellIt = cellDescsByIds.find(connectingCellId);
+				if (cellIt == cellDescsByIds.end()) {
 					continue;
 				}
 				set<uint64_t> id;
@@ -100,17 +125,6 @@ void ItemManager::updateConnections(DataDescription const &data
 
 namespace
 {
-	void getCellsByIds(DataDescription const &desc, map<uint64_t, CellDescription> &result)
-	{
-		for (auto const &clusterT : desc.clusters) {
-			auto const &clusterD = clusterT.getValue();
-			for (auto const &cellT : clusterD.cells) {
-				auto const &cellD = cellT.getValue();
-				result[cellD.id] = cellD;
-			}
-		}
-	}
-
 	void getClusterIdsByCellIds(DataDescription const &desc, map<uint64_t, uint64_t> &result)
 	{
 		for (auto const &clusterT : desc.clusters) {
@@ -124,61 +138,14 @@ namespace
 
 }
 
-void ItemManager::update(DataDescription const &data)
+void ItemManager::update(VisualDescription* visualDesc)
 {
-	_descManager->setData(data);
 	_viewport->setModeToNoUpdate();
 
-	map<uint64_t, CellDescription> cellDescByIds;
-	getCellsByIds(data, cellDescByIds);
-	getClusterIdsByCellIds(data, _clusterIdsByCellIds);
-
-	map<uint64_t, CellItem*> newCellsByIds;
-	for (auto const &clusterT : data.clusters) {
-		auto const &cluster = clusterT.getValue();
-		updateEntities(cluster.cells, _cellsByIds, newCellsByIds);
-	}
-	for (auto const& cellById : _cellsByIds) {
-		delete cellById.second;
-	}
-	_cellsByIds = newCellsByIds;
-
-	updateConnections(data, cellDescByIds);
-
-	map<uint64_t, ParticleItem*> newParticlesByIds;
-	updateEntities(data.particles, _particlesByIds, newParticlesByIds);
-	for (auto const& particleById : _particlesByIds) {
-		delete particleById.second;
-	}
-	_particlesByIds = newParticlesByIds;
+	DataDescription &data = visualDesc->getDataRef();
+	updateCells(data);
+	updateConnections(data, visualDesc->getCellDescsByIds());
+	updateParticles(data);
 
 	_viewport->setModeToUpdate();
 }
-
-void ItemManager::setSelection(list<QGraphicsItem*> const &items)
-{
-	_selectedItems->update(items, _clusterIdsByCellIds, _cellsByIds);
-	_scene->update();
-}
-
-void ItemManager::moveSelection(QVector2D const &delta)
-{
-	_viewport->setModeToNoUpdate();
-	//1. SelectedItems: change cell descriptions of selection
-	//2. SelectedItems: move graphic items
-	//3. reconnect cells
-	//4. update connections
-	_selectedItems->move(delta);
-/*
-	for (set<uint64_t> connectionId : _selectedItems->getConnectionIds()) {
-		auto connectionIdIt = connectionId.begin();
-		auto const &cellDesc1 = _cellsByIds.at(*(connectionIdIt++))->getDescription();
-		auto const &cellDesc2 = _cellsByIds.at(*connectionIdIt)->getDescription();
-		_connectionsByIds.at(connectionId)->update(cellDesc1, cellDesc2);
-	}
-*/
-	map<uint64_t, CellDescription> cellDescByIds;
-	getCellsByIds(_descManager->getDataRef(), cellDescByIds);	//<-- should be done by DescManager
-	updateConnections(_descManager->getDataRef(), cellDescByIds);
-	_viewport->setModeToUpdate();
-};
