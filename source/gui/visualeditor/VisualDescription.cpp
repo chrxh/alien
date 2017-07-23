@@ -23,7 +23,7 @@ void VisualDescription::setData(DataDescription const & data)
 	_data = data;
 }
 
-void VisualDescription::setSelection(uint64_t cellIds, uint64_t particleIds)
+void VisualDescription::setSelection(vector<uint64_t> const &cellIds, vector<uint64_t> const &particleIds)
 {
 }
 
