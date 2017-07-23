@@ -11,8 +11,10 @@
 #include "Model/Context/SimulationContextApi.h"
 #include "Model/SpaceMetricApi.h"
 
-#include "ItemManager.h"
 #include "ShapeUniverse.h"
+#include "CellItem.h"
+#include "ParticleItem.h"
+#include "ItemManager.h"
 #include "VisualDescription.h"
 
 ShapeUniverse::ShapeUniverse(QObject *parent)
@@ -69,14 +71,25 @@ void ShapeUniverse::requestData()
 
 void ShapeUniverse::retrieveAndDisplayData()
 {
-	auto const& data = _simAccess->retrieveData();
-	_items->update(data);
+	_visualDesc->setData(_simAccess->retrieveData());
+	_items->update(_visualDesc);
 }
 
 void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
-
-//	_items->setSelection(QGraphicsScene::items(e->scenePos()).toStdList());
+	auto items = QGraphicsScene::items(e->scenePos()).toStdList();
+	vector<uint64_t> cellIds;
+	vector<uint64_t> particleIds;
+	for (auto item : items) {
+		if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
+			cellIds.push_back(cellItem->getId());
+		}
+		if (auto particleItem = qgraphicsitem_cast<ParticleItem*>(item)) {
+			particleIds.push_back(particleItem->getId());
+		}
+	}
+	_visualDesc->setSelection(cellIds, particleIds);
+	_items->update(_visualDesc);
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -88,7 +101,9 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		auto lastPos = e->lastScenePos();
 		auto pos = e->scenePos();
 		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
+/*
 		_items->moveSelection(delta);
+*/
 	}
 }
 

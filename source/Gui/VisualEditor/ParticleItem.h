@@ -18,15 +18,18 @@ public:
 	ParticleItem(ItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent = nullptr);
 	virtual ~ParticleItem() = default;
 
-	void update(EnergyParticleDescription const& desc);
+	virtual void update(EnergyParticleDescription const& desc);
 
-    QRectF boundingRect () const;
-    void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    int type() const;
+	virtual uint64_t getId() const;
 
-    void setFocusState (FocusState focusState);
+	virtual QRectF boundingRect () const;
+	virtual void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+	virtual int type() const;
+
+	virtual void setFocusState (FocusState focusState);
 
 private:
 	FocusState _focusState = FocusState::NO_FOCUS;
+	uint64_t _id;
 };
 

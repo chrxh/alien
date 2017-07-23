@@ -13,8 +13,14 @@ ParticleItem::ParticleItem (ItemConfig* config, EnergyParticleDescription const 
 
 void ParticleItem::update(EnergyParticleDescription const & desc)
 {
+	_id = desc.id;
 	auto pos = desc.pos.getValue();
 	QGraphicsItem::setPos(QPointF(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE));
+}
+
+uint64_t ParticleItem::getId() const
+{
+	return _id;
 }
 
 QRectF ParticleItem::boundingRect () const
