@@ -15,8 +15,14 @@ public:
 	virtual DataDescription& getDataRef();
 	virtual map<uint64_t, CellDescription> getCellDescsByIds() const;
 	virtual void setData(DataDescription const &data);
-	virtual void setSelection(vector<uint64_t> const &cellIds, vector<uint64_t> const &particleIds);
+	virtual void setSelection(set<uint64_t> const &cellIds, set<uint64_t> const &particleIds);
+	virtual bool isInSelection(uint64_t id) const;
+	virtual bool isInExtendedSelection(uint64_t id) const;
 
 private:
 	DataDescription _data;
+
+	set<uint64_t> _selectedCellIds;
+	set<uint64_t> _selectedClusterIds;
+	set<uint64_t> _selectedParticleIds;
 };

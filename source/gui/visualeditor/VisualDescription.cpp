@@ -23,7 +23,19 @@ void VisualDescription::setData(DataDescription const & data)
 	_data = data;
 }
 
-void VisualDescription::setSelection(vector<uint64_t> const &cellIds, vector<uint64_t> const &particleIds)
+void VisualDescription::setSelection(set<uint64_t> const &cellIds, set<uint64_t> const &particleIds)
 {
+	_selectedCellIds = cellIds;
+	_selectedParticleIds = particleIds;
+}
+
+bool VisualDescription::isInSelection(uint64_t id) const
+{
+	return (_selectedCellIds.find(id) != _selectedCellIds.end() || _selectedParticleIds.find(id) != _selectedParticleIds.end());
+}
+
+bool VisualDescription::isInExtendedSelection(uint64_t id) const
+{
+	return false;
 }
 

@@ -20,9 +20,9 @@ public:
 	virtual void update(VisualDescription* visualDesc);
 
 private:
-	void updateCells(DataDescription const &data);
-	void updateConnections(DataDescription const &data, map<uint64_t, CellDescription> const &cellsByIds);
-	void updateParticles(DataDescription const &data);
+	void updateCells(VisualDescription* visualDesc);
+	void updateConnections(VisualDescription* visualDesc);
+	void updateParticles(VisualDescription* visualDesc);
 		
 	QGraphicsScene *_scene = nullptr;
 	ViewportInterface *_viewport = nullptr;
