@@ -14,7 +14,7 @@ struct TokenDescription
 
 struct CellDescription
 {
-	uint64_t id = 0.0;
+	uint64_t id = 0;
 
 	Tracker<QVector2D> pos;
 	Tracker<double> energy;
