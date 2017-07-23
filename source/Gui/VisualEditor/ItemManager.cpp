@@ -30,24 +30,33 @@ void ItemManager::activate(IntVector2D size)
 	_particlesByIds.clear();
 }
 
-void ItemManager::updateCells(DataDescription const &data)
+void ItemManager::updateCells(VisualDescription* visualDesc)
 {
+	auto const &data = visualDesc->getDataRef();
+
 	map<uint64_t, CellItem*> newCellsByIds;
 	for (auto const &clusterT : data.clusters) {
 		auto const &cluster = clusterT.getValue();
 		for (auto const &cellT : cluster.cells) {
 			auto const &cell = cellT.getValue();
 			auto it = _cellsByIds.find(cell.id);
+			CellItem* item;
 			if (it != _cellsByIds.end()) {
-				auto item = it->second;
+				item = it->second;
 				item->update(cell);
 				newCellsByIds[cell.id] = item;
 				_cellsByIds.erase(it);
 			}
 			else {
-				CellItem* item = new CellItem(_config, cell);
+				item = new CellItem(_config, cell);
 				_scene->addItem(item);
 				newCellsByIds[cell.id] = item;
+			}
+			if (visualDesc->isInSelection(cell.id)) {
+				item->setFocusState(CellItem::FOCUS_CELL);
+			}
+			else {
+				item->setFocusState(CellItem::NO_FOCUS);
 			}
 		}
 	}
@@ -57,22 +66,31 @@ void ItemManager::updateCells(DataDescription const &data)
 	_cellsByIds = newCellsByIds;
 }
 
-void ItemManager::updateParticles(DataDescription const &data)
+void ItemManager::updateParticles(VisualDescription* visualDesc)
 {
+	auto const &data = visualDesc->getDataRef();
+
 	map<uint64_t, ParticleItem*> newParticlesByIds;
 	for (auto const &particleT : data.particles) {
 		auto const &particle = particleT.getValue();
 		auto it = _particlesByIds.find(particle.id);
+		ParticleItem* item;
 		if (it != _particlesByIds.end()) {
-			auto item = it->second;
+			item = it->second;
 			item->update(particle);
 			newParticlesByIds[particle.id] = item;
 			_particlesByIds.erase(it);
 		}
 		else {
-			ParticleItem* newParticle = new ParticleItem(_config, particle);
-			_scene->addItem(newParticle);
-			newParticlesByIds[particle.id] = newParticle;
+			item = new ParticleItem(_config, particle);
+			_scene->addItem(item);
+			newParticlesByIds[particle.id] = item;
+		}
+		if (visualDesc->isInSelection(particle.id)) {
+			item->setFocusState(ParticleItem::FOCUS);
+		}
+		else {
+			item->setFocusState(ParticleItem::NO_FOCUS);
 		}
 	}
 	for (auto const& particleById : _particlesByIds) {
@@ -81,8 +99,11 @@ void ItemManager::updateParticles(DataDescription const &data)
 	_particlesByIds = newParticlesByIds;
 }
 
-void ItemManager::updateConnections(DataDescription const &data, map<uint64_t, CellDescription> const &cellDescsByIds)
+void ItemManager::updateConnections(VisualDescription* visualDesc)
 {
+	auto const &data = visualDesc->getDataRef();
+	auto cellDescsByIds = visualDesc->getCellDescsByIds();
+
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
 	for (auto const &clusterT : data.clusters) {
 		auto const &cluster = clusterT.getValue();
@@ -142,10 +163,10 @@ void ItemManager::update(VisualDescription* visualDesc)
 {
 	_viewport->setModeToNoUpdate();
 
-	DataDescription &data = visualDesc->getDataRef();
-	updateCells(data);
-	updateConnections(data, visualDesc->getCellDescsByIds());
-	updateParticles(data);
+	updateCells(visualDesc);
+	updateConnections(visualDesc);
+	updateParticles(visualDesc);
 
 	_viewport->setModeToUpdate();
+	_scene->update();
 }
