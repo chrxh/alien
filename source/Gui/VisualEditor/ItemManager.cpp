@@ -106,38 +106,34 @@ void ItemManager::updateParticles(VisualDescription* visualDesc)
 void ItemManager::updateConnections(VisualDescription* visualDesc)
 {
 	auto const &data = visualDesc->getDataRef();
-	auto cellDescsByIds = visualDesc->getCellDescsByCellIds();
 
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
 	for (auto const &clusterT : data.clusters) {
-		auto const &cluster = clusterT.getValue();
-		for (auto const &cellT : cluster.cells) {
+		auto const &clusterD = clusterT.getValue();
+		for (auto const &cellT : clusterD.cells) {
 			auto const &cellD = cellT.getValue();
 			if (!cellD.connectingCells.isInitialized()) {
 				continue;
 			}
 			for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
-				auto cellIt = cellDescsByIds.find(connectingCellId);
-				if (cellIt == cellDescsByIds.end()) {
+				auto &connectingCellD = visualDesc->getCellDescRef(connectingCellId);
+				set<uint64_t> connectionId;
+				connectionId.insert(cellD.id);
+				connectionId.insert(connectingCellId);
+				if (newConnectionsByIds.find(connectionId) != newConnectionsByIds.end()) {
 					continue;
 				}
-				set<uint64_t> id;
-				id.insert(cellD.id);
-				id.insert(connectingCellId);
-				if (newConnectionsByIds.find(id) != newConnectionsByIds.end()) {
-					continue;
-				}
-				auto connectionIt = _connectionsByIds.find(id);
+				auto connectionIt = _connectionsByIds.find(connectionId);
 				if (connectionIt != _connectionsByIds.end()) {
 					CellConnectionItem* connection = connectionIt->second;
-					connection->update(cellD, cellIt->second);
-					newConnectionsByIds[id] = connection;
+					connection->update(cellD, connectingCellD);
+					newConnectionsByIds[connectionId] = connection;
 					_connectionsByIds.erase(connectionIt);
 				}
 				else {
-					CellConnectionItem* newConnection = new CellConnectionItem(_config, cellD, cellIt->second);
+					CellConnectionItem* newConnection = new CellConnectionItem(_config, cellD, connectingCellD);
 					_scene->addItem(newConnection);
-					newConnectionsByIds[id] = newConnection;
+					newConnectionsByIds[connectionId] = newConnection;
 				}
 			}
 		}

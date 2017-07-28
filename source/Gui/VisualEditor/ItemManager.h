@@ -32,6 +32,5 @@ private:
 	map<uint64_t, CellItem*> _cellsByIds;
 	map<uint64_t, ParticleItem*> _particlesByIds;
 	map<set<uint64_t>, CellConnectionItem*> _connectionsByIds;
-	map<uint64_t, uint64_t> _clusterIdsByCellIds;
 };
 
