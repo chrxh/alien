@@ -20,9 +20,13 @@ public:
 	virtual bool isInExtendedSelection(uint64_t id) const;
 
 private:
+	virtual void updateInternals();
+
 	DataDescription _data;
 
 	set<uint64_t> _selectedCellIds;
 	set<uint64_t> _selectedClusterIds;
 	set<uint64_t> _selectedParticleIds;
+
+	map<uint64_t, uint64_t> _clusterIdsByCellIds;
 };

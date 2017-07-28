@@ -55,6 +55,9 @@ void ItemManager::updateCells(VisualDescription* visualDesc)
 			if (visualDesc->isInSelection(cell.id)) {
 				item->setFocusState(CellItem::FOCUS_CELL);
 			}
+			else if (visualDesc->isInExtendedSelection(cell.id)) {
+				item->setFocusState(CellItem::FOCUS_CLUSTER);
+			}
 			else {
 				item->setFocusState(CellItem::NO_FOCUS);
 			}
@@ -142,21 +145,6 @@ void ItemManager::updateConnections(VisualDescription* visualDesc)
 		delete connectionById.second;
 	}
 	_connectionsByIds = newConnectionsByIds;
-}
-
-namespace
-{
-	void getClusterIdsByCellIds(DataDescription const &desc, map<uint64_t, uint64_t> &result)
-	{
-		for (auto const &clusterT : desc.clusters) {
-			auto const &cluster = clusterT.getValue();
-			for (auto const &cellT : cluster.cells) {
-				auto const &cell = cellT.getValue();
-				result[cell.id] = cluster.id;
-			}
-		}
-	}
-
 }
 
 void ItemManager::update(VisualDescription* visualDesc)
