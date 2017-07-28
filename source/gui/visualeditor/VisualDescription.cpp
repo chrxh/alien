@@ -25,10 +25,10 @@ void VisualDescription::setData(DataDescription const & data)
 	updateInternals();
 }
 
-void VisualDescription::setSelection(set<uint64_t> const &cellIds, set<uint64_t> const &particleIds)
+void VisualDescription::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
-	_selectedCellIds = cellIds;
-	_selectedParticleIds = particleIds;
+	_selectedCellIds = set<uint64_t>(cellIds.begin(), cellIds.end());
+	_selectedParticleIds = set<uint64_t>(particleIds.begin(), particleIds.end());
 	_selectedClusterIds.clear();
 	for (uint64_t cellId : cellIds) {
 		auto clusterIdByCellIdIter = _clusterIdsByCellIds.find(cellId);
@@ -38,7 +38,7 @@ void VisualDescription::setSelection(set<uint64_t> const &cellIds, set<uint64_t>
 	}
 }
 
-bool VisualDescription::isInSelection(set<uint64_t> const & ids) const
+bool VisualDescription::isInSelection(list<uint64_t> const & ids) const
 {
 	for (uint64_t id : ids) {
 		if (!isInSelection(id)) {
