@@ -3,6 +3,7 @@
 
 #include "gui/Settings.h"
 #include "ViewportController.h"
+#include "CoordinateSystem.h"
 
 void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* shapeScene, ActiveScene activeScene)
 {
@@ -30,7 +31,7 @@ void ViewportController::initViewMatrices()
 	_pixelSceneViewMatrix = QMatrix();
 	_pixelSceneViewMatrix.scale(2.0, 2.0);
 	_shapeSceneViewMatrix = QMatrix();
-	_shapeSceneViewMatrix.scale(20.0 / GRAPHICS_ITEM_SIZE, 20.0 / GRAPHICS_ITEM_SIZE);
+	_shapeSceneViewMatrix.scale(CoordinateSystem::sceneToModel(20.0), CoordinateSystem::sceneToModel(20.0));
 }
 
 void ViewportController::setActiveScene(ActiveScene activeScene)
@@ -51,8 +52,8 @@ QRectF ViewportController::getRect() const
 	auto p1 = _view->mapToScene(0, 0);
 	auto p2 = _view->mapToScene(_view->width(), _view->height());
 	if (_activeScene == ActiveScene::ShapeScene) {
-		p1 = p1 / GRAPHICS_ITEM_SIZE;
-		p2 = p2 / GRAPHICS_ITEM_SIZE;
+		p1 = CoordinateSystem::sceneToModel(p1);
+		p2 = CoordinateSystem::sceneToModel(p2);
 	}
 	return{ p1, p2 };
 }
@@ -62,7 +63,7 @@ QVector2D ViewportController::getCenter() const
 	QPointF centerPoint = _view->mapToScene(_view->width() / 2, _view->height() / 2);
 	QVector2D result(centerPoint.x(), centerPoint.y());
 	if (_activeScene == ActiveScene::ShapeScene) {
-		result = result / GRAPHICS_ITEM_SIZE;
+		result = CoordinateSystem::sceneToModel(result);
 	}
 	return result;
 }

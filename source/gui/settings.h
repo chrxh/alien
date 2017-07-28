@@ -41,7 +41,6 @@ const QColor BUTTON_TEXT_HIGHLIGHT_COLOR(0x90, 0x90, 0xFF);
 const QString GLOBAL_FONT = "Courier New";
 
 //cell properties
-const qreal GRAPHICS_ITEM_SIZE = 10.0;
 const QColor CELLFUNCTION_INFO_COLOR(0x40, 0x40, 0x90);
 const QColor BRANCHNUMBER_INFO_COLOR(0x00, 0x00, 0x00);
 const QColor INDIVIDUAL_CELL_COLOR1(0x50, 0x90, 0xFF, 0xB0);

@@ -6,6 +6,7 @@
 
 #include "ItemConfig.h"
 #include "CellItem.h"
+#include "CoordinateSystem.h"
 
 CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
     : AbstractItem(parent), _config(config)
@@ -16,23 +17,24 @@ CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsIt
 void CellItem::update(CellDescription const &desc)
 {
 	_desc = desc;
-	auto pos = desc.pos.getValueOrDefault();
-	QGraphicsItem::setPos(QPointF(pos.x() * GRAPHICS_ITEM_SIZE, pos.y() * GRAPHICS_ITEM_SIZE));
+	auto pos = CoordinateSystem::modelToScene(desc.pos.getValueOrDefault());
+	QGraphicsItem::setPos(QPointF(pos.x(), pos.y()));
 }
 
 QRectF CellItem::boundingRect () const
 {
-    return QRectF(-0.5*GRAPHICS_ITEM_SIZE, -0.5*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE);
+    return QRectF(CoordinateSystem::modelToScene(-0.5), CoordinateSystem::modelToScene(-0.5)
+		, CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0));
 }
 
 void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     //set pen color depending on whether the cell is on focus or not
     if( _focusState == NO_FOCUS ) {
-        painter->setPen(QPen(QBrush(QColor(0,0,0,0)), 0.03 * GRAPHICS_ITEM_SIZE));
+        painter->setPen(QPen(QBrush(QColor(0,0,0,0)), CoordinateSystem::modelToScene(0.03)));
     }
     else {
-        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), CoordinateSystem::modelToScene(0.03)));
     }
 
     //set brush color
@@ -59,9 +61,9 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     //draw cell
     if( (_focusState == NO_FOCUS) || (_focusState == FOCUS_CLUSTER) )
-        painter->drawEllipse(QPointF(0.0, 0.0), 0.33*GRAPHICS_ITEM_SIZE, 0.33*GRAPHICS_ITEM_SIZE);
+        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.33), CoordinateSystem::modelToScene(0.33));
     else
-        painter->drawEllipse(QPointF(0.0, 0.0), 0.5*GRAPHICS_ITEM_SIZE, 0.5*GRAPHICS_ITEM_SIZE);
+        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.5), CoordinateSystem::modelToScene(0.5));
 
     //draw token
 	int numToken = getNumToken();
@@ -70,7 +72,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
             painter->setBrush(QBrush(TOKEN_COLOR));
         else
             painter->setBrush(QBrush(TOKEN_FOCUS_COLOR));
-        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), CoordinateSystem::modelToScene(0.03)));
         qreal shift1 = -0.5*0.20*(qreal)(numToken-1);
         if( numToken > 3)
             shift1 = -0.5*0.20*2.0;
@@ -79,19 +81,21 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
             qreal shift2 = 0.20*(qreal)(i%3);
             qreal shiftY2 = 0.35*(qreal)(i/3);
             if( numToken <= 3 )
-                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), 0.2*GRAPHICS_ITEM_SIZE, 0.2*GRAPHICS_ITEM_SIZE);
+                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), CoordinateSystem::modelToScene(0.2), CoordinateSystem::modelToScene(0.2));
             else
-                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), 0.1*GRAPHICS_ITEM_SIZE, 0.1*GRAPHICS_ITEM_SIZE);
+                painter->drawEllipse(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2), CoordinateSystem::modelToScene(0.1), CoordinateSystem::modelToScene(0.1));
         }
     }
 
 	if (_config->isShowCellInfo()) {
 		auto font = GuiSettings::getCellFont();
 		painter->setFont(font);
-		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
-		painter->drawText(QRectF(-1.5*GRAPHICS_ITEM_SIZE, 0.1*GRAPHICS_ITEM_SIZE, 3.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, _displayString);
-		painter->setPen(QPen(QBrush(BRANCHNUMBER_INFO_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
-		painter->drawText(QRectF(-0.49*GRAPHICS_ITEM_SIZE, -0.47*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE, 1.0*GRAPHICS_ITEM_SIZE), Qt::AlignCenter, QString::number(getBranchNumber()));
+		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), CoordinateSystem::modelToScene(0.03)));
+		painter->drawText(QRectF(CoordinateSystem::modelToScene(-1.5), CoordinateSystem::modelToScene(0.1), CoordinateSystem::modelToScene(3.0)
+			, CoordinateSystem::modelToScene(1.0)), Qt::AlignCenter, _displayString);
+		painter->setPen(QPen(QBrush(BRANCHNUMBER_INFO_COLOR), CoordinateSystem::modelToScene(0.03)));
+		painter->drawText(QRectF(CoordinateSystem::modelToScene(-0.49), CoordinateSystem::modelToScene(-0.47)
+			, CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0)), Qt::AlignCenter, QString::number(getBranchNumber()));
 	}
 
 }
