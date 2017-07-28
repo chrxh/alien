@@ -21,9 +21,8 @@ class ItemManager;
 class VisualDescription;
 class ViewportInterface;
 class ViewportController;
-enum class ActiveScene {
-	PixelScene, ShapeScene
-};
+class MarkerItem;
+enum class ActiveScene { PixelScene, ShapeScene };
 
 
 #endif // GUI_DEFINITIONS_H

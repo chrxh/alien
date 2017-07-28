@@ -26,6 +26,7 @@ public:
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent* e);
 	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
 	void retrieveAndDisplayData();

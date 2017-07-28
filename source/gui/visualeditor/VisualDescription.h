@@ -16,6 +16,7 @@ public:
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
 	virtual void setData(DataDescription const &data);
 	virtual void setSelection(set<uint64_t> const &cellIds, set<uint64_t> const &particleIds);
+	virtual bool isSomethingSelected();
 	virtual bool isInSelection(uint64_t id) const;
 	virtual bool isInExtendedSelection(uint64_t id) const;
 

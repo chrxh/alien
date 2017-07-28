@@ -7,10 +7,12 @@ class MarkerItem
 	: public QGraphicsItem
 {
 public:
-    MarkerItem (qreal x1, qreal y1, qreal x2, qreal y2, QGraphicsItem* parent = 0);
+    MarkerItem (QPointF const &upperLeft, QPointF const &lowerRight, QGraphicsItem* parent = 0);
     virtual ~MarkerItem () = default;
 
-    void setEndPos(qreal x, qreal y);
+	virtual void update(QPointF upperLeft, QPointF lowerRight);
+
+    virtual void setLowerRight(QPointF lowerRight);
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

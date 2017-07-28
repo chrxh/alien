@@ -1,19 +1,32 @@
-#include "MarkerItem.h"
+#include <QPainter>
 
 #include "gui/Settings.h"
 
-#include <QPainter>
+#include "MarkerItem.h"
+#include "CoordinateSystem.h"
 
-MarkerItem::MarkerItem (qreal x1, qreal y1, qreal x2, qreal y2, QGraphicsItem* parent)
-    : QGraphicsItem(parent), _x1(x1), _y1(y1), _dx(x2-x1), _dy(y2-y1)
+MarkerItem::MarkerItem (QPointF const &upperLeft, QPointF const &lowerRight, QGraphicsItem* parent)
+    : QGraphicsItem(parent)
 {
-    QGraphicsItem::setPos(x1, y1);
+	update(upperLeft, lowerRight);
 }
 
-void MarkerItem::setEndPos(qreal x, qreal y)
+void MarkerItem::update(QPointF upperLeft, QPointF lowerRight)
 {
-    _dx = x-_x1;
-    _dy = y-_y1;
+	upperLeft = CoordinateSystem::modelToScene(upperLeft);
+	lowerRight = CoordinateSystem::modelToScene(lowerRight);
+	_x1 = upperLeft.x();
+	_y1 = upperLeft.y();
+	_dx = lowerRight.x() - upperLeft.x();
+	_dy = lowerRight.y() - upperLeft.y();
+	QGraphicsItem::setPos(_x1, _y1);
+}
+
+void MarkerItem::setLowerRight(QPointF lowerRight)
+{
+	lowerRight = CoordinateSystem::modelToScene(lowerRight);
+	_dx = lowerRight.x() - _x1;
+    _dy = lowerRight.y() - _y1;
 }
 
 QRectF MarkerItem::boundingRect () const

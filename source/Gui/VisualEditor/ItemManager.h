@@ -19,6 +19,10 @@ public:
 	virtual void activate(IntVector2D size);
 	virtual void update(VisualDescription* visualDesc);
 
+	virtual void setMarkerItem(QPointF const &upperLeft, QPointF const &lowerRight);
+	virtual void setMarkerLowerRight(QPointF const &lowerRight);
+	virtual void deleteMarker();
+
 private:
 	void updateCells(VisualDescription* visualDesc);
 	void updateConnections(VisualDescription* visualDesc);
@@ -32,5 +36,6 @@ private:
 	map<uint64_t, CellItem*> _cellsByIds;
 	map<uint64_t, ParticleItem*> _particlesByIds;
 	map<set<uint64_t>, CellConnectionItem*> _connectionsByIds;
+	MarkerItem* _marker = nullptr;
 };
 

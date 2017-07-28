@@ -38,6 +38,11 @@ void VisualDescription::setSelection(set<uint64_t> const &cellIds, set<uint64_t>
 	}
 }
 
+bool VisualDescription::isSomethingSelected()
+{
+	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
+}
+
 bool VisualDescription::isInSelection(uint64_t id) const
 {
 	return (_selectedCellIds.find(id) != _selectedCellIds.end() || _selectedParticleIds.find(id) != _selectedParticleIds.end());

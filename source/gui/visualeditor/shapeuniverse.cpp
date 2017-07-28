@@ -78,7 +78,7 @@ void ShapeUniverse::retrieveAndDisplayData()
 
 namespace
 {
-	void collectIds(QList<QGraphicsItem*> items, set<uint64_t> &cellIds, set<uint64_t> &particleIds)
+	void collectIds(std::list<QGraphicsItem*> const &items, set<uint64_t> &cellIds, set<uint64_t> &particleIds)
 	{
 		for (auto item : items) {
 			if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
@@ -89,15 +89,31 @@ namespace
 			}
 		}
 	}
+
+	bool clickedOnSpace(std::list<QGraphicsItem*> const &items)
+	{
+		for (auto item : items) {
+			if (qgraphicsitem_cast<CellItem*>(item) || qgraphicsitem_cast<ParticleItem*>(item)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
 
 void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
+	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
 	set<uint64_t> cellIds;
 	set<uint64_t> particleIds;
-	collectIds(QGraphicsScene::items(e->scenePos()), cellIds, particleIds);
+	collectIds(itemsClicked, cellIds, particleIds);
 	_visualDesc->setSelection(cellIds, particleIds);
 	_items->update(_visualDesc);
+
+	if (clickedOnSpace(itemsClicked)) {
+		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
+		_items->setMarkerItem(pos, pos);
+	}
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -113,7 +129,16 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		_visualDesc->moveSelection(delta);
 		_items->update(_visualDesc);
 	}
+	if(!_visualDesc->isSomethingSelected()) {
+		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
+		_items->setMarkerLowerRight(pos);
+	}
 }
 
-
+void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+{
+	if (!_visualDesc->isSomethingSelected()) {
+		_items->deleteMarker();
+	}
+}
 
