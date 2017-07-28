@@ -76,19 +76,26 @@ void ShapeUniverse::retrieveAndDisplayData()
 	_items->update(_visualDesc);
 }
 
-void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
+namespace
 {
-	auto items = QGraphicsScene::items(e->scenePos()).toStdList();
-	set<uint64_t> cellIds;
-	set<uint64_t> particleIds;
-	for (auto item : items) {
-		if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
-			cellIds.insert(cellItem->getId());
-		}
-		if (auto particleItem = qgraphicsitem_cast<ParticleItem*>(item)) {
-			particleIds.insert(particleItem->getId());
+	void collectIds(QList<QGraphicsItem*> items, set<uint64_t> &cellIds, set<uint64_t> &particleIds)
+	{
+		for (auto item : items) {
+			if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
+				cellIds.insert(cellItem->getId());
+			}
+			if (auto particleItem = qgraphicsitem_cast<ParticleItem*>(item)) {
+				particleIds.insert(particleItem->getId());
+			}
 		}
 	}
+}
+
+void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
+{
+	set<uint64_t> cellIds;
+	set<uint64_t> particleIds;
+	collectIds(QGraphicsScene::items(e->scenePos()), cellIds, particleIds);
 	_visualDesc->setSelection(cellIds, particleIds);
 	_items->update(_visualDesc);
 }
