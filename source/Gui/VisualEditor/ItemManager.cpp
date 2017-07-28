@@ -10,6 +10,7 @@
 #include "ParticleItem.h"
 #include "CellConnectionItem.h"
 #include "CoordinateSystem.h"
+#include "MarkerItem.h"
 
 void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters* parameters)
 {
@@ -154,4 +155,33 @@ void ItemManager::update(VisualDescription* visualDesc)
 
 	_viewport->setModeToUpdate();
 	_scene->update();
+}
+
+void ItemManager::setMarkerItem(QPointF const &upperLeft, QPointF const &lowerRight)
+{
+	if (_marker) {
+		_marker->update(upperLeft, lowerRight);
+	}
+	else {
+		_marker = new MarkerItem(upperLeft, lowerRight);
+		_scene->addItem(_marker);
+	}
+	_scene->update();
+}
+
+void ItemManager::setMarkerLowerRight(QPointF const & lowerRight)
+{
+	if (_marker) {
+		_marker->setLowerRight(lowerRight);
+		_scene->update();
+	}
+}
+
+void ItemManager::deleteMarker()
+{
+	if (_marker) {
+		delete _marker;
+		_marker = nullptr;
+		_scene->update();
+	}
 }

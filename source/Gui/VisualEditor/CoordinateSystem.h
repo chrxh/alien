@@ -10,6 +10,7 @@ public:
 	static double sceneToModel(double len);
 
 	static QVector2D modelToScene(QVector2D const &vec);
+	static QPointF modelToScene(QPointF const &vec);
 	static double modelToScene(double len);
 
 };
