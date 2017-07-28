@@ -106,7 +106,7 @@ void ItemManager::updateParticles(VisualDescription* visualDesc)
 void ItemManager::updateConnections(VisualDescription* visualDesc)
 {
 	auto const &data = visualDesc->getDataRef();
-	auto cellDescsByIds = visualDesc->getCellDescsByIds();
+	auto cellDescsByIds = visualDesc->getCellDescsByCellIds();
 
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
 	for (auto const &clusterT : data.clusters) {
