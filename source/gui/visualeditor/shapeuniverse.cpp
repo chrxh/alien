@@ -78,14 +78,14 @@ void ShapeUniverse::retrieveAndDisplayData()
 
 namespace
 {
-	void collectIds(std::list<QGraphicsItem*> const &items, set<uint64_t> &cellIds, set<uint64_t> &particleIds)
+	void collectIds(std::list<QGraphicsItem*> const &items, list<uint64_t> &cellIds, list<uint64_t> &particleIds)
 	{
 		for (auto item : items) {
 			if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
-				cellIds.insert(cellItem->getId());
+				cellIds.push_back(cellItem->getId());
 			}
 			if (auto particleItem = qgraphicsitem_cast<ParticleItem*>(item)) {
-				particleIds.insert(particleItem->getId());
+				particleIds.push_back(particleItem->getId());
 			}
 		}
 	}
@@ -104,8 +104,8 @@ namespace
 void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
-	set<uint64_t> cellIds;
-	set<uint64_t> particleIds;
+	list<uint64_t> cellIds;
+	list<uint64_t> particleIds;
 	collectIds(itemsClicked, cellIds, particleIds);
 
 	if (!_visualDesc->isInSelection(cellIds) || !_visualDesc->isInSelection(particleIds)) {
@@ -114,7 +114,7 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	}
 
 	if (clickedOnSpace(itemsClicked)) {
-		_visualDesc->setSelection(set<uint64_t>(), set<uint64_t>());
+		_visualDesc->setSelection(list<uint64_t>(), list<uint64_t>());
 		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
 		_itemManager->setMarkerItem(pos, pos);
 		_itemManager->update(_visualDesc);
@@ -130,8 +130,8 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
 		_itemManager->setMarkerLowerRight(pos);
 		auto itemsWithinMarker = _itemManager->getItemsWithinMarker();
-		set<uint64_t> cellIds;
-		set<uint64_t> particleIds;
+		list<uint64_t> cellIds;
+		list<uint64_t> particleIds;
 		collectIds(itemsWithinMarker, cellIds, particleIds);
 		_visualDesc->setSelection(cellIds, particleIds);
 		_itemManager->update(_visualDesc);

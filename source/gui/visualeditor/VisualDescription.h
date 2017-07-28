@@ -15,9 +15,9 @@ public:
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
 	virtual void setData(DataDescription const &data);
-	virtual void setSelection(set<uint64_t> const &cellIds, set<uint64_t> const &particleIds);
-	virtual bool isInSelection(set<uint64_t> const &ids) const;
-	virtual bool isInSelection(uint64_t id) const;
+	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);
+	virtual bool isInSelection(list<uint64_t> const &ids) const;
+	virtual bool isInSelection(uint64_t id) const; //id can mean cell or particle id
 	virtual bool isInExtendedSelection(uint64_t id) const;
 
 	virtual void moveSelection(QVector2D const &delta);
