@@ -16,6 +16,7 @@
 #include "ParticleItem.h"
 #include "ItemManager.h"
 #include "VisualDescription.h"
+#include "CoordinateSystem.h"
 
 ShapeUniverse::ShapeUniverse(QObject *parent)
 	: QGraphicsScene(parent)
@@ -101,9 +102,9 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		auto lastPos = e->lastScenePos();
 		auto pos = e->scenePos();
 		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
-/*
-		_items->moveSelection(delta);
-*/
+		delta = CoordinateSystem::sceneToModel(delta);
+		_visualDesc->moveSelection(delta);
+		_items->update(_visualDesc);
 	}
 }
 

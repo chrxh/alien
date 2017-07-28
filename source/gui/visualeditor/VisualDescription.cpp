@@ -5,9 +5,9 @@ DataDescription & VisualDescription::getDataRef()
 	return _data;
 }
 
-map<uint64_t, CellDescription> const& VisualDescription::getCellDescsByIds() const
+map<uint64_t, CellDescription> const& VisualDescription::getCellDescsByCellIds() const
 {
-	return _cellDescsByIds;
+	return _cellDescsByCellIds;
 }
 
 void VisualDescription::setData(DataDescription const & data)
@@ -46,20 +46,35 @@ bool VisualDescription::isInExtendedSelection(uint64_t id) const
 
 void VisualDescription::moveSelection(QVector2D const &delta)
 {
-
+	for (uint64_t cellId : _selectedCellIds) {
+		int clusterIndex = _clusterIndicesByCellIds.at(cellId);
+		int cellIndex = _cellIndicesByCellIds.at(cellId);
+		CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
+		CellDescription &cellDesc = clusterDesc.cells[cellIndex].getValue();
+		cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+	}
 }
 
 void VisualDescription::updateInternals()
 {
 	_clusterIdsByCellIds.clear();
-	_cellDescsByIds.clear();
+	_cellDescsByCellIds.clear();
+	_clusterIndicesByCellIds.clear();
+	_cellIndicesByCellIds.clear();
+
+	int clusterIndex = 0;
 	for (auto const &clusterT : _data.clusters) {
 		auto const &cluster = clusterT.getValue();
+		int cellIndex = 0;
 		for (auto const &cellT : cluster.cells) {
 			auto const &cell = cellT.getValue();
 			_clusterIdsByCellIds[cell.id] = cluster.id;
-			_cellDescsByIds[cell.id] = cell;
+			_cellDescsByCellIds[cell.id] = cell;
+			_clusterIndicesByCellIds[cell.id] = clusterIndex;
+			_cellIndicesByCellIds[cell.id] = cellIndex;
+			++cellIndex;
 		}
+		++clusterIndex;
 	}
 }
 
