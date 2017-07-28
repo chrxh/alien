@@ -52,6 +52,10 @@ bool VisualDescription::isInExtendedSelection(uint64_t id) const
 	return false;
 }
 
+void VisualDescription::moveSelection(QVector2D const &delta)
+{
+}
+
 void VisualDescription::updateInternals()
 {
 	_clusterIdsByCellIds.clear();

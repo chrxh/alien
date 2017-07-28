@@ -19,6 +19,8 @@ public:
 	virtual bool isInSelection(uint64_t id) const;
 	virtual bool isInExtendedSelection(uint64_t id) const;
 
+	virtual void moveSelection(QVector2D const &delta);
+
 private:
 	virtual void updateInternals();
 

@@ -6,6 +6,7 @@
 
 #include "ItemConfig.h"
 #include "CellConnectionItem.h"
+#include "CoordinateSystem.h"
 
 CellConnectionItem::CellConnectionItem(ItemConfig* config, CellDescription const & cell1, CellDescription const & cell2, QGraphicsItem * parent)
 	: AbstractItem(parent), _config(config)
@@ -25,12 +26,12 @@ CellConnectionGraphicsItem::CellConnectionGraphicsItem (qreal x1, qreal y1, qrea
 
 void CellConnectionItem::update(CellDescription const & cell1, CellDescription const & cell2)
 {
-	auto const &pos1 = cell1.pos.getValue();
-	auto const &pos2 = cell2.pos.getValue();
-	_dx = (pos2.x() - pos1.x()) * GRAPHICS_ITEM_SIZE;
-	_dy = (pos2.y() - pos1.y()) * GRAPHICS_ITEM_SIZE;
+	auto pos1 = CoordinateSystem::modelToScene(cell1.pos.getValue());
+	auto pos2 = CoordinateSystem::modelToScene(cell2.pos.getValue());
+	_dx = (pos2.x() - pos1.x());
+	_dy = (pos2.y() - pos1.y());
 
-	QGraphicsItem::setPos(QPointF(pos1.x()*GRAPHICS_ITEM_SIZE, pos1.y()*GRAPHICS_ITEM_SIZE));
+	QGraphicsItem::setPos(QPointF(pos1.x(), pos1.y()));
 
 	auto branchNumber1 = cell1.tokenBranchNumber.getValueOr(0);
 	auto branchNumber2 = cell2.tokenBranchNumber.getValueOr(0);
@@ -58,9 +59,9 @@ QRectF CellConnectionItem::boundingRect () const
 void CellConnectionItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if( _connectionState == NO_DIR_CONNECTION )
-        painter->setPen(QPen(QBrush(LINE_INACTIVE_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+        painter->setPen(QPen(QBrush(LINE_INACTIVE_COLOR), CoordinateSystem::modelToScene(0.03)));
     else
-        painter->setPen(QPen(QBrush(LINE_ACTIVE_COLOR), 0.03 * GRAPHICS_ITEM_SIZE));
+        painter->setPen(QPen(QBrush(LINE_ACTIVE_COLOR), CoordinateSystem::modelToScene(0.03)));
     painter->drawLine(QPointF(0.0, 0.0), QPointF(_dx, _dy));
 
     if( (_connectionState == A_TO_B_CONNECTION) || (_connectionState == B_TO_A_CONNECTION) ) {
@@ -76,8 +77,8 @@ void CellConnectionItem::paint (QPainter *painter, const QStyleOptionGraphicsIte
         }
 
         qreal len = qSqrt(relPosX*relPosX+relPosY*relPosY);
-        relPosX = relPosX / len * GRAPHICS_ITEM_SIZE;
-        relPosY = relPosY / len * GRAPHICS_ITEM_SIZE;
+        relPosX = CoordinateSystem::modelToScene(relPosX / len);
+        relPosY = CoordinateSystem::modelToScene(relPosY / len);
 
         //rotate 45 degree counterclockwise and scaling
         qreal aX = (relPosX-relPosY)/10.0;

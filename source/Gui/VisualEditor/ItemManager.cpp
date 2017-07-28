@@ -9,6 +9,7 @@
 #include "CellItem.h"
 #include "ParticleItem.h"
 #include "CellConnectionItem.h"
+#include "CoordinateSystem.h"
 
 void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters* parameters)
 {
@@ -25,7 +26,7 @@ void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, Simu
 void ItemManager::activate(IntVector2D size)
 {
 	_scene->clear();
-	_scene->setSceneRect(0, 0, size.x*GRAPHICS_ITEM_SIZE, size.y*GRAPHICS_ITEM_SIZE);
+	_scene->setSceneRect(0, 0, CoordinateSystem::modelToScene(size.x), CoordinateSystem::modelToScene(size.y));
 	_cellsByIds.clear();
 	_particlesByIds.clear();
 }
