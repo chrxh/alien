@@ -185,3 +185,13 @@ void ItemManager::deleteMarker()
 		_scene->update();
 	}
 }
+
+bool ItemManager::isMarkerActive() const
+{
+	return (bool)_marker;
+}
+
+std::list<QGraphicsItem*> ItemManager::getItemsWithinMarker() const
+{
+	return _marker->collidingItems().toStdList();
+}
