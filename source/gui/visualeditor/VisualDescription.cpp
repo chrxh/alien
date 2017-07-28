@@ -38,6 +38,16 @@ void VisualDescription::setSelection(set<uint64_t> const &cellIds, set<uint64_t>
 	}
 }
 
+bool VisualDescription::isInSelection(set<uint64_t> const & ids) const
+{
+	for (uint64_t id : ids) {
+		if (!isInSelection(id)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool VisualDescription::isInSelection(uint64_t id) const
 {
 	return (_selectedCellIds.find(id) != _selectedCellIds.end() || _selectedParticleIds.find(id) != _selectedParticleIds.end());
