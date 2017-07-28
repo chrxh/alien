@@ -5,17 +5,9 @@ DataDescription & VisualDescription::getDataRef()
 	return _data;
 }
 
-map<uint64_t, CellDescription> VisualDescription::getCellDescsByIds() const
+map<uint64_t, CellDescription> const& VisualDescription::getCellDescsByIds() const
 {
-	map<uint64_t, CellDescription> result;
-	for (auto const &clusterT : _data.clusters) {
-		auto const &clusterD = clusterT.getValue();
-		for (auto const &cellT : clusterD.cells) {
-			auto const &cellD = cellT.getValue();
-			result[cellD.id] = cellD;
-		}
-	}
-	return result;
+	return _cellDescsByIds;
 }
 
 void VisualDescription::setData(DataDescription const & data)
@@ -54,18 +46,20 @@ bool VisualDescription::isInExtendedSelection(uint64_t id) const
 
 void VisualDescription::moveSelection(QVector2D const &delta)
 {
+
 }
 
 void VisualDescription::updateInternals()
 {
 	_clusterIdsByCellIds.clear();
+	_cellDescsByIds.clear();
 	for (auto const &clusterT : _data.clusters) {
 		auto const &cluster = clusterT.getValue();
 		for (auto const &cellT : cluster.cells) {
 			auto const &cell = cellT.getValue();
 			_clusterIdsByCellIds[cell.id] = cluster.id;
+			_cellDescsByIds[cell.id] = cell;
 		}
 	}
-
 }
 
