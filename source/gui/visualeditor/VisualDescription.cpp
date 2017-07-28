@@ -13,6 +13,12 @@ CellDescription & VisualDescription::getCellDescRef(uint64_t cellId)
 	return clusterDesc.cells[cellIndex].getValue();
 }
 
+EnergyParticleDescription & VisualDescription::getParticleDescRef(uint64_t particleId)
+{
+	int particleIndex = _particleIndicesByParticleIds.at(particleId);
+	return _data.particles[particleIndex].getValue();
+}
+
 void VisualDescription::setData(DataDescription const & data)
 {
 	_data = data;
@@ -56,6 +62,11 @@ void VisualDescription::moveSelection(QVector2D const &delta)
 		CellDescription &cellDesc = getCellDescRef(cellId);
 		cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
 	}
+
+	for (uint64_t particleId : _selectedParticleIds) {
+		EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
+		particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+	}
 }
 
 void VisualDescription::updateInternals()
@@ -63,19 +74,27 @@ void VisualDescription::updateInternals()
 	_clusterIdsByCellIds.clear();
 	_clusterIndicesByCellIds.clear();
 	_cellIndicesByCellIds.clear();
+	_particleIndicesByParticleIds.clear();
 
 	int clusterIndex = 0;
 	for (auto const &clusterT : _data.clusters) {
-		auto const &cluster = clusterT.getValue();
+		auto const &clusterD = clusterT.getValue();
 		int cellIndex = 0;
-		for (auto const &cellT : cluster.cells) {
-			auto const &cell = cellT.getValue();
-			_clusterIdsByCellIds[cell.id] = cluster.id;
-			_clusterIndicesByCellIds[cell.id] = clusterIndex;
-			_cellIndicesByCellIds[cell.id] = cellIndex;
+		for (auto const &cellT : clusterD.cells) {
+			auto const &cellD = cellT.getValue();
+			_clusterIdsByCellIds[cellD.id] = clusterD.id;
+			_clusterIndicesByCellIds[cellD.id] = clusterIndex;
+			_cellIndicesByCellIds[cellD.id] = cellIndex;
 			++cellIndex;
 		}
 		++clusterIndex;
+	}
+
+	int particleIndex = 0;
+	for (auto const &particleT : _data.particles) {
+		auto const &particleD = particleT.getValue();
+		_particleIndicesByParticleIds[particleD.id] = particleIndex;
+		++particleIndex;
 	}
 }
 
