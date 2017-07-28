@@ -35,7 +35,7 @@ private:
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
 
-	ItemManager* _items = nullptr;
+	ItemManager* _itemManager = nullptr;
 	VisualDescription* _visualDesc = nullptr;
 };
 

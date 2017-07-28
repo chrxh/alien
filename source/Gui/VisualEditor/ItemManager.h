@@ -22,6 +22,8 @@ public:
 	virtual void setMarkerItem(QPointF const &upperLeft, QPointF const &lowerRight);
 	virtual void setMarkerLowerRight(QPointF const &lowerRight);
 	virtual void deleteMarker();
+	virtual bool isMarkerActive() const;
+	virtual std::list<QGraphicsItem*> getItemsWithinMarker() const;
 
 private:
 	void updateCells(VisualDescription* visualDesc);

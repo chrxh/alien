@@ -37,7 +37,7 @@ void ShapeUniverse::init(SimulationController * controller, SimulationAccess* ac
 
 	auto items = new ItemManager();
 	auto descManager = new VisualDescription();
-	SET_CHILD(_items, items);
+	SET_CHILD(_itemManager, items);
 	SET_CHILD(_visualDesc, descManager);
 
 	items->init(this, viewport, _controller->getContext()->getSimulationParameters());
@@ -46,7 +46,7 @@ void ShapeUniverse::init(SimulationController * controller, SimulationAccess* ac
 void ShapeUniverse::activate()
 {
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
-	_items->activate(size);
+	_itemManager->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
 	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
@@ -73,7 +73,7 @@ void ShapeUniverse::requestData()
 void ShapeUniverse::retrieveAndDisplayData()
 {
 	_visualDesc->setData(_simAccess->retrieveData());
-	_items->update(_visualDesc);
+	_itemManager->update(_visualDesc);
 }
 
 namespace
@@ -108,11 +108,11 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	set<uint64_t> particleIds;
 	collectIds(itemsClicked, cellIds, particleIds);
 	_visualDesc->setSelection(cellIds, particleIds);
-	_items->update(_visualDesc);
+	_itemManager->update(_visualDesc);
 
 	if (clickedOnSpace(itemsClicked)) {
 		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
-		_items->setMarkerItem(pos, pos);
+		_itemManager->setMarkerItem(pos, pos);
 	}
 }
 
@@ -121,24 +121,32 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 	bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
 	
-	if (leftButton) {
-		auto lastPos = e->lastScenePos();
-		auto pos = e->scenePos();
-		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
-		delta = CoordinateSystem::sceneToModel(delta);
-		_visualDesc->moveSelection(delta);
-		_items->update(_visualDesc);
-	}
-	if(!_visualDesc->isSomethingSelected()) {
+	if(_itemManager->isMarkerActive()) {
 		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
-		_items->setMarkerLowerRight(pos);
+		_itemManager->setMarkerLowerRight(pos);
+		auto itemsWithinMarker = _itemManager->getItemsWithinMarker();
+		set<uint64_t> cellIds;
+		set<uint64_t> particleIds;
+		collectIds(itemsWithinMarker, cellIds, particleIds);
+		_visualDesc->setSelection(cellIds, particleIds);
+		_itemManager->update(_visualDesc);
+	}
+	if (!_itemManager->isMarkerActive()) {
+		if (leftButton) {
+			auto lastPos = e->lastScenePos();
+			auto pos = e->scenePos();
+			QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
+			delta = CoordinateSystem::sceneToModel(delta);
+			_visualDesc->moveSelection(delta);
+			_itemManager->update(_visualDesc);
+		}
 	}
 }
 
 void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
-	if (!_visualDesc->isSomethingSelected()) {
-		_items->deleteMarker();
+	if (_itemManager->isMarkerActive()) {
+		_itemManager->deleteMarker();
 	}
 }
 
