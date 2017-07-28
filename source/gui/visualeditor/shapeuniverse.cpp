@@ -107,12 +107,17 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	set<uint64_t> cellIds;
 	set<uint64_t> particleIds;
 	collectIds(itemsClicked, cellIds, particleIds);
-	_visualDesc->setSelection(cellIds, particleIds);
-	_itemManager->update(_visualDesc);
+
+	if (!_visualDesc->isInSelection(cellIds) || !_visualDesc->isInSelection(particleIds)) {
+		_visualDesc->setSelection(cellIds, particleIds);
+		_itemManager->update(_visualDesc);
+	}
 
 	if (clickedOnSpace(itemsClicked)) {
+		_visualDesc->setSelection(set<uint64_t>(), set<uint64_t>());
 		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
 		_itemManager->setMarkerItem(pos, pos);
+		_itemManager->update(_visualDesc);
 	}
 }
 
