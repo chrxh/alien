@@ -22,7 +22,8 @@ public:
 	virtual void moveSelection(QVector2D const &delta);
 
 private:
-	virtual void updateInternals();
+	void updateInternals();
+	EnergyParticleDescription & getParticleDescRef(uint64_t particleId);
 
 	DataDescription _data;
 
@@ -33,4 +34,5 @@ private:
 	map<uint64_t, uint64_t> _clusterIdsByCellIds;
 	map<uint64_t, int> _clusterIndicesByCellIds;
 	map<uint64_t, int> _cellIndicesByCellIds;
+	map<uint64_t, int> _particleIndicesByParticleIds;
 };
