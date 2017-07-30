@@ -14,9 +14,11 @@ void CellConnectorImpl::reconnect(DataDescription &data)
 	updateInternals(data);
 	updateConnectingCells();
 
+/*
 	DataDescription dataNew;
 	reclustering(dataNew);
 	data = dataNew;
+*/
 }
 
 void CellConnectorImpl::updateInternals(DataDescription const &data)
@@ -73,6 +75,7 @@ void CellConnectorImpl::removeConnectionsIfNecessary(CellDescription &cellDesc)
 		if (displacement.length() <= _parameters->cellMaxDistance) {
 			connectingCellIdsNew.push_back(connectingCellId);
 		}
+		//TODO: remove connection also in connectingCell
 	}
 	cellDesc.connectingCells.setValue(connectingCellIdsNew);
 }
