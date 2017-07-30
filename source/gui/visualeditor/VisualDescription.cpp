@@ -29,10 +29,9 @@ bool VisualDescription::isParticlePresent(uint64_t particleId)
 	return _particleIds.find(particleId) != _particleIds.end();
 }
 
-void VisualDescription::setData(DataDescription const & data)
+void VisualDescription::setData(DataDescription const &data)
 {
-	_data = data;
-	updateInternals();
+	updateInternals(data);
 }
 
 void VisualDescription::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
@@ -138,8 +137,9 @@ void VisualDescription::setToUnmodified()
 	}
 }
 
-void VisualDescription::updateInternals()
+void VisualDescription::updateInternals(DataDescription const &data)
 {
+	_data = data;
 	_cellIds.clear();
 	_particleIds.clear();
 	_clusterIdsByCellIds.clear();

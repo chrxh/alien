@@ -34,6 +34,7 @@ private:
 	SimulationAccess* _simAccess = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
+	CellConnector* _connector = nullptr;
 
 	ItemManager* _itemManager = nullptr;
 	VisualDescription* _visualDesc = nullptr;
