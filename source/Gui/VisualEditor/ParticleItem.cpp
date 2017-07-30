@@ -4,6 +4,7 @@
 #include "gui/Settings.h"
 
 #include "ParticleItem.h"
+#include "CoordinateSystem.h"
 
 ParticleItem::ParticleItem (ItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
     : AbstractItem(parent)
@@ -14,8 +15,8 @@ ParticleItem::ParticleItem (ItemConfig* config, EnergyParticleDescription const 
 void ParticleItem::update(EnergyParticleDescription const & desc)
 {
 	_id = desc.id;
-	auto pos = desc.pos.getValue();
-	QGraphicsItem::setPos(QPointF(pos.x()*GRAPHICS_ITEM_SIZE, pos.y()*GRAPHICS_ITEM_SIZE));
+	auto pos = CoordinateSystem::modelToScene(desc.pos.getValue());
+	QGraphicsItem::setPos(QPointF(pos.x(), pos.y()));
 }
 
 uint64_t ParticleItem::getId() const
@@ -25,7 +26,8 @@ uint64_t ParticleItem::getId() const
 
 QRectF ParticleItem::boundingRect () const
 {
-    return QRectF(-0.4*GRAPHICS_ITEM_SIZE, -0.4*GRAPHICS_ITEM_SIZE, 0.8*GRAPHICS_ITEM_SIZE, 0.8*GRAPHICS_ITEM_SIZE);
+    return QRectF(CoordinateSystem::modelToScene(-0.4), CoordinateSystem::modelToScene(-0.4)
+		, CoordinateSystem::modelToScene(0.8), CoordinateSystem::modelToScene(0.8));
 }
 
 void ParticleItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -33,12 +35,12 @@ void ParticleItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *opt
     if( _focusState == NO_FOCUS ) {
         painter->setPen(QPen(QBrush(QColor(0,0,0,0)), 0.03));
         painter->setBrush(QBrush(ENERGY_COLOR));
-        painter->drawEllipse(QPointF(0.0, 0.0), 0.20*GRAPHICS_ITEM_SIZE, 0.20*GRAPHICS_ITEM_SIZE);
+        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.20), CoordinateSystem::modelToScene(0.20));
     }
     else {
         painter->setPen(QPen(QBrush(ENERGY_PEN_FOCUS_COLOR), 0.03));
         painter->setBrush(QBrush(ENERGY_FOCUS_COLOR));
-        painter->drawEllipse(QPointF(0.0, 0.0), 0.4*GRAPHICS_ITEM_SIZE, 0.4*GRAPHICS_ITEM_SIZE);
+        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.4), CoordinateSystem::modelToScene(0.4));
     }
 }
 

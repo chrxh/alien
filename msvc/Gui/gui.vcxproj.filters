@@ -288,15 +288,6 @@
     <ClCompile Include="Release\moc_TokenTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\VisualEditor\SelectedItems.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SelectedItems.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SelectedItems.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\VisualEditor\AbstractItem.cpp">
       <Filter>Source Files\Visualeditor</Filter>
     </ClCompile>
@@ -498,9 +489,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\TokenTab.h">
       <Filter>Source Files\Texteditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\VisualEditor\SelectedItems.h">
-      <Filter>Source Files\Visualeditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ItemConfig.h">
       <Filter>Source Files\Visualeditor</Filter>

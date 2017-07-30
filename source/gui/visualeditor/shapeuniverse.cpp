@@ -137,13 +137,16 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		_itemManager->update(_visualDesc);
 	}
 	if (!_itemManager->isMarkerActive()) {
+		auto lastPos = e->lastScenePos();
+		auto pos = e->scenePos();
+		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
+		delta = CoordinateSystem::sceneToModel(delta);
 		if (leftButton) {
-			auto lastPos = e->lastScenePos();
-			auto pos = e->scenePos();
-			QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
-			delta = CoordinateSystem::sceneToModel(delta);
 			_visualDesc->moveSelection(delta);
 			_itemManager->update(_visualDesc);
+		}
+		if (rightButton) {
+
 		}
 	}
 }
