@@ -79,6 +79,31 @@ void VisualDescription::moveSelection(QVector2D const &delta)
 	}
 }
 
+void VisualDescription::moveExtendedSelection(QVector2D const & delta)
+{
+	list<uint64_t> extSelectedCellIds;
+	for (auto clusterIdByCellId : _clusterIdsByCellIds) {
+		uint64_t cellId = clusterIdByCellId.first;
+		uint64_t clusterId = clusterIdByCellId.second;
+		if (_selectedClusterIds.find(clusterId) != _selectedClusterIds.end()) {
+			extSelectedCellIds.push_back(cellId);
+		}
+	}
+
+	for (uint64_t cellId : extSelectedCellIds) {
+		int clusterIndex = _clusterIndicesByCellIds.at(cellId);
+		int cellIndex = _cellIndicesByCellIds.at(cellId);
+		CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
+		CellDescription &cellDesc = getCellDescRef(cellId);
+		cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+	}
+
+	for (uint64_t particleId : _selectedParticleIds) {
+		EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
+		particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+	}
+}
+
 void VisualDescription::updateInternals()
 {
 	_clusterIdsByCellIds.clear();
