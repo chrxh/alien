@@ -17,21 +17,21 @@
 #include "Model/Entities/CellCluster.h"
 #include "Model/Entities/EnergyParticle.h"
 
-#include "pixeluniverse.h"
+#include "PixelUniverseT.h"
 
-PixelUniverse::PixelUniverse(QObject* parent)
+PixelUniverseT::PixelUniverseT(QObject* parent)
 {
 	setBackgroundBrush(QBrush(BACKGROUND_COLOR));
     _pixmap = addPixmap(QPixmap());
     update();
 }
 
-PixelUniverse::~PixelUniverse()
+PixelUniverseT::~PixelUniverseT()
 {
 	delete _image;
 }
 
-void PixelUniverse::init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport)
+void PixelUniverseT::init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
@@ -45,22 +45,22 @@ void PixelUniverse::init(SimulationController* controller, SimulationAccess* acc
 
 }
 
-void PixelUniverse::activate()
+void PixelUniverseT::activate()
 {
-	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	connect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
+	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseT::requestData);
+	connect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverseT::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_simAccess->requireImage({ { 0, 0 }, size }, _image);
 }
 
-void PixelUniverse::deactivate()
+void PixelUniverseT::deactivate()
 {
-	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	disconnect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverse::retrieveAndDisplayData);
+	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseT::requestData);
+	disconnect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverseT::retrieveAndDisplayData);
 }
 
-void PixelUniverse::requestData()
+void PixelUniverseT::requestData()
 {
 /*
 	ResolveDescription resolveDesc;
@@ -71,7 +71,7 @@ void PixelUniverse::requestData()
 	_simAccess->requireImage(rect, _image);
 }
 
-void PixelUniverse::retrieveAndDisplayData()
+void PixelUniverseT::retrieveAndDisplayData()
 {
 /*
 	auto const& data = _simAccess->retrieveData();
@@ -147,7 +147,7 @@ namespace
 	}
 }
 
-void PixelUniverse::displayClusters(DataDescription const& data) const
+void PixelUniverseT::displayClusters(DataDescription const& data) const
 {
 	auto space = _controller->getContext()->getSpaceMetric();
 	for (auto const& clusterTracker : data.clusters) {
@@ -163,7 +163,7 @@ void PixelUniverse::displayClusters(DataDescription const& data) const
 	}
 }
 
-void PixelUniverse::displayParticles(DataDescription const & data) const
+void PixelUniverseT::displayParticles(DataDescription const & data) const
 {
 	auto space = _controller->getContext()->getSpaceMetric();
 	for (auto const& particleTracker : data.particles) {
