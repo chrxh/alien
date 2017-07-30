@@ -19,6 +19,16 @@ EnergyParticleDescription & VisualDescription::getParticleDescRef(uint64_t parti
 	return _data.particles[particleIndex].getValue();
 }
 
+bool VisualDescription::isCellPresent(uint64_t cellId)
+{
+	return _cellIds.find(cellId) != _cellIds.end();
+}
+
+bool VisualDescription::isParticlePresent(uint64_t particleId)
+{
+	return _particleIds.find(particleId) != _particleIds.end();
+}
+
 void VisualDescription::setData(DataDescription const & data)
 {
 	_data = data;
@@ -66,16 +76,20 @@ bool VisualDescription::isInExtendedSelection(uint64_t id) const
 void VisualDescription::moveSelection(QVector2D const &delta)
 {
 	for (uint64_t cellId : _selectedCellIds) {
-		int clusterIndex = _clusterIndicesByCellIds.at(cellId);
-		int cellIndex = _cellIndicesByCellIds.at(cellId);
-		CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
-		CellDescription &cellDesc = getCellDescRef(cellId);
-		cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+		if (isCellPresent(cellId)) {
+			int clusterIndex = _clusterIndicesByCellIds.at(cellId);
+			int cellIndex = _cellIndicesByCellIds.at(cellId);
+			CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
+			CellDescription &cellDesc = getCellDescRef(cellId);
+			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+		}
 	}
 
 	for (uint64_t particleId : _selectedParticleIds) {
-		EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
-		particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+		if (isParticlePresent(particleId)) {
+			EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
+			particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+		}
 	}
 }
 
@@ -91,21 +105,27 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 	}
 
 	for (uint64_t cellId : extSelectedCellIds) {
-		int clusterIndex = _clusterIndicesByCellIds.at(cellId);
-		int cellIndex = _cellIndicesByCellIds.at(cellId);
-		CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
-		CellDescription &cellDesc = getCellDescRef(cellId);
-		cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+		if (isCellPresent(cellId)) {
+			int clusterIndex = _clusterIndicesByCellIds.at(cellId);
+			int cellIndex = _cellIndicesByCellIds.at(cellId);
+			CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
+			CellDescription &cellDesc = getCellDescRef(cellId);
+			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+		}
 	}
 
 	for (uint64_t particleId : _selectedParticleIds) {
-		EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
-		particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+		if (isParticlePresent(particleId)) {
+			EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
+			particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+		}
 	}
 }
 
 void VisualDescription::updateInternals()
 {
+	_cellIds.clear();
+	_particleIds.clear();
 	_clusterIdsByCellIds.clear();
 	_clusterIndicesByCellIds.clear();
 	_cellIndicesByCellIds.clear();
@@ -120,6 +140,7 @@ void VisualDescription::updateInternals()
 			_clusterIdsByCellIds[cellD.id] = clusterD.id;
 			_clusterIndicesByCellIds[cellD.id] = clusterIndex;
 			_cellIndicesByCellIds[cellD.id] = cellIndex;
+			_cellIds.insert(cellD.id);
 			++cellIndex;
 		}
 		++clusterIndex;
@@ -129,6 +150,7 @@ void VisualDescription::updateInternals()
 	for (auto const &particleT : _data.particles) {
 		auto const &particleD = particleT.getValue();
 		_particleIndicesByParticleIds[particleD.id] = particleIndex;
+		_particleIds.insert(particleD.id);
 		++particleIndex;
 	}
 }

@@ -26,6 +26,8 @@ public:
 private:
 	void updateInternals();
 	EnergyParticleDescription & getParticleDescRef(uint64_t particleId);
+	bool isCellPresent(uint64_t cellId);
+	bool isParticlePresent(uint64_t particleId);
 
 	DataDescription _data;
 
@@ -33,6 +35,8 @@ private:
 	set<uint64_t> _selectedClusterIds;
 	set<uint64_t> _selectedParticleIds;
 
+	set<uint64_t> _cellIds;
+	set<uint64_t> _particleIds;
 	map<uint64_t, uint64_t> _clusterIdsByCellIds;
 	map<uint64_t, int> _clusterIndicesByCellIds;
 	map<uint64_t, int> _cellIndicesByCellIds;
