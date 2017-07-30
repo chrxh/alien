@@ -7,19 +7,19 @@
 #include "Model/AccessPorts/SimulationAccess.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/SpaceMetric.h"
-#include "pixeluniverse.h"
-#include "shapeuniverse.h"
+#include "PixelUniverseT.h"
+#include "ShapeUniverseT.h"
 #include "ViewportController.h"
 
-#include "visualeditor.h"
+#include "VisualEditorT.h"
 #include "ui_visualeditor.h"
 
 
-VisualEditor::VisualEditor(QWidget *parent)
+VisualEditorT::VisualEditorT(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::VisualEditor)
-	, _pixelUniverse(new PixelUniverse(this))
-	, _shapeUniverse(new ShapeUniverse(this))
+	, _pixelUniverse(new PixelUniverseT(this))
+	, _shapeUniverse(new ShapeUniverseT(this))
 	, _viewport(new ViewportController(this))
 {
     ui->setupUi(this);
@@ -28,12 +28,12 @@ VisualEditor::VisualEditor(QWidget *parent)
     ui->simulationView->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
 }
 
-VisualEditor::~VisualEditor()
+VisualEditorT::~VisualEditorT()
 {
     delete ui;
 }
 
-void VisualEditor::init(SimulationController* controller, SimulationAccess* access)
+void VisualEditorT::init(SimulationController* controller, SimulationAccess* access)
 {
 	_pixelUniverseInit = false;
 	_shapeUniverseInit = false;
@@ -45,7 +45,7 @@ void VisualEditor::init(SimulationController* controller, SimulationAccess* acce
 }
 
 
-void VisualEditor::setActiveScene (ActiveScene activeScene)
+void VisualEditorT::setActiveScene (ActiveScene activeScene)
 {
 	_activeScene = activeScene;
 	_viewport->setActiveScene(activeScene);
@@ -60,7 +60,7 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 	}
 }
 
-QVector2D VisualEditor::getViewCenterWithIncrement ()
+QVector2D VisualEditorT::getViewCenterWithIncrement ()
 {
 	QVector2D center = _viewport->getCenter();
 
@@ -71,22 +71,22 @@ QVector2D VisualEditor::getViewCenterWithIncrement ()
     return center + posIncrement;
 }
 
-QGraphicsView* VisualEditor::getGraphicsView ()
+QGraphicsView* VisualEditorT::getGraphicsView ()
 {
     return ui->simulationView;
 }
 
-qreal VisualEditor::getZoomFactor ()
+qreal VisualEditorT::getZoomFactor ()
 {
 	return _viewport->getZoomFactor();
 }
 
-void VisualEditor::zoomIn ()
+void VisualEditorT::zoomIn ()
 {
 	_viewport->zoomIn();
 }
 
-void VisualEditor::zoomOut ()
+void VisualEditorT::zoomOut ()
 {
 	_viewport->zoomOut();
 }
