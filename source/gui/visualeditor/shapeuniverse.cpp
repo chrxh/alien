@@ -146,7 +146,8 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 			_itemManager->update(_visualDesc);
 		}
 		if (rightButton) {
-
+			_visualDesc->moveExtendedSelection(delta);
+			_itemManager->update(_visualDesc);
 		}
 	}
 }
