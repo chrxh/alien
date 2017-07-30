@@ -11,12 +11,12 @@
 #include "Model/Entities/CellTO.h"
 #include "gui/Definitions.h"
 
-class ShapeUniverseT : public QGraphicsScene
+class ShapeUniverse : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    ShapeUniverseT (QObject *parent = nullptr);
-	virtual ~ShapeUniverseT();
+    ShapeUniverse (QObject *parent = nullptr);
+	virtual ~ShapeUniverse();
 
 	virtual void init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport);
 	virtual void activate();
