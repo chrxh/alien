@@ -4,7 +4,6 @@
 #include "Gui/Definitions.h"
 
 #include "ItemConfig.h"
-#include "SelectedItems.h"
 
 class ItemManager
 	: public QObject
