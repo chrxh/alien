@@ -12,7 +12,7 @@ public:
 	virtual SimulationController* buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const override;
 	virtual SimulationAccess* buildSimulationAccess(SimulationContextApi* context) const override;
-	virtual CellConnector* buildCellConnector() const override;
+	virtual CellConnector* buildCellConnector(SimulationContextApi* context) const override;
 
 	virtual SymbolTable* buildDefaultSymbolTable() const override;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const override;

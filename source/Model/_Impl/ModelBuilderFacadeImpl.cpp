@@ -28,6 +28,7 @@
 #include "Model/_Impl/SimulationControllerImpl.h"
 
 #include "ModelBuilderFacadeImpl.h"
+#include "CellConnectorImpl.h"
 
 SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 	, SymbolTable* symbolTable, SimulationParameters* parameters) const
@@ -85,9 +86,11 @@ SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationConte
 	return access;
 }
 
-CellConnector * ModelBuilderFacadeImpl::buildCellConnector() const
+CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContextApi* context) const
 {
-	return new CellConnectorImpl();
+	auto connector = new CellConnectorImpl();
+	connector->init(context->getSpaceMetric(), context->getSimulationParameters());
+	return connector;
 }
 
 namespace

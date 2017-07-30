@@ -12,7 +12,7 @@
 #include "Model/Context/SimulationContextApi.h"
 #include "Model/Context/EnergyParticleMap.h"
 #include "Model/Context/CellMap.h"
-#include "Model/SpaceMetricApi.h"
+#include "Model/Context/SpaceMetricApi.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/CellCluster.h"
 #include "Model/Entities/EnergyParticle.h"

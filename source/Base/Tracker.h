@@ -39,7 +39,7 @@ public:
 	}
 	void setToUnModified()
 	{
-		if (isInitialized) {
+		if (isInitialized()) {
 			init(getValue());
 		}
 	}
