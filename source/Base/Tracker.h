@@ -37,6 +37,12 @@ public:
 		}
 		return *this;
 	}
+	void setToUnModified()
+	{
+		if (isInitialized) {
+			init(getValue());
+		}
+	}
 };
 
 enum class TrackerElementState {
