@@ -150,6 +150,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 			_visualDesc->moveExtendedSelection(delta);
 			_itemManager->update(_visualDesc);
 		}
+		_visualDesc->setToUnmodified();
 	}
 }
 

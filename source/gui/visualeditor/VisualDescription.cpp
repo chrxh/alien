@@ -122,6 +122,22 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 	}
 }
 
+void VisualDescription::setToUnmodified()
+{
+	for (auto &clusterT : _data.clusters) {
+		auto &clusterD = clusterT.getValue();
+		for (auto &cellT : clusterD.cells) {
+			auto &cellD = cellT.getValue();
+			cellD.pos.setToUnModified();
+		}
+	}
+
+	for (auto &particleT : _data.particles) {
+		auto &particleD = particleT.getValue();
+		particleD.pos.setToUnModified();
+	}
+}
+
 void VisualDescription::updateInternals()
 {
 	_cellIds.clear();
