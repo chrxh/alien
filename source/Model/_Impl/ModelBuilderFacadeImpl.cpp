@@ -87,7 +87,7 @@ SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationConte
 
 CellConnector * ModelBuilderFacadeImpl::buildCellConnector() const
 {
-	return nullptr;
+	return new CellConnectorImpl();
 }
 
 namespace

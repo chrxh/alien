@@ -337,6 +337,18 @@
     <ClCompile Include="Release\moc_SimulationContextApi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Model\_Impl\CellConnectorImpl.cpp">
+      <Filter>Source Files\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_CellConnectorImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_CellConnectorImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_CellConnectorImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Settings.h">
@@ -492,7 +504,7 @@
     <ClInclude Include="..\..\source\Model\ModelServices.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Context\CellConnector.h">
+    <ClInclude Include="..\..\source\Model\CellConnector.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -571,6 +583,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\SimulationContextApi.h">
       <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\_Impl\CellConnectorImpl.h">
+      <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

@@ -23,6 +23,8 @@ public:
 	virtual void moveSelection(QVector2D const &delta);
 	virtual void moveExtendedSelection(QVector2D const &delta);
 
+	virtual void setToUnmodified();
+
 private:
 	void updateInternals();
 	EnergyParticleDescription & getParticleDescRef(uint64_t particleId);
