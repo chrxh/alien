@@ -8,15 +8,15 @@
 #include "gui/Definitions.h"
 
 namespace Ui {
-class VisualEditorT;
+	class VisualEditor;
 }
 
-class VisualEditorT : public QWidget
+class VisualEditor : public QWidget
 {
     Q_OBJECT
 public:
-    VisualEditorT(QWidget *parent = 0);
-    virtual ~VisualEditorT();
+    VisualEditor(QWidget *parent = 0);
+    virtual ~VisualEditor();
 
 	void init(SimulationController* controller, SimulationAccess* access);
     void reset();
@@ -34,8 +34,8 @@ private:
     Ui::VisualEditor *ui;
 
 	SimulationController* _controller = nullptr;
-    PixelUniverseT* _pixelUniverse = nullptr;
-    ShapeUniverseT* _shapeUniverse = nullptr;
+    PixelUniverse* _pixelUniverse = nullptr;
+    ShapeUniverse* _shapeUniverse = nullptr;
 	ViewportController* _viewport = nullptr;
 
 	ActiveScene _activeScene = ActiveScene::PixelScene;

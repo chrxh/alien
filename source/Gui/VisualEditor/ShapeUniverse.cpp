@@ -11,24 +11,24 @@
 #include "Model/Context/SimulationContextApi.h"
 #include "Model/SpaceMetricApi.h"
 
-#include "ShapeUniverseT.h"
+#include "ShapeUniverse.h"
 #include "CellItem.h"
 #include "ParticleItem.h"
 #include "ItemManager.h"
 #include "VisualDescription.h"
 #include "CoordinateSystem.h"
 
-ShapeUniverseT::ShapeUniverseT(QObject *parent)
+ShapeUniverse::ShapeUniverse(QObject *parent)
 	: QGraphicsScene(parent)
 {
     setBackgroundBrush(QBrush(UNIVERSE_COLOR));
 }
 
-ShapeUniverseT::~ShapeUniverseT()
+ShapeUniverse::~ShapeUniverse()
 {
 }
 
-void ShapeUniverseT::init(SimulationController * controller, SimulationAccess* access, ViewportInterface * viewport)
+void ShapeUniverse::init(SimulationController * controller, SimulationAccess* access, ViewportInterface * viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
@@ -43,26 +43,26 @@ void ShapeUniverseT::init(SimulationController * controller, SimulationAccess* a
 	items->init(this, viewport, _controller->getContext()->getSimulationParameters());
 }
 
-void ShapeUniverseT::activate()
+void ShapeUniverse::activate()
 {
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_itemManager->activate(size);
 
-	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverseT::requestData);
-	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverseT::retrieveAndDisplayData, Qt::QueuedConnection);
+	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
+	connect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
 	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
 }
 
-void ShapeUniverseT::deactivate()
+void ShapeUniverse::deactivate()
 {
-	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverseT::requestData);
-	disconnect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverseT::retrieveAndDisplayData);
+	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
+	disconnect(_simAccess, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
 }
 
-void ShapeUniverseT::requestData()
+void ShapeUniverse::requestData()
 {
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
@@ -70,7 +70,7 @@ void ShapeUniverseT::requestData()
 	_simAccess->requireData(rect, resolveDesc);
 }
 
-void ShapeUniverseT::retrieveAndDisplayData()
+void ShapeUniverse::retrieveAndDisplayData()
 {
 	_visualDesc->setData(_simAccess->retrieveData());
 	_itemManager->update(_visualDesc);
@@ -101,7 +101,7 @@ namespace
 	}
 }
 
-void ShapeUniverseT::mousePressEvent(QGraphicsSceneMouseEvent* e)
+void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
 	list<uint64_t> cellIds;
@@ -121,7 +121,7 @@ void ShapeUniverseT::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	}
 }
 
-void ShapeUniverseT::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
 	bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
@@ -152,7 +152,7 @@ void ShapeUniverseT::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 	}
 }
 
-void ShapeUniverseT::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
 	if (_itemManager->isMarkerActive()) {
 		_itemManager->deleteMarker();
