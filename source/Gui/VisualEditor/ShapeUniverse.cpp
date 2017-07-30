@@ -53,7 +53,8 @@ void ShapeUniverse::activate()
 
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
-	_simAccess->requireData({ { 0, 0 }, size }, resolveDesc);
+	IntRect rect = _viewport->getRect();
+	_simAccess->requireData(rect, resolveDesc);
 }
 
 void ShapeUniverse::deactivate()
