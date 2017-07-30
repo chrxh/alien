@@ -30,6 +30,7 @@ void ItemManager::activate(IntVector2D size)
 	_scene->setSceneRect(0, 0, CoordinateSystem::modelToScene(size.x), CoordinateSystem::modelToScene(size.y));
 	_cellsByIds.clear();
 	_particlesByIds.clear();
+	_connectionsByIds.clear();
 }
 
 void ItemManager::updateCells(VisualDescription* visualDesc)
