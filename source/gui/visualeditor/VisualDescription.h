@@ -26,7 +26,7 @@ public:
 	virtual void setToUnmodified();
 
 private:
-	void updateInternals();
+	void updateInternals(DataDescription const &data);
 	EnergyParticleDescription & getParticleDescRef(uint64_t particleId);
 	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);

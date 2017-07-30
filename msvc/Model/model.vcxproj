@@ -249,24 +249,24 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODEL_LIB -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -D_WINDLL "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Model"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\Model\CellConnector.h" />
-    <ClInclude Include="..\..\source\Model\DllExport.h" />
-    <ClInclude Include="..\..\source\Model\ModelBuilderFacade.h" />
-    <ClInclude Include="..\..\source\Model\Entities\Timestamp.h" />
-    <ClInclude Include="..\..\source\Model\ModelServices.h" />
-    <CustomBuild Include="..\..\source\Model\SpaceMetricApi.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    <CustomBuild Include="..\..\source\Model\Context\SpaceMetricApi.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing SpaceMetricApi.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Model"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing SpaceMetricApi.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODEL_LIB -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -D_WINDLL "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Model"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing SpaceMetricApi.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODEL_LIB -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -D_WINDLL "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Model"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\source\Model\DllExport.h" />
+    <ClInclude Include="..\..\source\Model\ModelBuilderFacade.h" />
+    <ClInclude Include="..\..\source\Model\Entities\Timestamp.h" />
+    <ClInclude Include="..\..\source\Model\ModelServices.h" />
     <CustomBuild Include="..\..\source\Model\_Impl\CellConnectorImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing CellConnectorImpl.h...</Message>

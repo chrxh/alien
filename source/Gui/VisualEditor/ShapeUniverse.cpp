@@ -3,13 +3,15 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
+#include "Base/Definitions.h"
 #include "Gui/Settings.h"
 #include "Gui/visualeditor/ViewportInterface.h"
 #include "Model/SimulationController.h"
 #include "Model/ModelBuilderFacade.h"
+#include "Model/CellConnector.h"
 #include "Model/AccessPorts/SimulationAccess.h"
 #include "Model/Context/SimulationContextApi.h"
-#include "Model/SpaceMetricApi.h"
+#include "Model/Context/SpaceMetricApi.h"
 
 #include "ShapeUniverse.h"
 #include "CellItem.h"
@@ -37,6 +39,8 @@ void ShapeUniverse::init(SimulationController * controller, SimulationAccess* ac
 
 	auto items = new ItemManager();
 	auto descManager = new VisualDescription();
+	auto connector = facade->buildCellConnector(controller->getContext());
+	SET_CHILD(_connector, connector);
 	SET_CHILD(_itemManager, items);
 	SET_CHILD(_visualDesc, descManager);
 
@@ -144,6 +148,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		delta = CoordinateSystem::sceneToModel(delta);
 		if (leftButton) {
 			_visualDesc->moveSelection(delta);
+			_connector->reconnect(_visualDesc->getDataRef());
 			_itemManager->update(_visualDesc);
 		}
 		if (rightButton) {

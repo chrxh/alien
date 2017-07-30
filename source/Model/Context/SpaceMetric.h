@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/SpaceMetricApi.h"
+#include "Model/Context/SpaceMetricApi.h"
 
 class SpaceMetric
 	: public SpaceMetricApi
