@@ -56,9 +56,9 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections)
 		.setTokenAccessNumber(_tokenAccessNumber).setEnergy(_energy).setMetadata(_metadata);
 	if (resolveDescription.resolveCellLinks) {
-		vector<uint64_t> connectingCells(_numConnections);
+		list<uint64_t> connectingCells;
 		for (int i = 0; i < _numConnections; ++i) {
-			connectingCells[i] = _connectingCells[i]->getId();
+			connectingCells.push_back(_connectingCells[i]->getId());
 		}
 		result.setConnectingCells(connectingCells);
 	}

@@ -111,7 +111,7 @@ uint64_t CellItem::getId() const
 	return _desc.id;
 }
 
-vector<uint64_t> CellItem::getConnectedIds() const
+list<uint64_t> CellItem::getConnectedIds() const
 {
 	return _desc.connectingCells.getValueOrDefault();
 }

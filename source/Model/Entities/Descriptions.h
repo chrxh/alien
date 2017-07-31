@@ -19,7 +19,7 @@ struct CellDescription
 	Tracker<QVector2D> pos;
 	Tracker<double> energy;
 	Tracker<int> maxConnections;
-	Tracker<vector<uint64_t>> connectingCells;
+	Tracker<list<uint64_t>> connectingCells;
 	Tracker<bool> tokenBlocked;
 	Tracker<int> tokenBranchNumber;
 	Tracker<CellMetadata> metadata;
@@ -30,7 +30,7 @@ struct CellDescription
 	CellDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
 	CellDescription& setEnergy(double value) { energy.init(value); return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
-	CellDescription& setConnectingCells(vector<uint64_t> const& value) { connectingCells.init(value); return *this; }
+	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells.init(value); return *this; }
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
 	CellDescription& setTokenAccessNumber(int value) { tokenBranchNumber.init(value); return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }

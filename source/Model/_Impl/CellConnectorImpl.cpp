@@ -14,6 +14,7 @@ void CellConnectorImpl::reconnect(DataDescription &data)
 	updateInternals(data);
 	updateConnectingCells();
 
+	data = _data;
 /*
 	DataDescription dataNew;
 	reclustering(dataNew);
@@ -35,11 +36,15 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 			auto const &cellD = cellT.getValue();
 			_clusterIndicesByCellIds[cellD.id] = clusterIndex;
 			_cellIndicesByCellIds[cellD.id] = cellIndex;
+			auto const &pos = cellD.pos.getValue();
+			auto intPos = _metric->correctPositionAndConvertToIntVector(pos);
+			_cellMap[intPos.x][intPos.x].push_back(cellD.id);
 			++cellIndex;
 		}
 		++clusterIndex;
 	}
 }
+
 
 void CellConnectorImpl::updateConnectingCells()
 {
@@ -49,7 +54,8 @@ void CellConnectorImpl::updateConnectingCells()
 		for (auto &cellT : clusterD.cells) {
 			auto &cellD = cellT.getValue();
 			if (cellD.pos.isModified()) {
-				removeConnectionsIfNecessary(cellD);
+				removeConnections(cellD);
+//				lookingForNewConnections(cellD)
 			}
 		}
 	}
@@ -57,27 +63,6 @@ void CellConnectorImpl::updateConnectingCells()
 
 void CellConnectorImpl::reclustering(DataDescription &result)
 {
-}
-
-void CellConnectorImpl::removeConnectionsIfNecessary(CellDescription &cellDesc)
-{
-	auto cellPos = cellDesc.pos.getValue();
-	auto const& connectingCellIds = cellDesc.connectingCells.getValueOrDefault();
-	if (connectingCellIds.empty()) {
-		return;
-	}
-	vector<uint64_t> connectingCellIdsNew;
-	for (uint64_t connectingCellId : connectingCellIds) {
-		auto const &connectingCell = getCellDescRef(connectingCellId);
-		auto connectingCellPos = connectingCell.pos.getValue();
-		auto displacement = connectingCellPos - cellPos;
-		_metric->correctDisplacement(displacement);
-		if (displacement.length() <= _parameters->cellMaxDistance) {
-			connectingCellIdsNew.push_back(connectingCellId);
-		}
-		//TODO: remove connection also in connectingCell
-	}
-	cellDesc.connectingCells.setValue(connectingCellIdsNew);
 }
 
 CellDescription & CellConnectorImpl::getCellDescRef(uint64_t cellId)
@@ -88,3 +73,15 @@ CellDescription & CellConnectorImpl::getCellDescRef(uint64_t cellId)
 	return clusterDesc.cells[cellIndex].getValue();
 }
 
+void CellConnectorImpl::removeConnections(CellDescription &cellDesc)
+{
+	if (cellDesc.connectingCells.isInitialized()) {
+		auto &connectingCellIds = cellDesc.connectingCells.getValue();
+		for (uint64_t connectingCellId : connectingCellIds) {
+			auto &connectingCell = getCellDescRef(connectingCellId);
+			auto &connectingCellConnections = connectingCell.connectingCells.getValue();
+			connectingCellConnections.remove(cellDesc.id);
+		}
+		cellDesc.connectingCells.reset();
+	}
+}
