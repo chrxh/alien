@@ -27,7 +27,7 @@ public:
 	virtual int type() const;
 
 	virtual uint64_t getId() const;
-	virtual vector<uint64_t> getConnectedIds() const;
+	virtual list<uint64_t> getConnectedIds() const;
 	virtual FocusState getFocusState ();
 	virtual void setFocusState (FocusState focusState);
 	virtual void setDisplayString (QString value);

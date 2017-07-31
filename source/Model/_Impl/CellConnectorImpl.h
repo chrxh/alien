@@ -19,8 +19,8 @@ private:
 	void updateConnectingCells();
 	void reclustering(DataDescription &result);
 
-	void removeConnectionsIfNecessary(CellDescription &cellDesc);
 	CellDescription& getCellDescRef(uint64_t cellId);
+	void removeConnections(CellDescription &cellDesc);
 
 	SpaceMetricApi *_metric = nullptr;
 	SimulationParameters *_parameters = nullptr;
@@ -29,4 +29,5 @@ private:
 
 	map<uint64_t, int> _clusterIndicesByCellIds;
 	map<uint64_t, int> _cellIndicesByCellIds;
+	map<int, map<int, list<uint64_t>>> _cellMap;
 };

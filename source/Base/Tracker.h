@@ -26,6 +26,7 @@ public:
 	bool isModified() const { return _initialValue != _value; }
 	bool isInitialized() const { return _value.is_initialized(); }
 	T const& getValue() const { return _value.get(); }
+	T & getValue() { return _value.get(); }
 	T const& getValueOr(T const& d) const { return _value.get_value_or(d); }
 	T const& getValueOrDefault() const { return _value.get_value_or(T()); }
 	T const& getInitialValue() const { return _initialValue.get(); }
@@ -42,6 +43,11 @@ public:
 		if (isInitialized()) {
 			init(getValue());
 		}
+	}
+	void reset()
+	{
+		_value.reset();
+		_initialValue.reset();
 	}
 };
 
