@@ -25,6 +25,7 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 {
 	_clusterIndicesByCellIds.clear();
 	_cellIndicesByCellIds.clear();
+	_cellMap.clear();
 
 	int clusterIndex = 0;
 	for (auto const &clusterT : data.clusters) {
