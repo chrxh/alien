@@ -54,6 +54,15 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data)
 			auto &cellD = cellT.getValue();
 			if (cellD.pos.isModified()) {
 				removeConnections(data, cellD);
+			}
+		}
+	}
+	for (auto &clusterT : data.clusters) {
+		auto &clusterD = clusterT.getValue();
+		int cellIndex = 0;
+		for (auto &cellT : clusterD.cells) {
+			auto &cellD = cellT.getValue();
+			if (cellD.pos.isModified()) {
 				establishNewConnectionsWithNeighborCells(data, cellD);
 			}
 		}
@@ -103,17 +112,24 @@ void CellConnectorImpl::establishNewConnectionsWithNeighborCells(DataDescription
 
 void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescription &cell2)
 {
+	if (cell1.id == cell2.id) {
+		return;
+	}
 	if (getDistance(cell1, cell2) > _parameters->cellMaxDistance) {
 		return;
 	}
-	if (!cell1.connectingCells.isInitialized() || !cell2.connectingCells.isInitialized()) {
+	if (cell1.connectingCells.getValueOrDefault().size() >= cell1.maxConnections.getValueOrDefault()
+		|| cell2.connectingCells.getValueOrDefault().size() >= cell2.maxConnections.getValueOrDefault()) {
 		return;
+	}
+	if (!cell1.connectingCells.isInitialized()) {
+		cell1.connectingCells.setValue(list<uint64_t>());
+	}
+	if (!cell2.connectingCells.isInitialized()) {
+		cell2.connectingCells.setValue(list<uint64_t>());
 	}
 	auto &connections1 = cell1.connectingCells.getValue();
 	auto &connections2 = cell2.connectingCells.getValue();
-	if (connections1.size() >= cell1.maxConnections.getValue() || connections2.size() >= cell2.maxConnections.getValue()) {
-		return;
-	}
 	connections1.push_back(cell2.id);
 	connections2.push_back(cell1.id);
 }
