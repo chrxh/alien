@@ -17,7 +17,7 @@ public:
 private:
 	void updateInternals(DataDescription const &data);
 	void updateConnectingCells(DataDescription &data);
-	void reclustering(DataDescription &result);
+	void reclustering(DataDescription &data);
 
 	CellDescription& getCellDescRef(DataDescription &data, uint64_t cellId);
 	void removeConnections(DataDescription &data, CellDescription &cellDesc);
