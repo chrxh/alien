@@ -27,10 +27,14 @@ private:
 
 	list<uint64_t> getCellIdsAtPos(IntVector2D const &pos);
 
+	unordered_set<int> reclusteringSingleClusterAndReturnModifiedClusterIndices(DataDescription &data, int clusterIndex);
+	void lookUpCell(DataDescription &data, uint64_t cellId, CellClusterDescription &newCluster
+		, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
+
 	SpaceMetricApi *_metric = nullptr;
 	SimulationParameters *_parameters = nullptr;
 
-	map<uint64_t, int> _clusterIndicesByCellIds;
-	map<uint64_t, int> _cellIndicesByCellIds;
-	map<int, map<int, list<uint64_t>>> _cellMap;
+	unordered_map<uint64_t, int> _clusterIndicesByCellIds;
+	unordered_map<uint64_t, int> _cellIndicesByCellIds;
+	unordered_map<int, unordered_map<int, list<uint64_t>>> _cellMap;
 };
