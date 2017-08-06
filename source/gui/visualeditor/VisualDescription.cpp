@@ -128,12 +128,39 @@ void VisualDescription::setToUnmodified()
 		for (auto &cellT : clusterD.cells) {
 			auto &cellD = cellT.getValue();
 			cellD.pos.setToUnModified();
+			cellD.connectingCells.setToUnModified();
 		}
 	}
 
 	for (auto &particleT : _data.particles) {
 		auto &particleD = particleT.getValue();
 		particleD.pos.setToUnModified();
+	}
+}
+
+void VisualDescription::updateAfterCellReconnections()
+{
+	_clusterIdsByCellIds.clear();
+	_clusterIndicesByCellIds.clear();
+	_cellIndicesByCellIds.clear();
+
+	int clusterIndex = 0;
+	for (auto const &clusterT : _data.clusters) {
+		auto const &clusterD = clusterT.getValue();
+		int cellIndex = 0;
+		for (auto const &cellT : clusterD.cells) {
+			auto const &cellD = cellT.getValue();
+			_clusterIdsByCellIds[cellD.id] = clusterD.id;
+			_clusterIndicesByCellIds[cellD.id] = clusterIndex;
+			_cellIndicesByCellIds[cellD.id] = cellIndex;
+			++cellIndex;
+		}
+		++clusterIndex;
+	}
+
+	_selectedClusterIds.clear();
+	for (uint64_t selectedCellId : _selectedCellIds) {
+		_selectedClusterIds.insert(_clusterIdsByCellIds.at(selectedCellId));
 	}
 }
 

@@ -13,6 +13,7 @@ void CellConnectorImpl::reconnect(DataDescription &data)
 {
 	updateInternals(data);
 	updateConnectingCells(data);
+	reclustering(data);
 
 /*
 	DataDescription dataNew;
@@ -69,8 +70,21 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data)
 	}
 }
 
-void CellConnectorImpl::reclustering(DataDescription &result)
+void CellConnectorImpl::reclustering(DataDescription &data)
 {
+	set<int> affectedClusterIndices;
+	int clusterIndex = 0;
+	for (auto &clusterT : data.clusters) {
+		auto &clusterD = clusterT.getValue();
+		for (auto &cellT : clusterD.cells) {
+			auto &cellD = cellT.getValue();
+			if (cellD.connectingCells.isModified()) {
+				affectedClusterIndices.insert(clusterIndex);
+			}
+		}
+		++clusterIndex;
+	}
+	int dummy = 0;
 }
 
 CellDescription & CellConnectorImpl::getCellDescRef(DataDescription &data, uint64_t cellId)
