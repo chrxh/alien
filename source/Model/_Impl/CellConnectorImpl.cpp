@@ -72,7 +72,7 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data)
 
 void CellConnectorImpl::reclustering(DataDescription &data)
 {
-	set<int> affectedClusterIndices;
+	unordered_set<int> affectedClusterIndices;
 	int clusterIndex = 0;
 	for (auto &clusterT : data.clusters) {
 		auto &clusterD = clusterT.getValue();
@@ -84,7 +84,53 @@ void CellConnectorImpl::reclustering(DataDescription &data)
 		}
 		++clusterIndex;
 	}
-	int dummy = 0;
+	
+	while (!affectedClusterIndices.empty()) {
+		int affectedClusterIndex = *affectedClusterIndices.begin();
+		unordered_set<int> modifiedClusterIndices = reclusteringSingleClusterAndReturnModifiedClusterIndices(data, affectedClusterIndex);
+		affectedClusterIndices.erase(modifiedClusterIndices.begin(), modifiedClusterIndices.end());
+	}
+}
+
+unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModifiedClusterIndices(DataDescription &data, int clusterIndex)
+{
+	auto &clusterT = data.clusters.at(clusterIndex);
+	auto &clusterD = clusterT.getValue();
+
+	unordered_set<uint64_t> lookedUpCellIds;
+	unordered_set<uint64_t> remainingCellIdsOfCluster;
+	for (auto &cellT : clusterD.cells) {
+		auto &cellD = cellT.getValue();
+		remainingCellIdsOfCluster.insert(cellD.id);
+	}
+
+	while (!remainingCellIdsOfCluster.empty()) {
+		uint64_t remainingCellIdOfCluster = *remainingCellIdsOfCluster.begin();
+		CellClusterDescription newCluster;
+		lookUpCell(data, remainingCellIdOfCluster, newCluster, lookedUpCellIds, remainingCellIdsOfCluster);
+	}
+
+	return{ clusterIndex };
+}
+
+void CellConnectorImpl::lookUpCell(DataDescription &data, uint64_t cellId, CellClusterDescription &newCluster
+	, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds)
+{
+	if (lookedUpCellIds.find(cellId) != lookedUpCellIds.end()) {
+		return;
+	}
+	
+	lookedUpCellIds.insert(cellId);
+	remainingCellIds.erase(cellId);
+
+	auto &cell = getCellDescRef(data, cellId);
+	newCluster.addCell(cell);
+
+	if (cell.connectingCells.isInitialized()) {
+		for (uint64_t connectingCellId : cell.connectingCells.getValue()) {
+			lookUpCell(data, connectingCellId, newCluster, lookedUpCellIds, remainingCellIds);
+		}
+	}
 }
 
 CellDescription & CellConnectorImpl::getCellDescRef(DataDescription &data, uint64_t cellId)
@@ -161,7 +207,7 @@ list<uint64_t> CellConnectorImpl::getCellIdsAtPos(IntVector2D const &pos)
 {
 	auto xIter = _cellMap.find(pos.x);
 	if (xIter != _cellMap.end()) {
-		map<int, list<uint64_t>> &mapRemainder = xIter->second;
+		unordered_map<int, list<uint64_t>> &mapRemainder = xIter->second;
 		auto yIter = mapRemainder.find(pos.y);
 		if (yIter != mapRemainder.end()) {
 			return yIter->second;
