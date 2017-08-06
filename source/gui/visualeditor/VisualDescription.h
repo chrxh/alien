@@ -25,6 +25,8 @@ public:
 
 	virtual void setToUnmodified();
 
+	virtual void updateAfterCellReconnections();
+
 private:
 	void updateInternals(DataDescription const &data);
 	EnergyParticleDescription & getParticleDescRef(uint64_t particleId);

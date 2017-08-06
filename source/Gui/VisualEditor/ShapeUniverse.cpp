@@ -149,6 +149,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		if (leftButton) {
 			_visualDesc->moveSelection(delta);
 			_connector->reconnect(_visualDesc->getDataRef());
+			_visualDesc->updateAfterCellReconnections();
 			_itemManager->update(_visualDesc);
 		}
 		if (rightButton) {
