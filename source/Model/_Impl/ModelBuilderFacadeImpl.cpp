@@ -30,6 +30,11 @@
 #include "ModelBuilderFacadeImpl.h"
 #include "CellConnectorImpl.h"
 
+namespace
+{
+	const int ARRAY_SIZE_FOR_RANDOM_NUMBERS = 234327;
+}
+
 SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 	, SymbolTable* symbolTable, SimulationParameters* parameters) const
 {
@@ -44,6 +49,7 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	metric->init(universeSize);
 	threads->init(maxRunngingThreads);
 	grid->init(gridSize, metric);
+	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, 0);
 	context->init(numberGen, metric, grid, threads, symbolTable, parameters);
 
 	for (int x = 0; x < gridSize.x; ++x) {
@@ -94,11 +100,6 @@ CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContextApi*
 	return connector;
 }
 
-namespace
-{
-	const int ARRAY_SIZE_FOR_RANDOM_NUMBERS = 234327;
-}
-
 Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
@@ -115,7 +116,7 @@ Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simulati
 	auto energyMap = contextFactory->buildEnergyParticleMap();
 	auto symbolTable = context->getSymbolTable()->clone();
 	auto parameters = context->getSimulationParameters()->clone();
-	uint16_t threadId = gridPos.x + gridPos.y * grid->getSize().x;
+	uint16_t threadId = gridPos.x + gridPos.y * grid->getSize().x + 1;
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, threadId);
 	compartment->init(grid->calcCompartmentRect(gridPos));
 	cellMap->init(metric, compartment);
