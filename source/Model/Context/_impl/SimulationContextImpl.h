@@ -19,6 +19,7 @@ public:
 	virtual UnitThreadController* getUnitThreadController() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
+	virtual NumberGenerator* getNumberGenerator() const override;
 
 private:
 	NumberGenerator* _numberGen = nullptr;

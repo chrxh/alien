@@ -1,12 +1,16 @@
 #include "CellConnectorImpl.h"
 
+#include "Base/NumberGenerator.h"
+
 #include "Model/Context/SpaceMetricApi.h"
 #include "Model/Context/SimulationParameters.h"
 
-void CellConnectorImpl::init(SpaceMetricApi * metric, SimulationParameters * parameters)
+
+void CellConnectorImpl::init(SpaceMetricApi *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
 {
 	_metric = metric;
 	_parameters = parameters;
+	_numberGen = numberGen;
 }
 
 void CellConnectorImpl::reconnect(DataDescription &data)
@@ -107,16 +111,24 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 	}
 
 	vector<CellClusterDescription> newClusters;
+	bool firstRun = true;
 	while (!remainingCellIdsOfCluster.empty()) {
 		uint64_t remainingCellIdOfCluster = *remainingCellIdsOfCluster.begin();
 		CellClusterDescription newCluster;
 		lookUpCell(data, remainingCellIdOfCluster, newCluster, lookedUpCellIds, remainingCellIdsOfCluster);
 		if (!newCluster.cells.empty()) {
 			newClusters.push_back(newCluster);
+			if (!firstRun) {
+				newCluster.id = clusterD.id;
+				firstRun = false;
+			}
+			else {
+				newCluster.id = _numberGen->getTag();
+			}
 		}
 	}
 
-	//TODO: restliche Clusterdaten füllen (id, pos, ...)
+	//TODO: restliche Clusterdaten füllen (pos, ...)
 	
 	unordered_set<int> discardClusterIndices;
 	for (uint64_t lookedUpCellId : lookedUpCellIds) {
@@ -130,7 +142,7 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 			data.clusters[discardClusterIndex] = newCluster;
 		}
 		else {
-			data.clusters.push_back(TrackerElement<CellClusterDescription>(newCluster));
+			data.addCellCluster(newCluster);
 		}
 	}
 	for (auto &discardClusterIndex : discardClusterIndices) {

@@ -16,6 +16,7 @@ public:
 
 	virtual UnitGrid* getUnitGrid() const = 0;
 	virtual UnitThreadController* getUnitThreadController() const = 0;
+	virtual NumberGenerator* getNumberGenerator() const = 0;
 };
 
 #endif // SIMULATIONCONTEXT_H

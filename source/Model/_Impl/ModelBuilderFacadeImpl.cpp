@@ -78,18 +78,19 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	return controller;
 }
 
-SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * context) const
+SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * contextApi) const
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
 	auto access = factory->buildSimulationAccess();
-	access->init(context);
+	access->init(contextApi);
 	return access;
 }
 
-CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContextApi* context) const
+CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContextApi* contextApi) const
 {
 	auto connector = new CellConnectorImpl();
-	connector->init(context->getSpaceMetric(), context->getSimulationParameters());
+	auto context = static_cast<SimulationContext*>(contextApi);
+	connector->init(context->getSpaceMetric(), context->getSimulationParameters(), context->getNumberGenerator());
 	return connector;
 }
 
