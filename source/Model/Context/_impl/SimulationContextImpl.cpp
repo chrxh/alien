@@ -52,3 +52,8 @@ SimulationParameters * SimulationContextImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
 }
+
+NumberGenerator * SimulationContextImpl::getNumberGenerator() const
+{
+	return _numberGen;
+}
