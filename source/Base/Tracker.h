@@ -2,6 +2,9 @@
 #define TRACKER_H
 
 #include <boost/optional.hpp>
+#include <vector>
+
+using std::vector;
 
 template<typename T>
 class Tracker
@@ -52,14 +55,14 @@ public:
 };
 
 enum class TrackerElementState {
-	Deleted, Retained, Added
+	Deleted, Modified, Unmodified, Added
 };
 
 template<typename T>
 class TrackerElement
 {
 private:
-	TrackerElementState _state = TrackerElementState::Retained;
+	TrackerElementState _state = TrackerElementState::Unmodified;
 	T _value;
 
 public:
@@ -71,14 +74,28 @@ public:
 	T const * operator->() const { return &_value; }
 
 	bool isDeleted() const { return _state == TrackerElementState::Deleted; }
+	bool isModified() const { return _state == TrackerElementState::Modified; }
+	bool isUnmodified() const { return _state == TrackerElementState::Unmodified; }
 	bool isAdded() const { return _state == TrackerElementState::Added; }
 	TrackerElement& setAsDeleted() { _state = TrackerElementState::Deleted; return *this; }
 	TrackerElement& setAsAdded() { _state = TrackerElementState::Added; return *this; }
+	TrackerElement& setAsModified() { _state = TrackerElementState::Modified; return *this; }
+	TrackerElement& setAsUnmodified() { _state = TrackerElementState::Unmodified; return *this; }
 	T const& getValue() const { return _value; }
 	T & getValue() { return _value; }
-	TrackerElement& setValue(T const& v) { _value = v; return *this; }
+	TrackerElement& setValue(T const& v) { _value = v; _state = TrackerElementState::Modified; return *this; }
 };
 
-
+template<typename T>
+vector<T> getUndeletedElements(vector<TrackerElement<T>> const& elements)
+{
+	vector<T> result;
+	for (auto const& element : elements) {
+		if (!element.isDeleted()) {
+			result.emplace_back(element.getValue());
+		}
+	}
+	return result;
+}
 
 #endif // TRACKER_H

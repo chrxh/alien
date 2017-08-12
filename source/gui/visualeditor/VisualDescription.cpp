@@ -123,12 +123,10 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 
 void VisualDescription::setToUnmodified()
 {
-	for (auto &clusterT : _data.clusters) {
-		auto &clusterD = clusterT.getValue();
-		for (auto &cellT : clusterD.cells) {
-			auto &cellD = cellT.getValue();
-			cellD.pos.setToUnModified();
-			cellD.connectingCells.setToUnModified();
+	for (auto &cluster : getUndeletedElements(_data.clusters)) {
+		for (auto &cell : getUndeletedElements(cluster.cells)) {
+			cell.pos.setToUnModified();
+			cell.connectingCells.setToUnModified();
 		}
 	}
 
@@ -145,14 +143,12 @@ void VisualDescription::updateAfterCellReconnections()
 	_cellIndicesByCellIds.clear();
 
 	int clusterIndex = 0;
-	for (auto const &clusterT : _data.clusters) {
-		auto const &clusterD = clusterT.getValue();
+	for (auto const &cluster : getUndeletedElements(_data.clusters)) {
 		int cellIndex = 0;
-		for (auto const &cellT : clusterD.cells) {
-			auto const &cellD = cellT.getValue();
-			_clusterIdsByCellIds[cellD.id] = clusterD.id;
-			_clusterIndicesByCellIds[cellD.id] = clusterIndex;
-			_cellIndicesByCellIds[cellD.id] = cellIndex;
+		for (auto const &cell : getUndeletedElements(cluster.cells)) {
+			_clusterIdsByCellIds[cell.id] = cluster.id;
+			_clusterIndicesByCellIds[cell.id] = clusterIndex;
+			_cellIndicesByCellIds[cell.id] = cellIndex;
 			++cellIndex;
 		}
 		++clusterIndex;
@@ -175,25 +171,22 @@ void VisualDescription::updateInternals(DataDescription const &data)
 	_particleIndicesByParticleIds.clear();
 
 	int clusterIndex = 0;
-	for (auto const &clusterT : _data.clusters) {
-		auto const &clusterD = clusterT.getValue();
+	for (auto const &cluster : getUndeletedElements(_data.clusters)) {
 		int cellIndex = 0;
-		for (auto const &cellT : clusterD.cells) {
-			auto const &cellD = cellT.getValue();
-			_clusterIdsByCellIds[cellD.id] = clusterD.id;
-			_clusterIndicesByCellIds[cellD.id] = clusterIndex;
-			_cellIndicesByCellIds[cellD.id] = cellIndex;
-			_cellIds.insert(cellD.id);
+		for (auto const &cell : getUndeletedElements(cluster.cells)) {
+			_clusterIdsByCellIds[cell.id] = cluster.id;
+			_clusterIndicesByCellIds[cell.id] = clusterIndex;
+			_cellIndicesByCellIds[cell.id] = cellIndex;
+			_cellIds.insert(cell.id);
 			++cellIndex;
 		}
 		++clusterIndex;
 	}
 
 	int particleIndex = 0;
-	for (auto const &particleT : _data.particles) {
-		auto const &particleD = particleT.getValue();
-		_particleIndicesByParticleIds[particleD.id] = particleIndex;
-		_particleIds.insert(particleD.id);
+	for (auto const &particle : getUndeletedElements(_data.particles)) {
+		_particleIndicesByParticleIds[particle.id] = particleIndex;
+		_particleIds.insert(particle.id);
 		++particleIndex;
 	}
 }

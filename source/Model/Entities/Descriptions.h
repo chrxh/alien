@@ -58,14 +58,9 @@ struct CellClusterDescription
 		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
-	CellDescription& test(CellDescription & value)
-	{
-		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Retained));
-		return value;
-	}
 	CellClusterDescription& retainCell(CellDescription const& value)
 	{
-		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Retained));
+		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Unmodified));
 		return *this;
 	}
 };
