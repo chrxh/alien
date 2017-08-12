@@ -117,19 +117,20 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 		CellClusterDescription newCluster;
 		lookUpCell(data, remainingCellIdOfCluster, newCluster, lookedUpCellIds, remainingCellIdsOfCluster);
 		if (!newCluster.cells.empty()) {
-			newClusters.push_back(newCluster);
-			if (!firstRun) {
+			if (firstRun) {
 				newCluster.id = clusterD.id;
 				firstRun = false;
 			}
 			else {
 				newCluster.id = _numberGen->getTag();
 			}
+			newClusters.push_back(newCluster);
 		}
 	}
 
 	//TODO: restliche Clusterdaten füllen (pos, ...)
-	
+	//ERR: Verbindung lösen und dann neu verbinden klappt noch nicht
+
 	unordered_set<int> discardClusterIndices;
 	for (uint64_t lookedUpCellId : lookedUpCellIds) {
 		discardClusterIndices.insert(_clusterIndicesByCellIds.at(lookedUpCellId));
@@ -140,6 +141,7 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 		if (!discardClusterIndices.empty()) {
 			int discardClusterIndex = *discardClusterIndices.begin();
 			data.clusters[discardClusterIndex] = newCluster;
+			discardClusterIndices.erase(discardClusterIndex);
 		}
 		else {
 			data.addCellCluster(newCluster);
