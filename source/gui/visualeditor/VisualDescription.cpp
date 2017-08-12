@@ -123,14 +123,19 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 
 void VisualDescription::setToUnmodified()
 {
-	for (auto &cluster : getUndeletedElements(_data.clusters)) {
-		for (auto &cell : getUndeletedElements(cluster.cells)) {
-			cell.pos.setToUnModified();
-			cell.connectingCells.setToUnModified();
+	for (auto &clusterT : _data.clusters) {
+		if (clusterT.isDeleted()) { continue; }
+		auto &clusterD = clusterT.getValue();
+		for (auto &cellT : clusterD.cells) {
+			if (cellT.isDeleted()) { continue; }
+			auto &cellD = cellT.getValue();
+			cellD.pos.setToUnModified();
+			cellD.connectingCells.setToUnModified();
 		}
 	}
 
 	for (auto &particleT : _data.particles) {
+		if (particleT.isDeleted()) { continue; }
 		auto &particleD = particleT.getValue();
 		particleD.pos.setToUnModified();
 	}

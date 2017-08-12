@@ -33,16 +33,14 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 	_cellMap.clear();
 
 	int clusterIndex = 0;
-	for (auto const &clusterT : data.clusters) {
-		auto const &clusterD = clusterT.getValue();
+	for (auto const &cluster : getUndeletedElements(data.clusters)) {
 		int cellIndex = 0;
-		for (auto const &cellT : clusterD.cells) {
-			auto const &cellD = cellT.getValue();
-			_clusterIndicesByCellIds[cellD.id] = clusterIndex;
-			_cellIndicesByCellIds[cellD.id] = cellIndex;
-			auto const &pos = cellD.pos.getValue();
+		for (auto const &cell : getUndeletedElements(cluster.cells)) {
+			_clusterIndicesByCellIds[cell.id] = clusterIndex;
+			_cellIndicesByCellIds[cell.id] = cellIndex;
+			auto const &pos = cell.pos.getValue();
 			auto intPos = _metric->correctPositionAndConvertToIntVector(pos);
-			_cellMap[intPos.x][intPos.y].push_back(cellD.id);
+			_cellMap[intPos.x][intPos.y].push_back(cell.id);
 			++cellIndex;
 		}
 		++clusterIndex;
@@ -53,9 +51,10 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 void CellConnectorImpl::updateConnectingCells(DataDescription &data)
 {
 	for (auto &clusterT : data.clusters) {
+		if (clusterT.isDeleted()) { continue; }
 		auto &clusterD = clusterT.getValue();
-		int cellIndex = 0;
 		for (auto &cellT : clusterD.cells) {
+			if (cellT.isDeleted()) { continue; }
 			auto &cellD = cellT.getValue();
 			if (cellD.pos.isModified()) {
 				removeConnections(data, cellD);
@@ -63,9 +62,11 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data)
 		}
 	}
 	for (auto &clusterT : data.clusters) {
+		if (clusterT.isDeleted()) { continue; }
 		auto &clusterD = clusterT.getValue();
 		int cellIndex = 0;
 		for (auto &cellT : clusterD.cells) {
+			if (cellT.isDeleted()) { continue; }
 			auto &cellD = cellT.getValue();
 			if (cellD.pos.isModified()) {
 				establishNewConnectionsWithNeighborCells(data, cellD);
@@ -79,8 +80,10 @@ void CellConnectorImpl::reclustering(DataDescription &data)
 	unordered_set<int> affectedClusterIndices;
 	int clusterIndex = 0;
 	for (auto &clusterT : data.clusters) {
+		if (clusterT.isDeleted()) { continue; }
 		auto &clusterD = clusterT.getValue();
 		for (auto &cellT : clusterD.cells) {
+			if (cellT.isDeleted()) { continue; }
 			auto &cellD = cellT.getValue();
 			if (cellD.connectingCells.isModified()) {
 				affectedClusterIndices.insert(clusterIndex);
