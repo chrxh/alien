@@ -38,10 +38,8 @@ void ItemManager::updateCells(VisualDescription* visualDesc)
 	auto const &data = visualDesc->getDataRef();
 
 	map<uint64_t, CellItem*> newCellsByIds;
-	for (auto const &clusterT : data.clusters) {
-		auto const &cluster = clusterT.getValue();
-		for (auto const &cellT : cluster.cells) {
-			auto const &cell = cellT.getValue();
+	for (auto const &cluster : getUndeletedElements(data.clusters)) {
+		for (auto const &cell : getUndeletedElements(cluster.cells)) {
 			auto it = _cellsByIds.find(cell.id);
 			CellItem* item;
 			if (it != _cellsByIds.end()) {
@@ -77,8 +75,7 @@ void ItemManager::updateParticles(VisualDescription* visualDesc)
 	auto const &data = visualDesc->getDataRef();
 
 	map<uint64_t, ParticleItem*> newParticlesByIds;
-	for (auto const &particleT : data.particles) {
-		auto const &particle = particleT.getValue();
+	for (auto const &particle : getUndeletedElements(data.particles)) {
 		auto it = _particlesByIds.find(particle.id);
 		ParticleItem* item;
 		if (it != _particlesByIds.end()) {
@@ -110,17 +107,15 @@ void ItemManager::updateConnections(VisualDescription* visualDesc)
 	auto const &data = visualDesc->getDataRef();
 
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
-	for (auto const &clusterT : data.clusters) {
-		auto const &clusterD = clusterT.getValue();
-		for (auto const &cellT : clusterD.cells) {
-			auto const &cellD = cellT.getValue();
-			if (!cellD.connectingCells.isInitialized()) {
+	for (auto const &cluster : getUndeletedElements(data.clusters)) {
+		for (auto const &cell : getUndeletedElements(cluster.cells)) {
+			if (!cell.connectingCells.isInitialized()) {
 				continue;
 			}
-			for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
+			for (uint64_t connectingCellId : cell.connectingCells.getValue()) {
 				auto &connectingCellD = visualDesc->getCellDescRef(connectingCellId);
 				set<uint64_t> connectionId;
-				connectionId.insert(cellD.id);
+				connectionId.insert(cell.id);
 				connectionId.insert(connectingCellId);
 				if (newConnectionsByIds.find(connectionId) != newConnectionsByIds.end()) {
 					continue;
@@ -128,12 +123,12 @@ void ItemManager::updateConnections(VisualDescription* visualDesc)
 				auto connectionIt = _connectionsByIds.find(connectionId);
 				if (connectionIt != _connectionsByIds.end()) {
 					CellConnectionItem* connection = connectionIt->second;
-					connection->update(cellD, connectingCellD);
+					connection->update(cell, connectingCellD);
 					newConnectionsByIds[connectionId] = connection;
 					_connectionsByIds.erase(connectionIt);
 				}
 				else {
-					CellConnectionItem* newConnection = new CellConnectionItem(_config, cellD, connectingCellD);
+					CellConnectionItem* newConnection = new CellConnectionItem(_config, cell, connectingCellD);
 					_scene->addItem(newConnection);
 					newConnectionsByIds[connectionId] = newConnection;
 				}
