@@ -41,7 +41,7 @@ public:
 		}
 		return *this;
 	}
-	void setToUnModified()
+	void setAsUnmodified()
 	{
 		if (isInitialized()) {
 			init(getValue());
@@ -70,8 +70,14 @@ public:
 	TrackerElement(T const &v) : _value(v) {}
 	TrackerElement(T const &v, TrackerElementState s) : _state(s), _value(v) {}
 
-	T* operator->() { return &_value; }
-	T const * operator->() const { return &_value; }
+	T const* operator->() const { return &_value; }
+	T* operator->()
+	{
+		if (_state == TrackerElementState::Unmodified) {
+			_state = TrackerElementState::Modified;
+		}
+		return &_value;
+	}
 
 	bool isDeleted() const { return _state == TrackerElementState::Deleted; }
 	bool isModified() const { return _state == TrackerElementState::Modified; }
@@ -82,7 +88,13 @@ public:
 	TrackerElement& setAsModified() { _state = TrackerElementState::Modified; return *this; }
 	TrackerElement& setAsUnmodified() { _state = TrackerElementState::Unmodified; return *this; }
 	T const& getValue() const { return _value; }
-	T & getValue() { return _value; }
+	T & getValue()
+	{
+		if (_state == TrackerElementState::Unmodified) {
+			_state = TrackerElementState::Modified;
+		}
+		return _value;
+	}
 	TrackerElement& setValue(T const& v) { _value = v; _state = TrackerElementState::Modified; return *this; }
 };
 
