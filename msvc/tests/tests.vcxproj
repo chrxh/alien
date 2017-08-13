@@ -263,6 +263,7 @@
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\Tests\Testsuite.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\CellClusterTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Unittests\CellConnectorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\CellFunctionCommunicatorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\NumberGeneratorTest.cpp" />

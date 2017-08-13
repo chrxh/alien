@@ -35,6 +35,19 @@ struct CellDescription
 	CellDescription& setTokenAccessNumber(int value) { tokenBranchNumber.init(value); return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
 	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction.init(value); return *this; }
+	CellDescription& setAsUnmodified()
+	{
+		pos.setAsUnmodified();
+		energy.setAsUnmodified();
+		maxConnections.setAsUnmodified();
+		connectingCells.setAsUnmodified();
+		tokenBlocked.setAsUnmodified();
+		tokenBranchNumber.setAsUnmodified();
+		metadata.setAsUnmodified();
+		cellFunction.setAsUnmodified();
+		tokens.setAsUnmodified();
+		return *this;
+	}
 };
 
 struct CellClusterDescription
@@ -58,6 +71,13 @@ struct CellClusterDescription
 		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
+	CellClusterDescription& addCells(list<CellDescription> const& value)
+	{
+		for (auto const &cell : value) {
+			addCell(cell);
+		}
+		return *this;
+	}
 	CellClusterDescription& retainCell(CellDescription const& value)
 	{
 		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Unmodified));
@@ -78,6 +98,14 @@ struct EnergyParticleDescription
 	EnergyParticleDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
 	EnergyParticleDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
 	EnergyParticleDescription& setEnergy(double value) { energy.init(value); return *this; }
+	EnergyParticleDescription& setAsUnmodified()
+	{
+		pos.setAsUnmodified();
+		vel.setAsUnmodified();
+		energy.setAsUnmodified();
+		metadata.setAsUnmodified();
+		return *this;
+	}
 };
 
 struct DataDescription

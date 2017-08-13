@@ -78,7 +78,6 @@ void VisualDescription::moveSelection(QVector2D const &delta)
 		if (isCellPresent(cellId)) {
 			int clusterIndex = _clusterIndicesByCellIds.at(cellId);
 			int cellIndex = _cellIndicesByCellIds.at(cellId);
-			CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
 			CellDescription &cellDesc = getCellDescRef(cellId);
 			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
 		}
@@ -107,7 +106,6 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 		if (isCellPresent(cellId)) {
 			int clusterIndex = _clusterIndicesByCellIds.at(cellId);
 			int cellIndex = _cellIndicesByCellIds.at(cellId);
-			CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
 			CellDescription &cellDesc = getCellDescRef(cellId);
 			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
 		}
@@ -129,15 +127,14 @@ void VisualDescription::setToUnmodified()
 		for (auto &cellT : clusterD.cells) {
 			if (cellT.isDeleted()) { continue; }
 			auto &cellD = cellT.getValue();
-			cellD.pos.setToUnModified();
-			cellD.connectingCells.setToUnModified();
+			cellD.setAsUnmodified();
 		}
 	}
 
 	for (auto &particleT : _data.particles) {
 		if (particleT.isDeleted()) { continue; }
 		auto &particleD = particleT.getValue();
-		particleD.pos.setToUnModified();
+		particleD.setAsUnmodified();
 	}
 }
 

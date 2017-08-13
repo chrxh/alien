@@ -143,7 +143,7 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 	for (auto &newCluster : newClusters) {
 		if (!discardClusterIndices.empty()) {
 			int discardClusterIndex = *discardClusterIndices.begin();
-			//TODO: Tracker der Cells in newCluster setzen...
+			//TODO: Tracker der Cells in newCluster setzen... Methode in CellClusterDescription?
 			data.clusters[discardClusterIndex].setValue(newCluster);
 			discardClusterIndices.erase(discardClusterIndex);
 		}
@@ -153,6 +153,9 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 	}
 	for (auto &discardClusterIndex : discardClusterIndices) {
 		data.clusters[discardClusterIndex].setAsDeleted();
+		for (auto &cellT : data.clusters[discardClusterIndex]->cells) {
+			cellT.setAsDeleted();
+		}
 	}
 
 	return result;
