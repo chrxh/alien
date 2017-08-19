@@ -19,12 +19,19 @@ public:
 	~CellConnectorTest();
 
 protected:
+	bool isCellAdded(CellClusterDescription const &cluster, uint64_t cellId) const;
+	bool isCellModified(CellClusterDescription const &cluster, uint64_t cellId) const;
+	bool isCellDeleted(CellClusterDescription const &cluster, uint64_t cellId) const;
+
 	SimulationController* _controller = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 	CellConnector* _connector = nullptr;
 
 	IntVector2D _universeSize{ 600, 300 };
+
+	DataDescription _data;
+	DescriptionNavigationMaps _navi;
 };
 
 CellConnectorTest::CellConnectorTest()
@@ -45,78 +52,108 @@ CellConnectorTest::~CellConnectorTest()
 	delete _connector;
 }
 
+bool CellConnectorTest::isCellAdded(CellClusterDescription const & cluster, uint64_t cellId) const
+{
+	for (auto const& cellT : cluster.cells) {
+		if (cellT->id == cellId && !cellT.isAdded()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CellConnectorTest::isCellModified(CellClusterDescription const & cluster, uint64_t cellId) const
+{
+	for (auto const& cellT : cluster.cells) {
+		if (cellT->id == cellId && !cellT.isModified()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CellConnectorTest::isCellDeleted(CellClusterDescription const & cluster, uint64_t cellId) const
+{
+	for (auto const& cellT : cluster.cells) {
+		if (cellT->id == cellId && !cellT.isDeleted()) {
+			return false;
+		}
+	}
+	return true;
+}
+
 TEST_F(CellConnectorTest, testMoveOneCellAway)
 {
-	DataDescription data;
-	auto clusterId = _numberGen->getTag();
-	auto cellId1 = _numberGen->getTag();
-	auto cellId2 = _numberGen->getTag();
-	data.retainCellCluster(CellClusterDescription().setId(clusterId).retainCells(
+	vector<uint64_t> cellIds;
+	cellIds.push_back(_numberGen->getTag());
+	cellIds.push_back(_numberGen->getTag());
+	_data.retainCellCluster(CellClusterDescription().setId(_numberGen->getTag()).retainCells(
 	{
-		CellDescription().setPos({ 100, 100 }).setId(cellId1).setConnectingCells({ cellId2 }).setMaxConnections(1),
-		CellDescription().setPos({ 101, 100 }).setId(cellId2).setConnectingCells({ cellId1 }).setMaxConnections(1)
+		CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+		CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
 	}));
-	data.clusters[0]->cells[1]->pos.setValue({ 103, 100 });
+	_data.clusters[0]->cells[1]->pos.setValue({ 103, 100 });
 
-	_connector->reconnect(data);
+	_connector->reconnect(_data);
 
-	ASSERT_EQ(2, data.clusters.size());
-	ASSERT_TRUE(data.clusters[0].isModified());
-	ASSERT_TRUE(data.clusters[1].isAdded());
+	_navi.update(_data);
 
-	ASSERT_EQ(2, data.clusters[0]->cells.size());
-	ASSERT_TRUE(data.clusters[0]->cells[0].isModified());
-	ASSERT_TRUE(data.clusters[0]->cells[1].isDeleted());
-	ASSERT_EQ(cellId1, data.clusters[0]->cells[0]->id);
-	ASSERT_EQ(cellId2, data.clusters[0]->cells[1]->id);
+	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
 
-	ASSERT_EQ(1, data.clusters[1]->cells.size());
-	ASSERT_TRUE(data.clusters[1]->cells[0].isAdded());
-	ASSERT_EQ(cellId2, data.clusters[1]->cells[0]->id);
+	ASSERT_EQ(2, _data.clusters.size());
+	ASSERT_TRUE(cluster0.isModified());
+	ASSERT_TRUE(cluster1.isAdded());
+
+	ASSERT_EQ(2, cluster0->cells.size());
+	ASSERT_TRUE(isCellModified(cluster0.getValue(), cellIds[0]));
+	ASSERT_TRUE(isCellDeleted(cluster0.getValue(), cellIds[1]));
+
+	ASSERT_EQ(1, cluster1->cells.size());
+	ASSERT_TRUE(isCellAdded(cluster0.getValue(), cellIds[1]));
 }
 
 TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 {
-	DataDescription data;
-	auto clusterId1 = _numberGen->getTag();
-	auto clusterId2 = _numberGen->getTag();
-	auto cellId1 = _numberGen->getTag();
-	auto cellId2 = _numberGen->getTag();
-	auto cellId3 = _numberGen->getTag();
-	auto cellId4 = _numberGen->getTag();
-	data.retainCellClusters({
-		CellClusterDescription().setId(clusterId1).retainCells(
+	vector<uint64_t> cellIds;
+	cellIds.push_back(_numberGen->getTag());
+	cellIds.push_back(_numberGen->getTag());
+	cellIds.push_back(_numberGen->getTag());
+	cellIds.push_back(_numberGen->getTag());
+	_data.retainCellClusters({
+		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 100, 100 }).setId(cellId1).setConnectingCells({ cellId2 }).setMaxConnections(1),
-			CellDescription().setPos({ 101, 100 }).setId(cellId2).setConnectingCells({ cellId1 }).setMaxConnections(1)
+			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
 		}), 
-		CellClusterDescription().setId(clusterId2).retainCells(
+		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 100 }).setId(cellId3).setConnectingCells({ cellId4 }).setMaxConnections(2),
-			CellDescription().setPos({ 201, 100 }).setId(cellId4).setConnectingCells({ cellId3 }).setMaxConnections(1)
+			CellDescription().setPos({ 200, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[3] }).setMaxConnections(2),
+			CellDescription().setPos({ 201, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2] }).setMaxConnections(1)
 		})
 	});
-	data.clusters[0]->cells[1]->pos.setValue({ 199, 100 });
+	_data.clusters[0]->cells[1]->pos.setValue({ 199, 100 });
 
-	_connector->reconnect(data);
+	_connector->reconnect(_data);
+	
+	_navi.update(_data);
 
-	ASSERT_EQ(2, data.clusters.size());
-	ASSERT_TRUE(data.clusters[0].isModified());
-	ASSERT_TRUE(data.clusters[1].isModified());
+	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[2]));
+	auto cell0 = cluster0->cells.at(_navi.cellIndicesByCellIds.at(cellIds[0]));
 
-	ASSERT_EQ(clusterId1, data.clusters[0]->id);
-	ASSERT_EQ(2, data.clusters[0]->cells.size());
-	ASSERT_TRUE(data.clusters[0]->cells[0].isModified());
-	ASSERT_TRUE(data.clusters[0]->cells[1].isDeleted());
-	ASSERT_EQ(cellId1, data.clusters[0]->cells[0]->id);
-	ASSERT_EQ(cellId2, data.clusters[0]->cells[1]->id);
+	ASSERT_EQ(2, _data.clusters.size());
+	ASSERT_TRUE(cluster0.isModified());
+	ASSERT_TRUE(cluster1.isModified());
 
-	ASSERT_EQ(clusterId2, data.clusters[1]->id);
-	ASSERT_EQ(3, data.clusters[1]->cells.size());
-	ASSERT_TRUE(data.clusters[1]->cells[0].isModified());
-	ASSERT_TRUE(data.clusters[1]->cells[1].isModified());
-	ASSERT_TRUE(data.clusters[1]->cells[2].isAdded());
+	ASSERT_EQ(2, cluster0->cells.size());
+	ASSERT_TRUE(isCellModified(cluster0.getValue(), cellIds[0]));
+	ASSERT_TRUE(isCellDeleted(cluster0.getValue(), cellIds[1]));
 
+	ASSERT_EQ(3, cluster1->cells.size());
+	ASSERT_TRUE(isCellModified(cluster1.getValue(), cellIds[2]));
+	ASSERT_TRUE(isCellModified(cluster1.getValue(), cellIds[3]));
+	ASSERT_TRUE(isCellAdded(cluster1.getValue(), cellIds[1]));
 }
 
 

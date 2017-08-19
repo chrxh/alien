@@ -35,7 +35,6 @@ private:
 	SimulationParameters *_parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 
-	unordered_map<uint64_t, int> _clusterIndicesByCellIds;
-	unordered_map<uint64_t, int> _cellIndicesByCellIds;
+	DescriptionNavigationMaps _navi;
 	unordered_map<int, unordered_map<int, list<uint64_t>>> _cellMap;
 };
