@@ -22,22 +22,15 @@ void CellConnectorImpl::reconnect(DataDescription &data)
 
 void CellConnectorImpl::updateInternals(DataDescription const &data)
 {
-	_clusterIndicesByCellIds.clear();
-	_cellIndicesByCellIds.clear();
+	_navi.update(data);
 	_cellMap.clear();
 
-	int clusterIndex = 0;
 	for (auto const &cluster : getUndeletedElements(data.clusters)) {
-		int cellIndex = 0;
 		for (auto const &cell : getUndeletedElements(cluster.cells)) {
-			_clusterIndicesByCellIds[cell.id] = clusterIndex;
-			_cellIndicesByCellIds[cell.id] = cellIndex;
 			auto const &pos = cell.pos.getValue();
 			auto intPos = _metric->correctPositionAndConvertToIntVector(pos);
 			_cellMap[intPos.x][intPos.y].push_back(cell.id);
-			++cellIndex;
 		}
-		++clusterIndex;
 	}
 }
 
@@ -130,7 +123,7 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 
 	unordered_set<int> discardClusterIndices;
 	for (uint64_t lookedUpCellId : lookedUpCellIds) {
-		discardClusterIndices.insert(_clusterIndicesByCellIds.at(lookedUpCellId));
+		discardClusterIndices.insert(_navi.clusterIndicesByCellIds.at(lookedUpCellId));
 	}
 	auto result = discardClusterIndices;
 
@@ -177,8 +170,8 @@ void CellConnectorImpl::lookUpCell(DataDescription &data, uint64_t cellId, CellC
 
 CellDescription & CellConnectorImpl::getCellDescRef(DataDescription &data, uint64_t cellId)
 {
-	int clusterIndex = _clusterIndicesByCellIds.at(cellId);
-	int cellIndex = _cellIndicesByCellIds.at(cellId);
+	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
+	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
 	CellClusterDescription &clusterDesc = data.clusters.at(clusterIndex).getValue();
 	return clusterDesc.cells[cellIndex].getValue();
 }

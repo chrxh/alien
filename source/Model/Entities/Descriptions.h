@@ -186,4 +186,44 @@ struct ResolveDescription
 	bool resolveCellLinks = false;
 };
 
+struct DescriptionNavigationMaps
+{
+	set<uint64_t> cellIds;
+	set<uint64_t> particleIds;
+	map<uint64_t, uint64_t> clusterIdsByCellIds;
+	map<uint64_t, int> clusterIndicesByCellIds;
+	map<uint64_t, int> cellIndicesByCellIds;
+	map<uint64_t, int> particleIndicesByParticleIds;
+
+	void update(DataDescription const& data)
+	{
+		cellIds.clear();
+		particleIds.clear();
+		clusterIdsByCellIds.clear();
+		clusterIndicesByCellIds.clear();
+		cellIndicesByCellIds.clear();
+		particleIndicesByParticleIds.clear();
+
+		int clusterIndex = 0;
+		for (auto const &cluster : getUndeletedElements(data.clusters)) {
+			int cellIndex = 0;
+			for (auto const &cell : getUndeletedElements(cluster.cells)) {
+				clusterIdsByCellIds.insert_or_assign(cell.id, cluster.id);
+				clusterIndicesByCellIds.insert_or_assign(cell.id, clusterIndex);
+				cellIndicesByCellIds.insert_or_assign(cell.id, cellIndex);
+				cellIds.insert(cell.id);
+				++cellIndex;
+			}
+			++clusterIndex;
+		}
+
+		int particleIndex = 0;
+		for (auto const &particle : getUndeletedElements(data.particles)) {
+			particleIndicesByParticleIds[particle.id] = particleIndex;
+			particleIds.insert(particle.id);
+			++particleIndex;
+		}
+	}
+};
+
 #endif // ENTITIES_DESCRIPTIONS_H
