@@ -18,12 +18,6 @@ void CellConnectorImpl::reconnect(DataDescription &data)
 	updateInternals(data);
 	updateConnectingCells(data);
 	reclustering(data);
-
-/*
-	DataDescription dataNew;
-	reclustering(dataNew);
-	data = dataNew;
-*/
 }
 
 void CellConnectorImpl::updateInternals(DataDescription const &data)
@@ -143,7 +137,6 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 	for (auto &newCluster : newClusters) {
 		if (!discardClusterIndices.empty()) {
 			int discardClusterIndex = *discardClusterIndices.begin();
-			//TODO: Tracker der Cells in newCluster setzen... Methode in CellClusterDescription?
 			auto clusterToUpdate = data.clusters.at(discardClusterIndex).getValue();
 			data.clusters[discardClusterIndex]->update(newCluster);
 			discardClusterIndices.erase(discardClusterIndex);
