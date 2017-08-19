@@ -83,6 +83,45 @@ struct CellClusterDescription
 		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Unmodified));
 		return *this;
 	}
+	CellClusterDescription& retainCells(list<CellDescription> const& value)
+	{
+		for (auto const &cell : value) {
+			retainCell(cell);
+		}
+		return *this;
+	}
+	CellClusterDescription& update(CellClusterDescription const& otherCluster)
+	{
+		id = otherCluster.id;
+		pos = otherCluster.pos;
+		vel = otherCluster.vel;
+		angle = otherCluster.angle;
+		angularVel = otherCluster.angularVel;
+		metadata = otherCluster.metadata;
+
+		map<uint64_t, TrackerElement<CellDescription>> cellTrackersByIds;
+		for (auto const &cellT : cells) {
+			cellTrackersByIds.insert_or_assign(cellT->id, cellT);
+		}
+		
+		cells.clear();
+		for (auto cellT : otherCluster.cells) {
+			auto cellDescIter = cellTrackersByIds.find(cellT->id);
+			if (cellDescIter != cellTrackersByIds.end()) {
+				if (cellT.isAdded()) {
+					cellT.setAsModified();
+				}
+				cells.emplace_back(cellT);
+				cellTrackersByIds.erase(cellDescIter);
+			}
+		}
+		for (auto const &cellTAndId : cellTrackersByIds) {
+			auto cellT = cellTAndId.second;
+			cellT.setAsDeleted();
+			cells.emplace_back(cellT);
+		}
+		return *this;
+	}
 };
 
 struct EnergyParticleDescription
@@ -116,6 +155,11 @@ struct DataDescription
 	DataDescription& addCellCluster(CellClusterDescription const& value)
 	{
 		clusters.emplace_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Added));
+		return *this;
+	}
+	DataDescription& retainCellCluster(CellClusterDescription const& value)
+	{
+		clusters.emplace_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Unmodified));
 		return *this;
 	}
 	DataDescription& addEnergyParticle(EnergyParticleDescription const& value)

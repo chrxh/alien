@@ -45,13 +45,13 @@ CellConnectorTest::~CellConnectorTest()
 	delete _connector;
 }
 
-TEST_F(CellConnectorTest, testOneCellMoved)
+TEST_F(CellConnectorTest, testOneCellOfClusterMoved)
 {
 	DataDescription data;
 	auto clusterId = _numberGen->getTag();
 	auto cellId1 = _numberGen->getTag();
 	auto cellId2 = _numberGen->getTag();
-	data.addCellCluster(CellClusterDescription().setId(clusterId).addCells(
+	data.retainCellCluster(CellClusterDescription().setId(clusterId).retainCells(
 	{
 		CellDescription().setPos({ 100, 100 }).setId(cellId1).setConnectingCells({ cellId2 }).setMaxConnections(1),
 		CellDescription().setPos({ 101, 100 }).setId(cellId2).setConnectingCells({ cellId1 }).setMaxConnections(1)
@@ -65,7 +65,7 @@ TEST_F(CellConnectorTest, testOneCellMoved)
 	ASSERT_TRUE(data.clusters[1].isAdded());
 
 	ASSERT_EQ(2, data.clusters[0]->cells.size());
-	ASSERT_TRUE(data.clusters[0]->cells[0].isUnmodified());
+	ASSERT_TRUE(data.clusters[0]->cells[0].isModified());
 	ASSERT_TRUE(data.clusters[0]->cells[1].isDeleted());
 	ASSERT_EQ(cellId1, data.clusters[0]->cells[0]->id);
 	ASSERT_EQ(cellId2, data.clusters[0]->cells[1]->id);
