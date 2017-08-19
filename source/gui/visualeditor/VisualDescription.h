@@ -39,10 +39,5 @@ private:
 	set<uint64_t> _selectedClusterIds;
 	set<uint64_t> _selectedParticleIds;
 
-	set<uint64_t> _cellIds;
-	set<uint64_t> _particleIds;
-	map<uint64_t, uint64_t> _clusterIdsByCellIds;
-	map<uint64_t, int> _clusterIndicesByCellIds;
-	map<uint64_t, int> _cellIndicesByCellIds;
-	map<uint64_t, int> _particleIndicesByParticleIds;
+	DescriptionNavigationMaps _navi;
 };
