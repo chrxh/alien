@@ -57,6 +57,9 @@ public:
 enum class TrackerElementState {
 	Deleted, Modified, Unmodified, Added
 };
+enum class TrackerUpdateState {
+	Yes, No
+};
 
 template<typename T>
 class TrackerElement
@@ -88,9 +91,9 @@ public:
 	TrackerElement& setAsModified() { _state = TrackerElementState::Modified; return *this; }
 	TrackerElement& setAsUnmodified() { _state = TrackerElementState::Unmodified; return *this; }
 	T const& getValue() const { return _value; }
-	T & getValue()
+	T & getValue(TrackerUpdateState update = TrackerUpdateState::No)
 	{
-		if (_state == TrackerElementState::Unmodified) {
+		if (update == TrackerUpdateState::Yes && _state == TrackerElementState::Unmodified) {
 			_state = TrackerElementState::Modified;
 		}
 		return _value;

@@ -111,9 +111,9 @@ struct CellClusterDescription
 				if (cellT.isAdded()) {
 					cellT.setAsModified();
 				}
-				cells.emplace_back(cellT);
 				cellTrackersByIds.erase(cellDescIter);
 			}
+			cells.emplace_back(cellT);
 		}
 		for (auto const &cellTAndId : cellTrackersByIds) {
 			auto cellT = cellTAndId.second;
@@ -160,6 +160,13 @@ struct DataDescription
 	DataDescription& retainCellCluster(CellClusterDescription const& value)
 	{
 		clusters.emplace_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Unmodified));
+		return *this;
+	}
+	DataDescription& retainCellClusters(list<CellClusterDescription> const& value)
+	{
+		for (auto const &cluster : value) {
+			retainCellCluster(cluster);
+		}
 		return *this;
 	}
 	DataDescription& addEnergyParticle(EnergyParticleDescription const& value)
