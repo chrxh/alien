@@ -144,7 +144,8 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 		if (!discardClusterIndices.empty()) {
 			int discardClusterIndex = *discardClusterIndices.begin();
 			//TODO: Tracker der Cells in newCluster setzen... Methode in CellClusterDescription?
-			data.clusters[discardClusterIndex].setValue(newCluster);
+			auto clusterToUpdate = data.clusters.at(discardClusterIndex).getValue();
+			data.clusters[discardClusterIndex]->update(newCluster);
 			discardClusterIndices.erase(discardClusterIndex);
 		}
 		else {
