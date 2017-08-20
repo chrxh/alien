@@ -225,9 +225,7 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 	ASSERT_TRUE(areAllClustersDeletedExcept({ cluster0->id }));
 
 	ASSERT_EQ(5, cluster0->cells.size());
-	for (int i = 0; i < 5; ++i) {
-		ASSERT_TRUE(isCellModified(cluster0.getValue(), cellIds[i]) || isCellAdded(cluster0.getValue(), cellIds[i]));
-	}
+	ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0], cellIds[1], cellIds[2], cellIds[3], cellIds[4] }));
 }
 
 TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
@@ -256,16 +254,24 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 	_connector->reconnect(_data);
 	_navi.update(_data);
 
+	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+	auto cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
+	ASSERT_EQ(3, _data.clusters.size());
+	ASSERT_TRUE(cluster0->id == cluster1->id);
+	ASSERT_TRUE(cluster0->id == cluster2->id);
+	ASSERT_TRUE(areAllClustersDeletedExcept({ cluster0->id }));
+	ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0], cellIds[1], cellIds[2], cellIds[3], cellIds[4] }));
+
 	uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 	uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 	_data.clusters[clusterIndex]->cells[cellIndex]->pos.setValue({ 100, 100 });
 	_connector->reconnect(_data);
 	_navi.update(_data);
 
-	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
-	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
-	auto cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
-
+	cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+	cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
 	ASSERT_EQ(5, _data.clusters.size());
 	ASSERT_TRUE(areAllClustersDeletedExcept({ cluster0->id, cluster1->id, cluster2->id }));
 	ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0] }));
@@ -303,20 +309,28 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		_connector->reconnect(_data);
 		_navi.update(_data);
 
+		auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+		auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+		auto cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
+		ASSERT_EQ(3 + i * 2, _data.clusters.size());
+		ASSERT_TRUE(cluster0->id == cluster1->id);
+		ASSERT_TRUE(cluster0->id == cluster2->id);
+		ASSERT_TRUE(areAllClustersDeletedExcept({ cluster0->id }));
+		ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0], cellIds[1], cellIds[2], cellIds[3], cellIds[4] }));
+
 		clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 		_data.clusters[clusterIndex]->cells[cellIndex]->pos.setValue({ 100, 100 });
 		_connector->reconnect(_data);
 		_navi.update(_data);
+
+		cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+		cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+		cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
+		ASSERT_EQ(5 + i*2, _data.clusters.size());
+		ASSERT_TRUE(areAllClustersDeletedExcept({ cluster0->id, cluster1->id, cluster2->id }));
+		ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0] }));
+		ASSERT_TRUE(areAllCellsDeletedExcept(cluster1.getValue(), { cellIds[1], cellIds[2] }));
+		ASSERT_TRUE(areAllCellsDeletedExcept(cluster2.getValue(), { cellIds[3], cellIds[4] }));
 	}
-
-	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
-	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
-	auto cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
-
-	ASSERT_EQ(5, _data.clusters.size());
-	ASSERT_TRUE(areAllClustersDeletedExcept({ cluster0->id, cluster1->id, cluster2->id }));
-	ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0] }));
-	ASSERT_TRUE(areAllCellsDeletedExcept(cluster1.getValue(), { cellIds[1], cellIds[2] }));
-	ASSERT_TRUE(areAllCellsDeletedExcept(cluster2.getValue(), { cellIds[3], cellIds[4] }));
 }
