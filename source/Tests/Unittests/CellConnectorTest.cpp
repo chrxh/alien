@@ -21,6 +21,7 @@ public:
 protected:
 	bool isCellAdded(CellClusterDescription const &cluster, uint64_t cellId) const;
 	bool isCellModified(CellClusterDescription const &cluster, uint64_t cellId) const;
+	bool isCellUnmodified(CellClusterDescription const & cluster, uint64_t cellId) const;
 	bool isCellDeleted(CellClusterDescription const &cluster, uint64_t cellId) const;
 	bool areAllClustersDeletedExcept(set<uint64_t> const &clusterIds) const;
 	bool areAllCellsDeletedExcept(CellClusterDescription const &cluster, set<uint64_t> const &cellIds) const;
@@ -68,6 +69,16 @@ bool CellConnectorTest::isCellModified(CellClusterDescription const & cluster, u
 {
 	for (auto const& cellT : cluster.cells) {
 		if (cellT->id == cellId && !cellT.isModified()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CellConnectorTest::isCellUnmodified(CellClusterDescription const & cluster, uint64_t cellId) const
+{
+	for (auto const& cellT : cluster.cells) {
+		if (cellT->id == cellId && !cellT.isUnmodified()) {
 			return false;
 		}
 	}
@@ -152,7 +163,7 @@ TEST_F(CellConnectorTest, testMoveOneCellAway)
 TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 {
 	vector<uint64_t> cellIds;
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.retainCellClusters({
@@ -161,7 +172,11 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 			CellDescription().setPos({ 200, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
-		})
+		}),
+		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		{
+			CellDescription().setPos({ 100, 100 }).setId(cellIds[3]).setMaxConnections(1),
+	})
 	});
 	_data.clusters[0]->cells[1]->pos.setValue({ 200, 101.1f });
 
@@ -170,14 +185,17 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 	_navi.update(_data);
 
 	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
 
-	ASSERT_EQ(1, _data.clusters.size());
+	ASSERT_EQ(2, _data.clusters.size());
 	ASSERT_TRUE(cluster0.isModified());
+	ASSERT_TRUE(cluster1.isUnmodified());
 
 	ASSERT_EQ(3, cluster0->cells.size());
 	ASSERT_TRUE(isCellModified(cluster0.getValue(), cellIds[0]));
 	ASSERT_TRUE(isCellModified(cluster0.getValue(), cellIds[1]));
 	ASSERT_TRUE(isCellModified(cluster0.getValue(), cellIds[2]));
+	ASSERT_TRUE(isCellUnmodified(cluster1.getValue(), cellIds[3]));
 }
 
 TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
