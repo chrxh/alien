@@ -128,16 +128,13 @@ void VisualDescription::setToUnmodified()
 			if (cellT.isDeleted()) { continue; }
 			auto &cellD = cellT.getValue();
 			cellD.setAsUnmodified();
-			cellT.setAsUnmodified();
 		}
-		clusterT.setAsUnmodified();
 	}
 
 	for (auto &particleT : _data.particles) {
 		if (particleT.isDeleted()) { continue; }
 		auto &particleD = particleT.getValue();
 		particleD.setAsUnmodified();
-		particleT.setAsUnmodified();
 	}
 }
 
