@@ -6,12 +6,16 @@
 
 using std::vector;
 
+enum class TrackerUpdate {
+	Yes, No
+};
+
 template<typename T>
 class Tracker
 {
 private:
-	boost::optional<T> _initialValue;
 	boost::optional<T> _value;
+	bool _isModified = false;
 
 public:
 	Tracker() = default;
@@ -19,46 +23,44 @@ public:
 
 	void init(T const& v)
 	{
-		_initialValue = v;
 		_value = v;
+		_isModified = false;
 	}
 
 	T* operator->() { return _value.get(); }
 	T const* operator->() const { return _value->get; }
 
-	bool isModified() const { return _initialValue != _value; }
+	bool isModified() const { return _isModified; }
 	bool isInitialized() const { return _value.is_initialized(); }
 	T const& getValue() const { return _value.get(); }
-	T & getValue() { return _value.get(); }
+	T & getValue(TrackerUpdate update = TrackerUpdate::No)
+	{
+		if (update == TrackerUpdate::Yes) {
+			_isModified = true;
+		}
+		return _value.get();
+	}
 	T const& getValueOr(T const& d) const { return _value.get_value_or(d); }
 	T const& getValueOrDefault() const { return _value.get_value_or(T()); }
-	T const& getInitialValue() const { return _initialValue.get(); }
 	Tracker& setValue(T const& v)
 	{
 		_value = v;
-		if (!_initialValue.is_initialized()) {
-			_initialValue = v;
-		}
+		_isModified = true;
 		return *this;
 	}
 	void setAsUnmodified()
 	{
-		if (isInitialized()) {
-			init(getValue());
-		}
+		_isModified = false;
 	}
 	void reset()
 	{
 		_value.reset();
-		_initialValue.reset();
+		_isModified = false;
 	}
 };
 
 enum class TrackerElementState {
 	Deleted, Modified, Unmodified, Added
-};
-enum class TrackerUpdateState {
-	Yes, No
 };
 
 template<typename T>
@@ -91,9 +93,9 @@ public:
 	TrackerElement& setAsModified() { _state = TrackerElementState::Modified; return *this; }
 	TrackerElement& setAsUnmodified() { _state = TrackerElementState::Unmodified; return *this; }
 	T const& getValue() const { return _value; }
-	T & getValue(TrackerUpdateState update = TrackerUpdateState::No)
+	T & getValue(TrackerUpdate update = TrackerUpdate::No)
 	{
-		if (update == TrackerUpdateState::Yes && _state == TrackerElementState::Unmodified) {
+		if (update == TrackerUpdate::Yes && _state == TrackerElementState::Unmodified) {
 			_state = TrackerElementState::Modified;
 		}
 		return _value;

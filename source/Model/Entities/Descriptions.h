@@ -92,7 +92,6 @@ struct CellClusterDescription
 	}
 	CellClusterDescription& update(CellClusterDescription const& otherCluster)
 	{
-		id = otherCluster.id;
 		pos = otherCluster.pos;
 		vel = otherCluster.vel;
 		angle = otherCluster.angle;
@@ -205,22 +204,28 @@ struct DescriptionNavigationMaps
 		particleIndicesByParticleIds.clear();
 
 		int clusterIndex = 0;
-		for (auto const &cluster : getUndeletedElements(data.clusters)) {
-			int cellIndex = 0;
-			for (auto const &cell : getUndeletedElements(cluster.cells)) {
-				clusterIdsByCellIds.insert_or_assign(cell.id, cluster.id);
-				clusterIndicesByCellIds.insert_or_assign(cell.id, clusterIndex);
-				cellIndicesByCellIds.insert_or_assign(cell.id, cellIndex);
-				cellIds.insert(cell.id);
-				++cellIndex;
+		for (auto const &clusterT : data.clusters) {
+			if (!clusterT.isDeleted()) {
+				int cellIndex = 0;
+				for (auto const &cellT : clusterT->cells) {
+					if (!cellT.isDeleted()) {
+						clusterIdsByCellIds.insert_or_assign(cellT->id, clusterT->id);
+						clusterIndicesByCellIds.insert_or_assign(cellT->id, clusterIndex);
+						cellIndicesByCellIds.insert_or_assign(cellT->id, cellIndex);
+						cellIds.insert(cellT->id);
+					}
+					++cellIndex;
+				}
 			}
 			++clusterIndex;
 		}
 
 		int particleIndex = 0;
-		for (auto const &particle : getUndeletedElements(data.particles)) {
-			particleIndicesByParticleIds[particle.id] = particleIndex;
-			particleIds.insert(particle.id);
+		for (auto const &particleT : data.particles) {
+			if (!particleT.isDeleted()) {
+				particleIndicesByParticleIds[particleT->id] = particleIndex;
+				particleIds.insert(particleT->id);
+			}
 			++particleIndex;
 		}
 	}

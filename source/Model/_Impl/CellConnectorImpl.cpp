@@ -182,10 +182,10 @@ void CellConnectorImpl::removeConnections(DataDescription &data, CellDescription
 		auto &connectingCellIds = cellDesc.connectingCells.getValue();
 		for (uint64_t connectingCellId : connectingCellIds) {
 			auto &connectingCell = getCellDescRef(data, connectingCellId);
-			auto &connectingCellConnections = connectingCell.connectingCells.getValue();
+			auto &connectingCellConnections = connectingCell.connectingCells.getValue(TrackerUpdate::Yes);
 			connectingCellConnections.remove(cellDesc.id);
 		}
-		cellDesc.connectingCells.reset();
+		cellDesc.connectingCells.setValue({ });
 	}
 }
 
