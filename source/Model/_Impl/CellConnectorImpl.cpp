@@ -67,13 +67,14 @@ void CellConnectorImpl::reclustering(DataDescription &data)
 	unordered_set<int> affectedClusterIndices;
 	int clusterIndex = 0;
 	for (auto &clusterT : data.clusters) {
-		if (clusterT.isDeleted()) { continue; }
-		auto &clusterD = clusterT.getValue();
-		for (auto &cellT : clusterD.cells) {
-			if (cellT.isDeleted()) { continue; }
-			auto &cellD = cellT.getValue();
-			if (cellD.connectingCells.isModified()) {
-				affectedClusterIndices.insert(clusterIndex);
+		if (!clusterT.isDeleted()) {
+			auto &clusterD = clusterT.getValue();
+			for (auto &cellT : clusterD.cells) {
+				if (cellT.isDeleted()) { continue; }
+				auto &cellD = cellT.getValue();
+				if (cellD.connectingCells.isModified()) {
+					affectedClusterIndices.insert(clusterIndex);
+				}
 			}
 		}
 		++clusterIndex;
