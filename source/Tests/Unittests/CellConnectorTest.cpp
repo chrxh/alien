@@ -272,3 +272,51 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 	ASSERT_TRUE(areAllCellsDeletedExcept(cluster1.getValue(), { cellIds[1], cellIds[2] }));
 	ASSERT_TRUE(areAllCellsDeletedExcept(cluster2.getValue(), { cellIds[3], cellIds[4] }));
 }
+
+TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
+{
+	vector<uint64_t> cellIds;
+	for (int i = 0; i < 5; ++i) {
+		cellIds.push_back(_numberGen->getTag());
+	}
+	_data.retainCellClusters({
+		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		{
+			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
+		}),
+		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		{
+			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
+			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
+		}),
+		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		{
+			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
+			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
+		})
+	});
+	_navi.update(_data);
+	for (int i = 0; i < 10; ++i) {
+		uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
+		uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
+		_data.clusters[clusterIndex]->cells[cellIndex]->pos.setValue({ 200, 100 });
+		_connector->reconnect(_data);
+		_navi.update(_data);
+
+		clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
+		cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
+		_data.clusters[clusterIndex]->cells[cellIndex]->pos.setValue({ 100, 100 });
+		_connector->reconnect(_data);
+		_navi.update(_data);
+	}
+
+	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+	auto cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
+
+	ASSERT_EQ(5, _data.clusters.size());
+	ASSERT_TRUE(areAllClustersDeletedExcept({ cluster0->id, cluster1->id, cluster2->id }));
+	ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0] }));
+	ASSERT_TRUE(areAllCellsDeletedExcept(cluster1.getValue(), { cellIds[1], cellIds[2] }));
+	ASSERT_TRUE(areAllCellsDeletedExcept(cluster2.getValue(), { cellIds[3], cellIds[4] }));
+}
