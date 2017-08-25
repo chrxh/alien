@@ -40,7 +40,7 @@ void CellConnectionItem::update(CellDescription const & cell1, CellDescription c
 		_connectionState = ConnectionState::B_TO_A_CONNECTION;
 	}
 	else if (branchNumber2 == (branchNumber1 + 1) % maxBranchNumber) {
-		_connectionState = ConnectionState::B_TO_A_CONNECTION;
+		_connectionState = ConnectionState::A_TO_B_CONNECTION;
 	}
 	else {
 		_connectionState = ConnectionState::NO_DIR_CONNECTION;
