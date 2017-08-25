@@ -21,7 +21,7 @@
 #include "CellConstructorImpl.h"
 
 using ACTIVATE_TOKEN = Cell::ActivateToken;
-using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenAccessNumber;
+using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenBranchNumber;
 
 CellConstructorImpl::CellConstructorImpl (UnitContext* context)
     : CellFunction(context)
@@ -42,7 +42,7 @@ namespace {
 		CellMetadata meta;
 		meta.color = metadata;
 		auto desc = CellDescription().setEnergy(context->getSimulationParameters()->cellCreationEnergy).setMaxConnections(maxConnections)
-			.setTokenAccessNumber(tokenAccessNumber).setFlagTokenBlocked(true).setMetadata(meta)
+			.setTokenBranchNumber(tokenAccessNumber).setFlagTokenBlocked(true).setMetadata(meta)
 			.setCellFunction(CellFunctionDescription().setType(convertCellTypeNumberToName(cellType)).setData(cellFunctionData));
 		auto cell = factory->build(desc, context);
 		baseCell->getCluster()->addCell(cell, posOfNewCell);

@@ -123,7 +123,7 @@ CellDescription EnergyParticleImpl::getRandomCellDesciption(double energy) const
 	}
 	Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(_context->getNumberGenerator()->getRandomInt(Enums::CellFunction::_COUNTER));
 	return CellDescription().setEnergy(energy).setCellFunction(CellFunctionDescription().setType(randomCellFunction).setData(randomData))
-		.setMaxConnections(randomMaxConnections).setTokenAccessNumber(randomTokenAccessNumber);
+		.setMaxConnections(randomMaxConnections).setTokenBranchNumber(randomTokenAccessNumber);
 }
 
 void EnergyParticleImpl::collisionWithEnergyParticle(EnergyParticle* otherEnergy)
