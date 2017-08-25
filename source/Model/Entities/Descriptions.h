@@ -32,7 +32,7 @@ struct CellDescription
 	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
 	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells.init(value); return *this; }
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
-	CellDescription& setTokenAccessNumber(int value) { tokenBranchNumber.init(value); return *this; }
+	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber.init(value); return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
 	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction.init(value); return *this; }
 	CellDescription& setAsUnmodified()
