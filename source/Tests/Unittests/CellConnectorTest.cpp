@@ -142,7 +142,6 @@ TEST_F(CellConnectorTest, testMoveOneCellAway)
 	_data.clusters[0]->cells[1]->pos.setValue({ 103, 100 });
 
 	_connector->reconnect(_data);
-
 	_navi.update(_data);
 
 	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -181,7 +180,6 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 	_data.clusters[0]->cells[1]->pos.setValue({ 200, 101.1f });
 
 	_connector->reconnect(_data);
-
 	_navi.update(_data);
 
 	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
@@ -219,7 +217,6 @@ TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 	_data.clusters[0]->cells[1]->pos.setValue({ 199, 100 });
 
 	_connector->reconnect(_data);
-	
 	_navi.update(_data);
 
 	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -264,7 +261,6 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 	_data.clusters[0]->cells[0]->pos.setValue({ 200, 100 });
 
 	_connector->reconnect(_data);
-
 	_navi.update(_data);
 
 	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -315,6 +311,7 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 	uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 	uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 	_data.clusters[clusterIndex]->cells[cellIndex]->pos.setValue({ 100, 100 });
+
 	_connector->reconnect(_data);
 	_navi.update(_data);
 
@@ -370,6 +367,7 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 		_data.clusters[clusterIndex]->cells[cellIndex]->pos.setValue({ 100, 100 });
+
 		_connector->reconnect(_data);
 		_navi.update(_data);
 
@@ -382,4 +380,44 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		ASSERT_TRUE(areAllCellsDeletedExcept(cluster1.getValue(), { cellIds[1], cellIds[2] }));
 		ASSERT_TRUE(areAllCellsDeletedExcept(cluster2.getValue(), { cellIds[3], cellIds[4] }));
 	}
+}
+
+TEST_F(CellConnectorTest, testMoveSeveralCells)
+{
+	vector<uint64_t> cellIds;
+	for (int i = 0; i < 5; ++i) {
+		cellIds.push_back(_numberGen->getTag());
+	}
+	_data.retainCellCluster(CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+	{
+		CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+		CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(3),
+		CellDescription().setPos({ 102, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[1], cellIds[3] }).setMaxConnections(5),
+		CellDescription().setPos({ 103, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2], cellIds[4] }).setMaxConnections(3),
+		CellDescription().setPos({ 104, 100 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(4)
+	}));
+	for (int i = 0; i < 5; ++i) {
+		_data.clusters[0]->cells[i]->pos.setValue({ 200 + static_cast<float>(i), 100 });
+	}
+
+	_connector->reconnect(_data);
+	_navi.update(_data);
+
+	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cell0 = cluster0->cells.at(_navi.cellIndicesByCellIds.at(cellIds[0]));
+	auto cell1 = cluster0->cells.at(_navi.cellIndicesByCellIds.at(cellIds[1]));
+	auto cell2 = cluster0->cells.at(_navi.cellIndicesByCellIds.at(cellIds[2]));
+	auto cell3 = cluster0->cells.at(_navi.cellIndicesByCellIds.at(cellIds[3]));
+	auto cell4 = cluster0->cells.at(_navi.cellIndicesByCellIds.at(cellIds[4]));
+
+	ASSERT_EQ(1, _data.clusters.size());
+	ASSERT_EQ(5, cluster0->cells.size());
+	ASSERT_TRUE(cluster0.isModified());
+	ASSERT_TRUE(areAllCellsDeletedExcept(cluster0.getValue(), { cellIds[0], cellIds[1], cellIds[2], cellIds[3], cellIds[4] }));
+
+	ASSERT_EQ(1, cell0->connectingCells.getValue().size());
+	ASSERT_EQ(2, cell1->connectingCells.getValue().size());
+	ASSERT_EQ(2, cell2->connectingCells.getValue().size());
+	ASSERT_EQ(2, cell3->connectingCells.getValue().size());
+	ASSERT_EQ(1, cell4->connectingCells.getValue().size());
 }
