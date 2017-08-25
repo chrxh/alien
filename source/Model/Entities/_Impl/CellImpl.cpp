@@ -18,13 +18,13 @@ CellImpl::CellImpl (UnitContext* context)
 	_id = _context->getNumberGenerator()->getTag();
 }
 
-CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenAccessNumber
+CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber
     , QVector2D relPos)
     : CellImpl(context)
 {
     _relPos = relPos;
     _energy = energy;
-    _tokenAccessNumber = tokenAccessNumber;
+    _tokenBranchNumber = tokenBranchNumber;
     resetConnections(maxConnections);
 }
 
@@ -54,7 +54,7 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 {
 	CellDescription result;
 	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections)
-		.setTokenAccessNumber(_tokenAccessNumber).setEnergy(_energy).setMetadata(_metadata);
+		.setTokenBranchNumber(_tokenBranchNumber).setEnergy(_energy).setMetadata(_metadata);
 	if (resolveDescription.resolveCellLinks) {
 		list<uint64_t> connectingCells;
 		for (int i = 0; i < _numConnections; ++i) {
@@ -304,10 +304,10 @@ void CellImpl::setToken (int i, Token* token)
     _tokenStack[i] = token;
 }
 
-void CellImpl::addToken (Token* token, ActivateToken act, UpdateTokenAccessNumber update)
+void CellImpl::addToken (Token* token, ActivateToken act, UpdateTokenBranchNumber update)
 {
-    if( update == UpdateTokenAccessNumber::YES )
-        token->setTokenAccessNumber(_tokenAccessNumber);
+    if( update == UpdateTokenBranchNumber::YES )
+        token->setTokenAccessNumber(_tokenBranchNumber);
     if( act == ActivateToken::NOW )
         _tokenStack[_tokenStackPointer++] = token;
     else
@@ -368,12 +368,12 @@ void CellImpl::setRelPosition (QVector2D relPos)
 
 int CellImpl::getBranchNumber () const
 {
-    return _tokenAccessNumber;
+    return _tokenBranchNumber;
 }
 
 void CellImpl::setBranchNumber (int i)
 {
-    _tokenAccessNumber = i % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
+    _tokenBranchNumber = i % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
 }
 
 bool CellImpl::isTokenBlocked () const
@@ -481,7 +481,7 @@ void CellImpl::serializePrimitives (QDataStream& stream) const
     }
 	*/
     //remaining data
-    stream << _tokenAccessNumber << _blockToken << _vel;
+    stream << _tokenBranchNumber << _blockToken << _vel;
 }
 
 void CellImpl::deserializePrimitives(QDataStream& stream)
@@ -507,7 +507,7 @@ void CellImpl::deserializePrimitives(QDataStream& stream)
 	_numConnections = numConnections;
 
 	//remaining data
-	stream >> _tokenAccessNumber >> _blockToken >> _vel;
+	stream >> _tokenBranchNumber >> _blockToken >> _vel;
 }
 
 

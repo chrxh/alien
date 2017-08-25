@@ -14,7 +14,7 @@ public:
 
     CellImpl (UnitContext* context);
     CellImpl (qreal energy, UnitContext* context, int maxConnections
-        , int tokenAccessNumber, QVector2D relPos);
+        , int tokenBranchNumber, QVector2D relPos);
 
     ~CellImpl();
 
@@ -48,7 +48,7 @@ public:
     int getNumToken (bool newTokenStackPointer = false) const override;
     Token* getToken (int i) const override;
     void setToken (int i, Token* token) override;
-	void addToken(Token* token, ActivateToken act = ActivateToken::NOW, UpdateTokenAccessNumber update = UpdateTokenAccessNumber::YES) override;
+	void addToken(Token* token, ActivateToken act = ActivateToken::NOW, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::YES) override;
     void delAllTokens () override;
     Token* takeTokenFromStack () override;
 	void mutationByChance() override;
@@ -105,7 +105,7 @@ private:
     int _numConnections = 0;
     Cell** _connectingCells = nullptr;
 
-    int _tokenAccessNumber = 0;
+    int _tokenBranchNumber = 0;
     bool _blockToken = false;
 
     QVector2D _vel;
