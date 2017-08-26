@@ -96,9 +96,9 @@ void CellClusterImpl::setContext(UnitContext * context)
 	}
 }
 
-CellClusterDescription CellClusterImpl::getDescription(ResolveDescription const& resolveDescription) const
+ClusterChangeDescription CellClusterImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
-	CellClusterDescription result;
+	ClusterChangeDescription result;
 	result.setId(_id).setPos(_pos).setVel(_pos).setAngle(_angle).setAngularVel(_angularVel);
 	for (auto const& cell : _cells) {
 		result.retainCell(cell->getDescription(resolveDescription));
@@ -189,7 +189,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
 
 			QVector2D pos = calcPosition(cell, true);
 			QVector2D vel = cell->getVelocity();
-			auto desc = EnergyParticleDescription().setEnergy(energyForParticle).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+			auto desc = ParticleChangeDescription().setEnergy(energyForParticle).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
             energyParticle = factory->build(desc, _context);
 			EnergyParticleMetadata metadata;
 			metadata.color = cell->getMetadata().color;
@@ -1101,7 +1101,7 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
 
 		QVector2D pos = calcPosition(originCell) + posPerturbation;
 		QVector2D vel = originCell->getVelocity() * parameters->radiationVelocityMultiplier + velPerturbation;
-		auto desc = EnergyParticleDescription().setEnergy(radEnergy).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+		auto desc = ParticleChangeDescription().setEnergy(radEnergy).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
         energyParticle = factory->build(desc, _context);
 		EnergyParticleMetadata metadata;
 		metadata.color = originCell->getMetadata().color;

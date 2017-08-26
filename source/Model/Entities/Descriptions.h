@@ -12,7 +12,7 @@ struct TokenDescription
 	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
 };
 
-struct CellDescription
+struct CellChangeDescription
 {
 	uint64_t id = 0;
 
@@ -26,16 +26,16 @@ struct CellDescription
 	Tracker<CellFunctionDescription> cellFunction;
 	Tracker<vector<TokenDescription>> tokens;
 
-	CellDescription& setId(uint64_t value) { id = value; return *this; }
-	CellDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
-	CellDescription& setEnergy(double value) { energy.init(value); return *this; }
-	CellDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
-	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells.init(value); return *this; }
-	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
-	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber.init(value); return *this; }
-	CellDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
-	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction.init(value); return *this; }
-	CellDescription& setAsUnmodified()
+	CellChangeDescription& setId(uint64_t value) { id = value; return *this; }
+	CellChangeDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
+	CellChangeDescription& setEnergy(double value) { energy.init(value); return *this; }
+	CellChangeDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
+	CellChangeDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells.init(value); return *this; }
+	CellChangeDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
+	CellChangeDescription& setTokenBranchNumber(int value) { tokenBranchNumber.init(value); return *this; }
+	CellChangeDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
+	CellChangeDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction.init(value); return *this; }
+	CellChangeDescription& setAsUnmodified()
 	{
 		pos.setAsUnmodified();
 		energy.setAsUnmodified();
@@ -50,7 +50,7 @@ struct CellDescription
 	}
 };
 
-struct CellClusterDescription
+struct ClusterChangeDescription
 {
 	uint64_t id = 0;
 
@@ -59,38 +59,38 @@ struct CellClusterDescription
 	Tracker<double> angle;
 	Tracker<double> angularVel;
 	Tracker<CellClusterMetadata> metadata;
-	vector<TrackerElement<CellDescription>> cells;
+	vector<TrackerElement<CellChangeDescription>> cells;
 
-	CellClusterDescription& setId(uint64_t value) { id = value; return *this; }
-	CellClusterDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
-	CellClusterDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
-	CellClusterDescription& setAngle(double value) { angle.init(value); return *this; }
-	CellClusterDescription& setAngularVel(double value) { angularVel.init(value); return *this; }
-	CellClusterDescription& addCell(CellDescription const& value)
+	ClusterChangeDescription& setId(uint64_t value) { id = value; return *this; }
+	ClusterChangeDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
+	ClusterChangeDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
+	ClusterChangeDescription& setAngle(double value) { angle.init(value); return *this; }
+	ClusterChangeDescription& setAngularVel(double value) { angularVel.init(value); return *this; }
+	ClusterChangeDescription& addCell(CellChangeDescription const& value)
 	{
-		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Added));
+		cells.emplace_back(TrackerElement<CellChangeDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
-	CellClusterDescription& addCells(list<CellDescription> const& value)
+	ClusterChangeDescription& addCells(list<CellChangeDescription> const& value)
 	{
 		for (auto const &cell : value) {
 			addCell(cell);
 		}
 		return *this;
 	}
-	CellClusterDescription& retainCell(CellDescription const& value)
+	ClusterChangeDescription& retainCell(CellChangeDescription const& value)
 	{
-		cells.emplace_back(TrackerElement<CellDescription>(value, TrackerElementState::Unmodified));
+		cells.emplace_back(TrackerElement<CellChangeDescription>(value, TrackerElementState::Unmodified));
 		return *this;
 	}
-	CellClusterDescription& retainCells(list<CellDescription> const& value)
+	ClusterChangeDescription& retainCells(list<CellChangeDescription> const& value)
 	{
 		for (auto const &cell : value) {
 			retainCell(cell);
 		}
 		return *this;
 	}
-	CellClusterDescription& update(CellClusterDescription const& otherCluster)
+	ClusterChangeDescription& update(ClusterChangeDescription const& otherCluster)
 	{
 		pos = otherCluster.pos;
 		vel = otherCluster.vel;
@@ -98,8 +98,8 @@ struct CellClusterDescription
 		angularVel = otherCluster.angularVel;
 		metadata = otherCluster.metadata;
 
-		map<uint64_t, TrackerElement<CellDescription>> cellTrackersByIds;
-		vector<TrackerElement<CellDescription>> deletedCellTrackers;
+		map<uint64_t, TrackerElement<CellChangeDescription>> cellTrackersByIds;
+		vector<TrackerElement<CellChangeDescription>> deletedCellTrackers;
 		for (auto const &cellT : cells) {
 			if (!cellT.isDeleted()) {
 				cellTrackersByIds.insert_or_assign(cellT->id, cellT);
@@ -129,7 +129,7 @@ struct CellClusterDescription
 	}
 };
 
-struct EnergyParticleDescription
+struct ParticleChangeDescription
 {
 	uint64_t id = 0;
 
@@ -138,11 +138,11 @@ struct EnergyParticleDescription
 	Tracker<double> energy;
 	Tracker<EnergyParticleMetadata> metadata;
 
-	EnergyParticleDescription& setId(uint64_t value) { id = value; return *this; }
-	EnergyParticleDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
-	EnergyParticleDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
-	EnergyParticleDescription& setEnergy(double value) { energy.init(value); return *this; }
-	EnergyParticleDescription& setAsUnmodified()
+	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
+	ParticleChangeDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
+	ParticleChangeDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
+	ParticleChangeDescription& setEnergy(double value) { energy.init(value); return *this; }
+	ParticleChangeDescription& setAsUnmodified()
 	{
 		pos.setAsUnmodified();
 		vel.setAsUnmodified();
@@ -152,31 +152,31 @@ struct EnergyParticleDescription
 	}
 };
 
-struct DataDescription
+struct DataChangeDescription
 {
-	vector<TrackerElement<CellClusterDescription>> clusters;
-	vector<TrackerElement<EnergyParticleDescription>> particles;
+	vector<TrackerElement<ClusterChangeDescription>> clusters;
+	vector<TrackerElement<ParticleChangeDescription>> particles;
 
-	DataDescription& addCellCluster(CellClusterDescription const& value)
+	DataChangeDescription& addCellCluster(ClusterChangeDescription const& value)
 	{
-		clusters.emplace_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Added));
+		clusters.emplace_back(TrackerElement<ClusterChangeDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
-	DataDescription& retainCellCluster(CellClusterDescription const& value)
+	DataChangeDescription& retainCellCluster(ClusterChangeDescription const& value)
 	{
-		clusters.emplace_back(TrackerElement<CellClusterDescription>(value, TrackerElementState::Unmodified));
+		clusters.emplace_back(TrackerElement<ClusterChangeDescription>(value, TrackerElementState::Unmodified));
 		return *this;
 	}
-	DataDescription& retainCellClusters(list<CellClusterDescription> const& value)
+	DataChangeDescription& retainCellClusters(list<ClusterChangeDescription> const& value)
 	{
 		for (auto const &cluster : value) {
 			retainCellCluster(cluster);
 		}
 		return *this;
 	}
-	DataDescription& addEnergyParticle(EnergyParticleDescription const& value)
+	DataChangeDescription& addEnergyParticle(ParticleChangeDescription const& value)
 	{
-		particles.emplace_back(TrackerElement<EnergyParticleDescription>(value, TrackerElementState::Added));
+		particles.emplace_back(TrackerElement<ParticleChangeDescription>(value, TrackerElementState::Added));
 		return *this;
 	}
 	void clear()
@@ -200,7 +200,7 @@ struct DescriptionNavigationMaps
 	map<uint64_t, int> cellIndicesByCellIds;
 	map<uint64_t, int> particleIndicesByParticleIds;
 
-	void update(DataDescription const& data)
+	void update(DataChangeDescription const& data)
 	{
 		cellIds.clear();
 		particleIds.clear();
