@@ -2,13 +2,13 @@
 
 #include "Model/Features/CellFeatureFactory.h"
 
-#include "EnergyParticleImpl.h"
+#include "ParticleImpl.h"
 #include "CellImpl.h"
-#include "CellClusterImpl.h"
+#include "ClusterImpl.h"
 #include "TokenImpl.h"
 #include "EntityFactoryImpl.h"
 
-CellCluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, UnitContext* context) const
+Cluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, UnitContext* context) const
 {
 	list<Cell*> cells;
 	map<uint64_t, Cell*> cellsByIds;
@@ -32,7 +32,7 @@ CellCluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, Unit
 		}
 	}
 
-	return new CellClusterImpl(QList<Cell*>::fromStdList(cells), desc.angle.getValueOr(0.0), desc.pos.getValue()
+	return new ClusterImpl(QList<Cell*>::fromStdList(cells), desc.angle.getValueOr(0.0), desc.pos.getValue()
 		, desc.angularVel.getValueOr(0.0), desc.vel.getValueOr(QVector2D()), context);
 }
 
@@ -64,11 +64,11 @@ Token * EntityFactoryImpl::build(TokenDescription const & desc, UnitContext * co
 	return new TokenImpl(context, energy, data);
 }
 
-EnergyParticle* EntityFactoryImpl::build(ParticleChangeDescription const& desc, UnitContext* context) const
+Particle* EntityFactoryImpl::build(ParticleChangeDescription const& desc, UnitContext* context) const
 {
 	auto const& pos = desc.pos.getValue();
 	auto const&vel = desc.vel.getValueOr({ 0.0, 0.0 });
-	auto particle = new EnergyParticleImpl(desc.energy.getValue(), pos, vel, context);
+	auto particle = new ParticleImpl(desc.energy.getValue(), pos, vel, context);
 	auto const& metadata = desc.metadata.getValueOr(EnergyParticleMetadata());
 	particle->setMetadata(metadata);
 	return particle;

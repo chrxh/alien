@@ -1,8 +1,8 @@
 #include "Definitions.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/Cell.h"
 
-std::size_t CellClusterHash::operator()(CellCluster* const& s) const
+std::size_t CellClusterHash::operator()(Cluster* const& s) const
 {
 	return s->getId();
 }

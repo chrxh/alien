@@ -8,7 +8,7 @@
 #include "Model/Features/CellFeature.h"
 #include "Model/Entities/EntityFactory.h"
 #include "Model/Entities/Token.h"
-#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Particle.h"
 #include "Model/Physics/Physics.h"
 #include "Model/Settings.h"
 #include "Model/Context/UnitContext.h"
@@ -16,13 +16,13 @@
 #include "Model/Context/SpaceMetric.h"
 #include "Model/Context/SimulationParameters.h"
 
-#include "CellClusterImpl.h"
+#include "ClusterImpl.h"
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
-CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel
+ClusterImpl::ClusterImpl(QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel
     , QVector2D vel, UnitContext* context)
-    : CellCluster(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
+    : Cluster(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
 {
 	_id = _context->getNumberGenerator()->getTag();
 	_context->getSpaceMetric()->correctPosition(_pos);
@@ -34,8 +34,8 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, QVector2D po
     updateAngularMass();
 }
 
-CellClusterImpl::CellClusterImpl(UnitContext* context)
-	: CellClusterImpl(QList<Cell*>(), 0.0, QVector2D(), 0.0, QVector2D(), context)
+ClusterImpl::ClusterImpl(UnitContext* context)
+	: ClusterImpl(QList<Cell*>(), 0.0, QVector2D(), 0.0, QVector2D(), context)
 {
 }
 
@@ -51,7 +51,7 @@ namespace
 		return result;
 	}
 
-	void setRelPositionInCluster(QList<Cell*> const& cells, CellCluster* cluster)
+	void setRelPositionInCluster(QList<Cell*> const& cells, Cluster* cluster)
 	{
 		foreach(Cell* cell, cells) {
 
@@ -63,8 +63,8 @@ namespace
 	}
 }
 
-CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, UnitContext* context)
-    : CellCluster(context), _angle(angle), _cells(cells)
+ClusterImpl::ClusterImpl(QList< Cell* > cells, qreal angle, UnitContext* context)
+    : Cluster(context), _angle(angle), _cells(cells)
 {
 	_id = _context->getNumberGenerator()->getTag();
 	setCenterPosition(calcCenterPosition(_cells));
@@ -73,14 +73,14 @@ CellClusterImpl::CellClusterImpl(QList< Cell* > cells, qreal angle, UnitContext*
     updateVel_angularVel_via_cellVelocities();
 }
 
-CellClusterImpl::~CellClusterImpl ()
+ClusterImpl::~ClusterImpl ()
 {
     foreach(Cell* cell, _cells) {
         delete cell;
     }
 }
 
-void CellClusterImpl::clearCellsFromMap ()
+void ClusterImpl::clearCellsFromMap ()
 {
 	auto cellMap = _context->getCellMap();
     foreach( Cell* cell, _cells) {
@@ -88,7 +88,7 @@ void CellClusterImpl::clearCellsFromMap ()
     }
 }
 
-void CellClusterImpl::setContext(UnitContext * context)
+void ClusterImpl::setContext(UnitContext * context)
 {
 	_context = context;
 	for(auto const& cell : _cells) {
@@ -96,23 +96,23 @@ void CellClusterImpl::setContext(UnitContext * context)
 	}
 }
 
-ClusterChangeDescription CellClusterImpl::getDescription(ResolveDescription const& resolveDescription) const
+ClusterDescription ClusterImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
-	ClusterChangeDescription result;
+	ClusterDescription result;
 	result.setId(_id).setPos(_pos).setVel(_pos).setAngle(_angle).setAngularVel(_angularVel);
 	for (auto const& cell : _cells) {
-		result.retainCell(cell->getDescription(resolveDescription));
+		result.addCell(cell->getDescription(resolveDescription));
 	}
 	return result;
 }
 
-void CellClusterImpl::clearCellFromMap (Cell* cell)
+void ClusterImpl::clearCellFromMap (Cell* cell)
 {
 	auto cellMap = _context->getCellMap();
 	cellMap->removeCellIfPresent(applyTransformation(cell->getRelPosition()), cell);
 }
 
-void CellClusterImpl::drawCellsToMap ()
+void ClusterImpl::drawCellsToMap ()
 {
 	auto cellMap = _context->getCellMap();
 	foreach(Cell* cell, _cells) {
@@ -122,7 +122,7 @@ void CellClusterImpl::drawCellsToMap ()
 }
 
 //initiate movement of particles
-void CellClusterImpl::processingInit ()
+void ClusterImpl::processingInit ()
 {
 	if (!isTimestampFitting()) {
 		return;
@@ -141,7 +141,7 @@ void CellClusterImpl::processingInit ()
 }
 
 //dissipation, returns lost energy
-void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles)
+void ClusterImpl::processingDissipation (QList< Cluster* >& fragments, QList< Particle* >& energyParticles)
 {
 	if (!isTimestampFitting()) {
 		return;
@@ -159,7 +159,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
     QMutableListIterator<Cell*> i(_cells);
     while (i.hasNext()) {
         Cell* cell(i.next());
-        EnergyParticle* energyParticle(0);
+        Particle* energyParticle(0);
 
         //radiation of cell
         qreal cellEnergy = cell->getEnergy();
@@ -223,7 +223,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
             getConnectedComponent(_cells[0], tag, component);
             if( component.size() < size ) {
                 EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
-                CellCluster* part = new CellClusterImpl(component, _angle, _context);
+                Cluster* part = new ClusterImpl(component, _angle, _context);
                 fragments << part;
 
                 //remove fragment from cluster
@@ -254,14 +254,14 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
         while( !_cells.isEmpty() );
 
         //calc energy difference
-        foreach(CellCluster* cluster, fragments) {
+        foreach(Cluster* cluster, fragments) {
             newEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
         }
         qreal diffEnergy = oldEnergy-newEnergy;
 
         //spread energy difference on cells
         qreal diffEnergyCell = (diffEnergy/static_cast<qreal>(size)) / parameters->cellMass_Reciprocal;
-        foreach(CellCluster* cluster, fragments)
+        foreach(Cluster* cluster, fragments)
             foreach(Cell* cell, cluster->getCellsRef()) {
                 if( cell->getEnergy() > (-diffEnergyCell) )
                     cell->setEnergy(cell->getEnergy() + diffEnergyCell);
@@ -269,7 +269,7 @@ void CellClusterImpl::processingDissipation (QList< CellCluster* >& fragments, Q
     }
 }
 
-void CellClusterImpl::processingMutationByChance()
+void ClusterImpl::processingMutationByChance()
 {
 	if (!isTimestampFitting()) {
 		return;
@@ -280,7 +280,7 @@ void CellClusterImpl::processingMutationByChance()
 	}
 }
 
-void CellClusterImpl::processingMovement ()
+void ClusterImpl::processingMovement ()
 {
 	if (!isTimestampFitting()) {
 		return;
@@ -308,7 +308,7 @@ void CellClusterImpl::processingMovement ()
     //collect information for every colliding cluster
     QMap< quint64, CollisionData > clusterCollisionDataMap;
     QMap< quint64, Cell* > idCellMap;
-    QMap< quint64, CellCluster* > idClusterMap;
+    QMap< quint64, Cluster* > idClusterMap;
 	foreach(Cell* cell, _cells) {
         pos = calcPosition(cell, true);
         for(int x = -1; x < 2; ++x)
@@ -368,7 +368,7 @@ void CellClusterImpl::processingMovement ()
     QMapIterator< quint64, CollisionData > it(clusterCollisionDataMap);
     while(it.hasNext()) {
         it.next();
-        CellCluster* otherCluster = idClusterMap[it.key()];
+        Cluster* otherCluster = idClusterMap[it.key()];
         CollisionData collisionData = it.value();
 
         //collision?
@@ -545,7 +545,7 @@ void CellClusterImpl::processingMovement ()
 }
 
 //token processing
-void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose)
+void ClusterImpl::processingToken (QList< Particle* >& energyParticles, bool& decompose)
 {
 	if (!isTimestampFitting()) {
 		return;
@@ -654,7 +654,7 @@ void CellClusterImpl::processingToken (QList< EnergyParticle* >& energyParticles
 }
 
 //activate new token and kill cells which are too close or where too much forces are applied
-void CellClusterImpl::processingCompletion ()
+void ClusterImpl::processingCompletion ()
 {
 	if (!isTimestampFitting()) {
 		return;
@@ -680,7 +680,7 @@ void CellClusterImpl::processingCompletion ()
                 if( otherCell ) {
                     if( otherCell != cell ) {
 //                    if( otherCell->_cluster != this ) {
-                        CellCluster* otherCluster = otherCell->getCluster();
+                        Cluster* otherCluster = otherCell->getCluster();
 //                        foreach(Cell* otherCell2, otherCluster->getCellsRef()) {
 //                            if( otherCell2 != cell ) {
                                 QVector2D displacement = otherCluster->calcPosition(otherCell, true)-calcPosition(cell, true);
@@ -705,7 +705,7 @@ void CellClusterImpl::processingCompletion ()
     }
 }
 
-void CellClusterImpl::addCell (Cell* cell, QVector2D absPos)
+void ClusterImpl::addCell (Cell* cell, QVector2D absPos)
 {
     cell->setRelPosition(absToRelPos(absPos));
     cell->setCluster(this);
@@ -715,7 +715,7 @@ void CellClusterImpl::addCell (Cell* cell, QVector2D absPos)
     updateAngularMass();
 }
 
-void CellClusterImpl::removeCell (Cell* cell, bool maintainCenter)
+void ClusterImpl::removeCell (Cell* cell, bool maintainCenter)
 {
     cell->delAllConnection();
     _cells.removeAll(cell);
@@ -724,7 +724,7 @@ void CellClusterImpl::removeCell (Cell* cell, bool maintainCenter)
     updateAngularMass();
 }
 
-void CellClusterImpl::updateCellVel (bool forceCheck)
+void ClusterImpl::updateCellVel (bool forceCheck)
 {
     if( _cells.size() == 1 ) {
         _cells[0]->setVelocity(_vel);
@@ -754,7 +754,7 @@ void CellClusterImpl::updateCellVel (bool forceCheck)
     }
 }
 
-void CellClusterImpl::updateAngularMass () {
+void ClusterImpl::updateAngularMass () {
 
     //calc angular mass
     _angularMass = 0.0;
@@ -762,7 +762,7 @@ void CellClusterImpl::updateAngularMass () {
         _angularMass += (cell->getRelPosition().lengthSquared());
 }
 
-void CellClusterImpl::updateRelCoordinates (bool maintainCenter)
+void ClusterImpl::updateRelCoordinates (bool maintainCenter)
 {
     if( maintainCenter ) {
 
@@ -795,7 +795,7 @@ void CellClusterImpl::updateRelCoordinates (bool maintainCenter)
 }
 
 //Note: angular mass needs to be calculated before, energy may be lost
-void CellClusterImpl::updateVel_angularVel_via_cellVelocities ()
+void ClusterImpl::updateVel_angularVel_via_cellVelocities ()
 {
     if( _cells.size() > 1 ) {
 
@@ -825,7 +825,7 @@ void CellClusterImpl::updateVel_angularVel_via_cellVelocities ()
 }
 
 
-QVector2D CellClusterImpl::calcPosition (const Cell* cell, bool metricCorrection) const
+QVector2D ClusterImpl::calcPosition (const Cell* cell, bool metricCorrection) const
 {
     QVector2D cellPos = applyTransformation(cell->getRelPosition());
 	if (metricCorrection) {
@@ -834,15 +834,15 @@ QVector2D CellClusterImpl::calcPosition (const Cell* cell, bool metricCorrection
     return cellPos;
 }
 
-QVector2D CellClusterImpl::calcCellDistWithoutTorusCorrection (Cell* cell) const
+QVector2D ClusterImpl::calcCellDistWithoutTorusCorrection (Cell* cell) const
 {
     return calcPosition(cell)-_pos;
 }
 
-QList< CellCluster* > CellClusterImpl::decompose () const
+QList< Cluster* > ClusterImpl::decompose () const
 {
 	auto numberGen = _context->getNumberGenerator();
-	QList< CellCluster* > fragments;
+	QList< Cluster* > fragments;
     while( !_cells.isEmpty() ) {
 
 
@@ -852,24 +852,24 @@ QList< CellCluster* > CellClusterImpl::decompose () const
         getConnectedComponent(_cells[0], tag, component);
 
         //remove fragment from clusters
-        QMap< quint64, CellCluster* > idClusterMap;
+        QMap< quint64, Cluster* > idClusterMap;
         foreach( Cell* cell, component) {
             idClusterMap[cell->getCluster()->getId()] = cell->getCluster();
         }
 
-        foreach( CellCluster* cluster, idClusterMap.values() ) {
+        foreach( Cluster* cluster, idClusterMap.values() ) {
             QMutableListIterator<Cell*> i(cluster->getCellsRef());
             while (i.hasNext()) {
                 if( i.next()->getTag() == tag )
                     i.remove();
             }
         }
-        fragments << new CellClusterImpl(component, _angle, _context);
+        fragments << new ClusterImpl(component, _angle, _context);
     }
     return fragments;
 }
 
-qreal CellClusterImpl::calcAngularMassWithNewParticle (QVector2D particlePos) const
+qreal ClusterImpl::calcAngularMassWithNewParticle (QVector2D particlePos) const
 {
 
     //calc new center
@@ -893,7 +893,7 @@ qreal CellClusterImpl::calcAngularMassWithNewParticle (QVector2D particlePos) co
     return aMass;
 }
 
-qreal CellClusterImpl::calcAngularMassWithoutUpdate () const
+qreal ClusterImpl::calcAngularMassWithoutUpdate () const
 {
 
     //calc new center
@@ -914,12 +914,12 @@ qreal CellClusterImpl::calcAngularMassWithoutUpdate () const
     return aMass;
 }
 
-bool CellClusterImpl::isEmpty() const
+bool ClusterImpl::isEmpty() const
 {
     return _cells.isEmpty();
 }
 
-QList< Cell* >& CellClusterImpl::getCellsRef ()
+QList< Cell* >& ClusterImpl::getCellsRef ()
 {
     return _cells;
 }
@@ -930,7 +930,7 @@ QList< Cell* >& CellClusterImpl::getCellsRef ()
 }
 */
 
-void CellClusterImpl::findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell2) const
+void ClusterImpl::findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell2) const
 {
     qreal bestR1(0.0);
     qreal bestR2(0.0);
@@ -953,17 +953,17 @@ void CellClusterImpl::findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell
     }
 }
 
-const quint64& CellClusterImpl::getId () const
+const quint64& ClusterImpl::getId () const
 {
     return _id;
 }
 
-void CellClusterImpl::setId (quint64 id)
+void ClusterImpl::setId (quint64 id)
 {
     _id = id;
 }
 
-QList< quint64 > CellClusterImpl::getCellIds () const
+QList< quint64 > ClusterImpl::getCellIds () const
 {
     QList< quint64 > ids;
     foreach( Cell* cell, _cells )
@@ -971,80 +971,80 @@ QList< quint64 > CellClusterImpl::getCellIds () const
     return ids;
 }
 
-QVector2D CellClusterImpl::getPosition () const
+QVector2D ClusterImpl::getPosition () const
 {
     return _pos;
 }
 
-void CellClusterImpl::setCenterPosition (QVector2D pos, bool updateTransform)
+void ClusterImpl::setCenterPosition (QVector2D pos, bool updateTransform)
 {
     _pos = pos;
     if( updateTransform )
         updateTransformationMatrix();
 }
 
-qreal CellClusterImpl::getAngle () const
+qreal ClusterImpl::getAngle () const
 {
     return _angle;
 }
 
-void CellClusterImpl::setAngle (qreal angle, bool updateTransform)
+void ClusterImpl::setAngle (qreal angle, bool updateTransform)
 {
     _angle = angle;
     if( updateTransform )
         updateTransformationMatrix();
 }
 
-QVector2D CellClusterImpl::getVelocity () const
+QVector2D ClusterImpl::getVelocity () const
 {
     return _vel;
 }
 
-void CellClusterImpl::setVelocity (QVector2D vel)
+void ClusterImpl::setVelocity (QVector2D vel)
 {
     _vel = vel;
 }
 
-qreal CellClusterImpl::getMass () const
+qreal ClusterImpl::getMass () const
 {
     return _cells.size();
 }
 
-qreal CellClusterImpl::getAngularVel () const
+qreal ClusterImpl::getAngularVel () const
 {
     return _angularVel;
 }
 
-qreal CellClusterImpl::getAngularMass () const
+qreal ClusterImpl::getAngularMass () const
 {
     return _angularMass;
 }
 
-void CellClusterImpl::setAngularVel (qreal vel)
+void ClusterImpl::setAngularVel (qreal vel)
 {
     _angularVel = vel;
 }
 
-void CellClusterImpl::updateTransformationMatrix ()
+void ClusterImpl::updateTransformationMatrix ()
 {
     _transform.setToIdentity();
     _transform.translate(_pos);
     _transform.rotate(_angle, 0.0, 0.0, 1.0);
 }
 
-QVector2D CellClusterImpl::relToAbsPos (QVector2D relPos) const
+QVector2D ClusterImpl::relToAbsPos (QVector2D relPos) const
 {
     return applyTransformation(relPos);
 }
 
-QVector2D CellClusterImpl::absToRelPos (QVector2D absPos) const
+QVector2D ClusterImpl::absToRelPos (QVector2D absPos) const
 {
     return applyInverseTransformation(absPos);
 }
 
 
 
-Cell* CellClusterImpl::findNearestCell (QVector2D pos) const
+Cell* ClusterImpl::findNearestCell (QVector2D pos) const
 {
     foreach( Cell* cell, _cells)
         if((calcPosition(cell, true)-pos).lengthSquared() < 0.5)
@@ -1052,14 +1052,14 @@ Cell* CellClusterImpl::findNearestCell (QVector2D pos) const
     return 0;
 }
 
-void CellClusterImpl::getConnectedComponent(Cell* cell, QList< Cell* >& component) const
+void ClusterImpl::getConnectedComponent(Cell* cell, QList< Cell* >& component) const
 {
     component.clear();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
     getConnectedComponent(cell, _context->getNumberGenerator()->getTag(), component);
 }
 
-void CellClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const
+void ClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const
 {
     if( cell->getTag() != tag ) {
         cell->setTag(tag);
@@ -1070,7 +1070,7 @@ void CellClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QLis
     }
 }
 
-void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const
+void ClusterImpl::radiation (qreal& energy, Cell* originCell, Particle*& energyParticle) const
 {
 	auto parameters = _context->getSimulationParameters();
 	auto numberGen = _context->getNumberGenerator();
@@ -1109,17 +1109,17 @@ void CellClusterImpl::radiation (qreal& energy, Cell* originCell, EnergyParticle
     }
 }
 
-CellClusterMetadata CellClusterImpl::getMetadata() const
+CellClusterMetadata ClusterImpl::getMetadata() const
 {
 	return _meta;
 }
 
-void CellClusterImpl::setMetadata(CellClusterMetadata metadata)
+void ClusterImpl::setMetadata(CellClusterMetadata metadata)
 {
 	_meta = metadata;
 }
 
-void CellClusterImpl::serializePrimitives (QDataStream& stream) const
+void ClusterImpl::serializePrimitives (QDataStream& stream) const
 {
     stream << _angle << _pos << _angularVel << _vel;
     /*stream << _cells.size();
@@ -1130,7 +1130,7 @@ void CellClusterImpl::serializePrimitives (QDataStream& stream) const
     stream << _id;
 }
 
-void CellClusterImpl::deserializePrimitives(QDataStream& stream)
+void ClusterImpl::deserializePrimitives(QDataStream& stream)
 {
 	stream >> _angle >> _pos >> _angularVel >> _vel;
 	stream >> _id;

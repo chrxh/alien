@@ -20,7 +20,7 @@ public:
 
 	Q_SIGNAL void dataReadyToRetrieve();
 	Q_SIGNAL void imageReady();
-	virtual DataChangeDescription const& retrieveData() = 0;
+	virtual DataDescription const& retrieveData() = 0;
 };
 
 #endif // SIMULATIONACCESS_H

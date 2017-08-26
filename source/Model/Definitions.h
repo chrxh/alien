@@ -9,9 +9,9 @@
 #include "DllExport.h"
 
 class Cell;
-class CellCluster;
+class Cluster;
 class UnitGrid;
-class EnergyParticle;
+class Particle;
 class Token;
 class CellFeature;
 class Unit;
@@ -44,9 +44,9 @@ class CellConnector;
 
 struct CellClusterHash
 {
-	std::size_t operator()(CellCluster* const& s) const;
+	std::size_t operator()(Cluster* const& s) const;
 };
-typedef std::unordered_set<CellCluster*, CellClusterHash> CellClusterSet;
+typedef std::unordered_set<Cluster*, CellClusterHash> CellClusterSet;
 
 struct CellHash
 {

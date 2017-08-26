@@ -2,8 +2,8 @@
 
 #include "Base/ServiceLocator.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
-#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Cluster.h"
+#include "Model/Entities/Particle.h"
 #include "Model/Entities/Token.h"
 #include "Model/Entities/EntityFactory.h"
 #include "Model/Physics/Physics.h"
@@ -30,7 +30,7 @@ namespace {
 CellFeature::ProcessingResult CellPropulsionImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
-    CellCluster* cluster(cell->getCluster());
+    Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
     quint8 cmd = tokenMem[Enums::Prop::IN] % 7;
     qreal angle = PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);

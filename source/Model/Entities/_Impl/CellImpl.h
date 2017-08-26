@@ -1,5 +1,4 @@
-#ifndef CELLIMPL_H
-#define CELLIMPL_H
+#pragma once
 
 #include "Model/Entities/Cell.h"
 
@@ -20,7 +19,7 @@ public:
 
 	virtual void setContext(UnitContext* context) override;
 
-	virtual CellChangeDescription getDescription(ResolveDescription const& resolveDescription) const override;
+	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const override;
 
     void registerFeatures (CellFeature* features) override;
     CellFeature* getFeatures () const override;
@@ -53,8 +52,8 @@ public:
     Token* takeTokenFromStack () override;
 	void mutationByChance() override;
 
-    void setCluster (CellCluster* cluster) override;
-    CellCluster* getCluster () const override;
+    void setCluster (Cluster* cluster) override;
+    Cluster* getCluster () const override;
     QVector2D calcPosition (bool metricCorrection = false) const override;
     void setAbsPosition (QVector2D pos) override;
     void setAbsPositionAndUpdateMap (QVector2D pos) override;
@@ -83,7 +82,7 @@ public:
     void deserializePrimitives(QDataStream& stream) override;
 
 private:
-    friend class CellCluster;
+    friend class Cluster;
 
 	UnitContext* _context = nullptr;
 	CellFeature* _features = nullptr;
@@ -98,7 +97,7 @@ private:
     quint64 _id = 0;
     int _protectionCounter = 0;
     QVector2D _relPos;
-    CellCluster* _cluster = nullptr;
+    Cluster* _cluster = nullptr;
     qreal _energy = 0.0;
 
     int _maxConnections = 0;
@@ -112,7 +111,4 @@ private:
 
 	CellMetadata _metadata;
 };
-
-#endif // CELLIMPL_H
-
 

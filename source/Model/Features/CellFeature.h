@@ -16,7 +16,7 @@ public:
     void registerNextFeature (CellFeature* nextFeature);
     struct ProcessingResult {
         bool decompose;
-        EnergyParticle* newEnergyParticle;
+        Particle* newEnergyParticle;
     };
     ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
 	void mutate();

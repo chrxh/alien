@@ -3,7 +3,7 @@
 #include <mutex>
 #include <QObject>
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 #include "Cuda/CudaInterface.cuh"
 #include "DefinitionsImpl.h"
 

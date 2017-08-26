@@ -1,19 +1,18 @@
-#ifndef ENERGYPARTICLEIMPL_H
-#define ENERGYPARTICLEIMPL_H
+#pragma once
 
-#include "Model/Entities/EnergyParticle.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/Particle.h"
+#include "Model/Entities/ChangeDescriptions.h"
 
-class EnergyParticleImpl
-	: public EnergyParticle
+class ParticleImpl
+	: public Particle
 {
 public:
-	EnergyParticleImpl(UnitContext* context);
-	EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
+	ParticleImpl(UnitContext* context);
+	ParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
-	virtual ParticleChangeDescription getDescription() const override;
+	virtual ParticleDescription getDescription() const override;
 
-	virtual bool processingMovement(CellCluster*& cluster) override;
+	virtual bool processingMovement(Cluster*& cluster) override;
 
 	virtual qreal getEnergy() const override;
 	virtual void setEnergy(qreal value) override;
@@ -35,7 +34,7 @@ public:
 
 private:
 	void move();
-	void collisionWithEnergyParticle(EnergyParticle* otherEnergy);
+	void collisionWithEnergyParticle(Particle* otherEnergy);
 	void collisionWithCell(Cell* cell);
 
 	CellChangeDescription getRandomCellDesciption(double energy) const;
@@ -47,4 +46,3 @@ private:
 	EnergyParticleMetadata _metadata;
 };
 
-#endif // ENERGYPARTICLEIMPL_H

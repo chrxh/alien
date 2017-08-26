@@ -264,6 +264,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODEL_LIB -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -D_WINDLL "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Model"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\Model\DllExport.h" />
+    <ClInclude Include="..\..\source\Model\Entities\Descriptions.h" />
     <ClInclude Include="..\..\source\Model\ModelBuilderFacade.h" />
     <ClInclude Include="..\..\source\Model\Entities\Timestamp.h" />
     <ClInclude Include="..\..\source\Model\ModelServices.h" />
@@ -587,15 +588,15 @@
     </CustomBuild>
     <ClInclude Include="..\..\source\Model\Definitions.h" />
     <ClInclude Include="..\..\source\Model\Entities\Cell.h" />
-    <ClInclude Include="..\..\source\Model\Entities\CellCluster.h" />
+    <ClInclude Include="..\..\source\Model\Entities\Cluster.h" />
     <ClInclude Include="..\..\source\Model\Entities\CellTO.h" />
-    <ClInclude Include="..\..\source\Model\Entities\Descriptions.h" />
-    <ClInclude Include="..\..\source\Model\Entities\EnergyParticle.h" />
+    <ClInclude Include="..\..\source\Model\Entities\ChangeDescriptions.h" />
+    <ClInclude Include="..\..\source\Model\Entities\Particle.h" />
     <ClInclude Include="..\..\source\Model\Entities\EntityFactory.h" />
     <ClInclude Include="..\..\source\Model\Entities\Token.h" />
-    <ClInclude Include="..\..\source\Model\Entities\_Impl\CellClusterImpl.h" />
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\ClusterImpl.h" />
     <ClInclude Include="..\..\source\Model\Entities\_Impl\CellImpl.h" />
-    <ClInclude Include="..\..\source\Model\Entities\_Impl\EnergyParticleImpl.h" />
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\ParticleImpl.h" />
     <ClInclude Include="..\..\source\Model\Entities\_Impl\EntityFactoryImpl.h" />
     <ClInclude Include="..\..\source\Model\Entities\_Impl\TokenImpl.h" />
     <ClInclude Include="..\..\source\Model\Features\CellFeature.h" />
@@ -667,9 +668,9 @@
     <ClCompile Include="..\..\source\Model\Definitions.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\CellTO.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\Timestamp.cpp" />
-    <ClCompile Include="..\..\source\Model\Entities\_Impl\CellClusterImpl.cpp" />
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\ClusterImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\_Impl\CellImpl.cpp" />
-    <ClCompile Include="..\..\source\Model\Entities\_Impl\EnergyParticleImpl.cpp" />
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\ParticleImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\_Impl\EntityFactoryImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\_Impl\TokenImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Features\CellFeature.cpp" />

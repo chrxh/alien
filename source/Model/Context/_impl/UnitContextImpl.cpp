@@ -3,8 +3,8 @@
 #include "Model/Context/EnergyParticleMap.h"
 #include "Model/Context/MapCompartment.h"
 #include "Model/Context/SimulationParameters.h"
-#include "Model/Entities/CellCluster.h"
-#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Cluster.h"
+#include "Model/Entities/Particle.h"
 #include "Model/Metadata/SymbolTable.h"
 
 #include "UnitContextImpl.h"
@@ -78,23 +78,23 @@ void UnitContextImpl::incTimestamp()
 	++_timestamp;
 }
 
-QList<CellCluster*>& UnitContextImpl::getClustersRef ()
+QList<Cluster*>& UnitContextImpl::getClustersRef ()
 {
     return _clusters;
 }
 
-QList<EnergyParticle*>& UnitContextImpl::getEnergyParticlesRef ()
+QList<Particle*>& UnitContextImpl::getEnergyParticlesRef ()
 {
     return _energyParticles;
 }
 
 void UnitContextImpl::deleteClustersAndEnergyParticles()
 {
-	foreach(CellCluster* cluster, _clusters) {
+	foreach(Cluster* cluster, _clusters) {
 		delete cluster;
 	}
 	_clusters.clear();
-	foreach(EnergyParticle* particle, _energyParticles) {
+	foreach(Particle* particle, _energyParticles) {
 		delete particle;
 	}
 	_energyParticles.clear();

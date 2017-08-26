@@ -22,7 +22,7 @@ public:
 
 	//advanced functions
 	virtual CellClusterSet getNearbyClusters(QVector2D const& pos, qreal r) const override;
-	virtual CellCluster* getNearbyClusterFast(QVector2D const& pos, qreal r, qreal minMass, qreal maxMass, CellCluster* exclude) const override;
+	virtual Cluster* getNearbyClusterFast(QVector2D const& pos, qreal r, qreal minMass, qreal maxMass, Cluster* exclude) const override;
 	using CellSelectFunction = bool(*)(Cell*);
 	virtual QList< Cell* > getNearbySpecificCells(QVector2D const& pos, qreal r, CellSelectFunction selection) const override;
 

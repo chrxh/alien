@@ -1,6 +1,6 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/Token.h"
 #include "Model/Features/CellFeature.h"
 #include "Model/Physics/Physics.h"
@@ -50,9 +50,9 @@ void CellImpl::setContext(UnitContext * context)
 	}
 }
 
-CellChangeDescription CellImpl::getDescription(ResolveDescription const& resolveDescription) const
+CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
-	CellChangeDescription result;
+	CellDescription result;
 	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections)
 		.setTokenBranchNumber(_tokenBranchNumber).setEnergy(_energy).setMetadata(_metadata);
 	if (resolveDescription.resolveCellLinks) {
@@ -324,12 +324,12 @@ void CellImpl::delAllTokens ()
     _newTokenStackPointer = 0;
 }
 
-void CellImpl::setCluster (CellCluster* cluster)
+void CellImpl::setCluster (Cluster* cluster)
 {
     _cluster = cluster;
 }
 
-CellCluster* CellImpl::getCluster() const
+Cluster* CellImpl::getCluster() const
 {
     return _cluster;
 }

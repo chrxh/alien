@@ -17,14 +17,14 @@ public:
 	virtual void serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const = 0;
 	virtual SymbolTable* deserializeSymbolTable(QDataStream& stream) const = 0;
 
-    virtual void serializeCellCluster(CellCluster* cluster, QDataStream& stream) const = 0;
-    virtual CellCluster* deserializeCellCluster(QDataStream& stream, UnitContext* context) const = 0;
+    virtual void serializeCellCluster(Cluster* cluster, QDataStream& stream) const = 0;
+    virtual Cluster* deserializeCellCluster(QDataStream& stream, UnitContext* context) const = 0;
 
     virtual void serializeFeaturedCell(Cell* cell, QDataStream& stream) const = 0;
     virtual Cell* deserializeFeaturedCell(QDataStream& stream, UnitContext* context) const = 0;
 
-    virtual void serializeEnergyParticle(EnergyParticle* particle, QDataStream& stream) const = 0;
-    virtual EnergyParticle* deserializeEnergyParticle(QDataStream& stream, UnitContext* context) const = 0;
+    virtual void serializeEnergyParticle(Particle* particle, QDataStream& stream) const = 0;
+    virtual Particle* deserializeEnergyParticle(QDataStream& stream, UnitContext* context) const = 0;
 
     virtual void serializeToken(Token* token, QDataStream& stream) const = 0;
     virtual Token* deserializeToken(QDataStream& stream, UnitContext* context) const = 0;
