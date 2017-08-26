@@ -20,7 +20,7 @@ public:
 
 	virtual void setContext(UnitContext* context) override;
 
-	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const override;
+	virtual CellChangeDescription getDescription(ResolveDescription const& resolveDescription) const override;
 
     void registerFeatures (CellFeature* features) override;
     CellFeature* getFeatures () const override;

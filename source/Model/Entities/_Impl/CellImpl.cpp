@@ -50,9 +50,9 @@ void CellImpl::setContext(UnitContext * context)
 	}
 }
 
-CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescription) const
+CellChangeDescription CellImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
-	CellDescription result;
+	CellChangeDescription result;
 	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections)
 		.setTokenBranchNumber(_tokenBranchNumber).setEnergy(_energy).setMetadata(_metadata);
 	if (resolveDescription.resolveCellLinks) {

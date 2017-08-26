@@ -13,14 +13,14 @@ void CellConnectorImpl::init(SpaceMetricApi *metric, SimulationParameters *param
 	_numberGen = numberGen;
 }
 
-void CellConnectorImpl::reconnect(DataDescription &data)
+void CellConnectorImpl::reconnect(DataChangeDescription &data)
 {
 	updateInternals(data);
 	updateConnectingCells(data);
 	reclustering(data);
 }
 
-void CellConnectorImpl::updateInternals(DataDescription const &data)
+void CellConnectorImpl::updateInternals(DataChangeDescription const &data)
 {
 	_navi.update(data);
 	_cellMap.clear();
@@ -35,7 +35,7 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 }
 
 
-void CellConnectorImpl::updateConnectingCells(DataDescription &data)
+void CellConnectorImpl::updateConnectingCells(DataChangeDescription &data)
 {
 	for (auto &clusterT : data.clusters) {
 		if (clusterT.isDeleted()) { continue; }
@@ -61,7 +61,7 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data)
 	}
 }
 
-void CellConnectorImpl::reclustering(DataDescription &data)
+void CellConnectorImpl::reclustering(DataChangeDescription &data)
 {
 	unordered_set<int> affectedClusterIndices;
 	int clusterIndex = 0;
@@ -88,7 +88,7 @@ void CellConnectorImpl::reclustering(DataDescription &data)
 	}
 }
 
-unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModifiedClusterIndices(DataDescription &data, int clusterIndex)
+unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModifiedClusterIndices(DataChangeDescription &data, int clusterIndex)
 {
 	auto &clusterT = data.clusters.at(clusterIndex);
 	auto &clusterD = clusterT.getValue();
@@ -100,11 +100,11 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 		remainingCellIdsOfCluster.insert(cellD.id);
 	}
 
-	vector<CellClusterDescription> newClusters;
+	vector<ClusterChangeDescription> newClusters;
 	bool firstRun = true;
 	while (!remainingCellIdsOfCluster.empty()) {
 		uint64_t remainingCellIdOfCluster = *remainingCellIdsOfCluster.begin();
-		CellClusterDescription newCluster;
+		ClusterChangeDescription newCluster;
 		lookUpCell(data, remainingCellIdOfCluster, newCluster, lookedUpCellIds, remainingCellIdsOfCluster);
 		if (!newCluster.cells.empty()) {
 			if (firstRun) {
@@ -147,7 +147,7 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 	return result;
 }
 
-void CellConnectorImpl::lookUpCell(DataDescription &data, uint64_t cellId, CellClusterDescription &newCluster
+void CellConnectorImpl::lookUpCell(DataChangeDescription &data, uint64_t cellId, ClusterChangeDescription &newCluster
 	, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds)
 {
 	if (lookedUpCellIds.find(cellId) != lookedUpCellIds.end()) {
@@ -167,15 +167,15 @@ void CellConnectorImpl::lookUpCell(DataDescription &data, uint64_t cellId, CellC
 	}
 }
 
-CellDescription & CellConnectorImpl::getCellDescRef(DataDescription &data, uint64_t cellId)
+CellChangeDescription & CellConnectorImpl::getCellDescRef(DataChangeDescription &data, uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-	CellClusterDescription &clusterDesc = data.clusters.at(clusterIndex).getValue();
+	ClusterChangeDescription &clusterDesc = data.clusters.at(clusterIndex).getValue();
 	return clusterDesc.cells[cellIndex].getValue();
 }
 
-void CellConnectorImpl::removeConnections(DataDescription &data, CellDescription &cellDesc)
+void CellConnectorImpl::removeConnections(DataChangeDescription &data, CellChangeDescription &cellDesc)
 {
 	if (cellDesc.connectingCells.isInitialized()) {
 		auto &connectingCellIds = cellDesc.connectingCells.getValue();
@@ -188,7 +188,7 @@ void CellConnectorImpl::removeConnections(DataDescription &data, CellDescription
 	}
 }
 
-void CellConnectorImpl::establishNewConnectionsWithNeighborCells(DataDescription & data, CellDescription & cellDesc)
+void CellConnectorImpl::establishNewConnectionsWithNeighborCells(DataChangeDescription & data, CellChangeDescription & cellDesc)
 {
 	int r = static_cast<int>(std::ceil(_parameters->cellMaxDistance));
 	IntVector2D pos = cellDesc.pos.getValue();
@@ -204,7 +204,7 @@ void CellConnectorImpl::establishNewConnectionsWithNeighborCells(DataDescription
 	}
 }
 
-void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescription &cell2)
+void CellConnectorImpl::establishNewConnection(CellChangeDescription &cell1, CellChangeDescription &cell2)
 {
 	if (cell1.id == cell2.id) {
 		return;
@@ -230,7 +230,7 @@ void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescr
 	}
 }
 
-double CellConnectorImpl::getDistance(CellDescription &cell1, CellDescription &cell2)
+double CellConnectorImpl::getDistance(CellChangeDescription &cell1, CellChangeDescription &cell2)
 {
 	auto &pos1 = cell1.pos.getValue();
 	auto &pos2 = cell2.pos.getValue();

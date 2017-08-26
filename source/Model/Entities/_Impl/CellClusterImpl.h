@@ -17,7 +17,7 @@ public:
 
 	virtual void setContext(UnitContext* context) override;
 
-	virtual CellClusterDescription getDescription(ResolveDescription const& resolveDescription) const override;
+	virtual ClusterChangeDescription getDescription(ResolveDescription const& resolveDescription) const override;
 
     void clearCellsFromMap () override;
     void clearCellFromMap (Cell* cell) override;
