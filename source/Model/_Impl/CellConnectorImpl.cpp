@@ -51,7 +51,6 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data)
 	for (auto &clusterT : data.clusters) {
 		if (clusterT.isDeleted()) { continue; }
 		auto &clusterD = clusterT.getValue();
-		int cellIndex = 0;
 		for (auto &cellT : clusterD.cells) {
 			if (cellT.isDeleted()) { continue; }
 			auto &cellD = cellT.getValue();
@@ -226,8 +225,10 @@ void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescr
 	}
 	auto &connections1 = cell1.connectingCells.getValue();
 	auto &connections2 = cell2.connectingCells.getValue();
-	connections1.push_back(cell2.id);
-	connections2.push_back(cell1.id);
+	if (std::find(connections1.begin(), connections1.end(), cell2.id) == connections1.end()) {
+		connections1.push_back(cell2.id);
+		connections2.push_back(cell1.id);
+	}
 }
 
 double CellConnectorImpl::getDistance(CellDescription &cell1, CellDescription &cell2)
