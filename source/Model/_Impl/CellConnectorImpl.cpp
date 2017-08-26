@@ -119,7 +119,6 @@ unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModified
 	}
 
 	//TODO: restliche Clusterdaten füllen (pos, ...)
-	//ERR: Verbindung lösen und dann neu verbinden klappt noch nicht
 
 	unordered_set<int> discardClusterIndices;
 	for (uint64_t lookedUpCellId : lookedUpCellIds) {

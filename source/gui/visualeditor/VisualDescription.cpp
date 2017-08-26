@@ -144,7 +144,9 @@ void VisualDescription::updateAfterCellReconnections()
 
 	_selectedClusterIds.clear();
 	for (uint64_t selectedCellId : _selectedCellIds) {
-		_selectedClusterIds.insert(_navi.clusterIdsByCellIds.at(selectedCellId));
+		if (_navi.clusterIdsByCellIds.find(selectedCellId) != _navi.clusterIdsByCellIds.end()) {
+			_selectedClusterIds.insert(_navi.clusterIdsByCellIds.at(selectedCellId));
+		}
 	}
 }
 

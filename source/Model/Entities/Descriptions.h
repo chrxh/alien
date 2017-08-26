@@ -99,11 +99,17 @@ struct CellClusterDescription
 		metadata = otherCluster.metadata;
 
 		map<uint64_t, TrackerElement<CellDescription>> cellTrackersByIds;
+		vector<TrackerElement<CellDescription>> deletedCellTrackers;
 		for (auto const &cellT : cells) {
-			cellTrackersByIds.insert_or_assign(cellT->id, cellT);
+			if (!cellT.isDeleted()) {
+				cellTrackersByIds.insert_or_assign(cellT->id, cellT);
+			}
+			else {
+				deletedCellTrackers.push_back(cellT);
+			}
 		}
 		
-		cells.clear();
+		cells = deletedCellTrackers;
 		for (auto cellT : otherCluster.cells) {
 			auto cellDescIter = cellTrackersByIds.find(cellT->id);
 			if (cellDescIter != cellTrackersByIds.end()) {
