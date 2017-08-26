@@ -9,7 +9,7 @@ CellDescription & VisualDescription::getCellDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-	ClusterDescription &clusterDesc = _data.clusters[clusterIndex];
+	ClusterDescription &clusterDesc = _data.clusters.at(clusterIndex);
 	return clusterDesc.cells.at(cellIndex);
 }
 

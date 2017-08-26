@@ -134,13 +134,16 @@ struct DescriptionNavigationMaps
 				clusterIndicesByCellIds.insert_or_assign(cell.id, clusterIndex);
 				cellIndicesByCellIds.insert_or_assign(cell.id, cellIndex);
 				cellIds.insert(cell.id);
+				++cellIndex;
 			}
+			++clusterIndex;
 		}
 
 		int particleIndex = 0;
 		for (auto const &particle : data.particles) {
 			particleIndicesByParticleIds.insert_or_assign(particle.id, particleIndex);
 			particleIds.insert(particle.id);
+			++particleIndex;
 		}
 	}
 };
