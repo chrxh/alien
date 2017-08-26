@@ -8,7 +8,7 @@
 #include "TokenImpl.h"
 #include "EntityFactoryImpl.h"
 
-CellCluster* EntityFactoryImpl::build(CellClusterDescription const& desc, UnitContext* context) const
+CellCluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, UnitContext* context) const
 {
 	list<Cell*> cells;
 	map<uint64_t, Cell*> cellsByIds;
@@ -36,7 +36,7 @@ CellCluster* EntityFactoryImpl::build(CellClusterDescription const& desc, UnitCo
 		, desc.angularVel.getValueOr(0.0), desc.vel.getValueOr(QVector2D()), context);
 }
 
-Cell * EntityFactoryImpl::build(CellDescription const & desc, UnitContext * context) const
+Cell * EntityFactoryImpl::build(CellChangeDescription const & desc, UnitContext * context) const
 {
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
 	auto const& energy = desc.energy.getValue();
@@ -64,7 +64,7 @@ Token * EntityFactoryImpl::build(TokenDescription const & desc, UnitContext * co
 	return new TokenImpl(context, energy, data);
 }
 
-EnergyParticle* EntityFactoryImpl::build(EnergyParticleDescription const& desc, UnitContext* context) const
+EnergyParticle* EntityFactoryImpl::build(ParticleChangeDescription const& desc, UnitContext* context) const
 {
 	auto const& pos = desc.pos.getValue();
 	auto const&vel = desc.vel.getValueOr({ 0.0, 0.0 });

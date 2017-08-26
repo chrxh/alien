@@ -16,10 +16,10 @@ public:
 
 	virtual void init(SimulationContextApi* context) override;
 
-	virtual void updateData(DataDescription const &desc) override;
+	virtual void updateData(DataChangeDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	virtual void requireImage(IntRect rect, QImage* target) override;
-	virtual DataDescription const& retrieveData() override;
+	virtual DataChangeDescription const& retrieveData() override;
 
 	virtual void unregister() override;
 	virtual void accessToUnits() override;
@@ -46,8 +46,8 @@ private:
 	bool _imageRequired = false;
 	QImage* _requiredImage = nullptr;
 
-	DataDescription _dataCollected;
-	DataDescription _dataToUpdate;
+	DataChangeDescription _dataCollected;
+	DataChangeDescription _dataToUpdate;
 };
 
 #endif // SIMULATIONACCESSIMPL_H

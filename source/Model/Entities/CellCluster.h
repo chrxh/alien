@@ -15,7 +15,7 @@ public:
 	CellCluster(UnitContext* context) : Timestamp(context) {}
 	virtual ~CellCluster() = default;
 
-	virtual CellClusterDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
+	virtual ClusterChangeDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
 
     virtual void clearCellsFromMap () = 0;
     virtual void clearCellFromMap (Cell* cell) = 0;

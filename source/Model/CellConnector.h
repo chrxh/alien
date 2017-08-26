@@ -9,6 +9,6 @@ public:
 	CellConnector(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CellConnector() = default;
 
-	virtual void reconnect(DataDescription &data) = 0;
+	virtual void reconnect(DataChangeDescription &data) = 0;
 };
 

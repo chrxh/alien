@@ -31,7 +31,7 @@ void SimulationAccessImpl::init(SimulationContextApi * context)
 	_registered = true;
 }
 
-void SimulationAccessImpl::updateData(DataDescription const & desc)
+void SimulationAccessImpl::updateData(DataChangeDescription const & desc)
 {
 	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
 	_dataToUpdate.particles.insert(_dataToUpdate.particles.end(), desc.particles.begin(), desc.particles.end());
@@ -60,7 +60,7 @@ void SimulationAccessImpl::requireImage(IntRect rect, QImage * target)
 	}
 }
 
-DataDescription const& SimulationAccessImpl::retrieveData()
+DataChangeDescription const& SimulationAccessImpl::retrieveData()
 {
 	return _dataCollected;
 }

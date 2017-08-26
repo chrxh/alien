@@ -31,9 +31,9 @@ EnergyParticleImpl::EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D ve
 	_vel = vel;
 }
 
-EnergyParticleDescription EnergyParticleImpl::getDescription() const
+ParticleChangeDescription EnergyParticleImpl::getDescription() const
 {
-	EnergyParticleDescription result;
+	ParticleChangeDescription result;
 	result.setId(_id).setPos(_pos).setEnergy(_energy);
 	return result;
 }
@@ -85,7 +85,7 @@ bool EnergyParticleImpl::processingMovement(CellCluster*& cluster)
 		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		CellMetadata meta;
 		meta.color = _metadata.color;
-		auto desc = CellClusterDescription().setPos(_pos).setVel(_vel)
+		auto desc = ClusterChangeDescription().setPos(_pos).setVel(_vel)
 			.addCell(getRandomCellDesciption(eNew).setMetadata(meta));
 		cluster = factory->build(desc, _context);
 		_energy = 0;
@@ -112,7 +112,7 @@ void EnergyParticleImpl::collisionWithCell(Cell* cell)
 	_energy = 0;
 }
 
-CellDescription EnergyParticleImpl::getRandomCellDesciption(double energy) const
+CellChangeDescription EnergyParticleImpl::getRandomCellDesciption(double energy) const
 {
 	auto parameters = _context->getSimulationParameters();
 	int randomMaxConnections = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxBonds + 1);
@@ -122,7 +122,7 @@ CellDescription EnergyParticleImpl::getRandomCellDesciption(double energy) const
 		randomData[i] = _context->getNumberGenerator()->getRandomInt(256);
 	}
 	Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(_context->getNumberGenerator()->getRandomInt(Enums::CellFunction::_COUNTER));
-	return CellDescription().setEnergy(energy).setCellFunction(CellFunctionDescription().setType(randomCellFunction).setData(randomData))
+	return CellChangeDescription().setEnergy(energy).setCellFunction(CellFunctionDescription().setType(randomCellFunction).setData(randomData))
 		.setMaxConnections(randomMaxConnections).setTokenBranchNumber(randomTokenAccessNumber);
 }
 

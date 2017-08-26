@@ -11,7 +11,7 @@ public:
 	EnergyParticleImpl(UnitContext* context);
 	EnergyParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
-	virtual EnergyParticleDescription getDescription() const override;
+	virtual ParticleChangeDescription getDescription() const override;
 
 	virtual bool processingMovement(CellCluster*& cluster) override;
 
@@ -38,7 +38,7 @@ private:
 	void collisionWithEnergyParticle(EnergyParticle* otherEnergy);
 	void collisionWithCell(Cell* cell);
 
-	CellDescription getRandomCellDesciption(double energy) const;
+	CellChangeDescription getRandomCellDesciption(double energy) const;
 
 	qreal _energy = 0.0;
 	QVector2D _pos;

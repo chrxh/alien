@@ -14,7 +14,7 @@ public:
 	EnergyParticle(UnitContext* context) : Timestamp(context) {}
 	virtual ~EnergyParticle() = default;
 
-	virtual EnergyParticleDescription getDescription() const = 0;
+	virtual ParticleChangeDescription getDescription() const = 0;
 
     virtual bool processingMovement (CellCluster*& cluster) = 0;
 

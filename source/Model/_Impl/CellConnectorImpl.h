@@ -12,23 +12,23 @@ public:
 
 	virtual void init(SpaceMetricApi *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
-	virtual void reconnect(DataDescription &data) override;
+	virtual void reconnect(DataChangeDescription &data) override;
 
 private:
-	void updateInternals(DataDescription const &data);
-	void updateConnectingCells(DataDescription &data);
-	void reclustering(DataDescription &data);
+	void updateInternals(DataChangeDescription const &data);
+	void updateConnectingCells(DataChangeDescription &data);
+	void reclustering(DataChangeDescription &data);
 
-	CellDescription& getCellDescRef(DataDescription &data, uint64_t cellId);
-	void removeConnections(DataDescription &data, CellDescription &cellDesc);
-	void establishNewConnectionsWithNeighborCells(DataDescription &data, CellDescription &cellDesc);
-	void establishNewConnection(CellDescription &cell1, CellDescription &cell2);
-	double getDistance(CellDescription &cell1, CellDescription &cell2);
+	CellChangeDescription& getCellDescRef(DataChangeDescription &data, uint64_t cellId);
+	void removeConnections(DataChangeDescription &data, CellChangeDescription &cellDesc);
+	void establishNewConnectionsWithNeighborCells(DataChangeDescription &data, CellChangeDescription &cellDesc);
+	void establishNewConnection(CellChangeDescription &cell1, CellChangeDescription &cell2);
+	double getDistance(CellChangeDescription &cell1, CellChangeDescription &cell2);
 
 	list<uint64_t> getCellIdsAtPos(IntVector2D const &pos);
 
-	unordered_set<int> reclusteringSingleClusterAndReturnModifiedClusterIndices(DataDescription &data, int clusterIndex);
-	void lookUpCell(DataDescription &data, uint64_t cellId, CellClusterDescription &newCluster
+	unordered_set<int> reclusteringSingleClusterAndReturnModifiedClusterIndices(DataChangeDescription &data, int clusterIndex);
+	void lookUpCell(DataChangeDescription &data, uint64_t cellId, ClusterChangeDescription &newCluster
 		, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
 
 	SpaceMetricApi *_metric = nullptr;
