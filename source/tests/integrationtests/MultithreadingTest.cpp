@@ -92,9 +92,9 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 
 	_parameters->radiationProb = 0.0;
 
-	DataDescription desc;
-	desc.addCellCluster(CellClusterDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
-		.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy)));
+	DataChangeDescription desc;
+	desc.addCellCluster(ClusterChangeDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
+		.addCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy)));
 	access->updateData(desc);
 
 	runSimulation(300);
@@ -103,7 +103,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	
 	ResolveDescription resolveDesc;
 	access->requireData(rect, resolveDesc);
-	DataDescription data = access->retrieveData();
+	DataChangeDescription data = access->retrieveData();
 	ASSERT_EQ(1, data.clusters.size()) << "Wrong number of clusters.";
 	auto const& cluster = data.clusters[0].getValue();
 	ASSERT_PRED_FORMAT2(predEqualVectorMediumPrecision, QVector2D(400, 200), cluster.pos.getValue());
@@ -116,11 +116,11 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto access = facade->buildSimulationAccess(_context);
-	DataDescription desc;
+	DataChangeDescription desc;
 	for (int i = 0; i < 10000; ++i) {
-		desc.addCellCluster(CellClusterDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
+		desc.addCellCluster(ClusterChangeDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
 			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5 ))
-			.addCell(CellDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
+			.addCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
 	}
 	access->updateData(desc);
 

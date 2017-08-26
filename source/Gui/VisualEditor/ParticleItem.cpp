@@ -6,13 +6,13 @@
 #include "ParticleItem.h"
 #include "CoordinateSystem.h"
 
-ParticleItem::ParticleItem (ItemConfig* config, EnergyParticleDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
+ParticleItem::ParticleItem (ItemConfig* config, ParticleChangeDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
     : AbstractItem(parent)
 {
 	update(desc);
 }
 
-void ParticleItem::update(EnergyParticleDescription const & desc)
+void ParticleItem::update(ParticleChangeDescription const & desc)
 {
 	_id = desc.id;
 	auto pos = CoordinateSystem::modelToScene(desc.pos.getValue());

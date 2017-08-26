@@ -14,10 +14,10 @@ public:
 
 	virtual void init(SimulationContextApi* context) override;
 
-	virtual void updateData(DataDescription const &desc) override;
+	virtual void updateData(DataChangeDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	virtual void requireImage(IntRect rect, QImage* target) override;
-	virtual DataDescription const& retrieveData() override;
+	virtual DataChangeDescription const& retrieveData() override;
 
 private:
 	Q_SLOT void dataReadyToRetrieveFromGpu();
@@ -33,6 +33,6 @@ private:
 	ResolveDescription _resolveDesc;
 	QImage* _requiredImage = nullptr;
 
-	DataDescription _dataCollected;
+	DataChangeDescription _dataCollected;
 };
 

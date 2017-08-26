@@ -44,18 +44,18 @@ void WorkerForGpu::unlockData()
 }
 
 /*
-void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolveDesc, DataDescription & result)
+void GpuWorker::getData(IntRect const & rect, ResolveDescription const & resolveDesc, DataChangeDescription & result)
 {
 	result.clear();
 	CudaData data = cudaGetDataRef();
 	
 	for (int i = 0; i < data.numClusters; ++i) {
-		CellClusterDescription clusterDesc;
+		ClusterChangeDescription clusterDesc;
 		CudaCellCluster temp = data.clusters[i];
 		if (rect.isContained({ static_cast<int>(data.clusters[i].pos.x), static_cast<int>(data.clusters[i].pos.y) }))
 		for (int j = 0; j < data.clusters[i].numCells; ++j) {
 			auto pos = data.clusters[i].cells[j].absPos;
-			clusterDesc.addCell(CellDescription().setPos({ static_cast<float>(pos.x), static_cast<float>(pos.y) }).setMetadata(CellMetadata()).setEnergy(100.0f));
+			clusterDesc.addCell(CellChangeDescription().setPos({ static_cast<float>(pos.x), static_cast<float>(pos.y) }).setMetadata(CellMetadata()).setEnergy(100.0f));
 		}
 		result.addCellCluster(clusterDesc);
 	}
@@ -83,7 +83,7 @@ void GpuWorker::getImage(IntRect const & rect, QImage * image)
 	CudaCellCluster* clusters;
 	cudaGetClustersRef(numCLusters, clusters);
 	for (int i = 0; i < numCLusters; ++i) {
-		CellClusterDescription clusterDesc;
+		ClusterChangeDescription clusterDesc;
 		CudaCellCluster temp = clusters[i];
 		if (rect.isContained({ static_cast<int>(clusters[i].pos.x), static_cast<int>(clusters[i].pos.y) }))
 			for (int j = 0; j < clusters[i].numCells; ++j) {

@@ -8,13 +8,13 @@
 #include "CellItem.h"
 #include "CoordinateSystem.h"
 
-CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
+CellItem::CellItem (ItemConfig* config, CellChangeDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
     : AbstractItem(parent), _config(config)
 {
 	update(desc);
 }
 
-void CellItem::update(CellDescription const &desc)
+void CellItem::update(CellChangeDescription const &desc)
 {
 	_desc = desc;
 	auto pos = CoordinateSystem::modelToScene(desc.pos.getValueOrDefault());

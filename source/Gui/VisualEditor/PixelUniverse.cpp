@@ -147,7 +147,7 @@ namespace
 	}
 }
 
-void PixelUniverse::displayClusters(DataDescription const& data) const
+void PixelUniverse::displayClusters(DataChangeDescription const& data) const
 {
 	auto space = _controller->getContext()->getSpaceMetric();
 	for (auto const& clusterTracker : data.clusters) {
@@ -163,7 +163,7 @@ void PixelUniverse::displayClusters(DataDescription const& data) const
 	}
 }
 
-void PixelUniverse::displayParticles(DataDescription const & data) const
+void PixelUniverse::displayParticles(DataChangeDescription const & data) const
 {
 	auto space = _controller->getContext()->getSpaceMetric();
 	for (auto const& particleTracker : data.particles) {

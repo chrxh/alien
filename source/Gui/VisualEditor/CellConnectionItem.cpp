@@ -8,7 +8,7 @@
 #include "CellConnectionItem.h"
 #include "CoordinateSystem.h"
 
-CellConnectionItem::CellConnectionItem(ItemConfig* config, CellDescription const & cell1, CellDescription const & cell2, QGraphicsItem * parent)
+CellConnectionItem::CellConnectionItem(ItemConfig* config, CellChangeDescription const & cell1, CellChangeDescription const & cell2, QGraphicsItem * parent)
 	: AbstractItem(parent), _config(config)
 {
 	QGraphicsItem::setZValue(-1.0);
@@ -24,7 +24,7 @@ CellConnectionGraphicsItem::CellConnectionGraphicsItem (qreal x1, qreal y1, qrea
 }
 */
 
-void CellConnectionItem::update(CellDescription const & cell1, CellDescription const & cell2)
+void CellConnectionItem::update(CellChangeDescription const & cell1, CellChangeDescription const & cell2)
 {
 	auto pos1 = CoordinateSystem::modelToScene(cell1.pos.getValue());
 	auto pos2 = CoordinateSystem::modelToScene(cell2.pos.getValue());
