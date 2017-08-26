@@ -12,10 +12,10 @@ public:
         B_TO_A_CONNECTION
     };
 
-	CellConnectionItem(ItemConfig *config, CellDescription const &cell1, CellDescription const &cell2, QGraphicsItem *parent = nullptr);
+	CellConnectionItem(ItemConfig *config, CellChangeDescription const &cell1, CellChangeDescription const &cell2, QGraphicsItem *parent = nullptr);
 	virtual ~CellConnectionItem() = default;
 
-	void update(CellDescription const &cell1, CellDescription const &cell2);
+	void update(CellChangeDescription const &cell1, CellChangeDescription const &cell2);
 
     QRectF boundingRect () const;
     void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
