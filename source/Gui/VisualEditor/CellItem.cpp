@@ -66,6 +66,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
         painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.5), CoordinateSystem::modelToScene(0.5));
 
     //draw token
+/*
 	int numToken = getNumToken();
     if( numToken > 0 ) {
         if( _focusState == NO_FOCUS )
@@ -97,6 +98,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 		painter->drawText(QRectF(CoordinateSystem::modelToScene(-0.49), CoordinateSystem::modelToScene(-0.47)
 			, CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0)), Qt::AlignCenter, QString::number(getBranchNumber()));
 	}
+*/
 
 }
 

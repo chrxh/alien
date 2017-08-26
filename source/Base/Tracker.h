@@ -14,38 +14,67 @@ template<typename T>
 class Tracker
 {
 private:
-	boost::optional<T> _value;
+	T _value;
 	bool _isModified = false;
+	bool _isInitialized = false;
 
 public:
 	Tracker() = default;
-	Tracker(T const &v) : _initialValue(v), _value(v) {}
+	Tracker(T const &v) : _isInitialized(true), _value(v) {}
 
 	void init(T const& v)
 	{
 		_value = v;
 		_isModified = false;
+		_isInitialized = true;
 	}
 
-	T* operator->() { return _value.get(); }
-	T const* operator->() const { return _value->get; }
+	T* operator->()
+	{
+		if (!_isInitialized) {
+			throw std::exception("value not initialized");
+		}
+		return _value;
+	}
+	T const* operator->() const {
+		if (!_isInitialized) {
+			throw std::exception("value not initialized");
+		}
+		return _value;
+	}
 
 	bool isModified() const { return _isModified; }
-	bool isInitialized() const { return _value.is_initialized(); }
-	T const& getValue() const { return _value.get(); }
+	bool isInitialized() const { return _isInitialized; }
+	T const& getValue() const
+	{
+		if (!_isInitialized) {
+			throw std::exception("value not initialized");
+		}
+		return _value;
+	}
 	T & getValue(TrackerUpdate update = TrackerUpdate::No)
 	{
+		if (!_isInitialized) {
+			throw std::exception("value not initialized");
+		}
 		if (update == TrackerUpdate::Yes) {
 			_isModified = true;
 		}
-		return _value.get();
+		return _value;
 	}
-	T const& getValueOr(T const& d) const { return _value.get_value_or(d); }
-	T const& getValueOrDefault() const { return _value.get_value_or(T()); }
+	T const& getValueOr(T const& d) const
+	{
+		if (_isInitialized) {
+			return _value;
+		}
+		return d;
+	}
+	T const& getValueOrDefault() const { return getValueOr(T()); }
 	Tracker& setValue(T const& v)
 	{
 		_value = v;
 		_isModified = true;
+		_isInitialized = true;
 		return *this;
 	}
 	void setAsUnmodified()
@@ -54,8 +83,8 @@ public:
 	}
 	void reset()
 	{
-		_value.reset();
 		_isModified = false;
+		_isInitialized = false;
 	}
 };
 
