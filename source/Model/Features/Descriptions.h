@@ -1,5 +1,4 @@
-#ifndef FEATURE_DESCRIPTIONS_H
-#define FEATURE_DESCRIPTIONS_H
+#pragma once
 
 #include "Model/Definitions.h"
 #include "Model/Features/CellFeatureEnums.h"
@@ -13,4 +12,3 @@ struct CellFunctionDescription
 	CellFunctionDescription& setData(QByteArray const &value) { data = value; return *this; }
 };
 
-#endif // FEATURE_DESCRIPTIONS_H

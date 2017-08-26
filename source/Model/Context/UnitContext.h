@@ -25,8 +25,8 @@ public:
 	virtual uint64_t getTimestamp() const = 0;
 	virtual void incTimestamp() = 0;
 
-	virtual QList<CellCluster*>& getClustersRef() = 0;
-	virtual QList<EnergyParticle*>& getEnergyParticlesRef() = 0;
+	virtual QList<Cluster*>& getClustersRef() = 0;
+	virtual QList<Particle*>& getEnergyParticlesRef() = 0;
 };
 
 #endif // UNITCONTEXT_H

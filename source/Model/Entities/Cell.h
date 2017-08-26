@@ -1,10 +1,9 @@
-#ifndef CELL_H
-#define CELL_H
+#pragma once
 
 #include <QVector2D>
 
 #include "Model/Definitions.h"
-#include "Descriptions.h"
+#include "ChangeDescriptions.h"
 
 class Cell
 {
@@ -13,7 +12,7 @@ public:
 
 	virtual void setContext(UnitContext* context) = 0;
 
-	virtual CellChangeDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
+	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
 
     virtual void registerFeatures (CellFeature* features) = 0;
     virtual CellFeature* getFeatures () const = 0;
@@ -46,8 +45,8 @@ public:
     virtual void addToken (Token* token, ActivateToken act = ActivateToken::NOW, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::YES) = 0;
     virtual void delAllTokens () = 0;
 
-    virtual void setCluster (CellCluster* cluster) = 0;
-    virtual CellCluster* getCluster () const = 0;
+    virtual void setCluster (Cluster* cluster) = 0;
+    virtual Cluster* getCluster () const = 0;
     virtual QVector2D calcPosition (bool metricCorrection = false) const = 0;
     virtual void setAbsPosition (QVector2D pos) = 0;
     virtual void setAbsPositionAndUpdateMap (QVector2D pos) = 0;
@@ -78,4 +77,3 @@ public:
     virtual void deserializePrimitives(QDataStream& stream) = 0;
 };
 
-#endif // CELL_H

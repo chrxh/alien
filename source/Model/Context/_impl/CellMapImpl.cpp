@@ -4,7 +4,7 @@
 #include "Model/Context/UnitContext.h"
 #include "Model/Settings.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 
 #include "CellMapImpl.h"
 
@@ -124,14 +124,14 @@ CellClusterSet CellMapImpl::getNearbyClusters(QVector2D const& pos, qreal r) con
 	return clusters;
 }
 
-CellCluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, qreal minMass, qreal maxMass, CellCluster * exclude) const
+Cluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, qreal minMass, qreal maxMass, Cluster * exclude) const
 {
 	int step = qCeil(qSqrt(minMass + ALIEN_PRECISION)) + 3;  //horizontal or vertical length of cell cluster >= minDim
 	int rc = qCeil(r);
 	qreal rs = r*r + ALIEN_PRECISION;
 
 	//grid scan
-	CellCluster* closestCluster = 0;
+	Cluster* closestCluster = 0;
 	qreal closestClusterDist = 0.0;
 
 	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
@@ -140,7 +140,7 @@ CellCluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, 
 			if (static_cast<qreal>(rx*rx + ry*ry) < rs) {
 				Cell*& cell = locateCell(_metric->shiftPosition(intPos, { rx, ry }));
 				if (cell) {
-					CellCluster* cluster = cell->getCluster();
+					Cluster* cluster = cell->getCluster();
 					if (cluster != exclude) {
 
 						//compare masses

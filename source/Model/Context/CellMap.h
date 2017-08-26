@@ -21,7 +21,7 @@ public:
 
 	//advanced functions
 	virtual CellClusterSet getNearbyClusters(QVector2D const& pos, qreal r) const = 0;
-	virtual CellCluster* getNearbyClusterFast(QVector2D const& pos, qreal r, qreal minMass, qreal maxMass, CellCluster* exclude) const = 0;
+	virtual Cluster* getNearbyClusterFast(QVector2D const& pos, qreal r, qreal minMass, qreal maxMass, Cluster* exclude) const = 0;
 	using CellSelectFunction = bool(*)(Cell*);
 	virtual QList< Cell* > getNearbySpecificCells(QVector2D const& pos, qreal r, CellSelectFunction selection) const = 0;
 

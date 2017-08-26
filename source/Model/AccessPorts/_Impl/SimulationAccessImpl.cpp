@@ -1,18 +1,18 @@
 #include <QImage>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 #include "Model/Entities/EntityFactory.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Particle.h"
 #include "Model/Context/SimulationContext.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/UnitThreadController.h"
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/Unit.h"
 #include "Model/Context/SpaceMetric.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 
 #include "SimulationAccessImpl.h"
 
@@ -60,7 +60,7 @@ void SimulationAccessImpl::requireImage(IntRect rect, QImage * target)
 	}
 }
 
-DataChangeDescription const& SimulationAccessImpl::retrieveData()
+DataDescription const& SimulationAccessImpl::retrieveData()
 {
 	return _dataCollected;
 }
@@ -191,7 +191,7 @@ void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 	for (auto const& cluster : clusters) {
 		auto pos = metric->correctPositionAndConvertToIntVector(cluster->getPosition());
 		if (_requiredRect.isContained(pos)) {
-			_dataCollected.clusters.emplace_back(cluster->getDescription(_resolveDesc));
+			_dataCollected.addCluster(cluster->getDescription(_resolveDesc));
 		}
 	}
 }
@@ -203,7 +203,7 @@ void SimulationAccessImpl::collectParticlesFromUnit(Unit * unit)
 	for (auto const& particle : particles) {
 		auto pos = metric->correctPositionAndConvertToIntVector(particle->getPosition());
 		if (_requiredRect.isContained(pos)) {
-			_dataCollected.particles.emplace_back(particle->getDescription());
+			_dataCollected.addParticle(particle->getDescription());
 		}
 	}
 }

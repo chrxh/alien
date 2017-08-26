@@ -1,22 +1,22 @@
 #include "VisualDescription.h"
 
-DataChangeDescription & VisualDescription::getDataRef()
+DataDescription & VisualDescription::getDataRef()
 {
 	return _data;
 }
 
-CellChangeDescription & VisualDescription::getCellDescRef(uint64_t cellId)
+CellDescription & VisualDescription::getCellDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-	ClusterChangeDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
-	return clusterDesc.cells[cellIndex].getValue();
+	ClusterDescription &clusterDesc = _data.clusters[clusterIndex];
+	return clusterDesc.cells.at(cellIndex);
 }
 
-ParticleChangeDescription & VisualDescription::getParticleDescRef(uint64_t particleId)
+ParticleDescription & VisualDescription::getParticleDescRef(uint64_t particleId)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
-	return _data.particles[particleIndex].getValue();
+	return _data.particles.at(particleIndex);
 }
 
 bool VisualDescription::isCellPresent(uint64_t cellId)
@@ -29,7 +29,7 @@ bool VisualDescription::isParticlePresent(uint64_t particleId)
 	return _navi.particleIds.find(particleId) != _navi.particleIds.end();
 }
 
-void VisualDescription::setData(DataChangeDescription const &data)
+void VisualDescription::setData(DataDescription const &data)
 {
 	updateInternals(data);
 }
@@ -72,21 +72,27 @@ bool VisualDescription::isInExtendedSelection(uint64_t id) const
 	return false;
 }
 
+list<uint64_t> VisualDescription::getSelectedCellIds() const
+{
+	list<uint64_t> result(_selectedCellIds.begin(), _selectedCellIds.end());
+	return result;
+}
+
 void VisualDescription::moveSelection(QVector2D const &delta)
 {
 	for (uint64_t cellId : _selectedCellIds) {
 		if (isCellPresent(cellId)) {
 			int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 			int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-			CellChangeDescription &cellDesc = getCellDescRef(cellId);
-			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+			CellDescription &cellDesc = getCellDescRef(cellId);
+			cellDesc.pos = *cellDesc.pos + delta;
 		}
 	}
 
 	for (uint64_t particleId : _selectedParticleIds) {
 		if (isParticlePresent(particleId)) {
-			ParticleChangeDescription &particleDesc = getParticleDescRef(particleId);
-			particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+			ParticleDescription &particleDesc = getParticleDescRef(particleId);
+			particleDesc.pos = *particleDesc.pos + delta;
 		}
 	}
 }
@@ -106,35 +112,16 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 		if (isCellPresent(cellId)) {
 			int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 			int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-			CellChangeDescription &cellDesc = getCellDescRef(cellId);
-			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
+			CellDescription &cellDesc = getCellDescRef(cellId);
+			cellDesc.pos = *cellDesc.pos + delta;
 		}
 	}
 
 	for (uint64_t particleId : _selectedParticleIds) {
 		if (isParticlePresent(particleId)) {
-			ParticleChangeDescription &particleDesc = getParticleDescRef(particleId);
-			particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
+			ParticleDescription &particleDesc = getParticleDescRef(particleId);
+			particleDesc.pos = *particleDesc.pos + delta;
 		}
-	}
-}
-
-void VisualDescription::setToUnmodified()
-{
-	for (auto &clusterT : _data.clusters) {
-		if (clusterT.isDeleted()) { continue; }
-		auto &clusterD = clusterT.getValue();
-		for (auto &cellT : clusterT->cells) {
-			if (cellT.isDeleted()) { continue; }
-			auto &cellD = cellT.getValue();
-			cellD.setAsUnmodified();
-		}
-	}
-
-	for (auto &particleT : _data.particles) {
-		if (particleT.isDeleted()) { continue; }
-		auto &particleD = particleT.getValue();
-		particleD.setAsUnmodified();
 	}
 }
 
@@ -150,7 +137,7 @@ void VisualDescription::updateAfterCellReconnections()
 	}
 }
 
-void VisualDescription::updateInternals(DataChangeDescription const &data)
+void VisualDescription::updateInternals(DataDescription const &data)
 {
 	_data = data;
 	_navi.update(data);

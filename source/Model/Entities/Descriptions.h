@@ -1,5 +1,4 @@
-#ifndef ENTITIES_DESCRIPTIONS_H
-#define ENTITIES_DESCRIPTIONS_H
+#pragma once
 
 #include "Model/Features/Descriptions.h"
 
@@ -12,171 +11,89 @@ struct TokenDescription
 	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
 };
 
-struct CellChangeDescription
+struct CellDescription
 {
 	uint64_t id = 0;
 
-	Tracker<QVector2D> pos;
-	Tracker<double> energy;
-	Tracker<int> maxConnections;
-	Tracker<list<uint64_t>> connectingCells;
-	Tracker<bool> tokenBlocked;
-	Tracker<int> tokenBranchNumber;
-	Tracker<CellMetadata> metadata;
-	Tracker<CellFunctionDescription> cellFunction;
-	Tracker<vector<TokenDescription>> tokens;
+	optional<QVector2D> pos;
+	optional<double> energy;
+	optional<int> maxConnections;
+	optional<list<uint64_t>> connectingCells;
+	optional<bool> tokenBlocked;
+	optional<int> tokenBranchNumber;
+	optional<CellMetadata> metadata;
+	optional<CellFunctionDescription> cellFunction;
+	optional<vector<TokenDescription>> tokens;
 
-	CellChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	CellChangeDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
-	CellChangeDescription& setEnergy(double value) { energy.init(value); return *this; }
-	CellChangeDescription& setMaxConnections(int value) { maxConnections.init(value); return *this; }
-	CellChangeDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells.init(value); return *this; }
-	CellChangeDescription& setFlagTokenBlocked(bool value) { tokenBlocked.init(value); return *this; }
-	CellChangeDescription& setTokenBranchNumber(int value) { tokenBranchNumber.init(value); return *this; }
-	CellChangeDescription& setMetadata(CellMetadata const& value) { metadata.init(value); return *this; }
-	CellChangeDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction.init(value); return *this; }
-	CellChangeDescription& setAsUnmodified()
-	{
-		pos.setAsUnmodified();
-		energy.setAsUnmodified();
-		maxConnections.setAsUnmodified();
-		connectingCells.setAsUnmodified();
-		tokenBlocked.setAsUnmodified();
-		tokenBranchNumber.setAsUnmodified();
-		metadata.setAsUnmodified();
-		cellFunction.setAsUnmodified();
-		tokens.setAsUnmodified();
-		return *this;
-	}
+	CellDescription& setId(uint64_t value) { id = value; return *this; }
+	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
+	CellDescription& setEnergy(double value) { energy = value; return *this; }
+	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
+	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells = value; return *this; }
+	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
+	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
+	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
+	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction = value; return *this; }
 };
 
-struct ClusterChangeDescription
+struct ClusterDescription
 {
 	uint64_t id = 0;
 
-	Tracker<QVector2D> pos;
-	Tracker<QVector2D> vel;
-	Tracker<double> angle;
-	Tracker<double> angularVel;
-	Tracker<CellClusterMetadata> metadata;
-	vector<TrackerElement<CellChangeDescription>> cells;
+	optional<QVector2D> pos;
+	optional<QVector2D> vel;
+	optional<double> angle;
+	optional<double> angularVel;
+	optional<CellClusterMetadata> metadata;
+	vector<CellDescription> cells;
 
-	ClusterChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	ClusterChangeDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
-	ClusterChangeDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
-	ClusterChangeDescription& setAngle(double value) { angle.init(value); return *this; }
-	ClusterChangeDescription& setAngularVel(double value) { angularVel.init(value); return *this; }
-	ClusterChangeDescription& addCell(CellChangeDescription const& value)
+	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
+	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
+	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
+	ClusterDescription& setAngle(double value) { angle = value; return *this; }
+	ClusterDescription& setAngularVel(double value) { angularVel = value; return *this; }
+	ClusterDescription& addCell(CellDescription const& value)
 	{
-		cells.emplace_back(TrackerElement<CellChangeDescription>(value, TrackerElementState::Added));
+		cells.emplace_back(value);
 		return *this;
 	}
-	ClusterChangeDescription& addCells(list<CellChangeDescription> const& value)
+	ClusterDescription& addCells(list<CellDescription> const& value)
 	{
 		for (auto const &cell : value) {
 			addCell(cell);
 		}
 		return *this;
 	}
-	ClusterChangeDescription& retainCell(CellChangeDescription const& value)
-	{
-		cells.emplace_back(TrackerElement<CellChangeDescription>(value, TrackerElementState::Unmodified));
-		return *this;
-	}
-	ClusterChangeDescription& retainCells(list<CellChangeDescription> const& value)
-	{
-		for (auto const &cell : value) {
-			retainCell(cell);
-		}
-		return *this;
-	}
-	ClusterChangeDescription& update(ClusterChangeDescription const& otherCluster)
-	{
-		pos = otherCluster.pos;
-		vel = otherCluster.vel;
-		angle = otherCluster.angle;
-		angularVel = otherCluster.angularVel;
-		metadata = otherCluster.metadata;
-
-		map<uint64_t, TrackerElement<CellChangeDescription>> cellTrackersByIds;
-		vector<TrackerElement<CellChangeDescription>> deletedCellTrackers;
-		for (auto const &cellT : cells) {
-			if (!cellT.isDeleted()) {
-				cellTrackersByIds.insert_or_assign(cellT->id, cellT);
-			}
-			else {
-				deletedCellTrackers.push_back(cellT);
-			}
-		}
-		
-		cells = deletedCellTrackers;
-		for (auto cellT : otherCluster.cells) {
-			auto cellDescIter = cellTrackersByIds.find(cellT->id);
-			if (cellDescIter != cellTrackersByIds.end()) {
-				if (cellT.isAdded()) {
-					cellT.setAsModified();
-				}
-				cellTrackersByIds.erase(cellDescIter);
-			}
-			cells.emplace_back(cellT);
-		}
-		for (auto const &cellTAndId : cellTrackersByIds) {
-			auto cellT = cellTAndId.second;
-			cellT.setAsDeleted();
-			cells.emplace_back(cellT);
-		}
-		return *this;
-	}
 };
 
-struct ParticleChangeDescription
+struct ParticleDescription
 {
 	uint64_t id = 0;
 
-	Tracker<QVector2D> pos;
-	Tracker<QVector2D> vel;
-	Tracker<double> energy;
-	Tracker<EnergyParticleMetadata> metadata;
+	optional<QVector2D> pos;
+	optional<QVector2D> vel;
+	optional<double> energy;
+	optional<EnergyParticleMetadata> metadata;
 
-	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	ParticleChangeDescription& setPos(QVector2D const& value) { pos.init(value); return *this; }
-	ParticleChangeDescription& setVel(QVector2D const& value) { vel.init(value); return *this; }
-	ParticleChangeDescription& setEnergy(double value) { energy.init(value); return *this; }
-	ParticleChangeDescription& setAsUnmodified()
-	{
-		pos.setAsUnmodified();
-		vel.setAsUnmodified();
-		energy.setAsUnmodified();
-		metadata.setAsUnmodified();
-		return *this;
-	}
+	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
+	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
+	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
+	ParticleDescription& setEnergy(double value) { energy = value; return *this; }
 };
 
-struct DataChangeDescription
+struct DataDescription
 {
-	vector<TrackerElement<ClusterChangeDescription>> clusters;
-	vector<TrackerElement<ParticleChangeDescription>> particles;
+	vector<ClusterDescription> clusters;
+	vector<ParticleDescription> particles;
 
-	DataChangeDescription& addCellCluster(ClusterChangeDescription const& value)
+	DataDescription& addCluster(ClusterDescription const& value)
 	{
-		clusters.emplace_back(TrackerElement<ClusterChangeDescription>(value, TrackerElementState::Added));
+		clusters.emplace_back(value);
 		return *this;
 	}
-	DataChangeDescription& retainCellCluster(ClusterChangeDescription const& value)
+	DataDescription& addParticle(ParticleDescription const& value)
 	{
-		clusters.emplace_back(TrackerElement<ClusterChangeDescription>(value, TrackerElementState::Unmodified));
-		return *this;
-	}
-	DataChangeDescription& retainCellClusters(list<ClusterChangeDescription> const& value)
-	{
-		for (auto const &cluster : value) {
-			retainCellCluster(cluster);
-		}
-		return *this;
-	}
-	DataChangeDescription& addEnergyParticle(ParticleChangeDescription const& value)
-	{
-		particles.emplace_back(TrackerElement<ParticleChangeDescription>(value, TrackerElementState::Added));
+		particles.emplace_back(value);
 		return *this;
 	}
 	void clear()
@@ -200,7 +117,7 @@ struct DescriptionNavigationMaps
 	map<uint64_t, int> cellIndicesByCellIds;
 	map<uint64_t, int> particleIndicesByParticleIds;
 
-	void update(DataChangeDescription const& data)
+	void update(DataDescription const& data)
 	{
 		cellIds.clear();
 		particleIds.clear();
@@ -210,31 +127,21 @@ struct DescriptionNavigationMaps
 		particleIndicesByParticleIds.clear();
 
 		int clusterIndex = 0;
-		for (auto const &clusterT : data.clusters) {
-			if (!clusterT.isDeleted()) {
-				int cellIndex = 0;
-				for (auto const &cellT : clusterT->cells) {
-					if (!cellT.isDeleted()) {
-						clusterIdsByCellIds.insert_or_assign(cellT->id, clusterT->id);
-						clusterIndicesByCellIds.insert_or_assign(cellT->id, clusterIndex);
-						cellIndicesByCellIds.insert_or_assign(cellT->id, cellIndex);
-						cellIds.insert(cellT->id);
-					}
-					++cellIndex;
-				}
+		for (auto const &cluster : data.clusters) {
+			int cellIndex = 0;
+			for (auto const &cell : cluster.cells) {
+				clusterIdsByCellIds.insert_or_assign(cell.id, cluster.id);
+				clusterIndicesByCellIds.insert_or_assign(cell.id, clusterIndex);
+				cellIndicesByCellIds.insert_or_assign(cell.id, cellIndex);
+				cellIds.insert(cell.id);
 			}
-			++clusterIndex;
 		}
 
 		int particleIndex = 0;
-		for (auto const &particleT : data.particles) {
-			if (!particleT.isDeleted()) {
-				particleIndicesByParticleIds[particleT->id] = particleIndex;
-				particleIds.insert(particleT->id);
-			}
-			++particleIndex;
+		for (auto const &particle : data.particles) {
+			particleIndicesByParticleIds.insert_or_assign(particle.id, particleIndex);
+			particleIds.insert(particle.id);
 		}
 	}
 };
 
-#endif // ENTITIES_DESCRIPTIONS_H

@@ -1,21 +1,21 @@
 #include <QPainter>
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 #include "gui/Settings.h"
 
 #include "ParticleItem.h"
 #include "CoordinateSystem.h"
 
-ParticleItem::ParticleItem (ItemConfig* config, ParticleChangeDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
+ParticleItem::ParticleItem (ItemConfig* config, ParticleDescription const &desc, QGraphicsItem *parent /*= nullptr*/)
     : AbstractItem(parent)
 {
 	update(desc);
 }
 
-void ParticleItem::update(ParticleChangeDescription const & desc)
+void ParticleItem::update(ParticleDescription const & desc)
 {
 	_id = desc.id;
-	auto pos = CoordinateSystem::modelToScene(desc.pos.getValue());
+	auto pos = CoordinateSystem::modelToScene(*desc.pos);
 	QGraphicsItem::setPos(QPointF(pos.x(), pos.y()));
 }
 

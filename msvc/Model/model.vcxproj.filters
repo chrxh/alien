@@ -73,13 +73,7 @@
     <ClCompile Include="..\..\source\Model\Entities\Timestamp.cpp">
       <Filter>Source Files\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Model\Entities\_Impl\CellClusterImpl.cpp">
-      <Filter>Source Files\Entities\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\Entities\_Impl\CellImpl.cpp">
-      <Filter>Source Files\Entities\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Entities\_Impl\EnergyParticleImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Entities\_Impl\EntityFactoryImpl.cpp">
@@ -349,6 +343,12 @@
     <ClCompile Include="Release\moc_SpaceMetricApi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\ClusterImpl.cpp">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Entities\_Impl\ParticleImpl.cpp">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Settings.h">
@@ -376,9 +376,6 @@
       <Filter>Source Files\Metadata</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Features\EnergyGuidance.h">
-      <Filter>Source Files\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Features\Descriptions.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Features\CellFunction.h">
@@ -426,16 +423,7 @@
     <ClInclude Include="..\..\source\Model\Entities\Cell.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Entities\CellCluster.h">
-      <Filter>Source Files\Entities</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Entities\CellTO.h">
-      <Filter>Source Files\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Entities\Descriptions.h">
-      <Filter>Source Files\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Entities\EnergyParticle.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Entities\EntityFactory.h">
@@ -447,13 +435,7 @@
     <ClInclude Include="..\..\source\Model\Entities\Token.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Entities\_Impl\CellClusterImpl.h">
-      <Filter>Source Files\Entities\_Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Entities\_Impl\CellImpl.h">
-      <Filter>Source Files\Entities\_Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Entities\_Impl\EnergyParticleImpl.h">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Entities\_Impl\EntityFactoryImpl.h">
@@ -506,6 +488,27 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\CellConnector.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Entities\ChangeDescriptions.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Features\Descriptions.h">
+      <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Entities\Descriptions.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Entities\Cluster.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\ClusterImpl.h">
+      <Filter>Source Files\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Entities\Particle.h">
+      <Filter>Source Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Entities\_Impl\ParticleImpl.h">
+      <Filter>Source Files\Entities\_Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

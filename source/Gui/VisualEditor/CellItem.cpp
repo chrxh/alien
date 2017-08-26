@@ -1,6 +1,6 @@
 #include <QPainter>
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 
 #include "Gui/Settings.h"
 
@@ -8,16 +8,16 @@
 #include "CellItem.h"
 #include "CoordinateSystem.h"
 
-CellItem::CellItem (ItemConfig* config, CellChangeDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
+CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
     : AbstractItem(parent), _config(config)
 {
 	update(desc);
 }
 
-void CellItem::update(CellChangeDescription const &desc)
+void CellItem::update(CellDescription const &desc)
 {
 	_desc = desc;
-	auto pos = CoordinateSystem::modelToScene(desc.pos.getValueOrDefault());
+	auto pos = CoordinateSystem::modelToScene(*desc.pos);
 	QGraphicsItem::setPos(QPointF(pos.x(), pos.y()));
 }
 
@@ -115,7 +115,7 @@ uint64_t CellItem::getId() const
 
 list<uint64_t> CellItem::getConnectedIds() const
 {
-	return _desc.connectingCells.getValueOrDefault();
+	return _desc.connectingCells.get_value_or(list<uint64_t>());
 }
 
 CellItem::FocusState CellItem::getFocusState ()
@@ -135,23 +135,23 @@ void CellItem::setDisplayString(QString value)
 
 int CellItem::getBranchNumber() const
 {
-	return _desc.tokenBranchNumber.getValueOr(0);
+	return _desc.tokenBranchNumber.get_value_or(0);
 }
 
 int CellItem::getNumToken() const
 {
-	return _desc.tokens.getValueOrDefault().size();
+	return _desc.tokens.get_value_or(vector<TokenDescription>()).size();
 }
 
 bool CellItem::isConnectable() const
 {
-	auto numConnections = _desc.connectingCells.getValueOrDefault().size();
-	auto maxConnections = _desc.maxConnections.getValueOr(0);
+	auto numConnections = _desc.connectingCells.get_value_or(list<uint64_t>()).size();
+	auto maxConnections = _desc.maxConnections.get_value_or(0);
 	return (numConnections < maxConnections);
 }
 
 uint8_t CellItem::getColorCode() const
 {
-	return _desc.metadata.getValueOrDefault().color;
+	return _desc.metadata.get_value_or(CellMetadata()).color;
 }
 

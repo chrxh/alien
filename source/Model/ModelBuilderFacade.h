@@ -3,7 +3,7 @@
 
 #include "Model/Entities/CellTO.h"
 #include "Model/Features/CellFeatureEnums.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 
 #include "Definitions.h"
 

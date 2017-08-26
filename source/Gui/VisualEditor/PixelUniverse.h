@@ -7,6 +7,7 @@
 
 #include "gui/Definitions.h"
 #include "Model/Definitions.h"
+#include "Model/Entities/Descriptions.h"
 
 class PixelUniverse : public QGraphicsScene
 {
@@ -23,8 +24,8 @@ private:
     Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
 
-	void displayClusters(DataChangeDescription const& data) const;
-	void displayParticles(DataChangeDescription const& data) const;
+	void displayClusters(DataDescription const& data) const;
+	void displayParticles(DataDescription const& data) const;
 
 	SimulationAccess* _simAccess = nullptr;
 	SimulationController* _controller = nullptr;

@@ -27,7 +27,7 @@
 #include "Model/Context/SimulationContext.h"
 #include "Model/SerializationFacade.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Metadata/SymbolTable.h"
 
 #include "MainWindow.h"
@@ -894,7 +894,7 @@ void MainWindow::cellDefocused ()
     ui->actionDeleteExtension->setEnabled(false);
 }
 
-void MainWindow::energyParticleFocused (EnergyParticle* e)
+void MainWindow::energyParticleFocused (Particle* e)
 {
     if( _textEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);

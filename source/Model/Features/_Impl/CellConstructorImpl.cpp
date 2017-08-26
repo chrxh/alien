@@ -8,7 +8,7 @@
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Entities/EntityFactory.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/Token.h"
 #include "Model/Physics/Physics.h"
 #include "Model/Physics/PhysicalQuantityConverter.h"
@@ -49,7 +49,7 @@ namespace {
 		return cell;
     }
 
-    Cell* obstacleCheck (CellCluster* cluster, bool safeMode, CellMap* cellMap, SpaceMetric* metric, SimulationParameters* parameters)
+    Cell* obstacleCheck (Cluster* cluster, bool safeMode, CellMap* cellMap, SpaceMetric* metric, SimulationParameters* parameters)
     {
         foreach( Cell* cell, cluster->getCellsRef() ) {
             QVector2D pos = cluster->calcPosition(cell, true);
@@ -123,7 +123,7 @@ namespace {
 CellFeature::ProcessingResult CellConstructorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
-    CellCluster* cluster(cell->getCluster());
+    Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
 	quint8 cmd = tokenMem[Enums::Constr::IN] % 4;
     quint8 opt = tokenMem[Enums::Constr::IN_OPTION] % 7;

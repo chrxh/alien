@@ -75,7 +75,7 @@ private Q_SLOTS:
 
     void cellFocused (Cell* cell);
     void cellDefocused ();
-    void energyParticleFocused (EnergyParticle* e);
+    void energyParticleFocused (Particle* e);
     void entitiesSelected(int numCells, int numEnergyParticles);
 
 	void updateFrameLabel();

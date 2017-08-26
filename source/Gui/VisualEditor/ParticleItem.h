@@ -15,10 +15,10 @@ public:
         Type = UserType + 2
     };
 
-	ParticleItem(ItemConfig* config, ParticleChangeDescription const &desc, QGraphicsItem *parent = nullptr);
+	ParticleItem(ItemConfig* config, ParticleDescription const &desc, QGraphicsItem *parent = nullptr);
 	virtual ~ParticleItem() = default;
 
-	virtual void update(ParticleChangeDescription const& desc);
+	virtual void update(ParticleDescription const& desc);
 
 	virtual uint64_t getId() const;
 

@@ -27,14 +27,14 @@ public:
 	virtual uint64_t getTimestamp() const override;
 	virtual void incTimestamp() override;
 
-	virtual QList<CellCluster*>& getClustersRef() override;
-	virtual QList<EnergyParticle*>& getEnergyParticlesRef () override;
+	virtual QList<Cluster*>& getClustersRef() override;
+	virtual QList<Particle*>& getEnergyParticlesRef () override;
 
 private:
 	void deleteClustersAndEnergyParticles();
 
-	QList<CellCluster*> _clusters;
-    QList<EnergyParticle*> _energyParticles;
+	QList<Cluster*> _clusters;
+    QList<Particle*> _energyParticles;
 	NumberGenerator* _numberGen = nullptr;
 	SpaceMetric* _metric = nullptr;
     CellMap* _cellMap = nullptr;

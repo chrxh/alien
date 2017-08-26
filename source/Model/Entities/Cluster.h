@@ -1,31 +1,30 @@
-#ifndef CELLCLUSTER_H
-#define CELLCLUSTER_H
+#pragma once
 
 #include <QList>
 #include <QVector2D>
 
 #include "Model/Definitions.h"
 #include "Timestamp.h"
-#include "Descriptions.h"
+#include "ChangeDescriptions.h"
 
-class CellCluster
+class Cluster
 	: public Timestamp
 {
 public:
-	CellCluster(UnitContext* context) : Timestamp(context) {}
-	virtual ~CellCluster() = default;
+	Cluster(UnitContext* context) : Timestamp(context) {}
+	virtual ~Cluster() = default;
 
-	virtual ClusterChangeDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
+	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
 
     virtual void clearCellsFromMap () = 0;
     virtual void clearCellFromMap (Cell* cell) = 0;
     virtual void drawCellsToMap () = 0;
 
     virtual void processingInit () = 0;
-    virtual void processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles) = 0;
+    virtual void processingDissipation (QList< Cluster* >& fragments, QList< Particle* >& energyParticles) = 0;
 	virtual void processingMutationByChance() = 0;
 	virtual void processingMovement() = 0;
-    virtual void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose) = 0;
+    virtual void processingToken (QList< Particle* >& energyParticles, bool& decompose) = 0;
     virtual void processingCompletion () = 0;
 
     virtual void addCell (Cell* cell, QVector2D absPos) = 0;
@@ -36,7 +35,7 @@ public:
     virtual void updateVel_angularVel_via_cellVelocities () = 0;
     virtual QVector2D calcPosition (const Cell *cell, bool metricCorrection = false) const = 0;
     virtual QVector2D calcCellDistWithoutTorusCorrection (Cell* cell) const = 0;
-    virtual QList< CellCluster* > decompose () const = 0;
+    virtual QList< Cluster* > decompose () const = 0;
     virtual qreal calcAngularMassWithNewParticle (QVector2D particlePos) const = 0;
     virtual qreal calcAngularMassWithoutUpdate () const = 0;
 
@@ -72,5 +71,3 @@ public:
 	virtual void deserializePrimitives (QDataStream& stream) = 0;
 };
 
-
-#endif // CELLCLUSTER_H

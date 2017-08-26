@@ -6,7 +6,7 @@
 #include "Model/Context/CellMap.h"
 #include "Model/Context/SpaceMetric.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/Token.h"
 #include "Model/Physics/Physics.h"
 #include "Model/Physics/PhysicalQuantityConverter.h"
@@ -21,7 +21,7 @@ CellSensorImpl::CellSensorImpl (UnitContext* context)
 CellFeature::ProcessingResult CellSensorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
-    CellCluster* cluster(cell->getCluster());
+    Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
 	quint8 cmd = tokenMem[Enums::Sensor::IN] % 5;
 	auto cellMap = _context->getCellMap();
@@ -43,7 +43,7 @@ CellFeature::ProcessingResult CellSensorImpl::processImpl (Token* token, Cell* c
     if( cmd == Enums::SensorIn::SEARCH_VICINITY ) {
         QVector2D cellPos = cell->calcPosition(_context);
 //        auto time1 = high_resolution_clock::now();
-        CellCluster* otherCluster = cellMap->getNearbyClusterFast(cellPos, parameters->cellFunctionSensorRange
+        Cluster* otherCluster = cellMap->getNearbyClusterFast(cellPos, parameters->cellFunctionSensorRange
             , minMassReal, maxMassReal, cluster);
 //        nanoseconds diff1 = high_resolution_clock::now()- time1;
 //        cout << "Dauer: " << diff1.count() << endl;

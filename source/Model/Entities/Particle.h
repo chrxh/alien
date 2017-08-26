@@ -1,22 +1,21 @@
-#ifndef ENERGYPARTICLE_H
-#define ENERGYPARTICLE_H
+#pragma once
 
 #include <QVector2D>
 
 #include "Model/Definitions.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 #include "Timestamp.h"
 
-class EnergyParticle
+class Particle
 	: public Timestamp
 {
 public:
-	EnergyParticle(UnitContext* context) : Timestamp(context) {}
-	virtual ~EnergyParticle() = default;
+	Particle(UnitContext* context) : Timestamp(context) {}
+	virtual ~Particle() = default;
 
-	virtual ParticleChangeDescription getDescription() const = 0;
+	virtual ParticleDescription getDescription() const = 0;
 
-    virtual bool processingMovement (CellCluster*& cluster) = 0;
+    virtual bool processingMovement (Cluster*& cluster) = 0;
 
 	virtual qreal getEnergy() const = 0;
 	virtual void setEnergy(qreal value) = 0;
@@ -37,4 +36,3 @@ public:
 	virtual void deserializePrimitives (QDataStream& stream) = 0;
 };
 
-#endif // ENERGYPARTICLE_H

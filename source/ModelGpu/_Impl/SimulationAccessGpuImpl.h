@@ -3,7 +3,7 @@
 #include "Model/AccessPorts/SimulationAccess.h"
 #include "Model/Context/SimulationContext.h"
 #include "Model/Context/UnitObserver.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 
 class SimulationAccessGpuImpl
 	: public SimulationAccess

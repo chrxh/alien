@@ -9,7 +9,7 @@
 #include "Model/Context/SpaceMetric.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Token.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/EntityFactory.h"
 
 class CellClusterTest : public ::testing::Test

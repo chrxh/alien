@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 
 #include "AbstractItem.h"
 
@@ -17,10 +17,10 @@ public:
         Type = UserType + 1
     };
 
-    CellItem (ItemConfig *config, CellChangeDescription const &desc, QGraphicsItem *parent = nullptr);
+    CellItem (ItemConfig *config, CellDescription const &desc, QGraphicsItem *parent = nullptr);
     virtual ~CellItem () = default;
 
-	virtual void update(CellChangeDescription const &desc);
+	virtual void update(CellDescription const &desc);
 
 	virtual QRectF boundingRect () const;
 	virtual void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -41,5 +41,5 @@ private:
 	ItemConfig *_config = nullptr;
     FocusState _focusState = FocusState::NO_FOCUS;
 	QString _displayString;
-	CellChangeDescription _desc;
+	CellDescription _desc;
 };

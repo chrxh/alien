@@ -3,8 +3,8 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
-#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Cluster.h"
+#include "Model/Entities/Particle.h"
 #include "Model/Entities/Token.h"
 #include "Model/Entities/EntityFactory.h"
 #include "Model/Features/CellFunction.h"
@@ -28,14 +28,14 @@ void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, 
 	auto const& clusters = context->getClustersRef();
 	quint32 numCluster = clusters.size();
 	stream << numCluster;
-	foreach(CellCluster* cluster, clusters) {
+	foreach(Cluster* cluster, clusters) {
 		serializeCellCluster(cluster, stream);
 	}
 
 	auto const& energyParticles = context->getEnergyParticlesRef();
 	quint32 numEnergyParticles = energyParticles.size();
 	stream << numEnergyParticles;
-	foreach(EnergyParticle* e, energyParticles) {
+	foreach(Particle* e, energyParticles) {
 		serializeEnergyParticle(e, stream);
 	}
 
@@ -111,7 +111,7 @@ SymbolTable* SerializationFacadeImpl::deserializeSymbolTable(QDataStream& stream
 	return symbolTable;
 }
 
-void SerializationFacadeImpl::serializeCellCluster(CellCluster* cluster, QDataStream& stream) const
+void SerializationFacadeImpl::serializeCellCluster(Cluster* cluster, QDataStream& stream) const
 {
 	cluster->serializePrimitives(stream);
 	QList<Cell*>& cells = cluster->getCellsRef();
@@ -123,13 +123,13 @@ void SerializationFacadeImpl::serializeCellCluster(CellCluster* cluster, QDataSt
 	stream << meta.name;
 }
 
-CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
+Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     , QMap< quint64, quint64 >& oldNewClusterIdMap, QMap< quint64, quint64 >& oldNewCellIdMap
     , QMap< quint64, Cell* >& oldIdCellMap, UnitContext* context) const
 {
     auto entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	CellCluster* cluster = entityFactory->build(ClusterChangeDescription(), context);
+	Cluster* cluster = entityFactory->build(ClusterChangeDescription(), context);
     cluster->deserializePrimitives(stream);
 
     //read data and reconstructing structures
@@ -182,7 +182,7 @@ CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     return cluster;
 }
 
-CellCluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
+Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     , UnitContext* context) const
 {
     QMap< quint64, quint64 > oldNewClusterIdMap;
@@ -274,19 +274,19 @@ Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream, UnitContex
     return token;
 }
 
-void SerializationFacadeImpl::serializeEnergyParticle(EnergyParticle* particle, QDataStream& stream) const
+void SerializationFacadeImpl::serializeEnergyParticle(Particle* particle, QDataStream& stream) const
 {
 	particle->serializePrimitives(stream);
 	auto metadata = particle->getMetadata();
 	stream << metadata.color;
 }
 
-EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
-    , QMap< quint64, EnergyParticle* >& oldIdEnergyMap, UnitContext* context) const
+Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
+    , QMap< quint64, Particle* >& oldIdEnergyMap, UnitContext* context) const
 {
     auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	EnergyParticle* particle = factory->build(ParticleChangeDescription(), context);
+	Particle* particle = factory->build(ParticleChangeDescription(), context);
     particle->deserializePrimitives(stream);
 	EnergyParticleMetadata metadata;
 	stream >> metadata.color;
@@ -296,12 +296,12 @@ EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& 
 	return particle;
 }
 
-EnergyParticle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
+Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
 	, UnitContext* context) const
 {
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	QMap< quint64, EnergyParticle* > temp;
-	EnergyParticle* particle = deserializeEnergyParticle(stream, temp, context);
+	QMap< quint64, Particle* > temp;
+	Particle* particle = deserializeEnergyParticle(stream, temp, context);
 	EnergyParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
