@@ -14,8 +14,8 @@
 #include "Model/Context/CellMap.h"
 #include "Model/Context/SpaceMetricApi.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
-#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Cluster.h"
+#include "Model/Entities/Particle.h"
 
 #include "PixelUniverse.h"
 
@@ -147,29 +147,26 @@ namespace
 	}
 }
 
-void PixelUniverse::displayClusters(DataChangeDescription const& data) const
+void PixelUniverse::displayClusters(DataDescription const& data) const
 {
 	auto space = _controller->getContext()->getSpaceMetric();
-	for (auto const& clusterTracker : data.clusters) {
-		auto const& clusterDesc = clusterTracker.getValue();
-		for (auto const& cellTracker : clusterDesc.cells) {
-			auto const& cellDesc = cellTracker.getValue();
-			auto const& pos = cellDesc.pos.getValue();
-			auto const& meta = cellDesc.metadata.getValue();
-			auto const& energy = cellDesc.energy.getValue();
+	for (auto const& cluster : data.clusters) {
+		for (auto const& cell : cluster.cells) {
+			auto const& pos = *cell.pos;
+			auto const& meta = *cell.metadata;
+			auto const& energy = *cell.energy;
 			auto intPos = space->correctPositionAndConvertToIntVector(pos);
 			_image->setPixel(intPos.x, intPos.y, calcCellColor(meta, energy));
 		}
 	}
 }
 
-void PixelUniverse::displayParticles(DataChangeDescription const & data) const
+void PixelUniverse::displayParticles(DataDescription const & data) const
 {
 	auto space = _controller->getContext()->getSpaceMetric();
-	for (auto const& particleTracker : data.particles) {
-		auto const& particleDesc = particleTracker.getValue();
-		auto const& pos = particleDesc.pos.getValue();
-		auto const& energy = particleDesc.energy.getValue();
+	for (auto const& particle: data.particles) {
+		auto const& pos = *particle.pos;
+		auto const& energy = *particle.energy;
 		auto intPos = space->correctPositionAndConvertToIntVector(pos);
 		_image->setPixel(intPos.x, intPos.y, calcParticleColor(energy));
 	}

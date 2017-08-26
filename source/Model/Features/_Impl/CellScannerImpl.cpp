@@ -6,7 +6,7 @@
 #include "Model/Physics/Physics.h"
 #include "Model/Physics/PhysicalQuantityConverter.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/Token.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/SimulationParameters.h"

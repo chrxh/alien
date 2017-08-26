@@ -2,7 +2,7 @@
 
 #include "gui/Settings.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>

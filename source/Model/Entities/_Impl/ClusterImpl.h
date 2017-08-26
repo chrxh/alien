@@ -1,33 +1,32 @@
-#ifndef CELLCLUSTERIMPL_H
-#define CELLCLUSTERIMPL_H
+#pragma once
 
 #include <QMatrix4x4>
 
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 
-class CellClusterImpl
-	: public CellCluster
+class ClusterImpl
+	: public Cluster
 {
 public:
-    CellClusterImpl (UnitContext* context);
-    CellClusterImpl (QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
-    CellClusterImpl (QList< Cell* > cells, qreal angle, UnitContext* context);
+    ClusterImpl (UnitContext* context);
+    ClusterImpl (QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
+    ClusterImpl (QList< Cell* > cells, qreal angle, UnitContext* context);
 
-    ~CellClusterImpl ();
+    ~ClusterImpl ();
 
 	virtual void setContext(UnitContext* context) override;
 
-	virtual ClusterChangeDescription getDescription(ResolveDescription const& resolveDescription) const override;
+	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const override;
 
     void clearCellsFromMap () override;
     void clearCellFromMap (Cell* cell) override;
     void drawCellsToMap () override;
 
     void processingInit () override;
-    void processingDissipation (QList< CellCluster* >& fragments, QList< EnergyParticle* >& energyParticles) override;
+    void processingDissipation (QList< Cluster* >& fragments, QList< Particle* >& energyParticles) override;
 	void processingMutationByChance() override;
 	void processingMovement() override;
-    void processingToken (QList< EnergyParticle* >& energyParticles, bool& decompose) override;
+    void processingToken (QList< Particle* >& energyParticles, bool& decompose) override;
     void processingCompletion () override;
 
     void addCell (Cell* cell, QVector2D absPos) override;
@@ -38,7 +37,7 @@ public:
     void updateVel_angularVel_via_cellVelocities () override;
     QVector2D calcPosition (const Cell *cell, bool metricCorrection = false) const override;
     QVector2D calcCellDistWithoutTorusCorrection (Cell* cell) const override;
-    QList< CellCluster* > decompose () const override;
+    QList< Cluster* > decompose () const override;
     qreal calcAngularMassWithNewParticle (QVector2D particlePos) const override;
     qreal calcAngularMassWithoutUpdate () const override;
 
@@ -74,7 +73,7 @@ public:
 	virtual void deserializePrimitives(QDataStream& stream) override;
 
 private:
-    void radiation (qreal& energy, Cell* originCell, EnergyParticle*& energyParticle) const;
+    void radiation (qreal& energy, Cell* originCell, Particle*& energyParticle) const;
 	inline QVector2D applyTransformation(QVector2D pos) const;
 	inline QVector2D applyTransformation(QMatrix4x4 const& transform, QVector2D pos) const;
 	inline QVector2D applyInverseTransformation(QVector2D pos) const;
@@ -94,19 +93,17 @@ private:
 
 /********************* inline methods ******************/
 
-QVector2D CellClusterImpl::applyTransformation(QVector2D pos) const
+QVector2D ClusterImpl::applyTransformation(QVector2D pos) const
 {
 	return _transform.map(QVector3D(pos)).toVector2D();
 }
 
-QVector2D CellClusterImpl::applyTransformation(QMatrix4x4 const & transform, QVector2D pos) const
+QVector2D ClusterImpl::applyTransformation(QMatrix4x4 const & transform, QVector2D pos) const
 {
 	return QVector2D();
 }
 
-QVector2D CellClusterImpl::applyInverseTransformation(QVector2D pos) const
+QVector2D ClusterImpl::applyInverseTransformation(QVector2D pos) const
 {
 	return _transform.inverted().map(QVector3D(pos)).toVector2D();
 }
-
-#endif // CELLCLUSTERIMPL_H

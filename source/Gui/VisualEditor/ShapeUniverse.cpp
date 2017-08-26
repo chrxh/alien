@@ -148,7 +148,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		delta = CoordinateSystem::sceneToModel(delta);
 		if (leftButton) {
 			_visualDesc->moveSelection(delta);
-			_connector->reconnect(_visualDesc->getDataRef());
+			_connector->reconnect(_visualDesc->getDataRef(), _visualDesc->getSelectedCellIds());
 			_visualDesc->updateAfterCellReconnections();
 			_itemManager->update(_visualDesc);
 		}
@@ -156,7 +156,6 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 			_visualDesc->moveExtendedSelection(delta);
 			_itemManager->update(_visualDesc);
 		}
-		_visualDesc->setToUnmodified();
 	}
 }
 

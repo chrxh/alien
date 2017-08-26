@@ -1,7 +1,7 @@
 #include "Model/Physics/Physics.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Entities/CellCluster.h"
-#include "Model/Entities/EnergyParticle.h"
+#include "Model/Entities/Cluster.h"
+#include "Model/Entities/Particle.h"
 #include "Model/Entities/Token.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/SpaceMetric.h"
@@ -27,7 +27,7 @@ qreal UnitImpl::calcTransEnergy() const
 {
 
 	qreal transEnergy(0.0);
-	foreach(CellCluster* cluster, _context->getClustersRef()) {
+	foreach(Cluster* cluster, _context->getClustersRef()) {
 		if (!cluster->isEmpty()) {
 			transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), 0.0, 0.0);
 		}
@@ -38,7 +38,7 @@ qreal UnitImpl::calcTransEnergy() const
 qreal UnitImpl::calcRotEnergy() const
 {
 	qreal rotEnergy(0.0);
-	foreach(CellCluster* cluster, _context->getClustersRef()) {
+	foreach(Cluster* cluster, _context->getClustersRef()) {
 		if (cluster->getMass() > 1.0) {
 			rotEnergy += Physics::kineticEnergy(0.0, QVector2D(), cluster->getAngularMass(), cluster->getAngularVel());
 		}
@@ -49,14 +49,14 @@ qreal UnitImpl::calcRotEnergy() const
 qreal UnitImpl::calcInternalEnergy() const
 {
 	qreal internalEnergy(0.0);
-	foreach(CellCluster* cluster, _context->getClustersRef()) {
+	foreach(Cluster* cluster, _context->getClustersRef()) {
 		if (!cluster->isEmpty()) {
 			foreach(Cell* cell, cluster->getCellsRef()) {
 				internalEnergy += cell->getEnergyIncludingTokens();
 			}
 		}
 	}
-	foreach(EnergyParticle* energyParticle, _context->getEnergyParticlesRef()) {
+	foreach(Particle* energyParticle, _context->getEnergyParticlesRef()) {
 		internalEnergy += energyParticle->getEnergy();
 	}
 	return internalEnergy;
@@ -90,17 +90,17 @@ UnitContext * UnitImpl::getContext() const
 
 void UnitImpl::processingClustersCompletion()
 {
-	foreach(CellCluster* cluster, _context->getClustersRef()) {
+	foreach(Cluster* cluster, _context->getClustersRef()) {
 		cluster->processingCompletion();
 	}
 }
 
 void UnitImpl::processingClustersToken()
 {
-	QMutableListIterator<CellCluster*> j(_context->getClustersRef());
-	QList< EnergyParticle* > energyParticles;
+	QMutableListIterator<Cluster*> j(_context->getClustersRef());
+	QList< Particle* > energyParticles;
 	while (j.hasNext()) {
-		CellCluster* cluster(j.next());
+		Cluster* cluster(j.next());
 		if (cluster->isEmpty()) {
 			delete cluster;
 			j.remove();
@@ -114,8 +114,8 @@ void UnitImpl::processingClustersToken()
 			//decompose cluster?
 			if (decompose) {
 				j.remove();
-				QList< CellCluster* > newClusters = cluster->decompose();
-				foreach(CellCluster* newCluster, newClusters) {
+				QList< Cluster* > newClusters = cluster->decompose();
+				foreach(Cluster* newCluster, newClusters) {
 					j.insert(newCluster);
 				}
 			}
@@ -125,26 +125,26 @@ void UnitImpl::processingClustersToken()
 
 void UnitImpl::processingClustersMovement()
 {
-	foreach(CellCluster* cluster, _context->getClustersRef()) {
+	foreach(Cluster* cluster, _context->getClustersRef()) {
 		cluster->processingMovement();
 	}
 }
 
 void UnitImpl::processingClustersMutationByChance()
 {
-	foreach(CellCluster* cluster, _context->getClustersRef()) {
+	foreach(Cluster* cluster, _context->getClustersRef()) {
 		cluster->processingMutationByChance();
 	}
 }
 
 void UnitImpl::processingClustersDissipation()
 {
-	QMutableListIterator<CellCluster*> i(_context->getClustersRef());
-	QList< EnergyParticle* > energyParticles;
+	QMutableListIterator<Cluster*> i(_context->getClustersRef());
+	QList< Particle* > energyParticles;
 	while (i.hasNext()) {
 
-		QList< CellCluster* > fragments;
-		CellCluster* cluster(i.next());
+		QList< Cluster* > fragments;
+		Cluster* cluster(i.next());
 		energyParticles.clear();
 		cluster->processingDissipation(fragments, energyParticles);
 		_context->getEnergyParticlesRef() << energyParticles;
@@ -155,7 +155,7 @@ void UnitImpl::processingClustersDissipation()
 			//            delCluster = true;
 			delete cluster;
 			i.remove();
-			foreach(CellCluster* cluster2, fragments) {
+			foreach(Cluster* cluster2, fragments) {
 				i.insert(cluster2);
 			}
 		}
@@ -164,7 +164,7 @@ void UnitImpl::processingClustersDissipation()
 
 void UnitImpl::processingClustersInit()
 {
-	foreach(CellCluster* cluster, _context->getClustersRef()) {
+	foreach(Cluster* cluster, _context->getClustersRef()) {
 		cluster->processingInit();
 	}
 }
@@ -174,9 +174,9 @@ void UnitImpl::processingClustersCompartmentAllocation()
 	auto compartment = _context->getMapCompartment();
 	auto spaceMetric = _context->getSpaceMetric();
 
-	QMutableListIterator<CellCluster*> clusterIter(_context->getClustersRef());
+	QMutableListIterator<Cluster*> clusterIter(_context->getClustersRef());
 	while (clusterIter.hasNext()) {
-		CellCluster* cluster = clusterIter.next();
+		Cluster* cluster = clusterIter.next();
 		IntVector2D intPos = spaceMetric->correctPositionAndConvertToIntVector(cluster->getPosition());
 		if (!compartment->isPointInCompartment(intPos)) {
 			clusterIter.remove();
@@ -189,10 +189,10 @@ void UnitImpl::processingClustersCompartmentAllocation()
 
 void UnitImpl::processingParticlesMovement()
 {
-	QMutableListIterator<EnergyParticle*> p(_context->getEnergyParticlesRef());
+	QMutableListIterator<Particle*> p(_context->getEnergyParticlesRef());
 	while (p.hasNext()) {
-		EnergyParticle* e(p.next());
-		CellCluster* cluster(0);
+		Particle* e(p.next());
+		Cluster* cluster(0);
 		if (!e->processingMovement(cluster)) {
 
 			//transform into cell?
@@ -224,9 +224,9 @@ void UnitImpl::processingParticlesCompartmentAllocation()
 	auto compartment = _context->getMapCompartment();
 	auto spaceMetric = _context->getSpaceMetric();
 
-	QMutableListIterator<EnergyParticle*> particleIter(_context->getEnergyParticlesRef());
+	QMutableListIterator<Particle*> particleIter(_context->getEnergyParticlesRef());
 	while (particleIter.hasNext()) {
-		EnergyParticle* particle = particleIter.next();
+		Particle* particle = particleIter.next();
 		IntVector2D intPos = spaceMetric->correctPositionAndConvertToIntVector(particle->getPosition());
 		if (!compartment->isPointInCompartment(intPos)) {
 			particleIter.remove();

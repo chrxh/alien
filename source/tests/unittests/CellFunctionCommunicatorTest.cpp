@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Entities/CellCluster.h"
+#include "Model/Entities/Cluster.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Token.h"
 #include "Model/Features/_Impl/CellCommunicatorImpl.h"

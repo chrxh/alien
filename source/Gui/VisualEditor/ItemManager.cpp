@@ -1,6 +1,6 @@
 #include <QGraphicsScene>
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Entities/ChangeDescriptions.h"
 #include "Gui/settings.h"
 #include "Gui/visualeditor/ViewportInterface.h"
 
@@ -38,14 +38,14 @@ void ItemManager::updateCells(VisualDescription* visualDesc)
 	auto const &data = visualDesc->getDataRef();
 
 	map<uint64_t, CellItem*> newCellsByIds;
-	for (auto const &cluster : getUndeletedElements(data.clusters)) {
-		for (auto const &cell : getUndeletedElements(cluster.cells)) {
+	for (auto const &cluster : data.clusters) {
+		for (auto const &cell : cluster.cells) {
 			auto it = _cellsByIds.find(cell.id);
 			CellItem* item;
 			if (it != _cellsByIds.end()) {
 				item = it->second;
 				item->update(cell);
-				newCellsByIds[cell.id] = item;
+				newCellsByIds.insert_or_assign(cell.id, item);
 				_cellsByIds.erase(it);
 			}
 			else {
@@ -75,19 +75,19 @@ void ItemManager::updateParticles(VisualDescription* visualDesc)
 	auto const &data = visualDesc->getDataRef();
 
 	map<uint64_t, ParticleItem*> newParticlesByIds;
-	for (auto const &particle : getUndeletedElements(data.particles)) {
+	for (auto const &particle : data.particles) {
 		auto it = _particlesByIds.find(particle.id);
 		ParticleItem* item;
 		if (it != _particlesByIds.end()) {
 			item = it->second;
 			item->update(particle);
-			newParticlesByIds[particle.id] = item;
+			newParticlesByIds.insert_or_assign(particle.id, item);
 			_particlesByIds.erase(it);
 		}
 		else {
 			item = new ParticleItem(_config, particle);
 			_scene->addItem(item);
-			newParticlesByIds[particle.id] = item;
+			newParticlesByIds.insert_or_assign(particle.id, item);
 		}
 		if (visualDesc->isInSelection(particle.id)) {
 			item->setFocusState(ParticleItem::FOCUS);
@@ -107,12 +107,12 @@ void ItemManager::updateConnections(VisualDescription* visualDesc)
 	auto const &data = visualDesc->getDataRef();
 
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
-	for (auto const &cluster : getUndeletedElements(data.clusters)) {
-		for (auto const &cell : getUndeletedElements(cluster.cells)) {
-			if (!cell.connectingCells.isInitialized()) {
+	for (auto const &cluster : data.clusters) {
+		for (auto const &cell : cluster.cells) {
+			if (!cell.connectingCells) {
 				continue;
 			}
-			for (uint64_t connectingCellId : cell.connectingCells.getValue()) {
+			for (uint64_t connectingCellId : *cell.connectingCells) {
 				auto &connectingCellD = visualDesc->getCellDescRef(connectingCellId);
 				set<uint64_t> connectionId;
 				connectionId.insert(cell.id);

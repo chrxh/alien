@@ -10,6 +10,7 @@
 #include <QList>
 #include <QDataStream>
 #include <qmath.h>
+#include <boost/optional.hpp>
 
 #include <set>
 #include <map>
@@ -36,6 +37,7 @@ using std::list;
 using std::unordered_set;
 using std::unordered_map;
 using std::pair;
+using boost::optional;
 
 struct IntRect;
 struct BASE_EXPORT IntVector2D {
