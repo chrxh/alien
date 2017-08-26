@@ -425,24 +425,20 @@ TEST_F(CellConnectorTest, testMoveSeveralCells)
 TEST_F(CellConnectorTest, testMoveSeveralCellsOverOtherCells)
 {
 	vector<uint64_t> cellIds;
-	for (int i = 0; i < 20; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		cellIds.push_back(_numberGen->getTag());
 	}
 
 	for (int i = 0; i < 4; ++i) {
 		_data.retainCellCluster(CellClusterDescription().setId(_numberGen->getTag()).retainCells({
-			CellDescription().setPos({ 100 + static_cast<float>(i) * 25, 100 }).setId(cellIds[0 + i * 5]).setConnectingCells({ cellIds[1 + i * 5] }).setMaxConnections(2),
-			CellDescription().setPos({ 101 + static_cast<float>(i) * 25, 100 }).setId(cellIds[1 + i * 5]).setConnectingCells({ cellIds[0 + i * 5], cellIds[2 + i * 5] }).setMaxConnections(3),
-			CellDescription().setPos({ 102 + static_cast<float>(i) * 25, 100 }).setId(cellIds[2 + i * 5]).setConnectingCells({ cellIds[1 + i * 5], cellIds[3 + i * 5] }).setMaxConnections(5),
-			CellDescription().setPos({ 103 + static_cast<float>(i) * 25, 100 }).setId(cellIds[3 + i * 5]).setConnectingCells({ cellIds[2 + i * 5], cellIds[4 + i * 5] }).setMaxConnections(3),
-			CellDescription().setPos({ 104 + static_cast<float>(i) * 25, 100 }).setId(cellIds[4 + i * 5]).setConnectingCells({ cellIds[3 + i * 5] }).setMaxConnections(4)
+			CellDescription().setPos({ 100 + static_cast<float>(i) * 25, 100 }).setId(cellIds[0 + i]).setMaxConnections(2)
 		}));
 	}
 
-	for (int movement = 0; movement < 10; ++movement) {
+	for (int movement = 0; movement < 11; ++movement) {
 		_navi.update(_data);
 
-		for (int i = 0; i < 10; ++i) {
+		for (int i = 0; i < 2; ++i) {
 			auto &cluster = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[i]));
 			auto &cell = cluster->cells.at(_navi.cellIndicesByCellIds.at(cellIds[i]));
 			auto pos = cell->pos.getValue();
