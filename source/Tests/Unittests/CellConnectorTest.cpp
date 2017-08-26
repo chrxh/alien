@@ -19,12 +19,12 @@ public:
 	~CellConnectorTest();
 
 protected:
-	bool isCellAdded(CellClusterDescription const &cluster, uint64_t cellId) const;
-	bool isCellModified(CellClusterDescription const &cluster, uint64_t cellId) const;
-	bool isCellUnmodified(CellClusterDescription const & cluster, uint64_t cellId) const;
-	bool isCellDeleted(CellClusterDescription const &cluster, uint64_t cellId) const;
+	bool isCellAdded(ClusterChangeDescription const &cluster, uint64_t cellId) const;
+	bool isCellModified(ClusterChangeDescription const &cluster, uint64_t cellId) const;
+	bool isCellUnmodified(ClusterChangeDescription const & cluster, uint64_t cellId) const;
+	bool isCellDeleted(ClusterChangeDescription const &cluster, uint64_t cellId) const;
 	bool areAllClustersDeletedExcept(set<uint64_t> const &clusterIds) const;
-	bool areAllCellsDeletedExcept(CellClusterDescription const &cluster, set<uint64_t> const &cellIds) const;
+	bool areAllCellsDeletedExcept(ClusterChangeDescription const &cluster, set<uint64_t> const &cellIds) const;
 
 	SimulationController* _controller = nullptr;
 	SimulationParameters* _parameters = nullptr;
@@ -33,7 +33,7 @@ protected:
 
 	IntVector2D _universeSize{ 600, 300 };
 
-	DataDescription _data;
+	DataChangeDescription _data;
 	DescriptionNavigationMaps _navi;
 };
 
@@ -55,7 +55,7 @@ CellConnectorTest::~CellConnectorTest()
 	delete _connector;
 }
 
-bool CellConnectorTest::isCellAdded(CellClusterDescription const & cluster, uint64_t cellId) const
+bool CellConnectorTest::isCellAdded(ClusterChangeDescription const & cluster, uint64_t cellId) const
 {
 	for (auto const& cellT : cluster.cells) {
 		if (cellT->id == cellId && !cellT.isAdded()) {
@@ -65,7 +65,7 @@ bool CellConnectorTest::isCellAdded(CellClusterDescription const & cluster, uint
 	return true;
 }
 
-bool CellConnectorTest::isCellModified(CellClusterDescription const & cluster, uint64_t cellId) const
+bool CellConnectorTest::isCellModified(ClusterChangeDescription const & cluster, uint64_t cellId) const
 {
 	for (auto const& cellT : cluster.cells) {
 		if (cellT->id == cellId && !cellT.isModified()) {
@@ -75,7 +75,7 @@ bool CellConnectorTest::isCellModified(CellClusterDescription const & cluster, u
 	return true;
 }
 
-bool CellConnectorTest::isCellUnmodified(CellClusterDescription const & cluster, uint64_t cellId) const
+bool CellConnectorTest::isCellUnmodified(ClusterChangeDescription const & cluster, uint64_t cellId) const
 {
 	for (auto const& cellT : cluster.cells) {
 		if (cellT->id == cellId && !cellT.isUnmodified()) {
@@ -85,7 +85,7 @@ bool CellConnectorTest::isCellUnmodified(CellClusterDescription const & cluster,
 	return true;
 }
 
-bool CellConnectorTest::isCellDeleted(CellClusterDescription const & cluster, uint64_t cellId) const
+bool CellConnectorTest::isCellDeleted(ClusterChangeDescription const & cluster, uint64_t cellId) const
 {
 	for (auto const& cellT : cluster.cells) {
 		if (cellT->id == cellId && !cellT.isDeleted()) {
@@ -112,7 +112,7 @@ bool CellConnectorTest::areAllClustersDeletedExcept(set<uint64_t> const &cluster
 	return true;
 }
 
-bool CellConnectorTest::areAllCellsDeletedExcept(CellClusterDescription const & cluster, set<uint64_t> const & cellIds) const
+bool CellConnectorTest::areAllCellsDeletedExcept(ClusterChangeDescription const & cluster, set<uint64_t> const & cellIds) const
 {
 	for (auto const& cellT : cluster.cells) {
 		if (cellIds.find(cellT->id) == cellIds.end()) {
@@ -134,10 +134,10 @@ TEST_F(CellConnectorTest, testMoveOneCellAway)
 	vector<uint64_t> cellIds;
 	cellIds.push_back(_numberGen->getTag());
 	cellIds.push_back(_numberGen->getTag());
-	_data.retainCellCluster(CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+	_data.retainCellCluster(ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 	{
-		CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
-		CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
+		CellChangeDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+		CellChangeDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
 	}));
 	_data.clusters[0]->cells[1]->pos.setValue({ 103, 100 });
 
@@ -166,15 +166,15 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.retainCellClusters({
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
-			CellDescription().setPos({ 200, 101 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(2),
-			CellDescription().setPos({ 200, 102 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+			CellChangeDescription().setPos({ 200, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+			CellChangeDescription().setPos({ 200, 101 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(2),
+			CellChangeDescription().setPos({ 200, 102 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 		}),
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 100, 100 }).setId(cellIds[3]).setMaxConnections(1),
+			CellChangeDescription().setPos({ 100, 100 }).setId(cellIds[3]).setMaxConnections(1),
 	})
 	});
 	_data.clusters[0]->cells[1]->pos.setValue({ 200, 101.1f });
@@ -203,15 +203,15 @@ TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.retainCellClusters({
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
-			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
+			CellChangeDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+			CellChangeDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
 		}), 
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[3] }).setMaxConnections(2),
-			CellDescription().setPos({ 201, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2] }).setMaxConnections(1)
+			CellChangeDescription().setPos({ 200, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[3] }).setMaxConnections(2),
+			CellChangeDescription().setPos({ 201, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2] }).setMaxConnections(1)
 		})
 	});
 	_data.clusters[0]->cells[1]->pos.setValue({ 199, 100 });
@@ -243,19 +243,19 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.retainCellClusters({
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
+			CellChangeDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
-			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
+			CellChangeDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
+			CellChangeDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
-			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
+			CellChangeDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
+			CellChangeDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
 	});
 	_data.clusters[0]->cells[0]->pos.setValue({ 200, 100 });
@@ -280,19 +280,19 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.retainCellClusters({
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
+			CellChangeDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
-			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
+			CellChangeDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
+			CellChangeDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
-			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
+			CellChangeDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
+			CellChangeDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
 	});
 	_data.clusters[0]->cells[0]->pos.setValue({ 200, 100 });
@@ -332,19 +332,19 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.retainCellClusters({
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
+			CellChangeDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
-			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
+			CellChangeDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
+			CellChangeDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+		ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 		{
-			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
-			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
+			CellChangeDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
+			CellChangeDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
 	});
 	_navi.update(_data);
@@ -388,13 +388,13 @@ TEST_F(CellConnectorTest, testMoveSeveralCells)
 	for (int i = 0; i < 5; ++i) {
 		cellIds.push_back(_numberGen->getTag());
 	}
-	_data.retainCellCluster(CellClusterDescription().setId(_numberGen->getTag()).retainCells(
+	_data.retainCellCluster(ClusterChangeDescription().setId(_numberGen->getTag()).retainCells(
 	{
-		CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
-		CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(3),
-		CellDescription().setPos({ 102, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[1], cellIds[3] }).setMaxConnections(5),
-		CellDescription().setPos({ 103, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2], cellIds[4] }).setMaxConnections(3),
-		CellDescription().setPos({ 104, 100 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(4)
+		CellChangeDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+		CellChangeDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(3),
+		CellChangeDescription().setPos({ 102, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[1], cellIds[3] }).setMaxConnections(5),
+		CellChangeDescription().setPos({ 103, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2], cellIds[4] }).setMaxConnections(3),
+		CellChangeDescription().setPos({ 104, 100 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(4)
 	}));
 	for (int i = 0; i < 5; ++i) {
 		_data.clusters[0]->cells[i]->pos.setValue({ 200 + static_cast<float>(i), 100 });
@@ -430,8 +430,8 @@ TEST_F(CellConnectorTest, testMoveSeveralCellsOverOtherCells)
 	}
 
 	for (int i = 0; i < 4; ++i) {
-		_data.retainCellCluster(CellClusterDescription().setId(_numberGen->getTag()).retainCells({
-			CellDescription().setPos({ 100 + static_cast<float>(i) * 25, 100 }).setId(cellIds[0 + i]).setMaxConnections(2)
+		_data.retainCellCluster(ClusterChangeDescription().setId(_numberGen->getTag()).retainCells({
+			CellChangeDescription().setPos({ 100 + static_cast<float>(i) * 25, 100 }).setId(cellIds[0 + i]).setMaxConnections(2)
 		}));
 	}
 

@@ -1,19 +1,19 @@
 #include "VisualDescription.h"
 
-DataDescription & VisualDescription::getDataRef()
+DataChangeDescription & VisualDescription::getDataRef()
 {
 	return _data;
 }
 
-CellDescription & VisualDescription::getCellDescRef(uint64_t cellId)
+CellChangeDescription & VisualDescription::getCellDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-	CellClusterDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
+	ClusterChangeDescription &clusterDesc = _data.clusters[clusterIndex].getValue();
 	return clusterDesc.cells[cellIndex].getValue();
 }
 
-EnergyParticleDescription & VisualDescription::getParticleDescRef(uint64_t particleId)
+ParticleChangeDescription & VisualDescription::getParticleDescRef(uint64_t particleId)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles[particleIndex].getValue();
@@ -29,7 +29,7 @@ bool VisualDescription::isParticlePresent(uint64_t particleId)
 	return _navi.particleIds.find(particleId) != _navi.particleIds.end();
 }
 
-void VisualDescription::setData(DataDescription const &data)
+void VisualDescription::setData(DataChangeDescription const &data)
 {
 	updateInternals(data);
 }
@@ -78,14 +78,14 @@ void VisualDescription::moveSelection(QVector2D const &delta)
 		if (isCellPresent(cellId)) {
 			int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 			int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-			CellDescription &cellDesc = getCellDescRef(cellId);
+			CellChangeDescription &cellDesc = getCellDescRef(cellId);
 			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
 		}
 	}
 
 	for (uint64_t particleId : _selectedParticleIds) {
 		if (isParticlePresent(particleId)) {
-			EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
+			ParticleChangeDescription &particleDesc = getParticleDescRef(particleId);
 			particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
 		}
 	}
@@ -106,14 +106,14 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 		if (isCellPresent(cellId)) {
 			int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 			int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-			CellDescription &cellDesc = getCellDescRef(cellId);
+			CellChangeDescription &cellDesc = getCellDescRef(cellId);
 			cellDesc.pos.setValue(cellDesc.pos.getValue() + delta);
 		}
 	}
 
 	for (uint64_t particleId : _selectedParticleIds) {
 		if (isParticlePresent(particleId)) {
-			EnergyParticleDescription &particleDesc = getParticleDescRef(particleId);
+			ParticleChangeDescription &particleDesc = getParticleDescRef(particleId);
 			particleDesc.pos.setValue(particleDesc.pos.getValue() + delta);
 		}
 	}
@@ -150,7 +150,7 @@ void VisualDescription::updateAfterCellReconnections()
 	}
 }
 
-void VisualDescription::updateInternals(DataDescription const &data)
+void VisualDescription::updateInternals(DataChangeDescription const &data)
 {
 	_data = data;
 	_navi.update(data);

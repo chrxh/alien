@@ -53,9 +53,9 @@ Benchmark::~Benchmark()
 
 void Benchmark::createTestData(SimulationAccess * access)
 {
-	DataDescription desc;
+	DataChangeDescription desc;
 	for (int i = 0; i < 20000 * 9; ++i) {
-		desc.addEnergyParticle(EnergyParticleDescription().setPos(QVector2D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y)))
+		desc.addEnergyParticle(ParticleChangeDescription().setPos(QVector2D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y)))
 			.setVel(QVector2D(_numberGen->getRandomReal()*2.0 - 1.0, _numberGen->getRandomReal()*2.0 - 1.0))
 			.setEnergy(50));
 	}

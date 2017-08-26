@@ -18,7 +18,7 @@ void SimulationAccessGpuImpl::init(SimulationContextApi * context)
 	connect(worker, &WorkerForGpu::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }
 
-void SimulationAccessGpuImpl::updateData(DataDescription const & desc)
+void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
 {
 }
 
@@ -42,7 +42,7 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	worker->requireData();
 }
 
-DataDescription const & SimulationAccessGpuImpl::retrieveData()
+DataChangeDescription const & SimulationAccessGpuImpl::retrieveData()
 {
 	return _dataCollected;
 }
@@ -107,12 +107,12 @@ void SimulationAccessGpuImpl::createData()
 	worker->ptrCorrectionForRetrievedData();
 
 	for (int i = 0; i < cudaData.numClusters; ++i) {
-		CellClusterDescription clusterDesc;
+		ClusterChangeDescription clusterDesc;
 		if (_requiredRect.isContained({ static_cast<int>(cudaData.clusters[i].pos.x), static_cast<int>(cudaData.clusters[i].pos.y) }))
 			for (int j = 0; j < cudaData.clusters[i].numCells; ++j) {
 				auto pos = cudaData.clusters[i].cells[j].absPos;
 				auto id = cudaData.clusters[i].cells[j].id;
-				clusterDesc.addCell(CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata()).setEnergy(100.0f).setId(id));
+				clusterDesc.addCell(CellChangeDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata()).setEnergy(100.0f).setId(id));
 			}
 		_dataCollected.addCellCluster(clusterDesc);
 	}
