@@ -27,7 +27,7 @@ private:
 
 	list<uint64_t> getCellIdsAtPos(IntVector2D const &pos);
 
-	unordered_set<int> reclusteringSingleClusterAndReturnModifiedClusterIndices(DataDescription &data
+	unordered_set<int> reclusteringSingleClusterAndReturnDiscardedClusterIndices(DataDescription &data
 		, int clusterIndex, vector<ClusterDescription> &newClusters);
 	void lookUpCell(DataDescription &data, uint64_t cellId, ClusterDescription &newCluster
 		, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
