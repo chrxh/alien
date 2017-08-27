@@ -24,7 +24,7 @@ protected:
     UnitContext* _context;
 
     //data for cluster1
-    CellCluster* _cluster1 = nullptr;
+    Cluster* _cluster1 = nullptr;
     Cell* _cellWithToken = nullptr;
     Cell* _cellWithoutToken = nullptr;
     CellCommunicatorImpl* _communicator1a = nullptr;
@@ -32,7 +32,7 @@ protected:
     Token* _token = nullptr;
 
     //data for cluster2
-    CellCluster* _cluster2 = nullptr;
+    Cluster* _cluster2 = nullptr;
 	CellCommunicatorImpl* _communicator2 = nullptr;
 };
 

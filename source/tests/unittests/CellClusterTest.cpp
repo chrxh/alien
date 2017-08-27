@@ -20,7 +20,7 @@ public:
 
 protected:
 	UnitContext* _context = nullptr;
-	CellCluster* _cluster = nullptr;
+	Cluster* _cluster = nullptr;
 	Cell* _cell1 = nullptr;
 	Cell* _cell2 = nullptr;
 	Cell* _cell3 = nullptr;
