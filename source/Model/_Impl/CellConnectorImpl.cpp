@@ -19,6 +19,7 @@ void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &c
 {
 	updateInternals(data);
 	updateConnectingCells(data, changedCellIds);
+//	set<uint64_t> 
 	reclustering(data, changedCellIds);
 }
 

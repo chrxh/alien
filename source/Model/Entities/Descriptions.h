@@ -52,16 +52,14 @@ struct ClusterDescription
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ClusterDescription& setAngle(double value) { angle = value; return *this; }
 	ClusterDescription& setAngularVel(double value) { angularVel = value; return *this; }
-	ClusterDescription& addCell(CellDescription const& value)
-	{
-		cells.emplace_back(value);
-		return *this;
-	}
 	ClusterDescription& addCells(list<CellDescription> const& value)
 	{
-		for (auto const &cell : value) {
-			addCell(cell);
-		}
+		cells.insert(cells.end(), value.begin(), value.end());
+		return *this;
+	}
+	ClusterDescription& addCell(CellDescription const& value)
+	{
+		addCells({ value });
 		return *this;
 	}
 };
@@ -86,9 +84,14 @@ struct DataDescription
 	vector<ClusterDescription> clusters;
 	vector<ParticleDescription> particles;
 
+	DataDescription& addClusters(list<ClusterDescription> const& value)
+	{
+		clusters.insert(clusters.end(), value.begin(), value.end());
+		return *this;
+	}
 	DataDescription& addCluster(ClusterDescription const& value)
 	{
-		clusters.emplace_back(value);
+		addClusters({ value });
 		return *this;
 	}
 	DataDescription& addParticle(ParticleDescription const& value)
