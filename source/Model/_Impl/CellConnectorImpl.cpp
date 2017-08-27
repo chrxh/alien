@@ -19,8 +19,27 @@ void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &c
 {
 	updateInternals(data);
 	updateConnectingCells(data, changedCellIds);
-//	set<uint64_t> 
+
+	//TEMP
+	set<uint64_t> cellIdsBefore;
+	for (auto cluster : data.clusters) {
+		for (auto cell : cluster.cells) {
+			cellIdsBefore.insert(cell.id);
+		}
+	}
+
 	reclustering(data, changedCellIds);
+
+	//TEMP
+	set<uint64_t> cellIdsAfter;
+	for (auto cluster : data.clusters) {
+		for (auto cell : cluster.cells) {
+			cellIdsAfter.insert(cell.id);
+		}
+	}
+	if (cellIdsAfter != cellIdsBefore) {
+		int dummy = 5;
+	}
 }
 
 void CellConnectorImpl::updateInternals(DataDescription const &data)
@@ -54,66 +73,43 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data, list<uint64
 void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const &changedCellIds)
 {
 	unordered_set<int> affectedClusterIndices;
-	unordered_set<int> allDiscardedClusterIndices;
-	for (uint64_t changedCellId : changedCellIds) {
-		auto &cell = getCellDescRef(data, changedCellId);
-		affectedClusterIndices.insert(_navi.clusterIndicesByCellIds.at(changedCellId));
+	for (uint64_t lookedUpCellId : changedCellIds) {
+		affectedClusterIndices.insert(_navi.clusterIndicesByCellIds.at(lookedUpCellId));
 	}
 
 	vector<ClusterDescription> newClusters;
-	while (!affectedClusterIndices.empty()) {
-		int affectedClusterIndex = *affectedClusterIndices.begin();
-		unordered_set<int> modifiedClusterIndices = reclusteringSingleClusterAndReturnModifiedClusterIndices(data, affectedClusterIndex, newClusters);
-		for (int modifiedClusterIndex : modifiedClusterIndices) {
-			affectedClusterIndices.erase(modifiedClusterIndex);
-		}
-		allDiscardedClusterIndices.insert(modifiedClusterIndices.begin(), modifiedClusterIndices.end());
-	}
-
-	for (int clusterIndex = 0; clusterIndex < data.clusters.size(); ++clusterIndex) {
-		if (allDiscardedClusterIndices.find(clusterIndex) == allDiscardedClusterIndices.end()) {
-			newClusters.emplace_back(data.clusters.at(clusterIndex));
+	//----
+	unordered_set<uint64_t> remainingCellIds;
+	for (int affectedClusterIndex : affectedClusterIndices) {
+		for (auto &cell : data.clusters[affectedClusterIndex].cells) {
+			remainingCellIds.insert(cell.id);
 		}
 	}
-	data.clusters = newClusters;
-}
-
-unordered_set<int> CellConnectorImpl::reclusteringSingleClusterAndReturnModifiedClusterIndices(DataDescription &data, int clusterIndex, vector<ClusterDescription> &newClusters)
-{
-	auto &cluster = data.clusters.at(clusterIndex);
 
 	unordered_set<uint64_t> lookedUpCellIds;
-	unordered_set<uint64_t> remainingCellIdsOfCluster;
-	for (auto &cell : cluster.cells) {
-		remainingCellIdsOfCluster.insert(cell.id);
-	}
 
-	bool firstRun = true;
-	while (!remainingCellIdsOfCluster.empty()) {
-		uint64_t remainingCellIdOfCluster = *remainingCellIdsOfCluster.begin();
+	while (!remainingCellIds.empty()) {
 		ClusterDescription newCluster;
-		lookUpCell(data, remainingCellIdOfCluster, newCluster, lookedUpCellIds, remainingCellIdsOfCluster);
+		lookUpCell(data, *remainingCellIds.begin(), newCluster, lookedUpCellIds, remainingCellIds);
 		if (!newCluster.cells.empty()) {
-			if (firstRun) {
-				newCluster.id = cluster.id;
-				firstRun = false;
-			}
-			else {
-				newCluster.id = _numberGen->getTag();
-			}
+			//TODO: restliche Clusterdaten füllen
+			newCluster.id = _numberGen->getTag();
 			newClusters.push_back(newCluster);
 		}
 	}
 
-	//TODO: restliche Clusterdaten füllen (pos, ...)
-
-	unordered_set<int> discardClusterIndices;
+	unordered_set<int> discardedClusterIndices;
 	for (uint64_t lookedUpCellId : lookedUpCellIds) {
-		discardClusterIndices.insert(_navi.clusterIndicesByCellIds.at(lookedUpCellId));
+		discardedClusterIndices.insert(_navi.clusterIndicesByCellIds.at(lookedUpCellId));
 	}
-	auto result = discardClusterIndices;
 
-	return result;
+	for (int clusterIndex = 0; clusterIndex < data.clusters.size(); ++clusterIndex) {
+		if (discardedClusterIndices.find(clusterIndex) == discardedClusterIndices.end()) {
+			newClusters.emplace_back(data.clusters.at(clusterIndex));
+		}
+	}
+
+	data.clusters = newClusters;
 }
 
 void CellConnectorImpl::lookUpCell(DataDescription &data, uint64_t cellId, ClusterDescription &newCluster
