@@ -19,27 +19,7 @@ void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &c
 {
 	updateInternals(data);
 	updateConnectingCells(data, changedCellIds);
-
-	//TEMP
-	set<uint64_t> cellIdsBefore;
-	for (auto cluster : data.clusters) {
-		for (auto cell : cluster.cells) {
-			cellIdsBefore.insert(cell.id);
-		}
-	}
-
 	reclustering(data, changedCellIds);
-
-	//TEMP
-	set<uint64_t> cellIdsAfter;
-	for (auto cluster : data.clusters) {
-		for (auto cell : cluster.cells) {
-			cellIdsAfter.insert(cell.id);
-		}
-	}
-	if (cellIdsAfter != cellIdsBefore) {
-		int dummy = 5;
-	}
 }
 
 void CellConnectorImpl::updateInternals(DataDescription const &data)

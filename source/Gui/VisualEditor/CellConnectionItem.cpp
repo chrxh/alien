@@ -15,15 +15,6 @@ CellConnectionItem::CellConnectionItem(ItemConfig* config, CellDescription const
 	update(cell1, cell2);
 }
 
-/*
-CellConnectionGraphicsItem::CellConnectionGraphicsItem (qreal x1, qreal y1, qreal x2, qreal y2, ConnectionState s, QGraphicsItem* parent)
-    : QGraphicsItem(parent), _dx(x2-x1), _dy(y2-y1), _connectionState(s)
-{
-    QGraphicsItem::setPos(x1, y1);
-    QGraphicsItem::setZValue(-1.0);
-}
-*/
-
 void CellConnectionItem::update(CellDescription const & cell1, CellDescription const & cell2)
 {
 	auto pos1 = CoordinateSystem::modelToScene(*cell1.pos);
@@ -49,10 +40,10 @@ void CellConnectionItem::update(CellDescription const & cell1, CellDescription c
 
 QRectF CellConnectionItem::boundingRect () const
 {
-    qreal minX = qMin(0.0, _dx);
-    qreal minY = qMin(0.0, _dy);
-    qreal maxX = qMax(0.0, _dx);
-    qreal maxY = qMax(0.0, _dy);
+    qreal minX = qMin(0.0, _dx) - CoordinateSystem::modelToScene(0.05);
+    qreal minY = qMin(0.0, _dy) - CoordinateSystem::modelToScene(0.05);
+    qreal maxX = qMax(0.0, _dx) + CoordinateSystem::modelToScene(0.05);
+    qreal maxY = qMax(0.0, _dy) + CoordinateSystem::modelToScene(0.05);
     return QRectF(minX, minY, (maxX-minX), (maxY-minY));
 }
 
