@@ -120,6 +120,8 @@ void ItemManager::updateConnections(VisualDescription* visualDesc)
 				if (newConnectionsByIds.find(connectionId) != newConnectionsByIds.end()) {
 					continue;
 				}
+				//update may lead to exception in rare cases (Qt bug?)
+/*
 				auto connectionIt = _connectionsByIds.find(connectionId);
 				if (connectionIt != _connectionsByIds.end()) {
 					CellConnectionItem* connection = connectionIt->second;
@@ -128,10 +130,13 @@ void ItemManager::updateConnections(VisualDescription* visualDesc)
 					_connectionsByIds.erase(connectionIt);
 				}
 				else {
+*/
 					CellConnectionItem* newConnection = new CellConnectionItem(_config, cell, connectingCellD);
 					_scene->addItem(newConnection);
 					newConnectionsByIds[connectionId] = newConnection;
+/*
 				}
+*/
 			}
 		}
 	}
