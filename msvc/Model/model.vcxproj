@@ -667,6 +667,7 @@
     <ClCompile Include="..\..\source\Model\Context\_Impl\UnitThreadControllerImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Definitions.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\CellTO.cpp" />
+    <ClCompile Include="..\..\source\Model\Entities\ChangeDescriptions.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\Timestamp.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\_Impl\ClusterImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Entities\_Impl\CellImpl.cpp" />

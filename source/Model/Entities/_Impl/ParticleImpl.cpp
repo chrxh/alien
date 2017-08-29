@@ -86,7 +86,7 @@ bool ParticleImpl::processingMovement(Cluster*& cluster)
 		CellMetadata meta;
 		meta.color = _metadata.color;
 		auto desc = ClusterChangeDescription().setPos(_pos).setVel(_vel)
-			.addCell(getRandomCellDesciption(eNew).setMetadata(meta));
+			.addNewCell(getRandomCellDesciption(eNew).setMetadata(meta));
 		cluster = factory->build(desc, _context);
 		_energy = 0;
 		cluster->drawCellsToMap();

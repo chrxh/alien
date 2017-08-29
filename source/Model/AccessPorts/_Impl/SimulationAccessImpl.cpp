@@ -86,7 +86,7 @@ void SimulationAccessImpl::callBackUpdateData()
 	for (auto const& clusterDesc : _dataToUpdate.clusters) {
 		if (clusterDesc.isAdded()) {
 			auto const& clusterDescVal = clusterDesc.getValue();
-			auto unitContext = grid->getUnitOfMapPos(clusterDescVal.pos.getValue())->getContext();
+			auto unitContext = grid->getUnitOfMapPos(*clusterDescVal.pos)->getContext();
 			auto cluster = factory->build(clusterDescVal, unitContext);
 			unitContext->getClustersRef().push_back(cluster);
 		}
@@ -94,7 +94,7 @@ void SimulationAccessImpl::callBackUpdateData()
 	for (auto const& particleDesc : _dataToUpdate.particles) {
 		if (particleDesc.isAdded()) {
 			auto const& particleDescVel = particleDesc.getValue();
-			auto unitContext = grid->getUnitOfMapPos(particleDescVel.pos.getValue())->getContext();
+			auto unitContext = grid->getUnitOfMapPos(*particleDescVel.pos)->getContext();
 			auto particle = factory->build(particleDescVel, unitContext);
 			unitContext->getEnergyParticlesRef().push_back(particle);
 		}

@@ -20,10 +20,10 @@ Cluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, UnitCont
 
 	for (auto const &cellT : desc.cells) {
 		auto cellD = cellT.getValue();
-		if (!cellD.connectingCells.isInitialized()) {
+		if (!cellD.connectingCells) {
 			continue;
 		}
-		for (uint64_t connectingCellId : cellD.connectingCells.getValue()) {
+		for (uint64_t connectingCellId : *cellD.connectingCells) {
 			Cell* cell1 = cellsByIds[cellD.id];
 			Cell* cell2 = cellsByIds[connectingCellId];
 			if (!cell1->isConnectedTo(cell2)) {
@@ -32,25 +32,25 @@ Cluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, UnitCont
 		}
 	}
 
-	return new ClusterImpl(QList<Cell*>::fromStdList(cells), desc.angle.getValueOr(0.0), desc.pos.getValue()
-		, desc.angularVel.getValueOr(0.0), desc.vel.getValueOr(QVector2D()), context);
+	return new ClusterImpl(QList<Cell*>::fromStdList(cells), desc.angle.get_value_or(0.0), desc.pos.get()
+		, desc.angularVel.get_value_or(0.0), desc.vel.get_value_or(QVector2D()), context);
 }
 
 Cell * EntityFactoryImpl::build(CellChangeDescription const & desc, UnitContext * context) const
 {
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-	auto const& energy = desc.energy.getValue();
-	auto const& maxConnections = desc.maxConnections.getValueOr(0);
-	auto const& tokenAccessNumber = desc.tokenBranchNumber.getValueOr(0);
-	auto const& relPos = desc.pos.getValueOr({ 0.0, 0.0 });
+	auto const& energy = *desc.energy;
+	auto const& maxConnections = desc.maxConnections.get_value_or(0);
+	auto const& tokenAccessNumber = desc.tokenBranchNumber.get_value_or(0);
+	auto const& relPos = desc.pos.get_value_or({ 0.0, 0.0 });
 	auto cell = new CellImpl(energy, context, maxConnections, tokenAccessNumber, relPos);
-	cell->setFlagTokenBlocked(desc.tokenBlocked.getValueOr(false));
-	cell->setMetadata(desc.metadata.getValueOr(CellMetadata()));
+	cell->setFlagTokenBlocked(desc.tokenBlocked.get_value_or(false));
+	cell->setMetadata(desc.metadata.get_value_or(CellMetadata()));
 
-	auto const& cellFunction = desc.cellFunction.getValueOr(CellFunctionDescription());
+	auto const& cellFunction = desc.cellFunction.get_value_or(CellFunctionDescription());
 	featureFactory->addCellFunction(cell, cellFunction.type, cellFunction.data, context);
 	featureFactory->addEnergyGuidance(cell, context);
-	auto const& tokensDesc = desc.tokens.getValueOr(vector<TokenDescription>());
+	auto const& tokensDesc = desc.tokens.get_value_or(vector<TokenDescription>());
 	for (auto const& tokenDesc : tokensDesc) {
 		cell->addToken(build(tokenDesc, context));
 	}
@@ -66,10 +66,10 @@ Token * EntityFactoryImpl::build(TokenDescription const & desc, UnitContext * co
 
 Particle* EntityFactoryImpl::build(ParticleChangeDescription const& desc, UnitContext* context) const
 {
-	auto const& pos = desc.pos.getValue();
-	auto const&vel = desc.vel.getValueOr({ 0.0, 0.0 });
-	auto particle = new ParticleImpl(desc.energy.getValue(), pos, vel, context);
-	auto const& metadata = desc.metadata.getValueOr(EnergyParticleMetadata());
+	auto const& pos = *desc.pos;
+	auto const&vel = desc.vel.get_value_or({ 0.0, 0.0 });
+	auto particle = new ParticleImpl(*desc.energy, pos, vel, context);
+	auto const& metadata = desc.metadata.get_value_or(EnergyParticleMetadata());
 	particle->setMetadata(metadata);
 	return particle;
 }
