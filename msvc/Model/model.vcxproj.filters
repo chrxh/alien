@@ -349,6 +349,9 @@
     <ClCompile Include="..\..\source\Model\Entities\_Impl\ParticleImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Model\Entities\ChangeDescriptions.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Settings.h">
