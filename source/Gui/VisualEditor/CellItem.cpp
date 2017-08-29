@@ -23,8 +23,8 @@ void CellItem::update(CellDescription const &desc)
 
 QRectF CellItem::boundingRect () const
 {
-    return QRectF(CoordinateSystem::modelToScene(-0.5), CoordinateSystem::modelToScene(-0.5)
-		, CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0));
+    return QRectF(CoordinateSystem::modelToScene(-0.6), CoordinateSystem::modelToScene(-0.6)
+		, CoordinateSystem::modelToScene(1.2), CoordinateSystem::modelToScene(1.2));
 }
 
 void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
