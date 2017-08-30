@@ -111,6 +111,13 @@ struct DataChangeDescription
 		}
 		return *this;
 	}
+	DataChangeDescription& addDeletedCluster(uint64_t id)
+	{
+		ClusterChangeDescription cluster;
+		cluster.id = id;
+		clusters.emplace_back(ChangeTracker<ClusterChangeDescription>(cluster, ChangeTracker<ClusterChangeDescription>::State::Deleted));
+		return *this;
+	}
 	DataChangeDescription& addParticle(ParticleChangeDescription const& value)
 	{
 		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Added));
