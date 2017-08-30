@@ -9,8 +9,12 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 	});
 	unordered_set<uint64_t> clusterIdSetAfter(clusterIdsAfter.begin(), clusterIdsAfter.end());
 
-	for (auto const& cluster : dataBefore.clusters) {
-		if(clusterIdSetAfter.find(cluster.id) == clusterIdSetAfter.end()) {
+	for (auto const& clusterBefore : dataBefore.clusters) {
+		if(clusterIdSetAfter.find(clusterBefore.id) == clusterIdSetAfter.end()) {
+			addDeletedCluster(clusterBefore.id);
+		}
+		else {
+			clusterIdSetAfter.erase(clusterBefore.id);
 		}
 	}
 }
