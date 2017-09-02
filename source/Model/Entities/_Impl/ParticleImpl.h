@@ -26,8 +26,8 @@ public:
 	virtual quint64 getId() const override;
 	virtual void setId(quint64 value) override;
 
-	virtual EnergyParticleMetadata getMetadata() const override;
-	virtual void setMetadata(EnergyParticleMetadata value) override;
+	virtual ParticleMetadata getMetadata() const override;
+	virtual void setMetadata(ParticleMetadata value) override;
 
 	virtual void serializePrimitives(QDataStream& stream) const override;
 	virtual void deserializePrimitives(QDataStream& stream) override;
@@ -43,6 +43,6 @@ private:
 	QVector2D _pos;
 	QVector2D _vel;
 	quint64 _id = 0;
-	EnergyParticleMetadata _metadata;
+	ParticleMetadata _metadata;
 };
 

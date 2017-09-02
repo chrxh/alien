@@ -64,8 +64,8 @@ public:
     virtual void getConnectedComponent(Cell* cell, QList< Cell* >& component) const = 0;
     virtual void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const = 0;
 
-	virtual CellClusterMetadata getMetadata() const = 0;
-	virtual void setMetadata(CellClusterMetadata metadata) = 0;
+	virtual ClusterMetadata getMetadata() const = 0;
+	virtual void setMetadata(ClusterMetadata metadata) = 0;
 
     virtual void serializePrimitives (QDataStream& stream) const = 0;
 	virtual void deserializePrimitives (QDataStream& stream) = 0;

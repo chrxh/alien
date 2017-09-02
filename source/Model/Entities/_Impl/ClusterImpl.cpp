@@ -191,7 +191,7 @@ void ClusterImpl::processingDissipation (QList< Cluster* >& fragments, QList< Pa
 			QVector2D vel = cell->getVelocity();
 			auto desc = ParticleChangeDescription().setEnergy(energyForParticle).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
             energyParticle = factory->build(desc, _context);
-			EnergyParticleMetadata metadata;
+			ParticleMetadata metadata;
 			metadata.color = cell->getMetadata().color;
             energyParticle->setMetadata(metadata);
             energyParticles << energyParticle;
@@ -1103,18 +1103,18 @@ void ClusterImpl::radiation (qreal& energy, Cell* originCell, Particle*& energyP
 		QVector2D vel = originCell->getVelocity() * parameters->radiationVelocityMultiplier + velPerturbation;
 		auto desc = ParticleChangeDescription().setEnergy(radEnergy).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
         energyParticle = factory->build(desc, _context);
-		EnergyParticleMetadata metadata;
+		ParticleMetadata metadata;
 		metadata.color = originCell->getMetadata().color;
         energyParticle->setMetadata(metadata);
     }
 }
 
-CellClusterMetadata ClusterImpl::getMetadata() const
+ClusterMetadata ClusterImpl::getMetadata() const
 {
 	return _meta;
 }
 
-void ClusterImpl::setMetadata(CellClusterMetadata metadata)
+void ClusterImpl::setMetadata(ClusterMetadata metadata)
 {
 	_meta = metadata;
 }

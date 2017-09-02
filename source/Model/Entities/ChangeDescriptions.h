@@ -18,6 +18,9 @@ struct CellChangeDescription
 	optional<CellFunctionDescription> cellFunction;
 	optional<vector<TokenDescription>> tokens;
 
+	CellChangeDescription() = default;
+	CellChangeDescription(CellDescription const& desc);
+	CellChangeDescription(CellDescription const& before, CellDescription const& after);
 	CellChangeDescription& setId(uint64_t value) { id = value; return *this; }
 	CellChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellChangeDescription& setEnergy(double value) { energy = value; return *this; }
@@ -37,8 +40,12 @@ struct ClusterChangeDescription
 	optional<QVector2D> vel;
 	optional<double> angle;
 	optional<double> angularVel;
-	optional<CellClusterMetadata> metadata;
+	optional<ClusterMetadata> metadata;
 	vector<ChangeTracker<CellChangeDescription>> cells;
+
+	ClusterChangeDescription() = default;
+	ClusterChangeDescription(ClusterDescription const& desc);
+	ClusterChangeDescription(ClusterDescription const& before, ClusterDescription const& after);
 
 	ClusterChangeDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
@@ -69,6 +76,13 @@ struct ClusterChangeDescription
 		}
 		return *this;
 	}
+	ClusterChangeDescription& addDeletedCell(uint64_t id)
+	{
+		CellChangeDescription cell;
+		cell.id = id;
+		cells.emplace_back(ChangeTracker<CellChangeDescription>(cell, ChangeTracker<CellChangeDescription>::State::Deleted));
+		return *this;
+	}
 };
 
 struct ParticleChangeDescription
@@ -78,7 +92,11 @@ struct ParticleChangeDescription
 	optional<QVector2D> pos;
 	optional<QVector2D> vel;
 	optional<double> energy;
-	optional<EnergyParticleMetadata> metadata;
+	optional<ParticleMetadata> metadata;
+
+	ParticleChangeDescription() = default;
+	ParticleChangeDescription(ParticleDescription const& desc);
+	ParticleChangeDescription(ParticleDescription const& before, ParticleDescription const& after);
 
 	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
@@ -118,9 +136,21 @@ struct DataChangeDescription
 		clusters.emplace_back(ChangeTracker<ClusterChangeDescription>(cluster, ChangeTracker<ClusterChangeDescription>::State::Deleted));
 		return *this;
 	}
-	DataChangeDescription& addParticle(ParticleChangeDescription const& value)
+	DataChangeDescription& addNewParticle(ParticleChangeDescription const& value)
 	{
 		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Added));
+		return *this;
+	}
+	DataChangeDescription& addModifiedParticle(ParticleChangeDescription const& value)
+	{
+		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Modified));
+		return *this;
+	}
+	DataChangeDescription& addDeletedParticle(uint64_t id)
+	{
+		ParticleChangeDescription particle;
+		particle.id = id;
+		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(particle, ChangeTracker<ParticleChangeDescription>::State::Deleted));
 		return *this;
 	}
 	void clear()

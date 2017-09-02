@@ -66,8 +66,8 @@ public:
     void getConnectedComponent(Cell* cell, QList< Cell* >& component) const override;
     void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const override;
 
-	CellClusterMetadata getMetadata() const override;
-	void setMetadata(CellClusterMetadata metadata) override;
+	ClusterMetadata getMetadata() const override;
+	void setMetadata(ClusterMetadata metadata) override;
 
     void serializePrimitives (QDataStream& stream) const override;
 	virtual void deserializePrimitives(QDataStream& stream) override;
@@ -88,7 +88,7 @@ private:
     QList<Cell*> _cells;
 	
     quint64 _id = 0;
-	CellClusterMetadata _meta;
+	ClusterMetadata _meta;
 };
 
 /********************* inline methods ******************/
