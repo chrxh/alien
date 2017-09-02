@@ -9,6 +9,11 @@ struct TokenDescription
 
 	TokenDescription& setEnergy(double value) { energy = value; return *this; }
 	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
+	bool operator==(TokenDescription const& other) const {
+		return energy == other.energy
+			&& data == other.data;
+	}
+	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
 struct CellDescription
@@ -44,7 +49,7 @@ struct ClusterDescription
 	optional<QVector2D> vel;
 	optional<double> angle;
 	optional<double> angularVel;
-	optional<CellClusterMetadata> metadata;
+	optional<ClusterMetadata> metadata;
 	vector<CellDescription> cells;
 
 	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
@@ -71,7 +76,7 @@ struct ParticleDescription
 	optional<QVector2D> pos;
 	optional<QVector2D> vel;
 	optional<double> energy;
-	optional<EnergyParticleMetadata> metadata;
+	optional<ParticleMetadata> metadata;
 
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }

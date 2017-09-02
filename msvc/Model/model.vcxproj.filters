@@ -369,13 +369,7 @@
     <ClInclude Include="..\..\source\Model\Physics\PhysicalQuantityConverter.h">
       <Filter>Source Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Metadata\CellClusterMetadata.h">
-      <Filter>Source Files\Metadata</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Metadata\CellMetadata.h">
-      <Filter>Source Files\Metadata</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Metadata\EnergyParticleMetadata.h">
       <Filter>Source Files\Metadata</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Features\EnergyGuidance.h">
@@ -512,6 +506,12 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Entities\_Impl\ParticleImpl.h">
       <Filter>Source Files\Entities\_Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Metadata\ClusterMetadata.h">
+      <Filter>Source Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Metadata\ParticleMetadata.h">
+      <Filter>Source Files\Metadata</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

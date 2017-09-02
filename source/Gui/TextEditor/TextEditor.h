@@ -113,9 +113,9 @@ private Q_SLOTS:
 
 private:
 	CellMetadata getCellMetadata(Cell* cell);
-	CellClusterMetadata getCellClusterMetadata(Cell* cell);
+	ClusterMetadata getCellClusterMetadata(Cell* cell);
 	void setCellMetadata(Cell* cell, CellMetadata meta);
-	void setCellClusterMetadata(Cell* cell, CellClusterMetadata meta);
+	void setCellClusterMetadata(Cell* cell, ClusterMetadata meta);
 
     void invokeUpdateCell (bool clusterDataChanged);
     void setTabSymbolsWidgetVisibility ();

@@ -1,10 +1,9 @@
-#ifndef MODEL_DEFINITIONS_H
-#define MODEL_DEFINITIONS_H
+#pragma once
 
 #include "Base/Definitions.h"
 #include "Model/Metadata/CellMetadata.h"
-#include "Model/Metadata/CellClusterMetadata.h"
-#include "Model/Metadata/EnergyParticleMetadata.h"
+#include "Model/Metadata/ClusterMetadata.h"
+#include "Model/Metadata/ParticleMetadata.h"
 
 #include "DllExport.h"
 
@@ -54,5 +53,3 @@ struct CellHash
 };
 typedef std::unordered_set<Cell*, CellHash> CellSet;
 
-
-#endif // MODEL_DEFINITIONS_H
