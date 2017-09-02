@@ -283,7 +283,7 @@ CellMetadata TextEditor::getCellMetadata(Cell* cell)
 	return CellMetadata();
 }
 
-CellClusterMetadata TextEditor::getCellClusterMetadata(Cell* cell)
+ClusterMetadata TextEditor::getCellClusterMetadata(Cell* cell)
 {
 /*
 	_context->lock();
@@ -291,7 +291,7 @@ CellClusterMetadata TextEditor::getCellClusterMetadata(Cell* cell)
 	_context->unlock();
 	return meta;
 */
-	return CellClusterMetadata();
+	return ClusterMetadata();
 }
 
 void TextEditor::energyParticleFocused (EnergyParticle* e)
@@ -420,7 +420,7 @@ void TextEditor::setCellMetadata(Cell* cell, CellMetadata meta)
 */
 }
 
-void TextEditor::setCellClusterMetadata(Cell * cell, CellClusterMetadata meta)
+void TextEditor::setCellClusterMetadata(Cell * cell, ClusterMetadata meta)
 {
 /*
 	_context->lock();
@@ -730,7 +730,7 @@ void TextEditor::changesFromMetadataEditor(QString clusterName, QString cellName
 		setCellMetadata(_focusCell, meta);
 	}
 	{
-		CellClusterMetadata meta = getCellClusterMetadata(_focusCell);
+		ClusterMetadata meta = getCellClusterMetadata(_focusCell);
 		meta.name = clusterName;
 		setCellClusterMetadata(_focusCell, meta);
 	}

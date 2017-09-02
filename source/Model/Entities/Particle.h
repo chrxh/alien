@@ -29,8 +29,8 @@ public:
 	virtual quint64 getId() const = 0;
 	virtual void setId(quint64 value) = 0;
 
-	virtual EnergyParticleMetadata getMetadata() const = 0;
-	virtual void setMetadata(EnergyParticleMetadata value) = 0;
+	virtual ParticleMetadata getMetadata() const = 0;
+	virtual void setMetadata(ParticleMetadata value) = 0;
 
     virtual void serializePrimitives (QDataStream& stream) const = 0;
 	virtual void deserializePrimitives (QDataStream& stream) = 0;

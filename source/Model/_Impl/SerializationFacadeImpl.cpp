@@ -119,7 +119,7 @@ void SerializationFacadeImpl::serializeCellCluster(Cluster* cluster, QDataStream
     foreach (Cell* cell, cells) {
 		serializeFeaturedCell(cell, stream);
 	}
-	CellClusterMetadata meta = cluster->getMetadata();
+	ClusterMetadata meta = cluster->getMetadata();
 	stream << meta.name;
 }
 
@@ -175,7 +175,7 @@ Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     cluster->updateRelCoordinates();
     cluster->updateAngularMass();
 
-	CellClusterMetadata meta;
+	ClusterMetadata meta;
 	stream >> meta.name;
 	cluster->setMetadata(meta);
 
@@ -288,7 +288,7 @@ Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
 	Particle* particle = factory->build(ParticleChangeDescription(), context);
     particle->deserializePrimitives(stream);
-	EnergyParticleMetadata metadata;
+	ParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
 	oldIdEnergyMap[particle->getId()] = particle;
@@ -302,7 +302,7 @@ Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
 	QMap< quint64, Particle* > temp;
 	Particle* particle = deserializeEnergyParticle(stream, temp, context);
-	EnergyParticleMetadata metadata;
+	ParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
 	particle->setId(context->getNumberGenerator()->getTag());

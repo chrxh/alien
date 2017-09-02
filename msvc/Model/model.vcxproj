@@ -615,9 +615,9 @@
     <ClInclude Include="..\..\source\Model\Features\_Impl\CellSensorImpl.h" />
     <ClInclude Include="..\..\source\Model\Features\_Impl\CellWeaponImpl.h" />
     <ClInclude Include="..\..\source\Model\Features\_Impl\EnergyGuidanceImpl.h" />
-    <ClInclude Include="..\..\source\Model\Metadata\CellClusterMetadata.h" />
+    <ClInclude Include="..\..\source\Model\Metadata\ClusterMetadata.h" />
     <ClInclude Include="..\..\source\Model\Metadata\CellMetadata.h" />
-    <ClInclude Include="..\..\source\Model\Metadata\EnergyParticleMetadata.h" />
+    <ClInclude Include="..\..\source\Model\Metadata\ParticleMetadata.h" />
     <CustomBuild Include="..\..\source\Model\Metadata\SymbolTable.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing SymbolTable.h...</Message>

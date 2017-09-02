@@ -1,5 +1,4 @@
-#ifndef CELLMETADATA_H
-#define CELLMETADATA_H
+#pragma once
 
 #include <QString>
 
@@ -9,6 +8,13 @@ struct CellMetadata
     QString name;
     QString description;
     quint8 color = 0;
+
+	bool operator==(CellMetadata const& other) const {
+		return computerSourcecode == other.computerSourcecode
+			&& name == other.name
+			&& description == other.description
+			&& color == other.color;
+	}
+	bool operator!=(CellMetadata const& other) const { return !operator==(other); }
 };
 
-#endif // CELLMETADATA_H

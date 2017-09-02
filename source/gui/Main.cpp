@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 	auto access = cpuFacade->buildSimulationAccess(controller->getContext());
 	DataChangeDescription desc;
 	for (int i = 0; i < 20000*9; ++i) {
-		desc.addParticle(ParticleChangeDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
+		desc.addNewParticle(ParticleChangeDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
 			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
 			.setEnergy(50));
 	}

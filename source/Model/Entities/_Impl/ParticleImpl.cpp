@@ -193,12 +193,12 @@ void ParticleImpl::setId(quint64 value)
 	_id = value;
 }
 
-EnergyParticleMetadata ParticleImpl::getMetadata() const
+ParticleMetadata ParticleImpl::getMetadata() const
 {
 	return _metadata;
 }
 
-void ParticleImpl::setMetadata(EnergyParticleMetadata value)
+void ParticleImpl::setMetadata(ParticleMetadata value)
 {
 	_metadata = value;
 }

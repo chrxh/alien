@@ -69,7 +69,7 @@ Particle* EntityFactoryImpl::build(ParticleChangeDescription const& desc, UnitCo
 	auto const& pos = *desc.pos;
 	auto const&vel = desc.vel.get_value_or({ 0.0, 0.0 });
 	auto particle = new ParticleImpl(*desc.energy, pos, vel, context);
-	auto const& metadata = desc.metadata.get_value_or(EnergyParticleMetadata());
+	auto const& metadata = desc.metadata.get_value_or(ParticleMetadata());
 	particle->setMetadata(metadata);
 	return particle;
 }
