@@ -21,6 +21,8 @@ struct MODEL_EXPORT CellChangeDescription
 	CellChangeDescription() = default;
 	CellChangeDescription(CellDescription const& desc);
 	CellChangeDescription(CellDescription const& before, CellDescription const& after);
+
+	bool isEmpty() const;
 	CellChangeDescription& setId(uint64_t value) { id = value; return *this; }
 	CellChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellChangeDescription& setEnergy(double value) { energy = value; return *this; }
@@ -47,6 +49,7 @@ struct MODEL_EXPORT ClusterChangeDescription
 	ClusterChangeDescription(ClusterDescription const& desc);
 	ClusterChangeDescription(ClusterDescription const& before, ClusterDescription const& after);
 
+	bool isEmpty() const;
 	ClusterChangeDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterChangeDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -98,6 +101,7 @@ struct ParticleChangeDescription
 	ParticleChangeDescription(ParticleDescription const& desc);
 	ParticleChangeDescription(ParticleDescription const& before, ParticleDescription const& after);
 
+	bool isEmpty() const;
 	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleChangeDescription& setVel(QVector2D const& value) { vel = value; return *this; }
