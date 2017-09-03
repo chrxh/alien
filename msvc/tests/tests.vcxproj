@@ -248,9 +248,6 @@
     <ProjectReference Include="..\Base\Base.vcxproj">
       <Project>{21bb3377-a473-473c-a064-396ec67979ab}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\ModelGpu\ModelGpu.vcxproj">
-      <Project>{2a5d1c28-f6ee-4a46-9c5d-b393990d335b}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Model\model.vcxproj">
       <Project>{046b2f85-571f-35cc-b683-6c420049404b}</Project>
     </ProjectReference>
@@ -265,6 +262,7 @@
     <ClCompile Include="..\..\source\Tests\Unittests\CellClusterTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\CellConnectorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\CellFunctionCommunicatorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\unittests\ChangeDescriptionsTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\NumberGeneratorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\PhysicsTest.cpp" />

@@ -9,6 +9,7 @@
 
 #include "Model/Definitions.h"
 #include "Model/Entities/CellTO.h"
+#include "Model/Entities/Descriptions.h"
 #include "gui/Definitions.h"
 
 class ShapeUniverse : public QGraphicsScene
@@ -38,6 +39,8 @@ private:
 
 	ItemManager* _itemManager = nullptr;
 	VisualDescription* _visualDesc = nullptr;
+
+	DataDescription _savedDataBeforeMovement;
 };
 
 #endif // SHAPEUNIVERSE_H

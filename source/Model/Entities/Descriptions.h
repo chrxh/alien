@@ -30,6 +30,7 @@ struct CellDescription
 	optional<CellFunctionDescription> cellFunction;
 	optional<vector<TokenDescription>> tokens;
 
+	CellDescription() = default;
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
@@ -39,6 +40,7 @@ struct CellDescription
 	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
 	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction = value; return *this; }
+	CellDescription& setTokens(vector<TokenDescription> const& value) { tokens = value; return *this; }
 };
 
 struct ClusterDescription
