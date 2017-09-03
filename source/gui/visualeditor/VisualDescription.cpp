@@ -72,6 +72,11 @@ bool VisualDescription::isInExtendedSelection(uint64_t id) const
 	return false;
 }
 
+bool VisualDescription::areEntitiesSelected() const
+{
+	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
+}
+
 list<uint64_t> VisualDescription::getSelectedCellIds() const
 {
 	list<uint64_t> result(_selectedCellIds.begin(), _selectedCellIds.end());

@@ -26,6 +26,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 
 CellChangeDescription::CellChangeDescription(CellDescription const & before, CellDescription const & after)
 {
+	id = after.id;
 	SET_DELTA(before.pos, after.pos, pos);
 	SET_DELTA(before.energy, after.energy, energy);
 	SET_DELTA(before.maxConnections, after.maxConnections, maxConnections);
@@ -52,6 +53,7 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & de
 
 ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & before, ClusterDescription const & after)
 {
+	id = after.id;
 	SET_DELTA(before.pos, after.pos, pos);
 	SET_DELTA(before.vel, after.vel, vel);
 	SET_DELTA(before.angle, after.angle, angle);
@@ -93,6 +95,7 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 
 ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & before, ParticleDescription const & after)
 {
+	id = after.id;
 	SET_DELTA(before.pos, after.pos, pos);
 	SET_DELTA(before.vel, after.vel, vel);
 	SET_DELTA(before.energy, after.energy, energy);
