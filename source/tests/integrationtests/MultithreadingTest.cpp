@@ -93,8 +93,8 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	_parameters->radiationProb = 0.0;
 
 	DataChangeDescription desc;
-	desc.addCellCluster(ClusterChangeDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
-		.addCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy)));
+	desc.addNewCluster(ClusterChangeDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
+		.addNewCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy)));
 	access->updateData(desc);
 
 	runSimulation(300);
@@ -118,9 +118,9 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	auto access = facade->buildSimulationAccess(_context);
 	DataChangeDescription desc;
 	for (int i = 0; i < 10000; ++i) {
-		desc.addCellCluster(ClusterChangeDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
+		desc.addNewCluster(ClusterChangeDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
 			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5 ))
-			.addCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
+			.addNewCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
 	}
 	access->updateData(desc);
 

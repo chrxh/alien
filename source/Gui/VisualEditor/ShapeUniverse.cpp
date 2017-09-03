@@ -116,6 +116,7 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	if (!_visualDesc->isInSelection(cellIds) || !_visualDesc->isInSelection(particleIds)) {
 		_visualDesc->setSelection(cellIds, particleIds);
 		_itemManager->update(_visualDesc);
+		_savedDataBeforeMovement = _visualDesc->getDataRef();
 	}
 
 	if (clickedOnSpace(itemsClicked)) {
@@ -163,6 +164,11 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
 	if (_itemManager->isMarkerActive()) {
 		_itemManager->deleteMarker();
+
+	}
+	if (_visualDesc->areEntitiesSelected()) {
+		DataChangeDescription delta(_savedDataBeforeMovement, _visualDesc->getDataRef());
+		_simAccess->updateData(delta);
 	}
 }
 

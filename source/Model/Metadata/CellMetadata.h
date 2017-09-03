@@ -16,5 +16,7 @@ struct CellMetadata
 			&& color == other.color;
 	}
 	bool operator!=(CellMetadata const& other) const { return !operator==(other); }
+
+	CellMetadata& setName(QString const& value) { name = value; return *this; }
 };
 

@@ -4,7 +4,7 @@
 
 #include "Descriptions.h"
 
-struct CellChangeDescription
+struct MODEL_EXPORT CellChangeDescription
 {
 	uint64_t id = 0;
 
@@ -32,7 +32,7 @@ struct CellChangeDescription
 	CellChangeDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction = value; return *this; }
 };
 
-struct ClusterChangeDescription
+struct MODEL_EXPORT ClusterChangeDescription
 {
 	uint64_t id = 0;
 
@@ -104,7 +104,7 @@ struct ParticleChangeDescription
 	ParticleChangeDescription& setEnergy(double value) { energy = value; return *this; }
 };
 
-struct DataChangeDescription
+struct MODEL_EXPORT DataChangeDescription
 {
 	vector<ChangeTracker<ClusterChangeDescription>> clusters;
 	vector<ChangeTracker<ParticleChangeDescription>> particles;
