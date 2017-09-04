@@ -50,6 +50,19 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data, list<uint64
 	}
 }
 
+namespace
+{
+	void setClusterAttributes(ClusterDescription& cluster)
+	{
+		QVector2D center;
+		for (auto const& cell : cluster.cells) {
+			center += *cell.pos;
+		}
+		center = center / cluster.cells.size();
+		cluster.pos = center;
+	}
+}
+
 void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const &changedCellIds)
 {
 	unordered_set<int> affectedClusterIndices;
@@ -58,10 +71,9 @@ void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const
 	}
 
 	vector<ClusterDescription> newClusters;
-	//----
 	unordered_set<uint64_t> remainingCellIds;
 	for (int affectedClusterIndex : affectedClusterIndices) {
-		for (auto &cell : data.clusters[affectedClusterIndex].cells) {
+		for (auto &cell : data.clusters.at(affectedClusterIndex).cells) {
 			remainingCellIds.insert(cell.id);
 		}
 	}
@@ -72,8 +84,8 @@ void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const
 		ClusterDescription newCluster;
 		lookUpCell(data, *remainingCellIds.begin(), newCluster, lookedUpCellIds, remainingCellIds);
 		if (!newCluster.cells.empty()) {
-			//TODO: restliche Clusterdaten füllen
 			newCluster.id = _numberGen->getTag();
+			setClusterAttributes(newCluster);
 			newClusters.push_back(newCluster);
 		}
 	}

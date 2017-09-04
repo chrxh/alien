@@ -189,7 +189,7 @@ void ClusterImpl::processingDissipation (QList< Cluster* >& fragments, QList< Pa
 
 			QVector2D pos = calcPosition(cell, true);
 			QVector2D vel = cell->getVelocity();
-			auto desc = ParticleChangeDescription().setEnergy(energyForParticle).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+			auto desc = ParticleDescription().setEnergy(energyForParticle).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
             energyParticle = factory->build(desc, _context);
 			ParticleMetadata metadata;
 			metadata.color = cell->getMetadata().color;
@@ -1101,7 +1101,7 @@ void ClusterImpl::radiation (qreal& energy, Cell* originCell, Particle*& energyP
 
 		QVector2D pos = calcPosition(originCell) + posPerturbation;
 		QVector2D vel = originCell->getVelocity() * parameters->radiationVelocityMultiplier + velPerturbation;
-		auto desc = ParticleChangeDescription().setEnergy(radEnergy).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+		auto desc = ParticleDescription().setEnergy(radEnergy).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
         energyParticle = factory->build(desc, _context);
 		ParticleMetadata metadata;
 		metadata.color = originCell->getMetadata().color;
