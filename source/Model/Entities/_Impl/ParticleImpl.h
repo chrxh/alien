@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Model/Entities/Particle.h"
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/Entities/Descriptions.h"
 
 class ParticleImpl
 	: public Particle
@@ -37,7 +37,7 @@ private:
 	void collisionWithEnergyParticle(Particle* otherEnergy);
 	void collisionWithCell(Cell* cell);
 
-	CellChangeDescription getRandomCellDesciption(double energy) const;
+	CellDescription getRandomCellDesciption(double energy) const;
 
 	qreal _energy = 0.0;
 	QVector2D _pos;

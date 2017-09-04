@@ -8,23 +8,22 @@
 #include "TokenImpl.h"
 #include "EntityFactoryImpl.h"
 
-Cluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, UnitContext* context) const
+Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* context) const
 {
 	list<Cell*> cells;
 	map<uint64_t, Cell*> cellsByIds;
-	for (auto const &cellT : desc.cells) {
-		auto cell = build(cellT.getValue(), context);
+	for (auto const &cellDesc : desc.cells) {
+		auto cell = build(cellDesc, context);
 		cells.push_back(cell);
-		cellsByIds[cellT.getValue().id] = cell;
+		cellsByIds[cellDesc.id] = cell;
 	}
 
-	for (auto const &cellT : desc.cells) {
-		auto cellD = cellT.getValue();
-		if (!cellD.connectingCells) {
+	for (auto const &cellDesc : desc.cells) {
+		if (!cellDesc.connectingCells) {
 			continue;
 		}
-		for (uint64_t connectingCellId : *cellD.connectingCells) {
-			Cell* cell1 = cellsByIds[cellD.id];
+		for (uint64_t connectingCellId : *cellDesc.connectingCells) {
+			Cell* cell1 = cellsByIds[cellDesc.id];
 			Cell* cell2 = cellsByIds[connectingCellId];
 			if (!cell1->isConnectedTo(cell2)) {
 				cell1->newConnection(cell2);
@@ -36,7 +35,7 @@ Cluster* EntityFactoryImpl::build(ClusterChangeDescription const& desc, UnitCont
 		, desc.angularVel.get_value_or(0.0), desc.vel.get_value_or(QVector2D()), context);
 }
 
-Cell * EntityFactoryImpl::build(CellChangeDescription const & desc, UnitContext * context) const
+Cell * EntityFactoryImpl::build(CellDescription const & desc, UnitContext * context) const
 {
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
 	auto const& energy = *desc.energy;
@@ -64,10 +63,10 @@ Token * EntityFactoryImpl::build(TokenDescription const & desc, UnitContext * co
 	return new TokenImpl(context, energy, data);
 }
 
-Particle* EntityFactoryImpl::build(ParticleChangeDescription const& desc, UnitContext* context) const
+Particle* EntityFactoryImpl::build(ParticleDescription const& desc, UnitContext* context) const
 {
 	auto const& pos = *desc.pos;
-	auto const&vel = desc.vel.get_value_or({ 0.0, 0.0 });
+	auto const& vel = desc.vel.get_value_or({ 0.0, 0.0 });
 	auto particle = new ParticleImpl(*desc.energy, pos, vel, context);
 	auto const& metadata = desc.metadata.get_value_or(ParticleMetadata());
 	particle->setMetadata(metadata);

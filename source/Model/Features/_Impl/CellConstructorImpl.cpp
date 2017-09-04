@@ -41,7 +41,7 @@ namespace {
 		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		CellMetadata meta;
 		meta.color = metadata;
-		auto desc = CellChangeDescription().setEnergy(context->getSimulationParameters()->cellCreationEnergy).setMaxConnections(maxConnections)
+		auto desc = CellDescription().setEnergy(context->getSimulationParameters()->cellCreationEnergy).setMaxConnections(maxConnections)
 			.setTokenBranchNumber(tokenAccessNumber).setFlagTokenBlocked(true).setMetadata(meta)
 			.setCellFunction(CellFunctionDescription().setType(convertCellTypeNumberToName(cellType)).setData(cellFunctionData));
 		auto cell = factory->build(desc, context);

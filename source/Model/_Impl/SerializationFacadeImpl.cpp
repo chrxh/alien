@@ -129,7 +129,7 @@ Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
 {
     auto entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	Cluster* cluster = entityFactory->build(ClusterChangeDescription(), context);
+	Cluster* cluster = entityFactory->build(ClusterDescription(), context);
     cluster->deserializePrimitives(stream);
 
     //read data and reconstructing structures
@@ -221,7 +221,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 {
 	EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-	Cell* cell = entityFactory->build(CellChangeDescription(), context);
+	Cell* cell = entityFactory->build(CellDescription(), context);
 	featureFactory->addEnergyGuidance(cell, context);
 
 	cell->deserializePrimitives(stream);
@@ -286,7 +286,7 @@ Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
 {
     auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-	Particle* particle = factory->build(ParticleChangeDescription(), context);
+	Particle* particle = factory->build(ParticleDescription(), context);
     particle->deserializePrimitives(stream);
 	ParticleMetadata metadata;
 	stream >> metadata.color;
