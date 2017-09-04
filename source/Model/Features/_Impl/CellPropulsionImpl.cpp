@@ -106,7 +106,7 @@ CellFeature::ProcessingResult CellPropulsionImpl::processImpl (Token* token, Cel
 		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		QVector2D pos = cluster->calcPosition(cell, _context) - impulse.normalized();
 		QVector2D vel = tangVel - impulse.normalized() / 4.0;
-		auto desc = ParticleChangeDescription().setEnergy(qAbs(energyDiff)).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
+		auto desc = ParticleDescription().setEnergy(qAbs(energyDiff)).setPos(QVector2D(pos.x(), pos.y())).setVel(QVector2D(vel.x(), vel.y()));
 		processingResult.newEnergyParticle = factory->build(desc, _context);
 
         //update velocities
