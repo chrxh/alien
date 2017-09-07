@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Model/Features/Descriptions.h"
+#include "Model/Definitions.h"
 
 struct TokenDescription
 {
@@ -31,6 +32,7 @@ struct CellDescription
 	optional<vector<TokenDescription>> tokens;
 
 	CellDescription() = default;
+	CellDescription(CellChangeDescription const& change);
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
@@ -54,6 +56,8 @@ struct ClusterDescription
 	optional<ClusterMetadata> metadata;
 	vector<CellDescription> cells;
 
+	ClusterDescription() = default;
+	ClusterDescription(ClusterChangeDescription const& change);
 	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -80,6 +84,8 @@ struct ParticleDescription
 	optional<double> energy;
 	optional<ParticleMetadata> metadata;
 
+	ParticleDescription() = default;
+	ParticleDescription(ParticleChangeDescription const& change);
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
