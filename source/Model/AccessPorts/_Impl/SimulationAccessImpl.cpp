@@ -83,20 +83,20 @@ void SimulationAccessImpl::callBackUpdateData()
 
 	auto grid = _context->getUnitGrid();
 
-	for (auto const& clusterDesc : _dataToUpdate.clusters) {
-		if (clusterDesc.isAdded()) {
-			auto const& clusterDescVal = clusterDesc.getValue();
-			auto unitContext = grid->getUnitOfMapPos(*clusterDescVal.pos)->getContext();
-			//auto cluster = factory->build(clusterDescVal, unitContext);
-			//unitContext->getClustersRef().push_back(cluster);
+	for (auto const& clusterTracker : _dataToUpdate.clusters) {
+		if (clusterTracker.isAdded()) {
+			auto const& clusterDesc = clusterTracker.getValue();
+			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
+			auto cluster = factory->build(clusterDesc, unitContext);
+			unitContext->getClustersRef().push_back(cluster);
 		}
 	}
-	for (auto const& particleDesc : _dataToUpdate.particles) {
-		if (particleDesc.isAdded()) {
-			auto const& particleDescVel = particleDesc.getValue();
-			auto unitContext = grid->getUnitOfMapPos(*particleDescVel.pos)->getContext();
-			//auto particle = factory->build(particleDescVel, unitContext);
-			//unitContext->getEnergyParticlesRef().push_back(particle);
+	for (auto const& particleTracker : _dataToUpdate.particles) {
+		if (particleTracker.isAdded()) {
+			auto const& particleDesc = particleTracker.getValue();
+			auto unitContext = grid->getUnitOfMapPos(*particleDesc.pos)->getContext();
+			auto particle = factory->build(particleDesc, unitContext);
+			unitContext->getEnergyParticlesRef().push_back(particle);
 		}
 	}
 
