@@ -221,7 +221,8 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 {
 	EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
-	Cell* cell = entityFactory->build(CellDescription(), context);
+	//TODO: new serialization
+	Cell* cell;// = entityFactory->build(CellDescription(), context);
 	featureFactory->addEnergyGuidance(cell, context);
 
 	cell->deserializePrimitives(stream);
