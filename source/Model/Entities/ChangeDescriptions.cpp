@@ -139,6 +139,16 @@ bool ParticleChangeDescription::isEmpty() const
 		;
 }
 
+DataChangeDescription::DataChangeDescription(DataDescription const & desc)
+{
+	for (auto const& cluster : desc.clusters) {
+		addNewCluster(cluster);
+	}
+	for (auto const& particle : desc.particles) {
+		addNewParticle(particle);
+	}
+}
+
 DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
 {
 	unordered_map<uint64_t, int> clusterAfterIndicesByIds;

@@ -114,6 +114,7 @@ struct MODEL_EXPORT DataChangeDescription
 	vector<ChangeTracker<ParticleChangeDescription>> particles;
 
 	DataChangeDescription() = default;
+	DataChangeDescription(DataDescription const& desc);
 	DataChangeDescription(DataDescription const& dataBefore, DataDescription const& dataAfter);
 
 	DataChangeDescription& addNewCluster(ClusterChangeDescription const& value)

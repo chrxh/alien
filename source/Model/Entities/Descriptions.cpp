@@ -15,6 +15,14 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	tokens = change.tokens;
 }
 
+bool CellDescription::operator==(CellChangeDescription const & other) const
+{
+	return pos == other.pos && energy == other.energy && maxConnections == other.maxConnections
+		&& connectingCells == other.connectingCells && tokenBlocked == other.tokenBlocked
+		&& tokenBranchNumber == other.tokenBranchNumber && metadata == other.metadata
+		&& cellFunction == other.cellFunction && tokens == other.tokens;
+}
+
 ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
 {
 	id = change.id;
@@ -31,6 +39,12 @@ ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
 
 }
 
+bool ClusterDescription::operator==(ClusterDescription const & other) const
+{
+	return pos == other.pos && vel == other.vel && angle == other.angle && angularVel == other.angularVel
+		&& metadata == other.metadata && cells == other.cells;
+}
+
 ParticleDescription::ParticleDescription(ParticleChangeDescription const & change)
 {
 	id = change.id;
@@ -38,4 +52,14 @@ ParticleDescription::ParticleDescription(ParticleChangeDescription const & chang
 	vel = change.vel;
 	energy = change.energy;
 	metadata = change.metadata;
+}
+
+bool ParticleDescription::operator==(ParticleDescription const & other) const
+{
+	return pos == other.pos && vel == other.vel && energy == other.energy && metadata == other.metadata;
+}
+
+bool DataDescription::operator==(DataDescription const & other) const
+{
+	return clusters == other.clusters && particles == other.particles;
 }

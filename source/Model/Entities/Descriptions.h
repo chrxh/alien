@@ -33,6 +33,7 @@ struct CellDescription
 
 	CellDescription() = default;
 	CellDescription(CellChangeDescription const& change);
+	bool operator==(CellChangeDescription const& other) const;
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
@@ -58,6 +59,7 @@ struct ClusterDescription
 
 	ClusterDescription() = default;
 	ClusterDescription(ClusterChangeDescription const& change);
+	bool operator==(ClusterDescription const& other) const;
 	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -86,16 +88,19 @@ struct ParticleDescription
 
 	ParticleDescription() = default;
 	ParticleDescription(ParticleChangeDescription const& change);
+	bool operator==(ParticleDescription const& other) const;
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ParticleDescription& setEnergy(double value) { energy = value; return *this; }
 };
 
-struct DataDescription
+struct MODEL_EXPORT DataDescription
 {
 	vector<ClusterDescription> clusters;
 	vector<ParticleDescription> particles;
+
+	bool operator==(DataDescription const& other) const;
 
 	DataDescription& addClusters(list<ClusterDescription> const& value)
 	{

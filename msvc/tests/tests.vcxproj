@@ -255,6 +255,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\source\Tests\integrationtests\Benchmark.cpp" />
     <ClCompile Include="..\..\source\Tests\Integrationtests\ComparisonTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\integrationtests\DataDescriptionTransferTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Integrationtests\MultithreadingTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Integrationtests\ReplicatorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
