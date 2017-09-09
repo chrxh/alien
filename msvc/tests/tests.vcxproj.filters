@@ -77,6 +77,9 @@
     <ClCompile Include="..\..\source\Tests\unittests\ChangeDescriptionsTest.cpp">
       <Filter>Source Files\Unittests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Tests\integrationtests\DataDescriptionTransferTest.cpp">
+      <Filter>Source Files\Integrationtests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Tests\Predicates.h">

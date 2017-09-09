@@ -43,9 +43,9 @@ namespace {
 		meta.color = metadata;
 		auto desc = CellDescription().setEnergy(context->getSimulationParameters()->cellCreationEnergy).setMaxConnections(maxConnections)
 			.setTokenBranchNumber(tokenAccessNumber).setFlagTokenBlocked(true).setMetadata(meta)
-			.setCellFunction(CellFunctionDescription().setType(convertCellTypeNumberToName(cellType)).setData(cellFunctionData));
-		auto cell = factory->build(desc, context);
-		baseCell->getCluster()->addCell(cell, posOfNewCell);
+			.setCellFunction(CellFunctionDescription().setType(convertCellTypeNumberToName(cellType)).setData(cellFunctionData))
+			.setPos(posOfNewCell);
+		auto cell = factory->build(desc, baseCell->getCluster(), context);
 		return cell;
     }
 

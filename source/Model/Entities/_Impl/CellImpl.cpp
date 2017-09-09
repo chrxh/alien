@@ -18,11 +18,9 @@ CellImpl::CellImpl (UnitContext* context)
 	_id = _context->getNumberGenerator()->getTag();
 }
 
-CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber
-    , QVector2D relPos)
+CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber)
     : CellImpl(context)
 {
-    _relPos = relPos;
     _energy = energy;
     _tokenBranchNumber = tokenBranchNumber;
     resetConnections(maxConnections);

@@ -12,8 +12,7 @@ class CellImpl
 public:
 
     CellImpl (UnitContext* context);
-    CellImpl (qreal energy, UnitContext* context, int maxConnections
-        , int tokenBranchNumber, QVector2D relPos);
+    CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber);
 
     ~CellImpl();
 
