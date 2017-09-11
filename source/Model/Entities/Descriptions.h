@@ -12,10 +12,9 @@ struct MODEL_EXPORT TokenDescription
 	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
 	bool operator==(TokenDescription const& other) const;
 	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
-	bool isCompatibleWith(TokenDescription const& other) const;
 };
 
-struct CellDescription
+struct MODEL_EXPORT CellDescription
 {
 	uint64_t id = 0;
 
@@ -31,7 +30,6 @@ struct CellDescription
 
 	CellDescription() = default;
 	CellDescription(CellChangeDescription const& change);
-	bool isCompatibleWith(CellChangeDescription const& other) const;
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
@@ -57,7 +55,6 @@ struct ClusterDescription
 
 	ClusterDescription() = default;
 	ClusterDescription(ClusterChangeDescription const& change);
-	bool isCompatibleWith(ClusterDescription const& other) const;
 	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -91,7 +88,6 @@ struct ParticleDescription
 
 	ParticleDescription() = default;
 	ParticleDescription(ParticleChangeDescription const& change);
-	bool isCompatibleWith(ParticleDescription const& other) const;
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -102,8 +98,6 @@ struct MODEL_EXPORT DataDescription
 {
 	optional<vector<ClusterDescription>> clusters;
 	optional<vector<ParticleDescription>> particles;
-
-	bool isCompatibleWith(DataDescription const& other) const;
 
 	DataDescription& addClusters(list<ClusterDescription> const& value)
 	{
