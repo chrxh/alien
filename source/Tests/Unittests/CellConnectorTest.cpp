@@ -52,8 +52,8 @@ CellConnectorTest::~CellConnectorTest()
 
 bool CellConnectorTest::clusterConsistsOfFollowingCells(ClusterDescription const &cluster, set<uint64_t> const & cellIds)
 {
-	vector<uint64_t> clusterCellIds(cluster.cells.size());
-	std::transform(cluster.cells.begin(), cluster.cells.end(), clusterCellIds.begin(), [](auto const &cell) {
+	vector<uint64_t> clusterCellIds(cluster.cells->size());
+	std::transform(cluster.cells->begin(), cluster.cells->end(), clusterCellIds.begin(), [](auto const &cell) {
 		return cell.id;
 	});
 	set<uint64_t> clusterCellIdSet(clusterCellIds.begin(), clusterCellIds.end());
@@ -76,11 +76,11 @@ TEST_F(CellConnectorTest, testMoveOneCellAway)
 	_connector->reconnect(_data, { _data.clusters[0].cells[1].id });
 
 	_navi.update(_data);
-	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
-	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
-	ASSERT_EQ(2, _data.clusters.size());
-	ASSERT_EQ(1, cluster0.cells.size());
-	ASSERT_EQ(1, cluster1.cells.size());
+	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cluster1 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+	ASSERT_EQ(2, _data.clusters->size());
+	ASSERT_EQ(1, cluster0.cells->size());
+	ASSERT_EQ(1, cluster1.cells->size());
 }
 
 TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
@@ -97,13 +97,13 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 		})
 	});
-	_data.clusters[0].cells[1].pos = QVector2D({ 200, 101.1f });
+	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 200, 101.1f });
 
 	_connector->reconnect(_data, { _data.clusters[0].cells[1].id });
 
 	_navi.update(_data);
-	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
-	ASSERT_EQ(1, _data.clusters.size());
+	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+	ASSERT_EQ(1, _data.clusters->size());
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster0, { cellIds[0], cellIds[1], cellIds[2] }));
 }
 
@@ -130,10 +130,10 @@ TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 	_connector->reconnect(_data, { _data.clusters[0].cells[1].id });
 
 	_navi.update(_data);
-	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
-	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[2]));
-	ASSERT_EQ(2, _data.clusters.size());
-	ASSERT_EQ(1, cluster0.cells.size());
+	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cluster1 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[2]));
+	ASSERT_EQ(2, _data.clusters->size());
+	ASSERT_EQ(1, cluster0.cells->size());
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster1, { cellIds[2], cellIds[3], cellIds[1] }));
 }
 
@@ -163,8 +163,8 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 
 	_connector->reconnect(_data, { _data.clusters[0].cells[0].id });
 	_navi.update(_data);
-	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
-	ASSERT_EQ(1, _data.clusters.size());
+	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	ASSERT_EQ(1, _data.clusters->size());
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster0, { cellIds[0], cellIds[1], cellIds[2], cellIds[3], cellIds[4] }));
 }
 
@@ -196,15 +196,15 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 	_navi.update(_data);
 	uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 	uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
-	_data.clusters[clusterIndex].cells[cellIndex].pos = QVector2D({ 100, 100 });
-	_connector->reconnect(_data, { _data.clusters[clusterIndex].cells[cellIndex].id });
+	_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 100, 100 });
+	_connector->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 
 	_navi.update(_data);
-	auto cluster0 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
-	auto cluster1 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
-	auto cluster2 = _data.clusters.at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
-	ASSERT_EQ(3, _data.clusters.size());
-	ASSERT_EQ(1, cluster0.cells.size());
+	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
+	auto cluster1 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
+	auto cluster2 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[3]));
+	ASSERT_EQ(3, _data.clusters->size());
+	ASSERT_EQ(1, cluster0.cells->size());
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster1, { cellIds[1], cellIds[2] }));
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster2, { cellIds[3], cellIds[4] }));
 }

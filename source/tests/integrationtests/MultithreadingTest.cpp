@@ -104,8 +104,9 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	ResolveDescription resolveDesc;
 	access->requireData(rect, resolveDesc);
 	DataDescription data = access->retrieveData();
-	ASSERT_EQ(1, data.clusters.size()) << "Wrong number of clusters.";
-	auto const& cluster = data.clusters[0];
+	ASSERT_TRUE(data.clusters);
+	ASSERT_EQ(1, data.clusters->size()) << "Wrong number of clusters.";
+	auto const& cluster = data.clusters->at(0);
 	ASSERT_PRED_FORMAT2(predEqualVectorMediumPrecision, QVector2D(400, 200), *cluster.pos);
 
 	delete access;

@@ -55,7 +55,8 @@ TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 	DataDescription dataBefore;
 	QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
 	dataBefore.addCluster(
-		ClusterDescription().setPos(pos)
+		ClusterDescription()
+		.setPos(pos)
 		.setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)))
 		.addCell(
 			CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos)
