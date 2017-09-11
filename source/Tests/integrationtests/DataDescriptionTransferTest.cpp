@@ -155,7 +155,7 @@ TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 		cluster.setPos(pos).setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)));
 		for (int j = 0; j < numCells; ++j) {
 			cluster.addCell(
-				CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos + QVector2D(j, 0))
+				CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells)/2.0 + j, 0))
 					.setMaxConnections(2).setId(_numberGen->getTag())
 			);
 		}
@@ -186,15 +186,14 @@ TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 		return cluster1.cells->size() <= cluster2.cells->size();
 	});
 	for (int i = 0; i < numClusters; ++i) {
-		auto cluster1 = dataAfter.clusters->at(i);
-		auto cluster2 = dataBefore.clusters->at(i);
+		auto& cluster1 = dataAfter.clusters->at(i);
+		auto& cluster2 = dataBefore.clusters->at(i);
 		std::sort(cluster1.cells->begin(), cluster1.cells->end(), [](auto const &cell1, auto const &cell2) {
 			return cell1.pos->x() <= cell2.pos->x();
 		});
 		std::sort(cluster2.cells->begin(), cluster2.cells->end(), [](auto const &cell1, auto const &cell2) {
 			return cell1.pos->x() <= cell2.pos->x();
 		});
-		ASSERT_TRUE(cluster1.cells->size() == cluster2.cells->size());
 	}
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 	delete access;
