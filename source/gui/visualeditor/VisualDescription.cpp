@@ -8,15 +8,15 @@ DataDescription & VisualDescription::getDataRef()
 CellDescription & VisualDescription::getCellDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
-	ClusterDescription &clusterDesc = _data.clusters.at(clusterIndex);
+	ClusterDescription &clusterDesc = _data.clusters->at(clusterIndex);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-	return clusterDesc.cells.at(cellIndex);
+	return clusterDesc.cells->at(cellIndex);
 }
 
 ParticleDescription & VisualDescription::getParticleDescRef(uint64_t particleId)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
-	return _data.particles.at(particleIndex);
+	return _data.particles->at(particleIndex);
 }
 
 bool VisualDescription::isCellPresent(uint64_t cellId)

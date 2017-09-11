@@ -3,7 +3,7 @@
 #include "Model/Features/Descriptions.h"
 #include "Model/Definitions.h"
 
-struct TokenDescription
+struct MODEL_EXPORT TokenDescription
 {
 	optional<double> energy;
 	optional<QByteArray> data;
@@ -12,7 +12,7 @@ struct TokenDescription
 	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
 	bool operator==(TokenDescription const& other) const;
 	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
-	bool isCompatible(TokenDescription const& other) const;
+	bool isCompatibleWith(TokenDescription const& other) const;
 };
 
 struct CellDescription
@@ -31,7 +31,7 @@ struct CellDescription
 
 	CellDescription() = default;
 	CellDescription(CellChangeDescription const& change);
-	bool isCompatible(CellChangeDescription const& other) const;
+	bool isCompatibleWith(CellChangeDescription const& other) const;
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
@@ -57,7 +57,7 @@ struct ClusterDescription
 
 	ClusterDescription() = default;
 	ClusterDescription(ClusterChangeDescription const& change);
-	bool isCompatible(ClusterDescription const& other) const;
+	bool isCompatibleWith(ClusterDescription const& other) const;
 	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -91,7 +91,7 @@ struct ParticleDescription
 
 	ParticleDescription() = default;
 	ParticleDescription(ParticleChangeDescription const& change);
-	bool isCompatible(ParticleDescription const& other) const;
+	bool isCompatibleWith(ParticleDescription const& other) const;
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -103,7 +103,7 @@ struct MODEL_EXPORT DataDescription
 	optional<vector<ClusterDescription>> clusters;
 	optional<vector<ParticleDescription>> particles;
 
-	bool isCompatible(DataDescription const& other) const;
+	bool isCompatibleWith(DataDescription const& other) const;
 
 	DataDescription& addClusters(list<ClusterDescription> const& value)
 	{

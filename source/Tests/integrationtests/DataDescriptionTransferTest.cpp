@@ -54,14 +54,16 @@ TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 
 	DataDescription dataBefore;
 	QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
-	dataBefore.addCluster(
-		ClusterDescription()
-		.setPos(pos)
-		.setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)))
-		.addCell(
-			CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos)
-		)
-	);
+	for (int i = 0; i < 100; ++i) {
+		dataBefore.addCluster(
+			ClusterDescription()
+			.setPos(pos)
+			.setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)))
+			.addCell(
+				CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos)
+			)
+		);
+	}
 	access->updateData(dataBefore);
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
 
@@ -69,7 +71,7 @@ TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 	access->requireData(rect, resolveDesc);
 	DataDescription dataAfter = access->retrieveData();
 
-	ASSERT_TRUE(dataBefore == dataAfter);
+	ASSERT_TRUE(dataBefore.isCompatibleWith(dataAfter));
 	delete access;
 }
 
