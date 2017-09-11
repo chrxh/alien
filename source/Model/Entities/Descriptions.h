@@ -5,16 +5,14 @@
 
 struct TokenDescription
 {
-	double energy = 0.0;
-	QByteArray data;
+	optional<double> energy;
+	optional<QByteArray> data;
 
 	TokenDescription& setEnergy(double value) { energy = value; return *this; }
 	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
-	bool operator==(TokenDescription const& other) const {
-		return energy == other.energy
-			&& data == other.data;
-	}
+	bool operator==(TokenDescription const& other) const;
 	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
+	bool isCompatible(TokenDescription const& other) const;
 };
 
 struct CellDescription
@@ -33,7 +31,7 @@ struct CellDescription
 
 	CellDescription() = default;
 	CellDescription(CellChangeDescription const& change);
-	bool operator==(CellChangeDescription const& other) const;
+	bool isCompatible(CellChangeDescription const& other) const;
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
@@ -55,11 +53,11 @@ struct ClusterDescription
 	optional<double> angle;
 	optional<double> angularVel;
 	optional<ClusterMetadata> metadata;
-	vector<CellDescription> cells;
+	optional<vector<CellDescription>> cells;
 
 	ClusterDescription() = default;
 	ClusterDescription(ClusterChangeDescription const& change);
-	bool operator==(ClusterDescription const& other) const;
+	bool isCompatible(ClusterDescription const& other) const;
 	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -67,7 +65,12 @@ struct ClusterDescription
 	ClusterDescription& setAngularVel(double value) { angularVel = value; return *this; }
 	ClusterDescription& addCells(list<CellDescription> const& value)
 	{
-		cells.insert(cells.end(), value.begin(), value.end());
+		if (cells) {
+			cells->insert(cells->end(), value.begin(), value.end());
+		}
+		else {
+			cells = vector<CellDescription>(value.begin(), value.end());
+		}
 		return *this;
 	}
 	ClusterDescription& addCell(CellDescription const& value)
@@ -88,7 +91,7 @@ struct ParticleDescription
 
 	ParticleDescription() = default;
 	ParticleDescription(ParticleChangeDescription const& change);
-	bool operator==(ParticleDescription const& other) const;
+	bool isCompatible(ParticleDescription const& other) const;
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
@@ -97,14 +100,19 @@ struct ParticleDescription
 
 struct MODEL_EXPORT DataDescription
 {
-	vector<ClusterDescription> clusters;
-	vector<ParticleDescription> particles;
+	optional<vector<ClusterDescription>> clusters;
+	optional<vector<ParticleDescription>> particles;
 
-	bool operator==(DataDescription const& other) const;
+	bool isCompatible(DataDescription const& other) const;
 
 	DataDescription& addClusters(list<ClusterDescription> const& value)
 	{
-		clusters.insert(clusters.end(), value.begin(), value.end());
+		if (clusters) {
+			clusters->insert(clusters->end(), value.begin(), value.end());
+		}
+		else {
+			clusters = vector<ClusterDescription>(value.begin(), value.end());
+		}
 		return *this;
 	}
 	DataDescription& addCluster(ClusterDescription const& value)
@@ -114,13 +122,16 @@ struct MODEL_EXPORT DataDescription
 	}
 	DataDescription& addParticle(ParticleDescription const& value)
 	{
-		particles.emplace_back(value);
+		if (!particles) {
+			particles = vector<ParticleDescription>();
+		}
+		particles->emplace_back(value);
 		return *this;
 	}
 	void clear()
 	{
-		clusters.clear();
-		particles.clear();
+		clusters = boost::none;
+		particles = boost::none;
 	}
 };
 
@@ -148,23 +159,29 @@ struct DescriptionNavigationMaps
 		particleIndicesByParticleIds.clear();
 
 		int clusterIndex = 0;
-		for (auto const &cluster : data.clusters) {
-			int cellIndex = 0;
-			for (auto const &cell : cluster.cells) {
-				clusterIdsByCellIds.insert_or_assign(cell.id, cluster.id);
-				clusterIndicesByCellIds.insert_or_assign(cell.id, clusterIndex);
-				cellIndicesByCellIds.insert_or_assign(cell.id, cellIndex);
-				cellIds.insert(cell.id);
-				++cellIndex;
+		if (data.clusters) {
+			for (auto const &cluster : *data.clusters) {
+				int cellIndex = 0;
+				if (cluster.cells) {
+					for (auto const &cell : *cluster.cells) {
+						clusterIdsByCellIds.insert_or_assign(cell.id, cluster.id);
+						clusterIndicesByCellIds.insert_or_assign(cell.id, clusterIndex);
+						cellIndicesByCellIds.insert_or_assign(cell.id, cellIndex);
+						cellIds.insert(cell.id);
+						++cellIndex;
+					}
+				}
+				++clusterIndex;
 			}
-			++clusterIndex;
 		}
 
 		int particleIndex = 0;
-		for (auto const &particle : data.particles) {
-			particleIndicesByParticleIds.insert_or_assign(particle.id, particleIndex);
-			particleIds.insert(particle.id);
-			++particleIndex;
+		if (data.particles) {
+			for (auto const &particle : *data.particles) {
+				particleIndicesByParticleIds.insert_or_assign(particle.id, particleIndex);
+				particleIds.insert(particle.id);
+				++particleIndex;
+			}
 		}
 	}
 };

@@ -1,5 +1,4 @@
-#ifndef MODEL_SETTINGS_H
-#define MODEL_SETTINGS_H
+#pragma once
 
 #include "Definitions.h"
 
@@ -12,4 +11,3 @@ public:
 	static SimulationParameters* loadDefaultSimulationParameters();
 };
 
-#endif // MODEL_SETTINGS_H

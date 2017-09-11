@@ -27,8 +27,8 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 	_navi.update(data);
 	_cellMap.clear();
 
-	for (auto const &cluster : data.clusters) {
-		for (auto const &cell : cluster.cells) {
+	for (auto const &cluster : *data.clusters) {
+		for (auto const &cell : *cluster.cells) {
 			auto const &pos = *cell.pos;
 			auto intPos = _metric->correctPositionAndConvertToIntVector(pos);
 			_cellMap[intPos.x][intPos.y].push_back(cell.id);
@@ -55,10 +55,10 @@ namespace
 	void setClusterAttributes(ClusterDescription& cluster)
 	{
 		QVector2D center;
-		for (auto const& cell : cluster.cells) {
+		for (auto const& cell : *cluster.cells) {
 			center += *cell.pos;
 		}
-		center = center / cluster.cells.size();
+		center = center / cluster.cells->size();
 		cluster.pos = center;
 	}
 }
@@ -73,7 +73,7 @@ void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const
 	vector<ClusterDescription> newClusters;
 	unordered_set<uint64_t> remainingCellIds;
 	for (int affectedClusterIndex : affectedClusterIndices) {
-		for (auto &cell : data.clusters.at(affectedClusterIndex).cells) {
+		for (auto &cell : *data.clusters->at(affectedClusterIndex).cells) {
 			remainingCellIds.insert(cell.id);
 		}
 	}
@@ -83,7 +83,7 @@ void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const
 	while (!remainingCellIds.empty()) {
 		ClusterDescription newCluster;
 		lookUpCell(data, *remainingCellIds.begin(), newCluster, lookedUpCellIds, remainingCellIds);
-		if (!newCluster.cells.empty()) {
+		if (newCluster.cells && !newCluster.cells->empty()) {
 			newCluster.id = _numberGen->getTag();
 			setClusterAttributes(newCluster);
 			newClusters.push_back(newCluster);
@@ -95,9 +95,9 @@ void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const
 		discardedClusterIndices.insert(_navi.clusterIndicesByCellIds.at(lookedUpCellId));
 	}
 
-	for (int clusterIndex = 0; clusterIndex < data.clusters.size(); ++clusterIndex) {
+	for (int clusterIndex = 0; clusterIndex < data.clusters->size(); ++clusterIndex) {
 		if (discardedClusterIndices.find(clusterIndex) == discardedClusterIndices.end()) {
-			newClusters.emplace_back(data.clusters.at(clusterIndex));
+			newClusters.emplace_back(data.clusters->at(clusterIndex));
 		}
 	}
 
@@ -128,8 +128,8 @@ CellDescription & CellConnectorImpl::getCellDescRef(DataDescription &data, uint6
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
-	ClusterDescription &cluster = data.clusters.at(clusterIndex);
-	return cluster.cells[cellIndex];
+	ClusterDescription &cluster = data.clusters->at(clusterIndex);
+	return cluster.cells->at(cellIndex);
 }
 
 void CellConnectorImpl::removeConnections(DataDescription &data, CellDescription &cellDesc)
