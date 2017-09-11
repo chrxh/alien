@@ -13,27 +13,26 @@ Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* c
 	auto result = new ClusterImpl(QList<Cell*>(), desc.angle.get_value_or(0.0), desc.pos.get()
 		, desc.angularVel.get_value_or(0.0), desc.vel.get_value_or(QVector2D()), context);
 
-	list<Cell*> cells;
-	map<uint64_t, Cell*> cellsByIds;
-	for (auto const &cellDesc : desc.cells) {
-		auto cell = build(cellDesc, result, context);
-		cells.push_back(cell);
-		cellsByIds[cellDesc.id] = cell;
-	}
-
-	for (auto const &cellDesc : desc.cells) {
-		if (!cellDesc.connectingCells) {
-			continue;
+	if (desc.cells) {
+		map<uint64_t, Cell*> cellsByIds;
+		for (auto const &cellDesc : *desc.cells) {
+			auto cell = build(cellDesc, result, context);
+			cellsByIds[cellDesc.id] = cell;
 		}
-		for (uint64_t connectingCellId : *cellDesc.connectingCells) {
-			Cell* cell1 = cellsByIds[cellDesc.id];
-			Cell* cell2 = cellsByIds[connectingCellId];
-			if (!cell1->isConnectedTo(cell2)) {
-				cell1->newConnection(cell2);
+
+		for (auto const &cellDesc : *desc.cells) {
+			if (!cellDesc.connectingCells) {
+				continue;
+			}
+			for (uint64_t connectingCellId : *cellDesc.connectingCells) {
+				Cell* cell1 = cellsByIds[cellDesc.id];
+				Cell* cell2 = cellsByIds[connectingCellId];
+				if (!cell1->isConnectedTo(cell2)) {
+					cell1->newConnection(cell2);
+				}
 			}
 		}
 	}
-
 	return result;
 }
 
@@ -60,8 +59,8 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 
 Token * EntityFactoryImpl::build(TokenDescription const & desc, UnitContext * context) const
 {
-	auto const& data = desc.data;
-	auto const& energy = desc.energy;
+	auto const& data = desc.data.get_value_or(QByteArray());
+	auto const& energy = desc.energy.get_value_or(0.0);
 	return new TokenImpl(context, energy, data);
 }
 

@@ -99,7 +99,7 @@ void ClusterImpl::setContext(UnitContext * context)
 ClusterDescription ClusterImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
 	ClusterDescription result;
-	result.setId(_id).setPos(_pos).setVel(_pos).setAngle(_angle).setAngularVel(_angularVel);
+	result.setId(_id).setPos(_pos).setVel(_vel).setAngle(_angle).setAngularVel(_angularVel);
 	for (auto const& cell : _cells) {
 		result.addCell(cell->getDescription(resolveDescription));
 	}
@@ -764,6 +764,9 @@ void ClusterImpl::updateAngularMass () {
 
 void ClusterImpl::updateRelCoordinates (bool maintainCenter)
 {
+	if (_cells.isEmpty()) {
+		return;
+	}
     if( maintainCenter ) {
 
         //calc new center in relative coordinates

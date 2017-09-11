@@ -60,8 +60,10 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & de
 	angle = desc.angle;
 	angularVel = desc.angularVel;
 	metadata = desc.metadata;
-	for (auto const& cell : desc.cells) {
-		addNewCell(cell);
+	if (desc.cells) {
+		for (auto const& cell : *desc.cells) {
+			addNewCell(cell);
+		}
 	}
 }
 
@@ -74,30 +76,37 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & be
 	SET_DELTA(before.angularVel, after.angularVel, angularVel);
 	SET_DELTA(before.metadata, after.metadata, metadata);
 
-	unordered_map<uint64_t, int> cellAfterIndicesByIds;
-	for (int index = 0; index < after.cells.size(); ++index) {
-		cellAfterIndicesByIds.insert_or_assign(after.cells.at(index).id, index);
-	}
-
-	for (auto const& cellBefore : before.cells) {
-		auto cellIdAfterIt = cellAfterIndicesByIds.find(cellBefore.id);
-		if (cellIdAfterIt == cellAfterIndicesByIds.end()) {
-			addDeletedCell(cellBefore.id);
+	if (before.cells && after.cells) {
+		unordered_map<uint64_t, int> cellAfterIndicesByIds;
+		for (int index = 0; index < after.cells->size(); ++index) {
+			cellAfterIndicesByIds.insert_or_assign(after.cells->at(index).id, index);
 		}
-		else {
-			int cellAfterIndex = cellIdAfterIt->second;
-			auto const& cellAfter = after.cells.at(cellAfterIndex);
-			CellChangeDescription change(cellBefore, cellAfter);
-			if (!change.isEmpty()) {
-				addModifiedCell(change);
+
+		for (auto const& cellBefore : *before.cells) {
+			auto cellIdAfterIt = cellAfterIndicesByIds.find(cellBefore.id);
+			if (cellIdAfterIt == cellAfterIndicesByIds.end()) {
+				addDeletedCell(cellBefore.id);
 			}
-			cellAfterIndicesByIds.erase(cellAfter.id);
+			else {
+				int cellAfterIndex = cellIdAfterIt->second;
+				auto const& cellAfter = after.cells->at(cellAfterIndex);
+				CellChangeDescription change(cellBefore, cellAfter);
+				if (!change.isEmpty()) {
+					addModifiedCell(change);
+				}
+				cellAfterIndicesByIds.erase(cellAfter.id);
+			}
+		}
+
+		for (auto const& cellAfterIndexById : cellAfterIndicesByIds) {
+			auto const& cellAfter = after.cells->at(cellAfterIndexById.second);
+			addNewCell(CellChangeDescription(cellAfter));
 		}
 	}
-
-	for (auto const& cellAfterIndexById : cellAfterIndicesByIds) {
-		auto const& cellAfter = after.cells.at(cellAfterIndexById.second);
-		addNewCell(CellChangeDescription(cellAfter));
+	if (!before.cells && after.cells) {
+		for (auto const& cellAfter : *after.cells) {
+			addNewCell(CellChangeDescription(cellAfter));
+		}
 	}
 }
 
@@ -141,66 +150,84 @@ bool ParticleChangeDescription::isEmpty() const
 
 DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 {
-	for (auto const& cluster : desc.clusters) {
-		addNewCluster(cluster);
+	if (desc.clusters) {
+		for (auto const& cluster : *desc.clusters) {
+			addNewCluster(cluster);
+		}
 	}
-	for (auto const& particle : desc.particles) {
-		addNewParticle(particle);
+	if (desc.particles) {
+		for (auto const& particle : *desc.particles) {
+			addNewParticle(particle);
+		}
 	}
 }
 
 DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
 {
-	unordered_map<uint64_t, int> clusterAfterIndicesByIds;
-	for (int index = 0; index < dataAfter.clusters.size(); ++index) {
-		clusterAfterIndicesByIds.insert_or_assign(dataAfter.clusters.at(index).id, index);
-	}
-
-	for (auto const& clusterBefore : dataBefore.clusters) {
-		auto clusterIdAfterIt = clusterAfterIndicesByIds.find(clusterBefore.id);
-		if (clusterIdAfterIt == clusterAfterIndicesByIds.end()) {
-			addDeletedCluster(clusterBefore.id);
+	if (dataBefore.clusters && dataAfter.clusters) {
+		unordered_map<uint64_t, int> clusterAfterIndicesByIds;
+		for (int index = 0; index < dataAfter.clusters->size(); ++index) {
+			clusterAfterIndicesByIds.insert_or_assign(dataAfter.clusters->at(index).id, index);
 		}
-		else {
-			int clusterAfterIndex = clusterIdAfterIt->second;
-			auto const& clusterAfter = dataAfter.clusters.at(clusterAfterIndex);
-			ClusterChangeDescription change(clusterBefore, clusterAfter);
-			if (!change.isEmpty()) {
-				addModifiedCluster(change);
+
+		for (auto const& clusterBefore : *dataBefore.clusters) {
+			auto clusterIdAfterIt = clusterAfterIndicesByIds.find(clusterBefore.id);
+			if (clusterIdAfterIt == clusterAfterIndicesByIds.end()) {
+				addDeletedCluster(clusterBefore.id);
 			}
-			clusterAfterIndicesByIds.erase(clusterBefore.id);
-		}
-	}
-
-	for (auto const& clusterAfterIndexById : clusterAfterIndicesByIds) {
-		auto const& clusterAfter = dataAfter.clusters.at(clusterAfterIndexById.second);
-		addNewCluster(ClusterChangeDescription(clusterAfter));
-	}
-
-	unordered_map<uint64_t, int> particleAfterIndicesByIds;
-	for (int index = 0; index < dataAfter.particles.size(); ++index) {
-		particleAfterIndicesByIds.insert_or_assign(dataAfter.particles.at(index).id, index);
-	}
-
-	for (auto const& particleBefore : dataBefore.particles) {
-		auto particleIdAfterIt = particleAfterIndicesByIds.find(particleBefore.id);
-		if (particleIdAfterIt == particleAfterIndicesByIds.end()) {
-			addDeletedParticle(particleBefore.id);
-		}
-		else {
-			int particleAfterIndex = particleIdAfterIt->second;
-			auto const& particleAfter = dataAfter.particles.at(particleAfterIndex);
-			ParticleChangeDescription change(particleBefore, particleAfter);
-			if (!change.isEmpty()) {
-				addModifiedParticle(change);
+			else {
+				int clusterAfterIndex = clusterIdAfterIt->second;
+				auto const& clusterAfter = dataAfter.clusters->at(clusterAfterIndex);
+				ClusterChangeDescription change(clusterBefore, clusterAfter);
+				if (!change.isEmpty()) {
+					addModifiedCluster(change);
+				}
+				clusterAfterIndicesByIds.erase(clusterBefore.id);
 			}
-			particleAfterIndicesByIds.erase(particleBefore.id);
+		}
+
+		for (auto const& clusterAfterIndexById : clusterAfterIndicesByIds) {
+			auto const& clusterAfter = dataAfter.clusters->at(clusterAfterIndexById.second);
+			addNewCluster(ClusterChangeDescription(clusterAfter));
+		}
+	}
+	if (!dataBefore.clusters && dataAfter.clusters) {
+		for (auto const& clusterAfter : *dataAfter.clusters) {
+			addNewCluster(ClusterChangeDescription(clusterAfter));
 		}
 	}
 
-	for (auto const& particleAfterIndexById : particleAfterIndicesByIds) {
-		auto const& particleAfter = dataAfter.particles.at(particleAfterIndexById.second);
-		addNewParticle(ParticleChangeDescription(particleAfter));
+	if (dataBefore.particles && dataAfter.particles) {
+		unordered_map<uint64_t, int> particleAfterIndicesByIds;
+		for (int index = 0; index < dataAfter.particles->size(); ++index) {
+			particleAfterIndicesByIds.insert_or_assign(dataAfter.particles->at(index).id, index);
+		}
+
+		for (auto const& particleBefore : *dataBefore.particles) {
+			auto particleIdAfterIt = particleAfterIndicesByIds.find(particleBefore.id);
+			if (particleIdAfterIt == particleAfterIndicesByIds.end()) {
+				addDeletedParticle(particleBefore.id);
+			}
+			else {
+				int particleAfterIndex = particleIdAfterIt->second;
+				auto const& particleAfter = dataAfter.particles->at(particleAfterIndex);
+				ParticleChangeDescription change(particleBefore, particleAfter);
+				if (!change.isEmpty()) {
+					addModifiedParticle(change);
+				}
+				particleAfterIndicesByIds.erase(particleBefore.id);
+			}
+		}
+
+		for (auto const& particleAfterIndexById : particleAfterIndicesByIds) {
+			auto const& particleAfter = dataAfter.particles->at(particleAfterIndexById.second);
+			addNewParticle(ParticleChangeDescription(particleAfter));
+		}
+	}
+	if (!dataBefore.particles && dataAfter.particles) {
+		for (auto const& particleAfter : *dataAfter.particles) {
+			addNewParticle(ParticleChangeDescription(particleAfter));
+		}
 	}
 }
 
