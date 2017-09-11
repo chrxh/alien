@@ -47,22 +47,129 @@ DataDescriptionTransferTest::~DataDescriptionTransferTest()
 	delete _numberGen;
 }
 
+namespace
+{
+	template<typename T>
+	bool isCompatible(T const& a, T const& b)
+	{
+		return a == b;
+	}
+
+	template<>
+	bool isCompatible<QVector2D>(QVector2D const& vec1, QVector2D const& vec2)
+	{
+		return std::abs(vec1.x() - vec2.x()) < ALIEN_PRECISION
+			&& std::abs(vec1.y() - vec2.y()) < ALIEN_PRECISION;
+	}
+
+	template<>
+	bool isCompatible<double>(double const& a, double const& b)
+	{
+		return std::abs(a - b) < ALIEN_PRECISION;
+	}
+
+	template<typename T>
+	bool isCompatible(optional<T> const& a, optional<T> const& b)
+	{
+		if (!a || !b) {
+			return true;
+		}
+		return isCompatible(*a, *b);
+	}
+
+	template<typename T>
+	bool isCompatible(vector<T> const& a, vector<T> const& b)
+	{
+		if (a.size() != b.size()) {
+			false;
+		}
+		for (int i = 0; i < a.size(); ++i) {
+			if (!isCompatible(a.at(i), b.at(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	template<>
+	bool isCompatible<TokenDescription>(TokenDescription const & token1, TokenDescription const & token2)
+	{
+		return isCompatible(token1.energy, token2.energy)
+			&& isCompatible(token1.data, token2.data);
+	}
+
+	template<>
+	bool isCompatible<CellDescription>(CellDescription const & cell1, CellDescription const & cell2)
+	{
+		return isCompatible(cell1.pos, cell2.pos)
+			&& isCompatible(cell1.energy, cell2.energy)
+			&& isCompatible(cell1.maxConnections, cell2.maxConnections)
+			&& isCompatible(cell1.connectingCells, cell2.connectingCells)
+			&& isCompatible(cell1.tokenBlocked, cell2.tokenBlocked)
+			&& isCompatible(cell1.tokenBranchNumber, cell2.tokenBranchNumber)
+			&& isCompatible(cell1.metadata, cell2.metadata)
+			&& isCompatible(cell1.cellFunction, cell2.cellFunction)
+			&& isCompatible(cell1.tokens, cell2.tokens)
+			;
+	}
+
+	template<>
+	bool isCompatible<ClusterDescription>(ClusterDescription const & cluster1, ClusterDescription const & cluster2)
+	{
+		return isCompatible(cluster1.pos, cluster2.pos)
+			&& isCompatible(cluster1.vel, cluster2.vel)
+			&& isCompatible(cluster1.angle, cluster2.angle)
+			&& isCompatible(cluster1.angularVel, cluster2.angularVel)
+			&& isCompatible(cluster1.metadata, cluster2.metadata)
+			&& isCompatible(cluster1.cells, cluster2.cells);
+	}
+
+	template<>
+	bool isCompatible<ParticleDescription>(ParticleDescription const & particle1, ParticleDescription const & particle2)
+	{
+		return isCompatible(particle1.pos, particle2.pos)
+			&& isCompatible(particle1.vel, particle2.vel)
+			&& isCompatible(particle1.energy, particle2.energy)
+			&& isCompatible(particle1.metadata, particle2.metadata);
+	}
+
+	template<>
+	bool isCompatible<DataDescription>(DataDescription const & data1, DataDescription const & data2)
+	{
+		return isCompatible(data1.clusters, data2.clusters)
+			&& isCompatible(data1.particles, data2.particles);
+	}
+}
+
 TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto access = facade->buildSimulationAccess(_context);
 
 	DataDescription dataBefore;
-	QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
-	for (int i = 0; i < 100; ++i) {
-		dataBefore.addCluster(
-			ClusterDescription()
-			.setPos(pos)
-			.setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)))
-			.addCell(
-				CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos)
-			)
-		);
+	int numClusters = 100;
+	for (int i = 1; i <= numClusters; ++i) {
+		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
+		int numCells = i;
+		ClusterDescription cluster;
+		cluster.setPos(pos).setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)));
+		for (int j = 0; j < numCells; ++j) {
+			cluster.addCell(
+				CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos + QVector2D(j, 0))
+					.setMaxConnections(2).setId(_numberGen->getTag())
+			);
+		}
+		for (int j = 0; j < numCells; ++j) {
+			list<uint64_t> connectingCells;
+			if (j > 0) {
+				connectingCells.emplace_back(cluster.cells->at(j - 1).id);
+			}
+			if (j < numCells - 1) {
+				connectingCells.emplace_back(cluster.cells->at(j + 1).id);
+			}
+			cluster.cells->at(j).setConnectingCells(connectingCells);
+		}
+		dataBefore.addCluster(cluster);
 	}
 	access->updateData(dataBefore);
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
@@ -71,7 +178,25 @@ TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 	access->requireData(rect, resolveDesc);
 	DataDescription dataAfter = access->retrieveData();
 
-	ASSERT_TRUE(dataBefore.isCompatibleWith(dataAfter));
+	ASSERT_TRUE(dataBefore.clusters->size() == dataAfter.clusters->size());
+	std::sort(dataBefore.clusters->begin(), dataBefore.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
+		return cluster1.cells->size() <= cluster2.cells->size();
+	});
+	std::sort(dataAfter.clusters->begin(), dataAfter.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
+		return cluster1.cells->size() <= cluster2.cells->size();
+	});
+	for (int i = 0; i < numClusters; ++i) {
+		auto cluster1 = dataAfter.clusters->at(i);
+		auto cluster2 = dataBefore.clusters->at(i);
+		std::sort(cluster1.cells->begin(), cluster1.cells->end(), [](auto const &cell1, auto const &cell2) {
+			return cell1.pos->x() <= cell2.pos->x();
+		});
+		std::sort(cluster2.cells->begin(), cluster2.cells->end(), [](auto const &cell1, auto const &cell2) {
+			return cell1.pos->x() <= cell2.pos->x();
+		});
+		ASSERT_TRUE(cluster1.cells->size() == cluster2.cells->size());
+	}
+	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 	delete access;
 }
 
