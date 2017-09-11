@@ -5,59 +5,59 @@
 namespace
 {
 	template<typename T>
-	bool isCompatibleFunc(T const& a, T const& b)
+	bool isCompatible(T const& a, T const& b)
 	{
 		return a == b;
 	}
 
 	template<>
-	bool isCompatibleFunc<QVector2D>(QVector2D const& vec1, QVector2D const& vec2)
+	bool isCompatible<QVector2D>(QVector2D const& vec1, QVector2D const& vec2)
 	{
 		return std::abs(vec1.x() - vec2.x()) < ALIEN_PRECISION
 			&& std::abs(vec1.y() - vec2.y()) < ALIEN_PRECISION;
 	}
 
 	template<>
-	bool isCompatibleFunc<double>(double const& a, double const& b)
+	bool isCompatible<double>(double const& a, double const& b)
 	{
 		return std::abs(a - b) < ALIEN_PRECISION;
 	}
 
 	template<>
-	bool isCompatibleFunc<CellDescription>(CellDescription const& a, CellDescription const& b)
+	bool isCompatible<CellDescription>(CellDescription const& a, CellDescription const& b)
 	{
-		return a.isCompatible(b);
+		return a.isCompatibleWith(b);
 	}
 
 	template<>
-	bool isCompatibleFunc<ClusterDescription>(ClusterDescription const& a, ClusterDescription const& b)
+	bool isCompatible<ClusterDescription>(ClusterDescription const& a, ClusterDescription const& b)
 	{
-		return a.isCompatible(b);
+		return a.isCompatibleWith(b);
 	}
 
 	template<>
-	bool isCompatibleFunc<ParticleDescription>(ParticleDescription const& a, ParticleDescription const& b)
+	bool isCompatible<ParticleDescription>(ParticleDescription const& a, ParticleDescription const& b)
 	{
-		return a.isCompatible(b);
+		return a.isCompatibleWith(b);
 	}
 
 	template<typename T>
-	bool isCompatibleFunc(optional<T> const& a, optional<T> const& b)
+	bool isCompatible(optional<T> const& a, optional<T> const& b)
 	{
 		if (!a || !b) {
 			return true;
 		}
-		return isCompatibleFunc(*a, *b);
+		return isCompatible(*a, *b);
 	}
 
 	template<typename T>
-	bool isCompatibleFunc(vector<T> const& a, vector<T> const& b)
+	bool isCompatible(vector<T> const& a, vector<T> const& b)
 	{
 		if (a.size() != b.size()) {
 			false;
 		}
 		for (int i = 0; i < a.size(); ++i) {
-			if (!isCompatibleFunc(a.at(i), b.at(i))) {
+			if (!isCompatible(a.at(i), b.at(i))) {
 				return false;
 			}
 		}
@@ -71,10 +71,10 @@ bool TokenDescription::operator==(TokenDescription const& other) const {
 		&& data == other.data;
 }
 
-bool TokenDescription::isCompatible(TokenDescription const & other) const
+bool TokenDescription::isCompatibleWith(TokenDescription const & other) const
 {
-	return isCompatibleFunc(energy, other.energy)
-		&& isCompatibleFunc(data, other.data);
+	return isCompatible(energy, other.energy)
+		&& isCompatible(data, other.data);
 }
 
 CellDescription::CellDescription(CellChangeDescription const & change)
@@ -91,17 +91,17 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	tokens = change.tokens;
 }
 
-bool CellDescription::isCompatible(CellChangeDescription const & other) const
+bool CellDescription::isCompatibleWith(CellChangeDescription const & other) const
 {
-	return isCompatibleFunc(pos, other.pos)
-		&& isCompatibleFunc(energy, other.energy)
-		&& isCompatibleFunc(maxConnections, other.maxConnections)
-		&& isCompatibleFunc(connectingCells, other.connectingCells)
-		&& isCompatibleFunc(tokenBlocked, other.tokenBlocked)
-		&& isCompatibleFunc(tokenBranchNumber, other.tokenBranchNumber)
-		&& isCompatibleFunc(metadata, other.metadata)
-		&& isCompatibleFunc(cellFunction, other.cellFunction)
-		&& isCompatibleFunc(tokens, other.tokens)
+	return isCompatible(pos, other.pos)
+		&& isCompatible(energy, other.energy)
+		&& isCompatible(maxConnections, other.maxConnections)
+		&& isCompatible(connectingCells, other.connectingCells)
+		&& isCompatible(tokenBlocked, other.tokenBlocked)
+		&& isCompatible(tokenBranchNumber, other.tokenBranchNumber)
+		&& isCompatible(metadata, other.metadata)
+		&& isCompatible(cellFunction, other.cellFunction)
+		&& isCompatible(tokens, other.tokens)
 		;
 }
 
@@ -124,14 +124,14 @@ ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
 
 }
 
-bool ClusterDescription::isCompatible(ClusterDescription const & other) const
+bool ClusterDescription::isCompatibleWith(ClusterDescription const & other) const
 {
-	return isCompatibleFunc(pos, other.pos)
-		&& isCompatibleFunc(vel, other.vel)
-		&& isCompatibleFunc(angle, other.angle) 
-		&& isCompatibleFunc(angularVel, other.angularVel)
-		&& isCompatibleFunc(metadata, other.metadata)
-		&& isCompatibleFunc(cells, other.cells);
+	return isCompatible(pos, other.pos)
+		&& isCompatible(vel, other.vel)
+		&& isCompatible(angle, other.angle) 
+		&& isCompatible(angularVel, other.angularVel)
+		&& isCompatible(metadata, other.metadata)
+		&& isCompatible(cells, other.cells);
 }
 
 ParticleDescription::ParticleDescription(ParticleChangeDescription const & change)
@@ -143,16 +143,16 @@ ParticleDescription::ParticleDescription(ParticleChangeDescription const & chang
 	metadata = change.metadata;
 }
 
-bool ParticleDescription::isCompatible(ParticleDescription const & other) const
+bool ParticleDescription::isCompatibleWith(ParticleDescription const & other) const
 {
-	return isCompatibleFunc(pos, other.pos)
-		&& isCompatibleFunc(vel, other.vel)
-		&& isCompatibleFunc(energy, other.energy)
-		&& isCompatibleFunc(metadata, other.metadata);
+	return isCompatible(pos, other.pos)
+		&& isCompatible(vel, other.vel)
+		&& isCompatible(energy, other.energy)
+		&& isCompatible(metadata, other.metadata);
 }
 
-bool DataDescription::isCompatible(DataDescription const & other) const
+bool DataDescription::isCompatibleWith(DataDescription const & other) const
 {
-	return isCompatibleFunc(clusters, other.clusters)
-		&& isCompatibleFunc(particles, other.particles);
+	return isCompatible(clusters, other.clusters)
+		&& isCompatible(particles, other.particles);
 }
