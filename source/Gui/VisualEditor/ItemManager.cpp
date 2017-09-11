@@ -36,10 +36,13 @@ void ItemManager::activate(IntVector2D size)
 void ItemManager::updateCells(VisualDescription* visualDesc)
 {
 	auto const &data = visualDesc->getDataRef();
+	if (!data.clusters) {
+		return;
+	}
 
 	map<uint64_t, CellItem*> newCellsByIds;
-	for (auto const &cluster : data.clusters) {
-		for (auto const &cell : cluster.cells) {
+	for (auto const &cluster : *data.clusters) {
+		for (auto const &cell : *cluster.cells) {
 			auto it = _cellsByIds.find(cell.id);
 			CellItem* item;
 			if (it != _cellsByIds.end()) {
@@ -73,9 +76,12 @@ void ItemManager::updateCells(VisualDescription* visualDesc)
 void ItemManager::updateParticles(VisualDescription* visualDesc)
 {
 	auto const &data = visualDesc->getDataRef();
+	if (!data.particles) {
+		return;
+	}
 
 	map<uint64_t, ParticleItem*> newParticlesByIds;
-	for (auto const &particle : data.particles) {
+	for (auto const &particle : *data.particles) {
 		auto it = _particlesByIds.find(particle.id);
 		ParticleItem* item;
 		if (it != _particlesByIds.end()) {
@@ -105,10 +111,13 @@ void ItemManager::updateParticles(VisualDescription* visualDesc)
 void ItemManager::updateConnections(VisualDescription* visualDesc)
 {
 	auto const &data = visualDesc->getDataRef();
+	if (!data.clusters) {
+		return;
+	}
 
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
-	for (auto const &cluster : data.clusters) {
-		for (auto const &cell : cluster.cells) {
+	for (auto const &cluster : *data.clusters) {
+		for (auto const &cell : *cluster.cells) {
 			if (!cell.connectingCells) {
 				continue;
 			}

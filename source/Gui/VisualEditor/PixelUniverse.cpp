@@ -149,9 +149,13 @@ namespace
 
 void PixelUniverse::displayClusters(DataDescription const& data) const
 {
+	if (!data.clusters) {
+		return;
+	}
+
 	auto space = _controller->getContext()->getSpaceMetric();
-	for (auto const& cluster : data.clusters) {
-		for (auto const& cell : cluster.cells) {
+	for (auto const& cluster : *data.clusters) {
+		for (auto const& cell : *cluster.cells) {
 			auto const& pos = *cell.pos;
 			auto const& meta = *cell.metadata;
 			auto const& energy = *cell.energy;
@@ -163,8 +167,12 @@ void PixelUniverse::displayClusters(DataDescription const& data) const
 
 void PixelUniverse::displayParticles(DataDescription const & data) const
 {
+	if (!data.particles) {
+		return;
+	}
+
 	auto space = _controller->getContext()->getSpaceMetric();
-	for (auto const& particle: data.particles) {
+	for (auto const& particle : *data.particles) {
 		auto const& pos = *particle.pos;
 		auto const& energy = *particle.energy;
 		auto intPos = space->correctPositionAndConvertToIntVector(pos);
