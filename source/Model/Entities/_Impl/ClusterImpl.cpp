@@ -105,7 +105,6 @@ ClusterDescription ClusterImpl::getDescription(ResolveDescription const& resolve
 	}
 	if (!result.cells) {
 		result.cells = vector<CellDescription>();
-		int dummy = 0;
 	}
 	return result;
 }
