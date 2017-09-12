@@ -103,6 +103,10 @@ ClusterDescription ClusterImpl::getDescription(ResolveDescription const& resolve
 	for (auto const& cell : _cells) {
 		result.addCell(cell->getDescription(resolveDescription));
 	}
+	if (!result.cells) {
+		result.cells = vector<CellDescription>();
+		int dummy = 0;
+	}
 	return result;
 }
 

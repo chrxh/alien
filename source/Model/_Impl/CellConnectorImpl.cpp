@@ -18,14 +18,27 @@ void CellConnectorImpl::init(SpaceMetricApi *metric, SimulationParameters *param
 void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &changedCellIds)
 {
 	updateInternals(data);
-	updateConnectingCells(data, changedCellIds);
-	reclustering(data, changedCellIds);
+	list<uint64_t> changedAndPresentCellIds = filterPresentCellIds(changedCellIds);
+	updateConnectingCells(data, changedAndPresentCellIds);
+	reclustering(data, changedAndPresentCellIds);
+}
+
+list<uint64_t> CellConnectorImpl::filterPresentCellIds(list<uint64_t> const & cellIds) const
+{
+	list<uint64_t> result;
+	std::copy_if(cellIds.begin(), cellIds.end(), std::back_inserter(result), [&](auto const& cellId) {
+		return _navi.cellIds.find(cellId) != _navi.cellIds.end();
+	});
+	return result;
 }
 
 void CellConnectorImpl::updateInternals(DataDescription const &data)
 {
 	_navi.update(data);
 	_cellMap.clear();
+	if (!data.clusters) {
+		return;
+	}
 
 	for (auto const &cluster : *data.clusters) {
 		for (auto const &cell : *cluster.cells) {

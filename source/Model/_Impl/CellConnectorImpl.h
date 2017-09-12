@@ -15,6 +15,7 @@ public:
 	virtual void reconnect(DataDescription &data, list<uint64_t> const &changedCellIds) override;
 
 private:
+	list<uint64_t> filterPresentCellIds(list<uint64_t> const& cellIds) const;
 	void updateInternals(DataDescription const &data);
 	void updateConnectingCells(DataDescription &data, list<uint64_t> const &changedCellIds);
 	void reclustering(DataDescription &data, list<uint64_t> const &changedCellIds);
