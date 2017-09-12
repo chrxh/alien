@@ -278,7 +278,7 @@ CellFeature::ProcessingResult CellConstructorImpl::processImpl (Token* token, Ce
                 }
 
                 //update relative coordinates
-                cluster->updateRelCoordinates(true);
+                cluster->updateRelCoordinates(Cluster::MaintainCenter::Yes);
 
                 //obstacle found?
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {

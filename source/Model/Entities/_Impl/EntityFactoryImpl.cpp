@@ -33,6 +33,7 @@ Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* c
 			}
 		}
 	}
+	result->updateInternals();
 	return result;
 }
 
@@ -53,7 +54,7 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 	for (auto const& tokenDesc : tokensDesc) {
 		cell->addToken(build(tokenDesc, context));
 	}
-	cluster->addCell(cell, cellDesc.pos.get_value_or({ 0.0, 0.0 }));
+	cluster->addCell(cell, cellDesc.pos.get_value_or({ 0.0, 0.0 }), Cluster::UpdateInternals::No);
 	return cell;
 }
 
