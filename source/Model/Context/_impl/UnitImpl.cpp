@@ -67,41 +67,11 @@ void UnitImpl::calculateTimestep()
 
 	processingClustersInit();
 	processingClustersDissipation();
-
-	foreach(Cluster* cluster, _context->getClustersRef()) {
-		if (cluster->getCellsRef().isEmpty()) {
-			int dummy = 0;
-		}
-	}
-
 	processingClustersMutationByChance();
 	processingClustersMovement();
-
-	foreach(Cluster* cluster, _context->getClustersRef()) {
-		if (cluster->getCellsRef().isEmpty()) {
-			int dummy = 0;
-		}
-	}
 	processingClustersToken();
-
-	foreach(Cluster* cluster, _context->getClustersRef()) {
-		if (cluster->getCellsRef().isEmpty()) {
-			int dummy = 0;
-		}
-	}
 	processingClustersCompletion();
-
-	foreach(Cluster* cluster, _context->getClustersRef()) {
-		if (cluster->getCellsRef().isEmpty()) {
-			int dummy = 0;
-		}
-	}
 	processingParticlesMovement();
-	foreach(Cluster* cluster, _context->getClustersRef()) {
-		if (cluster->getCellsRef().isEmpty()) {
-			int dummy = 0;
-		}
-	}
 
 	incClustersTimestamp();
 	incParticlesTimestamp();
@@ -109,12 +79,6 @@ void UnitImpl::calculateTimestep()
 
 	processingParticlesCompartmentAllocation();
 	processingClustersCompartmentAllocation();
-
-	foreach(Cluster* cluster, _context->getClustersRef()) {
-		if (cluster->getCellsRef().isEmpty()) {
-			int dummy = 0;
-		}
-	}
 
 	Q_EMIT timestepCalculated();
 }
@@ -163,14 +127,6 @@ void UnitImpl::processingClustersMovement()
 {
 	foreach(Cluster* cluster, _context->getClustersRef()) {
 		cluster->processingMovement();
-	}
-	QMutableListIterator<Cluster*> j(_context->getClustersRef());
-	while (j.hasNext()) {
-		Cluster* cluster(j.next());
-		if (cluster->getCellsRef().isEmpty()) {
-			delete cluster;
-			j.remove();
-		}
 	}
 }
 
