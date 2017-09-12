@@ -705,23 +705,23 @@ void ClusterImpl::processingCompletion ()
     }
 }
 
-void ClusterImpl::addCell (Cell* cell, QVector2D absPos)
+void ClusterImpl::addCell (Cell* cell, QVector2D absPos, UpdateInternals update /*= UpdateInternals::Yes*/)
 {
     cell->setRelPosition(absToRelPos(absPos));
     cell->setCluster(this);
     _cells << cell;
 
-    updateRelCoordinates(true);
-    updateAngularMass();
+	if (update == Cluster::UpdateInternals::Yes) {
+		updateInternals(MaintainCenter::Yes);
+	}
 }
 
-void ClusterImpl::removeCell (Cell* cell, bool maintainCenter)
+void ClusterImpl::removeCell (Cell* cell, MaintainCenter maintainCenter /*= MaintainCenter::Yes*/)
 {
     cell->delAllConnection();
     _cells.removeAll(cell);
 
-    updateRelCoordinates(maintainCenter);
-    updateAngularMass();
+	updateInternals(maintainCenter);
 }
 
 void ClusterImpl::updateCellVel (bool forceCheck)
@@ -762,12 +762,12 @@ void ClusterImpl::updateAngularMass () {
         _angularMass += (cell->getRelPosition().lengthSquared());
 }
 
-void ClusterImpl::updateRelCoordinates (bool maintainCenter)
+void ClusterImpl::updateRelCoordinates (MaintainCenter maintainCenter /*= MaintainCenter::No*/)
 {
 	if (_cells.isEmpty()) {
 		return;
 	}
-    if( maintainCenter ) {
+    if( maintainCenter == MaintainCenter::Yes) {
 
         //calc new center in relative coordinates
 //        calcTransform();
@@ -1071,6 +1071,12 @@ void ClusterImpl::getConnectedComponent(Cell* cell, const quint64& tag, QList< C
             getConnectedComponent(cell->getConnection(i), tag, component);
         }
     }
+}
+
+void ClusterImpl::updateInternals(MaintainCenter maintanCenter /*= MaintainCenter::No*/)
+{
+	updateRelCoordinates(MaintainCenter::Yes);
+	updateAngularMass();
 }
 
 void ClusterImpl::radiation (qreal& energy, Cell* originCell, Particle*& energyParticle) const

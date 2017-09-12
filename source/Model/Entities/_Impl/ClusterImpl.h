@@ -29,11 +29,11 @@ public:
     void processingToken (QList< Particle* >& energyParticles, bool& decompose) override;
     void processingCompletion () override;
 
-    void addCell (Cell* cell, QVector2D absPos) override;
-    void removeCell (Cell* cell, bool maintainCenter = true) override;
+    void addCell (Cell* cell, QVector2D absPos, UpdateInternals update = UpdateInternals::Yes) override;
+	void removeCell(Cell* cell, MaintainCenter maintainCenter = MaintainCenter::Yes) override;
     void updateCellVel (bool forceCheck = true) override;
     void updateAngularMass () override;
-    void updateRelCoordinates (bool maintainCenter = false) override;
+    void updateRelCoordinates (MaintainCenter maintainCenter = MaintainCenter::No) override;
     void updateVel_angularVel_via_cellVelocities () override;
     QVector2D calcPosition (const Cell *cell, bool metricCorrection = false) const override;
     QVector2D calcCellDistWithoutTorusCorrection (Cell* cell) const override;
@@ -68,6 +68,8 @@ public:
 
 	ClusterMetadata getMetadata() const override;
 	void setMetadata(ClusterMetadata metadata) override;
+
+	void updateInternals(MaintainCenter maintanCenter = MaintainCenter::No) override;
 
     void serializePrimitives (QDataStream& stream) const override;
 	virtual void deserializePrimitives(QDataStream& stream) override;

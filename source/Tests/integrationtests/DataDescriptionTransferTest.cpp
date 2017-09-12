@@ -58,14 +58,14 @@ namespace
 	template<>
 	bool isCompatible<QVector2D>(QVector2D const& vec1, QVector2D const& vec2)
 	{
-		return std::abs(vec1.x() - vec2.x()) < ALIEN_PRECISION
-			&& std::abs(vec1.y() - vec2.y()) < ALIEN_PRECISION;
+		return std::abs(vec1.x() - vec2.x()) < FLOATINGPOINT_MEDIUM_PRECISION
+			&& std::abs(vec1.y() - vec2.y()) < FLOATINGPOINT_MEDIUM_PRECISION;
 	}
 
 	template<>
 	bool isCompatible<double>(double const& a, double const& b)
 	{
-		return std::abs(a - b) < ALIEN_PRECISION;
+		return std::abs(a - b) < FLOATINGPOINT_MEDIUM_PRECISION;
 	}
 
 	template<typename T>
@@ -155,7 +155,7 @@ TEST_F(DataDescriptionTransferTest, testTransferRandomData)
 		cluster.setPos(pos).setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)));
 		for (int j = 0; j < numCells; ++j) {
 			cluster.addCell(
-				CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells)/2.0 + j, 0))
+				CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
 					.setMaxConnections(2).setId(_numberGen->getTag())
 			);
 		}
