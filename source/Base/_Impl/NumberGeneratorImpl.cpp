@@ -54,7 +54,7 @@ QByteArray NumberGeneratorImpl::getRandomArray(int length)
 
 uint64_t NumberGeneratorImpl::getTag()
 {
-	return _threadId | _runningNumber++;
+	return _threadId | ++_runningNumber;
 }
 
 uint32_t NumberGeneratorImpl::getNumberFromArray()

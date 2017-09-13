@@ -77,4 +77,6 @@ bool IntRect::isContained(IntVector2D const &p) const
 		previousChild->setParent(this); \
 	}
 
+#define THROW_NOT_IMPLEMENTED() throw std::exception("not implemented")
+
 #endif // BASE_DEFINITIONS_H

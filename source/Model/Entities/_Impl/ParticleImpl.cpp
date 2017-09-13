@@ -17,14 +17,9 @@
 #include "ParticleImpl.h"
 
 
-ParticleImpl::ParticleImpl(UnitContext* context)
+ParticleImpl::ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D vel, UnitContext* context)
 	: Particle(context)
-{
-	_id = _context->getNumberGenerator()->getTag();
-}
-
-ParticleImpl::ParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context)
-	: ParticleImpl(context)
+	, _id(id)
 {
 	_energy = energy;
 	_pos = pos;
