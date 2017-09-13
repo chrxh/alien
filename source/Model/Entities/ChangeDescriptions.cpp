@@ -85,7 +85,7 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & be
 		for (auto const& cellBefore : *before.cells) {
 			auto cellIdAfterIt = cellAfterIndicesByIds.find(cellBefore.id);
 			if (cellIdAfterIt == cellAfterIndicesByIds.end()) {
-				addDeletedCell(cellBefore.id);
+				addDeletedCell(CellChangeDescription().setId(cellBefore.id).setPos(*cellBefore.pos));
 			}
 			else {
 				int cellAfterIndex = cellIdAfterIt->second;
@@ -173,7 +173,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 		for (auto const& clusterBefore : *dataBefore.clusters) {
 			auto clusterIdAfterIt = clusterAfterIndicesByIds.find(clusterBefore.id);
 			if (clusterIdAfterIt == clusterAfterIndicesByIds.end()) {
-				addDeletedCluster(clusterBefore.id);
+				addDeletedCluster(ClusterChangeDescription().setId(clusterBefore.id).setPos(*clusterBefore.pos));
 			}
 			else {
 				int clusterAfterIndex = clusterIdAfterIt->second;
@@ -206,7 +206,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 		for (auto const& particleBefore : *dataBefore.particles) {
 			auto particleIdAfterIt = particleAfterIndicesByIds.find(particleBefore.id);
 			if (particleIdAfterIt == particleAfterIndicesByIds.end()) {
-				addDeletedParticle(particleBefore.id);
+				addDeletedParticle(ParticleChangeDescription().setId(particleBefore.id).setPos(*particleBefore.pos));
 			}
 			else {
 				int particleAfterIndex = particleIdAfterIt->second;

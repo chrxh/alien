@@ -79,11 +79,9 @@ struct MODEL_EXPORT ClusterChangeDescription
 		}
 		return *this;
 	}
-	ClusterChangeDescription& addDeletedCell(uint64_t id)
+	ClusterChangeDescription& addDeletedCell(CellChangeDescription const& value)
 	{
-		CellChangeDescription cell;
-		cell.id = id;
-		cells.emplace_back(ChangeTracker<CellChangeDescription>(cell, ChangeTracker<CellChangeDescription>::State::Deleted));
+		cells.emplace_back(ChangeTracker<CellChangeDescription>(value, ChangeTracker<CellChangeDescription>::State::Deleted));
 		return *this;
 	}
 };
@@ -134,11 +132,9 @@ struct MODEL_EXPORT DataChangeDescription
 		}
 		return *this;
 	}
-	DataChangeDescription& addDeletedCluster(uint64_t id)
+	DataChangeDescription& addDeletedCluster(ClusterChangeDescription const& value)
 	{
-		ClusterChangeDescription cluster;
-		cluster.id = id;
-		clusters.emplace_back(ChangeTracker<ClusterChangeDescription>(cluster, ChangeTracker<ClusterChangeDescription>::State::Deleted));
+		clusters.emplace_back(ChangeTracker<ClusterChangeDescription>(value, ChangeTracker<ClusterChangeDescription>::State::Deleted));
 		return *this;
 	}
 	DataChangeDescription& addNewParticle(ParticleChangeDescription const& value)
@@ -151,11 +147,9 @@ struct MODEL_EXPORT DataChangeDescription
 		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Modified));
 		return *this;
 	}
-	DataChangeDescription& addDeletedParticle(uint64_t id)
+	DataChangeDescription& addDeletedParticle(ParticleChangeDescription const& value)
 	{
-		ParticleChangeDescription particle;
-		particle.id = id;
-		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(particle, ChangeTracker<ParticleChangeDescription>::State::Deleted));
+		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Deleted));
 		return *this;
 	}
 	void clear()
