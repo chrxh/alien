@@ -7,8 +7,7 @@ class ParticleImpl
 	: public Particle
 {
 public:
-	ParticleImpl(UnitContext* context);
-	ParticleImpl(qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
+	ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
 	virtual ParticleDescription getDescription() const override;
 

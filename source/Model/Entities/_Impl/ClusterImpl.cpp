@@ -20,11 +20,10 @@
 
 const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
-ClusterImpl::ClusterImpl(QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel
+ClusterImpl::ClusterImpl(QList< Cell* > cells, uint64_t id, qreal angle, QVector2D pos, qreal angularVel
     , QVector2D vel, UnitContext* context)
-    : Cluster(context), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
+    : Cluster(context), _id(id), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
 {
-	_id = _context->getNumberGenerator()->getTag();
 	_context->getSpaceMetric()->correctPosition(_pos);
     foreach(Cell* cell, _cells) {
         cell->setCluster(this);
@@ -32,11 +31,6 @@ ClusterImpl::ClusterImpl(QList< Cell* > cells, qreal angle, QVector2D pos, qreal
     updateTransformationMatrix();
     updateRelCoordinates();
     updateAngularMass();
-}
-
-ClusterImpl::ClusterImpl(UnitContext* context)
-	: ClusterImpl(QList<Cell*>(), 0.0, QVector2D(), 0.0, QVector2D(), context)
-{
 }
 
 namespace

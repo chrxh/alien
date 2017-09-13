@@ -84,7 +84,7 @@ void SimulationAccessImpl::callBackUpdateData()
 	auto grid = _context->getUnitGrid();
 
 	unordered_set<uint64_t> clusterIdsToDelete;
-	list<UnitContext*> unitsWhereClustersShouldBeDeleted;
+	unordered_set<UnitContext*> unitsWhereClustersShouldBeDeleted;
 
 	for (auto const& clusterTracker : _dataToUpdate.clusters) {
 		auto const& clusterDesc = clusterTracker.getValue();
@@ -94,8 +94,11 @@ void SimulationAccessImpl::callBackUpdateData()
 			unitContext->getClustersRef().push_back(cluster);
 		}
 		if (clusterTracker.isDeleted()) {
-			unitsWhereClustersShouldBeDeleted.push_back(unitContext);
+			unitsWhereClustersShouldBeDeleted.insert(unitContext);
 			clusterIdsToDelete.insert(clusterDesc.id);
+		}
+		if (clusterTracker.isModified()) {
+			THROW_NOT_IMPLEMENTED();
 		}
 	}
 
@@ -104,6 +107,8 @@ void SimulationAccessImpl::callBackUpdateData()
 		while (clusterIt.hasNext()) {
 			Cluster* cluster(clusterIt.next());
 			if (clusterIdsToDelete.find(cluster->getId()) != clusterIdsToDelete.end()) {
+				cluster->clearCellsFromMap();
+				delete cluster;
 				clusterIt.remove();
 			}
 		}

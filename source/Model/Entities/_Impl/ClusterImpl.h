@@ -8,9 +8,7 @@ class ClusterImpl
 	: public Cluster
 {
 public:
-    ClusterImpl (UnitContext* context);
-    ClusterImpl (QList< Cell* > cells, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
-    ClusterImpl (QList< Cell* > cells, qreal angle, UnitContext* context);
+    ClusterImpl (QList< Cell* > cells, uint64_t id, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
 
     ~ClusterImpl ();
 
@@ -75,7 +73,9 @@ public:
 	virtual void deserializePrimitives(QDataStream& stream) override;
 
 private:
-    void radiation (qreal& energy, Cell* originCell, Particle*& energyParticle) const;
+	ClusterImpl(QList< Cell* > cells, qreal angle, UnitContext* context);
+
+	void radiation (qreal& energy, Cell* originCell, Particle*& energyParticle) const;
 	inline QVector2D applyTransformation(QVector2D pos) const;
 	inline QVector2D applyTransformation(QMatrix4x4 const& transform, QVector2D pos) const;
 	inline QVector2D applyInverseTransformation(QVector2D pos) const;
