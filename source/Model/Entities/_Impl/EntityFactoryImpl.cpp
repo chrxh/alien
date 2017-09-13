@@ -1,5 +1,5 @@
 #include "Base/ServiceLocator.h"
-
+#include "Base/NumberGenerator.h"
 #include "Model/Features/CellFeatureFactory.h"
 
 #include "ParticleImpl.h"
@@ -10,7 +10,8 @@
 
 Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* context) const
 {
-	auto result = new ClusterImpl(QList<Cell*>(), desc.angle.get_value_or(0.0), desc.pos.get()
+	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getTag() : desc.id;
+	auto result = new ClusterImpl(QList<Cell*>(), id, desc.angle.get_value_or(0.0), desc.pos.get()
 		, desc.angularVel.get_value_or(0.0), desc.vel.get_value_or(QVector2D()), context);
 
 	if (desc.cells) {
@@ -43,7 +44,8 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 	auto const& energy = *cellDesc.energy;
 	auto const& maxConnections = cellDesc.maxConnections.get_value_or(0);
 	auto const& tokenAccessNumber = cellDesc.tokenBranchNumber.get_value_or(0);
-	auto cell = new CellImpl(energy, context, maxConnections, tokenAccessNumber);
+	uint64_t id = cellDesc.id == 0 ? context->getNumberGenerator()->getTag() : cellDesc.id;
+	auto cell = new CellImpl(id, energy, context, maxConnections, tokenAccessNumber);
 	cell->setFlagTokenBlocked(cellDesc.tokenBlocked.get_value_or(false));
 	cell->setMetadata(cellDesc.metadata.get_value_or(CellMetadata()));
 
@@ -69,7 +71,8 @@ Particle* EntityFactoryImpl::build(ParticleDescription const& desc, UnitContext*
 {
 	auto const& pos = *desc.pos;
 	auto const& vel = desc.vel.get_value_or({ 0.0, 0.0 });
-	auto particle = new ParticleImpl(*desc.energy, pos, vel, context);
+	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getTag() : desc.id;
+	auto particle = new ParticleImpl(id, *desc.energy, pos, vel, context);
 	auto const& metadata = desc.metadata.get_value_or(ParticleMetadata());
 	particle->setMetadata(metadata);
 	return particle;

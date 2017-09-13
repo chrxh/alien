@@ -11,8 +11,7 @@ class CellImpl
 {
 public:
 
-    CellImpl (UnitContext* context);
-    CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber);
+    CellImpl (uint64_t id, qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber);
 
     ~CellImpl();
 

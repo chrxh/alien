@@ -10,18 +10,13 @@
 
 #include "CellImpl.h"
 
-CellImpl::CellImpl (UnitContext* context)
-    : _context(context)
+CellImpl::CellImpl (uint64_t id, qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber)
+	: _id(id)
+	, _context(context)
 	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
-    , _newTokenStack(context->getSimulationParameters()->cellMaxToken)
+	, _newTokenStack(context->getSimulationParameters()->cellMaxToken)
 {
-	_id = _context->getNumberGenerator()->getTag();
-}
-
-CellImpl::CellImpl (qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber)
-    : CellImpl(context)
-{
-    _energy = energy;
+	_energy = energy;
     _tokenBranchNumber = tokenBranchNumber;
     resetConnections(maxConnections);
 }
