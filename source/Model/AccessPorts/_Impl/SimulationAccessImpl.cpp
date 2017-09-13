@@ -83,14 +83,32 @@ void SimulationAccessImpl::callBackUpdateData()
 
 	auto grid = _context->getUnitGrid();
 
+	unordered_set<uint64_t> clusterIdsToDelete;
+	list<UnitContext*> unitsWhereClustersShouldBeDeleted;
+
 	for (auto const& clusterTracker : _dataToUpdate.clusters) {
+		auto const& clusterDesc = clusterTracker.getValue();
+		auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
 		if (clusterTracker.isAdded()) {
-			auto const& clusterDesc = clusterTracker.getValue();
-			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
 			auto cluster = factory->build(clusterDesc, unitContext);
 			unitContext->getClustersRef().push_back(cluster);
 		}
+		if (clusterTracker.isDeleted()) {
+			unitsWhereClustersShouldBeDeleted.push_back(unitContext);
+			clusterIdsToDelete.insert(clusterDesc.id);
+		}
 	}
+
+	for (auto const& unitContext : unitsWhereClustersShouldBeDeleted) {
+		QMutableListIterator<Cluster*> clusterIt(unitContext->getClustersRef());
+		while (clusterIt.hasNext()) {
+			Cluster* cluster(clusterIt.next());
+			if (clusterIdsToDelete.find(cluster->getId()) != clusterIdsToDelete.end()) {
+				clusterIt.remove();
+			}
+		}
+	}
+
 	for (auto const& particleTracker : _dataToUpdate.particles) {
 		if (particleTracker.isAdded()) {
 			auto const& particleDesc = particleTracker.getValue();
