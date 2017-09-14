@@ -12,6 +12,7 @@
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/Unit.h"
 #include "Model/Context/SpaceMetric.h"
+#include "Model/Context/EnergyParticleMap.h"
 #include "Model/Entities/Cluster.h"
 
 #include "SimulationAccessImpl.h"
@@ -83,46 +84,80 @@ void SimulationAccessImpl::callBackUpdateData()
 
 	auto grid = _context->getUnitGrid();
 
-	unordered_set<uint64_t> clusterIdsToDelete;
-	unordered_set<UnitContext*> unitsWhereClustersShouldBeDeleted;
+	{
+		unordered_set<uint64_t> clusterIdsToDelete;
+		unordered_set<UnitContext*> units;
 
-	for (auto const& clusterTracker : _dataToUpdate.clusters) {
-		auto const& clusterDesc = clusterTracker.getValue();
-		auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
-		if (clusterTracker.isAdded()) {
-			auto cluster = factory->build(clusterDesc, unitContext);
-			unitContext->getClustersRef().push_back(cluster);
+		for (auto const& clusterTracker : _dataToUpdate.clusters) {
+			auto const& clusterDesc = clusterTracker.getValue();
+			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
+			if (clusterTracker.isAdded()) {
+				auto cluster = factory->build(clusterDesc, unitContext);
+				unitContext->getClustersRef().push_back(cluster);
+			}
+			if (clusterTracker.isDeleted()) {
+				units.insert(unitContext);
+				clusterIdsToDelete.insert(clusterDesc.id);
+			}
+			if (clusterTracker.isModified()) {
+				THROW_NOT_IMPLEMENTED();
+			}
 		}
-		if (clusterTracker.isDeleted()) {
-			unitsWhereClustersShouldBeDeleted.insert(unitContext);
-			clusterIdsToDelete.insert(clusterDesc.id);
-		}
-		if (clusterTracker.isModified()) {
-			THROW_NOT_IMPLEMENTED();
-		}
-	}
 
-	for (auto const& unitContext : unitsWhereClustersShouldBeDeleted) {
-		QMutableListIterator<Cluster*> clusterIt(unitContext->getClustersRef());
-		while (clusterIt.hasNext()) {
-			Cluster* cluster(clusterIt.next());
-			if (clusterIdsToDelete.find(cluster->getId()) != clusterIdsToDelete.end()) {
-				cluster->clearCellsFromMap();
-				delete cluster;
-				clusterIt.remove();
+		for (auto const& unitContext : units) {
+			QMutableListIterator<Cluster*> clusterIt(unitContext->getClustersRef());
+			while (clusterIt.hasNext()) {
+				Cluster* cluster = clusterIt.next();
+				if (clusterIdsToDelete.find(cluster->getId()) != clusterIdsToDelete.end()) {
+					cluster->clearCellsFromMap();
+					delete cluster;
+					clusterIt.remove();
+				}
 			}
 		}
 	}
 
-	for (auto const& particleTracker : _dataToUpdate.particles) {
-		if (particleTracker.isAdded()) {
+	{
+		unordered_set<uint64_t> particleIdsToDelete;
+		unordered_map<uint64_t, ParticleChangeDescription> particlesToUpdate;
+		unordered_set<UnitContext*> units;
+
+		for (auto const& particleTracker : _dataToUpdate.particles) {
 			auto const& particleDesc = particleTracker.getValue();
 			auto unitContext = grid->getUnitOfMapPos(*particleDesc.pos)->getContext();
-			auto particle = factory->build(particleDesc, unitContext);
-			unitContext->getEnergyParticlesRef().push_back(particle);
+			if (particleTracker.isAdded()) {
+				auto particle = factory->build(particleDesc, unitContext);
+				unitContext->getParticlesRef().push_back(particle);
+			}
+			if (particleTracker.isDeleted()) {
+				units.insert(unitContext);
+				particleIdsToDelete.insert(particleDesc.id);
+			}
+			if (particleTracker.isModified()) {
+				units.insert(unitContext);
+				particlesToUpdate.insert_or_assign(particleDesc.id, particleDesc);
+			}
+		}
+
+		for (auto const& unitContext : units) {
+			QMutableListIterator<Particle*> particleIt(unitContext->getParticlesRef());
+			auto energyMap = unitContext->getEnergyParticleMap();
+			while (particleIt.hasNext()) {
+				Particle* particle = particleIt.next();
+				if (particleIdsToDelete.find(particle->getId()) != particleIdsToDelete.end()) {
+					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
+					particleIt.remove();
+					delete particle;
+				}
+				if (particlesToUpdate.find(particle->getId()) != particlesToUpdate.end()) {
+					ParticleChangeDescription const& change = particlesToUpdate.at(particle->getId());
+					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
+					particle->applyChangeDescription(change);
+					energyMap->setParticle(particle->getPosition(), particle);
+				}
+			}
 		}
 	}
-
 	_dataToUpdate.clear();
 }
 
@@ -192,7 +227,7 @@ void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 void SimulationAccessImpl::drawParticlesFromUnit(Unit * unit)
 {
 	auto metric = unit->getContext()->getSpaceMetric();
-	auto const &particles = unit->getContext()->getEnergyParticlesRef();
+	auto const &particles = unit->getContext()->getParticlesRef();
 	for (auto const &particle : particles) {
 		auto pos = metric->correctPositionAndConvertToIntVector(particle->getPosition());
 		if (_requiredRect.isContained(pos)) {
@@ -222,7 +257,7 @@ void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 void SimulationAccessImpl::collectParticlesFromUnit(Unit * unit)
 {
 	auto metric = unit->getContext()->getSpaceMetric();
-	auto const& particles = unit->getContext()->getEnergyParticlesRef();
+	auto const& particles = unit->getContext()->getParticlesRef();
 	for (auto const& particle : particles) {
 		auto pos = metric->correctPositionAndConvertToIntVector(particle->getPosition());
 		if (_requiredRect.isContained(pos)) {

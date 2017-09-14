@@ -33,6 +33,22 @@ ParticleDescription ParticleImpl::getDescription() const
 	return result;
 }
 
+void ParticleImpl::applyChangeDescription(ParticleChangeDescription const & change)
+{
+	if (change.pos) {
+		_pos = *change.pos;
+	}
+	if (change.vel) {
+		_vel = *change.vel;
+	}
+	if (change.energy) {
+		_energy = *change.energy;
+	}
+	if (change.metadata) {
+		_metadata = *change.metadata;
+	}
+}
+
 //return: false = energy is zero
 //        cluster is nonzero if particle transforms into cell
 bool ParticleImpl::processingMovement(Cluster*& cluster)
