@@ -10,6 +10,7 @@ public:
 	ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
 	virtual ParticleDescription getDescription() const override;
+	virtual void applyChangeDescription(ParticleChangeDescription const& change) override;
 
 	virtual bool processingMovement(Cluster*& cluster) override;
 
@@ -38,10 +39,10 @@ private:
 
 	CellDescription getRandomCellDesciption(double energy) const;
 
+	quint64 _id = 0;
 	qreal _energy = 0.0;
 	QVector2D _pos;
 	QVector2D _vel;
-	quint64 _id = 0;
 	ParticleMetadata _metadata;
 };
 

@@ -56,7 +56,7 @@ qreal UnitImpl::calcInternalEnergy() const
 			}
 		}
 	}
-	foreach(Particle* energyParticle, _context->getEnergyParticlesRef()) {
+	foreach(Particle* energyParticle, _context->getParticlesRef()) {
 		internalEnergy += energyParticle->getEnergy();
 	}
 	return internalEnergy;
@@ -109,7 +109,7 @@ void UnitImpl::processingClustersToken()
 			energyParticles.clear();
 			bool decompose = false;
 			cluster->processingToken(energyParticles, decompose);
-			_context->getEnergyParticlesRef() << energyParticles;
+			_context->getParticlesRef() << energyParticles;
 
 			//decompose cluster?
 			if (decompose) {
@@ -147,7 +147,7 @@ void UnitImpl::processingClustersDissipation()
 		Cluster* cluster(i.next());
 		energyParticles.clear();
 		cluster->processingDissipation(fragments, energyParticles);
-		_context->getEnergyParticlesRef() << energyParticles;
+		_context->getParticlesRef() << energyParticles;
 
 		//new cell cluster fragments?
 		//        bool delCluster = false;
@@ -189,7 +189,7 @@ void UnitImpl::processingClustersCompartmentAllocation()
 
 void UnitImpl::processingParticlesMovement()
 {
-	QMutableListIterator<Particle*> p(_context->getEnergyParticlesRef());
+	QMutableListIterator<Particle*> p(_context->getParticlesRef());
 	while (p.hasNext()) {
 		Particle* e(p.next());
 		Cluster* cluster(0);
@@ -214,7 +214,7 @@ void UnitImpl::incClustersTimestamp()
 
 void UnitImpl::incParticlesTimestamp()
 {
-	for (auto const& particle : _context->getEnergyParticlesRef()) {
+	for (auto const& particle : _context->getParticlesRef()) {
 		particle->incTimestampIfFit();
 	}
 }
@@ -224,14 +224,14 @@ void UnitImpl::processingParticlesCompartmentAllocation()
 	auto compartment = _context->getMapCompartment();
 	auto spaceMetric = _context->getSpaceMetric();
 
-	QMutableListIterator<Particle*> particleIter(_context->getEnergyParticlesRef());
+	QMutableListIterator<Particle*> particleIter(_context->getParticlesRef());
 	while (particleIter.hasNext()) {
 		Particle* particle = particleIter.next();
 		IntVector2D intPos = spaceMetric->correctPositionAndConvertToIntVector(particle->getPosition());
 		if (!compartment->isPointInCompartment(intPos)) {
 			particleIter.remove();
 			auto otherContext = compartment->getNeighborContext(intPos);
-			otherContext->getEnergyParticlesRef().push_back(particle);
+			otherContext->getParticlesRef().push_back(particle);
 			particle->setContext(otherContext);
 		}
 	}
