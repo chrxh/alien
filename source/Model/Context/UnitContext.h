@@ -1,5 +1,4 @@
-#ifndef UNITCONTEXT_H
-#define UNITCONTEXT_H
+#pragma once
 
 #include "Model/Definitions.h"
 
@@ -26,7 +25,5 @@ public:
 	virtual void incTimestamp() = 0;
 
 	virtual QList<Cluster*>& getClustersRef() = 0;
-	virtual QList<Particle*>& getEnergyParticlesRef() = 0;
+	virtual QList<Particle*>& getParticlesRef() = 0;
 };
-
-#endif // UNITCONTEXT_H

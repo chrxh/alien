@@ -32,7 +32,7 @@ void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, 
 		serializeCellCluster(cluster, stream);
 	}
 
-	auto const& energyParticles = context->getEnergyParticlesRef();
+	auto const& energyParticles = context->getParticlesRef();
 	quint32 numEnergyParticles = energyParticles.size();
 	stream << numEnergyParticles;
 	foreach(Particle* e, energyParticles) {

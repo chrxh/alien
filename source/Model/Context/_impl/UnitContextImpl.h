@@ -1,5 +1,4 @@
-#ifndef SIMULATIONUNITCONTEXTIMPL_H
-#define SIMULATIONUNITCONTEXTIMPL_H
+#pragma once
 
 #include <QMutex>
 
@@ -28,7 +27,7 @@ public:
 	virtual void incTimestamp() override;
 
 	virtual QList<Cluster*>& getClustersRef() override;
-	virtual QList<Particle*>& getEnergyParticlesRef () override;
+	virtual QList<Particle*>& getParticlesRef () override;
 
 private:
 	void deleteClustersAndEnergyParticles();
@@ -46,4 +45,3 @@ private:
 	uint64_t _timestamp = 0;
 };
 
-#endif // SIMULATIONUNITCONTEXTIMPL_H

@@ -83,7 +83,7 @@ QList<Cluster*>& UnitContextImpl::getClustersRef ()
     return _clusters;
 }
 
-QList<Particle*>& UnitContextImpl::getEnergyParticlesRef ()
+QList<Particle*>& UnitContextImpl::getParticlesRef ()
 {
     return _energyParticles;
 }
