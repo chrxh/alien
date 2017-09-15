@@ -17,6 +17,9 @@ void CellConnectorImpl::init(SpaceMetricApi *metric, SimulationParameters *param
 
 void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &changedCellIds)
 {
+	if (!data.clusters) {
+		return;
+	}
 	updateInternals(data);
 	list<uint64_t> changedAndPresentCellIds = filterPresentCellIds(changedCellIds);
 	updateConnectingCells(data, changedAndPresentCellIds);
@@ -36,9 +39,6 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 {
 	_navi.update(data);
 	_cellMap.clear();
-	if (!data.clusters) {
-		return;
-	}
 
 	for (auto const &cluster : *data.clusters) {
 		for (auto const &cell : *cluster.cells) {
