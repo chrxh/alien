@@ -137,6 +137,7 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 	SET_DELTA(before.vel, after.vel, vel);
 	SET_DELTA(before.energy, after.energy, energy);
 	SET_DELTA(before.metadata, after.metadata, metadata);
+	_posBefore = before.pos;
 }
 
 bool ParticleChangeDescription::isEmpty() const
@@ -146,6 +147,11 @@ bool ParticleChangeDescription::isEmpty() const
 		&& !energy.is_initialized()
 		&& !metadata.is_initialized()
 		;
+}
+
+QVector2D ParticleChangeDescription::getPosBefore() const
+{
+	return *_posBefore;
 }
 
 DataChangeDescription::DataChangeDescription(DataDescription const & desc)

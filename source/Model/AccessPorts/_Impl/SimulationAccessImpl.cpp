@@ -134,6 +134,7 @@ void SimulationAccessImpl::callBackUpdateData()
 				particleIdsToDelete.insert(particleDesc.id);
 			}
 			if (particleTracker.isModified()) {
+				auto unitContext = grid->getUnitOfMapPos(particleDesc.getPosBefore())->getContext();
 				units.insert(unitContext);
 				particlesToUpdate.insert_or_assign(particleDesc.id, particleDesc);
 			}
@@ -153,7 +154,16 @@ void SimulationAccessImpl::callBackUpdateData()
 					ParticleChangeDescription const& change = particlesToUpdate.at(particle->getId());
 					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
 					particle->applyChangeDescription(change);
-					energyMap->setParticle(particle->getPosition(), particle);
+
+					auto newUnitContext = grid->getUnitOfMapPos(particle->getPosition())->getContext();
+					auto newEnergyMap = newUnitContext->getEnergyParticleMap();
+					if (newUnitContext != unitContext) {
+						particleIt.remove();
+						newUnitContext->getParticlesRef().push_back(particle);
+						particle->setContext(newUnitContext);
+					}
+					newEnergyMap->setParticle(particle->getPosition(), particle);
+					particlesToUpdate.erase(particle->getId());
 				}
 			}
 		}
