@@ -22,6 +22,7 @@ public:
 
 protected:
 	ClusterDescription createClusterDescription(int numCells) const;
+	ParticleDescription createParticleDescription() const;
 
 	ModelBuilderFacade* _facade = nullptr;
 	SimulationController* _controller = nullptr;
@@ -78,29 +79,35 @@ ClusterDescription DataDescriptionTransferTest::createClusterDescription(int num
 	return cluster;
 }
 
+ParticleDescription DataDescriptionTransferTest::createParticleDescription() const
+{
+	QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
+	return ParticleDescription().setEnergy(_parameters->cellMinEnergy).setPos(pos).setId(_numberGen->getTag());
+}
+
 namespace
 {
 	template<typename T>
-	bool isCompatible(T const& a, T const& b)
+	bool isCompatible(T a, T b)
 	{
 		return a == b;
 	}
 
 	template<>
-	bool isCompatible<QVector2D>(QVector2D const& vec1, QVector2D const& vec2)
+	bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2)
 	{
 		return std::abs(vec1.x() - vec2.x()) < FLOATINGPOINT_MEDIUM_PRECISION
 			&& std::abs(vec1.y() - vec2.y()) < FLOATINGPOINT_MEDIUM_PRECISION;
 	}
 
 	template<>
-	bool isCompatible<double>(double const& a, double const& b)
+	bool isCompatible<double>(double a, double b)
 	{
 		return std::abs(a - b) < FLOATINGPOINT_MEDIUM_PRECISION;
 	}
 
 	template<typename T>
-	bool isCompatible(optional<T> const& a, optional<T> const& b)
+	bool isCompatible(optional<T> a, optional<T> b)
 	{
 		if (!a || !b) {
 			return true;
@@ -109,7 +116,7 @@ namespace
 	}
 
 	template<typename T>
-	bool isCompatible(vector<T> const& a, vector<T> const& b)
+	bool isCompatible(vector<T> a, vector<T> b)
 	{
 		if (a.size() != b.size()) {
 			false;
@@ -123,14 +130,14 @@ namespace
 	}
 
 	template<>
-	bool isCompatible<TokenDescription>(TokenDescription const & token1, TokenDescription const & token2)
+	bool isCompatible<TokenDescription>(TokenDescription token1, TokenDescription token2)
 	{
 		return isCompatible(token1.energy, token2.energy)
 			&& isCompatible(token1.data, token2.data);
 	}
 
 	template<>
-	bool isCompatible<CellDescription>(CellDescription const & cell1, CellDescription const & cell2)
+	bool isCompatible<CellDescription>(CellDescription cell1, CellDescription cell2)
 	{
 		return isCompatible(cell1.pos, cell2.pos)
 			&& isCompatible(cell1.energy, cell2.energy)
@@ -145,7 +152,7 @@ namespace
 	}
 
 	template<>
-	bool isCompatible<ClusterDescription>(ClusterDescription const & cluster1, ClusterDescription const & cluster2)
+	bool isCompatible<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2)
 	{
 		return isCompatible(cluster1.pos, cluster2.pos)
 			&& isCompatible(cluster1.vel, cluster2.vel)
@@ -156,7 +163,7 @@ namespace
 	}
 
 	template<>
-	bool isCompatible<ParticleDescription>(ParticleDescription const & particle1, ParticleDescription const & particle2)
+	bool isCompatible<ParticleDescription>(ParticleDescription particle1, ParticleDescription particle2)
 	{
 		return isCompatible(particle1.pos, particle2.pos)
 			&& isCompatible(particle1.vel, particle2.vel)
@@ -164,9 +171,30 @@ namespace
 			&& isCompatible(particle1.metadata, particle2.metadata);
 	}
 
-	template<>
-	bool isCompatible<DataDescription>(DataDescription const & data1, DataDescription const & data2)
+	void sortById(DataDescription& data)
 	{
+		if (data.clusters) {
+			std::sort(data.clusters->begin(), data.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
+				return cluster1.id <= cluster2.id;
+			});
+			for (auto& cluster : *data.clusters) {
+				std::sort(cluster.cells->begin(), cluster.cells->end(), [](auto const &cell1, auto const &cell2) {
+					return cell1.id <= cell2.id;
+				});
+			}
+		}
+		if (data.particles) {
+			std::sort(data.particles->begin(), data.particles->end(), [](auto const &particle1, auto const &particle2) {
+				return particle1.id <= particle2.id;
+			});
+		}
+	}
+
+	template<>
+	bool isCompatible<DataDescription>(DataDescription data1, DataDescription data2)
+	{
+		sortById(data1);
+		sortById(data2);
 		return isCompatible(data1.clusters, data2.clusters)
 			&& isCompatible(data1.particles, data2.particles);
 	}
@@ -174,12 +202,14 @@ namespace
 
 TEST_F(DataDescriptionTransferTest, testAddRandomData)
 {
-
 	DataDescription dataBefore;
-	int numClusters = 100;
-	for (int i = 1; i <= numClusters; ++i) {
+	for (int i = 1; i <= 100; ++i) {
 		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
 		dataBefore.addCluster(createClusterDescription(i));
+	}
+	for (int i = 1; i <= 100; ++i) {
+		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
+		dataBefore.addParticle(createParticleDescription());
 	}
 	_access->updateData(dataBefore);
 
@@ -188,32 +218,13 @@ TEST_F(DataDescriptionTransferTest, testAddRandomData)
 	_access->requireData(rect, resolveDesc);
 	DataDescription dataAfter = _access->retrieveData();
 
-	ASSERT_TRUE(dataBefore.clusters->size() == dataAfter.clusters->size());
-	std::sort(dataBefore.clusters->begin(), dataBefore.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
-		return cluster1.cells->size() <= cluster2.cells->size();
-	});
-	std::sort(dataAfter.clusters->begin(), dataAfter.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
-		return cluster1.cells->size() <= cluster2.cells->size();
-	});
-	for (int i = 0; i < dataAfter.clusters->size(); ++i) {
-		auto& cluster1 = dataAfter.clusters->at(i);
-		auto& cluster2 = dataBefore.clusters->at(i);
-		std::sort(cluster1.cells->begin(), cluster1.cells->end(), [](auto const &cell1, auto const &cell2) {
-			return cell1.pos->x() <= cell2.pos->x();
-		});
-		std::sort(cluster2.cells->begin(), cluster2.cells->end(), [](auto const &cell1, auto const &cell2) {
-			return cell1.pos->x() <= cell2.pos->x();
-		});
-	}
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
 TEST_F(DataDescriptionTransferTest, testAddAndDeleteRandomData)
 {
-
 	DataDescription dataBefore;
-	int numClusters = 100;
-	for (int i = 1; i <= numClusters; ++i) {
+	for (int i = 1; i <= 100; ++i) {
 		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
 		dataBefore.addCluster(createClusterDescription(i));
 	}
@@ -234,22 +245,6 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteRandomData)
 	_access->requireData(rect, resolveDesc);
 	DataDescription dataAfter = _access->retrieveData();
 
-	ASSERT_TRUE(dataBefore.clusters->size() == dataAfter.clusters->size());
-	std::sort(dataBefore.clusters->begin(), dataBefore.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
-		return cluster1.cells->size() <= cluster2.cells->size();
-	});
-	std::sort(dataAfter.clusters->begin(), dataAfter.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
-		return cluster1.cells->size() <= cluster2.cells->size();
-	});
-	for (int i = 0; i < dataAfter.clusters->size(); ++i) {
-		auto& cluster1 = dataAfter.clusters->at(i);
-		auto& cluster2 = dataBefore.clusters->at(i);
-		std::sort(cluster1.cells->begin(), cluster1.cells->end(), [](auto const &cell1, auto const &cell2) {
-			return cell1.pos->x() <= cell2.pos->x();
-		});
-		std::sort(cluster2.cells->begin(), cluster2.cells->end(), [](auto const &cell1, auto const &cell2) {
-			return cell1.pos->x() <= cell2.pos->x();
-		});
-	}
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
+
