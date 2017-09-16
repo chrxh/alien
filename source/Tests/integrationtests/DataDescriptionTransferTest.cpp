@@ -260,3 +260,62 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteRandomData)
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
+TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
+{
+	DataDescription dataBefore;
+	for (int i = 1; i <= 100; ++i) {
+		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
+		dataBefore.addParticle(createParticleDescription());
+	}
+	_access->updateData(dataBefore);
+
+	DataChangeDescription dataChange;
+	for (int i = 0; i <= 49; ++i) {
+		{
+			auto &particle = dataBefore.particles->at(i);
+			auto particleOriginal = particle;
+			auto &pos = *particle.pos;
+			pos = pos + QVector2D(100.0, 0);
+			dataChange.addModifiedParticle(ParticleChangeDescription(particleOriginal, particle));
+		}
+	}
+	_access->updateData(dataChange);
+
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
+	ResolveDescription resolveDesc;
+	_access->requireData(rect, resolveDesc);
+	DataDescription dataAfter = _access->retrieveData();
+
+	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+}
+
+TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
+{
+	DataDescription dataBefore;
+	for (int i = 1; i <= 100; ++i) {
+		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
+		dataBefore.addParticle(createParticleDescription());
+	}
+	_access->updateData(dataBefore);
+
+	DataChangeDescription dataChange;
+	for (int i = 0; i <= 49; ++i) {
+		{
+			auto &particle = dataBefore.particles->at(i);
+			auto particleOriginal = particle;
+			auto &pos = *particle.pos;
+			pos = pos + QVector2D(1000.0, 0);
+			dataChange.addModifiedParticle(ParticleChangeDescription(particleOriginal, particle));
+		}
+	}
+	_access->updateData(dataChange);
+
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
+	ResolveDescription resolveDesc;
+	_access->requireData(rect, resolveDesc);
+	DataDescription dataAfter = _access->retrieveData();
+
+	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+}
