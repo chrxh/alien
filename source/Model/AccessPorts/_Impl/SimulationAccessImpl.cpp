@@ -145,11 +145,6 @@ void SimulationAccessImpl::callBackUpdateData()
 			auto energyMap = unitContext->getEnergyParticleMap();
 			while (particleIt.hasNext()) {
 				Particle* particle = particleIt.next();
-				if (particleIdsToDelete.find(particle->getId()) != particleIdsToDelete.end()) {
-					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
-					particleIt.remove();
-					delete particle;
-				}
 				if (particlesToUpdate.find(particle->getId()) != particlesToUpdate.end()) {
 					ParticleChangeDescription const& change = particlesToUpdate.at(particle->getId());
 					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
@@ -164,6 +159,11 @@ void SimulationAccessImpl::callBackUpdateData()
 					}
 					newEnergyMap->setParticle(particle->getPosition(), particle);
 					particlesToUpdate.erase(particle->getId());
+				}
+				if (particleIdsToDelete.find(particle->getId()) != particleIdsToDelete.end()) {
+					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
+					particleIt.remove();
+					delete particle;
 				}
 			}
 		}

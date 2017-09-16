@@ -228,17 +228,29 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteRandomData)
 		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
 		dataBefore.addCluster(createClusterDescription(i));
 	}
+	for (int i = 1; i <= 100; ++i) {
+		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
+		dataBefore.addParticle(createParticleDescription());
+	}
 	_access->updateData(dataBefore);
 
 	DataChangeDescription dataChange;
 	for (int i = 0; i <= 49; ++i) {
-		uint64_t id = dataBefore.clusters->at(i).id;
-		auto pos = *dataBefore.clusters->at(i).pos;
-		dataChange.addDeletedCluster(ClusterChangeDescription().setId(id).setPos(pos));
+		{
+			uint64_t id = dataBefore.clusters->at(i).id;
+			auto pos = *dataBefore.clusters->at(i).pos;
+			dataChange.addDeletedCluster(ClusterChangeDescription().setId(id).setPos(pos));
+		}
+		{
+			uint64_t id = dataBefore.particles->at(i).id;
+			auto pos = *dataBefore.particles->at(i).pos;
+			dataChange.addDeletedParticle(ParticleChangeDescription().setId(id).setPos(pos));
+		}
 	}
 	_access->updateData(dataChange);
 
 	dataBefore.clusters->erase(dataBefore.clusters->begin(), dataBefore.clusters->begin() + 50);
+	dataBefore.particles->erase(dataBefore.particles->begin(), dataBefore.particles->begin() + 50);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	ResolveDescription resolveDesc;
