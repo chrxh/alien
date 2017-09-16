@@ -86,7 +86,7 @@ struct MODEL_EXPORT ClusterChangeDescription
 	}
 };
 
-struct ParticleChangeDescription
+struct MODEL_EXPORT ParticleChangeDescription
 {
 	uint64_t id = 0;
 
