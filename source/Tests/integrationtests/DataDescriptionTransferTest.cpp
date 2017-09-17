@@ -8,8 +8,10 @@
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
+#include "Model/CellConnector.h"
 #include "Model/Context/SimulationContext.h"
 #include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SpaceMetricApi.h"
 #include "Model/AccessPorts/SimulationAccess.h"
 
 #include "Tests/Predicates.h"
@@ -26,6 +28,7 @@ public:
 protected:
 	SimulationController* _controller = nullptr;
 	SimulationContext* _context = nullptr;
+	SpaceMetricApi* _metric = nullptr;
 	SimulationAccess* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
 };
@@ -36,6 +39,7 @@ DataDescriptionTransferTest::DataDescriptionTransferTest()
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
 	_context = static_cast<SimulationContext*>(_controller->getContext());
+	_metric = _context->getSpaceMetric();
 	_access = _facade->buildSimulationAccess(_context);
 }
 
@@ -122,10 +126,10 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
 			auto &pos = *particle.pos;
 			pos = pos + QVector2D(100.0, 0);
 			dataChange.addModifiedParticle(ParticleChangeDescription(particleOriginal, particle));
+			_metric->correctPosition(pos);
 		}
 	}
 	_access->updateData(dataChange);
-
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	ResolveDescription resolveDesc;
@@ -152,6 +156,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 			auto &pos = *particle.pos;
 			pos = pos + QVector2D(1000.0, 0);
 			dataChange.addModifiedParticle(ParticleChangeDescription(particleOriginal, particle));
+			_metric->correctPosition(pos);
 		}
 	}
 	_access->updateData(dataChange);
@@ -164,6 +169,8 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 
 TEST_F(DataDescriptionTransferTest, testAddAndDeleteAndModifyWithinSimulation)
 {
+	auto connector = _facade->buildCellConnector(_context);
+
 	DataDescription dataBefore;
 	for (int i = 1; i <= 10000; ++i) {
 		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
@@ -171,8 +178,34 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteAndModifyWithinSimulation)
 	}
 	_access->updateData(dataBefore);
 
-	runSimulation(200, _controller);
+	runSimulation(100, _controller);
 
-	_access->requireData({ { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } }, ResolveDescription());
-	DataDescription dataAfter = _access->retrieveData();
+	_access->requireData({ { 0, 0 },{ _universeSize.x/2, _universeSize.y/2 } }, ResolveDescription());
+	DataDescription extract = _access->retrieveData();
+	DataDescription extractOriginal = extract;
+
+	if (!extract.clusters || !extract.particles) {
+		EXPECT_TRUE(false) << "no clusters or particles found";
+		return;
+	}
+	list<uint64_t> cellIdsToModify;
+	for (int clusterIndex = 0; clusterIndex < extract.clusters->size()/3; ++clusterIndex) {
+		auto& cluster = extract.clusters->at(clusterIndex);
+		for (int cellIndex = 0; cellIndex < cluster.cells->size() / 3; ++cellIndex) {
+			auto& cell = cluster.cells->at(cellIndex);
+			auto& pos = *cell.pos;
+			pos = pos + QVector2D(1000.0, 0);
+			cellIdsToModify.push_back(cell.id);
+		}
+	}
+	for (auto& particle : *extract.particles) {
+		auto& pos = *particle.pos;
+		pos = pos + QVector2D(1000.0, 420.0);
+	}
+	connector->reconnect(extract, cellIdsToModify);
+	_access->updateData(DataChangeDescription(extractOriginal, extract));
+
+	runSimulation(100, _controller);
+
+	EXPECT_TRUE(true);
 }

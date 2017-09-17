@@ -63,9 +63,9 @@ TEST_F(ChangeDescriptionsTest, testCreateClusterChangeDescriptionFromClusterDesc
 	const double energyCell1 = 100;
 	const int maxConnectionsCell2 = 5;
 	const list<CellDescription> cells1 = {
-		CellDescription().setId(cellId1).setEnergy(energyCell1),
-		CellDescription().setId(cellId2).setMaxConnections(maxConnectionsCell2),
-		CellDescription().setId(cellId3)
+		CellDescription().setId(cellId1).setPos({ 0, 0 }).setEnergy(energyCell1),
+		CellDescription().setId(cellId2).setPos({ 1, 0 }).setMaxConnections(maxConnectionsCell2),
+		CellDescription().setId(cellId3).setPos({ 2, 0 })
 	};
 
 	ClusterDescription desc1 = ClusterDescription().setId(id).setPos(pos1).setAngle(angle1).setAngularVel(angularVel1).addCells(cells1);
@@ -78,9 +78,9 @@ TEST_F(ChangeDescriptionsTest, testCreateClusterChangeDescriptionFromClusterDesc
 	const double newEnergyCell1 = 140;
 	const int maxConnectionsCell4 = 5;
 	const list<CellDescription> cells2 = {
-		CellDescription().setId(cellId1).setEnergy(newEnergyCell1),
-		CellDescription().setId(cellId3),
-		CellDescription().setId(cellId4).setMaxConnections(maxConnectionsCell4)
+		CellDescription().setId(cellId1).setPos({ 0, 0 }).setEnergy(newEnergyCell1),
+		CellDescription().setId(cellId3).setPos({ 2, 0 }),
+		CellDescription().setId(cellId4).setPos({ 3, 0 }).setMaxConnections(maxConnectionsCell4)
 	};
 	ClusterDescription desc2 = ClusterDescription().setId(id).setVel(vel2).setAngle(angle2).setAngularVel(angularVel2).addCells(cells2);
 
