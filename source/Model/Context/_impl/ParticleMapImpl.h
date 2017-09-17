@@ -1,17 +1,16 @@
-#ifndef ENERGYPARTICLEMAPIMPL_H
-#define ENERGYPARTICLEMAPIMPL_H
+#pragma once
 
-#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/ParticleMap.h"
 #include "Model/Context/MapCompartment.h"
 #include "Model/Context/UnitContext.h"
 
-class EnergyParticleMapImpl
-	: public EnergyParticleMap
+class ParticleMapImpl
+	: public ParticleMap
 {
 	Q_OBJECT
 public:
-	EnergyParticleMapImpl(QObject* parent = nullptr);
-	virtual ~EnergyParticleMapImpl();
+	ParticleMapImpl(QObject* parent = nullptr);
+	virtual ~ParticleMapImpl();
 
 	virtual void init(SpaceMetric* metric, MapCompartment* compartment) override;
 	virtual void clear() override;
@@ -34,17 +33,15 @@ private:
 
 /****************** inline methods ******************/
 
-Particle*& EnergyParticleMapImpl::locateParticle(IntVector2D & intPos) const
+Particle*& ParticleMapImpl::locateParticle(IntVector2D & intPos) const
 {
 	if (_compartment->isPointInCompartment(intPos)) {
 		_compartment->convertAbsToRelPosition(intPos);
 		return _energyGrid[intPos.x][intPos.y];
 	}
 	else {
-		auto energyMap = static_cast<EnergyParticleMapImpl*>(_compartment->getNeighborContext(intPos)->getEnergyParticleMap());
+		auto energyMap = static_cast<ParticleMapImpl*>(_compartment->getNeighborContext(intPos)->getEnergyParticleMap());
 		_compartment->convertAbsToRelPosition(intPos);
 		return energyMap->_energyGrid[intPos.x][intPos.y];
 	}
 }
-
-#endif //ENERGYPARTICLEMAPIMPL_H

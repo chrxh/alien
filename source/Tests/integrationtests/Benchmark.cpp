@@ -20,35 +20,21 @@
 
 #include "tests/Predicates.h"
 
-class Benchmark : public ::testing::Test
+#include "IntegrationTestFramework.h"
+
+class Benchmark
+	: public IntegrationTestFramework
 {
 public:
 	Benchmark();
-	~Benchmark();
 
 protected:
 	void createTestData(SimulationAccess* access);
-	void runSimulation(int timesteps, SimulationController* controller);
-
-	SimulationParameters* _parameters = nullptr;
-	NumberGenerator* _numberGen = nullptr;
-	SymbolTable* _symbols = nullptr;
-	IntVector2D _universeSize{ 12 * 33 * 3, 12 * 17 * 3 };
 };
 
 Benchmark::Benchmark()
+	: IntegrationTestFramework({ 12 * 33 * 3, 12 * 17 * 3 })
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_symbols = facade->buildDefaultSymbolTable();
-	_parameters = facade->buildDefaultSimulationParameters();
-	_numberGen = factory->buildRandomNumberGenerator();
-	_numberGen->init(123123, 0);
-}
-
-Benchmark::~Benchmark()
-{
-	delete _numberGen;
 }
 
 void Benchmark::createTestData(SimulationAccess * access)
@@ -60,20 +46,6 @@ void Benchmark::createTestData(SimulationAccess * access)
 			.setEnergy(50));
 	}
 	access->updateData(desc);
-}
-
-void Benchmark::runSimulation(int timesteps, SimulationController* controller)
-{
-	QEventLoop pause;
-	int t = 0;
-	controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
-		if (++t == timesteps) {
-			controller->setRun(false);
-			pause.quit();
-		}
-	});
-	controller->setRun(true);
-	pause.exec();
 }
 
 TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)

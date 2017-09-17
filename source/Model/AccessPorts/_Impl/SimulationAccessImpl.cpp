@@ -12,7 +12,7 @@
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/Unit.h"
 #include "Model/Context/SpaceMetric.h"
-#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/ParticleMap.h"
 #include "Model/Entities/Cluster.h"
 
 #include "SimulationAccessImpl.h"
@@ -180,8 +180,8 @@ void SimulationAccessImpl::callBackCollectData()
 	_dataRequired = false;
 	_dataCollected.clear();
 	auto grid = _context->getUnitGrid();
-	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D());
-	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D());
+	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
+	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
 	IntVector2D gridPos;
 	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
 		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
@@ -202,8 +202,8 @@ void SimulationAccessImpl::callBackDrawImage()
 	_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
 
 	auto grid = _context->getUnitGrid();
-	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D());
-	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D());
+	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
+	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
 	IntVector2D gridPos;
 	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
 		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
@@ -239,7 +239,7 @@ void SimulationAccessImpl::drawParticlesFromUnit(Unit * unit)
 	auto metric = unit->getContext()->getSpaceMetric();
 	auto const &particles = unit->getContext()->getParticlesRef();
 	for (auto const &particle : particles) {
-		auto pos = metric->correctPositionAndConvertToIntVector(particle->getPosition());
+		IntVector2D pos = particle->getPosition();
 		if (_requiredRect.isContained(pos)) {
 			_requiredImage->setPixel(pos.x, pos.y, 0x902020);
 		}
@@ -257,7 +257,7 @@ void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 	auto metric = unit->getContext()->getSpaceMetric();
 	auto const& clusters = unit->getContext()->getClustersRef();
 	for (auto const& cluster : clusters) {
-		auto pos = metric->correctPositionAndConvertToIntVector(cluster->getPosition());
+		IntVector2D pos = cluster->getPosition();
 		if (_requiredRect.isContained(pos)) {
 			_dataCollected.addCluster(cluster->getDescription(_resolveDesc));
 		}
@@ -269,7 +269,7 @@ void SimulationAccessImpl::collectParticlesFromUnit(Unit * unit)
 	auto metric = unit->getContext()->getSpaceMetric();
 	auto const& particles = unit->getContext()->getParticlesRef();
 	for (auto const& particle : particles) {
-		auto pos = metric->correctPositionAndConvertToIntVector(particle->getPosition());
+		IntVector2D pos = particle->getPosition();
 		if (_requiredRect.isContained(pos)) {
 			_dataCollected.addParticle(particle->getDescription());
 		}

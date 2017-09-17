@@ -1,5 +1,4 @@
-#ifndef UNITGRIDIMPL_H
-#define UNITGRIDIMPL_H
+#pragma once
 
 #include "Model/Context/UnitGrid.h"
 
@@ -16,8 +15,8 @@ public:
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) override;
 	virtual IntVector2D getSize() const override;
 	virtual Unit* getUnitOfGridPos(IntVector2D gridPos) const override;
-	virtual Unit* getUnitOfMapPos(QVector2D pos) const override;
-	virtual IntVector2D getGridPosOfMapPos(QVector2D pos) const override;
+	virtual Unit* getUnitOfMapPos(QVector2D pos, CorrectionMode mode = CorrectionMode::Torus) const override;
+	virtual IntVector2D getGridPosOfMapPos(QVector2D pos, CorrectionMode mode = CorrectionMode::Torus) const override;
 	virtual IntRect calcCompartmentRect(IntVector2D gridPos) const override;
 
 private:
@@ -28,4 +27,3 @@ private:
 	vector<vector<Unit*>> _units;
 };
 
-#endif // UNITGRIDIMPL_H

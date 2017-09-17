@@ -1,20 +1,20 @@
 #include "Model/Context/SpaceMetric.h"
 #include "Model/Entities/Particle.h"
 
-#include "EnergyParticleMapImpl.h"
+#include "ParticleMapImpl.h"
 
-EnergyParticleMapImpl::EnergyParticleMapImpl(QObject* parent)
-	: EnergyParticleMap(parent)
+ParticleMapImpl::ParticleMapImpl(QObject* parent)
+	: ParticleMap(parent)
 {
 }
 
-EnergyParticleMapImpl::~EnergyParticleMapImpl()
+ParticleMapImpl::~ParticleMapImpl()
 {
 	deleteGrid();
 }
 
 
-void EnergyParticleMapImpl::init(SpaceMetric* metric, MapCompartment* compartment)
+void ParticleMapImpl::init(SpaceMetric* metric, MapCompartment* compartment)
 {
 	_metric = metric;
 	_compartment = compartment;
@@ -28,14 +28,14 @@ void EnergyParticleMapImpl::init(SpaceMetric* metric, MapCompartment* compartmen
 	clear();
 }
 
-void EnergyParticleMapImpl::clear()
+void ParticleMapImpl::clear()
 {
 	for (int x = 0; x < _size.x; ++x)
 		for (int y = 0; y < _size.y; ++y)
 			_energyGrid[x][y] = nullptr;
 }
 
-void EnergyParticleMapImpl::removeParticleIfPresent(QVector2D pos, Particle * particleToRemove)
+void ParticleMapImpl::removeParticleIfPresent(QVector2D pos, Particle * particleToRemove)
 {
 	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
 	Particle*& particle = locateParticle(intPos);
@@ -44,19 +44,19 @@ void EnergyParticleMapImpl::removeParticleIfPresent(QVector2D pos, Particle * pa
 	}
 }
 
-void EnergyParticleMapImpl::setParticle(QVector2D pos, Particle * particle)
+void ParticleMapImpl::setParticle(QVector2D pos, Particle * particle)
 {
 	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
 	locateParticle(intPos) = particle;
 }
 
-Particle * EnergyParticleMapImpl::getParticle(QVector2D pos) const
+Particle * ParticleMapImpl::getParticle(QVector2D pos) const
 {
 	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
 	return locateParticle(intPos);
 }
 
-void EnergyParticleMapImpl::serializePrimitives(QDataStream & stream) const
+void ParticleMapImpl::serializePrimitives(QDataStream & stream) const
 {
 	//determine number of energy particle entries
 	quint32 numEntries = 0;
@@ -77,7 +77,7 @@ void EnergyParticleMapImpl::serializePrimitives(QDataStream & stream) const
 	}
 }
 
-void EnergyParticleMapImpl::deserializePrimitives(QDataStream & stream, QMap<quint64, Particle*> const & oldIdEnergyMap)
+void ParticleMapImpl::deserializePrimitives(QDataStream & stream, QMap<quint64, Particle*> const & oldIdEnergyMap)
 {
 	quint32 numEntries = 0;
 	qint32 x = 0;
@@ -91,7 +91,7 @@ void EnergyParticleMapImpl::deserializePrimitives(QDataStream & stream, QMap<qui
 	}
 }
 
-void EnergyParticleMapImpl::deleteGrid()
+void ParticleMapImpl::deleteGrid()
 {
 	if (_energyGrid) {
 		for (int x = 0; x < _size.x; ++x) {

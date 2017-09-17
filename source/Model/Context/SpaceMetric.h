@@ -22,6 +22,8 @@ public:
 	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const = 0;
 	virtual QVector2D correctionIncrement (QVector2D pos1, QVector2D pos2) const = 0;
 
+	virtual void truncatePosition(IntVector2D& pos) const = 0;
+
 	virtual void serializePrimitives(QDataStream& stream) const = 0;
 	virtual void deserializePrimitives(QDataStream& stream) = 0;
 };

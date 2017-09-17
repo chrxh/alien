@@ -1,15 +1,14 @@
-#ifndef ENERGYPARTICLEMAP_H
-#define ENERGYPARTICLEMAP_H
+#pragma once
 
 #include "Model/Definitions.h"
 
-class EnergyParticleMap
+class ParticleMap
 	: public QObject
 {
 	Q_OBJECT
 public:
-	EnergyParticleMap(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~EnergyParticleMap() = default;
+	ParticleMap(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~ParticleMap() = default;
 
 	virtual void init(SpaceMetric* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
@@ -26,9 +25,8 @@ protected:
 	Particle*** _energyGrid = nullptr;
 };
 
-Particle * EnergyParticleMap::getParticleFast(IntVector2D const& intPos) const
+Particle * ParticleMap::getParticleFast(IntVector2D const& intPos) const
 {
 	return _energyGrid[intPos.x][intPos.y];
 }
 
-#endif //ENERGYPARTICLEMAP_H

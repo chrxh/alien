@@ -17,7 +17,7 @@ public:
 	virtual SpaceMetric* buildSpaceMetric() const override;
 	virtual MapCompartment* buildMapCompartment() const override;
 	virtual CellMap* buildCellMap() const override;
-	virtual EnergyParticleMap* buildEnergyParticleMap() const override;
+	virtual ParticleMap* buildEnergyParticleMap() const override;
 };
 
 #endif // CONTEXTFACTORYIMPL_H

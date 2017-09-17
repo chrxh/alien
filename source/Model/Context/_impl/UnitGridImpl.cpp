@@ -39,14 +39,21 @@ Unit * UnitGridImpl::getUnitOfGridPos(IntVector2D gridPos) const
 	return _units[gridPos.x][gridPos.y];
 }
 
-Unit * UnitGridImpl::getUnitOfMapPos(QVector2D pos) const
+Unit * UnitGridImpl::getUnitOfMapPos(QVector2D pos, CorrectionMode mode /*= CorrectionMode::Torus*/) const
 {
-	return getUnitOfGridPos(getGridPosOfMapPos(pos));
+	return getUnitOfGridPos(getGridPosOfMapPos(pos, mode));
 }
 
-IntVector2D UnitGridImpl::getGridPosOfMapPos(QVector2D pos) const
+IntVector2D UnitGridImpl::getGridPosOfMapPos(QVector2D pos, CorrectionMode mode /*= CorrectionMode::Torus*/) const
 {
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos;
+	if (mode == UnitGrid::Torus) {
+		intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	}
+	else {
+		intPos = pos;
+		_metric->truncatePosition(intPos);
+	}
 	auto size = _metric->getSize();
 	intPos.restrictToRect({ { 0, 0 }, { size.x - 1, size.y - 1 } });
 	IntVector2D compartmentSize = calcCompartmentSize();
