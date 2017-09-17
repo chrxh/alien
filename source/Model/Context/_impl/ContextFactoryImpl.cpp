@@ -6,7 +6,7 @@
 #include "UnitThreadControllerImpl.h"
 #include "SpaceMetricImpl.h"
 #include "CellMapImpl.h"
-#include "EnergyParticleMapImpl.h"
+#include "ParticleMapImpl.h"
 
 SimulationContext * ContextFactoryImpl::buildSimulationContext() const
 {
@@ -48,7 +48,7 @@ CellMap * ContextFactoryImpl::buildCellMap() const
 	return new CellMapImpl();
 }
 
-EnergyParticleMap * ContextFactoryImpl::buildEnergyParticleMap() const
+ParticleMap * ContextFactoryImpl::buildEnergyParticleMap() const
 {
-	return new EnergyParticleMapImpl();
+	return new ParticleMapImpl();
 }

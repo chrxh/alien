@@ -12,13 +12,13 @@ public:
 	UnitContextImpl(QObject* parent = nullptr);
 	virtual ~UnitContextImpl();
 
-	void init(NumberGenerator* numberGen, SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap
+	void init(NumberGenerator* numberGen, SpaceMetric* metric, CellMap* cellMap, ParticleMap* energyMap
 		, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters) override;
 
 	virtual NumberGenerator* getNumberGenerator() const override;
 	virtual SpaceMetric* getSpaceMetric () const override;
 	virtual CellMap* getCellMap () const override;
-	virtual EnergyParticleMap* getEnergyParticleMap () const override;
+	virtual ParticleMap* getEnergyParticleMap () const override;
 	virtual MapCompartment* getMapCompartment() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
@@ -37,7 +37,7 @@ private:
 	NumberGenerator* _numberGen = nullptr;
 	SpaceMetric* _metric = nullptr;
     CellMap* _cellMap = nullptr;
-    EnergyParticleMap* _energyParticleMap = nullptr;
+    ParticleMap* _energyParticleMap = nullptr;
 	MapCompartment* _mapCompartment = nullptr;
 	SymbolTable* _symbolTable = nullptr;
 	SimulationParameters* _simulationParameters = nullptr;

@@ -9,7 +9,7 @@
 #include "gui/Settings.h"
 #include "Model/Context/SimulationParameters.h"
 #include "Model/Context/SimulationContext.h"
-#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/ParticleMap.h"
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Cluster.h"
