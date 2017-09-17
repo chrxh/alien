@@ -59,6 +59,8 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 
 	delete access;
 	delete controller;
+
+	EXPECT_TRUE(true);
 }
 
 TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
@@ -72,6 +74,8 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 
 	delete access;
 	delete controller;
+
+	EXPECT_TRUE(true);
 }
 
 TEST_F(Benchmark, benchmarkFourThread)
@@ -85,6 +89,8 @@ TEST_F(Benchmark, benchmarkFourThread)
 
 	delete access;
 	delete controller;
+
+	EXPECT_TRUE(true);
 }
 
 TEST_F(Benchmark, benchmarkEightThread)
@@ -98,4 +104,6 @@ TEST_F(Benchmark, benchmarkEightThread)
 
 	delete access;
 	delete controller;
+
+	EXPECT_TRUE(true);
 }
