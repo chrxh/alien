@@ -80,6 +80,9 @@
     <ClCompile Include="..\..\source\Tests\integrationtests\DataDescriptionTransferTest.cpp">
       <Filter>Source Files\Integrationtests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.cpp">
+      <Filter>Source Files\Integrationtests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Tests\Predicates.h">
@@ -87,6 +90,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Tests\TestSettings.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.h">
+      <Filter>Source Files\Integrationtests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

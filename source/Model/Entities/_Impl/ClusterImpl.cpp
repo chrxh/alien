@@ -22,9 +22,9 @@ const int PROTECTION_COUNTER_AFTER_COLLISION = 14;
 
 ClusterImpl::ClusterImpl(QList< Cell* > cells, uint64_t id, qreal angle, QVector2D pos, qreal angularVel
     , QVector2D vel, UnitContext* context)
-    : Cluster(context), _id(id), _angle(angle), _pos(pos), _angularVel(angularVel), _vel(vel), _cells(cells)
+    : Cluster(context), _id(id), _angle(angle), _angularVel(angularVel), _vel(vel), _cells(cells)
 {
-	_context->getSpaceMetric()->correctPosition(_pos);
+	setCenterPosition(pos);
     foreach(Cell* cell, _cells) {
         cell->setCluster(this);
     }
@@ -782,9 +782,8 @@ void ClusterImpl::updateRelCoordinates (MaintainCenter maintainCenter /*= Mainta
     else {
 
         //center transformation
-        _pos = calcCenterPosition(_cells);
 		QMatrix4x4 oldTransform(_transform);
-		updateTransformationMatrix();
+		setCenterPosition(calcCenterPosition(_cells));
         QMatrix4x4 newTransformInv(_transform.inverted());
 
         //set rel coordinated with respect to the new center
@@ -979,8 +978,10 @@ QVector2D ClusterImpl::getPosition () const
 void ClusterImpl::setCenterPosition (QVector2D pos, bool updateTransform)
 {
     _pos = pos;
-    if( updateTransform )
-        updateTransformationMatrix();
+	_context->getSpaceMetric()->correctPosition(_pos);
+	if (updateTransform) {
+		updateTransformationMatrix();
+	}
 }
 
 qreal ClusterImpl::getAngle () const

@@ -1,5 +1,4 @@
-#ifndef UNITGRID_H
-#define UNITGRID_H
+#pragma once
 
 #include "Model/Definitions.h"
 
@@ -16,9 +15,8 @@ public:
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) = 0;
 	virtual IntVector2D getSize() const = 0;
 	virtual Unit* getUnitOfGridPos(IntVector2D gridPos) const = 0;
-	virtual Unit* getUnitOfMapPos(QVector2D pos) const = 0;
-	virtual IntVector2D getGridPosOfMapPos(QVector2D pos) const = 0;
+	enum CorrectionMode { Torus, Truncation };
+	virtual Unit* getUnitOfMapPos(QVector2D pos, CorrectionMode mode = CorrectionMode::Torus) const = 0;
+	virtual IntVector2D getGridPosOfMapPos(QVector2D pos, CorrectionMode mode = CorrectionMode::Torus) const = 0;
 	virtual IntRect calcCompartmentRect(IntVector2D gridPos) const = 0;
 };
-
-#endif // UNITGRID_H

@@ -16,7 +16,7 @@ public:
 	virtual SpaceMetric* buildSpaceMetric() const = 0;
 	virtual MapCompartment* buildMapCompartment() const = 0;
 	virtual CellMap* buildCellMap() const = 0;
-	virtual EnergyParticleMap* buildEnergyParticleMap() const = 0;
+	virtual ParticleMap* buildEnergyParticleMap() const = 0;
 };
 
 #endif // CONTEXTFACTORY_H

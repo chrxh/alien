@@ -101,6 +101,14 @@ QVector2D SpaceMetricImpl::correctionIncrement(QVector2D pos1, QVector2D pos2) c
 	return correction;
 }
 
+void SpaceMetricImpl::truncatePosition(IntVector2D & pos) const
+{
+	pos.x = pos.x < 0 ? 0 : pos.x;
+	pos.y = pos.y < 0 ? 0 : pos.y;
+	pos.x = pos.x >= _size.x ? _size.x - 1 : pos.x;
+	pos.y = pos.y >= _size.y ? _size.y - 1 : pos.y;
+}
+
 void SpaceMetricImpl::serializePrimitives(QDataStream & stream) const
 {
 	stream << _size.x << _size.y;

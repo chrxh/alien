@@ -1,6 +1,6 @@
 #include "Base/NumberGenerator.h"
 #include "Model/Context/CellMap.h"
-#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/ParticleMap.h"
 #include "Model/Context/MapCompartment.h"
 #include "Model/Context/SimulationParameters.h"
 #include "Model/Entities/Cluster.h"
@@ -19,7 +19,7 @@ UnitContextImpl::~UnitContextImpl ()
 	deleteClustersAndEnergyParticles();
 }
 
-void UnitContextImpl::init(NumberGenerator* numberGen, SpaceMetric* metric, CellMap* cellMap, EnergyParticleMap* energyMap
+void UnitContextImpl::init(NumberGenerator* numberGen, SpaceMetric* metric, CellMap* cellMap, ParticleMap* energyMap
 	, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters)
 {
 	SET_CHILD(_numberGen, numberGen);
@@ -43,7 +43,7 @@ SpaceMetric* UnitContextImpl::getSpaceMetric () const
     return _metric;
 }
 
-EnergyParticleMap* UnitContextImpl::getEnergyParticleMap () const
+ParticleMap* UnitContextImpl::getEnergyParticleMap () const
 {
     return _energyParticleMap;
 }

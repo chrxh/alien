@@ -6,7 +6,7 @@
 #include "Model/Physics/Physics.h"
 #include "Model/Settings.h"
 #include "Model/Context/UnitContext.h"
-#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/ParticleMap.h"
 #include "Model/Context/CellMap.h"
 #include "Model/Context/SpaceMetric.h"
 #include "Model/Context/SimulationParameters.h"
@@ -22,7 +22,7 @@ ParticleImpl::ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D v
 	, _id(id)
 {
 	_energy = energy;
-	_pos = pos;
+	setPosition(pos);
 	_vel = vel;
 }
 
@@ -36,7 +36,7 @@ ParticleDescription ParticleImpl::getDescription() const
 void ParticleImpl::applyChangeDescription(ParticleChangeDescription const & change)
 {
 	if (change.pos) {
-		_pos = *change.pos;
+		setPosition(*change.pos);
 	}
 	if (change.vel) {
 		_vel = *change.vel;
@@ -182,6 +182,7 @@ QVector2D ParticleImpl::getPosition() const
 void ParticleImpl::setPosition(QVector2D value)
 {
 	_pos = value;
+	_context->getSpaceMetric()->correctPosition(_pos);
 }
 
 QVector2D ParticleImpl::getVelocity() const

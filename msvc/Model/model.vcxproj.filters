@@ -91,15 +91,6 @@
     <ClCompile Include="Release\moc_CellMap.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_EnergyParticleMap.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_EnergyParticleMap.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_EnergyParticleMap.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_MapCompartment.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -157,15 +148,6 @@
     <ClCompile Include="Release\moc_UnitContext.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_UnitGrid.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_UnitGrid.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_UnitGrid.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_UnitThreadController.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -189,18 +171,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Context\_Impl\ContextFactoryImpl.cpp">
       <Filter>Source Files\Context\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Context\_Impl\EnergyParticleMapImpl.cpp">
-      <Filter>Source Files\Context\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_EnergyParticleMapImpl.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_EnergyParticleMapImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_EnergyParticleMapImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SignalWrapper.cpp">
       <Filter>Generated Files\Tests</Filter>
@@ -354,6 +324,27 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Entities\Descriptions.cpp">
       <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_ParticleMap.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ParticleMap.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ParticleMap.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Context\_Impl\ParticleMapImpl.cpp">
+      <Filter>Source Files\Context\_Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_ParticleMapImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ParticleMapImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ParticleMapImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -527,9 +518,6 @@
     <CustomBuild Include="..\..\source\Model\Context\CellMap.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\EnergyParticleMap.h">
-      <Filter>Source Files\Context</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\MapCompartment.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
@@ -557,16 +545,10 @@
     <CustomBuild Include="..\..\source\Model\Context\_Impl\CellMapImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\_Impl\EnergyParticleMapImpl.h">
-      <Filter>Source Files\Context\_Impl</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\_Impl\SignalWrapper.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\_Impl\SimulationContextImpl.h">
-      <Filter>Source Files\Context\_Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitGrid.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitGridImpl.h">
@@ -595,6 +577,12 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\SpaceMetricApi.h">
       <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Context\ParticleMap.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Context\_Impl\ParticleMapImpl.h">
+      <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

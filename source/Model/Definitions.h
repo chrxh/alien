@@ -15,7 +15,7 @@ class Token;
 class CellFeature;
 class Unit;
 class CellMap;
-class EnergyParticleMap;
+class ParticleMap;
 class SpaceMetricApi;
 class SpaceMetric;
 class MapCompartment;

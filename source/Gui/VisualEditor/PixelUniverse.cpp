@@ -10,7 +10,7 @@
 #include "Model/ModelBuilderFacade.h"
 #include "Model/SimulationController.h"
 #include "Model/Context/SimulationContextApi.h"
-#include "Model/Context/EnergyParticleMap.h"
+#include "Model/Context/ParticleMap.h"
 #include "Model/Context/CellMap.h"
 #include "Model/Context/SpaceMetricApi.h"
 #include "Model/Entities/Cell.h"
