@@ -7,21 +7,6 @@
 #include <QFont>
 
 #include "Base/ServiceLocator.h"
-#include "dialogs/addenergydialog.h"
-#include "dialogs/addrectstructuredialog.h"
-#include "dialogs/addhexagonstructuredialog.h"
-#include "dialogs/newsimulationdialog.h"
-#include "dialogs/simulationparametersdialog.h"
-#include "dialogs/symboltabledialog.h"
-#include "dialogs/selectionmultiplyrandomdialog.h"
-#include "dialogs/selectionmultiplyarrangementdialog.h"
-#include "monitoring/simulationmonitor.h"
-#include "assistance/tutorialwindow.h"
-#include "misc/startscreencontroller.h"
-#include "gui/texteditor/TextEditor.h"
-#include "gui/Settings.h"
-#include "gui/Settings.h"
-#include "gui/visualeditor/ViewportController.h"
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
 #include "Model/Context/SimulationContext.h"
@@ -29,6 +14,23 @@
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Cluster.h"
 #include "Model/Metadata/SymbolTable.h"
+#include "Gui/dialogs/addenergydialog.h"
+#include "Gui/dialogs/addrectstructuredialog.h"
+#include "Gui/dialogs/addhexagonstructuredialog.h"
+#include "Gui/dialogs/newsimulationdialog.h"
+#include "Gui/dialogs/simulationparametersdialog.h"
+#include "Gui/dialogs/symboltabledialog.h"
+#include "Gui/dialogs/selectionmultiplyrandomdialog.h"
+#include "Gui/dialogs/selectionmultiplyarrangementdialog.h"
+#include "Gui/monitoring/simulationmonitor.h"
+#include "Gui/assistance/tutorialwindow.h"
+#include "Gui/misc/startscreencontroller.h"
+#include "Gui/texteditor/TextEditor.h"
+#include "Gui/visualeditor/ViewportController.h"
+#include "Gui/DataEditor/DataEditorController.h"
+#include "Gui/Toolbar/ToolbarController.h"
+#include "Gui/Settings.h"
+#include "Gui/Settings.h"
 
 #include "MainWindow.h"
 #include "ui_mainwindow.h"
@@ -38,6 +40,7 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	, ui(new Ui::MainWindow)
 	, _simController(simController)
 	, _textEditor(new TextEditor(this))
+	, _dataEditor(new DataEditorController(this))
 	, _oneSecondTimer(new QTimer(this))
     , _monitor(new SimulationMonitor(this))
     , _tutorialWindow(new TutorialWindow(this))
@@ -45,15 +48,16 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 {
     ui->setupUi(this);
 
-    //init main objects
-	TextEditor::MicroEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabComputerWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
+	_toolbar = new ToolbarController(ui->visualEditor);
+
+	TextEditor::TextEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabComputerWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
 		, ui->cellEditor2, ui->clusterEditor2, ui->energyEditor2, ui->metadataEditor2, ui->cellComputerEdit
 		, ui->symbolEdit2, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
 		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2
 		, ui->buttonShowInfo };
-    _textEditor->init(microWidgets);
+	_textEditor->init(microWidgets);
 
-	ui->visualEditor->init(simController, access);
+	ui->visualEditor->init(simController, access, _dataEditor->getContext());
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
 		_framedata.fps = value;
 		updateFrameLabel();
@@ -63,18 +67,7 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 		updateFrameLabel();
 	});
 
-    //set font
-    setFont(GuiSettings::getGlobalFont());
-    ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
-    ui->menuView->setFont(GuiSettings::getGlobalFont());
-    ui->menuEdit->setFont(GuiSettings::getGlobalFont());
-    ui->menuSelection->setFont(GuiSettings::getGlobalFont());
-    ui->menuSettings->setFont(GuiSettings::getGlobalFont());
-    ui->menuHelp->setFont(GuiSettings::getGlobalFont());
-    ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
-    ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
-    ui->menuAddEnsemble->setFont(GuiSettings::getGlobalFont());
-    ui->menuMultiplyExtension->setFont(GuiSettings::getGlobalFont());
+	setupFont();
 
     //set color
     ui->fpsForcingButton->setStyleSheet(BUTTON_STYLESHEET);
@@ -938,6 +931,21 @@ void MainWindow::startScreenFinished ()
     ui->actionZoomOut->setEnabled(true);
 	ui->frameLabel->setVisible(true);
 	updateFrameLabel();
+}
+
+void MainWindow::setupFont()
+{
+	setFont(GuiSettings::getGlobalFont());
+	ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
+	ui->menuView->setFont(GuiSettings::getGlobalFont());
+	ui->menuEdit->setFont(GuiSettings::getGlobalFont());
+	ui->menuSelection->setFont(GuiSettings::getGlobalFont());
+	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
+	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
+	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
+	ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
+	ui->menuAddEnsemble->setFont(GuiSettings::getGlobalFont());
+	ui->menuMultiplyExtension->setFont(GuiSettings::getGlobalFont());
 }
 
 void MainWindow::changeEvent(QEvent *e)

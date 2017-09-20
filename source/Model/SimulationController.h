@@ -1,5 +1,4 @@
-#ifndef SIMULATIONCONTROLLER_H
-#define SIMULATIONCONTROLLER_H
+#pragma once
 
 #include "Definitions.h"
 
@@ -21,4 +20,3 @@ public:
 	Q_SIGNAL void updateTimestepsPerSecond(int value);
 };
 
-#endif // SIMULATIONCONTROLLER_H
