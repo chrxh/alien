@@ -19,11 +19,22 @@
     <Filter Include="Source Files\Monitoring">
       <UniqueIdentifier>{c62b95c0-4b02-4878-98cd-a7abedefec11}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Visualeditor">
+    <Filter Include="Source Files\TextEditor">
+      <UniqueIdentifier>{a7ef51b6-b5e0-4d15-aa20-c60392f162f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\VisualEditor">
       <UniqueIdentifier>{84149345-9237-4d47-b641-14dc7df60a87}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Texteditor">
-      <UniqueIdentifier>{a7ef51b6-b5e0-4d15-aa20-c60392f162f5}</UniqueIdentifier>
+    <Filter Include="Source Files\DataEditor">
+      <UniqueIdentifier>{14d39e98-1e70-4b27-9a9d-608c16ca871b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files\Toolbar">
+      <UniqueIdentifier>{800aeef2-dba6-4418-8130-3bb7f83b1200}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -106,7 +117,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ViewportController.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ViewportController.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -145,7 +156,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ViewportInterface.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ViewportInterface.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -154,7 +165,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\CellComputerEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_CellComputerEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -163,7 +174,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\CellEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_CellEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -172,7 +183,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\ClusterEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ClusterEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -181,7 +192,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\ComputerCodeEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ComputerCodeEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -190,7 +201,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\EnergyEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_EnergyEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -199,7 +210,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\HexEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_HexEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -208,7 +219,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\MetadataEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_MetadataEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -217,7 +228,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\MetadataPropertiesEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_MetadataPropertiesEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -226,7 +237,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\SymbolEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_SymbolEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -235,7 +246,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\TextEditor.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_TextEditor.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -244,7 +255,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\TokenEdit.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_TokenEdit.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -253,7 +264,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\TokenTab.cpp">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_TokenTab.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -262,19 +273,19 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\VisualEditor\AbstractItem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\CellConnectionItem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\CellItem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ParticleItem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ItemConfig.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ItemConfig.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -283,7 +294,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ItemManager.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ItemManager.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -292,10 +303,10 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\MarkerItem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\VisualEditor\VisualDescription.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_VisualDescription.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -304,10 +315,10 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\VisualEditor\CoordinateSystem.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\PixelUniverse.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_PixelUniverse.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -316,7 +327,7 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ShapeUniverse.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ShapeUniverse.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -325,12 +336,57 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\VisualEditor.cpp">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_VisualEditor.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_VisualEditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorContext.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditorContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditorContext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ToolbarView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ToolbarView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarView.cpp">
+      <Filter>Source Files\Toolbar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarController.cpp">
+      <Filter>Source Files\Toolbar</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ToolbarController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ToolbarController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorController.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditorController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditorController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarContext.cpp">
+      <Filter>Source Files\Toolbar</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ToolbarContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ToolbarContext.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -416,7 +472,7 @@
       <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ViewportController.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\MainWindow.h">
       <Filter>Source Files</Filter>
@@ -425,79 +481,97 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ViewportInterface.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\CellComputerEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\CellComputerEdit.ui">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\CellEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\ClusterEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\ComputerCodeEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\EnergyEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\HexEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\MetadataEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\MetadataEdit.ui">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\MetadataPropertiesEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\SymbolEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\SymbolEdit.ui">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\TextEditor.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\TokenEdit.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\TokenTab.ui">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\TokenTab.h">
-      <Filter>Source Files\Texteditor</Filter>
+      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ItemConfig.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ItemManager.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\VisualEditor\VisualDescription.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\VisualEditor\CoordinateSystem.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\PixelUniverse.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ShapeUniverse.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\VisualEditor.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\VisualEditor.ui">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorContext.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarView.h">
+      <Filter>Source Files\Toolbar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarView.ui">
+      <Filter>Source Files\Toolbar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarController.h">
+      <Filter>Source Files\Toolbar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorController.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarContext.h">
+      <Filter>Source Files\Toolbar</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -636,21 +710,24 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\VisualEditor\AbstractItem.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\gui\visualeditor\CellConnectionItem.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\gui\visualeditor\CellItem.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\gui\visualeditor\ParticleItem.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\gui\visualeditor\MarkerItem.h">
-      <Filter>Source Files\Visualeditor</Filter>
+      <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
     <ClInclude Include="ui_VisualEditor.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_ToolbarView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

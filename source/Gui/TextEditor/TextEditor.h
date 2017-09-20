@@ -1,19 +1,16 @@
-#ifndef MICROEDITOR_H
-#define MICROEDITOR_H
+#pragma once
 
 #include <QWidget>
 #include <QTimer>
 
 #include "Model/Entities/CellTO.h"
 #include "Model/Definitions.h"
+#include "Gui/Definitions.h"
 
 namespace Ui {
 class TextEditor;
 }
 
-class Cell;
-class CellCluster;
-class EnergyParticle;
 class CellEdit;
 class ClusterEdit;
 class CellComputerEdit;
@@ -34,7 +31,7 @@ public:
 	virtual ~TextEditor() {}
 
 
-	struct MicroEditorWidgets {
+	struct TextEditorWidgets {
 		QTabWidget* tabClusterWidget;
 		QTabWidget* tabComputerWidget;
 		QTabWidget* tabTokenWidget;
@@ -54,7 +51,7 @@ public:
 		QToolButton* delTokenButton;
 		QToolButton* buttonShowInfo;
 	};
-	void init(MicroEditorWidgets widgets);
+	void init(TextEditorWidgets widgets);
 	void update();
 
     void setVisible (bool visible);
@@ -72,7 +69,7 @@ Q_SIGNALS:
     void delSelection ();                                       //to macro editor
     void delExtendedSelection ();                                //to macro editor
     void defocus ();                                            //to macro editor
-    void energyParticleUpdated (EnergyParticle* e);                //to macro editor
+    void energyParticleUpdated (Particle* e);                //to macro editor
     void metadataUpdated ();                                    //to macro editor
     void numTokenUpdate (int numToken, int maxToken, bool pasteTokenPossible);  //to main windows
 	void toggleInformation(bool on);
@@ -82,9 +79,9 @@ public Q_SLOTS:
     void defocused (bool requestDataUpdate = true);
     void cellFocused (Cell* cell, bool requestDataUpdate = true);
 
-	void energyParticleFocused(EnergyParticle* e);
-    void energyParticleUpdated_Slot (EnergyParticle* e);
-    void reclustered (QList< CellCluster* > clusters);
+	void energyParticleFocused(Particle* e);
+    void energyParticleUpdated_Slot (Particle* e);
+    void reclustered (QList< Cluster* > clusters);
     void universeUpdated (SimulationContext* context, bool force);
     void requestUpdate ();
 
@@ -123,11 +120,11 @@ private:
 	SimulationContext* _context;
 
     //widgets
-	MicroEditorWidgets _widgets;
+	TextEditorWidgets _widgets;
 
     Cell* _focusCell = nullptr;
     CellTO _focusCellReduced;
-    EnergyParticle* _focusEnergyParticle = nullptr;
+    Particle* _focusEnergyParticle = nullptr;
     QWidget* _tabCluster = nullptr;
     QWidget* _tabCell = nullptr;
     QWidget* _tabParticle = nullptr;
@@ -143,5 +140,3 @@ private:
     QByteArray _savedTokenData;  //for copying tokens
 };
 
-
-#endif // MICROEDITOR_H
