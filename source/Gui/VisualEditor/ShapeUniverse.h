@@ -19,7 +19,8 @@ public:
     ShapeUniverse (QObject *parent = nullptr);
 	virtual ~ShapeUniverse();
 
-	virtual void init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport);
+	virtual void init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport
+		, DataEditorContext* dataEditorContext);
 	virtual void activate();
 	virtual void deactivate();
 	virtual void requestData();
@@ -41,6 +42,7 @@ private:
 	VisualDescription* _visualDesc = nullptr;
 
 	DataDescription _savedDataBeforeMovement;
+	DataEditorContext* _dataEditorContext;
 };
 
 #endif // SHAPEUNIVERSE_H

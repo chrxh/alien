@@ -1,5 +1,4 @@
-#ifndef GUI_DEFINITIONS_H
-#define GUI_DEFINITIONS_H
+#pragma once
 
 #include "Base/Definitions.h"
 
@@ -22,7 +21,10 @@ class VisualDescription;
 class ViewportInterface;
 class ViewportController;
 class MarkerItem;
+class DataEditorController;
+class DataEditorContext;
+class ToolbarController;
+class ToolbarContext;
+class ToolbarView;
+
 enum class ActiveScene { PixelScene, ShapeScene };
-
-
-#endif // GUI_DEFINITIONS_H

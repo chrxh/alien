@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QByteArray>
@@ -84,17 +83,21 @@ private Q_SLOTS:
 private:
     Ui::MainWindow *ui;
 
+	void setupFont();
+
     void changeEvent(QEvent *e);
 	void stopSimulation();
 	void updateControllerAndEditors();
 
-    SimulationController* _simController;
-	TextEditor* _textEditor;
+    SimulationController* _simController = nullptr;
+	TextEditor* _textEditor = nullptr;
+	DataEditorController* _dataEditor = nullptr;
+	ToolbarController* _toolbar = nullptr;
 
-    QTimer* _oneSecondTimer;
-    SimulationMonitor* _monitor;
-    TutorialWindow* _tutorialWindow;
-    StartScreenController* _startScreen;
+    QTimer* _oneSecondTimer = nullptr;
+    SimulationMonitor* _monitor = nullptr;
+    TutorialWindow* _tutorialWindow = nullptr;
+    StartScreenController* _startScreen = nullptr;
 	struct Framedata {
 		int fps = 0;
 		int frame = 0;
@@ -108,4 +111,3 @@ private:
     QByteArray _snapshot;
 };
 
-#endif // MAINWINDOW_H

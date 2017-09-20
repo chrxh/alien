@@ -33,7 +33,7 @@ TextEditor::TextEditor(QObject *parent)
 {
 }
 
-void TextEditor::init (MicroEditorWidgets widgets)
+void TextEditor::init (TextEditorWidgets widgets)
 {
 	_widgets = widgets;
 
@@ -294,7 +294,7 @@ ClusterMetadata TextEditor::getCellClusterMetadata(Cell* cell)
 	return ClusterMetadata();
 }
 
-void TextEditor::energyParticleFocused (EnergyParticle* e)
+void TextEditor::energyParticleFocused (Particle* e)
 {
     if( (!isVisible()) || (!_context) || (!e) )
         return;
@@ -313,26 +313,26 @@ void TextEditor::energyParticleFocused (EnergyParticle* e)
     energyParticleUpdated_Slot(e);
 }
 
-void TextEditor::energyParticleUpdated_Slot (EnergyParticle* e)
+void TextEditor::energyParticleUpdated_Slot (Particle* e)
 {
 /*
     if( !e )
         return;
 
     //update data for editor if particle is focused (we also use cluster editor)
-    if( _focusEnergyParticle == e ) {
+    if( _focusParticle == e ) {
         _context->lock();
         auto pos = e->getPosition();
         auto vel = e->getVelocity();
         auto energyValue = e->getEnergy();
         _context->unlock();
-		_widgets.energyEditor->updateEnergyParticle(pos, vel, energyValue);
+		_widgets.energyEditor->updateParticle(pos, vel, energyValue);
     }
 */
 }
 
 
-void TextEditor::reclustered (QList< CellCluster* > clusters)
+void TextEditor::reclustered (QList< Cluster* > clusters)
 {
 /*
     if( !_context)
@@ -405,9 +405,11 @@ void TextEditor::requestUpdate ()
     }
 
     //save energy particle data
-    if( _focusEnergyParticle ) {
+/*
+    if( _focusParticle ) {
 		_widgets.energyEditor->requestUpdate();
     }
+*/
 
 }
 

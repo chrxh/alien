@@ -30,12 +30,14 @@ ShapeUniverse::~ShapeUniverse()
 {
 }
 
-void ShapeUniverse::init(SimulationController * controller, SimulationAccess* access, ViewportInterface * viewport)
+void ShapeUniverse::init(SimulationController * controller, SimulationAccess* access, ViewportInterface * viewport
+	, DataEditorContext* dataEditorContext)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
 	_simAccess = access;
+	_dataEditorContext = dataEditorContext;
 
 	auto items = new ItemManager();
 	auto descManager = new VisualDescription();

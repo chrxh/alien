@@ -18,7 +18,7 @@ public:
     VisualEditor(QWidget *parent = 0);
     virtual ~VisualEditor();
 
-	void init(SimulationController* controller, SimulationAccess* access);
+	void init(SimulationController* controller, SimulationAccess* access, DataEditorContext* dataEditorContext);
     void reset();
 
 	void setActiveScene(ActiveScene activeScene);
