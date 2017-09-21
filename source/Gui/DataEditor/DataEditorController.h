@@ -14,5 +14,6 @@ public:
 	DataEditorContext* getContext() const;
 
 private:
+	DataEditorModel* _model = nullptr;
 	DataEditorContext* _context = nullptr;
 };
