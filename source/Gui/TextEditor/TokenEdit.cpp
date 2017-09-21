@@ -2,7 +2,7 @@
 #include <QTextBlock>
 #include <qmath.h>
 
-#include "gui/SettingsT.h"
+#include "gui/Settings.h"
 
 #include "TokenEdit.h"
 

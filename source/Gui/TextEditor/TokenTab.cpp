@@ -2,8 +2,8 @@
 #include <QSignalMapper>
 
 #include "Model/Metadata/SymbolTable.h"
-#include "gui/SettingsT.h"
-#include "gui/SettingsT.h"
+#include "gui/Settings.h"
+#include "gui/Settings.h"
 
 #include "HexEdit.h"
 #include "TokenTab.h"
