@@ -1,8 +1,8 @@
 #include <QScrollBar>
 
 #include "Model/Metadata/SymbolTable.h"
-#include "gui/Settings.h"
-#include "gui/Settings.h"
+#include "gui/SettingsT.h"
+#include "gui/SettingsT.h"
 
 #include "SymbolEdit.h"
 #include "ui_SymbolEdit.h"
