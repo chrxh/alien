@@ -1,6 +1,6 @@
 ﻿#include "ToolbarView.h"
 
-#include "Gui/Settings.h"
+#include "Gui/SettingsT.h"
 
 ToolbarView::ToolbarView(QWidget * parent) : QWidget(parent)
 {

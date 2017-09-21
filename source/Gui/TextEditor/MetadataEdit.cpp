@@ -1,6 +1,6 @@
 #include <QScrollBar>
 
-#include "Gui/Settings.h"
+#include "Gui/SettingsT.h"
 #include "MetadataPropertiesEdit.h"
 
 #include "MetadataEdit.h"
