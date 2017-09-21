@@ -29,6 +29,7 @@
 #include "Gui/visualeditor/ViewportController.h"
 #include "Gui/DataEditor/DataEditorController.h"
 #include "Gui/Toolbar/ToolbarController.h"
+#include "Gui/Toolbar/ToolbarContext.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 
@@ -49,13 +50,9 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
     ui->setupUi(this);
 
 	_toolbar = new ToolbarController({ 0, 0 }, ui->visualEditor);
-
-	TextEditor::TextEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabComputerWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
-		, ui->cellEditor2, ui->clusterEditor2, ui->energyEditor2, ui->metadataEditor2, ui->cellComputerEdit
-		, ui->symbolEdit2, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
-		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2
-		, ui->buttonShowInfo };
-	_textEditor->init(microWidgets);
+	connect(ui->actionEditor, &QAction::triggered, [this](bool checked) {
+		checked ? _toolbar->getContext()->activate() : _toolbar->getContext()->deactivate();
+	});
 
 	ui->visualEditor->init(simController, access, _dataEditor->getContext());
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
@@ -68,6 +65,15 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	});
 
 	setupFont();
+
+
+
+	TextEditor::TextEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabComputerWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
+		, ui->cellEditor2, ui->clusterEditor2, ui->energyEditor2, ui->metadataEditor2, ui->cellComputerEdit
+		, ui->symbolEdit2, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
+		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2
+		, ui->buttonShowInfo };
+	_textEditor->init(microWidgets);
 
     //set color
     ui->fpsForcingButton->setStyleSheet(BUTTON_STYLESHEET);

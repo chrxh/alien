@@ -91,6 +91,7 @@ void TextEditor::init (TextEditorWidgets widgets)
     connect(_widgets.symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
 
 //	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
+
 }
 
 
@@ -102,13 +103,13 @@ void TextEditor::update ()
 
 void TextEditor::setVisible (bool visible)
 {
-	_widgets.requestCellButton->setVisible(visible);
-	_widgets.requestEnergyParticleButton->setVisible(visible);
-	_widgets.delEntityButton->setVisible(visible);
-	_widgets.delClusterButton->setVisible(visible);
-	_widgets.addTokenButton->setVisible(visible);
-	_widgets.delTokenButton->setVisible(visible);
-	_widgets.buttonShowInfo->setVisible(visible);
+	_widgets.requestCellButton->setVisible(false);
+	_widgets.requestEnergyParticleButton->setVisible(false);
+	_widgets.delEntityButton->setVisible(false);
+	_widgets.delClusterButton->setVisible(false);
+	_widgets.addTokenButton->setVisible(false);
+	_widgets.delTokenButton->setVisible(false);
+	_widgets.buttonShowInfo->setVisible(false);
 }
 
 bool TextEditor::isVisible ()
