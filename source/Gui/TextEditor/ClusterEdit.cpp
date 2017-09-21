@@ -1,6 +1,6 @@
 #include "ClusterEdit.h"
 
-#include "gui/Settings.h"
+#include "gui/SettingsT.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Cluster.h"
 

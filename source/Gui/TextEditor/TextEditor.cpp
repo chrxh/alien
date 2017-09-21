@@ -5,8 +5,8 @@
 #include <QEvent>
 
 #include "Base/ServiceLocator.h"
-#include "gui/Settings.h"
-#include "gui/Settings.h"
+#include "gui/SettingsT.h"
+#include "gui/SettingsT.h"
 #include "Model/Context/SimulationParameters.h"
 #include "Model/Context/SimulationContext.h"
 #include "Model/Context/ParticleMap.h"
