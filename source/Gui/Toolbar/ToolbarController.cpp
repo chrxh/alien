@@ -10,10 +10,9 @@ ToolbarController::ToolbarController(IntVector2D const& upperLeftPosition, QWidg
 	_view->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _view->width(), _view->height());
 	_context = new ToolbarContext(this);
 
-	connect(_context, &ToolbarContext::activate, this, &ToolbarController::onActivate);
-	connect(_context, &ToolbarContext::deactivate, this, &ToolbarController::onDeactivate);
+	connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow);
 
-	onDeactivate();
+	onShow(false);
 }
 
 ToolbarContext * ToolbarController::getContext() const
@@ -21,12 +20,7 @@ ToolbarContext * ToolbarController::getContext() const
 	return _context;
 }
 
-void ToolbarController::onActivate()
+void ToolbarController::onShow(bool visible)
 {
-	_view->setVisible(true);
-}
-
-void ToolbarController::onDeactivate()
-{
-	_view->setVisible(false);
+	_view->setVisible(visible);
 }

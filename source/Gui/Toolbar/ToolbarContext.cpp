@@ -4,6 +4,3 @@ ToolbarContext::ToolbarContext(QObject * parent) : QObject(parent) {
 	
 }
 
-ToolbarContext::~ToolbarContext() {
-	
-}

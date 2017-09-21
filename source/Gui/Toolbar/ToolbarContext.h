@@ -5,9 +5,7 @@ class ToolbarContext : public QObject {
 	Q_OBJECT
 public:
 	ToolbarContext(QObject * parent = nullptr);
-	~ToolbarContext();
+	virtual ~ToolbarContext() = default;
 
-	Q_SIGNAL void activate();
-	Q_SIGNAL void deactivate();
-	
+	Q_SIGNAL void show(bool visible);
 };
