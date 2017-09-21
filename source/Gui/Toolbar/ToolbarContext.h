@@ -7,6 +7,7 @@ public:
 	ToolbarContext(QObject * parent = nullptr);
 	~ToolbarContext();
 
-private:
+	Q_SIGNAL void activate();
+	Q_SIGNAL void deactivate();
 	
 };
