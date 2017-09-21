@@ -407,6 +407,15 @@
     <ClCompile Include="..\..\source\gui\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Dialogs\AddRectStructureDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_AddRectStructureDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_AddRectStructureDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -597,6 +606,12 @@
     <CustomBuild Include="..\..\source\gui\MainWindow.ui">
       <Filter>Source Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\dialogs\AddRectStructureDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Dialogs\AddRectStructureDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\gui\resources\tutorial\angle.png">
@@ -753,6 +768,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\gui\Settings.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_AddRectStructureDialog.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
