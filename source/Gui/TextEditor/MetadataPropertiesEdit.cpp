@@ -1,7 +1,7 @@
 #include "MetadataPropertiesEdit.h"
 
-#include "gui/SettingsT.h"
-#include "gui/SettingsT.h"
+#include "gui/Settings.h"
+#include "gui/Settings.h"
 
 #include <QMouseEvent>
 #include <QTextBlock>

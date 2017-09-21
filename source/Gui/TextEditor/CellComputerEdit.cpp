@@ -1,8 +1,8 @@
 #include "CellComputerEdit.h"
 #include "ui_CellComputerEdit.h"
 
-#include "gui/SettingsT.h"
-#include "gui/SettingsT.h"
+#include "gui/Settings.h"
+#include "gui/Settings.h"
 
 #include <QTimer>
 
