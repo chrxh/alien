@@ -1,10 +1,13 @@
 #include "DataEditorContext.h"
 
-void DataEditorContext::setData(boost::optional<DataDescription> const & value)
+DataEditorContext::DataEditorContext(DataEditorModel* model, QObject *parent /*= nullptr*/)
+	: QObject(parent)
+	, _model(model)
 {
+
 }
 
-boost::optional<DataDescription> DataEditorContext::getData()
+DataEditorModel* DataEditorContext::getModel()
 {
-	return boost::optional<DataDescription>();
+	return _model;
 }

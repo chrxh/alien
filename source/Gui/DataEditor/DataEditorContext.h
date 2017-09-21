@@ -2,6 +2,7 @@
 
 #include <QObject>
 
+#include "Gui/Definitions.h"
 #include "Model/Entities/Descriptions.h"
 
 class DataEditorContext
@@ -9,15 +10,14 @@ class DataEditorContext
 {
 	Q_OBJECT
 public:
-	DataEditorContext(QObject *parent = nullptr) : QObject(parent) {}
+	DataEditorContext(DataEditorModel* model, QObject *parent = nullptr);
 	virtual ~DataEditorContext() = default;
 
-	void setData(boost::optional<DataDescription> const& value);
-	boost::optional<DataDescription> getData();
+	DataEditorModel* getModel();
 
-	Q_SIGNAL void notifyClusterEditor();
-	Q_SIGNAL void notifyOthers();
+	Q_SIGNAL void notifyDataEditor();
+	Q_SIGNAL void notifyExternals();
 
 private:
-	boost::optional<DataDescription> _clusterUnderEdit;
+	DataEditorModel* _model;
 };

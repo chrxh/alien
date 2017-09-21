@@ -26,5 +26,6 @@ class DataEditorContext;
 class ToolbarController;
 class ToolbarContext;
 class ToolbarView;
+class DataEditorModel;
 
 enum class ActiveScene { PixelScene, ShapeScene };

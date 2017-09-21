@@ -48,7 +48,7 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 {
     ui->setupUi(this);
 
-	_toolbar = new ToolbarController(ui->visualEditor);
+	_toolbar = new ToolbarController({ 0, 0 }, ui->visualEditor);
 
 	TextEditor::TextEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabComputerWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
 		, ui->cellEditor2, ui->clusterEditor2, ui->energyEditor2, ui->metadataEditor2, ui->cellComputerEdit
