@@ -11,7 +11,7 @@ public:
 	DataEditorModel(QObject * parent = nullptr);
 	~DataEditorModel();
 
-	DataDescription _data;
+	DataDescription data;
 	set<uint64_t> selectedCellIds;
 	set<uint64_t> selectedParticleIds;
 };

@@ -41,7 +41,6 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	, ui(new Ui::MainWindow)
 	, _simController(simController)
 	, _textEditor(new TextEditor(this))
-	, _dataEditor(new DataEditorController(this))
 	, _oneSecondTimer(new QTimer(this))
     , _monitor(new SimulationMonitor(this))
     , _tutorialWindow(new TutorialWindow(this))
@@ -50,9 +49,9 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
     ui->setupUi(this);
 
 	_toolbar = new ToolbarController({ 0, 0 }, ui->visualEditor);
-	connect(ui->actionEditor, &QAction::triggered, [this](bool checked) {
-		checked ? _toolbar->getContext()->activate() : _toolbar->getContext()->deactivate();
-	});
+	connect(ui->actionEditor, &QAction::triggered, _toolbar->getContext(), &ToolbarContext::show);
+
+	_dataEditor = new DataEditorController(this);
 
 	ui->visualEditor->init(simController, access, _dataEditor->getContext());
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
