@@ -8,11 +8,12 @@ class ToolbarController
 {
 	Q_OBJECT
 public:
-	ToolbarController(QWidget * parent = nullptr);
+	ToolbarController(IntVector2D const& upperLeftPosition, QWidget * parent = nullptr);
 	~ToolbarController();
 
 	ToolbarContext* getContext() const;
 
 private:
 	ToolbarContext* _context = nullptr;
+	ToolbarView* _view = nullptr;
 };
