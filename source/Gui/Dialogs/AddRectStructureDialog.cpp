@@ -1,7 +1,7 @@
 #include "gui/GuiSettings.h"
 #include "model/context/SimulationParameters.h"
 
-#include "addrectstructuredialog.h"
+#include "AddRectStructureDialog.h"
 #include "ui_addrectstructuredialog.h"
 
 

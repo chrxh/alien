@@ -15,7 +15,7 @@
 #include "Model/Entities/Cluster.h"
 #include "Model/Metadata/SymbolTable.h"
 #include "Gui/dialogs/AddEnergyDialog.h"
-#include "Gui/dialogs/addrectstructuredialog.h"
+#include "Gui/dialogs/AddRectStructureDialog.h"
 #include "Gui/dialogs/AddHexagonStructureDialog.h"
 #include "Gui/dialogs/NewSimulationDialog.h"
 #include "Gui/dialogs/SimulationParametersDialog.h"
