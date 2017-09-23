@@ -5,7 +5,9 @@
 #include "Base/ServiceLocator.h"
 #include "Base/Definitions.h"
 #include "Gui/Settings.h"
-#include "Gui/visualeditor/ViewportInterface.h"
+#include "Gui/VisualEditor/ViewportInterface.h"
+#include "Gui/DataEditor/DataEditorModel.h"
+#include "Gui/DataEditor/DataEditorContext.h"
 #include "Model/SimulationController.h"
 #include "Model/ModelBuilderFacade.h"
 #include "Model/CellConnector.h"
@@ -83,20 +85,46 @@ void ShapeUniverse::retrieveAndDisplayData()
 	_itemManager->update(_visualDesc);
 }
 
-namespace
+ShapeUniverse::Selection ShapeUniverse::getSelectionFromItems(std::list<QGraphicsItem*> const &items) const
 {
-	void collectIds(std::list<QGraphicsItem*> const &items, list<uint64_t> &cellIds, list<uint64_t> &particleIds)
-	{
-		for (auto item : items) {
-			if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
-				cellIds.push_back(cellItem->getId());
-			}
-			if (auto particleItem = qgraphicsitem_cast<ParticleItem*>(item)) {
-				particleIds.push_back(particleItem->getId());
-			}
+	ShapeUniverse::Selection result;
+	for (auto item : items) {
+		if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
+			result.cellIds.push_back(cellItem->getId());
+		}
+		if (auto particleItem = qgraphicsitem_cast<ParticleItem*>(item)) {
+			result.particleIds.push_back(particleItem->getId());
 		}
 	}
+	return result;
+}
 
+void ShapeUniverse::delegateSelection(Selection const & selection)
+{
+	_visualDesc->setSelection(selection.cellIds, selection.particleIds);
+	_itemManager->update(_visualDesc);
+
+	auto dataEditorModel = _dataEditorContext->getModel();
+	dataEditorModel->selectedCellIds = selection.cellIds;
+	dataEditorModel->selectedParticleIds = selection.particleIds;
+	_dataEditorContext->notifyDataEditor();
+}
+
+void ShapeUniverse::startMarking(QPointF const& scenePos)
+{
+	_visualDesc->setSelection(list<uint64_t>(), list<uint64_t>());
+	auto pos = CoordinateSystem::sceneToModel(scenePos);
+	_itemManager->setMarkerItem(pos, pos);
+	_itemManager->update(_visualDesc);
+
+	auto dataEditorModel = _dataEditorContext->getModel();
+	dataEditorModel->selectedCellIds.clear();
+	dataEditorModel->selectedParticleIds.clear();
+	_dataEditorContext->notifyDataEditor();
+}
+
+namespace
+{
 	bool clickedOnSpace(std::list<QGraphicsItem*> const &items)
 	{
 		for (auto item : items) {
@@ -111,20 +139,14 @@ namespace
 void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
-	list<uint64_t> cellIds;
-	list<uint64_t> particleIds;
-	collectIds(itemsClicked, cellIds, particleIds);
+	Selection selection = getSelectionFromItems(itemsClicked);
 
-	if (!_visualDesc->isInSelection(cellIds) || !_visualDesc->isInSelection(particleIds)) {
-		_visualDesc->setSelection(cellIds, particleIds);
-		_itemManager->update(_visualDesc);
+	if (!_visualDesc->isInSelection(selection.cellIds) || !_visualDesc->isInSelection(selection.particleIds)) {
+		delegateSelection(selection);
 	}
 
 	if (clickedOnSpace(itemsClicked)) {
-		_visualDesc->setSelection(list<uint64_t>(), list<uint64_t>());
-		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
-		_itemManager->setMarkerItem(pos, pos);
-		_itemManager->update(_visualDesc);
+		startMarking(e->scenePos());
 	}
 	_savedDataBeforeMovement = _visualDesc->getDataRef();
 }
@@ -140,8 +162,8 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		auto itemsWithinMarker = _itemManager->getItemsWithinMarker();
 		list<uint64_t> cellIds;
 		list<uint64_t> particleIds;
-		collectIds(itemsWithinMarker, cellIds, particleIds);
-		_visualDesc->setSelection(cellIds, particleIds);
+		auto selection = getSelectionFromItems(itemsWithinMarker);
+		_visualDesc->setSelection(selection.cellIds, selection.particleIds);
 		_itemManager->update(_visualDesc);
 	}
 	if (!_itemManager->isMarkerActive()) {

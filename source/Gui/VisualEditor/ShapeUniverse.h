@@ -32,6 +32,15 @@ protected:
 private:
 	void retrieveAndDisplayData();
 
+	struct Selection
+	{
+		list<uint64_t> cellIds;
+		list<uint64_t> particleIds;
+	};
+	Selection getSelectionFromItems(std::list<QGraphicsItem*> const &items) const;
+	void delegateSelection(Selection const& selection);
+	void startMarking(QPointF const& scenePos);
+
 	SimulationAccess* _simAccess = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;

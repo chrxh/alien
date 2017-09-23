@@ -4,6 +4,3 @@ DataEditorModel::DataEditorModel(QObject * parent) : QObject(parent) {
 	
 }
 
-DataEditorModel::~DataEditorModel() {
-	
-}

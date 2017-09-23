@@ -15,6 +15,7 @@ public:
 
 	DataEditorModel* getModel();
 
+	Q_SIGNAL void show(bool visible);
 	Q_SIGNAL void notifyDataEditor();
 	Q_SIGNAL void notifyExternals();
 
