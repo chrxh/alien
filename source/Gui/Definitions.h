@@ -2,6 +2,11 @@
 
 #include "Base/Definitions.h"
 
+class QGraphicsItem;
+class QGraphicsView;
+class QGraphicsScene;
+class QTableWidget;
+
 class CellItem;
 class ParticleItem;
 class CellConnectionItem;
@@ -13,9 +18,6 @@ class StartScreenController;
 class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
-class QGraphicsItem;
-class QGraphicsView;
-class QGraphicsScene;
 class ItemManager;
 class VisualDescription;
 class ViewportInterface;
@@ -27,5 +29,6 @@ class ToolbarController;
 class ToolbarContext;
 class ToolbarView;
 class DataEditorModel;
+class DataEditorView;
 
 enum class ActiveScene { PixelScene, ShapeScene };

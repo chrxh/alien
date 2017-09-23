@@ -22,12 +22,13 @@
 #include "Gui/dialogs/SymbolTableDialog.h"
 #include "Gui/dialogs/SelectionMultiplyRandomDialog.h"
 #include "Gui/dialogs/SelectionMultiplyArrangementDialog.h"
-#include "Gui/monitoring/SimulationMonitor.h"
-#include "Gui/assistance/TutorialWindow.h"
-#include "Gui/misc/StartScreenController.h"
-#include "Gui/texteditor/TextEditor.h"
-#include "Gui/visualeditor/ViewportController.h"
+#include "Gui/Monitoring/SimulationMonitor.h"
+#include "Gui/Assistance/TutorialWindow.h"
+#include "Gui/Misc/StartScreenController.h"
+#include "Gui/TextEditor/TextEditor.h"
+#include "Gui/VisualEditor/ViewportController.h"
 #include "Gui/DataEditor/DataEditorController.h"
+#include "Gui/DataEditor/DataEditorContext.h"
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
 #include "Gui/Settings.h"
@@ -48,10 +49,11 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 {
     ui->setupUi(this);
 
-	_toolbar = new ToolbarController({ 0, 0 }, ui->visualEditor);
+	_toolbar = new ToolbarController({ 10, 10 }, ui->visualEditor);
 	connect(ui->actionEditor, &QAction::triggered, _toolbar->getContext(), &ToolbarContext::show);
 
-	_dataEditor = new DataEditorController(this);
+	_dataEditor = new DataEditorController({ 10, 60 }, ui->visualEditor);
+	connect(ui->actionEditor, &QAction::triggered, _dataEditor->getContext(), &DataEditorContext::show);
 
 	ui->visualEditor->init(simController, access, _dataEditor->getContext());
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
