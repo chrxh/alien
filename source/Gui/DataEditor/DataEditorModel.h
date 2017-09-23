@@ -9,9 +9,9 @@ class DataEditorModel
 	Q_OBJECT
 public:
 	DataEditorModel(QObject * parent = nullptr);
-	~DataEditorModel();
+	virtual ~DataEditorModel() = default;
 
 	DataDescription data;
-	set<uint64_t> selectedCellIds;
-	set<uint64_t> selectedParticleIds;
+	list<uint64_t> selectedCellIds;
+	list<uint64_t> selectedParticleIds;
 };

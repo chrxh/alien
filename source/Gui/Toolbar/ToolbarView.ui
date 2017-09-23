@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>367</width>
-    <height>60</height>
+    <width>356</width>
+    <height>47</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
   <widget class="QToolButton" name="requestCellButton2">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
+     <x>0</x>
+     <y>0</y>
      <width>42</width>
      <height>41</height>
     </rect>
@@ -136,8 +136,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>214</x>
-     <y>10</y>
+     <x>204</x>
+     <y>0</y>
      <width>42</width>
      <height>41</height>
     </rect>
@@ -253,8 +253,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>316</x>
-     <y>10</y>
+     <x>306</x>
+     <y>0</y>
      <width>42</width>
      <height>41</height>
     </rect>
@@ -373,8 +373,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>265</x>
-     <y>10</y>
+     <x>255</x>
+     <y>0</y>
      <width>42</width>
      <height>41</height>
     </rect>
@@ -487,8 +487,8 @@
   <widget class="QToolButton" name="requestEnergyParticleButton2">
    <property name="geometry">
     <rect>
-     <x>61</x>
-     <y>10</y>
+     <x>51</x>
+     <y>0</y>
      <width>42</width>
      <height>41</height>
     </rect>
@@ -604,8 +604,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>112</x>
-     <y>10</y>
+     <x>102</x>
+     <y>0</y>
      <width>42</width>
      <height>41</height>
     </rect>
@@ -721,8 +721,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>163</x>
-     <y>10</y>
+     <x>153</x>
+     <y>0</y>
      <width>42</width>
      <height>41</height>
     </rect>

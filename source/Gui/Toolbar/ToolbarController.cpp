@@ -6,8 +6,7 @@
 ToolbarController::ToolbarController(IntVector2D const& upperLeftPosition, QWidget* parent)
 	: QObject(parent)
 {
-	_view = new ToolbarView(parent);
-	_view->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _view->width(), _view->height());
+	_view = new ToolbarView(upperLeftPosition, parent);
 	_context = new ToolbarContext(this);
 
 	connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow);

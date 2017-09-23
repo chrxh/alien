@@ -2,6 +2,8 @@
 
 #include <QWidget>
 
+#include "Gui/Definitions.h"
+
 #include "ui_ToolbarView.h"
 
 class ToolbarView
@@ -9,7 +11,7 @@ class ToolbarView
 {
 	Q_OBJECT
 public:
-	ToolbarView(QWidget * parent = nullptr);
+	ToolbarView(IntVector2D const& upperLeftPosition, QWidget * parent = nullptr);
 	~ToolbarView();
 
 private:
