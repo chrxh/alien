@@ -10,7 +10,6 @@
 #include "Gui/DataEditor/DataEditorModel.h"
 #include "Model/SimulationController.h"
 #include "Model/ModelBuilderFacade.h"
-#include "Model/AccessPorts/SimulationAccess.h"
 #include "Model/Context/SimulationContextApi.h"
 #include "Model/Context/SpaceMetricApi.h"
 
@@ -30,17 +29,16 @@ ShapeUniverse::~ShapeUniverse()
 {
 }
 
-void ShapeUniverse::init(SimulationController * controller, DataManipulator* manipulator, SimulationAccess* access, ViewportInterface * viewport)
+void ShapeUniverse::init(SimulationController * controller, DataManipulator* manipulator, ViewportInterface * viewport)
 {
 	_controller = controller;
 	_viewport = viewport;
-	_access = access;
 	_manipulator = manipulator;
 
-	auto items = new ItemManager();
-	SET_CHILD(_itemManager, items);
+	auto itemManager = new ItemManager();
+	SET_CHILD(_itemManager, itemManager);
 
-	items->init(this, viewport, _controller->getContext()->getSimulationParameters());
+	_itemManager->init(this, viewport, _controller->getContext()->getSimulationParameters());
 }
 
 void ShapeUniverse::activate()
@@ -49,31 +47,24 @@ void ShapeUniverse::activate()
 	_itemManager->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
+	connect(_manipulator, &DataManipulator::dataUpdated, this, &ShapeUniverse::displayData);
 
-	ResolveDescription resolveDesc;
-	resolveDesc.resolveCellLinks = true;
-	IntRect rect = _viewport->getRect();
-	_access->requireData(rect, resolveDesc);
+	_manipulator->dataUpdateRequired(_viewport->getRect());
 }
 
 void ShapeUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &ShapeUniverse::retrieveAndDisplayData);
+	disconnect(_manipulator, &DataManipulator::dataUpdated, this, &ShapeUniverse::displayData);
 }
 
 void ShapeUniverse::requestData()
 {
-	ResolveDescription resolveDesc;
-	resolveDesc.resolveCellLinks = true;
-	IntRect rect = _viewport->getRect();
-	_access->requireData(rect, resolveDesc);
+	_manipulator->dataUpdateRequired(_viewport->getRect());
 }
 
-void ShapeUniverse::retrieveAndDisplayData()
+void ShapeUniverse::displayData()
 {
-	_manipulator->setData(_access->retrieveData());
 	_itemManager->update(_manipulator);
 }
 
@@ -144,7 +135,6 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	if (clickedOnSpace(itemsClicked)) {
 		startMarking(e->scenePos());
 	}
-	_savedDataBeforeMovement = _manipulator->getDataRef();
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -186,8 +176,7 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
-			DataChangeDescription delta(_savedDataBeforeMovement, _manipulator->getDataRef());
-			_access->updateData(delta);
+			_manipulator->sendDataChangesToSimulation();
 		}
 	}
 }

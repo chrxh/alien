@@ -18,7 +18,7 @@ public:
     ShapeUniverse (QObject *parent = nullptr);
 	virtual ~ShapeUniverse();
 
-	virtual void init(SimulationController* controller, DataManipulator* manipulator, SimulationAccess* access, ViewportInterface* viewport);
+	virtual void init(SimulationController* controller, DataManipulator* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 	virtual void requestData();
@@ -29,7 +29,7 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
-	void retrieveAndDisplayData();
+	void displayData();
 
 	struct Selection
 	{
@@ -40,12 +40,9 @@ private:
 	void delegateSelection(Selection const& selection);
 	void startMarking(QPointF const& scenePos);
 
-	SimulationAccess* _access = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
 
 	ItemManager* _itemManager = nullptr;
 	DataManipulator* _manipulator = nullptr;
-
-	DataDescription _savedDataBeforeMovement;
 };

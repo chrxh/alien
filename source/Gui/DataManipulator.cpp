@@ -7,6 +7,8 @@ void DataManipulator::init(SimulationAccess * access, CellConnector * connector)
 {
 	SET_CHILD(_access, access);
 	SET_CHILD(_connector, connector);
+
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection);
 }
 
 DataDescription & DataManipulator::getDataRef()
@@ -38,9 +40,11 @@ bool DataManipulator::isParticlePresent(uint64_t particleId)
 	return _navi.particleIds.find(particleId) != _navi.particleIds.end();
 }
 
-void DataManipulator::setData(DataDescription const &data)
+void DataManipulator::dataFromSimulationAvailable()
 {
-	updateInternals(data);
+	updateInternals(_access->retrieveData());
+
+	Q_EMIT dataUpdated();
 }
 
 void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
@@ -54,6 +58,7 @@ void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t>
 			_selectedClusterIds.insert(clusterIdByCellIdIter->second);
 		}
 	}
+	_unchangedData = _data;
 }
 
 bool DataManipulator::isInSelection(list<uint64_t> const & ids) const
@@ -142,6 +147,19 @@ void DataManipulator::moveExtendedSelection(QVector2D const & delta)
 	}
 }
 
+void DataManipulator::sendDataChangesToSimulation()
+{
+	DataChangeDescription delta(_unchangedData, _data);
+	_access->updateData(delta);
+}
+
+void DataManipulator::dataUpdateRequired(IntRect const& rect) const
+{
+	ResolveDescription resolveDesc;
+	resolveDesc.resolveCellLinks = true;
+	_access->requireData(rect, resolveDesc);
+}
+
 void DataManipulator::updateAfterCellReconnections()
 {
 	_navi.update(_data);
@@ -157,6 +175,7 @@ void DataManipulator::updateAfterCellReconnections()
 void DataManipulator::updateInternals(DataDescription const &data)
 {
 	_data = data;
+	_unchangedData = _data;
 	_navi.update(data);
 }
 
