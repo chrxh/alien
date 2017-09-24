@@ -5,7 +5,7 @@
 class QGraphicsItem;
 class QGraphicsView;
 class QGraphicsScene;
-class QTableWidget;
+class QTabWidget;
 
 class CellItem;
 class ParticleItem;
@@ -19,7 +19,7 @@ class MetadataManager;
 class PixelUniverse;
 class ShapeUniverse;
 class ItemManager;
-class VisualDescription;
+class DataManipulator;
 class ViewportInterface;
 class ViewportController;
 class MarkerItem;
@@ -30,5 +30,7 @@ class ToolbarContext;
 class ToolbarView;
 class DataEditorModel;
 class DataEditorView;
+class ClusterEditor;
+class DataManipulator;
 
 enum class ActiveScene { PixelScene, ShapeScene };

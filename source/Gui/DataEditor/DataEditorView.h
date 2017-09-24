@@ -21,5 +21,7 @@ private:
 
 	DataEditorModel* _model = nullptr;
 
-	QTableWidget* _mainTab = nullptr;
+	QTabWidget* _mainTabWidget = nullptr;
+
+	ClusterEditor* _clusterEditor = nullptr;
 };
