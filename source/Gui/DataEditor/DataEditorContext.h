@@ -10,15 +10,8 @@ class DataEditorContext
 {
 	Q_OBJECT
 public:
-	DataEditorContext(DataEditorModel* model, QObject *parent = nullptr);
+	DataEditorContext(QObject *parent = nullptr);
 	virtual ~DataEditorContext() = default;
 
-	DataEditorModel* getModel();
-
 	Q_SIGNAL void show(bool visible);
-	Q_SIGNAL void notifyDataEditor();
-	Q_SIGNAL void notifyExternals();
-
-private:
-	DataEditorModel* _model;
 };

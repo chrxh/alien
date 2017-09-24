@@ -9,8 +9,10 @@ class DataEditorView
 {
 	Q_OBJECT
 public:
-	DataEditorView(IntVector2D const& upperLeftPosition, DataEditorModel* model, QWidget * parent = nullptr);
+	DataEditorView(QWidget * parent = nullptr);
 	virtual ~DataEditorView() = default;
+
+	void init(IntVector2D const& upperLeftPosition);
 
 	void update() const;
 	void show(bool visible);
@@ -18,8 +20,6 @@ public:
 private:
 	bool _visible = false;
 	IntVector2D _upperLeftPosition;
-
-	DataEditorModel* _model = nullptr;
 
 	QTabWidget* _mainTabWidget = nullptr;
 

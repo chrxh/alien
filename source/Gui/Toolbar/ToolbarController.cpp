@@ -3,12 +3,16 @@
 #include "ToolbarView.h"
 #include "ToolbarContext.h"
 
-ToolbarController::ToolbarController(IntVector2D const& upperLeftPosition, QWidget* parent)
+ToolbarController::ToolbarController(QWidget* parent)
 	: QObject(parent)
 {
-	_view = new ToolbarView(upperLeftPosition, parent);
+	_view = new ToolbarView(parent);
 	_context = new ToolbarContext(this);
+}
 
+void ToolbarController::init(IntVector2D const & upperLeftPosition)
+{
+	_view->init(upperLeftPosition);
 	connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow);
 
 	onShow(false);

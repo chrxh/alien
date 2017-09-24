@@ -11,8 +11,10 @@ class ToolbarView
 {
 	Q_OBJECT
 public:
-	ToolbarView(IntVector2D const& upperLeftPosition, QWidget * parent = nullptr);
-	~ToolbarView();
+	ToolbarView(QWidget * parent = nullptr);
+	virtual ~ToolbarView() = default;
+
+	void init(IntVector2D const& upperLeftPosition);
 
 private:
 	Ui::Toolbar ui;

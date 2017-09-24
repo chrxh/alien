@@ -7,7 +7,6 @@
 #include "Gui/Settings.h"
 #include "Gui/DataManipulator.h"
 #include "Gui/VisualEditor/ViewportInterface.h"
-#include "Gui/DataEditor/DataEditorModel.h"
 #include "Model/SimulationController.h"
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Context/SimulationContextApi.h"
@@ -86,13 +85,6 @@ void ShapeUniverse::delegateSelection(Selection const & selection)
 {
 	_manipulator->setSelection(selection.cellIds, selection.particleIds);
 	_itemManager->update(_manipulator);
-
-/*
-	auto dataEditorModel = _dataEditorContext->getModel();
-	dataEditorModel->selectedCellIds = selection.cellIds;
-	dataEditorModel->selectedParticleIds = selection.particleIds;
-	_dataEditorContext->notifyDataEditor();
-*/
 }
 
 void ShapeUniverse::startMarking(QPointF const& scenePos)
@@ -101,13 +93,6 @@ void ShapeUniverse::startMarking(QPointF const& scenePos)
 	auto pos = CoordinateSystem::sceneToModel(scenePos);
 	_itemManager->setMarkerItem(pos, pos);
 	_itemManager->update(_manipulator);
-
-/*
-	auto dataEditorModel = _dataEditorContext->getModel();
-	dataEditorModel->selectedCellIds.clear();
-	dataEditorModel->selectedParticleIds.clear();
-	_dataEditorContext->notifyDataEditor();
-*/
 }
 
 namespace
