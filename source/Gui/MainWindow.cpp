@@ -53,19 +53,21 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 
     ui->setupUi(this);
 
-	_toolbar = new ToolbarController({ 10, 10 }, ui->visualEditor);
+	_toolbar = new ToolbarController(ui->visualEditor);
 	connect(ui->actionEditor, &QAction::triggered, _toolbar->getContext(), &ToolbarContext::show);
 
-	_dataEditor = new DataEditorController({ 10, 60 }, ui->visualEditor);
+	_dataEditor = new DataEditorController(ui->visualEditor);
 	connect(ui->actionEditor, &QAction::triggered, _dataEditor->getContext(), &DataEditorContext::show);
 
 	_dataManipulator = new DataManipulator(this);
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto connector = facade->buildCellConnector(_simController->getContext());
 
+	_toolbar->init({ 10, 10 });
+	_dataEditor->init({ 10, 60 }, _dataManipulator);
 	_dataManipulator->init(access, connector);
-
 	ui->visualEditor->init(simController, _dataManipulator, access);
+
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
 		_framedata.fps = value;
 		updateFrameLabel();

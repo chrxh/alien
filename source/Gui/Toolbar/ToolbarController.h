@@ -8,8 +8,10 @@ class ToolbarController
 {
 	Q_OBJECT
 public:
-	ToolbarController(IntVector2D const& upperLeftPosition, QWidget * parent = nullptr);
+	ToolbarController(QWidget * parent = nullptr);
 	virtual ~ToolbarController() = default;
+
+	void init(IntVector2D const& upperLeftPosition);
 
 	ToolbarContext* getContext() const;
 
