@@ -93,6 +93,7 @@ private:
 	TextEditor* _textEditor = nullptr;
 	DataEditorController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
+	DataManipulator* _dataManipulator = nullptr;
 
     QTimer* _oneSecondTimer = nullptr;
     SimulationMonitor* _monitor = nullptr;

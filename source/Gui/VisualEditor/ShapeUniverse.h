@@ -9,7 +9,7 @@
 #include "Model/Definitions.h"
 #include "Model/Entities/CellTO.h"
 #include "Model/Entities/Descriptions.h"
-#include "gui/Definitions.h"
+#include "Gui/Definitions.h"
 
 class ShapeUniverse : public QGraphicsScene
 {
@@ -18,8 +18,7 @@ public:
     ShapeUniverse (QObject *parent = nullptr);
 	virtual ~ShapeUniverse();
 
-	virtual void init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport
-		, DataEditorContext* dataEditorContext);
+	virtual void init(SimulationController* controller, DataManipulator* manipulator, SimulationAccess* access, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 	virtual void requestData();
@@ -41,14 +40,12 @@ private:
 	void delegateSelection(Selection const& selection);
 	void startMarking(QPointF const& scenePos);
 
-	SimulationAccess* _simAccess = nullptr;
+	SimulationAccess* _access = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
-	CellConnector* _connector = nullptr;
 
 	ItemManager* _itemManager = nullptr;
-	VisualDescription* _visualDesc = nullptr;
+	DataManipulator* _manipulator = nullptr;
 
 	DataDescription _savedDataBeforeMovement;
-	DataEditorContext* _dataEditorContext;
 };

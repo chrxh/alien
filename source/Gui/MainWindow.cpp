@@ -9,6 +9,7 @@
 #include "Base/ServiceLocator.h"
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
+#include "Model/ModelBuilderFacade.h"
 #include "Model/Context/SimulationContext.h"
 #include "Model/SerializationFacade.h"
 #include "Model/Entities/Cell.h"
@@ -33,6 +34,7 @@
 #include "Gui/Toolbar/ToolbarContext.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
+#include "Gui/DataManipulator.h"
 
 #include "MainWindow.h"
 #include "ui_mainwindow.h"
@@ -47,6 +49,8 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
     , _tutorialWindow(new TutorialWindow(this))
     , _startScreen(new StartScreenController(this))
 {
+	SET_CHILD(_simController, simController);
+
     ui->setupUi(this);
 
 	_toolbar = new ToolbarController({ 10, 10 }, ui->visualEditor);
@@ -55,7 +59,13 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	_dataEditor = new DataEditorController({ 10, 60 }, ui->visualEditor);
 	connect(ui->actionEditor, &QAction::triggered, _dataEditor->getContext(), &DataEditorContext::show);
 
-	ui->visualEditor->init(simController, access, _dataEditor->getContext());
+	_dataManipulator = new DataManipulator(this);
+	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto connector = facade->buildCellConnector(_simController->getContext());
+
+	_dataManipulator->init(access, connector);
+
+	ui->visualEditor->init(simController, _dataManipulator, access);
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
 		_framedata.fps = value;
 		updateFrameLabel();

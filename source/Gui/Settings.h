@@ -2,6 +2,7 @@
 
 #include <QColor>
 #include <QFont>
+#include <QPalette>
 
 //visual editor
 const QColor BACKGROUND_COLOR(0x00, 0x00, 0x00);
@@ -56,4 +57,5 @@ class GuiSettings
 public:
     static QFont getGlobalFont ();
 	static QFont getCellFont();
+	static QPalette getPaletteForTabWidget();
 };
