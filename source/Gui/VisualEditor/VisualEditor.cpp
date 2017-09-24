@@ -33,13 +33,13 @@ VisualEditor::~VisualEditor()
     delete ui;
 }
 
-void VisualEditor::init(SimulationController* controller, SimulationAccess* access, DataEditorContext* dataEditorContext)
+void VisualEditor::init(SimulationController* controller, DataManipulator* manipulator, SimulationAccess* access)
 {
 	_pixelUniverseInit = false;
 	_shapeUniverseInit = false;
 	_controller = controller;
 	_pixelUniverse->init(controller, access, _viewport);
-	_shapeUniverse->init(controller, access, _viewport, dataEditorContext);
+	_shapeUniverse->init(controller, manipulator, access, _viewport);
 	_viewport->init(ui->simulationView, _pixelUniverse, _shapeUniverse, ActiveScene::PixelScene);
 	setActiveScene(_activeScene);
 }

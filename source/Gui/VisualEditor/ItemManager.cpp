@@ -2,10 +2,10 @@
 
 #include "Model/Entities/ChangeDescriptions.h"
 #include "Gui/Settings.h"
+#include "Gui/DataManipulator.h"
 #include "Gui/visualeditor/ViewportInterface.h"
 
 #include "ItemManager.h"
-#include "VisualDescription.h"
 #include "CellItem.h"
 #include "ParticleItem.h"
 #include "CellConnectionItem.h"
@@ -33,9 +33,9 @@ void ItemManager::activate(IntVector2D size)
 	_connectionsByIds.clear();
 }
 
-void ItemManager::updateCells(VisualDescription* visualDesc)
+void ItemManager::updateCells(DataManipulator* manipulator)
 {
-	auto const &data = visualDesc->getDataRef();
+	auto const &data = manipulator->getDataRef();
 	if (!data.clusters) {
 		return;
 	}
@@ -56,10 +56,10 @@ void ItemManager::updateCells(VisualDescription* visualDesc)
 				_scene->addItem(item);
 				newCellsByIds[cell.id] = item;
 			}
-			if (visualDesc->isInSelection(cell.id)) {
+			if (manipulator->isInSelection(cell.id)) {
 				item->setFocusState(CellItem::FOCUS_CELL);
 			}
-			else if (visualDesc->isInExtendedSelection(cell.id)) {
+			else if (manipulator->isInExtendedSelection(cell.id)) {
 				item->setFocusState(CellItem::FOCUS_CLUSTER);
 			}
 			else {
@@ -73,9 +73,9 @@ void ItemManager::updateCells(VisualDescription* visualDesc)
 	_cellsByIds = newCellsByIds;
 }
 
-void ItemManager::updateParticles(VisualDescription* visualDesc)
+void ItemManager::updateParticles(DataManipulator* manipulator)
 {
-	auto const &data = visualDesc->getDataRef();
+	auto const &data = manipulator->getDataRef();
 	if (!data.particles) {
 		return;
 	}
@@ -95,7 +95,7 @@ void ItemManager::updateParticles(VisualDescription* visualDesc)
 			_scene->addItem(item);
 			newParticlesByIds.insert_or_assign(particle.id, item);
 		}
-		if (visualDesc->isInSelection(particle.id)) {
+		if (manipulator->isInSelection(particle.id)) {
 			item->setFocusState(ParticleItem::FOCUS);
 		}
 		else {
@@ -108,7 +108,7 @@ void ItemManager::updateParticles(VisualDescription* visualDesc)
 	_particlesByIds = newParticlesByIds;
 }
 
-void ItemManager::updateConnections(VisualDescription* visualDesc)
+void ItemManager::updateConnections(DataManipulator* visualDesc)
 {
 	auto const &data = visualDesc->getDataRef();
 	if (!data.clusters) {
@@ -155,7 +155,7 @@ void ItemManager::updateConnections(VisualDescription* visualDesc)
 	_connectionsByIds = newConnectionsByIds;
 }
 
-void ItemManager::update(VisualDescription* visualDesc)
+void ItemManager::update(DataManipulator* visualDesc)
 {
 	_viewport->setModeToNoUpdate();
 

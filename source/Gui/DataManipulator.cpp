@@ -1,11 +1,20 @@
-#include "VisualDescription.h"
+#include "DataManipulator.h"
 
-DataDescription & VisualDescription::getDataRef()
+#include "Model/AccessPorts/SimulationAccess.h"
+#include "Model/CellConnector.h"
+
+void DataManipulator::init(SimulationAccess * access, CellConnector * connector)
+{
+	SET_CHILD(_access, access);
+	SET_CHILD(_connector, connector);
+}
+
+DataDescription & DataManipulator::getDataRef()
 {
 	return _data;
 }
 
-CellDescription & VisualDescription::getCellDescRef(uint64_t cellId)
+CellDescription & DataManipulator::getCellDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	ClusterDescription &clusterDesc = _data.clusters->at(clusterIndex);
@@ -13,28 +22,28 @@ CellDescription & VisualDescription::getCellDescRef(uint64_t cellId)
 	return clusterDesc.cells->at(cellIndex);
 }
 
-ParticleDescription & VisualDescription::getParticleDescRef(uint64_t particleId)
+ParticleDescription & DataManipulator::getParticleDescRef(uint64_t particleId)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles->at(particleIndex);
 }
 
-bool VisualDescription::isCellPresent(uint64_t cellId)
+bool DataManipulator::isCellPresent(uint64_t cellId)
 {
 	return _navi.cellIds.find(cellId) != _navi.cellIds.end();
 }
 
-bool VisualDescription::isParticlePresent(uint64_t particleId)
+bool DataManipulator::isParticlePresent(uint64_t particleId)
 {
 	return _navi.particleIds.find(particleId) != _navi.particleIds.end();
 }
 
-void VisualDescription::setData(DataDescription const &data)
+void DataManipulator::setData(DataDescription const &data)
 {
 	updateInternals(data);
 }
 
-void VisualDescription::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
+void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
 	_selectedCellIds = set<uint64_t>(cellIds.begin(), cellIds.end());
 	_selectedParticleIds = set<uint64_t>(particleIds.begin(), particleIds.end());
@@ -47,7 +56,7 @@ void VisualDescription::setSelection(list<uint64_t> const &cellIds, list<uint64_
 	}
 }
 
-bool VisualDescription::isInSelection(list<uint64_t> const & ids) const
+bool DataManipulator::isInSelection(list<uint64_t> const & ids) const
 {
 	for (uint64_t id : ids) {
 		if (!isInSelection(id)) {
@@ -57,12 +66,12 @@ bool VisualDescription::isInSelection(list<uint64_t> const & ids) const
 	return true;
 }
 
-bool VisualDescription::isInSelection(uint64_t id) const
+bool DataManipulator::isInSelection(uint64_t id) const
 {
 	return (_selectedCellIds.find(id) != _selectedCellIds.end() || _selectedParticleIds.find(id) != _selectedParticleIds.end());
 }
 
-bool VisualDescription::isInExtendedSelection(uint64_t id) const
+bool DataManipulator::isInExtendedSelection(uint64_t id) const
 {
 	auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(id);
 	if (clusterIdByCellIdIter != _navi.clusterIdsByCellIds.end()) {
@@ -72,18 +81,18 @@ bool VisualDescription::isInExtendedSelection(uint64_t id) const
 	return false;
 }
 
-bool VisualDescription::areEntitiesSelected() const
+bool DataManipulator::areEntitiesSelected() const
 {
 	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
 }
 
-list<uint64_t> VisualDescription::getSelectedCellIds() const
+list<uint64_t> DataManipulator::getSelectedCellIds() const
 {
 	list<uint64_t> result(_selectedCellIds.begin(), _selectedCellIds.end());
 	return result;
 }
 
-void VisualDescription::moveSelection(QVector2D const &delta)
+void DataManipulator::moveSelection(QVector2D const &delta)
 {
 	for (uint64_t cellId : _selectedCellIds) {
 		if (isCellPresent(cellId)) {
@@ -100,9 +109,12 @@ void VisualDescription::moveSelection(QVector2D const &delta)
 			particleDesc.pos = *particleDesc.pos + delta;
 		}
 	}
+
+	_connector->reconnect(getDataRef(), getSelectedCellIds());
+	updateAfterCellReconnections();
 }
 
-void VisualDescription::moveExtendedSelection(QVector2D const & delta)
+void DataManipulator::moveExtendedSelection(QVector2D const & delta)
 {
 	list<uint64_t> extSelectedCellIds;
 	for (auto clusterIdByCellId : _navi.clusterIdsByCellIds) {
@@ -130,7 +142,7 @@ void VisualDescription::moveExtendedSelection(QVector2D const & delta)
 	}
 }
 
-void VisualDescription::updateAfterCellReconnections()
+void DataManipulator::updateAfterCellReconnections()
 {
 	_navi.update(_data);
 
@@ -142,7 +154,7 @@ void VisualDescription::updateAfterCellReconnections()
 	}
 }
 
-void VisualDescription::updateInternals(DataDescription const &data)
+void DataManipulator::updateInternals(DataDescription const &data)
 {
 	_data = data;
 	_navi.update(data);

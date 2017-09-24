@@ -4,13 +4,15 @@
 
 #include "Gui/Definitions.h"
 
-class VisualDescription
+class DataManipulator
 	: public QObject
 {
 	Q_OBJECT
 public:
-	VisualDescription(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~VisualDescription() = default;
+	DataManipulator(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~DataManipulator() = default;
+
+	virtual void init(SimulationAccess* access, CellConnector* connector);
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
@@ -25,14 +27,15 @@ public:
 	virtual void moveSelection(QVector2D const &delta);
 	virtual void moveExtendedSelection(QVector2D const &delta);
 
-	virtual void updateAfterCellReconnections();
-
 private:
+	void updateAfterCellReconnections();
 	void updateInternals(DataDescription const &data);
 	ParticleDescription & getParticleDescRef(uint64_t particleId);
 	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);
 
+	SimulationAccess* _access = nullptr;
+	CellConnector* _connector = nullptr;
 	DataDescription _data;
 
 	set<uint64_t> _selectedCellIds;

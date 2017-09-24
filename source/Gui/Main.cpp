@@ -135,14 +135,10 @@ int main(int argc, char *argv[])
 	}
 	access->updateData(desc);
 
+	MainWindow w(controller, access);
+	w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
-    MainWindow w(controller, access);
-    w.setWindowState(w.windowState() | Qt::WindowFullScreen);
-
-    w.show();
-	auto result = a.exec();
-	delete access;
-	delete controller;
-	return result;
+	w.show();
+	return a.exec();
 }
 
