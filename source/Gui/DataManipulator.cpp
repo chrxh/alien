@@ -59,6 +59,8 @@ void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t>
 		}
 	}
 	_unchangedData = _data;
+
+	Q_EMIT dataUpdated();
 }
 
 bool DataManipulator::isInSelection(list<uint64_t> const & ids) const

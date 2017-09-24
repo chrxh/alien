@@ -27,9 +27,9 @@ public:
 	virtual bool areEntitiesSelected() const;
 	virtual list<uint64_t> getSelectedCellIds() const;
 
-
 	virtual void sendDataChangesToSimulation();
 	virtual void dataUpdateRequired(IntRect const& rect) const;
+
 	Q_SIGNAL void dataUpdated();
 
 private:

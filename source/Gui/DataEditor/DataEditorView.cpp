@@ -2,20 +2,16 @@
 
 #include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
 #include "DataEditorView.h"
 
 namespace
 {
 }
 
-DataEditorView::DataEditorView(IntVector2D const& upperLeftPosition, DataEditorModel* model, QWidget * parent)
+DataEditorView::DataEditorView(QWidget * parent)
 	: QObject(parent)
-	, _upperLeftPosition(upperLeftPosition)
-	, _model(model)
 {
 	_mainTabWidget = new QTabWidget(parent);
-	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, 100, 200);
 	_mainTabWidget->setMinimumSize(QSize(385, 260));
 	_mainTabWidget->setMaximumSize(QSize(385, 260));
 	_mainTabWidget->setTabShape(QTabWidget::Triangular);
@@ -26,12 +22,19 @@ DataEditorView::DataEditorView(IntVector2D const& upperLeftPosition, DataEditorM
 	update();
 }
 
+void DataEditorView::init(IntVector2D const & upperLeftPosition)
+{
+	_upperLeftPosition = upperLeftPosition;
+	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
+}
+
 void DataEditorView::update() const
 {
 	if (!_visible) {
 		_mainTabWidget->setVisible(false);
 		return;
 	}
+/*
 	bool areItemsSelected = !_model->selectedCellIds.empty() || !_model->selectedParticleIds.empty();
 	_mainTabWidget->setVisible(areItemsSelected);
 	
@@ -47,6 +50,7 @@ void DataEditorView::update() const
 	else {
 		selector = MainTabViewSelector::Ensemble;
 	}
+*/
 }
 
 void DataEditorView::show(bool visible)
