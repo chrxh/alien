@@ -1,23 +1,23 @@
-#ifndef CLUSTEREDIT_H
-#define CLUSTEREDIT_H
+#pragma once
 
 #include <QTextEdit>
 #include <QVector2D>
 
+#include "Model/Definitions.h"
 #include "Model/Entities/CellTO.h"
 
-class Cell;
-class ClusterEdit : public QTextEdit
+class CellEditWidget
+	: public QTextEdit
 {
     Q_OBJECT
 public:
-    explicit ClusterEdit(QWidget *parent = 0);
+    explicit CellEditWidget(QWidget *parent = 0);
 
-    void updateCluster (CellTO cell);
+    void updateCell (CellTO cell);
     void requestUpdate ();
 
 Q_SIGNALS:
-    void clusterDataChanged (CellTO cell);
+    void cellDataChanged (CellTO cell);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -32,8 +32,8 @@ private:
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
+    QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
     CellTO _cell;
 };
 
-#endif // CLUSTEREDIT_H

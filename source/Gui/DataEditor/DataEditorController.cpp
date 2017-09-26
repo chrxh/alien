@@ -34,5 +34,12 @@ void DataEditorController::onShow(bool visible)
 
 void DataEditorController::dataUpdatedFromManipulator()
 {
-	_view->update();
+	auto const& selectedCellIds = _manipulator->getSelectedCellIds();
+	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
+	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
+		_view->switchToClusterEditor(ClusterDescription());
+	}
+	if (selectedCellIds.empty() && selectedParticleIds.empty()) {
+		_view->switchToNoEditor();
+	}
 }

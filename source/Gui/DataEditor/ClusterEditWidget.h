@@ -1,23 +1,23 @@
-#ifndef CELLEDIT_H
-#define CELLEDIT_H
+#pragma once
 
 #include <QTextEdit>
 #include <QVector2D>
 
 #include "Model/Entities/CellTO.h"
+#include "Model/Definitions.h"
 
-class Cell;
-class CellEdit : public QTextEdit
+class ClusterEditWidget
+	: public QTextEdit
 {
     Q_OBJECT
 public:
-    explicit CellEdit(QWidget *parent = 0);
+    explicit ClusterEditWidget(QWidget *parent = 0);
 
-    void updateCell (CellTO cell);
+    void updateCluster (CellTO cell);
     void requestUpdate ();
 
 Q_SIGNALS:
-    void cellDataChanged (CellTO cell);
+    void clusterDataChanged (CellTO cell);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -32,9 +32,6 @@ private:
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
-    QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
     CellTO _cell;
 };
-
-#endif // CELLEDIT_H

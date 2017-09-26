@@ -99,6 +99,12 @@ list<uint64_t> DataManipulator::getSelectedCellIds() const
 	return result;
 }
 
+list<uint64_t> DataManipulator::getSelectedParticleIds() const
+{
+	list<uint64_t> result(_selectedParticleIds.begin(), _selectedParticleIds.end());
+	return result;
+}
+
 void DataManipulator::moveSelection(QVector2D const &delta)
 {
 	for (uint64_t cellId : _selectedCellIds) {

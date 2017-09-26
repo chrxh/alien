@@ -292,7 +292,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="ClusterEdit" name="clusterEditor2">
+          <widget class="ClusterEditWidget" name="clusterEditor2">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -450,7 +450,7 @@ p, li { white-space: pre-wrap; }
           <number>0</number>
          </property>
          <item>
-          <widget class="CellEdit" name="cellEditor2">
+          <widget class="CellEditWidget" name="cellEditor2">
            <property name="palette">
             <palette>
              <active>
@@ -4061,14 +4061,14 @@ p, li { white-space: pre-wrap; }
    <header>gui/visualeditor/visualeditor.h</header>
   </customwidget>
   <customwidget>
-   <class>ClusterEdit</class>
+   <class>ClusterEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>gui/texteditor/clusteredit.h</header>
+   <header>Gui/DataEditor/ClusterEditWidget.h</header>
   </customwidget>
   <customwidget>
-   <class>CellEdit</class>
+   <class>CellEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>gui/texteditor/celledit.h</header>
+   <header>gui/DataEditor/CellEditWidget.h</header>
   </customwidget>
   <customwidget>
    <class>EnergyEdit</class>
