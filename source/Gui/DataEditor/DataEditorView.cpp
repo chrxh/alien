@@ -47,8 +47,7 @@ void DataEditorView::update() const
 
 	if (_editorSelector == EditorSelector::Cluster) {
 		_mainTabWidget->setVisible(true);
-		CellTO cellTO;
-		_clusterEditTab->updateCluster(cellTO);
+		_clusterEditTab->updateCluster(_selectedData.clusters->at(0));
 	}
 }
 
@@ -61,6 +60,8 @@ void DataEditorView::switchToNoEditor()
 void DataEditorView::switchToClusterEditor(ClusterDescription const & cluster)
 {
 	_editorSelector = EditorSelector::Cluster;
+	_selectedData.clear();
+	_selectedData.addCluster(cluster);
 	update();
 }
 
