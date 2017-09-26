@@ -37,7 +37,8 @@ void DataEditorController::dataUpdatedFromManipulator()
 	auto const& selectedCellIds = _manipulator->getSelectedCellIds();
 	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
-		_view->switchToClusterEditor(ClusterDescription());
+		auto const& clusterDesc = _manipulator->getClusterDescRef(selectedCellIds.front());
+		_view->switchToClusterEditor(clusterDesc);
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.empty()) {
 		_view->switchToNoEditor();

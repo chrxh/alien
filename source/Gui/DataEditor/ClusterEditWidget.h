@@ -3,7 +3,7 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "Model/Entities/CellTO.h"
+#include "Model/Entities/Descriptions.h"
 #include "Model/Definitions.h"
 
 class ClusterEditWidget
@@ -13,11 +13,8 @@ class ClusterEditWidget
 public:
     explicit ClusterEditWidget(QWidget *parent = 0);
 
-    void updateCluster (CellTO cell);
+    void updateCluster (ClusterDescription const& cluster);
     void requestUpdate ();
-
-Q_SIGNALS:
-    void clusterDataChanged (CellTO cell);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -33,5 +30,5 @@ private:
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 
-    CellTO _cell;
+	ClusterDescription _cluster;
 };
