@@ -49,7 +49,6 @@ void CellConnectorImpl::updateInternals(DataDescription const &data)
 	}
 }
 
-
 void CellConnectorImpl::updateConnectingCells(DataDescription &data, list<uint64_t> const &changedCellIds)
 {
 	for (uint64_t changedCellId : changedCellIds) {
@@ -73,6 +72,9 @@ namespace
 		}
 		center = center / cluster.cells->size();
 		cluster.pos = center;
+		cluster.vel = QVector2D();
+		cluster.angle = 0.0;
+		cluster.angularVel = 0.0;
 	}
 }
 

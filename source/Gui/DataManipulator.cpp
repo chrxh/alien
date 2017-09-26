@@ -18,10 +18,15 @@ DataDescription & DataManipulator::getDataRef()
 
 CellDescription & DataManipulator::getCellDescRef(uint64_t cellId)
 {
-	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
-	ClusterDescription &clusterDesc = _data.clusters->at(clusterIndex);
+	ClusterDescription &clusterDesc = getClusterDescRef(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
 	return clusterDesc.cells->at(cellIndex);
+}
+
+ClusterDescription & DataManipulator::getClusterDescRef(uint64_t cellId)
+{
+	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
+	return _data.clusters->at(clusterIndex);
 }
 
 ParticleDescription & DataManipulator::getParticleDescRef(uint64_t particleId)
@@ -95,14 +100,12 @@ bool DataManipulator::areEntitiesSelected() const
 
 list<uint64_t> DataManipulator::getSelectedCellIds() const
 {
-	list<uint64_t> result(_selectedCellIds.begin(), _selectedCellIds.end());
-	return result;
+	return list<uint64_t>(_selectedCellIds.begin(), _selectedCellIds.end());
 }
 
 list<uint64_t> DataManipulator::getSelectedParticleIds() const
 {
-	list<uint64_t> result(_selectedParticleIds.begin(), _selectedParticleIds.end());
-	return result;
+	return list<uint64_t>(_selectedParticleIds.begin(), _selectedParticleIds.end());
 }
 
 void DataManipulator::moveSelection(QVector2D const &delta)
@@ -184,6 +187,9 @@ void DataManipulator::updateInternals(DataDescription const &data)
 {
 	_data = data;
 	_unchangedData = _data;
+	_selectedCellIds.clear();
+	_selectedClusterIds.clear();
+	_selectedParticleIds.clear();
 	_navi.update(data);
 }
 
