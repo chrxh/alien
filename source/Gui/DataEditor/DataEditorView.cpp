@@ -1,12 +1,10 @@
 ﻿#include <QTabWidget>
 
 #include "Gui/Settings.h"
+#include "ClusterEditWidget.h"
+#include "CellEditWidget.h"
 
 #include "DataEditorView.h"
-
-namespace
-{
-}
 
 DataEditorView::DataEditorView(QWidget * parent)
 	: QObject(parent)
@@ -19,38 +17,51 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_mainTabWidget->setTabsClosable(false);
 	_mainTabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
 
+	_clusterEditTab = new ClusterEditWidget(_mainTabWidget);
+	_clusterEditTab->setFrameShape(QFrame::NoFrame);
+	_clusterEditTab->setLineWidth(0);
+	_clusterEditTab->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_clusterEditTab->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_clusterEditTab->setOverwriteMode(false);
+	_clusterEditTab->setCursorWidth(6);
+	_clusterEditTab->setPalette(GuiSettings::getPaletteForTab());
+	_mainTabWidget->addTab(_clusterEditTab, "cluster");
+
+	_cellEditTab = new CellEditWidget(_mainTabWidget);
+	_mainTabWidget->addTab(_cellEditTab, "cell");
+
 	update();
 }
 
 void DataEditorView::init(IntVector2D const & upperLeftPosition)
 {
-	_upperLeftPosition = upperLeftPosition;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
 }
 
 void DataEditorView::update() const
 {
-	if (!_visible) {
+	if (!_visible || _editorSelector == EditorSelector::No) {
 		_mainTabWidget->setVisible(false);
 		return;
 	}
-/*
-	bool areItemsSelected = !_model->selectedCellIds.empty() || !_model->selectedParticleIds.empty();
-	_mainTabWidget->setVisible(areItemsSelected);
-	
-	enum class MainTabViewSelector { Cell, Particle, Ensemble }	selector;
-	if (_model->selectedCellIds.size() + _model->selectedParticleIds.size() == 1) {
-		if (!_model->selectedCellIds.empty()) {
-			selector = MainTabViewSelector::Cell;
-		}
-		if (!_model->selectedParticleIds.empty()) {
-			selector = MainTabViewSelector::Particle;
-		}
+
+	if (_editorSelector == EditorSelector::Cluster) {
+		_mainTabWidget->setVisible(true);
+		CellTO cellTO;
+		_clusterEditTab->updateCluster(cellTO);
 	}
-	else {
-		selector = MainTabViewSelector::Ensemble;
-	}
-*/
+}
+
+void DataEditorView::switchToNoEditor()
+{
+	_editorSelector = EditorSelector::No;
+	update();
+}
+
+void DataEditorView::switchToClusterEditor(ClusterDescription const & cluster)
+{
+	_editorSelector = EditorSelector::Cluster;
+	update();
 }
 
 void DataEditorView::show(bool visible)
