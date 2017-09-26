@@ -58,4 +58,5 @@ public:
     static QFont getGlobalFont ();
 	static QFont getCellFont();
 	static QPalette getPaletteForTabWidget();
+	static QPalette getPaletteForTab();
 };

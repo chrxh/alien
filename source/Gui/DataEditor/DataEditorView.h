@@ -2,6 +2,7 @@
 
 #include <QWidget>
 
+#include "Model/Entities/Descriptions.h"
 #include "Gui/Definitions.h"
 
 class DataEditorView
@@ -14,14 +15,20 @@ public:
 
 	void init(IntVector2D const& upperLeftPosition);
 
-	void update() const;
+	void switchToNoEditor();
+	void switchToClusterEditor(ClusterDescription const& cluster);
 	void show(bool visible);
 
 private:
+	void update() const;
+
 	bool _visible = false;
-	IntVector2D _upperLeftPosition;
+
+	enum class EditorSelector { No, Cluster };
+	EditorSelector _editorSelector = EditorSelector::No;
 
 	QTabWidget* _mainTabWidget = nullptr;
 
-	ClusterEditor* _clusterEditor = nullptr;
+	ClusterEditWidget* _clusterEditTab = nullptr;
+	CellEditWidget* _cellEditTab = nullptr;
 };

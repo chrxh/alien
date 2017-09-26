@@ -1,4 +1,4 @@
-#include "ClusterEdit.h"
+#include "ClusterEditWidget.h"
 
 #include "gui/Settings.h"
 #include "Model/Entities/Cell.h"
@@ -9,19 +9,19 @@
 #include <QTextLayout>
 #include <qmath.h>
 
-ClusterEdit::ClusterEdit(QWidget *parent) :
+ClusterEditWidget::ClusterEditWidget(QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void ClusterEdit::updateCluster (CellTO cell)
+void ClusterEditWidget::updateCluster (CellTO cell)
 {
     _cell = cell;
     updateDisplay();
 }
 
-void ClusterEdit::requestUpdate ()
+void ClusterEditWidget::requestUpdate ()
 {
     int row = QTextEdit::textCursor().blockNumber();
     QString currentText = QTextEdit::textCursor().block().text();
@@ -43,7 +43,7 @@ void ClusterEdit::requestUpdate ()
     Q_EMIT clusterDataChanged(_cell);
 }
 
-void ClusterEdit::keyPressEvent (QKeyEvent* e)
+void ClusterEditWidget::keyPressEvent (QKeyEvent* e)
 {
     //auxilliary data
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
@@ -202,7 +202,7 @@ void ClusterEdit::keyPressEvent (QKeyEvent* e)
     }
 }
 
-void ClusterEdit::mousePressEvent(QMouseEvent* e)
+void ClusterEditWidget::mousePressEvent(QMouseEvent* e)
 {
     QTextEdit::mousePressEvent(e);
     int col = QTextEdit::textCursor().columnNumber();
@@ -233,18 +233,18 @@ void ClusterEdit::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void ClusterEdit::mouseDoubleClickEvent (QMouseEvent* e)
+void ClusterEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
 {
     QTextEdit::clearFocus();
 }
 
-void ClusterEdit::wheelEvent (QWheelEvent* e)
+void ClusterEditWidget::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
-void ClusterEdit::updateDisplay ()
+void ClusterEditWidget::updateDisplay ()
 {
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
@@ -288,7 +288,7 @@ void ClusterEdit::updateDisplay ()
         QTextEdit::moveCursor(QTextCursor::Right);
 }
 
-qreal ClusterEdit::generateNumberFromFormattedString (QString s)
+qreal ClusterEditWidget::generateNumberFromFormattedString (QString s)
 {
     int i = s.indexOf(':');
     if( i >= 0 ) {
@@ -303,7 +303,7 @@ qreal ClusterEdit::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString ClusterEdit::generateFormattedRealString (QString s)
+QString ClusterEditWidget::generateFormattedRealString (QString s)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
@@ -319,7 +319,7 @@ QString ClusterEdit::generateFormattedRealString (QString s)
     return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
 }
 
-QString ClusterEdit::generateFormattedRealString (qreal r)
+QString ClusterEditWidget::generateFormattedRealString (qreal r)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";

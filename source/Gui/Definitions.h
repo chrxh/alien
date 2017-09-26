@@ -30,7 +30,8 @@ class ToolbarContext;
 class ToolbarView;
 class DataEditorModel;
 class DataEditorView;
-class ClusterEditor;
 class DataManipulator;
+class ClusterEditWidget;
+class CellEditWidget;
 
 enum class ActiveScene { PixelScene, ShapeScene };

@@ -11,8 +11,8 @@ namespace Ui {
 class TextEditor;
 }
 
-class CellEdit;
-class ClusterEdit;
+class CellEditWidget;
+class ClusterEditWidget;
 class CellComputerEdit;
 class EnergyEdit;
 class MetadataEdit;
@@ -36,8 +36,8 @@ public:
 		QTabWidget* tabComputerWidget;
 		QTabWidget* tabTokenWidget;
 		QTabWidget* tabSymbolsWidget;
-		CellEdit* cellEditor;
-		ClusterEdit* clusterEditor;
+		CellEditWidget* cellEditor;
+		ClusterEditWidget* clusterEditor;
 		EnergyEdit* energyEditor;
 		MetadataEdit* metadataEditor;
 		CellComputerEdit* cellComputerEdit;

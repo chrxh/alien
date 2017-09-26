@@ -5,8 +5,6 @@
 #include <QEvent>
 
 #include "Base/ServiceLocator.h"
-#include "gui/Settings.h"
-#include "gui/Settings.h"
 #include "Model/Context/SimulationParameters.h"
 #include "Model/Context/SimulationContext.h"
 #include "Model/Context/ParticleMap.h"
@@ -14,9 +12,11 @@
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Cluster.h"
 #include "Model/Entities/Particle.h"
+#include "Gui/DataEditor/ClusterEditWidget.h"
+#include "Gui/DataEditor/CellEditWidget.h"
+#include "Gui/Settings.h"
+#include "Gui/Settings.h"
 #include "TokenTab.h"
-#include "CellEdit.h"
-#include "ClusterEdit.h"
 #include "EnergyEdit.h"
 #include "HexEdit.h"
 #include "MetadataEdit.h"
