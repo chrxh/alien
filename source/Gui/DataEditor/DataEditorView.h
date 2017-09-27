@@ -16,14 +16,15 @@ public:
 	void init(IntVector2D const& upperLeftPosition);
 
 	void switchToNoEditor();
-	void switchToClusterEditor(ClusterDescription const& cluster);
+	void switchToClusterEditor(ClusterDescription const& cluster, CellDescription const& cell);
 	void show(bool visible);
 
 private:
 	void update() const;
 
 	bool _visible = false;
-	DataDescription _selectedData;
+	ClusterDescription _selectedCluster;
+	CellDescription _selectedCell;
 
 	enum class EditorSelector { No, Cluster };
 	EditorSelector _editorSelector = EditorSelector::No;

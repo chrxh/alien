@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+
 #include "Gui/Definitions.h"
 
 class DataEditorController
@@ -17,7 +18,7 @@ public:
 
 private:
 	Q_SLOT void onShow(bool visible);
-	Q_SLOT void dataUpdatedFromManipulator(set<UpdateTarget> const& argets);
+	Q_SLOT void dataUpdatedFromManipulator(set<UpdateTarget> const& targets);
 
 	DataEditorView* _view = nullptr;
 	DataManipulator* _manipulator = nullptr;

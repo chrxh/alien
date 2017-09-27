@@ -28,6 +28,10 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_mainTabWidget->addTab(_clusterEditTab, "cluster");
 
 	_cellEditTab = new CellEditWidget(_mainTabWidget);
+	_cellEditTab->setPalette(GuiSettings::getPaletteForTab());
+	_cellEditTab->setFrameShape(QFrame::NoFrame);
+	_cellEditTab->setFrameShadow(QFrame::Plain);
+	_cellEditTab->setCursorWidth(6);
 	_mainTabWidget->addTab(_cellEditTab, "cell");
 
 	update();
@@ -47,7 +51,8 @@ void DataEditorView::update() const
 
 	if (_editorSelector == EditorSelector::Cluster) {
 		_mainTabWidget->setVisible(true);
-		_clusterEditTab->updateCluster(_selectedData.clusters->at(0));
+		_clusterEditTab->updateCluster(_selectedCluster);
+		_cellEditTab->updateCell(_selectedCell);
 	}
 }
 
@@ -57,11 +62,11 @@ void DataEditorView::switchToNoEditor()
 	update();
 }
 
-void DataEditorView::switchToClusterEditor(ClusterDescription const & cluster)
+void DataEditorView::switchToClusterEditor(ClusterDescription const & cluster, CellDescription const& cell)
 {
 	_editorSelector = EditorSelector::Cluster;
-	_selectedData.clear();
-	_selectedData.addCluster(cluster);
+	_selectedCluster = cluster;
+	_selectedCell = cell;
 	update();
 }
 
