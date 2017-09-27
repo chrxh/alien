@@ -17,7 +17,7 @@ void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManip
 	_manipulator = manipulator;
 
 	connect(_context, &DataEditorContext::show, this, &DataEditorController::onShow);
-	connect(_manipulator, &DataManipulator::dataUpdated, this, &DataEditorController::dataUpdatedFromManipulator);
+	connect(_manipulator, &DataManipulator::notify, this, &DataEditorController::dataUpdatedFromManipulator);
 
 	onShow(false);
 }
@@ -32,8 +32,12 @@ void DataEditorController::onShow(bool visible)
 	_view->show(visible);
 }
 
-void DataEditorController::dataUpdatedFromManipulator()
+void DataEditorController::dataUpdatedFromManipulator(set<UpdateTarget> const& targets)
 {
+	if (targets.find(UpdateTarget::DataEditor) == targets.end()) {
+		return;
+	}
+
 	auto const& selectedCellIds = _manipulator->getSelectedCellIds();
 	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {

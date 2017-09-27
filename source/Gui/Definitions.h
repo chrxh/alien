@@ -35,3 +35,5 @@ class ClusterEditWidget;
 class CellEditWidget;
 
 enum class ActiveScene { PixelScene, ShapeScene };
+enum class UpdateTarget { Simulation, VisualEditor, DataEditor };
+

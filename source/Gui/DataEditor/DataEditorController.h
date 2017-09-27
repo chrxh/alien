@@ -17,7 +17,7 @@ public:
 
 private:
 	Q_SLOT void onShow(bool visible);
-	Q_SLOT void dataUpdatedFromManipulator();
+	Q_SLOT void dataUpdatedFromManipulator(set<UpdateTarget> const& argets);
 
 	DataEditorView* _view = nullptr;
 	DataManipulator* _manipulator = nullptr;
