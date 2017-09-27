@@ -3,6 +3,7 @@
 #include <QWidget>
 
 #include "Gui/Definitions.h"
+#include "Gui/DataManipulator.h"
 
 class DataEditorController
 	: public QObject
@@ -18,7 +19,7 @@ public:
 
 private:
 	Q_SLOT void onShow(bool visible);
-	Q_SLOT void dataUpdatedFromManipulator(set<UpdateTarget> const& targets);
+	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);
 
 	DataEditorModel* _model = nullptr;
 	DataEditorView* _view = nullptr;
