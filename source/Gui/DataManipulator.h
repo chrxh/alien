@@ -31,11 +31,12 @@ public:
 
 	virtual void dataUpdateRequired(IntRect const& rect) const;
 
-	Q_SIGNAL void notify(set<UpdateTarget> const& targets);
+	enum class Receiver { Simulation, VisualEditor, DataEditor };
+	Q_SIGNAL void notify(set<Receiver> const& targets);
 
 private:
 	Q_SLOT void dataFromSimulationAvailable();
-	Q_SLOT void sendDataChangesToSimulation(set<UpdateTarget> const& targets);
+	Q_SLOT void sendDataChangesToSimulation(set<Receiver> const& targets);
 
 	void updateAfterCellReconnections();
 	void updateInternals(DataDescription const &data);

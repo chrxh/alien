@@ -12,6 +12,9 @@ public:
 	DataEditorModel(QObject *parent);
 	virtual ~DataEditorModel() = default;
 
+	enum class Receiver { ClusterEdit, CellEdit };
+	Q_SIGNAL void notify(set<Receiver> const& targets);
+
 	ClusterDescription selectedCluster;
 	CellDescription selectedCell;
 };
