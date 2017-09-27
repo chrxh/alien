@@ -4,7 +4,7 @@
 #include <QVector2D>
 
 #include "Model/Definitions.h"
-#include "Model/Entities/CellTO.h"
+#include "Model/Entities/Descriptions.h"
 
 class CellEditWidget
 	: public QTextEdit
@@ -13,11 +13,8 @@ class CellEditWidget
 public:
     explicit CellEditWidget(QWidget *parent = 0);
 
-    void updateCell (CellTO cell);
+    void updateCell (CellDescription const& cell);
     void requestUpdate ();
-
-Q_SIGNALS:
-    void cellDataChanged (CellTO cell);
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -34,6 +31,6 @@ private:
     QString generateFormattedRealString (qreal r);
     QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
-    CellTO _cell;
+	CellDescription _cell;
 };
 
