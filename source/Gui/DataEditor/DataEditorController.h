@@ -20,6 +20,7 @@ private:
 	Q_SLOT void onShow(bool visible);
 	Q_SLOT void dataUpdatedFromManipulator(set<UpdateTarget> const& targets);
 
+	DataEditorModel* _model = nullptr;
 	DataEditorView* _view = nullptr;
 	DataManipulator* _manipulator = nullptr;
 	DataEditorContext* _context = nullptr;
