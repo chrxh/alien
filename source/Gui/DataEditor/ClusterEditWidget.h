@@ -5,6 +5,7 @@
 
 #include "Model/Entities/Descriptions.h"
 #include "Model/Definitions.h"
+#include "DataEditorModel.h"
 
 class ClusterEditWidget
 	: public QTextEdit
@@ -13,8 +14,8 @@ class ClusterEditWidget
 public:
     explicit ClusterEditWidget(QWidget *parent = 0);
 
-    void updateCluster (ClusterDescription const& cluster);
-    void requestUpdate ();
+	void init(DataEditorModel* model);
+	void requestUpdate();
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -23,6 +24,7 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
+	Q_SLOT void notificationFromModel(set<DataEditorModel::Receiver> const& targets);
 
     void updateDisplay ();
 
@@ -30,5 +32,5 @@ private:
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 
-	ClusterDescription _cluster;
+	DataEditorModel* _model;
 };

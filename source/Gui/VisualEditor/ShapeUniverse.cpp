@@ -46,7 +46,7 @@ void ShapeUniverse::activate()
 	_itemManager->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	connect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::displayData);
+	connect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::notificationFromManipulator);
 
 	_manipulator->dataUpdateRequired(_viewport->getRect());
 }
@@ -54,7 +54,7 @@ void ShapeUniverse::activate()
 void ShapeUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	disconnect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::displayData);
+	disconnect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::notificationFromManipulator);
 }
 
 void ShapeUniverse::requestData()
@@ -62,9 +62,9 @@ void ShapeUniverse::requestData()
 	_manipulator->dataUpdateRequired(_viewport->getRect());
 }
 
-void ShapeUniverse::displayData(set<UpdateTarget> const& targets)
+void ShapeUniverse::notificationFromManipulator(set<DataManipulator::Receiver> const& targets)
 {
-	if (targets.find(UpdateTarget::VisualEditor) == targets.end()) {
+	if (targets.find(DataManipulator::Receiver::VisualEditor) == targets.end()) {
 		return;
 	}
 	_itemManager->update(_manipulator);
@@ -123,7 +123,7 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	if (clickedOnSpace(itemsClicked)) {
 		startMarking(e->scenePos());
 	}
-	Q_EMIT _manipulator->notify({ UpdateTarget::DataEditor });
+	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::DataEditor });
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -156,7 +156,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		}
 	}
 	if (leftButton || rightButton) {
-		Q_EMIT _manipulator->notify({ UpdateTarget::DataEditor });
+		Q_EMIT _manipulator->notify({ DataManipulator::Receiver::DataEditor });
 	}
 }
 
@@ -168,7 +168,7 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
-			Q_EMIT _manipulator->notify({ UpdateTarget::Simulation });
+			Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation });
 		}
 	}
 }

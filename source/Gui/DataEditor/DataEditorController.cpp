@@ -19,7 +19,7 @@ void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManip
 	_manipulator = manipulator;
 
 	connect(_context, &DataEditorContext::show, this, &DataEditorController::onShow);
-	connect(_manipulator, &DataManipulator::notify, this, &DataEditorController::dataUpdatedFromManipulator);
+	connect(_manipulator, &DataManipulator::notify, this, &DataEditorController::notificationFromManipulator);
 
 	onShow(false);
 }
@@ -34,9 +34,9 @@ void DataEditorController::onShow(bool visible)
 	_view->show(visible);
 }
 
-void DataEditorController::dataUpdatedFromManipulator(set<UpdateTarget> const& targets)
+void DataEditorController::notificationFromManipulator(set<DataManipulator::Receiver> const& targets)
 {
-	if (targets.find(UpdateTarget::DataEditor) == targets.end()) {
+	if (targets.find(DataManipulator::Receiver::DataEditor) == targets.end()) {
 		return;
 	}
 

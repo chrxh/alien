@@ -50,12 +50,12 @@ void DataManipulator::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
-	Q_EMIT notify({ UpdateTarget::DataEditor, UpdateTarget::VisualEditor });
+	Q_EMIT notify({ Receiver::DataEditor, Receiver::VisualEditor });
 }
 
-void DataManipulator::sendDataChangesToSimulation(set<UpdateTarget> const& targets)
+void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)
 {
-	if (targets.find(UpdateTarget::Simulation) != targets.end()) {
+	if (targets.find(Receiver::Simulation) != targets.end()) {
 		DataChangeDescription delta(_unchangedData, _data);
 		_access->updateData(delta);
 	}

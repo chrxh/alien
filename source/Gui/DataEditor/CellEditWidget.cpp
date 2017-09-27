@@ -14,9 +14,17 @@ CellEditWidget::CellEditWidget(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void CellEditWidget::updateCell (CellDescription const& cell)
+void CellEditWidget::init(DataEditorModel * model)
 {
-    _cell = cell;
+	_model = model;
+	connect(_model, &DataEditorModel::notify, this, &CellEditWidget::notificationFromModel);
+}
+
+void CellEditWidget::notificationFromModel (set<DataEditorModel::Receiver> const& targets)
+{
+	if (targets.find(DataEditorModel::Receiver::CellEdit) == targets.end()) {
+		return;
+	}
     updateDisplay();
 }
 
@@ -26,15 +34,15 @@ void CellEditWidget::requestUpdate ()
     QString currentText = QTextEdit::textCursor().block().text();
 
     if( row == 0 )
-        _cell.pos->setX(generateNumberFromFormattedString(currentText));
+        _model->selectedCell.pos->setX(generateNumberFromFormattedString(currentText));
     if( row == 1 )
-        _cell.pos->setY(generateNumberFromFormattedString(currentText));
+        _model->selectedCell.pos->setY(generateNumberFromFormattedString(currentText));
     if( row == 2 )
-		_cell.energy = generateNumberFromFormattedString(currentText);
+		_model->selectedCell.energy = generateNumberFromFormattedString(currentText);
     if( row == 4 )
-        _cell.maxConnections = qRound(generateNumberFromFormattedString(currentText));
-    if( (row == 6) && !(*_cell.tokenBlocked))
-        _cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText));
+        _model->selectedCell.maxConnections = qRound(generateNumberFromFormattedString(currentText));
+    if( (row == 6) && !(*_model->selectedCell.tokenBlocked))
+        _model->selectedCell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText));
 
 }
 
@@ -183,11 +191,11 @@ void CellEditWidget::keyPressEvent (QKeyEvent* e)
         k = "";
         if( e->key() == Qt::Key_Y ) {
             k = "y";
-            _cell.tokenBlocked = false;
+            _model->selectedCell.tokenBlocked = false;
         }
         if( e->key() == Qt::Key_N ) {
             k = "n";
-            _cell.tokenBlocked = true;
+            _model->selectedCell.tokenBlocked = true;
         }
         if( !k.isEmpty() ) {
             QTextEdit::textCursor().deleteChar();
@@ -215,7 +223,7 @@ void CellEditWidget::keyPressEvent (QKeyEvent* e)
             QTextEdit::moveCursor(QTextCursor::Down);
             QTextEdit::keyPressEvent(e);
         }
-        if( (row == 5) && !(*_cell.tokenBlocked) )
+        if( (row == 5) && !(*_model->selectedCell.tokenBlocked) )
             QTextEdit::keyPressEvent(e);
         if( row == 4 ) {
             QTextEdit::moveCursor(QTextCursor::EndOfLine);
@@ -268,7 +276,7 @@ void CellEditWidget::mousePressEvent(QMouseEvent* e)
         QTextEdit::moveCursor(QTextCursor::NextWord);
     }
     if( row == 6 ) {
-        if( !(*_cell.tokenBlocked)) {
+        if( !(*_model->selectedCell.tokenBlocked)) {
             QTextEdit::moveCursor(QTextCursor::StartOfBlock);
             QTextEdit::moveCursor(QTextCursor::NextWord);
             QTextEdit::moveCursor(QTextCursor::NextWord);
@@ -285,19 +293,19 @@ void CellEditWidget::mousePressEvent(QMouseEvent* e)
     //cursor at cell function?
     if( (row >= 7) && (col >= 18) && (col <= 36)) {
         if( row == 7 )
-            _cell.cellFunction->type = Enums::CellFunction::COMPUTER;
+            _model->selectedCell.cellFunction->type = Enums::CellFunction::COMPUTER;
         if( row == 8 )
-			_cell.cellFunction->type = Enums::CellFunction::PROPULSION;
+			_model->selectedCell.cellFunction->type = Enums::CellFunction::PROPULSION;
         if( row == 9 )
-			_cell.cellFunction->type = Enums::CellFunction::SCANNER;
+			_model->selectedCell.cellFunction->type = Enums::CellFunction::SCANNER;
         if( row == 10 )
-			_cell.cellFunction->type = Enums::CellFunction::WEAPON;
+			_model->selectedCell.cellFunction->type = Enums::CellFunction::WEAPON;
         if( row == 11 )
-			_cell.cellFunction->type = Enums::CellFunction::CONSTRUCTOR;
+			_model->selectedCell.cellFunction->type = Enums::CellFunction::CONSTRUCTOR;
         if( row == 12 )
-			_cell.cellFunction->type = Enums::CellFunction::SENSOR;
+			_model->selectedCell.cellFunction->type = Enums::CellFunction::SENSOR;
         if( row == 13 )
-			_cell.cellFunction->type = Enums::CellFunction::COMMUNICATOR;
+			_model->selectedCell.cellFunction->type = Enums::CellFunction::COMMUNICATOR;
         updateDisplay();
     }
 }
@@ -335,26 +343,26 @@ void CellEditWidget::updateDisplay ()
 
     //create string of display
     text = parStart+colorTextStart+ "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_cell.pos->x())+parEnd;
+    text += generateFormattedRealString(_model->selectedCell.pos->x())+parEnd;
     text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_cell.pos->y())+parEnd;
+    text += generateFormattedRealString(_model->selectedCell.pos->y())+parEnd;
     text += parStart+colorTextStart+ "internal energy: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*_cell.energy)+parEnd;
+    text += generateFormattedRealString(*_model->selectedCell.energy)+parEnd;
     text += parStart+colorTextStart+ "current bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+QString("%1").arg(_cell.connectingCells->size())+colorEnd+parEnd;
+    text += colorDataStart+QString("%1").arg(_model->selectedCell.connectingCells->size())+colorEnd+parEnd;
     text += parStart+colorTextStart+ "max bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+QString("%1").arg(*_cell.maxConnections)+colorEnd+parEnd;
+    text += colorDataStart+QString("%1").arg(*_model->selectedCell.maxConnections)+colorEnd+parEnd;
     text += parStart+colorTextStart+ "allow token: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    if(!(*_cell.tokenBlocked)) {
+    if(!(*_model->selectedCell.tokenBlocked)) {
         text += colorDataStart+"y"+colorEnd+parEnd;
         text += parStart+colorTextStart+ "branch number: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-        text += colorDataStart+QString("%1").arg(*_cell.tokenBranchNumber)+colorEnd+parEnd;
+        text += colorDataStart+QString("%1").arg(*_model->selectedCell.tokenBranchNumber)+colorEnd+parEnd;
     }
     else {
         text += colorDataStart+"n"+colorEnd+parEnd;
         text += parStart+colorTextStartInactive+ "branch number: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd+parEnd;
     }
-    text += generateFormattedCellFunctionString(_cell.cellFunction->type);
+    text += generateFormattedCellFunctionString(_model->selectedCell.cellFunction->type);
 
     QTextEdit::setText(text);
 

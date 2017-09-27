@@ -10,6 +10,7 @@
 #include "Model/Entities/CellTO.h"
 #include "Model/Entities/Descriptions.h"
 #include "Gui/Definitions.h"
+#include "Gui/DataManipulator.h"
 
 class ShapeUniverse : public QGraphicsScene
 {
@@ -29,7 +30,7 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
-	Q_SLOT void displayData(set<UpdateTarget> const& targets);
+	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);
 
 	struct Selection
 	{
