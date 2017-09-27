@@ -5,7 +5,9 @@
       <UniqueIdentifier>{bcc88cf3-0d02-4e06-a3d3-2906911cf18e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{47fb5731-135a-45cb-96c2-17dabdd01fc0}</UniqueIdentifier>
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+      <ParseFiles>true</ParseFiles>
     </Filter>
     <Filter Include="Source Files\Assistance">
       <UniqueIdentifier>{6b1aa77d-d5f0-4133-ae8e-d70427125474}</UniqueIdentifier>
@@ -35,6 +37,11 @@
     </Filter>
     <Filter Include="Source Files\Toolbar">
       <UniqueIdentifier>{800aeef2-dba6-4418-8130-3bb7f83b1200}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+      <ParseFiles>true</ParseFiles>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -407,6 +414,15 @@
     <ClCompile Include="Release\moc_CellEditWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditorModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditorModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorModel.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -598,6 +614,9 @@
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\CellEditWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorModel.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
   </ItemGroup>

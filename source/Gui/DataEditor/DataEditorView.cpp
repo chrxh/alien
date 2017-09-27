@@ -3,6 +3,7 @@
 #include "Gui/Settings.h"
 #include "ClusterEditWidget.h"
 #include "CellEditWidget.h"
+#include "DataEditorModel.h"
 
 #include "DataEditorView.h"
 
@@ -37,9 +38,10 @@ DataEditorView::DataEditorView(QWidget * parent)
 	update();
 }
 
-void DataEditorView::init(IntVector2D const & upperLeftPosition)
+void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel* model)
 {
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
+	_model = model;
 }
 
 void DataEditorView::update() const
@@ -51,8 +53,8 @@ void DataEditorView::update() const
 
 	if (_editorSelector == EditorSelector::Cluster) {
 		_mainTabWidget->setVisible(true);
-		_clusterEditTab->updateCluster(_selectedCluster);
-		_cellEditTab->updateCell(_selectedCell);
+		_clusterEditTab->updateCluster(_model->selectedCluster);
+		_cellEditTab->updateCell(_model->selectedCell);
 	}
 }
 
@@ -62,11 +64,9 @@ void DataEditorView::switchToNoEditor()
 	update();
 }
 
-void DataEditorView::switchToClusterEditor(ClusterDescription const & cluster, CellDescription const& cell)
+void DataEditorView::switchToClusterEditor()
 {
 	_editorSelector = EditorSelector::Cluster;
-	_selectedCluster = cluster;
-	_selectedCell = cell;
 	update();
 }
 
