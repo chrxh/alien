@@ -46,7 +46,7 @@ void ShapeUniverse::activate()
 	_itemManager->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	connect(_manipulator, &DataManipulator::dataUpdated, this, &ShapeUniverse::displayData);
+	connect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::displayData);
 
 	_manipulator->dataUpdateRequired(_viewport->getRect());
 }
@@ -54,7 +54,7 @@ void ShapeUniverse::activate()
 void ShapeUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	disconnect(_manipulator, &DataManipulator::dataUpdated, this, &ShapeUniverse::displayData);
+	disconnect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::displayData);
 }
 
 void ShapeUniverse::requestData()
@@ -62,8 +62,11 @@ void ShapeUniverse::requestData()
 	_manipulator->dataUpdateRequired(_viewport->getRect());
 }
 
-void ShapeUniverse::displayData()
+void ShapeUniverse::displayData(set<UpdateTarget> const& targets)
 {
+	if (targets.find(UpdateTarget::VisualEditor) == targets.end()) {
+		return;
+	}
 	_itemManager->update(_manipulator);
 }
 
@@ -120,6 +123,7 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	if (clickedOnSpace(itemsClicked)) {
 		startMarking(e->scenePos());
 	}
+	Q_EMIT _manipulator->notify({ UpdateTarget::DataEditor });
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -151,6 +155,9 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 			_itemManager->update(_manipulator);
 		}
 	}
+	if (leftButton || rightButton) {
+		Q_EMIT _manipulator->notify({ UpdateTarget::DataEditor });
+	}
 }
 
 void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
@@ -161,7 +168,7 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
-			_manipulator->sendDataChangesToSimulation();
+			Q_EMIT _manipulator->notify({ UpdateTarget::Simulation });
 		}
 	}
 }

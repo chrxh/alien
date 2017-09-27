@@ -29,7 +29,7 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
-	void displayData();
+	Q_SLOT void displayData(set<UpdateTarget> const& targets);
 
 	struct Selection
 	{
