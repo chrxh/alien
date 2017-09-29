@@ -12,7 +12,7 @@ public:
 	DataEditorView(QWidget * parent = nullptr);
 	virtual ~DataEditorView() = default;
 
-	void init(IntVector2D const& upperLeftPosition, DataEditorModel* model);
+	void init(IntVector2D const& upperLeftPosition, DataEditorModel* model, DataEditorController* controller);
 
 	void switchToNoEditor();
 	void switchToClusterEditor();

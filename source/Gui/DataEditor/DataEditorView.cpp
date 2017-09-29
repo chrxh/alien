@@ -38,12 +38,12 @@ DataEditorView::DataEditorView(QWidget * parent)
 	update();
 }
 
-void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel* model)
+void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel* model, DataEditorController* controller)
 {
 	_model = model;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
-	_clusterEditTab->init(_model);
-	_cellEditTab->init(_model);
+	_clusterEditTab->init(_model, controller);
+	_cellEditTab->init(_model, controller);
 }
 
 void DataEditorView::update() const
@@ -55,7 +55,8 @@ void DataEditorView::update() const
 
 	if (_editorSelector == EditorSelector::Cluster) {
 		_mainTabWidget->setVisible(true);
-		Q_EMIT _model->notify({ DataEditorModel::Receiver::CellEdit, DataEditorModel::Receiver::ClusterEdit });
+		_clusterEditTab->updateDisplay();
+		_cellEditTab->updateDisplay();
 	}
 }
 
