@@ -15,7 +15,7 @@ DataEditorController::DataEditorController(QWidget *parent /*= nullptr*/)
 void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator)
 {
 	_model = new DataEditorModel(this);
-	_view->init(upperLeftPosition, _model);
+	_view->init(upperLeftPosition, _model, this);
 	_manipulator = manipulator;
 
 	connect(_context, &DataEditorContext::show, this, &DataEditorController::onShow);
@@ -43,8 +43,7 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 	auto const& selectedCellIds = _manipulator->getSelectedCellIds();
 	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
-		_model->selectedCluster = _manipulator->getClusterDescRef(selectedCellIds.front());
-		_model->selectedCell = _manipulator->getCellDescRef(selectedCellIds.front());
+		_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellIds.front()), selectedCellIds.front());
 		_view->switchToClusterEditor();
 	}
 	if (selectedCellIds.size() + selectedParticleIds.size() > 1) {

@@ -5,7 +5,7 @@
 
 #include "Model/Definitions.h"
 #include "Model/Entities/Descriptions.h"
-#include "DataEditorModel.h"
+#include "Gui/Definitions.h"
 
 class CellEditWidget
 	: public QTextEdit
@@ -15,7 +15,9 @@ public:
     CellEditWidget(QWidget *parent = 0);
 	virtual ~CellEditWidget() = default;
 
-	void init(DataEditorModel* model);
+	void init(DataEditorModel* model, DataEditorController* controller);
+
+    void updateDisplay ();
 
     void requestUpdate ();
 
@@ -26,9 +28,6 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
-    Q_SLOT void notificationFromModel (set<DataEditorModel::Receiver> const& targets);
-
-    void updateDisplay ();
 
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
@@ -36,5 +35,6 @@ private:
     QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
 	DataEditorModel* _model = nullptr;
+	DataEditorController* _controller = nullptr;
 };
 

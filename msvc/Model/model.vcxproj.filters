@@ -346,6 +346,15 @@
     <ClCompile Include="Release\moc_ParticleMapImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_UnitGrid.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UnitGrid.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_UnitGrid.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Settings.h">

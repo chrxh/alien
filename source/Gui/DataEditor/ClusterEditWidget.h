@@ -5,7 +5,7 @@
 
 #include "Model/Entities/Descriptions.h"
 #include "Model/Definitions.h"
-#include "DataEditorModel.h"
+#include "Gui/Definitions.h"
 
 class ClusterEditWidget
 	: public QTextEdit
@@ -14,7 +14,9 @@ class ClusterEditWidget
 public:
     explicit ClusterEditWidget(QWidget *parent = 0);
 
-	void init(DataEditorModel* model);
+	void init(DataEditorModel* model, DataEditorController* controller);
+    void updateDisplay ();
+
 	void requestUpdate();
 
 protected:
@@ -24,13 +26,11 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
-	Q_SLOT void notificationFromModel(set<DataEditorModel::Receiver> const& targets);
-
-    void updateDisplay ();
 
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 
-	DataEditorModel* _model;
+	DataEditorModel* _model = nullptr;
+	DataEditorController* _controller = nullptr;
 };

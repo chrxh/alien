@@ -4,7 +4,8 @@
 
 #include "Model/Entities/Descriptions.h"
 
-class DataEditorModel : public QObject
+class DataEditorModel
+	: public QObject
 {
 	Q_OBJECT
 
@@ -12,9 +13,15 @@ public:
 	DataEditorModel(QObject *parent);
 	virtual ~DataEditorModel() = default;
 
-	enum class Receiver { ClusterEdit, CellEdit };
-	Q_SIGNAL void notify(set<Receiver> const& targets);
+	void editClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
 
-	ClusterDescription selectedCluster;
-	CellDescription selectedCell;
+	CellDescription& getCellToEditRef();
+	ClusterDescription& getClusterToEditRef();
+
+private:
+	DataDescription _selectedData;
+	DescriptionNavigationMaps _navi;
+
+	set<uint64_t> _selectedCellIds;
+	set<uint64_t> _selectedParticleIds;
 };

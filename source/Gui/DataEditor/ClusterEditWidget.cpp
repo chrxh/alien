@@ -16,37 +16,30 @@ ClusterEditWidget::ClusterEditWidget(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void ClusterEditWidget::init(DataEditorModel* model)
+void ClusterEditWidget::init(DataEditorModel* model, DataEditorController* controller)
 {
 	_model = model;
-	connect(_model, &DataEditorModel::notify, this, &ClusterEditWidget::notificationFromModel);
-}
-
-void ClusterEditWidget::notificationFromModel(set<DataEditorModel::Receiver> const& targets)
-{
-	if (targets.find(DataEditorModel::Receiver::ClusterEdit) == targets.end()) {
-		return;
-	}
-	updateDisplay();
+	_controller = controller;
 }
 
 void ClusterEditWidget::requestUpdate ()
 {
-    int row = QTextEdit::textCursor().blockNumber();
+	auto &cluster= _model->getClusterToEditRef();
+	int row = QTextEdit::textCursor().blockNumber();
     QString currentText = QTextEdit::textCursor().block().text();
 
     if( row == 1 )
-        _model->selectedCluster.pos->setX(generateNumberFromFormattedString(currentText));
+        cluster.pos->setX(generateNumberFromFormattedString(currentText));
     if( row == 2 )
-		_model->selectedCluster.pos->setY(generateNumberFromFormattedString(currentText));
+		cluster.pos->setY(generateNumberFromFormattedString(currentText));
     if( row == 3 )
-		_model->selectedCluster.vel->setX(generateNumberFromFormattedString(currentText));
+		cluster.vel->setX(generateNumberFromFormattedString(currentText));
     if( row == 4 )
-		_model->selectedCluster.vel->setY(generateNumberFromFormattedString(currentText));
+		cluster.vel->setY(generateNumberFromFormattedString(currentText));
     if( row == 5 )
-		*_model->selectedCluster.angle = generateNumberFromFormattedString(currentText);
+		*cluster.angle = generateNumberFromFormattedString(currentText);
     if( row == 6 )
-		*_model->selectedCluster.angularVel = generateNumberFromFormattedString(currentText);
+		*cluster.angularVel = generateNumberFromFormattedString(currentText);
 }
 
 void ClusterEditWidget::keyPressEvent (QKeyEvent* e)
@@ -252,7 +245,8 @@ void ClusterEditWidget::wheelEvent (QWheelEvent* e)
 
 void ClusterEditWidget::updateDisplay ()
 {
-    int col = QTextEdit::textCursor().columnNumber();
+	auto &cluster = _model->getClusterToEditRef();
+	int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
 
     //define auxilliary strings
@@ -271,19 +265,19 @@ void ClusterEditWidget::updateDisplay ()
 
     //create string of display
     text = parStart+colorTextStart+ "number of cells: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+QString("%1").arg(_model->selectedCluster.cells->size())+colorEnd+parEnd;
+    text += colorDataStart+QString("%1").arg(cluster.cells->size())+colorEnd+parEnd;
     text += parStart+colorTextStart+ "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_model->selectedCluster.pos->x())+parEnd;
+    text += generateFormattedRealString(cluster.pos->x())+parEnd;
     text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_model->selectedCluster.pos->y())+parEnd;
+    text += generateFormattedRealString(cluster.pos->y())+parEnd;
     text += parStart+colorTextStart+ "velocity x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_model->selectedCluster.vel->x())+parEnd;
+    text += generateFormattedRealString(cluster.vel->x())+parEnd;
     text += parStart+colorTextStart+ "velocity y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_model->selectedCluster.vel->y())+parEnd;
+    text += generateFormattedRealString(cluster.vel->y())+parEnd;
     text += parStart+colorTextStart+ "angle: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*_model->selectedCluster.angle)+parEnd;
+    text += generateFormattedRealString(*cluster.angle)+parEnd;
     text += parStart+colorTextStart+ "angular vel: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*_model->selectedCluster.angularVel)+parEnd;
+    text += generateFormattedRealString(*cluster.angularVel)+parEnd;
 
     QTextEdit::setText(text);
 
