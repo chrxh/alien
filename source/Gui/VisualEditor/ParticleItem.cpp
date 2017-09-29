@@ -26,8 +26,8 @@ uint64_t ParticleItem::getId() const
 
 QRectF ParticleItem::boundingRect () const
 {
-    return QRectF(CoordinateSystem::modelToScene(-0.5), CoordinateSystem::modelToScene(-0.5)
-		, CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0));
+    return QRectF(CoordinateSystem::modelToScene(-0.4), CoordinateSystem::modelToScene(-0.4)
+		, CoordinateSystem::modelToScene(0.8), CoordinateSystem::modelToScene(0.8));
 }
 
 void ParticleItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
