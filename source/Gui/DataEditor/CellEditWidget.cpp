@@ -3,8 +3,8 @@
 #include <QTextLayout>
 #include <qmath.h>
 
-#include "Model/Entities/Cell.h"
-#include "Model/Entities/Cluster.h"
+#include "Model/Local/Cell.h"
+#include "Model/Local/Cluster.h"
 #include "Gui/Settings.h"
 
 #include "CellEditWidget.h"

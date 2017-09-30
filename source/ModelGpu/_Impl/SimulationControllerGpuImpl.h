@@ -2,7 +2,7 @@
 
 #include <QTime>
 
-#include "Model/SimulationController.h"
+#include "Model/Api/SimulationController.h"
 #include "DefinitionsImpl.h"
 
 class SimulationControllerGpuImpl

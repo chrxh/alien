@@ -3,12 +3,12 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/ModelBuilderFacade.h"
-#include "Model/Settings.h"
-#include "Model/SimulationController.h"
-#include "Model/CellConnector.h"
-#include "Model/Context/SimulationContextLocal.h"
-#include "Model/SimulationParameters.h"
+#include "Model/Api/ModelBuilderFacade.h"
+#include "Model/Api/Settings.h"
+#include "Model/Api/SimulationController.h"
+#include "Model/Api/CellConnector.h"
+#include "Model/Local/SimulationContextLocal.h"
+#include "Model/Api/SimulationParameters.h"
 
 #include "tests/Predicates.h"
 

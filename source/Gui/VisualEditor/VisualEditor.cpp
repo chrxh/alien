@@ -4,9 +4,9 @@
 
 #include "gui/Settings.h"
 #include "gui/texteditor/TextEditor.h"
-#include "Model/SimulationAccess.h"
-#include "Model/Context/UnitContext.h"
-#include "Model/Context/SpaceMetricLocal.h"
+#include "Model/Api/SimulationAccess.h"
+#include "Model/Local/UnitContext.h"
+#include "Model/Local/SpaceMetricLocal.h"
 #include "PixelUniverse.h"
 #include "ShapeUniverse.h"
 #include "ViewportController.h"

@@ -1,8 +1,8 @@
 #include "EnergyEdit.h"
 
 #include "gui/Settings.h"
-#include "Model/Entities/Cell.h"
-#include "Model/Entities/Cluster.h"
+#include "Model/Local/Cell.h"
+#include "Model/Local/Cluster.h"
 
 #include <QKeyEvent>
 #include <QTextBlock>

@@ -1,8 +1,8 @@
 #include "Base/ServiceLocator.h"
 
-#include "Model/Context/SpaceMetricLocal.h"
-#include "Model/Context/ContextFactory.h"
-#include "Model/ModelBuilderFacade.h"
+#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/ContextFactory.h"
+#include "Model/Api/ModelBuilderFacade.h"
 
 #include "SimulationControllerGpuImpl.h"
 #include "SimulationContextGpuImpl.h"

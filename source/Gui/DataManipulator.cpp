@@ -1,7 +1,7 @@
 #include "DataManipulator.h"
 
-#include "Model/SimulationAccess.h"
-#include "Model/CellConnector.h"
+#include "Model/Api/SimulationAccess.h"
+#include "Model/Api/CellConnector.h"
 
 void DataManipulator::init(SimulationAccess * access, CellConnector * connector)
 {

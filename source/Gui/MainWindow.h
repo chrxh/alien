@@ -5,7 +5,7 @@
 #include <QStack>
 
 #include "Definitions.h"
-#include "Model/Definitions.h"
+#include "Model/Api/Definitions.h"
 
 namespace Ui {
     class MainWindow;

@@ -2,10 +2,10 @@
 #include <QFile>
 #include <gtest/gtest.h>
 
-#include "Model/Entities/Cluster.h"
-#include "Model/SimulationController.h"
-#include "Model/Context/UnitContext.h"
-#include "Model/Settings.h"
+#include "Model/Local/Cluster.h"
+#include "Model/Api/SimulationController.h"
+#include "Model/Local/UnitContext.h"
+#include "Model/Api/Settings.h"
 #include "tests/TestSettings.h"
 
 

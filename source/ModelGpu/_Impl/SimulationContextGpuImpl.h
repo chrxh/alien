@@ -2,7 +2,7 @@
 
 #include <QThread>
 
-#include "Model/SimulationContext.h"
+#include "Model/Api/SimulationContext.h"
 #include "DefinitionsImpl.h"
 
 class SimulationContextGpuImpl

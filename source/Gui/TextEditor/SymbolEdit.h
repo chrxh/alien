@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "Model/Definitions.h"
+#include "Model/Api/Definitions.h"
 
 namespace Ui {
 class SymbolEdit;

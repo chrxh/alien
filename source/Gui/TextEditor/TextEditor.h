@@ -3,8 +3,8 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "Model/Entities/CellTO.h"
-#include "Model/Definitions.h"
+#include "Model/Api/CellTO.h"
+#include "Model/Api/Definitions.h"
 #include "Gui/Definitions.h"
 
 namespace Ui {

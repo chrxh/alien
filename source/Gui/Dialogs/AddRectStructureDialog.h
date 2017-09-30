@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "model/Definitions.h"
+#include "Model/Api/Definitions.h"
 
 namespace Ui {
 class AddRectStructureDialog;
