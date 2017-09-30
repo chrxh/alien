@@ -17,9 +17,9 @@ public:
 	void switchToNoEditor();
 	void switchToClusterEditor();
 	void show(bool visible);
+	void update() const;
 
 private:
-	void update() const;
 
 	bool _visible = false;
 	enum class EditorSelector { No, Cluster };

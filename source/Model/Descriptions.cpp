@@ -18,7 +18,7 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	tokenBlocked = change.tokenBlocked;
 	tokenBranchNumber = change.tokenBranchNumber;
 	metadata = change.metadata;
-	cellFunction = change.cellFunction;
+	cellFeature = change.cellFunction;
 	tokens = change.tokens;
 }
 

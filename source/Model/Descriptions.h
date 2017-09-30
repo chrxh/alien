@@ -3,18 +3,18 @@
 #include "Model/Definitions.h"
 #include "Model/CellFeatureEnums.h"
 
-struct CellFunctionDescription
+struct CellFeatureDescription
 {
 	Enums::CellFunction::Type type = Enums::CellFunction::COMPUTER;
 	QByteArray data;
 
-	CellFunctionDescription& setType(Enums::CellFunction::Type value) { type = value; return *this; }
-	CellFunctionDescription& setData(QByteArray const &value) { data = value; return *this; }
-	bool operator==(CellFunctionDescription const& other) const {
+	CellFeatureDescription& setType(Enums::CellFunction::Type value) { type = value; return *this; }
+	CellFeatureDescription& setData(QByteArray const &value) { data = value; return *this; }
+	bool operator==(CellFeatureDescription const& other) const {
 		return type == other.type
 			&& data == other.data;
 	}
-	bool operator!=(CellFunctionDescription const& other) const { return !operator==(other); }
+	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
 };
 
 
@@ -40,7 +40,7 @@ struct MODEL_EXPORT CellDescription
 	optional<bool> tokenBlocked;
 	optional<int> tokenBranchNumber;
 	optional<CellMetadata> metadata;
-	optional<CellFunctionDescription> cellFunction;
+	optional<CellFeatureDescription> cellFeature;
 	optional<vector<TokenDescription>> tokens;
 
 	CellDescription() = default;
@@ -53,7 +53,7 @@ struct MODEL_EXPORT CellDescription
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
-	CellDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction = value; return *this; }
+	CellDescription& setCellFeature(CellFeatureDescription const& value) { cellFeature = value; return *this; }
 	CellDescription& setTokens(vector<TokenDescription> const& value) { tokens = value; return *this; }
 };
 
@@ -154,6 +154,7 @@ struct DescriptionNavigationMaps
 	set<uint64_t> cellIds;
 	set<uint64_t> particleIds;
 	map<uint64_t, uint64_t> clusterIdsByCellIds;
+	map<uint64_t, int> clusterIndicesByClusterIds;
 	map<uint64_t, int> clusterIndicesByCellIds;
 	map<uint64_t, int> cellIndicesByCellIds;
 	map<uint64_t, int> particleIndicesByParticleIds;
@@ -164,12 +165,14 @@ struct DescriptionNavigationMaps
 		particleIds.clear();
 		clusterIdsByCellIds.clear();
 		clusterIndicesByCellIds.clear();
+		clusterIndicesByClusterIds.clear();
 		cellIndicesByCellIds.clear();
 		particleIndicesByParticleIds.clear();
 
 		int clusterIndex = 0;
 		if (data.clusters) {
 			for (auto const &cluster : *data.clusters) {
+				clusterIndicesByClusterIds.insert_or_assign(cluster.id, clusterIndex);
 				int cellIndex = 0;
 				if (cluster.cells) {
 					for (auto const &cell : *cluster.cells) {

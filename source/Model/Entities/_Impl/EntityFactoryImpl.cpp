@@ -49,7 +49,7 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 	cell->setFlagTokenBlocked(cellDesc.tokenBlocked.get_value_or(false));
 	cell->setMetadata(cellDesc.metadata.get_value_or(CellMetadata()));
 
-	auto const& cellFunction = cellDesc.cellFunction.get_value_or(CellFunctionDescription());
+	auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
 	featureFactory->addCellFunction(cell, cellFunction.type, cellFunction.data, context);
 	featureFactory->addEnergyGuidance(cell, context);
 	auto const& tokensDesc = cellDesc.tokens.get_value_or(vector<TokenDescription>());
