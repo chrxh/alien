@@ -4,7 +4,7 @@
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
-#include "Model/Context/SimulationContext.h"
+#include "Model/Context/SimulationContextLocal.h"
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/Unit.h"
 #include "Model/Context/UnitContext.h"
@@ -22,7 +22,7 @@ protected:
 	IntVector2D correctUniversePosition(IntVector2D const& pos);
 
 	SimulationController* _controller = nullptr;
-	SimulationContext* _context = nullptr;
+	SimulationContextLocal* _context = nullptr;
 	UnitGrid* _grid = nullptr;
 	const IntVector2D _gridSize{ 6, 8 };
 	const IntVector2D _universeSize{ 1200, 800 };
@@ -36,7 +36,7 @@ MapCompartmentTest::MapCompartmentTest()
 	auto parameters = facade->buildDefaultSimulationParameters();
 
 	_controller = facade->buildSimulationController(4, _gridSize, _universeSize, symbols, parameters);
-	_context = static_cast<SimulationContext*>(_controller->getContext());
+	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
 
 	_grid = _context->getUnitGrid();
 	_compartmentSize = { _universeSize.x / _gridSize.x, _universeSize.y / _gridSize.y };

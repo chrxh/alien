@@ -4,7 +4,7 @@
 #include "Model/Entities/Token.h"
 #include "Model/Features/CellFeature.h"
 #include "Model/Physics/Physics.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/CellMap.h"
 

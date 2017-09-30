@@ -4,11 +4,11 @@
 
 #include "Base/NumberGenerator.h"
 
-#include "Model/Context/SpaceMetricApi.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SpaceMetric.h"
+#include "Model/SimulationParameters.h"
 
 
-void CellConnectorImpl::init(SpaceMetricApi *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
+void CellConnectorImpl::init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
 {
 	_metric = metric;
 	_parameters = parameters;

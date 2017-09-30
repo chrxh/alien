@@ -1,14 +1,14 @@
 #include "Base/NumberGenerator.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/UnitThreadController.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 #include "Model/Metadata/SymbolTable.h"
 
 #include "SimulationContextImpl.h"
 
 SimulationContextImpl::SimulationContextImpl(QObject * parent)
-	: SimulationContext(parent)
+	: SimulationContextLocal(parent)
 {
 }
 
@@ -17,7 +17,7 @@ SimulationContextImpl::~SimulationContextImpl()
 	delete _threads;
 }
 
-void SimulationContextImpl::init(NumberGenerator* numberGen, SpaceMetric* metric, UnitGrid* grid, UnitThreadController* threads
+void SimulationContextImpl::init(NumberGenerator* numberGen, SpaceMetricLocal* metric, UnitGrid* grid, UnitThreadController* threads
 	, SymbolTable * symbolTable, SimulationParameters* parameters)
 {
 	SET_CHILD(_numberGen, numberGen);
@@ -28,7 +28,7 @@ void SimulationContextImpl::init(NumberGenerator* numberGen, SpaceMetric* metric
 	SET_CHILD(_simulationParameters, parameters);
 }
 
-SpaceMetricApi * SimulationContextImpl::getSpaceMetric() const
+SpaceMetric * SimulationContextImpl::getSpaceMetric() const
 {
 	return _metric;
 }

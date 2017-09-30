@@ -5,8 +5,8 @@
 #include <QEvent>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Context/SimulationParameters.h"
-#include "Model/Context/SimulationContext.h"
+#include "Model/SimulationParameters.h"
+#include "Model/Context/SimulationContextLocal.h"
 #include "Model/Context/ParticleMap.h"
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Entities/Cell.h"
@@ -371,7 +371,7 @@ void TextEditor::reclustered (QList< Cluster* > clusters)
 */
 }
 
-void TextEditor::universeUpdated (SimulationContext* context, bool force)
+void TextEditor::universeUpdated (SimulationContextLocal* context, bool force)
 {
 	_context = context;
     defocused(false);
@@ -380,6 +380,7 @@ void TextEditor::universeUpdated (SimulationContext* context, bool force)
 void TextEditor::requestUpdate ()
 {
     //save cell data
+/*
     if( _focusCell ) {
 
          //save edited code from code editor
@@ -404,6 +405,7 @@ void TextEditor::requestUpdate ()
             tab->requestUpdate();
         }
     }
+*/
 
     //save energy particle data
 /*

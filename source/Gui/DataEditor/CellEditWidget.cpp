@@ -9,6 +9,7 @@
 
 #include "CellEditWidget.h"
 #include "DataEditorModel.h"
+#include "DataEditorController.h"
 
 CellEditWidget::CellEditWidget(QWidget *parent) :
     QTextEdit(parent)
@@ -22,7 +23,7 @@ void CellEditWidget::init(DataEditorModel * model, DataEditorController* control
 	_controller = controller;
 }
 
-void CellEditWidget::requestUpdate ()
+void CellEditWidget::updateData ()
 {
     int row = QTextEdit::textCursor().blockNumber();
     QString currentText = QTextEdit::textCursor().block().text();
@@ -38,7 +39,7 @@ void CellEditWidget::requestUpdate ()
 		cell.maxConnections = qRound(generateNumberFromFormattedString(currentText));
     if( (row == 6) && !(*cell.tokenBlocked))
 		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText));
-
+	_controller->notificationFromCellEditWidget();
 }
 
 void CellEditWidget::keyPressEvent (QKeyEvent* e)
@@ -55,7 +56,7 @@ void CellEditWidget::keyPressEvent (QKeyEvent* e)
 
     //request update?
     if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
-        requestUpdate();
+        updateData();
 
     //typing number?
     QString k;

@@ -13,8 +13,8 @@
 #include "Model/Settings.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/CellMap.h"
-#include "Model/Context/SpaceMetric.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SpaceMetricLocal.h"
+#include "Model/SimulationParameters.h"
 
 #include "ClusterImpl.h"
 
@@ -880,7 +880,7 @@ qreal ClusterImpl::calcAngularMassWithNewParticle (QVector2D particlePos) const
     center = center / (_cells.size()+1);
 
     //calc new angular mass
-	SpaceMetric* metric = _context->getSpaceMetric();
+	SpaceMetricLocal* metric = _context->getSpaceMetric();
     QVector2D diff = particleRelPos - center;
 	metric->correctDisplacement(diff);
     qreal aMass = diff.lengthSquared();
@@ -904,7 +904,7 @@ qreal ClusterImpl::calcAngularMassWithoutUpdate () const
 
     //calc new angular mass
     qreal aMass = 0.0;
-	SpaceMetric* metric = _context->getSpaceMetric();
+	SpaceMetricLocal* metric = _context->getSpaceMetric();
 	foreach(Cell* cell, _cells) {
         QVector2D displacement = cell->getRelPosition() - center;
 		metric->correctDisplacement(displacement);

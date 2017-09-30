@@ -10,20 +10,20 @@
 #include "Model/Features/CellComputer.h"
 #include "Model/Features/EnergyGuidance.h"
 #include "Model/Features/CellFeatureFactory.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 #include "Model/Context/CellMap.h"
 #include "Model/Context/ParticleMap.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Context/ContextFactory.h"
 #include "Model/Context/MapCompartment.h"
 #include "Model/Context/UnitThreadController.h"
 #include "Model/Context/UnitGrid.h"
-#include "Model/Context/SimulationContext.h"
+#include "Model/Context/SimulationContextLocal.h"
 #include "Model/Context/Unit.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/AccessPorts/AccessPortFactory.h"
-#include "Model/AccessPorts/SimulationAccess.h"
 #include "Model/Metadata/SymbolTable.h"
+#include "Model/SimulationAccess.h"
 #include "Model/Settings.h"
 #include "Model/_Impl/SimulationControllerImpl.h"
 
@@ -40,7 +40,7 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	SimulationContext* context = contextFactory->buildSimulationContext();
+	SimulationContextLocal* context = contextFactory->buildSimulationContext();
 
 	auto threads = contextFactory->buildSimulationThreads();
 	auto grid = contextFactory->buildSimulationGrid();
@@ -79,12 +79,12 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	}
 
 	auto controller = new SimulationControllerImpl();
-	controller->init(static_cast<SimulationContext*>(context));
+	controller->init(static_cast<SimulationContextLocal*>(context));
 
 	return controller;
 }
 
-SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContextApi * contextApi) const
+SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContext * contextApi) const
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
 	auto access = factory->buildSimulationAccess();
@@ -92,15 +92,15 @@ SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationConte
 	return access;
 }
 
-CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContextApi* contextApi) const
+CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContext* contextApi) const
 {
 	auto connector = new CellConnectorImpl();
-	auto context = static_cast<SimulationContext*>(contextApi);
+	auto context = static_cast<SimulationContextLocal*>(contextApi);
 	connector->init(context->getSpaceMetric(), context->getSimulationParameters(), context->getNumberGenerator());
 	return connector;
 }
 
-Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContext* context) const
+Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextLocal* context) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -110,7 +110,7 @@ Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simulati
 	auto unit = contextFactory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = contextFactory->buildSimulationUnitContext();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
-	auto metric = static_cast<SpaceMetric*>(context->getSpaceMetric())->clone();
+	auto metric = static_cast<SpaceMetricLocal*>(context->getSpaceMetric())->clone();
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();

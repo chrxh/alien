@@ -10,7 +10,7 @@ public:
 	UnitGrid(QObject* parent) : QObject(parent) {}
 	virtual ~UnitGrid() = default;
 
-	virtual void init(IntVector2D gridSize, SpaceMetric* metric) = 0;
+	virtual void init(IntVector2D gridSize, SpaceMetricLocal* metric) = 0;
 
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) = 0;
 	virtual IntVector2D getSize() const = 0;

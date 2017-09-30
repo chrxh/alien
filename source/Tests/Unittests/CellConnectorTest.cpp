@@ -7,8 +7,8 @@
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
 #include "Model/CellConnector.h"
-#include "Model/Context/SimulationContext.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SimulationContextLocal.h"
+#include "Model/SimulationParameters.h"
 
 #include "tests/Predicates.h"
 
@@ -39,7 +39,7 @@ CellConnectorTest::CellConnectorTest()
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
 	_controller = facade->buildSimulationController(1, { 1,1 }, _universeSize, symbols, _parameters);
-	auto context = static_cast<SimulationContext*>(_controller->getContext());
+	auto context = static_cast<SimulationContextLocal*>(_controller->getContext());
 	_numberGen = context->getNumberGenerator();
 	_connector = facade->buildCellConnector(context);
 }

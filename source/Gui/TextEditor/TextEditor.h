@@ -82,7 +82,7 @@ public Q_SLOTS:
 	void energyParticleFocused(Particle* e);
     void energyParticleUpdated_Slot (Particle* e);
     void reclustered (QList< Cluster* > clusters);
-    void universeUpdated (SimulationContext* context, bool force);
+    void universeUpdated (SimulationContextLocal* context, bool force);
     void requestUpdate ();
 
 	void entitiesSelected(int numCells, int numEnergyParticles);
@@ -117,7 +117,7 @@ private:
     void invokeUpdateCell (bool clusterDataChanged);
     void setTabSymbolsWidgetVisibility ();
 
-	SimulationContext* _context;
+	SimulationContextLocal* _context;
 
     //widgets
 	TextEditorWidgets _widgets;

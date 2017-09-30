@@ -9,8 +9,8 @@
 #include "Gui/VisualEditor/ViewportInterface.h"
 #include "Model/SimulationController.h"
 #include "Model/ModelBuilderFacade.h"
-#include "Model/Context/SimulationContextApi.h"
-#include "Model/Context/SpaceMetricApi.h"
+#include "Model/SimulationContext.h"
+#include "Model/SpaceMetric.h"
 
 #include "ShapeUniverse.h"
 #include "CellItem.h"

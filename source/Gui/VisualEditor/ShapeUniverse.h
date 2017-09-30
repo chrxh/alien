@@ -8,7 +8,7 @@
 
 #include "Model/Definitions.h"
 #include "Model/Entities/CellTO.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 #include "Gui/Definitions.h"
 #include "Gui/DataManipulator.h"
 

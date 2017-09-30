@@ -1,7 +1,6 @@
-#ifndef CELLTO_H
-#define CELLTO_H
+#pragma once 
 
-#include "Model/Features/CellFeatureEnums.h"
+#include "Model/CellFeatureEnums.h"
 #include <QVector>
 #include <QList>
 #include <QVector2D>
@@ -39,6 +38,4 @@ struct MODEL_EXPORT CellTO  //TO = Transfer Object
     QList< qreal > tokenEnergies;
     QList< QByteArray > tokenData;
 };
-
-#endif // CELLTO_H
 

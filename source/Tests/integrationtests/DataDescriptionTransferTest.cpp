@@ -9,10 +9,10 @@
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
 #include "Model/CellConnector.h"
-#include "Model/Context/SimulationContext.h"
-#include "Model/Context/SimulationParameters.h"
-#include "Model/Context/SpaceMetricApi.h"
-#include "Model/AccessPorts/SimulationAccess.h"
+#include "Model/Context/SimulationContextLocal.h"
+#include "Model/SimulationParameters.h"
+#include "Model/SpaceMetric.h"
+#include "Model/SimulationAccess.h"
 
 #include "Tests/Predicates.h"
 
@@ -27,8 +27,8 @@ public:
 
 protected:
 	SimulationController* _controller = nullptr;
-	SimulationContext* _context = nullptr;
-	SpaceMetricApi* _metric = nullptr;
+	SimulationContextLocal* _context = nullptr;
+	SpaceMetric* _metric = nullptr;
 	SimulationAccess* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
 };
@@ -38,7 +38,7 @@ DataDescriptionTransferTest::DataDescriptionTransferTest()
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
-	_context = static_cast<SimulationContext*>(_controller->getContext());
+	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
 	_metric = _context->getSpaceMetric();
 	_access = _facade->buildSimulationAccess(_context);
 }

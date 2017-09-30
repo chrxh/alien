@@ -3,7 +3,7 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 #include "Model/Definitions.h"
 #include "Gui/Definitions.h"
 
@@ -17,8 +17,6 @@ public:
 	void init(DataEditorModel* model, DataEditorController* controller);
     void updateDisplay ();
 
-	void requestUpdate();
-
 protected:
     void keyPressEvent (QKeyEvent* e);
     void mousePressEvent(QMouseEvent* e);
@@ -26,6 +24,7 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
+	void requestUpdate();
 
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
