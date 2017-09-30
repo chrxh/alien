@@ -1,5 +1,5 @@
 #include "Model/Context/Unit.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 
 #include "UnitGridImpl.h"
 
@@ -12,7 +12,7 @@ UnitGridImpl::~UnitGridImpl()
 {
 }
 
-void UnitGridImpl::init(IntVector2D gridSize, SpaceMetric* metric)
+void UnitGridImpl::init(IntVector2D gridSize, SpaceMetricLocal* metric)
 {
 	if ((metric->getSize().x % gridSize.x != 0) || (metric->getSize().y % gridSize.y != 0)) {
 		throw std::exception("Universe size is not a multiple of grid size.");

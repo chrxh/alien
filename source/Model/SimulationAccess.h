@@ -1,8 +1,7 @@
-#ifndef SIMULATIONACCESS_H
-#define SIMULATIONACCESS_H
+#pragma once
 
 #include "Model/Definitions.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 
 class MODEL_EXPORT SimulationAccess
 	: public QObject
@@ -12,7 +11,7 @@ public:
 	SimulationAccess(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~SimulationAccess() = default;
 
-	virtual void init(SimulationContextApi* context) = 0;
+	virtual void init(SimulationContext* context) = 0;
 
 	virtual void updateData(DataChangeDescription const &desc) = 0;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
@@ -23,4 +22,3 @@ public:
 	virtual DataDescription const& retrieveData() = 0;
 };
 
-#endif // SIMULATIONACCESS_H

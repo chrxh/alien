@@ -12,7 +12,7 @@ public:
 	ParticleMapImpl(QObject* parent = nullptr);
 	virtual ~ParticleMapImpl();
 
-	virtual void init(SpaceMetric* metric, MapCompartment* compartment) override;
+	virtual void init(SpaceMetricLocal* metric, MapCompartment* compartment) override;
 	virtual void clear() override;
 
 	virtual void removeParticleIfPresent(QVector2D pos, Particle* particleToRemove) override;
@@ -26,7 +26,7 @@ private:
 	void deleteGrid();
 	inline Particle*& locateParticle(IntVector2D & intPos) const;
 
-	SpaceMetric* _metric = nullptr;
+	SpaceMetricLocal* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
 	IntVector2D _size = { 0, 0 };
 };

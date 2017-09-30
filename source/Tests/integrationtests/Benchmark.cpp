@@ -8,15 +8,15 @@
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
-#include "Model/Context/SimulationContext.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SimulationContextLocal.h"
+#include "Model/SimulationParameters.h"
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/Unit.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/MapCompartment.h"
 #include "Model/Context/_Impl/UnitThreadControllerImpl.h"
 #include "Model/Context/_Impl/UnitThread.h"
-#include "Model/AccessPorts/SimulationAccess.h"
+#include "Model/SimulationAccess.h"
 
 #include "tests/Predicates.h"
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Model/AccessPorts/SimulationAccess.h"
-#include "Model/Context/SimulationContext.h"
+#include "Model/SimulationAccess.h"
+#include "Model/Context/SimulationContextLocal.h"
 #include "Model/Context/UnitObserver.h"
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 
 class SimulationAccessGpuImpl
 	: public SimulationAccess
@@ -12,7 +12,7 @@ public:
 	SimulationAccessGpuImpl(QObject* parent = nullptr) : SimulationAccess(parent) {}
 	virtual ~SimulationAccessGpuImpl();
 
-	virtual void init(SimulationContextApi* context) override;
+	virtual void init(SimulationContext* context) override;
 
 	virtual void updateData(DataChangeDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;

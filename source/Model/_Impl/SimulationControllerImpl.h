@@ -12,15 +12,15 @@ public:
 	SimulationControllerImpl(QObject* parent = nullptr);
 	virtual ~SimulationControllerImpl() = default;
 
-	virtual void init(SimulationContextApi* context) override;
+	virtual void init(SimulationContext* context) override;
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
-	virtual SimulationContextApi* getContext() const override;
+	virtual SimulationContext* getContext() const override;
 
 private:
 	Q_SLOT void oneSecondTimerTimeout();
 
-	SimulationContext* _context = nullptr;
+	SimulationContextLocal* _context = nullptr;
 
 	bool _flagSimulationRunning = false;
 	QTimer* _oneSecondTimer = nullptr;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 
 class MODEL_EXPORT CellConnector
 	: public QObject

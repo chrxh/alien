@@ -1,4 +1,4 @@
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Entities/Particle.h"
 
 #include "ParticleMapImpl.h"
@@ -14,7 +14,7 @@ ParticleMapImpl::~ParticleMapImpl()
 }
 
 
-void ParticleMapImpl::init(SpaceMetric* metric, MapCompartment* compartment)
+void ParticleMapImpl::init(SpaceMetricLocal* metric, MapCompartment* compartment)
 {
 	_metric = metric;
 	_compartment = compartment;

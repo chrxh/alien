@@ -22,7 +22,7 @@ SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nul
 	_frameTimer->start(updateFrameInMilliSec);
 }
 
-void SimulationControllerGpuImpl::init(SimulationContextApi * context)
+void SimulationControllerGpuImpl::init(SimulationContext * context)
 {
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
 	connect(_context->getGpuThreadController(), &ThreadController::timestepCalculated, [this]() {
@@ -62,7 +62,7 @@ void SimulationControllerGpuImpl::calculateSingleTimestep()
 	_context->getGpuThreadController()->calculate(_mode);
 }
 
-SimulationContextApi * SimulationControllerGpuImpl::getContext() const
+SimulationContext * SimulationControllerGpuImpl::getContext() const
 {
 	return _context;
 }

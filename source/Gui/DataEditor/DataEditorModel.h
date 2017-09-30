@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 
 class DataEditorModel
 	: public QObject

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Model/Entities/Particle.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 
 class ParticleImpl
 	: public Particle

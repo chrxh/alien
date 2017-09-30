@@ -3,7 +3,7 @@
 #include <mutex>
 #include <QObject>
 
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 #include "Cuda/CudaInterface.cuh"
 #include "DefinitionsImpl.h"
 
@@ -15,7 +15,7 @@ public:
 	WorkerForGpu(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~WorkerForGpu();
 
-	virtual void init(SpaceMetricApi* metric);
+	virtual void init(SpaceMetric* metric);
 	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual DataForAccess retrieveData();
@@ -30,7 +30,7 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 private:
-	SpaceMetricApi* _metric;
+	SpaceMetric* _metric;
 
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;

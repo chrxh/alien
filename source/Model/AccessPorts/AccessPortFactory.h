@@ -1,8 +1,7 @@
-#ifndef ACCESSPORTFACTORY_H
-#define ACCESSPORTFACTORY_H
+#pragma once
 
 #include "Model/Definitions.h"
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 
 class AccessPortFactory
 {
@@ -12,4 +11,3 @@ public:
 	virtual SimulationAccess* buildSimulationAccess() const = 0;
 };
 
-#endif // ACCESSPORTFACTORY_H

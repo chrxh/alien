@@ -3,7 +3,7 @@
 #include <QVector2D>
 
 #include "Model/Definitions.h"
-#include "ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 
 class Cell
 {

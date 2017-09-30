@@ -6,7 +6,7 @@
 
 #include "gui/Definitions.h"
 #include "Model/Definitions.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 
 class PixelUniverse : public QGraphicsScene
 {
