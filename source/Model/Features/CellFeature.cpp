@@ -13,6 +13,17 @@ void CellFeature::setContext(UnitContext * context)
 	}
 }
 
+CellFeatureDescription CellFeature::getDescription() const
+{
+	CellFeatureDescription result;
+	CellFeature const* feature = this;
+	while (feature) {
+		getDescriptionImpl(result);
+		feature = feature->_nextFeature;
+	}
+	return result;
+}
+
 void CellFeature::registerNextFeature (CellFeature* nextFeature)
 {
     _nextFeature = nextFeature;

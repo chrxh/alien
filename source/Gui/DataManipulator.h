@@ -21,6 +21,8 @@ public:
 	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);
 	virtual void moveSelection(QVector2D const &delta);
 	virtual void moveExtendedSelection(QVector2D const &delta);
+	virtual void reconnectSelectedCells();
+	virtual void updateCluster(ClusterDescription const& cluster);
 
 	virtual bool isInSelection(list<uint64_t> const &ids) const;
 	virtual bool isInSelection(uint64_t id) const; //id can mean cell or particle id
@@ -29,7 +31,7 @@ public:
 	virtual list<uint64_t> getSelectedCellIds() const;
 	virtual list<uint64_t> getSelectedParticleIds() const;
 
-	virtual void dataUpdateRequired(IntRect const& rect) const;
+	virtual void requireDataUpdateFromSimulation(IntRect const& rect) const;
 
 	enum class Receiver { Simulation, VisualEditor, DataEditor };
 	Q_SIGNAL void notify(set<Receiver> const& targets);

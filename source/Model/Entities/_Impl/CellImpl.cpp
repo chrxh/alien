@@ -47,7 +47,8 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 {
 	CellDescription result;
 	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections)
-		.setTokenBranchNumber(_tokenBranchNumber).setEnergy(_energy).setMetadata(_metadata);
+		.setTokenBranchNumber(_tokenBranchNumber).setEnergy(_energy).setMetadata(_metadata)
+		.setFlagTokenBlocked(_blockToken).setCellFeature(_features->getDescription());
 	if (resolveDescription.resolveCellLinks) {
 		list<uint64_t> connectingCells;
 		for (int i = 0; i < _numConnections; ++i) {
