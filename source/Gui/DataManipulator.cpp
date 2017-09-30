@@ -55,10 +55,11 @@ void DataManipulator::dataFromSimulationAvailable()
 
 void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)
 {
-	if (targets.find(Receiver::Simulation) != targets.end()) {
-		DataChangeDescription delta(_unchangedData, _data);
-		_access->updateData(delta);
+	if (targets.find(Receiver::Simulation) == targets.end()) {
 	}
+	DataChangeDescription delta(_unchangedData, _data);
+	_access->updateData(delta);
+	_unchangedData = _data;
 }
 
 void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
@@ -72,7 +73,6 @@ void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t>
 			_selectedClusterIds.insert(clusterIdByCellIdIter->second);
 		}
 	}
-	_unchangedData = _data;
 }
 
 bool DataManipulator::isInSelection(list<uint64_t> const & ids) const
