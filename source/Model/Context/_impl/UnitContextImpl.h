@@ -3,7 +3,7 @@
 #include <QMutex>
 
 #include "Model/Context/UnitContext.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 
 class UnitContextImpl
 	: public UnitContext
@@ -12,11 +12,11 @@ public:
 	UnitContextImpl(QObject* parent = nullptr);
 	virtual ~UnitContextImpl();
 
-	void init(NumberGenerator* numberGen, SpaceMetric* metric, CellMap* cellMap, ParticleMap* energyMap
+	void init(NumberGenerator* numberGen, SpaceMetricLocal* metric, CellMap* cellMap, ParticleMap* energyMap
 		, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters) override;
 
 	virtual NumberGenerator* getNumberGenerator() const override;
-	virtual SpaceMetric* getSpaceMetric () const override;
+	virtual SpaceMetricLocal* getSpaceMetric () const override;
 	virtual CellMap* getCellMap () const override;
 	virtual ParticleMap* getEnergyParticleMap () const override;
 	virtual MapCompartment* getMapCompartment() const override;
@@ -35,7 +35,7 @@ private:
 	QList<Cluster*> _clusters;
     QList<Particle*> _energyParticles;
 	NumberGenerator* _numberGen = nullptr;
-	SpaceMetric* _metric = nullptr;
+	SpaceMetricLocal* _metric = nullptr;
     CellMap* _cellMap = nullptr;
     ParticleMap* _energyParticleMap = nullptr;
 	MapCompartment* _mapCompartment = nullptr;

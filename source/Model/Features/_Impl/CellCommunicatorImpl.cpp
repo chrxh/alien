@@ -5,10 +5,10 @@
 #include "Model/Entities/Token.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/CellMap.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Physics/Physics.h"
 #include "Model/Physics/PhysicalQuantityConverter.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 
 #include "CellCommunicatorImpl.h"
 
@@ -139,7 +139,7 @@ bool CellCommunicatorImpl::sendMessageToCommunicatorAndReturnSuccess (const Mess
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector2D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
-            SpaceMetric* metric = _context->getSpaceMetric();
+            SpaceMetricLocal* metric = _context->getSpaceMetric();
             QVector2D displacementOfObjectFromReceiver = metric->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();

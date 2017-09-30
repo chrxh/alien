@@ -3,10 +3,10 @@
 
 #include "Base/ServiceLocator.h"
 #include "Model/Context/UnitContext.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 #include "Model/Settings.h"
 #include "Model/ModelBuilderFacade.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Token.h"
 #include "Model/Entities/Cluster.h"

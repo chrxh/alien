@@ -3,15 +3,15 @@
 
 #include "Model/Definitions.h"
 
-class MODEL_EXPORT SimulationContextApi
+class MODEL_EXPORT SimulationContext
 	: public QObject
 {
 Q_OBJECT
 public:
-	SimulationContextApi(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~SimulationContextApi() = default;
+	SimulationContext(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~SimulationContext() = default;
 
-	virtual SpaceMetricApi* getSpaceMetric() const = 0;
+	virtual SpaceMetric* getSpaceMetric() const = 0;
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;
 };

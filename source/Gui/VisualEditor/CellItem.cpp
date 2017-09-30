@@ -1,6 +1,6 @@
 #include <QPainter>
 
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 
 #include "Gui/Settings.h"
 

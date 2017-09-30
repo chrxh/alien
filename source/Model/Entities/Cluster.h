@@ -4,8 +4,8 @@
 #include <QVector2D>
 
 #include "Model/Definitions.h"
+#include "Model/ChangeDescriptions.h"
 #include "Timestamp.h"
-#include "ChangeDescriptions.h"
 
 class Cluster
 	: public Timestamp

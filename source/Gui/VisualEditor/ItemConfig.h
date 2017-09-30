@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 
 class ItemConfig
 	: public QObject

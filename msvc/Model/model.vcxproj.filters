@@ -100,36 +100,6 @@
     <ClCompile Include="Release\moc_MapCompartment.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationContext.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationContext.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationContext.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Context\SimulationParameters.cpp">
-      <Filter>Source Files\Context</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationParameters.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationParameters.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationParameters.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_SpaceMetric.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SpaceMetric.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SpaceMetric.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_Unit.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -253,15 +223,6 @@
     <ClCompile Include="..\..\source\Model\AccessPorts\_Impl\SimulationAccessImpl.cpp">
       <Filter>Source Files\AccessPorts\_Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationAccess.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationAccess.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationAccess.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\_Impl\SerializationFacadeImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
@@ -283,15 +244,6 @@
     <ClCompile Include="..\..\source\Model\ModelServices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationContextApi.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\_Impl\CellConnectorImpl.cpp">
       <Filter>Source Files\_Impl</Filter>
     </ClCompile>
@@ -304,26 +256,11 @@
     <ClCompile Include="Release\moc_CellConnectorImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SpaceMetricApi.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SpaceMetricApi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SpaceMetricApi.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\Entities\_Impl\ClusterImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Entities\_Impl\ParticleImpl.cpp">
       <Filter>Source Files\Entities\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Entities\ChangeDescriptions.cpp">
-      <Filter>Source Files\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Entities\Descriptions.cpp">
-      <Filter>Source Files\Entities</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_ParticleMap.cpp">
       <Filter>Generated Files\Tests</Filter>
@@ -355,6 +292,69 @@
     <ClCompile Include="Tests\moc_UnitGrid.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContextLocal.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextLocal.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextLocal.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\ChangeDescriptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Descriptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationAccess.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationAccess.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationAccess.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationContext.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SpaceMetricLocal.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SpaceMetricLocal.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SpaceMetricLocal.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SpaceMetric.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SpaceMetric.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SpaceMetric.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationParameters.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationParameters.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationParameters.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\SimulationParameters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Settings.h">
@@ -382,9 +382,6 @@
       <Filter>Source Files\Features</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Features\CellFeatureFactory.h">
-      <Filter>Source Files\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Features\CellFeatureEnums.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Features\CellFeature.h">
@@ -489,15 +486,6 @@
     <ClInclude Include="..\..\source\Model\CellConnector.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Entities\ChangeDescriptions.h">
-      <Filter>Source Files\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Features\Descriptions.h">
-      <Filter>Source Files\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Entities\Descriptions.h">
-      <Filter>Source Files\Entities</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Entities\Cluster.h">
       <Filter>Source Files\Entities</Filter>
     </ClInclude>
@@ -516,6 +504,15 @@
     <ClInclude Include="..\..\source\Model\Metadata\ParticleMetadata.h">
       <Filter>Source Files\Metadata</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Model\CellFeatureEnums.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\ChangeDescriptions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Descriptions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\SimulationController.h">
@@ -528,15 +525,6 @@
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\MapCompartment.h">
-      <Filter>Source Files\Context</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\SimulationContext.h">
-      <Filter>Source Files\Context</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\SimulationParameters.h">
-      <Filter>Source Files\Context</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\SpaceMetric.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\Unit.h">
@@ -572,26 +560,35 @@
     <CustomBuild Include="..\..\source\Model\Context\_Impl\UnitThreadControllerImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\AccessPorts\SimulationAccess.h">
-      <Filter>Source Files\AccessPorts</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Model\_Impl\SimulationControllerImpl.h">
       <Filter>Source Files\_Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\SimulationContextApi.h">
-      <Filter>Source Files\Context</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Model\_Impl\CellConnectorImpl.h">
       <Filter>Source Files\_Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Context\SpaceMetricApi.h">
-      <Filter>Source Files\Context</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\ParticleMap.h">
       <Filter>Source Files\Context</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Context\_Impl\ParticleMapImpl.h">
       <Filter>Source Files\Context\_Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Context\SimulationContextLocal.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\SimulationAccess.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\SimulationContext.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Context\SpaceMetricLocal.h">
+      <Filter>Source Files\Context</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\SpaceMetric.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\SimulationParameters.h">
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

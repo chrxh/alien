@@ -1,8 +1,7 @@
-#ifndef ENTITYFACTORY_H
-#define ENTITYFACTORY_H
+#pragma once
 
 #include "Model/Definitions.h"
-#include "ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 
 class EntityFactory
 {
@@ -15,4 +14,3 @@ public:
 	virtual Particle* build(ParticleDescription const& desc, UnitContext* context) const = 0;
 };
 
-#endif // ENTITYFACTORY_H

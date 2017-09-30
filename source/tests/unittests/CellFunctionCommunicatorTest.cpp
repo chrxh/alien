@@ -9,8 +9,8 @@
 #include "Model/Context/UnitContext.h"
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Settings.h"
-#include "Model/Context/SpaceMetric.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SpaceMetricLocal.h"
+#include "Model/SimulationParameters.h"
 
 #include "tests/TestSettings.h"
 

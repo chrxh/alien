@@ -1,6 +1,6 @@
 #include <functional>
 
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Settings.h"
 #include "Model/Entities/Cell.h"
@@ -18,7 +18,7 @@ CellMapImpl::~CellMapImpl()
 	deleteCellMap();
 }
 
-void CellMapImpl::init(SpaceMetric* metric, MapCompartment* compartment)
+void CellMapImpl::init(SpaceMetricLocal* metric, MapCompartment* compartment)
 {
 	_metric = metric;
 	_compartment = compartment;

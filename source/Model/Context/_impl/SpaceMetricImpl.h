@@ -1,17 +1,17 @@
 #ifndef SPACEMETRICIMPL_H
 #define SPACEMETRICIMPL_H
 
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 
 class SpaceMetricImpl
-	: public SpaceMetric
+	: public SpaceMetricLocal
 {
 public:
 	SpaceMetricImpl(QObject* parent = nullptr);
 	virtual ~SpaceMetricImpl() {}
 
 	virtual void init(IntVector2D size);
-	virtual SpaceMetric* clone(QObject* parent = nullptr) const override;
+	virtual SpaceMetricLocal* clone(QObject* parent = nullptr) const override;
 
 	virtual IntVector2D getSize() const override;
 

@@ -8,6 +8,7 @@
 #include "Gui/Settings.h"
 
 #include "DataEditorModel.h"
+#include "DataEditorController.h"
 #include "ClusterEditWidget.h"
 
 ClusterEditWidget::ClusterEditWidget(QWidget *parent) :
@@ -40,6 +41,8 @@ void ClusterEditWidget::requestUpdate ()
 		*cluster.angle = generateNumberFromFormattedString(currentText);
     if( row == 6 )
 		*cluster.angularVel = generateNumberFromFormattedString(currentText);
+
+	_controller->notificationFromClusterEditWidget();
 }
 
 void ClusterEditWidget::keyPressEvent (QKeyEvent* e)

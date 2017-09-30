@@ -4,7 +4,7 @@
 #include <QVector2D>
 
 #include "Model/Definitions.h"
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 #include "Gui/Definitions.h"
 
 class CellEditWidget
@@ -16,10 +16,7 @@ public:
 	virtual ~CellEditWidget() = default;
 
 	void init(DataEditorModel* model, DataEditorController* controller);
-
     void updateDisplay ();
-
-    void requestUpdate ();
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -28,6 +25,7 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
+    void updateData ();
 
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);

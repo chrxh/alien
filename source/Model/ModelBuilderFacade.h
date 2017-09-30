@@ -1,9 +1,8 @@
-#ifndef MODELBUILDERFACADE_H
-#define MODELBUILDERFACADE_H
+#pragma once
 
 #include "Model/Entities/CellTO.h"
-#include "Model/Features/CellFeatureEnums.h"
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/CellFeatureEnums.h"
+#include "Model/ChangeDescriptions.h"
 
 #include "Definitions.h"
 
@@ -14,11 +13,10 @@ public:
 
 	virtual SimulationController* buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
-	virtual SimulationAccess* buildSimulationAccess(SimulationContextApi* context) const = 0;
-	virtual CellConnector* buildCellConnector(SimulationContextApi* context) const = 0;
+	virtual SimulationAccess* buildSimulationAccess(SimulationContext* context) const = 0;
+	virtual CellConnector* buildCellConnector(SimulationContext* context) const = 0;
 
 	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
 };
 
-#endif // MODELBUILDERFACADE_H

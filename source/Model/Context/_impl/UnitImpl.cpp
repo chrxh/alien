@@ -4,7 +4,7 @@
 #include "Model/Entities/Particle.h"
 #include "Model/Entities/Token.h"
 #include "Model/Context/UnitContext.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Context/MapCompartment.h"
 
 #include "UnitImpl.h"

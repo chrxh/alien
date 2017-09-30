@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Entities/Descriptions.h"
+#include "Model/Descriptions.h"
 
 #include "Gui/Definitions.h"
 

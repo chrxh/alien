@@ -10,7 +10,7 @@
 #include "Model/Physics/PhysicalQuantityConverter.h"
 #include "Model/Settings.h"
 #include "Model/Context/UnitContext.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 
 #include "CellPropulsionImpl.h"
 

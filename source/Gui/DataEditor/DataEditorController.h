@@ -17,6 +17,9 @@ public:
 
 	DataEditorContext* getContext() const;
 
+	void notificationFromCellEditWidget();
+	void notificationFromClusterEditWidget();
+
 private:
 	Q_SLOT void onShow(bool visible);
 	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);

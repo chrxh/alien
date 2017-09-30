@@ -1,5 +1,4 @@
-#ifndef UNIT_H
-#define UNIT_H
+#pragma once
 
 #include <QThread>
 #include "Model/Definitions.h"
@@ -23,5 +22,3 @@ public:
 
 
 };
-
-#endif // UNIT_H

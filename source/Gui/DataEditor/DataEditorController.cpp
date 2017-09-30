@@ -29,6 +29,14 @@ DataEditorContext * DataEditorController::getContext() const
 	return _context;
 }
 
+void DataEditorController::notificationFromCellEditWidget()
+{
+}
+
+void DataEditorController::notificationFromClusterEditWidget()
+{
+}
+
 void DataEditorController::onShow(bool visible)
 {
 	_view->show(visible);

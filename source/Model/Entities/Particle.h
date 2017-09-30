@@ -3,7 +3,7 @@
 #include <QVector2D>
 
 #include "Model/Definitions.h"
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 #include "Timestamp.h"
 
 class Particle

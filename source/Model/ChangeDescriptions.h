@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Model/Features/Descriptions.h"
-
 #include "Descriptions.h"
 
 struct MODEL_EXPORT CellChangeDescription

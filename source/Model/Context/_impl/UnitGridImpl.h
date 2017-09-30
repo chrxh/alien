@@ -10,7 +10,7 @@ public:
 	UnitGridImpl(QObject* parent = nullptr);
 	virtual ~UnitGridImpl();
 
-	virtual void init(IntVector2D gridSize, SpaceMetric* metric) override;
+	virtual void init(IntVector2D gridSize, SpaceMetricLocal* metric) override;
 
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) override;
 	virtual IntVector2D getSize() const override;
@@ -22,7 +22,7 @@ public:
 private:
 	IntVector2D calcCompartmentSize() const;
 
-	SpaceMetric* _metric = nullptr;
+	SpaceMetricLocal* _metric = nullptr;
 	IntVector2D _gridSize = { 0, 0 };
 	vector<vector<Unit*>> _units;
 };

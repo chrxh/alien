@@ -3,7 +3,7 @@
 #include "Model/Entities/Cell.h"
 
 SpaceMetricImpl::SpaceMetricImpl(QObject * parent)
-	: SpaceMetric(parent)
+	: SpaceMetricLocal(parent)
 {
 }
 
@@ -12,7 +12,7 @@ void SpaceMetricImpl::init(IntVector2D size)
 	_size = size;
 }
 
-SpaceMetric * SpaceMetricImpl::clone(QObject * parent) const
+SpaceMetricLocal * SpaceMetricImpl::clone(QObject * parent) const
 {
 	auto metric = new SpaceMetricImpl(parent);
 	metric->_size = _size;

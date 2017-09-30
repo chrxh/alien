@@ -1,6 +1,6 @@
 #include "DataManipulator.h"
 
-#include "Model/AccessPorts/SimulationAccess.h"
+#include "Model/SimulationAccess.h"
 #include "Model/CellConnector.h"
 
 void DataManipulator::init(SimulationAccess * access, CellConnector * connector)

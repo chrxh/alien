@@ -1,17 +1,17 @@
 #include <QImage>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 #include "Model/Entities/EntityFactory.h"
 #include "Model/Entities/Cluster.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Particle.h"
-#include "Model/Context/SimulationContext.h"
+#include "Model/Context/SimulationContextLocal.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/UnitThreadController.h"
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/Unit.h"
-#include "Model/Context/SpaceMetric.h"
+#include "Model/Context/SpaceMetricLocal.h"
 #include "Model/Context/ParticleMap.h"
 #include "Model/Entities/Cluster.h"
 
@@ -25,9 +25,9 @@ SimulationAccessImpl::~SimulationAccessImpl()
 	}
 }
 
-void SimulationAccessImpl::init(SimulationContextApi * context)
+void SimulationAccessImpl::init(SimulationContext * context)
 {
-	_context = static_cast<SimulationContext*>(context);
+	_context = static_cast<SimulationContextLocal*>(context);
 	_context->getUnitThreadController()->registerObserver(this);
 	_registered = true;
 }

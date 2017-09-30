@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Model/Context/SpaceMetricApi.h"
+#include "Model/SpaceMetric.h"
 
-class SpaceMetric
-	: public SpaceMetricApi
+class SpaceMetricLocal
+	: public SpaceMetric
 {
 	Q_OBJECT
 public:
-	SpaceMetric(QObject* parent = nullptr) : SpaceMetricApi(parent) {}
-	virtual ~SpaceMetric() = default;
+	SpaceMetricLocal(QObject* parent = nullptr) : SpaceMetric(parent) {}
+	virtual ~SpaceMetricLocal() = default;
 
 	virtual void init(IntVector2D size) = 0;
-	virtual SpaceMetric* clone(QObject* parent = nullptr) const = 0;
+	virtual SpaceMetricLocal* clone(QObject* parent = nullptr) const = 0;
 
 	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const = 0;
 	virtual void correctDisplacement(QVector2D& displacement) const = 0;

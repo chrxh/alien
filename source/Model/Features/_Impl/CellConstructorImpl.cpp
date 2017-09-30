@@ -15,8 +15,8 @@
 #include "Model/Settings.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/CellMap.h"
-#include "Model/Context/SpaceMetric.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SpaceMetricLocal.h"
+#include "Model/SimulationParameters.h"
 
 #include "CellConstructorImpl.h"
 
@@ -49,7 +49,7 @@ namespace {
 		return cell;
     }
 
-    Cell* obstacleCheck (Cluster* cluster, bool safeMode, CellMap* cellMap, SpaceMetric* metric, SimulationParameters* parameters)
+    Cell* obstacleCheck (Cluster* cluster, bool safeMode, CellMap* cellMap, SpaceMetricLocal* metric, SimulationParameters* parameters)
     {
         foreach( Cell* cell, cluster->getCellsRef() ) {
             QVector2D pos = cluster->calcPosition(cell, true);

@@ -1,10 +1,9 @@
-#ifndef CELLFUNCTION_H
-#define CELLFUNCTION_H
+#pragma once
+
+#include "Model/Definitions.h"
+#include "Model/CellFeatureEnums.h"
 
 #include "CellFeature.h"
-
-#include "CellFeatureEnums.h"
-#include "Model/Definitions.h"
 
 class CellFunction
 	: public CellFeature
@@ -23,6 +22,4 @@ public:
 protected:
     qreal calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const;
 };
-
-#endif // CELLFUNCTION_H
 

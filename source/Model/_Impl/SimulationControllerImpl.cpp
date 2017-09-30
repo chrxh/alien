@@ -1,7 +1,7 @@
 #include <QTimer>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Context/SimulationContext.h"
+#include "Model/Context/SimulationContextLocal.h"
 #include "Model/Context/UnitThreadController.h"
 
 #include "SimulationControllerImpl.h"
@@ -19,9 +19,9 @@ SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
 	_oneSecondTimer->start(1000);
 }
 
-void SimulationControllerImpl::init(SimulationContextApi* context)
+void SimulationControllerImpl::init(SimulationContext* context)
 {
-	SET_CHILD(_context, static_cast<SimulationContext*>(context));
+	SET_CHILD(_context, static_cast<SimulationContextLocal*>(context));
 	connect(_context->getUnitThreadController(), &UnitThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
 		++_timestepsPerSecond;
@@ -55,7 +55,7 @@ void SimulationControllerImpl::calculateSingleTimestep()
 	_context->getUnitThreadController()->calculateTimestep();
 }
 
-SimulationContextApi * SimulationControllerImpl::getContext() const
+SimulationContext * SimulationControllerImpl::getContext() const
 {
 	return _context;
 }

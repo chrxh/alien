@@ -8,15 +8,15 @@
 #include "Model/ModelBuilderFacade.h"
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
-#include "Model/Context/SimulationContext.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SimulationContextLocal.h"
+#include "Model/SimulationParameters.h"
 #include "Model/Context/UnitGrid.h"
 #include "Model/Context/Unit.h"
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/MapCompartment.h"
 #include "Model/Context/_Impl/UnitThreadControllerImpl.h"
 #include "Model/Context/_Impl/UnitThread.h"
-#include "Model/AccessPorts/SimulationAccess.h"
+#include "Model/SimulationAccess.h"
 
 #include "tests/Predicates.h"
 
@@ -30,7 +30,7 @@ protected:
 	void runSimulation(int timesteps);
 
 	SimulationController* _controller = nullptr;
-	SimulationContext* _context = nullptr;
+	SimulationContextLocal* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
@@ -46,7 +46,7 @@ MultithreadingTest::MultithreadingTest()
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
 	_controller = facade->buildSimulationController(_threads, _gridSize, _universeSize, symbols, _parameters);
-	_context = static_cast<SimulationContext*>(_controller->getContext());
+	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 	_numberGen = factory->buildRandomNumberGenerator();
 	_numberGen->init(123123, 0);

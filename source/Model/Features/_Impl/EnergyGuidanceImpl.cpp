@@ -1,9 +1,9 @@
 #include "Model/Entities/Token.h"
 #include "Model/Entities/Cell.h"
-#include "Model/Features/CellFeatureEnums.h"
+#include "Model/CellFeatureEnums.h"
 #include "Model/Settings.h"
 #include "Model/Context/UnitContext.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 
 #include "EnergyGuidanceImpl.h"
 

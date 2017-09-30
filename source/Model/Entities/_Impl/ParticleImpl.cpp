@@ -8,8 +8,8 @@
 #include "Model/Context/UnitContext.h"
 #include "Model/Context/ParticleMap.h"
 #include "Model/Context/CellMap.h"
-#include "Model/Context/SpaceMetric.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/Context/SpaceMetricLocal.h"
+#include "Model/SimulationParameters.h"
 
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Cluster.h"

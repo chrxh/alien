@@ -1,9 +1,9 @@
 #include <QtGlobal>
 
-#include "Model/Features/CellFeatureEnums.h"
+#include "Model/CellFeatureEnums.h"
 #include "Model/Metadata/SymbolTable.h"
 
-#include "Context/SimulationParameters.h"
+#include "SimulationParameters.h"
 #include "Settings.h"
 
 SymbolTable* ModelSettings::loadDefaultSymbolTable()

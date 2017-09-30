@@ -7,7 +7,7 @@
 #include "Model/Metadata/SymbolTable.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Token.h"
-#include "Model/Context/SimulationParameters.h"
+#include "Model/SimulationParameters.h"
 
 #include "CellComputerImpl.h"
 

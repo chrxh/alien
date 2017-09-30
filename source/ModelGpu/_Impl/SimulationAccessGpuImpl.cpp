@@ -1,6 +1,6 @@
 #include <QImage>
 
-#include "Model/Context/SpaceMetricApi.h"
+#include "Model/SpaceMetric.h"
 
 #include "WorkerForGpu.h"
 #include "ThreadController.h"
@@ -11,7 +11,7 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 {
 }
 
-void SimulationAccessGpuImpl::init(SimulationContextApi * context)
+void SimulationAccessGpuImpl::init(SimulationContext * context)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(context);
 	auto worker = _context->getGpuThreadController()->getGpuWorker();

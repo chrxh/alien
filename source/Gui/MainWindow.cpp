@@ -10,7 +10,7 @@
 #include "Model/Settings.h"
 #include "Model/SimulationController.h"
 #include "Model/ModelBuilderFacade.h"
-#include "Model/Context/SimulationContext.h"
+#include "Model/Context/SimulationContextLocal.h"
 #include "Model/SerializationFacade.h"
 #include "Model/Entities/Cell.h"
 #include "Model/Entities/Cluster.h"

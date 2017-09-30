@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Entities/ChangeDescriptions.h"
+#include "Model/ChangeDescriptions.h"
 
 #include "AbstractItem.h"
 

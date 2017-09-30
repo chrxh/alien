@@ -10,7 +10,7 @@ public:
 	CellConnectorImpl(QObject *parent = nullptr) : CellConnector(parent) { }
 	virtual ~CellConnectorImpl() = default;
 
-	virtual void init(SpaceMetricApi *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
+	virtual void init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
 	virtual void reconnect(DataDescription &data, list<uint64_t> const &changedCellIds) override;
 
@@ -33,7 +33,7 @@ private:
 	void lookUpCell(DataDescription &data, uint64_t cellId, ClusterDescription &newCluster
 		, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
 
-	SpaceMetricApi *_metric = nullptr;
+	SpaceMetric *_metric = nullptr;
 	SimulationParameters *_parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 
