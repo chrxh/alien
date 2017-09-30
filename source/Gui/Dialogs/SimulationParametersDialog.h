@@ -2,7 +2,7 @@
 #define SIMULATIONPARAMETERSDIALOG_H
 
 #include <QDialog>
-#include "Model/SimulationParameters.h"
+#include "Model/Api/SimulationParameters.h"
 
 namespace Ui {
 class SimulationParametersDialog;

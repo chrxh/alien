@@ -2,7 +2,7 @@
 
 #include <QThread>
 
-#include "Model/Definitions.h"
+#include "Model/Api/Definitions.h"
 #include "DefinitionsImpl.h"
 
 class ThreadController
