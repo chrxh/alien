@@ -20,7 +20,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 	tokenBlocked = desc.tokenBlocked;
 	tokenBranchNumber = desc.tokenBranchNumber;
 	metadata = desc.metadata;
-	cellFunction = desc.cellFunction;
+	cellFunction = desc.cellFeature;
 	tokens = desc.tokens;
 }
 
@@ -34,7 +34,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & before, Cel
 	SET_DELTA(before.tokenBlocked, after.tokenBlocked, tokenBlocked);
 	SET_DELTA(before.tokenBranchNumber, after.tokenBranchNumber, tokenBranchNumber);
 	SET_DELTA(before.metadata, after.metadata, metadata);
-	SET_DELTA(before.cellFunction, after.cellFunction, cellFunction);
+	SET_DELTA(before.cellFeature, after.cellFeature, cellFunction);
 	SET_DELTA(before.tokens, after.tokens, tokens);
 }
 

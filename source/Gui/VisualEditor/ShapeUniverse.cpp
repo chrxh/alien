@@ -48,7 +48,7 @@ void ShapeUniverse::activate()
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
 	connect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::notificationFromManipulator);
 
-	_manipulator->dataUpdateRequired(_viewport->getRect());
+	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
 }
 
 void ShapeUniverse::deactivate()
@@ -59,7 +59,7 @@ void ShapeUniverse::deactivate()
 
 void ShapeUniverse::requestData()
 {
-	_manipulator->dataUpdateRequired(_viewport->getRect());
+	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
 }
 
 void ShapeUniverse::notificationFromManipulator(set<DataManipulator::Receiver> const& targets)
@@ -148,6 +148,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		delta = CoordinateSystem::sceneToModel(delta);
 		if (leftButton) {
 			_manipulator->moveSelection(delta);
+			_manipulator->reconnectSelectedCells();
 			_itemManager->update(_manipulator);
 		}
 		if (rightButton) {

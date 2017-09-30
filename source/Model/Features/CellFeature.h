@@ -1,9 +1,9 @@
-#ifndef CELLFEATURE_H
-#define CELLFEATURE_H
+#pragma once
 
 #include <QDataStream>
 
 #include "Model/Definitions.h"
+#include "Model/Descriptions.h"
 
 class CellFeature
 {
@@ -12,6 +12,8 @@ public:
     virtual ~CellFeature ();
 
 	virtual void setContext(UnitContext* context);
+
+	virtual CellFeatureDescription getDescription() const;
 
     void registerNextFeature (CellFeature* nextFeature);
     struct ProcessingResult {
@@ -25,7 +27,8 @@ public:
 	virtual void deserializePrimitives(QDataStream& stream) {}
 
 protected:
-    virtual ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) = 0;
+	virtual void getDescriptionImpl(CellFeatureDescription& desc) const {};
+	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) = 0;
 	virtual void mutateImpl() {};
 
     UnitContext* _context = nullptr;
@@ -51,4 +54,3 @@ T* CellFeature::findObject ()
     }
 }
 
-#endif // CELLFEATURE_H

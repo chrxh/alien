@@ -132,9 +132,6 @@ void DataManipulator::moveSelection(QVector2D const &delta)
 			particleDesc.pos = *particleDesc.pos + delta;
 		}
 	}
-
-	_connector->reconnect(getDataRef(), getSelectedCellIds());
-	updateAfterCellReconnections();
 }
 
 void DataManipulator::moveExtendedSelection(QVector2D const & delta)
@@ -165,7 +162,21 @@ void DataManipulator::moveExtendedSelection(QVector2D const & delta)
 	}
 }
 
-void DataManipulator::dataUpdateRequired(IntRect const& rect) const
+void DataManipulator::reconnectSelectedCells()
+{
+	_connector->reconnect(getDataRef(), getSelectedCellIds());
+	updateAfterCellReconnections();
+}
+
+void DataManipulator::updateCluster(ClusterDescription const & cluster)
+{
+	int clusterIndex = _navi.clusterIndicesByClusterIds.at(cluster.id);
+	_data.clusters->at(clusterIndex) = cluster;
+
+	_navi.update(_data);
+}
+
+void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect) const
 {
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;

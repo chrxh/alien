@@ -20,23 +20,23 @@ TEST_F(ChangeDescriptionsTest, testCreateCellChangeDescriptionFromCellDescriptio
 	const list<uint64_t> connectingCells1 = { 204, 503 };
 	const int tokenBranchNumber1 = 5;
 	const CellMetadata metadata1 = CellMetadata().setName("test");
-	const CellFunctionDescription cellFunction1 = CellFunctionDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+	const CellFeatureDescription cellFunction1 = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
 	const vector<TokenDescription> tokens1 = { TokenDescription().setEnergy(200) };
 
-	CellDescription desc1 = CellDescription().setId(id).setCellFunction(cellFunction1)
+	CellDescription desc1 = CellDescription().setId(id).setCellFeature(cellFunction1)
 		.setEnergy(energy1).setConnectingCells(connectingCells1).setTokenBranchNumber(tokenBranchNumber1)
-		.setMetadata(metadata1).setCellFunction(cellFunction1).setTokens(tokens1);
+		.setMetadata(metadata1).setCellFeature(cellFunction1).setTokens(tokens1);
 
 	const double energy2 = 200;
 	const list<uint64_t> connectingCells2 = { 104, 503 };
 	const int maxConnections2 = 3;
 	const CellMetadata metadata2 = CellMetadata().setName("test2");
-	const CellFunctionDescription cellFunction2 = CellFunctionDescription().setType(Enums::CellFunction::COMPUTER);
+	const CellFeatureDescription cellFunction2 = CellFeatureDescription().setType(Enums::CellFunction::COMPUTER);
 	const vector<TokenDescription> tokens2 = { TokenDescription().setEnergy(300) };
 
-	CellDescription desc2 = CellDescription().setId(id).setCellFunction(cellFunction2)
+	CellDescription desc2 = CellDescription().setId(id).setCellFeature(cellFunction2)
 		.setEnergy(energy2).setConnectingCells(connectingCells2).setMaxConnections(maxConnections2)
-		.setMetadata(metadata2).setCellFunction(cellFunction2).setTokens(tokens2);
+		.setMetadata(metadata2).setCellFeature(cellFunction2).setTokens(tokens2);
 
 	CellChangeDescription change(desc1, desc2);
 

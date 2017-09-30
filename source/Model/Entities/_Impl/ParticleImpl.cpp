@@ -133,7 +133,7 @@ CellDescription ParticleImpl::getRandomCellDesciption(double energy) const
 		randomData[i] = _context->getNumberGenerator()->getRandomInt(256);
 	}
 	Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(_context->getNumberGenerator()->getRandomInt(Enums::CellFunction::_COUNTER));
-	return CellDescription().setEnergy(energy).setCellFunction(CellFunctionDescription().setType(randomCellFunction).setData(randomData))
+	return CellDescription().setEnergy(energy).setCellFeature(CellFeatureDescription().setType(randomCellFunction).setData(randomData))
 		.setMaxConnections(randomMaxConnections).setTokenBranchNumber(randomTokenAccessNumber);
 }
 

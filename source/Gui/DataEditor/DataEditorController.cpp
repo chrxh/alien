@@ -29,12 +29,46 @@ DataEditorContext * DataEditorController::getContext() const
 	return _context;
 }
 
+namespace
+{
+	QVector2D calcCenterPosOfCells(ClusterDescription const& cluster)
+	{
+		QVector2D result;
+		for (auto const& cell : *cluster.cells) {
+			result += *cell.pos;
+		}
+		result  /= cluster.cells->size();
+		return result;
+	}
+}
+
 void DataEditorController::notificationFromCellEditWidget()
 {
+	auto& cluster = _model->getClusterToEditRef();
+	cluster.pos = calcCenterPosOfCells(cluster);
+
+	_manipulator->updateCluster(cluster);
+	_manipulator->reconnectSelectedCells();
+
+	uint64_t selectedCellId = _model->getCellToEditRef().id;
+	_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
+	_view->update();
+	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
 void DataEditorController::notificationFromClusterEditWidget()
 {
+	auto& cluster = _model->getClusterToEditRef();
+	QVector2D oldClusterPos = calcCenterPosOfCells(cluster);
+	QVector2D delta = *cluster.pos - oldClusterPos;
+	for (auto& cell : *cluster.cells) {
+		*cell.pos += delta;
+	}
+
+	_manipulator->updateCluster(cluster);
+
+	_view->update();
+	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
 void DataEditorController::onShow(bool visible)
@@ -51,7 +85,8 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 	auto const& selectedCellIds = _manipulator->getSelectedCellIds();
 	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
-		_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellIds.front()), selectedCellIds.front());
+		uint64_t selectedCellId = selectedCellIds.front();
+		_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
 		_view->switchToClusterEditor();
 	}
 	if (selectedCellIds.size() + selectedParticleIds.size() > 1) {

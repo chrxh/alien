@@ -293,19 +293,19 @@ void CellEditWidget::mousePressEvent(QMouseEvent* e)
     //cursor at cell function?
     if( (row >= 7) && (col >= 18) && (col <= 36)) {
         if( row == 7 )
-            cell.cellFunction->type = Enums::CellFunction::COMPUTER;
+            cell.cellFeature->type = Enums::CellFunction::COMPUTER;
         if( row == 8 )
-			cell.cellFunction->type = Enums::CellFunction::PROPULSION;
+			cell.cellFeature->type = Enums::CellFunction::PROPULSION;
         if( row == 9 )
-			cell.cellFunction->type = Enums::CellFunction::SCANNER;
+			cell.cellFeature->type = Enums::CellFunction::SCANNER;
         if( row == 10 )
-			cell.cellFunction->type = Enums::CellFunction::WEAPON;
+			cell.cellFeature->type = Enums::CellFunction::WEAPON;
         if( row == 11 )
-			cell.cellFunction->type = Enums::CellFunction::CONSTRUCTOR;
+			cell.cellFeature->type = Enums::CellFunction::CONSTRUCTOR;
         if( row == 12 )
-			cell.cellFunction->type = Enums::CellFunction::SENSOR;
+			cell.cellFeature->type = Enums::CellFunction::SENSOR;
         if( row == 13 )
-			cell.cellFunction->type = Enums::CellFunction::COMMUNICATOR;
+			cell.cellFeature->type = Enums::CellFunction::COMMUNICATOR;
         updateDisplay();
     }
 }
@@ -363,7 +363,7 @@ void CellEditWidget::updateDisplay ()
         text += colorDataStart+"n"+colorEnd+parEnd;
         text += parStart+colorTextStartInactive+ "branch number: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd+parEnd;
     }
-    text += generateFormattedCellFunctionString(cell.cellFunction->type);
+    text += generateFormattedCellFunctionString(cell.cellFeature->type);
 
     QTextEdit::setText(text);
 

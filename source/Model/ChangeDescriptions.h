@@ -13,7 +13,7 @@ struct MODEL_EXPORT CellChangeDescription
 	optional<bool> tokenBlocked;
 	optional<int> tokenBranchNumber;
 	optional<CellMetadata> metadata;
-	optional<CellFunctionDescription> cellFunction;
+	optional<CellFeatureDescription> cellFunction;
 	optional<vector<TokenDescription>> tokens;
 
 	CellChangeDescription() = default;
@@ -29,7 +29,7 @@ struct MODEL_EXPORT CellChangeDescription
 	CellChangeDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellChangeDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellChangeDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
-	CellChangeDescription& setCellFunction(CellFunctionDescription const& value) { cellFunction = value; return *this; }
+	CellChangeDescription& setCellFunction(CellFeatureDescription const& value) { cellFunction = value; return *this; }
 };
 
 struct MODEL_EXPORT ClusterChangeDescription

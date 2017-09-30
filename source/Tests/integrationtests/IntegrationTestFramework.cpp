@@ -109,7 +109,7 @@ bool isCompatible<CellDescription>(CellDescription cell1, CellDescription cell2)
 		&& isCompatible(cell1.tokenBlocked, cell2.tokenBlocked)
 		&& isCompatible(cell1.tokenBranchNumber, cell2.tokenBranchNumber)
 		&& isCompatible(cell1.metadata, cell2.metadata)
-		&& isCompatible(cell1.cellFunction, cell2.cellFunction)
+		&& isCompatible(cell1.cellFeature, cell2.cellFeature)
 		&& isCompatible(cell1.tokens, cell2.tokens)
 		;
 }
