@@ -4,7 +4,7 @@
 #include <QVector2D>
 #include <gtest/gtest.h>
 
-#include "Model/Definitions.h"
+#include "Model/Api/Definitions.h"
 #include "TestSettings.h"
 
 bool predEqualIntVector(IntVector2D a, IntVector2D b);

@@ -1,7 +1,7 @@
 #include <QDebug>
 
 #include "gui/Settings.h"
-#include "Model/Context/UnitContext.h"
+#include "Model/Local/UnitContext.h"
 
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"

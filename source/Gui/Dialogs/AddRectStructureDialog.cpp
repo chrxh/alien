@@ -1,5 +1,5 @@
 #include "Gui/Settings.h"
-#include "Model/SimulationParameters.h"
+#include "Model/Api/SimulationParameters.h"
 
 #include "AddRectStructureDialog.h"
 #include "ui_AddRectStructureDialog.h"

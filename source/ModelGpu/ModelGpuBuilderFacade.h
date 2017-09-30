@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Definitions.h"
+#include "Model/Api/Definitions.h"
 #include "Definitions.h"
 
 class ModelGpuBuilderFacade

@@ -3,7 +3,7 @@
 #include <QObject>
 
 #include "Gui/Definitions.h"
-#include "Model/Descriptions.h"
+#include "Model/Api/Descriptions.h"
 
 class DataEditorContext
 	: public QObject

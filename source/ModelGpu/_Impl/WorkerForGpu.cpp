@@ -1,7 +1,7 @@
 #include <functional>
 #include <QImage>
 
-#include "Model/SpaceMetric.h"
+#include "Model/Api/SpaceMetric.h"
 #include "ModelGpu/_Impl/Cuda/CudaInterface.cuh"
 
 #include "WorkerForGpu.h"

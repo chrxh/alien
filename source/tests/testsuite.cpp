@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <QApplication>
 
-#include "Model/modelservices.h"
+#include "Model/Api/ModelServices.h"
 
 /*
 #include "unittests/testphysics.h"

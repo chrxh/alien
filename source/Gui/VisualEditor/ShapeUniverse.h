@@ -6,9 +6,9 @@
 #include <QMap>
 #include <QVector2D>
 
-#include "Model/Definitions.h"
-#include "Model/Entities/CellTO.h"
-#include "Model/Descriptions.h"
+#include "Model/Api/Definitions.h"
+#include "Model/Api/CellTO.h"
+#include "Model/Api/Descriptions.h"
 #include "Gui/Definitions.h"
 #include "Gui/DataManipulator.h"
 

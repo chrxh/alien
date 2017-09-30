@@ -4,7 +4,7 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "Model/Entities/CellTO.h"
+#include "Model/Api/CellTO.h"
 
 class Cell;
 class EnergyEdit : public QTextEdit

@@ -1,6 +1,6 @@
 #include <QPainter>
 
-#include "Model/ChangeDescriptions.h"
+#include "Model/Api/ChangeDescriptions.h"
 
 #include "Gui/Settings.h"
 
