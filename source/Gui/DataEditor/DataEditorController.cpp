@@ -68,7 +68,7 @@ void DataEditorController::notificationFromClusterEditWidget()
 	_manipulator->updateCluster(cluster);
 
 	_view->update();
-//	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
+	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
 void DataEditorController::onShow(bool visible)
