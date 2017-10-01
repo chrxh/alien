@@ -43,7 +43,7 @@ SpaceMetricLocal* UnitContextImpl::getSpaceMetric () const
     return _metric;
 }
 
-ParticleMap* UnitContextImpl::getEnergyParticleMap () const
+ParticleMap* UnitContextImpl::getParticleMap () const
 {
     return _energyParticleMap;
 }

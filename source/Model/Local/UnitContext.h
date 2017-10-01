@@ -16,7 +16,7 @@ public:
 	virtual NumberGenerator* getNumberGenerator() const = 0;
     virtual SpaceMetricLocal* getSpaceMetric() const = 0;
 	virtual CellMap* getCellMap() const = 0;
-	virtual ParticleMap* getEnergyParticleMap() const = 0;
+	virtual ParticleMap* getParticleMap() const = 0;
 	virtual MapCompartment* getMapCompartment() const = 0;
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;

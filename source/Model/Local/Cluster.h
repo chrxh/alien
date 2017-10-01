@@ -15,6 +15,7 @@ public:
 	virtual ~Cluster() = default;
 
 	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
+	virtual void applyChangeDescription(ClusterChangeDescription const& change) = 0;
 
     virtual void clearCellsFromMap () = 0;
     virtual void clearCellFromMap (Cell* cell) = 0;

@@ -40,7 +40,7 @@ void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, 
 	}
 
 	context->getCellMap()->serializePrimitives(stream);
-	context->getEnergyParticleMap()->serializePrimitives(stream);
+	context->getParticleMap()->serializePrimitives(stream);
 	context->getSymbolTable()->serializePrimitives(stream);
 	context->getSimulationParameters()->serializePrimitives(stream);
 }

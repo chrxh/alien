@@ -18,7 +18,7 @@ public:
 	virtual NumberGenerator* getNumberGenerator() const override;
 	virtual SpaceMetricLocal* getSpaceMetric () const override;
 	virtual CellMap* getCellMap () const override;
-	virtual ParticleMap* getEnergyParticleMap () const override;
+	virtual ParticleMap* getParticleMap () const override;
 	virtual MapCompartment* getMapCompartment() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
