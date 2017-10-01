@@ -103,6 +103,25 @@ ClusterDescription ClusterImpl::getDescription(ResolveDescription const& resolve
 	return result;
 }
 
+void ClusterImpl::applyChangeDescription(ClusterChangeDescription const & change)
+{
+	if (change.pos) {
+		setCenterPosition(*change.pos);
+	}
+	if (change.vel) {
+		setVelocity(*change.vel);
+	}
+	if (change.angle) {
+		setAngle(*change.angle);
+	}
+	if (change.angularVel) {
+		setAngularVel(*change.angularVel);
+	}
+	if (change.metadata) {
+		setMetadata(*change.metadata);
+	}
+}
+
 void ClusterImpl::clearCellFromMap (Cell* cell)
 {
 	auto cellMap = _context->getCellMap();

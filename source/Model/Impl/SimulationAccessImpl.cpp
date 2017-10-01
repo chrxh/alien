@@ -80,95 +80,123 @@ void SimulationAccessImpl::accessToUnits()
 
 void SimulationAccessImpl::callBackUpdateData()
 {
+	updateClusterData();
+	updateParticleData();
+
+	_dataToUpdate.clear();
+}
+
+void SimulationAccessImpl::updateClusterData()
+{
 	EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 
 	auto grid = _context->getUnitGrid();
 
-	{
-		unordered_set<uint64_t> clusterIdsToDelete;
-		unordered_set<UnitContext*> units;
+	unordered_set<uint64_t> clusterIdsToDelete;
+	unordered_map<uint64_t, ClusterChangeDescription> clusterToUpdate;
+	unordered_set<UnitContext*> units;
 
-		for (auto const& clusterTracker : _dataToUpdate.clusters) {
-			auto const& clusterDesc = clusterTracker.getValue();
-			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
-			if (clusterTracker.isAdded()) {
-				auto cluster = factory->build(clusterDesc, unitContext);
-				unitContext->getClustersRef().push_back(cluster);
-			}
-			if (clusterTracker.isDeleted()) {
-				units.insert(unitContext);
-				clusterIdsToDelete.insert(clusterDesc.id);
-			}
-			if (clusterTracker.isModified()) {
-				THROW_NOT_IMPLEMENTED();
-			}
+	for (auto const& clusterTracker : _dataToUpdate.clusters) {
+		auto const& clusterDesc = clusterTracker.getValue();
+		if(!clusterDesc.pos) { continue; }
+		auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
+		if (clusterTracker.isAdded()) {
+			auto cluster = factory->build(clusterDesc, unitContext);
+			unitContext->getClustersRef().push_back(cluster);
 		}
+		if (clusterTracker.isDeleted()) {
+			units.insert(unitContext);
+			clusterIdsToDelete.insert(clusterDesc.id);
+		}
+		if (clusterTracker.isModified()) {
+			auto unitContext = grid->getUnitOfMapPos(clusterDesc.getPosBefore())->getContext();
+			units.insert(unitContext);
+			clusterToUpdate.insert_or_assign(clusterDesc.id, clusterDesc);
+		}
+	}
 
-		for (auto const& unitContext : units) {
-			QMutableListIterator<Cluster*> clusterIt(unitContext->getClustersRef());
-			while (clusterIt.hasNext()) {
-				Cluster* cluster = clusterIt.next();
-				if (clusterIdsToDelete.find(cluster->getId()) != clusterIdsToDelete.end()) {
-					cluster->clearCellsFromMap();
-					delete cluster;
+	for (auto const& unitContext : units) {
+		QMutableListIterator<Cluster*> clusterIt(unitContext->getClustersRef());
+		auto cellMap = unitContext->getParticleMap();
+		while (clusterIt.hasNext()) {
+			Cluster* cluster = clusterIt.next();
+			if (clusterToUpdate.find(cluster->getId()) != clusterToUpdate.end()) {
+				ClusterChangeDescription const& change = clusterToUpdate.at(cluster->getId());
+				cluster->clearCellsFromMap();
+				cluster->applyChangeDescription(change);
+
+				auto newUnitContext = grid->getUnitOfMapPos(cluster->getPosition())->getContext();
+				if (newUnitContext != unitContext) {
 					clusterIt.remove();
+					newUnitContext->getClustersRef().push_back(cluster);
+					cluster->setContext(newUnitContext);
 				}
+				cluster->drawCellsToMap();
+				clusterToUpdate.erase(cluster->getId());
+			}
+			if (clusterIdsToDelete.find(cluster->getId()) != clusterIdsToDelete.end()) {
+				cluster->clearCellsFromMap();
+				delete cluster;
+				clusterIt.remove();
 			}
 		}
 	}
+}
 
-	{
-		unordered_set<uint64_t> particleIdsToDelete;
-		unordered_map<uint64_t, ParticleChangeDescription> particlesToUpdate;
-		unordered_set<UnitContext*> units;
+void SimulationAccessImpl::updateParticleData()
+{
+	EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 
-		for (auto const& particleTracker : _dataToUpdate.particles) {
-			auto const& particleDesc = particleTracker.getValue();
-			auto unitContext = grid->getUnitOfMapPos(*particleDesc.pos)->getContext();
-			if (particleTracker.isAdded()) {
-				auto particle = factory->build(particleDesc, unitContext);
-				unitContext->getParticlesRef().push_back(particle);
-			}
-			if (particleTracker.isDeleted()) {
-				units.insert(unitContext);
-				particleIdsToDelete.insert(particleDesc.id);
-			}
-			if (particleTracker.isModified()) {
-				auto unitContext = grid->getUnitOfMapPos(particleDesc.getPosBefore())->getContext();
-				units.insert(unitContext);
-				particlesToUpdate.insert_or_assign(particleDesc.id, particleDesc);
-			}
+	auto grid = _context->getUnitGrid();
+
+	unordered_set<uint64_t> particleIdsToDelete;
+	unordered_map<uint64_t, ParticleChangeDescription> particlesToUpdate;
+	unordered_set<UnitContext*> units;
+
+	for (auto const& particleTracker : _dataToUpdate.particles) {
+		auto const& particleDesc = particleTracker.getValue();
+		if (!particleDesc.pos) { continue; }
+		auto unitContext = grid->getUnitOfMapPos(*particleDesc.pos)->getContext();
+		if (particleTracker.isAdded()) {
+			auto particle = factory->build(particleDesc, unitContext);
+			unitContext->getParticlesRef().push_back(particle);
 		}
+		if (particleTracker.isDeleted()) {
+			units.insert(unitContext);
+			particleIdsToDelete.insert(particleDesc.id);
+		}
+		if (particleTracker.isModified()) {
+			auto unitContext = grid->getUnitOfMapPos(particleDesc.getPosBefore())->getContext();
+			units.insert(unitContext);
+			particlesToUpdate.insert_or_assign(particleDesc.id, particleDesc);
+		}
+	}
 
-		for (auto const& unitContext : units) {
-			QMutableListIterator<Particle*> particleIt(unitContext->getParticlesRef());
-			auto energyMap = unitContext->getEnergyParticleMap();
-			while (particleIt.hasNext()) {
-				Particle* particle = particleIt.next();
-				if (particlesToUpdate.find(particle->getId()) != particlesToUpdate.end()) {
-					ParticleChangeDescription const& change = particlesToUpdate.at(particle->getId());
-					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
-					particle->applyChangeDescription(change);
+	for (auto const& unitContext : units) {
+		QMutableListIterator<Particle*> particleIt(unitContext->getParticlesRef());
+		while (particleIt.hasNext()) {
+			Particle* particle = particleIt.next();
+			if (particlesToUpdate.find(particle->getId()) != particlesToUpdate.end()) {
+				particle->clearParticleFromMap();
+				ParticleChangeDescription const& change = particlesToUpdate.at(particle->getId());
+				particle->applyChangeDescription(change);
 
-					auto newUnitContext = grid->getUnitOfMapPos(particle->getPosition())->getContext();
-					auto newEnergyMap = newUnitContext->getEnergyParticleMap();
-					if (newUnitContext != unitContext) {
-						particleIt.remove();
-						newUnitContext->getParticlesRef().push_back(particle);
-						particle->setContext(newUnitContext);
-					}
-					newEnergyMap->setParticle(particle->getPosition(), particle);
-					particlesToUpdate.erase(particle->getId());
-				}
-				if (particleIdsToDelete.find(particle->getId()) != particleIdsToDelete.end()) {
-					energyMap->removeParticleIfPresent(particle->getPosition(), particle);
+				auto newUnitContext = grid->getUnitOfMapPos(particle->getPosition())->getContext();
+				if (newUnitContext != unitContext) {
 					particleIt.remove();
-					delete particle;
+					newUnitContext->getParticlesRef().push_back(particle);
+					particle->setContext(newUnitContext);
 				}
+				particle->drawParticleToMap();
+				particlesToUpdate.erase(particle->getId());
+			}
+			if (particleIdsToDelete.find(particle->getId()) != particleIdsToDelete.end()) {
+				particle->clearParticleFromMap();
+				particleIt.remove();
+				delete particle;
 			}
 		}
 	}
-	_dataToUpdate.clear();
 }
 
 void SimulationAccessImpl::callBackCollectData()

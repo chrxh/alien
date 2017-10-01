@@ -40,7 +40,7 @@ Particle*& ParticleMapImpl::locateParticle(IntVector2D & intPos) const
 		return _energyGrid[intPos.x][intPos.y];
 	}
 	else {
-		auto energyMap = static_cast<ParticleMapImpl*>(_compartment->getNeighborContext(intPos)->getEnergyParticleMap());
+		auto energyMap = static_cast<ParticleMapImpl*>(_compartment->getNeighborContext(intPos)->getParticleMap());
 		_compartment->convertAbsToRelPosition(intPos);
 		return energyMap->_energyGrid[intPos.x][intPos.y];
 	}

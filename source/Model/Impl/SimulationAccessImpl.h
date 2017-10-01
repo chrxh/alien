@@ -22,10 +22,14 @@ public:
 
 	virtual void unregister() override;
 	virtual void accessToUnits() override;
+
 private:
 	void callBackUpdateData();
 	void callBackCollectData();
 	void callBackDrawImage();
+
+	void updateClusterData();
+	void updateParticleData();
 
 	void drawImageFromUnit(Unit* unit);
 	void drawClustersFromUnit(Unit* unit);
