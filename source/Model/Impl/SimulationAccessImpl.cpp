@@ -98,13 +98,13 @@ void SimulationAccessImpl::updateClusterData()
 
 	for (auto const& clusterTracker : _dataToUpdate.clusters) {
 		auto const& clusterDesc = clusterTracker.getValue();
-		if(!clusterDesc.pos) { continue; }
-		auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
 		if (clusterTracker.isAdded()) {
+			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
 			auto cluster = factory->build(clusterDesc, unitContext);
 			unitContext->getClustersRef().push_back(cluster);
 		}
 		if (clusterTracker.isDeleted()) {
+			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
 			units.insert(unitContext);
 			clusterIdsToDelete.insert(clusterDesc.id);
 		}
@@ -155,13 +155,13 @@ void SimulationAccessImpl::updateParticleData()
 
 	for (auto const& particleTracker : _dataToUpdate.particles) {
 		auto const& particleDesc = particleTracker.getValue();
-		if (!particleDesc.pos) { continue; }
-		auto unitContext = grid->getUnitOfMapPos(*particleDesc.pos)->getContext();
 		if (particleTracker.isAdded()) {
+			auto unitContext = grid->getUnitOfMapPos(*particleDesc.pos)->getContext();
 			auto particle = factory->build(particleDesc, unitContext);
 			unitContext->getParticlesRef().push_back(particle);
 		}
 		if (particleTracker.isDeleted()) {
+			auto unitContext = grid->getUnitOfMapPos(*particleDesc.pos)->getContext();
 			units.insert(unitContext);
 			particleIdsToDelete.insert(particleDesc.id);
 		}
