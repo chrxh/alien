@@ -56,6 +56,7 @@ void DataManipulator::dataFromSimulationAvailable()
 void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)
 {
 	if (targets.find(Receiver::Simulation) == targets.end()) {
+		return;
 	}
 	DataChangeDescription delta(_unchangedData, _data);
 	_access->updateData(delta);
@@ -136,6 +137,12 @@ void DataManipulator::moveSelection(QVector2D const &delta)
 
 void DataManipulator::moveExtendedSelection(QVector2D const & delta)
 {
+	for (uint64_t selectedClusterId : _selectedClusterIds) {
+		auto selectedClusterIndex = _navi.clusterIndicesByClusterIds.at(selectedClusterId);
+		ClusterDescription &clusterDesc = _data.clusters->at(selectedClusterIndex);
+		clusterDesc.pos = *clusterDesc.pos + delta;
+	}
+
 	list<uint64_t> extSelectedCellIds;
 	for (auto clusterIdByCellId : _navi.clusterIdsByCellIds) {
 		uint64_t cellId = clusterIdByCellId.first;

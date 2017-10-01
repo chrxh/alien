@@ -58,7 +58,7 @@ bool ParticleImpl::processingMovement(Cluster*& cluster)
 	}
 
 	auto cellMap = _context->getCellMap();
-	auto energyMap = _context->getEnergyParticleMap();
+	auto energyMap = _context->getParticleMap();
 	auto parameters = _context->getSimulationParameters();
 	energyMap->removeParticleIfPresent(_pos, this);
 	move();
@@ -107,6 +107,18 @@ bool ParticleImpl::processingMovement(Cluster*& cluster)
 		energyMap->setParticle(_pos, this);
 	}
 	return true;
+}
+
+void ParticleImpl::clearParticleFromMap()
+{
+	auto energyMap = _context->getParticleMap();
+	energyMap->removeParticleIfPresent(getPosition(), this);
+}
+
+void ParticleImpl::drawParticleToMap()
+{
+	auto energyMap = _context->getParticleMap();
+	energyMap->setParticle(getPosition(), this);
 }
 
 void ParticleImpl::collisionWithCell(Cell* cell)

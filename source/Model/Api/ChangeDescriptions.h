@@ -82,6 +82,10 @@ struct MODEL_EXPORT ClusterChangeDescription
 		cells.emplace_back(ChangeTracker<CellChangeDescription>(value, ChangeTracker<CellChangeDescription>::State::Deleted));
 		return *this;
 	}
+	QVector2D getPosBefore() const;
+
+private:
+	optional<QVector2D> _posBefore;
 };
 
 struct MODEL_EXPORT ParticleChangeDescription

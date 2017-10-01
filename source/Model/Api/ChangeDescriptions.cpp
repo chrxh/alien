@@ -108,6 +108,7 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & be
 			addNewCell(CellChangeDescription(cellAfter));
 		}
 	}
+	_posBefore = before.pos;
 }
 
 bool ClusterChangeDescription::isEmpty() const
@@ -119,6 +120,11 @@ bool ClusterChangeDescription::isEmpty() const
 		&& !metadata.is_initialized()
 		&& cells.empty()
 		;
+}
+
+QVector2D ClusterChangeDescription::getPosBefore() const
+{
+	return *_posBefore;
 }
 
 ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & desc)

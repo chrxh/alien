@@ -18,6 +18,9 @@ public:
 
     virtual bool processingMovement (Cluster*& cluster) = 0;
 
+	virtual void clearParticleFromMap() = 0;
+	virtual void drawParticleToMap() = 0;
+
 	virtual qreal getEnergy() const = 0;
 	virtual void setEnergy(qreal value) = 0;
 

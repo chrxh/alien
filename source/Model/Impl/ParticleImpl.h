@@ -14,6 +14,9 @@ public:
 
 	virtual bool processingMovement(Cluster*& cluster) override;
 
+	virtual void clearParticleFromMap() override;
+	virtual void drawParticleToMap() override;
+
 	virtual qreal getEnergy() const override;
 	virtual void setEnergy(qreal value) override;
 

@@ -10,8 +10,6 @@
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/SimulationContext.h"
-#include "Model/Local/ParticleMap.h"
-#include "Model/Local/CellMap.h"
 #include "Model/Api/SpaceMetric.h"
 
 #include "PixelUniverse.h"

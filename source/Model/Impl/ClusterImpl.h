@@ -10,11 +10,12 @@ class ClusterImpl
 public:
     ClusterImpl (QList< Cell* > cells, uint64_t id, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
 
-    ~ClusterImpl ();
+    virtual ~ClusterImpl ();
 
 	virtual void setContext(UnitContext* context) override;
 
 	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const override;
+	virtual void applyChangeDescription(ClusterChangeDescription const& change) override;
 
     void clearCellsFromMap () override;
     void clearCellFromMap (Cell* cell) override;
