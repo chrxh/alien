@@ -1,11 +1,11 @@
 ﻿#include "Base/ServiceLocator.h"
 
-#include "Model/_Impl/ModelBuilderFacadeImpl.h"
-#include "Model/_Impl/SerializationFacadeImpl.h"
-#include "Model/AccessPorts/_Impl/AccessPortFactoryImpl.h"
-#include "Model/Context/_Impl/ContextFactoryImpl.h"
-#include "Model/Entities/_Impl/EntityFactoryImpl.h"
-#include "Model/Features/_Impl/CellFeatureFactoryImpl.h"
+#include "Model/Impl/ModelBuilderFacadeImpl.h"
+#include "Model/Impl/SerializationFacadeImpl.h"
+#include "Model/Impl/AccessPortFactoryImpl.h"
+#include "Model/Impl/ContextFactoryImpl.h"
+#include "Model/Impl/EntityFactoryImpl.h"
+#include "Model/Impl/CellFeatureFactoryImpl.h"
 
 #include "modelservices.h"
 
