@@ -109,7 +109,7 @@ void SimulationAccessImpl::updateClusterData()
 			clusterIdsToDelete.insert(clusterDesc.id);
 		}
 		if (clusterTracker.isModified()) {
-			auto unitContext = grid->getUnitOfMapPos(clusterDesc.getPosBefore())->getContext();
+			auto unitContext = grid->getUnitOfMapPos(clusterDesc.pos.getOldValue())->getContext();
 			units.insert(unitContext);
 			clusterToUpdate.insert_or_assign(clusterDesc.id, clusterDesc);
 		}
@@ -166,7 +166,7 @@ void SimulationAccessImpl::updateParticleData()
 			particleIdsToDelete.insert(particleDesc.id);
 		}
 		if (particleTracker.isModified()) {
-			auto unitContext = grid->getUnitOfMapPos(particleDesc.getPosBefore())->getContext();
+			auto unitContext = grid->getUnitOfMapPos(particleDesc.pos.getOldValue())->getContext();
 			units.insert(unitContext);
 			particlesToUpdate.insert_or_assign(particleDesc.id, particleDesc);
 		}
