@@ -6,15 +6,15 @@ struct MODEL_EXPORT CellChangeDescription
 {
 	uint64_t id = 0;
 
-	optional<QVector2D> pos;
-	optional<double> energy;
-	optional<int> maxConnections;
-	optional<list<uint64_t>> connectingCells;
-	optional<bool> tokenBlocked;
-	optional<int> tokenBranchNumber;
-	optional<CellMetadata> metadata;
-	optional<CellFeatureDescription> cellFunction;
-	optional<vector<TokenDescription>> tokens;
+	ValueTracker<QVector2D> pos;
+	ValueTracker<double> energy;
+	ValueTracker<int> maxConnections;
+	ValueTracker<list<uint64_t>> connectingCells;
+	ValueTracker<bool> tokenBlocked;
+	ValueTracker<int> tokenBranchNumber;
+	ValueTracker<CellMetadata> metadata;
+	ValueTracker<CellFeatureDescription> cellFeatures;
+	ValueTracker<vector<TokenDescription>> tokens;
 
 	CellChangeDescription() = default;
 	CellChangeDescription(CellDescription const& desc);
@@ -29,19 +29,19 @@ struct MODEL_EXPORT CellChangeDescription
 	CellChangeDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellChangeDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellChangeDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
-	CellChangeDescription& setCellFunction(CellFeatureDescription const& value) { cellFunction = value; return *this; }
+	CellChangeDescription& setCellFunction(CellFeatureDescription const& value) { cellFeatures = value; return *this; }
 };
 
 struct MODEL_EXPORT ClusterChangeDescription
 {
 	uint64_t id = 0;
 
-	optional<QVector2D> pos;
-	optional<QVector2D> vel;
-	optional<double> angle;
-	optional<double> angularVel;
-	optional<ClusterMetadata> metadata;
-	vector<ChangeTracker<CellChangeDescription>> cells;
+	ValueTracker<QVector2D> pos;
+	ValueTracker<QVector2D> vel;
+	ValueTracker<double> angle;
+	ValueTracker<double> angularVel;
+	ValueTracker<ClusterMetadata> metadata;
+	vector<StateTracker<CellChangeDescription>> cells;
 
 	ClusterChangeDescription() = default;
 	ClusterChangeDescription(ClusterDescription const& desc);
@@ -55,7 +55,7 @@ struct MODEL_EXPORT ClusterChangeDescription
 	ClusterChangeDescription& setAngularVel(double value) { angularVel = value; return *this; }
 	ClusterChangeDescription& addNewCell(CellChangeDescription const& value)
 	{
-		cells.emplace_back(ChangeTracker<CellChangeDescription>(value, ChangeTracker<CellChangeDescription>::State::Added));
+		cells.emplace_back(StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Added));
 		return *this;
 	}
 	ClusterChangeDescription& addNewCells(list<CellChangeDescription> const& value)
@@ -67,7 +67,7 @@ struct MODEL_EXPORT ClusterChangeDescription
 	}
 	ClusterChangeDescription& addModifiedCell(CellChangeDescription const& value)
 	{
-		cells.emplace_back(ChangeTracker<CellChangeDescription>(value, ChangeTracker<CellChangeDescription>::State::Modified));
+		cells.emplace_back(StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Modified));
 		return *this;
 	}
 	ClusterChangeDescription& addModifiedCells(list<CellChangeDescription> const& value)
@@ -79,7 +79,7 @@ struct MODEL_EXPORT ClusterChangeDescription
 	}
 	ClusterChangeDescription& addDeletedCell(CellChangeDescription const& value)
 	{
-		cells.emplace_back(ChangeTracker<CellChangeDescription>(value, ChangeTracker<CellChangeDescription>::State::Deleted));
+		cells.emplace_back(StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Deleted));
 		return *this;
 	}
 	QVector2D getPosBefore() const;
@@ -92,10 +92,10 @@ struct MODEL_EXPORT ParticleChangeDescription
 {
 	uint64_t id = 0;
 
-	optional<QVector2D> pos;
-	optional<QVector2D> vel;
-	optional<double> energy;
-	optional<ParticleMetadata> metadata;
+	ValueTracker<QVector2D> pos;
+	ValueTracker<QVector2D> vel;
+	ValueTracker<double> energy;
+	ValueTracker<ParticleMetadata> metadata;
 
 	ParticleChangeDescription() = default;
 	ParticleChangeDescription(ParticleDescription const& desc);
@@ -114,8 +114,8 @@ private:
 
 struct MODEL_EXPORT DataChangeDescription
 {
-	vector<ChangeTracker<ClusterChangeDescription>> clusters;
-	vector<ChangeTracker<ParticleChangeDescription>> particles;
+	vector<StateTracker<ClusterChangeDescription>> clusters;
+	vector<StateTracker<ParticleChangeDescription>> particles;
 
 	DataChangeDescription() = default;
 	DataChangeDescription(DataDescription const& desc);
@@ -123,12 +123,12 @@ struct MODEL_EXPORT DataChangeDescription
 
 	DataChangeDescription& addNewCluster(ClusterChangeDescription const& value)
 	{
-		clusters.emplace_back(ChangeTracker<ClusterChangeDescription>(value, ChangeTracker<ClusterChangeDescription>::State::Added));
+		clusters.emplace_back(StateTracker<ClusterChangeDescription>(value, StateTracker<ClusterChangeDescription>::State::Added));
 		return *this;
 	}
 	DataChangeDescription& addModifiedCluster(ClusterChangeDescription const& value)
 	{
-		clusters.emplace_back(ChangeTracker<ClusterChangeDescription>(value, ChangeTracker<ClusterChangeDescription>::State::Modified));
+		clusters.emplace_back(StateTracker<ClusterChangeDescription>(value, StateTracker<ClusterChangeDescription>::State::Modified));
 		return *this;
 	}
 	DataChangeDescription& addModifiedClusters(list<ClusterChangeDescription> const& value)
@@ -140,22 +140,22 @@ struct MODEL_EXPORT DataChangeDescription
 	}
 	DataChangeDescription& addDeletedCluster(ClusterChangeDescription const& value)
 	{
-		clusters.emplace_back(ChangeTracker<ClusterChangeDescription>(value, ChangeTracker<ClusterChangeDescription>::State::Deleted));
+		clusters.emplace_back(StateTracker<ClusterChangeDescription>(value, StateTracker<ClusterChangeDescription>::State::Deleted));
 		return *this;
 	}
 	DataChangeDescription& addNewParticle(ParticleChangeDescription const& value)
 	{
-		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Added));
+		particles.emplace_back(StateTracker<ParticleChangeDescription>(value, StateTracker<ParticleChangeDescription>::State::Added));
 		return *this;
 	}
 	DataChangeDescription& addModifiedParticle(ParticleChangeDescription const& value)
 	{
-		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Modified));
+		particles.emplace_back(StateTracker<ParticleChangeDescription>(value, StateTracker<ParticleChangeDescription>::State::Modified));
 		return *this;
 	}
 	DataChangeDescription& addDeletedParticle(ParticleChangeDescription const& value)
 	{
-		particles.emplace_back(ChangeTracker<ParticleChangeDescription>(value, ChangeTracker<ParticleChangeDescription>::State::Deleted));
+		particles.emplace_back(StateTracker<ParticleChangeDescription>(value, StateTracker<ParticleChangeDescription>::State::Deleted));
 		return *this;
 	}
 	void clear()

@@ -14,12 +14,14 @@ public:
 	virtual ~DataEditorModel() = default;
 
 	void editClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
+	DataChangeDescription getAndsUpdateChanges();
 
 	CellDescription& getCellToEditRef();
 	ClusterDescription& getClusterToEditRef();
 
 private:
-	DataDescription _selectedData;
+	DataDescription _data;
+	DataDescription _unchangedData;
 	DescriptionNavigationMaps _navi;
 
 	set<uint64_t> _selectedCellIds;

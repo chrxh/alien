@@ -41,12 +41,12 @@ TEST_F(ChangeDescriptionsTest, testCreateCellChangeDescriptionFromCellDescriptio
 	CellChangeDescription change(desc1, desc2);
 
 	ASSERT_EQ(id, change.id);
-	ASSERT_EQ(boost::none, change.energy);
+	ASSERT_FALSE(change.energy);
 	ASSERT_EQ(connectingCells2, *change.connectingCells);
-	ASSERT_EQ(boost::none, change.tokenBranchNumber);
+	ASSERT_FALSE(change.tokenBranchNumber);
 	ASSERT_EQ(maxConnections2, *change.maxConnections);
 	ASSERT_EQ(metadata2, *change.metadata);
-	ASSERT_EQ(cellFunction2, *change.cellFunction);
+	ASSERT_EQ(cellFunction2, *change.cellFeatures);
 	ASSERT_EQ(tokens2, *change.tokens);
 }
 
@@ -87,9 +87,9 @@ TEST_F(ChangeDescriptionsTest, testCreateClusterChangeDescriptionFromClusterDesc
 	ClusterChangeDescription change(desc1, desc2);
 
 	ASSERT_EQ(id, change.id);
-	ASSERT_EQ(boost::none, change.pos);
+	ASSERT_FALSE(change.pos);
 	ASSERT_EQ(vel2, *change.vel);
-	ASSERT_EQ(boost::none, change.angle);
+	ASSERT_FALSE(change.angle);
 	ASSERT_EQ(angularVel2, *change.angularVel);
 	ASSERT_EQ(3, change.cells.size());
 

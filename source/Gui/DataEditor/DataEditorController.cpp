@@ -1,5 +1,8 @@
-#include "Gui/DataManipulator.h"
+#include <QMatrix4x4>
 
+#include "Model/Api/ChangeDescriptions.h"
+
+#include "Gui/DataManipulator.h"
 #include "DataEditorController.h"
 #include "DataEditorContext.h"
 #include "DataEditorModel.h"
@@ -58,11 +61,30 @@ void DataEditorController::notificationFromCellEditWidget()
 
 void DataEditorController::notificationFromClusterEditWidget()
 {
+	DataChangeDescription changes = _model->getAndsUpdateChanges();
+	if (changes.clusters.empty()) {
+		return;
+	}
+	CHECK(changes.clusters.size() == 1);
+
+	auto const& clusterChanges = changes.clusters.front().getValue();
 	auto& cluster = _model->getClusterToEditRef();
-	QVector2D oldClusterPos = calcCenterPosOfCells(cluster);
-	QVector2D delta = *cluster.pos - oldClusterPos;
-	for (auto& cell : *cluster.cells) {
-		*cell.pos += delta;
+
+	if (clusterChanges.pos) {
+		auto delta = clusterChanges.pos.getValue() - clusterChanges.pos.getOldValue();
+		for (auto& cell : *cluster.cells) {
+			*cell.pos += delta;
+		}
+	}
+
+	if (clusterChanges.angle) {
+		auto delta = *clusterChanges.angle - *cluster.angle;
+		QMatrix4x4 transform;
+		transform.rotate(delta, 0.0, 0.0, 1.0);
+		for (auto& cell : *cluster.cells) {
+			auto newRelPos = transform.map(QVector3D(*cell.pos - *cluster.pos)).toVector2D();
+			cell.pos = newRelPos + *cluster.pos;
+		}
 	}
 
 	_manipulator->updateCluster(cluster);
