@@ -78,7 +78,7 @@ void DataEditorController::notificationFromClusterEditWidget()
 	}
 
 	if (clusterChanges.angle) {
-		auto delta = *clusterChanges.angle - *cluster.angle;
+		auto delta = clusterChanges.angle.getValue() - clusterChanges.angle.getOldValue();
 		QMatrix4x4 transform;
 		transform.rotate(delta, 0.0, 0.0, 1.0);
 		for (auto& cell : *cluster.cells) {
