@@ -1,5 +1,4 @@
-#ifndef BASE_DEFINITIONS_H
-#define BASE_DEFINITIONS_H
+#pragma once
 
 #include <QtGlobal>
 #include <QVector2D>
@@ -79,4 +78,7 @@ bool IntRect::isContained(IntVector2D const &p) const
 
 #define THROW_NOT_IMPLEMENTED() throw std::exception("not implemented")
 
-#endif // BASE_DEFINITIONS_H
+#define CHECK(expression)\
+	if(!expression) {\
+		throw std::exception("check failed");\
+	}
