@@ -20,35 +20,35 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 	tokenBlocked = desc.tokenBlocked;
 	tokenBranchNumber = desc.tokenBranchNumber;
 	metadata = desc.metadata;
-	cellFunction = desc.cellFeature;
+	cellFeatures = desc.cellFeature;
 	tokens = desc.tokens;
 }
 
 CellChangeDescription::CellChangeDescription(CellDescription const & before, CellDescription const & after)
 {
 	id = after.id;
-	SET_DELTA(before.pos, after.pos, pos);
-	SET_DELTA(before.energy, after.energy, energy);
-	SET_DELTA(before.maxConnections, after.maxConnections, maxConnections);
-	SET_DELTA(before.connectingCells, after.connectingCells, connectingCells);
-	SET_DELTA(before.tokenBlocked, after.tokenBlocked, tokenBlocked);
-	SET_DELTA(before.tokenBranchNumber, after.tokenBranchNumber, tokenBranchNumber);
-	SET_DELTA(before.metadata, after.metadata, metadata);
-	SET_DELTA(before.cellFeature, after.cellFeature, cellFunction);
-	SET_DELTA(before.tokens, after.tokens, tokens);
+	pos = ValueTracker<QVector2D>(before.pos, after.pos);
+	energy = ValueTracker<double>(before.energy, after.energy);
+	maxConnections = ValueTracker<int>(before.maxConnections, after.maxConnections);
+	connectingCells = ValueTracker<list<uint64_t>>(before.connectingCells, after.connectingCells);
+	tokenBlocked = ValueTracker<bool>(before.tokenBlocked, after.tokenBlocked);
+	tokenBranchNumber = ValueTracker<int>(before.tokenBranchNumber, after.tokenBranchNumber);
+	metadata = ValueTracker<CellMetadata>(before.metadata, after.metadata);
+	cellFeatures = ValueTracker<CellFeatureDescription>(before.cellFeature, after.cellFeature);
+	tokens = ValueTracker<vector<TokenDescription>>(before.tokens, after.tokens);
 }
 
 bool CellChangeDescription::isEmpty() const
 {
-	return !pos.is_initialized()
-		&& !energy.is_initialized()
-		&& !maxConnections.is_initialized()
-		&& !connectingCells.is_initialized()
-		&& !tokenBlocked.is_initialized()
-		&& !tokenBranchNumber.is_initialized()
-		&& !metadata.is_initialized()
-		&& !cellFunction.is_initialized()
-		&& !tokens.is_initialized()
+	return !pos
+		&& !energy
+		&& !maxConnections
+		&& !connectingCells
+		&& !tokenBlocked
+		&& !tokenBranchNumber
+		&& !metadata
+		&& !cellFeatures
+		&& !tokens
 		;
 }
 
@@ -70,11 +70,11 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & de
 ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & before, ClusterDescription const & after)
 {
 	id = after.id;
-	SET_DELTA(before.pos, after.pos, pos);
-	SET_DELTA(before.vel, after.vel, vel);
-	SET_DELTA(before.angle, after.angle, angle);
-	SET_DELTA(before.angularVel, after.angularVel, angularVel);
-	SET_DELTA(before.metadata, after.metadata, metadata);
+	pos = ValueTracker<QVector2D>(before.pos, after.pos);
+	vel = ValueTracker<QVector2D>(before.vel, after.vel);
+	angle = ValueTracker<double>(before.angle, after.angle);
+	angularVel = ValueTracker<double>(before.angularVel, after.angularVel);
+	metadata = ValueTracker<ClusterMetadata>(before.metadata, after.metadata);
 
 	if (before.cells && after.cells) {
 		unordered_map<uint64_t, int> cellAfterIndicesByIds;
@@ -113,11 +113,11 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & be
 
 bool ClusterChangeDescription::isEmpty() const
 {
-	return !pos.is_initialized()
-		&& !vel.is_initialized()
-		&& !angle.is_initialized()
-		&& !angularVel.is_initialized()
-		&& !metadata.is_initialized()
+	return !pos
+		&& !vel
+		&& !angle
+		&& !angularVel
+		&& !metadata
 		&& cells.empty()
 		;
 }
@@ -139,19 +139,19 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & before, ParticleDescription const & after)
 {
 	id = after.id;
-	SET_DELTA(before.pos, after.pos, pos);
-	SET_DELTA(before.vel, after.vel, vel);
-	SET_DELTA(before.energy, after.energy, energy);
-	SET_DELTA(before.metadata, after.metadata, metadata);
+	pos = ValueTracker<QVector2D>(before.pos, after.pos);
+	vel = ValueTracker<QVector2D>(before.vel, after.vel);
+	energy = ValueTracker<double>(before.energy, after.energy);
+	metadata = ValueTracker<ParticleMetadata>(before.metadata, after.metadata);
 	_posBefore = before.pos;
 }
 
 bool ParticleChangeDescription::isEmpty() const
 {
-	return !pos.is_initialized()
-		&& !vel.is_initialized()
-		&& !energy.is_initialized()
-		&& !metadata.is_initialized()
+	return !pos
+		&& !vel
+		&& !energy
+		&& !metadata
 		;
 }
 
