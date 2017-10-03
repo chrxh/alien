@@ -82,10 +82,6 @@ struct MODEL_EXPORT ClusterChangeDescription
 		cells.emplace_back(StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Deleted));
 		return *this;
 	}
-	QVector2D getPosBefore() const;
-
-private:
-	optional<QVector2D> _posBefore;
 };
 
 struct MODEL_EXPORT ParticleChangeDescription
@@ -102,14 +98,10 @@ struct MODEL_EXPORT ParticleChangeDescription
 	ParticleChangeDescription(ParticleDescription const& before, ParticleDescription const& after);
 
 	bool isEmpty() const;
-	QVector2D getPosBefore() const;
 	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleChangeDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ParticleChangeDescription& setEnergy(double value) { energy = value; return *this; }
-
-private:
-	optional<QVector2D> _posBefore;
 };
 
 struct MODEL_EXPORT DataChangeDescription

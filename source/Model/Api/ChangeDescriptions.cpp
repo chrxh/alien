@@ -1,15 +1,5 @@
 #include "ChangeDescriptions.h"
 
-#define SET_DELTA(before, after, delta)\
-	if(before && after) {\
-		if (*before != *after) { \
-			delta = *after; \
-		} \
-	} \
-	if(!before && after) { \
-		delta = *after; \
-	}
-
 CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 {
 	id = desc.id;
@@ -108,7 +98,6 @@ ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & be
 			addNewCell(CellChangeDescription(cellAfter));
 		}
 	}
-	_posBefore = before.pos;
 }
 
 bool ClusterChangeDescription::isEmpty() const
@@ -120,11 +109,6 @@ bool ClusterChangeDescription::isEmpty() const
 		&& !metadata
 		&& cells.empty()
 		;
-}
-
-QVector2D ClusterChangeDescription::getPosBefore() const
-{
-	return *_posBefore;
 }
 
 ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & desc)
@@ -143,7 +127,6 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 	vel = ValueTracker<QVector2D>(before.vel, after.vel);
 	energy = ValueTracker<double>(before.energy, after.energy);
 	metadata = ValueTracker<ParticleMetadata>(before.metadata, after.metadata);
-	_posBefore = before.pos;
 }
 
 bool ParticleChangeDescription::isEmpty() const
@@ -153,11 +136,6 @@ bool ParticleChangeDescription::isEmpty() const
 		&& !energy
 		&& !metadata
 		;
-}
-
-QVector2D ParticleChangeDescription::getPosBefore() const
-{
-	return *_posBefore;
 }
 
 DataChangeDescription::DataChangeDescription(DataDescription const & desc)
