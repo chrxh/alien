@@ -25,7 +25,7 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
-    void updateData ();
+    void updateModelAndNotifyController ();
 
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);

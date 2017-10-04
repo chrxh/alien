@@ -23,7 +23,7 @@ void CellEditWidget::init(DataEditorModel * model, DataEditorController* control
 	_controller = controller;
 }
 
-void CellEditWidget::updateData ()
+void CellEditWidget::updateModelAndNotifyController ()
 {
     int row = QTextEdit::textCursor().blockNumber();
     QString currentText = QTextEdit::textCursor().block().text();
@@ -55,8 +55,9 @@ void CellEditWidget::keyPressEvent (QKeyEvent* e)
     int rowLen = QTextEdit::document()->findBlockByNumber(row).length();
 
     //request update?
-    if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
-        updateData();
+	if ((e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) {
+		updateModelAndNotifyController();
+	}
 
     //typing number?
     QString k;
@@ -307,6 +308,7 @@ void CellEditWidget::mousePressEvent(QMouseEvent* e)
         if( row == 13 )
 			cell.cellFeature->type = Enums::CellFunction::COMMUNICATOR;
         updateDisplay();
+		_controller->notificationFromCellEditWidget();
     }
 }
 
@@ -426,6 +428,18 @@ QString CellEditWidget::generateFormattedRealString (qreal r)
         return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
 }
 
+namespace
+{
+	QString ws(int num)
+	{
+		QString result;
+		for (int i = 0; i < num; ++i) {
+			result += "&nbsp;";
+		}
+		return result;
+	}
+}
+
 QString CellEditWidget::generateFormattedCellFunctionString (Enums::CellFunction::Type type)
 {
     //define auxilliary strings
@@ -438,35 +452,35 @@ QString CellEditWidget::generateFormattedCellFunctionString (Enums::CellFunction
     QString text;
 
     //generate formatted string
-    text += parStart+colorTextStart+ "cell function:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
+    text += parStart+colorTextStart+ "cell function:" + ws(7)+colorEnd;
     if( type == Enums::CellFunction::COMPUTER )
-        text += colorDataStart+"&nbsp;&#9002; computer &#9001;&nbsp;"+colorEnd+parEnd;
+        text += colorDataStart+" > computer"+colorEnd+parEnd;
     else
-        text += colorData2Start+"&nbsp;&nbsp;&nbsp;computer"+colorEnd+parEnd;
+        text += colorData2Start+ws(3)+"computer"+colorEnd+parEnd;
     if( type == Enums::CellFunction::PROPULSION )
-        text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; propulsion &#9001;&nbsp;"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ws(22)+"> propulsion"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;propulsion"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ws(24)+"propulsion"+colorEnd+parEnd;
     if( type == Enums::CellFunction::SCANNER )
-        text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; scanner &#9001;&nbsp;"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ws(22)+"> scanner"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scanner"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ws(24)+"scanner"+colorEnd+parEnd;
     if( type == Enums::CellFunction::WEAPON )
-        text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; weapon &#9001;&nbsp;"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ws(22)+"> weapon"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;weapon"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ws(24)+"weapon"+colorEnd+parEnd;
     if( type == Enums::CellFunction::CONSTRUCTOR )
-        text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; constructor &#9001;&nbsp;"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ws(22)+"> constructor"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constructor"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ws(24)+"constructor"+colorEnd+parEnd;
     if( type == Enums::CellFunction::SENSOR )
-        text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; sensor &#9001;&nbsp;"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ws(22)+"> sensor"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sensor"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ws(24)+"sensor"+colorEnd+parEnd;
     if( type == Enums::CellFunction::COMMUNICATOR )
-        text += parStart+colorDataStart+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9002; communicator &#9001;&nbsp;"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ws(22)+"> communicator"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;communicator"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ws(24)+"communicator"+colorEnd+parEnd;
     return text;
 }
 
