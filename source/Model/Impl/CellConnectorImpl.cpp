@@ -28,6 +28,27 @@ void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &c
 	reclustering(changedAndPresentCellIds);
 }
 
+void CellConnectorImpl::finalizeVelocities(DataDescription & unchangedData, DataDescription & data, list<uint64_t> const & changedCellIds)
+{
+	_navi.update(unchangedData);
+	_data = &unchangedData;
+
+	DescriptionNavigator naviForNewData;
+	naviForNewData.update(data);
+	
+	set<int> changedClusterIndices;
+	for (uint64_t changedCellId : changedCellIds) {
+		changedClusterIndices.insert(naviForNewData.clusterIndicesByCellIds.at(changedCellId));
+	}
+	
+	for (int changedClusterIndex : changedClusterIndices) {
+		auto& cluster = data.clusters->at(changedClusterIndex);
+		ClusterVelocities velocities = calcVelocitiesBasedOnOldClusters(*cluster.cells);
+		cluster.setVel(velocities.linearVel);
+		cluster.setAngularVel(velocities.angularVel);
+	}
+}
+
 list<uint64_t> CellConnectorImpl::filterPresentCellIds(list<uint64_t> const & cellIds) const
 {
 	list<uint64_t> result;
@@ -210,14 +231,22 @@ list<uint64_t> CellConnectorImpl::getCellIdsAtPos(IntVector2D const &pos)
 	return list<uint64_t>();
 }
 
+namespace
+{
+	QVector2D calcCenter(vector<CellDescription> const & cells)
+	{
+		QVector2D result;
+		for (auto const& cell : cells) {
+			result += *cell.pos;
+		}
+		result = result / cells.size();
+		return result;
+	}
+}
+
 void CellConnectorImpl::setClusterAttributes(ClusterDescription& cluster)
 {
-	QVector2D center;
-	for (auto const& cell : *cluster.cells) {
-		center += *cell.pos;
-	}
-	center = center / cluster.cells->size();
-	cluster.pos = center;
+	cluster.pos = calcCenter(*cluster.cells);
 	cluster.angle = calcAngleBasedOnOldClusters(*cluster.cells);
 	auto velocities = calcVelocitiesBasedOnOldClusters(*cluster.cells);
 	cluster.vel = velocities.linearVel;
@@ -235,16 +264,56 @@ double CellConnectorImpl::calcAngleBasedOnOldClusters(vector<CellDescription> co
 	return result;
 }
 
+namespace
+{
+	double calcAngularMass(vector<CellDescription> const & cells)
+	{
+		QVector2D center = calcCenter(cells);
+		double result = 0.0;
+		for (auto const& cell : cells) {
+			result += (*cell.pos - center).lengthSquared();
+		}
+		return result;
+	}
+}
+
+#include <QDebug>
 CellConnectorImpl::ClusterVelocities CellConnectorImpl::calcVelocitiesBasedOnOldClusters(vector<CellDescription> const & cells) const
 {
+	CHECK(!cells.empty());
+	
 	ClusterVelocities result;
+	if (cells.size() == 1) {
+		int clusterIndex = _navi.clusterIndicesByCellIds.at(cells.front().id);
+		int cellIndex = _navi.cellIndicesByCellIds.at(cells.front().id);
+		auto const& cluster = _data->clusters->at(clusterIndex);
+		result.linearVel = Physics::tangentialVelocity(*cells.front().pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+		return result;
+	}
+
+	QVector2D center = calcCenter(cells);
 	for (auto const& cell : cells) {
 		int clusterIndex = _navi.clusterIndicesByCellIds.at(cell.id);
 		int cellIndex = _navi.cellIndicesByCellIds.at(cell.id);
 		auto const& cluster = _data->clusters->at(clusterIndex);
-		auto const& cell = cluster.cells->at(cellIndex);
-		result.linearVel += Physics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+		result.linearVel += Physics::tangentialVelocity(*cell.pos - center, *cluster.vel, *cluster.angularVel);
 	}
 	result.linearVel /= cells.size();
+
+	double angularMomentum = 0.0;
+	for (auto const& cell : cells) {
+		int clusterIndex = _navi.clusterIndicesByCellIds.at(cell.id);
+		int cellIndex = _navi.cellIndicesByCellIds.at(cell.id);
+		auto const& cluster = _data->clusters->at(clusterIndex);
+		auto cellVel = Physics::tangentialVelocity(*cell.pos - center, *cluster.vel, *cluster.angularVel);
+		QVector2D r = *cell.pos - center;
+		QVector2D v = cellVel - result.linearVel;
+		angularMomentum += Physics::angularMomentum(r, v);
+	}
+	result.angularVel = Physics::angularVelocity(angularMomentum, calcAngularMass(cells));
+	if (std::abs(result.angularVel) > 20.0) {
+		qDebug() << result.angularVel;
+	}
+
 	return result;
 }

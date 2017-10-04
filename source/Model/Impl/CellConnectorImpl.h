@@ -13,6 +13,7 @@ public:
 	virtual void init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
 	virtual void reconnect(DataDescription &data, list<uint64_t> const &changedCellIds) override;
+	virtual void finalizeVelocities(DataDescription& unchangedData, DataDescription& data, list<uint64_t> const &changedCellIds) override;
 
 private:
 	list<uint64_t> filterPresentCellIds(list<uint64_t> const& cellIds) const;
@@ -44,6 +45,6 @@ private:
 	NumberGenerator* _numberGen = nullptr;
 
 	DataDescription* _data = nullptr;
-	DescriptionNavigationMaps _navi;
+	DescriptionNavigator _navi;
 	unordered_map<int, unordered_map<int, list<uint64_t>>> _cellMap;
 };

@@ -23,6 +23,7 @@ public:
 	virtual void moveExtendedSelection(QVector2D const &delta);
 	virtual void reconnectSelectedCells();
 	virtual void updateCluster(ClusterDescription const& cluster);
+	virtual void guessVelocitiesForSelection();
 
 	virtual bool isInSelection(list<uint64_t> const &ids) const;
 	virtual bool isInSelection(uint64_t id) const; //id can mean cell or particle id
@@ -55,5 +56,5 @@ private:
 	set<uint64_t> _selectedClusterIds;
 	set<uint64_t> _selectedParticleIds;
 
-	DescriptionNavigationMaps _navi;
+	DescriptionNavigator _navi;
 };
