@@ -13,7 +13,6 @@ public:
 	virtual void init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
 	virtual void reconnect(DataDescription &data, list<uint64_t> const &changedCellIds) override;
-	virtual void finalizeVelocities(DataDescription& unchangedData, DataDescription& data, list<uint64_t> const &changedCellIds) override;
 
 private:
 	list<uint64_t> filterPresentCellIds(list<uint64_t> const& cellIds) const;
