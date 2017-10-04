@@ -23,8 +23,8 @@ private:
 	CellDescription& getCellDescRef(DataDescription &data, uint64_t cellId);
 	void removeConnections(DataDescription &data, CellDescription &cellDesc);
 	void establishNewConnectionsWithNeighborCells(DataDescription &data, CellDescription &cellDesc);
-	void establishNewConnection(CellDescription &cell1, CellDescription &cell2);
-	double getDistance(CellDescription &cell1, CellDescription &cell2);
+	void establishNewConnection(CellDescription &cell1, CellDescription &cell2) const;
+	double getDistance(CellDescription &cell1, CellDescription &cell2) const;
 
 	list<uint64_t> getCellIdsAtPos(IntVector2D const &pos);
 
@@ -32,6 +32,9 @@ private:
 		, int clusterIndex, vector<ClusterDescription> &newClusters);
 	void lookUpCell(DataDescription &data, uint64_t cellId, ClusterDescription &newCluster
 		, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
+
+	void setClusterAttributes(DataDescription const& data, ClusterDescription& cluster);
+	double calcAngle(DataDescription const& data, ClusterDescription const &changedCellIds) const;
 
 	SpaceMetric *_metric = nullptr;
 	SimulationParameters *_parameters = nullptr;

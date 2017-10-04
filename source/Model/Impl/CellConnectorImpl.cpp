@@ -62,22 +62,6 @@ void CellConnectorImpl::updateConnectingCells(DataDescription &data, list<uint64
 	}
 }
 
-namespace
-{
-	void setClusterAttributes(ClusterDescription& cluster)
-	{
-		QVector2D center;
-		for (auto const& cell : *cluster.cells) {
-			center += *cell.pos;
-		}
-		center = center / cluster.cells->size();
-		cluster.pos = center;
-		cluster.vel = QVector2D();
-		cluster.angle = 0.0;
-		cluster.angularVel = 0.0;
-	}
-}
-
 void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const &changedCellIds)
 {
 	unordered_set<int> affectedClusterIndices;
@@ -100,7 +84,7 @@ void CellConnectorImpl::reclustering(DataDescription &data, list<uint64_t> const
 		lookUpCell(data, *remainingCellIds.begin(), newCluster, lookedUpCellIds, remainingCellIds);
 		if (newCluster.cells && !newCluster.cells->empty()) {
 			newCluster.id = _numberGen->getTag();
-			setClusterAttributes(newCluster);
+			setClusterAttributes(data, newCluster);
 			newClusters.push_back(newCluster);
 		}
 	}
@@ -176,7 +160,7 @@ void CellConnectorImpl::establishNewConnectionsWithNeighborCells(DataDescription
 	}
 }
 
-void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescription &cell2)
+void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescription &cell2) const
 {
 	if (cell1.id == cell2.id) {
 		return;
@@ -202,7 +186,7 @@ void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescr
 	}
 }
 
-double CellConnectorImpl::getDistance(CellDescription &cell1, CellDescription &cell2)
+double CellConnectorImpl::getDistance(CellDescription &cell1, CellDescription &cell2) const
 {
 	auto &pos1 = *cell1.pos;
 	auto &pos2 = *cell2.pos;
@@ -222,4 +206,28 @@ list<uint64_t> CellConnectorImpl::getCellIdsAtPos(IntVector2D const &pos)
 		}
 	}
 	return list<uint64_t>();
+}
+
+void CellConnectorImpl::setClusterAttributes(DataDescription const& data, ClusterDescription& cluster)
+{
+	QVector2D center;
+	for (auto const& cell : *cluster.cells) {
+		center += *cell.pos;
+	}
+	center = center / cluster.cells->size();
+	cluster.pos = center;
+	cluster.vel = QVector2D();
+	cluster.angle = calcAngle(data, cluster);
+	cluster.angularVel = 0.0;
+}
+
+double CellConnectorImpl::calcAngle(DataDescription const& data, ClusterDescription const & cluster) const
+{
+	qreal result = 0.0;
+	for (auto const& cell : *cluster.cells) {
+		int clusterIndex = _navi.clusterIndicesByCellIds.at(cell.id);
+		result += *data.clusters->at(clusterIndex).angle;
+	}
+	result /= cluster.cells->size();
+	return result;
 }
