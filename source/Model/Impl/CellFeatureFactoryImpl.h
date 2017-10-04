@@ -8,8 +8,8 @@ class CellFeatureFactoryImpl
 public:
     ~CellFeatureFactoryImpl () {}
 
-    CellFeature* addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const override;
-    CellFeature* addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data, UnitContext* context) const override;
+    CellFeatureChain* addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const override;
+    CellFeatureChain* addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data, UnitContext* context) const override;
 
-    CellFeature* addEnergyGuidance (Cell* cell, UnitContext* context) const override;
+    CellFeatureChain* addEnergyGuidance (Cell* cell, UnitContext* context) const override;
 };

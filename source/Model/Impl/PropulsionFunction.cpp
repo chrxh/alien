@@ -12,10 +12,10 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "CellPropulsionImpl.h"
+#include "PropulsionFunction.h"
 
 
-CellPropulsionImpl::CellPropulsionImpl (UnitContext* context)
+PropulsionFunction::PropulsionFunction (UnitContext* context)
     : CellFunction(context)
 {
 }
@@ -27,7 +27,7 @@ namespace {
     }
 }
 
-CellFeature::ProcessingResult CellPropulsionImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     Cluster* cluster(cell->getCluster());

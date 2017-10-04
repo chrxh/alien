@@ -1,14 +1,13 @@
-#ifndef CELLFUNCTIONCOMPUTER_H
-#define CELLFUNCTIONCOMPUTER_H
+#pragma once
 
 #include "CellFunction.h"
 
-class CellComputer
+class ComputerFunction
 	: public CellFunction
 {
 public:
-    CellComputer (UnitContext* context) : CellFunction(context) {}
-    virtual ~CellComputer () {}
+    ComputerFunction (UnitContext* context) : CellFunction(context) {}
+    virtual ~ComputerFunction () {}
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::COMPUTER; }
 
@@ -21,5 +20,3 @@ public:
     virtual CompilationState injectAndCompileInstructionCode (QString code) = 0;
     virtual QByteArray& getMemoryReference () = 0;
 };
-
-#endif // CELLFUNCTIONCOMPUTER_H

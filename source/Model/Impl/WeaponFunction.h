@@ -2,11 +2,11 @@
 
 #include "Model/Local/CellFunction.h"
 
-class CellWeaponImpl
+class WeaponFunction
 	: public CellFunction
 {
 public:
-    CellWeaponImpl (UnitContext* context);
+    WeaponFunction (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::WEAPON; }
 

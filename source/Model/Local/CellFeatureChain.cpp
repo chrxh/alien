@@ -1,11 +1,11 @@
-#include "CellFeature.h"
+#include "CellFeatureChain.h"
 
-CellFeature::~CellFeature ()
+CellFeatureChain::~CellFeatureChain ()
 {
     delete _nextFeature;
 }
 
-void CellFeature::setContext(UnitContext * context)
+void CellFeatureChain::setContext(UnitContext * context)
 {
 	_context = context;
 	if (_nextFeature) {
@@ -13,23 +13,23 @@ void CellFeature::setContext(UnitContext * context)
 	}
 }
 
-CellFeatureDescription CellFeature::getDescription() const
+CellFeatureDescription CellFeatureChain::getDescription() const
 {
 	CellFeatureDescription result;
-	CellFeature const* feature = this;
+	CellFeatureChain const* feature = this;
 	while (feature) {
-		getDescriptionImpl(result);
+		feature->appendDescriptionImpl(result);
 		feature = feature->_nextFeature;
 	}
 	return result;
 }
 
-void CellFeature::registerNextFeature (CellFeature* nextFeature)
+void CellFeatureChain::registerNextFeature (CellFeatureChain* nextFeature)
 {
     _nextFeature = nextFeature;
 }
 
-CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult CellFeatureChain::process (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult resultFromThisFeature = processImpl(token, cell, previousCell);
     ProcessingResult resultFromNextFeature {false, nullptr };
@@ -44,7 +44,7 @@ CellFeature::ProcessingResult CellFeature::process (Token* token, Cell* cell, Ce
     return mergedResult;
 }
 
-void CellFeature::mutate()
+void CellFeatureChain::mutate()
 {
 	mutateImpl();
 	if (_nextFeature) {

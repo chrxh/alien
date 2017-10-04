@@ -1,19 +1,19 @@
 #include "CellFeatureFactoryImpl.h"
 
 #include "Model/Local/Cell.h"
-#include "CellComputerImpl.h"
-#include "CellConstructorImpl.h"
-#include "CellPropulsionImpl.h"
-#include "CellScannerImpl.h"
-#include "CellWeaponImpl.h"
-#include "CellSensorImpl.h"
-#include "CellCommunicatorImpl.h"
+#include "ComputerFunctionImpl.h"
+#include "ConstructorFunction.h"
+#include "PropulsionFunction.h"
+#include "ScannerFunction.h"
+#include "WeaponFunction.h"
+#include "SensorFunction.h"
+#include "CommunicatorFunction.h"
 #include "EnergyGuidanceImpl.h"
 
 namespace {
-    CellFeature* registerNewFeature (Cell* cell, CellFeature* newFeature)
+    CellFeatureChain* registerNewFeature (Cell* cell, CellFeatureChain* newFeature)
     {
-        CellFeature* features = cell->getFeatures();
+        CellFeatureChain* features = cell->getFeatures();
         if( features ) {
             features->registerNextFeature(newFeature);
         }
@@ -23,42 +23,42 @@ namespace {
     }
 }
 
-CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const
+CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
-            return registerNewFeature(cell, new CellComputerImpl(context));
+            return registerNewFeature(cell, new ComputerFunctionImpl(context));
         case Enums::CellFunction::PROPULSION :
-            return registerNewFeature(cell, new CellPropulsionImpl(context));
+            return registerNewFeature(cell, new PropulsionFunction(context));
         case Enums::CellFunction::SCANNER :
-            return registerNewFeature(cell, new CellScannerImpl(context));
+            return registerNewFeature(cell, new ScannerFunction(context));
         case Enums::CellFunction::WEAPON :
-            return registerNewFeature(cell, new CellWeaponImpl(context));
+            return registerNewFeature(cell, new WeaponFunction(context));
         case Enums::CellFunction::CONSTRUCTOR :
-            return registerNewFeature(cell, new CellConstructorImpl(context));
+            return registerNewFeature(cell, new ConstructorFunction(context));
         case Enums::CellFunction::SENSOR :
-            return registerNewFeature(cell, new CellSensorImpl(context));
+            return registerNewFeature(cell, new SensorFunction(context));
         case Enums::CellFunction::COMMUNICATOR :
-            return registerNewFeature(cell, new CellCommunicatorImpl(context));
+            return registerNewFeature(cell, new CommunicatorFunction(context));
         default:
             return nullptr;
     }
 }
 
-CellFeature* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data
+CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data
     , UnitContext* context) const
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
-            return registerNewFeature(cell, new CellComputerImpl(data, context));
+            return registerNewFeature(cell, new ComputerFunctionImpl(data, context));
         case Enums::CellFunction::COMMUNICATOR :
-            return registerNewFeature(cell, new CellCommunicatorImpl(data, context));
+            return registerNewFeature(cell, new CommunicatorFunction(data, context));
         default:
             return addCellFunction(cell, type, context);
     }
 }
 
-CellFeature* CellFeatureFactoryImpl::addEnergyGuidance (Cell* cell, UnitContext* context) const
+CellFeatureChain* CellFeatureFactoryImpl::addEnergyGuidance (Cell* cell, UnitContext* context) const
 {
     return registerNewFeature(cell, new EnergyGuidanceImpl(context));
 }

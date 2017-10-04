@@ -11,14 +11,14 @@
 #include "Model/Local/Physics.h"
 #include "Model/Local/PhysicalQuantityConverter.h"
 
-#include "CellSensorImpl.h"
+#include "SensorFunction.h"
 
-CellSensorImpl::CellSensorImpl (UnitContext* context)
+SensorFunction::SensorFunction (UnitContext* context)
     : CellFunction(context)
 {
 }
 
-CellFeature::ProcessingResult CellSensorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     Cluster* cluster(cell->getCluster());

@@ -9,16 +9,16 @@
 #include "Model/Local/Token.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "CellComputerImpl.h"
+#include "ComputerFunctionImpl.h"
 
-CellComputerImpl::CellComputerImpl (UnitContext* context)
-    : CellComputer(context)
+ComputerFunctionImpl::ComputerFunctionImpl (UnitContext* context)
+    : ComputerFunction(context)
     , _memory(context->getSimulationParameters()->cellFunctionComputerCellMemorySize, 0)
 {
 }
 
-CellComputerImpl::CellComputerImpl (QByteArray data, UnitContext* context)
-	: CellComputerImpl(context)
+ComputerFunctionImpl::ComputerFunctionImpl (QByteArray data, UnitContext* context)
+	: ComputerFunctionImpl(context)
 {
 	if (!data.isEmpty()) {
 		int numInstructions = data[0];
@@ -43,7 +43,7 @@ namespace {
     }
 }
 
-QString CellComputerImpl::decompileInstructionCode () const
+QString ComputerFunctionImpl::decompileInstructionCode () const
 {
     QString text;
     QString textOp1, textOp2;
@@ -131,7 +131,7 @@ QString CellComputerImpl::decompileInstructionCode () const
     return text;
 }
 
-CellComputer::CompilationState CellComputerImpl::injectAndCompileInstructionCode (QString sourceCode)
+ComputerFunction::CompilationState ComputerFunctionImpl::injectAndCompileInstructionCode (QString sourceCode)
 {
     State state = State::LOOKING_FOR_INSTR_START;
 
@@ -162,7 +162,7 @@ CellComputer::CompilationState CellComputerImpl::injectAndCompileInstructionCode
     }
 }
 
-bool CellComputerImpl::resolveInstructionAndReturnSuccess(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded)
+bool ComputerFunctionImpl::resolveInstructionAndReturnSuccess(InstructionCoded& instructionCoded, InstructionUncoded instructionUncoded)
 {
 	instructionUncoded.operand1 = applyTableToCode(instructionUncoded.operand1);
 	instructionUncoded.operand2 = applyTableToCode(instructionUncoded.operand2);
@@ -283,7 +283,7 @@ bool CellComputerImpl::resolveInstructionAndReturnSuccess(InstructionCoded& inst
 	return true;
 }
 
-bool CellComputerImpl::gotoNextStateAndReturnSuccess(State &state, QChar &currentSymbol, InstructionUncoded& instruction
+bool ComputerFunctionImpl::gotoNextStateAndReturnSuccess(State &state, QChar &currentSymbol, InstructionUncoded& instruction
 	, int bytePos, int codeSize)
 {
 	switch (state) {
@@ -378,12 +378,12 @@ bool CellComputerImpl::gotoNextStateAndReturnSuccess(State &state, QChar &curren
 	return true;
 }
 
-QByteArray& CellComputerImpl::getMemoryReference ()
+QByteArray& ComputerFunctionImpl::getMemoryReference ()
 {
     return _memory;
 }
 
-void CellComputerImpl::mutateImpl()
+void ComputerFunctionImpl::mutateImpl()
 {
 	auto numberGen = _context->getNumberGenerator();
 	qint8 randomByte = static_cast<qint8>(numberGen->getRandomInt(256));
@@ -427,7 +427,7 @@ namespace
 	}
 }
 
-CellFeature::ProcessingResult CellComputerImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult ComputerFunctionImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
 
@@ -551,12 +551,12 @@ CellFeature::ProcessingResult CellComputerImpl::processImpl (Token* token, Cell*
     return processingResult;
 }
 
-void CellComputerImpl::serializePrimitives (QDataStream& stream) const
+void ComputerFunctionImpl::serializePrimitives (QDataStream& stream) const
 {
     stream << _memory << _code;
 }
 
-void CellComputerImpl::deserializePrimitives (QDataStream& stream)
+void ComputerFunctionImpl::deserializePrimitives (QDataStream& stream)
 {
     //load remaining attributes
     stream >> _memory >> _code;
@@ -566,7 +566,7 @@ void CellComputerImpl::deserializePrimitives (QDataStream& stream)
 	_code = _code.left(3 * parameters->cellFunctionComputerMaxInstructions);
 }
 
-QByteArray CellComputerImpl::getInternalData () const
+QByteArray ComputerFunctionImpl::getInternalData () const
 {
 	QByteArray data;
 	data.push_back(_code.size() / 3);
@@ -574,7 +574,7 @@ QByteArray CellComputerImpl::getInternalData () const
 	return data;
 }
 
-void CellComputerImpl::writeInstruction (InstructionCoded const& instructionCoded)
+void ComputerFunctionImpl::writeInstruction (InstructionCoded const& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/MEMMEM/CMEM - 2 Bit][MEM/MEMMEM/CMEM/CONST - 2 Bit]
     _code.push_back((static_cast<quint8>(instructionCoded.operation) << 4)
@@ -583,7 +583,7 @@ void CellComputerImpl::writeInstruction (InstructionCoded const& instructionCode
     _code.push_back(instructionCoded.operand2);
 }
 
-void CellComputerImpl::readInstruction (int& instructionPointer, InstructionCoded& instructionCoded) const
+void ComputerFunctionImpl::readInstruction (int& instructionPointer, InstructionCoded& instructionCoded) const
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
 	instructionCoded.operation = static_cast<Enums::ComputerOperation::Type>((_code[instructionPointer] >> 4) & 0xF);
@@ -596,7 +596,7 @@ void CellComputerImpl::readInstruction (int& instructionPointer, InstructionCode
     instructionPointer += 3;
 }
 
-QString CellComputerImpl::applyTableToCode(QString s)
+QString ComputerFunctionImpl::applyTableToCode(QString s)
 {
 	QString prefix;
 	QString postfix;

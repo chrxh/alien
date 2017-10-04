@@ -8,7 +8,7 @@
 #include "Model/Local/Token.h"
 #include "Model/Local/EntityFactory.h"
 #include "Model/Local/CellFunction.h"
-#include "Model/Local/CellComputer.h"
+#include "Model/Local/ComputerFunction.h"
 #include "Model/Local/EnergyGuidance.h"
 #include "Model/Local/CellFeatureFactory.h"
 #include "Model/Local/SymbolTable.h"
@@ -195,7 +195,7 @@ Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
 void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& stream) const
 {
 	cell->serializePrimitives(stream);
-	CellFeature* features = cell->getFeatures();
+	CellFeatureChain* features = cell->getFeatures();
 	CellFunction* cellFunction = features->findObject<CellFunction>();
 	if (cellFunction) {
 		stream << static_cast<quint8>(cellFunction->getType());
@@ -229,7 +229,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	quint8 rawType;
 	stream >> rawType;
 	Enums::CellFunction::Type type = static_cast<Enums::CellFunction::Type>(rawType);
-	CellFeature* feature = featureFactory->addCellFunction(cell, type, context);
+	CellFeatureChain* feature = featureFactory->addCellFunction(cell, type, context);
 	feature->deserializePrimitives(stream);
 
 	SimulationParameters* parameters = context->getSimulationParameters();

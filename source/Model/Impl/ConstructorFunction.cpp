@@ -18,12 +18,12 @@
 #include "Model/Local/SpaceMetricLocal.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "CellConstructorImpl.h"
+#include "ConstructorFunction.h"
 
 using ACTIVATE_TOKEN = Cell::ActivateToken;
 using UPDATE_TOKEN_ACCESS_NUMBER = Cell::UpdateTokenBranchNumber;
 
-CellConstructorImpl::CellConstructorImpl (UnitContext* context)
+ConstructorFunction::ConstructorFunction (UnitContext* context)
     : CellFunction(context)
 {
 }
@@ -120,7 +120,7 @@ namespace {
     }
 }
 
-CellFeature::ProcessingResult CellConstructorImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
     Cluster* cluster(cell->getCluster());

@@ -1,18 +1,15 @@
-#ifndef CELLFUNCTIONCOMMUNICATORIMPL_H
-#define CELLFUNCTIONCOMMUNICATORIMPL_H
+#pragma once
 
 #include "Model/Local/CellFunction.h"
 
 #include <QVector2D>
 
-class CellFunctionCommunicatorTest;
-
-class CellCommunicatorImpl
+class CommunicatorFunction
 	: public CellFunction
 {
 public:
-    CellCommunicatorImpl (UnitContext* context);
-    CellCommunicatorImpl (QByteArray data, UnitContext* context);
+    CommunicatorFunction (UnitContext* context);
+    CommunicatorFunction (QByteArray data, UnitContext* context);
 
     void serializePrimitives (QDataStream& stream) const override;
     void deserializePrimitives (QDataStream& stream) override;
@@ -30,7 +27,7 @@ public:
     MessageData& getReceivedMessageRef();
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
+	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
 
@@ -51,5 +48,3 @@ private:
     void receiveMessage (Token* token,Cell* receiverCell, Cell* receiverPreviousCell);
     void calcReceivedMessageAngle (Cell* receiverCell, Cell* receiverPreviousCell);
 };
-
-#endif // CELLFUNCTIONCOMMUNICATORIMPL_H

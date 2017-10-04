@@ -12,7 +12,7 @@ class Cluster;
 class UnitGrid;
 class Particle;
 class Token;
-class CellFeature;
+class CellFeatureChain;
 class Unit;
 class CellMap;
 class ParticleMap;

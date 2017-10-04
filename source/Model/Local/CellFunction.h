@@ -3,23 +3,21 @@
 #include "Model/Api/Definitions.h"
 #include "Model/Api/CellFeatureEnums.h"
 
-#include "CellFeature.h"
+#include "CellFeatureChain.h"
 
 class CellFunction
-	: public CellFeature
+	: public CellFeatureChain
 {
 public:
-    CellFunction (UnitContext* context) : CellFeature(context) {}
+    CellFunction (UnitContext* context) : CellFeatureChain(context) {}
     virtual ~CellFunction() {}
 
     //new interface
     virtual Enums::CellFunction::Type getType () const = 0;
-	virtual QByteArray getInternalData() const {
-		return QByteArray();
-	}
-
+	virtual QByteArray getInternalData() const { return QByteArray(); }
 
 protected:
-    qreal calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const;
+	virtual void appendDescriptionImpl(CellFeatureDescription & desc) const override;
+	qreal calcAngle(Cell* origin, Cell* ref1, Cell* ref2) const;
 };
 
