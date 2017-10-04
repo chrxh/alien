@@ -329,7 +329,7 @@ void CellEditWidget::updateDisplay ()
 	int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
 
-    //define auxilliary strings
+    //define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
     QString colorCaptionStart = "<span style=\"color:"+CELL_EDIT_CAPTION_COLOR1.name()+"\">";
@@ -442,7 +442,7 @@ namespace
 
 QString CellEditWidget::generateFormattedCellFunctionString (Enums::CellFunction::Type type)
 {
-    //define auxilliary strings
+    //define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
     QString colorTextStart = "<span style=\"color:"+CELL_EDIT_TEXT_COLOR1.name()+"\">";
