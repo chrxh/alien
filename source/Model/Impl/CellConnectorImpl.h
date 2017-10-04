@@ -16,30 +16,34 @@ public:
 
 private:
 	list<uint64_t> filterPresentCellIds(list<uint64_t> const& cellIds) const;
-	void updateInternals(DataDescription const &data);
-	void updateConnectingCells(DataDescription &data, list<uint64_t> const &changedCellIds);
-	void reclustering(DataDescription &data, list<uint64_t> const &changedCellIds);
+	void updateInternals();
+	void updateConnectingCells(list<uint64_t> const &changedCellIds);
+	void reclustering(list<uint64_t> const &changedCellIds);
 
-	CellDescription& getCellDescRef(DataDescription &data, uint64_t cellId);
-	void removeConnections(DataDescription &data, CellDescription &cellDesc);
-	void establishNewConnectionsWithNeighborCells(DataDescription &data, CellDescription &cellDesc);
+	CellDescription& getCellDescRef(uint64_t cellId);
+	void removeConnections(CellDescription &cellDesc);
+	void establishNewConnectionsWithNeighborCells(CellDescription &cellDesc);
 	void establishNewConnection(CellDescription &cell1, CellDescription &cell2) const;
 	double getDistance(CellDescription &cell1, CellDescription &cell2) const;
 
 	list<uint64_t> getCellIdsAtPos(IntVector2D const &pos);
 
-	unordered_set<int> reclusteringSingleClusterAndReturnDiscardedClusterIndices(DataDescription &data
-		, int clusterIndex, vector<ClusterDescription> &newClusters);
-	void lookUpCell(DataDescription &data, uint64_t cellId, ClusterDescription &newCluster
-		, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
+	unordered_set<int> reclusteringSingleClusterAndReturnDiscardedClusterIndices(int clusterIndex, vector<ClusterDescription> &newClusters);
+	void lookUpCell(uint64_t cellId, ClusterDescription &newCluster, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
 
-	void setClusterAttributes(DataDescription const& data, ClusterDescription& cluster);
-	double calcAngle(DataDescription const& data, ClusterDescription const &changedCellIds) const;
+	void setClusterAttributes(ClusterDescription& cluster);
+	double calcAngleBasedOnOldClusters(vector<CellDescription> const & cells) const;
+	struct ClusterVelocities {
+		QVector2D linearVel;
+		double angularVel = 0.0;
+	};
+	ClusterVelocities calcVelocitiesBasedOnOldClusters(vector<CellDescription> const & cells) const;
 
-	SpaceMetric *_metric = nullptr;
-	SimulationParameters *_parameters = nullptr;
+	SpaceMetric* _metric = nullptr;
+	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 
+	DataDescription* _data = nullptr;
 	DescriptionNavigationMaps _navi;
 	unordered_map<int, unordered_map<int, list<uint64_t>>> _cellMap;
 };
