@@ -28,27 +28,6 @@ void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &c
 	reclustering(changedAndPresentCellIds);
 }
 
-void CellConnectorImpl::finalizeVelocities(DataDescription & unchangedData, DataDescription & data, list<uint64_t> const & changedCellIds)
-{
-	_navi.update(unchangedData);
-	_data = &unchangedData;
-
-	DescriptionNavigator naviForNewData;
-	naviForNewData.update(data);
-	
-	set<int> changedClusterIndices;
-	for (uint64_t changedCellId : changedCellIds) {
-		changedClusterIndices.insert(naviForNewData.clusterIndicesByCellIds.at(changedCellId));
-	}
-	
-	for (int changedClusterIndex : changedClusterIndices) {
-		auto& cluster = data.clusters->at(changedClusterIndex);
-		ClusterVelocities velocities = calcVelocitiesBasedOnOldClusters(*cluster.cells);
-		cluster.setVel(velocities.linearVel);
-		cluster.setAngularVel(velocities.angularVel);
-	}
-}
-
 list<uint64_t> CellConnectorImpl::filterPresentCellIds(list<uint64_t> const & cellIds) const
 {
 	list<uint64_t> result;
@@ -277,7 +256,6 @@ namespace
 	}
 }
 
-#include <QDebug>
 CellConnectorImpl::ClusterVelocities CellConnectorImpl::calcVelocitiesBasedOnOldClusters(vector<CellDescription> const & cells) const
 {
 	CHECK(!cells.empty());
@@ -311,9 +289,6 @@ CellConnectorImpl::ClusterVelocities CellConnectorImpl::calcVelocitiesBasedOnOld
 		angularMomentum += Physics::angularMomentum(r, v);
 	}
 	result.angularVel = Physics::angularVelocity(angularMomentum, calcAngularMass(cells));
-	if (std::abs(result.angularVel) > 20.0) {
-		qDebug() << result.angularVel;
-	}
 
 	return result;
 }
