@@ -2,7 +2,7 @@
 #include "Base/NumberGenerator.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Token.h"
-#include "Model/Local/CellFeature.h"
+#include "Model/Local/CellFeatureChain.h"
 #include "Model/Local/Physics.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Local/UnitContext.h"
@@ -59,12 +59,12 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 	return result;
 }
 
-void CellImpl::registerFeatures (CellFeature* features)
+void CellImpl::registerFeatures (CellFeatureChain* features)
 {
     _features = features;
 }
 
-CellFeature* CellImpl::getFeatures () const
+CellFeatureChain* CellImpl::getFeatures () const
 {
     return _features;
 }

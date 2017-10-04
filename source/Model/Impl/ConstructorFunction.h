@@ -4,16 +4,16 @@
 
 #include <QVector2D>
 
-class CellConstructorImpl
+class ConstructorFunction
 	: public CellFunction
 {
 public:
-    CellConstructorImpl (UnitContext* context);
+    ConstructorFunction (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::CONSTRUCTOR; }
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
+	ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
 };

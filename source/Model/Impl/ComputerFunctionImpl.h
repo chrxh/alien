@@ -4,29 +4,29 @@
 #include <QChar>
 #include <QVector>
 
-#include "Model/Local/CellComputer.h"
+#include "Model/Local/ComputerFunction.h"
 
-class CellComputerImpl
-	: public CellComputer
+class ComputerFunctionImpl
+	: public ComputerFunction
 {
 public:
-    CellComputerImpl (UnitContext* context);
-    CellComputerImpl (QByteArray data, UnitContext* context);
+    ComputerFunctionImpl (UnitContext* context);
+    ComputerFunctionImpl (QByteArray data, UnitContext* context);
 
-	QByteArray getInternalData () const override;
+	virtual QByteArray getInternalData () const override;
 
-    QString decompileInstructionCode () const override;
-    CompilationState injectAndCompileInstructionCode (QString sourceCode) override;
+	virtual QString decompileInstructionCode () const override;
+	virtual CompilationState injectAndCompileInstructionCode (QString sourceCode) override;
 
-	QByteArray& getMemoryReference() override;
+	virtual QByteArray& getMemoryReference() override;
 
-	void mutateImpl() override;
+	virtual void mutateImpl() override;
 
-    void serializePrimitives (QDataStream& stream) const override;
-    void deserializePrimitives (QDataStream& stream) override;
+	virtual void serializePrimitives (QDataStream& stream) const override;
+	virtual void deserializePrimitives (QDataStream& stream) override;
 
 protected:
-    ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
+	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) override;
 
 private:
 	enum class State {

@@ -5,17 +5,17 @@
 #include "Model/Api/Definitions.h"
 #include "Model/Api/Descriptions.h"
 
-class CellFeature
+class CellFeatureChain
 {
 public:
-    CellFeature (UnitContext* context) : _context(context) {}
-    virtual ~CellFeature ();
+    CellFeatureChain (UnitContext* context) : _context(context) {}
+    virtual ~CellFeatureChain ();
 
 	virtual void setContext(UnitContext* context);
 
 	virtual CellFeatureDescription getDescription() const;
 
-    void registerNextFeature (CellFeature* nextFeature);
+    void registerNextFeature (CellFeatureChain* nextFeature);
     struct ProcessingResult {
         bool decompose;
         Particle* newEnergyParticle;
@@ -27,12 +27,12 @@ public:
 	virtual void deserializePrimitives(QDataStream& stream) {}
 
 protected:
-	virtual void getDescriptionImpl(CellFeatureDescription& desc) const {};
+	virtual void appendDescriptionImpl(CellFeatureDescription& desc) const {};
 	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) = 0;
 	virtual void mutateImpl() {};
 
     UnitContext* _context = nullptr;
-    CellFeature* _nextFeature = nullptr;
+    CellFeatureChain* _nextFeature = nullptr;
 
 public:
     template< typename T >
@@ -41,7 +41,7 @@ public:
 
 /******************** inline methods ******************/
 template< typename T >
-T* CellFeature::findObject ()
+T* CellFeatureChain::findObject ()
 {
     T* object = dynamic_cast< T* >(this);
     if( object )

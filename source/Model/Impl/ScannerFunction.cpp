@@ -11,9 +11,9 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "CellScannerImpl.h"
+#include "ScannerFunction.h"
 
-CellScannerImpl::CellScannerImpl(UnitContext* context)
+ScannerFunction::ScannerFunction(UnitContext* context)
     : CellFunction(context)
 {
 }
@@ -86,7 +86,7 @@ namespace {
 
 }
 
-CellFeature::ProcessingResult CellScannerImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
 	auto numberGen = _context->getNumberGenerator();
 	ProcessingResult processingResult{ false, 0 };

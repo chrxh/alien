@@ -6,14 +6,14 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/Settings.h"
 
-#include "CellWeaponImpl.h"
+#include "WeaponFunction.h"
 
-CellWeaponImpl::CellWeaponImpl (UnitContext* context)
+WeaponFunction::WeaponFunction (UnitContext* context)
     : CellFunction(context)
 {
 }
 
-CellFeature::ProcessingResult CellWeaponImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult WeaponFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
 	auto cellMap = _context->getCellMap();
