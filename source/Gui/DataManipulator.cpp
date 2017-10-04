@@ -183,6 +183,11 @@ void DataManipulator::updateCluster(ClusterDescription const & cluster)
 	_navi.update(_data);
 }
 
+void DataManipulator::guessVelocitiesForSelection()
+{
+	_connector->finalizeVelocities(_unchangedData, _data, getSelectedCellIds());
+}
+
 void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect) const
 {
 	ResolveDescription resolveDesc;

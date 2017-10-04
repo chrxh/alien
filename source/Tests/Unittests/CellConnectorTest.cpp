@@ -29,7 +29,7 @@ protected:
 	IntVector2D _universeSize{ 600, 300 };
 
 	DataDescription _data;
-	DescriptionNavigationMaps _navi;
+	DescriptionNavigator _navi;
 };
 
 CellConnectorTest::CellConnectorTest()

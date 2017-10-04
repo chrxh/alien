@@ -22,7 +22,7 @@ public:
 private:
 	DataDescription _data;
 	DataDescription _unchangedData;
-	DescriptionNavigationMaps _navi;
+	DescriptionNavigator _navi;
 
 	set<uint64_t> _selectedCellIds;
 	set<uint64_t> _selectedParticleIds;

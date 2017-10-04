@@ -169,6 +169,7 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
+//			_manipulator->guessVelocitiesForSelection();
 			Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation });
 		}
 	}

@@ -149,7 +149,7 @@ struct ResolveDescription
 	bool resolveCellLinks = false;
 };
 
-struct DescriptionNavigationMaps
+struct DescriptionNavigator
 {
 	set<uint64_t> cellIds;
 	set<uint64_t> particleIds;
