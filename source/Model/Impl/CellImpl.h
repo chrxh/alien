@@ -19,8 +19,8 @@ public:
 
 	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const override;
 
-    void registerFeatures (CellFeature* features) override;
-    CellFeature* getFeatures () const override;
+    void registerFeatures (CellFeatureChain* features) override;
+    CellFeatureChain* getFeatures () const override;
     void removeFeatures () override;
 
     bool connectable (Cell* otherCell) const override;
@@ -83,7 +83,7 @@ private:
     friend class Cluster;
 
 	UnitContext* _context = nullptr;
-	CellFeature* _features = nullptr;
+	CellFeatureChain* _features = nullptr;
 
     QVector<Token*> _tokenStack;
     QVector<Token*> _newTokenStack;

@@ -9,6 +9,12 @@
 #include "CellFunction.h"
 
 
+void CellFunction::appendDescriptionImpl(CellFeatureDescription & desc) const
+{
+	desc.setType(getType());
+	desc.setData(getInternalData());
+}
+
 qreal CellFunction::calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const
 {
 	SpaceMetricLocal* topo = _context->getSpaceMetric();

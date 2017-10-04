@@ -14,8 +14,8 @@ public:
 
 	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
 
-    virtual void registerFeatures (CellFeature* features) = 0;
-    virtual CellFeature* getFeatures () const = 0;
+    virtual void registerFeatures (CellFeatureChain* features) = 0;
+    virtual CellFeatureChain* getFeatures () const = 0;
     virtual void removeFeatures () = 0;
 
     virtual bool connectable (Cell* otherCell) const = 0;

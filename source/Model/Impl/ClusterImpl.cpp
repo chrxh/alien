@@ -5,7 +5,7 @@
 #include "Base/NumberGenerator.h"
 #include "Model/Local/Cell.h"
 #include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Local/CellFeature.h"
+#include "Model/Local/CellFeatureChain.h"
 #include "Model/Local/EntityFactory.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/Particle.h"
@@ -647,7 +647,7 @@ void ClusterImpl::processingToken (QList< Particle* >& energyParticles, bool& de
                     for( int i = 0; i < spreadTokenCounter; ++i ) {
 
                         //execute cell function
-                        CellFeature::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
+                        CellFeatureChain::ProcessingResult processingResult = spreadTokenCells[i]->getFeatures()->process(spreadToken[i], spreadTokenCells[i], cell);
                         if( processingResult.decompose )
                             decompose = true;
                         if( processingResult.newEnergyParticle )

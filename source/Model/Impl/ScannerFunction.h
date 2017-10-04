@@ -1,18 +1,15 @@
-#ifndef CELLFUNCTIONSCANNER_H
-#define CELLFUNCTIONSCANNER_H
+#pragma once
 
 #include "Model/Local/CellFunction.h"
 
-class CellScannerImpl
+class ScannerFunction
 	: public CellFunction
 {
 public:
-    CellScannerImpl (UnitContext* context);
+    ScannerFunction (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::SCANNER; }
 
 protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
-
-#endif // CELLFUNCTIONSCANNER_H

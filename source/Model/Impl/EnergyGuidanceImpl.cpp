@@ -14,7 +14,7 @@ EnergyGuidanceImpl::EnergyGuidanceImpl (UnitContext* context)
 
 }
 
-CellFeature::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
+CellFeatureChain::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
 	auto& tokenMem = token->getMemoryRef();

@@ -1,15 +1,12 @@
-#ifndef ENERGYGUIDANCE_H
-#define ENERGYGUIDANCE_H
+#pragma once
 
-#include "CellFeature.h"
+#include "CellFeatureChain.h"
 
 class EnergyGuidance
-	: public CellFeature
+	: public CellFeatureChain
 {
 public:
-    EnergyGuidance (UnitContext* context) : CellFeature(context) {}
+    EnergyGuidance (UnitContext* context) : CellFeatureChain(context) {}
 
     virtual ~EnergyGuidance () {}
 };
-
-#endif // ENERGYGUIDANCE_H

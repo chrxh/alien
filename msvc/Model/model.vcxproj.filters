@@ -27,11 +27,11 @@
     <Filter Include="Source Files\Api">
       <UniqueIdentifier>{64db83ed-d1ea-47f5-b83e-f0a8036bf9ab}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Local">
-      <UniqueIdentifier>{f085e879-c578-40d7-925a-d6916880eddb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Impl">
       <UniqueIdentifier>{7d9a10e4-f3a8-4a12-8daa-128b0bf6aa20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Local">
+      <UniqueIdentifier>{f085e879-c578-40d7-925a-d6916880eddb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -69,12 +69,6 @@
       <Filter>Source Files\Local</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\Cell.h">
-      <Filter>Source Files\Local</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Local\CellComputer.h">
-      <Filter>Source Files\Local</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Local\CellFeature.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\CellFeatureFactory.h">
@@ -125,31 +119,10 @@
     <ClInclude Include="..\..\source\Model\Impl\AccessPortFactoryImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellCommunicatorImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellComputerImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellConstructorImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\CellFeatureFactoryImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\CellImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellPropulsionImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellScannerImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellSensorImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellWeaponImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\ClusterImpl.h">
@@ -190,6 +163,33 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Api\CellTO.h">
       <Filter>Source Files\Api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Local\CellFeatureChain.h">
+      <Filter>Source Files\Local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\CommunicatorFunction.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Local\ComputerFunction.h">
+      <Filter>Source Files\Local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\ComputerFunctionImpl.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\ConstructorFunction.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\PropulsionFunction.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\ScannerFunction.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\SensorFunction.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\WeaponFunction.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -255,9 +255,6 @@
     </ClCompile>
     <ClCompile Include="Release\moc_SpaceMetric.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Local\CellFeature.cpp">
-      <Filter>Source Files\Local</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Local\CellFunction.cpp">
       <Filter>Source Files\Local</Filter>
@@ -367,12 +364,6 @@
     <ClCompile Include="..\..\source\Model\Impl\AccessPortFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellCommunicatorImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellComputerImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\CellConnectorImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -384,9 +375,6 @@
     </ClCompile>
     <ClCompile Include="Release\moc_CellConnectorImpl.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellConstructorImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\CellFeatureFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
@@ -405,18 +393,6 @@
     </ClCompile>
     <ClCompile Include="Release\moc_CellMapImpl.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellPropulsionImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellScannerImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellSensorImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellWeaponImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\ClusterImpl.cpp">
       <Filter>Source Files\Impl</Filter>
@@ -546,6 +522,30 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Api\CellTO.cpp">
       <Filter>Source Files\Api</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Local\CellFeatureChain.cpp">
+      <Filter>Source Files\Local</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\CommunicatorFunction.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\ComputerFunctionImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\ConstructorFunction.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\PropulsionFunction.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\ScannerFunction.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\SensorFunction.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\WeaponFunction.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

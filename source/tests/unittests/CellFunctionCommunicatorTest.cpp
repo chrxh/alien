@@ -4,7 +4,7 @@
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Token.h"
-#include "Model/Impl/CellCommunicatorImpl.h"
+#include "Model/Impl/CommunicatorFunction.h"
 #include "Model/Local/PhysicalQuantityConverter.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/ModelBuilderFacade.h"
@@ -27,13 +27,13 @@ protected:
     Cluster* _cluster1 = nullptr;
     Cell* _cellWithToken = nullptr;
     Cell* _cellWithoutToken = nullptr;
-    CellCommunicatorImpl* _communicator1a = nullptr;
-	CellCommunicatorImpl* _communicator1b = nullptr;
+    CommunicatorFunction* _communicator1a = nullptr;
+	CommunicatorFunction* _communicator1b = nullptr;
     Token* _token = nullptr;
 
     //data for cluster2
     Cluster* _cluster2 = nullptr;
-	CellCommunicatorImpl* _communicator2 = nullptr;
+	CommunicatorFunction* _communicator2 = nullptr;
 };
 
 CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()

@@ -1,13 +1,12 @@
-#ifndef CELLFUNCTIONSENSOR_H
-#define CELLFUNCTIONSENSOR_H
+#pragma once
 
 #include "Model/Local/CellFunction.h"
 
-class CellSensorImpl
+class SensorFunction
 	: public CellFunction
 {
 public:
-    CellSensorImpl (UnitContext* context);
+    SensorFunction (UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::SENSOR; }
 
@@ -15,4 +14,3 @@ protected:
     ProcessingResult processImpl (Token* token, Cell* cell, Cell* previousCell) override;
 };
 
-#endif // CELLFUNCTIONSENSOR_H
