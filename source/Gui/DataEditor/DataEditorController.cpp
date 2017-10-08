@@ -102,6 +102,10 @@ void DataEditorController::notificationFromClusterEditWidget()
 
 void DataEditorController::notificationFromMetadataEditWidget()
 {
+	auto& cluster = _model->getClusterToEditRef();
+	_manipulator->updateCluster(cluster);
+
+	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
 void DataEditorController::onShow(bool visible)
