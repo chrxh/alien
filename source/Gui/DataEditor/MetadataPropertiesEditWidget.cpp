@@ -1,44 +1,49 @@
-#include "MetadataPropertiesEdit.h"
-
-#include "gui/Settings.h"
-#include "gui/Settings.h"
-
 #include <QMouseEvent>
 #include <QTextBlock>
 
-MetadataPropertiesEdit::MetadataPropertiesEdit (QWidget *parent) :
+#include "Gui/Settings.h"
+#include "Gui/Settings.h"
+
+#include "DataEditorModel.h"
+#include "DataEditorController.h"
+#include "MetadataPropertiesEditWidget.h"
+
+MetadataPropertiesEditWidget::MetadataPropertiesEditWidget (QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void MetadataPropertiesEdit::updateMetadata (QString clusterName, QString cellName, quint8 cellColor)
+void MetadataPropertiesEditWidget::updateModel ()
 {
-    _clusterName = clusterName;
-    _cellName = cellName;
-    _cellColor = cellColor;
-    updateDisplay();
-}
-
-void MetadataPropertiesEdit::requestUpdate ()
-{
-    int row = QTextEdit::textCursor().blockNumber();
+	auto& cluster = *_model->getClusterToEditRef().metadata;
+	auto& cell = *_model->getCellToEditRef().metadata;
+	int row = QTextEdit::textCursor().blockNumber();
 
     //collect new data
     QString currentText = QTextEdit::textCursor().block().text();
     currentText.remove(0, 14);
-    if( row == 0 )
-        _clusterName = currentText;
-    if( row == 1 )
-        _cellName = currentText;
+    if(row == 0)
+        cluster.name = currentText;
+    if(row == 1)
+        cell.name = currentText;
 
     //inform other instances
-    Q_EMIT metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
+	_controller->notificationFromMetadataEditWidget();
 }
 
-void MetadataPropertiesEdit::updateDisplay ()
+void MetadataPropertiesEditWidget::init(DataEditorModel * model, DataEditorController * controller)
 {
-    //define auxilliary strings
+	_model = model;
+	_controller = controller;
+}
+
+void MetadataPropertiesEditWidget::updateDisplay ()
+{
+	auto const& cluster = *_model->getClusterToEditRef().metadata;
+	auto const& cell = *_model->getCellToEditRef().metadata;
+
+	//define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
     QString colorTextStart = "<span style=\"color:"+CELL_EDIT_TEXT_COLOR1.name()+"\">";
@@ -71,31 +76,31 @@ void MetadataPropertiesEdit::updateDisplay ()
     QString sep7 = colorEnd + colorBlack + "&#9001;" + colorEnd + color7;
     QString colorBlock8 = "&#9608;&#9608;";//"&#10108;";
     QString sep8 = colorEnd;
-    if( _cellColor == 0 ) {
+    if( cell.color == 0 ) {
         sep1 = colorWhite + "&#9002;" + colorEnd+color1;
         sep2 = colorEnd+ colorWhite + "&#9001;" + colorEnd + color2;
     }
-    if( _cellColor == 1 ) {
+    if(cell.color == 1 ) {
         sep2 = colorEnd + colorWhite + "&#9002;" + colorEnd + color2;
         sep3 = colorEnd + colorWhite + "&#9001;" + colorEnd + color3;
     }
-    if( _cellColor == 2 ) {
+    if(cell.color == 2 ) {
         sep3 = colorEnd + colorWhite + "&#9002;" + colorEnd + color3;
         sep4 = colorEnd + colorWhite + "&#9001;" + colorEnd + color4;
     }
-    if( _cellColor == 3 ) {
+    if(cell.color == 3 ) {
         sep4 = colorEnd + colorWhite + "&#9002;" + colorEnd + color4;
         sep5 = colorEnd + colorWhite + "&#9001;" + colorEnd + color5;
     }
-    if( _cellColor == 4 ) {
+    if(cell.color == 4 ) {
         sep5 = colorEnd + colorWhite + "&#9002;" + colorEnd + color5;
         sep6 = colorEnd + colorWhite + "&#9001;" + colorEnd + color6;
     }
-    if( _cellColor == 5 ) {
+    if(cell.color == 5 ) {
         sep6 = colorEnd + colorWhite + "&#9002;" + colorEnd + color6;
         sep7 = colorEnd + colorWhite + "&#9001;" + colorEnd + color7;
     }
-    if( _cellColor >= 6 ) {
+    if(cell.color >= 6 ) {
         sep7 = colorEnd + colorWhite + "&#9002;" + colorEnd + color7;
         sep8 = colorEnd + colorWhite + "&#9001;" + colorEnd;
     }
@@ -108,22 +113,20 @@ void MetadataPropertiesEdit::updateDisplay ()
     //create string of display
     QString text;
     text = parStart+colorTextStart+ "cluster name:"+colorEnd;
-    text += colorDataStart+" " +_clusterName+colorEnd+parEnd;
+    text += colorDataStart+" " + cluster.name+colorEnd+parEnd;
     text += parStart+colorTextStart+ "cell name:&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+" " + _cellName+colorEnd+parEnd;
+    text += colorDataStart+" " + cell.name+colorEnd+parEnd;
     text += parStart+colorTextStart+ "cell color: &nbsp;&nbsp;"+colorEnd;
     text += sep1+colorBlock2+sep2+colorBlock3+sep3+colorBlock4+sep4+colorBlock5+sep5+colorBlock6+sep6+colorBlock7+sep7+colorBlock8+sep8+parEnd;
-//    text += parStart+colorTextStart+ "description: &nbsp;&nbsp;"+colorEnd;
-//    text += colorDataStart+colorEnd+parEnd;
 
     QTextEdit::setText(text);
 }
 
-void MetadataPropertiesEdit::keyPressEvent (QKeyEvent* e)
+void MetadataPropertiesEditWidget::keyPressEvent (QKeyEvent* e)
 {
     //notify other instances about update?
     if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
-        requestUpdate();
+        updateModel();
 
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
@@ -164,9 +167,9 @@ void MetadataPropertiesEdit::keyPressEvent (QKeyEvent* e)
         QTextEdit::keyPressEvent(e);
 }
 
-void MetadataPropertiesEdit::mousePressEvent (QMouseEvent* e)
+void MetadataPropertiesEditWidget::mousePressEvent (QMouseEvent* e)
 {
-    requestUpdate();
+    updateModel();
     QTextEdit::mousePressEvent(e);
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
@@ -183,37 +186,31 @@ void MetadataPropertiesEdit::mousePressEvent (QMouseEvent* e)
 
     //cell color clicked?
     if( row == 2 ) {
-        if( (col == 15) || (col == 16) || (col == 17) )
-            _cellColor = 0;
+		auto& cluster = *_model->getClusterToEditRef().metadata;
+		auto& cell = *_model->getCellToEditRef().metadata;
+		if ((col == 15) || (col == 16) || (col == 17))
+            cell.color = 0;
         if( (col == 18) || (col == 19) || (col == 20) )
-            _cellColor = 1;
+            cell.color = 1;
         if( (col == 21) || (col == 22) || (col == 23) )
-            _cellColor = 2;
+            cell.color = 2;
         if( (col == 24) || (col == 25) || (col == 26) )
-            _cellColor = 3;
+            cell.color = 3;
         if( (col == 27) || (col == 28) || (col == 29) )
-            _cellColor = 4;
+            cell.color = 4;
         if( (col == 30) || (col == 31) || (col == 32) )
-            _cellColor = 5;
+            cell.color = 5;
         if( (col == 33) || (col == 34) || (col == 35) )
-            _cellColor = 6;
+            cell.color = 6;
         updateDisplay();
         QTextEdit::clearFocus();
-        Q_EMIT metadataPropertiesChanged(_clusterName, _cellName, _cellColor);
+		_controller->notificationFromMetadataEditWidget();
     }
-
-/*    if( e->y() < 30 )
-        QTextEdit::mousePressEvent(e);
-    else
-        QTextEdit::clearFocus();*/
 }
 
-void MetadataPropertiesEdit::mouseDoubleClickEvent (QMouseEvent* e)
+void MetadataPropertiesEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
 {
-    /*if( e->y() < 30 )
-        QTextEdit::mouseDoubleClickEvent(e);
-    else*/
-        QTextEdit::clearFocus();
+	QTextEdit::clearFocus();
 }
 
 

@@ -12,21 +12,25 @@
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Particle.h"
+
 #include "Gui/DataEditor/ClusterEditWidget.h"
 #include "Gui/DataEditor/CellEditWidget.h"
+#include "Gui/DataEditor/MetadataEditWidget.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 #include "TokenTab.h"
 #include "EnergyEdit.h"
 #include "HexEditWidget.h"
-#include "MetadataEdit.h"
 #include "SymbolEdit.h"
 #include "CellComputerEditWidget.h"
 
 #include "TextEditor.h"
 
-const int tabPosX1 = 410;
-const int tabPosX2 = 810;
+namespace
+{
+	const int tabPosX1 = 410;
+	const int tabPosX2 = 810;
+}
 
 TextEditor::TextEditor(QObject *parent)
 	: QObject(parent)

@@ -816,7 +816,7 @@ p, li { white-space: pre-wrap; }
           <number>0</number>
          </property>
          <item>
-          <widget class="MetadataEdit" name="metadataEditor2" native="true">
+          <widget class="MetadataEditWidget" name="metadataEditor2" native="true">
            <property name="palette">
             <palette>
              <active>
@@ -3546,9 +3546,9 @@ p, li { white-space: pre-wrap; }
    <header>gui/texteditor/symboledit.h</header>
   </customwidget>
   <customwidget>
-   <class>MetadataEdit</class>
+   <class>MetadataEditWidget</class>
    <extends>QWidget</extends>
-   <header>gui/texteditor/metadataedit.h</header>
+   <header>Gui/DataEditor/MetadataEditWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -75,6 +75,7 @@ struct ClusterDescription
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ClusterDescription& setAngle(double value) { angle = value; return *this; }
 	ClusterDescription& setAngularVel(double value) { angularVel = value; return *this; }
+	ClusterDescription& setMetadata(ClusterMetadata const& value) { metadata = value; return *this; }
 	ClusterDescription& addCells(list<CellDescription> const& value)
 	{
 		if (cells) {

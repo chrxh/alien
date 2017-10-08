@@ -15,7 +15,7 @@ class CellEditWidget;
 class ClusterEditWidget;
 class CellComputerEditWidget;
 class EnergyEdit;
-class MetadataEdit;
+class MetadataEditWidget;
 class SymbolEdit;
 class QTextEdit;
 class QLabel;
@@ -38,7 +38,7 @@ public:
 		CellEditWidget* cellEditor;
 		ClusterEditWidget* clusterEditor;
 		EnergyEdit* energyEditor;
-		MetadataEdit* metadataEditor;
+		MetadataEditWidget* metadataEditor;
 		SymbolEdit* symbolEdit;
 		QTextEdit* selectionEditor;
 		QToolButton* requestCellButton;
