@@ -51,7 +51,7 @@ QPalette GuiSettings::getPaletteForTab()
 	QBrush brush3(QColor(0, 0, 0, 255));
 	result.setBrush(QPalette::Active, QPalette::Text, brush);
 	result.setBrush(QPalette::Active, QPalette::Base, brush3);
-	QBrush brush7(QColor(152, 152, 152, 255));
+	QBrush brush7(QColor(0, 0, 0, 255));
 	brush7.setStyle(Qt::SolidPattern);
 	result.setBrush(QPalette::Active, QPalette::Window, brush7);
 	result.setBrush(QPalette::Inactive, QPalette::Text, brush);

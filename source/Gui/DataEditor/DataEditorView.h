@@ -31,6 +31,7 @@ private:
 	QTabWidget* _mainTabWidget = nullptr;
 	ClusterEditWidget* _clusterEditTab = nullptr;
 	CellEditWidget* _cellEditTab = nullptr;
+	MetadataEditWidget* _metadataEditTab = nullptr;
 
 	QTabWidget* _computerTabWidget = nullptr;
 	CellComputerEditWidget* _computerEditTab = nullptr;
