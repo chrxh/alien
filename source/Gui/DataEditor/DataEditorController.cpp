@@ -109,7 +109,13 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
 		uint64_t selectedCellId = selectedCellIds.front();
 		_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
-		_view->switchToClusterEditor();
+		auto cell = _manipulator->getCellDescRef(selectedCellId);
+		if (cell.cellFeature->type == Enums::CellFunction::COMPUTER) {
+			_view->switchToCellEditorWithComputer();
+		}
+		else {
+			_view->switchToCellEditorWithoutComputer();
+		}
 	}
 	if (selectedCellIds.size() + selectedParticleIds.size() > 1) {
 		_view->switchToNoEditor();
