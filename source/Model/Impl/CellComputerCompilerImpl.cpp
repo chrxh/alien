@@ -1,0 +1,23 @@
+﻿#include "CellComputerCompilerImpl.h"
+
+#include "CellComputerFunctionImpl.h"
+
+CellComputerCompilerImpl::CellComputerCompilerImpl(QObject * parent) : CellComputerCompiler(parent) {
+	
+}
+
+void CellComputerCompilerImpl::init(SymbolTable * symbols, SimulationParameters* parameters)
+{
+	_symbols = symbols;
+	_parameters = parameters;
+}
+
+CompilationResult CellComputerCompilerImpl::compileSourceCode(std::string const & code) const
+{
+	return CellComputerFunctionImpl::compileSourceCode(code, _symbols);
+}
+
+std::string CellComputerCompilerImpl::decompileSourceCode(QByteArray const & data) const
+{
+	return CellComputerFunctionImpl::decompileSourceCode(data, _parameters);
+}

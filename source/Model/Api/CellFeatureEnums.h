@@ -1,5 +1,4 @@
-#ifndef CELLFEATUREENUMS_H
-#define CELLFEATUREENUMS_H
+#pragma once
 
 #include "Model/Api/Definitions.h"
 
@@ -232,4 +231,3 @@ namespace Enums
 	};
 }
 
-#endif // CELLFEATUREENUMS_H

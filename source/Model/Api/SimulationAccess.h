@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Model/Api/Definitions.h"
-#include "Model/Api/Descriptions.h"
+#include "Definitions.h"
+#include "Descriptions.h"
 
 class MODEL_EXPORT SimulationAccess
 	: public QObject

@@ -8,7 +8,7 @@
 #include "Model/Local/Token.h"
 #include "Model/Local/EntityFactory.h"
 #include "Model/Local/CellFunction.h"
-#include "Model/Local/ComputerFunction.h"
+#include "Model/Local/CellComputerFunction.h"
 #include "Model/Local/EnergyGuidance.h"
 #include "Model/Local/CellFeatureFactory.h"
 #include "Model/Local/SymbolTable.h"

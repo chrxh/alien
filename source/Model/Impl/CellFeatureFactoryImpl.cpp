@@ -1,7 +1,7 @@
 #include "CellFeatureFactoryImpl.h"
 
 #include "Model/Local/Cell.h"
-#include "ComputerFunctionImpl.h"
+#include "CellComputerFunctionImpl.h"
 #include "ConstructorFunction.h"
 #include "PropulsionFunction.h"
 #include "ScannerFunction.h"
@@ -27,7 +27,7 @@ CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::Ce
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
-            return registerNewFeature(cell, new ComputerFunctionImpl(context));
+            return registerNewFeature(cell, new CellComputerFunctionImpl(context));
         case Enums::CellFunction::PROPULSION :
             return registerNewFeature(cell, new PropulsionFunction(context));
         case Enums::CellFunction::SCANNER :
@@ -50,7 +50,7 @@ CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::Ce
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
-            return registerNewFeature(cell, new ComputerFunctionImpl(data, context));
+            return registerNewFeature(cell, new CellComputerFunctionImpl(data, context));
         case Enums::CellFunction::COMMUNICATOR :
             return registerNewFeature(cell, new CommunicatorFunction(data, context));
         default:
