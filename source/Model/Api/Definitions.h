@@ -7,6 +7,8 @@
 
 #include "DllExport.h"
 
+class QTimer;
+
 class Cell;
 class Cluster;
 class UnitGrid;
@@ -39,10 +41,10 @@ struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
 class SimulationAccess;
-class QTimer;
 class ModelBuilderFacade;
 class SerializationFacade;
 class CellConnector;
+class CellComputerCompiler;
 
 struct CellClusterHash
 {
