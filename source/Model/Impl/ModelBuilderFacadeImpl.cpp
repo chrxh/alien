@@ -1,16 +1,19 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "Base/ServiceLocator.h"
+
+#include "Model/Api/SimulationParameters.h"
+#include "Model/Api/SimulationAccess.h"
+#include "Model/Api/Settings.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Particle.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/EntityFactory.h"
 #include "Model/Local/CellFunction.h"
-#include "Model/Local/ComputerFunction.h"
+#include "Model/Local/CellComputerFunction.h"
 #include "Model/Local/EnergyGuidance.h"
 #include "Model/Local/CellFeatureFactory.h"
-#include "Model/Api/SimulationParameters.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/ParticleMap.h"
 #include "Model/Local/SpaceMetricLocal.h"
@@ -23,10 +26,9 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/AccessPortFactory.h"
 #include "Model/Local/SymbolTable.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/Settings.h"
-#include "Model/Impl/SimulationControllerImpl.h"
 
+#include "SimulationControllerImpl.h"
+#include "CellComputerCompilerImpl.h"
 #include "ModelBuilderFacadeImpl.h"
 #include "CellConnectorImpl.h"
 
@@ -98,6 +100,13 @@ CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContext* co
 	auto context = static_cast<SimulationContextLocal*>(contextApi);
 	connector->init(context->getSpaceMetric(), context->getSimulationParameters(), context->getNumberGenerator());
 	return connector;
+}
+
+CellComputerCompiler * ModelBuilderFacadeImpl::buildCellComputerCompiler(SimulationContext* context) const
+{
+	auto compiler = new CellComputerCompilerImpl();
+	compiler->init(context->getSymbolTable(), context->getSimulationParameters());
+	return compiler;
 }
 
 Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextLocal* context) const
