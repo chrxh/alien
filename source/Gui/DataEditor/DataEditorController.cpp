@@ -55,7 +55,14 @@ void DataEditorController::notificationFromCellEditWidget()
 
 	uint64_t selectedCellId = _model->getCellToEditRef().id;
 	_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
-	_view->update();
+
+	auto cell = _manipulator->getCellDescRef(selectedCellId);
+	if (cell.cellFeature->type == Enums::CellFunction::COMPUTER) {
+		_view->switchToCellEditorWithComputer();
+	}
+	else {
+		_view->switchToCellEditorWithoutComputer();
+	}
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
