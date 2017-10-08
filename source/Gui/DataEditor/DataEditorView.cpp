@@ -4,6 +4,7 @@
 #include "Gui/Settings.h"
 #include "ClusterEditWidget.h"
 #include "CellEditWidget.h"
+#include "MetadataEditWidget.h"
 #include "CellComputerEditWidget.h"
 
 #include "DataEditorModel.h"
@@ -37,6 +38,10 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_cellEditTab->setCursorWidth(6);
 	_mainTabWidget->addTab(_cellEditTab, "cell");
 
+	_metadataEditTab = new MetadataEditWidget(_mainTabWidget);
+	_metadataEditTab->setPalette(GuiSettings::getPaletteForTab());
+	_mainTabWidget->addTab(_metadataEditTab, "metadata");
+	
 	_computerTabWidget = new QTabWidget(parent);
 	_computerTabWidget->setMinimumSize(QSize(385, 341));
 	_computerTabWidget->setMaximumSize(QSize(385, 341));
@@ -46,6 +51,7 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_computerTabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
 
 	_computerEditTab = new CellComputerEditWidget(_mainTabWidget);
+	_computerEditTab->setPalette(GuiSettings::getPaletteForTab());
 	_computerTabWidget->addTab(_computerEditTab, "cell computer");
 
 	update();
@@ -58,6 +64,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel
 	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + 270, _mainTabWidget->width(), _mainTabWidget->height());
 	_clusterEditTab->init(_model, controller);
 	_cellEditTab->init(_model, controller);
+	_metadataEditTab->init(_model, controller);
 }
 
 void DataEditorView::update() const
@@ -72,7 +79,7 @@ void DataEditorView::update() const
 		_mainTabWidget->setVisible(true);
 		_clusterEditTab->updateDisplay();
 		_cellEditTab->updateDisplay();
-
+		_metadataEditTab->updateDisplay();
 		_computerTabWidget->setVisible(true);
 	}
 
@@ -80,7 +87,7 @@ void DataEditorView::update() const
 		_mainTabWidget->setVisible(true);
 		_clusterEditTab->updateDisplay();
 		_cellEditTab->updateDisplay();
-
+		_metadataEditTab->updateDisplay();
 		_computerTabWidget->setVisible(false);
 	}
 }

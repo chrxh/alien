@@ -93,7 +93,7 @@ void ClusterImpl::setContext(UnitContext * context)
 ClusterDescription ClusterImpl::getDescription(ResolveDescription const& resolveDescription) const
 {
 	ClusterDescription result;
-	result.setId(_id).setPos(_pos).setVel(_vel).setAngle(_angle).setAngularVel(_angularVel);
+	result.setId(_id).setPos(_pos).setVel(_vel).setAngle(_angle).setAngularVel(_angularVel).setMetadata(_meta);
 	for (auto const& cell : _cells) {
 		result.addCell(cell->getDescription(resolveDescription));
 	}

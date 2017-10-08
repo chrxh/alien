@@ -33,6 +33,7 @@ class DataEditorView;
 class DataManipulator;
 class ClusterEditWidget;
 class CellEditWidget;
+class MetadataEditWidget;
 class CellComputerEditWidget;
 
 enum class ActiveScene { PixelScene, ShapeScene };

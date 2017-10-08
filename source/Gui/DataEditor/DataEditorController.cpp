@@ -100,6 +100,10 @@ void DataEditorController::notificationFromClusterEditWidget()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
+void DataEditorController::notificationFromMetadataEditWidget()
+{
+}
+
 void DataEditorController::onShow(bool visible)
 {
 	_view->show(visible);
