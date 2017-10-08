@@ -38,6 +38,7 @@ private:
 		double angularVel = 0.0;
 	};
 	ClusterVelocities calcVelocitiesBasedOnOldClusters(vector<CellDescription> const & cells) const;
+	ClusterMetadata calcMetadataBasedOnOldClusters(vector<CellDescription> const & cells) const;
 
 	SpaceMetric* _metric = nullptr;
 	SimulationParameters* _parameters = nullptr;
