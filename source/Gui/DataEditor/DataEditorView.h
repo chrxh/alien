@@ -15,14 +15,15 @@ public:
 	void init(IntVector2D const& upperLeftPosition, DataEditorModel* model, DataEditorController* controller);
 
 	void switchToNoEditor();
-	void switchToClusterEditor();
+	void switchToCellEditorWithoutComputer();
+	void switchToCellEditorWithComputer();
 	void show(bool visible);
 	void update() const;
 
 private:
 
 	bool _visible = false;
-	enum class EditorSelector { No, Cluster };
+	enum class EditorSelector { No, CellWithComputer, CellWithoutComputer };
 	EditorSelector _editorSelector = EditorSelector::No;
 
 	DataEditorModel* _model = nullptr;
@@ -30,4 +31,7 @@ private:
 	QTabWidget* _mainTabWidget = nullptr;
 	ClusterEditWidget* _clusterEditTab = nullptr;
 	CellEditWidget* _cellEditTab = nullptr;
+
+	QTabWidget* _computerTabWidget = nullptr;
+	CellComputerEditWidget* _computerEditTab = nullptr;
 };

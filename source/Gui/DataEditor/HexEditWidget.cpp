@@ -1,4 +1,4 @@
-#include "HexEdit.h"
+#include "HexEditWidget.h"
 
 #include"gui/Settings.h"
 
@@ -6,35 +6,35 @@
 #include <QTextBlock>
 #include <QKeyEvent>
 
-HexEdit::HexEdit(QWidget *parent) :
+HexEditWidget::HexEditWidget(QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
     QTextEdit::setCursorWidth(6);
 }
 
-HexEdit::~HexEdit ()
+HexEditWidget::~HexEditWidget ()
 {
 
 }
 
-void HexEdit::update ()
+void HexEditWidget::update ()
 {
     QTextEdit::setText("");
 }
 
-void HexEdit::update (QByteArray const& data)
+void HexEditWidget::update (QByteArray const& data)
 {
     _data = data;
     displayData();
 }
 
-QByteArray const& HexEdit::getDataRef ()
+QByteArray const& HexEditWidget::getDataRef ()
 {
     return _data;
 }
 
-QByteArray HexEdit::convertHexStringToByteArray(QString hexCode)
+QByteArray HexEditWidget::convertHexStringToByteArray(QString hexCode)
 {
     QByteArray d(hexCode.size()/2, 0);
     int len = hexCode.length()/2;
@@ -46,7 +46,7 @@ QByteArray HexEdit::convertHexStringToByteArray(QString hexCode)
     return d;
 }
 
-void HexEdit::keyPressEvent (QKeyEvent* e)
+void HexEditWidget::keyPressEvent (QKeyEvent* e)
 {
 //    QTextEdit::keyPressEvent(e);
 
@@ -160,7 +160,7 @@ void HexEdit::keyPressEvent (QKeyEvent* e)
 
 }
 
-void HexEdit::mousePressEvent(QMouseEvent* e)
+void HexEditWidget::mousePressEvent(QMouseEvent* e)
 {
     QTextEdit::mousePressEvent(e);
 //    if( QTextEdit::textCursor().blockNumber() == 0 )
@@ -185,18 +185,18 @@ void HexEdit::mousePressEvent(QMouseEvent* e)
     QTextEdit::setPalette(p);
 }
 
-void HexEdit::mouseDoubleClickEvent (QMouseEvent* e)
+void HexEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
 {
 
 }
 
-void HexEdit::wheelEvent (QWheelEvent* e)
+void HexEditWidget::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
-void HexEdit::displayData ()
+void HexEditWidget::displayData ()
 {
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();

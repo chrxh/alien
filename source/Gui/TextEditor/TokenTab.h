@@ -10,7 +10,7 @@ namespace Ui {
     class TokenTab;
 }
 
-class HexEdit;
+class HexEditWidget;
 class QSignalMapper;
 class TokenTab : public QWidget
 {
@@ -34,7 +34,7 @@ private Q_SLOTS:
 
 private:
     Ui::TokenTab *ui;
-    QMap< quint8, HexEdit* > _hexEditList;      //associate start addresses with hex editors
+    QMap< quint8, HexEditWidget* > _hexEditList;      //associate start addresses with hex editors
     QByteArray _tokenMemory;
     QSignalMapper* _signalMapper;
     QSignalMapper* _signalMapper2;

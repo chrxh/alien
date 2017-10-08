@@ -1,14 +1,13 @@
-#ifndef HEXEDIT_H
-#define HEXEDIT_H
+#pragma once
 
 #include <QTextEdit>
 
-class HexEdit : public QTextEdit
+class HexEditWidget : public QTextEdit
 {
     Q_OBJECT
 public:
-    HexEdit(QWidget *parent = 0);
-    ~HexEdit ();
+    HexEditWidget(QWidget *parent = 0);
+    ~HexEditWidget ();
 
     void update ();
     void update (QByteArray const& data);
@@ -33,5 +32,3 @@ private:
 
     QByteArray _data;
 };
-
-#endif // HEXEDIT_H

@@ -1,14 +1,14 @@
-#include "CellComputerEdit.h"
-#include "ui_CellComputerEdit.h"
+#include "CellComputerEditWidget.h"
+#include "ui_CellComputerEditWidget.h"
 
 #include "gui/Settings.h"
 #include "gui/Settings.h"
 
 #include <QTimer>
 
-CellComputerEdit::CellComputerEdit(QWidget *parent) :
+CellComputerEditWidget::CellComputerEditWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::CellComputerEdit),
+    ui(new Ui::CellComputerEditWidget),
     _timer(new QTimer(this)),
     _expectCellCompilerAnswer(false)
 {
@@ -17,38 +17,38 @@ CellComputerEdit::CellComputerEdit(QWidget *parent) :
     //set colors
     ui->compileButton2->setStyleSheet(BUTTON_STYLESHEET);
 
-    QPalette p = ui->computerMemoryLabel2->palette();
+    QPalette p = ui->memoryLabel->palette();
     p.setColor(QPalette::WindowText, CELL_EDIT_CAPTION_COLOR1);
-    ui->computerMemoryLabel2->setPalette(p);
-    ui->computerCodeLabel2->setPalette(p);
+    ui->memoryLabel->setPalette(p);
+    ui->codeLabel->setPalette(p);
 
     //connections
-    connect(ui->computerMemoryEditor2, SIGNAL(dataChanged(QByteArray)), this, SIGNAL(changesFromComputerMemoryEditor(QByteArray)));
+    connect(ui->memoryEditor, SIGNAL(dataChanged(QByteArray)), this, SIGNAL(changesFromComputerMemoryEditor(QByteArray)));
     connect(ui->compileButton2, SIGNAL(clicked()), this, SLOT(compileButtonClicked_Slot()));
     connect(_timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
 }
 
-CellComputerEdit::~CellComputerEdit()
+CellComputerEditWidget::~CellComputerEditWidget()
 {
     delete ui;
 }
 
-void CellComputerEdit::updateComputerMemory(QByteArray const& data)
+void CellComputerEditWidget::updateComputerMemory(QByteArray const& data)
 {
-    ui->computerMemoryEditor2->update(data);
+    ui->memoryEditor->update(data);
 }
 
-void CellComputerEdit::updateComputerCode (QString code)
+void CellComputerEditWidget::updateComputerCode (QString code)
 {
-    ui->computerCodeEditor2->update(code);
+    ui->codeEditWidget->update(code);
 }
 
-QString CellComputerEdit::getComputerCode ()
+QString CellComputerEditWidget::getComputerCode ()
 {
-    return ui->computerCodeEditor2->getCode();
+    return ui->codeEditWidget->getCode();
 }
 
-void CellComputerEdit::setCompilationState (bool error, int line)
+void CellComputerEditWidget::setCompilationState (bool error, int line)
 {
     if( _expectCellCompilerAnswer ) {
         _expectCellCompilerAnswer = false;
@@ -70,19 +70,19 @@ void CellComputerEdit::setCompilationState (bool error, int line)
     }
 }
 
-void CellComputerEdit::expectCellCompilerAnswer ()
+void CellComputerEditWidget::expectCellCompilerAnswer ()
 {
     _expectCellCompilerAnswer = true;
 }
 
-void CellComputerEdit::compileButtonClicked_Slot ()
+void CellComputerEditWidget::compileButtonClicked_Slot ()
 {
-    Q_EMIT compileButtonClicked(ui->computerCodeEditor2->getCode());
+    Q_EMIT compileButtonClicked(ui->codeEditWidget->getCode());
 }
 
-void CellComputerEdit::timerTimeout ()
+void CellComputerEditWidget::timerTimeout ()
 {
-    QPalette p = ui->computerCodeEditor2->palette();
+    QPalette p = ui->codeEditWidget->palette();
     ui->compilationStateLabel2->setPalette(p);
     ui->compilationStateLabel2->setText("");
     _timer->stop();

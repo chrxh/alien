@@ -5,7 +5,7 @@
 #include "gui/Settings.h"
 #include "gui/Settings.h"
 
-#include "HexEdit.h"
+#include "HexEditWidget.h"
 #include "TokenTab.h"
 #include "ui_TokenTab.h"
 
@@ -115,7 +115,7 @@ void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray c
             ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 
             //create hex editor
-            HexEdit* hex = new HexEdit();
+            HexEditWidget* hex = new HexEditWidget();
             hex->setMinimumHeight(26+15*(v.size()-1));
             hex->setGeometry(0, 0, 100, 26+15*(v.size()-1));
             hex->setMaximumHeight(26+15*(v.size()-1));
@@ -171,7 +171,7 @@ void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray c
             ui->tableWidget->item(row, 1)->setTextColor(CELL_EDIT_TEXT_COLOR2);
             ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 
-            HexEdit* hex = new HexEdit();
+            HexEditWidget* hex = new HexEditWidget();
             int size = (kNew-k)/6;
             hex->setMaximumHeight(26+13*size);
             hex->setMinimumHeight(26+13*size);
@@ -205,7 +205,7 @@ void TokenTab::requestUpdate ()
 
 void TokenTab::tokenMemoryChanged_Slot (int tokenMemPointer)
 {
-    HexEdit* hex = _hexEditList[tokenMemPointer];
+    HexEditWidget* hex = _hexEditList[tokenMemPointer];
     if( hex ) {
         QByteArray newData = hex->getDataRef();
         for(int i = 0; i < newData.size(); ++i) {
@@ -224,11 +224,11 @@ void TokenTab::tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer)
 //        int oldPos = hex->textCursor().columnNumber();
 
         //set focus
-        HexEdit* preHex = _hexEditList.lowerBound(tokenMemPointer).operator --().value();
+        HexEditWidget* preHex = _hexEditList.lowerBound(tokenMemPointer).operator --().value();
         preHex->setFocus(Qt::OtherFocusReason);
 
         //calc row (QTableWidget does not give correct information because the widget inside an table item is focused...)
-        QMap<quint8, HexEdit*>::iterator it(_hexEditList.lowerBound(tokenMemPointer));
+        QMap<quint8, HexEditWidget*>::iterator it(_hexEditList.lowerBound(tokenMemPointer));
         int row = 0;
         while(it.key() != 0) {
             it--;
@@ -248,11 +248,11 @@ void TokenTab::tokenMemoryCursorReachedEnd_Slot (int tokenMemPointer)
     if(_hexEditList.lowerBound(tokenMemPointer).operator ++() != _hexEditList.end()) {
 
         //set focus
-        HexEdit* nextHex = _hexEditList.lowerBound(tokenMemPointer).operator ++().value();
+        HexEditWidget* nextHex = _hexEditList.lowerBound(tokenMemPointer).operator ++().value();
         nextHex->setFocus(Qt::OtherFocusReason);
 
         //calc row (QTableWidget does not give correct information because the widget inside an table item is focused...)
-        QMap<quint8, HexEdit*>::iterator it(_hexEditList.lowerBound(tokenMemPointer));
+        QMap<quint8, HexEditWidget*>::iterator it(_hexEditList.lowerBound(tokenMemPointer));
         int row = 0;
         while(it.key() != 0) {
             it--;
