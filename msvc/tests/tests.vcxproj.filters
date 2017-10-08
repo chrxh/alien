@@ -41,9 +41,6 @@
     <ClCompile Include="..\..\source\Tests\Unittests\CellClusterTest.cpp">
       <Filter>Source Files\Unittests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\Unittests\CellFunctionCommunicatorTest.cpp">
-      <Filter>Source Files\Unittests</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Tests\Unittests\MapCompartmentTest.cpp">
       <Filter>Source Files\Unittests</Filter>
     </ClCompile>
@@ -82,6 +79,9 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.cpp">
       <Filter>Source Files\Integrationtests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\Unittests\CommunicatorFunctionTest.cpp">
+      <Filter>Source Files\Unittests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

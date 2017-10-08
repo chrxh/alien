@@ -1,10 +1,12 @@
 ﻿#include <QTabWidget>
+#include <QGridLayout>
 
 #include "Gui/Settings.h"
 #include "ClusterEditWidget.h"
 #include "CellEditWidget.h"
-#include "DataEditorModel.h"
+#include "CellComputerEditWidget.h"
 
+#include "DataEditorModel.h"
 #include "DataEditorView.h"
 
 DataEditorView::DataEditorView(QWidget * parent)
@@ -35,6 +37,17 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_cellEditTab->setCursorWidth(6);
 	_mainTabWidget->addTab(_cellEditTab, "cell");
 
+	_computerTabWidget = new QTabWidget(parent);
+	_computerTabWidget->setMinimumSize(QSize(385, 341));
+	_computerTabWidget->setMaximumSize(QSize(385, 341));
+	_computerTabWidget->setTabShape(QTabWidget::Triangular);
+	_computerTabWidget->setElideMode(Qt::ElideNone);
+	_computerTabWidget->setTabsClosable(false);
+	_computerTabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
+
+	_computerEditTab = new CellComputerEditWidget(_mainTabWidget);
+	_computerTabWidget->addTab(_computerEditTab, "cell computer");
+
 	update();
 }
 
@@ -42,6 +55,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel
 {
 	_model = model;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
+	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + 270, _mainTabWidget->width(), _mainTabWidget->height());
 	_clusterEditTab->init(_model, controller);
 	_cellEditTab->init(_model, controller);
 }
@@ -50,13 +64,24 @@ void DataEditorView::update() const
 {
 	if (!_visible || _editorSelector == EditorSelector::No) {
 		_mainTabWidget->setVisible(false);
+		_computerTabWidget->setVisible(false);
 		return;
 	}
 
-	if (_editorSelector == EditorSelector::Cluster) {
+	if (_editorSelector == EditorSelector::CellWithComputer) {
 		_mainTabWidget->setVisible(true);
 		_clusterEditTab->updateDisplay();
 		_cellEditTab->updateDisplay();
+
+		_computerTabWidget->setVisible(true);
+	}
+
+	if (_editorSelector == EditorSelector::CellWithoutComputer) {
+		_mainTabWidget->setVisible(true);
+		_clusterEditTab->updateDisplay();
+		_cellEditTab->updateDisplay();
+
+		_computerTabWidget->setVisible(false);
 	}
 }
 
@@ -66,9 +91,15 @@ void DataEditorView::switchToNoEditor()
 	update();
 }
 
-void DataEditorView::switchToClusterEditor()
+void DataEditorView::switchToCellEditorWithoutComputer()
 {
-	_editorSelector = EditorSelector::Cluster;
+	_editorSelector = EditorSelector::CellWithoutComputer;
+	update();
+}
+
+void DataEditorView::switchToCellEditorWithComputer()
+{
+	_editorSelector = EditorSelector::CellWithComputer;
 	update();
 }
 

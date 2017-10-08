@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CellComputerEdit</class>
- <widget class="QWidget" name="CellComputerEdit">
+ <class>CellComputerEditWidget</class>
+ <widget class="QWidget" name="cellComputerEditWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -94,7 +94,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0" colspan="3">
-    <widget class="QLabel" name="computerMemoryLabel2">
+    <widget class="QLabel" name="memoryLabel">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -225,7 +225,7 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
-    <widget class="HexEdit" name="computerMemoryEditor2">
+    <widget class="HexEditWidget" name="memoryEditor">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -401,7 +401,7 @@
     </widget>
    </item>
    <item row="2" column="0" colspan="3">
-    <widget class="QLabel" name="computerCodeLabel2">
+    <widget class="QLabel" name="codeLabel">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -532,7 +532,7 @@
     </widget>
    </item>
    <item row="3" column="0" colspan="3">
-    <widget class="ComputerCodeEdit" name="computerCodeEditor2">
+    <widget class="CodeEditWidget" name="codeEditWidget">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -770,14 +770,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>HexEdit</class>
+   <class>HexEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>gui/texteditor/hexedit.h</header>
+   <header>Gui/DataEditor/HexEditWidget.h</header>
   </customwidget>
   <customwidget>
-   <class>ComputerCodeEdit</class>
+   <class>CodeEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>gui/texteditor/computercodeedit.h</header>
+   <header>Gui/DataEditor/CodeEditWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -13,7 +13,7 @@ class TextEditor;
 
 class CellEditWidget;
 class ClusterEditWidget;
-class CellComputerEdit;
+class CellComputerEditWidget;
 class EnergyEdit;
 class MetadataEdit;
 class SymbolEdit;
@@ -33,14 +33,12 @@ public:
 
 	struct TextEditorWidgets {
 		QTabWidget* tabClusterWidget;
-		QTabWidget* tabComputerWidget;
 		QTabWidget* tabTokenWidget;
 		QTabWidget* tabSymbolsWidget;
 		CellEditWidget* cellEditor;
 		ClusterEditWidget* clusterEditor;
 		EnergyEdit* energyEditor;
 		MetadataEdit* metadataEditor;
-		CellComputerEdit* cellComputerEdit;
 		SymbolEdit* symbolEdit;
 		QTextEdit* selectionEditor;
 		QToolButton* requestCellButton;

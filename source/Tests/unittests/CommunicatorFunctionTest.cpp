@@ -14,11 +14,11 @@
 
 #include "tests/TestSettings.h"
 
-class CellFunctionCommunicatorTest : public ::testing::Test
+class CommunicatorFunctionTest : public ::testing::Test
 {
 public:
-	CellFunctionCommunicatorTest();
-	~CellFunctionCommunicatorTest();
+	CommunicatorFunctionTest();
+	~CommunicatorFunctionTest();
 
 protected:
     UnitContext* _context;
@@ -36,7 +36,7 @@ protected:
 	CommunicatorFunction* _communicator2 = nullptr;
 };
 
-CellFunctionCommunicatorTest::CellFunctionCommunicatorTest()
+CommunicatorFunctionTest::CommunicatorFunctionTest()
 {
 /*
 	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
@@ -162,7 +162,7 @@ TEST_F (TestCellFunctionCommunicator, testSendMessage)
 }
 */
 
-CellFunctionCommunicatorTest::~CellFunctionCommunicatorTest()
+CommunicatorFunctionTest::~CommunicatorFunctionTest()
 {
 	delete _cluster1;
 	delete _cluster2;

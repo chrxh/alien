@@ -18,10 +18,10 @@
 #include "Gui/Settings.h"
 #include "TokenTab.h"
 #include "EnergyEdit.h"
-#include "HexEdit.h"
+#include "HexEditWidget.h"
 #include "MetadataEdit.h"
 #include "SymbolEdit.h"
-#include "CellComputerEdit.h"
+#include "CellComputerEditWidget.h"
 
 #include "TextEditor.h"
 
@@ -43,12 +43,16 @@ void TextEditor::init (TextEditorWidgets widgets)
     _tabParticle = _widgets.tabClusterWidget->widget(2);
     _tabSelection = _widgets.tabClusterWidget->widget(3);
     _tabMeta = _widgets.tabClusterWidget->widget(4);
+/*
     _tabComputer = _widgets.tabComputerWidget->widget(0);
     _tabSymbolTable = _widgets.tabComputerWidget->widget(1);
+*/
 
     //hide widgets
 	_widgets.tabClusterWidget->setVisible(false);
+/*
 	_widgets.tabComputerWidget->setVisible(false);
+*/
 	_widgets.tabTokenWidget->setVisible(false);
 	_widgets.tabSymbolsWidget->setVisible(false);
 
@@ -82,8 +86,10 @@ void TextEditor::init (TextEditorWidgets widgets)
     connect(_widgets.delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
     connect(_widgets.delClusterButton, SIGNAL(clicked()), this, SLOT(delExtendedSelectionClicked()));
 	connect(_widgets.buttonShowInfo, SIGNAL(clicked()), this, SLOT(buttonShowInfoClicked()));
+/*
 	connect(_widgets.cellComputerEdit, SIGNAL(changesFromComputerMemoryEditor(QByteArray)), this, SLOT(changesFromComputerMemoryEditor(QByteArray)));
     connect(_widgets.cellComputerEdit, SIGNAL(compileButtonClicked(QString)), this, SLOT(compileButtonClicked(QString)));
+*/
     connect(_widgets.addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
     connect(_widgets.delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
     connect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
@@ -132,7 +138,9 @@ Cell* TextEditor::getFocusedCell ()
 
 void TextEditor::computerCompilationReturn (bool error, int line)
 {
+/*
 	_widgets.cellComputerEdit->setCompilationState(error, line);
+*/
 }
 
 
@@ -151,11 +159,13 @@ void TextEditor::defocused (bool requestDataUpdate)
 			_widgets.tabClusterWidget->removeTab(0);
 		_widgets.tabClusterWidget->setVisible(false);
     }
+/*
     if(_widgets.tabComputerWidget->count() > 0 ) {
         while(_widgets.tabComputerWidget->count() > 0)
 			_widgets.tabComputerWidget->removeTab(0);
 		_widgets.tabComputerWidget->setVisible(false);
     }
+*/
     if(_widgets.tabTokenWidget->count() > 0 ) {
         disconnect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), 0, 0);  //token widgets will be generated dynamically
         while(_widgets.tabTokenWidget->count() > 0 ) {
@@ -633,20 +643,25 @@ void TextEditor::changesFromCellEditor (CellTO newCellProperties)
     _focusCellReduced.copyCellProperties(newCellProperties);
 
     //close tabs
+/*
     if(_widgets.tabComputerWidget->count() > 0 ) {
         while(_widgets.tabComputerWidget->count() > 0)
 			_widgets.tabComputerWidget->removeTab(0);
 		_widgets.tabComputerWidget->setVisible(false);
     }
+*/
 
     //update data for cell function: computer
     if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
+/*
 		_widgets.tabComputerWidget->setVisible(true);
 		_widgets.tabComputerWidget->insertTab(0, _tabComputer, "cell computer");
 		_widgets.tabComputerWidget->insertTab(1, _tabSymbolTable, "symbol table");
+*/
+/*
 		_widgets.cellComputerEdit->updateComputerMemory(_focusCellReduced.computerMemory);
 
         //load computer code from meta data if available
@@ -658,6 +673,7 @@ void TextEditor::changesFromCellEditor (CellTO newCellProperties)
         //otherwise use translated cell data
         else
 			_widgets.cellComputerEdit->updateComputerCode(_focusCellReduced.computerCode);
+*/
     }
 //    else
 //        _tabTokenWidget->move(10, tabPosY1);
@@ -786,7 +802,9 @@ void TextEditor::compileButtonClicked (QString code)
     //NOTE: widgets are updated via reclustered(...)
 
     //Q_EMIT signal to notify other instances
+/*
 	_widgets.cellComputerEdit->expectCellCompilerAnswer();
+*/
     invokeUpdateCell(false);
 }
 
@@ -805,10 +823,12 @@ void TextEditor::setTabSymbolsWidgetVisibility ()
 		_widgets.tabSymbolsWidget->setGeometry(tabPosX2, _widgets.tabClusterWidget->y(), _widgets.tabSymbolsWidget->width(), _widgets.tabSymbolsWidget->height());
 		_widgets.tabSymbolsWidget->setVisible(true);
     }
+/*
     else if(_widgets.tabComputerWidget->isVisible() ) {
 		_widgets.tabSymbolsWidget->setGeometry(tabPosX1, _widgets.tabClusterWidget->y(), _widgets.tabSymbolsWidget->width(), _widgets.tabSymbolsWidget->height());
 		_widgets.tabSymbolsWidget->setVisible(true);
     }
+*/
     else
 		_widgets.tabSymbolsWidget->setVisible(false);
 }

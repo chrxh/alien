@@ -1,19 +1,18 @@
-#ifndef CELLCOMPUTEREDIT_H
-#define CELLCOMPUTEREDIT_H
+#pragma once
 
 #include <QWidget>
 
 namespace Ui {
-class CellComputerEdit;
+class CellComputerEditWidget;
 }
 
-class CellComputerEdit : public QWidget
+class CellComputerEditWidget : public QWidget
 {
     Q_OBJECT
     
 public:
-    explicit CellComputerEdit(QWidget *parent = 0);
-    ~CellComputerEdit();
+    explicit CellComputerEditWidget(QWidget *parent = 0);
+    ~CellComputerEditWidget();
 
     void updateComputerMemory (QByteArray const& data);
     void updateComputerCode (QString code);
@@ -32,9 +31,7 @@ private Q_SLOTS:
 
     
 private:
-    Ui::CellComputerEdit *ui;
+    Ui::CellComputerEditWidget *ui;
     QTimer* _timer;
     bool _expectCellCompilerAnswer;
 };
-
-#endif // CELLCOMPUTEREDIT_H

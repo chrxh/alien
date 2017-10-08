@@ -1,4 +1,4 @@
-#include "ComputerCodeEdit.h"
+#include "CodeEditWidget.h"
 
 #include "gui/Settings.h"
 #include "gui/Settings.h"
@@ -7,29 +7,29 @@
 #include <QTextBlock>
 #include <QScrollBar>
 
-ComputerCodeEdit::ComputerCodeEdit(QWidget *parent)
+CodeEditWidget::CodeEditWidget(QWidget *parent)
     : QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
     verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
 }
 
-ComputerCodeEdit::~ComputerCodeEdit()
+CodeEditWidget::~CodeEditWidget()
 {
 
 }
 
-void ComputerCodeEdit::update (QString code)
+void CodeEditWidget::update (QString code)
 {
     displayData(code);
 }
 
-void ComputerCodeEdit::update ()
+void CodeEditWidget::update ()
 {
     QTextEdit::setText("");
 }
 
-QString ComputerCodeEdit::getCode ()
+QString CodeEditWidget::getCode ()
 {
     removeLineNumbers();
     QString code = QTextEdit::toPlainText();
@@ -37,14 +37,14 @@ QString ComputerCodeEdit::getCode ()
     return code;
 }
 
-void ComputerCodeEdit::keyPressEvent (QKeyEvent* e)
+void CodeEditWidget::keyPressEvent (QKeyEvent* e)
 {
     removeLineNumbers();
     QTextEdit::keyPressEvent(e);
     insertLineNumbers();
 }
 
-void ComputerCodeEdit::mousePressEvent(QMouseEvent* e)
+void CodeEditWidget::mousePressEvent(QMouseEvent* e)
 {
     QTextEdit::mousePressEvent(e);
     int pos(QTextEdit::textCursor().positionInBlock());
@@ -53,14 +53,14 @@ void ComputerCodeEdit::mousePressEvent(QMouseEvent* e)
             QTextEdit::moveCursor(QTextCursor::Right);
 }
 
-void ComputerCodeEdit::wheelEvent (QWheelEvent* e)
+void CodeEditWidget::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
 
-void ComputerCodeEdit::displayData (QString code)
+void CodeEditWidget::displayData (QString code)
 {
     //set colors
     QPalette p(QTextEdit::palette());
@@ -98,7 +98,7 @@ void ComputerCodeEdit::displayData (QString code)
     QTextEdit::setText(text);
 }
 
-void ComputerCodeEdit::insertLineNumbers ()
+void CodeEditWidget::insertLineNumbers ()
 {
     //define auxilliary strings
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
@@ -122,7 +122,7 @@ void ComputerCodeEdit::insertLineNumbers ()
     while(c.movePosition(QTextCursor::NextBlock));
 }
 
-void ComputerCodeEdit::removeLineNumbers ()
+void CodeEditWidget::removeLineNumbers ()
 {
     //remove line numbers
     QTextCursor c(QTextEdit::document());

@@ -1,14 +1,13 @@
-#ifndef COMPUTERCODEEDIT_H
-#define COMPUTERCODEEDIT_H
+#pragma once
 
 #include <QTextEdit>
 
-class ComputerCodeEdit : public QTextEdit
+class CodeEditWidget : public QTextEdit
 {
     Q_OBJECT
 public:
-    ComputerCodeEdit(QWidget *parent = 0);
-    ~ComputerCodeEdit();
+    CodeEditWidget(QWidget *parent = 0);
+    ~CodeEditWidget();
 
     void update (QString code);
     void update ();
@@ -24,5 +23,3 @@ private:
     void insertLineNumbers ();
     void removeLineNumbers ();
 };
-
-#endif // COMPUTERCODEEDIT_H
