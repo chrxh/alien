@@ -20,6 +20,7 @@ public:
 	void notificationFromCellEditWidget();
 	void notificationFromClusterEditWidget();
 	void notificationFromMetadataEditWidget();
+	void notificationFromCellComputerEditWidget();
 
 private:
 	Q_SLOT void onShow(bool visible);

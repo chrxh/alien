@@ -7,7 +7,7 @@
 #include "Model/Impl/EntityFactoryImpl.h"
 #include "Model/Impl/CellFeatureFactoryImpl.h"
 
-#include "modelservices.h"
+#include "ModelServices.h"
 
 ModelServices::ModelServices()
 {

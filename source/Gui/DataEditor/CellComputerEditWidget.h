@@ -2,6 +2,9 @@
 
 #include <QWidget>
 
+#include "Model/Api/Definitions.h"
+#include "Gui/Definitions.h"
+
 namespace Ui {
 class CellComputerEditWidget;
 }
@@ -11,27 +14,20 @@ class CellComputerEditWidget : public QWidget
     Q_OBJECT
     
 public:
-    explicit CellComputerEditWidget(QWidget *parent = 0);
-    ~CellComputerEditWidget();
+    CellComputerEditWidget(QWidget *parent = 0);
+    virtual ~CellComputerEditWidget();
 
-    void updateComputerMemory (QByteArray const& data);
-    void updateComputerCode (QString code);
-    QString getComputerCode ();
+	void init(DataEditorModel* model, DataEditorController* controller, CellComputerCompiler* compiler);
 
-    void setCompilationState (bool error, int line);
-    void expectCellCompilerAnswer ();
-
-Q_SIGNALS:
-    void changesFromComputerMemoryEditor (QByteArray data);
-    void compileButtonClicked (QString code);
-
-private Q_SLOTS:
-    void compileButtonClicked_Slot ();
-    void timerTimeout ();
-
-    
 private:
+    Q_SLOT void compileButtonClicked ();
+	Q_SLOT void timerTimeout ();
+    
+	void setCompilationState(bool error, int line);
+
     Ui::CellComputerEditWidget *ui;
-    QTimer* _timer;
-    bool _expectCellCompilerAnswer;
+	QTimer* _timer = nullptr;
+	DataEditorModel* _model = nullptr;
+	DataEditorController* _controller = nullptr;
+	CellComputerCompiler* _compiler = nullptr;
 };

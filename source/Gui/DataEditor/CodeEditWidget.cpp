@@ -1,11 +1,15 @@
-#include "CodeEditWidget.h"
-
-#include "gui/Settings.h"
-#include "gui/Settings.h"
-
 #include <QKeyEvent>
 #include <QTextBlock>
 #include <QScrollBar>
+
+#include "Model/Api/CellComputerCompiler.h"
+#include "Gui/Settings.h"
+#include "Gui/Settings.h"
+
+#include "DataEditorModel.h"
+#include "DataEditorController.h"
+#include "CodeEditWidget.h"
+
 
 CodeEditWidget::CodeEditWidget(QWidget *parent)
     : QTextEdit(parent)
@@ -14,27 +18,29 @@ CodeEditWidget::CodeEditWidget(QWidget *parent)
     verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
 }
 
-CodeEditWidget::~CodeEditWidget()
+void CodeEditWidget::init(DataEditorModel * model, DataEditorController * controller, CellComputerCompiler * compiler)
 {
-
+	_model = model;
+	_controller = controller;
+	_compiler = compiler;
 }
 
-void CodeEditWidget::update (QString code)
+void CodeEditWidget::updateDisplay()
 {
+	auto &cell = _model->getCellToEditRef();
+	auto code = cell.metadata->computerSourcecode;
+	if (code.isEmpty()) {
+		 code = QString::fromStdString(_compiler->decompileSourceCode(cell.cellFeature->data));
+	}
     displayData(code);
 }
 
-void CodeEditWidget::update ()
-{
-    QTextEdit::setText("");
-}
-
-QString CodeEditWidget::getCode ()
+std::string CodeEditWidget::getCode ()
 {
     removeLineNumbers();
     QString code = QTextEdit::toPlainText();
     insertLineNumbers();
-    return code;
+    return code.toStdString();
 }
 
 void CodeEditWidget::keyPressEvent (QKeyEvent* e)
