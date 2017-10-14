@@ -12,7 +12,7 @@ class ClusterEditWidget
 {
     Q_OBJECT
 public:
-    explicit ClusterEditWidget(QWidget *parent = 0);
+    ClusterEditWidget(QWidget *parent = 0);
 
 	void init(DataEditorModel* model, DataEditorController* controller);
     void updateDisplay ();

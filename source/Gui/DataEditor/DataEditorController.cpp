@@ -108,6 +108,10 @@ void DataEditorController::notificationFromMetadataEditWidget()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
+void DataEditorController::notificationFromCellComputerEditWidget()
+{
+}
+
 void DataEditorController::onShow(bool visible)
 {
 	_view->show(visible);
