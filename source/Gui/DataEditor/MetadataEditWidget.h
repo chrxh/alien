@@ -13,7 +13,7 @@ class MetadataEditWidget
     Q_OBJECT
 
 public:
-    explicit MetadataEditWidget(QWidget *parent = 0);
+    MetadataEditWidget(QWidget *parent = 0);
     virtual ~MetadataEditWidget();
 
 	void init(DataEditorModel* model, DataEditorController* controller);
