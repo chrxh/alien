@@ -62,6 +62,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel
 	_model = model;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
 	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + 270, _mainTabWidget->width(), _mainTabWidget->height());
+
 	_clusterEditTab->init(_model, controller);
 	_cellEditTab->init(_model, controller);
 	_metadataEditTab->init(_model, controller);
@@ -82,6 +83,7 @@ void DataEditorView::update() const
 		_cellEditTab->updateDisplay();
 		_metadataEditTab->updateDisplay();
 		_computerTabWidget->setVisible(true);
+		_computerEditTab->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithoutComputer) {

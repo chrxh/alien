@@ -59,6 +59,25 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 	return result;
 }
 
+void CellImpl::applyChangeDescription(CellChangeDescription const & change)
+{
+	if (change.energy) {
+		setEnergy(*change.energy);
+	}
+	if (change.maxConnections) {
+		setMaxConnections(*change.maxConnections);
+	}
+	if (change.tokenBlocked) {
+		setFlagTokenBlocked(*change.tokenBlocked);
+	}
+	if (change.tokenBranchNumber) {
+		setBranchNumber(*change.tokenBranchNumber);
+	}
+	if (change.metadata) {
+		setMetadata(*change.metadata);
+	}
+}
+
 void CellImpl::registerFeatures (CellFeatureChain* features)
 {
     _features = features;

@@ -44,22 +44,10 @@ void CellComputerEditWidget::init(DataEditorModel * model, DataEditorController 
 	ui->codeEditWidget->init(model, controller, compiler);
 }
 
-/*
-void CellComputerEditWidget::updateComputerMemory(QByteArray const& data)
+void CellComputerEditWidget::updateDisplay()
 {
-    ui->memoryEditor->update(data);
+	ui->codeEditWidget->updateDisplay();
 }
-
-void CellComputerEditWidget::updateComputerCode (QString code)
-{
-    ui->codeEditWidget->update(code);
-}
-
-QString CellComputerEditWidget::getComputerCode ()
-{
-    return ui->codeEditWidget->getCode();
-}
-*/
 
 void CellComputerEditWidget::setCompilationState (bool error, int line)
 {
@@ -87,6 +75,7 @@ void CellComputerEditWidget::compileButtonClicked ()
 	if (result.compilationOk) {
 		auto& cell = _model->getCellToEditRef();
 		cell.cellFeature->data = result.compilation;
+		cell.metadata->computerSourcecode = QString::fromStdString(code);
 	}
 	setCompilationState(!result.compilationOk, result.lineOfFirstError);
 	_controller->notificationFromCellComputerEditWidget();

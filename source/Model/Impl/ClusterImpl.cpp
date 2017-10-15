@@ -120,6 +120,19 @@ void ClusterImpl::applyChangeDescription(ClusterChangeDescription const & change
 	if (change.metadata) {
 		setMetadata(*change.metadata);
 	}
+	if (!change.cells.empty()) {
+		map<uint64_t, Cell*> cellsByIds;
+		for (auto const& cell : _cells) {
+			cellsByIds.insert_or_assign(cell->getId(), cell);
+		}
+		for (auto const& cellT : change.cells) {
+			if (cellT.isModified()) {
+				if (cellsByIds.find(cellT->id) != cellsByIds.end()) {
+					cellsByIds.at(cellT->id)->applyChangeDescription(cellT.getValue());
+				}
+			}
+		}
+	}
 }
 
 void ClusterImpl::clearCellFromMap (Cell* cell)
