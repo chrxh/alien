@@ -7,6 +7,7 @@
 #include "ui_CellComputerEditWidget.h"
 #include "CodeEditWidget.h"
 #include "DataEditorController.h"
+#include "DataEditorModel.h"
 #include "CellComputerEditWidget.h"
 
 CellComputerEditWidget::CellComputerEditWidget(QWidget *parent) :
@@ -79,18 +80,15 @@ void CellComputerEditWidget::setCompilationState (bool error, int line)
     _timer->start(2000);
 }
 
-/*
-void CellComputerEditWidget::expectCellCompilerAnswer ()
-{
-    _expectCellCompilerAnswer = true;
-}
-*/
-
 void CellComputerEditWidget::compileButtonClicked ()
 {
 	auto const& code = ui->codeEditWidget->getCode();
 	CompilationResult result = _compiler->compileSourceCode(code);
-	setCompilationState(result.compilationOk, result.lineOfFirstError);
+	if (result.compilationOk) {
+		auto& cell = _model->getCellToEditRef();
+		cell.cellFeature->data = result.compilation;
+	}
+	setCompilationState(!result.compilationOk, result.lineOfFirstError);
 	_controller->notificationFromCellComputerEditWidget();
 }
 

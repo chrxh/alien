@@ -64,7 +64,7 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	auto connector = facade->buildCellConnector(_simController->getContext());
 
 	_toolbar->init({ 10, 10 });
-	_dataEditor->init({ 10, 60 }, _dataManipulator);
+	_dataEditor->init({ 10, 60 }, _dataManipulator, simController->getContext());
 	_dataManipulator->init(access, connector);
 	ui->visualEditor->init(simController, _dataManipulator, access);
 

@@ -13,7 +13,6 @@ public:
 	virtual SimulationAccess* buildSimulationAccess(SimulationContext* contextApi) const override;
 
 	virtual CellConnector* buildCellConnector(SimulationContext* contextApi) const override;
-	virtual CellComputerCompiler* buildCellComputerCompiler(SimulationContext* context) const override;
 
 	virtual SymbolTable* buildDefaultSymbolTable() const override;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const override;

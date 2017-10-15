@@ -13,7 +13,7 @@ public:
 	DataEditorController(QWidget *parent = nullptr);
 	virtual ~DataEditorController() = default;
 
-	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator);
+	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator, SimulationContext* context);
 
 	DataEditorContext* getContext() const;
 
