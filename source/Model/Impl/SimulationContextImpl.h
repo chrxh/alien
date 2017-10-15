@@ -1,5 +1,4 @@
-#ifndef SIMULATIONCONTEXTIMPL_H
-#define SIMULATIONCONTEXTIMPL_H
+#pragma once
 
 #include "Model/Local/SimulationContextLocal.h"
 
@@ -12,7 +11,7 @@ public:
 	virtual ~SimulationContextImpl();
 
 	virtual void init(NumberGenerator* numberGen, SpaceMetricLocal* metric, UnitGrid* grid, UnitThreadController* threads
-		, SymbolTable * symbolTable, SimulationParameters* parameters) override;
+		, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler) override;
 
 	virtual SpaceMetric* getSpaceMetric() const;
 	virtual UnitGrid* getUnitGrid() const override;
@@ -20,6 +19,7 @@ public:
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
+	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
 private:
 	NumberGenerator* _numberGen = nullptr;
@@ -28,6 +28,6 @@ private:
 	UnitThreadController* _threads = nullptr;
 	SymbolTable* _symbolTable = nullptr;
 	SimulationParameters* _simulationParameters = nullptr;
+	CellComputerCompiler* _compiler = nullptr;
 };
 
-#endif // SIMULATIONCONTEXTIMPL_H

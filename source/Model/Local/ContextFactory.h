@@ -1,7 +1,7 @@
-#ifndef CONTEXTFACTORY_H
-#define CONTEXTFACTORY_H
+#pragma once
 
 #include "Model/Api/Definitions.h"
+#include "Definitions.h"
 
 class ContextFactory
 {
@@ -17,6 +17,5 @@ public:
 	virtual MapCompartment* buildMapCompartment() const = 0;
 	virtual CellMap* buildCellMap() const = 0;
 	virtual ParticleMap* buildEnergyParticleMap() const = 0;
+	virtual CellComputerCompilerLocal* buildCellComputerCompiler() const = 0;
 };
-
-#endif // CONTEXTFACTORY_H

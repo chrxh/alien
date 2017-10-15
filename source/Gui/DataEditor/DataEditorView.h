@@ -2,6 +2,7 @@
 
 #include <QWidget>
 
+#include "Model/Api/Definitions.h"
 #include "Gui/Definitions.h"
 
 class DataEditorView
@@ -12,7 +13,8 @@ public:
 	DataEditorView(QWidget * parent = nullptr);
 	virtual ~DataEditorView() = default;
 
-	void init(IntVector2D const& upperLeftPosition, DataEditorModel* model, DataEditorController* controller);
+	void init(IntVector2D const& upperLeftPosition, DataEditorModel* model, DataEditorController* controller
+		, CellComputerCompiler* compiler);
 
 	void switchToNoEditor();
 	void switchToCellEditorWithoutComputer();

@@ -7,6 +7,7 @@
 #include "SpaceMetricImpl.h"
 #include "CellMapImpl.h"
 #include "ParticleMapImpl.h"
+#include "CellComputerCompilerImpl.h"
 
 SimulationContextLocal * ContextFactoryImpl::buildSimulationContext() const
 {
@@ -51,4 +52,9 @@ CellMap * ContextFactoryImpl::buildCellMap() const
 ParticleMap * ContextFactoryImpl::buildEnergyParticleMap() const
 {
 	return new ParticleMapImpl();
+}
+
+CellComputerCompilerLocal* ContextFactoryImpl::buildCellComputerCompiler() const
+{
+	return new CellComputerCompilerImpl();
 }

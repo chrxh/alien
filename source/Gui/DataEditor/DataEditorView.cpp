@@ -57,7 +57,7 @@ DataEditorView::DataEditorView(QWidget * parent)
 	update();
 }
 
-void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel* model, DataEditorController* controller)
+void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel* model, DataEditorController* controller, CellComputerCompiler* compiler)
 {
 	_model = model;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
@@ -65,6 +65,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel
 	_clusterEditTab->init(_model, controller);
 	_cellEditTab->init(_model, controller);
 	_metadataEditTab->init(_model, controller);
+	_computerEditTab->init(_model, controller, compiler);
 }
 
 void DataEditorView::update() const
