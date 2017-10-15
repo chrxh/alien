@@ -377,12 +377,11 @@ CellFeatureChain::ProcessingResult CellComputerFunctionImpl::processImpl (Token*
 	auto parameters = _context->getSimulationParameters();
 	vector<bool> condTable(parameters->cellFunctionComputerMaxInstructions);
     int condPointer(0);
-    int bytePos = 0;
-    while( bytePos < _code.size() ) {
+	for (int instructionPointer = 0; instructionPointer + 2 < _code.size(); ) {
 
         //decode instruction
 		InstructionCoded instruction;
-        readInstruction(_code, bytePos, instruction);
+        readInstruction(_code, instructionPointer, instruction);
 
         //operand 1: pointer to mem
         quint8 opPointer1 = 0;
@@ -559,7 +558,7 @@ std::string CellComputerFunctionImpl::decompileSourceCode(QByteArray const & dat
 	QString text;
 	QString textOp1, textOp2;
 	int conditionLevel = 0;
-	for (int instructionPointer = 0; instructionPointer < data.size(); ) {
+	for (int instructionPointer = 0; instructionPointer + 2 < data.size(); ) {
 
 		//decode instruction data
 		InstructionCoded instruction;

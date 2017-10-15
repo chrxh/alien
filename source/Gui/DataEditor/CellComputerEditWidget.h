@@ -18,6 +18,7 @@ public:
     virtual ~CellComputerEditWidget();
 
 	void init(DataEditorModel* model, DataEditorController* controller, CellComputerCompiler* compiler);
+	void updateDisplay();
 
 private:
     Q_SLOT void compileButtonClicked ();
