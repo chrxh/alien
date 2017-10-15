@@ -44,6 +44,7 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	SimulationContextLocal* context = contextFactory->buildSimulationContext();
 
+	auto compiler = contextFactory->buildCellComputerCompiler();
 	auto threads = contextFactory->buildSimulationThreads();
 	auto grid = contextFactory->buildSimulationGrid();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
@@ -52,7 +53,8 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	threads->init(maxRunngingThreads);
 	grid->init(gridSize, metric);
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, 0);
-	context->init(numberGen, metric, grid, threads, symbolTable, parameters);
+	compiler->init(symbolTable, parameters);
+	context->init(numberGen, metric, grid, threads, symbolTable, parameters, compiler);
 
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
@@ -100,13 +102,6 @@ CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContext* co
 	auto context = static_cast<SimulationContextLocal*>(contextApi);
 	connector->init(context->getSpaceMetric(), context->getSimulationParameters(), context->getNumberGenerator());
 	return connector;
-}
-
-CellComputerCompiler * ModelBuilderFacadeImpl::buildCellComputerCompiler(SimulationContext* context) const
-{
-	auto compiler = new CellComputerCompilerImpl();
-	compiler->init(context->getSymbolTable(), context->getSimulationParameters());
-	return compiler;
 }
 
 Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextLocal* context) const

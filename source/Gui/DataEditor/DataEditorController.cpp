@@ -1,6 +1,7 @@
 #include <QMatrix4x4>
 
 #include "Model/Api/ChangeDescriptions.h"
+#include "Model/Api/SimulationContext.h"
 
 #include "Gui/DataManipulator.h"
 #include "DataEditorController.h"
@@ -15,10 +16,10 @@ DataEditorController::DataEditorController(QWidget *parent /*= nullptr*/)
 	_context = new DataEditorContext(this);
 }
 
-void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator)
+void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator, SimulationContext* context)
 {
 	_model = new DataEditorModel(this);
-	_view->init(upperLeftPosition, _model, this);
+	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
 	_manipulator = manipulator;
 
 	connect(_context, &DataEditorContext::show, this, &DataEditorController::onShow);
@@ -110,6 +111,10 @@ void DataEditorController::notificationFromMetadataEditWidget()
 
 void DataEditorController::notificationFromCellComputerEditWidget()
 {
+	auto& cluster = _model->getClusterToEditRef();
+	_manipulator->updateCluster(cluster);
+
+	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
 void DataEditorController::onShow(bool visible)

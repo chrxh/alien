@@ -15,7 +15,6 @@ public:
 	virtual SimulationAccess* buildSimulationAccess(SimulationContext* context) const = 0;
 
 	virtual CellConnector* buildCellConnector(SimulationContext* context) const = 0;
-	virtual CellComputerCompiler* buildCellComputerCompiler(SimulationContext* context) const = 0;
 
 	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
