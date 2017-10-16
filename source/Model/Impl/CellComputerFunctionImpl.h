@@ -26,6 +26,7 @@ public:
 
 protected:
 	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) override;
+	virtual void appendDescriptionImpl(CellFeatureDescription & desc) const override;
 
 private:
 	QByteArray _code;
