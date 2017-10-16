@@ -50,7 +50,7 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 	cell->setMetadata(cellDesc.metadata.get_value_or(CellMetadata()));
 
 	auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
-	featureFactory->addCellFunction(cell, cellFunction.type, cellFunction.data, context);
+	featureFactory->addCellFunction(cell, cellFunction.type, cellFunction.constData, context);
 	featureFactory->addEnergyGuidance(cell, context);
 	auto const& tokensDesc = cellDesc.tokens.get_value_or(vector<TokenDescription>());
 	for (auto const& tokenDesc : tokensDesc) {
