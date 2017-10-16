@@ -12,7 +12,7 @@
 void CellFunction::appendDescriptionImpl(CellFeatureDescription & desc) const
 {
 	desc.setType(getType());
-	desc.setData(getInternalData());
+	desc.setVolatileData(getInternalData());
 }
 
 qreal CellFunction::calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const

@@ -30,7 +30,7 @@ void CodeEditWidget::updateDisplay()
 	auto &cell = _model->getCellToEditRef();
 	auto code = cell.metadata->computerSourcecode;
 	if (code.isEmpty()) {
-		 code = QString::fromStdString(_compiler->decompileSourceCode(cell.cellFeature->data));
+		 code = QString::fromStdString(_compiler->decompileSourceCode(cell.cellFeature->constData));
 	}
     displayData(code);
 }

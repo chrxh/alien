@@ -131,6 +131,7 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 	auto const& selectedCellIds = _manipulator->getSelectedCellIds();
 	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
+
 		uint64_t selectedCellId = selectedCellIds.front();
 		_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
 		auto cell = _manipulator->getCellDescRef(selectedCellId);

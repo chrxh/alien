@@ -140,12 +140,12 @@ CellDescription ParticleImpl::getRandomCellDesciption(double energy) const
 	auto parameters = _context->getSimulationParameters();
 	int randomMaxConnections = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxBonds + 1);
 	int randomTokenAccessNumber = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxTokenBranchNumber);
-	QByteArray randomData(256, 0);
-	for (int i = 0; i < 256; ++i) {
+	QByteArray randomData(255, 0);
+	for (int i = 0; i < 255; ++i) {
 		randomData[i] = _context->getNumberGenerator()->getRandomInt(256);
 	}
 	Enums::CellFunction::Type randomCellFunction = static_cast<Enums::CellFunction::Type>(_context->getNumberGenerator()->getRandomInt(Enums::CellFunction::_COUNTER));
-	return CellDescription().setEnergy(energy).setCellFeature(CellFeatureDescription().setType(randomCellFunction).setData(randomData))
+	return CellDescription().setEnergy(energy).setCellFeature(CellFeatureDescription().setType(randomCellFunction).setConstData(randomData))
 		.setMaxConnections(randomMaxConnections).setTokenBranchNumber(randomTokenAccessNumber);
 }
 

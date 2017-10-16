@@ -377,7 +377,8 @@ CellFeatureChain::ProcessingResult CellComputerFunctionImpl::processImpl (Token*
 	auto parameters = _context->getSimulationParameters();
 	vector<bool> condTable(parameters->cellFunctionComputerMaxInstructions);
     int condPointer(0);
-	for (int instructionPointer = 0; instructionPointer + 2 < _code.size(); ) {
+	CHECK((_code.size() % 3) == 0);
+	for (int instructionPointer = 0; instructionPointer < _code.size(); ) {
 
         //decode instruction
 		InstructionCoded instruction;
@@ -493,6 +494,13 @@ CellFeatureChain::ProcessingResult CellComputerFunctionImpl::processImpl (Token*
     return processingResult;
 }
 
+void CellComputerFunctionImpl::appendDescriptionImpl(CellFeatureDescription & desc) const
+{
+	desc.setType(getType());
+	desc.setConstData(_code);
+	desc.setVolatileData(_memory);
+}
+
 void CellComputerFunctionImpl::serializePrimitives (QDataStream& stream) const
 {
     stream << _memory << _code;
@@ -558,7 +566,8 @@ std::string CellComputerFunctionImpl::decompileSourceCode(QByteArray const & dat
 	QString text;
 	QString textOp1, textOp2;
 	int conditionLevel = 0;
-	for (int instructionPointer = 0; instructionPointer + 2 < data.size(); ) {
+	CHECK((data.size() % 3) == 0);
+	for (int instructionPointer = 0; instructionPointer < data.size(); ) {
 
 		//decode instruction data
 		InstructionCoded instruction;

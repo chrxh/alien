@@ -6,13 +6,16 @@
 struct CellFeatureDescription
 {
 	Enums::CellFunction::Type type = Enums::CellFunction::COMPUTER;
-	QByteArray data;
+	QByteArray volatileData;
+	QByteArray constData;
 
 	CellFeatureDescription& setType(Enums::CellFunction::Type value) { type = value; return *this; }
-	CellFeatureDescription& setData(QByteArray const &value) { data = value; return *this; }
+	CellFeatureDescription& setVolatileData(QByteArray const &value) { volatileData = value; return *this; }
+	CellFeatureDescription& setConstData(QByteArray const &value) { constData = value; return *this; }
 	bool operator==(CellFeatureDescription const& other) const {
 		return type == other.type
-			&& data == other.data;
+			&& volatileData == other.volatileData
+			&& constData == other.constData;
 	}
 	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
 };

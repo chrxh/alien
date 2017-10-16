@@ -26,9 +26,8 @@ CellComputerEditWidget::CellComputerEditWidget(QWidget *parent) :
     ui->codeLabel->setPalette(p);
 
     //connections
-    connect(ui->memoryEditor, SIGNAL(dataChanged(QByteArray)), this, SIGNAL(changesFromComputerMemoryEditor(QByteArray)));
-    connect(ui->compileButton, SIGNAL(clicked()), this, SLOT(compileButtonClicked()));
-    connect(_timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
+    connect(ui->compileButton, &QToolButton::clicked, this, &CellComputerEditWidget::compileButtonClicked);
+	connect(_timer, &QTimer::timeout, this, &CellComputerEditWidget::timerTimeout);
 }
 
 CellComputerEditWidget::~CellComputerEditWidget()
@@ -74,7 +73,7 @@ void CellComputerEditWidget::compileButtonClicked ()
 	CompilationResult result = _compiler->compileSourceCode(code);
 	if (result.compilationOk) {
 		auto& cell = _model->getCellToEditRef();
-		cell.cellFeature->data = result.compilation;
+		cell.cellFeature->constData = result.compilation;
 		cell.metadata->computerSourcecode = QString::fromStdString(code);
 	}
 	setCompilationState(!result.compilationOk, result.lineOfFirstError);
