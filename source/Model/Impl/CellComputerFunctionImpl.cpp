@@ -21,7 +21,7 @@ CellComputerFunctionImpl::CellComputerFunctionImpl (QByteArray const& data, Unit
 	: CellComputerFunctionImpl(context)
 {
 	if (!data.isEmpty()) {
-		int numInstructions = data[0];
+		int numInstructions = static_cast<int>(static_cast<uint8_t>(data[0]));
 		int minSize = 3 * std::min(numInstructions, context->getSimulationParameters()->cellFunctionComputerMaxInstructions);
 		_code = data.mid(1, minSize);
 		if (_code.size() != minSize) {
