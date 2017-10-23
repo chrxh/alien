@@ -16,6 +16,7 @@ public:
 	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator, SimulationContext* context);
 
 	DataEditorContext* getContext() const;
+	SimulationParameters* getSimulationParameters() const;
 
 	void notificationFromCellEditWidget();
 	void notificationFromClusterEditWidget();
@@ -30,4 +31,5 @@ private:
 	DataEditorView* _view = nullptr;
 	DataManipulator* _manipulator = nullptr;
 	DataEditorContext* _context = nullptr;
+	SimulationParameters* _parameters = nullptr;
 };

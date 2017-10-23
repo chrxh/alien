@@ -25,9 +25,9 @@ CellComputerEditWidget::CellComputerEditWidget(QWidget *parent) :
     ui->memoryLabel->setPalette(p);
     ui->codeLabel->setPalette(p);
 
-    //connections
     connect(ui->compileButton, &QToolButton::clicked, this, &CellComputerEditWidget::compileButtonClicked);
 	connect(_timer, &QTimer::timeout, this, &CellComputerEditWidget::timerTimeout);
+	connect(ui->memoryEditWidget, &HexEditWidget::dataChanged, this, &CellComputerEditWidget::updateFromMemoryEditWidget);
 }
 
 CellComputerEditWidget::~CellComputerEditWidget()
@@ -46,6 +46,9 @@ void CellComputerEditWidget::init(DataEditorModel * model, DataEditorController 
 void CellComputerEditWidget::updateDisplay()
 {
 	ui->codeEditWidget->updateDisplay();
+	auto const &cell = _model->getCellToEditRef();
+	auto const &data = cell.cellFeature->volatileData;
+	ui->memoryEditWidget->updateDisplay(data);
 }
 
 void CellComputerEditWidget::setCompilationState (bool error, int line)
@@ -86,6 +89,13 @@ void CellComputerEditWidget::timerTimeout ()
     ui->compilationStateLabel->setPalette(p);
     ui->compilationStateLabel->setText("");
     _timer->stop();
+}
+
+void CellComputerEditWidget::updateFromMemoryEditWidget()
+{
+	auto &cell = _model->getCellToEditRef();
+	cell.cellFeature->volatileData = ui->memoryEditWidget->getData();
+	_controller->notificationFromCellComputerEditWidget();
 }
 
 
