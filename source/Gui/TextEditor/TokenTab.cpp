@@ -120,7 +120,7 @@ void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray c
             hex->setGeometry(0, 0, 100, 26+15*(v.size()-1));
             hex->setMaximumHeight(26+15*(v.size()-1));
             hex->setStyleSheet("border: 0px");
-            hex->update(tokenMemory.mid(tokenMemPointer, 1));
+            hex->updateDisplay(tokenMemory.mid(tokenMemPointer, 1));
             ui->tableWidget->setCellWidget(row, 2, hex);
             ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);
 
@@ -177,7 +177,7 @@ void TokenTab::update (SymbolTable* symbolTable, qreal tokenEnergy, QByteArray c
             hex->setMinimumHeight(26+13*size);
             hex->setGeometry(0, 0, 100, 26+13*size);
             hex->setStyleSheet("border: 0px");
-            hex->update(tokenMemory.mid(tokenMemPointer, kNew-k));
+            hex->updateDisplay(tokenMemory.mid(tokenMemPointer, kNew-k));
             ui->tableWidget->setCellWidget(row, 2, hex);
             ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);
 
@@ -207,7 +207,7 @@ void TokenTab::tokenMemoryChanged_Slot (int tokenMemPointer)
 {
     HexEditWidget* hex = _hexEditList[tokenMemPointer];
     if( hex ) {
-        QByteArray newData = hex->getDataRef();
+        QByteArray newData = hex->getData();
         for(int i = 0; i < newData.size(); ++i) {
             _tokenMemory[tokenMemPointer+i] = newData[i];
         }

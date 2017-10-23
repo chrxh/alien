@@ -3,8 +3,7 @@
 #include <QTextLayout>
 #include <qmath.h>
 
-#include "Model/Local/Cell.h"
-#include "Model/Local/Cluster.h"
+#include "Model/Api/SimulationParameters.h"
 #include "Gui/Settings.h"
 
 #include "CellEditWidget.h"
@@ -293,8 +292,12 @@ void CellEditWidget::mousePressEvent(QMouseEvent* e)
 
     //cursor at cell function?
     if( (row >= 7) && (col >= 18) && (col <= 36)) {
-        if( row == 7 )
-            cell.cellFeature->type = Enums::CellFunction::COMPUTER;
+		if (row == 7) {
+			cell.cellFeature->type = Enums::CellFunction::COMPUTER;
+			auto parameters = _controller->getSimulationParameters();
+			int memorySize = parameters->cellFunctionComputerCellMemorySize;
+			cell.cellFeature->setVolatileData(QByteArray(memorySize, 0));
+		}
         if( row == 8 )
 			cell.cellFeature->type = Enums::CellFunction::PROPULSION;
         if( row == 9 )

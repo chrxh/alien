@@ -1,10 +1,11 @@
-#include "HexEditWidget.h"
-
-#include"gui/Settings.h"
-
 #include <QTextDocument>
 #include <QTextBlock>
 #include <QKeyEvent>
+
+#include "Gui/Settings.h"
+
+#include "HexEditWidget.h"
+
 
 HexEditWidget::HexEditWidget(QWidget *parent) :
     QTextEdit(parent)
@@ -13,25 +14,9 @@ HexEditWidget::HexEditWidget(QWidget *parent) :
     QTextEdit::setCursorWidth(6);
 }
 
-HexEditWidget::~HexEditWidget ()
+QByteArray const & HexEditWidget::getData() const
 {
-
-}
-
-void HexEditWidget::update ()
-{
-    QTextEdit::setText("");
-}
-
-void HexEditWidget::update (QByteArray const& data)
-{
-    _data = data;
-    displayData();
-}
-
-QByteArray const& HexEditWidget::getDataRef ()
-{
-    return _data;
+	return _data;
 }
 
 QByteArray HexEditWidget::convertHexStringToByteArray(QString hexCode)
@@ -48,9 +33,7 @@ QByteArray HexEditWidget::convertHexStringToByteArray(QString hexCode)
 
 void HexEditWidget::keyPressEvent (QKeyEvent* e)
 {
-//    QTextEdit::keyPressEvent(e);
-
-    //read valid keys
+	//read valid keys
     QString k;
     if( (e->key() == Qt::Key_0) )
         k = "0";
@@ -99,10 +82,10 @@ void HexEditWidget::keyPressEvent (QKeyEvent* e)
         QTextEdit::textCursor().insertHtml(s1+k+"</span>");
 
         //read and Q_EMIT data
-        QString data = QTextEdit::document()->findBlockByLineNumber(0).text();
-        data.remove(" ");
-        _data = convertHexStringToByteArray(data);
-        Q_EMIT dataChanged(_data);
+        QString docData = QTextEdit::document()->findBlockByLineNumber(0).text();
+		docData.remove(" ");
+        _data = convertHexStringToByteArray(docData);
+		Q_EMIT dataChanged();
     }
 
     //arrow keys pressed?
@@ -162,9 +145,7 @@ void HexEditWidget::keyPressEvent (QKeyEvent* e)
 
 void HexEditWidget::mousePressEvent(QMouseEvent* e)
 {
-    QTextEdit::mousePressEvent(e);
-//    if( QTextEdit::textCursor().blockNumber() == 0 )
-//        QTextEdit::moveCursor(QTextCursor::Down);
+	QTextEdit::mousePressEvent(e);
 
     //skip the empty space
     int pos(QTextEdit::textCursor().positionInBlock());
@@ -196,9 +177,10 @@ void HexEditWidget::wheelEvent (QWheelEvent* e)
     QTextEdit::clearFocus();
 }
 
-void HexEditWidget::displayData ()
+void HexEditWidget::updateDisplay (QByteArray const& data)
 {
-    int col = QTextEdit::textCursor().columnNumber();
+	_data = data;
+	int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
 
     //define auxilliary strings

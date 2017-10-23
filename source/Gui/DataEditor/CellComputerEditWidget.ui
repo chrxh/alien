@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>CellComputerEditWidget</class>
- <widget class="QWidget" name="cellComputerEditWidget">
+ <widget class="QWidget" name="CellComputerEditWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -225,7 +225,7 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
-    <widget class="HexEditWidget" name="memoryEditor">
+    <widget class="HexEditWidget" name="memoryEditWidget">
      <property name="enabled">
       <bool>true</bool>
      </property>
