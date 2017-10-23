@@ -23,6 +23,7 @@ public:
 private:
     Q_SLOT void compileButtonClicked ();
 	Q_SLOT void timerTimeout ();
+	Q_SLOT void updateFromMemoryEditWidget();
     
 	void setCompilationState(bool error, int line);
 

@@ -14,7 +14,7 @@ public:
 
     //new interface
     virtual Enums::CellFunction::Type getType () const = 0;
-	virtual QByteArray getInternalData() const { return QByteArray(); }
+	virtual QByteArray getInternalData() const;
 
 protected:
 	virtual void appendDescriptionImpl(CellFeatureDescription & desc) const override;

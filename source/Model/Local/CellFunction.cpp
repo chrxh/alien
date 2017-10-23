@@ -1,6 +1,8 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
+#include "Model/Api/SimulationContext.h"
+#include "Model/Api/SimulationParameters.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Physics.h"
 #include "Model/Local/UnitContext.h"
@@ -8,6 +10,11 @@
 
 #include "CellFunction.h"
 
+QByteArray CellFunction::getInternalData() const
+{
+	int memorySize = _context->getSimulationParameters()->cellFunctionComputerCellMemorySize;
+	return QByteArray(memorySize, 0);
+}
 
 void CellFunction::appendDescriptionImpl(CellFeatureDescription & desc) const
 {

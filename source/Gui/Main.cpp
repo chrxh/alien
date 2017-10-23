@@ -36,6 +36,7 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
+//- CellComputer-Memory in die Simulation übertragen
 //- _simAccess->retrieveData() liefert Cluster ohne Zellen
 //- Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 //- Optimierung: CellMapImpl::locateCell und CellMapImpl::removeCellIfPresent

@@ -21,6 +21,7 @@ void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManip
 	_model = new DataEditorModel(this);
 	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
 	_manipulator = manipulator;
+	_parameters = context->getSimulationParameters();
 
 	connect(_context, &DataEditorContext::show, this, &DataEditorController::onShow);
 	connect(_manipulator, &DataManipulator::notify, this, &DataEditorController::notificationFromManipulator);
@@ -31,6 +32,11 @@ void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManip
 DataEditorContext * DataEditorController::getContext() const
 {
 	return _context;
+}
+
+SimulationParameters * DataEditorController::getSimulationParameters() const
+{
+	return _parameters;
 }
 
 namespace
