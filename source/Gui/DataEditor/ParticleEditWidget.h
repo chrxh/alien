@@ -7,16 +7,15 @@
 #include "Model/Api/Descriptions.h"
 #include "Gui/Definitions.h"
 
-class CellEditWidget
-	: public QTextEdit
+class ParticleEditWidget : public QTextEdit
 {
     Q_OBJECT
 public:
-    CellEditWidget(QWidget *parent = nullptr);
-	virtual ~CellEditWidget() = default;
+    ParticleEditWidget(QWidget *parent = nullptr);
+	virtual ~ParticleEditWidget() = default;
 
 	void init(DataEditorModel* model, DataEditorController* controller);
-    void updateDisplay ();
+    void updateDisplay();
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -25,14 +24,12 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
-    void updateModelAndNotifyController ();
+	void updateModelAndNotifyController();
 
-    qreal generateNumberFromFormattedString (QString s);
+	qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
-    QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
 	DataEditorModel* _model = nullptr;
 	DataEditorController* _controller = nullptr;
 };
-

@@ -20,6 +20,7 @@ public:
 
 	void notificationFromCellEditWidget();
 	void notificationFromClusterEditWidget();
+	void notificationFromParticleEditWidget();
 	void notificationFromMetadataEditWidget();
 	void notificationFromCellComputerEditWidget();
 

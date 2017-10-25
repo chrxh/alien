@@ -1,50 +1,21 @@
-#include "EnergyEdit.h"
-
-#include "gui/Settings.h"
-#include "Model/Local/Cell.h"
-#include "Model/Local/Cluster.h"
-
 #include <QKeyEvent>
 #include <QTextBlock>
 #include <QTextLayout>
 #include <qmath.h>
 
-EnergyEdit::EnergyEdit(QWidget *parent) :
+#include "Gui/Settings.h"
+
+#include "ParticleEditWidget.h"
+#include "DataEditorModel.h"
+#include "DataEditorController.h"
+
+ParticleEditWidget::ParticleEditWidget(QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void EnergyEdit::updateEnergyParticle (QVector2D pos, QVector2D vel, qreal energy)
-{
-    _energyParticlePos = pos;
-    _energyParticleVel = vel;
-    _energyParticleValue = energy;
-    updateDisplay();
-}
-
-void EnergyEdit::requestUpdate ()
-{
-    int row = QTextEdit::textCursor().blockNumber();
-    QString currentText = QTextEdit::textCursor().block().text();
-
-    if( row == 0 )
-        _energyParticlePos.setX(generateNumberFromFormattedString(currentText));
-    if( row == 1 )
-        _energyParticlePos.setY(generateNumberFromFormattedString(currentText));
-    if( row == 2 )
-        _energyParticleVel.setX(generateNumberFromFormattedString(currentText));
-    if( row == 3 )
-        _energyParticleVel.setY(generateNumberFromFormattedString(currentText));
-    if( row == 4 )
-        _energyParticleValue = generateNumberFromFormattedString(currentText);
-    updateDisplay();
-
-    //inform other instances
-    Q_EMIT energyParticleDataChanged(_energyParticlePos, _energyParticleVel, _energyParticleValue);
-}
-
-void EnergyEdit::keyPressEvent (QKeyEvent* e)
+void ParticleEditWidget::keyPressEvent (QKeyEvent* e)
 {
     //auxilliary data
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
@@ -56,7 +27,7 @@ void EnergyEdit::keyPressEvent (QKeyEvent* e)
 
     //request update?
     if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
-        requestUpdate();
+        updateModelAndNotifyController();
 
     //typing number?
     QString k;
@@ -204,24 +175,11 @@ void EnergyEdit::keyPressEvent (QKeyEvent* e)
 
     //update data?
     if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) {
-        if( row == 0 )
-            _energyParticlePos.setX(generateNumberFromFormattedString(currentText));
-        if( row == 1 )
-            _energyParticlePos.setY(generateNumberFromFormattedString(currentText));
-        if( row == 2 )
-            _energyParticleVel.setX(generateNumberFromFormattedString(currentText));
-        if( row == 3 )
-            _energyParticleVel.setY(generateNumberFromFormattedString(currentText));
-        if( row == 4 )
-            _energyParticleValue = generateNumberFromFormattedString(currentText);
-        updateDisplay();
-
-        //inform other instances
-        Q_EMIT energyParticleDataChanged(_energyParticlePos, _energyParticleVel, _energyParticleValue);
-    }
+    	updateModelAndNotifyController();
+	}
 }
 
-void EnergyEdit::mousePressEvent(QMouseEvent* e)
+void ParticleEditWidget::mousePressEvent(QMouseEvent* e)
 {
     QTextEdit::mousePressEvent(e);
     int col = QTextEdit::textCursor().columnNumber();
@@ -236,23 +194,29 @@ void EnergyEdit::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void EnergyEdit::mouseDoubleClickEvent (QMouseEvent* e)
+void ParticleEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
 {
     QTextEdit::clearFocus();
 }
 
-void EnergyEdit::wheelEvent (QWheelEvent* e)
+void ParticleEditWidget::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
-void EnergyEdit::updateDisplay ()
+void ParticleEditWidget::init(DataEditorModel * model, DataEditorController * controller)
+{
+	_model = model;
+	_controller = controller;
+}
+
+void ParticleEditWidget::updateDisplay ()
 {
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
 
-    //define auxilliary strings
+    //define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
     QString colorTextStart = "<span style=\"color:"+CELL_EDIT_TEXT_COLOR1.name()+"\">";
@@ -265,16 +229,17 @@ void EnergyEdit::updateDisplay ()
     QTextEdit::setPalette(p);
 
     //create string of display
-    text = parStart+colorTextStart+ "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_energyParticlePos.x())+parEnd;
+	auto &particle = _model->getParticleToEditRef();
+	text = parStart + colorTextStart + "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + colorEnd;
+    text += generateFormattedRealString(particle.pos->x())+parEnd;
     text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_energyParticlePos.y())+parEnd;
+    text += generateFormattedRealString(particle.pos->y())+parEnd;
     text += parStart+colorTextStart+ "velocity x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_energyParticleVel.x())+parEnd;
+    text += generateFormattedRealString(particle.vel->x())+parEnd;
     text += parStart+colorTextStart+ "velocity y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_energyParticleVel.y())+parEnd;
+    text += generateFormattedRealString(particle.vel->y())+parEnd;
     text += parStart+colorTextStart+ "energy value: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(_energyParticleValue)+parEnd;
+    text += generateFormattedRealString(*particle.energy)+parEnd;
     QTextEdit::setText(text);
 
     //restore cursor
@@ -284,7 +249,26 @@ void EnergyEdit::updateDisplay ()
         QTextEdit::moveCursor(QTextCursor::Right);
 }
 
-qreal EnergyEdit::generateNumberFromFormattedString (QString s)
+void ParticleEditWidget::updateModelAndNotifyController()
+{
+	int row = QTextEdit::textCursor().blockNumber();
+	QString currentText = QTextEdit::textCursor().block().text();
+
+	auto &particle = _model->getParticleToEditRef();
+	if (row == 0)
+		particle.pos->setX(generateNumberFromFormattedString(currentText));
+	if (row == 1)
+		particle.pos->setY(generateNumberFromFormattedString(currentText));
+	if (row == 2)
+		particle.vel->setX(generateNumberFromFormattedString(currentText));
+	if (row == 3)
+		particle.vel->setY(generateNumberFromFormattedString(currentText));
+	if (row == 4)
+		particle.energy = generateNumberFromFormattedString(currentText);
+	_controller->notificationFromParticleEditWidget();
+}
+
+qreal ParticleEditWidget::generateNumberFromFormattedString (QString s)
 {
     int i = s.indexOf(':');
     if( i >= 0 ) {
@@ -299,7 +283,7 @@ qreal EnergyEdit::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString EnergyEdit::generateFormattedRealString (QString s)
+QString ParticleEditWidget::generateFormattedRealString (QString s)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
@@ -315,7 +299,7 @@ QString EnergyEdit::generateFormattedRealString (QString s)
     return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
 }
 
-QString EnergyEdit::generateFormattedRealString (qreal r)
+QString ParticleEditWidget::generateFormattedRealString (qreal r)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
