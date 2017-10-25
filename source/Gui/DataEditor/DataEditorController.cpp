@@ -107,6 +107,10 @@ void DataEditorController::notificationFromClusterEditWidget()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
+void DataEditorController::notificationFromParticleEditWidget()
+{
+}
+
 void DataEditorController::notificationFromMetadataEditWidget()
 {
 	auto& cluster = _model->getClusterToEditRef();
@@ -147,6 +151,9 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 		else {
 			_view->switchToCellEditorWithoutComputer();
 		}
+	}
+	if (selectedCellIds.empty() && selectedParticleIds.size() == 1) {
+		_view->switchToParticleEditor();
 	}
 	if (selectedCellIds.size() + selectedParticleIds.size() > 1) {
 		_view->switchToNoEditor();

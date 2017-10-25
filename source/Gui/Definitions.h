@@ -35,6 +35,7 @@ class ClusterEditWidget;
 class CellEditWidget;
 class MetadataEditWidget;
 class CellComputerEditWidget;
+class ParticleEditWidget;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 

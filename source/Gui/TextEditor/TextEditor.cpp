@@ -19,7 +19,6 @@
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 #include "TokenTab.h"
-#include "EnergyEdit.h"
 #include "HexEditWidget.h"
 #include "SymbolEdit.h"
 #include "CellComputerEditWidget.h"
@@ -82,9 +81,7 @@ void TextEditor::init (TextEditorWidgets widgets)
 	_widgets.tabSymbolsWidget->parent()->installEventFilter(this);
 
     //establish connections
-    connect(_widgets.cellEditor, SIGNAL(cellDataChanged(CellTO)), this, SLOT(changesFromCellEditor(CellTO)));
     connect(_widgets.clusterEditor, SIGNAL(clusterDataChanged(CellTO)), this, SLOT(changesFromClusterEditor(CellTO)));
-    connect(_widgets.energyEditor, SIGNAL(energyParticleDataChanged(QVector2D,QVector2D,qreal)), this, SLOT(changesFromEnergyParticleEditor(QVector2D,QVector2D,qreal)));
     connect(_widgets.requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
     connect(_widgets.requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
     connect(_widgets.delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
