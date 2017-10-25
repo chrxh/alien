@@ -34,6 +34,13 @@ CellDescription & DataEditorModel::getCellToEditRef()
 	return _data.clusters->at(clusterIndex).cells->at(cellIndex);
 }
 
+ParticleDescription & DataEditorModel::getParticleToEditRef()
+{
+	uint64_t selectedParticleId = *_selectedParticleIds.begin();
+	int particleIndex = _navi.particleIndicesByParticleIds.at(selectedParticleId);
+	return _data.particles->at(particleIndex);
+}
+
 ClusterDescription & DataEditorModel::getClusterToEditRef()
 {
 	uint64_t selectedCellId = *_selectedCellIds.begin();

@@ -14,7 +14,7 @@ class TextEditor;
 class CellEditWidget;
 class ClusterEditWidget;
 class CellComputerEditWidget;
-class EnergyEdit;
+class ParticleEditWidget;
 class MetadataEditWidget;
 class SymbolEdit;
 class QTextEdit;
@@ -37,7 +37,6 @@ public:
 		QTabWidget* tabSymbolsWidget;
 		CellEditWidget* cellEditor;
 		ClusterEditWidget* clusterEditor;
-		EnergyEdit* energyEditor;
 		MetadataEditWidget* metadataEditor;
 		SymbolEdit* symbolEdit;
 		QTextEdit* selectionEditor;

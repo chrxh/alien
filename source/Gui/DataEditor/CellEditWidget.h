@@ -12,7 +12,7 @@ class CellEditWidget
 {
     Q_OBJECT
 public:
-    CellEditWidget(QWidget *parent = 0);
+    CellEditWidget(QWidget *parent = nullptr);
 	virtual ~CellEditWidget() = default;
 
 	void init(DataEditorModel* model, DataEditorController* controller);

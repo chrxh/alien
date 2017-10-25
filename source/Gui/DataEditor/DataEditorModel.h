@@ -17,6 +17,7 @@ public:
 	DataChangeDescription getAndsUpdateChanges();
 
 	CellDescription& getCellToEditRef();
+	ParticleDescription& getParticleToEditRef();
 	ClusterDescription& getClusterToEditRef();
 
 private:
