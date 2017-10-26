@@ -30,7 +30,7 @@ ClusterDescription & DataManipulator::getClusterDescRef(uint64_t cellId)
 	return _data.clusters->at(clusterIndex);
 }
 
-ParticleDescription & DataManipulator::getParticleDescRef(uint64_t particleId)
+ParticleDescription& DataManipulator::getParticleDescRef(uint64_t particleId)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles->at(particleIndex);

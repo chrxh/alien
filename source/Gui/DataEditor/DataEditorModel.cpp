@@ -19,6 +19,17 @@ void DataEditorModel::editClusterAndCell(ClusterDescription const & cluster, uin
 	_navi.update(_data);
 }
 
+void DataEditorModel::editParticle(ParticleDescription const & particle)
+{
+	_data.clear();
+	_data.addParticle(particle);
+	_unchangedData = _data;
+
+	_selectedCellIds.clear();
+	_selectedParticleIds = { particle.id };
+	_navi.update(_data);
+}
+
 DataChangeDescription DataEditorModel::getAndsUpdateChanges()
 {
 	DataChangeDescription result(_unchangedData, _data);

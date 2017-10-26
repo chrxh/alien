@@ -153,6 +153,8 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 		}
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.size() == 1) {
+		uint64_t selectedParticleId = selectedParticleIds.front();
+		_model->editParticle(_manipulator->getParticleDescRef(selectedParticleId));
 		_view->switchToParticleEditor();
 	}
 	if (selectedCellIds.size() + selectedParticleIds.size() > 1) {

@@ -14,6 +14,7 @@ public:
 	virtual ~DataEditorModel() = default;
 
 	void editClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
+	void editParticle(ParticleDescription const& particle);
 	DataChangeDescription getAndsUpdateChanges();
 
 	CellDescription& getCellToEditRef();

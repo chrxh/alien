@@ -17,6 +17,7 @@ public:
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
 	virtual ClusterDescription& getClusterDescRef(uint64_t clusterId);
+	virtual ParticleDescription& getParticleDescRef(uint64_t particleId);
 
 	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);
 	virtual void moveSelection(QVector2D const &delta);
@@ -42,7 +43,6 @@ private:
 
 	void updateAfterCellReconnections();
 	void updateInternals(DataDescription const &data);
-	ParticleDescription & getParticleDescRef(uint64_t particleId);
 	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);
 
