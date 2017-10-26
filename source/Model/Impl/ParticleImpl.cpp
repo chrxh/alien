@@ -29,7 +29,7 @@ ParticleImpl::ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D v
 ParticleDescription ParticleImpl::getDescription() const
 {
 	ParticleDescription result;
-	result.setId(_id).setPos(_pos).setEnergy(_energy);
+	result.setId(_id).setPos(_pos).setVel(_vel).setEnergy(_energy);
 	return result;
 }
 
