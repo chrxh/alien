@@ -109,6 +109,10 @@ void DataEditorController::notificationFromClusterEditWidget()
 
 void DataEditorController::notificationFromParticleEditWidget()
 {
+	auto& particle = _model->getParticleToEditRef();
+	_manipulator->updateParticle(particle);
+
+	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
 void DataEditorController::notificationFromMetadataEditWidget()
