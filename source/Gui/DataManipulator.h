@@ -30,8 +30,8 @@ public:
 	virtual bool isInSelection(uint64_t id) const; //id can mean cell or particle id
 	virtual bool isInExtendedSelection(uint64_t id) const;
 	virtual bool areEntitiesSelected() const;
-	virtual list<uint64_t> getSelectedCellIds() const;
-	virtual list<uint64_t> getSelectedParticleIds() const;
+	virtual set<uint64_t> getSelectedCellIds() const;
+	virtual set<uint64_t> getSelectedParticleIds() const;
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect) const;
 
