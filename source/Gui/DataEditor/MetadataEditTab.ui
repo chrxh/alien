@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MetadataEditWidget</class>
- <widget class="QWidget" name="metadataEditWidget">
+ <class>MetadataEditTab</class>
+ <widget class="QWidget" name="MetadataEditTab">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -6,16 +6,16 @@
 #include "Gui/Definitions.h"
 
 namespace Ui {
-class CellComputerEditWidget;
+class CellComputerEditTab;
 }
 
-class CellComputerEditWidget : public QWidget
+class CellComputerEditTab : public QWidget
 {
     Q_OBJECT
     
 public:
-    CellComputerEditWidget(QWidget *parent = 0);
-    virtual ~CellComputerEditWidget();
+    CellComputerEditTab(QWidget *parent = 0);
+    virtual ~CellComputerEditTab();
 
 	void init(DataEditorModel* model, DataEditorController* controller, CellComputerCompiler* compiler);
 	void updateDisplay();
@@ -27,7 +27,7 @@ private:
     
 	void setCompilationState(bool error, int line);
 
-    Ui::CellComputerEditWidget *ui;
+    Ui::CellComputerEditTab *ui;
 	QTimer* _timer = nullptr;
 	DataEditorModel* _model = nullptr;
 	DataEditorController* _controller = nullptr;

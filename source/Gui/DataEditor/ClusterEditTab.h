@@ -3,19 +3,19 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "Model/Api/Definitions.h"
 #include "Model/Api/Descriptions.h"
+#include "Model/Api/Definitions.h"
 #include "Gui/Definitions.h"
 
-class ParticleEditWidget : public QTextEdit
+class ClusterEditTab
+	: public QTextEdit
 {
     Q_OBJECT
 public:
-    ParticleEditWidget(QWidget *parent = nullptr);
-	virtual ~ParticleEditWidget() = default;
+    ClusterEditTab(QWidget *parent = 0);
 
 	void init(DataEditorModel* model, DataEditorController* controller);
-    void updateDisplay();
+    void updateDisplay ();
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -24,9 +24,9 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
-	void updateModelAndNotifyController();
+	void requestUpdate();
 
-	qreal generateNumberFromFormattedString (QString s);
+    qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 

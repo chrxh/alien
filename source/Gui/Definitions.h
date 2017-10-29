@@ -31,11 +31,11 @@ class ToolbarView;
 class DataEditorModel;
 class DataEditorView;
 class DataManipulator;
-class ClusterEditWidget;
-class CellEditWidget;
-class MetadataEditWidget;
-class CellComputerEditWidget;
-class ParticleEditWidget;
+class ClusterEditTab;
+class CellEditTab;
+class MetadataEditTab;
+class CellComputerEditTab;
+class ParticleEditTab;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 

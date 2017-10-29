@@ -11,11 +11,11 @@ namespace Ui {
 class TextEditor;
 }
 
-class CellEditWidget;
-class ClusterEditWidget;
-class CellComputerEditWidget;
-class ParticleEditWidget;
-class MetadataEditWidget;
+class CellEditTab;
+class ClusterEditTab;
+class CellComputerEditTab;
+class ParticleEditTab;
+class MetadataEditTab;
 class SymbolEdit;
 class QTextEdit;
 class QLabel;
@@ -35,9 +35,6 @@ public:
 		QTabWidget* tabClusterWidget;
 		QTabWidget* tabTokenWidget;
 		QTabWidget* tabSymbolsWidget;
-		CellEditWidget* cellEditor;
-		ClusterEditWidget* clusterEditor;
-		MetadataEditWidget* metadataEditor;
 		SymbolEdit* symbolEdit;
 		QTextEdit* selectionEditor;
 		QToolButton* requestCellButton;

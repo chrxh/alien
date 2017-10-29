@@ -4,15 +4,15 @@
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 
-#include "ui_CellComputerEditWidget.h"
+#include "ui_CellComputerEditTab.h"
 #include "CodeEditWidget.h"
 #include "DataEditorController.h"
 #include "DataEditorModel.h"
-#include "CellComputerEditWidget.h"
+#include "CellComputerEditTab.h"
 
-CellComputerEditWidget::CellComputerEditWidget(QWidget *parent) :
+CellComputerEditTab::CellComputerEditTab(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::CellComputerEditWidget),
+    ui(new Ui::CellComputerEditTab),
     _timer(new QTimer(this))
 {
     ui->setupUi(this);
@@ -25,17 +25,17 @@ CellComputerEditWidget::CellComputerEditWidget(QWidget *parent) :
     ui->memoryLabel->setPalette(p);
     ui->codeLabel->setPalette(p);
 
-    connect(ui->compileButton, &QToolButton::clicked, this, &CellComputerEditWidget::compileButtonClicked);
-	connect(_timer, &QTimer::timeout, this, &CellComputerEditWidget::timerTimeout);
-	connect(ui->memoryEditWidget, &HexEditWidget::dataChanged, this, &CellComputerEditWidget::updateFromMemoryEditWidget);
+    connect(ui->compileButton, &QToolButton::clicked, this, &CellComputerEditTab::compileButtonClicked);
+	connect(_timer, &QTimer::timeout, this, &CellComputerEditTab::timerTimeout);
+	connect(ui->memoryEditWidget, &HexEditWidget::dataChanged, this, &CellComputerEditTab::updateFromMemoryEditWidget);
 }
 
-CellComputerEditWidget::~CellComputerEditWidget()
+CellComputerEditTab::~CellComputerEditTab()
 {
     delete ui;
 }
 
-void CellComputerEditWidget::init(DataEditorModel * model, DataEditorController * controller, CellComputerCompiler * compiler)
+void CellComputerEditTab::init(DataEditorModel * model, DataEditorController * controller, CellComputerCompiler * compiler)
 {
 	_model = model;
 	_controller = controller;
@@ -43,7 +43,7 @@ void CellComputerEditWidget::init(DataEditorModel * model, DataEditorController 
 	ui->codeEditWidget->init(model, controller, compiler);
 }
 
-void CellComputerEditWidget::updateDisplay()
+void CellComputerEditTab::updateDisplay()
 {
 	ui->codeEditWidget->updateDisplay();
 	auto const &cell = _model->getCellToEditRef();
@@ -51,7 +51,7 @@ void CellComputerEditWidget::updateDisplay()
 	ui->memoryEditWidget->updateDisplay(data);
 }
 
-void CellComputerEditWidget::setCompilationState (bool error, int line)
+void CellComputerEditTab::setCompilationState (bool error, int line)
 {
     if( error ) {
         QPalette p = ui->compilationStateLabel->palette();
@@ -70,7 +70,7 @@ void CellComputerEditWidget::setCompilationState (bool error, int line)
     _timer->start(2000);
 }
 
-void CellComputerEditWidget::compileButtonClicked ()
+void CellComputerEditTab::compileButtonClicked ()
 {
 	auto const& code = ui->codeEditWidget->getCode();
 	CompilationResult result = _compiler->compileSourceCode(code);
@@ -83,7 +83,7 @@ void CellComputerEditWidget::compileButtonClicked ()
 	_controller->notificationFromCellComputerEditWidget();
 }
 
-void CellComputerEditWidget::timerTimeout ()
+void CellComputerEditTab::timerTimeout ()
 {
     QPalette p = ui->codeEditWidget->palette();
     ui->compilationStateLabel->setPalette(p);
@@ -91,7 +91,7 @@ void CellComputerEditWidget::timerTimeout ()
     _timer->stop();
 }
 
-void CellComputerEditWidget::updateFromMemoryEditWidget()
+void CellComputerEditTab::updateFromMemoryEditWidget()
 {
 	auto &cell = _model->getCellToEditRef();
 	cell.cellFeature->volatileData = ui->memoryEditWidget->getData();
