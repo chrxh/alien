@@ -183,6 +183,14 @@ void DataManipulator::updateCluster(ClusterDescription const & cluster)
 	_navi.update(_data);
 }
 
+void DataManipulator::updateParticle(ParticleDescription const & particle)
+{
+	int particleIndex = _navi.particleIndicesByParticleIds.at(particle.id);
+	_data.particles->at(particleIndex) = particle;
+
+	_navi.update(_data);
+}
+
 void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect) const
 {
 	ResolveDescription resolveDesc;

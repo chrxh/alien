@@ -26,8 +26,9 @@ void ParticleEditTab::keyPressEvent (QKeyEvent* e)
     int rowLen = QTextEdit::document()->findBlockByNumber(row).length();
 
     //request update?
-    if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
-        updateModelAndNotifyController();
+	if ((e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) {
+		updateModelAndNotifyController();
+	}
 
     //typing number?
     QString k;
