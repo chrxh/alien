@@ -106,14 +106,14 @@ bool DataManipulator::areEntitiesSelected() const
 	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
 }
 
-list<uint64_t> DataManipulator::getSelectedCellIds() const
+set<uint64_t> DataManipulator::getSelectedCellIds() const
 {
-	return list<uint64_t>(_selectedCellIds.begin(), _selectedCellIds.end());
+	return _selectedCellIds;
 }
 
-list<uint64_t> DataManipulator::getSelectedParticleIds() const
+set<uint64_t> DataManipulator::getSelectedParticleIds() const
 {
-	return list<uint64_t>(_selectedParticleIds.begin(), _selectedParticleIds.end());
+	return _selectedParticleIds;
 }
 
 void DataManipulator::moveSelection(QVector2D const &delta)

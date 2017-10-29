@@ -61,7 +61,7 @@ void DataEditorController::notificationFromCellEditWidget()
 	_manipulator->reconnectSelectedCells();
 
 	uint64_t selectedCellId = _model->getCellToEditRef().id;
-	_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
+	_model->setClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
 
 	auto cell = _manipulator->getCellDescRef(selectedCellId);
 	if (cell.cellFeature->type == Enums::CellFunction::COMPUTER) {
@@ -75,7 +75,7 @@ void DataEditorController::notificationFromCellEditWidget()
 
 void DataEditorController::notificationFromClusterEditWidget()
 {
-	DataChangeDescription changes = _model->getAndsUpdateChanges();
+	DataChangeDescription changes = _model->getAndUpdateChanges();
 	if (changes.clusters.empty()) {
 		return;
 	}
@@ -146,8 +146,8 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
 
-		uint64_t selectedCellId = selectedCellIds.front();
-		_model->editClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
+		uint64_t selectedCellId = *selectedCellIds.begin();
+		_model->setClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
 		auto cell = _manipulator->getCellDescRef(selectedCellId);
 		if (cell.cellFeature->type == Enums::CellFunction::COMPUTER) {
 			_view->switchToCellEditorWithComputer();
@@ -157,12 +157,13 @@ void DataEditorController::notificationFromManipulator(set<DataManipulator::Rece
 		}
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.size() == 1) {
-		uint64_t selectedParticleId = selectedParticleIds.front();
-		_model->editParticle(_manipulator->getParticleDescRef(selectedParticleId));
+		uint64_t selectedParticleId = *selectedParticleIds.begin();
+		_model->setParticle(_manipulator->getParticleDescRef(selectedParticleId));
 		_view->switchToParticleEditor();
 	}
 	if (selectedCellIds.size() + selectedParticleIds.size() > 1) {
-		_view->switchToNoEditor();
+		_model->setSelectionIds(_manipulator->getSelectedCellIds(), _manipulator->getSelectedParticleIds());
+		_view->switchToSelectionEditor();
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.empty()) {
 		_view->switchToNoEditor();

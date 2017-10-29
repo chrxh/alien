@@ -16,7 +16,7 @@ void CellConnectorImpl::init(SpaceMetric *metric, SimulationParameters *paramete
 	_numberGen = numberGen;
 }
 
-void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &changedCellIds)
+void CellConnectorImpl::reconnect(DataDescription &data, set<uint64_t> const &changedCellIds)
 {
 	if (!data.clusters) {
 		return;
@@ -28,7 +28,7 @@ void CellConnectorImpl::reconnect(DataDescription &data, list<uint64_t> const &c
 	reclustering(changedAndPresentCellIds);
 }
 
-list<uint64_t> CellConnectorImpl::filterPresentCellIds(list<uint64_t> const & cellIds) const
+list<uint64_t> CellConnectorImpl::filterPresentCellIds(set<uint64_t> const & cellIds) const
 {
 	list<uint64_t> result;
 	std::copy_if(cellIds.begin(), cellIds.end(), std::back_inserter(result), [&](auto const& cellId) {

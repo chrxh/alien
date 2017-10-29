@@ -36,6 +36,7 @@ class CellEditTab;
 class MetadataEditTab;
 class CellComputerEditTab;
 class ParticleEditTab;
+class SelectionEditTab;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 

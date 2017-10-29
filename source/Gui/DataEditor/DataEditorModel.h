@@ -13,13 +13,18 @@ public:
 	DataEditorModel(QObject *parent);
 	virtual ~DataEditorModel() = default;
 
-	void editClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
-	void editParticle(ParticleDescription const& particle);
-	DataChangeDescription getAndsUpdateChanges();
+	void setClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
+	void setParticle(ParticleDescription const& particle);
+	void setSelectionIds(set<uint64_t> const& selectedCellIds, set<uint64_t> const& selectedParticleIds);
+
+	DataChangeDescription getAndUpdateChanges();
 
 	CellDescription& getCellToEditRef();
 	ParticleDescription& getParticleToEditRef();
 	ClusterDescription& getClusterToEditRef();
+
+	int getNumCells() const;
+	int getNumParticles() const;
 
 private:
 	DataDescription _data;

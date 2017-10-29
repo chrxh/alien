@@ -5,32 +5,41 @@
 DataEditorModel::DataEditorModel(QObject *parent)
 	: QObject(parent)
 {
-
 }
 
-void DataEditorModel::editClusterAndCell(ClusterDescription const & cluster, uint64_t cellId)
+void DataEditorModel::setClusterAndCell(ClusterDescription const & cluster, uint64_t cellId)
 {
 	_data.clear();
 	_data.addCluster(cluster);
 	_unchangedData = _data;
+	_navi.update(_data);
 
 	_selectedCellIds = { cellId };
 	_selectedParticleIds.clear();
-	_navi.update(_data);
 }
 
-void DataEditorModel::editParticle(ParticleDescription const & particle)
+void DataEditorModel::setParticle(ParticleDescription const & particle)
 {
 	_data.clear();
 	_data.addParticle(particle);
 	_unchangedData = _data;
+	_navi.update(_data);
 
 	_selectedCellIds.clear();
 	_selectedParticleIds = { particle.id };
-	_navi.update(_data);
 }
 
-DataChangeDescription DataEditorModel::getAndsUpdateChanges()
+void DataEditorModel::setSelectionIds(set<uint64_t> const& selectedCellIds, set<uint64_t> const& selectedParticleIds)
+{
+	_data.clear();
+	_unchangedData = _data;
+	_navi.update(_data);
+
+	_selectedCellIds = selectedCellIds;
+	_selectedParticleIds = selectedParticleIds;
+}
+
+DataChangeDescription DataEditorModel::getAndUpdateChanges()
 {
 	DataChangeDescription result(_unchangedData, _data);
 	_unchangedData = _data;
@@ -57,4 +66,14 @@ ClusterDescription & DataEditorModel::getClusterToEditRef()
 	uint64_t selectedCellId = *_selectedCellIds.begin();
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(selectedCellId);
 	return _data.clusters->at(clusterIndex);
+}
+
+int DataEditorModel::getNumCells() const
+{
+	return _selectedCellIds.size();
+}
+
+int DataEditorModel::getNumParticles() const
+{
+	return _selectedParticleIds.size();
 }

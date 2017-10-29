@@ -12,10 +12,10 @@ public:
 
 	virtual void init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
-	virtual void reconnect(DataDescription &data, list<uint64_t> const &changedCellIds) override;
+	virtual void reconnect(DataDescription &data, set<uint64_t> const &changedCellIds) override;
 
 private:
-	list<uint64_t> filterPresentCellIds(list<uint64_t> const& cellIds) const;
+	list<uint64_t> filterPresentCellIds(set<uint64_t> const& cellIds) const;
 	void updateInternals();
 	void updateConnectingCells(list<uint64_t> const &changedCellIds);
 	void reclustering(list<uint64_t> const &changedCellIds);
