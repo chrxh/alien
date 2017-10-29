@@ -13,15 +13,15 @@
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Particle.h"
 
-#include "Gui/DataEditor/ClusterEditWidget.h"
-#include "Gui/DataEditor/CellEditWidget.h"
-#include "Gui/DataEditor/MetadataEditWidget.h"
+#include "Gui/DataEditor/ClusterEditTab.h"
+#include "Gui/DataEditor/CellEditTab.h"
+#include "Gui/DataEditor/MetadataEditTab.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 #include "TokenTab.h"
 #include "HexEditWidget.h"
 #include "SymbolEdit.h"
-#include "CellComputerEditWidget.h"
+#include "CellComputerEditTab.h"
 
 #include "TextEditor.h"
 
@@ -81,7 +81,6 @@ void TextEditor::init (TextEditorWidgets widgets)
 	_widgets.tabSymbolsWidget->parent()->installEventFilter(this);
 
     //establish connections
-    connect(_widgets.clusterEditor, SIGNAL(clusterDataChanged(CellTO)), this, SLOT(changesFromClusterEditor(CellTO)));
     connect(_widgets.requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
     connect(_widgets.requestEnergyParticleButton, SIGNAL(clicked()), this, SIGNAL(requestNewEnergyParticle()));
     connect(_widgets.delEntityButton, SIGNAL(clicked()), this, SLOT(delSelectionClicked()));
@@ -94,7 +93,6 @@ void TextEditor::init (TextEditorWidgets widgets)
     connect(_widgets.addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
     connect(_widgets.delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
     connect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
-    connect(_widgets.metadataEditor, SIGNAL(metadataChanged(QString,QString,quint8,QString)), this, SLOT(changesFromMetadataEditor(QString,QString,quint8,QString)));
     connect(_widgets.symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
 
 //	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
