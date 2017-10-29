@@ -7,6 +7,7 @@
 #include "MetadataEditTab.h"
 #include "CellComputerEditTab.h"
 #include "ParticleEditTab.h"
+#include "SelectionEditTab.h"
 
 #include "DataEditorModel.h"
 #include "DataEditorView.h"
@@ -52,6 +53,10 @@ DataEditorView::DataEditorView(QWidget * parent)
 	setupTextEdit(_particleEditTab);
 	_particleEditTab->setVisible(false);
 
+	_selectionEditTab = new SelectionEditTab(_mainTabWidget);
+	setupTextEdit(_selectionEditTab);
+	_selectionEditTab->setVisible(false);
+
 	_computerTabWidget = new QTabWidget(parent);
 	_computerTabWidget->setMinimumSize(QSize(385, 341));
 	_computerTabWidget->setMaximumSize(QSize(385, 341));
@@ -78,6 +83,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel
 	_metadataEditTab->init(_model, controller);
 	_computerEditTab->init(_model, controller, compiler);
 	_particleEditTab->init(_model, controller);
+	_selectionEditTab->init(_model, controller);
 }
 
 void DataEditorView::update() const
@@ -86,6 +92,10 @@ void DataEditorView::update() const
 		_mainTabWidget->setVisible(false);
 		_computerTabWidget->setVisible(false);
 		return;
+	}
+
+	if (_editorSelector == EditorSelector::Selection) {
+		_selectionEditTab->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithComputer) {
@@ -169,6 +179,20 @@ void DataEditorView::switchToParticleEditor()
 	_mainTabWidget->addTab(_particleEditTab, "particle");
 
 	_editorSelector = EditorSelector::Particle;
+	update();
+}
+
+void DataEditorView::switchToSelectionEditor()
+{
+	saveTabPositionForCellEditor();
+
+	_mainTabWidget->setVisible(true);
+	_computerTabWidget->setVisible(false);
+
+	_mainTabWidget->clear();
+	_mainTabWidget->addTab(_selectionEditTab, "selection");
+
+	_editorSelector = EditorSelector::Selection;
 	update();
 }
 

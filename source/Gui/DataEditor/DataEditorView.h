@@ -20,12 +20,13 @@ public:
 	void switchToCellEditorWithComputer();
 	void switchToCellEditorWithoutComputer();
 	void switchToParticleEditor();
+	void switchToSelectionEditor();
 
 	void show(bool visible);
 	void update() const;
 
 private:
-	enum class EditorSelector { No, CellWithComputer, CellWithoutComputer, Particle };
+	enum class EditorSelector { No, CellWithComputer, CellWithoutComputer, Particle, Selection };
 	void saveTabPositionForCellEditor();
 	int getTabPositionForCellEditor();
 
@@ -39,6 +40,7 @@ private:
 	CellEditTab* _cellEditTab = nullptr;
 	MetadataEditTab* _metadataEditTab = nullptr;
 	ParticleEditTab* _particleEditTab = nullptr;
+	SelectionEditTab* _selectionEditTab = nullptr;
 
 	QTabWidget* _computerTabWidget = nullptr;
 	CellComputerEditTab* _computerEditTab = nullptr;

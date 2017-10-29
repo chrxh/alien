@@ -3,11 +3,10 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "Model/Api/Definitions.h"
-#include "Model/Api/Descriptions.h"
 #include "Gui/Definitions.h"
 
-class ParticleEditTab : public QTextEdit
+class ParticleEditTab
+	: public QTextEdit
 {
     Q_OBJECT
 public:
