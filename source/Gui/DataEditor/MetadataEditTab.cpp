@@ -5,12 +5,12 @@
 #include "DataEditorModel.h"
 #include "DataEditorController.h"
 #include "MetadataPropertiesEditWidget.h"
-#include "MetadataEditWidget.h"
-#include "ui_MetadataEditWidget.h"
+#include "MetadataEditTab.h"
+#include "ui_MetadataEditTab.h"
 
-MetadataEditWidget::MetadataEditWidget(QWidget *parent) :
+MetadataEditTab::MetadataEditTab(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MetadataEditWidget)
+    ui(new Ui::MetadataEditTab)
 {
     ui->setupUi(this);
 
@@ -22,22 +22,22 @@ MetadataEditWidget::MetadataEditWidget(QWidget *parent) :
     p.setColor(QPalette::Text, CELL_EDIT_METADATA_CURSOR_COLOR);
     ui->metadataDescriptionEdit->setPalette(p);
 
-    connect(ui->metadataDescriptionEdit, &QTextEdit::textChanged, this, &MetadataEditWidget::changesFromMetadataDescriptionEditor);
+    connect(ui->metadataDescriptionEdit, &QTextEdit::textChanged, this, &MetadataEditTab::changesFromMetadataDescriptionEditor);
 }
 
-MetadataEditWidget::~MetadataEditWidget()
+MetadataEditTab::~MetadataEditTab()
 {
     delete ui;
 }
 
-void MetadataEditWidget::init(DataEditorModel * model, DataEditorController * controller)
+void MetadataEditTab::init(DataEditorModel * model, DataEditorController * controller)
 {
 	_model = model;
 	_controller = controller;
 	ui->metadataPropertiesEditWidget->init(model, controller);
 }
 
-void MetadataEditWidget::updateDisplay ()
+void MetadataEditTab::updateDisplay ()
 {
 	auto const& cell = *_model->getCellToEditRef().metadata;
 	ui->metadataPropertiesEditWidget->updateDisplay();
@@ -46,7 +46,7 @@ void MetadataEditWidget::updateDisplay ()
         ui->metadataDescriptionEdit->verticalScrollBar()->setValue(0);
 }
 
-void MetadataEditWidget::changesFromMetadataDescriptionEditor()
+void MetadataEditTab::changesFromMetadataDescriptionEditor()
 {
 	auto& cell = *_model->getCellToEditRef().metadata;
 	cell.description = ui->metadataDescriptionEdit->toPlainText();

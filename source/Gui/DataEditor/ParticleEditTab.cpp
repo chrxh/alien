@@ -5,17 +5,17 @@
 
 #include "Gui/Settings.h"
 
-#include "ParticleEditWidget.h"
+#include "ParticleEditTab.h"
 #include "DataEditorModel.h"
 #include "DataEditorController.h"
 
-ParticleEditWidget::ParticleEditWidget(QWidget *parent) :
+ParticleEditTab::ParticleEditTab(QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void ParticleEditWidget::keyPressEvent (QKeyEvent* e)
+void ParticleEditTab::keyPressEvent (QKeyEvent* e)
 {
     //auxilliary data
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
@@ -179,7 +179,7 @@ void ParticleEditWidget::keyPressEvent (QKeyEvent* e)
 	}
 }
 
-void ParticleEditWidget::mousePressEvent(QMouseEvent* e)
+void ParticleEditTab::mousePressEvent(QMouseEvent* e)
 {
     QTextEdit::mousePressEvent(e);
     int col = QTextEdit::textCursor().columnNumber();
@@ -194,24 +194,24 @@ void ParticleEditWidget::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void ParticleEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
+void ParticleEditTab::mouseDoubleClickEvent (QMouseEvent* e)
 {
     QTextEdit::clearFocus();
 }
 
-void ParticleEditWidget::wheelEvent (QWheelEvent* e)
+void ParticleEditTab::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
-void ParticleEditWidget::init(DataEditorModel * model, DataEditorController * controller)
+void ParticleEditTab::init(DataEditorModel * model, DataEditorController * controller)
 {
 	_model = model;
 	_controller = controller;
 }
 
-void ParticleEditWidget::updateDisplay ()
+void ParticleEditTab::updateDisplay ()
 {
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
@@ -249,7 +249,7 @@ void ParticleEditWidget::updateDisplay ()
         QTextEdit::moveCursor(QTextCursor::Right);
 }
 
-void ParticleEditWidget::updateModelAndNotifyController()
+void ParticleEditTab::updateModelAndNotifyController()
 {
 	int row = QTextEdit::textCursor().blockNumber();
 	QString currentText = QTextEdit::textCursor().block().text();
@@ -268,7 +268,7 @@ void ParticleEditWidget::updateModelAndNotifyController()
 	_controller->notificationFromParticleEditWidget();
 }
 
-qreal ParticleEditWidget::generateNumberFromFormattedString (QString s)
+qreal ParticleEditTab::generateNumberFromFormattedString (QString s)
 {
     int i = s.indexOf(':');
     if( i >= 0 ) {
@@ -283,7 +283,7 @@ qreal ParticleEditWidget::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString ParticleEditWidget::generateFormattedRealString (QString s)
+QString ParticleEditTab::generateFormattedRealString (QString s)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
@@ -299,7 +299,7 @@ QString ParticleEditWidget::generateFormattedRealString (QString s)
     return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
 }
 
-QString ParticleEditWidget::generateFormattedRealString (qreal r)
+QString ParticleEditTab::generateFormattedRealString (qreal r)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";

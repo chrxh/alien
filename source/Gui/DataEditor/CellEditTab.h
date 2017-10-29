@@ -3,16 +3,17 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "Model/Api/Descriptions.h"
 #include "Model/Api/Definitions.h"
+#include "Model/Api/Descriptions.h"
 #include "Gui/Definitions.h"
 
-class ClusterEditWidget
+class CellEditTab
 	: public QTextEdit
 {
     Q_OBJECT
 public:
-    ClusterEditWidget(QWidget *parent = 0);
+    CellEditTab(QWidget *parent = nullptr);
+	virtual ~CellEditTab() = default;
 
 	void init(DataEditorModel* model, DataEditorController* controller);
     void updateDisplay ();
@@ -24,12 +25,14 @@ protected:
     void wheelEvent (QWheelEvent* e);
 
 private:
-	void requestUpdate();
+    void updateModelAndNotifyController ();
 
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
+    QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
 	DataEditorModel* _model = nullptr;
 	DataEditorController* _controller = nullptr;
 };
+

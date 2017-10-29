@@ -2,11 +2,11 @@
 #include <QGridLayout>
 
 #include "Gui/Settings.h"
-#include "ClusterEditWidget.h"
-#include "CellEditWidget.h"
-#include "MetadataEditWidget.h"
-#include "CellComputerEditWidget.h"
-#include "ParticleEditWidget.h"
+#include "ClusterEditTab.h"
+#include "CellEditTab.h"
+#include "MetadataEditTab.h"
+#include "CellComputerEditTab.h"
+#include "ParticleEditTab.h"
 
 #include "DataEditorModel.h"
 #include "DataEditorView.h"
@@ -36,19 +36,19 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_mainTabWidget->setTabsClosable(false);
 	_mainTabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
 
-	_clusterEditTab = new ClusterEditWidget(_mainTabWidget);
+	_clusterEditTab = new ClusterEditTab(_mainTabWidget);
 	setupTextEdit(_clusterEditTab);
 	_clusterEditTab->setVisible(false);
 
-	_cellEditTab = new CellEditWidget(_mainTabWidget);
+	_cellEditTab = new CellEditTab(_mainTabWidget);
 	setupTextEdit(_cellEditTab);
 	_cellEditTab->setVisible(false);
 
-	_metadataEditTab = new MetadataEditWidget(_mainTabWidget);
+	_metadataEditTab = new MetadataEditTab(_mainTabWidget);
 	_metadataEditTab->setPalette(GuiSettings::getPaletteForTab());
 	_metadataEditTab->setVisible(false);
 
-	_particleEditTab = new ParticleEditWidget(_mainTabWidget);
+	_particleEditTab = new ParticleEditTab(_mainTabWidget);
 	setupTextEdit(_particleEditTab);
 	_particleEditTab->setVisible(false);
 
@@ -60,7 +60,7 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_computerTabWidget->setTabsClosable(false);
 	_computerTabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
 
-	_computerEditTab = new CellComputerEditWidget(_mainTabWidget);
+	_computerEditTab = new CellComputerEditTab(_mainTabWidget);
 	_computerEditTab->setPalette(GuiSettings::getPaletteForTab());
 	_computerEditTab->setVisible(false);
 	

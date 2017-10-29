@@ -6,23 +6,23 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Gui/Settings.h"
 
-#include "CellEditWidget.h"
+#include "CellEditTab.h"
 #include "DataEditorModel.h"
 #include "DataEditorController.h"
 
-CellEditWidget::CellEditWidget(QWidget *parent) :
+CellEditTab::CellEditTab(QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void CellEditWidget::init(DataEditorModel * model, DataEditorController* controller)
+void CellEditTab::init(DataEditorModel * model, DataEditorController* controller)
 {
 	_model = model;
 	_controller = controller;
 }
 
-void CellEditWidget::updateModelAndNotifyController ()
+void CellEditTab::updateModelAndNotifyController ()
 {
     int row = QTextEdit::textCursor().blockNumber();
     QString currentText = QTextEdit::textCursor().block().text();
@@ -41,7 +41,7 @@ void CellEditWidget::updateModelAndNotifyController ()
 	_controller->notificationFromCellEditWidget();
 }
 
-void CellEditWidget::keyPressEvent (QKeyEvent* e)
+void CellEditTab::keyPressEvent (QKeyEvent* e)
 {
 	auto &cell = _model->getCellToEditRef();
 
@@ -249,7 +249,7 @@ void CellEditWidget::keyPressEvent (QKeyEvent* e)
     }
 }
 
-void CellEditWidget::mousePressEvent(QMouseEvent* e)
+void CellEditTab::mousePressEvent(QMouseEvent* e)
 {
 	auto &cell = _model->getCellToEditRef();
 	
@@ -315,18 +315,18 @@ void CellEditWidget::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void CellEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
+void CellEditTab::mouseDoubleClickEvent (QMouseEvent* e)
 {
     QTextEdit::clearFocus();
 }
 
-void CellEditWidget::wheelEvent (QWheelEvent* e)
+void CellEditTab::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
-void CellEditWidget::updateDisplay ()
+void CellEditTab::updateDisplay ()
 {
 	auto &cell = _model->getCellToEditRef();
 	int col = QTextEdit::textCursor().columnNumber();
@@ -379,7 +379,7 @@ void CellEditWidget::updateDisplay ()
         QTextEdit::moveCursor(QTextCursor::Right);
 }
 
-qreal CellEditWidget::generateNumberFromFormattedString (QString s)
+qreal CellEditTab::generateNumberFromFormattedString (QString s)
 {
     int i = s.indexOf(':');
     if( i >= 0 ) {
@@ -394,7 +394,7 @@ qreal CellEditWidget::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString CellEditWidget::generateFormattedRealString (QString s)
+QString CellEditTab::generateFormattedRealString (QString s)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
@@ -410,7 +410,7 @@ QString CellEditWidget::generateFormattedRealString (QString s)
     return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
 }
 
-QString CellEditWidget::generateFormattedRealString (qreal r)
+QString CellEditTab::generateFormattedRealString (qreal r)
 {
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
@@ -443,7 +443,7 @@ namespace
 	}
 }
 
-QString CellEditWidget::generateFormattedCellFunctionString (Enums::CellFunction::Type type)
+QString CellEditTab::generateFormattedCellFunctionString (Enums::CellFunction::Type type)
 {
     //define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";

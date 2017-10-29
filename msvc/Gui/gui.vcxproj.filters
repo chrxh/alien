@@ -342,24 +342,6 @@
     <ClCompile Include="Release\moc_DataManipulator.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_ClusterEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ClusterEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\ClusterEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\CellEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CellEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_DataEditorModel.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -368,15 +350,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorModel.cpp">
       <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\CellComputerEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CellComputerEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellComputerEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\CodeEditWidget.cpp">
       <Filter>Source Files\DataEditor</Filter>
@@ -396,15 +369,6 @@
     <ClCompile Include="Release\moc_HexEditWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_MetadataEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_MetadataEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\MetadataPropertiesEditWidget.cpp">
       <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
@@ -414,13 +378,49 @@
     <ClCompile Include="Release\moc_MetadataPropertiesEditWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\ParticleEditWidget.cpp">
+    <ClCompile Include="..\..\source\Gui\DataEditor\ClusterEditTab.cpp">
       <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_ParticleEditWidget.cpp">
+    <ClCompile Include="Debug\moc_ClusterEditTab.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_ParticleEditWidget.cpp">
+    <ClCompile Include="Release\moc_ClusterEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\CellComputerEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_CellComputerEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_CellComputerEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\CellEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_CellEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_CellEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MetadataEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MetadataEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\ParticleEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ParticleEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ParticleEditTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -586,19 +586,7 @@
     <CustomBuild Include="..\..\source\Gui\DataManipulator.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\ClusterEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\CellEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorModel.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\CellComputerEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\CellComputerEditWidget.ui">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\CodeEditWidget.h">
@@ -607,16 +595,28 @@
     <CustomBuild Include="..\..\source\Gui\DataEditor\HexEditWidget.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditWidget.ui">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataPropertiesEditWidget.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\ParticleEditWidget.h">
+    <CustomBuild Include="..\..\source\Gui\DataEditor\ClusterEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\CellComputerEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\CellEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\CellComputerEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\ParticleEditTab.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -773,10 +773,10 @@
     <ClInclude Include="ui_AddRectStructureDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_CellComputerEditWidget.h">
+    <ClInclude Include="ui_CellComputerEditTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_MetadataEditWidget.h">
+    <ClInclude Include="ui_MetadataEditTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
