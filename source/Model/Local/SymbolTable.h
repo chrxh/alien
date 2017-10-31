@@ -19,7 +19,7 @@ public:
 	virtual QString applyTableToCode(QString const& input) const;
 	virtual void clearTable();
 	virtual QMap< QString, QString > const& getTableConstRef () const;
-	virtual void setTable(SymbolTable const& table);
+	virtual void setTable(QMap<QString, QString> const& table);
 	virtual void mergeTable(SymbolTable const& table);
 
 	virtual void serializePrimitives (QDataStream& stream) const;
