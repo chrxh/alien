@@ -26,6 +26,11 @@ public:
 	int getNumCells() const;
 	int getNumParticles() const;
 
+	SimulationParameters* getSimulationParameters() const;
+	void setSimulationParameters(SimulationParameters* parameters);
+
+	map<string, string>& getSymbolsRef();
+
 private:
 	DataDescription _data;
 	DataDescription _unchangedData;
@@ -33,4 +38,7 @@ private:
 
 	set<uint64_t> _selectedCellIds;
 	set<uint64_t> _selectedParticleIds;
+
+	SimulationParameters* _parameters = nullptr;
+	map<string, string> _symbols;
 };

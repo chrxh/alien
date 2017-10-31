@@ -48,15 +48,6 @@
     <ClCompile Include="qrc_ressources.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\texteditor\SymbolEdit.cpp">
-      <Filter>Source Files\TextEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SymbolEdit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SymbolEdit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\texteditor\TextEditor.cpp">
       <Filter>Source Files\TextEditor</Filter>
     </ClCompile>
@@ -369,15 +360,6 @@
     <ClCompile Include="Release\moc_HexEditWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataPropertiesEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_MetadataPropertiesEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_MetadataPropertiesEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\ClusterEditTab.cpp">
       <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
@@ -432,6 +414,24 @@
     <ClCompile Include="Release\moc_SelectionEditTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataEditWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MetadataEditWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MetadataEditWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\SymbolEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SymbolEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SymbolEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -456,12 +456,6 @@
   <ItemGroup>
     <CustomBuild Include="..\..\source\gui\resources\ressources.qrc">
       <Filter>Resources</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor\SymbolEdit.h">
-      <Filter>Source Files\TextEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor\SymbolEdit.ui">
-      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\texteditor\TextEditor.h">
       <Filter>Source Files\TextEditor</Filter>
@@ -604,9 +598,6 @@
     <CustomBuild Include="..\..\source\Gui\DataEditor\HexEditWidget.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataPropertiesEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\ClusterEditTab.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
@@ -629,6 +620,15 @@
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\SelectionEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\SymbolEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\SymbolEditTab.ui">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -719,9 +719,6 @@
     <ClInclude Include="resource.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_SymbolEdit.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_TokenTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -789,6 +786,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_MetadataEditTab.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_SymbolEditTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,15 +6,15 @@
 
 #include "DataEditorModel.h"
 #include "DataEditorController.h"
-#include "MetadataPropertiesEditWidget.h"
+#include "MetadataEditWidget.h"
 
-MetadataPropertiesEditWidget::MetadataPropertiesEditWidget (QWidget *parent) :
+MetadataEditWidget::MetadataEditWidget (QWidget *parent) :
     QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void MetadataPropertiesEditWidget::updateModel ()
+void MetadataEditWidget::updateModel ()
 {
 	auto& cluster = *_model->getClusterToEditRef().metadata;
 	auto& cell = *_model->getCellToEditRef().metadata;
@@ -32,13 +32,13 @@ void MetadataPropertiesEditWidget::updateModel ()
 	_controller->notificationFromMetadataEditWidget();
 }
 
-void MetadataPropertiesEditWidget::init(DataEditorModel * model, DataEditorController * controller)
+void MetadataEditWidget::init(DataEditorModel * model, DataEditorController * controller)
 {
 	_model = model;
 	_controller = controller;
 }
 
-void MetadataPropertiesEditWidget::updateDisplay ()
+void MetadataEditWidget::updateDisplay ()
 {
 	auto const& cluster = *_model->getClusterToEditRef().metadata;
 	auto const& cell = *_model->getCellToEditRef().metadata;
@@ -122,7 +122,7 @@ void MetadataPropertiesEditWidget::updateDisplay ()
     QTextEdit::setText(text);
 }
 
-void MetadataPropertiesEditWidget::keyPressEvent (QKeyEvent* e)
+void MetadataEditWidget::keyPressEvent (QKeyEvent* e)
 {
     //notify other instances about update?
     if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
@@ -167,7 +167,7 @@ void MetadataPropertiesEditWidget::keyPressEvent (QKeyEvent* e)
         QTextEdit::keyPressEvent(e);
 }
 
-void MetadataPropertiesEditWidget::mousePressEvent (QMouseEvent* e)
+void MetadataEditWidget::mousePressEvent (QMouseEvent* e)
 {
     updateModel();
     QTextEdit::mousePressEvent(e);
@@ -208,7 +208,7 @@ void MetadataPropertiesEditWidget::mousePressEvent (QMouseEvent* e)
     }
 }
 
-void MetadataPropertiesEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
+void MetadataEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
 {
 	QTextEdit::clearFocus();
 }

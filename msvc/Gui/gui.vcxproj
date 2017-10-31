@@ -31,8 +31,9 @@
     <ClCompile Include="..\..\source\Gui\DataEditor\ParticleEditTab.cpp" />
     <ClCompile Include="..\..\source\Gui\DataEditor\HexEditWidget.cpp" />
     <ClCompile Include="..\..\source\Gui\DataEditor\MetadataEditTab.cpp" />
-    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataPropertiesEditWidget.cpp" />
+    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataEditWidget.cpp" />
     <ClCompile Include="..\..\source\Gui\DataEditor\SelectionEditTab.cpp" />
+    <ClCompile Include="..\..\source\Gui\DataEditor\SymbolEditTab.cpp" />
     <ClCompile Include="..\..\source\Gui\DataManipulator.cpp" />
     <ClCompile Include="..\..\source\gui\dialogs\AddEnergyDialog.cpp" />
     <ClCompile Include="..\..\source\gui\dialogs\AddHexagonStructureDialog.cpp" />
@@ -47,7 +48,6 @@
     <ClCompile Include="..\..\source\gui\MainWindow.cpp" />
     <ClCompile Include="..\..\source\gui\misc\StartScreenController.cpp" />
     <ClCompile Include="..\..\source\gui\monitoring\SimulationMonitor.cpp" />
-    <ClCompile Include="..\..\source\gui\texteditor\SymbolEdit.cpp" />
     <ClCompile Include="..\..\source\gui\texteditor\TextEditor.cpp" />
     <ClCompile Include="..\..\source\gui\texteditor\TokenEdit.cpp" />
     <ClCompile Include="..\..\source\gui\texteditor\TokenTab.cpp" />
@@ -135,7 +135,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Debug\moc_MetadataPropertiesEditWidget.cpp">
+    <ClCompile Include="Debug\moc_MetadataEditWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -179,7 +179,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Debug\moc_SymbolEdit.cpp">
+    <ClCompile Include="Debug\moc_SymbolEditTab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -295,7 +295,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Release\moc_MetadataPropertiesEditWidget.cpp">
+    <ClCompile Include="Release\moc_MetadataEditWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -339,7 +339,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Release\moc_SymbolEdit.cpp">
+    <ClCompile Include="Release\moc_SymbolEditTab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -701,19 +701,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
-    <None Include="..\..\source\gui\resources\tutorial\angle.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="..\..\source\gui\resources\tutorial\tutorial.html">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <CustomBuild Include="..\..\source\gui\texteditor\SymbolEdit.ui">
+    <CustomBuild Include="..\..\source\Gui\DataEditor\SymbolEditTab.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\ui_%(Filename).h;%(Outputs)</Outputs>
@@ -730,7 +718,20 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\ui_%(Filename).h" "%(FullPath)"</Command>
+      <SubType>Designer</SubType>
     </CustomBuild>
+    <None Include="..\..\source\gui\resources\tutorial\angle.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\source\gui\resources\tutorial\tutorial.html">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <CustomBuild Include="..\..\source\gui\texteditor\TokenTab.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
@@ -1169,21 +1170,21 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataPropertiesEditWidget.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing MetadataPropertiesEditWidget.h...</Message>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditWidget.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing MetadataEditWidget.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I." "-I$(QTDIR)\include" "-I$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtConcurrent" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\source\Gui\DataEditor"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing MetadataPropertiesEditWidget.h...</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing MetadataEditWidget.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing MetadataPropertiesEditWidget.h...</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing MetadataEditWidget.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I." "-I$(QTDIR)\include" "-I$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtConcurrent" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\source\Gui\DataEditor"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing MetadataPropertiesEditWidget.h...</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing MetadataEditWidget.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
     </CustomBuild>
@@ -1223,6 +1224,24 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\SymbolEditTab.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SymbolEditTab.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I." "-I$(QTDIR)\include" "-I$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtConcurrent" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\source\Gui\DataEditor"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing SymbolEditTab.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing SymbolEditTab.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I." "-I$(QTDIR)\include" "-I$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtConcurrent" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\source\Gui\DataEditor"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing SymbolEditTab.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
+    </CustomBuild>
     <ClInclude Include="ui_AddEnergyDialog.h" />
     <ClInclude Include="ui_AddHexagonStructureDialog.h" />
     <ClInclude Include="ui_AddRectStructureDialog.h" />
@@ -1234,6 +1253,7 @@
     <ClInclude Include="ui_SelectionMultiplyRandomDialog.h" />
     <ClInclude Include="ui_SimulationMonitor.h" />
     <ClInclude Include="ui_SimulationParametersDialog.h" />
+    <ClInclude Include="ui_SymbolEditTab.h" />
     <ClInclude Include="ui_SymbolTableDialog.h" />
     <ClInclude Include="ui_TutorialWindow.h" />
     <ClInclude Include="ui_VisualEditor.h" />
@@ -1409,7 +1429,6 @@
     </CustomBuild>
     <ClInclude Include="..\..\source\gui\visualeditor\MarkerItem.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ui_SymbolEdit.h" />
     <ClInclude Include="ui_TokenTab.h" />
     <CustomBuild Include="..\..\source\gui\visualeditor\VisualEditor.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -1552,24 +1571,6 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB  "-I." "-I$(QTDIR)\include" "-I$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtConcurrent" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\source\Gui\DataEditor"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing TextEditor.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB  "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor\SymbolEdit.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SymbolEdit.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB  "-I." "-I$(QTDIR)\include" "-I$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtConcurrent" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\source\Gui\DataEditor"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing SymbolEdit.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB  "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing SymbolEdit.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB  "-I." "-I$(QTDIR)\include" "-I$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtConcurrent" "-I$(QTDIR)\include\QtWidgets" "-I.\..\..\source\Gui\DataEditor"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing SymbolEdit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB  "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Gui\DataEditor"</Command>
     </CustomBuild>

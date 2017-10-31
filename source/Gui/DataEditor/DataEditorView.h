@@ -36,14 +36,17 @@ private:
 	DataEditorModel* _model = nullptr;
 
 	QTabWidget* _mainTabWidget = nullptr;
-	ClusterEditTab* _clusterEditTab = nullptr;
-	CellEditTab* _cellEditTab = nullptr;
-	MetadataEditTab* _metadataEditTab = nullptr;
-	ParticleEditTab* _particleEditTab = nullptr;
-	SelectionEditTab* _selectionEditTab = nullptr;
+	ClusterEditTab* _clusterTab = nullptr;
+	CellEditTab* _cellTab = nullptr;
+	MetadataEditTab* _metadataTab = nullptr;
+	ParticleEditTab* _particleTab = nullptr;
+	SelectionEditTab* _selectionTab = nullptr;
 
 	QTabWidget* _computerTabWidget = nullptr;
-	CellComputerEditTab* _computerEditTab = nullptr;
+	CellComputerEditTab* _computerTab = nullptr;
+
+	QTabWidget* _symbolTabWidget = nullptr;
+	SymbolEditTab* _symbolTab = nullptr;
 
 	int _savedTabPosition;
 };

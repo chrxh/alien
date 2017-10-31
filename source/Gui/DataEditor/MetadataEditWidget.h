@@ -3,13 +3,13 @@
 #include <QTextEdit>
 #include "Gui/Definitions.h"
 
-class MetadataPropertiesEditWidget
+class MetadataEditWidget
 	: public QTextEdit
 {
     Q_OBJECT
 public:
-    MetadataPropertiesEditWidget(QWidget *parent = 0);
-	virtual ~MetadataPropertiesEditWidget() = default;
+    MetadataEditWidget(QWidget *parent = 0);
+	virtual ~MetadataEditWidget() = default;
 
 	void init(DataEditorModel* model, DataEditorController* controller);
 	void updateDisplay();

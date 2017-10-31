@@ -8,6 +8,7 @@
 #include "CellComputerEditTab.h"
 #include "ParticleEditTab.h"
 #include "SelectionEditTab.h"
+#include "SymbolEditTab.h"
 
 #include "DataEditorModel.h"
 #include "DataEditorView.h"
@@ -24,51 +25,60 @@ namespace
 		tab->setCursorWidth(6);
 		tab->setPalette(GuiSettings::getPaletteForTab());
 	}
+
+	void setupTabWidget(QTabWidget* tabWidget, QSize const& size)
+	{
+		tabWidget->setMinimumSize(size);
+		tabWidget->setMaximumSize(size);
+		tabWidget->setTabShape(QTabWidget::Triangular);
+		tabWidget->setElideMode(Qt::ElideNone);
+		tabWidget->setTabsClosable(false);
+		tabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
+	}
 }
 
 DataEditorView::DataEditorView(QWidget * parent)
 	: QObject(parent)
 {
+	//main tabs
 	_mainTabWidget = new QTabWidget(parent);
-	_mainTabWidget->setMinimumSize(QSize(385, 260));
-	_mainTabWidget->setMaximumSize(QSize(385, 260));
-	_mainTabWidget->setTabShape(QTabWidget::Triangular);
-	_mainTabWidget->setElideMode(Qt::ElideNone);
-	_mainTabWidget->setTabsClosable(false);
-	_mainTabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
+	setupTabWidget(_mainTabWidget, QSize(385, 260));
 
-	_clusterEditTab = new ClusterEditTab(_mainTabWidget);
-	setupTextEdit(_clusterEditTab);
-	_clusterEditTab->setVisible(false);
+	_clusterTab = new ClusterEditTab(parent);
+	setupTextEdit(_clusterTab);
+	_clusterTab->setVisible(false);
 
-	_cellEditTab = new CellEditTab(_mainTabWidget);
-	setupTextEdit(_cellEditTab);
-	_cellEditTab->setVisible(false);
+	_cellTab = new CellEditTab(parent);
+	setupTextEdit(_cellTab);
+	_cellTab->setVisible(false);
 
-	_metadataEditTab = new MetadataEditTab(_mainTabWidget);
-	_metadataEditTab->setPalette(GuiSettings::getPaletteForTab());
-	_metadataEditTab->setVisible(false);
+	_metadataTab = new MetadataEditTab(parent);
+	_metadataTab->setPalette(GuiSettings::getPaletteForTab());
+	_metadataTab->setVisible(false);
 
-	_particleEditTab = new ParticleEditTab(_mainTabWidget);
-	setupTextEdit(_particleEditTab);
-	_particleEditTab->setVisible(false);
+	_particleTab = new ParticleEditTab(parent);
+	setupTextEdit(_particleTab);
+	_particleTab->setVisible(false);
 
-	_selectionEditTab = new SelectionEditTab(_mainTabWidget);
-	setupTextEdit(_selectionEditTab);
-	_selectionEditTab->setVisible(false);
+	_selectionTab = new SelectionEditTab(parent);
+	setupTextEdit(_selectionTab);
+	_selectionTab->setVisible(false);
 
+	//computer tabs
 	_computerTabWidget = new QTabWidget(parent);
-	_computerTabWidget->setMinimumSize(QSize(385, 341));
-	_computerTabWidget->setMaximumSize(QSize(385, 341));
-	_computerTabWidget->setTabShape(QTabWidget::Triangular);
-	_computerTabWidget->setElideMode(Qt::ElideNone);
-	_computerTabWidget->setTabsClosable(false);
-	_computerTabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
+	setupTabWidget(_computerTabWidget, QSize(385, 341));
 
-	_computerEditTab = new CellComputerEditTab(_mainTabWidget);
-	_computerEditTab->setPalette(GuiSettings::getPaletteForTab());
-	_computerEditTab->setVisible(false);
-	
+	_computerTab = new CellComputerEditTab(parent);
+	_computerTab->setPalette(GuiSettings::getPaletteForTab());
+	_computerTab->setVisible(false);
+
+	//symbol tabs
+	_symbolTabWidget = new QTabWidget(parent);
+	setupTabWidget(_symbolTabWidget, QSize(385, 260));
+
+	_symbolTab = new SymbolEditTab(parent);
+	_symbolTab->setVisible(false);
+
 	update();
 }
 
@@ -77,13 +87,14 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel
 	_model = model;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
 	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + 270, _mainTabWidget->width(), _mainTabWidget->height());
+	_symbolTabWidget->setGeometry(upperLeftPosition.x + 395, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
 
-	_clusterEditTab->init(_model, controller);
-	_cellEditTab->init(_model, controller);
-	_metadataEditTab->init(_model, controller);
-	_computerEditTab->init(_model, controller, compiler);
-	_particleEditTab->init(_model, controller);
-	_selectionEditTab->init(_model, controller);
+	_clusterTab->init(_model, controller);
+	_cellTab->init(_model, controller);
+	_metadataTab->init(_model, controller);
+	_computerTab->init(_model, controller, compiler);
+	_particleTab->init(_model, controller);
+	_selectionTab->init(_model, controller);
 }
 
 void DataEditorView::update() const
@@ -91,28 +102,29 @@ void DataEditorView::update() const
 	if (!_visible || _editorSelector == EditorSelector::No) {
 		_mainTabWidget->setVisible(false);
 		_computerTabWidget->setVisible(false);
+		_symbolTabWidget->setVisible(false);
 		return;
 	}
 
 	if (_editorSelector == EditorSelector::Selection) {
-		_selectionEditTab->updateDisplay();
+		_selectionTab->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithComputer) {
-		_clusterEditTab->updateDisplay();
-		_cellEditTab->updateDisplay();
-		_metadataEditTab->updateDisplay();
-		_computerEditTab->updateDisplay();
+		_clusterTab->updateDisplay();
+		_cellTab->updateDisplay();
+		_metadataTab->updateDisplay();
+		_computerTab->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithoutComputer) {
-		_clusterEditTab->updateDisplay();
-		_cellEditTab->updateDisplay();
-		_metadataEditTab->updateDisplay();
+		_clusterTab->updateDisplay();
+		_cellTab->updateDisplay();
+		_metadataTab->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::Particle) {
-		_particleEditTab->updateDisplay();
+		_particleTab->updateDisplay();
 	}
 }
 
@@ -141,12 +153,16 @@ void DataEditorView::switchToCellEditorWithComputer()
 
 	_mainTabWidget->setVisible(true);
 	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_clusterEditTab, "cluster");
-	_mainTabWidget->addTab(_cellEditTab, "cell");
-	_mainTabWidget->addTab(_metadataEditTab, "metadata");
+	_mainTabWidget->addTab(_clusterTab, "cluster");
+	_mainTabWidget->addTab(_cellTab, "cell");
+	_mainTabWidget->addTab(_metadataTab, "metadata");
 	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 	_computerTabWidget->setVisible(true);
-	_computerTabWidget->addTab(_computerEditTab, "cell computer");
+	_computerTabWidget->clear();
+	_computerTabWidget->addTab(_computerTab, "cell computer");
+	_symbolTabWidget->setVisible(true);
+	_symbolTabWidget->clear();
+	_symbolTabWidget->addTab(_symbolTab, "symbols");
 
 	_editorSelector = EditorSelector::CellWithComputer;
 	update();
@@ -157,12 +173,14 @@ void DataEditorView::switchToCellEditorWithoutComputer()
 	saveTabPositionForCellEditor();
 
 	_mainTabWidget->setVisible(true);
-	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_clusterEditTab, "cluster");
-	_mainTabWidget->addTab(_cellEditTab, "cell");
-	_mainTabWidget->addTab(_metadataEditTab, "metadata");
-	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 	_computerTabWidget->setVisible(false);
+	_symbolTabWidget->setVisible(false);
+
+	_mainTabWidget->clear();
+	_mainTabWidget->addTab(_clusterTab, "cluster");
+	_mainTabWidget->addTab(_cellTab, "cell");
+	_mainTabWidget->addTab(_metadataTab, "metadata");
+	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 
 	_editorSelector = EditorSelector::CellWithoutComputer;
 	update();
@@ -174,9 +192,10 @@ void DataEditorView::switchToParticleEditor()
 
 	_mainTabWidget->setVisible(true);
 	_computerTabWidget->setVisible(false);
+	_symbolTabWidget->setVisible(false);
 
 	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_particleEditTab, "particle");
+	_mainTabWidget->addTab(_particleTab, "particle");
 
 	_editorSelector = EditorSelector::Particle;
 	update();
@@ -188,9 +207,10 @@ void DataEditorView::switchToSelectionEditor()
 
 	_mainTabWidget->setVisible(true);
 	_computerTabWidget->setVisible(false);
+	_symbolTabWidget->setVisible(false);
 
 	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_selectionEditTab, "selection");
+	_mainTabWidget->addTab(_selectionTab, "selection");
 
 	_editorSelector = EditorSelector::Selection;
 	update();

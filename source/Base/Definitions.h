@@ -11,6 +11,7 @@
 #include <qmath.h>
 #include <boost/optional.hpp>
 
+#include <string>
 #include <set>
 #include <map>
 #include <vector>
@@ -36,6 +37,7 @@ using std::list;
 using std::unordered_set;
 using std::unordered_map;
 using std::pair;
+using std::string;
 using boost::optional;
 
 struct IntRect;

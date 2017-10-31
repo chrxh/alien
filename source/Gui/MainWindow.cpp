@@ -81,8 +81,8 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 
 
 
-	TextEditor::TextEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabTokenWidget2, ui->tabSymbolsWidget
-		, ui->symbolEdit2, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
+	TextEditor::TextEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabTokenWidget2
+		, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
 		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2
 		, ui->buttonShowInfo };
 	_textEditor->init(microWidgets);

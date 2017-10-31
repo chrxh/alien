@@ -294,7 +294,7 @@ void CellEditTab::mousePressEvent(QMouseEvent* e)
     if( (row >= 7) && (col >= 18) && (col <= 36)) {
 		if (row == 7) {
 			cell.cellFeature->type = Enums::CellFunction::COMPUTER;
-			auto parameters = _controller->getSimulationParameters();
+			auto parameters = _model->getSimulationParameters();
 			int memorySize = parameters->cellFunctionComputerCellMemorySize;
 			cell.cellFeature->setVolatileData(QByteArray(memorySize, 0));
 		}

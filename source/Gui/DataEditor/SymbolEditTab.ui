@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SymbolEdit</class>
- <widget class="QWidget" name="SymbolEdit">
+ <class>SymbolEditTab</class>
+ <widget class="QWidget" name="SymbolEditTab">
   <property name="geometry">
    <rect>
     <x>0</x>
