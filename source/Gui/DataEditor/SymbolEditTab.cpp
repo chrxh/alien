@@ -45,10 +45,9 @@ void SymbolEditTab::init(DataEditorModel * model, DataEditorController * control
 
 void SymbolEditTab::updateDisplay()
 {
-	auto& symbols = _model->getSymbolsRef();
+	disconnect(ui->tableWidget, &QTableWidget::itemChanged, this, &SymbolEditTab::itemContentChanged);
 
-    //disable notification for item changes
-    disconnect(ui->tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)), 0, 0);
+	auto& symbols = _model->getSymbolsRef();
 
     //delete rows in the table
     while( ui->tableWidget->rowCount() > 0 )
@@ -79,29 +78,27 @@ void SymbolEditTab::updateDisplay()
     else
         ui->delSymbolButton->setEnabled(false);
 
-    //notify item changes now
     connect(ui->tableWidget, &QTableWidget::itemChanged, this, &SymbolEditTab::itemContentChanged);
 }
 
-void SymbolEditTab::addSymbolButtonClicked ()
+void SymbolEditTab::addSymbolButtonClicked()
 {
 	disconnect(ui->tableWidget, &QTableWidget::itemChanged, this, &SymbolEditTab::itemContentChanged);
 
-    //create new row in table
-    int row = ui->tableWidget->rowCount();
-    ui->tableWidget->insertRow(row);
-    ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
-    QTableWidgetItem* item = new QTableWidgetItem("");
-    ui->tableWidget->setItem(row, 0, item);
-    ui->tableWidget->setItem(row, 1, new QTableWidgetItem(""));
-    ui->tableWidget->editItem(item);
-    ui->tableWidget->setCurrentCell(row,0);
+	//create new row in table
+	int row = ui->tableWidget->rowCount();
+	ui->tableWidget->insertRow(row);
+	ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
+	QTableWidgetItem* item = new QTableWidgetItem("");
+	ui->tableWidget->setItem(row, 0, item);
+	ui->tableWidget->setItem(row, 1, new QTableWidgetItem(""));
+	ui->tableWidget->editItem(item);
+	ui->tableWidget->setCurrentCell(row, 0);
 
-    //activate del button
-    ui->delSymbolButton->setEnabled(true);
+	//activate del button
+	ui->delSymbolButton->setEnabled(true);
 
-    //notify item changes now
-    connect(ui->tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(itemContentChanged(QTableWidgetItem*)));
+	connect(ui->tableWidget, &QTableWidget::itemChanged, this, &SymbolEditTab::itemContentChanged);
 }
 
 void SymbolEditTab::delSymbolButtonClicked ()
@@ -116,7 +113,8 @@ void SymbolEditTab::delSymbolButtonClicked ()
     }
     if( ui->tableWidget->rowCount() == 0 )
         ui->delSymbolButton->setEnabled(false);
-    Q_EMIT symbolTableChanged();
+
+	_controller->notificationFromSymbolTab();
 }
 
 void SymbolEditTab::itemSelectionChanged ()
@@ -143,7 +141,7 @@ void SymbolEditTab::itemContentChanged (QTableWidgetItem* item)
 		symbols.insert_or_assign(key.toStdString(), value.toStdString());
     }
 
-    Q_EMIT symbolTableChanged();
+	_controller->notificationFromSymbolTab();
 }
 
 

@@ -17,11 +17,12 @@ public:
 
 	DataEditorContext* getContext() const;
 
-	void notificationFromCellEditWidget();
-	void notificationFromClusterEditWidget();
-	void notificationFromParticleEditWidget();
-	void notificationFromMetadataEditWidget();
-	void notificationFromCellComputerEditWidget();
+	void notificationFromCellTab();
+	void notificationFromClusterTab();
+	void notificationFromParticleTab();
+	void notificationFromMetadataTab();
+	void notificationFromCellComputerTab();
+	void notificationFromSymbolTab();
 
 private:
 	Q_SLOT void onShow(bool visible);
@@ -32,4 +33,5 @@ private:
 	DataManipulator* _manipulator = nullptr;
 	DataEditorContext* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
+	SymbolTable* _symbolTable = nullptr;
 };

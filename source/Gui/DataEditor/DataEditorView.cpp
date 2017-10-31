@@ -95,6 +95,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel
 	_computerTab->init(_model, controller, compiler);
 	_particleTab->init(_model, controller);
 	_selectionTab->init(_model, controller);
+	_symbolTab->init(_model, controller);
 }
 
 void DataEditorView::update() const
@@ -115,6 +116,7 @@ void DataEditorView::update() const
 		_cellTab->updateDisplay();
 		_metadataTab->updateDisplay();
 		_computerTab->updateDisplay();
+		_symbolTab->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithoutComputer) {

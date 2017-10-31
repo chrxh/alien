@@ -266,7 +266,7 @@ void ParticleEditTab::updateModelAndNotifyController()
 		particle.vel->setY(generateNumberFromFormattedString(currentText));
 	if (row == 4)
 		particle.energy = generateNumberFromFormattedString(currentText);
-	_controller->notificationFromParticleEditWidget();
+	_controller->notificationFromParticleTab();
 }
 
 qreal ParticleEditTab::generateNumberFromFormattedString (QString s)

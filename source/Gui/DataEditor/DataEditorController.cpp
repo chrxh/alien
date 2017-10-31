@@ -1,6 +1,7 @@
 #include <QMatrix4x4>
 
 #include "Model/Api/ChangeDescriptions.h"
+#include "Model/Local/SymbolTable.h"	//TODO: move to Api
 #include "Model/Api/SimulationContext.h"
 
 #include "Gui/DataManipulator.h"
@@ -16,10 +17,36 @@ DataEditorController::DataEditorController(QWidget *parent /*= nullptr*/)
 	_context = new DataEditorContext(this);
 }
 
+namespace
+{
+	map<string, string> transform(QMap< QString, QString > const& qMap)
+	{
+		map<QString, QString> stdMap = qMap.toStdMap();
+
+		map<string, string> result;
+		std::transform(stdMap.begin(), stdMap.end(), std::inserter(result, result.begin()), [](auto const& entry) {
+			return make_pair(entry.first.toStdString(), entry.second.toStdString());
+		});
+		return result;
+	}
+	
+	QMap<QString, QString> transform(map<string, string> const& stdMap)
+	{
+		QMap<QString, QString> result;
+		for (auto const& entry : stdMap)
+		{
+			result.insert(QString::fromStdString(entry.first), QString::fromStdString(entry.second));
+		}
+		return result;
+	}
+}
+
 void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator, SimulationContext* context)
 {
+	_symbolTable = context->getSymbolTable();
 	_model = new DataEditorModel(this);
 	_model->setSimulationParameters(context->getSimulationParameters());
+	_model->getSymbolsRef() = transform(context->getSymbolTable()->getTableConstRef());
 	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
 	_manipulator = manipulator;
 
@@ -47,7 +74,7 @@ namespace
 	}
 }
 
-void DataEditorController::notificationFromCellEditWidget()
+void DataEditorController::notificationFromCellTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
 	cluster.pos = calcCenterPosOfCells(cluster);
@@ -68,7 +95,7 @@ void DataEditorController::notificationFromCellEditWidget()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromClusterEditWidget()
+void DataEditorController::notificationFromClusterTab()
 {
 	DataChangeDescription changes = _model->getAndUpdateChanges();
 	if (changes.clusters.empty()) {
@@ -102,7 +129,7 @@ void DataEditorController::notificationFromClusterEditWidget()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromParticleEditWidget()
+void DataEditorController::notificationFromParticleTab()
 {
 	auto& particle = _model->getParticleToEditRef();
 	_manipulator->updateParticle(particle);
@@ -110,7 +137,7 @@ void DataEditorController::notificationFromParticleEditWidget()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromMetadataEditWidget()
+void DataEditorController::notificationFromMetadataTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
 	_manipulator->updateCluster(cluster);
@@ -118,12 +145,17 @@ void DataEditorController::notificationFromMetadataEditWidget()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromCellComputerEditWidget()
+void DataEditorController::notificationFromCellComputerTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
 	_manipulator->updateCluster(cluster);
 
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
+}
+
+void DataEditorController::notificationFromSymbolTab()
+{
+	_symbolTable->setTable(transform(_model->getSymbolsRef()));
 }
 
 void DataEditorController::onShow(bool visible)

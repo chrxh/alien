@@ -45,9 +45,9 @@ QMap< QString, QString > const& SymbolTable::getTableConstRef() const
 	return _symbolsByKey;
 }
 
-void SymbolTable::setTable(SymbolTable const& table)
+void SymbolTable::setTable(QMap<QString, QString> const & table)
 {
-	_symbolsByKey = table._symbolsByKey;
+	_symbolsByKey = table;
 }
 
 void SymbolTable::mergeTable(SymbolTable const& table)
