@@ -6,6 +6,7 @@ class QGraphicsItem;
 class QGraphicsView;
 class QGraphicsScene;
 class QTabWidget;
+class QTableWidgetItem;
 
 class CellItem;
 class ParticleItem;
@@ -37,6 +38,7 @@ class MetadataEditTab;
 class CellComputerEditTab;
 class ParticleEditTab;
 class SelectionEditTab;
+class SymbolEditTab;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 

@@ -4,7 +4,7 @@
 
 #include "DataEditorModel.h"
 #include "DataEditorController.h"
-#include "MetadataPropertiesEditWidget.h"
+#include "MetadataEditWidget.h"
 #include "MetadataEditTab.h"
 #include "ui_MetadataEditTab.h"
 

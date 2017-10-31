@@ -1,18 +1,17 @@
 #include <QScrollBar>
 
-#include "Model/Local/SymbolTable.h"
-#include "gui/Settings.h"
-#include "gui/Settings.h"
+#include "Gui/Settings.h"
 
-#include "SymbolEdit.h"
-#include "ui_SymbolEdit.h"
+#include "DataEditorModel.h"
+#include "DataEditorController.h"
+#include "SymbolEditTab.h"
+#include "ui_SymbolEditTab.h"
 
-SymbolEdit::SymbolEdit(QWidget *parent)
-	: QWidget(parent), ui(new Ui::SymbolEdit)
+SymbolEditTab::SymbolEditTab(QWidget *parent)
+	: QWidget(parent), ui(new Ui::SymbolEditTab)
 {
     ui->setupUi(this);
 
-    //set color
     setStyleSheet("background-color: #000000");
     ui->tableWidget->setStyleSheet(TABLE_STYLESHEET);
     ui->tableWidget->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
@@ -23,27 +22,30 @@ SymbolEdit::SymbolEdit(QWidget *parent)
     ui->addSymbolButton->setPalette(p);
     ui->delSymbolButton->setPalette(p);
 
-	//set font
     ui->tableWidget->setFont(GuiSettings::getGlobalFont());
 
-    //set section length
     ui->tableWidget->horizontalHeader()->resizeSection(0, 285);
     ui->tableWidget->horizontalHeader()->resizeSection(1, 55);
 
-    //connections
-    connect(ui->addSymbolButton, SIGNAL(clicked()), this, SLOT(addSymbolButtonClicked()));
-    connect(ui->delSymbolButton, SIGNAL(clicked()), this, SLOT(delSymbolButtonClicked()));
-    connect(ui->tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()));
+    connect(ui->addSymbolButton, &QPushButton::clicked, this, &SymbolEditTab::addSymbolButtonClicked);
+    connect(ui->delSymbolButton, &QPushButton::clicked, this, &SymbolEditTab::delSymbolButtonClicked);
+    connect(ui->tableWidget, &QTableWidget::itemSelectionChanged, this, &SymbolEditTab::itemSelectionChanged);
 }
 
-SymbolEdit::~SymbolEdit()
+SymbolEditTab::~SymbolEditTab()
 {
     delete ui;
 }
 
-void SymbolEdit::loadSymbols(SymbolTable* symbolTable)
+void SymbolEditTab::init(DataEditorModel * model, DataEditorController * controller)
 {
-    _symbolTable = symbolTable;
+	_model = model;
+	_controller = controller;
+}
+
+void SymbolEditTab::updateDisplay()
+{
+	auto& symbols = _model->getSymbolsRef();
 
     //disable notification for item changes
     disconnect(ui->tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)), 0, 0);
@@ -53,10 +55,8 @@ void SymbolEdit::loadSymbols(SymbolTable* symbolTable)
         ui->tableWidget->removeRow(0);
 
     //create entries in the table
-    QMapIterator< QString, QString > it = _symbolTable->getTableConstRef();
     int i = 0;
-    while( it.hasNext() ) {
-        it.next();
+	for(pair<string, string>const& keyAndValue : symbols) {
 
         //create new row in table
         ui->tableWidget->insertRow(i);
@@ -64,10 +64,10 @@ void SymbolEdit::loadSymbols(SymbolTable* symbolTable)
         ui->tableWidget->verticalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
 
         //set values
-        QString key = it.key();
-        QString value = it.value();
-        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(key));
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(value));
+        string key = keyAndValue.first;
+		string value = keyAndValue.second;
+        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(key)));
+        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(value)));
         ui->tableWidget->item(i, 0)->setTextColor(CELL_EDIT_DATA_COLOR1);
         ui->tableWidget->item(i, 1)->setTextColor(CELL_EDIT_DATA_COLOR1);
         ++i;
@@ -80,12 +80,12 @@ void SymbolEdit::loadSymbols(SymbolTable* symbolTable)
         ui->delSymbolButton->setEnabled(false);
 
     //notify item changes now
-    connect(ui->tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(itemContentChanged(QTableWidgetItem*)));
+    connect(ui->tableWidget, &QTableWidget::itemChanged, this, &SymbolEditTab::itemContentChanged);
 }
 
-void SymbolEdit::addSymbolButtonClicked ()
+void SymbolEditTab::addSymbolButtonClicked ()
 {
-    disconnect(ui->tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)), 0, 0);
+	disconnect(ui->tableWidget, &QTableWidget::itemChanged, this, &SymbolEditTab::itemContentChanged);
 
     //create new row in table
     int row = ui->tableWidget->rowCount();
@@ -104,13 +104,14 @@ void SymbolEdit::addSymbolButtonClicked ()
     connect(ui->tableWidget, SIGNAL(itemChanged(QTableWidgetItem*)), this, SLOT(itemContentChanged(QTableWidgetItem*)));
 }
 
-void SymbolEdit::delSymbolButtonClicked ()
+void SymbolEditTab::delSymbolButtonClicked ()
 {
-    while( !ui->tableWidget->selectedItems().isEmpty() ) {
+	auto& symbols = _model->getSymbolsRef();
+	while (!ui->tableWidget->selectedItems().isEmpty()) {
         QList< QTableWidgetItem* > items = ui->tableWidget->selectedItems();
         int row = items.at(0)->row();
         QString key = ui->tableWidget->item(row, 0)->text();
-        _symbolTable->delEntry(key);
+		symbols.erase(key.toStdString());
         ui->tableWidget->removeRow(row);
     }
     if( ui->tableWidget->rowCount() == 0 )
@@ -118,7 +119,7 @@ void SymbolEdit::delSymbolButtonClicked ()
     Q_EMIT symbolTableChanged();
 }
 
-void SymbolEdit::itemSelectionChanged ()
+void SymbolEditTab::itemSelectionChanged ()
 {
     //items selected?
     if( ui->tableWidget->selectedItems().empty() ) {
@@ -129,16 +130,17 @@ void SymbolEdit::itemSelectionChanged ()
     }
 }
 
-void SymbolEdit::itemContentChanged (QTableWidgetItem* item)
+void SymbolEditTab::itemContentChanged (QTableWidgetItem* item)
 {
     //clear and update complete symbol table
-    _symbolTable->clearTable();
+	auto& symbols = _model->getSymbolsRef();
+	symbols.clear();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
 
         //obtain key and value text
         QString key = ui->tableWidget->item(i, 0)->text();
         QString value = ui->tableWidget->item(i, 1)->text();
-        _symbolTable->addEntry(key, value);
+		symbols.insert_or_assign(key.toStdString(), value.toStdString());
     }
 
     Q_EMIT symbolTableChanged();
