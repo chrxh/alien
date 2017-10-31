@@ -16,7 +16,6 @@ public:
 	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator, SimulationContext* context);
 
 	DataEditorContext* getContext() const;
-	SimulationParameters* getSimulationParameters() const;
 
 	void notificationFromCellEditWidget();
 	void notificationFromClusterEditWidget();

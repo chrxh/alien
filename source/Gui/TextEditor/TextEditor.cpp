@@ -20,7 +20,6 @@
 #include "Gui/Settings.h"
 #include "TokenTab.h"
 #include "HexEditWidget.h"
-#include "SymbolEdit.h"
 #include "CellComputerEditTab.h"
 
 #include "TextEditor.h"
@@ -57,7 +56,9 @@ void TextEditor::init (TextEditorWidgets widgets)
 	_widgets.tabComputerWidget->setVisible(false);
 */
 	_widgets.tabTokenWidget->setVisible(false);
+/*
 	_widgets.tabSymbolsWidget->setVisible(false);
+*/
 
     //set colors
 	_widgets.requestCellButton->setStyleSheet(BUTTON_STYLESHEET);
@@ -78,7 +79,9 @@ void TextEditor::init (TextEditorWidgets widgets)
 	_widgets.buttonShowInfo->setToolTip("show informations");
 
     //install event filter for parent widget
+/*
 	_widgets.tabSymbolsWidget->parent()->installEventFilter(this);
+*/
 
     //establish connections
     connect(_widgets.requestCellButton, SIGNAL(clicked()), this, SIGNAL(requestNewCell()));
@@ -93,7 +96,6 @@ void TextEditor::init (TextEditorWidgets widgets)
     connect(_widgets.addTokenButton, SIGNAL(clicked()), this, SLOT(addTokenClicked()));
     connect(_widgets.delTokenButton, SIGNAL(clicked()), this, SLOT(delTokenClicked()));
     connect(_widgets.tabTokenWidget, SIGNAL(currentChanged(int)), this, SLOT(tokenTabChanged(int)));
-    connect(_widgets.symbolEdit, SIGNAL(symbolTableChanged()), this, SLOT(changesFromSymbolTableEditor()));
 
 //	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
 
@@ -102,8 +104,10 @@ void TextEditor::init (TextEditorWidgets widgets)
 
 void TextEditor::update ()
 {
+/*
 	_widgets.symbolEdit->loadSymbols(_context->getSymbolTable());
 	changesFromSymbolTableEditor(); //nach reset
+*/
 }
 
 void TextEditor::setVisible (bool visible)
@@ -819,8 +823,10 @@ void TextEditor::invokeUpdateCell (bool clusterDataChanged)
 void TextEditor::setTabSymbolsWidgetVisibility ()
 {
     if(_widgets.tabTokenWidget->isVisible() ) {
+/*
 		_widgets.tabSymbolsWidget->setGeometry(tabPosX2, _widgets.tabClusterWidget->y(), _widgets.tabSymbolsWidget->width(), _widgets.tabSymbolsWidget->height());
 		_widgets.tabSymbolsWidget->setVisible(true);
+*/
     }
 /*
     else if(_widgets.tabComputerWidget->isVisible() ) {
@@ -828,7 +834,9 @@ void TextEditor::setTabSymbolsWidgetVisibility ()
 		_widgets.tabSymbolsWidget->setVisible(true);
     }
 */
+/*
     else
 		_widgets.tabSymbolsWidget->setVisible(false);
+*/
 }
 

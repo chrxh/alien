@@ -77,3 +77,18 @@ int DataEditorModel::getNumParticles() const
 {
 	return _selectedParticleIds.size();
 }
+
+SimulationParameters * DataEditorModel::getSimulationParameters() const
+{
+	return _parameters;
+}
+
+void DataEditorModel::setSimulationParameters(SimulationParameters * parameters)
+{
+	_parameters = parameters;
+}
+
+map<string, string>& DataEditorModel::getSymbolsRef()
+{
+	return _symbols;
+}

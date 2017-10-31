@@ -16,7 +16,7 @@ class ClusterEditTab;
 class CellComputerEditTab;
 class ParticleEditTab;
 class MetadataEditTab;
-class SymbolEdit;
+class SymbolEditTab;
 class QTextEdit;
 class QLabel;
 class QTabWidget;
@@ -34,8 +34,6 @@ public:
 	struct TextEditorWidgets {
 		QTabWidget* tabClusterWidget;
 		QTabWidget* tabTokenWidget;
-		QTabWidget* tabSymbolsWidget;
-		SymbolEdit* symbolEdit;
 		QTextEdit* selectionEditor;
 		QToolButton* requestCellButton;
 		QToolButton* requestEnergyParticleButton;
