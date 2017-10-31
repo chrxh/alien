@@ -80,7 +80,7 @@ void CellComputerEditTab::compileButtonClicked ()
 		cell.metadata->computerSourcecode = QString::fromStdString(code);
 	}
 	setCompilationState(!result.compilationOk, result.lineOfFirstError);
-	_controller->notificationFromCellComputerEditWidget();
+	_controller->notificationFromCellComputerTab();
 }
 
 void CellComputerEditTab::timerTimeout ()
@@ -95,7 +95,7 @@ void CellComputerEditTab::updateFromMemoryEditWidget()
 {
 	auto &cell = _model->getCellToEditRef();
 	cell.cellFeature->volatileData = ui->memoryEditWidget->getData();
-	_controller->notificationFromCellComputerEditWidget();
+	_controller->notificationFromCellComputerTab();
 }
 
 

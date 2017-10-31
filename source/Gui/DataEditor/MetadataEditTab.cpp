@@ -50,5 +50,5 @@ void MetadataEditTab::changesFromMetadataDescriptionEditor()
 {
 	auto& cell = *_model->getCellToEditRef().metadata;
 	cell.description = ui->metadataDescriptionEdit->toPlainText();
-	_controller->notificationFromMetadataEditWidget();
+	_controller->notificationFromMetadataTab();
 }

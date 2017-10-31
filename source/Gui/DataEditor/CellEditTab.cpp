@@ -38,7 +38,7 @@ void CellEditTab::updateModelAndNotifyController ()
 		cell.maxConnections = qRound(generateNumberFromFormattedString(currentText));
     if( (row == 6) && !(*cell.tokenBlocked))
 		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText));
-	_controller->notificationFromCellEditWidget();
+	_controller->notificationFromCellTab();
 }
 
 void CellEditTab::keyPressEvent (QKeyEvent* e)
@@ -311,7 +311,7 @@ void CellEditTab::mousePressEvent(QMouseEvent* e)
         if( row == 13 )
 			cell.cellFeature->type = Enums::CellFunction::COMMUNICATOR;
         updateDisplay();
-		_controller->notificationFromCellEditWidget();
+		_controller->notificationFromCellTab();
     }
 }
 

@@ -42,7 +42,7 @@ void ClusterEditTab::requestUpdate ()
     if( row == 6 )
 		*cluster.angularVel = generateNumberFromFormattedString(currentText);
 
-	_controller->notificationFromClusterEditWidget();
+	_controller->notificationFromClusterTab();
 }
 
 void ClusterEditTab::keyPressEvent (QKeyEvent* e)

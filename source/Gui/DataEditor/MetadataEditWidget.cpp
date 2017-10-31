@@ -29,7 +29,7 @@ void MetadataEditWidget::updateModel ()
         cell.name = currentText;
 
     //inform other instances
-	_controller->notificationFromMetadataEditWidget();
+	_controller->notificationFromMetadataTab();
 }
 
 void MetadataEditWidget::init(DataEditorModel * model, DataEditorController * controller)
@@ -204,7 +204,7 @@ void MetadataEditWidget::mousePressEvent (QMouseEvent* e)
             cell.color = 6;
         updateDisplay();
         QTextEdit::clearFocus();
-		_controller->notificationFromMetadataEditWidget();
+		_controller->notificationFromMetadataTab();
     }
 }
 
