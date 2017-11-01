@@ -11,13 +11,16 @@ public:
 	ToolbarController(QWidget * parent = nullptr);
 	virtual ~ToolbarController() = default;
 
-	void init(IntVector2D const& upperLeftPosition);
+	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator);
 
 	ToolbarContext* getContext() const;
+
+	void onRequestCell();
 
 private:
 	Q_SLOT void onShow(bool visible);
 
 	ToolbarContext* _context = nullptr;
 	ToolbarView* _view = nullptr;
+	DataManipulator* _manipulator = nullptr;
 };
