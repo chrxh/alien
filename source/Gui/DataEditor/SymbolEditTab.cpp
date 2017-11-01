@@ -17,6 +17,7 @@ SymbolEditTab::SymbolEditTab(QWidget *parent)
     ui->tableWidget->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
     ui->addSymbolButton->setStyleSheet(BUTTON_STYLESHEET);
     ui->delSymbolButton->setStyleSheet(BUTTON_STYLESHEET);
+
     QPalette p = ui->addSymbolButton->palette();
     p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
     ui->addSymbolButton->setPalette(p);
@@ -89,11 +90,18 @@ void SymbolEditTab::addSymbolButtonClicked()
 	int row = ui->tableWidget->rowCount();
 	ui->tableWidget->insertRow(row);
 	ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
-	QTableWidgetItem* item = new QTableWidgetItem("");
-	ui->tableWidget->setItem(row, 0, item);
-	ui->tableWidget->setItem(row, 1, new QTableWidgetItem(""));
-	ui->tableWidget->editItem(item);
-	ui->tableWidget->setCurrentCell(row, 0);
+	{
+		QTableWidgetItem* item = new QTableWidgetItem("");
+		item->setTextColor(CELL_EDIT_DATA_COLOR1);
+		ui->tableWidget->setItem(row, 0, item);
+		ui->tableWidget->editItem(item);
+	}
+	{
+		QTableWidgetItem* item = new QTableWidgetItem("");
+		item->setTextColor(CELL_EDIT_DATA_COLOR1);
+		ui->tableWidget->setItem(row, 1, item);
+		ui->tableWidget->setCurrentCell(row, 0);
+	}
 
 	//activate del button
 	ui->delSymbolButton->setEnabled(true);

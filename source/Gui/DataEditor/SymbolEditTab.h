@@ -21,8 +21,6 @@ public:
 	void init(DataEditorModel* model, DataEditorController* controller);
 	void updateDisplay();
 
-	Q_SIGNAL void symbolTableChanged ();
-
 private:
     Q_SLOT void addSymbolButtonClicked ();
 	Q_SLOT void delSymbolButtonClicked ();
