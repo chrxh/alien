@@ -42,10 +42,10 @@ using boost::optional;
 
 struct IntRect;
 struct BASE_EXPORT IntVector2D {
-	int x;
-	int y;
+	int x = 0;
+	int y = 0;
 
-	IntVector2D();
+	IntVector2D() = default;
 	IntVector2D(std::initializer_list<int> l);
 	IntVector2D(QVector2D const& vec);
 	QVector2D toQVector2D();
@@ -63,11 +63,17 @@ struct BASE_EXPORT IntRect {
 	IntRect(std::initializer_list<IntVector2D> l);
 	IntRect(QRectF const& rect);
 	inline bool isContained(IntVector2D const& p) const;
+	inline IntVector2D center() const;
 };
 
 bool IntRect::isContained(IntVector2D const &p) const
 {
 	return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y;
+}
+
+IntVector2D IntRect::center() const
+{
+	return IntVector2D({ (p1.x + p2.x) / 2, (p1.y + p2.y) / 2 });
 }
 
 

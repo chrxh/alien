@@ -39,9 +39,9 @@ void MetadataEditTab::init(DataEditorModel * model, DataEditorController * contr
 
 void MetadataEditTab::updateDisplay ()
 {
-	auto const& cell = *_model->getCellToEditRef().metadata;
+	auto const& metadata = *_model->getCellToEditRef().metadata;
 	ui->metadataPropertiesEditWidget->updateDisplay();
-    ui->metadataDescriptionEdit->setText(cell.description);
+    ui->metadataDescriptionEdit->setText(metadata.description);
     if( ui->metadataDescriptionEdit->verticalScrollBar() )
         ui->metadataDescriptionEdit->verticalScrollBar()->setValue(0);
 }

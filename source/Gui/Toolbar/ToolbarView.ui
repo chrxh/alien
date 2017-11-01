@@ -16,7 +16,7 @@
   <property name="windowOpacity">
    <double>1.000000000000000</double>
   </property>
-  <widget class="QToolButton" name="requestCellButton2">
+  <widget class="QToolButton" name="requestCellButton">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -130,7 +130,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="addTokenButton2">
+  <widget class="QToolButton" name="addTokenButton">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -367,7 +367,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QToolButton" name="delTokenButton2">
+  <widget class="QToolButton" name="delTokenButton">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -484,7 +484,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="requestEnergyParticleButton2">
+  <widget class="QToolButton" name="requestParticleButton">
    <property name="geometry">
     <rect>
      <x>51</x>
@@ -598,7 +598,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="delEntityButton2">
+  <widget class="QToolButton" name="delEntityButton">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -715,7 +715,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="delClusterButton2">
+  <widget class="QToolButton" name="delClusterButton">
    <property name="enabled">
     <bool>false</bool>
    </property>

@@ -2,11 +2,6 @@
 
 #include "Definitions.h"
 
-IntVector2D::IntVector2D()
-	: x(0), y(0)
-{
-}
-
 IntVector2D::IntVector2D(std::initializer_list<int> l)
 {
 	auto it = l.begin();

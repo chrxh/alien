@@ -19,6 +19,8 @@ public:
 	virtual ClusterDescription& getClusterDescRef(uint64_t clusterId);
 	virtual ParticleDescription& getParticleDescRef(uint64_t particleId);
 
+	virtual void addAndSelectCell(QVector2D const& posDelta);
+
 	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);
 	virtual void moveSelection(QVector2D const &delta);
 	virtual void moveExtendedSelection(QVector2D const &delta);
@@ -33,7 +35,7 @@ public:
 	virtual set<uint64_t> getSelectedCellIds() const;
 	virtual set<uint64_t> getSelectedParticleIds() const;
 
-	virtual void requireDataUpdateFromSimulation(IntRect const& rect) const;
+	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
 
 	enum class Receiver { Simulation, VisualEditor, DataEditor };
 	Q_SIGNAL void notify(set<Receiver> const& targets);
@@ -57,4 +59,5 @@ private:
 	set<uint64_t> _selectedParticleIds;
 
 	DescriptionNavigator _navi;
+	IntRect _rect;
 };
