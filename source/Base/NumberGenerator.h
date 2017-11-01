@@ -1,5 +1,4 @@
-#ifndef RANDOMNUMBERGENERATOR_H
-#define RANDOMNUMBERGENERATOR_H
+#pragma once
 
 #include "Definitions.h"
 
@@ -22,5 +21,3 @@ public:
 
 	virtual uint64_t getTag() = 0;
 };
-
-#endif // RANDOMNUMBERGENERATOR_H

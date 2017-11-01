@@ -36,6 +36,21 @@ ParticleDescription& DataManipulator::getParticleDescRef(uint64_t particleId)
 	return _data.particles->at(particleIndex);
 }
 
+void DataManipulator::addAndSelectCell(QVector2D const & posDelta)
+{
+	QVector2D pos = _rect.center().toQVector2D();
+	_data.addCluster(ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
+		CellDescription().setEnergy(100).setMaxConnections(4).setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
+		.setFlagTokenBlocked(false).setTokenBranchNumber(0).setCellFeature(
+			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER)
+		)
+	));
+	_selectedCellIds = { 0 };
+	_selectedClusterIds = { 0 };
+	_selectedParticleIds.clear();
+	_navi.update(_data);
+}
+
 bool DataManipulator::isCellPresent(uint64_t cellId)
 {
 	return _navi.cellIds.find(cellId) != _navi.cellIds.end();
@@ -191,8 +206,9 @@ void DataManipulator::updateParticle(ParticleDescription const & particle)
 	_navi.update(_data);
 }
 
-void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect) const
+void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect)
 {
+	_rect = rect;
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
 	_access->requireData(rect, resolveDesc);

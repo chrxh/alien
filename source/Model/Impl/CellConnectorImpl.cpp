@@ -230,7 +230,9 @@ void CellConnectorImpl::setClusterAttributes(ClusterDescription& cluster)
 	auto velocities = calcVelocitiesBasedOnOldClusters(*cluster.cells);
 	cluster.vel = velocities.linearVel;
 	cluster.angularVel = velocities.angularVel;
-	cluster.metadata = calcMetadataBasedOnOldClusters(*cluster.cells);
+	if (auto clusterMetadata = calcMetadataBasedOnOldClusters(*cluster.cells)) {
+		cluster.metadata = *clusterMetadata;
+	}
 }
 
 double CellConnectorImpl::calcAngleBasedOnOldClusters(vector<CellDescription> const & cells) const
@@ -294,7 +296,7 @@ CellConnectorImpl::ClusterVelocities CellConnectorImpl::calcVelocitiesBasedOnOld
 	return result;
 }
 
-ClusterMetadata CellConnectorImpl::calcMetadataBasedOnOldClusters(vector<CellDescription> const & cells) const
+optional<ClusterMetadata> CellConnectorImpl::calcMetadataBasedOnOldClusters(vector<CellDescription> const & cells) const
 {
 	CHECK(!cells.empty());
 
@@ -313,5 +315,5 @@ ClusterMetadata CellConnectorImpl::calcMetadataBasedOnOldClusters(vector<CellDes
 		}
 	}
 	auto clusterWithMaxCount = _data->clusters->at(clusterIndexWithMaxCount);
-	return *clusterWithMaxCount.metadata;
+	return clusterWithMaxCount.metadata;
 }
