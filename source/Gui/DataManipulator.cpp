@@ -1,12 +1,12 @@
 #include "DataManipulator.h"
 
 #include "Model/Api/SimulationAccess.h"
-#include "Model/Api/CellConnector.h"
+#include "Model/Api/DescriptionHelper.h"
 
-void DataManipulator::init(SimulationAccess * access, CellConnector * connector)
+void DataManipulator::init(SimulationAccess * access, DescriptionHelper * connector)
 {
 	SET_CHILD(_access, access);
-	SET_CHILD(_connector, connector);
+	SET_CHILD(_descHelper, connector);
 
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection);
 	connect(this, &DataManipulator::notify, this, &DataManipulator::sendDataChangesToSimulation);
@@ -39,14 +39,15 @@ ParticleDescription& DataManipulator::getParticleDescRef(uint64_t particleId)
 void DataManipulator::addAndSelectCell(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D();
-	_data.addCluster(ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
+	auto cluster = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
 		CellDescription().setEnergy(100).setMaxConnections(4).setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
 		.setFlagTokenBlocked(false).setTokenBranchNumber(0).setCellFeature(
 			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER)
-		)
-	));
-	_selectedCellIds = { 0 };
-	_selectedClusterIds = { 0 };
+		));
+	_descHelper->makeValid(cluster);
+	_data.addCluster(cluster);
+	_selectedCellIds = { cluster.cells->front().id };
+	_selectedClusterIds = { cluster.id };
 	_selectedParticleIds.clear();
 	_navi.update(_data);
 }
@@ -186,7 +187,7 @@ void DataManipulator::moveExtendedSelection(QVector2D const & delta)
 
 void DataManipulator::reconnectSelectedCells()
 {
-	_connector->reconnect(getDataRef(), getSelectedCellIds());
+	_descHelper->reconnect(getDataRef(), getSelectedCellIds());
 	updateAfterCellReconnections();
 }
 

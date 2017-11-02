@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "CellConnectorImpl.h"
+#include "DescriptionHelperImpl.h"
 
 #include "Base/NumberGenerator.h"
 
@@ -9,14 +9,14 @@
 #include "Model/Local/Physics.h"
 
 
-void CellConnectorImpl::init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
+void DescriptionHelperImpl::init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
 {
 	_metric = metric;
 	_parameters = parameters;
 	_numberGen = numberGen;
 }
 
-void CellConnectorImpl::reconnect(DataDescription &data, set<uint64_t> const &changedCellIds)
+void DescriptionHelperImpl::reconnect(DataDescription &data, set<uint64_t> const &changedCellIds)
 {
 	if (!data.clusters) {
 		return;
@@ -28,7 +28,21 @@ void CellConnectorImpl::reconnect(DataDescription &data, set<uint64_t> const &ch
 	reclustering(changedAndPresentCellIds);
 }
 
-list<uint64_t> CellConnectorImpl::filterPresentCellIds(set<uint64_t> const & cellIds) const
+void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
+{
+	if (cluster.id == 0) {
+		cluster.id = _numberGen->getTag();
+	}
+	if (cluster.cells) {
+		CHECK(cluster.cells->size() == 1);	//only one cell supported
+
+		if (cluster.cells->front().id == 0) {
+			cluster.cells->front().id = _numberGen->getTag();
+		}
+	}
+}
+
+list<uint64_t> DescriptionHelperImpl::filterPresentCellIds(set<uint64_t> const & cellIds) const
 {
 	list<uint64_t> result;
 	std::copy_if(cellIds.begin(), cellIds.end(), std::back_inserter(result), [&](auto const& cellId) {
@@ -37,7 +51,7 @@ list<uint64_t> CellConnectorImpl::filterPresentCellIds(set<uint64_t> const & cel
 	return result;
 }
 
-void CellConnectorImpl::updateInternals()
+void DescriptionHelperImpl::updateInternals()
 {
 	_navi.update(*_data);
 	_cellMap.clear();
@@ -51,7 +65,7 @@ void CellConnectorImpl::updateInternals()
 	}
 }
 
-void CellConnectorImpl::updateConnectingCells(list<uint64_t> const &changedCellIds)
+void DescriptionHelperImpl::updateConnectingCells(list<uint64_t> const &changedCellIds)
 {
 	for (uint64_t changedCellId : changedCellIds) {
 		auto &cell = getCellDescRef(changedCellId);
@@ -64,7 +78,7 @@ void CellConnectorImpl::updateConnectingCells(list<uint64_t> const &changedCellI
 	}
 }
 
-void CellConnectorImpl::reclustering(list<uint64_t> const &changedCellIds)
+void DescriptionHelperImpl::reclustering(list<uint64_t> const &changedCellIds)
 {
 	unordered_set<int> affectedClusterIndices;
 	for (uint64_t lookedUpCellId : changedCellIds) {
@@ -105,7 +119,7 @@ void CellConnectorImpl::reclustering(list<uint64_t> const &changedCellIds)
 	_data->clusters = newClusters;
 }
 
-void CellConnectorImpl::lookUpCell(uint64_t cellId, ClusterDescription &newCluster, unordered_set<uint64_t> &lookedUpCellIds
+void DescriptionHelperImpl::lookUpCell(uint64_t cellId, ClusterDescription &newCluster, unordered_set<uint64_t> &lookedUpCellIds
 	, unordered_set<uint64_t> &remainingCellIds)
 {
 	if (lookedUpCellIds.find(cellId) != lookedUpCellIds.end()) {
@@ -125,7 +139,7 @@ void CellConnectorImpl::lookUpCell(uint64_t cellId, ClusterDescription &newClust
 	}
 }
 
-CellDescription & CellConnectorImpl::getCellDescRef(uint64_t cellId)
+CellDescription & DescriptionHelperImpl::getCellDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
@@ -133,7 +147,7 @@ CellDescription & CellConnectorImpl::getCellDescRef(uint64_t cellId)
 	return cluster.cells->at(cellIndex);
 }
 
-void CellConnectorImpl::removeConnections(CellDescription &cellDesc)
+void DescriptionHelperImpl::removeConnections(CellDescription &cellDesc)
 {
 	if (cellDesc.connectingCells) {
 		auto &connectingCellIds = *cellDesc.connectingCells;
@@ -146,7 +160,7 @@ void CellConnectorImpl::removeConnections(CellDescription &cellDesc)
 	}
 }
 
-void CellConnectorImpl::establishNewConnectionsWithNeighborCells(CellDescription & cellDesc)
+void DescriptionHelperImpl::establishNewConnectionsWithNeighborCells(CellDescription & cellDesc)
 {
 	int r = static_cast<int>(std::ceil(_parameters->cellMaxDistance));
 	IntVector2D pos = *cellDesc.pos;
@@ -162,7 +176,7 @@ void CellConnectorImpl::establishNewConnectionsWithNeighborCells(CellDescription
 	}
 }
 
-void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescription &cell2) const
+void DescriptionHelperImpl::establishNewConnection(CellDescription &cell1, CellDescription &cell2) const
 {
 	if (cell1.id == cell2.id) {
 		return;
@@ -188,7 +202,7 @@ void CellConnectorImpl::establishNewConnection(CellDescription &cell1, CellDescr
 	}
 }
 
-double CellConnectorImpl::getDistance(CellDescription &cell1, CellDescription &cell2) const
+double DescriptionHelperImpl::getDistance(CellDescription &cell1, CellDescription &cell2) const
 {
 	auto &pos1 = *cell1.pos;
 	auto &pos2 = *cell2.pos;
@@ -197,7 +211,7 @@ double CellConnectorImpl::getDistance(CellDescription &cell1, CellDescription &c
 	return displacement.length();
 }
 
-list<uint64_t> CellConnectorImpl::getCellIdsAtPos(IntVector2D const &pos)
+list<uint64_t> DescriptionHelperImpl::getCellIdsAtPos(IntVector2D const &pos)
 {
 	auto xIter = _cellMap.find(pos.x);
 	if (xIter != _cellMap.end()) {
@@ -223,7 +237,7 @@ namespace
 	}
 }
 
-void CellConnectorImpl::setClusterAttributes(ClusterDescription& cluster)
+void DescriptionHelperImpl::setClusterAttributes(ClusterDescription& cluster)
 {
 	cluster.pos = calcCenter(*cluster.cells);
 	cluster.angle = calcAngleBasedOnOldClusters(*cluster.cells);
@@ -235,7 +249,7 @@ void CellConnectorImpl::setClusterAttributes(ClusterDescription& cluster)
 	}
 }
 
-double CellConnectorImpl::calcAngleBasedOnOldClusters(vector<CellDescription> const & cells) const
+double DescriptionHelperImpl::calcAngleBasedOnOldClusters(vector<CellDescription> const & cells) const
 {
 	qreal result = 0.0;
 	for (auto const& cell : cells) {
@@ -259,7 +273,7 @@ namespace
 	}
 }
 
-CellConnectorImpl::ClusterVelocities CellConnectorImpl::calcVelocitiesBasedOnOldClusters(vector<CellDescription> const & cells) const
+DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBasedOnOldClusters(vector<CellDescription> const & cells) const
 {
 	CHECK(!cells.empty());
 	
@@ -296,7 +310,7 @@ CellConnectorImpl::ClusterVelocities CellConnectorImpl::calcVelocitiesBasedOnOld
 	return result;
 }
 
-optional<ClusterMetadata> CellConnectorImpl::calcMetadataBasedOnOldClusters(vector<CellDescription> const & cells) const
+optional<ClusterMetadata> DescriptionHelperImpl::calcMetadataBasedOnOldClusters(vector<CellDescription> const & cells) const
 {
 	CHECK(!cells.empty());
 

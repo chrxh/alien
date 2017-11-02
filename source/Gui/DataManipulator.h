@@ -12,7 +12,7 @@ public:
 	DataManipulator(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~DataManipulator() = default;
 
-	virtual void init(SimulationAccess* access, CellConnector* connector);
+	virtual void init(SimulationAccess* access, DescriptionHelper* connector);
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
@@ -50,7 +50,7 @@ private:
 	bool isParticlePresent(uint64_t particleId);
 
 	SimulationAccess* _access = nullptr;
-	CellConnector* _connector = nullptr;
+	DescriptionHelper* _descHelper = nullptr;
 	DataDescription _data;
 	DataDescription _unchangedData;
 

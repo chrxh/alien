@@ -43,7 +43,7 @@ struct ParticleDescription;
 class SimulationAccess;
 class ModelBuilderFacade;
 class SerializationFacade;
-class CellConnector;
+class DescriptionHelper;
 class CellComputerCompiler;
 
 struct CellClusterHash

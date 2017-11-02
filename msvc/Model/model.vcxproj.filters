@@ -33,16 +33,8 @@
     <Filter Include="Source Files\Local">
       <UniqueIdentifier>{f085e879-c578-40d7-925a-d6916880eddb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\Model\Api\CellConnector.h">
-      <Filter>Source Files\Api</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Api\CellFeatureEnums.h">
       <Filter>Source Files\Api</Filter>
     </ClInclude>
@@ -198,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\Definitions.h">
       <Filter>Source Files\Local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Api\DescriptionHelper.h">
+      <Filter>Source Files\Api</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -371,18 +366,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\AccessPortFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellConnectorImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_CellConnectorImpl.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CellConnectorImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellConnectorImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\CellFeatureFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
@@ -579,6 +562,27 @@
     <ClCompile Include="..\..\source\Model\Local\CellComputerCompilerLocal.cpp">
       <Filter>Source Files\Local</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_CellComputerCompiler.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_CellComputerCompiler.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_CellComputerCompiler.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\DescriptionHelperImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_DescriptionHelperImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DescriptionHelperImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DescriptionHelperImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\Api\SimulationAccess.h">
@@ -626,9 +630,6 @@
     <CustomBuild Include="..\..\source\Model\Local\UnitThreadController.h">
       <Filter>Source Files\Local</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Impl\CellConnectorImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Impl\CellMapImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
@@ -664,6 +665,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Local\CellComputerCompilerLocal.h">
       <Filter>Source Files\Local</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Impl\DescriptionHelperImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

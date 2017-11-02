@@ -1,18 +1,19 @@
 #pragma once
 
-#include "Model/Api/CellConnector.h"
+#include "Model/Api/DescriptionHelper.h"
 
-class CellConnectorImpl
-	: public CellConnector
+class DescriptionHelperImpl
+	: public DescriptionHelper
 {
 	Q_OBJECT
 public:
-	CellConnectorImpl(QObject *parent = nullptr) : CellConnector(parent) { }
-	virtual ~CellConnectorImpl() = default;
+	DescriptionHelperImpl(QObject *parent = nullptr) : DescriptionHelper(parent) { }
+	virtual ~DescriptionHelperImpl() = default;
 
 	virtual void init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
 	virtual void reconnect(DataDescription &data, set<uint64_t> const &changedCellIds) override;
+	virtual void makeValid(ClusterDescription& cluster) override;
 
 private:
 	list<uint64_t> filterPresentCellIds(set<uint64_t> const& cellIds) const;
