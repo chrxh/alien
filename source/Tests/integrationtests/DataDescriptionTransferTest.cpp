@@ -8,7 +8,7 @@
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/Settings.h"
 #include "Model/Api/SimulationController.h"
-#include "Model/Api/CellConnector.h"
+#include "Model/Api/DescriptionHelper.h"
 #include "Model/Local/SimulationContextLocal.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/SpaceMetric.h"

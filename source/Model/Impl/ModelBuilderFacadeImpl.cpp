@@ -30,7 +30,7 @@
 #include "SimulationControllerImpl.h"
 #include "CellComputerCompilerImpl.h"
 #include "ModelBuilderFacadeImpl.h"
-#include "CellConnectorImpl.h"
+#include "DescriptionHelperImpl.h"
 
 namespace
 {
@@ -96,12 +96,12 @@ SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationConte
 	return access;
 }
 
-CellConnector * ModelBuilderFacadeImpl::buildCellConnector(SimulationContext* contextApi) const
+DescriptionHelper * ModelBuilderFacadeImpl::buildDescriptionHelper(SimulationContext* contextApi) const
 {
-	auto connector = new CellConnectorImpl();
+	auto descHelper = new DescriptionHelperImpl();
 	auto context = static_cast<SimulationContextLocal*>(contextApi);
-	connector->init(context->getSpaceMetric(), context->getSimulationParameters(), context->getNumberGenerator());
-	return connector;
+	descHelper->init(context->getSpaceMetric(), context->getSimulationParameters(), context->getNumberGenerator());
+	return descHelper;
 }
 
 Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextLocal* context) const

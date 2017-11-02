@@ -1,0 +1,15 @@
+#pragma once
+
+#include "Model/Api/ChangeDescriptions.h"
+
+class MODEL_EXPORT DescriptionHelper
+	: public QObject
+{
+public:
+	DescriptionHelper(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~DescriptionHelper() = default;
+
+	virtual void reconnect(DataDescription& data, set<uint64_t> const& changedCellIds) = 0;
+	virtual void makeValid(ClusterDescription& cluster) = 0;
+};
+

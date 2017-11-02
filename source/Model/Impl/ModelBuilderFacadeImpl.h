@@ -12,7 +12,7 @@ public:
 		, SymbolTable* symbolTable, SimulationParameters* parameters) const override;
 	virtual SimulationAccess* buildSimulationAccess(SimulationContext* contextApi) const override;
 
-	virtual CellConnector* buildCellConnector(SimulationContext* contextApi) const override;
+	virtual DescriptionHelper* buildDescriptionHelper(SimulationContext* contextApi) const override;
 
 	virtual SymbolTable* buildDefaultSymbolTable() const override;
 	virtual SimulationParameters* buildDefaultSimulationParameters() const override;
