@@ -6,7 +6,7 @@
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/Settings.h"
 #include "Model/Api/SimulationController.h"
-#include "Model/Api/CellConnector.h"
+#include "Model/Api/DescriptionHelper.h"
 #include "Model/Local/SimulationContextLocal.h"
 #include "Model/Api/SimulationParameters.h"
 
@@ -24,7 +24,7 @@ protected:
 	SimulationController* _controller = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
-	CellConnector* _connector = nullptr;
+	DescriptionHelper* _connector = nullptr;
 
 	IntVector2D _universeSize{ 600, 300 };
 
@@ -41,7 +41,7 @@ CellConnectorTest::CellConnectorTest()
 	_controller = facade->buildSimulationController(1, { 1,1 }, _universeSize, symbols, _parameters);
 	auto context = static_cast<SimulationContextLocal*>(_controller->getContext());
 	_numberGen = context->getNumberGenerator();
-	_connector = facade->buildCellConnector(context);
+	_connector = facade->buildDescriptionHelper(context);
 }
 
 CellConnectorTest::~CellConnectorTest()

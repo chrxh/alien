@@ -61,11 +61,11 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 
 	_dataManipulator = new DataManipulator(this);
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto connector = facade->buildCellConnector(_simController->getContext());
+	auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
 
 	_toolbar->init({ 10, 10 }, _dataManipulator);
 	_dataEditor->init({ 10, 60 }, _dataManipulator, simController->getContext());
-	_dataManipulator->init(access, connector);
+	_dataManipulator->init(access, descHelper);
 	ui->visualEditor->init(simController, _dataManipulator, access);
 
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
