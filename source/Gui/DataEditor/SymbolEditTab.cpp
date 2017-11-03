@@ -60,8 +60,6 @@ void SymbolEditTab::updateDisplay()
 
         //create new row in table
         ui->tableWidget->insertRow(i);
-        ui->tableWidget->setVerticalHeaderItem(i, new QTableWidgetItem(""));
-        ui->tableWidget->verticalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
 
         //set values
         string key = keyAndValue.first;
