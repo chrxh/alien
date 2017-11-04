@@ -1,7 +1,7 @@
 #include <QMatrix4x4>
 
 #include "Model/Api/ChangeDescriptions.h"
-#include "Model/Local/SymbolTable.h"	//TODO: move to Api
+#include "Model/Api/SymbolTable.h"
 #include "Model/Api/SimulationContext.h"
 
 #include "Gui/DataManipulator.h"
