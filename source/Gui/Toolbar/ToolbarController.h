@@ -16,11 +16,13 @@ public:
 	ToolbarContext* getContext() const;
 
 	void onRequestCell();
+	void onRequestParticle();
 
 private:
 	Q_SLOT void onShow(bool visible);
 
 	ToolbarContext* _context = nullptr;
 	ToolbarView* _view = nullptr;
+	ToolbarModel* _model = nullptr;
 	DataManipulator* _manipulator = nullptr;
 };

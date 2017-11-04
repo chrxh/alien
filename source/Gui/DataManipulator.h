@@ -12,7 +12,7 @@ public:
 	DataManipulator(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~DataManipulator() = default;
 
-	virtual void init(SimulationAccess* access, DescriptionHelper* connector);
+	virtual void init(SimulationAccess* access, DescriptionHelper* connector, SimulationContext* context);
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
@@ -20,6 +20,7 @@ public:
 	virtual ParticleDescription& getParticleDescRef(uint64_t particleId);
 
 	virtual void addAndSelectCell(QVector2D const& posDelta);
+	virtual void addAndSelectParticle(QVector2D const& posDelta);
 
 	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);
 	virtual void moveSelection(QVector2D const &delta);
@@ -51,6 +52,7 @@ private:
 
 	SimulationAccess* _access = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
+	SimulationParameters* _parameters = nullptr;
 	DataDescription _data;
 	DataDescription _unchangedData;
 

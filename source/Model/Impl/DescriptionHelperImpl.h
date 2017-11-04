@@ -14,6 +14,7 @@ public:
 
 	virtual void reconnect(DataDescription &data, set<uint64_t> const &changedCellIds) override;
 	virtual void makeValid(ClusterDescription& cluster) override;
+	virtual void makeValid(ParticleDescription& particle) override;
 
 private:
 	list<uint64_t> filterPresentCellIds(set<uint64_t> const& cellIds) const;
