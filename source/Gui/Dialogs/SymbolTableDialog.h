@@ -1,10 +1,8 @@
-#ifndef SYMBOLTABLEDIALOG_H
-#define SYMBOLTABLEDIALOG_H
-
+#pragma once
 #include <QDialog>
 
 #include "Model/Api/Definitions.h"
-#include "Model/Local/SymbolTable.h"
+#include "Model/Api/SymbolTable.h"
 
 namespace Ui {
 class SymbolTableDialog;
@@ -37,4 +35,3 @@ private:
 	SymbolTable* _symbolTable;
 };
 
-#endif // SYMBOLTABLEDIALOG_H

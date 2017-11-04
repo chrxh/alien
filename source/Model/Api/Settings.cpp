@@ -1,8 +1,8 @@
 #include <QtGlobal>
 
 #include "Model/Api/CellFeatureEnums.h"
-#include "Model/Local/SymbolTable.h"
 
+#include "SymbolTable.h"
 #include "SimulationParameters.h"
 #include "Settings.h"
 

@@ -1,9 +1,9 @@
 #include <QScrollBar>
 #include <QSignalMapper>
 
-#include "Model/Local/SymbolTable.h"
-#include "gui/Settings.h"
-#include "gui/Settings.h"
+#include "Model/Api/SymbolTable.h"
+#include "Gui/Settings.h"
+#include "Gui/Settings.h"
 
 #include "HexEditWidget.h"
 #include "TokenTab.h"
