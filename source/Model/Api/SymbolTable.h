@@ -1,5 +1,4 @@
-#ifndef SYMBOLTABLE_H
-#define SYMBOLTABLE_H
+#pragma once
 
 #include "Model/Api/Definitions.h"
 
@@ -28,5 +27,3 @@ public:
 private:
     QMap<QString,QString> _symbolsByKey;
 };
-
-#endif // SYMBOLTABLE_H

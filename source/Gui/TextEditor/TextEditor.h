@@ -3,7 +3,6 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "Model/Api/CellTO.h"
 #include "Model/Api/Definitions.h"
 #include "Gui/Definitions.h"
 
@@ -55,9 +54,6 @@ public:
 Q_SIGNALS:
     void requestNewCell ();                                     //to macro editor
     void requestNewEnergyParticle ();                           //to macro editor
-    void updateCell (QList< Cell* > cells,
-                     QList< CellTO > newCellsData,
-                     bool clusterDataChanged);                  //to simulator
     void delSelection ();                                       //to macro editor
     void delExtendedSelection ();                                //to macro editor
     void defocus ();                                            //to macro editor
@@ -87,8 +83,10 @@ public Q_SLOTS:
 	void buttonShowInfoClicked();
 
 private Q_SLOTS:
+/*
     void changesFromCellEditor (CellTO newCellProperties);
     void changesFromClusterEditor (CellTO newClusterProperties);
+*/
     void changesFromEnergyParticleEditor (QVector2D pos, QVector2D vel, qreal energyValue);
     void changesFromTokenEditor (qreal energy);
     void changesFromComputerMemoryEditor (QByteArray const& data);
@@ -115,7 +113,6 @@ private:
 	TextEditorWidgets _widgets;
 
     Cell* _focusCell = nullptr;
-    CellTO _focusCellReduced;
     Particle* _focusEnergyParticle = nullptr;
     QWidget* _tabCluster = nullptr;
     QWidget* _tabCell = nullptr;

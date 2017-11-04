@@ -4,7 +4,7 @@
 #include "Base/ServiceLocator.h"
 #include "Model/Api/Settings.h"
 #include "Model/Api/SerializationFacade.h"
-#include "Model/Local/SymbolTable.h"
+#include "Model/Api/SymbolTable.h"
 #include "Model/Api/ModelBuilderFacade.h"
 #include "gui/Settings.h"
 

@@ -1,11 +1,11 @@
 #include "Base/NumberGenerator.h"
+#include "Model/Api/SimulationParameters.h"
+#include "Model/Api/SymbolTable.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/ParticleMap.h"
 #include "Model/Local/MapCompartment.h"
-#include "Model/Api/SimulationParameters.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Particle.h"
-#include "Model/Local/SymbolTable.h"
 
 #include "UnitContextImpl.h"
 

@@ -5,6 +5,7 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/Settings.h"
+#include "Model/Api/SymbolTable.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Particle.h"
@@ -25,7 +26,6 @@
 #include "Model/Local/Unit.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/AccessPortFactory.h"
-#include "Model/Local/SymbolTable.h"
 
 #include "SimulationControllerImpl.h"
 #include "CellComputerCompilerImpl.h"

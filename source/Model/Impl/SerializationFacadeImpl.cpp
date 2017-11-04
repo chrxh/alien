@@ -2,6 +2,10 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
+#include "Model/Api/SymbolTable.h"
+#include "Model/Api/Settings.h"
+#include "Model/Api/SimulationParameters.h"
+#include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Particle.h"
@@ -11,15 +15,11 @@
 #include "Model/Local/CellComputerFunction.h"
 #include "Model/Local/EnergyGuidance.h"
 #include "Model/Local/CellFeatureFactory.h"
-#include "Model/Local/SymbolTable.h"
-#include "Model/Api/Settings.h"
 #include "Model/Local/ContextFactory.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/ParticleMap.h"
 #include "Model/Local/SpaceMetricLocal.h"
-#include "Model/Api/SimulationParameters.h"
 #include "Model/Impl/UnitContextImpl.h"
-#include "Model/Api/ModelBuilderFacade.h"
 
 void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, QDataStream & stream) const
 {

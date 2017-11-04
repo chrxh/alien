@@ -483,6 +483,7 @@ void TextEditor::entitiesSelected (int numCells, int numEnergyParticles)
 
 void TextEditor::addTokenClicked ()
 {
+/*
     //create token (new token is the last token on the stack)
     int newTokenTab = _currentTokenTab+1;
 	SimulationParameters* parameters = _context->getSimulationParameters();
@@ -499,6 +500,7 @@ void TextEditor::addTokenClicked ()
 
     //activate Symbols Widget
     setTabSymbolsWidgetVisibility();
+*/
 
 /*
     //create token (new token is the last token on the stack)
@@ -531,6 +533,7 @@ void TextEditor::addTokenClicked ()
 
 void TextEditor::delTokenClicked ()
 {
+/*
     //remove token
     _focusCellReduced.tokenEnergies.removeAt(_widgets.tabTokenWidget->currentIndex());
     _focusCellReduced.tokenData.removeAt(_widgets.tabTokenWidget->currentIndex());
@@ -547,6 +550,7 @@ void TextEditor::delTokenClicked ()
 
     //update sybols widget
     setTabSymbolsWidgetVisibility();
+*/
 
 
 /*
@@ -578,6 +582,7 @@ void TextEditor::delTokenClicked ()
 
 void TextEditor::copyTokenClicked ()
 {
+/*
     requestUpdate();
     _savedTokenEnergy = _focusCellReduced.tokenEnergies[_currentTokenTab];
     _savedTokenData = _focusCellReduced.tokenData[_currentTokenTab];
@@ -585,10 +590,12 @@ void TextEditor::copyTokenClicked ()
     int numToken = _focusCellReduced.tokenEnergies.size();
 	SimulationParameters* parameters = _context->getSimulationParameters();
 	Q_EMIT numTokenUpdate(numToken, parameters->cellMaxToken, _pasteTokenPossible);
+*/
 }
 
 void TextEditor::pasteTokenClicked ()
 {
+/*
     //create token (new token is the next to current token on the stack)
     int newTokenTab = _currentTokenTab+1;
     _focusCellReduced.tokenEnergies.insert(newTokenTab, _savedTokenEnergy);
@@ -603,6 +610,7 @@ void TextEditor::pasteTokenClicked ()
 
     //update Symbols Widget
     setTabSymbolsWidgetVisibility();
+*/
 }
 
 void TextEditor::delSelectionClicked ()
@@ -640,10 +648,12 @@ void TextEditor::buttonShowInfoClicked()
 	Q_EMIT toggleInformation(_widgets.buttonShowInfo->isChecked());
 }
 
+/*
 void TextEditor::changesFromCellEditor (CellTO newCellProperties)
 {
     //copy cell properties editable by cluster editor
     _focusCellReduced.copyCellProperties(newCellProperties);
+*/
 
     //close tabs
 /*
@@ -655,7 +665,7 @@ void TextEditor::changesFromCellEditor (CellTO newCellProperties)
 */
 
     //update data for cell function: computer
-    if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
+//    if( _focusCellReduced.cellFunctionType == Enums::CellFunction::COMPUTER ) {
 
         //activate tab for computer widgets
 //        _tabTokenWidget->move(10, tabPosY2);
@@ -676,7 +686,6 @@ void TextEditor::changesFromCellEditor (CellTO newCellProperties)
         //otherwise use translated cell data
         else
 			_widgets.cellComputerEdit->updateComputerCode(_focusCellReduced.computerCode);
-*/
     }
 //    else
 //        _tabTokenWidget->move(10, tabPosY1);
@@ -688,7 +697,9 @@ void TextEditor::changesFromCellEditor (CellTO newCellProperties)
     invokeUpdateCell(false);
 
 }
+*/
 
+/*
 void TextEditor::changesFromClusterEditor (CellTO newClusterProperties)
 {
     //copy cell properties editable by cluster editor
@@ -697,6 +708,7 @@ void TextEditor::changesFromClusterEditor (CellTO newClusterProperties)
     //Q_EMIT signal to notify other instances
     invokeUpdateCell(true);
 }
+*/
 
 void TextEditor::changesFromEnergyParticleEditor (QVector2D pos, QVector2D vel, qreal energyValue)
 {
@@ -720,28 +732,34 @@ void TextEditor::changesFromEnergyParticleEditor (QVector2D pos, QVector2D vel, 
 
 void TextEditor::changesFromTokenEditor (qreal energy)
 {
+/*
     _focusCellReduced.tokenEnergies[_currentTokenTab] = energy;
 
     //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);
+*/
 }
 
 void TextEditor::changesFromComputerMemoryEditor(QByteArray const& data)
 {
+/*
     //copy cell memory
     _focusCellReduced.computerMemory = data;
 
     //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);
+*/
 }
 
 void TextEditor::changesFromTokenMemoryEditor(QByteArray data)
 {
+/*
     //copy token memory
     _focusCellReduced.tokenData[_currentTokenTab] = data;
 
     //Q_EMIT signal to notify other instances
     invokeUpdateCell(false);
+*/
 }
 
 void TextEditor::changesFromMetadataEditor(QString clusterName, QString cellName, quint8 cellColor, QString cellDescription)
@@ -765,12 +783,14 @@ void TextEditor::changesFromMetadataEditor(QString clusterName, QString cellName
 
 void TextEditor::changesFromSymbolTableEditor ()
 {
+/*
     QWidget* widget = _widgets.tabTokenWidget->currentWidget();
     TokenTab* tokenTab= qobject_cast<TokenTab*>(widget);
     if( tokenTab ) {
 		tokenTab->update(_context->getSymbolTable(), _focusCellReduced.tokenEnergies[_currentTokenTab], _focusCellReduced.tokenData[_currentTokenTab]);
     }
 //    _focusCellReduced.tokenData[_currentTokenTab] = data;
+*/
 }
 
 void TextEditor::clusterTabChanged (int index)
@@ -791,6 +811,7 @@ void TextEditor::tokenTabChanged (int index)
 
 void TextEditor::compileButtonClicked (QString code)
 {
+/*
     if( (!_context) || (!_focusCell) )
         return;
 
@@ -802,6 +823,7 @@ void TextEditor::compileButtonClicked (QString code)
     //update cell data
     _focusCellReduced.computerCode = code;
 
+*/
     //NOTE: widgets are updated via reclustered(...)
 
     //Q_EMIT signal to notify other instances
@@ -813,11 +835,13 @@ void TextEditor::compileButtonClicked (QString code)
 
 void TextEditor::invokeUpdateCell (bool clusterDataChanged)
 {
+/*
     QList< Cell* > cells;
     QList< CellTO > newCellsData;
     cells << _focusCell;
     newCellsData << _focusCellReduced;
     Q_EMIT updateCell(cells, newCellsData, clusterDataChanged);
+*/
 }
 
 void TextEditor::setTabSymbolsWidgetVisibility ()

@@ -7,7 +7,6 @@
 #include <QVector2D>
 
 #include "Model/Api/Definitions.h"
-#include "Model/Api/CellTO.h"
 #include "Model/Api/Descriptions.h"
 #include "Gui/Definitions.h"
 #include "Gui/DataManipulator.h"

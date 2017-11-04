@@ -2,12 +2,12 @@
 #include <qdebug.h>
 
 #include "Base/NumberGenerator.h"
-#include "Model/Local/UnitContext.h"
+#include "Model/Api/SimulationParameters.h"
 #include "Model/Api/Settings.h"
-#include "Model/Local/SymbolTable.h"
+#include "Model/Api/SymbolTable.h"
+#include "Model/Local/UnitContext.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Token.h"
-#include "Model/Api/SimulationParameters.h"
 
 #include "CellComputerFunctionImpl.h"
 
