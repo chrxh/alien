@@ -2,6 +2,7 @@
 #include <QWidget>
 
 #include "Gui/Definitions.h"
+#include "Gui/DataManipulator.h"
 
 class ToolbarController
 	: public QObject
@@ -20,6 +21,7 @@ public:
 
 private:
 	Q_SLOT void onShow(bool visible);
+	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);
 
 	ToolbarContext* _context = nullptr;
 	ToolbarView* _view = nullptr;

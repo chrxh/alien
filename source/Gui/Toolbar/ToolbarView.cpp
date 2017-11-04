@@ -25,3 +25,10 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 		_controller->onRequestParticle();
 	});
 }
+
+void ToolbarView::setEnableDeleteSelections(bool enable)
+{
+	ui.delSelectionButton->setEnabled(enable);
+	ui.delExtendedSelectionButton->setEnabled(enable);
+}
+

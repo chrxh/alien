@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="MetadataPropertiesEditWidget" name="metadataPropertiesEditWidget">
+    <widget class="MetadataEditWidget" name="metadataEditWidget">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -202,9 +202,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MetadataPropertiesEditWidget</class>
+   <class>MetadataEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>Gui/DataEditor/MetadataPropertiesEditWidget.h</header>
+   <header>Gui/DataEditor/MetadataEditWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

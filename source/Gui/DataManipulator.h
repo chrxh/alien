@@ -38,7 +38,7 @@ public:
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
 
-	enum class Receiver { Simulation, VisualEditor, DataEditor };
+	enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
 	Q_SIGNAL void notify(set<Receiver> const& targets);
 
 private:
