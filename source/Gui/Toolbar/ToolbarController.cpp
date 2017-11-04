@@ -1,5 +1,8 @@
 ﻿#include "ToolbarController.h"
 
+#include "Model/Api/SimulationContext.h"
+#include "Model/Api/SimulationParameters.h"
+
 #include "Gui/DataManipulator.h"
 
 #include "ToolbarView.h"
@@ -14,9 +17,10 @@ ToolbarController::ToolbarController(QWidget* parent)
 	_context = new ToolbarContext(this);
 }
 
-void ToolbarController::init(IntVector2D const & upperLeftPosition, DataManipulator* manipulator)
+void ToolbarController::init(IntVector2D const & upperLeftPosition, DataManipulator* manipulator, const SimulationContext* context)
 {
 	_manipulator = manipulator;
+	_parameters = context->getSimulationParameters();
 	_view->init(upperLeftPosition, this);
 
 	connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow);
@@ -67,4 +71,19 @@ void ToolbarController::notificationFromManipulator(set<DataManipulator::Receive
 	bool isCellSelected = !_manipulator->getSelectedCellIds().empty();
 	bool isParticleSelected = !_manipulator->getSelectedParticleIds().empty();
 	_view->setEnableDeleteSelections(isCellSelected || isParticleSelected);
+
+	if (_manipulator->getSelectedCellIds().size() == 1) {
+		uint64_t selectedCellId = *_manipulator->getSelectedCellIds().begin();
+		int numToken = 0;
+		if (auto tokens = _manipulator->getCellDescRef(selectedCellId).tokens) {
+			numToken = tokens->size();
+		}
+
+		_view->setEnableAddToken(numToken < _parameters->cellMaxToken);
+		_view->setEnableDeleteToken(numToken > 0);
+	}
+	else {
+		_view->setEnableAddToken(false);
+		_view->setEnableDeleteToken(false);
+	}
 }
