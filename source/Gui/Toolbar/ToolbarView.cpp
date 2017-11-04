@@ -32,3 +32,13 @@ void ToolbarView::setEnableDeleteSelections(bool enable)
 	ui.delExtendedSelectionButton->setEnabled(enable);
 }
 
+void ToolbarView::setEnableAddToken(bool enable)
+{
+	ui.addTokenButton->setEnabled(enable);
+}
+
+void ToolbarView::setEnableDeleteToken(bool enable)
+{
+	ui.delTokenButton->setEnabled(enable);
+}
+
