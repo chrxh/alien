@@ -65,7 +65,7 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 
 	_toolbar->init({ 10, 10 }, _dataManipulator);
 	_dataEditor->init({ 10, 60 }, _dataManipulator, simController->getContext());
-	_dataManipulator->init(access, descHelper);
+	_dataManipulator->init(access, descHelper, simController->getContext());
 	ui->visualEditor->init(simController, _dataManipulator, access);
 
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {

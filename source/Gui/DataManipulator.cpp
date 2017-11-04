@@ -1,12 +1,15 @@
 #include "DataManipulator.h"
 
 #include "Model/Api/SimulationAccess.h"
+#include "Model/Api/SimulationContext.h"
+#include "Model/Api/SimulationParameters.h"
 #include "Model/Api/DescriptionHelper.h"
 
-void DataManipulator::init(SimulationAccess * access, DescriptionHelper * connector)
+void DataManipulator::init(SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
 {
 	SET_CHILD(_access, access);
 	SET_CHILD(_descHelper, connector);
+	_parameters = context->getSimulationParameters();
 
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection);
 	connect(this, &DataManipulator::notify, this, &DataManipulator::sendDataChangesToSimulation);
@@ -38,17 +41,30 @@ ParticleDescription& DataManipulator::getParticleDescRef(uint64_t particleId)
 
 void DataManipulator::addAndSelectCell(QVector2D const & posDelta)
 {
-	QVector2D pos = _rect.center().toQVector2D();
-	auto cluster = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
-		CellDescription().setEnergy(100).setMaxConnections(4).setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
+	QVector2D pos = _rect.center().toQVector2D() + posDelta;
+	auto desc = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
+		CellDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(_parameters->cellCreationMaxConnection)
+		.setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
 		.setFlagTokenBlocked(false).setTokenBranchNumber(0).setCellFeature(
 			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER)
 		));
-	_descHelper->makeValid(cluster);
-	_data.addCluster(cluster);
-	_selectedCellIds = { cluster.cells->front().id };
-	_selectedClusterIds = { cluster.id };
-	_selectedParticleIds.clear();
+	_descHelper->makeValid(desc);
+	_data.addCluster(desc);
+	_selectedCellIds = { desc.cells->front().id };
+	_selectedClusterIds = { desc.id };
+	_selectedParticleIds = { };
+	_navi.update(_data);
+}
+
+void DataManipulator::addAndSelectParticle(QVector2D const & posDelta)
+{
+	QVector2D pos = _rect.center().toQVector2D() + posDelta;
+	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters->cellMinEnergy / 2.0);
+	_descHelper->makeValid(desc);
+	_data.addParticle(desc);
+	_selectedCellIds = { };
+	_selectedClusterIds = { };
+	_selectedParticleIds = { desc.id };
 	_navi.update(_data);
 }
 

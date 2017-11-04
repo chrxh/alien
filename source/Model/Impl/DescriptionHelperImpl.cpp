@@ -42,6 +42,13 @@ void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 	}
 }
 
+void DescriptionHelperImpl::makeValid(ParticleDescription & particle)
+{
+	if (particle.id == 0) {
+		particle.id = _numberGen->getTag();
+	}
+}
+
 list<uint64_t> DescriptionHelperImpl::filterPresentCellIds(set<uint64_t> const & cellIds) const
 {
 	list<uint64_t> result;

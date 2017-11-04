@@ -3,12 +3,14 @@
 #include "Gui/DataManipulator.h"
 
 #include "ToolbarView.h"
+#include "ToolbarModel.h"
 #include "ToolbarContext.h"
 
 ToolbarController::ToolbarController(QWidget* parent)
 	: QObject(parent)
 {
 	_view = new ToolbarView(parent);
+	_model = new ToolbarModel(this);
 	_context = new ToolbarContext(this);
 }
 
@@ -28,8 +30,18 @@ ToolbarContext * ToolbarController::getContext() const
 
 void ToolbarController::onRequestCell()
 {
-	_manipulator->addAndSelectCell({0.0, 0.0});
+	_manipulator->addAndSelectCell(_model->getPositionDeltaForNewEntity());
 	_manipulator->reconnectSelectedCells();
+	Q_EMIT _manipulator->notify({
+		DataManipulator::Receiver::DataEditor,
+		DataManipulator::Receiver::Simulation,
+		DataManipulator::Receiver::VisualEditor
+	});
+}
+
+void ToolbarController::onRequestParticle()
+{
+	_manipulator->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
 	Q_EMIT _manipulator->notify({
 		DataManipulator::Receiver::DataEditor,
 		DataManipulator::Receiver::Simulation,
