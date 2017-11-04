@@ -20,4 +20,8 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 	connect(ui.requestCellButton, &QPushButton::clicked, [this]() {
 		_controller->onRequestCell();
 	});
+
+	connect(ui.requestParticleButton, &QPushButton::clicked, [this]() {
+		_controller->onRequestParticle();
+	});
 }

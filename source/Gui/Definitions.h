@@ -29,6 +29,7 @@ class DataEditorContext;
 class ToolbarController;
 class ToolbarContext;
 class ToolbarView;
+class ToolbarModel;
 class DataEditorModel;
 class DataEditorView;
 class DataManipulator;
