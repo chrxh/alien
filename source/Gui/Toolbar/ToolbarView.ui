@@ -598,7 +598,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="delEntityButton">
+  <widget class="QToolButton" name="delSelectionButton">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -715,7 +715,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="delClusterButton">
+  <widget class="QToolButton" name="delExtendedSelectionButton">
    <property name="enabled">
     <bool>false</bool>
    </property>

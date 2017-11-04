@@ -8,9 +8,9 @@
 #include "MetadataEditTab.h"
 #include "ui_MetadataEditTab.h"
 
-MetadataEditTab::MetadataEditTab(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::MetadataEditTab)
+MetadataEditTab::MetadataEditTab(QWidget *parent)
+	: QWidget(parent)
+	, ui(new Ui::MetadataEditTab)
 {
     ui->setupUi(this);
 
@@ -34,13 +34,13 @@ void MetadataEditTab::init(DataEditorModel * model, DataEditorController * contr
 {
 	_model = model;
 	_controller = controller;
-	ui->metadataPropertiesEditWidget->init(model, controller);
+	ui->metadataEditWidget->init(model, controller);
 }
 
 void MetadataEditTab::updateDisplay ()
 {
 	auto const& metadata = *_model->getCellToEditRef().metadata;
-	ui->metadataPropertiesEditWidget->updateDisplay();
+	ui->metadataEditWidget->updateDisplay();
     ui->metadataDescriptionEdit->setText(metadata.description);
     if( ui->metadataDescriptionEdit->verticalScrollBar() )
         ui->metadataDescriptionEdit->verticalScrollBar()->setValue(0);
