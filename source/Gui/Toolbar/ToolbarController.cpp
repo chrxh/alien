@@ -18,7 +18,9 @@ void ToolbarController::init(IntVector2D const & upperLeftPosition, DataManipula
 {
 	_manipulator = manipulator;
 	_view->init(upperLeftPosition, this);
+
 	connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow);
+	connect(_manipulator, &DataManipulator::notify, this, &ToolbarController::notificationFromManipulator);
 
 	onShow(false);
 }
@@ -35,7 +37,8 @@ void ToolbarController::onRequestCell()
 	Q_EMIT _manipulator->notify({
 		DataManipulator::Receiver::DataEditor,
 		DataManipulator::Receiver::Simulation,
-		DataManipulator::Receiver::VisualEditor
+		DataManipulator::Receiver::VisualEditor,
+		DataManipulator::Receiver::Toolbar
 	});
 }
 
@@ -45,11 +48,23 @@ void ToolbarController::onRequestParticle()
 	Q_EMIT _manipulator->notify({
 		DataManipulator::Receiver::DataEditor,
 		DataManipulator::Receiver::Simulation,
-		DataManipulator::Receiver::VisualEditor
+		DataManipulator::Receiver::VisualEditor,
+		DataManipulator::Receiver::Toolbar
 	});
 }
 
 void ToolbarController::onShow(bool visible)
 {
 	_view->setVisible(visible);
+}
+
+void ToolbarController::notificationFromManipulator(set<DataManipulator::Receiver> const & targets)
+{
+	if (targets.find(DataManipulator::Receiver::Toolbar) == targets.end()) {
+		return;
+	}
+
+	bool isCellSelected = !_manipulator->getSelectedCellIds().empty();
+	bool isParticleSelected = !_manipulator->getSelectedParticleIds().empty();
+	_view->setEnableDeleteSelections(isCellSelected || isParticleSelected);
 }

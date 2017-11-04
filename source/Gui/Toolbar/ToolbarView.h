@@ -16,6 +16,8 @@ public:
 
 	void init(IntVector2D const& upperLeftPosition, ToolbarController* _controller);
 
+	void setEnableDeleteSelections(bool enable);
+
 private:
 	Ui::Toolbar ui;
 
