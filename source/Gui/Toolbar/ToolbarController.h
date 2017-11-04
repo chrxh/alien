@@ -12,7 +12,7 @@ public:
 	ToolbarController(QWidget * parent = nullptr);
 	virtual ~ToolbarController() = default;
 
-	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator);
+	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator, const SimulationContext* context);
 
 	ToolbarContext* getContext() const;
 
@@ -27,4 +27,5 @@ private:
 	ToolbarView* _view = nullptr;
 	ToolbarModel* _model = nullptr;
 	DataManipulator* _manipulator = nullptr;
+	const SimulationParameters* _parameters = nullptr;
 };
