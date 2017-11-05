@@ -15,7 +15,7 @@ public:
 
 	void setClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
 	void setParticle(ParticleDescription const& particle);
-	void setSelectionIds(set<uint64_t> const& selectedCellIds, set<uint64_t> const& selectedParticleIds);
+	void setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds);
 
 	DataChangeDescription getAndUpdateChanges();
 
@@ -36,8 +36,8 @@ private:
 	DataDescription _unchangedData;
 	DescriptionNavigator _navi;
 
-	set<uint64_t> _selectedCellIds;
-	set<uint64_t> _selectedParticleIds;
+	unordered_set<uint64_t> _selectedCellIds;
+	unordered_set<uint64_t> _selectedParticleIds;
 
 	SimulationParameters* _parameters = nullptr;
 	map<string, string> _symbols;

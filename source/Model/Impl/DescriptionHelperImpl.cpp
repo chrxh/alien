@@ -16,16 +16,33 @@ void DescriptionHelperImpl::init(SpaceMetric *metric, SimulationParameters *para
 	_numberGen = numberGen;
 }
 
-void DescriptionHelperImpl::reconnect(DataDescription &data, set<uint64_t> const &changedCellIds)
+void DescriptionHelperImpl::reconnect(DataDescription &data, unordered_set<uint64_t> const &changedCellIds)
 {
 	if (!data.clusters) {
 		return;
 	}
 	_data = &data;
+
 	updateInternals();
 	list<uint64_t> changedAndPresentCellIds = filterPresentCellIds(changedCellIds);
 	updateConnectingCells(changedAndPresentCellIds);
-	reclustering(changedAndPresentCellIds);
+
+	unordered_set<uint64_t> clusterIds;
+	for (uint64_t cellId : changedAndPresentCellIds) {
+		clusterIds.insert(_navi.clusterIdsByCellIds.at(cellId));
+	}
+	reclustering(clusterIds);
+}
+
+void DescriptionHelperImpl::recluster(DataDescription & data, unordered_set<uint64_t> const & changedClusterIds)
+{
+	if (!data.clusters) {
+		return;
+	}
+	_data = &data;
+
+	updateInternals();
+	reclustering(changedClusterIds);
 }
 
 void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
@@ -49,7 +66,7 @@ void DescriptionHelperImpl::makeValid(ParticleDescription & particle)
 	}
 }
 
-list<uint64_t> DescriptionHelperImpl::filterPresentCellIds(set<uint64_t> const & cellIds) const
+list<uint64_t> DescriptionHelperImpl::filterPresentCellIds(unordered_set<uint64_t> const & cellIds) const
 {
 	list<uint64_t> result;
 	std::copy_if(cellIds.begin(), cellIds.end(), std::back_inserter(result), [&](auto const& cellId) {
@@ -85,11 +102,11 @@ void DescriptionHelperImpl::updateConnectingCells(list<uint64_t> const &changedC
 	}
 }
 
-void DescriptionHelperImpl::reclustering(list<uint64_t> const &changedCellIds)
+void DescriptionHelperImpl::reclustering(unordered_set<uint64_t> const& clusterIds)
 {
-	unordered_set<int> affectedClusterIndices;
-	for (uint64_t lookedUpCellId : changedCellIds) {
-		affectedClusterIndices.insert(_navi.clusterIndicesByCellIds.at(lookedUpCellId));
+	unordered_set<uint64_t> affectedClusterIndices;
+	for (uint64_t clusterId : clusterIds) {
+		affectedClusterIndices.insert(_navi.clusterIndicesByClusterIds.at(clusterId));
 	}
 
 	vector<ClusterDescription> newClusters;

@@ -70,6 +70,49 @@ void DataManipulator::addAndSelectParticle(QVector2D const & posDelta)
 
 void DataManipulator::deleteSelection()
 {
+	if (_data.clusters) {
+		unordered_set<uint64_t> modifiedClusterIds;
+		vector<ClusterDescription> newClusters;
+		for (auto const& cluster : *_data.clusters) {
+			if (_selectedClusterIds.find(cluster.id) == _selectedClusterIds.end()) {
+				newClusters.push_back(cluster);
+			}
+			else if (cluster.cells) {
+				vector<CellDescription> newCells;
+				for (auto const& cell : *cluster.cells) {
+					if (_selectedCellIds.find(cell.id) == _selectedCellIds.end()) {
+						newCells.push_back(cell);
+					}
+					else {
+						TODO: remove cell connections
+					}
+				}
+				if (!newCells.empty()) {
+					ClusterDescription newCluster = cluster;
+					newCluster.cells = newCells;
+					newClusters.push_back(newCluster);
+					modifiedClusterIds.insert(cluster.id);
+				}
+			}
+		}
+		_data.clusters = newClusters;
+		if (!modifiedClusterIds.empty()) {
+			_descHelper->recluster(_data, modifiedClusterIds);
+		}
+	}
+	if (_data.particles) {
+		vector<ParticleDescription> newParticles;
+		for (auto const& particle : *_data.particles) {
+			if (_selectedParticleIds.find(particle.id) == _selectedParticleIds.end()) {
+				newParticles.push_back(particle);
+			}
+		}
+		_data.particles = newParticles;
+	}
+	_selectedCellIds = {};
+	_selectedClusterIds = {};
+	_selectedParticleIds = {};
+	_navi.update(_data);
 }
 
 void DataManipulator::deleteExtendedSelection()
@@ -127,8 +170,8 @@ void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)
 
 void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
-	_selectedCellIds = set<uint64_t>(cellIds.begin(), cellIds.end());
-	_selectedParticleIds = set<uint64_t>(particleIds.begin(), particleIds.end());
+	_selectedCellIds = unordered_set<uint64_t>(cellIds.begin(), cellIds.end());
+	_selectedParticleIds = unordered_set<uint64_t>(particleIds.begin(), particleIds.end());
 	_selectedClusterIds.clear();
 	for (uint64_t cellId : cellIds) {
 		auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(cellId);
@@ -168,12 +211,12 @@ bool DataManipulator::areEntitiesSelected() const
 	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
 }
 
-set<uint64_t> DataManipulator::getSelectedCellIds() const
+unordered_set<uint64_t> DataManipulator::getSelectedCellIds() const
 {
 	return _selectedCellIds;
 }
 
-set<uint64_t> DataManipulator::getSelectedParticleIds() const
+unordered_set<uint64_t> DataManipulator::getSelectedParticleIds() const
 {
 	return _selectedParticleIds;
 }

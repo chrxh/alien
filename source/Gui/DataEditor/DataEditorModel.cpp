@@ -29,7 +29,7 @@ void DataEditorModel::setParticle(ParticleDescription const & particle)
 	_selectedParticleIds = { particle.id };
 }
 
-void DataEditorModel::setSelectionIds(set<uint64_t> const& selectedCellIds, set<uint64_t> const& selectedParticleIds)
+void DataEditorModel::setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds)
 {
 	_data.clear();
 	_unchangedData = _data;
