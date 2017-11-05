@@ -12,15 +12,16 @@ public:
 
 	virtual void init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
-	virtual void reconnect(DataDescription &data, set<uint64_t> const &changedCellIds) override;
+	virtual void reconnect(DataDescription& data, unordered_set<uint64_t> const& changedCellIds) override;
+	virtual void recluster(DataDescription& data, unordered_set<uint64_t> const& changedClusterIds) override;
 	virtual void makeValid(ClusterDescription& cluster) override;
 	virtual void makeValid(ParticleDescription& particle) override;
 
 private:
-	list<uint64_t> filterPresentCellIds(set<uint64_t> const& cellIds) const;
+	list<uint64_t> filterPresentCellIds(unordered_set<uint64_t> const& cellIds) const;
 	void updateInternals();
 	void updateConnectingCells(list<uint64_t> const &changedCellIds);
-	void reclustering(list<uint64_t> const &changedCellIds);
+	void reclustering(unordered_set<uint64_t> const& clusterIds);
 
 	CellDescription& getCellDescRef(uint64_t cellId);
 	void removeConnections(CellDescription &cellDesc);
