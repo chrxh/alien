@@ -18,6 +18,8 @@ public:
 
 	void onRequestCell();
 	void onRequestParticle();
+	void onDeleteSelection();
+	void onDeleteExtendedSelection();
 
 private:
 	Q_SLOT void onShow(bool visible);
