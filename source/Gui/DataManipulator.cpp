@@ -68,6 +68,36 @@ void DataManipulator::addAndSelectParticle(QVector2D const & posDelta)
 	_navi.update(_data);
 }
 
+void DataManipulator::deleteSelection()
+{
+}
+
+void DataManipulator::deleteExtendedSelection()
+{
+	if (_data.clusters) {
+		vector<ClusterDescription> newClusters;
+		for (auto const& cluster : *_data.clusters) {
+			if (_selectedClusterIds.find(cluster.id) == _selectedClusterIds.end()) {
+				newClusters.push_back(cluster);
+			}
+		}
+		_data.clusters = newClusters;
+	}
+	if (_data.particles) {
+		vector<ParticleDescription> newParticles;
+		for (auto const& particle : *_data.particles) {
+			if (_selectedParticleIds.find(particle.id) == _selectedParticleIds.end()) {
+				newParticles.push_back(particle);
+			}
+		}
+		_data.particles = newParticles;
+	}
+	_selectedCellIds = {};
+	_selectedClusterIds = {};
+	_selectedParticleIds = {};
+	_navi.update(_data);
+}
+
 bool DataManipulator::isCellPresent(uint64_t cellId)
 {
 	return _navi.cellIds.find(cellId) != _navi.cellIds.end();

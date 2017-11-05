@@ -57,6 +57,28 @@ void ToolbarController::onRequestParticle()
 	});
 }
 
+void ToolbarController::onDeleteSelection()
+{
+	_manipulator->deleteSelection();
+	Q_EMIT _manipulator->notify({
+		DataManipulator::Receiver::DataEditor,
+		DataManipulator::Receiver::Simulation,
+		DataManipulator::Receiver::VisualEditor,
+		DataManipulator::Receiver::Toolbar
+	});
+}
+
+void ToolbarController::onDeleteExtendedSelection()
+{
+	_manipulator->deleteExtendedSelection();
+	Q_EMIT _manipulator->notify({
+		DataManipulator::Receiver::DataEditor,
+		DataManipulator::Receiver::Simulation,
+		DataManipulator::Receiver::VisualEditor,
+		DataManipulator::Receiver::Toolbar
+	});
+}
+
 void ToolbarController::onShow(bool visible)
 {
 	_view->setVisible(visible);
