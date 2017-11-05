@@ -83,9 +83,6 @@ void DataManipulator::deleteSelection()
 					if (_selectedCellIds.find(cell.id) == _selectedCellIds.end()) {
 						newCells.push_back(cell);
 					}
-					else {
-						TODO: remove cell connections
-					}
 				}
 				if (!newCells.empty()) {
 					ClusterDescription newCluster = cluster;
