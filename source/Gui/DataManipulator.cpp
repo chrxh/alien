@@ -68,6 +68,31 @@ void DataManipulator::addAndSelectParticle(QVector2D const & posDelta)
 	_navi.update(_data);
 }
 
+namespace
+{
+	void correctConnections(vector<CellDescription> &cells)
+	{
+		unordered_set<uint64_t> cellSet;
+		std::transform(cells.begin(), cells.end(), std::inserter(cellSet, cellSet.begin()),
+			[](CellDescription const & cell) {
+				return cell.id;
+			});
+
+		for (auto& cell : cells) {
+			if (cell.connectingCells) {
+				list<uint64_t> newConnectingCells;
+				for (uint64_t const& connectingCell : *cell.connectingCells) {
+					if (cellSet.find(connectingCell) != cellSet.end()) {
+						newConnectingCells.push_back(connectingCell);
+					}
+				}
+				cell.connectingCells = newConnectingCells;
+			}
+		}
+	}
+}
+
+
 void DataManipulator::deleteSelection()
 {
 	if (_data.clusters) {
@@ -83,11 +108,9 @@ void DataManipulator::deleteSelection()
 					if (_selectedCellIds.find(cell.id) == _selectedCellIds.end()) {
 						newCells.push_back(cell);
 					}
-					else {
-						TODO: remove cell connections
-					}
 				}
 				if (!newCells.empty()) {
+					correctConnections(newCells);
 					ClusterDescription newCluster = cluster;
 					newCluster.cells = newCells;
 					newClusters.push_back(newCluster);

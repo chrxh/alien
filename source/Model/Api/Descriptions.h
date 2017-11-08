@@ -201,4 +201,3 @@ struct DescriptionNavigator
 		}
 	}
 };
-
