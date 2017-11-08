@@ -178,7 +178,7 @@ void DataManipulator::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
-	Q_EMIT notify({ Receiver::DataEditor, Receiver::VisualEditor });
+	Q_EMIT notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar });
 }
 
 void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)
@@ -343,9 +343,28 @@ void DataManipulator::updateInternals(DataDescription const &data)
 {
 	_data = data;
 	_unchangedData = _data;
-	_selectedCellIds.clear();
-	_selectedClusterIds.clear();
-	_selectedParticleIds.clear();
+
 	_navi.update(data);
+
+	unordered_set<uint64_t> newSelectedCells;
+	std::copy_if(_selectedCellIds.begin(), _selectedCellIds.end(), std::inserter(newSelectedCells, newSelectedCells.begin()), 
+		[this](uint64_t cellId) {
+			return _navi.cellIds.find(cellId) != _navi.cellIds.end();
+		});
+	_selectedCellIds = newSelectedCells;
+
+	unordered_set<uint64_t> newSelectedClusterIds;
+	std::copy_if(_selectedClusterIds.begin(), _selectedClusterIds.end(), std::inserter(newSelectedClusterIds, newSelectedClusterIds.begin()),
+		[this](uint64_t clusterId) {
+			return _navi.clusterIndicesByClusterIds.find(clusterId) != _navi.clusterIndicesByClusterIds.end();
+		});
+	_selectedClusterIds = newSelectedClusterIds;
+
+	unordered_set<uint64_t> newSelectedParticles;
+	std::copy_if(_selectedParticleIds.begin(), _selectedParticleIds.end(), std::inserter(newSelectedParticles, newSelectedParticles.begin()),
+		[this](uint64_t particleId) {
+			return _navi.particleIds.find(particleId) != _navi.particleIds.end();
+		});
+	_selectedParticleIds = newSelectedParticles;
 }
 
