@@ -79,6 +79,17 @@ void ToolbarController::onDeleteExtendedSelection()
 	});
 }
 
+void ToolbarController::onRequestToken()
+{
+	_manipulator->addToken();
+	Q_EMIT _manipulator->notify({
+		DataManipulator::Receiver::DataEditor,
+		DataManipulator::Receiver::Simulation,
+		DataManipulator::Receiver::VisualEditor,
+		DataManipulator::Receiver::Toolbar
+	});
+}
+
 void ToolbarController::onShow(bool visible)
 {
 	_view->setVisible(visible);
