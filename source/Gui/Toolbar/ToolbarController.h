@@ -20,6 +20,7 @@ public:
 	void onRequestParticle();
 	void onDeleteSelection();
 	void onDeleteExtendedSelection();
+	void onRequestToken();
 
 private:
 	Q_SLOT void onShow(bool visible);

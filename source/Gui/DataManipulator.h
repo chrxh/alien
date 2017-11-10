@@ -23,6 +23,7 @@ public:
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
+	virtual void addToken();
 
 	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);
 	virtual void moveSelection(QVector2D const &delta);

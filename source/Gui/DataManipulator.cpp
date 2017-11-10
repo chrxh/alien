@@ -164,6 +164,20 @@ void DataManipulator::deleteExtendedSelection()
 	_navi.update(_data);
 }
 
+void DataManipulator::addToken()
+{
+	CHECK(_selectedCellIds.size() == 1);
+	auto& cell = getCellDescRef(*_selectedCellIds.begin());
+
+	int numToken = 0;
+	if (cell.tokens) {
+		numToken = cell.tokens->size();
+	}
+	if (numToken < _parameters->cellMaxToken) {
+		cell.addToken(TokenDescription().setEnergy(_parameters->tokenCreationEnergy));
+	}
+}
+
 bool DataManipulator::isCellPresent(uint64_t cellId)
 {
 	return _navi.cellIds.find(cellId) != _navi.cellIds.end();
