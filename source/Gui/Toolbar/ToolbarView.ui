@@ -130,7 +130,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="addTokenButton">
+  <widget class="QToolButton" name="requestTokenButton">
    <property name="enabled">
     <bool>false</bool>
    </property>

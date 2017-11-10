@@ -58,6 +58,14 @@ struct MODEL_EXPORT CellDescription
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
 	CellDescription& setCellFeature(CellFeatureDescription const& value) { cellFeature = value; return *this; }
 	CellDescription& setTokens(vector<TokenDescription> const& value) { tokens = value; return *this; }
+	CellDescription& addToken(TokenDescription const& value)
+	{
+		if (!tokens) {
+			tokens = vector<TokenDescription>();
+		}
+		tokens->push_back(value);
+		return *this;
+	}
 };
 
 struct ClusterDescription

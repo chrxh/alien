@@ -29,6 +29,9 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 	connect(ui.delExtendedSelectionButton, &QPushButton::clicked, [this]() {
 		_controller->onDeleteExtendedSelection();
 	});
+	connect(ui.requestTokenButton, &QPushButton::clicked, [this]() {
+		_controller->onRequestToken();
+	});
 }
 
 void ToolbarView::setEnableDeleteSelections(bool enable)
@@ -39,7 +42,7 @@ void ToolbarView::setEnableDeleteSelections(bool enable)
 
 void ToolbarView::setEnableAddToken(bool enable)
 {
-	ui.addTokenButton->setEnabled(enable);
+	ui.requestTokenButton->setEnabled(enable);
 }
 
 void ToolbarView::setEnableDeleteToken(bool enable)
