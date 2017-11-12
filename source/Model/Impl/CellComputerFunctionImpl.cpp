@@ -84,7 +84,7 @@ namespace {
 				s.chop(1);
 			}
 		}
-		s = symbols->applyTableToCode(s);
+		s = QString::fromStdString(symbols->getValue(s.toStdString()));
 		return prefix + s + postfix;
 	}
 

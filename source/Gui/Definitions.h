@@ -7,12 +7,12 @@ class QGraphicsView;
 class QGraphicsScene;
 class QTabWidget;
 class QTableWidgetItem;
+class QSignalMapper;
 
 class CellItem;
 class ParticleItem;
 class CellConnectionItem;
 class ItemConfig;
-class TextEditor;
 class SimulationMonitor;
 class TutorialWindow;
 class StartScreenController;
@@ -40,6 +40,7 @@ class CellComputerEditTab;
 class ParticleEditTab;
 class SelectionEditTab;
 class SymbolEditTab;
+class HexEditWidget;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 

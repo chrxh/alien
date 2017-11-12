@@ -1,0 +1,276 @@
+#include <QScrollBar>
+#include <QSignalMapper>
+
+#include "Model/Api/SymbolTable.h"
+#include "Gui/Settings.h"
+#include "Gui/Settings.h"
+
+#include "DataEditorModel.h"
+#include "HexEditWidget.h"
+#include "TokenEditTab.h"
+#include "ui_TokenEditTab.h"
+
+TokenEditTab::TokenEditTab(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::TokenEditTab),
+    _signalMapper(new QSignalMapper(this)),
+    _signalMapper2(new QSignalMapper(this)),
+    _signalMapper3(new QSignalMapper(this))
+{
+    ui->setupUi(this);
+
+    //set color
+    QPalette p = ui->tokenMemoryLabel->palette();
+    p.setColor(QPalette::WindowText, CELL_EDIT_CAPTION_COLOR1);
+    ui->tokenMemoryLabel->setPalette(p);
+    p.setColor(QPalette::WindowText, CELL_EDIT_DATA_COLOR1);
+    p.setColor(QPalette::Text, CELL_EDIT_DATA_COLOR1);
+    p.setColor(QPalette::Base, QColor(0,0,0));
+    p.setColor(QPalette::Window, QColor(0,0,0));
+    ui->tableWidget->setPalette(p);
+    ui->tableWidget->setStyleSheet("background-color: #000000; color: #B0B0B0; gridline-color: #303030;");
+    ui->tableWidget->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
+
+//    ui->tableWidget->horizontalHeader()->setPalette(p);
+/*    QString s = "::section{background: #000000; font-family: Courier New; font-weight: bold; font-size: 12px;} ";
+    ui->tableWidget->horizontalHeader()->setStyleSheet(s);
+    ui->tableWidget->verticalHeader()->setStyleSheet(s);*/
+
+    //set font
+    ui->tableWidget->setFont(GuiSettings::getGlobalFont());
+
+    //set section length
+    ui->tableWidget->horizontalHeader()->resizeSection(0, 60);
+    ui->tableWidget->horizontalHeader()->resizeSection(1, 195);
+    ui->tableWidget->horizontalHeader()->resizeSection(2, 100);
+    ui->tableWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+
+    connect(ui->tokenEditWidget, SIGNAL(dataChanged(qreal)), this, SIGNAL(tokenPropChanged(qreal)));
+    connect(_signalMapper, SIGNAL(mapped(int)), this, SLOT(tokenMemoryChanged_Slot(int)));
+    connect(_signalMapper2, SIGNAL(mapped(int)), this, SLOT(tokenMemoryCursorReachedBeginning_Slot(int)));
+    connect(_signalMapper3, SIGNAL(mapped(int)), this, SLOT(tokenMemoryCursorReachedEnd_Slot(int)));
+}
+
+TokenEditTab::~TokenEditTab()
+{
+    delete ui;
+}
+
+void TokenEditTab::init(DataEditorModel * model, DataEditorController * controller)
+{
+	_model = model;
+	_controller = controller;
+}
+
+void TokenEditTab::updateDisplay(int tokenIndex)
+{
+	_tokenIndex = tokenIndex;
+
+	//    ui->tokenMemoryEditor->update(tokenMemory);
+	auto const& token = _model->getTokenToEditRef(_tokenIndex);
+	ui->tokenEditWidget->update(*token.energy);
+
+	//delete rows in the table
+	while (ui->tableWidget->rowCount() > 0)
+		ui->tableWidget->removeRow(0);
+
+	//find all addresses from variables
+	_hexEditByStartAddress.clear();
+	QMap< quint8, QStringList > addressVarMap;
+	for(auto const& keyAndValue : _model->getSymbolTable()->getEntries()) {
+		QString k = QString::fromStdString(keyAndValue.first);
+		QString v = QString::fromStdString(keyAndValue.second);
+
+		//fast check if variable or not
+		if (v.size() > 1) {
+			if ((v.at(0) == QChar('[')) && (v.at(1) != QChar('['))) {
+				int i = v.indexOf("]");
+				if (i >= 0) {
+					bool ok(true);
+					quint32 addr = v.mid(1, i - 1).toUInt(&ok) % 256;
+					if (ok) {
+						addressVarMap[addr] << k;
+					}
+				}
+			}
+		}
+	}
+
+	int row = 0;
+	int tokenMemPointer = 0;
+	QMapIterator< quint8, QStringList > addressVarMapIt(addressVarMap);
+	do {
+
+		//add address block for variable
+		qint32 k = -1;
+		if (addressVarMapIt.hasNext()) {
+			addressVarMapIt.next();
+			k = addressVarMapIt.key();
+			QStringList v = addressVarMapIt.value();
+			ui->tableWidget->insertRow(row);
+
+			//set address and var info
+			ui->tableWidget->setItem(row, 0, new QTableWidgetItem(QString("%1").arg(k, 2, 16, QChar('0')).toUpper()));
+			ui->tableWidget->setItem(row, 1, new QTableWidgetItem(v.join(QChar('\n'))));
+			ui->tableWidget->item(row, 0)->setFlags(Qt::NoItemFlags);
+			ui->tableWidget->item(row, 0)->setTextAlignment(Qt::AlignTop);
+			ui->tableWidget->item(row, 0)->setTextColor(CELL_EDIT_TEXT_COLOR1);
+			ui->tableWidget->item(row, 1)->setFlags(Qt::NoItemFlags);
+			ui->tableWidget->item(row, 1)->setTextAlignment(Qt::AlignTop);
+			ui->tableWidget->item(row, 1)->setTextColor(CELL_EDIT_TEXT_COLOR2);
+			ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
+
+			//create hex editor
+			HexEditWidget* hex = new HexEditWidget();
+			hex->setMinimumHeight(26 + 15 * (v.size() - 1));
+			hex->setGeometry(0, 0, 100, 26 + 15 * (v.size() - 1));
+			hex->setMaximumHeight(26 + 15 * (v.size() - 1));
+			hex->setStyleSheet("border: 0px");
+			hex->updateDisplay(token.data->mid(tokenMemPointer, 1));
+			ui->tableWidget->setCellWidget(row, 2, hex);
+			ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);
+
+			//update signal mapper
+			_signalMapper->setMapping(hex, tokenMemPointer);
+			_signalMapper2->setMapping(hex, tokenMemPointer);
+			_signalMapper3->setMapping(hex, tokenMemPointer);
+			connect(hex, SIGNAL(dataChanged(QByteArray)), _signalMapper, SLOT(map()));
+			connect(hex, SIGNAL(cursorReachedBeginning(int)), _signalMapper2, SLOT(map()));
+			connect(hex, SIGNAL(cursorReachedEnd(int)), _signalMapper3, SLOT(map()));
+			_hexEditByStartAddress[tokenMemPointer] = hex;
+
+			//update pointer
+			++row;
+			++tokenMemPointer;
+		}
+
+		//read next address for variable
+		qint32 kNew = -1;
+		if (addressVarMapIt.hasNext()) {
+			addressVarMapIt.next();
+			kNew = addressVarMapIt.key();
+			addressVarMapIt.previous();
+		}
+
+		//calc data block address range
+		if (k == -1)
+			k = 0;
+		else
+			k++;
+		if (kNew == -1)
+			kNew = 256;
+
+		//add data address block?
+		if (kNew > k) {
+			ui->tableWidget->insertRow(row);
+			if (kNew > (k + 1))
+				ui->tableWidget->setItem(row, 0, new QTableWidgetItem(QString("%1 - %2").arg(k, 2, 16, QChar('0')).arg(kNew, 2, 16, QChar('0')).toUpper()));
+			else
+				ui->tableWidget->setItem(row, 0, new QTableWidgetItem(QString("%1").arg(k, 2, 16, QChar('0')).toUpper()));
+			ui->tableWidget->setItem(row, 1, new QTableWidgetItem("(pure data block)"));
+			//            ui->tableWidget->setItem(row, 2, new QTableWidgetItem("blabla"));
+			ui->tableWidget->item(row, 0)->setFlags(Qt::NoItemFlags);
+			ui->tableWidget->item(row, 0)->setTextAlignment(Qt::AlignTop);
+			ui->tableWidget->item(row, 0)->setTextColor(CELL_EDIT_TEXT_COLOR1);
+			ui->tableWidget->item(row, 1)->setFlags(Qt::NoItemFlags);
+			ui->tableWidget->item(row, 1)->setTextAlignment(Qt::AlignTop);
+			ui->tableWidget->item(row, 1)->setTextColor(CELL_EDIT_TEXT_COLOR2);
+			ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
+
+			HexEditWidget* hex = new HexEditWidget();
+			int size = (kNew - k) / 6;
+			hex->setMaximumHeight(26 + 13 * size);
+			hex->setMinimumHeight(26 + 13 * size);
+			hex->setGeometry(0, 0, 100, 26 + 13 * size);
+			hex->setStyleSheet("border: 0px");
+			hex->updateDisplay(token.data->mid(tokenMemPointer, kNew - k));
+			ui->tableWidget->setCellWidget(row, 2, hex);
+			ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);
+
+			//update signal mapper
+			_signalMapper->setMapping(hex, tokenMemPointer);
+			_signalMapper2->setMapping(hex, tokenMemPointer);
+			_signalMapper3->setMapping(hex, tokenMemPointer);
+			connect(hex, SIGNAL(dataChanged(QByteArray)), _signalMapper, SLOT(map()));
+			connect(hex, SIGNAL(cursorReachedBeginning(int)), _signalMapper2, SLOT(map()));
+			connect(hex, SIGNAL(cursorReachedEnd(int)), _signalMapper3, SLOT(map()));
+			_hexEditByStartAddress[tokenMemPointer] = hex;
+
+			//update pointer
+			++row;
+			tokenMemPointer = tokenMemPointer + kNew - k;
+		}
+	} while (addressVarMapIt.hasNext());
+}
+
+void TokenEditTab::requestUpdate ()
+{
+    ui->tokenEditWidget->requestUpdate();
+	auto const& token = _model->getTokenToEditRef(_tokenIndex);
+    Q_EMIT tokenMemoryChanged(*token.data);
+}
+
+void TokenEditTab::tokenMemoryChanged_Slot (int tokenMemPointer)
+{
+	auto& token = _model->getTokenToEditRef(_tokenIndex);
+	HexEditWidget* hex = _hexEditByStartAddress[tokenMemPointer];
+    if( hex ) {
+        QByteArray newData = hex->getData();
+        for(int i = 0; i < newData.size(); ++i) {
+			token.data.get()[tokenMemPointer + i] = newData[i];
+        }
+    }
+    Q_EMIT tokenMemoryChanged(*token.data);
+}
+
+void TokenEditTab::tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer)
+{
+    if(tokenMemPointer > 0) {
+
+        //get cursor column position
+//        HexEdit* hex = _hexEditList[tokenMemPointer];
+//        int oldPos = hex->textCursor().columnNumber();
+
+        //set focus
+        HexEditWidget* preHex = _hexEditByStartAddress.lowerBound(tokenMemPointer).operator --().value();
+        preHex->setFocus(Qt::OtherFocusReason);
+
+        //calc row (QTableWidget does not give correct information because the widget inside an table item is focused...)
+        QMap<quint8, HexEditWidget*>::iterator it(_hexEditByStartAddress.lowerBound(tokenMemPointer));
+        int row = 0;
+        while(it.key() != 0) {
+            it--;
+            row++;
+        }
+
+        //set cursor position
+//        preHex->textCursor().setPosition(1);//oldPos);
+
+        //scroll to row
+        ui->tableWidget->scrollToItem(ui->tableWidget->item(row-1, 0));
+    }
+}
+
+void TokenEditTab::tokenMemoryCursorReachedEnd_Slot (int tokenMemPointer)
+{
+    if(_hexEditByStartAddress.lowerBound(tokenMemPointer).operator ++() != _hexEditByStartAddress.end()) {
+
+        //set focus
+        HexEditWidget* nextHex = _hexEditByStartAddress.lowerBound(tokenMemPointer).operator ++().value();
+        nextHex->setFocus(Qt::OtherFocusReason);
+
+        //calc row (QTableWidget does not give correct information because the widget inside an table item is focused...)
+        QMap<quint8, HexEditWidget*>::iterator it(_hexEditByStartAddress.lowerBound(tokenMemPointer));
+        int row = 0;
+        while(it.key() != 0) {
+            it--;
+            row++;
+        }
+
+        //scroll to row
+        ui->tableWidget->scrollToItem(ui->tableWidget->item(row+1, 0));
+    }
+}
+
+

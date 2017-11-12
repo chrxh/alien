@@ -59,6 +59,7 @@ private:
 	DataDescription _data;
 	DataDescription _unchangedData;
 
+	optional<uint> _selectedTokenIndex;
 	unordered_set<uint64_t> _selectedCellIds;
 	unordered_set<uint64_t> _selectedClusterIds;
 	unordered_set<uint64_t> _selectedParticleIds;

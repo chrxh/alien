@@ -7,6 +7,12 @@ DataEditorModel::DataEditorModel(QObject *parent)
 {
 }
 
+void DataEditorModel::init(SimulationParameters const* parameters, SymbolTable* symbols)
+{
+	_parameters = parameters;
+	_symbols = symbols;
+}
+
 void DataEditorModel::setClusterAndCell(ClusterDescription const & cluster, uint64_t cellId)
 {
 	_data.clear();
@@ -46,6 +52,12 @@ DataChangeDescription DataEditorModel::getAndUpdateChanges()
 	return result;
 }
 
+TokenDescription & DataEditorModel::getTokenToEditRef(int tokenIndex)
+{
+	auto& cell = getCellToEditRef();
+	return cell.tokens->at(tokenIndex);
+}
+
 CellDescription & DataEditorModel::getCellToEditRef()
 {
 	uint64_t selectedCellId = *_selectedCellIds.begin();
@@ -78,17 +90,13 @@ int DataEditorModel::getNumParticles() const
 	return _selectedParticleIds.size();
 }
 
-SimulationParameters * DataEditorModel::getSimulationParameters() const
+SimulationParameters const* DataEditorModel::getSimulationParameters() const
 {
 	return _parameters;
 }
 
-void DataEditorModel::setSimulationParameters(SimulationParameters * parameters)
-{
-	_parameters = parameters;
-}
-
-map<string, string>& DataEditorModel::getSymbolsRef()
+SymbolTable * DataEditorModel::getSymbolTable() const
 {
 	return _symbols;
 }
+

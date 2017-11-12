@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TokenTab</class>
- <widget class="QWidget" name="TokenTab">
+ <class>TokenEditTab</class>
+ <widget class="QWidget" name="TokenEditTab">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -94,7 +94,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="TokenEdit" name="tokenEditor">
+    <widget class="TokenEditWidget" name="tokenEditWidget">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -339,9 +339,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TokenEdit</class>
+   <class>TokenEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>gui/texteditor/tokenedit.h</header>
+   <header>Gui/DataEditor/TokenEditWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
