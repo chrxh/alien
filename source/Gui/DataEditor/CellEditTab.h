@@ -15,7 +15,7 @@ public:
     CellEditTab(QWidget *parent = nullptr);
 	virtual ~CellEditTab() = default;
 
-	void init(DataEditorModel* model, DataEditorController* controller);
+	void init(DataEditModel* model, DataEditController* controller);
     void updateDisplay ();
 
 protected:
@@ -32,7 +32,7 @@ private:
     QString generateFormattedRealString (qreal r);
     QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
-	DataEditorModel* _model = nullptr;
-	DataEditorController* _controller = nullptr;
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
 };
 

@@ -18,7 +18,7 @@ public:
     TokenEditTab(QWidget *parent = 0);
     virtual ~TokenEditTab();
 
-	void init(DataEditorModel* model, DataEditorController* controller);
+	void init(DataEditModel* model, DataEditController* controller);
 	void updateDisplay(int tokenIndex);
 
 	void update(SymbolTable* symbolTable, qreal tokenEnergy, QByteArray const& tokenData);
@@ -36,8 +36,8 @@ private Q_SLOTS:
 private:
     Ui::TokenEditTab *ui;
 
-	DataEditorModel* _model = nullptr;
-	DataEditorController* _controller = nullptr;
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
 	int _tokenIndex = 0;
 	
 	QMap<quint8, HexEditWidget*> _hexEditByStartAddress;      //associate start addresses with hex editors

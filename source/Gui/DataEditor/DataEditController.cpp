@@ -5,33 +5,33 @@
 #include "Model/Api/SimulationContext.h"
 
 #include "Gui/DataManipulator.h"
-#include "DataEditorController.h"
-#include "DataEditorContext.h"
-#include "DataEditorModel.h"
+#include "DataEditController.h"
+#include "DataEditContext.h"
+#include "DataEditModel.h"
 #include "DataEditorView.h"
 
-DataEditorController::DataEditorController(QWidget *parent /*= nullptr*/)
+DataEditController::DataEditController(QWidget *parent /*= nullptr*/)
 	: QObject(parent)
 {
 	_view = new DataEditorView(parent);
-	_context = new DataEditorContext(this);
+	_context = new DataEditContext(this);
 }
 
-void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator, SimulationContext* context)
+void DataEditController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator, SimulationContext* context)
 {
 	_symbolTable = context->getSymbolTable();
-	_model = new DataEditorModel(this);
+	_model = new DataEditModel(this);
 	_model->init(context->getSimulationParameters(), context->getSymbolTable());
 	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
 	_manipulator = manipulator;
 
-	connect(_context, &DataEditorContext::show, this, &DataEditorController::onShow);
-	connect(_manipulator, &DataManipulator::notify, this, &DataEditorController::notificationFromManipulator);
+	connect(_context, &DataEditContext::show, this, &DataEditController::onShow);
+	connect(_manipulator, &DataManipulator::notify, this, &DataEditController::notificationFromManipulator);
 
 	onShow(false);
 }
 
-DataEditorContext * DataEditorController::getContext() const
+DataEditContext * DataEditController::getContext() const
 {
 	return _context;
 }
@@ -49,7 +49,7 @@ namespace
 	}
 }
 
-void DataEditorController::notificationFromCellTab()
+void DataEditController::notificationFromCellTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
 	cluster.pos = calcCenterPosOfCells(cluster);
@@ -70,7 +70,7 @@ void DataEditorController::notificationFromCellTab()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromClusterTab()
+void DataEditController::notificationFromClusterTab()
 {
 	DataChangeDescription changes = _model->getAndUpdateChanges();
 	if (changes.clusters.empty()) {
@@ -104,7 +104,7 @@ void DataEditorController::notificationFromClusterTab()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromParticleTab()
+void DataEditController::notificationFromParticleTab()
 {
 	auto& particle = _model->getParticleToEditRef();
 	_manipulator->updateParticle(particle);
@@ -112,7 +112,7 @@ void DataEditorController::notificationFromParticleTab()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromMetadataTab()
+void DataEditController::notificationFromMetadataTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
 	_manipulator->updateCluster(cluster);
@@ -120,7 +120,7 @@ void DataEditorController::notificationFromMetadataTab()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromCellComputerTab()
+void DataEditController::notificationFromCellComputerTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
 	_manipulator->updateCluster(cluster);
@@ -128,16 +128,16 @@ void DataEditorController::notificationFromCellComputerTab()
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
-void DataEditorController::notificationFromSymbolTab()
+void DataEditController::notificationFromSymbolTab()
 {
 }
 
-void DataEditorController::onShow(bool visible)
+void DataEditController::onShow(bool visible)
 {
 	_view->show(visible);
 }
 
-void DataEditorController::notificationFromManipulator(set<DataManipulator::Receiver> const& targets)
+void DataEditController::notificationFromManipulator(set<DataManipulator::Receiver> const& targets)
 {
 	if (targets.find(DataManipulator::Receiver::DataEditor) == targets.end()) {
 		return;

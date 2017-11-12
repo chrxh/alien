@@ -11,7 +11,7 @@ public:
     MetadataEditWidget(QWidget *parent = 0);
 	virtual ~MetadataEditWidget() = default;
 
-	void init(DataEditorModel* model, DataEditorController* controller);
+	void init(DataEditModel* model, DataEditController* controller);
 	void updateDisplay();
 
 private:
@@ -21,6 +21,6 @@ private:
 
 	void updateModel();
 
-	DataEditorModel* _model = nullptr;
-	DataEditorController* _controller = nullptr;
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
 };

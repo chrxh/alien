@@ -24,13 +24,13 @@ class DataManipulator;
 class ViewportInterface;
 class ViewportController;
 class MarkerItem;
-class DataEditorController;
-class DataEditorContext;
+class DataEditController;
+class DataEditContext;
 class ToolbarController;
 class ToolbarContext;
 class ToolbarView;
 class ToolbarModel;
-class DataEditorModel;
+class DataEditModel;
 class DataEditorView;
 class DataManipulator;
 class ClusterEditTab;
@@ -41,6 +41,7 @@ class ParticleEditTab;
 class SelectionEditTab;
 class SymbolEditTab;
 class HexEditWidget;
+class TokenEditTabWidget;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 

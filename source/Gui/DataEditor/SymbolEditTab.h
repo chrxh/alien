@@ -18,7 +18,7 @@ public:
     SymbolEditTab(QWidget *parent = nullptr);
     virtual ~SymbolEditTab();
 
-	void init(DataEditorModel* model, DataEditorController* controller);
+	void init(DataEditModel* model, DataEditController* controller);
 	void updateDisplay();
 
 private:
@@ -29,7 +29,7 @@ private:
 
     Ui::SymbolEditTab *ui;
 
-	DataEditorModel* _model = nullptr;
-	DataEditorController* _controller = nullptr;
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
 };
 
