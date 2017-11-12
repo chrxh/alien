@@ -5,13 +5,13 @@
 #include "Gui/Definitions.h"
 #include "Model/Api/Descriptions.h"
 
-class DataEditorContext
+class DataEditContext
 	: public QObject
 {
 	Q_OBJECT
 public:
-	DataEditorContext(QObject *parent = nullptr);
-	virtual ~DataEditorContext() = default;
+	DataEditContext(QObject *parent = nullptr);
+	virtual ~DataEditContext() = default;
 
 	Q_SIGNAL void show(bool visible);
 };

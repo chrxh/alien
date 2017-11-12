@@ -7,8 +7,8 @@
 #include "Gui/Settings.h"
 
 #include "CellEditTab.h"
-#include "DataEditorModel.h"
-#include "DataEditorController.h"
+#include "DataEditModel.h"
+#include "DataEditController.h"
 
 CellEditTab::CellEditTab(QWidget *parent) :
     QTextEdit(parent)
@@ -16,7 +16,7 @@ CellEditTab::CellEditTab(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void CellEditTab::init(DataEditorModel * model, DataEditorController* controller)
+void CellEditTab::init(DataEditModel * model, DataEditController* controller)
 {
 	_model = model;
 	_controller = controller;

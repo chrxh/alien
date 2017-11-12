@@ -12,7 +12,7 @@ public:
     CodeEditWidget(QWidget *parent = 0);
 	virtual ~CodeEditWidget() = default;
 
-	void init(DataEditorModel* model, DataEditorController* controller, CellComputerCompiler* compiler);
+	void init(DataEditModel* model, DataEditController* controller, CellComputerCompiler* compiler);
     void updateDisplay ();
 
     std::string getCode ();
@@ -27,7 +27,7 @@ private:
     void insertLineNumbers ();
     void removeLineNumbers ();
 
-	DataEditorModel* _model = nullptr;
-	DataEditorController* _controller = nullptr;
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
 	CellComputerCompiler* _compiler = nullptr;
 };

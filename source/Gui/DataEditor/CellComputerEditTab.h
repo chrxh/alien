@@ -17,7 +17,7 @@ public:
     CellComputerEditTab(QWidget *parent = 0);
     virtual ~CellComputerEditTab();
 
-	void init(DataEditorModel* model, DataEditorController* controller, CellComputerCompiler* compiler);
+	void init(DataEditModel* model, DataEditController* controller, CellComputerCompiler* compiler);
 	void updateDisplay();
 
 private:
@@ -29,7 +29,7 @@ private:
 
     Ui::CellComputerEditTab *ui;
 	QTimer* _timer = nullptr;
-	DataEditorModel* _model = nullptr;
-	DataEditorController* _controller = nullptr;
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
 	CellComputerCompiler* _compiler = nullptr;
 };

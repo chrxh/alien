@@ -2,8 +2,8 @@
 
 #include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
-#include "DataEditorController.h"
+#include "DataEditModel.h"
+#include "DataEditController.h"
 #include "MetadataEditWidget.h"
 #include "MetadataEditTab.h"
 #include "ui_MetadataEditTab.h"
@@ -30,7 +30,7 @@ MetadataEditTab::~MetadataEditTab()
     delete ui;
 }
 
-void MetadataEditTab::init(DataEditorModel * model, DataEditorController * controller)
+void MetadataEditTab::init(DataEditModel * model, DataEditController * controller)
 {
 	_model = model;
 	_controller = controller;

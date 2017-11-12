@@ -7,8 +7,8 @@
 #include "Model/Local/Cluster.h"
 #include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
-#include "DataEditorController.h"
+#include "DataEditModel.h"
+#include "DataEditController.h"
 #include "ClusterEditTab.h"
 
 ClusterEditTab::ClusterEditTab(QWidget *parent) :
@@ -17,7 +17,7 @@ ClusterEditTab::ClusterEditTab(QWidget *parent) :
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void ClusterEditTab::init(DataEditorModel* model, DataEditorController* controller)
+void ClusterEditTab::init(DataEditModel* model, DataEditController* controller)
 {
 	_model = model;
 	_controller = controller;

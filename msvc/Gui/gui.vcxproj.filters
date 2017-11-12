@@ -45,15 +45,6 @@
     <ClCompile Include="qrc_ressources.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorContext.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditorContext.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditorContext.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_ToolbarView.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -70,15 +61,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_ToolbarController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorController.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditorController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditorController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarContext.cpp">
@@ -303,15 +285,6 @@
     <ClCompile Include="Release\moc_DataManipulator.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditorModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditorModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorModel.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\CodeEditWidget.cpp">
       <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
@@ -429,6 +402,42 @@
     <ClCompile Include="Release\moc_TokenEditWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditContext.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditContext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditController.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditModel.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\TokenEditTabWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_TokenEditTabWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_TokenEditTabWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -454,9 +463,6 @@
     <CustomBuild Include="..\..\source\gui\resources\ressources.qrc">
       <Filter>Resources</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorContext.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarView.h">
       <Filter>Source Files\Toolbar</Filter>
     </CustomBuild>
@@ -465,9 +471,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarController.h">
       <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorController.h">
-      <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarContext.h">
       <Filter>Source Files\Toolbar</Filter>
@@ -574,9 +577,6 @@
     <CustomBuild Include="..\..\source\Gui\DataManipulator.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorModel.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\CodeEditWidget.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
@@ -626,6 +626,18 @@
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditContext.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditController.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditModel.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTabWidget.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
   </ItemGroup>

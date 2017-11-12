@@ -6,8 +6,8 @@
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
-#include "DataEditorController.h"
+#include "DataEditModel.h"
+#include "DataEditController.h"
 #include "CodeEditWidget.h"
 
 
@@ -18,7 +18,7 @@ CodeEditWidget::CodeEditWidget(QWidget *parent)
     verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
 }
 
-void CodeEditWidget::init(DataEditorModel * model, DataEditorController * controller, CellComputerCompiler * compiler)
+void CodeEditWidget::init(DataEditModel * model, DataEditController * controller, CellComputerCompiler * compiler)
 {
 	_model = model;
 	_controller = controller;

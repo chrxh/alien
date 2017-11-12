@@ -6,8 +6,8 @@
 #include "Gui/Settings.h"
 
 #include "ParticleEditTab.h"
-#include "DataEditorModel.h"
-#include "DataEditorController.h"
+#include "DataEditModel.h"
+#include "DataEditController.h"
 
 ParticleEditTab::ParticleEditTab(QWidget *parent) :
     QTextEdit(parent)
@@ -206,7 +206,7 @@ void ParticleEditTab::wheelEvent (QWheelEvent* e)
     QTextEdit::clearFocus();
 }
 
-void ParticleEditTab::init(DataEditorModel * model, DataEditorController * controller)
+void ParticleEditTab::init(DataEditModel * model, DataEditController * controller)
 {
 	_model = model;
 	_controller = controller;

@@ -3,8 +3,8 @@
 #include "Model/Api/SymbolTable.h"
 #include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
-#include "DataEditorController.h"
+#include "DataEditModel.h"
+#include "DataEditController.h"
 #include "SymbolEditTab.h"
 #include "ui_SymbolEditTab.h"
 
@@ -39,7 +39,7 @@ SymbolEditTab::~SymbolEditTab()
     delete ui;
 }
 
-void SymbolEditTab::init(DataEditorModel * model, DataEditorController * controller)
+void SymbolEditTab::init(DataEditModel * model, DataEditController * controller)
 {
 	_model = model;
 	_controller = controller;

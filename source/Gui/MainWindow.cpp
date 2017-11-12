@@ -27,8 +27,8 @@
 #include "Gui/Assistance/TutorialWindow.h"
 #include "Gui/Misc/StartScreenController.h"
 #include "Gui/VisualEditor/ViewportController.h"
-#include "Gui/DataEditor/DataEditorController.h"
-#include "Gui/DataEditor/DataEditorContext.h"
+#include "Gui/DataEditor/DataEditController.h"
+#include "Gui/DataEditor/DataEditContext.h"
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
 #include "Gui/Settings.h"
@@ -54,8 +54,8 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	_toolbar = new ToolbarController(ui->visualEditor);
 	connect(ui->actionEditor, &QAction::triggered, _toolbar->getContext(), &ToolbarContext::show);
 
-	_dataEditor = new DataEditorController(ui->visualEditor);
-	connect(ui->actionEditor, &QAction::triggered, _dataEditor->getContext(), &DataEditorContext::show);
+	_dataEditor = new DataEditController(ui->visualEditor);
+	connect(ui->actionEditor, &QAction::triggered, _dataEditor->getContext(), &DataEditContext::show);
 
 	_dataManipulator = new DataManipulator(this);
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
