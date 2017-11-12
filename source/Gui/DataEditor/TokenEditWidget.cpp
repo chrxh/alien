@@ -4,21 +4,16 @@
 
 #include "gui/Settings.h"
 
-#include "TokenEdit.h"
+#include "TokenEditWidget.h"
 
 
-TokenEdit::TokenEdit(QWidget *parent)
+TokenEditWidget::TokenEditWidget(QWidget *parent)
     : QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-TokenEdit::~TokenEdit()
-{
-
-}
-
-void TokenEdit::update (qreal energy)
+void TokenEditWidget::update (qreal energy)
 {
     //define auxilliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
@@ -39,7 +34,7 @@ void TokenEdit::update (qreal energy)
     QTextEdit::setText(text);
 }
 
-void TokenEdit::requestUpdate ()
+void TokenEditWidget::requestUpdate ()
 {
     QString currentText = QTextEdit::textCursor().block().text();
     qreal energy = generateNumberFromFormattedString(currentText);
@@ -48,7 +43,7 @@ void TokenEdit::requestUpdate ()
     Q_EMIT dataChanged(energy);
 }
 
-void TokenEdit::keyPressEvent (QKeyEvent* e)
+void TokenEditWidget::keyPressEvent (QKeyEvent* e)
 {
     //auxilliary data
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
@@ -191,7 +186,7 @@ void TokenEdit::keyPressEvent (QKeyEvent* e)
     }
 }
 
-void TokenEdit::mousePressEvent(QMouseEvent* e)
+void TokenEditWidget::mousePressEvent(QMouseEvent* e)
 {
     QTextEdit::mousePressEvent(e);
 
@@ -206,18 +201,18 @@ void TokenEdit::mousePressEvent(QMouseEvent* e)
     }
 }
 
-void TokenEdit::mouseDoubleClickEvent (QMouseEvent* e)
+void TokenEditWidget::mouseDoubleClickEvent (QMouseEvent* e)
 {
     QTextEdit::clearFocus();
 }
 
-void TokenEdit::wheelEvent (QWheelEvent* e)
+void TokenEditWidget::wheelEvent (QWheelEvent* e)
 {
     QTextEdit::wheelEvent(e);
     QTextEdit::clearFocus();
 }
 
-qreal TokenEdit::generateNumberFromFormattedString (QString s)
+qreal TokenEditWidget::generateNumberFromFormattedString (QString s)
 {
     int i = s.indexOf(':');
     if( i >= 0 ) {
@@ -232,7 +227,7 @@ qreal TokenEdit::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString TokenEdit::generateFormattedRealString (qreal r)
+QString TokenEditWidget::generateFormattedRealString (qreal r)
 {
     //define auxilliary strings
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";

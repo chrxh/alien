@@ -1,5 +1,6 @@
 #include <QScrollBar>
 
+#include "Model/Api/SymbolTable.h"
 #include "Gui/Settings.h"
 
 #include "DataEditorModel.h"
@@ -48,15 +49,13 @@ void SymbolEditTab::updateDisplay()
 {
 	disconnect(ui->tableWidget, &QTableWidget::itemChanged, this, &SymbolEditTab::itemContentChanged);
 
-	auto& symbols = _model->getSymbolsRef();
-
     //delete rows in the table
     while( ui->tableWidget->rowCount() > 0 )
         ui->tableWidget->removeRow(0);
 
     //create entries in the table
     int i = 0;
-	for(pair<string, string>const& keyAndValue : symbols) {
+	for(pair<string, string>const& keyAndValue : _model->getSymbolTable()->getEntries()) {
 
         //create new row in table
         ui->tableWidget->insertRow(i);
@@ -109,12 +108,12 @@ void SymbolEditTab::addSymbolButtonClicked()
 
 void SymbolEditTab::delSymbolButtonClicked ()
 {
-	auto& symbols = _model->getSymbolsRef();
+	auto symbols = _model->getSymbolTable();
 	while (!ui->tableWidget->selectedItems().isEmpty()) {
         QList< QTableWidgetItem* > items = ui->tableWidget->selectedItems();
         int row = items.at(0)->row();
         QString key = ui->tableWidget->item(row, 0)->text();
-		symbols.erase(key.toStdString());
+		symbols->delEntry(key.toStdString());
         ui->tableWidget->removeRow(row);
     }
     if( ui->tableWidget->rowCount() == 0 )
@@ -137,14 +136,14 @@ void SymbolEditTab::itemSelectionChanged ()
 void SymbolEditTab::itemContentChanged (QTableWidgetItem* item)
 {
     //clear and update complete symbol table
-	auto& symbols = _model->getSymbolsRef();
-	symbols.clear();
+	auto symbols = _model->getSymbolTable();
+	symbols->clear();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
 
         //obtain key and value text
         QString key = ui->tableWidget->item(i, 0)->text();
         QString value = ui->tableWidget->item(i, 1)->text();
-		symbols.insert_or_assign(key.toStdString(), value.toStdString());
+		symbols->addEntry(key.toStdString(), value.toStdString());
     }
 
 	_controller->notificationFromSymbolTab();

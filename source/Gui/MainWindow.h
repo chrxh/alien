@@ -90,7 +90,6 @@ private:
 	void updateControllerAndEditors();
 
     SimulationController* _simController = nullptr;
-	TextEditor* _textEditor = nullptr;
 	DataEditorController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
 	DataManipulator* _dataManipulator = nullptr;

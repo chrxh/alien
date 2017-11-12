@@ -52,11 +52,11 @@ SymbolTable* SymbolTableDialog::getNewSymbolTable()
 
 void SymbolTableDialog::widgetsToSymbolTable ()
 {
-    _symbolTable->clearTable();
+    _symbolTable->clear();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
         QTableWidgetItem* item1 = ui->tableWidget->item(i, 0);
         QTableWidgetItem* item2 = ui->tableWidget->item(i, 1);
-        _symbolTable->addEntry(item1->text(), item2->text());
+        _symbolTable->addEntry(item1->text().toStdString(), item2->text().toStdString());
     }
 }
 
@@ -67,17 +67,15 @@ void SymbolTableDialog::symbolTableToWidgets()
         ui->tableWidget->removeRow(0);
 
     //create entries in the table
-    QMapIterator< QString, QString > it = _symbolTable->getTableConstRef();
     row = 0;
-    while( it.hasNext() ) {
-        it.next();
+	for(auto const& keyAndValue : _symbolTable->getEntries()) {
 
         //create new row in table
         ui->tableWidget->insertRow(row);
         ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
-        QTableWidgetItem* item = new QTableWidgetItem(it.key());
+        QTableWidgetItem* item = new QTableWidgetItem(QString::fromStdString(keyAndValue.first));
         ui->tableWidget->setItem(row, 0, item);
-        item = new QTableWidgetItem(it.value());
+        item = new QTableWidgetItem(QString::fromStdString(keyAndValue.second));
         ui->tableWidget->setItem(row, 1, item);
         row++;
     }
@@ -145,7 +143,7 @@ void SymbolTableDialog::loadButtonClicked ()
             file.close();
         }
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occured. The specified symbol table could not loaded.");
+            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
             msgBox.exec();
         }
     }
@@ -182,7 +180,7 @@ void SymbolTableDialog::mergeWithButtonClicked ()
 			QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
-			_symbolTable->mergeTable(*symbolTable);
+			_symbolTable->mergeEntries(*symbolTable);
 			delete symbolTable;
 			file.close();
 

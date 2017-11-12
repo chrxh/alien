@@ -2,8 +2,7 @@
 #include <QTimer>
 #include <QGraphicsItem>
 
-#include "gui/Settings.h"
-#include "gui/texteditor/TextEditor.h"
+#include "Gui/Settings.h"
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/SpaceMetricLocal.h"

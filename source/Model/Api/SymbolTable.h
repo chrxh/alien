@@ -9,21 +9,21 @@ class SymbolTable
 public:
 
 	SymbolTable(QObject* parent = nullptr);
-	virtual ~SymbolTable();
+	virtual ~SymbolTable() = default;
 
 	virtual SymbolTable* clone(QObject* parent = nullptr) const;
 
-	virtual void addEntry(QString const& key, QString const& value);
-	virtual void delEntry(QString const& key);
-	virtual QString applyTableToCode(QString const& input) const;
-	virtual void clearTable();
-	virtual QMap< QString, QString > const& getTableConstRef () const;
-	virtual void setTable(QMap<QString, QString> const& table);
-	virtual void mergeTable(SymbolTable const& table);
+	virtual void addEntry(string const& key, string const& value);
+	virtual void delEntry(string const& key);
+	virtual string getValue(string const& input) const;
+	virtual void clear();
+	virtual map<string, string> const& getEntries () const;
+	virtual void setEntries(map<string, string> const& table);
+	virtual void mergeEntries(SymbolTable const& table);
 
 	virtual void serializePrimitives (QDataStream& stream) const;
 	virtual void deserializePrimitives (QDataStream& stream);
 
 private:
-    QMap<QString,QString> _symbolsByKey;
+    map<string, string> _symbolsByKey;
 };

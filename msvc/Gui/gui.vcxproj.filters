@@ -21,9 +21,6 @@
     <Filter Include="Source Files\Monitoring">
       <UniqueIdentifier>{c62b95c0-4b02-4878-98cd-a7abedefec11}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\TextEditor">
-      <UniqueIdentifier>{a7ef51b6-b5e0-4d15-aa20-c60392f162f5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\VisualEditor">
       <UniqueIdentifier>{84149345-9237-4d47-b641-14dc7df60a87}</UniqueIdentifier>
     </Filter>
@@ -47,33 +44,6 @@
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">
       <Filter>Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\texteditor\TextEditor.cpp">
-      <Filter>Source Files\TextEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_TextEditor.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_TextEditor.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\texteditor\TokenEdit.cpp">
-      <Filter>Source Files\TextEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_TokenEdit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_TokenEdit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\texteditor\TokenTab.cpp">
-      <Filter>Source Files\TextEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_TokenTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_TokenTab.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorContext.cpp">
       <Filter>Source Files\DataEditor</Filter>
@@ -441,6 +411,24 @@
     <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarModel.cpp">
       <Filter>Source Files\Toolbar</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\TokenEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_TokenEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_TokenEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\TokenEditWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_TokenEditWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_TokenEditWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -465,18 +453,6 @@
   <ItemGroup>
     <CustomBuild Include="..\..\source\gui\resources\ressources.qrc">
       <Filter>Resources</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor\TextEditor.h">
-      <Filter>Source Files\TextEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor\TokenEdit.h">
-      <Filter>Source Files\TextEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor\TokenTab.ui">
-      <Filter>Source Files\TextEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\texteditor\TokenTab.h">
-      <Filter>Source Files\TextEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorContext.h">
       <Filter>Source Files\DataEditor</Filter>
@@ -643,6 +619,15 @@
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarModel.h">
       <Filter>Source Files\Toolbar</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\gui\resources\tutorial\angle.png">
@@ -731,9 +716,6 @@
     <ClInclude Include="resource.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_TokenTab.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_ToolbarView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -801,6 +783,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_SymbolEditTab.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_TokenEditTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

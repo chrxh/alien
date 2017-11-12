@@ -1,14 +1,14 @@
-#ifndef TOKENEDIT_H
-#define TOKENEDIT_H
+#pragma once
 
 #include <QTextEdit>
 
-class TokenEdit : public QTextEdit
+class TokenEditWidget
+	: public QTextEdit
 {
     Q_OBJECT
 public:
-    TokenEdit (QWidget *parent = 0);
-    ~TokenEdit ();
+    TokenEditWidget (QWidget *parent = 0);
+	virtual ~TokenEditWidget() = default;
 
     void update (qreal energy);
     void requestUpdate ();
@@ -26,5 +26,3 @@ private:
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (qreal r);
 };
-
-#endif // TOKENEDIT_H

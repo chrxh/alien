@@ -17,36 +17,11 @@ DataEditorController::DataEditorController(QWidget *parent /*= nullptr*/)
 	_context = new DataEditorContext(this);
 }
 
-namespace
-{
-	map<string, string> transform(QMap< QString, QString > const& qMap)
-	{
-		map<QString, QString> stdMap = qMap.toStdMap();
-
-		map<string, string> result;
-		std::transform(stdMap.begin(), stdMap.end(), std::inserter(result, result.begin()), [](auto const& entry) {
-			return make_pair(entry.first.toStdString(), entry.second.toStdString());
-		});
-		return result;
-	}
-	
-	QMap<QString, QString> transform(map<string, string> const& stdMap)
-	{
-		QMap<QString, QString> result;
-		for (auto const& entry : stdMap)
-		{
-			result.insert(QString::fromStdString(entry.first), QString::fromStdString(entry.second));
-		}
-		return result;
-	}
-}
-
 void DataEditorController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator, SimulationContext* context)
 {
 	_symbolTable = context->getSymbolTable();
 	_model = new DataEditorModel(this);
-	_model->setSimulationParameters(context->getSimulationParameters());
-	_model->getSymbolsRef() = transform(context->getSymbolTable()->getTableConstRef());
+	_model->init(context->getSimulationParameters(), context->getSymbolTable());
 	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
 	_manipulator = manipulator;
 
@@ -155,7 +130,6 @@ void DataEditorController::notificationFromCellComputerTab()
 
 void DataEditorController::notificationFromSymbolTab()
 {
-	_symbolTable->setTable(transform(_model->getSymbolsRef()));
 }
 
 void DataEditorController::onShow(bool visible)
