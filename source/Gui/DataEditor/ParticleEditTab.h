@@ -13,7 +13,7 @@ public:
     ParticleEditTab(QWidget *parent = nullptr);
 	virtual ~ParticleEditTab() = default;
 
-	void init(DataEditorModel* model, DataEditorController* controller);
+	void init(DataEditModel* model, DataEditController* controller);
     void updateDisplay();
 
 protected:
@@ -29,6 +29,6 @@ private:
     QString generateFormattedRealString (QString s);
     QString generateFormattedRealString (qreal r);
 
-	DataEditorModel* _model = nullptr;
-	DataEditorController* _controller = nullptr;
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
 };

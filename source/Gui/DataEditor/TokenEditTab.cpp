@@ -5,7 +5,7 @@
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
+#include "DataEditModel.h"
 #include "HexEditWidget.h"
 #include "TokenEditTab.h"
 #include "ui_TokenEditTab.h"
@@ -57,7 +57,7 @@ TokenEditTab::~TokenEditTab()
     delete ui;
 }
 
-void TokenEditTab::init(DataEditorModel * model, DataEditorController * controller)
+void TokenEditTab::init(DataEditModel * model, DataEditController * controller)
 {
 	_model = model;
 	_controller = controller;

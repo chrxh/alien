@@ -5,17 +5,17 @@
 #include "Gui/Definitions.h"
 #include "Gui/DataManipulator.h"
 
-class DataEditorController
+class DataEditController
 	: public QObject
 {
 	Q_OBJECT
 public:
-	DataEditorController(QWidget *parent = nullptr);
-	virtual ~DataEditorController() = default;
+	DataEditController(QWidget *parent = nullptr);
+	virtual ~DataEditController() = default;
 
 	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator, SimulationContext* context);
 
-	DataEditorContext* getContext() const;
+	DataEditContext* getContext() const;
 
 	void notificationFromCellTab();
 	void notificationFromClusterTab();
@@ -28,10 +28,10 @@ private:
 	Q_SLOT void onShow(bool visible);
 	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);
 
-	DataEditorModel* _model = nullptr;
+	DataEditModel* _model = nullptr;
 	DataEditorView* _view = nullptr;
 	DataManipulator* _manipulator = nullptr;
-	DataEditorContext* _context = nullptr;
+	DataEditContext* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	SymbolTable* _symbolTable = nullptr;
 };

@@ -13,7 +13,7 @@ public:
 	DataEditorView(QWidget * parent = nullptr);
 	virtual ~DataEditorView() = default;
 
-	void init(IntVector2D const& upperLeftPosition, DataEditorModel* model, DataEditorController* controller
+	void init(IntVector2D const& upperLeftPosition, DataEditModel* model, DataEditController* controller
 		, CellComputerCompiler* compiler);
 
 	void switchToNoEditor();
@@ -26,14 +26,22 @@ public:
 	void update() const;
 
 private:
-	enum class EditorSelector { No, CellWithComputer, CellWithoutComputer, Particle, Selection };
+	enum class EditorSelector {
+		No, 
+		CellWithComputerWithToken, 
+		CellWithoutComputerWithToken, 
+		CellWithComputerWithoutToken, 
+		CellWithoutComputerWithoutToken, 
+		Particle, 
+		Selection
+	};
 	void saveTabPositionForCellEditor();
 	int getTabPositionForCellEditor();
 
 	bool _visible = false;
 	EditorSelector _editorSelector = EditorSelector::No;
 
-	DataEditorModel* _model = nullptr;
+	DataEditModel* _model = nullptr;
 
 	QTabWidget* _mainTabWidget = nullptr;
 	ClusterEditTab* _clusterTab = nullptr;
@@ -48,5 +56,8 @@ private:
 	QTabWidget* _symbolTabWidget = nullptr;
 	SymbolEditTab* _symbolTab = nullptr;
 
-	int _savedTabPosition;
+	TokenEditTabWidget* _tokenTabWidget = nullptr;
+
+	int _savedTabPosition = 0;
+	IntVector2D _upperLeftPosition;
 };

@@ -1,19 +1,19 @@
 #include "Model/Api/ChangeDescriptions.h"
 
-#include "DataEditorModel.h"
+#include "DataEditModel.h"
 
-DataEditorModel::DataEditorModel(QObject *parent)
+DataEditModel::DataEditModel(QObject *parent)
 	: QObject(parent)
 {
 }
 
-void DataEditorModel::init(SimulationParameters const* parameters, SymbolTable* symbols)
+void DataEditModel::init(SimulationParameters const* parameters, SymbolTable* symbols)
 {
 	_parameters = parameters;
 	_symbols = symbols;
 }
 
-void DataEditorModel::setClusterAndCell(ClusterDescription const & cluster, uint64_t cellId)
+void DataEditModel::setClusterAndCell(ClusterDescription const & cluster, uint64_t cellId)
 {
 	_data.clear();
 	_data.addCluster(cluster);
@@ -24,7 +24,7 @@ void DataEditorModel::setClusterAndCell(ClusterDescription const & cluster, uint
 	_selectedParticleIds.clear();
 }
 
-void DataEditorModel::setParticle(ParticleDescription const & particle)
+void DataEditModel::setParticle(ParticleDescription const & particle)
 {
 	_data.clear();
 	_data.addParticle(particle);
@@ -35,7 +35,7 @@ void DataEditorModel::setParticle(ParticleDescription const & particle)
 	_selectedParticleIds = { particle.id };
 }
 
-void DataEditorModel::setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds)
+void DataEditModel::setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds)
 {
 	_data.clear();
 	_unchangedData = _data;
@@ -45,20 +45,20 @@ void DataEditorModel::setSelectionIds(unordered_set<uint64_t> const& selectedCel
 	_selectedParticleIds = selectedParticleIds;
 }
 
-DataChangeDescription DataEditorModel::getAndUpdateChanges()
+DataChangeDescription DataEditModel::getAndUpdateChanges()
 {
 	DataChangeDescription result(_unchangedData, _data);
 	_unchangedData = _data;
 	return result;
 }
 
-TokenDescription & DataEditorModel::getTokenToEditRef(int tokenIndex)
+TokenDescription & DataEditModel::getTokenToEditRef(int tokenIndex)
 {
 	auto& cell = getCellToEditRef();
 	return cell.tokens->at(tokenIndex);
 }
 
-CellDescription & DataEditorModel::getCellToEditRef()
+CellDescription & DataEditModel::getCellToEditRef()
 {
 	uint64_t selectedCellId = *_selectedCellIds.begin();
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(selectedCellId);
@@ -66,36 +66,36 @@ CellDescription & DataEditorModel::getCellToEditRef()
 	return _data.clusters->at(clusterIndex).cells->at(cellIndex);
 }
 
-ParticleDescription & DataEditorModel::getParticleToEditRef()
+ParticleDescription & DataEditModel::getParticleToEditRef()
 {
 	uint64_t selectedParticleId = *_selectedParticleIds.begin();
 	int particleIndex = _navi.particleIndicesByParticleIds.at(selectedParticleId);
 	return _data.particles->at(particleIndex);
 }
 
-ClusterDescription & DataEditorModel::getClusterToEditRef()
+ClusterDescription & DataEditModel::getClusterToEditRef()
 {
 	uint64_t selectedCellId = *_selectedCellIds.begin();
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(selectedCellId);
 	return _data.clusters->at(clusterIndex);
 }
 
-int DataEditorModel::getNumCells() const
+int DataEditModel::getNumCells() const
 {
 	return _selectedCellIds.size();
 }
 
-int DataEditorModel::getNumParticles() const
+int DataEditModel::getNumParticles() const
 {
 	return _selectedParticleIds.size();
 }
 
-SimulationParameters const* DataEditorModel::getSimulationParameters() const
+SimulationParameters const* DataEditModel::getSimulationParameters() const
 {
 	return _parameters;
 }
 
-SymbolTable * DataEditorModel::getSymbolTable() const
+SymbolTable * DataEditModel::getSymbolTable() const
 {
 	return _symbols;
 }

@@ -6,8 +6,8 @@
 
 #include "ui_CellComputerEditTab.h"
 #include "CodeEditWidget.h"
-#include "DataEditorController.h"
-#include "DataEditorModel.h"
+#include "DataEditController.h"
+#include "DataEditModel.h"
 #include "CellComputerEditTab.h"
 
 CellComputerEditTab::CellComputerEditTab(QWidget *parent) :
@@ -35,7 +35,7 @@ CellComputerEditTab::~CellComputerEditTab()
     delete ui;
 }
 
-void CellComputerEditTab::init(DataEditorModel * model, DataEditorController * controller, CellComputerCompiler * compiler)
+void CellComputerEditTab::init(DataEditModel * model, DataEditController * controller, CellComputerCompiler * compiler)
 {
 	_model = model;
 	_controller = controller;

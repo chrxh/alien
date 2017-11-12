@@ -4,8 +4,8 @@
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
-#include "DataEditorController.h"
+#include "DataEditModel.h"
+#include "DataEditController.h"
 #include "MetadataEditWidget.h"
 
 MetadataEditWidget::MetadataEditWidget (QWidget *parent) :
@@ -32,7 +32,7 @@ void MetadataEditWidget::updateModel ()
 	_controller->notificationFromMetadataTab();
 }
 
-void MetadataEditWidget::init(DataEditorModel * model, DataEditorController * controller)
+void MetadataEditWidget::init(DataEditModel * model, DataEditController * controller)
 {
 	_model = model;
 	_controller = controller;

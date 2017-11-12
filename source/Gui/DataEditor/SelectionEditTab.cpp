@@ -1,6 +1,6 @@
 ﻿#include "Gui/Settings.h"
 
-#include "DataEditorModel.h"
+#include "DataEditModel.h"
 #include "SelectionEditTab.h"
 
 SelectionEditTab::SelectionEditTab(QWidget * parent /*= nullptr*/) : QTextEdit(parent)
@@ -8,7 +8,7 @@ SelectionEditTab::SelectionEditTab(QWidget * parent /*= nullptr*/) : QTextEdit(p
 	
 }
 
-void SelectionEditTab::init(DataEditorModel * model, DataEditorController * controller)
+void SelectionEditTab::init(DataEditModel * model, DataEditController * controller)
 {
 	_model = model;
 	_controller = controller;

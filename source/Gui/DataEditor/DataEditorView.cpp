@@ -9,8 +9,9 @@
 #include "ParticleEditTab.h"
 #include "SelectionEditTab.h"
 #include "SymbolEditTab.h"
+#include "TokenEditTabWidget.h"
 
-#include "DataEditorModel.h"
+#include "DataEditModel.h"
 #include "DataEditorView.h"
 
 namespace
@@ -79,15 +80,21 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_symbolTab = new SymbolEditTab(parent);
 	_symbolTab->setVisible(false);
 
+	//token tabs
+	_tokenTabWidget = new TokenEditTabWidget(parent);
+	setupTabWidget(_tokenTabWidget, QSize(385, 260));
+
 	update();
 }
 
-void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditorModel* model, DataEditorController* controller, CellComputerCompiler* compiler)
+void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditModel* model, DataEditController* controller, CellComputerCompiler* compiler)
 {
 	_model = model;
+	_upperLeftPosition = upperLeftPosition;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
-	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + 270, _mainTabWidget->width(), _mainTabWidget->height());
-	_symbolTabWidget->setGeometry(upperLeftPosition.x + 395, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
+	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + 270, _computerTabWidget->width(), _computerTabWidget->height());
+	_symbolTabWidget->setGeometry(upperLeftPosition.x + 395, upperLeftPosition.y, _symbolTabWidget->width(), _symbolTabWidget->height());
+	_tokenTabWidget->setGeometry(upperLeftPosition.x + 395 + _symbolTabWidget->width() + 10, upperLeftPosition.y, _tokenTabWidget->width(), _tokenTabWidget->height());
 
 	_clusterTab->init(_model, controller);
 	_cellTab->init(_model, controller);
@@ -104,6 +111,7 @@ void DataEditorView::update() const
 		_mainTabWidget->setVisible(false);
 		_computerTabWidget->setVisible(false);
 		_symbolTabWidget->setVisible(false);
+		_tokenTabWidget->setVisible(false);
 		return;
 	}
 
@@ -111,14 +119,16 @@ void DataEditorView::update() const
 		_mainTabWidget->setVisible(true);
 		_computerTabWidget->setVisible(false);
 		_symbolTabWidget->setVisible(false);
+		_tokenTabWidget->setVisible(false);
 
 		_selectionTab->updateDisplay();
 	}
 
-	if (_editorSelector == EditorSelector::CellWithComputer) {
+	if (_editorSelector == EditorSelector::CellWithComputerWithoutToken) {
 		_mainTabWidget->setVisible(true);
 		_computerTabWidget->setVisible(true);
 		_symbolTabWidget->setVisible(true);
+		_tokenTabWidget->setVisible(false);
 
 		_clusterTab->updateDisplay();
 		_cellTab->updateDisplay();
@@ -127,10 +137,11 @@ void DataEditorView::update() const
 		_symbolTab->updateDisplay();
 	}
 
-	if (_editorSelector == EditorSelector::CellWithoutComputer) {
+	if (_editorSelector == EditorSelector::CellWithoutComputerWithoutToken) {
 		_mainTabWidget->setVisible(true);
 		_computerTabWidget->setVisible(false);
 		_symbolTabWidget->setVisible(false);
+		_tokenTabWidget->setVisible(false);
 
 		_clusterTab->updateDisplay();
 		_cellTab->updateDisplay();
@@ -141,6 +152,7 @@ void DataEditorView::update() const
 		_mainTabWidget->setVisible(true);
 		_computerTabWidget->setVisible(false);
 		_symbolTabWidget->setVisible(false);
+		_tokenTabWidget->setVisible(false);
 
 		_particleTab->updateDisplay();
 	}
@@ -148,7 +160,7 @@ void DataEditorView::update() const
 
 void DataEditorView::saveTabPositionForCellEditor()
 {
-	if (_editorSelector == EditorSelector::CellWithComputer || _editorSelector == EditorSelector::CellWithoutComputer) {
+	if (_editorSelector == EditorSelector::CellWithComputerWithoutToken || _editorSelector == EditorSelector::CellWithoutComputerWithoutToken) {
 		_savedTabPosition = _mainTabWidget->currentIndex();
 	}
 }
@@ -179,7 +191,7 @@ void DataEditorView::switchToCellEditorWithComputer()
 	_symbolTabWidget->clear();
 	_symbolTabWidget->addTab(_symbolTab, "symbols");
 
-	_editorSelector = EditorSelector::CellWithComputer;
+	_editorSelector = EditorSelector::CellWithComputerWithoutToken;
 	update();
 }
 
@@ -193,7 +205,7 @@ void DataEditorView::switchToCellEditorWithoutComputer()
 	_mainTabWidget->addTab(_metadataTab, "metadata");
 	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 
-	_editorSelector = EditorSelector::CellWithoutComputer;
+	_editorSelector = EditorSelector::CellWithoutComputerWithoutToken;
 	update();
 }
 

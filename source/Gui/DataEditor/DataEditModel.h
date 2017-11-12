@@ -4,14 +4,14 @@
 
 #include "Model/Api/Descriptions.h"
 
-class DataEditorModel
+class DataEditModel
 	: public QObject
 {
 	Q_OBJECT
 
 public:
-	DataEditorModel(QObject *parent);
-	virtual ~DataEditorModel() = default;
+	DataEditModel(QObject *parent);
+	virtual ~DataEditModel() = default;
 
 	void init(SimulationParameters const* parameters, SymbolTable* symbols);
 
