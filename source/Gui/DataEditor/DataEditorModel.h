@@ -13,12 +13,15 @@ public:
 	DataEditorModel(QObject *parent);
 	virtual ~DataEditorModel() = default;
 
+	void init(SimulationParameters const* parameters, SymbolTable* symbols);
+
 	void setClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
 	void setParticle(ParticleDescription const& particle);
 	void setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds);
 
 	DataChangeDescription getAndUpdateChanges();
 
+	TokenDescription& getTokenToEditRef(int tokenIndex);
 	CellDescription& getCellToEditRef();
 	ParticleDescription& getParticleToEditRef();
 	ClusterDescription& getClusterToEditRef();
@@ -26,10 +29,8 @@ public:
 	int getNumCells() const;
 	int getNumParticles() const;
 
-	SimulationParameters* getSimulationParameters() const;
-	void setSimulationParameters(SimulationParameters* parameters);
-
-	map<string, string>& getSymbolsRef();
+	SimulationParameters const* getSimulationParameters() const;
+	SymbolTable* getSymbolTable() const;
 
 private:
 	DataDescription _data;
@@ -39,6 +40,6 @@ private:
 	unordered_set<uint64_t> _selectedCellIds;
 	unordered_set<uint64_t> _selectedParticleIds;
 
-	SimulationParameters* _parameters = nullptr;
-	map<string, string> _symbols;
+	SimulationParameters const* _parameters = nullptr;
+	SymbolTable* _symbols = nullptr;
 };

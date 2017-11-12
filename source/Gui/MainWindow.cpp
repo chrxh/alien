@@ -26,7 +26,6 @@
 #include "Gui/Monitoring/SimulationMonitor.h"
 #include "Gui/Assistance/TutorialWindow.h"
 #include "Gui/Misc/StartScreenController.h"
-#include "Gui/TextEditor/TextEditor.h"
 #include "Gui/VisualEditor/ViewportController.h"
 #include "Gui/DataEditor/DataEditorController.h"
 #include "Gui/DataEditor/DataEditorContext.h"
@@ -43,7 +42,6 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
 	, _simController(simController)
-	, _textEditor(new TextEditor(this))
 	, _oneSecondTimer(new QTimer(this))
     , _monitor(new SimulationMonitor(this))
     , _tutorialWindow(new TutorialWindow(this))
@@ -79,13 +77,6 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 
 	setupFont();
 
-
-
-	TextEditor::TextEditorWidgets microWidgets{ ui->tabClusterWidget2, ui->tabTokenWidget2
-		, ui->selectionEditor2, ui->requestCellButton2, ui->requestEnergyParticleButton2
-		, ui->delEntityButton2, ui->delClusterButton2, ui->addTokenButton2, ui->delTokenButton2
-		, ui->buttonShowInfo };
-	_textEditor->init(microWidgets);
 
     //set color
     ui->fpsForcingButton->setStyleSheet(BUTTON_STYLESHEET);
@@ -124,10 +115,6 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
     connect(ui->actionSave_symbols, SIGNAL(triggered(bool)), this, SLOT(saveSymbols()));
     connect(ui->actionLoad_symbols, SIGNAL(triggered(bool)), this, SLOT(loadSymbols()));
     connect(ui->actionMerge_with, SIGNAL(triggered(bool)), this, SLOT(loadSymbolsWithMerging()));
-    connect(ui->actionNewToken, SIGNAL(triggered(bool)), _textEditor, SLOT(addTokenClicked()));
-    connect(ui->actionDeleteToken, SIGNAL(triggered(bool)), _textEditor, SLOT(delTokenClicked()));
-    connect(ui->actionCopyToken, SIGNAL(triggered(bool)), _textEditor, SLOT(copyTokenClicked()));
-    connect(ui->actionPasteToken, SIGNAL(triggered(bool)), _textEditor, SLOT(pasteTokenClicked()));
     connect(ui->actionEditSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(editSimulationParameters()));
     connect(ui->actionLoadSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(loadSimulationParameters()));
     connect(ui->actionSaveSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(saveSimulationParameters()));
@@ -136,8 +123,6 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
     connect(ui->actionRandom, SIGNAL(triggered(bool)), this, SLOT(multiplyRandomExtendedSelection()));
     connect(ui->actionArrangement, SIGNAL(triggered(bool)), this, SLOT(multiplyArrangementExtendedSelection()));
     connect(ui->actionAboutAlien, SIGNAL(triggered(bool)), this, SLOT(aboutAlien()));
-    connect(ui->actionDeleteCell, SIGNAL(triggered(bool)), _textEditor, SLOT(delSelectionClicked()));
-    connect(ui->actionDeleteExtension, SIGNAL(triggered(bool)), _textEditor, SLOT(delExtendedSelectionClicked()));
     connect(ui->actionTutorial, SIGNAL(triggered(bool)), _tutorialWindow, SLOT(setVisible(bool)));
     connect(_tutorialWindow, SIGNAL(closed()), this, SLOT(tutorialClosed()));
 
@@ -147,9 +132,6 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
     //connect fps widgets
     connect(ui->fpsForcingButton, SIGNAL(toggled(bool)), this, SLOT(fpsForcingButtonClicked(bool)));
     connect(ui->fpsForcingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(fpsForcingSpinboxClicked()));
-
-    //setup micro editor
-    _textEditor->setVisible(false);
 
     //init widgets
     QFont f = ui->frameLabel->font();
@@ -251,7 +233,9 @@ void MainWindow::runClicked (bool run)
     ui->actionDeleteExtension->setEnabled(false);
 
     _undoUniverserses.clear();
+/*
     _textEditor->requestUpdate();
+*/
     _simController->setRun(run);
 }
 
@@ -265,7 +249,9 @@ void MainWindow::stepForwardClicked ()
     ui->actionCopyCell->setEnabled(false);
     ui->actionDeleteCell->setEnabled(false);
     ui->actionDeleteExtension->setEnabled(false);
+/*
     _textEditor->requestUpdate();
+*/
 
     //save old universe
     QByteArray b;
@@ -406,8 +392,10 @@ void MainWindow::fullscreen (bool triggered)
 
 void MainWindow::setVisualMode (bool editMode)
 {
+/*
     if( !editMode )
         _textEditor->requestUpdate();
+*/
     ui->actionPlay->setChecked(false);
     ui->actionStep->setEnabled(true);
     ui->actionPlay->setIcon(QIcon("://Icons/play.png"));
@@ -424,7 +412,9 @@ void MainWindow::setVisualMode (bool editMode)
     }
 
     //update micro editor
+/*
     _textEditor->setVisible(editMode);
+*/
 
     //stop running
     _simController->setRun(false);
@@ -478,7 +468,9 @@ void MainWindow::addRandomEnergy ()
 void MainWindow::copyCell ()
 {
     //serialize cell
+/*
     Cell* focusCell = _textEditor->getFocusedCell();
+*/
     QDataStream out(&_serializedCellData, QIODevice::WriteOnly);
     quint64 clusterId;
     quint64 cellId;
@@ -534,9 +526,9 @@ void MainWindow::loadSymbols ()
 			oldSymbolTable->setTable(*newSymbolTable);
 			delete newSymbolTable;
             file.close();
-*/
 
             _textEditor->update();
+*/
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -582,9 +574,9 @@ void MainWindow::loadSymbolsWithMerging ()
 			oldSymbolTable->mergeTable(*newSymbolTable);
 			delete newSymbolTable;
 			file.close();
-*/
 
             _textEditor->update();
+*/
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -885,6 +877,7 @@ void MainWindow::numTokenChanged (int numToken, int maxToken, bool pasteTokenPos
 
 void MainWindow::cellFocused (Cell* cell)
 {
+/*
     if( _textEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);
         ui->actionCopy_cell_extension->setEnabled(true);
@@ -893,6 +886,7 @@ void MainWindow::cellFocused (Cell* cell)
         ui->actionDeleteCell->setEnabled(true);
         ui->actionDeleteExtension->setEnabled(true);
     }
+*/
 }
 
 void MainWindow::cellDefocused ()
@@ -907,6 +901,7 @@ void MainWindow::cellDefocused ()
 
 void MainWindow::energyParticleFocused (Particle* e)
 {
+/*
     if( _textEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);
         ui->actionCopy_cell_extension->setEnabled(true);
@@ -915,6 +910,7 @@ void MainWindow::energyParticleFocused (Particle* e)
         ui->actionDeleteCell->setEnabled(true);
         ui->actionDeleteExtension->setEnabled(true);
     }
+*/
 }
 
 void MainWindow::entitiesSelected (int numCells, int numEnergyParticles)

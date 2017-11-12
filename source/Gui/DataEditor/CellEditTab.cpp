@@ -36,8 +36,10 @@ void CellEditTab::updateModelAndNotifyController ()
 		cell.energy = generateNumberFromFormattedString(currentText);
     if( row == 4 )
 		cell.maxConnections = qRound(generateNumberFromFormattedString(currentText));
-    if( (row == 6) && !(*cell.tokenBlocked))
-		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText));
+	if ((row == 6) && !(*cell.tokenBlocked)) {
+		auto parameters = _model->getSimulationParameters();
+		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText)) % parameters->cellMaxTokenBranchNumber;
+	}
 	_controller->notificationFromCellTab();
 }
 
@@ -45,7 +47,7 @@ void CellEditTab::keyPressEvent (QKeyEvent* e)
 {
 	auto &cell = _model->getCellToEditRef();
 
-	//auxilliary data
+	//auxiliary data
     QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
     QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
     QString colorEnd = "</span>";
