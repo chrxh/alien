@@ -92,9 +92,9 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditModel* 
 	_model = model;
 	_upperLeftPosition = upperLeftPosition;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
-	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + 270, _computerTabWidget->width(), _computerTabWidget->height());
-	_symbolTabWidget->setGeometry(upperLeftPosition.x + 395, upperLeftPosition.y, _symbolTabWidget->width(), _symbolTabWidget->height());
-	_tokenTabWidget->setGeometry(upperLeftPosition.x + 395 + _symbolTabWidget->width() + 10, upperLeftPosition.y, _tokenTabWidget->width(), _tokenTabWidget->height());
+	_computerTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y + _mainTabWidget->height() + 10, _computerTabWidget->width(), _computerTabWidget->height());
+	_symbolTabWidget->setGeometry(upperLeftPosition.x + _mainTabWidget->width() + 10, upperLeftPosition.y, _symbolTabWidget->width(), _symbolTabWidget->height());
+	_tokenTabWidget->setGeometry(_upperLeftPosition.x + _mainTabWidget->width() + 10 + _symbolTabWidget->width() + 10, _upperLeftPosition.y, _tokenTabWidget->width(), _tokenTabWidget->height());
 
 	_clusterTab->init(_model, controller);
 	_cellTab->init(_model, controller);
@@ -122,6 +122,32 @@ void DataEditorView::update() const
 		_tokenTabWidget->setVisible(false);
 
 		_selectionTab->updateDisplay();
+	}
+
+	if (_editorSelector == EditorSelector::CellWithComputerWithToken) {
+		_mainTabWidget->setVisible(true);
+		_computerTabWidget->setVisible(true);
+		_symbolTabWidget->setVisible(true);
+		_tokenTabWidget->setVisible(true);
+		_tokenTabWidget->setGeometry(_upperLeftPosition.x + _computerTabWidget->width() + 10 + _symbolTabWidget->width() + 10, _upperLeftPosition.y, _tokenTabWidget->width(), _tokenTabWidget->height());
+
+		_clusterTab->updateDisplay();
+		_cellTab->updateDisplay();
+		_metadataTab->updateDisplay();
+		_computerTab->updateDisplay();
+		_symbolTab->updateDisplay();
+	}
+
+	if (_editorSelector == EditorSelector::CellWithoutComputerWithToken) {
+		_mainTabWidget->setVisible(true);
+		_computerTabWidget->setVisible(false);
+		_symbolTabWidget->setVisible(false);
+		_tokenTabWidget->setVisible(true);
+		_tokenTabWidget->setGeometry(_upperLeftPosition.x + _computerTabWidget->width() + 10, _upperLeftPosition.y, _tokenTabWidget->width(), _tokenTabWidget->height());
+
+		_clusterTab->updateDisplay();
+		_cellTab->updateDisplay();
+		_metadataTab->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithComputerWithoutToken) {
@@ -160,7 +186,10 @@ void DataEditorView::update() const
 
 void DataEditorView::saveTabPositionForCellEditor()
 {
-	if (_editorSelector == EditorSelector::CellWithComputerWithoutToken || _editorSelector == EditorSelector::CellWithoutComputerWithoutToken) {
+	if (_editorSelector == EditorSelector::CellWithComputerWithToken
+		|| _editorSelector == EditorSelector::CellWithComputerWithoutToken
+		|| _editorSelector == EditorSelector::CellWithoutComputerWithToken
+		|| _editorSelector == EditorSelector::CellWithoutComputerWithoutToken) {
 		_savedTabPosition = _mainTabWidget->currentIndex();
 	}
 }
@@ -177,7 +206,39 @@ void DataEditorView::switchToNoEditor()
 	update();
 }
 
-void DataEditorView::switchToCellEditorWithComputer()
+void DataEditorView::switchToCellEditorWithComputerWithToken()
+{
+	saveTabPositionForCellEditor();
+
+	_mainTabWidget->clear();
+	_mainTabWidget->addTab(_clusterTab, "cluster");
+	_mainTabWidget->addTab(_cellTab, "cell");
+	_mainTabWidget->addTab(_metadataTab, "metadata");
+	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
+	_computerTabWidget->clear();
+	_computerTabWidget->addTab(_computerTab, "cell computer");
+	_symbolTabWidget->clear();
+	_symbolTabWidget->addTab(_symbolTab, "symbols");
+
+	_editorSelector = EditorSelector::CellWithComputerWithToken;
+	update();
+}
+
+void DataEditorView::switchToCellEditorWithoutComputerWithToken()
+{
+	saveTabPositionForCellEditor();
+
+	_mainTabWidget->clear();
+	_mainTabWidget->addTab(_clusterTab, "cluster");
+	_mainTabWidget->addTab(_cellTab, "cell");
+	_mainTabWidget->addTab(_metadataTab, "metadata");
+	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
+
+	_editorSelector = EditorSelector::CellWithoutComputerWithToken;
+	update();
+}
+
+void DataEditorView::switchToCellEditorWithComputerWithoutToken()
 {
 	saveTabPositionForCellEditor();
 
@@ -195,7 +256,7 @@ void DataEditorView::switchToCellEditorWithComputer()
 	update();
 }
 
-void DataEditorView::switchToCellEditorWithoutComputer()
+void DataEditorView::switchToCellEditorWithoutComputerWithoutToken()
 {
 	saveTabPositionForCellEditor();
 
