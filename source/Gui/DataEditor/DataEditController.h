@@ -28,6 +28,8 @@ private:
 	Q_SLOT void onShow(bool visible);
 	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);
 
+	void switchToCellEditor(CellDescription const& cell);
+
 	DataEditModel* _model = nullptr;
 	DataEditorView* _view = nullptr;
 	DataManipulator* _manipulator = nullptr;

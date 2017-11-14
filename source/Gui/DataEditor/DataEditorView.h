@@ -17,8 +17,10 @@ public:
 		, CellComputerCompiler* compiler);
 
 	void switchToNoEditor();
-	void switchToCellEditorWithComputer();
-	void switchToCellEditorWithoutComputer();
+	void switchToCellEditorWithComputerWithToken();
+	void switchToCellEditorWithoutComputerWithToken();
+	void switchToCellEditorWithComputerWithoutToken();
+	void switchToCellEditorWithoutComputerWithoutToken();
 	void switchToParticleEditor();
 	void switchToSelectionEditor();
 
