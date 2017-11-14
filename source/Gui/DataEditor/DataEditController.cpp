@@ -60,13 +60,8 @@ void DataEditController::notificationFromCellTab()
 	uint64_t selectedCellId = _model->getCellToEditRef().id;
 	_model->setClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
 
-	auto cell = _manipulator->getCellDescRef(selectedCellId);
-	if (cell.cellFeature->type == Enums::CellFunction::COMPUTER) {
-		_view->switchToCellEditorWithComputer();
-	}
-	else {
-		_view->switchToCellEditorWithoutComputer();
-	}
+	switchToCellEditor(_manipulator->getCellDescRef(selectedCellId));
+
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 
@@ -150,12 +145,7 @@ void DataEditController::notificationFromManipulator(set<DataManipulator::Receiv
 		uint64_t selectedCellId = *selectedCellIds.begin();
 		_model->setClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
 		auto cell = _manipulator->getCellDescRef(selectedCellId);
-		if (cell.cellFeature->type == Enums::CellFunction::COMPUTER) {
-			_view->switchToCellEditorWithComputer();
-		}
-		else {
-			_view->switchToCellEditorWithoutComputer();
-		}
+		switchToCellEditor(_manipulator->getCellDescRef(selectedCellId));
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.size() == 1) {
 		uint64_t selectedParticleId = *selectedParticleIds.begin();
@@ -168,5 +158,23 @@ void DataEditController::notificationFromManipulator(set<DataManipulator::Receiv
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.empty()) {
 		_view->switchToNoEditor();
+	}
+}
+
+void DataEditController::switchToCellEditor(CellDescription const& cell)
+{
+	bool computerActive = cell.cellFeature->type == Enums::CellFunction::COMPUTER;
+	bool tokenActive = cell.tokens && !cell.tokens->empty();
+	if (computerActive && tokenActive) {
+		_view->switchToCellEditorWithComputerWithToken();
+	}
+	else if (!computerActive && tokenActive) {
+		_view->switchToCellEditorWithoutComputerWithToken();
+	}
+	else if (computerActive && !tokenActive) {
+		_view->switchToCellEditorWithComputerWithoutToken();
+	}
+	else if (!computerActive && !tokenActive) {
+		_view->switchToCellEditorWithoutComputerWithoutToken();
 	}
 }
