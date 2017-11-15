@@ -25,7 +25,7 @@ public:
 	void switchToSelectionEditor();
 
 	void show(bool visible);
-	void update() const;
+	void updateDisplay() const;
 
 private:
 	enum class EditorSelector {

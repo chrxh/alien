@@ -42,6 +42,7 @@ class SelectionEditTab;
 class SymbolEditTab;
 class HexEditWidget;
 class TokenEditTabWidget;
+class TokenEditTab;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 
