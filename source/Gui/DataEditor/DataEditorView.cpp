@@ -10,47 +10,25 @@
 #include "SelectionEditTab.h"
 #include "SymbolEditTab.h"
 #include "TokenEditTabWidget.h"
+#include "TabWidgetHelper.h"
 
 #include "DataEditModel.h"
 #include "DataEditorView.h"
 
-namespace
-{
-	void setupTextEdit(QTextEdit* tab)
-	{
-		tab->setFrameShape(QFrame::NoFrame);
-		tab->setLineWidth(0);
-		tab->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		tab->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		tab->setOverwriteMode(false);
-		tab->setCursorWidth(6);
-		tab->setPalette(GuiSettings::getPaletteForTab());
-	}
-
-	void setupTabWidget(QTabWidget* tabWidget, QSize const& size)
-	{
-		tabWidget->setMinimumSize(size);
-		tabWidget->setMaximumSize(size);
-		tabWidget->setTabShape(QTabWidget::Triangular);
-		tabWidget->setElideMode(Qt::ElideNone);
-		tabWidget->setTabsClosable(false);
-		tabWidget->setPalette(GuiSettings::getPaletteForTabWidget());
-	}
-}
 
 DataEditorView::DataEditorView(QWidget * parent)
 	: QObject(parent)
 {
 	//main tabs
 	_mainTabWidget = new QTabWidget(parent);
-	setupTabWidget(_mainTabWidget, QSize(385, 260));
+	TabWidgetHelper::setupTabWidget(_mainTabWidget, QSize(385, 260));
 
 	_clusterTab = new ClusterEditTab(parent);
-	setupTextEdit(_clusterTab);
+	TabWidgetHelper::setupTextEdit(_clusterTab);
 	_clusterTab->setVisible(false);
 
 	_cellTab = new CellEditTab(parent);
-	setupTextEdit(_cellTab);
+	TabWidgetHelper::setupTextEdit(_cellTab);
 	_cellTab->setVisible(false);
 
 	_metadataTab = new MetadataEditTab(parent);
@@ -58,16 +36,16 @@ DataEditorView::DataEditorView(QWidget * parent)
 	_metadataTab->setVisible(false);
 
 	_particleTab = new ParticleEditTab(parent);
-	setupTextEdit(_particleTab);
+	TabWidgetHelper::setupTextEdit(_particleTab);
 	_particleTab->setVisible(false);
 
 	_selectionTab = new SelectionEditTab(parent);
-	setupTextEdit(_selectionTab);
+	TabWidgetHelper::setupTextEdit(_selectionTab);
 	_selectionTab->setVisible(false);
 
 	//computer tabs
 	_computerTabWidget = new QTabWidget(parent);
-	setupTabWidget(_computerTabWidget, QSize(385, 341));
+	TabWidgetHelper::setupTabWidget(_computerTabWidget, QSize(385, 341));
 
 	_computerTab = new CellComputerEditTab(parent);
 	_computerTab->setPalette(GuiSettings::getPaletteForTab());
@@ -75,16 +53,16 @@ DataEditorView::DataEditorView(QWidget * parent)
 
 	//symbol tabs
 	_symbolTabWidget = new QTabWidget(parent);
-	setupTabWidget(_symbolTabWidget, QSize(385, 260));
+	TabWidgetHelper::setupTabWidget(_symbolTabWidget, QSize(385, 260));
 
 	_symbolTab = new SymbolEditTab(parent);
 	_symbolTab->setVisible(false);
 
 	//token tabs
 	_tokenTabWidget = new TokenEditTabWidget(parent);
-	setupTabWidget(_tokenTabWidget, QSize(385, 260));
+	TabWidgetHelper::setupTabWidget(_tokenTabWidget, QSize(385, 260));
 
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditModel* model, DataEditController* controller, CellComputerCompiler* compiler)
@@ -103,9 +81,10 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditModel* 
 	_particleTab->init(_model, controller);
 	_selectionTab->init(_model, controller);
 	_symbolTab->init(_model, controller);
+	_tokenTabWidget->init(_model, controller);
 }
 
-void DataEditorView::update() const
+void DataEditorView::updateDisplay() const
 {
 	if (!_visible || _editorSelector == EditorSelector::No) {
 		_mainTabWidget->setVisible(false);
@@ -136,6 +115,7 @@ void DataEditorView::update() const
 		_metadataTab->updateDisplay();
 		_computerTab->updateDisplay();
 		_symbolTab->updateDisplay();
+		_tokenTabWidget->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithoutComputerWithToken) {
@@ -148,6 +128,7 @@ void DataEditorView::update() const
 		_clusterTab->updateDisplay();
 		_cellTab->updateDisplay();
 		_metadataTab->updateDisplay();
+		_tokenTabWidget->updateDisplay();
 	}
 
 	if (_editorSelector == EditorSelector::CellWithComputerWithoutToken) {
@@ -203,7 +184,7 @@ void DataEditorView::switchToNoEditor()
 {
 	saveTabPositionForCellEditor();
 	_editorSelector = EditorSelector::No;
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::switchToCellEditorWithComputerWithToken()
@@ -221,7 +202,7 @@ void DataEditorView::switchToCellEditorWithComputerWithToken()
 	_symbolTabWidget->addTab(_symbolTab, "symbols");
 
 	_editorSelector = EditorSelector::CellWithComputerWithToken;
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::switchToCellEditorWithoutComputerWithToken()
@@ -235,7 +216,7 @@ void DataEditorView::switchToCellEditorWithoutComputerWithToken()
 	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 
 	_editorSelector = EditorSelector::CellWithoutComputerWithToken;
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::switchToCellEditorWithComputerWithoutToken()
@@ -253,7 +234,7 @@ void DataEditorView::switchToCellEditorWithComputerWithoutToken()
 	_symbolTabWidget->addTab(_symbolTab, "symbols");
 
 	_editorSelector = EditorSelector::CellWithComputerWithoutToken;
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::switchToCellEditorWithoutComputerWithoutToken()
@@ -267,7 +248,7 @@ void DataEditorView::switchToCellEditorWithoutComputerWithoutToken()
 	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 
 	_editorSelector = EditorSelector::CellWithoutComputerWithoutToken;
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::switchToParticleEditor()
@@ -278,7 +259,7 @@ void DataEditorView::switchToParticleEditor()
 	_mainTabWidget->addTab(_particleTab, "particle");
 
 	_editorSelector = EditorSelector::Particle;
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::switchToSelectionEditor()
@@ -289,11 +270,11 @@ void DataEditorView::switchToSelectionEditor()
 	_mainTabWidget->addTab(_selectionTab, "selection");
 
 	_editorSelector = EditorSelector::Selection;
-	update();
+	updateDisplay();
 }
 
 void DataEditorView::show(bool visible)
 {
 	_visible = visible;
-	update();
+	updateDisplay();
 }

@@ -800,6 +800,9 @@
     <ClInclude Include="ui_TokenEditTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\DataEditor\TabWidgetHelper.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="gui.rc">
