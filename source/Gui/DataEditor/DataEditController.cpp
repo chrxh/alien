@@ -95,7 +95,7 @@ void DataEditController::notificationFromClusterTab()
 
 	_manipulator->updateCluster(cluster);
 
-	_view->update();
+	_view->updateDisplay();
 	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
 }
 

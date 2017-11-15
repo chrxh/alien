@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+
 #include "Gui/Definitions.h"
 
 namespace Ui {
