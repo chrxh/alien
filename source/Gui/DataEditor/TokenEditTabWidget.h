@@ -15,9 +15,11 @@ public:
 	void updateDisplay();
 
 private:
+	TokenEditTab* createNewTab(int index) const;
+	void deleteAllTabs();
+
 	DataEditModel* _model = nullptr;
 	DataEditController* _controller = nullptr;
 
-	vector<TokenEditTab*> tokenTabs;
-	int _currentIndex = 0;
+	vector<TokenEditTab*> _tokenTabs;
 };

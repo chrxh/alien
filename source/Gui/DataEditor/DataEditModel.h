@@ -18,6 +18,9 @@ public:
 	void setClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
 	void setParticle(ParticleDescription const& particle);
 	void setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds);
+	void setSelectedTokenIndex(uint value);
+
+	uint getSelectedTokenIndex() const;
 
 	DataChangeDescription getAndUpdateChanges();
 
@@ -37,6 +40,7 @@ private:
 	DataDescription _unchangedData;
 	DescriptionNavigator _navi;
 
+	uint _selectedTokenIndex = 0;
 	unordered_set<uint64_t> _selectedCellIds;
 	unordered_set<uint64_t> _selectedParticleIds;
 
