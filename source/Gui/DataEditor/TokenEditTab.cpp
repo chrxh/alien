@@ -57,15 +57,15 @@ TokenEditTab::~TokenEditTab()
     delete ui;
 }
 
-void TokenEditTab::init(DataEditModel * model, DataEditController * controller)
+void TokenEditTab::init(DataEditModel * model, DataEditController * controller, int tokenIndex)
 {
 	_model = model;
 	_controller = controller;
+	_tokenIndex = tokenIndex;
 }
 
-void TokenEditTab::updateDisplay(int tokenIndex)
+void TokenEditTab::updateDisplay()
 {
-	_tokenIndex = tokenIndex;
 
 	//    ui->tokenMemoryEditor->update(tokenMemory);
 	auto const& token = _model->getTokenToEditRef(_tokenIndex);
@@ -204,13 +204,6 @@ void TokenEditTab::updateDisplay(int tokenIndex)
 	} while (addressVarMapIt.hasNext());
 }
 
-void TokenEditTab::requestUpdate ()
-{
-    ui->tokenEditWidget->requestUpdate();
-	auto const& token = _model->getTokenToEditRef(_tokenIndex);
-    Q_EMIT tokenMemoryChanged(*token.data);
-}
-
 void TokenEditTab::tokenMemoryChanged_Slot (int tokenMemPointer)
 {
 	auto& token = _model->getTokenToEditRef(_tokenIndex);
@@ -221,7 +214,6 @@ void TokenEditTab::tokenMemoryChanged_Slot (int tokenMemPointer)
 			token.data.get()[tokenMemPointer + i] = newData[i];
         }
     }
-    Q_EMIT tokenMemoryChanged(*token.data);
 }
 
 void TokenEditTab::tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer)

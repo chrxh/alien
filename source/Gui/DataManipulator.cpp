@@ -174,7 +174,7 @@ void DataManipulator::addToken()
 		numToken = cell.tokens->size();
 	}
 	if (numToken < _parameters->cellMaxToken) {
-		cell.addToken(TokenDescription().setEnergy(_parameters->tokenCreationEnergy));
+		cell.addToken(TokenDescription().setEnergy(_parameters->tokenCreationEnergy).setData(QByteArray(_parameters->tokenMemorySize, 0)));
 	}
 }
 

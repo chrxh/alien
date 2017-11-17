@@ -18,20 +18,13 @@ public:
     TokenEditTab(QWidget *parent = 0);
     virtual ~TokenEditTab();
 
-	void init(DataEditModel* model, DataEditController* controller);
-	void updateDisplay(int tokenIndex);
+	void init(DataEditModel* model, DataEditController* controller, int tokenIndex);
+	void updateDisplay();
 
-	void update(SymbolTable* symbolTable, qreal tokenEnergy, QByteArray const& tokenData);
-    void requestUpdate ();
-
-Q_SIGNALS:
-    void tokenMemoryChanged (QByteArray data);
-    void tokenPropChanged (qreal energy);
-
-private Q_SLOTS:
-    void tokenMemoryChanged_Slot (int tokenMemPointer);
-    void tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer);
-    void tokenMemoryCursorReachedEnd_Slot (int tokenMemPointer);
+private:
+	Q_SLOT void tokenMemoryChanged_Slot (int tokenMemPointer);
+	Q_SLOT void tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer);
+	Q_SLOT void tokenMemoryCursorReachedEnd_Slot (int tokenMemPointer);
 
 private:
     Ui::TokenEditTab *ui;
