@@ -46,7 +46,6 @@ TokenEditTab::TokenEditTab(QWidget *parent) :
     ui->tableWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
 
-    connect(ui->tokenEditWidget, SIGNAL(dataChanged(qreal)), this, SIGNAL(tokenPropChanged(qreal)));
     connect(_signalMapper, SIGNAL(mapped(int)), this, SLOT(tokenMemoryChanged_Slot(int)));
     connect(_signalMapper2, SIGNAL(mapped(int)), this, SLOT(tokenMemoryCursorReachedBeginning_Slot(int)));
     connect(_signalMapper3, SIGNAL(mapped(int)), this, SLOT(tokenMemoryCursorReachedEnd_Slot(int)));
