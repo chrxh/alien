@@ -5,6 +5,8 @@
 #include "Model/Api/SimulationContext.h"
 
 #include "Gui/DataManipulator.h"
+#include "Gui/Notifier.h"
+
 #include "DataEditController.h"
 #include "DataEditContext.h"
 #include "DataEditModel.h"
@@ -17,8 +19,9 @@ DataEditController::DataEditController(QWidget *parent /*= nullptr*/)
 	_context = new DataEditContext(this);
 }
 
-void DataEditController::init(IntVector2D const & upperLeftPosition, DataManipulator * manipulator, SimulationContext* context)
+void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataManipulator * manipulator, SimulationContext* context)
 {
+	_notifier = notifier;
 	_symbolTable = context->getSymbolTable();
 	_model = new DataEditModel(this);
 	_model->init(context->getSimulationParameters(), context->getSymbolTable());
@@ -26,7 +29,7 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, DataManipul
 	_manipulator = manipulator;
 
 	connect(_context, &DataEditContext::show, this, &DataEditController::onShow);
-	connect(_manipulator, &DataManipulator::notify, this, &DataEditController::notificationFromManipulator);
+	connect(_notifier, &Notifier::notify, this, &DataEditController::receivedExternalNotifications);
 
 	onShow(false);
 }
@@ -62,7 +65,7 @@ void DataEditController::notificationFromCellTab()
 
 	switchToCellEditor(_manipulator->getCellDescRef(selectedCellId));
 
-	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
+	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor });
 }
 
 void DataEditController::notificationFromClusterTab()
@@ -96,7 +99,7 @@ void DataEditController::notificationFromClusterTab()
 	_manipulator->updateCluster(cluster);
 
 	_view->updateDisplay();
-	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
+	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor });
 }
 
 void DataEditController::notificationFromParticleTab()
@@ -104,7 +107,7 @@ void DataEditController::notificationFromParticleTab()
 	auto& particle = _model->getParticleToEditRef();
 	_manipulator->updateParticle(particle);
 
-	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
+	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor });
 }
 
 void DataEditController::notificationFromMetadataTab()
@@ -112,7 +115,7 @@ void DataEditController::notificationFromMetadataTab()
 	auto& cluster = _model->getClusterToEditRef();
 	_manipulator->updateCluster(cluster);
 
-	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
+	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor });
 }
 
 void DataEditController::notificationFromCellComputerTab()
@@ -120,7 +123,7 @@ void DataEditController::notificationFromCellComputerTab()
 	auto& cluster = _model->getClusterToEditRef();
 	_manipulator->updateCluster(cluster);
 
-	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation, DataManipulator::Receiver::VisualEditor });
+	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor });
 }
 
 void DataEditController::notificationFromSymbolTab()
@@ -132,9 +135,9 @@ void DataEditController::onShow(bool visible)
 	_view->show(visible);
 }
 
-void DataEditController::notificationFromManipulator(set<DataManipulator::Receiver> const& targets)
+void DataEditController::receivedExternalNotifications(set<Receiver> const& targets)
 {
-	if (targets.find(DataManipulator::Receiver::DataEditor) == targets.end()) {
+	if (targets.find(Receiver::DataEditor) == targets.end()) {
 		return;
 	}
 

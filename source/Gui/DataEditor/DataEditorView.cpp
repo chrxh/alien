@@ -191,17 +191,18 @@ void DataEditorView::switchToCellEditorWithComputerWithToken()
 {
 	saveTabPositionForCellEditor();
 
-	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_clusterTab, "cluster");
-	_mainTabWidget->addTab(_cellTab, "cell");
-	_mainTabWidget->addTab(_metadataTab, "metadata");
-	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
-	_computerTabWidget->clear();
-	_computerTabWidget->addTab(_computerTab, "cell computer");
-	_symbolTabWidget->clear();
-	_symbolTabWidget->addTab(_symbolTab, "symbols");
-
-	_editorSelector = EditorSelector::CellWithComputerWithToken;
+	if (_editorSelector != EditorSelector::CellWithComputerWithToken) {
+		_mainTabWidget->clear();
+		_mainTabWidget->addTab(_clusterTab, "cluster");
+		_mainTabWidget->addTab(_cellTab, "cell");
+		_mainTabWidget->addTab(_metadataTab, "metadata");
+		_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
+		_computerTabWidget->clear();
+		_computerTabWidget->addTab(_computerTab, "cell computer");
+		_symbolTabWidget->clear();
+		_symbolTabWidget->addTab(_symbolTab, "symbols");
+		_editorSelector = EditorSelector::CellWithComputerWithToken;
+	}
 	updateDisplay();
 }
 
@@ -209,13 +210,14 @@ void DataEditorView::switchToCellEditorWithoutComputerWithToken()
 {
 	saveTabPositionForCellEditor();
 
-	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_clusterTab, "cluster");
-	_mainTabWidget->addTab(_cellTab, "cell");
-	_mainTabWidget->addTab(_metadataTab, "metadata");
-	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
-
-	_editorSelector = EditorSelector::CellWithoutComputerWithToken;
+	if (_editorSelector != EditorSelector::CellWithoutComputerWithToken) {
+		_mainTabWidget->clear();
+		_mainTabWidget->addTab(_clusterTab, "cluster");
+		_mainTabWidget->addTab(_cellTab, "cell");
+		_mainTabWidget->addTab(_metadataTab, "metadata");
+		_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
+		_editorSelector = EditorSelector::CellWithoutComputerWithToken;
+	}
 	updateDisplay();
 }
 
@@ -223,53 +225,54 @@ void DataEditorView::switchToCellEditorWithComputerWithoutToken()
 {
 	saveTabPositionForCellEditor();
 
-	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_clusterTab, "cluster");
-	_mainTabWidget->addTab(_cellTab, "cell");
-	_mainTabWidget->addTab(_metadataTab, "metadata");
-	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
-	_computerTabWidget->clear();
-	_computerTabWidget->addTab(_computerTab, "cell computer");
-	_symbolTabWidget->clear();
-	_symbolTabWidget->addTab(_symbolTab, "symbols");
-
-	_editorSelector = EditorSelector::CellWithComputerWithoutToken;
+	if (_editorSelector != EditorSelector::CellWithComputerWithoutToken) {
+		_mainTabWidget->clear();
+		_mainTabWidget->addTab(_clusterTab, "cluster");
+		_mainTabWidget->addTab(_cellTab, "cell");
+		_mainTabWidget->addTab(_metadataTab, "metadata");
+		_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
+		_computerTabWidget->clear();
+		_computerTabWidget->addTab(_computerTab, "cell computer");
+		_symbolTabWidget->clear();
+		_symbolTabWidget->addTab(_symbolTab, "symbols");
+		_editorSelector = EditorSelector::CellWithComputerWithoutToken;
+	}
 	updateDisplay();
 }
 
 void DataEditorView::switchToCellEditorWithoutComputerWithoutToken()
 {
 	saveTabPositionForCellEditor();
-
-	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_clusterTab, "cluster");
-	_mainTabWidget->addTab(_cellTab, "cell");
-	_mainTabWidget->addTab(_metadataTab, "metadata");
-	_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
-
-	_editorSelector = EditorSelector::CellWithoutComputerWithoutToken;
+	if (_editorSelector != EditorSelector::CellWithoutComputerWithoutToken) {
+		_mainTabWidget->clear();
+		_mainTabWidget->addTab(_clusterTab, "cluster");
+		_mainTabWidget->addTab(_cellTab, "cell");
+		_mainTabWidget->addTab(_metadataTab, "metadata");
+		_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
+		_editorSelector = EditorSelector::CellWithoutComputerWithoutToken;
+	}
 	updateDisplay();
 }
 
 void DataEditorView::switchToParticleEditor()
 {
 	saveTabPositionForCellEditor();
-
-	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_particleTab, "particle");
-
-	_editorSelector = EditorSelector::Particle;
+	if (_editorSelector != EditorSelector::Particle) {
+		_mainTabWidget->clear();
+		_mainTabWidget->addTab(_particleTab, "particle");
+		_editorSelector = EditorSelector::Particle;
+	}
 	updateDisplay();
 }
 
 void DataEditorView::switchToSelectionEditor()
 {
 	saveTabPositionForCellEditor();
-
-	_mainTabWidget->clear();
-	_mainTabWidget->addTab(_selectionTab, "selection");
-
-	_editorSelector = EditorSelector::Selection;
+	if (_editorSelector != EditorSelector::Selection) {
+		_mainTabWidget->clear();
+		_mainTabWidget->addTab(_selectionTab, "selection");
+		_editorSelector = EditorSelector::Selection;
+	}
 	updateDisplay();
 }
 

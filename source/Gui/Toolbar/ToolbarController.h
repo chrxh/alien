@@ -12,7 +12,7 @@ public:
 	ToolbarController(QWidget * parent = nullptr);
 	virtual ~ToolbarController() = default;
 
-	void init(IntVector2D const& upperLeftPosition, DataManipulator* manipulator, const SimulationContext* context);
+	void init(IntVector2D const& upperLeftPosition, Notifier* notifier, DataManipulator* manipulator, const SimulationContext* context);
 
 	ToolbarContext* getContext() const;
 
@@ -24,8 +24,9 @@ public:
 
 private:
 	Q_SLOT void onShow(bool visible);
-	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);
+	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
+	Notifier* _notifier = nullptr;
 	ToolbarContext* _context = nullptr;
 	ToolbarView* _view = nullptr;
 	ToolbarModel* _model = nullptr;

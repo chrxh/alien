@@ -4,6 +4,7 @@
 #include "Model/Api/SimulationParameters.h"
 
 #include "Gui/DataManipulator.h"
+#include "Gui/Notifier.h"
 
 #include "ToolbarView.h"
 #include "ToolbarModel.h"
@@ -17,14 +18,15 @@ ToolbarController::ToolbarController(QWidget* parent)
 	_context = new ToolbarContext(this);
 }
 
-void ToolbarController::init(IntVector2D const & upperLeftPosition, DataManipulator* manipulator, const SimulationContext* context)
+void ToolbarController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataManipulator* manipulator, const SimulationContext* context)
 {
+	_notifier = notifier;
 	_manipulator = manipulator;
 	_parameters = context->getSimulationParameters();
 	_view->init(upperLeftPosition, this);
 
 	connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow);
-	connect(_manipulator, &DataManipulator::notify, this, &ToolbarController::notificationFromManipulator);
+	connect(_notifier, &Notifier::notify, this, &ToolbarController::receivedNotifications);
 
 	onShow(false);
 }
@@ -38,55 +40,55 @@ void ToolbarController::onRequestCell()
 {
 	_manipulator->addAndSelectCell(_model->getPositionDeltaForNewEntity());
 	_manipulator->reconnectSelectedCells();
-	Q_EMIT _manipulator->notify({
-		DataManipulator::Receiver::DataEditor,
-		DataManipulator::Receiver::Simulation,
-		DataManipulator::Receiver::VisualEditor,
-		DataManipulator::Receiver::Toolbar
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::Toolbar
 	});
 }
 
 void ToolbarController::onRequestParticle()
 {
 	_manipulator->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
-	Q_EMIT _manipulator->notify({
-		DataManipulator::Receiver::DataEditor,
-		DataManipulator::Receiver::Simulation,
-		DataManipulator::Receiver::VisualEditor,
-		DataManipulator::Receiver::Toolbar
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::Toolbar
 	});
 }
 
 void ToolbarController::onDeleteSelection()
 {
 	_manipulator->deleteSelection();
-	Q_EMIT _manipulator->notify({
-		DataManipulator::Receiver::DataEditor,
-		DataManipulator::Receiver::Simulation,
-		DataManipulator::Receiver::VisualEditor,
-		DataManipulator::Receiver::Toolbar
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::Toolbar
 	});
 }
 
 void ToolbarController::onDeleteExtendedSelection()
 {
 	_manipulator->deleteExtendedSelection();
-	Q_EMIT _manipulator->notify({
-		DataManipulator::Receiver::DataEditor,
-		DataManipulator::Receiver::Simulation,
-		DataManipulator::Receiver::VisualEditor,
-		DataManipulator::Receiver::Toolbar
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::Toolbar
 	});
 }
 
 void ToolbarController::onRequestToken()
 {
 	_manipulator->addToken();
-	Q_EMIT _manipulator->notify({
-		DataManipulator::Receiver::DataEditor,
-		DataManipulator::Receiver::Simulation,
-		DataManipulator::Receiver::VisualEditor,
-		DataManipulator::Receiver::Toolbar
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::Toolbar
 	});
 }
 
@@ -95,9 +97,9 @@ void ToolbarController::onShow(bool visible)
 	_view->setVisible(visible);
 }
 
-void ToolbarController::notificationFromManipulator(set<DataManipulator::Receiver> const & targets)
+void ToolbarController::receivedNotifications(set<Receiver> const & targets)
 {
-	if (targets.find(DataManipulator::Receiver::Toolbar) == targets.end()) {
+	if (targets.find(Receiver::Toolbar) == targets.end()) {
 		return;
 	}
 

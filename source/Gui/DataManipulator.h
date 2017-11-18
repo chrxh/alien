@@ -12,7 +12,7 @@ public:
 	DataManipulator(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~DataManipulator() = default;
 
-	virtual void init(SimulationAccess* access, DescriptionHelper* connector, SimulationContext* context);
+	virtual void init(Notifier* notifier, SimulationAccess* access, DescriptionHelper* connector, SimulationContext* context);
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
@@ -41,9 +41,6 @@ public:
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
 
-	enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
-	Q_SIGNAL void notify(set<Receiver> const& targets);
-
 private:
 	Q_SLOT void dataFromSimulationAvailable();
 	Q_SLOT void sendDataChangesToSimulation(set<Receiver> const& targets);
@@ -53,6 +50,7 @@ private:
 	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);
 
+	Notifier* _notifier = nullptr;
 	SimulationAccess* _access = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
 	SimulationParameters* _parameters = nullptr;

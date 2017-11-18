@@ -43,6 +43,8 @@ class SymbolEditTab;
 class HexEditWidget;
 class TokenEditTabWidget;
 class TokenEditTab;
+class Notifier;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 
+enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };

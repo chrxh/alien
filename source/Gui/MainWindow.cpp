@@ -31,10 +31,11 @@
 #include "Gui/DataEditor/DataEditContext.h"
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
-#include "Gui/Settings.h"
-#include "Gui/Settings.h"
-#include "Gui/DataManipulator.h"
 
+#include "Settings.h"
+#include "Settings.h"
+#include "DataManipulator.h"
+#include "Notifier.h"
 #include "MainWindow.h"
 #include "ui_mainwindow.h"
 
@@ -60,11 +61,12 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	_dataManipulator = new DataManipulator(this);
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
+	auto notifier = new Notifier(this);
 
-	_toolbar->init({ 10, 10 }, _dataManipulator, simController->getContext());
-	_dataEditor->init({ 10, 60 }, _dataManipulator, simController->getContext());
-	_dataManipulator->init(access, descHelper, simController->getContext());
-	ui->visualEditor->init(simController, _dataManipulator, access);
+	_toolbar->init({ 10, 10 }, notifier, _dataManipulator, simController->getContext());
+	_dataEditor->init({ 10, 60 }, notifier, _dataManipulator, simController->getContext());
+	_dataManipulator->init(notifier, access, descHelper, simController->getContext());
+	ui->visualEditor->init(notifier, simController, _dataManipulator, access);
 
 	connect(_simController, &SimulationController::updateTimestepsPerSecond, [this](int value) {
 		_framedata.fps = value;

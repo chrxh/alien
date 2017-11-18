@@ -18,7 +18,7 @@ public:
     ShapeUniverse (QObject *parent = nullptr);
 	virtual ~ShapeUniverse();
 
-	virtual void init(SimulationController* controller, DataManipulator* manipulator, ViewportInterface* viewport);
+	virtual void init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 	virtual void requestData();
@@ -29,7 +29,7 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
-	Q_SLOT void notificationFromManipulator(set<DataManipulator::Receiver> const& targets);
+	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
 	struct Selection
 	{
@@ -45,4 +45,5 @@ private:
 
 	ItemManager* _itemManager = nullptr;
 	DataManipulator* _manipulator = nullptr;
+	Notifier* _notifier = nullptr;
 };
