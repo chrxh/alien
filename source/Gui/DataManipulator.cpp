@@ -1,18 +1,20 @@
-#include "DataManipulator.h"
-
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/DescriptionHelper.h"
 
-void DataManipulator::init(SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
+#include "DataManipulator.h"
+#include "Notifier.h"
+
+void DataManipulator::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
 {
 	SET_CHILD(_access, access);
 	SET_CHILD(_descHelper, connector);
+	_notifier = notifier;
 	_parameters = context->getSimulationParameters();
 
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection);
-	connect(this, &DataManipulator::notify, this, &DataManipulator::sendDataChangesToSimulation);
+	connect(_notifier, &Notifier::notify, this, &DataManipulator::sendDataChangesToSimulation);
 }
 
 DataDescription & DataManipulator::getDataRef()
@@ -192,7 +194,7 @@ void DataManipulator::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
-	Q_EMIT notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar });
+	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar });
 }
 
 void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)

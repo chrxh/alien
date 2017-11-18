@@ -4,13 +4,14 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/Definitions.h"
-#include "Gui/Settings.h"
-#include "Gui/DataManipulator.h"
-#include "Gui/VisualEditor/ViewportInterface.h"
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SpaceMetric.h"
+#include "Gui/VisualEditor/ViewportInterface.h"
+#include "Gui/Settings.h"
+#include "Gui/DataManipulator.h"
+#include "Gui/Notifier.h"
 
 #include "ShapeUniverse.h"
 #include "CellItem.h"
@@ -28,11 +29,12 @@ ShapeUniverse::~ShapeUniverse()
 {
 }
 
-void ShapeUniverse::init(SimulationController * controller, DataManipulator* manipulator, ViewportInterface * viewport)
+void ShapeUniverse::init(Notifier* notifier, SimulationController * controller, DataManipulator* manipulator, ViewportInterface * viewport)
 {
 	_controller = controller;
 	_viewport = viewport;
 	_manipulator = manipulator;
+	_notifier = notifier;
 
 	auto itemManager = new ItemManager();
 	SET_CHILD(_itemManager, itemManager);
@@ -46,7 +48,7 @@ void ShapeUniverse::activate()
 	_itemManager->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	connect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::notificationFromManipulator);
+	connect(_notifier, &Notifier::notify, this, &ShapeUniverse::receivedNotifications);
 
 	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
 }
@@ -54,7 +56,7 @@ void ShapeUniverse::activate()
 void ShapeUniverse::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	disconnect(_manipulator, &DataManipulator::notify, this, &ShapeUniverse::notificationFromManipulator);
+	disconnect(_notifier, &Notifier::notify, this, &ShapeUniverse::receivedNotifications);
 }
 
 void ShapeUniverse::requestData()
@@ -62,9 +64,9 @@ void ShapeUniverse::requestData()
 	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
 }
 
-void ShapeUniverse::notificationFromManipulator(set<DataManipulator::Receiver> const& targets)
+void ShapeUniverse::receivedNotifications(set<Receiver> const& targets)
 {
-	if (targets.find(DataManipulator::Receiver::VisualEditor) == targets.end()) {
+	if (targets.find(Receiver::VisualEditor) == targets.end()) {
 		return;
 	}
 	_itemManager->update(_manipulator);
@@ -123,7 +125,7 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	if (clickedOnSpace(itemsClicked)) {
 		startMarking(e->scenePos());
 	}
-	Q_EMIT _manipulator->notify({ DataManipulator::Receiver::DataEditor, DataManipulator::Receiver::Toolbar });
+	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar });
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -157,7 +159,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		}
 	}
 	if (leftButton || rightButton) {
-		Q_EMIT _manipulator->notify({ DataManipulator::Receiver::DataEditor, DataManipulator::Receiver::Toolbar });
+		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar });
 	}
 }
 
@@ -169,7 +171,7 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
-			Q_EMIT _manipulator->notify({ DataManipulator::Receiver::Simulation });
+			Q_EMIT _notifier->notify({ Receiver::Simulation });
 		}
 	}
 }
