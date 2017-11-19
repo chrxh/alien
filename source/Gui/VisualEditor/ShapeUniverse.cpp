@@ -125,7 +125,7 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	if (clickedOnSpace(itemsClicked)) {
 		startMarking(e->scenePos());
 	}
-	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar });
+	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::All);
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
@@ -159,7 +159,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		}
 	}
 	if (leftButton || rightButton) {
-		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar });
+		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::TokenUnchanged);
 	}
 }
 
@@ -171,7 +171,7 @@ void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
-			Q_EMIT _notifier->notify({ Receiver::Simulation });
+			Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::TokenUnchanged);
 		}
 	}
 }

@@ -11,7 +11,7 @@ public:
 	Notifier(QObject * parent = nullptr);
 	virtual ~Notifier() = default;
 
-	Q_SIGNAL void notify(set<Receiver> const& targets);
+	Q_SIGNAL void notify(set<Receiver> const& targets, UpdateDescription update);
 
 private:
 	

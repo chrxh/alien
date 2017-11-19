@@ -194,7 +194,7 @@ void DataManipulator::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
-	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar });
+	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar }, UpdateDescription::All);
 }
 
 void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)

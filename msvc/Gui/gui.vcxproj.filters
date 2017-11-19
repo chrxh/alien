@@ -650,7 +650,7 @@
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Notifier.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

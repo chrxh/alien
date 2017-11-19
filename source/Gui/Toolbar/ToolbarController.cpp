@@ -45,7 +45,7 @@ void ToolbarController::onRequestCell()
 		Receiver::Simulation,
 		Receiver::VisualEditor,
 		Receiver::Toolbar
-	});
+	}, UpdateDescription::All);
 }
 
 void ToolbarController::onRequestParticle()
@@ -56,7 +56,7 @@ void ToolbarController::onRequestParticle()
 		Receiver::Simulation,
 		Receiver::VisualEditor,
 		Receiver::Toolbar
-	});
+	}, UpdateDescription::All);
 }
 
 void ToolbarController::onDeleteSelection()
@@ -67,7 +67,7 @@ void ToolbarController::onDeleteSelection()
 		Receiver::Simulation,
 		Receiver::VisualEditor,
 		Receiver::Toolbar
-	});
+	}, UpdateDescription::All);
 }
 
 void ToolbarController::onDeleteExtendedSelection()
@@ -78,7 +78,7 @@ void ToolbarController::onDeleteExtendedSelection()
 		Receiver::Simulation,
 		Receiver::VisualEditor,
 		Receiver::Toolbar
-	});
+	}, UpdateDescription::All);
 }
 
 void ToolbarController::onRequestToken()
@@ -89,7 +89,7 @@ void ToolbarController::onRequestToken()
 		Receiver::Simulation,
 		Receiver::VisualEditor,
 		Receiver::Toolbar
-	});
+	}, UpdateDescription::All);
 }
 
 void ToolbarController::onShow(bool visible)
