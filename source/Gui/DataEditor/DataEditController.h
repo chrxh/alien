@@ -26,9 +26,9 @@ public:
 
 private:
 	Q_SLOT void onShow(bool visible);
-	Q_SLOT void receivedExternalNotifications(set<Receiver> const& targets);
+	Q_SLOT void receivedExternalNotifications(set<Receiver> const& targets, UpdateDescription update);
 
-	void switchToCellEditor(CellDescription const& cell);
+	void switchToCellEditor(CellDescription const& cell, UpdateDescription update = UpdateDescription::All);
 
 	Notifier* _notifier = nullptr;
 	DataEditModel* _model = nullptr;
