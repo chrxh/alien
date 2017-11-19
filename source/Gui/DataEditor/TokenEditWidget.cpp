@@ -2,8 +2,10 @@
 #include <QTextBlock>
 #include <qmath.h>
 
-#include "gui/Settings.h"
+#include "Gui/Settings.h"
 
+#include "DataEditModel.h"
+#include "DataEditController.h"
 #include "TokenEditWidget.h"
 
 
@@ -13,8 +15,17 @@ TokenEditWidget::TokenEditWidget(QWidget *parent)
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 
-void TokenEditWidget::update (qreal energy)
+void TokenEditWidget::init(DataEditModel * model, DataEditController * controller, int tokenIndex)
 {
+	_model = model;
+	_controller = controller;
+	_tokenIndex = tokenIndex;
+}
+
+void TokenEditWidget::updateDisplay ()
+{
+	auto const& token = _model->getTokenToEditRef(_tokenIndex);
+
     //define auxilliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
@@ -30,17 +41,17 @@ void TokenEditWidget::update (qreal energy)
 
     //create string of display
     text = parStart+colorTextStart+ "internal energy: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(energy)+parEnd;
+    text += generateFormattedRealString(*token.energy)+parEnd;
     QTextEdit::setText(text);
 }
 
 void TokenEditWidget::requestUpdate ()
 {
-    QString currentText = QTextEdit::textCursor().block().text();
-    qreal energy = generateNumberFromFormattedString(currentText);
+	auto& token = _model->getTokenToEditRef(_tokenIndex);
+	QString currentText = QTextEdit::textCursor().block().text();
+    token.energy = generateNumberFromFormattedString(currentText);
 
-    //inform other instances
-    Q_EMIT dataChanged(energy);
+	_controller->notificationFromTokenTab();
 }
 
 void TokenEditWidget::keyPressEvent (QKeyEvent* e)
@@ -181,8 +192,11 @@ void TokenEditWidget::keyPressEvent (QKeyEvent* e)
     if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return) ) {
 
         //inform other instances
-        QString currentText = QTextEdit::textCursor().block().text();
-        Q_EMIT dataChanged(generateNumberFromFormattedString(currentText));
+        QString energyStr = QTextEdit::textCursor().block().text();
+		auto& token = _model->getTokenToEditRef(_tokenIndex);
+		token.energy = generateNumberFromFormattedString(energyStr);
+		_controller->notificationFromTokenTab();
+
     }
 }
 

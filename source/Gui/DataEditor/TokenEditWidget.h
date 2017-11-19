@@ -2,19 +2,20 @@
 
 #include <QTextEdit>
 
+#include "Gui/Definitions.h"
+
 class TokenEditWidget
 	: public QTextEdit
 {
     Q_OBJECT
 public:
-    TokenEditWidget (QWidget *parent = 0);
+    TokenEditWidget (QWidget *parent = nullptr);
 	virtual ~TokenEditWidget() = default;
 
-    void update (qreal energy);
-    void requestUpdate ();
+	void init(DataEditModel* model, DataEditController* controller, int tokenIndex);
 
-Q_SIGNALS:
-    void dataChanged (qreal energy);
+    void updateDisplay();
+    void requestUpdate ();
 
 protected:
     void keyPressEvent (QKeyEvent* e);
@@ -25,4 +26,8 @@ protected:
 private:
     qreal generateNumberFromFormattedString (QString s);
     QString generateFormattedRealString (qreal r);
+
+	DataEditModel* _model = nullptr;
+	DataEditController* _controller = nullptr;
+	int _tokenIndex = 0;
 };

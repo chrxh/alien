@@ -5,13 +5,13 @@
 #include "Model/Api/Definitions.h"
 #include "Gui/Definitions.h"
 
-class DataEditorView
+class DataEditView
 	: public QObject
 {
 	Q_OBJECT
 public:
-	DataEditorView(QWidget * parent = nullptr);
-	virtual ~DataEditorView() = default;
+	DataEditView(QWidget * parent = nullptr);
+	virtual ~DataEditView() = default;
 
 	void init(IntVector2D const& upperLeftPosition, DataEditModel* model, DataEditController* controller
 		, CellComputerCompiler* compiler);

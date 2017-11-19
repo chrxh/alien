@@ -21,12 +21,14 @@ public:
 	void init(DataEditModel* model, DataEditController* controller, int tokenIndex);
 	void updateDisplay();
 
-private:
-	Q_SLOT void tokenMemoryChanged_Slot (int tokenMemPointer);
-	Q_SLOT void tokenMemoryCursorReachedBeginning_Slot (int tokenMemPointer);
-	Q_SLOT void tokenMemoryCursorReachedEnd_Slot (int tokenMemPointer);
 
 private:
+	HexEditWidget* createHexEditWidget(int size, int row, int tokenMemPointer);
+
+	Q_SLOT void tokenMemoryChanged (int tokenMemPointer);
+	Q_SLOT void tokenMemoryCursorReachedBeginning (int tokenMemPointer);
+	Q_SLOT void tokenMemoryCursorReachedEnd (int tokenMemPointer);
+
     Ui::TokenEditTab *ui;
 
 	DataEditModel* _model = nullptr;
