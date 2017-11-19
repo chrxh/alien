@@ -84,7 +84,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditModel* 
 	_tokenTabWidget->init(_model, controller);
 }
 
-void DataEditorView::updateDisplay() const
+void DataEditorView::updateDisplay(UpdateDescription update) const
 {
 	if (!_visible || _editorSelector == EditorSelector::No) {
 		_mainTabWidget->setVisible(false);
@@ -115,7 +115,9 @@ void DataEditorView::updateDisplay() const
 		_metadataTab->updateDisplay();
 		_computerTab->updateDisplay();
 		_symbolTab->updateDisplay();
-		_tokenTabWidget->updateDisplay();
+		if (update == UpdateDescription::All) {
+			_tokenTabWidget->updateDisplay();
+		}
 	}
 
 	if (_editorSelector == EditorSelector::CellWithoutComputerWithToken) {
@@ -128,7 +130,9 @@ void DataEditorView::updateDisplay() const
 		_clusterTab->updateDisplay();
 		_cellTab->updateDisplay();
 		_metadataTab->updateDisplay();
-		_tokenTabWidget->updateDisplay();
+		if (update == UpdateDescription::All) {
+			_tokenTabWidget->updateDisplay();
+		}
 	}
 
 	if (_editorSelector == EditorSelector::CellWithComputerWithoutToken) {
@@ -187,7 +191,7 @@ void DataEditorView::switchToNoEditor()
 	updateDisplay();
 }
 
-void DataEditorView::switchToCellEditorWithComputerWithToken()
+void DataEditorView::switchToCellEditorWithComputerWithToken(UpdateDescription update)
 {
 	saveTabPositionForCellEditor();
 
@@ -203,10 +207,10 @@ void DataEditorView::switchToCellEditorWithComputerWithToken()
 		_symbolTabWidget->addTab(_symbolTab, "symbols");
 		_editorSelector = EditorSelector::CellWithComputerWithToken;
 	}
-	updateDisplay();
+	updateDisplay(update);
 }
 
-void DataEditorView::switchToCellEditorWithoutComputerWithToken()
+void DataEditorView::switchToCellEditorWithoutComputerWithToken(UpdateDescription update)
 {
 	saveTabPositionForCellEditor();
 
@@ -218,7 +222,7 @@ void DataEditorView::switchToCellEditorWithoutComputerWithToken()
 		_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 		_editorSelector = EditorSelector::CellWithoutComputerWithToken;
 	}
-	updateDisplay();
+	updateDisplay(update);
 }
 
 void DataEditorView::switchToCellEditorWithComputerWithoutToken()

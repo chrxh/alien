@@ -17,15 +17,15 @@ public:
 		, CellComputerCompiler* compiler);
 
 	void switchToNoEditor();
-	void switchToCellEditorWithComputerWithToken();
-	void switchToCellEditorWithoutComputerWithToken();
+	void switchToCellEditorWithComputerWithToken(UpdateDescription update);
+	void switchToCellEditorWithoutComputerWithToken(UpdateDescription update);
 	void switchToCellEditorWithComputerWithoutToken();
 	void switchToCellEditorWithoutComputerWithoutToken();
 	void switchToParticleEditor();
 	void switchToSelectionEditor();
 
 	void show(bool visible);
-	void updateDisplay() const;
+	void updateDisplay(UpdateDescription update = UpdateDescription::All) const;
 
 private:
 	enum class EditorSelector {
