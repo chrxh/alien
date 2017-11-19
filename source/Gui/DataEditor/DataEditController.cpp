@@ -10,12 +10,12 @@
 #include "DataEditController.h"
 #include "DataEditContext.h"
 #include "DataEditModel.h"
-#include "DataEditorView.h"
+#include "DataEditView.h"
 
 DataEditController::DataEditController(QWidget *parent /*= nullptr*/)
 	: QObject(parent)
 {
-	_view = new DataEditorView(parent);
+	_view = new DataEditView(parent);
 	_context = new DataEditContext(this);
 }
 
@@ -128,6 +128,14 @@ void DataEditController::notificationFromCellComputerTab()
 
 void DataEditController::notificationFromSymbolTab()
 {
+}
+
+void DataEditController::notificationFromTokenTab()
+{
+	auto& cluster = _model->getClusterToEditRef();
+	_manipulator->updateCluster(cluster);
+
+	Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::All);
 }
 
 void DataEditController::onShow(bool visible)

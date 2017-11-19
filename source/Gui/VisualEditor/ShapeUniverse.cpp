@@ -118,14 +118,21 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
 	Selection selection = getSelectionFromItems(itemsClicked);
 
-	if (!_manipulator->isInSelection(selection.cellIds) || !_manipulator->isInSelection(selection.particleIds)) {
+	bool alreadySelected = _manipulator->isInSelection(selection.cellIds) && _manipulator->isInSelection(selection.particleIds);
+	if (!alreadySelected) {
 		delegateSelection(selection);
 	}
 
 	if (clickedOnSpace(itemsClicked)) {
 		startMarking(e->scenePos());
 	}
-	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::All);
+
+	if (alreadySelected) {
+		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::TokenUnchanged);
+	}
+	else {
+		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::All);
+	}
 }
 
 void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)

@@ -72,15 +72,6 @@
     <ClCompile Include="Release\moc_ToolbarContext.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditorView.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditorView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditorView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\assistance\TutorialWindow.cpp">
       <Filter>Source Files\Assistance</Filter>
     </ClCompile>
@@ -447,6 +438,15 @@
     <ClCompile Include="Release\moc_Notifier.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditView.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -483,9 +483,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarContext.h">
       <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditorView.h">
-      <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\assistance\TutorialWindow.h">
       <Filter>Source Files\Assistance</Filter>
@@ -651,6 +648,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Notifier.h">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditView.h">
+      <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
