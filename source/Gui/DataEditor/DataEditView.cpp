@@ -13,10 +13,10 @@
 #include "TabWidgetHelper.h"
 
 #include "DataEditModel.h"
-#include "DataEditorView.h"
+#include "DataEditView.h"
 
 
-DataEditorView::DataEditorView(QWidget * parent)
+DataEditView::DataEditView(QWidget * parent)
 	: QObject(parent)
 {
 	//main tabs
@@ -65,7 +65,7 @@ DataEditorView::DataEditorView(QWidget * parent)
 	updateDisplay();
 }
 
-void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditModel* model, DataEditController* controller, CellComputerCompiler* compiler)
+void DataEditView::init(IntVector2D const & upperLeftPosition, DataEditModel* model, DataEditController* controller, CellComputerCompiler* compiler)
 {
 	_model = model;
 	_upperLeftPosition = upperLeftPosition;
@@ -84,7 +84,7 @@ void DataEditorView::init(IntVector2D const & upperLeftPosition, DataEditModel* 
 	_tokenTabWidget->init(_model, controller);
 }
 
-void DataEditorView::updateDisplay(UpdateDescription update) const
+void DataEditView::updateDisplay(UpdateDescription update) const
 {
 	if (!_visible || _editorSelector == EditorSelector::No) {
 		_mainTabWidget->setVisible(false);
@@ -169,7 +169,7 @@ void DataEditorView::updateDisplay(UpdateDescription update) const
 	}
 }
 
-void DataEditorView::saveTabPositionForCellEditor()
+void DataEditView::saveTabPositionForCellEditor()
 {
 	if (_editorSelector == EditorSelector::CellWithComputerWithToken
 		|| _editorSelector == EditorSelector::CellWithComputerWithoutToken
@@ -179,19 +179,19 @@ void DataEditorView::saveTabPositionForCellEditor()
 	}
 }
 
-int DataEditorView::getTabPositionForCellEditor()
+int DataEditView::getTabPositionForCellEditor()
 {
 	return _savedTabPosition;
 }
 
-void DataEditorView::switchToNoEditor()
+void DataEditView::switchToNoEditor()
 {
 	saveTabPositionForCellEditor();
 	_editorSelector = EditorSelector::No;
 	updateDisplay();
 }
 
-void DataEditorView::switchToCellEditorWithComputerWithToken(UpdateDescription update)
+void DataEditView::switchToCellEditorWithComputerWithToken(UpdateDescription update)
 {
 	saveTabPositionForCellEditor();
 
@@ -210,7 +210,7 @@ void DataEditorView::switchToCellEditorWithComputerWithToken(UpdateDescription u
 	updateDisplay(update);
 }
 
-void DataEditorView::switchToCellEditorWithoutComputerWithToken(UpdateDescription update)
+void DataEditView::switchToCellEditorWithoutComputerWithToken(UpdateDescription update)
 {
 	saveTabPositionForCellEditor();
 
@@ -225,7 +225,7 @@ void DataEditorView::switchToCellEditorWithoutComputerWithToken(UpdateDescriptio
 	updateDisplay(update);
 }
 
-void DataEditorView::switchToCellEditorWithComputerWithoutToken()
+void DataEditView::switchToCellEditorWithComputerWithoutToken()
 {
 	saveTabPositionForCellEditor();
 
@@ -244,7 +244,7 @@ void DataEditorView::switchToCellEditorWithComputerWithoutToken()
 	updateDisplay();
 }
 
-void DataEditorView::switchToCellEditorWithoutComputerWithoutToken()
+void DataEditView::switchToCellEditorWithoutComputerWithoutToken()
 {
 	saveTabPositionForCellEditor();
 	if (_editorSelector != EditorSelector::CellWithoutComputerWithoutToken) {
@@ -258,7 +258,7 @@ void DataEditorView::switchToCellEditorWithoutComputerWithoutToken()
 	updateDisplay();
 }
 
-void DataEditorView::switchToParticleEditor()
+void DataEditView::switchToParticleEditor()
 {
 	saveTabPositionForCellEditor();
 	if (_editorSelector != EditorSelector::Particle) {
@@ -269,7 +269,7 @@ void DataEditorView::switchToParticleEditor()
 	updateDisplay();
 }
 
-void DataEditorView::switchToSelectionEditor()
+void DataEditView::switchToSelectionEditor()
 {
 	saveTabPositionForCellEditor();
 	if (_editorSelector != EditorSelector::Selection) {
@@ -280,7 +280,7 @@ void DataEditorView::switchToSelectionEditor()
 	updateDisplay();
 }
 
-void DataEditorView::show(bool visible)
+void DataEditView::show(bool visible)
 {
 	_visible = visible;
 	updateDisplay();

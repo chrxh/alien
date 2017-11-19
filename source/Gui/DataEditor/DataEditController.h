@@ -23,6 +23,7 @@ public:
 	void notificationFromMetadataTab();
 	void notificationFromCellComputerTab();
 	void notificationFromSymbolTab();
+	void notificationFromTokenTab();
 
 private:
 	Q_SLOT void onShow(bool visible);
@@ -32,7 +33,7 @@ private:
 
 	Notifier* _notifier = nullptr;
 	DataEditModel* _model = nullptr;
-	DataEditorView* _view = nullptr;
+	DataEditView* _view = nullptr;
 	DataManipulator* _manipulator = nullptr;
 	DataEditContext* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;

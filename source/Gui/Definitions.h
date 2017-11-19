@@ -31,7 +31,7 @@ class ToolbarContext;
 class ToolbarView;
 class ToolbarModel;
 class DataEditModel;
-class DataEditorView;
+class DataEditView;
 class DataManipulator;
 class ClusterEditTab;
 class CellEditTab;
