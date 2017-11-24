@@ -2,19 +2,21 @@
 
 #include "TabWidgetHelper.h"
 #include "TokenEditTab.h"
+#include "DataEditController.h"
 #include "DataEditModel.h"
 
 TokenEditTabWidget::TokenEditTabWidget(QWidget * parent) : QTabWidget(parent)
 {
-	connect(this, &TokenEditTabWidget::currentChanged, [this](int index) {
-		_model->setSelectedTokenIndex(index);
-	});
 }
 
 void TokenEditTabWidget::init(DataEditModel * model, DataEditController * controller)
 {
 	_model = model;
 	_controller = controller;
+
+	connect(this, &TokenEditTabWidget::currentChanged, [this](int index) {
+		_controller->setSelectedTokenIndex(index);
+	});
 }
 
 void TokenEditTabWidget::updateDisplay()
@@ -28,7 +30,7 @@ void TokenEditTabWidget::updateDisplay()
 	int numToken = cell.tokens->size();
 	if (_tokenTabs.size() != numToken) {
 
-		int origIndex = _model->getSelectedTokenIndex();
+		optional<uint> origIndex = _controller->getSelectedTokenIndex();
 		deleteAllTabs();
 
 		for (int tokenIndex = 0; tokenIndex < numToken; ++tokenIndex) {
@@ -36,10 +38,12 @@ void TokenEditTabWidget::updateDisplay()
 			addTab(tokenTab, "token " + QString::number(tokenIndex + 1));
 			_tokenTabs.push_back(tokenTab);
 		}
-		if (origIndex >= _tokenTabs.size()) {
-			origIndex = _tokenTabs.size() - 1;
+		if (origIndex) {
+			if (*origIndex >= _tokenTabs.size()) {
+				origIndex = _tokenTabs.size() - 1;
+			}
+			setCurrentIndex(*origIndex);
 		}
-		setCurrentIndex(origIndex);
 	}
 	for (auto tokenTab : _tokenTabs) {
 		tokenTab->updateDisplay();

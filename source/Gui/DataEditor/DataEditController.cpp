@@ -138,6 +138,16 @@ void DataEditController::notificationFromTokenTab()
 	Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::All);
 }
 
+void DataEditController::setSelectedTokenIndex(optional<uint> const& value)
+{
+	_manipulator->setSelectedTokenIndex(value);
+}
+
+optional<uint> DataEditController::getSelectedTokenIndex() const
+{
+	return _manipulator->getSelectedTokenIndex();
+}
+
 void DataEditController::onShow(bool visible)
 {
 	_view->show(visible);

@@ -45,16 +45,6 @@ void DataEditModel::setSelectionIds(unordered_set<uint64_t> const& selectedCellI
 	_selectedParticleIds = selectedParticleIds;
 }
 
-void DataEditModel::setSelectedTokenIndex(uint value)
-{
-	_selectedTokenIndex = value;
-}
-
-uint DataEditModel::getSelectedTokenIndex() const
-{
-	return _selectedTokenIndex;
-}
-
 DataChangeDescription DataEditModel::getAndUpdateChanges()
 {
 	DataChangeDescription result(_unchangedData, _data);

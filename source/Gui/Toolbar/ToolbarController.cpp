@@ -92,6 +92,17 @@ void ToolbarController::onRequestToken()
 	}, UpdateDescription::All);
 }
 
+void ToolbarController::onDeleteToken()
+{
+	_manipulator->deleteToken();
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::Toolbar
+	}, UpdateDescription::All);
+}
+
 void ToolbarController::onShow(bool visible)
 {
 	_view->setVisible(visible);

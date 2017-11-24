@@ -66,6 +66,20 @@ struct MODEL_EXPORT CellDescription
 		tokens->push_back(value);
 		return *this;
 	}
+	CellDescription& addToken(uint pos, TokenDescription const& value)
+	{
+		if (!tokens) {
+			tokens = vector<TokenDescription>();
+		}
+		tokens->insert(tokens->begin() + pos, value);
+		return *this;
+	}
+	CellDescription& delToken(uint pos)
+	{
+		CHECK(tokens);
+		tokens->erase(tokens->begin() + pos);
+		return *this;
+	}
 };
 
 struct ClusterDescription

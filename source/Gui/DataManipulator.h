@@ -19,11 +19,15 @@ public:
 	virtual ClusterDescription& getClusterDescRef(uint64_t clusterId);
 	virtual ParticleDescription& getParticleDescRef(uint64_t particleId);
 
+	virtual void setSelectedTokenIndex(optional<uint> const& value);
+	virtual optional<uint> getSelectedTokenIndex() const;
+
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
 	virtual void addToken();
+	virtual void deleteToken();
 
 	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);
 	virtual void moveSelection(QVector2D const &delta);
@@ -57,6 +61,7 @@ private:
 	DataDescription _data;
 	DataDescription _unchangedData;
 
+	optional<uint> _selectedTokenIndex;
 	unordered_set<uint64_t> _selectedCellIds;
 	unordered_set<uint64_t> _selectedClusterIds;
 	unordered_set<uint64_t> _selectedParticleIds;

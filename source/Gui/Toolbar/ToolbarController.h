@@ -21,6 +21,7 @@ public:
 	void onDeleteSelection();
 	void onDeleteExtendedSelection();
 	void onRequestToken();
+	void onDeleteToken();
 
 private:
 	Q_SLOT void onShow(bool visible);
