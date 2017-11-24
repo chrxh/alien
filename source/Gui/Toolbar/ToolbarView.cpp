@@ -32,6 +32,9 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 	connect(ui.requestTokenButton, &QPushButton::clicked, [this]() {
 		_controller->onRequestToken();
 	});
+	connect(ui.delTokenButton, &QPushButton::clicked, [this]() {
+		_controller->onDeleteToken();
+	});
 }
 
 void ToolbarView::setEnableDeleteSelections(bool enable)
