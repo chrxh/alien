@@ -104,9 +104,6 @@
     <ClInclude Include="..\..\source\Model\Local\Physics.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Local\Timestamp.h">
-      <Filter>Source Files\Local</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\Token.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
@@ -190,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Api\DescriptionHelper.h">
       <Filter>Source Files\Api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Local\EntityWithTimestamp.h">
+      <Filter>Source Files\Local</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -309,9 +309,6 @@
     </ClCompile>
     <ClCompile Include="Release\moc_SpaceMetricLocal.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Local\Timestamp.cpp">
-      <Filter>Source Files\Local</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_Unit.cpp">
       <Filter>Generated Files\Tests</Filter>
@@ -576,6 +573,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_SymbolTable.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Local\EntityWithTimestamp.cpp">
+      <Filter>Source Files\Local</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -46,7 +46,7 @@ public:
     int getNumToken (bool newTokenStackPointer = false) const override;
     Token* getToken (int i) const override;
     void setToken (int i, Token* token) override;
-	void addToken(Token* token, ActivateToken act = ActivateToken::NOW, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::YES) override;
+	void addToken(Token* token, ActivateToken act = ActivateToken::Now, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::Yes) override;
     void delAllTokens () override;
     Token* takeTokenFromStack () override;
 	void mutationByChance() override;

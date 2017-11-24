@@ -487,7 +487,7 @@
     <ClInclude Include="..\..\source\Model\Local\ParticleMetadata.h" />
     <ClInclude Include="..\..\source\Model\Local\PhysicalQuantityConverter.h" />
     <ClInclude Include="..\..\source\Model\Local\Physics.h" />
-    <ClInclude Include="..\..\source\Model\Local\Timestamp.h" />
+    <ClInclude Include="..\..\source\Model\Local\EntityWithTimestamp.h" />
     <ClInclude Include="..\..\source\Model\Local\Token.h" />
     <ClInclude Include="..\..\source\Model\Local\UnitObserver.h" />
     <CustomBuild Include="..\..\source\Model\Local\UnitThreadController.h">
@@ -731,7 +731,7 @@
     <ClCompile Include="..\..\source\Model\Local\CellFunction.cpp" />
     <ClCompile Include="..\..\source\Model\Local\PhysicalQuantityConverter.cpp" />
     <ClCompile Include="..\..\source\Model\Local\Physics.cpp" />
-    <ClCompile Include="..\..\source\Model\Local\Timestamp.cpp" />
+    <ClCompile Include="..\..\source\Model\Local\EntityWithTimestamp.cpp" />
     <ClCompile Include="Debug\moc_CellComputerCompilerImpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

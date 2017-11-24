@@ -41,9 +41,9 @@ public:
     virtual int getNumToken (bool newTokenStackPointer = false) const = 0;
     virtual Token* getToken (int i) const = 0;
     virtual void setToken (int i, Token* token) = 0;
-    enum class ActivateToken { NOW, LATER };
-    enum class UpdateTokenBranchNumber { YES, NO };
-    virtual void addToken (Token* token, ActivateToken act = ActivateToken::NOW, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::YES) = 0;
+    enum class ActivateToken { Now, Later };
+    enum class UpdateTokenBranchNumber { Yes, No };
+    virtual void addToken (Token* token, ActivateToken act = ActivateToken::Now, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::Yes) = 0;
     virtual void delAllTokens () = 0;
 
     virtual void setCluster (Cluster* cluster) = 0;
