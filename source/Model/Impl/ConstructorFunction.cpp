@@ -469,7 +469,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 						auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 						auto desc = TokenDescription().setEnergy(parameters->tokenCreationEnergy);
 						auto newToken = factory->build(desc, _context);
-                        newCell->addToken(newToken, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                        newCell->addToken(newToken, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
                         token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                     }
                 }
@@ -477,7 +477,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                     if( newCell->getNumToken(true) < parameters->cellMaxToken ) {
                         auto dup = token->duplicate();
                         dup->setEnergy(parameters->tokenCreationEnergy);
-                        newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                        newCell->addToken(dup, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
                         token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                     }
                 }
@@ -638,13 +638,13 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
 					auto desc = TokenDescription().setEnergy(parameters->tokenCreationEnergy);
 					auto token = factory->build(desc, _context);
-                    newCell->addToken(token, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                    newCell->addToken(token, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
                     token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                 }
                 if( opt == Enums::ConstrInOption::CREATE_DUP_TOKEN ) {
                     auto dup = token->duplicate();
                     dup->setEnergy(parameters->tokenCreationEnergy);
-                    newCell->addToken(dup, ACTIVATE_TOKEN::LATER, UPDATE_TOKEN_ACCESS_NUMBER::YES);
+                    newCell->addToken(dup, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
                     token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
                 }
 

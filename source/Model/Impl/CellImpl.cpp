@@ -1,12 +1,14 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
+
+#include "Model/Api/SimulationParameters.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/CellFeatureChain.h"
 #include "Model/Local/Physics.h"
-#include "Model/Api/SimulationParameters.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/CellMap.h"
+#include "Model/Local/EntityFactory.h"
 
 #include "CellImpl.h"
 
@@ -75,6 +77,13 @@ void CellImpl::applyChangeDescription(CellChangeDescription const & change)
 	}
 	if (change.metadata) {
 		setMetadata(*change.metadata);
+	}
+	if (change.tokens) {
+		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
+		delAllTokens();
+		for (auto const& tokenDesc : *change.tokens) {
+			addToken(factory->build(tokenDesc, _context));
+		}
 	}
 }
 
@@ -319,9 +328,9 @@ void CellImpl::setToken (int i, Token* token)
 
 void CellImpl::addToken (Token* token, ActivateToken act, UpdateTokenBranchNumber update)
 {
-    if( update == UpdateTokenBranchNumber::YES )
+    if( update == UpdateTokenBranchNumber::Yes )
         token->setTokenAccessNumber(_tokenBranchNumber);
-    if( act == ActivateToken::NOW )
+    if( act == ActivateToken::Now )
         _tokenStack[_tokenStackPointer++] = token;
     else
         _newTokenStack[_newTokenStackPointer++] = token;

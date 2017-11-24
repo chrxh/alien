@@ -4,13 +4,13 @@
 
 #include "Model/Api/Definitions.h"
 #include "Model/Api/ChangeDescriptions.h"
-#include "Timestamp.h"
+#include "EntityWithTimestamp.h"
 
 class Particle
-	: public Timestamp
+	: public EntityWithTimestamp
 {
 public:
-	Particle(UnitContext* context) : Timestamp(context) {}
+	Particle(UnitContext* context) : EntityWithTimestamp(context) {}
 	virtual ~Particle() = default;
 
 	virtual ParticleDescription getDescription() const = 0;

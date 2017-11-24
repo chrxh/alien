@@ -5,13 +5,13 @@
 
 #include "Model/Api/Definitions.h"
 #include "Model/Api/ChangeDescriptions.h"
-#include "Timestamp.h"
+#include "EntityWithTimestamp.h"
 
 class Cluster
-	: public Timestamp
+	: public EntityWithTimestamp
 {
 public:
-	Cluster(UnitContext* context) : Timestamp(context) {}
+	Cluster(UnitContext* context) : EntityWithTimestamp(context) {}
 	virtual ~Cluster() = default;
 
 	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
