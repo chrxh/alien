@@ -1,14 +1,13 @@
-#ifndef TIMESTAMP_H
-#define TIMESTAMP_H
+#pragma once
 
 #include "Model/Api/Definitions.h"
 #include "Model/Local/UnitContext.h"
 
-class Timestamp
+class EntityWithTimestamp
 {
 public:
-	inline Timestamp(UnitContext* context);
-	virtual ~Timestamp() = default;
+	inline EntityWithTimestamp(UnitContext* context);
+	virtual ~EntityWithTimestamp() = default;
 
 	virtual void setContext(UnitContext * context);
 	inline void incTimestampIfFit();
@@ -23,24 +22,21 @@ private:
 };
 
 /********************* inline methods ******************/
-Timestamp::Timestamp(UnitContext* context)
+EntityWithTimestamp::EntityWithTimestamp(UnitContext* context)
 {
 	_context = context;
 	_timestamp = _context->getTimestamp();
 }
 
-void Timestamp::incTimestampIfFit()
+void EntityWithTimestamp::incTimestampIfFit()
 {
 	if (isTimestampFitting()) {
 		++_timestamp;
 	}
 }
 
-bool Timestamp::isTimestampFitting() const
+bool EntityWithTimestamp::isTimestampFitting() const
 {
 	return _timestamp == _context->getTimestamp();
 }
 
-
-
-#endif // TIMESTAMP_H

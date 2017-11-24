@@ -554,7 +554,7 @@ void ClusterImpl::processingMovement ()
 							int tokenMemSize = _context->getSimulationParameters()->tokenMemorySize;
 							auto desc = TokenDescription().setEnergy(eDiff).setData(_context->getNumberGenerator()->getRandomArray(tokenMemSize));
                             auto token = factory->build(desc, _context);
-                            cell->addToken(token, Cell::ActivateToken::NOW, Cell::UpdateTokenBranchNumber::YES);
+                            cell->addToken(token, Cell::ActivateToken::Now, Cell::UpdateTokenBranchNumber::Yes);
                         }
                         //if not add to internal cell energy
                         else
@@ -630,12 +630,12 @@ void ClusterImpl::processingToken (QList< Particle* >& energyParticles, bool& de
                             if( spreadTokenCounter > 0 ) {
                                 spreadTokenCells[spreadTokenCounter] = otherCell;
                                 spreadToken[spreadTokenCounter] = token->duplicate();
-                                otherCell->addToken(spreadToken[spreadTokenCounter], Cell::ActivateToken::LATER, Cell::UpdateTokenBranchNumber::YES);
+                                otherCell->addToken(spreadToken[spreadTokenCounter], Cell::ActivateToken::Later, Cell::UpdateTokenBranchNumber::Yes);
                             }
                             if( spreadTokenCounter == 0 ) {
                                 spreadTokenCells[0] = otherCell;
                                 spreadToken[0] = token;
-                                otherCell->addToken(token, Cell::ActivateToken::LATER, Cell::UpdateTokenBranchNumber::YES);
+                                otherCell->addToken(token, Cell::ActivateToken::Later, Cell::UpdateTokenBranchNumber::Yes);
                             }
                             if( numPlaces > 1 ) {
                                 spreadToken[spreadTokenCounter]->setEnergy(availableTokenEnergy);
