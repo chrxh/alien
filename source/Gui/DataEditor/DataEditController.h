@@ -25,6 +25,9 @@ public:
 	void notificationFromSymbolTab();
 	void notificationFromTokenTab();
 
+	void setSelectedTokenIndex(optional<uint> const& value);	//will be stored in DataManipulator
+	optional<uint> getSelectedTokenIndex() const;
+
 private:
 	Q_SLOT void onShow(bool visible);
 	Q_SLOT void receivedExternalNotifications(set<Receiver> const& targets, UpdateDescription update);

@@ -41,6 +41,16 @@ ParticleDescription& DataManipulator::getParticleDescRef(uint64_t particleId)
 	return _data.particles->at(particleIndex);
 }
 
+void DataManipulator::setSelectedTokenIndex(optional<uint> const& value)
+{
+	_selectedTokenIndex = value;
+}
+
+optional<uint> DataManipulator::getSelectedTokenIndex() const
+{
+	return _selectedTokenIndex;
+}
+
 void DataManipulator::addAndSelectCell(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
@@ -171,13 +181,20 @@ void DataManipulator::addToken()
 	CHECK(_selectedCellIds.size() == 1);
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
 
-	int numToken = 0;
-	if (cell.tokens) {
-		numToken = cell.tokens->size();
-	}
+	int numToken = cell.tokens ? cell.tokens->size() : 0;
 	if (numToken < _parameters->cellMaxToken) {
-		cell.addToken(TokenDescription().setEnergy(_parameters->tokenCreationEnergy).setData(QByteArray(_parameters->tokenMemorySize, 0)));
+		uint pos = _selectedTokenIndex ? *_selectedTokenIndex : numToken;
+		cell.addToken(pos, TokenDescription().setEnergy(_parameters->tokenCreationEnergy).setData(QByteArray(_parameters->tokenMemorySize, 0)));
 	}
+}
+
+void DataManipulator::deleteToken()
+{
+	CHECK(_selectedCellIds.size() == 1);
+	CHECK(_selectedTokenIndex);
+
+	auto& cell = getCellDescRef(*_selectedCellIds.begin());
+	cell.delToken(*_selectedTokenIndex);
 }
 
 bool DataManipulator::isCellPresent(uint64_t cellId)
