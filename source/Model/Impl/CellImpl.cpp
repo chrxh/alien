@@ -58,6 +58,9 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 		}
 		result.setConnectingCells(connectingCells);
 	}
+	for (int i = 0; i < getNumToken(); ++i) {
+		result.addToken(getToken(i)->getDescription());
+	}
 	return result;
 }
 
