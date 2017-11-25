@@ -32,6 +32,11 @@ TokenImpl* TokenImpl::duplicate() const
 	return newToken;
 }
 
+TokenDescription TokenImpl::getDescription() const
+{
+	return TokenDescription().setEnergy(_energy).setData(_memory);
+}
+
 int TokenImpl::getTokenAccessNumber() const
 {
 	return _memory[0] % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
