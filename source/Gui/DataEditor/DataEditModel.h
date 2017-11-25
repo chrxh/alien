@@ -3,6 +3,7 @@
 #include <QObject>
 
 #include "Model/Api/Descriptions.h"
+#include "Gui/Definitions.h"
 
 class DataEditModel
 	: public QObject
@@ -13,11 +14,13 @@ public:
 	DataEditModel(QObject *parent);
 	virtual ~DataEditModel() = default;
 
-	void init(SimulationParameters const* parameters, SymbolTable* symbols);
+	void init(DataManipulator* manipulator, SimulationParameters const* parameters, SymbolTable* symbols);
 
 	void setClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
 	void setParticle(ParticleDescription const& particle);
 	void setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds);
+	void setSelectedTokenIndex(optional<uint> const& value);	//will be stored in DataManipulator
+	optional<uint> getSelectedTokenIndex() const;
 
 	DataChangeDescription getAndUpdateChanges();
 
@@ -40,6 +43,7 @@ private:
 	unordered_set<uint64_t> _selectedCellIds;
 	unordered_set<uint64_t> _selectedParticleIds;
 
+	DataManipulator* _manipulator = nullptr;
 	SimulationParameters const* _parameters = nullptr;
 	SymbolTable* _symbols = nullptr;
 };

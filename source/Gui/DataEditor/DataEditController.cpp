@@ -24,7 +24,7 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 	_notifier = notifier;
 	_symbolTable = context->getSymbolTable();
 	_model = new DataEditModel(this);
-	_model->init(context->getSimulationParameters(), context->getSymbolTable());
+	_model->init(manipulator, context->getSimulationParameters(), context->getSymbolTable());
 	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
 	_manipulator = manipulator;
 
@@ -136,16 +136,6 @@ void DataEditController::notificationFromTokenTab()
 	_manipulator->updateCluster(cluster);
 
 	Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::All);
-}
-
-void DataEditController::setSelectedTokenIndex(optional<uint> const& value)
-{
-	_manipulator->setSelectedTokenIndex(value);
-}
-
-optional<uint> DataEditController::getSelectedTokenIndex() const
-{
-	return _manipulator->getSelectedTokenIndex();
 }
 
 void DataEditController::onShow(bool visible)

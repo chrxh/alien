@@ -15,7 +15,7 @@ void TokenEditTabWidget::init(DataEditModel * model, DataEditController * contro
 	_controller = controller;
 
 	connect(this, &TokenEditTabWidget::currentChanged, [this](int index) {
-		_controller->setSelectedTokenIndex(index);
+		_model->setSelectedTokenIndex(index);
 	});
 }
 
@@ -30,7 +30,7 @@ void TokenEditTabWidget::updateDisplay()
 	int numToken = cell.tokens->size();
 	if (_tokenTabs.size() != numToken) {
 
-		optional<uint> origIndex = _controller->getSelectedTokenIndex();
+		optional<uint> origIndex = _model->getSelectedTokenIndex();
 		deleteAllTabs();
 
 		for (int tokenIndex = 0; tokenIndex < numToken; ++tokenIndex) {

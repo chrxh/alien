@@ -1,14 +1,16 @@
 #include "Model/Api/ChangeDescriptions.h"
 
 #include "DataEditModel.h"
+#include "Gui/DataManipulator.h"
 
 DataEditModel::DataEditModel(QObject *parent)
 	: QObject(parent)
 {
 }
 
-void DataEditModel::init(SimulationParameters const* parameters, SymbolTable* symbols)
+void DataEditModel::init(DataManipulator* manipulator, SimulationParameters const* parameters, SymbolTable* symbols)
 {
+	_manipulator = manipulator;
 	_parameters = parameters;
 	_symbols = symbols;
 }
@@ -43,6 +45,16 @@ void DataEditModel::setSelectionIds(unordered_set<uint64_t> const& selectedCellI
 
 	_selectedCellIds = selectedCellIds;
 	_selectedParticleIds = selectedParticleIds;
+}
+
+void DataEditModel::setSelectedTokenIndex(optional<uint> const & value)
+{
+	_manipulator->setSelectedTokenIndex(value);
+}
+
+optional<uint> DataEditModel::getSelectedTokenIndex() const
+{
+	return _manipulator->getSelectedTokenIndex();
 }
 
 DataChangeDescription DataEditModel::getAndUpdateChanges()
