@@ -1,9 +1,9 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#pragma once
 
 #include <QVector>
 
 #include "Model/Api/Definitions.h"
+#include "Model/Api/Descriptions.h"
 
 class Token
 {
@@ -13,6 +13,9 @@ public:
 	virtual void setContext(UnitContext* context) = 0;
 
     virtual Token* duplicate () const = 0;
+
+	virtual TokenDescription getDescription() const = 0;
+
 	virtual int getTokenAccessNumber() const = 0;
 	virtual void setTokenAccessNumber (int i) = 0;
 
@@ -25,4 +28,3 @@ public:
 	virtual void deserializePrimitives (QDataStream& stream) = 0;
 };
 
-#endif // TOKEN_H

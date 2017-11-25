@@ -12,6 +12,9 @@ public:
 	virtual void setContext(UnitContext* context) override;
 
 	TokenImpl* duplicate() const override;
+
+	virtual TokenDescription getDescription() const override;
+
 	int getTokenAccessNumber() const override;        //from memory[0]
 	void setTokenAccessNumber(int i) override;
 

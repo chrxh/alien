@@ -256,7 +256,11 @@ void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 		for (auto const &cell : cluster->getCellsRef()) {
 			auto pos = metric->correctPositionAndConvertToIntVector(cell->calcPosition(true));
 			if (_requiredRect.isContained(pos)) {
-				_requiredImage->setPixel(pos.x, pos.y, 0xFF);
+				if (cell->getNumToken() > 0) {
+					_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
+				} else {
+					_requiredImage->setPixel(pos.x, pos.y, 0xFF);
+				}
 			}
 		}
 	}
