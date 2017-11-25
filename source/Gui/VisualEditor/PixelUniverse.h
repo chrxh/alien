@@ -23,9 +23,6 @@ private:
     Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
 
-	void displayClusters(DataDescription const& data) const;
-	void displayParticles(DataDescription const& data) const;
-
 	SimulationAccess* _simAccess = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
