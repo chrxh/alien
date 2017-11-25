@@ -1,7 +1,8 @@
 #include <QMouseEvent>
 #include <QTextBlock>
 
-#include "Gui/Settings.h"
+#include "Model/Api/Settings.h"
+
 #include "Gui/Settings.h"
 
 #include "DataEditModel.h"

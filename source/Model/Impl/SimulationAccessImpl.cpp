@@ -2,6 +2,7 @@
 
 #include "Base/ServiceLocator.h"
 #include "Model/Api/ChangeDescriptions.h"
+#include "Model/Api/Settings.h"
 #include "Model/Local/EntityFactory.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Cell.h"
@@ -248,6 +249,69 @@ void SimulationAccessImpl::drawImageFromUnit(Unit * unit)
 	drawParticlesFromUnit(unit);
 }
 
+namespace
+{
+	uint32_t calcCellColor(CellMetadata const& meta, double energy)
+	{
+		uint8_t r = 0;
+		uint8_t g = 0;
+		uint8_t b = 0;
+		auto const& color = meta.color;
+		if (color == 0) {
+			r = INDIVIDUAL_CELL_COLOR1.red();
+			g = INDIVIDUAL_CELL_COLOR1.green();
+			b = INDIVIDUAL_CELL_COLOR1.blue();
+		}
+		if (color == 1) {
+			r = INDIVIDUAL_CELL_COLOR2.red();
+			g = INDIVIDUAL_CELL_COLOR2.green();
+			b = INDIVIDUAL_CELL_COLOR2.blue();
+		}
+		if (color == 2) {
+			r = INDIVIDUAL_CELL_COLOR3.red();
+			g = INDIVIDUAL_CELL_COLOR3.green();
+			b = INDIVIDUAL_CELL_COLOR3.blue();
+		}
+		if (color == 3) {
+			r = INDIVIDUAL_CELL_COLOR4.red();
+			g = INDIVIDUAL_CELL_COLOR4.green();
+			b = INDIVIDUAL_CELL_COLOR4.blue();
+		}
+		if (color == 4) {
+			r = INDIVIDUAL_CELL_COLOR5.red();
+			g = INDIVIDUAL_CELL_COLOR5.green();
+			b = INDIVIDUAL_CELL_COLOR5.blue();
+		}
+		if (color == 5) {
+			r = INDIVIDUAL_CELL_COLOR6.red();
+			g = INDIVIDUAL_CELL_COLOR6.green();
+			b = INDIVIDUAL_CELL_COLOR6.blue();
+		}
+		if (color == 6) {
+			r = INDIVIDUAL_CELL_COLOR7.red();
+			g = INDIVIDUAL_CELL_COLOR7.green();
+			b = INDIVIDUAL_CELL_COLOR7.blue();
+		}
+		quint32 e = energy / 2.0 + 20.0;
+		if (e > 150) {
+			e = 150;
+		}
+		r = r*e / 150;
+		g = g*e / 150;
+		b = b*e / 150;
+		return (r << 16) | (g << 8) | b;
+	}
+
+	uint32_t calcParticleColor(double energy)
+	{
+		quint32 e = (energy + 10) * 5;
+		if (e > 150) {
+			e = 150;
+		}
+		return (e << 16) | 0x30;
+	}
+}
+
 void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 {
 	auto metric = unit->getContext()->getSpaceMetric();
@@ -259,7 +323,7 @@ void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 				if (cell->getNumToken() > 0) {
 					_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
 				} else {
-					_requiredImage->setPixel(pos.x, pos.y, 0xFF);
+					_requiredImage->setPixel(pos.x, pos.y, calcCellColor(cell->getMetadata(), cell->getEnergy()));
 				}
 			}
 		}
@@ -273,7 +337,7 @@ void SimulationAccessImpl::drawParticlesFromUnit(Unit * unit)
 	for (auto const &particle : particles) {
 		IntVector2D pos = particle->getPosition();
 		if (_requiredRect.isContained(pos)) {
-			_requiredImage->setPixel(pos.x, pos.y, 0x902020);
+			_requiredImage->setPixel(pos.x, pos.y, calcParticleColor(particle->getEnergy()));
 		}
 	}
 }
