@@ -57,120 +57,12 @@ void PixelUniverse::deactivate()
 
 void PixelUniverse::requestData()
 {
-/*
-	ResolveDescription resolveDesc;
-	IntRect rect = _viewport->getRect();
-	_simAccess->requireData(rect, resolveDesc);
-*/
 	IntRect rect = _viewport->getRect();
 	_simAccess->requireImage(rect, _image);
 }
 
 void PixelUniverse::retrieveAndDisplayData()
 {
-/*
-	auto const& data = _simAccess->retrieveData();
-
-	_image->fill(UNIVERSE_COLOR);
-
-	displayClusters(data);
-	displayParticles(data);
-*/
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));
 }
 
-namespace
-{
-	uint32_t calcCellColor(CellMetadata const& meta, double energy)
-	{
-		uint8_t r = 0;
-		uint8_t g = 0;
-		uint8_t b = 0;
-		auto const& color = meta.color;
-		if (color == 0) {
-			r = INDIVIDUAL_CELL_COLOR1.red();
-			g = INDIVIDUAL_CELL_COLOR1.green();
-			b = INDIVIDUAL_CELL_COLOR1.blue();
-		}
-		if (color == 1) {
-			r = INDIVIDUAL_CELL_COLOR2.red();
-			g = INDIVIDUAL_CELL_COLOR2.green();
-			b = INDIVIDUAL_CELL_COLOR2.blue();
-		}
-		if (color == 2) {
-			r = INDIVIDUAL_CELL_COLOR3.red();
-			g = INDIVIDUAL_CELL_COLOR3.green();
-			b = INDIVIDUAL_CELL_COLOR3.blue();
-		}
-		if (color == 3) {
-			r = INDIVIDUAL_CELL_COLOR4.red();
-			g = INDIVIDUAL_CELL_COLOR4.green();
-			b = INDIVIDUAL_CELL_COLOR4.blue();
-		}
-		if (color == 4) {
-			r = INDIVIDUAL_CELL_COLOR5.red();
-			g = INDIVIDUAL_CELL_COLOR5.green();
-			b = INDIVIDUAL_CELL_COLOR5.blue();
-		}
-		if (color == 5) {
-			r = INDIVIDUAL_CELL_COLOR6.red();
-			g = INDIVIDUAL_CELL_COLOR6.green();
-			b = INDIVIDUAL_CELL_COLOR6.blue();
-		}
-		if (color == 6) {
-			r = INDIVIDUAL_CELL_COLOR7.red();
-			g = INDIVIDUAL_CELL_COLOR7.green();
-			b = INDIVIDUAL_CELL_COLOR7.blue();
-		}
-		quint32 e = energy / 2.0 + 20.0;
-		if (e > 150) {
-			e = 150;
-		}
-		r = r*e / 150;
-		g = g*e / 150;
-		b = b*e / 150;
-		return (r << 16) | (g << 8) | b;
-	}
-
-	uint32_t calcParticleColor(double energy)
-	{
-		quint32 e = (energy + 10)*5;
-		if (e > 150) {
-			e = 150;
-		}
-		return (e << 16) | 0x30;
-	}
-}
-
-void PixelUniverse::displayClusters(DataDescription const& data) const
-{
-	if (!data.clusters) {
-		return;
-	}
-
-	auto space = _controller->getContext()->getSpaceMetric();
-	for (auto const& cluster : *data.clusters) {
-		for (auto const& cell : *cluster.cells) {
-			auto const& pos = *cell.pos;
-			auto const& meta = *cell.metadata;
-			auto const& energy = *cell.energy;
-			auto intPos = space->correctPositionAndConvertToIntVector(pos);
-			_image->setPixel(intPos.x, intPos.y, calcCellColor(meta, energy));
-		}
-	}
-}
-
-void PixelUniverse::displayParticles(DataDescription const & data) const
-{
-	if (!data.particles) {
-		return;
-	}
-
-	auto space = _controller->getContext()->getSpaceMetric();
-	for (auto const& particle : *data.particles) {
-		auto const& pos = *particle.pos;
-		auto const& energy = *particle.energy;
-		auto intPos = space->correctPositionAndConvertToIntVector(pos);
-		_image->setPixel(intPos.x, intPos.y, calcParticleColor(energy));
-	}
-}
