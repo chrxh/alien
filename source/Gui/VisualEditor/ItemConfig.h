@@ -15,6 +15,8 @@ public:
 	void init(SimulationParameters* parameters);
 
 	bool isShowCellInfo() const;
+	void setShowCellInfo(bool value);
+
 	SimulationParameters* getSimulationParameters() const;
 
 private:

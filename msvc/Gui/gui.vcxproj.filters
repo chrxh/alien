@@ -198,24 +198,6 @@
     <ClCompile Include="..\..\source\gui\visualeditor\ParticleItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\PixelUniverse.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_PixelUniverse.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_PixelUniverse.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ShapeUniverse.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ShapeUniverse.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ShapeUniverse.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\visualeditor\ViewportController.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
@@ -447,6 +429,24 @@
     <ClCompile Include="Release\moc_DataEditView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\ItemUniverseView.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ItemUniverseView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ItemUniverseView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\visualeditor\PixelUniverseView.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_PixelUniverseView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_PixelUniverseView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -550,12 +550,6 @@
     <CustomBuild Include="..\..\source\gui\visualeditor\ItemManager.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\PixelUniverse.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\ShapeUniverse.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\ViewportController.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
@@ -651,6 +645,12 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditView.h">
       <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\ItemUniverseView.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\visualeditor\PixelUniverseView.h">
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

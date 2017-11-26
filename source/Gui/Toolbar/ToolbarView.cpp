@@ -35,6 +35,15 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 	connect(ui.delTokenButton, &QPushButton::clicked, [this]() {
 		_controller->onDeleteToken();
 	});
+	connect(ui.showCellInfoButton, &QPushButton::toggled, [this](bool checked) {
+		if (checked) {
+			ui.showCellInfoButton->setIcon(QIcon("://Icons/info_on.png"));
+		}
+		else {
+			ui.showCellInfoButton->setIcon(QIcon("://Icons/info_off.png"));
+		}
+		_controller->onToggleCellInfo(checked);
+	});
 }
 
 void ToolbarView::setEnableDeleteSelections(bool enable)

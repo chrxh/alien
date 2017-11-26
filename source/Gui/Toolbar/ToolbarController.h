@@ -22,6 +22,7 @@ public:
 	void onDeleteExtendedSelection();
 	void onRequestToken();
 	void onDeleteToken();
+	void onToggleCellInfo(bool showInfo);
 
 private:
 	Q_SLOT void onShow(bool visible);

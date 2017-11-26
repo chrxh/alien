@@ -12,21 +12,21 @@
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SpaceMetric.h"
 
-#include "PixelUniverse.h"
+#include "PixelUniverseView.h"
 
-PixelUniverse::PixelUniverse(QObject* parent)
+PixelUniverseView::PixelUniverseView(QObject* parent)
 {
 	setBackgroundBrush(QBrush(BACKGROUND_COLOR));
     _pixmap = addPixmap(QPixmap());
     update();
 }
 
-PixelUniverse::~PixelUniverse()
+PixelUniverseView::~PixelUniverseView()
 {
 	delete _image;
 }
 
-void PixelUniverse::init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport)
+void PixelUniverseView::init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
@@ -40,28 +40,28 @@ void PixelUniverse::init(SimulationController* controller, SimulationAccess* acc
 
 }
 
-void PixelUniverse::activate()
+void PixelUniverseView::activate()
 {
-	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	connect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverse::retrieveAndDisplayData, Qt::QueuedConnection);
+	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData);
+	connect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_simAccess->requireImage({ { 0, 0 }, size }, _image);
 }
 
-void PixelUniverse::deactivate()
+void PixelUniverseView::deactivate()
 {
-	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverse::requestData);
-	disconnect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverse::retrieveAndDisplayData);
+	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData);
+	disconnect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverseView::retrieveAndDisplayData);
 }
 
-void PixelUniverse::requestData()
+void PixelUniverseView::requestData()
 {
 	IntRect rect = _viewport->getRect();
 	_simAccess->requireImage(rect, _image);
 }
 
-void PixelUniverse::retrieveAndDisplayData()
+void PixelUniverseView::retrieveAndDisplayData()
 {
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));
 }

@@ -20,6 +20,7 @@ void CellItem::update(CellDescription const &desc)
 	_desc = desc;
 	auto pos = CoordinateSystem::modelToScene(*desc.pos);
 	QGraphicsItem::setPos(QPointF(pos.x(), pos.y()));
+	_displayString = getTypeString(_desc.cellFeature->type);
 }
 
 QRectF CellItem::boundingRect () const

@@ -11,12 +11,12 @@
 #include "Gui/Definitions.h"
 #include "Gui/DataManipulator.h"
 
-class ShapeUniverse : public QGraphicsScene
+class ItemUniverseView : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    ShapeUniverse (QObject *parent = nullptr);
-	virtual ~ShapeUniverse();
+    ItemUniverseView (QObject *parent = nullptr);
+	virtual ~ItemUniverseView() = default;
 
 	virtual void init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator, ViewportInterface* viewport);
 	virtual void activate();
@@ -30,6 +30,7 @@ protected:
 
 private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
+	Q_SLOT void cellInfoToggled(bool showInfo);
 
 	struct Selection
 	{

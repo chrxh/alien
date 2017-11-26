@@ -247,7 +247,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="buttonShowInfo">
+  <widget class="QToolButton" name="showCellInfoButton">
    <property name="enabled">
     <bool>true</bool>
    </property>

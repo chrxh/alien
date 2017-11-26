@@ -103,6 +103,11 @@ void ToolbarController::onDeleteToken()
 	}, UpdateDescription::All);
 }
 
+void ToolbarController::onToggleCellInfo(bool showInfo)
+{
+	Q_EMIT _notifier->toggleCellInfo(showInfo);
+}
+
 void ToolbarController::onShow(bool visible)
 {
 	_view->setVisible(visible);
