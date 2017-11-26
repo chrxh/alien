@@ -22,6 +22,7 @@ public:
 private:
     Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
+	Q_SLOT void scrolling();
 
 	SimulationAccess* _simAccess = nullptr;
 	SimulationController* _controller = nullptr;

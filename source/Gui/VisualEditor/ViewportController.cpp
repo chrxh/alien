@@ -5,14 +5,17 @@
 #include "ViewportController.h"
 #include "CoordinateSystem.h"
 
-void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* shapeScene, ActiveScene activeScene)
+void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* itemScene, ActiveScene activeScene)
 {
 	_view = view;
 	_activeScene = activeScene;
 	_pixelScene = pixelScene;
-	_shapeScene = shapeScene;
+	_itemScene = itemScene;
 	setSceneToView(activeScene);
 	initViewMatrices();
+
+	connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling);
+	connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling);
 }
 
 void ViewportController::setModeToUpdate()
@@ -89,7 +92,7 @@ void ViewportController::setSceneToView(ActiveScene activeScene)
 		_view->setScene(_pixelScene);
 	}
 	if (activeScene == ActiveScene::ShapeScene) {
-		_view->setScene(_shapeScene);
+		_view->setScene(_itemScene);
 	}
 }
 
