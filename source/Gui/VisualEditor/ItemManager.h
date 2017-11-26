@@ -24,6 +24,8 @@ public:
 	virtual bool isMarkerActive() const;
 	virtual std::list<QGraphicsItem*> getItemsWithinMarker() const;
 
+	virtual void toggleCellInfo(bool showInfo);
+
 private:
 	void updateCells(DataManipulator* visualDesc);
 	void updateConnections(DataManipulator* visualDesc);

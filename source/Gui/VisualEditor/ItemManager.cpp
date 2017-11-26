@@ -205,3 +205,8 @@ std::list<QGraphicsItem*> ItemManager::getItemsWithinMarker() const
 {
 	return _marker->collidingItems().toStdList();
 }
+
+void ItemManager::toggleCellInfo(bool showInfo)
+{
+	_config->setShowCellInfo(showInfo);
+}

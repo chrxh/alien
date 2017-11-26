@@ -35,16 +35,9 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- CellComputer-Memory in die Simulation übertragen
-//- _simAccess->retrieveData() liefert Cluster ohne Zellen
-//- Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
-//- Optimierung: CellMapImpl::locateCell und CellMapImpl::removeCellIfPresent
-//- SimulationContext in BuilderFacadeImpl::buildSimulationController erstellen
-
-//Model-Refactoring:
-//- Serialisierungs-Framework benutzt Descriptions
-//- init bei Cell/Cluster/EnergyParticle
-//- C-Arrays durch Vector ersetzen (z.B. CellImpl, CellMap,...)
+//- Nachladen der Simulationsdaten beim Scrollen
+//- rotieren in der Bearbeitung durch beide Maustasten
+//? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 
 /**************** alte Notizen ******************/
 //Potentielle Fehlerquellen Alt:
@@ -121,14 +114,14 @@ int main(int argc, char *argv[])
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
-	IntVector2D size = { 12 * 33 * 3, 12 * 17 * 3 };
+	IntVector2D size = { 12 * 33 * 3 /** 2*/, 12 * 17 * 3 /** 2*/ };
 	auto controller = cpuFacade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
-	numberGen->init(123123, 0);
+	numberGen->init(12315312, 0);
 	auto access = cpuFacade->buildSimulationAccess(controller->getContext());
 	DataChangeDescription desc;
-	for (int i = 0; i < 20000*9; ++i) {
+	for (int i = 0; i < 20000*9/**4*/; ++i) {
 		desc.addNewParticle(ParticleChangeDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
 			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
 			.setEnergy(50));
