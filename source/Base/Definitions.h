@@ -87,6 +87,6 @@ IntVector2D IntRect::center() const
 #define THROW_NOT_IMPLEMENTED() throw std::exception("not implemented")
 
 #define CHECK(expression)\
-	if(!expression) {\
+	if(!(expression)) {\
 		throw std::exception("check failed");\
 	}

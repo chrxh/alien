@@ -33,6 +33,8 @@ public:
 	virtual void moveSelection(QVector2D const &delta);
 	virtual void moveExtendedSelection(QVector2D const &delta);
 	virtual void reconnectSelectedCells();
+	virtual void rotateSelection(double angle);
+
 	virtual void updateCluster(ClusterDescription const& cluster);
 	virtual void updateParticle(ParticleDescription const& particle);
 
@@ -53,6 +55,8 @@ private:
 	void updateInternals(DataDescription const &data);
 	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);
+
+	QVector2D calcCenter();
 
 	Notifier* _notifier = nullptr;
 	SimulationAccess* _access = nullptr;

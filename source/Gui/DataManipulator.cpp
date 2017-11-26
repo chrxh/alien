@@ -1,3 +1,5 @@
+#include <QMatrix4x4>
+
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationParameters.h"
@@ -334,6 +336,65 @@ void DataManipulator::reconnectSelectedCells()
 {
 	_descHelper->reconnect(getDataRef(), getSelectedCellIds());
 	updateAfterCellReconnections();
+}
+
+void DataManipulator::rotateSelection(double angle)
+{
+	QVector3D center = calcCenter();
+
+	QMatrix4x4 transform;
+	transform.setToIdentity();
+	transform.translate(center);
+	transform.rotate(angle, 0.0, 0.0, 1.0);
+	transform.translate(-center);
+
+	if (_data.clusters) {
+		for (uint64_t clusterId : _selectedClusterIds) {
+			auto& cluster = _data.clusters->at(_navi.clusterIndicesByClusterIds.at(clusterId));
+			if (!cluster.cells) {
+				continue;
+			}
+			for (auto& cell : *cluster.cells) {
+				*cell.pos = transform.map(QVector3D(*cell.pos)).toVector2D();
+			}
+			*cluster.angle += angle;
+			*cluster.pos = transform.map(QVector3D(*cluster.pos)).toVector2D();
+		}
+	}
+	if (_data.particles) {
+		for (uint64_t particleId : _selectedParticleIds) {
+			auto& particle = getParticleDescRef(particleId);
+			*particle.pos = transform.map(QVector3D(*particle.pos)).toVector2D();
+		}
+	}
+}
+
+QVector2D DataManipulator::calcCenter()
+{
+	QVector2D result;
+	int numEntities = 0;
+	if (_data.clusters) {
+		for (uint64_t clusterId : _selectedClusterIds) {
+			auto const& cluster = _data.clusters->at(_navi.clusterIndicesByClusterIds.at(clusterId));
+			if (!cluster.cells) {
+				continue;
+			}
+			for (auto const& cell : *cluster.cells) {
+				result += *cell.pos;
+				++numEntities;
+			}
+		}
+	}
+	if (_data.particles) {
+		for (uint64_t particleId: _selectedParticleIds) {
+			auto const& particle = getParticleDescRef(particleId);
+			result += *particle.pos;
+			++numEntities;
+		}
+	}
+	CHECK(numEntities > 0);
+	result /= numEntities;
+	return result;
 }
 
 void DataManipulator::updateCluster(ClusterDescription const & cluster)

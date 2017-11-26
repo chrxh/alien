@@ -166,13 +166,17 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		auto pos = e->scenePos();
 		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
 		delta = CoordinateSystem::sceneToModel(delta);
-		if (leftButton) {
+		if (leftButton && !rightButton) {
 			_manipulator->moveSelection(delta);
 			_manipulator->reconnectSelectedCells();
 			_itemManager->update(_manipulator);
 		}
-		if (rightButton) {
+		if (rightButton && !leftButton) {
 			_manipulator->moveExtendedSelection(delta);
+			_itemManager->update(_manipulator);
+		}
+		if (leftButton && rightButton) {
+			_manipulator->rotateSelection(delta.y()*10);
 			_itemManager->update(_manipulator);
 		}
 	}
