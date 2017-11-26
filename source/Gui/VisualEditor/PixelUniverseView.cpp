@@ -44,6 +44,7 @@ void PixelUniverseView::activate()
 {
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData);
 	connect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection);
+	connect(_viewport, &ViewportInterface::scrolling, this, &PixelUniverseView::scrolling);
 
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_simAccess->requireImage({ { 0, 0 }, size }, _image);
@@ -53,6 +54,7 @@ void PixelUniverseView::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData);
 	disconnect(_simAccess, &SimulationAccess::imageReady, this, &PixelUniverseView::retrieveAndDisplayData);
+	disconnect(_viewport, &ViewportInterface::scrolling, this, &PixelUniverseView::scrolling);
 }
 
 void PixelUniverseView::requestData()
@@ -64,5 +66,10 @@ void PixelUniverseView::requestData()
 void PixelUniverseView::retrieveAndDisplayData()
 {
 	_pixmap->setPixmap(QPixmap::fromImage(*_image));
+}
+
+void PixelUniverseView::scrolling()
+{
+	requestData();
 }
 

@@ -46,15 +46,20 @@ void VisualEditor::init(Notifier* notifier, SimulationController* controller, Da
 
 void VisualEditor::setActiveScene (ActiveScene activeScene)
 {
-	_activeScene = activeScene;
-	_viewport->setActiveScene(activeScene);
-    _screenUpdatePossible = true;
 	if (activeScene == ActiveScene::PixelScene) {
 		_shapeUniverse->deactivate();
-		_pixelUniverse->activate();
 	}
 	if (activeScene == ActiveScene::ShapeScene) {
 		_pixelUniverse->deactivate();
+	}
+	_activeScene = activeScene;
+	_viewport->setActiveScene(activeScene);
+	_screenUpdatePossible = true;
+
+	if (activeScene == ActiveScene::PixelScene) {
+		_pixelUniverse->activate();
+	}
+	if (activeScene == ActiveScene::ShapeScene) {
 		_shapeUniverse->activate();
 	}
 }
