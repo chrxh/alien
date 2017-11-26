@@ -36,6 +36,7 @@
 
 //Nächstes Mal:
 //- rotieren in der Bearbeitung durch beide Maustasten
+//- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 
 /**************** alte Notizen ******************/
