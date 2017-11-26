@@ -47,14 +47,16 @@ void ItemUniverseView::activate()
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData);
 	connect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications);
+	connect(_viewport, &ViewportInterface::scrolling, this, &ItemUniverseView::scrolling);
 
-	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
+	requestData();
 }
 
 void ItemUniverseView::deactivate()
 {
 	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData);
 	disconnect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications);
+	disconnect(_viewport, &ViewportInterface::scrolling, this, &ItemUniverseView::scrolling);
 }
 
 void ItemUniverseView::requestData()
@@ -74,6 +76,11 @@ void ItemUniverseView::cellInfoToggled(bool showInfo)
 {
 	_itemManager->toggleCellInfo(showInfo);
 	_itemManager->update(_manipulator);
+}
+
+void ItemUniverseView::scrolling()
+{
+	requestData();
 }
 
 ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(std::list<QGraphicsItem*> const &items) const

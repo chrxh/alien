@@ -36,7 +36,7 @@ private:
 
 	QGraphicsView* _view = nullptr;
 	QGraphicsScene* _pixelScene = nullptr;
-	QGraphicsScene* _shapeScene = nullptr;
+	QGraphicsScene* _itemScene = nullptr;
 
 	QMatrix _pixelSceneViewMatrix;
 	QMatrix _shapeSceneViewMatrix;

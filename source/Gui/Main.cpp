@@ -35,7 +35,6 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- Nachladen der Simulationsdaten beim Scrollen
 //- rotieren in der Bearbeitung durch beide Maustasten
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 
