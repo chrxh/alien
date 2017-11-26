@@ -6,8 +6,8 @@
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/SpaceMetricLocal.h"
-#include "PixelUniverse.h"
-#include "ShapeUniverse.h"
+#include "PixelUniverseView.h"
+#include "ItemUniverseView.h"
 #include "ViewportController.h"
 
 #include "VisualEditor.h"
@@ -17,8 +17,8 @@
 VisualEditor::VisualEditor(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::VisualEditor)
-	, _pixelUniverse(new PixelUniverse(this))
-	, _shapeUniverse(new ShapeUniverse(this))
+	, _pixelUniverse(new PixelUniverseView(this))
+	, _shapeUniverse(new ItemUniverseView(this))
 	, _viewport(new ViewportController(this))
 {
     ui->setupUi(this);

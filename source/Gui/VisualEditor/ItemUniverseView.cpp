@@ -13,23 +13,20 @@
 #include "Gui/DataManipulator.h"
 #include "Gui/Notifier.h"
 
-#include "ShapeUniverse.h"
+#include "ItemUniverseView.h"
 #include "CellItem.h"
 #include "ParticleItem.h"
 #include "ItemManager.h"
 #include "CoordinateSystem.h"
 
-ShapeUniverse::ShapeUniverse(QObject *parent)
+ItemUniverseView::ItemUniverseView(QObject *parent)
 	: QGraphicsScene(parent)
 {
     setBackgroundBrush(QBrush(UNIVERSE_COLOR));
 }
 
-ShapeUniverse::~ShapeUniverse()
-{
-}
 
-void ShapeUniverse::init(Notifier* notifier, SimulationController * controller, DataManipulator* manipulator, ViewportInterface * viewport)
+void ItemUniverseView::init(Notifier* notifier, SimulationController * controller, DataManipulator* manipulator, ViewportInterface * viewport)
 {
 	_controller = controller;
 	_viewport = viewport;
@@ -40,31 +37,32 @@ void ShapeUniverse::init(Notifier* notifier, SimulationController * controller, 
 	SET_CHILD(_itemManager, itemManager);
 
 	_itemManager->init(this, viewport, _controller->getContext()->getSimulationParameters());
+	connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled);
 }
 
-void ShapeUniverse::activate()
+void ItemUniverseView::activate()
 {
 	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
 	_itemManager->activate(size);
 
-	connect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	connect(_notifier, &Notifier::notify, this, &ShapeUniverse::receivedNotifications);
+	connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData);
+	connect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications);
 
 	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
 }
 
-void ShapeUniverse::deactivate()
+void ItemUniverseView::deactivate()
 {
-	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ShapeUniverse::requestData);
-	disconnect(_notifier, &Notifier::notify, this, &ShapeUniverse::receivedNotifications);
+	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData);
+	disconnect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications);
 }
 
-void ShapeUniverse::requestData()
+void ItemUniverseView::requestData()
 {
 	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
 }
 
-void ShapeUniverse::receivedNotifications(set<Receiver> const& targets)
+void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
 {
 	if (targets.find(Receiver::VisualEditor) == targets.end()) {
 		return;
@@ -72,9 +70,15 @@ void ShapeUniverse::receivedNotifications(set<Receiver> const& targets)
 	_itemManager->update(_manipulator);
 }
 
-ShapeUniverse::Selection ShapeUniverse::getSelectionFromItems(std::list<QGraphicsItem*> const &items) const
+void ItemUniverseView::cellInfoToggled(bool showInfo)
 {
-	ShapeUniverse::Selection result;
+	_itemManager->toggleCellInfo(showInfo);
+	_itemManager->update(_manipulator);
+}
+
+ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(std::list<QGraphicsItem*> const &items) const
+{
+	ItemUniverseView::Selection result;
 	for (auto item : items) {
 		if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
 			result.cellIds.push_back(cellItem->getId());
@@ -86,13 +90,13 @@ ShapeUniverse::Selection ShapeUniverse::getSelectionFromItems(std::list<QGraphic
 	return result;
 }
 
-void ShapeUniverse::delegateSelection(Selection const & selection)
+void ItemUniverseView::delegateSelection(Selection const & selection)
 {
 	_manipulator->setSelection(selection.cellIds, selection.particleIds);
 	_itemManager->update(_manipulator);
 }
 
-void ShapeUniverse::startMarking(QPointF const& scenePos)
+void ItemUniverseView::startMarking(QPointF const& scenePos)
 {
 	_manipulator->setSelection(list<uint64_t>(), list<uint64_t>());
 	auto pos = CoordinateSystem::sceneToModel(scenePos);
@@ -113,7 +117,7 @@ namespace
 	}
 }
 
-void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
+void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
 	Selection selection = getSelectionFromItems(itemsClicked);
@@ -135,7 +139,7 @@ void ShapeUniverse::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	}
 }
 
-void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
 	bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
@@ -170,7 +174,7 @@ void ShapeUniverse::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 	}
 }
 
-void ShapeUniverse::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
 	if (_itemManager->isMarkerActive()) {
 		_itemManager->deleteMarker();

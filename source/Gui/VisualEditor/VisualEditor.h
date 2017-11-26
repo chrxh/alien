@@ -34,8 +34,8 @@ private:
     Ui::VisualEditor *ui;
 
 	SimulationController* _controller = nullptr;
-    PixelUniverse* _pixelUniverse = nullptr;
-    ShapeUniverse* _shapeUniverse = nullptr;
+    PixelUniverseView* _pixelUniverse = nullptr;
+    ItemUniverseView* _shapeUniverse = nullptr;
 	ViewportController* _viewport = nullptr;
 
 	ActiveScene _activeScene = ActiveScene::PixelScene;

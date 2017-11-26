@@ -8,12 +8,12 @@
 #include "Model/Api/Definitions.h"
 #include "Model/Api/Descriptions.h"
 
-class PixelUniverse : public QGraphicsScene
+class PixelUniverseView : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    PixelUniverse(QObject* parent = nullptr);
-    virtual ~PixelUniverse();
+    PixelUniverseView(QObject* parent = nullptr);
+    virtual ~PixelUniverseView();
 
 	virtual void init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport);
 	virtual void activate();
