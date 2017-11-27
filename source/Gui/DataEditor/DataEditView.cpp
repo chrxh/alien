@@ -114,8 +114,10 @@ void DataEditView::updateDisplay(UpdateDescription update) const
 		_cellTab->updateDisplay();
 		_metadataTab->updateDisplay();
 		_computerTab->updateDisplay();
-		_symbolTab->updateDisplay();
-		if (update == UpdateDescription::All) {
+		if (update != UpdateDescription::AllExceptSymbols) {
+			_symbolTab->updateDisplay();
+		}
+		if (update != UpdateDescription::AllExceptToken) {
 			_tokenTabWidget->updateDisplay();
 		}
 	}
@@ -130,7 +132,7 @@ void DataEditView::updateDisplay(UpdateDescription update) const
 		_clusterTab->updateDisplay();
 		_cellTab->updateDisplay();
 		_metadataTab->updateDisplay();
-		if (update == UpdateDescription::All) {
+		if (update != UpdateDescription::AllExceptToken) {
 			_tokenTabWidget->updateDisplay();
 		}
 	}
@@ -203,8 +205,10 @@ void DataEditView::switchToCellEditorWithComputerWithToken(UpdateDescription upd
 		_mainTabWidget->setCurrentIndex(getTabPositionForCellEditor());
 		_computerTabWidget->clear();
 		_computerTabWidget->addTab(_computerTab, "cell computer");
-		_symbolTabWidget->clear();
-		_symbolTabWidget->addTab(_symbolTab, "symbols");
+		if (update != UpdateDescription::AllExceptToken) {
+			_symbolTabWidget->clear();
+			_symbolTabWidget->addTab(_symbolTab, "symbols");
+		}
 		_editorSelector = EditorSelector::CellWithComputerWithToken;
 	}
 	updateDisplay(update);

@@ -139,7 +139,7 @@ void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	}
 
 	if (alreadySelected) {
-		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::TokenUnchanged);
+		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::AllExceptToken);
 	}
 	else {
 		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::All);
@@ -181,7 +181,7 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		}
 	}
 	if (leftButton || rightButton) {
-		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::TokenUnchanged);
+		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::Toolbar }, UpdateDescription::AllExceptToken);
 	}
 }
 
@@ -193,7 +193,7 @@ void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
-			Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::TokenUnchanged);
+			Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::AllExceptToken);
 		}
 	}
 }
