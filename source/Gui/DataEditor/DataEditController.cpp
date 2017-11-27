@@ -128,6 +128,7 @@ void DataEditController::notificationFromCellComputerTab()
 
 void DataEditController::notificationFromSymbolTab()
 {
+	Q_EMIT _notifier->notify({ Receiver::DataEditor }, UpdateDescription::AllExceptSymbols);
 }
 
 void DataEditController::notificationFromTokenTab()

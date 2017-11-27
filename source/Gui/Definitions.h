@@ -48,5 +48,5 @@ class Notifier;
 enum class ActiveScene { PixelScene, ShapeScene };
 
 enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
-enum class UpdateDescription { All, TokenUnchanged };
+enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
 

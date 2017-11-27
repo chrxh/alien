@@ -56,11 +56,12 @@ optional<uint> DataManipulator::getSelectedTokenIndex() const
 void DataManipulator::addAndSelectCell(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
+	int memorySize = _parameters->cellFunctionComputerCellMemorySize;
 	auto desc = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
 		CellDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(_parameters->cellCreationMaxConnection)
 		.setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
 		.setFlagTokenBlocked(false).setTokenBranchNumber(0).setCellFeature(
-			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER)
+			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setVolatileData(QByteArray(memorySize, 0))
 		));
 	_descHelper->makeValid(desc);
 	_data.addCluster(desc);

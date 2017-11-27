@@ -35,7 +35,7 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- rotieren in der Bearbeitung durch beide Maustasten
+//- Bug: CellCluster übereinander legen => beide verschwinden
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 
