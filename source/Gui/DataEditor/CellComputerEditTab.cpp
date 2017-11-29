@@ -18,7 +18,7 @@ CellComputerEditTab::CellComputerEditTab(QWidget *parent) :
     ui->setupUi(this);
 
     //set colors
-    ui->compileButton->setStyleSheet(BUTTON_STYLESHEET);
+    ui->compileButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
 
     QPalette p = ui->memoryLabel->palette();
     p.setColor(QPalette::WindowText, CELL_EDIT_CAPTION_COLOR1);

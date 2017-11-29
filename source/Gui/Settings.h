@@ -32,15 +32,6 @@ const QColor CELL_EDIT_METADATA_CURSOR_COLOR(0xA0, 0xFF, 0x80, 0x90);
 const QString resourceInfoOn("://Icons/info_on.png");
 const QString resourceInfoOff("://Icons/info_off.png");
 
-//stylesheets
-const QString BUTTON_STYLESHEET = "background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px";
-const QString TABLE_STYLESHEET = "background-color: #000000; color: #EEEEEE; gridline-color: #303030; selection-color: #EEEEEE; selection-background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px;";
-const QString SCROLLBAR_STYLESHEET = "background-color: #303030; color: #B0B0B0; gridline-color: #303030;";
-const QColor BUTTON_TEXT_COLOR(0xC2, 0xC2, 0xC2);
-const QColor BUTTON_TEXT_HIGHLIGHT_COLOR(0x90, 0x90, 0xFF);
-const QString GLOBAL_FONT = "Courier New";
-
-
 class GuiSettings
 {
 public:
@@ -48,4 +39,11 @@ public:
 	static QFont getCellFont();
 	static QPalette getPaletteForTabWidget();
 	static QPalette getPaletteForTab();
+
+	static const QString ButtonStyleSheet;
+	static const QString TableStyleSheet;
+	static const QString ScrollbarStyleSheet;
+	static const QColor ButtonTextColor;
+	static const QColor ButtonTextHighlightColor;
+	static const QString StandardFont;
 };
