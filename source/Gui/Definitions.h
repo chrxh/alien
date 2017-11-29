@@ -44,6 +44,9 @@ class HexEditWidget;
 class TokenEditTabWidget;
 class TokenEditTab;
 class Notifier;
+class MainView;
+class MainModel;
+class MainController;
 
 enum class ActiveScene { PixelScene, ShapeScene };
 

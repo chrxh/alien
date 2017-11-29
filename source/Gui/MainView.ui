@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>MainView</class>
+ <widget class="QMainWindow" name="mainView">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -1327,7 +1327,7 @@
   <customwidget>
    <class>VisualEditor</class>
    <extends>QWidget</extends>
-   <header>gui/visualeditor/visualeditor.h</header>
+   <header>Gui/Visualeditor/VisualEditor.h</header>
   </customwidget>
  </customwidgets>
  <resources>
@@ -1337,7 +1337,7 @@
   <connection>
    <sender>actionExit</sender>
    <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
+   <receiver>MainView</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
