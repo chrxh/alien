@@ -12,7 +12,7 @@ public:
 	SimulationControllerImpl(QObject* parent = nullptr);
 	virtual ~SimulationControllerImpl() = default;
 
-	virtual void init(SimulationContext* context) override;
+	virtual void init(SimulationContext* context);
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;

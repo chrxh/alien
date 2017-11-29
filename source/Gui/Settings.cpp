@@ -3,7 +3,7 @@
 QFont GuiSettings::getGlobalFont ()
 {
     //set font
-    QFont f(GLOBAL_FONT, 8, QFont::Bold);
+    QFont f(GuiSettings::StandardFont, 8, QFont::Bold);
     f.setStyleStrategy(QFont::PreferBitmap);
     return f;
 }
@@ -11,7 +11,7 @@ QFont GuiSettings::getGlobalFont ()
 QFont GuiSettings::getCellFont()
 {
 	//set font
-	QFont f(GLOBAL_FONT, 2, QFont::Normal);
+	QFont f(GuiSettings::StandardFont, 2, QFont::Normal);
 	f.setStyleStrategy(QFont::PreferBitmap);
 	return f;
 }
@@ -64,3 +64,10 @@ QPalette GuiSettings::getPaletteForTab()
 	result.setBrush(QPalette::Disabled, QPalette::Window, brush7);
 	return result;
 }
+
+const QString GuiSettings::ButtonStyleSheet = "background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px";
+const QString GuiSettings::TableStyleSheet = "background-color: #000000; color: #EEEEEE; gridline-color: #303030; selection-color: #EEEEEE; selection-background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px;";
+const QString GuiSettings::ScrollbarStyleSheet = "background-color: #303030; color: #B0B0B0; gridline-color: #303030;";
+const QColor GuiSettings::ButtonTextColor(0xC2, 0xC2, 0xC2);
+const QColor GuiSettings::ButtonTextHighlightColor(0x90, 0x90, 0xFF);
+const QString GuiSettings::StandardFont = "Courier New";

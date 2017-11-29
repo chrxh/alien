@@ -30,7 +30,7 @@ TokenEditTab::TokenEditTab(QWidget *parent) :
     p.setColor(QPalette::Window, QColor(0,0,0));
     ui->tableWidget->setPalette(p);
     ui->tableWidget->setStyleSheet("background-color: #000000; color: #B0B0B0; gridline-color: #303030;");
-    ui->tableWidget->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
+    ui->tableWidget->verticalScrollBar()->setStyleSheet(GuiSettings::ScrollbarStyleSheet);
 
     //set font
     ui->tableWidget->setFont(GuiSettings::getGlobalFont());

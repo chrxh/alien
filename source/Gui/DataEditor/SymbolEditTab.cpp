@@ -14,13 +14,13 @@ SymbolEditTab::SymbolEditTab(QWidget *parent)
     ui->setupUi(this);
 
     setStyleSheet("background-color: #000000");
-    ui->tableWidget->setStyleSheet(TABLE_STYLESHEET);
-    ui->tableWidget->verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
-    ui->addSymbolButton->setStyleSheet(BUTTON_STYLESHEET);
-    ui->delSymbolButton->setStyleSheet(BUTTON_STYLESHEET);
+    ui->tableWidget->setStyleSheet(GuiSettings::TableStyleSheet);
+    ui->tableWidget->verticalScrollBar()->setStyleSheet(GuiSettings::ScrollbarStyleSheet);
+    ui->addSymbolButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
+    ui->delSymbolButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
 
     QPalette p = ui->addSymbolButton->palette();
-    p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
+    p.setColor(QPalette::ButtonText, GuiSettings::ButtonTextColor);
     ui->addSymbolButton->setPalette(p);
     ui->delSymbolButton->setPalette(p);
 

@@ -19,7 +19,10 @@ public:
 	void init(MainModel* model, MainController* controller);
 
 private:
-	Ui::MainView *ui;
+	void setupFont();
+	void setupPalette();
+
+	Ui::MainView* ui = nullptr;
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;
 };

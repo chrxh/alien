@@ -10,7 +10,6 @@ public:
 	SimulationController(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~SimulationController() = default;
 
-    virtual void init(SimulationContext* context) = 0;
     virtual void setRun(bool run) = 0;
 	virtual void calculateSingleTimestep() = 0;
 	virtual SimulationContext* getContext() const = 0;
