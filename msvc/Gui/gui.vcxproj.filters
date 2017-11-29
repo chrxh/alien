@@ -228,15 +228,6 @@
     <ClCompile Include="..\..\source\gui\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\MainWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_MainWindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_MainWindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -447,6 +438,36 @@
     <ClCompile Include="Release\moc_PixelUniverseView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MainController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MainController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MainController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MainModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MainModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MainModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\MainViewTemp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MainView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MainView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MainView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -562,12 +583,6 @@
     <CustomBuild Include="..\..\source\gui\visualeditor\VisualEditor.ui">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\MainWindow.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\MainWindow.ui">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\dialogs\AddRectStructureDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
@@ -651,6 +666,21 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\PixelUniverseView.h">
       <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MainController.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\MainView.ui">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MainModel.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\MainViewTemp.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MainView.h">
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -791,9 +821,6 @@
     <ClInclude Include="..\..\source\gui\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_MainWindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\gui\Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -814,6 +841,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\DataEditor\TabWidgetHelper.h">
       <Filter>Source Files\DataEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_MainView.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

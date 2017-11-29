@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include <QMainWindow>
@@ -8,15 +9,17 @@
 #include "Model/Api/Definitions.h"
 
 namespace Ui {
-    class MainWindow;
+    class MainView;
 }
 
-class MainWindow : public QMainWindow
+class MainView : public QMainWindow
 {
     Q_OBJECT
 public:
-    MainWindow (SimulationController* simulator, SimulationAccess* access, QWidget *parent = 0);
-    ~MainWindow ();
+    MainView (QWidget *parent = nullptr);
+    virtual ~MainView ();
+
+	void init(MainModel* model);
 
 private Q_SLOTS:
 
@@ -81,7 +84,7 @@ private Q_SLOTS:
     void startScreenFinished ();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainView *ui;
 
 	void setupFont();
 
@@ -111,3 +114,4 @@ private:
     QByteArray _snapshot;
 };
 
+*/
