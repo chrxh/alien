@@ -15,7 +15,7 @@ CodeEditWidget::CodeEditWidget(QWidget *parent)
     : QTextEdit(parent)
 {
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
-    verticalScrollBar()->setStyleSheet(SCROLLBAR_STYLESHEET);
+    verticalScrollBar()->setStyleSheet(GuiSettings::ScrollbarStyleSheet);
 }
 
 void CodeEditWidget::init(DataEditModel * model, DataEditController * controller, CellComputerCompiler * compiler)
