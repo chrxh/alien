@@ -5,7 +5,6 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "gui/MainWindow.h"
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/Settings.h"
@@ -13,7 +12,9 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/SymbolTable.h"
 #include "Model/Api/ModelServices.h"
-#include "Model/Local/UnitContext.h"
+
+#include "Gui/MainController.h"
+
 
 /*
 #include "ModelGpu/ModelGpuBuilderFacade.h"
@@ -110,28 +111,32 @@ int main(int argc, char *argv[])
 	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
 */
 
+/*
 	ModelServices modelServices;
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
-	IntVector2D size = { 12 * 33 * 3 /** 2*/, 12 * 17 * 3 /** 2*/ };
+	IntVector2D size = { 12 * 33 * 3 / ** 2* /, 12 * 17 * 3 / ** 2* / };
 	auto controller = cpuFacade->buildSimulationController(8, { 12, 6 }, size, symbols, parameters);
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
 	numberGen->init(12315312, 0);
 	auto access = cpuFacade->buildSimulationAccess(controller->getContext());
 	DataChangeDescription desc;
-	for (int i = 0; i < 20000*9/**4*/; ++i) {
+	for (int i = 0; i < 20000*9/ **4* /; ++i) {
 		desc.addNewParticle(ParticleChangeDescription().setPos(QVector2D(numberGen->getRandomInt(size.x), numberGen->getRandomInt(size.y)))
 			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
 			.setEnergy(50));
 	}
 	access->updateData(desc);
 
-	MainWindow w(controller, access);
+	MainView w(controller, access);
 	w.setWindowState(w.windowState() | Qt::WindowFullScreen);
 
 	w.show();
+*/
+	MainController controller;
+	controller.init();
 	return a.exec();
 }
 

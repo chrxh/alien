@@ -1,3 +1,4 @@
+/*
 #include <QGraphicsScene>
 #include <QTimer>
 #include <QScrollBar>
@@ -36,22 +37,27 @@
 #include "Settings.h"
 #include "DataManipulator.h"
 #include "Notifier.h"
-#include "MainWindow.h"
-#include "ui_mainwindow.h"
+#include "MainView.h"
+#include "ui_MainView.h"
 
-MainWindow::MainWindow(SimulationController* simController, SimulationAccess* access, QWidget *parent)
+MainView::MainView(QWidget *parent)
 	: QMainWindow(parent)
-	, ui(new Ui::MainWindow)
-	, _simController(simController)
+	, ui(new Ui::MainView)
 	, _oneSecondTimer(new QTimer(this))
     , _monitor(new SimulationMonitor(this))
     , _tutorialWindow(new TutorialWindow(this))
     , _startScreen(new StartScreenController(this))
 {
-	SET_CHILD(_simController, simController);
-
     ui->setupUi(this);
+}
 
+MainView::~MainView()
+{
+    delete ui;
+}
+
+void MainView::init(MainModel * model)
+{
 	_toolbar = new ToolbarController(ui->visualEditor);
 	connect(ui->actionEditor, &QAction::triggered, _toolbar->getContext(), &ToolbarContext::show);
 
@@ -80,85 +86,80 @@ MainWindow::MainWindow(SimulationController* simController, SimulationAccess* ac
 	setupFont();
 
 
-    //set color
-    ui->fpsForcingButton->setStyleSheet(BUTTON_STYLESHEET);
-    ui->toolBar->setStyleSheet("background-color: #303030");
-    QPalette p = ui->fpsForcingButton->palette();
-    p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
-    ui->fpsForcingButton->setPalette(p);
+	//set color
+	ui->fpsForcingButton->setStyleSheet(BUTTON_STYLESHEET);
+	ui->toolBar->setStyleSheet("background-color: #303030");
+	QPalette p = ui->fpsForcingButton->palette();
+	p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
+	ui->fpsForcingButton->setPalette(p);
 
-    //connect signals/slots for actions
-    connect(ui->actionPlay, SIGNAL( triggered(bool) ), this, SLOT(runClicked(bool)));
-    connect(ui->actionStep, SIGNAL( triggered(bool) ), this, SLOT(stepForwardClicked()));
-    connect(ui->actionStepBack, SIGNAL( triggered(bool) ), this, SLOT(stepBackClicked()));
-    connect(ui->actionEditor, SIGNAL(triggered(bool)), this, SLOT(setVisualMode(bool)));
-    connect(ui->actionZoomIn, SIGNAL(triggered(bool)), ui->visualEditor, SLOT(zoomIn()));
-    connect(ui->actionZoomIn, SIGNAL(triggered(bool)), this, SLOT(updateFrameLabel()));
-    connect(ui->actionZoomOut, SIGNAL(triggered(bool)), ui->visualEditor, SLOT(zoomOut()));
-    connect(ui->actionZoomOut, SIGNAL(triggered(bool)), this, SLOT(updateFrameLabel()));
-    connect(ui->actionSnapshot, SIGNAL(triggered(bool)), this, SLOT(snapshotUniverse()));
-    connect(ui->actionRestore, SIGNAL(triggered(bool)), this, SLOT(restoreUniverse()));
-    connect(ui->actionAlienMonitor, SIGNAL(triggered(bool)), _monitor, SLOT(setVisible(bool)));
-    connect(ui->actionAlienMonitor, SIGNAL(triggered(bool)), this, SLOT(alienMonitorTriggered(bool)));
-    connect(ui->actionCopyCell, SIGNAL(triggered(bool)), this, SLOT(copyCell()));
-    connect(ui->actionPasteCell, SIGNAL(triggered(bool)), this, SLOT(pasteCell()));
-    connect(ui->actionCopy_cell_extension, SIGNAL(triggered(bool)), this, SLOT(copyExtendedSelection()));
-    connect(ui->actionPaste_cell_extension, SIGNAL(triggered(bool)), this, SLOT(pasteExtendedSelection()));
-    connect(ui->actionSave_cell_extension, SIGNAL(triggered(bool)), this, SLOT(saveExtendedSelection()));
-    connect(ui->actionLoad_cell_extension, SIGNAL(triggered(bool)), this, SLOT(loadExtendedSelection()));
-    connect(ui->actionNewCell, SIGNAL(triggered(bool)), this, SLOT(addCell()));
-    connect(ui->actionAddBlockStructure, SIGNAL(triggered(bool)), this, SLOT(addBlockStructure()));
-    connect(ui->actionAddHexagonStructure, SIGNAL(triggered(bool)), this, SLOT(addHexagonStructure()));
-    connect(ui->actionAddEnergyParticle, SIGNAL(triggered(bool)), this, SLOT(addEnergyParticle()));
-    connect(ui->actionAddRandomEnergy, SIGNAL(triggered(bool)), this, SLOT(addRandomEnergy()));
-    connect(ui->actionNewSimulation, SIGNAL(triggered(bool)), this, SLOT(newSimulation()));
-    connect(ui->actionSave_universe, SIGNAL(triggered(bool)), this, SLOT(saveSimulation()));
-    connect(ui->actionLoad_universe, SIGNAL(triggered(bool)), this, SLOT(loadSimulation()));
-    connect(ui->actionSave_symbols, SIGNAL(triggered(bool)), this, SLOT(saveSymbols()));
-    connect(ui->actionLoad_symbols, SIGNAL(triggered(bool)), this, SLOT(loadSymbols()));
-    connect(ui->actionMerge_with, SIGNAL(triggered(bool)), this, SLOT(loadSymbolsWithMerging()));
-    connect(ui->actionEditSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(editSimulationParameters()));
-    connect(ui->actionLoadSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(loadSimulationParameters()));
-    connect(ui->actionSaveSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(saveSimulationParameters()));
-    connect(ui->actionEditSymbols, SIGNAL(triggered(bool)), this, SLOT(editSymbolTable()));
-    connect(ui->actionFullscreen, SIGNAL(triggered(bool)), this, SLOT(fullscreen(bool)));
-    connect(ui->actionRandom, SIGNAL(triggered(bool)), this, SLOT(multiplyRandomExtendedSelection()));
-    connect(ui->actionArrangement, SIGNAL(triggered(bool)), this, SLOT(multiplyArrangementExtendedSelection()));
-    connect(ui->actionAboutAlien, SIGNAL(triggered(bool)), this, SLOT(aboutAlien()));
-    connect(ui->actionTutorial, SIGNAL(triggered(bool)), _tutorialWindow, SLOT(setVisible(bool)));
-    connect(_tutorialWindow, SIGNAL(closed()), this, SLOT(tutorialClosed()));
+	//connect signals/slots for actions
+	connect(ui->actionPlay, SIGNAL(triggered(bool)), this, SLOT(runClicked(bool)));
+	connect(ui->actionStep, SIGNAL(triggered(bool)), this, SLOT(stepForwardClicked()));
+	connect(ui->actionStepBack, SIGNAL(triggered(bool)), this, SLOT(stepBackClicked()));
+	connect(ui->actionEditor, SIGNAL(triggered(bool)), this, SLOT(setVisualMode(bool)));
+	connect(ui->actionZoomIn, SIGNAL(triggered(bool)), ui->visualEditor, SLOT(zoomIn()));
+	connect(ui->actionZoomIn, SIGNAL(triggered(bool)), this, SLOT(updateFrameLabel()));
+	connect(ui->actionZoomOut, SIGNAL(triggered(bool)), ui->visualEditor, SLOT(zoomOut()));
+	connect(ui->actionZoomOut, SIGNAL(triggered(bool)), this, SLOT(updateFrameLabel()));
+	connect(ui->actionSnapshot, SIGNAL(triggered(bool)), this, SLOT(snapshotUniverse()));
+	connect(ui->actionRestore, SIGNAL(triggered(bool)), this, SLOT(restoreUniverse()));
+	connect(ui->actionAlienMonitor, SIGNAL(triggered(bool)), _monitor, SLOT(setVisible(bool)));
+	connect(ui->actionAlienMonitor, SIGNAL(triggered(bool)), this, SLOT(alienMonitorTriggered(bool)));
+	connect(ui->actionCopyCell, SIGNAL(triggered(bool)), this, SLOT(copyCell()));
+	connect(ui->actionPasteCell, SIGNAL(triggered(bool)), this, SLOT(pasteCell()));
+	connect(ui->actionCopy_cell_extension, SIGNAL(triggered(bool)), this, SLOT(copyExtendedSelection()));
+	connect(ui->actionPaste_cell_extension, SIGNAL(triggered(bool)), this, SLOT(pasteExtendedSelection()));
+	connect(ui->actionSave_cell_extension, SIGNAL(triggered(bool)), this, SLOT(saveExtendedSelection()));
+	connect(ui->actionLoad_cell_extension, SIGNAL(triggered(bool)), this, SLOT(loadExtendedSelection()));
+	connect(ui->actionNewCell, SIGNAL(triggered(bool)), this, SLOT(addCell()));
+	connect(ui->actionAddBlockStructure, SIGNAL(triggered(bool)), this, SLOT(addBlockStructure()));
+	connect(ui->actionAddHexagonStructure, SIGNAL(triggered(bool)), this, SLOT(addHexagonStructure()));
+	connect(ui->actionAddEnergyParticle, SIGNAL(triggered(bool)), this, SLOT(addEnergyParticle()));
+	connect(ui->actionAddRandomEnergy, SIGNAL(triggered(bool)), this, SLOT(addRandomEnergy()));
+	connect(ui->actionNewSimulation, SIGNAL(triggered(bool)), this, SLOT(newSimulation()));
+	connect(ui->actionSave_universe, SIGNAL(triggered(bool)), this, SLOT(saveSimulation()));
+	connect(ui->actionLoad_universe, SIGNAL(triggered(bool)), this, SLOT(loadSimulation()));
+	connect(ui->actionSave_symbols, SIGNAL(triggered(bool)), this, SLOT(saveSymbols()));
+	connect(ui->actionLoad_symbols, SIGNAL(triggered(bool)), this, SLOT(loadSymbols()));
+	connect(ui->actionMerge_with, SIGNAL(triggered(bool)), this, SLOT(loadSymbolsWithMerging()));
+	connect(ui->actionEditSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(editSimulationParameters()));
+	connect(ui->actionLoadSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(loadSimulationParameters()));
+	connect(ui->actionSaveSimulationParameters, SIGNAL(triggered(bool)), this, SLOT(saveSimulationParameters()));
+	connect(ui->actionEditSymbols, SIGNAL(triggered(bool)), this, SLOT(editSymbolTable()));
+	connect(ui->actionFullscreen, SIGNAL(triggered(bool)), this, SLOT(fullscreen(bool)));
+	connect(ui->actionRandom, SIGNAL(triggered(bool)), this, SLOT(multiplyRandomExtendedSelection()));
+	connect(ui->actionArrangement, SIGNAL(triggered(bool)), this, SLOT(multiplyArrangementExtendedSelection()));
+	connect(ui->actionAboutAlien, SIGNAL(triggered(bool)), this, SLOT(aboutAlien()));
+	connect(ui->actionTutorial, SIGNAL(triggered(bool)), _tutorialWindow, SLOT(setVisible(bool)));
+	connect(_tutorialWindow, SIGNAL(closed()), this, SLOT(tutorialClosed()));
 
-    //connect simulation monitor
-    connect(_monitor, SIGNAL(closed()), this, SLOT(alienMonitorClosed()));
+	//connect simulation monitor
+	connect(_monitor, SIGNAL(closed()), this, SLOT(alienMonitorClosed()));
 
-    //connect fps widgets
-    connect(ui->fpsForcingButton, SIGNAL(toggled(bool)), this, SLOT(fpsForcingButtonClicked(bool)));
-    connect(ui->fpsForcingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(fpsForcingSpinboxClicked()));
+	//connect fps widgets
+	connect(ui->fpsForcingButton, SIGNAL(toggled(bool)), this, SLOT(fpsForcingButtonClicked(bool)));
+	connect(ui->fpsForcingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(fpsForcingSpinboxClicked()));
 
-    //init widgets
-    QFont f = ui->frameLabel->font();
-    f.setBold(false);
-    f.setItalic(true);
-    ui->frameLabel->setFont(f);
+	//init widgets
+	QFont f = ui->frameLabel->font();
+	f.setBold(false);
+	f.setItalic(true);
+	ui->frameLabel->setFont(f);
 
-    //init timer
-    connect(_oneSecondTimer, SIGNAL(timeout()), this, SLOT(oneSecondTimeout()));
-    _oneSecondTimer->start(1000);
+	//init timer
+	connect(_oneSecondTimer, SIGNAL(timeout()), this, SLOT(oneSecondTimeout()));
+	_oneSecondTimer->start(1000);
 
-    //connect and run start screen
-    connect(_startScreen, SIGNAL(startScreenFinished()), SLOT(startScreenFinished()));
-    _startScreen->runStartScreen(ui->visualEditor->getGraphicsView());
+	//connect and run start screen
+	connect(_startScreen, SIGNAL(startScreenFinished()), SLOT(startScreenFinished()));
+	_startScreen->runStartScreen(ui->visualEditor->getGraphicsView());
 	ui->frameLabel->setVisible(false);
 }
 
-MainWindow::~MainWindow()
+void MainView::newSimulation ()
 {
-    delete ui;
-}
-
-void MainWindow::newSimulation ()
-{
-/*
+/ *
     NewSimulationDialog d(_simController->getSimulationContext());
     if( d.exec() ) {
 		stopSimulation();
@@ -170,10 +171,10 @@ void MainWindow::newSimulation ()
 
 		updateControllerAndEditors();
     }
-*/
+* /
 }
 
-void MainWindow::loadSimulation ()
+void MainView::loadSimulation ()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
     if( !fileName.isEmpty() ) {
@@ -183,9 +184,9 @@ void MainWindow::loadSimulation ()
 
             //read simulation data
             QDataStream in(&file);
-/*
+/ *
             _simController->loadUniverse(in);
-*/
+* /
 			file.close();
 
 			updateControllerAndEditors();
@@ -197,16 +198,16 @@ void MainWindow::loadSimulation ()
     }
 }
 
-void MainWindow::saveSimulation ()
+void MainView::saveSimulation ()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
             QDataStream out(&file);
-/*
+/ *
             _simController->saveUniverse(out);
-*/
+* /
             file.close();
         }
         else {
@@ -216,7 +217,7 @@ void MainWindow::saveSimulation ()
     }
 }
 
-void MainWindow::runClicked (bool run)
+void MainView::runClicked (bool run)
 {
     if( run ) {
         ui->actionPlay->setIcon(QIcon("://Icons/pause.png"));
@@ -235,13 +236,13 @@ void MainWindow::runClicked (bool run)
     ui->actionDeleteExtension->setEnabled(false);
 
     _undoUniverserses.clear();
-/*
+/ *
     _textEditor->requestUpdate();
-*/
+* /
     _simController->setRun(run);
 }
 
-void MainWindow::stepForwardClicked ()
+void MainView::stepForwardClicked ()
 {
     //update widgets
     ui->actionSave_cell_extension->setEnabled(false);
@@ -251,25 +252,25 @@ void MainWindow::stepForwardClicked ()
     ui->actionCopyCell->setEnabled(false);
     ui->actionDeleteCell->setEnabled(false);
     ui->actionDeleteExtension->setEnabled(false);
-/*
+/ *
     _textEditor->requestUpdate();
-*/
+* /
 
     //save old universe
     QByteArray b;
     QDataStream out(&b, QIODevice::WriteOnly);
-/*
+/ *
     _simController->saveUniverse(out);
-*/
+* /
     _undoUniverserses.push(b);
 
     //calc next time step
-/*
+/ *
     _simController->requestNextTimestep();
-*/
+* /
 }
 
-void MainWindow::stepBackClicked ()
+void MainView::stepBackClicked ()
 {
     ui->actionSave_cell_extension->setEnabled(false);
     ui->actionCopy_cell_extension->setEnabled(false);
@@ -283,38 +284,40 @@ void MainWindow::stepBackClicked ()
     QDataStream in(&b, QIODevice::ReadOnly);
 
     //read simulation data
-/*
+/ *
     _simController->loadUniverse(in);
 
     //force simulator to update other coordinators
     _simController->updateUniverse();
-	*/
+	* /
 
     //no step back any more?
     if( _undoUniverserses.isEmpty() )
         ui->actionStepBack->setEnabled(false);
 }
 
-void MainWindow::snapshotUniverse ()
+void MainView::snapshotUniverse ()
 {
     ui->actionRestore->setEnabled(true);
 
     //save old universe
     _snapshot.clear();
     QDataStream out(&_snapshot, QIODevice::WriteOnly);
-/*
+/ *
     _simController->saveUniverse(out);
     ui->visualEditor->serializeViewMatrix(out);
-*/}
+* /}
 
-void MainWindow::restoreUniverse ()
+void MainView::restoreUniverse ()
 {
 
     //load old universe
+/ *
     QDataStream in(&_snapshot, QIODevice::ReadOnly);
+* /
 
     //read simulation data
-/*
+/ *
     _simController->loadUniverse(in);
 
     //reset editors
@@ -325,27 +328,29 @@ void MainWindow::restoreUniverse ()
 
     //force simulator to update other coordinators
     _simController->updateUniverse();
-*/
+* /
 
     //hide "step back" button
+/ *
     _undoUniverserses.clear();
+* /
     ui->actionStepBack->setEnabled(false);
 }
 
-void MainWindow::editSimulationParameters ()
+void MainView::editSimulationParameters ()
 {
-/*
+/ *
     SimulationParametersDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
 		auto newParameters = d.getSimulationParameters();
 		*_simController->getSimulationContext()->getSimulationParameters() = newParameters;
     }
-*/
+* /
 }
 
-void MainWindow::loadSimulationParameters ()
+void MainView::loadSimulationParameters ()
 {
-/*
+/ *
     QString fileName = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -362,12 +367,12 @@ void MainWindow::loadSimulationParameters ()
             msgBox.exec();
         }
     }
-*/
+* /
 }
 
-void MainWindow::saveSimulationParameters ()
+void MainView::saveSimulationParameters ()
 {
-/*
+/ *
     QString fileName = QFileDialog::getSaveFileName(this, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -384,20 +389,20 @@ void MainWindow::saveSimulationParameters ()
             msgBox.exec();
         }
     }
-*/
+* /
 }
 
-void MainWindow::fullscreen (bool triggered)
+void MainView::fullscreen (bool triggered)
 {
     QMainWindow::setWindowState(QMainWindow::windowState() ^ Qt::WindowFullScreen);
 }
 
-void MainWindow::setVisualMode (bool editMode)
+void MainView::setVisualMode (bool editMode)
 {
-/*
+/ *
     if( !editMode )
         _textEditor->requestUpdate();
-*/
+* /
     ui->actionPlay->setChecked(false);
     ui->actionStep->setEnabled(true);
     ui->actionPlay->setIcon(QIcon("://Icons/play.png"));
@@ -414,15 +419,15 @@ void MainWindow::setVisualMode (bool editMode)
     }
 
     //update micro editor
-/*
+/ *
     _textEditor->setVisible(editMode);
-*/
+* /
 
     //stop running
     _simController->setRun(false);
 }
 
-void MainWindow::alienMonitorTriggered (bool on)
+void MainView::alienMonitorTriggered (bool on)
 {
     if( on ) {
         ui->actionAlienMonitor->setIcon(QIcon("://Icons/monitor_active.png"));
@@ -432,72 +437,74 @@ void MainWindow::alienMonitorTriggered (bool on)
     }
 }
 
-void MainWindow::alienMonitorClosed()
+void MainView::alienMonitorClosed()
 {
     ui->actionAlienMonitor->setChecked(false);
     ui->actionAlienMonitor->setIcon(QIcon("://Icons/monitor.png"));
 }
 
-void MainWindow::addCell ()
+void MainView::addCell ()
 {
-/*    ui->visualEditor->newCellRequested();
+/ *    ui->visualEditor->newCellRequested();
 
     if( !_textEditor->isVisible() )
         _simController->updateUniverse();
-*/
+* /
 }
 
-void MainWindow::addEnergyParticle ()
+void MainView::addEnergyParticle ()
 {
-/*    ui->visualEditor->newEnergyParticleRequested();
+/ *    ui->visualEditor->newEnergyParticleRequested();
 
     if( !_textEditor->isVisible() )
         _simController->updateUniverse();
-*/
+* /
 }
 
-void MainWindow::addRandomEnergy ()
+void MainView::addRandomEnergy ()
 {
     AddEnergyDialog d;
-/*
+/ *
     if( d.exec() ) {
         _simController->addRandomEnergy(d.getTotalEnergy(), d.getMaxEnergyPerParticle());
         _simController->updateUniverse();
     }
-*/
+* /
 }
 
-void MainWindow::copyCell ()
+void MainView::copyCell ()
 {
     //serialize cell
-/*
+/ *
     Cell* focusCell = _textEditor->getFocusedCell();
-*/
+* /
+/ *
     QDataStream out(&_serializedCellData, QIODevice::WriteOnly);
+* /
     quint64 clusterId;
     quint64 cellId;
-/*
+/ *
     _simController->saveCell(out, focusCell, clusterId, cellId);
-*/
+* /
 
     //set actions
     ui->actionPasteCell->setEnabled(true);
 }
 
-void MainWindow::pasteCell ()
+void MainView::pasteCell ()
 {
     QDataStream in(&_serializedCellData, QIODevice::ReadOnly);
-/*
+/ *
     _simController->loadCell(in, ui->visualEditor->getViewCenterPosWithInc());
 
     //force simulator to update other coordinators
     _simController->updateUniverse();
-*/
+* /
 }
 
-void MainWindow::editSymbolTable ()
+void MainView::editSymbolTable ()
 {
-/*
+/ *
 	SymbolTable* symbolTable = _simController->getSimulationContext()->getSymbolTable();
 	if (!symbolTable)
 		return;
@@ -510,17 +517,17 @@ void MainWindow::editSymbolTable ()
         //update editor
         _microEditor->update();
     }
-*/
+* /
 }
 
-void MainWindow::loadSymbols ()
+void MainView::loadSymbols ()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
 
-/*
+/ *
             QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* oldSymbolTable = _simController->getSimulationContext()->getSymbolTable();
@@ -530,7 +537,7 @@ void MainWindow::loadSymbols ()
             file.close();
 
             _textEditor->update();
-*/
+* /
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -539,20 +546,20 @@ void MainWindow::loadSymbols ()
     }
 }
 
-void MainWindow::saveSymbols ()
+void MainView::saveSymbols ()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::WriteOnly) ) {
 
-/*
+/ *
             QDataStream out(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* symbolTable = _simController->getSimulationContext()->getSymbolTable();
 			facade->serializeSymbolTable(symbolTable, out);
             file.close();
-*/
+* /
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The symbol table could not saved.");
@@ -561,14 +568,14 @@ void MainWindow::saveSymbols ()
     }
 }
 
-void MainWindow::loadSymbolsWithMerging ()
+void MainView::loadSymbolsWithMerging ()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
         if( file.open(QIODevice::ReadOnly) ) {
 
-/*
+/ *
 			QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			SymbolTable* oldSymbolTable = _simController->getSimulationContext()->getSymbolTable();
@@ -578,7 +585,7 @@ void MainWindow::loadSymbolsWithMerging ()
 			file.close();
 
             _textEditor->update();
-*/
+* /
         }
         else {
             QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
@@ -587,32 +594,32 @@ void MainWindow::loadSymbolsWithMerging ()
     }
 }
 
-void MainWindow::addBlockStructure ()
+void MainView::addBlockStructure ()
 {
-/*
+/ *
     AddRectStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
         QVector2D center = ui->visualEditor->getViewCenterPosWithInc();
        _simController->addBlockStructure(center, d.getBlockSizeX(), d.getBlockSizeY(), QVector2D(d.getDistance(), d.getDistance(), 0.0)
 		   , d.getInternalEnergy());
     }
-*/
+* /
 }
 
-void MainWindow::addHexagonStructure ()
+void MainView::addHexagonStructure ()
 {
-/*
+/ *
     AddHexagonStructureDialog d(_simController->getSimulationContext()->getSimulationParameters());
     if( d.exec() ) {
         QVector2D center = ui->visualEditor->getViewCenterPosWithInc();
        _simController->addHexagonStructure(center, d.getLayers(), d.getDistance(), d.getInternalEnergy());
     }
-*/
+* /
 }
 
-void MainWindow::loadExtendedSelection ()
+void MainView::loadExtendedSelection ()
 {
-/*
+/ *
     QString fileName = QFileDialog::getOpenFileName(this, "Load Ensemble", "", "Alien Ensemble (*.ens)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -632,12 +639,12 @@ void MainWindow::loadExtendedSelection ()
             msgBox.exec();
         }
     }
-*/
+* /
 }
 
-void MainWindow::saveExtendedSelection ()
+void MainView::saveExtendedSelection ()
 {
-/*
+/ *
     QString fileName = QFileDialog::getSaveFileName(this, "Save Ensemble", "", "Alien Ensemble (*.ens)");
     if( !fileName.isEmpty() ) {
         QFile file(fileName);
@@ -660,12 +667,12 @@ void MainWindow::saveExtendedSelection ()
             msgBox.exec();
         }
     }
-*/
+* /
 }
 
-void MainWindow::copyExtendedSelection ()
+void MainView::copyExtendedSelection ()
 {
-/*
+/ *
     //get selected clusters and energy particles
     QList< CellCluster* > clusters;
     QList< EnergyParticle* > es;
@@ -679,12 +686,12 @@ void MainWindow::copyExtendedSelection ()
 
     //set actions
     ui->actionPaste_cell_extension->setEnabled(true);
-*/
+* /
 }
 
-void MainWindow::pasteExtendedSelection ()
+void MainView::pasteExtendedSelection ()
 {
-/*
+/ *
     QDataStream in(&_serializedEnsembleData, QIODevice::ReadOnly);
     QMap< quint64, quint64 > oldNewCellIdMap;
     QMap< quint64, quint64 > oldNewClusterIdMap;
@@ -694,12 +701,12 @@ void MainWindow::pasteExtendedSelection ()
 
     //force simulator to update other coordinators
     _simController->updateUniverse();
-*/
+* /
 }
 
-void MainWindow::multiplyRandomExtendedSelection ()
+void MainView::multiplyRandomExtendedSelection ()
 {
-/*
+/ *
     SelectionMultiplyRandomDialog d;
     if( d.exec() ) {
 
@@ -742,12 +749,12 @@ void MainWindow::multiplyRandomExtendedSelection ()
 
         _simController->updateUniverse();
     }
-*/
+* /
 }
 
-void MainWindow::multiplyArrangementExtendedSelection ()
+void MainView::multiplyArrangementExtendedSelection ()
 {
-/*
+/ *
     //get selected clusters and energy particles
     QList< CellCluster* > clusters;
     QList< EnergyParticle* > es;
@@ -805,31 +812,31 @@ void MainWindow::multiplyArrangementExtendedSelection ()
 
         _simController->updateUniverse();
     }
-*/
+* /
 }
 
-void MainWindow::aboutAlien ()
+void MainView::aboutAlien ()
 {
     QMessageBox msgBox(QMessageBox::Information,"about artificial life environment (alien)", "Developed by Christian Heinemann.");
     msgBox.exec();
 }
 
-void MainWindow::tutorialClosed()
+void MainView::tutorialClosed()
 {
     ui->actionTutorial->setChecked(false);
 }
 
-void MainWindow::oneSecondTimeout ()
+void MainView::oneSecondTimeout ()
 {
-/*
+/ *
     _monitor->update(_simController->getMonitorData());
-*/
+* /
 	updateFrameLabel();
 }
 
-void MainWindow::fpsForcingButtonClicked (bool toggled)
+void MainView::fpsForcingButtonClicked (bool toggled)
 {
-/*
+/ *
     if( toggled ) {
         _simController->forceFps(ui->fpsForcingSpinBox->value());
         QPalette p = ui->fpsForcingButton->palette();
@@ -842,18 +849,18 @@ void MainWindow::fpsForcingButtonClicked (bool toggled)
         p.setColor(QPalette::ButtonText, BUTTON_TEXT_COLOR);
         ui->fpsForcingButton->setPalette(p);
     }
-*/
+* /
 }
 
-void MainWindow::fpsForcingSpinboxClicked ()
+void MainView::fpsForcingSpinboxClicked ()
 {
-/*
+/ *
     if( ui->fpsForcingButton->isChecked() )
         _simController->forceFps(ui->fpsForcingSpinBox->value());
-*/
+* /
 }
 
-void MainWindow::numTokenChanged (int numToken, int maxToken, bool pasteTokenPossible)
+void MainView::numTokenChanged (int numToken, int maxToken, bool pasteTokenPossible)
 {
     if( numToken < maxToken) {
         ui->actionNewToken->setEnabled(true);
@@ -877,9 +884,9 @@ void MainWindow::numTokenChanged (int numToken, int maxToken, bool pasteTokenPos
     }
 }
 
-void MainWindow::cellFocused (Cell* cell)
+void MainView::cellFocused (Cell* cell)
 {
-/*
+/ *
     if( _textEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);
         ui->actionCopy_cell_extension->setEnabled(true);
@@ -888,10 +895,10 @@ void MainWindow::cellFocused (Cell* cell)
         ui->actionDeleteCell->setEnabled(true);
         ui->actionDeleteExtension->setEnabled(true);
     }
-*/
+* /
 }
 
-void MainWindow::cellDefocused ()
+void MainView::cellDefocused ()
 {
     ui->actionSave_cell_extension->setEnabled(false);
     ui->actionCopy_cell_extension->setEnabled(false);
@@ -901,9 +908,9 @@ void MainWindow::cellDefocused ()
     ui->actionDeleteExtension->setEnabled(false);
 }
 
-void MainWindow::energyParticleFocused (Particle* e)
+void MainView::energyParticleFocused (Particle* e)
 {
-/*
+/ *
     if( _textEditor->isVisible() ) {
         ui->actionSave_cell_extension->setEnabled(true);
         ui->actionCopy_cell_extension->setEnabled(true);
@@ -912,10 +919,10 @@ void MainWindow::energyParticleFocused (Particle* e)
         ui->actionDeleteCell->setEnabled(true);
         ui->actionDeleteExtension->setEnabled(true);
     }
-*/
+* /
 }
 
-void MainWindow::entitiesSelected (int numCells, int numEnergyParticles)
+void MainView::entitiesSelected (int numCells, int numEnergyParticles)
 {
     if( (numCells > 0) || (numEnergyParticles > 0) ) {
         ui->actionSave_cell_extension->setEnabled(true);
@@ -932,7 +939,7 @@ void MainWindow::entitiesSelected (int numCells, int numEnergyParticles)
     }
 }
 
-void MainWindow::updateFrameLabel ()
+void MainView::updateFrameLabel ()
 {
 	ui->frameLabel->setText(QString("Frame: %1  FPS: %2  Magnification: %3x")
 		.arg(_framedata.frame, 9, 10, QLatin1Char('0'))
@@ -940,7 +947,7 @@ void MainWindow::updateFrameLabel ()
 		.arg(ui->visualEditor->getZoomFactor()));
 }
 
-void MainWindow::startScreenFinished ()
+void MainView::startScreenFinished ()
 {
     ui->actionEditor->setEnabled(true);
     ui->actionZoomIn->setEnabled(true);
@@ -949,7 +956,7 @@ void MainWindow::startScreenFinished ()
 	updateFrameLabel();
 }
 
-void MainWindow::setupFont()
+void MainView::setupFont()
 {
 	setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
@@ -964,7 +971,7 @@ void MainWindow::setupFont()
 	ui->menuMultiplyExtension->setFont(GuiSettings::getGlobalFont());
 }
 
-void MainWindow::changeEvent(QEvent *e)
+void MainView::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
     switch (e->type()) {
@@ -976,21 +983,24 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
-void MainWindow::stopSimulation()
+void MainView::stopSimulation()
 {
 	ui->actionPlay->setChecked(false);
 	ui->actionStepBack->setEnabled(false);
+/ *
 	_undoUniverserses.clear();
+* /
 	runClicked(false);
 }
 
-void MainWindow::updateControllerAndEditors()
+void MainView::updateControllerAndEditors()
 {
-/*
+/ *
 	ui->visualEditor->reset();
 	_textEditor->update();
 	_simController->updateUniverse();
-*/
+* /
 }
 
 
+*/
