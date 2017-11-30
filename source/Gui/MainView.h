@@ -18,14 +18,16 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	void init(MainModel* model, MainController* controller);
+	virtual void init(MainModel* model, MainController* controller);
+	virtual void refresh();
 
-	void setupEditors(SimulationController* controller, DataManipulator* manipulator, Notifier* notifier);
+	virtual void setupEditors(SimulationController* controller, DataManipulator* manipulator, Notifier* notifier);
 
 private:
 	void connectActions();
-	void setupFont();
-	void setupPalette();
+	void setupTheme();
+
+	Q_SLOT void runClicked(bool run);
 
 	Ui::MainView* ui = nullptr;	//contains VisualEditor
 	MainModel* _model = nullptr;

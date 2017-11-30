@@ -19,6 +19,8 @@ public:
 	virtual void activate();
 	virtual void deactivate();
 
+	virtual void refresh();
+
 private:
     Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
