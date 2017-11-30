@@ -57,6 +57,11 @@ void PixelUniverseView::deactivate()
 	disconnect(_viewport, &ViewportInterface::scrolling, this, &PixelUniverseView::scrolling);
 }
 
+void PixelUniverseView::refresh()
+{
+	requestData();
+}
+
 void PixelUniverseView::requestData()
 {
 	IntRect rect = _viewport->getRect();

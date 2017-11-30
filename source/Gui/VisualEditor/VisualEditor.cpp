@@ -18,7 +18,7 @@ VisualEditor::VisualEditor(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::VisualEditor)
 	, _pixelUniverse(new PixelUniverseView(this))
-	, _shapeUniverse(new ItemUniverseView(this))
+	, _itemUniverse(new ItemUniverseView(this))
 	, _viewport(new ViewportController(this))
 {
     ui->setupUi(this);
@@ -38,16 +38,22 @@ void VisualEditor::init(Notifier* notifier, SimulationController* controller, Da
 	_shapeUniverseInit = false;
 	_controller = controller;
 	_pixelUniverse->init(controller, manipulator, _viewport);
-	_shapeUniverse->init(notifier, controller, manipulator, _viewport);
-	_viewport->init(ui->simulationView, _pixelUniverse, _shapeUniverse, ActiveScene::PixelScene);
+	_itemUniverse->init(notifier, controller, manipulator, _viewport);
+	_viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, ActiveScene::PixelScene);
 	setActiveScene(_activeScene);
+}
+
+void VisualEditor::refresh()
+{
+	_pixelUniverse->refresh();
+	_itemUniverse->refresh();
 }
 
 
 void VisualEditor::setActiveScene (ActiveScene activeScene)
 {
 	if (activeScene == ActiveScene::PixelScene) {
-		_shapeUniverse->deactivate();
+		_itemUniverse->deactivate();
 	}
 	if (activeScene == ActiveScene::ShapeScene) {
 		_pixelUniverse->deactivate();
@@ -60,7 +66,7 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 		_pixelUniverse->activate();
 	}
 	if (activeScene == ActiveScene::ShapeScene) {
-		_shapeUniverse->activate();
+		_itemUniverse->activate();
 	}
 }
 

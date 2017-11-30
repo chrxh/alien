@@ -2,10 +2,12 @@
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
-#include "Settings.h"
-#include "MainView.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
+#include "Settings.h"
+#include "MainView.h"
+#include "MainController.h"
+
 #include "ui_MainView.h"
 
 MainView::MainView(QWidget * parent)
@@ -27,10 +29,14 @@ void MainView::init(MainModel * model, MainController * controller)
 	_controller = controller;
 
 	connectActions();
-	setupFont();
-	setupPalette();
+	setupTheme();
 	setWindowState(windowState() | Qt::WindowFullScreen);
 	show();
+}
+
+void MainView::refresh()
+{
+	ui->visualEditor->refresh();
 }
 
 void MainView::setupEditors(SimulationController * controller, DataManipulator* manipulator, Notifier* notifier)
@@ -49,9 +55,10 @@ void MainView::setupEditors(SimulationController * controller, DataManipulator* 
 void MainView::connectActions()
 {
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+	connect(ui->actionPlay, &QAction::triggered, this, &MainView::runClicked);
 }
 
-void MainView::setupFont()
+void MainView::setupTheme()
 {
 	setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
@@ -64,13 +71,32 @@ void MainView::setupFont()
 	ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
 	ui->menuAddEnsemble->setFont(GuiSettings::getGlobalFont());
 	ui->menuMultiplyExtension->setFont(GuiSettings::getGlobalFont());
-}
 
-void MainView::setupPalette()
-{
 	ui->fpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
 	QPalette p = ui->fpsForcingButton->palette();
 	p.setColor(QPalette::ButtonText, GuiSettings::ButtonTextColor);
 	ui->fpsForcingButton->setPalette(p);
 }
+
+void MainView::runClicked(bool run)
+{
+	if (run) {
+		ui->actionPlay->setIcon(QIcon("://Icons/pause.png"));
+		ui->actionStep->setEnabled(false);
+	}
+	else {
+		ui->actionPlay->setIcon(QIcon("://Icons/play.png"));
+		ui->actionStep->setEnabled(true);
+	}
+	ui->actionSave_cell_extension->setEnabled(false);
+	ui->actionCopy_cell_extension->setEnabled(false);
+	ui->actionStepBack->setEnabled(false);
+	ui->menuMultiplyExtension->setEnabled(false);
+	ui->actionCopyCell->setEnabled(false);
+	ui->actionDeleteCell->setEnabled(false);
+	ui->actionDeleteExtension->setEnabled(false);
+
+	_controller->onRunSimulation(run);
+}
+

@@ -21,7 +21,9 @@ public:
 	virtual void init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
-	virtual void requestData();
+
+	virtual void refresh();
+
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent* e);
@@ -29,6 +31,8 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
+	void requestData();
+
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void cellInfoToggled(bool showInfo);
 	Q_SLOT void scrolling();
