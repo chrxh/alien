@@ -46,6 +46,9 @@ public:
 	virtual unordered_set<uint64_t> getSelectedParticleIds() const;
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
+	virtual void requireImageFromSimulation(IntRect const& rect, QImage* target);
+
+	Q_SIGNAL void imageReady();
 
 private:
 	Q_SLOT void dataFromSimulationAvailable();

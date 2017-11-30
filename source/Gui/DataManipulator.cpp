@@ -16,6 +16,7 @@ void DataManipulator::init(Notifier* notifier, SimulationAccess * access, Descri
 	_parameters = context->getSimulationParameters();
 
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection);
+	connect(_access, &SimulationAccess::imageReady, this, &DataManipulator::imageReady);
 	connect(_notifier, &Notifier::notify, this, &DataManipulator::sendDataChangesToSimulation);
 }
 
@@ -420,6 +421,11 @@ void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect)
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
 	_access->requireData(rect, resolveDesc);
+}
+
+void DataManipulator::requireImageFromSimulation(IntRect const & rect, QImage * target)
+{
+	_access->requireImage(rect, target);
 }
 
 void DataManipulator::updateAfterCellReconnections()

@@ -1,6 +1,11 @@
-﻿#include "Settings.h"
-#include "MainView.h"
+﻿#include "Model/Api/SimulationController.h"
 
+#include "Gui/Toolbar/ToolbarController.h"
+#include "Gui/Toolbar/ToolbarContext.h"
+#include "Settings.h"
+#include "MainView.h"
+#include "DataEditController.h"
+#include "DataEditContext.h"
 #include "ui_MainView.h"
 
 MainView::MainView(QWidget * parent)
@@ -21,10 +26,29 @@ void MainView::init(MainModel * model, MainController * controller)
 	_model = model;
 	_controller = controller;
 
+	connectActions();
 	setupFont();
 	setupPalette();
 	setWindowState(windowState() | Qt::WindowFullScreen);
 	show();
+}
+
+void MainView::setupEditors(SimulationController * controller, DataManipulator* manipulator, Notifier* notifier)
+{
+	_toolbar = new ToolbarController(ui->visualEditor);
+	connect(ui->actionEditor, &QAction::triggered, _toolbar->getContext(), &ToolbarContext::show);
+
+	_dataEditor = new DataEditController(ui->visualEditor);
+	connect(ui->actionEditor, &QAction::triggered, _dataEditor->getContext(), &DataEditContext::show);
+
+	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext());
+	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());
+	ui->visualEditor->init(notifier, controller, manipulator);
+}
+
+void MainView::connectActions()
+{
+	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 }
 
 void MainView::setupFont()

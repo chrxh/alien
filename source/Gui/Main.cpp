@@ -111,8 +111,8 @@ int main(int argc, char *argv[])
 	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
 */
 
-/*
 	ModelServices modelServices;
+/*
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();
