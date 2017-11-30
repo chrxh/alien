@@ -59,6 +59,11 @@ void ItemUniverseView::deactivate()
 	disconnect(_viewport, &ViewportInterface::scrolling, this, &ItemUniverseView::scrolling);
 }
 
+void ItemUniverseView::refresh()
+{
+	requestData();
+}
+
 void ItemUniverseView::requestData()
 {
 	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());

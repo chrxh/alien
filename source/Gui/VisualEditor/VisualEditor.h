@@ -18,24 +18,25 @@ public:
     VisualEditor(QWidget *parent = 0);
     virtual ~VisualEditor();
 
-	void init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator);
-    void reset();
+	virtual void init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator);
 
-	void setActiveScene(ActiveScene activeScene);
-    QVector2D getViewCenterWithIncrement ();
-    QGraphicsView* getGraphicsView ();
-    qreal getZoomFactor ();
+	virtual void refresh();
 
-public Q_SLOTS:
-    void zoomIn ();
-    void zoomOut ();
+	virtual void setActiveScene(ActiveScene activeScene);
+	virtual QVector2D getViewCenterWithIncrement ();
+	virtual QGraphicsView* getGraphicsView ();
+	virtual qreal getZoomFactor ();
+
+public:
+    Q_SLOT void zoomIn ();
+	Q_SLOT void zoomOut ();
 
 private:
     Ui::VisualEditor *ui;
 
 	SimulationController* _controller = nullptr;
     PixelUniverseView* _pixelUniverse = nullptr;
-    ItemUniverseView* _shapeUniverse = nullptr;
+    ItemUniverseView* _itemUniverse = nullptr;
 	ViewportController* _viewport = nullptr;
 
 	ActiveScene _activeScene = ActiveScene::PixelScene;
