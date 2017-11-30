@@ -15,7 +15,7 @@ public:
     PixelUniverseView(QObject* parent = nullptr);
     virtual ~PixelUniverseView();
 
-	virtual void init(SimulationController* controller, SimulationAccess* access, ViewportInterface* viewport);
+	virtual void init(SimulationController* controller, DataManipulator* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 
@@ -24,7 +24,7 @@ private:
 	Q_SLOT void retrieveAndDisplayData();
 	Q_SLOT void scrolling();
 
-	SimulationAccess* _simAccess = nullptr;
+	DataManipulator* _manipulator = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;
