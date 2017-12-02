@@ -8,11 +8,10 @@
 void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* itemScene, ActiveScene activeScene)
 {
 	_view = view;
-	_activeScene = activeScene;
 	_pixelScene = pixelScene;
 	_itemScene = itemScene;
-	setSceneToView(activeScene);
-	initViewMatrices();
+	_activeScene = activeScene;
+	setSceneToView(boost::none, activeScene);
 
 	connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling);
 	connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling);
@@ -29,25 +28,21 @@ void ViewportController::setModeToNoUpdate()
 	_view->update();
 }
 
-void ViewportController::initViewMatrices()
-{
-	_pixelSceneViewMatrix = QMatrix();
-	_pixelSceneViewMatrix.scale(2.0, 2.0);
-	_shapeSceneViewMatrix = QMatrix();
-	_shapeSceneViewMatrix.scale(CoordinateSystem::sceneToModel(20.0), CoordinateSystem::sceneToModel(20.0));
-}
-
 void ViewportController::setActiveScene(ActiveScene activeScene)
 {
-	saveScenePos(_activeScene);
-	setSceneToView(activeScene);
-	loadScenePos(activeScene);
+/*
+	saveScenePos();
+*/
+	setSceneToView(_activeScene, activeScene);
+/*
+	loadScenePos();
+*/
 	_activeScene = activeScene;
 }
 
 ActiveScene ViewportController::getActiveScene() const
 {
-	return _activeScene;
+	return *_activeScene;
 }
 
 QRectF ViewportController::getRect() const
@@ -86,40 +81,33 @@ qreal ViewportController::getZoomFactor() const
 	return  _view->matrix().m11();
 }
 
-void ViewportController::setSceneToView(ActiveScene activeScene)
+void ViewportController::setSceneToView(optional<ActiveScene> origActiveScene, ActiveScene activeScene)
 {
+	if (origActiveScene && *origActiveScene == activeScene) {
+		return;
+	}
 	if (activeScene == ActiveScene::PixelScene) {
 		_view->setScene(_pixelScene);
+		if (origActiveScene) {
+			_view->scale(CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0));
+		}
 	}
 	if (activeScene == ActiveScene::ItemScene) {
 		_view->setScene(_itemScene);
+		if (origActiveScene) {
+			_view->scale(CoordinateSystem::sceneToModel(1.0), CoordinateSystem::sceneToModel(1.0));
+		}
 	}
 }
 
-void ViewportController::saveScenePos(ActiveScene activeScene)
+void ViewportController::saveScrollPos()
 {
-	if (activeScene == ActiveScene::PixelScene) {
-		_pixelSceneViewMatrix = _view->matrix();
-		_pixelSceneScrollbarPos.x = _view->horizontalScrollBar()->value();
-		_pixelSceneScrollbarPos.y = _view->verticalScrollBar()->value();
-	}
-	if (activeScene == ActiveScene::ItemScene) {
-		_shapeSceneViewMatrix = _view->matrix();
-		_shapeSceneScrollbarPos.x = _view->horizontalScrollBar()->value();
-		_shapeSceneScrollbarPos.y = _view->verticalScrollBar()->value();
-	}
+	_sceneScrollbarPos.x = _view->horizontalScrollBar()->value();
+	_sceneScrollbarPos.y = _view->verticalScrollBar()->value();
 }
 
-void ViewportController::loadScenePos(ActiveScene activeScene)
+void ViewportController::restoreScrollPos()
 {
-	if (activeScene == ActiveScene::PixelScene) {
-		_view->setMatrix(_pixelSceneViewMatrix);
-		_view->horizontalScrollBar()->setValue(_pixelSceneScrollbarPos.x);
-		_view->verticalScrollBar()->setValue(_pixelSceneScrollbarPos.y);
-	}
-	if (activeScene == ActiveScene::ItemScene) {
-		_view->setMatrix(_shapeSceneViewMatrix);
-		_view->horizontalScrollBar()->setValue(_shapeSceneScrollbarPos.x);
-		_view->verticalScrollBar()->setValue(_shapeSceneScrollbarPos.y);
-	}
+	_view->horizontalScrollBar()->setValue(_sceneScrollbarPos.x);
+	_view->verticalScrollBar()->setValue(_sceneScrollbarPos.y);
 }

@@ -26,22 +26,18 @@ public:
 	virtual void zoomOut();
 	virtual qreal getZoomFactor() const;
 
-private:
-	void initViewMatrices();
+	virtual void saveScrollPos();
+	virtual void restoreScrollPos();
 
-	void setSceneToView(ActiveScene activeScene);
-	void saveScenePos(ActiveScene activeScene);
-	void loadScenePos(ActiveScene activeScene);
+private:
+	void setSceneToView(optional<ActiveScene> oldActiveScene, ActiveScene activeScene);
 
 
 	QGraphicsView* _view = nullptr;
 	QGraphicsScene* _pixelScene = nullptr;
 	QGraphicsScene* _itemScene = nullptr;
 
-	QMatrix _pixelSceneViewMatrix;
-	QMatrix _shapeSceneViewMatrix;
-	IntVector2D _pixelSceneScrollbarPos;
-	IntVector2D _shapeSceneScrollbarPos;
+	IntVector2D _sceneScrollbarPos;
 
-	ActiveScene _activeScene = ActiveScene::PixelScene;
+	optional<ActiveScene> _activeScene;
 };

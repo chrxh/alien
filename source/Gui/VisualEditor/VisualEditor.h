@@ -45,8 +45,6 @@ private:
     bool _shapeUniverseInit = false;
 
     qreal _posIncrement = 0.0;
-
-    bool _screenUpdatePossible = true;
 };
 
 

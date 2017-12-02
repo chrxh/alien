@@ -52,6 +52,7 @@ void VisualEditor::refresh()
 
 void VisualEditor::setActiveScene (ActiveScene activeScene)
 {
+	_viewport->saveScrollPos();
 	if (activeScene == ActiveScene::PixelScene) {
 		_itemUniverse->deactivate();
 	}
@@ -60,7 +61,6 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 	}
 	_activeScene = activeScene;
 	_viewport->setActiveScene(activeScene);
-	_screenUpdatePossible = true;
 
 	if (activeScene == ActiveScene::PixelScene) {
 		_pixelUniverse->activate();
@@ -68,6 +68,7 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 	if (activeScene == ActiveScene::ItemScene) {
 		_itemUniverse->activate();
 	}
+	_viewport->restoreScrollPos();
 }
 
 QVector2D VisualEditor::getViewCenterWithIncrement ()
