@@ -48,7 +48,7 @@ class MainView;
 class MainModel;
 class MainController;
 
-enum class ActiveScene { PixelScene, ShapeScene };
+enum class ActiveScene { PixelScene, ItemScene };
 
 enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };

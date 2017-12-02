@@ -27,7 +27,10 @@ private:
 	void connectActions();
 	void setupTheme();
 
-	Q_SLOT void runClicked(bool run);
+	Q_SLOT void onRunClicked(bool run);
+	Q_SLOT void onSetEditorMode(bool editorMode);
+
+	void cellDefocused();
 
 	Ui::MainView* ui = nullptr;	//contains VisualEditor
 	MainModel* _model = nullptr;

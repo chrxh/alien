@@ -55,7 +55,7 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 	if (activeScene == ActiveScene::PixelScene) {
 		_itemUniverse->deactivate();
 	}
-	if (activeScene == ActiveScene::ShapeScene) {
+	if (activeScene == ActiveScene::ItemScene) {
 		_pixelUniverse->deactivate();
 	}
 	_activeScene = activeScene;
@@ -65,7 +65,7 @@ void VisualEditor::setActiveScene (ActiveScene activeScene)
 	if (activeScene == ActiveScene::PixelScene) {
 		_pixelUniverse->activate();
 	}
-	if (activeScene == ActiveScene::ShapeScene) {
+	if (activeScene == ActiveScene::ItemScene) {
 		_itemUniverse->activate();
 	}
 }

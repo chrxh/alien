@@ -55,7 +55,14 @@ void MainView::setupEditors(SimulationController * controller, DataManipulator* 
 void MainView::connectActions()
 {
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
-	connect(ui->actionPlay, &QAction::triggered, this, &MainView::runClicked);
+	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
+	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
+	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditor, &VisualEditor::zoomIn);
+	connect(ui->actionZoomOut, &QAction::triggered, ui->visualEditor, &VisualEditor::zoomOut);
+
+	ui->actionEditor->setEnabled(true);
+	ui->actionZoomIn->setEnabled(true);
+	ui->actionZoomOut->setEnabled(true);
 }
 
 void MainView::setupTheme()
@@ -79,7 +86,7 @@ void MainView::setupTheme()
 	ui->fpsForcingButton->setPalette(p);
 }
 
-void MainView::runClicked(bool run)
+void MainView::onRunClicked(bool run)
 {
 	if (run) {
 		ui->actionPlay->setIcon(QIcon("://Icons/pause.png"));
@@ -98,5 +105,28 @@ void MainView::runClicked(bool run)
 	ui->actionDeleteExtension->setEnabled(false);
 
 	_controller->onRunSimulation(run);
+}
+
+void MainView::onSetEditorMode(bool editorMode)
+{
+	if (editorMode) {
+		ui->visualEditor->setActiveScene(ActiveScene::ItemScene);
+		ui->actionEditor->setIcon(QIcon("://Icons/microscope_active.png"));
+	}
+	else {
+		ui->visualEditor->setActiveScene(ActiveScene::PixelScene);
+		ui->actionEditor->setIcon(QIcon("://Icons/microscope.png"));
+		cellDefocused();
+	}
+}
+
+void MainView::cellDefocused()
+{
+	ui->actionSave_cell_extension->setEnabled(false);
+	ui->actionCopy_cell_extension->setEnabled(false);
+	ui->menuMultiplyExtension->setEnabled(false);
+	ui->actionCopyCell->setEnabled(false);
+	ui->actionDeleteCell->setEnabled(false);
+	ui->actionDeleteExtension->setEnabled(false);
 }
 
