@@ -9,17 +9,16 @@
 #include "NewSimulationDialog.h"
 #include "ui_newsimulationdialog.h"
 
-NewSimulationDialog::NewSimulationDialog(UnitContext* context, QWidget *parent)
+NewSimulationDialog::NewSimulationDialog(SimulationParameters* parameters, SymbolTable* symbols, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
-	, _localParameters(context->getSimulationParameters()->clone())
+	, _localParameters(parameters->clone())
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
 
-    _symTblDialog = new SymbolTableDialog(context->getSymbolTable());
+    _symTblDialog = new SymbolTableDialog(symbols);
 
-    //connections
     connect(ui->simulationParametersButton, SIGNAL(clicked()), this, SLOT(simulationParametersButtonClicked()));
     connect(ui->symbolTableButton, SIGNAL(clicked()), this, SLOT(symbolTableButtonClicked()));
 }

@@ -8,15 +8,15 @@
 #include "gui/Definitions.h"
 
 namespace Ui {
-	class VisualEditor;
+	class VisualEditController;
 }
 
-class VisualEditor : public QWidget
+class VisualEditController : public QWidget
 {
     Q_OBJECT
 public:
-    VisualEditor(QWidget *parent = 0);
-    virtual ~VisualEditor();
+    VisualEditController(QWidget *parent = 0);
+    virtual ~VisualEditController();
 
 	virtual void init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator);
 
@@ -32,7 +32,7 @@ public:
 	Q_SLOT void zoomOut ();
 
 private:
-    Ui::VisualEditor *ui;
+    Ui::VisualEditController *ui;
 
 	SimulationController* _controller = nullptr;
     PixelUniverseView* _pixelUniverse = nullptr;
