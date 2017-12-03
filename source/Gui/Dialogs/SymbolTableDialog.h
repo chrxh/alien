@@ -14,7 +14,7 @@ class SymbolTableDialog : public QDialog
     
 public:
 	SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent = 0);
-	~SymbolTableDialog();
+	virtual ~SymbolTableDialog();
 
     SymbolTable* getNewSymbolTable ();
 

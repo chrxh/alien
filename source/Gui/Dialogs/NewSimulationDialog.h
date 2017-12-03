@@ -17,8 +17,8 @@ class NewSimulationDialog : public QDialog
     Q_OBJECT
 
 public:
-	NewSimulationDialog(UnitContext* context, QWidget* parent = 0);
-    ~NewSimulationDialog();
+	NewSimulationDialog(SimulationParameters* parameters, SymbolTable* symbols, QWidget* parent = 0);
+    virtual ~NewSimulationDialog();
 
     IntVector2D getSize();
     qreal getEnergy();
