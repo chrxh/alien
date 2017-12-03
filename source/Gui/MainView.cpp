@@ -4,9 +4,11 @@
 #include "Gui/Toolbar/ToolbarContext.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
+#include "NewSimulationDialog.h"
 #include "Settings.h"
 #include "MainView.h"
 #include "MainController.h"
+#include "MainModel.h"
 
 #include "ui_MainView.h"
 
@@ -54,11 +56,13 @@ void MainView::setupEditors(SimulationController * controller, DataManipulator* 
 
 void MainView::connectActions()
 {
+	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
-	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditor, &VisualEditor::zoomIn);
-	connect(ui->actionZoomOut, &QAction::triggered, ui->visualEditor, &VisualEditor::zoomOut);
+	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditor, &VisualEditController::zoomIn);
+	connect(ui->actionZoomOut, &QAction::triggered, ui->visualEditor, &VisualEditController::zoomOut);
+
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -117,6 +121,13 @@ void MainView::onSetEditorMode(bool editorMode)
 		ui->visualEditor->setActiveScene(ActiveScene::PixelScene);
 		ui->actionEditor->setIcon(QIcon("://Icons/microscope.png"));
 		cellDefocused();
+	}
+}
+
+void MainView::onNewSimulation()
+{
+	NewSimulationDialog d(_model->getSimulationParameters(), _model->getSymbolTable());
+	if (d.exec()) {
 	}
 }
 

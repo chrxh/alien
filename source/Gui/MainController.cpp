@@ -62,6 +62,9 @@ void MainController::newSimulation(NewSimulationConfig config)
 	auto origNotifier = _notifier;
 	auto origSimController = _simController;
 
+	_model->setSimulationParameters(config.parameters);
+	_model->setSymbolTable(config.symbolTable);
+
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 
