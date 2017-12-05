@@ -25,9 +25,9 @@ public:
 	virtual void init();
 
 	virtual void onRunSimulation(bool run);
+	virtual void onNewSimulation(NewSimulationConfig config);
 
 private:
-	void newSimulation(NewSimulationConfig config);
 
 	MainView* _view = nullptr;
 	MainModel* _model = nullptr;

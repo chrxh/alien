@@ -128,6 +128,10 @@ void MainView::onNewSimulation()
 {
 	NewSimulationDialog d(_model->getSimulationParameters(), _model->getSymbolTable());
 	if (d.exec()) {
+		NewSimulationConfig config{ 
+			d.getMaxThreads(), d.getGridSize(), d.getUniverseSize(), d.getSymbolTable(), d.getSimulationParameters()
+		};
+		_controller->onNewSimulation(config);
 	}
 }
 

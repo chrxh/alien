@@ -34,7 +34,7 @@ void MainController::init()
 		facade->buildDefaultSymbolTable(),
 		facade->buildDefaultSimulationParameters()
 	};
-	newSimulation(config);
+	onNewSimulation(config);
 
 	//temp
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -56,7 +56,7 @@ void MainController::onRunSimulation(bool run)
 	_simController->setRun(run);
 }
 
-void MainController::newSimulation(NewSimulationConfig config)
+void MainController::onNewSimulation(NewSimulationConfig config)
 {
 	auto origDataManipulator = _dataManipulator;
 	auto origNotifier = _notifier;

@@ -1,6 +1,4 @@
-#include <QDebug>
-
-#include "gui/Settings.h"
+#include "Gui/Settings.h"
 #include "Model/Local/UnitContext.h"
 
 #include "SimulationParametersDialog.h"
@@ -19,8 +17,12 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters* parameters, Symbo
 
     _symTblDialog = new SymbolTableDialog(symbols);
 
-    connect(ui->simulationParametersButton, SIGNAL(clicked()), this, SLOT(simulationParametersButtonClicked()));
-    connect(ui->symbolTableButton, SIGNAL(clicked()), this, SLOT(symbolTableButtonClicked()));
+    connect(ui->simulationParametersButton, &QPushButton::clicked, this, &NewSimulationDialog::simulationParametersButtonClicked);
+    connect(ui->symbolTableButton, &QPushButton::clicked, this, &NewSimulationDialog::symbolTableButtonClicked);
+	connect(ui->gridSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
+	connect(ui->gridSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
+	connect(ui->unitSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
+	connect(ui->unitSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
 }
 
 
@@ -30,24 +32,42 @@ NewSimulationDialog::~NewSimulationDialog()
     delete ui;
 }
 
-IntVector2D NewSimulationDialog::getSize ()
+IntVector2D NewSimulationDialog::getUniverseSize () const
 {
-    bool ok(true);
-	return{ ui->sizeXEdit->text().toInt(&ok), ui->sizeYEdit->text().toInt(&ok) };
+	return _universeSize;
 }
 
-qreal NewSimulationDialog::getEnergy ()
+IntVector2D NewSimulationDialog::getGridSize() const
 {
-    bool ok(true);
-    return ui->energyEdit->text().toDouble(&ok);
+	return _gridSize;
 }
 
-SymbolTable* NewSimulationDialog::getNewSymbolTable()
+uint NewSimulationDialog::getMaxThreads() const
+{
+	bool ok(true);
+	uint maxThreads = ui->maxThreadsEdit->text().toUInt(&ok);
+	if (!ok) {
+		return 0;
+	}
+	return maxThreads;
+}
+
+qreal NewSimulationDialog::getEnergy () const
+{
+    bool ok(true);
+	double energy = ui->energyEdit->text().toDouble(&ok);
+	if (!ok) {
+		return 0.0;
+	}
+    return energy;
+}
+
+SymbolTable* NewSimulationDialog::getSymbolTable() const
 {
 	return _symTblDialog->getNewSymbolTable();
 }
 
-SimulationParameters* NewSimulationDialog::getNewSimulationParameters()
+SimulationParameters* NewSimulationDialog::getSimulationParameters() const
 {
 	return _localParameters;
 }
@@ -63,6 +83,27 @@ void NewSimulationDialog::simulationParametersButtonClicked ()
 void NewSimulationDialog::symbolTableButtonClicked ()
 {
     _symTblDialog->exec();
+}
+
+void NewSimulationDialog::updateUniverseSize()
+{
+	bool ok = false;
+	int gridSizeX = ui->gridSizeXEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	int gridSizeY = ui->gridSizeYEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	int unitSizeX = ui->unitSizeXEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	int unitSizeY = ui->unitSizeYEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	_universeSize = { gridSizeX * unitSizeX, gridSizeY * unitSizeY };
+	_gridSize = { gridSizeX, gridSizeY };
+	ui->universeSizeXLabel->setText(QString::fromStdString(std::to_string(_universeSize.x)));
+	ui->universeSizeYLabel->setText(QString::fromStdString(std::to_string(_universeSize.y)));
 }
 
 
