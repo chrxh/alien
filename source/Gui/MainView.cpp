@@ -29,8 +29,8 @@ void MainView::init(MainModel * model, MainController * controller)
 {
 	_model = model;
 	_controller = controller;
-	_toolbar = new ToolbarController(ui->visualEditor);
-	_dataEditor = new DataEditController(ui->visualEditor);
+	_toolbar = new ToolbarController(ui->visualEditController);
+	_dataEditor = new DataEditController(ui->visualEditController);
 
 	connectActions();
 	setupTheme();
@@ -40,14 +40,14 @@ void MainView::init(MainModel * model, MainController * controller)
 
 void MainView::refresh()
 {
-	ui->visualEditor->refresh();
+	ui->visualEditController->refresh();
 }
 
 void MainView::setupEditors(SimulationController * controller, DataManipulator* manipulator, Notifier* notifier)
 {
 	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext());
 	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());
-	ui->visualEditor->init(notifier, controller, manipulator);
+	ui->visualEditController->init(notifier, controller, manipulator);
 
 	ui->actionEditor->setChecked(false);
 	onSetEditorMode(false);
@@ -58,8 +58,8 @@ void MainView::connectActions()
 	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
-	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditor, &VisualEditController::zoomIn);
-	connect(ui->actionZoomOut, &QAction::triggered, ui->visualEditor, &VisualEditController::zoomOut);
+	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditController, &VisualEditController::zoomIn);
+	connect(ui->actionZoomOut, &QAction::triggered, ui->visualEditController, &VisualEditController::zoomOut);
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
 
 	ui->actionEditor->setEnabled(true);
@@ -114,12 +114,12 @@ void MainView::onSetEditorMode(bool editorMode)
 	_toolbar->getContext()->show(editorMode);
 	_dataEditor->getContext()->show(editorMode);
 	if (editorMode) {
-		ui->visualEditor->setActiveScene(ActiveScene::ItemScene);
+		ui->visualEditController->setActiveScene(ActiveScene::ItemScene);
 		ui->actionEditor->setIcon(QIcon("://Icons/microscope_active.png"));
 	}
 	else {
-		ui->visualEditor->setActiveScene(ActiveScene::PixelScene);
-		ui->actionEditor->setIcon(QIcon("://Icons/microscope.png"));
+		ui->visualEditController->setActiveScene(ActiveScene::PixelScene);
+		ui->actionEditor->setIcon(QIcon("://Icons/EditorView.png"));
 		cellDefocused();
 	}
 }
