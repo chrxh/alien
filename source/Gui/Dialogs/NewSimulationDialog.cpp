@@ -17,6 +17,8 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters* parameters, Symbo
 
     _symTblDialog = new SymbolTableDialog(symbols);
 
+	updateUniverseSize();
+
     connect(ui->simulationParametersButton, &QPushButton::clicked, this, &NewSimulationDialog::simulationParametersButtonClicked);
     connect(ui->symbolTableButton, &QPushButton::clicked, this, &NewSimulationDialog::symbolTableButtonClicked);
 	connect(ui->gridSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);

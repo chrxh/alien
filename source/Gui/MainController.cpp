@@ -4,6 +4,7 @@
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/SimulationAccess.h"
+#include "Model/Api/SimulationParameters.h"
 
 #include "MainController.h"
 #include "MainView.h"
@@ -28,27 +29,18 @@ void MainController::init()
 
 	_view->init(_model, this);
 
+	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	_numberGenerator = factory->buildRandomNumberGenerator();
+	_numberGenerator->init(12315312, 0);
+
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	NewSimulationConfig config {
-		8, { 12, 6 },{ 12 * 33 * 3 /** 2 */ , 12 * 17 * 3 /** 2 */ },
+		8, { 12, 6 },{ 12 * 33 * 3 , 12 * 17 * 3 },
 		facade->buildDefaultSymbolTable(),
-		facade->buildDefaultSimulationParameters()
+		facade->buildDefaultSimulationParameters(),
+		20000 * 9
 	};
 	onNewSimulation(config);
-
-	//temp
-	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto numberGen = factory->buildRandomNumberGenerator();
-	numberGen->init(12315312, 0);
-	auto access = facade->buildSimulationAccess(_simController->getContext());
-	DataChangeDescription desc;
-	for (int i = 0; i < 20000 * 9 /**4 */ ; ++i) {
-		desc.addNewParticle(ParticleChangeDescription().setPos(QVector2D(numberGen->getRandomInt(config.universeSize.x), numberGen->getRandomInt(config.universeSize.y)))
-			.setVel(QVector2D(numberGen->getRandomReal()*2.0 - 1.0, numberGen->getRandomReal()*2.0 - 1.0))
-			.setEnergy(50));
-	}
-	_simAccess->updateData(desc);
-	_view->refresh();
 }
 
 void MainController::onRunSimulation(bool run)
@@ -79,4 +71,17 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	delete origDataManipulator;
 	delete origNotifier;
 	delete origSimController;
+
+	DataChangeDescription desc;
+	for (int i = 0; i < config.energy; ++i) {
+		desc.addNewParticle(ParticleChangeDescription().setPos(QVector2D(_numberGenerator->getRandomInt(config.universeSize.x), _numberGenerator->getRandomInt(config.universeSize.y)))
+			.setVel(QVector2D(_numberGenerator->getRandomReal()*2.0 - 1.0, _numberGenerator->getRandomReal()*2.0 - 1.0))
+			.setEnergy(config.parameters->cellMinEnergy));
+	}
+	_simAccess->updateData(desc);
+	_view->refresh();
+}
+
+void MainController::addRandomEnergy(double amount)
+{
 }

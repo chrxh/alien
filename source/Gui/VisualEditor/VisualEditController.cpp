@@ -39,7 +39,8 @@ void VisualEditController::init(Notifier* notifier, SimulationController* contro
 	_controller = controller;
 	_pixelUniverse->init(controller, manipulator, _viewport);
 	_itemUniverse->init(notifier, controller, manipulator, _viewport);
-	_viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, ActiveScene::PixelScene);
+	_activeScene = ActiveScene::PixelScene;
+	_viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, _activeScene);
 	setActiveScene(_activeScene);
 }
 
