@@ -706,9 +706,6 @@
     <None Include="..\..\source\gui\resources\tutorial\logo.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\microscope.png">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="..\..\source\gui\resources\Icons\microscope_active.png">
       <Filter>Resources</Filter>
     </None>
@@ -758,6 +755,9 @@
       <Filter>Resources</Filter>
     </None>
     <None Include="..\..\source\gui\resources\Icons\add_token.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\gui\resources\Icons\EditorView.png">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>
