@@ -44,6 +44,7 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 		}
 		_controller->onToggleCellInfo(checked);
 	});
+	ui.showCellInfoButton->setChecked(false);
 }
 
 void ToolbarView::setEnableDeleteSelections(bool enable)

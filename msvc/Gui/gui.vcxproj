@@ -890,7 +890,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\source\gui\resources\Icons\microscope.png">
+    <None Include="..\..\source\gui\resources\Icons\EditorView.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
