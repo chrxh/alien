@@ -12,6 +12,8 @@ struct NewSimulationConfig
 	IntVector2D universeSize;
 	SymbolTable* symbolTable;
 	SimulationParameters* parameters;
+
+	double energy;
 };
 
 class MainController
@@ -28,6 +30,7 @@ public:
 	virtual void onNewSimulation(NewSimulationConfig config);
 
 private:
+	void addRandomEnergy(double amount);
 
 	MainView* _view = nullptr;
 	MainModel* _model = nullptr;
@@ -36,4 +39,5 @@ private:
 	DataManipulator* _dataManipulator = nullptr;
 	SimulationAccess* _simAccess = nullptr;
 	Notifier* _notifier = nullptr;
+	NumberGenerator* _numberGenerator = nullptr;
 };

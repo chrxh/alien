@@ -23,12 +23,13 @@ public:
 
 	virtual void setupEditors(SimulationController* controller, DataManipulator* manipulator, Notifier* notifier);
 
+
 private:
 	void connectActions();
 	void setupTheme();
 
-	Q_SLOT void onRunClicked(bool run);
 	Q_SLOT void onSetEditorMode(bool editorMode);
+	Q_SLOT void onRunClicked(bool run);
 	Q_SLOT void onNewSimulation();
 
 	void cellDefocused();
