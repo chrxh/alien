@@ -11,6 +11,7 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	_pixelScene = pixelScene;
 	_itemScene = itemScene;
 	_activeScene = activeScene;
+	_view->resetTransform();
 	setSceneToView(boost::none, activeScene);
 
 	connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling);

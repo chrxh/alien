@@ -29,6 +29,8 @@ void MainView::init(MainModel * model, MainController * controller)
 {
 	_model = model;
 	_controller = controller;
+	_toolbar = new ToolbarController(ui->visualEditor);
+	_dataEditor = new DataEditController(ui->visualEditor);
 
 	connectActions();
 	setupTheme();
@@ -43,15 +45,12 @@ void MainView::refresh()
 
 void MainView::setupEditors(SimulationController * controller, DataManipulator* manipulator, Notifier* notifier)
 {
-	_toolbar = new ToolbarController(ui->visualEditor);
-	connect(ui->actionEditor, &QAction::triggered, _toolbar->getContext(), &ToolbarContext::show);
-
-	_dataEditor = new DataEditController(ui->visualEditor);
-	connect(ui->actionEditor, &QAction::triggered, _dataEditor->getContext(), &DataEditContext::show);
-
 	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext());
 	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());
 	ui->visualEditor->init(notifier, controller, manipulator);
+
+	ui->actionEditor->setChecked(false);
+	onSetEditorMode(false);
 }
 
 void MainView::connectActions()
@@ -59,10 +58,9 @@ void MainView::connectActions()
 	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
-	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
 	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditor, &VisualEditController::zoomIn);
 	connect(ui->actionZoomOut, &QAction::triggered, ui->visualEditor, &VisualEditController::zoomOut);
-
+	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -113,6 +111,8 @@ void MainView::onRunClicked(bool run)
 
 void MainView::onSetEditorMode(bool editorMode)
 {
+	_toolbar->getContext()->show(editorMode);
+	_dataEditor->getContext()->show(editorMode);
 	if (editorMode) {
 		ui->visualEditor->setActiveScene(ActiveScene::ItemScene);
 		ui->actionEditor->setIcon(QIcon("://Icons/microscope_active.png"));
@@ -129,7 +129,7 @@ void MainView::onNewSimulation()
 	NewSimulationDialog d(_model->getSimulationParameters(), _model->getSymbolTable());
 	if (d.exec()) {
 		NewSimulationConfig config{ 
-			d.getMaxThreads(), d.getGridSize(), d.getUniverseSize(), d.getSymbolTable(), d.getSimulationParameters()
+			d.getMaxThreads(), d.getGridSize(), d.getUniverseSize(), d.getSymbolTable(), d.getSimulationParameters(), d.getEnergy()
 		};
 		_controller->onNewSimulation(config);
 	}
