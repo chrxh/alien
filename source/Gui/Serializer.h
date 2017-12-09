@@ -15,13 +15,15 @@ public:
 
 	virtual void serialize(SimulationController* simController, SimulationAccess* access);
 	Q_SIGNAL void serializationFinished();
-	virtual QByteArray const& retrieveSerializedSimulationContent() const;
-	virtual QByteArray const& retrieveSerializedSimulation() const;
+	virtual string const& retrieveSerializedSimulationContent();
+	virtual string const& retrieveSerializedSimulation();
 
-	virtual void deserializeSimulationContent(SimulationController* simController, QByteArray const& content) const;
-	virtual SimulationController* deserializeSimulation(QByteArray const&content) const;
+	virtual void deserializeSimulationContent(SimulationController* simController, string const& content) const;
+	virtual SimulationController* deserializeSimulation(string const& content) const;
 
 private:
-	QByteArray _simulationContent;
-	QByteArray _simulation;
+	SimulationAccess* _access = nullptr;
+
+	string _simulationContent;
+	string _simulation;
 };
