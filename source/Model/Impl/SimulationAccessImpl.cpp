@@ -14,6 +14,7 @@
 #include "Model/Local/Unit.h"
 #include "Model/Local/SpaceMetricLocal.h"
 #include "Model/Local/ParticleMap.h"
+#include "Model/Local/CellMap.h"
 #include "Model/Local/Cluster.h"
 
 #include "SimulationAccessImpl.h"
@@ -31,6 +32,14 @@ void SimulationAccessImpl::init(SimulationContext * context)
 	_context = static_cast<SimulationContextLocal*>(context);
 	_context->getUnitThreadController()->registerObserver(this);
 	_registered = true;
+}
+
+void SimulationAccessImpl::clear()
+{
+	_toClear = true;
+	if (_context->getUnitThreadController()->isNoThreadWorking()) {
+		accessToUnits();
+	}
 }
 
 void SimulationAccessImpl::updateData(DataChangeDescription const & desc)
@@ -74,21 +83,42 @@ void SimulationAccessImpl::unregister()
 
 void SimulationAccessImpl::accessToUnits()
 {
+	callBackClear();
 	callBackUpdateData();
 	callBackCollectData();
 	callBackDrawImage();
+}
+
+void SimulationAccessImpl::callBackClear()
+{
+	if (!_toClear) {
+		return;
+	}
+	auto grid = _context->getUnitGrid();
+	IntVector2D gridSize = grid->getSize();
+	for (int gridX = 0; gridX < gridSize.x; ++gridX) {
+		for (int gridY = 0; gridY < gridSize.y; ++gridY) {
+			auto unitContext = grid->getUnitOfGridPos({ gridX, gridY })->getContext();
+			unitContext->getClustersRef().clear();
+			unitContext->getParticlesRef().clear();
+			unitContext->getCellMap()->clear();
+			unitContext->getParticleMap()->clear();
+		}
+	}
+	_toClear = false;
 }
 
 void SimulationAccessImpl::callBackUpdateData()
 {
 	updateClusterData();
 	updateParticleData();
-
-	_dataToUpdate.clear();
 }
 
 void SimulationAccessImpl::updateClusterData()
 {
+	if (_dataToUpdate.clusters.empty()) {
+		return;
+	}
 	EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 
 	auto grid = _context->getUnitGrid();
@@ -142,10 +172,15 @@ void SimulationAccessImpl::updateClusterData()
 			}
 		}
 	}
+	_dataToUpdate.clusters.clear();
 }
 
 void SimulationAccessImpl::updateParticleData()
 {
+	if (_dataToUpdate.particles.empty()) {
+		return;
+	}
+
 	EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 
 	auto grid = _context->getUnitGrid();
@@ -198,6 +233,7 @@ void SimulationAccessImpl::updateParticleData()
 			}
 		}
 	}
+	_dataToUpdate.particles.clear();
 }
 
 void SimulationAccessImpl::callBackCollectData()

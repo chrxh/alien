@@ -15,15 +15,17 @@ public:
 
 	virtual void init(SimulationContext* context) override;
 
+	virtual void clear() override;
 	virtual void updateData(DataChangeDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	virtual void requireImage(IntRect rect, QImage* target) override;
 	virtual DataDescription const& retrieveData() override;
-
+	 
 	virtual void unregister() override;
 	virtual void accessToUnits() override;
 
 private:
+	void callBackClear();
 	void callBackUpdateData();
 	void callBackCollectData();
 	void callBackDrawImage();
@@ -51,5 +53,6 @@ private:
 
 	DataDescription _dataCollected;
 	DataChangeDescription _dataToUpdate;
+	bool _toClear = false;
 };
 
