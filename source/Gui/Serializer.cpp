@@ -7,32 +7,13 @@
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/SpaceMetric.h"
 #include "Model/Api/Descriptions.h"
+#include "Model/Api/ChangeDescriptions.h"
 
 #include "Serializer.h"
 
 using namespace std;
 using namespace boost;
 
-Serializer::Serializer(QObject *parent)
-	: QObject(parent)
-{
-}
-
-void Serializer::serialize(SimulationController * simController, SimulationAccess * access)
-{
-	IntVector2D universeSize = simController->getContext()->getSpaceMetric()->getSize();
-	ResolveDescription resolveDesc;
-	resolveDesc.resolveCellLinks = true;
-	access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
-
-	_simulation.clear();
-	_simulationContent.clear();
-	if (_access && _access != access) {
-		disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Serializer::serializationFinished);
-	}
-	_access = access;
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Serializer::serializationFinished);
-}
 
 namespace boost
 {
@@ -49,7 +30,7 @@ namespace boost
 
 	template<class CharType, class CharTrait, class T>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, vector<T>& vec)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, vector<T>& vec)
 	{
 		uint32_t size;
 		stream >> size;
@@ -75,7 +56,7 @@ namespace boost
 
 	template<class CharType, class CharTrait, class T>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, list<T>& listObj)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, list<T>& listObj)
 	{
 		uint32_t size;
 		stream >> size;
@@ -116,7 +97,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, QString& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, QString& data)
 	{
 		string str;
 		stream >> str;
@@ -134,7 +115,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, QByteArray& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, QByteArray& data)
 	{
 		string str;
 		stream >> str;
@@ -152,7 +133,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, CellMetadata& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, CellMetadata& data)
 	{
 		stream >> data.computerSourcecode >> data.name >> data.description >> data.color;
 		return stream;
@@ -168,7 +149,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, TokenDescription& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, TokenDescription& data)
 	{
 		stream >> data.energy >> data.data;
 		return stream;
@@ -184,7 +165,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>> (std::basic_istream<CharType, CharTrait>& stream, CellFeatureDescription& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, CellFeatureDescription& data)
 	{
 		uint32_t type;
 		stream >> type >> data.volatileData >> data.constData;
@@ -220,7 +201,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, ClusterMetadata& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ClusterMetadata& data)
 	{
 		stream >> data.name;
 		return stream;
@@ -236,7 +217,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, ClusterDescription& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ClusterDescription& data)
 	{
 		stream >> data.id >> data.pos >> data.vel >> data.angle >> data.angularVel >> data.metadata >> data.cells;
 		return stream;
@@ -252,7 +233,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, ParticleMetadata& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ParticleMetadata& data)
 	{
 		stream >> data.color;
 		return stream;
@@ -268,7 +249,7 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, ParticleDescription& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ParticleDescription& data)
 	{
 		stream >> data.id >> data.pos >> data.vel >> data.energy >> data.metadata;
 		return stream;
@@ -284,11 +265,32 @@ namespace boost
 
 	template<class CharType, class CharTrait>
 	inline
-		std::basic_istream<CharType, CharTrait>& operator>>(std::basic_istream<CharType, CharTrait>& stream, DataDescription& data)
+		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, DataDescription& data)
 	{
 		stream >> data.clusters >> data.particles;
 		return stream;
 	}
+}
+
+Serializer::Serializer(QObject *parent)
+	: QObject(parent)
+{
+}
+
+void Serializer::serialize(SimulationController * simController, SimulationAccess * access)
+{
+	IntVector2D universeSize = simController->getContext()->getSpaceMetric()->getSize();
+	ResolveDescription resolveDesc;
+	resolveDesc.resolveCellLinks = true;
+	access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
+
+	_simulation.clear();
+	_simulationContent.clear();
+	if (_access && _access != access) {
+		disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Serializer::serializationFinished);
+	}
+	_access = access;
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Serializer::serializationFinished);
 }
 
 string const& Serializer::retrieveSerializedSimulationContent()
@@ -307,14 +309,17 @@ string const& Serializer::retrieveSerializedSimulation()
 	return _simulation;
 }
 
-void Serializer::deserializeSimulationContent(SimulationController * simController, string const & content) const
+void Serializer::deserializeSimulationContent(SimulationAccess* access, string const & content) const
 {
 	DataDescription data;
 	istringstream stream;
 	stream >> data;
+
+	access->clear();
+	access->updateData(data);
 }
 
-SimulationController * Serializer::deserializeSimulation(string const & content) const
+SimulationController * Serializer::deserializeSimulation(SimulationAccess* access, string const & content) const
 {
 	return nullptr;
 }
