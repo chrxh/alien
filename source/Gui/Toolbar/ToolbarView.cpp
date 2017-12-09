@@ -17,6 +17,13 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 	_controller = controller;
 	setGeometry(upperLeftPosition.x, upperLeftPosition.y, width(), height());
 
+	ui.requestCellButton->disconnect();
+	ui.requestParticleButton->disconnect();
+	ui.delSelectionButton->disconnect();
+	ui.delExtendedSelectionButton->disconnect();
+	ui.requestTokenButton->disconnect();
+	ui.delTokenButton->disconnect();
+	ui.showCellInfoButton->disconnect();
 	connect(ui.requestCellButton, &QPushButton::clicked, [this]() {
 		_controller->onRequestCell();
 	});

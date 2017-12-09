@@ -13,6 +13,7 @@ public:
 
 	virtual void init(SimulationContext* context) = 0;
 
+	virtual void clear() = 0;
 	virtual void updateData(DataChangeDescription const &desc) = 0;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
 	virtual void requireImage(IntRect rect, QImage* target) = 0;

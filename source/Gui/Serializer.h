@@ -18,8 +18,8 @@ public:
 	virtual string const& retrieveSerializedSimulationContent();
 	virtual string const& retrieveSerializedSimulation();
 
-	virtual void deserializeSimulationContent(SimulationController* simController, string const& content) const;
-	virtual SimulationController* deserializeSimulation(string const& content) const;
+	virtual void deserializeSimulationContent(SimulationAccess* access, string const& content) const;
+	virtual SimulationController* deserializeSimulation(SimulationAccess* access, string const& content) const;
 
 private:
 	SimulationAccess* _access = nullptr;
