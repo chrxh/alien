@@ -23,7 +23,7 @@ ThreadController::~ThreadController()
 	delete _worker;
 }
 
-void ThreadController::init(SpaceMetric *metric)
+void ThreadController::init(SpaceProperties *metric)
 {
 	_worker->init(metric);
 }

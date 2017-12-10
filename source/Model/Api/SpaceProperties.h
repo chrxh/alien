@@ -2,13 +2,13 @@
 
 #include "Model/Api/Definitions.h"
 
-class SpaceMetric
+class SpaceProperties
 	: public QObject
 {
 	Q_OBJECT
 public:
-	SpaceMetric(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~SpaceMetric() = default;
+	SpaceProperties(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~SpaceProperties() = default;
 
 	virtual IntVector2D getSize() const = 0;
 	virtual IntVector2D correctPositionAndConvertToIntVector(QVector2D const &pos) const = 0;

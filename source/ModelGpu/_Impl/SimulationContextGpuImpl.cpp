@@ -1,6 +1,6 @@
 #include "Model/Local/SymbolTable.h"
 #include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 
 #include "WorkerForGpu.h"
 #include "ThreadController.h"
@@ -15,7 +15,7 @@ SimulationContextGpuImpl::~SimulationContextGpuImpl()
 {
 }
 
-void SimulationContextGpuImpl::init(SpaceMetric *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
+void SimulationContextGpuImpl::init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
 {
 	SET_CHILD(_metric, metric);
 	SET_CHILD(_symbolTable, symbolTable);
@@ -26,7 +26,7 @@ void SimulationContextGpuImpl::init(SpaceMetric *metric, SymbolTable *symbolTabl
 	_threadController->init(metric);
 }
 
-SpaceMetric * SimulationContextGpuImpl::getSpaceMetric() const
+SpaceProperties * SimulationContextGpuImpl::getSpaceMetric() const
 {
 	return _metric;
 }

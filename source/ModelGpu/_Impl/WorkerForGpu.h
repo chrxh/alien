@@ -15,7 +15,7 @@ public:
 	WorkerForGpu(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~WorkerForGpu();
 
-	virtual void init(SpaceMetric* metric);
+	virtual void init(SpaceProperties* metric);
 	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual DataForAccess retrieveData();
@@ -30,7 +30,7 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 private:
-	SpaceMetric* _metric;
+	SpaceProperties* _metric;
 
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;

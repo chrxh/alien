@@ -16,8 +16,12 @@ public:
 	SymbolTable* getSymbolTable() const;
 	void setSymbolTable(SymbolTable* symbols);
 
+	optional<bool> isEditMode() const;
+	void setEditMode(optional<bool> value);
+
 private:
-	
 	SimulationParameters* _parameters = nullptr;
 	SymbolTable* _symbols = nullptr;
+
+	optional<bool> _isEditMode;
 };

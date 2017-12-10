@@ -50,12 +50,14 @@ void MainView::setupEditors(SimulationController * controller, DataManipulator* 
 	ui->visualEditController->init(notifier, controller, manipulator);
 
 	ui->actionEditor->setChecked(false);
-	onSetEditorMode(false);
+	_model->setEditMode(boost::none);
+	onSetEditorMode();
 }
 
 void MainView::connectActions()
 {
 	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
+	connect(ui->actionSaveSimulation, &QAction::triggered, this, &MainView::onSaveSimulation);
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
 	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditController, &VisualEditController::zoomIn);
@@ -109,13 +111,17 @@ void MainView::onRunClicked(bool run)
 	_controller->onRunSimulation(run);
 }
 
-void MainView::onSetEditorMode(bool editorMode)
+void MainView::onSetEditorMode()
 {
-	_toolbar->getContext()->show(editorMode);
-	_dataEditor->getContext()->show(editorMode);
-	if (editorMode) {
+	auto editMode = _model->isEditMode();
+	bool newEditMode = editMode ? !editMode.get() : false;
+	_model->setEditMode(newEditMode);
+
+	_toolbar->getContext()->show(newEditMode);
+	_dataEditor->getContext()->show(newEditMode);
+	if (newEditMode) {
 		ui->visualEditController->setActiveScene(ActiveScene::ItemScene);
-		ui->actionEditor->setIcon(QIcon("://Icons/microscope_active.png"));
+		ui->actionEditor->setIcon(QIcon("://Icons/PixelView.png"));
 	}
 	else {
 		ui->visualEditController->setActiveScene(ActiveScene::PixelScene);
@@ -133,6 +139,10 @@ void MainView::onNewSimulation()
 		};
 		_controller->onNewSimulation(config);
 	}
+}
+
+void MainView::onSaveSimulation()
+{
 }
 
 void MainView::cellDefocused()

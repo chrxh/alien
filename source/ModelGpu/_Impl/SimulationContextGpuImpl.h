@@ -13,15 +13,15 @@ public:
 	SimulationContextGpuImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextGpuImpl();
 
-	void init(SpaceMetric *metric, SymbolTable *symbolTable, SimulationParameters *parameters);
+	void init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters);
 
-	virtual SpaceMetric* getSpaceMetric() const override;
+	virtual SpaceProperties* getSpaceMetric() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
 	virtual ThreadController* getGpuThreadController() const;
 
 private:
-	SpaceMetric *_metric = nullptr;
+	SpaceProperties *_metric = nullptr;
 	SymbolTable *_symbolTable = nullptr;
 	SimulationParameters *_parameters = nullptr;
 	ThreadController *_threadController = nullptr;

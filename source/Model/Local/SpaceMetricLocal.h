@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 
 class SpaceMetricLocal
-	: public SpaceMetric
+	: public SpaceProperties
 {
 	Q_OBJECT
 public:
-	SpaceMetricLocal(QObject* parent = nullptr) : SpaceMetric(parent) {}
+	SpaceMetricLocal(QObject* parent = nullptr) : SpaceProperties(parent) {}
 	virtual ~SpaceMetricLocal() = default;
 
 	virtual void init(IntVector2D size) = 0;
