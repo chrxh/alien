@@ -7,7 +7,7 @@
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/SimulationContext.h"
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 #include "Gui/VisualEditor/ViewportInterface.h"
 #include "Gui/Settings.h"
 #include "Gui/DataManipulator.h"

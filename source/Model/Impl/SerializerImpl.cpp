@@ -5,11 +5,11 @@
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 #include "Model/Api/Descriptions.h"
 #include "Model/Api/ChangeDescriptions.h"
 
-#include "Serializer.h"
+#include "SerializerImpl.h"
 
 using namespace std;
 using namespace boost;
@@ -272,12 +272,12 @@ namespace boost
 	}
 }
 
-Serializer::Serializer(QObject *parent)
-	: QObject(parent)
+SerializerImpl::SerializerImpl(QObject *parent /*= nullptr*/)
+	: Serializer(parent)
 {
 }
 
-void Serializer::serialize(SimulationController * simController, SimulationAccess * access)
+void SerializerImpl::serialize(SimulationController * simController, SimulationAccess * access)
 {
 	IntVector2D universeSize = simController->getContext()->getSpaceMetric()->getSize();
 	ResolveDescription resolveDesc;
@@ -287,13 +287,13 @@ void Serializer::serialize(SimulationController * simController, SimulationAcces
 	_simulation.clear();
 	_simulationContent.clear();
 	if (_access && _access != access) {
-		disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Serializer::serializationFinished);
+		disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::serializationFinished);
 	}
 	_access = access;
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Serializer::serializationFinished);
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::serializationFinished);
 }
 
-string const& Serializer::retrieveSerializedSimulationContent()
+string const& SerializerImpl::retrieveSerializedSimulationContent()
 {
 	DataDescription const& data = _access->retrieveData();
 	
@@ -304,12 +304,12 @@ string const& Serializer::retrieveSerializedSimulationContent()
 	return _simulationContent;
 }
 
-string const& Serializer::retrieveSerializedSimulation()
+string const& SerializerImpl::retrieveSerializedSimulation()
 {
 	return _simulation;
 }
 
-void Serializer::deserializeSimulationContent(SimulationAccess* access, string const & content) const
+void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, string const & content) const
 {
 	DataDescription data;
 	istringstream stream;
@@ -319,7 +319,7 @@ void Serializer::deserializeSimulationContent(SimulationAccess* access, string c
 	access->updateData(data);
 }
 
-SimulationController * Serializer::deserializeSimulation(SimulationAccess* access, string const & content) const
+SimulationController * SerializerImpl::deserializeSimulation(SimulationAccess* access, string const & content) const
 {
 	return nullptr;
 }

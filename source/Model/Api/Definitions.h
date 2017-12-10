@@ -18,7 +18,7 @@ class CellFeatureChain;
 class Unit;
 class CellMap;
 class ParticleMap;
-class SpaceMetric;
+class SpaceProperties;
 class SpaceMetricLocal;
 class MapCompartment;
 class UnitGrid;
@@ -45,6 +45,7 @@ class ModelBuilderFacade;
 class SerializationFacade;
 class DescriptionHelper;
 class CellComputerCompiler;
+class Serializer;
 
 struct CellClusterHash
 {

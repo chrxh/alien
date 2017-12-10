@@ -11,7 +11,7 @@
 #include "Model/Api/DescriptionHelper.h"
 #include "Model/Local/SimulationContextLocal.h"
 #include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 #include "Model/Api/SimulationAccess.h"
 
 #include "Tests/Predicates.h"
@@ -28,7 +28,7 @@ public:
 protected:
 	SimulationController* _controller = nullptr;
 	SimulationContextLocal* _context = nullptr;
-	SpaceMetric* _metric = nullptr;
+	SpaceProperties* _metric = nullptr;
 	SimulationAccess* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
 };

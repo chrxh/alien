@@ -5,6 +5,7 @@
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/SimulationParameters.h"
+#include "Model/Api/Serializer.h"
 
 #include "MainController.h"
 #include "MainView.h"
@@ -34,7 +35,9 @@ void MainController::init()
 	_numberGenerator->init(12315312, 0);
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	NewSimulationConfig config {
+	auto serializer = facade->buildSerializer();
+	SET_CHILD(_serializer, serializer);
+	NewSimulationConfig config{
 		8, { 12, 6 },{ 12 * 33 * 3 , 12 * 17 * 3 },
 		facade->buildDefaultSymbolTable(),
 		facade->buildDefaultSimulationParameters(),
@@ -80,6 +83,10 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	}
 	_simAccess->updateData(desc);
 	_view->refresh();
+}
+
+void MainController::onSaveSimulation()
+{
 }
 
 void MainController::addRandomEnergy(double amount)

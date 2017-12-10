@@ -4,12 +4,12 @@
 
 #include "Base/NumberGenerator.h"
 
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Local/Physics.h"
 
 
-void DescriptionHelperImpl::init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
+void DescriptionHelperImpl::init(SpaceProperties *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
 {
 	_metric = metric;
 	_parameters = parameters;

@@ -31,6 +31,7 @@
 #include "CellComputerCompilerImpl.h"
 #include "ModelBuilderFacadeImpl.h"
 #include "DescriptionHelperImpl.h"
+#include "SerializerImpl.h"
 
 namespace
 {
@@ -129,6 +130,11 @@ Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simulati
 	unit->init(unitContext);
 
 	return unit;
+}
+
+Serializer * ModelBuilderFacadeImpl::buildSerializer() const
+{
+	return new SerializerImpl();
 }
 
 SymbolTable * ModelBuilderFacadeImpl::buildDefaultSymbolTable() const

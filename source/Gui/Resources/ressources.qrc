@@ -18,7 +18,6 @@
         <file>Icons/monitor_active.png</file>
         <file>Icons/snapshot.png</file>
         <file>Icons/restore_active.png</file>
-        <file>Icons/microscope_active.png</file>
         <file>tutorial/logo.png</file>
         <file>tutorial/branching.png</file>
         <file>tutorial/constructor.png</file>
@@ -29,5 +28,6 @@
         <file>Icons/info_off.png</file>
         <file>tutorial/tutorial.html</file>
         <file>Icons/EditorView.png</file>
+        <file>Icons/PixelView.png</file>
     </qresource>
 </RCC>

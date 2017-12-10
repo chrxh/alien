@@ -1,7 +1,7 @@
 #include <functional>
 #include <QImage>
 
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 #include "ModelGpu/_Impl/Cuda/CudaInterface.cuh"
 
 #include "WorkerForGpu.h"
@@ -11,7 +11,7 @@ WorkerForGpu::~WorkerForGpu()
 	cudaShutdown();
 }
 
-void WorkerForGpu::init(SpaceMetric* metric)
+void WorkerForGpu::init(SpaceProperties* metric)
 {
 	_metric = metric;
 	auto size = metric->getSize();

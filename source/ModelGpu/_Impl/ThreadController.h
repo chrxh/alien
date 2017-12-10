@@ -13,7 +13,7 @@ public:
 	ThreadController(QObject* parent = nullptr);
 	virtual ~ThreadController();
 
-	void init(SpaceMetric *metric);
+	void init(SpaceProperties *metric);
 
 	virtual WorkerForGpu* getGpuWorker() const;
 
@@ -25,7 +25,7 @@ private:
 	Q_SIGNAL void runSimulationWithGpu();
 	Q_SLOT void timestepCalculatedWithGpu();
 
-	SpaceMetric *_metric = nullptr;
+	SpaceProperties *_metric = nullptr;
 
 	QThread _thread;
 	WorkerForGpu* _worker = nullptr;

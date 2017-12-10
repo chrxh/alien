@@ -10,7 +10,7 @@ public:
 	DescriptionHelperImpl(QObject *parent = nullptr) : DescriptionHelper(parent) { }
 	virtual ~DescriptionHelperImpl() = default;
 
-	virtual void init(SpaceMetric *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
+	virtual void init(SpaceProperties *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
 
 	virtual void reconnect(DataDescription& data, unordered_set<uint64_t> const& changedCellIds) override;
 	virtual void recluster(DataDescription& data, unordered_set<uint64_t> const& changedClusterIds) override;
@@ -43,7 +43,7 @@ private:
 	ClusterVelocities calcVelocitiesBasedOnOldClusters(vector<CellDescription> const & cells) const;
 	optional<ClusterMetadata> calcMetadataBasedOnOldClusters(vector<CellDescription> const & cells) const;
 
-	SpaceMetric* _metric = nullptr;
+	SpaceProperties* _metric = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 

@@ -28,6 +28,7 @@ public:
 
 	virtual void onRunSimulation(bool run);
 	virtual void onNewSimulation(NewSimulationConfig config);
+	virtual void onSaveSimulation();
 
 private:
 	void addRandomEnergy(double amount);
@@ -40,4 +41,5 @@ private:
 	SimulationAccess* _simAccess = nullptr;
 	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
+	Serializer* _serializer = nullptr;
 };
