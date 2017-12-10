@@ -1,5 +1,4 @@
-#ifndef UNITTHREADCONTROLLER_H
-#define UNITTHREADCONTROLLER_H
+#pragma once
 
 #include "Model/Api/Definitions.h"
 
@@ -23,6 +22,5 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 	virtual bool isNoThreadWorking() const = 0;
+	virtual int getMaxRunningThreads() const = 0;
 };
-
-#endif // UNITTHREADCONTROLLER_H

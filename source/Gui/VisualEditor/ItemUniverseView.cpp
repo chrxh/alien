@@ -42,7 +42,7 @@ void ItemUniverseView::init(Notifier* notifier, SimulationController * controlle
 
 void ItemUniverseView::activate()
 {
-	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
+	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
 	_itemManager->activate(size);
 
 	connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData);

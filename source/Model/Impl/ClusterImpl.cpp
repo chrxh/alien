@@ -321,7 +321,7 @@ void ClusterImpl::processingMovement ()
         QList< QPair< Cell*, Cell* > > overlappingCellPairs;
     };
 	auto parameters = _context->getSimulationParameters();
-	auto metric = _context->getSpaceMetric();
+	auto metric = _context->getSpaceProperties();
 	auto cellMap = _context->getCellMap();
 
 	_angle += _angularVel;
@@ -689,7 +689,7 @@ void ClusterImpl::processingCompletion ()
 		return;
 	}
 
-	auto metric = _context->getSpaceMetric();
+	auto metric = _context->getSpaceProperties();
 	auto cellMap = _context->getCellMap();
 	qreal maxClusterRadius = qMin(metric->getSize().x / 2.0, metric->getSize().y / 2.0);
     foreach( Cell* cell, _cells) {
@@ -860,7 +860,7 @@ QVector2D ClusterImpl::calcPosition (const Cell* cell, bool metricCorrection) co
 {
     QVector2D cellPos = applyTransformation(cell->getRelPosition());
 	if (metricCorrection) {
-		_context->getSpaceMetric()->correctPosition(cellPos);
+		_context->getSpaceProperties()->correctPosition(cellPos);
 	}
     return cellPos;
 }
@@ -912,7 +912,7 @@ qreal ClusterImpl::calcAngularMassWithNewParticle (QVector2D particlePos) const
     center = center / (_cells.size()+1);
 
     //calc new angular mass
-	SpaceMetricLocal* metric = _context->getSpaceMetric();
+	SpaceMetricLocal* metric = _context->getSpaceProperties();
     QVector2D diff = particleRelPos - center;
 	metric->correctDisplacement(diff);
     qreal aMass = diff.lengthSquared();
@@ -936,7 +936,7 @@ qreal ClusterImpl::calcAngularMassWithoutUpdate () const
 
     //calc new angular mass
     qreal aMass = 0.0;
-	SpaceMetricLocal* metric = _context->getSpaceMetric();
+	SpaceMetricLocal* metric = _context->getSpaceProperties();
 	foreach(Cell* cell, _cells) {
         QVector2D displacement = cell->getRelPosition() - center;
 		metric->correctDisplacement(displacement);
@@ -1010,7 +1010,7 @@ QVector2D ClusterImpl::getPosition () const
 void ClusterImpl::setCenterPosition (QVector2D pos, bool updateTransform)
 {
     _pos = pos;
-	_context->getSpaceMetric()->correctPosition(_pos);
+	_context->getSpaceProperties()->correctPosition(_pos);
 	if (updateTransform) {
 		updateTransformationMatrix();
 	}

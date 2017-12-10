@@ -23,7 +23,7 @@
 
 void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, QDataStream & stream) const
 {
-	context->getSpaceMetric()->serializePrimitives(stream);
+	context->getSpaceProperties()->serializePrimitives(stream);
 
 	auto const& clusters = context->getClustersRef();
 	quint32 numCluster = clusters.size();
@@ -39,10 +39,12 @@ void SerializationFacadeImpl::serializeSimulationContext(UnitContext * context, 
 		serializeEnergyParticle(e, stream);
 	}
 
+/*
 	context->getCellMap()->serializePrimitives(stream);
 	context->getParticleMap()->serializePrimitives(stream);
 	context->getSymbolTable()->serializePrimitives(stream);
 	context->getSimulationParameters()->serializePrimitives(stream);
+*/
 }
 
 void SerializationFacadeImpl::deserializeSimulationContext(UnitContext* prevContext, QDataStream & stream) const
@@ -89,30 +91,39 @@ void SerializationFacadeImpl::deserializeSimulationContext(UnitContext* prevCont
 
 void SerializationFacadeImpl::serializeSimulationParameters(SimulationParameters* parameters, QDataStream& stream) const
 {
+/*
 	parameters->serializePrimitives(stream);
+*/
 }
 
 SimulationParameters* SerializationFacadeImpl::deserializeSimulationParameters(QDataStream& stream) const
 {
 	SimulationParameters* parameters = new SimulationParameters();
+/*
 	parameters->deserializePrimitives(stream);
+*/
 	return parameters;
 }
 
 void SerializationFacadeImpl::serializeSymbolTable(SymbolTable* symbolTable, QDataStream& stream) const
 {
+/*
 	symbolTable->serializePrimitives(stream);
+*/
 }
 
 SymbolTable* SerializationFacadeImpl::deserializeSymbolTable(QDataStream& stream) const
 {
 	SymbolTable* symbolTable = new SymbolTable();
+/*
 	symbolTable->deserializePrimitives(stream);
+*/
 	return symbolTable;
 }
 
 void SerializationFacadeImpl::serializeCellCluster(Cluster* cluster, QDataStream& stream) const
 {
+/*
 	cluster->serializePrimitives(stream);
 	QList<Cell*>& cells = cluster->getCellsRef();
     stream << static_cast<quint32>(cells.size());
@@ -121,6 +132,7 @@ void SerializationFacadeImpl::serializeCellCluster(Cluster* cluster, QDataStream
 	}
 	ClusterMetadata meta = cluster->getMetadata();
 	stream << meta.name;
+*/
 }
 
 Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
@@ -130,6 +142,7 @@ Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
     auto entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
 	Cluster* cluster = entityFactory->build(ClusterDescription(), context);
+/*
     cluster->deserializePrimitives(stream);
 
     //read data and reconstructing structures
@@ -178,6 +191,7 @@ Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
 	ClusterMetadata meta;
 	stream >> meta.name;
 	cluster->setMetadata(meta);
+*/
 
     return cluster;
 }
@@ -194,6 +208,7 @@ Cluster* SerializationFacadeImpl::deserializeCellCluster(QDataStream& stream
 
 void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& stream) const
 {
+/*
 	cell->serializePrimitives(stream);
 	CellFeatureChain* features = cell->getFeatures();
 	CellFunction* cellFunction = features->findObject<CellFunction>();
@@ -214,6 +229,7 @@ void SerializationFacadeImpl::serializeFeaturedCell(Cell* cell, QDataStream& str
 
 	CellMetadata meta = cell->getMetadata();
 	stream << meta.color << meta.computerSourcecode << meta.description << meta.name;
+*/
 }
 
 Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
@@ -223,6 +239,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
 	//TODO: new serialization
 	Cell* cell;// = entityFactory->build(CellDescription(), context);
+/*
 	featureFactory->addEnergyGuidance(cell, context);
 
 	cell->deserializePrimitives(stream);
@@ -250,6 +267,7 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream
 	CellMetadata meta;
 	stream >> meta.color >> meta.computerSourcecode >> meta.description >> meta.name;
 	cell->setMetadata(meta);
+*/
 
 	return cell;
 }
@@ -264,22 +282,28 @@ Cell* SerializationFacadeImpl::deserializeFeaturedCell(QDataStream& stream, Unit
 
 void SerializationFacadeImpl::serializeToken(Token* token, QDataStream& stream) const
 {
+/*
     token->serializePrimitives(stream);
+*/
 }
 
 Token* SerializationFacadeImpl::deserializeToken(QDataStream& stream, UnitContext* context) const
 {
     EntityFactory* entityFactory = ServiceLocator::getInstance().getService<EntityFactory>();
     Token* token = entityFactory->build(TokenDescription(), context);
+/*
     token->deserializePrimitives(stream);
+*/
     return token;
 }
 
 void SerializationFacadeImpl::serializeEnergyParticle(Particle* particle, QDataStream& stream) const
 {
+/*
 	particle->serializePrimitives(stream);
 	auto metadata = particle->getMetadata();
 	stream << metadata.color;
+*/
 }
 
 Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
@@ -288,12 +312,14 @@ Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
     auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
 	Particle* particle = factory->build(ParticleDescription(), context);
+/*
     particle->deserializePrimitives(stream);
 	ParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
 	oldIdEnergyMap[particle->getId()] = particle;
 	particle->setId(context->getNumberGenerator()->getTag());
+*/
 	return particle;
 }
 
@@ -303,9 +329,11 @@ Particle* SerializationFacadeImpl::deserializeEnergyParticle(QDataStream& stream
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
 	QMap< quint64, Particle* > temp;
 	Particle* particle = deserializeEnergyParticle(stream, temp, context);
+/*
 	ParticleMetadata metadata;
 	stream >> metadata.color;
 	particle->setMetadata(metadata);
 	particle->setId(context->getNumberGenerator()->getTag());
+*/
 	return particle;
 }

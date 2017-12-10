@@ -34,7 +34,7 @@ void PixelUniverseView::init(SimulationController* controller, DataManipulator* 
 	_manipulator = manipulator;
 
 	delete _image;
-	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
+	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
 	_image = new QImage(size.x, size.y, QImage::Format_RGB32);
 	QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
 
@@ -46,7 +46,7 @@ void PixelUniverseView::activate()
 	connect(_manipulator, &DataManipulator::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection);
 	connect(_viewport, &ViewportInterface::scrolling, this, &PixelUniverseView::scrolling);
 
-	IntVector2D size = _controller->getContext()->getSpaceMetric()->getSize();
+	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
 	_manipulator->requireImageFromSimulation({ { 0, 0 }, size }, _image);
 }
 

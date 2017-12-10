@@ -39,7 +39,7 @@ DataDescriptionTransferTest::DataDescriptionTransferTest()
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
 	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
-	_metric = _context->getSpaceMetric();
+	_metric = _context->getSpaceProperties();
 	_access = _facade->buildSimulationAccess(_context);
 }
 

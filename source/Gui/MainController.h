@@ -28,10 +28,22 @@ public:
 
 	virtual void onRunSimulation(bool run);
 	virtual void onNewSimulation(NewSimulationConfig config);
-	virtual void onSaveSimulation();
+	virtual void onSaveSimulation(string const& filename);
 
 private:
 	void addRandomEnergy(double amount);
+
+	//asynchronous processing
+	struct SerializationOperation 
+	{
+		enum class Type {
+			SaveToFile
+		};
+		Type type;
+		string filename;
+	};
+	list<SerializationOperation> _serializationOperations;
+	Q_SLOT void serializationFinished();
 
 	MainView* _view = nullptr;
 	MainModel* _model = nullptr;

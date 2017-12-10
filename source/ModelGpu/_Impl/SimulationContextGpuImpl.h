@@ -15,7 +15,7 @@ public:
 
 	void init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters);
 
-	virtual SpaceProperties* getSpaceMetric() const override;
+	virtual SpaceProperties* getSpaceProperties() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
 	virtual ThreadController* getGpuThreadController() const;

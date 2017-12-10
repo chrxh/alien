@@ -13,7 +13,9 @@ public:
 	virtual void init(NumberGenerator* numberGen, SpaceMetricLocal* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler) override;
 
-	virtual SpaceProperties* getSpaceMetric() const;
+	virtual IntVector2D getGridSize() const override;
+	virtual int getMaxThreads() const override;
+	virtual SpaceProperties* getSpaceProperties() const;
 	virtual UnitGrid* getUnitGrid() const override;
 	virtual UnitThreadController* getUnitThreadController() const override;
 	virtual SymbolTable* getSymbolTable() const override;

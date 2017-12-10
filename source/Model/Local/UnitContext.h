@@ -14,7 +14,7 @@ public:
 		, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters) = 0;
 
 	virtual NumberGenerator* getNumberGenerator() const = 0;
-    virtual SpaceMetricLocal* getSpaceMetric() const = 0;
+    virtual SpaceMetricLocal* getSpaceProperties() const = 0;
 	virtual CellMap* getCellMap() const = 0;
 	virtual ParticleMap* getParticleMap() const = 0;
 	virtual MapCompartment* getMapCompartment() const = 0;

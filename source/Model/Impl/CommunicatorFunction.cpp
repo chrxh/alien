@@ -139,7 +139,7 @@ bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess (const Mess
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector2D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
-            SpaceMetricLocal* metric = _context->getSpaceMetric();
+            SpaceMetricLocal* metric = _context->getSpaceProperties();
             QVector2D displacementOfObjectFromReceiver = metric->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
