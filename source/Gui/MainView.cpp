@@ -1,4 +1,6 @@
-﻿#include "Model/Api/SimulationController.h"
+﻿#include <QFileDialog>
+
+#include "Model/Api/SimulationController.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
@@ -143,6 +145,10 @@ void MainView::onNewSimulation()
 
 void MainView::onSaveSimulation()
 {
+	QString fileName = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
+	if (!fileName.isEmpty()) {
+		_controller->onSaveSimulation(fileName.toStdString());
+	}
 }
 
 void MainView::cellDefocused()

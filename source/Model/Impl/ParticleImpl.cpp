@@ -163,7 +163,7 @@ void ParticleImpl::collisionWithEnergyParticle(Particle* otherEnergy)
 void ParticleImpl::move()
 {
 	_pos += _vel;
-	_context->getSpaceMetric()->correctPosition(_pos);
+	_context->getSpaceProperties()->correctPosition(_pos);
 }
 
 void ParticleImpl::serializePrimitives(QDataStream& stream) const
@@ -194,7 +194,7 @@ QVector2D ParticleImpl::getPosition() const
 void ParticleImpl::setPosition(QVector2D value)
 {
 	_pos = value;
-	_context->getSpaceMetric()->correctPosition(_pos);
+	_context->getSpaceProperties()->correctPosition(_pos);
 }
 
 QVector2D ParticleImpl::getVelocity() const

@@ -141,7 +141,9 @@ void SimulationParametersDialog::loadButtonClicked ()
 
             //read simulation data
             QDataStream in(&file);
+/*
             _localSimulationParameters->deserializePrimitives(in);
+*/
             file.close();
 
             //update widgets
@@ -165,7 +167,9 @@ void SimulationParametersDialog::saveButtonClicked ()
             //serialize symbol table
             QDataStream out(&file);
             getLocalSimulationParametersFromWidgets();
+/*
             _localSimulationParameters->serializePrimitives(out);
+*/
             file.close();
         }
         else {

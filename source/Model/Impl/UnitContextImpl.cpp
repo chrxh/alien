@@ -38,7 +38,7 @@ NumberGenerator * UnitContextImpl::getNumberGenerator() const
 	return _numberGen;
 }
 
-SpaceMetricLocal* UnitContextImpl::getSpaceMetric () const
+SpaceMetricLocal* UnitContextImpl::getSpaceProperties () const
 {
     return _metric;
 }

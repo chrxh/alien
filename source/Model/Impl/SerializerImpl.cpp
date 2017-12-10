@@ -1,5 +1,10 @@
 #include <sstream>
-#include <boost/optional/optional_io.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/optional.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+
 #include <QVector2D>
 
 #include "Model/Api/SimulationController.h"
@@ -8,6 +13,8 @@
 #include "Model/Api/SpaceProperties.h"
 #include "Model/Api/Descriptions.h"
 #include "Model/Api/ChangeDescriptions.h"
+#include "Model/Api/SimulationParameters.h"
+#include "Model/Api/SymbolTable.h"
 
 #include "SerializerImpl.h"
 
@@ -15,260 +22,112 @@ using namespace std;
 using namespace boost;
 
 
-namespace boost
-{
-	template<class CharType, class CharTrait, class T>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, vector<T> const& vec)
-	{
-		stream << static_cast<uint32_t>(vec.size());
-		for (T const& element : vec) {
-			stream << element;
+namespace boost {
+	namespace serialization {
+
+		template<class Archive>
+		inline void save(Archive& ar, QVector2D const& data, const unsigned int /*version*/)
+		{
+			ar << data.x() << data.y();
 		}
-		return stream;
-	}
-
-	template<class CharType, class CharTrait, class T>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, vector<T>& vec)
-	{
-		uint32_t size;
-		stream >> size;
-		vec = vector<T>(size);
-		for (int i = 0; i < size; ++i) {
-			T element;
-			stream >> element;
-			vec.push_back(element);
+		template<class Archive>
+		inline void load(Archive& ar, QVector2D& data, const unsigned int /*version*/)
+		{
+			decltype(data.x()) x, y;
+			ar >> x >> y;
+			data.setX(x);
+			data.setY(y);
 		}
-		return stream;
-	}
-
-	template<class CharType, class CharTrait, class T>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, list<T> const& listObj)
-	{
-		stream << static_cast<uint32_t>(listObj.size());
-		for (T const& element : listObj) {
-			stream << element;
+		template<class Archive>
+		inline void serialize(Archive & ar, QVector2D& data, const unsigned int version)
+		{
+			boost::serialization::split_free(ar, data, version);
 		}
-		return stream;
-	}
 
-	template<class CharType, class CharTrait, class T>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, list<T>& listObj)
-	{
-		uint32_t size;
-		stream >> size;
-		for (int i = 0; i < size; ++i) {
-			T element;
-			stream >> element;
-			listObj.push_back(element);
+		template<class Archive>
+		inline void save(Archive& ar, QByteArray const& data, const unsigned int /*version*/)
+		{
+			ar << data.toStdString();
 		}
-		return stream;
-	}
+		template<class Archive>
+		inline void load(Archive& ar, QByteArray& data, const unsigned int /*version*/)
+		{
+			string str;
+			ar >> str;
+			data = QByteArray::fromStdString(str);
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, QByteArray& data, const unsigned int version)
+		{
+			boost::serialization::split_free(ar, data, version);
+		}
 
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<< (std::basic_ostream<CharType, CharTrait>& stream, QVector2D const& data)
-	{
-		stream << data.x() << data.y();
-		return stream;
-	}
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, QVector2D& data)
-	{
-		decltype(data.x()) x;
-		decltype(data.y()) y;
-		stream >> x >> y;
-		data.setX(x);
-		data.setY(y);
-		return stream;
-	}
+		template<class Archive>
+		inline void save(Archive& ar, QString const& data, const unsigned int /*version*/)
+		{
+			ar << data.toStdString();
+		}
+		template<class Archive>
+		inline void load(Archive& ar, QString& data, const unsigned int /*version*/)
+		{
+			string str;
+			ar >> str;
+			data = QString::fromStdString(str);
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, QString& data, const unsigned int version)
+		{
+			boost::serialization::split_free(ar, data, version);
+		}
 
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, QString const& data)
-	{
-		stream << data.toStdString();
-		return stream;
-	}
 
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, QString& data)
-	{
-		string str;
-		stream >> str;
-		data = QString::fromStdString(str);
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, QByteArray const& data)
-	{
-		stream << data.toStdString();
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, QByteArray& data)
-	{
-		string str;
-		stream >> str;
-		data = QByteArray::fromStdString(str);
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, CellMetadata const& data)
-	{
-		stream << data.computerSourcecode << data.name << data.description << data.color;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, CellMetadata& data)
-	{
-		stream >> data.computerSourcecode >> data.name >> data.description >> data.color;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, TokenDescription const& data)
-	{
-		stream << data.energy << data.data;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, TokenDescription& data)
-	{
-		stream >> data.energy >> data.data;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, CellFeatureDescription const& data)
-	{
-		stream << static_cast<uint32_t>(data.type) << data.volatileData << data.constData;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, CellFeatureDescription& data)
-	{
-		uint32_t type;
-		stream >> type >> data.volatileData >> data.constData;
-		data.type = static_cast<Enums::CellFunction::Type>(type);
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, CellDescription const& data)
-	{
-		stream << data.id << data.pos << data.energy << data.maxConnections << data.connectingCells << data.tokenBlocked;
-		stream << data.tokenBranchNumber << data.metadata << data.cellFeature << data.tokens;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, CellDescription& data)
-	{
-		stream >> data.id >> data.pos >> data.energy >> data.maxConnections >> data.connectingCells >> data.tokenBlocked;
-		stream >> data.tokenBranchNumber >> data.metadata >> data.cellFeature /*>> data.tokens*/;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, ClusterMetadata const& data)
-	{
-		stream << data.name;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ClusterMetadata& data)
-	{
-		stream >> data.name;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, ClusterDescription const& data)
-	{
-		stream << data.id << data.pos << data.vel << data.angle << data.angularVel << data.metadata << data.cells;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ClusterDescription& data)
-	{
-		stream >> data.id >> data.pos >> data.vel >> data.angle >> data.angularVel >> data.metadata >> data.cells;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, ParticleMetadata const& data)
-	{
-		stream << data.color;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ParticleMetadata& data)
-	{
-		stream >> data.color;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, ParticleDescription const& data)
-	{
-		stream << data.id << data.pos << data.vel << data.energy << data.metadata;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, ParticleDescription& data)
-	{
-		stream >> data.id >> data.pos >> data.vel >> data.energy >> data.metadata;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& stream, DataDescription const& data)
-	{
-		stream << data.clusters << data.particles;
-		return stream;
-	}
-
-	template<class CharType, class CharTrait>
-	inline
-		std::basic_istream<CharType, CharTrait>& operator >> (std::basic_istream<CharType, CharTrait>& stream, DataDescription& data)
-	{
-		stream >> data.clusters >> data.particles;
-		return stream;
+		template<class Archive>
+		inline void serialize(Archive & ar, CellFeatureDescription& data, const unsigned int /*version*/)
+		{
+			ar & data.type & data.volatileData & data.constData;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, TokenDescription& data, const unsigned int /*version*/)
+		{
+			ar & data.energy & data.data;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, CellMetadata& data, const unsigned int /*version*/)
+		{
+			ar & data.computerSourcecode & data.name & data.description & data.color;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, CellDescription& data, const unsigned int /*version*/)
+		{
+			ar & data.id & data.pos & data.energy & data.maxConnections & data.connectingCells;
+			ar & data.tokenBlocked & data.tokenBranchNumber & data.metadata & data.cellFeature;
+			ar & data.tokens;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, ClusterMetadata& data, const unsigned int /*version*/)
+		{
+			ar & data.name;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, ClusterDescription& data, const unsigned int /*version*/)
+		{
+			ar & data.id & data.pos & data.vel & data.angle & data.angularVel & data.metadata & data.cells;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, ParticleMetadata& data, const unsigned int /*version*/)
+		{
+			ar & data.color;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, ParticleDescription& data, const unsigned int /*version*/)
+		{
+			ar & data.id & data.pos & data.vel & data.energy & data.metadata;
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, DataDescription& data, const unsigned int /*version*/)
+		{
+			ar & data.clusters & data.particles;
+		}
 	}
 }
 
@@ -279,29 +138,25 @@ SerializerImpl::SerializerImpl(QObject *parent /*= nullptr*/)
 
 void SerializerImpl::serialize(SimulationController * simController, SimulationAccess * access)
 {
-	IntVector2D universeSize = simController->getContext()->getSpaceMetric()->getSize();
+	_simulation.clear();
+	_universeContent.clear();
+
+	if (_access && _access != access) {
+		disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
+	}
+	_access = access;
+	_simController = simController;
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
+
+	IntVector2D universeSize = simController->getContext()->getSpaceProperties()->getSize();
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
 	access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
-
-	_simulation.clear();
-	_simulationContent.clear();
-	if (_access && _access != access) {
-		disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::serializationFinished);
-	}
-	_access = access;
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::serializationFinished);
 }
 
 string const& SerializerImpl::retrieveSerializedSimulationContent()
 {
-	DataDescription const& data = _access->retrieveData();
-	
-	ostringstream stream;
-	stream << data;
-
-	_simulationContent = stream.str();
-	return _simulationContent;
+	return _universeContent;
 }
 
 string const& SerializerImpl::retrieveSerializedSimulation()
@@ -311,9 +166,11 @@ string const& SerializerImpl::retrieveSerializedSimulation()
 
 void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, string const & content) const
 {
-	DataDescription data;
 	istringstream stream;
-	stream >> data;
+
+	DataDescription data;
+	boost::archive::binary_iarchive ia(stream);
+	ia >> data;
 
 	access->clear();
 	access->updateData(data);
@@ -321,5 +178,61 @@ void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, stri
 
 SimulationController * SerializerImpl::deserializeSimulation(SimulationAccess* access, string const & content) const
 {
+	istringstream stream;
+	DataDescription data;
+	boost::archive::binary_iarchive ia(stream);
+	ia >> data;
+
+	//TODO: deserialize sim data and create controller
+
 	return nullptr;
+}
+
+void SerializerImpl::dataReadyToRetrieve()
+{
+	ostringstream stream;
+	auto const& data = _access->retrieveData();
+
+	boost::archive::binary_oarchive oa(stream);
+	oa << data;
+	_universeContent = stream.str();
+
+/*
+	stream << _simController->getContext()->getSpaceProperties()->getSize();
+	stream << _simController->getContext()->getGridSize();
+	stream << _simController->getContext()->getMaxThreads();
+	auto parameters = _simController->getContext()->getSimulationParameters();
+	stream << parameters->cellMinDistance;
+	stream << parameters->cellMaxDistance;
+	stream << parameters->cellMass_Reciprocal;
+	stream << parameters->callMaxForce;
+	stream << parameters->cellMaxForceDecayProb;
+	stream << parameters->cellMaxBonds;
+	stream << parameters->cellMaxToken;
+	stream << parameters->cellMaxTokenBranchNumber;
+	stream << parameters->cellCreationEnergy;
+	stream << parameters->cellCreationMaxConnection;
+	stream << parameters->cellCreationTokenAccessNumber;
+	stream << parameters->cellMinEnergy;
+	stream << parameters->cellTransformationProb;
+	stream << parameters->cellFusionVelocity;
+	stream << parameters->cellFunctionWeaponStrength;
+	stream << parameters->cellFunctionComputerMaxInstructions;
+	stream << parameters->cellFunctionComputerCellMemorySize;
+	stream << parameters->tokenMemorySize;
+	stream << parameters->cellFunctionConstructorOffspringDistance;
+	stream << parameters->cellFunctionSensorRange;
+	stream << parameters->cellFunctionCommunicatorRange;
+	stream << parameters->tokenCreationEnergy;
+	stream << parameters->tokenMinEnergy;
+	stream << parameters->radiationExponent;
+	stream << parameters->radiationFactor;
+	stream << parameters->radiationProb;
+	stream << parameters->radiationVelocityMultiplier;
+	stream << parameters->radiationVelocityPerturbation;
+*/
+//	stream << _simController->getContext()->getSymbolTable()->getEntries();
+	_simulation = stream.str();
+
+	Q_EMIT serializationFinished();
 }

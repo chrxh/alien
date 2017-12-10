@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Model/Api/Definitions.h"
 #include "Model/Api/CellFeatureEnums.h"
 

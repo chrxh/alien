@@ -22,8 +22,11 @@ public:
 	virtual SimulationController* deserializeSimulation(SimulationAccess* access, string const& content) const override;
 
 private:
+	void dataReadyToRetrieve();
+
+	SimulationController* _simController = nullptr;
 	SimulationAccess* _access = nullptr;
 
-	string _simulationContent;
+	string _universeContent;
 	string _simulation;
 };

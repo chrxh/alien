@@ -148,6 +148,11 @@ bool UnitThreadControllerImpl::isNoThreadWorking() const
 	return result;
 }
 
+int UnitThreadControllerImpl::getMaxRunningThreads() const
+{
+	return _maxRunningThreads;
+}
+
 void UnitThreadControllerImpl::setAllUnitsReady()
 {
 	for (auto const& ts : _threadsAndCalcSignals) {

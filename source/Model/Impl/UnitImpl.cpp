@@ -172,7 +172,7 @@ void UnitImpl::processingClustersInit()
 void UnitImpl::processingClustersCompartmentAllocation()
 {
 	auto compartment = _context->getMapCompartment();
-	auto spaceMetric = _context->getSpaceMetric();
+	auto spaceMetric = _context->getSpaceProperties();
 
 	QMutableListIterator<Cluster*> clusterIter(_context->getClustersRef());
 	while (clusterIter.hasNext()) {
@@ -222,7 +222,7 @@ void UnitImpl::incParticlesTimestamp()
 void UnitImpl::processingParticlesCompartmentAllocation()
 {
 	auto compartment = _context->getMapCompartment();
-	auto spaceMetric = _context->getSpaceMetric();
+	auto spaceMetric = _context->getSpaceProperties();
 
 	QMutableListIterator<Particle*> particleIter(_context->getParticlesRef());
 	while (particleIter.hasNext()) {

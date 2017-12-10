@@ -28,6 +28,7 @@ public:
 	Q_SLOT virtual bool calculateTimestep() override;
 
 	virtual bool isNoThreadWorking() const override;
+	virtual int getMaxRunningThreads() const override;
 
 private:
 	Q_SLOT void threadFinishedCalculation(QObject* sender);

@@ -66,7 +66,7 @@ void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
 
 void SimulationAccessGpuImpl::createImage()
 {
-	auto metric = _context->getSpaceMetric();
+	auto metric = _context->getSpaceProperties();
 	auto worker = _context->getGpuThreadController()->getGpuWorker();
 	DataForAccess cudaData = worker->retrieveData();
 
