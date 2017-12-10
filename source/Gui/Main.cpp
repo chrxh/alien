@@ -36,6 +36,7 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
+//- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- Bug: CellCluster übereinander legen => beide verschwinden
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell

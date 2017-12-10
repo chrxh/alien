@@ -101,7 +101,7 @@ DescriptionHelper * ModelBuilderFacadeImpl::buildDescriptionHelper(SimulationCon
 {
 	auto descHelper = new DescriptionHelperImpl();
 	auto context = static_cast<SimulationContextLocal*>(contextApi);
-	descHelper->init(context->getSpaceMetric(), context->getSimulationParameters(), context->getNumberGenerator());
+	descHelper->init(context->getSpaceProperties(), context->getSimulationParameters(), context->getNumberGenerator());
 	return descHelper;
 }
 
@@ -115,7 +115,7 @@ Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simulati
 	auto unit = contextFactory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = contextFactory->buildSimulationUnitContext();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
-	auto metric = static_cast<SpaceMetricLocal*>(context->getSpaceMetric())->clone();
+	auto metric = static_cast<SpaceMetricLocal*>(context->getSpaceProperties())->clone();
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();

@@ -26,7 +26,7 @@ void SimulationContextGpuImpl::init(SpaceProperties *metric, SymbolTable *symbol
 	_threadController->init(metric);
 }
 
-SpaceProperties * SimulationContextGpuImpl::getSpaceMetric() const
+SpaceProperties * SimulationContextGpuImpl::getSpaceProperties() const
 {
 	return _metric;
 }

@@ -350,7 +350,7 @@ namespace
 
 void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 {
-	auto metric = unit->getContext()->getSpaceMetric();
+	auto metric = unit->getContext()->getSpaceProperties();
 	auto const &clusters = unit->getContext()->getClustersRef();
 	for (auto const &cluster : clusters) {
 		for (auto const &cell : cluster->getCellsRef()) {
@@ -368,7 +368,7 @@ void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 
 void SimulationAccessImpl::drawParticlesFromUnit(Unit * unit)
 {
-	auto metric = unit->getContext()->getSpaceMetric();
+	auto metric = unit->getContext()->getSpaceProperties();
 	auto const &particles = unit->getContext()->getParticlesRef();
 	for (auto const &particle : particles) {
 		IntVector2D pos = particle->getPosition();
@@ -386,7 +386,7 @@ void SimulationAccessImpl::collectDataFromUnit(Unit * unit)
 
 void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 {
-	auto metric = unit->getContext()->getSpaceMetric();
+	auto metric = unit->getContext()->getSpaceProperties();
 	auto const& clusters = unit->getContext()->getClustersRef();
 	for (auto const& cluster : clusters) {
 		IntVector2D pos = cluster->getPosition();
@@ -398,7 +398,7 @@ void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 
 void SimulationAccessImpl::collectParticlesFromUnit(Unit * unit)
 {
-	auto metric = unit->getContext()->getSpaceMetric();
+	auto metric = unit->getContext()->getSpaceProperties();
 	auto const& particles = unit->getContext()->getParticlesRef();
 	for (auto const& particle : particles) {
 		IntVector2D pos = particle->getPosition();

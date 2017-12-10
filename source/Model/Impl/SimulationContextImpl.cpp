@@ -31,7 +31,17 @@ void SimulationContextImpl::init(NumberGenerator* numberGen, SpaceMetricLocal* m
 	SET_CHILD(_compiler, compiler);
 }
 
-SpaceProperties * SimulationContextImpl::getSpaceMetric() const
+IntVector2D SimulationContextImpl::getGridSize() const
+{
+	return _grid->getSize();
+}
+
+int SimulationContextImpl::getMaxThreads() const
+{
+	return _threads->getMaxRunningThreads();
+}
+
+SpaceProperties * SimulationContextImpl::getSpaceProperties() const
 {
 	return _metric;
 }

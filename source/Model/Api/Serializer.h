@@ -4,7 +4,7 @@
 
 #include "Definitions.h"
 
-class Serializer
+class MODEL_EXPORT Serializer
 	: public QObject
 {
 	Q_OBJECT
