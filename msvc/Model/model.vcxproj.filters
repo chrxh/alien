@@ -247,15 +247,6 @@
     <ClCompile Include="Release\moc_SimulationParameters.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Tests\moc_SpaceMetric.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SpaceMetric.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SpaceMetric.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\Local\CellFunction.cpp">
       <Filter>Source Files\Local</Filter>
     </ClCompile>
@@ -577,6 +568,36 @@
     <ClCompile Include="..\..\source\Model\Local\EntityWithTimestamp.cpp">
       <Filter>Source Files\Local</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\SerializerImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SerializerImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SerializerImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SerializerImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SpaceProperties.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SpaceProperties.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SpaceProperties.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_Serializer.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_Serializer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_Serializer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\Api\SimulationAccess.h">
@@ -589,9 +610,6 @@
       <Filter>Source Files\Api</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Api\SimulationParameters.h">
-      <Filter>Source Files\Api</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Api\SpaceMetric.h">
       <Filter>Source Files\Api</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Local\CellMap.h">
@@ -661,6 +679,15 @@
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Api\SymbolTable.h">
+      <Filter>Source Files\Api</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Impl\SerializerImpl.h">
+      <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Api\SpaceProperties.h">
+      <Filter>Source Files\Api</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Api\Serializer.h">
       <Filter>Source Files\Api</Filter>
     </CustomBuild>
   </ItemGroup>

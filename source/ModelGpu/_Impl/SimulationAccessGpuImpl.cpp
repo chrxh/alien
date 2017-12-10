@@ -1,6 +1,6 @@
 #include <QImage>
 
-#include "Model/Api/SpaceMetric.h"
+#include "Model/Api/SpaceProperties.h"
 
 #include "WorkerForGpu.h"
 #include "ThreadController.h"

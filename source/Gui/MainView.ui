@@ -768,8 +768,8 @@
      <string>Simulation</string>
     </property>
     <addaction name="actionNewSimulation"/>
-    <addaction name="actionLoad_universe"/>
-    <addaction name="actionSave_universe"/>
+    <addaction name="actionLoadSimulation"/>
+    <addaction name="actionSaveSimulation"/>
     <addaction name="separator"/>
     <addaction name="actionPlay"/>
     <addaction name="actionStep"/>
@@ -878,17 +878,17 @@
   </widget>
   <action name="actionEditor">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="checked">
     <bool>false</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/microscope.png</normaloff>:/Icons/microscope.png</iconset>
+     <normaloff>:/Icons/EditorView.png</normaloff>:/Icons/EditorView.png</iconset>
    </property>
    <property name="text">
     <string>Editor</string>
@@ -921,24 +921,9 @@
     <string>Run</string>
    </property>
   </action>
-  <action name="actionNew">
-   <property name="text">
-    <string>New</string>
-   </property>
-  </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
-   </property>
-  </action>
-  <action name="actionLoad">
-   <property name="text">
-    <string>Load</string>
-   </property>
-  </action>
-  <action name="actionSave">
-   <property name="text">
-    <string>Save</string>
    </property>
   </action>
   <action name="actionZoomIn">
@@ -1030,16 +1015,6 @@
     <string>Ctrl+L</string>
    </property>
   </action>
-  <action name="actionZoom_in">
-   <property name="text">
-    <string>Zoom in</string>
-   </property>
-  </action>
-  <action name="actionZoom_out">
-   <property name="text">
-    <string>Zoom out</string>
-   </property>
-  </action>
   <action name="actionNewToken">
    <property name="enabled">
     <bool>false</bool>
@@ -1056,7 +1031,7 @@
     <string>Delete token</string>
    </property>
   </action>
-  <action name="actionSave_universe">
+  <action name="actionSaveSimulation">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -1064,7 +1039,7 @@
     <string>Save</string>
    </property>
   </action>
-  <action name="actionLoad_universe">
+  <action name="actionLoadSimulation">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -1167,14 +1142,6 @@
    </property>
    <property name="text">
     <string>Step back</string>
-   </property>
-  </action>
-  <action name="actionSave_3">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Save cell</string>
    </property>
   </action>
   <action name="actionCopyCell">
@@ -1282,37 +1249,6 @@
     <string>Arrange in grid</string>
    </property>
   </action>
-  <action name="actionSymbol_table">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Symbol table</string>
-   </property>
-  </action>
-  <action name="actionPlay_blue_matter_destruction">
-   <property name="text">
-    <string>Play 'blue matter destruction'</string>
-   </property>
-  </action>
-  <action name="actionLoad_script">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Load script</string>
-   </property>
-  </action>
-  <action name="actionSave_script">
-   <property name="text">
-    <string>Save script</string>
-   </property>
-  </action>
-  <action name="actionLoad_last_script">
-   <property name="text">
-    <string>Load last script</string>
-   </property>
-  </action>
   <action name="actionPasteCell">
    <property name="enabled">
     <bool>false</bool>
@@ -1333,22 +1269,5 @@
  <resources>
   <include location="resources/ressources.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>actionExit</sender>
-   <signal>triggered()</signal>
-   <receiver>MainView</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>391</x>
-     <y>233</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -468,15 +468,6 @@
     <ClCompile Include="Release\moc_VisualEditController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Serializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_Serializer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_Serializer.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -690,9 +681,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\visualeditor\VisualEditController.ui">
       <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Serializer.h">
-      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
