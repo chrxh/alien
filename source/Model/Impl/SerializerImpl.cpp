@@ -1,11 +1,14 @@
 #include <sstream>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
 #include <boost/serialization/optional.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
 #include <QVector2D>
+
+#include "Base/ServiceLocator.h"
 
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/SimulationContext.h"
@@ -15,6 +18,7 @@
 #include "Model/Api/ChangeDescriptions.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/SymbolTable.h"
+#include "Model/Api/ModelBuilderFacade.h"
 
 #include "SerializerImpl.h"
 
@@ -128,6 +132,60 @@ namespace boost {
 		{
 			ar & data.clusters & data.particles;
 		}
+		template<class Archive>
+		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int /*version*/)
+		{
+			ar & data.cellMinDistance;
+			ar & data.cellMaxDistance;
+			ar & data.cellMass_Reciprocal;
+			ar & data.callMaxForce;
+			ar & data.cellMaxForceDecayProb;
+			ar & data.cellMaxBonds;
+			ar & data.cellMaxToken;
+			ar & data.cellMaxTokenBranchNumber;
+			ar & data.cellCreationEnergy;
+			ar & data.cellCreationMaxConnection;
+			ar & data.cellCreationTokenAccessNumber;
+			ar & data.cellMinEnergy;
+			ar & data.cellTransformationProb;
+			ar & data.cellFusionVelocity;
+			ar & data.cellFunctionWeaponStrength;
+			ar & data.cellFunctionComputerMaxInstructions;
+			ar & data.cellFunctionComputerCellMemorySize;
+			ar & data.tokenMemorySize;
+			ar & data.cellFunctionConstructorOffspringDistance;
+			ar & data.cellFunctionSensorRange;
+			ar & data.cellFunctionCommunicatorRange;
+			ar & data.tokenCreationEnergy;
+			ar & data.tokenMinEnergy;
+			ar & data.radiationExponent;
+			ar & data.radiationFactor;
+			ar & data.radiationProb;
+			ar & data.radiationVelocityMultiplier;
+			ar & data.radiationVelocityPerturbation;
+		}
+		template<class Archive>
+		inline void save(Archive& ar, SymbolTable const& data, const unsigned int /*version*/)
+		{
+			ar << data.getEntries();
+		}
+		template<class Archive>
+		inline void load(Archive& ar, SymbolTable& data, const unsigned int /*version*/)
+		{
+			map<string, string> entries;
+			ar >> entries;
+			data.setEntries(entries);
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, SymbolTable& data, const unsigned int version)
+		{
+			boost::serialization::split_free(ar, data, version);
+		}
+		template<class Archive>
+		inline void serialize(Archive & ar, IntVector2D& data, const unsigned int /*version*/)
+		{
+			ar & data.x & data.y;
+		}
 	}
 }
 
@@ -179,13 +237,18 @@ void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, stri
 SimulationController * SerializerImpl::deserializeSimulation(SimulationAccess* access, string const & content) const
 {
 	istringstream stream;
-	DataDescription data;
 	boost::archive::binary_iarchive ia(stream);
-	ia >> data;
 
-	//TODO: deserialize sim data and create controller
+	DataDescription data;
+	SimulationParameters* parameters = new SimulationParameters();
+	SymbolTable* symbolTable = new SymbolTable();
+	IntVector2D universeSize;
+	IntVector2D gridSize;
+	int maxThreads;
+	ia >> data >> *parameters >> *symbolTable >> universeSize >> gridSize >> maxThreads;
 
-	return nullptr;
+	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	return facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters);
 }
 
 void SerializerImpl::dataReadyToRetrieve()
@@ -193,45 +256,15 @@ void SerializerImpl::dataReadyToRetrieve()
 	ostringstream stream;
 	auto const& data = _access->retrieveData();
 
-	boost::archive::binary_oarchive oa(stream);
-	oa << data;
+	boost::archive::binary_oarchive archive(stream);
+	archive << data;
 	_universeContent = stream.str();
+	archive << *_simController->getContext()->getSimulationParameters();
+	archive << *_simController->getContext()->getSymbolTable();
+	archive << _simController->getContext()->getSpaceProperties()->getSize();
+	archive << _simController->getContext()->getGridSize();
+	archive << _simController->getContext()->getMaxThreads();
 
-/*
-	stream << _simController->getContext()->getSpaceProperties()->getSize();
-	stream << _simController->getContext()->getGridSize();
-	stream << _simController->getContext()->getMaxThreads();
-	auto parameters = _simController->getContext()->getSimulationParameters();
-	stream << parameters->cellMinDistance;
-	stream << parameters->cellMaxDistance;
-	stream << parameters->cellMass_Reciprocal;
-	stream << parameters->callMaxForce;
-	stream << parameters->cellMaxForceDecayProb;
-	stream << parameters->cellMaxBonds;
-	stream << parameters->cellMaxToken;
-	stream << parameters->cellMaxTokenBranchNumber;
-	stream << parameters->cellCreationEnergy;
-	stream << parameters->cellCreationMaxConnection;
-	stream << parameters->cellCreationTokenAccessNumber;
-	stream << parameters->cellMinEnergy;
-	stream << parameters->cellTransformationProb;
-	stream << parameters->cellFusionVelocity;
-	stream << parameters->cellFunctionWeaponStrength;
-	stream << parameters->cellFunctionComputerMaxInstructions;
-	stream << parameters->cellFunctionComputerCellMemorySize;
-	stream << parameters->tokenMemorySize;
-	stream << parameters->cellFunctionConstructorOffspringDistance;
-	stream << parameters->cellFunctionSensorRange;
-	stream << parameters->cellFunctionCommunicatorRange;
-	stream << parameters->tokenCreationEnergy;
-	stream << parameters->tokenMinEnergy;
-	stream << parameters->radiationExponent;
-	stream << parameters->radiationFactor;
-	stream << parameters->radiationProb;
-	stream << parameters->radiationVelocityMultiplier;
-	stream << parameters->radiationVelocityPerturbation;
-*/
-//	stream << _simController->getContext()->getSymbolTable()->getEntries();
 	_simulation = stream.str();
 
 	Q_EMIT serializationFinished();
