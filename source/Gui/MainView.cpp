@@ -1,4 +1,5 @@
 ﻿#include <QFileDialog>
+#include <QMessageBox>
 
 #include "Model/Api/SimulationController.h"
 
@@ -60,6 +61,7 @@ void MainView::connectActions()
 {
 	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
 	connect(ui->actionSaveSimulation, &QAction::triggered, this, &MainView::onSaveSimulation);
+	connect(ui->actionLoadSimulation, &QAction::triggered, this, &MainView::onLoadSimulation);
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
 	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditController, &VisualEditController::zoomIn);
@@ -148,6 +150,17 @@ void MainView::onSaveSimulation()
 	QString fileName = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
 	if (!fileName.isEmpty()) {
 		_controller->onSaveSimulation(fileName.toStdString());
+	}
+}
+
+void MainView::onLoadSimulation()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
+	if (!fileName.isEmpty()) {
+		if(!_controller->onLoadSimulation(fileName.toStdString())) {
+			QMessageBox msgBox(QMessageBox::Warning, "Error", "An error occurred. The specified simulation could not loaded.");
+			msgBox.exec();
+		}
 	}
 }
 

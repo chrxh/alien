@@ -96,6 +96,51 @@ void MainController::onSaveSimulation(string const& filename)
 	_serializer->serialize(_simController, _simAccess);
 }
 
+bool MainController::onLoadSimulation(string const & filename)
+{
+	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
+	size_t size;
+	stream >> size;
+	string data;
+	data.resize(size);
+	stream.read(&data[0], size);
+	stream.close();
+	if(stream.fail()) {
+		return false;
+	}
+
+	try {
+		auto simControllerAndAccess = _serializer->deserializeSimulation(data);
+		auto origDataManipulator = _dataManipulator;
+		auto origNotifier = _notifier;
+		auto origSimController = _simController;
+
+		_simController = simControllerAndAccess.first;
+		_simAccess = simControllerAndAccess.second;
+
+		_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
+		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
+
+		_dataManipulator = new DataManipulator(this);
+		_notifier = new Notifier(this);
+		auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+		auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
+		_dataManipulator->init(_notifier, _simAccess, descHelper, _simController->getContext());
+
+		_view->setupEditors(_simController, _dataManipulator, _notifier);
+
+		delete origDataManipulator;
+		delete origNotifier;
+		delete origSimController;
+
+		_view->refresh();
+	}
+	catch(...) {
+		return false;
+	}
+	return true;
+}
+
 void MainController::addRandomEnergy(double amount)
 {
 	DataChangeDescription desc;
@@ -115,7 +160,8 @@ void MainController::serializationFinished()
 		if (operation.type == SerializationOperation::Type::SaveToFile) {
 			string const& data = _serializer->retrieveSerializedSimulation();
 			std::ofstream stream(operation.filename, std::ios_base::out | std::ios_base::binary);
-			stream << data;
+			stream << data.size();
+			stream.write(&data[0], data.size());
 			stream.close();
 		}
 	}
