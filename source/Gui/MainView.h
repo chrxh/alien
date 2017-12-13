@@ -31,6 +31,7 @@ private:
 	Q_SLOT void onRunClicked(bool run);
 	Q_SLOT void onNewSimulation();
 	Q_SLOT void onSaveSimulation();
+	Q_SLOT void onLoadSimulation();
 
 	void cellDefocused();
 

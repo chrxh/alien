@@ -19,14 +19,14 @@ public:
 	virtual string const& retrieveSerializedSimulation() override;
 
 	virtual void deserializeSimulationContent(SimulationAccess* access, string const& content) const override;
-	virtual SimulationController* deserializeSimulation(SimulationAccess* access, string const& content) const override;
+	virtual pair<SimulationController*, SimulationAccess*> deserializeSimulation(string const& content) const override;
 
 private:
-	void dataReadyToRetrieve();
+	Q_SLOT void dataReadyToRetrieve();
 
-	SimulationController* _simController = nullptr;
-	SimulationAccess* _access = nullptr;
+	SimulationController* _simControllerForSerialization = nullptr;
+	SimulationAccess* _simAccessForSerialization = nullptr;
 
-	string _universeContent;
-	string _simulation;
+	string _serializedUniverse;
+	string _serializedSimulation;
 };

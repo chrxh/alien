@@ -196,15 +196,15 @@ SerializerImpl::SerializerImpl(QObject *parent /*= nullptr*/)
 
 void SerializerImpl::serialize(SimulationController * simController, SimulationAccess * access)
 {
-	_simulation.clear();
-	_universeContent.clear();
+	_serializedSimulation.clear();
+	_serializedUniverse.clear();
 
-	if (_access && _access != access) {
-		disconnect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
+	if (_simAccessForSerialization && _simAccessForSerialization != access) {
+		disconnect(_simAccessForSerialization, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
 	}
-	_access = access;
-	_simController = simController;
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
+	_simAccessForSerialization = access;
+	_simControllerForSerialization = simController;
+	connect(_simAccessForSerialization, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
 
 	IntVector2D universeSize = simController->getContext()->getSpaceProperties()->getSize();
 	ResolveDescription resolveDesc;
@@ -214,17 +214,17 @@ void SerializerImpl::serialize(SimulationController * simController, SimulationA
 
 string const& SerializerImpl::retrieveSerializedSimulationContent()
 {
-	return _universeContent;
+	return _serializedUniverse;
 }
 
 string const& SerializerImpl::retrieveSerializedSimulation()
 {
-	return _simulation;
+	return _serializedSimulation;
 }
 
 void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, string const & content) const
 {
-	istringstream stream;
+	istringstream stream(content);
 
 	DataDescription data;
 	boost::archive::binary_iarchive ia(stream);
@@ -234,9 +234,9 @@ void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, stri
 	access->updateData(data);
 }
 
-SimulationController * SerializerImpl::deserializeSimulation(SimulationAccess* access, string const & content) const
+pair<SimulationController*, SimulationAccess*> SerializerImpl::deserializeSimulation(string const & content) const
 {
-	istringstream stream;
+	istringstream stream(content);
 	boost::archive::binary_iarchive ia(stream);
 
 	DataDescription data;
@@ -248,24 +248,29 @@ SimulationController * SerializerImpl::deserializeSimulation(SimulationAccess* a
 	ia >> data >> *parameters >> *symbolTable >> universeSize >> gridSize >> maxThreads;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	return facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters);
+	auto simController = facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters);
+	auto simAccess = facade->buildSimulationAccess(simController->getContext());
+
+	simAccess->clear();
+	simAccess->updateData(data);
+	return make_pair(simController, simAccess);
 }
 
 void SerializerImpl::dataReadyToRetrieve()
 {
 	ostringstream stream;
-	auto const& data = _access->retrieveData();
+	auto const& data = _simAccessForSerialization->retrieveData();
 
 	boost::archive::binary_oarchive archive(stream);
 	archive << data;
-	_universeContent = stream.str();
-	archive << *_simController->getContext()->getSimulationParameters();
-	archive << *_simController->getContext()->getSymbolTable();
-	archive << _simController->getContext()->getSpaceProperties()->getSize();
-	archive << _simController->getContext()->getGridSize();
-	archive << _simController->getContext()->getMaxThreads();
+	_serializedUniverse = stream.str();
+	archive << *_simControllerForSerialization->getContext()->getSimulationParameters();
+	archive << *_simControllerForSerialization->getContext()->getSymbolTable();
+	archive << _simControllerForSerialization->getContext()->getSpaceProperties()->getSize();
+	archive << _simControllerForSerialization->getContext()->getGridSize();
+	archive << _simControllerForSerialization->getContext()->getMaxThreads();
 
-	_simulation = stream.str();
+	_serializedSimulation = stream.str();
 
 	Q_EMIT serializationFinished();
 }

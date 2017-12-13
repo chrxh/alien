@@ -19,5 +19,5 @@ public:
 	virtual string const& retrieveSerializedSimulation() = 0;
 
 	virtual void deserializeSimulationContent(SimulationAccess* access, string const& content) const = 0;
-	virtual SimulationController* deserializeSimulation(SimulationAccess* access, string const& content) const = 0;
+	virtual pair<SimulationController*, SimulationAccess*> deserializeSimulation(string const& content) const = 0;
 };
