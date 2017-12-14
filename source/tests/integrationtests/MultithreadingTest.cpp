@@ -19,6 +19,7 @@
 #include "Model/Api/SimulationAccess.h"
 
 #include "tests/Predicates.h"
+#include "IntegrationTestHelper.h"
 
 class MultithreadingTest : public ::testing::Test
 {
@@ -101,10 +102,8 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	runSimulation(300);
 
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
-	
-	ResolveDescription resolveDesc;
-	access->requireData(rect, resolveDesc);
-	DataDescription data = access->retrieveData();
+	DataDescription data = IntegrationTestHelper::getContent(access, rect);
+
 	ASSERT_TRUE(data.clusters);
 	ASSERT_EQ(1, data.clusters->size()) << "Wrong number of clusters.";
 	auto const& cluster = data.clusters->at(0);
