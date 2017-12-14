@@ -14,6 +14,7 @@ public:
 
 	virtual void setTimestep(int timestep);
 	virtual void increaseTimestep();
+	virtual int getTimestep() const;
 
 private:
 	Q_SLOT void oneSecondTimerTimeout();

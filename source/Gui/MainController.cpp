@@ -80,6 +80,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	connectSimController();
+	_infoController->setTimestep(0);
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
 	_dataManipulator->init(_notifier, _simAccess, _descHelper, _simController->getContext());
@@ -100,9 +101,13 @@ void MainController::onSaveSimulation(string const& filename)
 bool MainController::onLoadSimulation(string const & filename)
 {
 	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
+
+	int timestep;
 	size_t size;
-	stream >> size;
 	string data;
+
+	stream.read(reinterpret_cast<char*>(&timestep), sizeof(int));
+	stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
 	data.resize(size);
 	stream.read(&data[0], size);
 	stream.close();
@@ -113,6 +118,7 @@ bool MainController::onLoadSimulation(string const & filename)
 		delete _simController;
 		_simController = _serializer->deserializeSimulation(data);
 		connectSimController();
+		_infoController->setTimestep(timestep);
 
 		_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
 		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
@@ -156,7 +162,10 @@ void MainController::serializationFinished()
 		if (operation.type == SerializationOperation::Type::SaveToFile) {
 			string const& data = _serializer->retrieveSerializedSimulation();
 			std::ofstream stream(operation.filename, std::ios_base::out | std::ios_base::binary);
-			stream << data.size();
+			int timestep = _infoController->getTimestep();
+			size_t dataSize = data.size();
+			stream.write(reinterpret_cast<char*>(&timestep), sizeof(int));
+			stream.write(reinterpret_cast<char*>(&dataSize), sizeof(size_t));
 			stream.write(&data[0], data.size());
 			stream.close();
 		}

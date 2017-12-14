@@ -8,7 +8,7 @@ class UnitImpl
 	Q_OBJECT
 public:
 	UnitImpl(QObject* parent = nullptr);
-	virtual ~UnitImpl();
+	virtual ~UnitImpl() = default;
 
 	virtual void init(UnitContext* context) override;
 	virtual UnitContext* getContext() const override;
