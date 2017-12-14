@@ -261,6 +261,7 @@
     <ClCompile Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.cpp" />
     <ClCompile Include="..\..\source\Tests\Integrationtests\MultithreadingTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Integrationtests\ReplicatorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\integrationtests\SerializationTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\Tests\Testsuite.cpp" />
     <ClCompile Include="..\..\source\Tests\Unittests\CellClusterTest.cpp" />
@@ -275,6 +276,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.h" />
+    <ClInclude Include="..\..\source\Tests\integrationtests\IntegrationTestHelper.h" />
     <ClInclude Include="..\..\source\Tests\Predicates.h" />
     <ClInclude Include="..\..\source\Tests\TestSettings.h" />
   </ItemGroup>

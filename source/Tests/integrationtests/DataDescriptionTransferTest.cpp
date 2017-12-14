@@ -16,6 +16,7 @@
 
 #include "Tests/Predicates.h"
 
+#include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
 class DataDescriptionTransferTest
@@ -64,9 +65,7 @@ TEST_F(DataDescriptionTransferTest, testAddRandomData)
 	_access->updateData(dataBefore);
 
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
-	ResolveDescription resolveDesc;
-	_access->requireData(rect, resolveDesc);
-	DataDescription dataAfter = _access->retrieveData();
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
@@ -103,9 +102,7 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteRandomData)
 	dataBefore.particles->erase(dataBefore.particles->begin(), dataBefore.particles->begin() + 50);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
-	ResolveDescription resolveDesc;
-	_access->requireData(rect, resolveDesc);
-	DataDescription dataAfter = _access->retrieveData();
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
@@ -133,9 +130,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
 	_access->updateData(dataChange);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
-	ResolveDescription resolveDesc;
-	_access->requireData(rect, resolveDesc);
-	DataDescription dataAfter = _access->retrieveData();
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
@@ -162,8 +157,8 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 	}
 	_access->updateData(dataChange);
 
-	_access->requireData({ { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } }, ResolveDescription());
-	DataDescription dataAfter = _access->retrieveData();
+	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
@@ -182,8 +177,7 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteAndModifyWithinSimulation)
 
 	runSimulation(100, _controller);
 
-	_access->requireData({ { 0, 0 },{ _universeSize.x/2, _universeSize.y/2 } }, ResolveDescription());
-	DataDescription extract = _access->retrieveData();
+	DataDescription extract = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x / 2, _universeSize.y / 2 } });
 	DataDescription extractOriginal = extract;
 
 	if (!extract.clusters || !extract.particles) {

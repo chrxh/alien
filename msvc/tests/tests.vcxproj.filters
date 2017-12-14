@@ -83,6 +83,9 @@
     <ClCompile Include="..\..\source\Tests\Unittests\CommunicatorFunctionTest.cpp">
       <Filter>Source Files\Unittests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Tests\integrationtests\SerializationTest.cpp">
+      <Filter>Source Files\Integrationtests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Tests\Predicates.h">
@@ -92,6 +95,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.h">
+      <Filter>Source Files\Integrationtests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Tests\integrationtests\IntegrationTestHelper.h">
       <Filter>Source Files\Integrationtests</Filter>
     </ClInclude>
   </ItemGroup>
