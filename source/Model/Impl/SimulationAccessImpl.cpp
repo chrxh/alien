@@ -403,7 +403,7 @@ void SimulationAccessImpl::collectParticlesFromUnit(Unit * unit)
 	for (auto const& particle : particles) {
 		IntVector2D pos = particle->getPosition();
 		if (_requiredRect.isContained(pos)) {
-			_dataCollected.addParticle(particle->getDescription());
+			_dataCollected.addParticle(particle->getDescription(_resolveDesc));
 		}
 	}
 }

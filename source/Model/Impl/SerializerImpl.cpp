@@ -216,7 +216,7 @@ void SerializerImpl::serialize(SimulationController * simController)
 
 	IntVector2D universeSize = simController->getContext()->getSpaceProperties()->getSize();
 	ResolveDescription resolveDesc;
-	resolveDesc.resolveCellLinks = true;
+	resolveDesc.resolveIds = false;
 	_access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
 }
 

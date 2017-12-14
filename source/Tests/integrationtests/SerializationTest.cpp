@@ -87,10 +87,10 @@ TEST_F(SerializationTest, testCheckIds)
 	}
 	_access->updateData(dataBefore);
 
-	runSimulation(1, _controller);
+	runSimulation(50, _controller);
 	auto const& data = serializeSimulation();
 	deserializeSimulation(data);
-	runSimulation(1, _controller);
+	runSimulation(50, _controller);
 
 	//check result
 	DataDescription extract = IntegrationTestHelper::getContent(_access, { { 0, 0 }, _universeSize });

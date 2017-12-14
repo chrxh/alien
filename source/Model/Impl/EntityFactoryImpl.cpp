@@ -19,6 +19,9 @@ Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* c
 		for (auto const &cellDesc : *desc.cells) {
 			auto cell = build(cellDesc, result, context);
 			cellsByIds[cellDesc.id] = cell;
+			if (desc.id == 0) {
+				cell->setId(context->getNumberGenerator()->getTag());	//generate id for cell if cluster has invalid id
+			}
 		}
 
 		for (auto const &cellDesc : *desc.cells) {
