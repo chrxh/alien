@@ -2,7 +2,7 @@
 #include <QWidget>
 
 #include "Gui/Definitions.h"
-#include "Gui/DataManipulator.h"
+#include "Gui/DataController.h"
 
 class ToolbarController
 	: public QObject
@@ -12,7 +12,7 @@ public:
 	ToolbarController(QWidget * parent = nullptr);
 	virtual ~ToolbarController() = default;
 
-	void init(IntVector2D const& upperLeftPosition, Notifier* notifier, DataManipulator* manipulator, const SimulationContext* context);
+	void init(IntVector2D const& upperLeftPosition, Notifier* notifier, DataController* manipulator, const SimulationContext* context);
 
 	ToolbarContext* getContext() const;
 
@@ -33,6 +33,6 @@ private:
 	ToolbarContext* _context = nullptr;
 	ToolbarView* _view = nullptr;
 	ToolbarModel* _model = nullptr;
-	DataManipulator* _manipulator = nullptr;
+	DataController* _manipulator = nullptr;
 	const SimulationParameters* _parameters = nullptr;
 };

@@ -5,6 +5,8 @@
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
+
+#include "InfoController.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
 #include "NewSimulationDialog.h"
@@ -28,12 +30,13 @@ MainView::~MainView()
 
 }
 
-void MainView::init(MainModel * model, MainController * controller)
+void MainView::init(MainModel* model, MainController* controller, InfoController* infoController)
 {
 	_model = model;
 	_controller = controller;
 	_toolbar = new ToolbarController(ui->visualEditController);
 	_dataEditor = new DataEditController(ui->visualEditController);
+	infoController->init(ui->infoLabel);
 
 	connectActions();
 	setupTheme();
@@ -46,7 +49,7 @@ void MainView::refresh()
 	ui->visualEditController->refresh();
 }
 
-void MainView::setupEditors(SimulationController * controller, DataManipulator* manipulator, Notifier* notifier)
+void MainView::setupEditors(SimulationController * controller, DataController* manipulator, Notifier* notifier)
 {
 	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext());
 	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());

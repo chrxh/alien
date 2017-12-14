@@ -16,7 +16,7 @@ public:
 	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport, SimulationParameters* parameters);
 
 	virtual void activate(IntVector2D size);
-	virtual void update(DataManipulator* visualDesc);
+	virtual void update(DataController* visualDesc);
 
 	virtual void setMarkerItem(QPointF const &upperLeft, QPointF const &lowerRight);
 	virtual void setMarkerLowerRight(QPointF const &lowerRight);
@@ -27,9 +27,9 @@ public:
 	virtual void toggleCellInfo(bool showInfo);
 
 private:
-	void updateCells(DataManipulator* visualDesc);
-	void updateConnections(DataManipulator* visualDesc);
-	void updateParticles(DataManipulator* visualDesc);
+	void updateCells(DataController* visualDesc);
+	void updateConnections(DataController* visualDesc);
+	void updateParticles(DataController* visualDesc);
 		
 	QGraphicsScene *_scene = nullptr;
 	ViewportInterface *_viewport = nullptr;

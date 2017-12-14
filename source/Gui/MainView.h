@@ -18,10 +18,10 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller);
+	virtual void init(MainModel* model, MainController* controller, InfoController* infoController);
 	virtual void refresh();
 
-	virtual void setupEditors(SimulationController* controller, DataManipulator* manipulator, Notifier* notifier);
+	virtual void setupEditors(SimulationController* controller, DataController* manipulator, Notifier* notifier);
 
 private:
 	void connectActions();

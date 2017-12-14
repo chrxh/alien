@@ -5,10 +5,10 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/DescriptionHelper.h"
 
-#include "DataManipulator.h"
+#include "DataController.h"
 #include "Notifier.h"
 
-void DataManipulator::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
+void DataController::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
 {
 	_descHelper = connector;
 	_access = access;
@@ -18,46 +18,46 @@ void DataManipulator::init(Notifier* notifier, SimulationAccess * access, Descri
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
-	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection));
-	_connections.push_back(connect(_access, &SimulationAccess::imageReady, this, &DataManipulator::imageReady));
-	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataManipulator::sendDataChangesToSimulation));
+	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataController::dataFromSimulationAvailable, Qt::QueuedConnection));
+	_connections.push_back(connect(_access, &SimulationAccess::imageReady, this, &DataController::imageReady));
+	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataController::sendDataChangesToSimulation));
 }
 
-DataDescription & DataManipulator::getDataRef()
+DataDescription & DataController::getDataRef()
 {
 	return _data;
 }
 
-CellDescription & DataManipulator::getCellDescRef(uint64_t cellId)
+CellDescription & DataController::getCellDescRef(uint64_t cellId)
 {
 	ClusterDescription &clusterDesc = getClusterDescRef(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
 	return clusterDesc.cells->at(cellIndex);
 }
 
-ClusterDescription & DataManipulator::getClusterDescRef(uint64_t cellId)
+ClusterDescription & DataController::getClusterDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	return _data.clusters->at(clusterIndex);
 }
 
-ParticleDescription& DataManipulator::getParticleDescRef(uint64_t particleId)
+ParticleDescription& DataController::getParticleDescRef(uint64_t particleId)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles->at(particleIndex);
 }
 
-void DataManipulator::setSelectedTokenIndex(optional<uint> const& value)
+void DataController::setSelectedTokenIndex(optional<uint> const& value)
 {
 	_selectedTokenIndex = value;
 }
 
-optional<uint> DataManipulator::getSelectedTokenIndex() const
+optional<uint> DataController::getSelectedTokenIndex() const
 {
 	return _selectedTokenIndex;
 }
 
-void DataManipulator::addAndSelectCell(QVector2D const & posDelta)
+void DataController::addAndSelectCell(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
 	int memorySize = _parameters->cellFunctionComputerCellMemorySize;
@@ -75,7 +75,7 @@ void DataManipulator::addAndSelectCell(QVector2D const & posDelta)
 	_navi.update(_data);
 }
 
-void DataManipulator::addAndSelectParticle(QVector2D const & posDelta)
+void DataController::addAndSelectParticle(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
 	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters->cellMinEnergy / 2.0);
@@ -112,7 +112,7 @@ namespace
 }
 
 
-void DataManipulator::deleteSelection()
+void DataController::deleteSelection()
 {
 	if (_data.clusters) {
 		unordered_set<uint64_t> modifiedClusterIds;
@@ -157,7 +157,7 @@ void DataManipulator::deleteSelection()
 	_navi.update(_data);
 }
 
-void DataManipulator::deleteExtendedSelection()
+void DataController::deleteExtendedSelection()
 {
 	if (_data.clusters) {
 		vector<ClusterDescription> newClusters;
@@ -183,7 +183,7 @@ void DataManipulator::deleteExtendedSelection()
 	_navi.update(_data);
 }
 
-void DataManipulator::addToken()
+void DataController::addToken()
 {
 	CHECK(_selectedCellIds.size() == 1);
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
@@ -195,7 +195,7 @@ void DataManipulator::addToken()
 	}
 }
 
-void DataManipulator::deleteToken()
+void DataController::deleteToken()
 {
 	CHECK(_selectedCellIds.size() == 1);
 	CHECK(_selectedTokenIndex);
@@ -204,24 +204,24 @@ void DataManipulator::deleteToken()
 	cell.delToken(*_selectedTokenIndex);
 }
 
-bool DataManipulator::isCellPresent(uint64_t cellId)
+bool DataController::isCellPresent(uint64_t cellId)
 {
 	return _navi.cellIds.find(cellId) != _navi.cellIds.end();
 }
 
-bool DataManipulator::isParticlePresent(uint64_t particleId)
+bool DataController::isParticlePresent(uint64_t particleId)
 {
 	return _navi.particleIds.find(particleId) != _navi.particleIds.end();
 }
 
-void DataManipulator::dataFromSimulationAvailable()
+void DataController::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
 	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar }, UpdateDescription::All);
 }
 
-void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)
+void DataController::sendDataChangesToSimulation(set<Receiver> const& targets)
 {
 	if (targets.find(Receiver::Simulation) == targets.end()) {
 		return;
@@ -231,7 +231,7 @@ void DataManipulator::sendDataChangesToSimulation(set<Receiver> const& targets)
 	_unchangedData = _data;
 }
 
-void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
+void DataController::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
 	_selectedCellIds = unordered_set<uint64_t>(cellIds.begin(), cellIds.end());
 	_selectedParticleIds = unordered_set<uint64_t>(particleIds.begin(), particleIds.end());
@@ -244,7 +244,7 @@ void DataManipulator::setSelection(list<uint64_t> const &cellIds, list<uint64_t>
 	}
 }
 
-bool DataManipulator::isInSelection(list<uint64_t> const & ids) const
+bool DataController::isInSelection(list<uint64_t> const & ids) const
 {
 	for (uint64_t id : ids) {
 		if (!isInSelection(id)) {
@@ -254,12 +254,12 @@ bool DataManipulator::isInSelection(list<uint64_t> const & ids) const
 	return true;
 }
 
-bool DataManipulator::isInSelection(uint64_t id) const
+bool DataController::isInSelection(uint64_t id) const
 {
 	return (_selectedCellIds.find(id) != _selectedCellIds.end() || _selectedParticleIds.find(id) != _selectedParticleIds.end());
 }
 
-bool DataManipulator::isInExtendedSelection(uint64_t id) const
+bool DataController::isInExtendedSelection(uint64_t id) const
 {
 	auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(id);
 	if (clusterIdByCellIdIter != _navi.clusterIdsByCellIds.end()) {
@@ -269,22 +269,22 @@ bool DataManipulator::isInExtendedSelection(uint64_t id) const
 	return false;
 }
 
-bool DataManipulator::areEntitiesSelected() const
+bool DataController::areEntitiesSelected() const
 {
 	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
 }
 
-unordered_set<uint64_t> DataManipulator::getSelectedCellIds() const
+unordered_set<uint64_t> DataController::getSelectedCellIds() const
 {
 	return _selectedCellIds;
 }
 
-unordered_set<uint64_t> DataManipulator::getSelectedParticleIds() const
+unordered_set<uint64_t> DataController::getSelectedParticleIds() const
 {
 	return _selectedParticleIds;
 }
 
-void DataManipulator::moveSelection(QVector2D const &delta)
+void DataController::moveSelection(QVector2D const &delta)
 {
 	for (uint64_t cellId : _selectedCellIds) {
 		if (isCellPresent(cellId)) {
@@ -303,7 +303,7 @@ void DataManipulator::moveSelection(QVector2D const &delta)
 	}
 }
 
-void DataManipulator::moveExtendedSelection(QVector2D const & delta)
+void DataController::moveExtendedSelection(QVector2D const & delta)
 {
 	for (uint64_t selectedClusterId : _selectedClusterIds) {
 		auto selectedClusterIndex = _navi.clusterIndicesByClusterIds.at(selectedClusterId);
@@ -337,13 +337,13 @@ void DataManipulator::moveExtendedSelection(QVector2D const & delta)
 	}
 }
 
-void DataManipulator::reconnectSelectedCells()
+void DataController::reconnectSelectedCells()
 {
 	_descHelper->reconnect(getDataRef(), getSelectedCellIds());
 	updateAfterCellReconnections();
 }
 
-void DataManipulator::rotateSelection(double angle)
+void DataController::rotateSelection(double angle)
 {
 	QVector3D center = calcCenter();
 
@@ -374,7 +374,7 @@ void DataManipulator::rotateSelection(double angle)
 	}
 }
 
-QVector2D DataManipulator::calcCenter()
+QVector2D DataController::calcCenter()
 {
 	QVector2D result;
 	int numEntities = 0;
@@ -402,7 +402,7 @@ QVector2D DataManipulator::calcCenter()
 	return result;
 }
 
-void DataManipulator::updateCluster(ClusterDescription const & cluster)
+void DataController::updateCluster(ClusterDescription const & cluster)
 {
 	int clusterIndex = _navi.clusterIndicesByClusterIds.at(cluster.id);
 	_data.clusters->at(clusterIndex) = cluster;
@@ -410,7 +410,7 @@ void DataManipulator::updateCluster(ClusterDescription const & cluster)
 	_navi.update(_data);
 }
 
-void DataManipulator::updateParticle(ParticleDescription const & particle)
+void DataController::updateParticle(ParticleDescription const & particle)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particle.id);
 	_data.particles->at(particleIndex) = particle;
@@ -418,7 +418,7 @@ void DataManipulator::updateParticle(ParticleDescription const & particle)
 	_navi.update(_data);
 }
 
-void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect)
+void DataController::requireDataUpdateFromSimulation(IntRect const& rect)
 {
 	_rect = rect;
 	ResolveDescription resolveDesc;
@@ -426,12 +426,12 @@ void DataManipulator::requireDataUpdateFromSimulation(IntRect const& rect)
 	_access->requireData(rect, resolveDesc);
 }
 
-void DataManipulator::requireImageFromSimulation(IntRect const & rect, QImage * target)
+void DataController::requireImageFromSimulation(IntRect const & rect, QImage * target)
 {
 	_access->requireImage(rect, target);
 }
 
-void DataManipulator::updateAfterCellReconnections()
+void DataController::updateAfterCellReconnections()
 {
 	_navi.update(_data);
 
@@ -443,7 +443,7 @@ void DataManipulator::updateAfterCellReconnections()
 	}
 }
 
-void DataManipulator::updateInternals(DataDescription const &data)
+void DataController::updateInternals(DataDescription const &data)
 {
 	_data = data;
 	_unchangedData = _data;

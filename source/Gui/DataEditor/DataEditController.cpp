@@ -4,7 +4,7 @@
 #include "Model/Api/SymbolTable.h"
 #include "Model/Api/SimulationContext.h"
 
-#include "Gui/DataManipulator.h"
+#include "Gui/DataController.h"
 #include "Gui/Notifier.h"
 
 #include "DataEditController.h"
@@ -19,7 +19,7 @@ DataEditController::DataEditController(QWidget *parent /*= nullptr*/)
 	_context = new DataEditContext(this);
 }
 
-void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataManipulator * manipulator, SimulationContext* context)
+void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataController * manipulator, SimulationContext* context)
 {
 	_notifier = notifier;
 	_symbolTable = context->getSymbolTable();

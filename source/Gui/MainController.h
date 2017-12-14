@@ -5,17 +5,6 @@
 
 #include "Definitions.h"
 
-struct NewSimulationConfig
-{
-	uint maxThreads;
-	IntVector2D gridSize;
-	IntVector2D universeSize;
-	SymbolTable* symbolTable;
-	SimulationParameters* parameters;
-
-	double energy;
-};
-
 class MainController
 	: public QObject
 {
@@ -32,6 +21,7 @@ public:
 	virtual bool onLoadSimulation(string const& filename);
 
 private:
+	void connectSimController() const;
 	void addRandomEnergy(double amount);
 
 	//asynchronous processing
@@ -50,7 +40,8 @@ private:
 	MainModel* _model = nullptr;
 
 	SimulationController* _simController = nullptr;
-	DataManipulator* _dataManipulator = nullptr;
+	DataController* _dataManipulator = nullptr;
+	InfoController* _infoController = nullptr;
 	SimulationAccess* _simAccess = nullptr;
 	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
