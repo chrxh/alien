@@ -1,78 +1,119 @@
 #pragma once
 
 #include <QList>
+#include <QMatrix4x4>
 #include <QVector2D>
 
 #include "Model/Api/Definitions.h"
 #include "Model/Api/ChangeDescriptions.h"
 #include "EntityWithTimestamp.h"
 
+
 class Cluster
 	: public EntityWithTimestamp
 {
 public:
-	Cluster(UnitContext* context) : EntityWithTimestamp(context) {}
-	virtual ~Cluster() = default;
+    Cluster (QList< Cell* > cells, uint64_t id, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
 
-	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
-	virtual void applyChangeDescription(ClusterChangeDescription const& change) = 0;
+    virtual ~Cluster ();
 
-    virtual void clearCellsFromMap () = 0;
-    virtual void clearCellFromMap (Cell* cell) = 0;
-    virtual void drawCellsToMap () = 0;
+	virtual void setContext(UnitContext* context);
 
-    virtual void processingInit () = 0;
-    virtual void processingDissipation (QList< Cluster* >& fragments, QList< Particle* >& energyParticles) = 0;
-	virtual void processingMutationByChance() = 0;
-	virtual void processingMovement() = 0;
-    virtual void processingToken (QList< Particle* >& energyParticles, bool& decompose) = 0;
-    virtual void processingCompletion () = 0;
+	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const;
+	virtual void applyChangeDescription(ClusterChangeDescription const& change);
+
+    void clearCellsFromMap ();
+    void clearCellFromMap (Cell* cell);
+    void drawCellsToMap ();
+
+    void processingInit ();
+    void processingDissipation (QList< Cluster* >& fragments, QList< Particle* >& energyParticles);
+	void processingMutationByChance();
+	void processingMovement();
+    void processingToken (QList< Particle* >& energyParticles, bool& decompose);
+    void processingCompletion ();
 
 	enum class UpdateInternals { No, Yes };
-    virtual void addCell (Cell* cell, QVector2D absPos, UpdateInternals update = UpdateInternals::Yes) = 0;
+	void addCell(Cell* cell, QVector2D absPos, UpdateInternals update = UpdateInternals::Yes);
 	enum MaintainCenter { No, Yes };
-    virtual void removeCell (Cell* cell, MaintainCenter maintainCenter = MaintainCenter::Yes) = 0;
-    virtual void updateCellVel (bool forceCheck = true) = 0;        //forceCheck = true: large forces destroy cell
-    virtual void updateAngularMass () = 0;
-    virtual void updateRelCoordinates (MaintainCenter maintainCenter = MaintainCenter::No) = 0;
-    virtual void updateVel_angularVel_via_cellVelocities () = 0;
-    virtual QVector2D calcPosition (const Cell *cell, bool metricCorrection = false) const = 0;
-    virtual QVector2D calcCellDistWithoutTorusCorrection (Cell* cell) const = 0;
-    virtual QList< Cluster* > decompose () const = 0;
-    virtual qreal calcAngularMassWithNewParticle (QVector2D particlePos) const = 0;
-    virtual qreal calcAngularMassWithoutUpdate () const = 0;
+	void removeCell(Cell* cell, MaintainCenter maintainCenter = MaintainCenter::Yes);
+    void updateCellVel (bool forceCheck = true);
+    void updateAngularMass ();
+    void updateRelCoordinates (MaintainCenter maintainCenter = MaintainCenter::No);
+    void updateVel_angularVel_via_cellVelocities ();
+    QVector2D calcPosition (const Cell *cell, bool metricCorrection = false) const;
+    QVector2D calcCellDistWithoutTorusCorrection (Cell* cell) const;
+    QList< Cluster* > decompose () const;
+    qreal calcAngularMassWithNewParticle (QVector2D particlePos) const;
+    qreal calcAngularMassWithoutUpdate () const;
 
-    virtual bool isEmpty() const = 0;
+    bool isEmpty() const;
 
-    virtual QList< Cell* >& getCellsRef () = 0;
-    virtual const quint64& getId () const = 0;
-    virtual void setId (quint64 id) = 0;
-    virtual QList< quint64 > getCellIds () const = 0;
-    virtual QVector2D getPosition () const = 0;
-    virtual void setCenterPosition (QVector2D pos, bool updateTransform = true) = 0;
-    virtual qreal getAngle () const = 0;  //in degrees
-    virtual void setAngle (qreal angle, bool updateTransform = true) = 0;
-    virtual QVector2D getVelocity () const = 0;
-    virtual void setVelocity (QVector2D vel) = 0;
-    virtual qreal getMass () const = 0;
-    virtual qreal getAngularVel () const = 0;
-    virtual void setAngularVel (qreal vel) = 0;
-    virtual qreal getAngularMass () const = 0;
-    virtual void updateTransformationMatrix () = 0;
-    virtual QVector2D relToAbsPos (QVector2D relPos) const = 0;
-    virtual QVector2D absToRelPos (QVector2D absPos) const = 0;
+    QList< Cell* >& getCellsRef();
+    const quint64& getId () const;
+    void setId (quint64 id);
+    QList< quint64 > getCellIds () const;
+    QVector2D getPosition () const;
+    void setCenterPosition (QVector2D pos, bool updateTransform = true);
+    qreal getAngle () const;
+    void setAngle (qreal angle, bool updateTransform = true);
+    QVector2D getVelocity () const;
+    void setVelocity (QVector2D vel);
+    qreal getMass () const;
+    qreal getAngularVel () const;
+    void setAngularVel (qreal vel);
+    qreal getAngularMass () const;
+    void updateTransformationMatrix ();
+    QVector2D relToAbsPos (QVector2D relPos) const;
+    QVector2D absToRelPos (QVector2D absPos) const;
 
-    virtual void findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell2) const = 0;
-    virtual Cell* findNearestCell (QVector2D pos) const = 0;
-    virtual void getConnectedComponent(Cell* cell, QList< Cell* >& component) const = 0;
-    virtual void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const = 0;
+    void findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell2) const;
+    Cell* findNearestCell (QVector2D pos) const;
+    void getConnectedComponent(Cell* cell, QList< Cell* >& component) const;
+    void getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const;
 
-	virtual ClusterMetadata getMetadata() const = 0;
-	virtual void setMetadata(ClusterMetadata metadata) = 0;
+	ClusterMetadata getMetadata() const;
+	void setMetadata(ClusterMetadata metadata);
 
-	virtual void updateInternals(MaintainCenter maintanCenter = MaintainCenter::No) = 0;
+	void updateInternals(MaintainCenter maintanCenter = MaintainCenter::No);
 
-    virtual void serializePrimitives (QDataStream& stream) const = 0;
-	virtual void deserializePrimitives (QDataStream& stream) = 0;
+    void serializePrimitives (QDataStream& stream) const;
+	virtual void deserializePrimitives(QDataStream& stream);
+
+private:
+	Cluster(QList< Cell* > cells, qreal angle, UnitContext* context);
+
+	void radiation (qreal& energy, Cell* originCell, Particle*& energyParticle) const;
+	inline QVector2D applyTransformation(QVector2D pos) const;
+	inline QVector2D applyTransformation(QMatrix4x4 const& transform, QVector2D pos) const;
+	inline QVector2D applyInverseTransformation(QVector2D pos) const;
+
+    qreal _angle = 0.0;       //in deg
+    QVector2D _pos;
+    qreal _angularVel = 0.0;  //in deg
+    QVector2D _vel;
+    QMatrix4x4 _transform;
+    qreal _angularMass = 0.0;
+	
+    QList<Cell*> _cells;
+	
+    quint64 _id = 0;
+	ClusterMetadata _meta;
 };
 
+/********************* inline methods ******************/
+
+QVector2D Cluster::applyTransformation(QVector2D pos) const
+{
+	return _transform.map(QVector3D(pos)).toVector2D();
+}
+
+QVector2D Cluster::applyTransformation(QMatrix4x4 const & transform, QVector2D pos) const
+{
+	return QVector2D();
+}
+
+QVector2D Cluster::applyInverseTransformation(QVector2D pos) const
+{
+	return _transform.inverted().map(QVector3D(pos)).toVector2D();
+}
