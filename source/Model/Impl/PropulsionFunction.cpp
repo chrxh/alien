@@ -1,7 +1,6 @@
 #include <QtCore/qmath.h>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Particle.h"
 #include "Model/Local/Token.h"
@@ -12,6 +11,7 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/SimulationParameters.h"
 
+#include "Cell.h"
 #include "PropulsionFunction.h"
 
 

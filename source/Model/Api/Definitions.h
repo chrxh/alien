@@ -9,8 +9,6 @@
 
 class QTimer;
 
-class Cell;
-class Cluster;
 class UnitGrid;
 class Particle;
 class Token;
@@ -46,16 +44,3 @@ class SerializationFacade;
 class DescriptionHelper;
 class CellComputerCompiler;
 class Serializer;
-
-struct CellClusterHash
-{
-	std::size_t operator()(Cluster* const& s) const;
-};
-typedef std::unordered_set<Cluster*, CellClusterHash> CellClusterSet;
-
-struct CellHash
-{
-    std::size_t operator()(Cell* const& s) const;
-};
-typedef std::unordered_set<Cell*, CellHash> CellSet;
-

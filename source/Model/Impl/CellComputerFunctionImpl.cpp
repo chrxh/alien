@@ -6,9 +6,9 @@
 #include "Model/Api/Settings.h"
 #include "Model/Api/SymbolTable.h"
 #include "Model/Local/UnitContext.h"
-#include "Model/Local/Cell.h"
 #include "Model/Local/Token.h"
 
+#include "Cell.h"
 #include "CellComputerFunctionImpl.h"
 
 CellComputerFunctionImpl::CellComputerFunctionImpl (UnitContext* context)

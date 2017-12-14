@@ -10,9 +10,9 @@
 #include "Model/Local/CellMap.h"
 #include "Model/Local/EntityFactory.h"
 
-#include "CellImpl.h"
+#include "Cell.h"
 
-CellImpl::CellImpl (uint64_t id, qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber)
+Cell::Cell (uint64_t id, qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber)
 	: _id(id)
 	, _context(context)
 	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
@@ -23,7 +23,7 @@ CellImpl::CellImpl (uint64_t id, qreal energy, UnitContext* context, int maxConn
     resetConnections(maxConnections);
 }
 
-CellImpl::~CellImpl()
+Cell::~Cell()
 {
     for(int i = 0; i < _tokenStackPointer; ++i )
         delete _tokenStack[i];
@@ -34,7 +34,7 @@ CellImpl::~CellImpl()
     delete _features;
 }
 
-void CellImpl::setContext(UnitContext * context)
+void Cell::setContext(UnitContext * context)
 {
 	_context = context;
 	for (int i = 0; i < _tokenStackPointer; ++i) {
@@ -45,7 +45,7 @@ void CellImpl::setContext(UnitContext * context)
 	}
 }
 
-CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescription) const
+CellDescription Cell::getDescription(ResolveDescription const& resolveDescription) const
 {
 	CellDescription result;
 	result.setId(_id).setPos(calcPosition()).setMaxConnections(_maxConnections)
@@ -64,7 +64,7 @@ CellDescription CellImpl::getDescription(ResolveDescription const& resolveDescri
 	return result;
 }
 
-void CellImpl::applyChangeDescription(CellChangeDescription const & change)
+void Cell::applyChangeDescription(CellChangeDescription const & change)
 {
 	if (change.energy) {
 		setEnergy(*change.energy);
@@ -90,28 +90,28 @@ void CellImpl::applyChangeDescription(CellChangeDescription const & change)
 	}
 }
 
-void CellImpl::registerFeatures (CellFeatureChain* features)
+void Cell::registerFeatures (CellFeatureChain* features)
 {
     _features = features;
 }
 
-CellFeatureChain* CellImpl::getFeatures () const
+CellFeatureChain* Cell::getFeatures () const
 {
     return _features;
 }
 
-void CellImpl::removeFeatures ()
+void Cell::removeFeatures ()
 {
     delete _features;
     _features = nullptr;
 }
 
-bool CellImpl::connectable (Cell* otherCell) const
+bool Cell::connectable (Cell* otherCell) const
 {
     return (_numConnections < _maxConnections) && (otherCell->getNumConnections() < otherCell->getMaxConnections());
 }
 
-bool CellImpl::isConnectedTo (Cell* otherCell) const
+bool Cell::isConnectedTo (Cell* otherCell) const
 {
     for( int i = 0; i < _numConnections; ++i )
         if( _connectingCells[i] == otherCell )
@@ -119,7 +119,7 @@ bool CellImpl::isConnectedTo (Cell* otherCell) const
     return false;
 }
 
-void CellImpl::resetConnections (int maxConnections)
+void Cell::resetConnections (int maxConnections)
 {
     //delete old array
     delete _connectingCells;
@@ -130,7 +130,7 @@ void CellImpl::resetConnections (int maxConnections)
     _connectingCells = new Cell*[maxConnections];
 }
 
-void CellImpl::newConnection (Cell* otherCell)
+void Cell::newConnection (Cell* otherCell)
 {
     _connectingCells[_numConnections] = otherCell;
     _numConnections++;
@@ -138,7 +138,7 @@ void CellImpl::newConnection (Cell* otherCell)
     otherCell->setNumConnections(otherCell->getNumConnections()+1);
 }
 
-void CellImpl::delConnection (Cell* otherCell)
+void Cell::delConnection (Cell* otherCell)
 {
     for( int i = 0; i < _numConnections; ++i ) {
         if( _connectingCells[i] == otherCell ) {
@@ -160,7 +160,7 @@ void CellImpl::delConnection (Cell* otherCell)
     }
 }
 
-void CellImpl::delAllConnection ()
+void Cell::delAllConnection ()
 {
     for( int i = 0; i < _numConnections; ++i ) {
         Cell* otherCell(_connectingCells[i]);
@@ -177,22 +177,22 @@ void CellImpl::delAllConnection ()
     _numConnections = 0;
 }
 
-int CellImpl::getNumConnections () const
+int Cell::getNumConnections () const
 {
     return _numConnections;
 }
 
-void CellImpl::setNumConnections (int num)
+void Cell::setNumConnections (int num)
 {
     _numConnections = num;
 }
 
-int CellImpl::getMaxConnections () const
+int Cell::getMaxConnections () const
 {
     return _maxConnections;
 }
 
-void CellImpl::setMaxConnections (int maxConnections)
+void Cell::setMaxConnections (int maxConnections)
 {
 
     //new array
@@ -214,17 +214,17 @@ void CellImpl::setMaxConnections (int maxConnections)
 }
 
 
-Cell* CellImpl::getConnection (int i) const
+Cell* Cell::getConnection (int i) const
 {
     return _connectingCells[i];
 }
 
-void CellImpl::setConnection (int i, Cell* cell)
+void Cell::setConnection (int i, Cell* cell)
 {
     _connectingCells[i] = cell;
 }
 
-QVector2D CellImpl::calcNormal (QVector2D outerSpace) const
+QVector2D Cell::calcNormal (QVector2D outerSpace) const
 {
     if( _numConnections < 2 ) {
         return outerSpace.normalized();
@@ -282,7 +282,7 @@ QVector2D CellImpl::calcNormal (QVector2D outerSpace) const
     return minVector+maxVector;
 }
 
-void CellImpl::activatingNewTokens ()
+void Cell::activatingNewTokens ()
 {
     _tokenStackPointer = _newTokenStackPointer;
     for( int i = 0; i < _newTokenStackPointer; ++i ) {
@@ -291,27 +291,27 @@ void CellImpl::activatingNewTokens ()
     _newTokenStackPointer = 0;
 }
 
-const quint64& CellImpl::getId () const
+const quint64& Cell::getId () const
 {
     return _id;
 }
 
-void CellImpl::setId (quint64 id)
+void Cell::setId (quint64 id)
 {
     _id = id;
 }
 
-const quint64& CellImpl::getTag () const
+const quint64& Cell::getTag () const
 {
     return _tag;
 }
 
-void CellImpl::setTag (quint64 tag)
+void Cell::setTag (quint64 tag)
 {
     _tag = tag;
 }
 
-int CellImpl::getNumToken (bool newTokenStackPointer /* = false*/) const
+int Cell::getNumToken (bool newTokenStackPointer /* = false*/) const
 {
     if( newTokenStackPointer )
         return _newTokenStackPointer;
@@ -319,17 +319,17 @@ int CellImpl::getNumToken (bool newTokenStackPointer /* = false*/) const
         return _tokenStackPointer;
 }
 
-Token* CellImpl::getToken (int i) const
+Token* Cell::getToken (int i) const
 {
     return _tokenStack[i];
 }
 
-void CellImpl::setToken (int i, Token* token)
+void Cell::setToken (int i, Token* token)
 {
     _tokenStack[i] = token;
 }
 
-void CellImpl::addToken (Token* token, ActivateToken act, UpdateTokenBranchNumber update)
+void Cell::addToken (Token* token, ActivateToken act, UpdateTokenBranchNumber update)
 {
     if( update == UpdateTokenBranchNumber::Yes )
         token->setTokenAccessNumber(_tokenBranchNumber);
@@ -339,7 +339,7 @@ void CellImpl::addToken (Token* token, ActivateToken act, UpdateTokenBranchNumbe
         _newTokenStack[_newTokenStackPointer++] = token;
 }
 
-void CellImpl::delAllTokens ()
+void Cell::delAllTokens ()
 {
     for( int j = 0; j < _tokenStackPointer; ++j )
          delete _tokenStack[j];
@@ -349,27 +349,27 @@ void CellImpl::delAllTokens ()
     _newTokenStackPointer = 0;
 }
 
-void CellImpl::setCluster (Cluster* cluster)
+void Cell::setCluster (Cluster* cluster)
 {
     _cluster = cluster;
 }
 
-Cluster* CellImpl::getCluster() const
+Cluster* Cell::getCluster() const
 {
     return _cluster;
 }
 
-QVector2D CellImpl::calcPosition (bool metricCorrection /*= false*/) const
+QVector2D Cell::calcPosition (bool metricCorrection /*= false*/) const
 {
     return _cluster->calcPosition(this, metricCorrection);
 }
 
-void CellImpl::setAbsPosition (QVector2D pos)
+void Cell::setAbsPosition (QVector2D pos)
 {
     _relPos = _cluster->absToRelPos(pos);
 }
 
-void CellImpl::setAbsPositionAndUpdateMap (QVector2D pos)
+void Cell::setAbsPositionAndUpdateMap (QVector2D pos)
 {
     QVector2D oldPos(calcPosition());
 	auto cellMap = _context->getCellMap();
@@ -380,43 +380,43 @@ void CellImpl::setAbsPositionAndUpdateMap (QVector2D pos)
 		cellMap->setCell(pos, this);
 }
 
-QVector2D CellImpl::getRelPosition () const
+QVector2D Cell::getRelPosition () const
 {
     return _relPos;
 }
 
-void CellImpl::setRelPosition (QVector2D relPos)
+void Cell::setRelPosition (QVector2D relPos)
 {
     _relPos = relPos;
 }
 
 
-int CellImpl::getBranchNumber () const
+int Cell::getBranchNumber () const
 {
     return _tokenBranchNumber;
 }
 
-void CellImpl::setBranchNumber (int i)
+void Cell::setBranchNumber (int i)
 {
     _tokenBranchNumber = i % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
 }
 
-bool CellImpl::isTokenBlocked () const
+bool Cell::isTokenBlocked () const
 {
     return _blockToken;
 }
 
-void CellImpl::setFlagTokenBlocked (bool block)
+void Cell::setFlagTokenBlocked (bool block)
 {
     _blockToken = block;
 }
 
-qreal CellImpl::getEnergy() const
+qreal Cell::getEnergy() const
 {
     return _energy;
 }
 
-qreal CellImpl::getEnergyIncludingTokens() const
+qreal Cell::getEnergyIncludingTokens() const
 {
     qreal energy = _energy;
     for(int i = 0; i < _tokenStackPointer; ++i)
@@ -426,52 +426,52 @@ qreal CellImpl::getEnergyIncludingTokens() const
     return energy;
 }
 
-void CellImpl::setEnergy (qreal i)
+void Cell::setEnergy (qreal i)
 {
     _energy = i;
 }
 
-QVector2D CellImpl::getVelocity () const
+QVector2D Cell::getVelocity () const
 {
     return _vel;
 }
 
-void CellImpl::setVelocity (QVector2D vel)
+void Cell::setVelocity (QVector2D vel)
 {
     _vel = vel;
 }
 
-int CellImpl::getProtectionCounter () const
+int Cell::getProtectionCounter () const
 {
     return _protectionCounter;
 }
 
-void CellImpl::setProtectionCounter (int counter)
+void Cell::setProtectionCounter (int counter)
 {
     _protectionCounter = counter;
 }
 
-bool CellImpl::isToBeKilled() const
+bool Cell::isToBeKilled() const
 {
     return _toBeKilled;
 }
 
-void CellImpl::setToBeKilled (bool toBeKilled)
+void Cell::setToBeKilled (bool toBeKilled)
 {
     _toBeKilled = toBeKilled;
 }
 
-CellMetadata CellImpl::getMetadata() const
+CellMetadata Cell::getMetadata() const
 {
 	return _metadata;
 }
 
-void CellImpl::setMetadata(CellMetadata metadata)
+void Cell::setMetadata(CellMetadata metadata)
 {
 	_metadata = metadata;
 }
 
-Token* CellImpl::takeTokenFromStack ()
+Token* Cell::takeTokenFromStack ()
 {
     if( _tokenStackPointer == 0 )
         return 0;
@@ -480,14 +480,14 @@ Token* CellImpl::takeTokenFromStack ()
     }
 }
 
-void CellImpl::mutationByChance()
+void Cell::mutationByChance()
 {
 	if (_context->getNumberGenerator()->getRandomReal() < _context->getSimulationParameters()->cellMutationProb) {
 		_features->mutate();
 	}
 }
 
-void CellImpl::serializePrimitives (QDataStream& stream) const
+void Cell::serializePrimitives (QDataStream& stream) const
 {
     //token
     /*stream << _tokenStackPointer;
@@ -509,7 +509,7 @@ void CellImpl::serializePrimitives (QDataStream& stream) const
     stream << _tokenBranchNumber << _blockToken << _vel;
 }
 
-void CellImpl::deserializePrimitives(QDataStream& stream)
+void Cell::deserializePrimitives(QDataStream& stream)
 {
 
 	//token stack

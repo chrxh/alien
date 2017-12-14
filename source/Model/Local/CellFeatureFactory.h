@@ -2,8 +2,8 @@
 
 #include <QString>
 
-#include "Model/Api/Definitions.h"
 #include "Model/Api/CellFeatureEnums.h"
+#include "Definitions.h"
 
 class CellFeatureFactory
 {

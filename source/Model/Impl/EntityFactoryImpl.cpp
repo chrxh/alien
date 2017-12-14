@@ -3,7 +3,7 @@
 #include "Model/Local/CellFeatureFactory.h"
 
 #include "ParticleImpl.h"
-#include "CellImpl.h"
+#include "Cell.h"
 #include "ClusterImpl.h"
 #include "TokenImpl.h"
 #include "EntityFactoryImpl.h"
@@ -48,7 +48,7 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 	auto const& maxConnections = cellDesc.maxConnections.get_value_or(0);
 	auto const& tokenAccessNumber = cellDesc.tokenBranchNumber.get_value_or(0);
 	uint64_t id = cellDesc.id == 0 ? context->getNumberGenerator()->getTag() : cellDesc.id;
-	auto cell = new CellImpl(id, energy, context, maxConnections, tokenAccessNumber);
+	auto cell = new Cell(id, energy, context, maxConnections, tokenAccessNumber);
 	cell->setFlagTokenBlocked(cellDesc.tokenBlocked.get_value_or(false));
 	cell->setMetadata(cellDesc.metadata.get_value_or(CellMetadata()));
 

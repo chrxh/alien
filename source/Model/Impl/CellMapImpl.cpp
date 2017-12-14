@@ -3,9 +3,9 @@
 #include "Model/Local/SpaceMetricLocal.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/Settings.h"
-#include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 
+#include "Cell.h"
 #include "CellMapImpl.h"
 
 CellMapImpl::CellMapImpl(QObject* parent /*= nullptr*/)

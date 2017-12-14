@@ -264,7 +264,6 @@
     <ClInclude Include="..\..\source\Model\Api\DllExport.h" />
     <ClInclude Include="..\..\source\Model\Api\ModelBuilderFacade.h" />
     <ClInclude Include="..\..\source\Model\Api\ModelServices.h" />
-    <ClInclude Include="..\..\source\Model\Api\SerializationFacade.h" />
     <CustomBuild Include="..\..\source\Model\Api\Serializer.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing Serializer.h...</Message>
@@ -313,7 +312,6 @@
     <ClInclude Include="..\..\source\Model\Impl\CellComputerFunctionImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\ConstructorFunction.h" />
     <ClInclude Include="..\..\source\Model\Impl\CellFeatureFactoryImpl.h" />
-    <ClInclude Include="..\..\source\Model\Impl\CellImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\PropulsionFunction.h" />
     <ClInclude Include="..\..\source\Model\Impl\ScannerFunction.h" />
     <ClInclude Include="..\..\source\Model\Impl\SensorFunction.h" />
@@ -334,12 +332,11 @@
     <ClInclude Include="..\..\source\Model\Impl\WeaponFunction.h" />
     <ClInclude Include="..\..\source\Model\Impl\ClusterImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\ContextFactoryImpl.h" />
-    <ClInclude Include="..\..\source\Model\Impl\DefinitionsImpl.h" />
+    <ClInclude Include="..\..\source\Model\Impl\Definitions.h" />
     <ClInclude Include="..\..\source\Model\Impl\EnergyGuidanceImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\EntityFactoryImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\ParticleImpl.h" />
-    <ClInclude Include="..\..\source\Model\Impl\SerializationFacadeImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\SpaceMetricImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\TokenImpl.h" />
@@ -717,7 +714,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Model\Api\ChangeDescriptions.cpp" />
-    <ClCompile Include="..\..\source\Model\Api\Definitions.cpp" />
     <ClCompile Include="..\..\source\Model\Api\Descriptions.cpp" />
     <ClCompile Include="..\..\source\Model\Api\ModelServices.cpp" />
     <ClCompile Include="..\..\source\Model\Api\Settings.cpp" />
@@ -730,7 +726,6 @@
     <ClCompile Include="..\..\source\Model\Impl\DescriptionHelperImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ConstructorFunction.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\CellFeatureFactoryImpl.cpp" />
-    <ClCompile Include="..\..\source\Model\Impl\CellImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\CellMapImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\PropulsionFunction.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ScannerFunction.cpp" />
@@ -744,7 +739,6 @@
     <ClCompile Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ParticleImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ParticleMapImpl.cpp" />
-    <ClCompile Include="..\..\source\Model\Impl\SerializationFacadeImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationAccessImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationContextImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationControllerImpl.cpp" />
@@ -755,9 +749,11 @@
     <ClCompile Include="..\..\source\Model\Impl\UnitImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\UnitThread.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\UnitThreadControllerImpl.cpp" />
+    <ClCompile Include="..\..\source\Model\Local\Cell.cpp" />
     <ClCompile Include="..\..\source\Model\Local\CellComputerCompilerLocal.cpp" />
     <ClCompile Include="..\..\source\Model\Local\CellFeatureChain.cpp" />
     <ClCompile Include="..\..\source\Model\Local\CellFunction.cpp" />
+    <ClCompile Include="..\..\source\Model\Local\Definitions.cpp" />
     <ClCompile Include="..\..\source\Model\Local\PhysicalQuantityConverter.cpp" />
     <ClCompile Include="..\..\source\Model\Local\Physics.cpp" />
     <ClCompile Include="..\..\source\Model\Local\EntityWithTimestamp.cpp" />

@@ -1,80 +1,115 @@
 #pragma once
 
+#include <QtGlobal>
+#include <QVector>
 #include <QVector2D>
 
-#include "Model/Api/Definitions.h"
 #include "Model/Api/ChangeDescriptions.h"
+#include "Definitions.h"
 
 class Cell
 {
 public:
-	virtual ~Cell() = default;
 
-	virtual void setContext(UnitContext* context) = 0;
+	Cell(uint64_t id, qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber);
 
-	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
-	virtual void applyChangeDescription(CellChangeDescription const& change) = 0;
+    ~Cell();
 
-    virtual void registerFeatures (CellFeatureChain* features) = 0;
-    virtual CellFeatureChain* getFeatures () const = 0;
-    virtual void removeFeatures () = 0;
+	virtual void setContext(UnitContext* context);
 
-    virtual bool connectable (Cell* otherCell) const = 0;
-    virtual bool isConnectedTo (Cell* otherCell) const = 0;
-    virtual void resetConnections (int maxConnections) = 0;
-    virtual void newConnection (Cell* otherCell) = 0;
-    virtual void delConnection (Cell* otherCell) = 0;
-    virtual void delAllConnection () = 0;
-    virtual int getNumConnections () const = 0;
-    virtual void setNumConnections (int num) = 0;
-    virtual int getMaxConnections () const = 0;
-    virtual void setMaxConnections (int maxConnections) = 0;
-    virtual Cell* getConnection (int i) const = 0;
-    virtual void setConnection (int i, Cell* cell) = 0;
-    virtual QVector2D calcNormal (QVector2D outerSpace) const = 0;
+	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const;
+	virtual void applyChangeDescription(CellChangeDescription const& change);
 
-    virtual void activatingNewTokens () = 0;
-    virtual const quint64& getId () const = 0;
-    virtual void setId (quint64 id) = 0;
-    virtual const quint64& getTag () const = 0;
-    virtual void setTag (quint64 tag) = 0;
-    virtual int getNumToken (bool newTokenStackPointer = false) const = 0;
-    virtual Token* getToken (int i) const = 0;
-    virtual void setToken (int i, Token* token) = 0;
-    enum class ActivateToken { Now, Later };
-    enum class UpdateTokenBranchNumber { Yes, No };
-    virtual void addToken (Token* token, ActivateToken act = ActivateToken::Now, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::Yes) = 0;
-    virtual void delAllTokens () = 0;
+    void registerFeatures (CellFeatureChain* features);
+    CellFeatureChain* getFeatures () const;
+    void removeFeatures ();
 
-    virtual void setCluster (Cluster* cluster) = 0;
-    virtual Cluster* getCluster () const = 0;
-    virtual QVector2D calcPosition (bool metricCorrection = false) const = 0;
-    virtual void setAbsPosition (QVector2D pos) = 0;
-    virtual void setAbsPositionAndUpdateMap (QVector2D pos) = 0;
-    virtual QVector2D getRelPosition () const = 0;
-    virtual void setRelPosition (QVector2D relPos) = 0;
+    bool connectable (Cell* otherCell) const;
+    bool isConnectedTo (Cell* otherCell) const;
+    void resetConnections (int maxConnections);
+    void newConnection (Cell* otherCell);
+    void delConnection (Cell* otherCell);
+    void delAllConnection ();
+    int getNumConnections () const;
+    void setNumConnections (int num);
+    int getMaxConnections () const;
+    void setMaxConnections (int maxConnections);
+    Cell* getConnection (int i) const;
+    void setConnection (int i, Cell* cell);
+    QVector2D calcNormal (QVector2D outerSpace) const;
 
-    virtual int getBranchNumber () const = 0;
-    virtual void setBranchNumber (int i) = 0;
-    virtual bool isTokenBlocked () const = 0;
-    virtual void setFlagTokenBlocked (bool block) = 0;
-    virtual qreal getEnergy() const = 0;
-    virtual qreal getEnergyIncludingTokens() const = 0;
-    virtual void setEnergy (qreal i) = 0;
+    void activatingNewTokens ();
+    const quint64& getId () const;
+    void setId (quint64 id);
+    const quint64& getTag () const;
+    void setTag (quint64 tag);
+    int getNumToken (bool newTokenStackPointer = false) const;
+    Token* getToken (int i) const;
+    void setToken (int i, Token* token);
+	enum class ActivateToken { Now, Later };
+	enum class UpdateTokenBranchNumber { Yes, No };
+	void addToken(Token* token, ActivateToken act = ActivateToken::Now, UpdateTokenBranchNumber update = UpdateTokenBranchNumber::Yes);
+    void delAllTokens ();
+    Token* takeTokenFromStack ();
+	void mutationByChance();
 
-    virtual QVector2D getVelocity () const = 0;
-    virtual void setVelocity (QVector2D vel) = 0;
-    virtual int getProtectionCounter () const = 0;
-    virtual void setProtectionCounter (int counter) = 0;
-    virtual bool isToBeKilled() const = 0;
-    virtual void setToBeKilled (bool toBeKilled) = 0;
-    virtual Token* takeTokenFromStack () = 0;
-	virtual void mutationByChance() = 0;
+    void setCluster (Cluster* cluster);
+    Cluster* getCluster () const;
+    QVector2D calcPosition (bool metricCorrection = false) const;
+    void setAbsPosition (QVector2D pos);
+    void setAbsPositionAndUpdateMap (QVector2D pos);
+    QVector2D getRelPosition () const;
+    void setRelPosition (QVector2D relPos);
 
-	virtual CellMetadata getMetadata() const = 0;
-	virtual void setMetadata(CellMetadata metadata) = 0;
+    int getBranchNumber () const;
+    void setBranchNumber (int i);
+    bool isTokenBlocked () const;
+    void setFlagTokenBlocked (bool block);
+    qreal getEnergy() const;
+    qreal getEnergyIncludingTokens() const;
+    void setEnergy (qreal i);
 
-    virtual void serializePrimitives (QDataStream& stream) const = 0;
-    virtual void deserializePrimitives(QDataStream& stream) = 0;
+    QVector2D getVelocity () const;
+    void setVelocity (QVector2D vel);
+    int getProtectionCounter () const;
+    void setProtectionCounter (int counter);
+    bool isToBeKilled() const;
+    void setToBeKilled (bool toBeKilled);
+
+	CellMetadata getMetadata() const;
+	void setMetadata(CellMetadata metadata);
+
+    void serializePrimitives (QDataStream& stream) const;
+    void deserializePrimitives(QDataStream& stream);
+
+private:
+    friend class Cluster;
+
+	UnitContext* _context = nullptr;
+	CellFeatureChain* _features = nullptr;
+
+    QVector<Token*> _tokenStack;
+    QVector<Token*> _newTokenStack;
+    int _tokenStackPointer = 0;
+    int _newTokenStackPointer = 0;
+
+    bool _toBeKilled = false;
+    quint64 _tag = 0;
+    quint64 _id = 0;
+    int _protectionCounter = 0;
+    QVector2D _relPos;
+    Cluster* _cluster = nullptr;
+    qreal _energy = 0.0;
+
+    int _maxConnections = 0;
+    int _numConnections = 0;
+    Cell** _connectingCells = nullptr;
+
+    int _tokenBranchNumber = 0;
+    bool _blockToken = false;
+
+    QVector2D _vel;
+
+	CellMetadata _metadata;
 };
 

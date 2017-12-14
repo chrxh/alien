@@ -1,6 +1,5 @@
 #include "CellFeatureFactoryImpl.h"
 
-#include "Model/Local/Cell.h"
 #include "CellComputerFunctionImpl.h"
 #include "ConstructorFunction.h"
 #include "PropulsionFunction.h"
@@ -9,6 +8,7 @@
 #include "SensorFunction.h"
 #include "CommunicatorFunction.h"
 #include "EnergyGuidanceImpl.h"
+#include "Cell.h"
 
 namespace {
     CellFeatureChain* registerNewFeature (Cell* cell, CellFeatureChain* newFeature)

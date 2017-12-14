@@ -6,7 +6,7 @@
 
 #include "Model/Local/UnitThreadController.h"
 
-#include "DefinitionsImpl.h"
+#include "Definitions.h"
 #include "SignalWrapper.h"
 
 class MODEL_EXPORT UnitThreadControllerImpl
