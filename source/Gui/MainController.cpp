@@ -33,7 +33,6 @@ void MainController::init()
 {
 	_model = new MainModel(this);
 	_view = new MainView();
-
 	_view->init(_model, this);
 
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -46,6 +45,7 @@ void MainController::init()
 	auto simAccess = facade->buildSimulationAccess();
 	SET_CHILD(_simAccess, simAccess);
 	_dataManipulator = new DataManipulator(this);
+	_notifier = new Notifier(this);
 
 	_serializer->init(_simAccess);
 	
@@ -68,9 +68,7 @@ void MainController::onRunSimulation(bool run)
 
 void MainController::onNewSimulation(NewSimulationConfig config)
 {
-	auto origDataManipulator = _dataManipulator;
-	auto origNotifier = _notifier;
-	auto origSimController = _simController;
+	delete _simController;
 
 	_model->setSimulationParameters(config.parameters);
 	_model->setSymbolTable(config.symbolTable);
@@ -79,14 +77,10 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	_simAccess->init(_simController->getContext());
 
-	_notifier = new Notifier(this);
 	auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
 	_dataManipulator->init(_notifier, _simAccess, descHelper, _simController->getContext());
 
 	_view->setupEditors(_simController, _dataManipulator, _notifier);
-
-	delete origNotifier;
-	delete origSimController;
 
 	addRandomEnergy(config.energy);
 
@@ -113,7 +107,6 @@ bool MainController::onLoadSimulation(string const & filename)
 	}
 
 	try {
-		delete _notifier;
 		delete _simController;
 
 		_simController = _serializer->deserializeSimulation(data);
@@ -121,7 +114,6 @@ bool MainController::onLoadSimulation(string const & filename)
 		_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
 		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
 
-		_notifier = new Notifier(this);
 		auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 		auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
 		_dataManipulator->init(_notifier, _simAccess, descHelper, _simController->getContext());

@@ -28,8 +28,11 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
 	_manipulator = manipulator;
 
-	connect(_context, &DataEditContext::show, this, &DataEditController::onShow);
-	connect(_notifier, &Notifier::notify, this, &DataEditController::receivedExternalNotifications);
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
+	_connections.push_back(connect(_context, &DataEditContext::show, this, &DataEditController::onShow));
+	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataEditController::receivedExternalNotifications));
 
 	onShow(false);
 }

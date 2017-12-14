@@ -37,7 +37,6 @@ void ItemUniverseView::init(Notifier* notifier, SimulationController * controlle
 	SET_CHILD(_itemManager, itemManager);
 
 	_itemManager->init(this, viewport, _controller->getContext()->getSimulationParameters());
-	connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled);
 }
 
 void ItemUniverseView::activate()
@@ -45,18 +44,19 @@ void ItemUniverseView::activate()
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
 	_itemManager->activate(size);
 
-	connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData);
-	connect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications);
-	connect(_viewport, &ViewportInterface::scrolling, this, &ItemUniverseView::scrolling);
+	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
+	_connections.push_back(connect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications));
+	_connections.push_back(connect(_viewport, &ViewportInterface::scrolling, this, &ItemUniverseView::scrolling));
+	_connections.push_back(connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled));
 
 	requestData();
 }
 
 void ItemUniverseView::deactivate()
 {
-	disconnect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData);
-	disconnect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications);
-	disconnect(_viewport, &ViewportInterface::scrolling, this, &ItemUniverseView::scrolling);
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
 }
 
 void ItemUniverseView::refresh()
