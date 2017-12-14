@@ -12,6 +12,7 @@
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/Serializer.h"
+#include "Model/Api/DescriptionHelper.h"
 
 #include "MainController.h"
 #include "MainView.h"
@@ -41,9 +42,11 @@ void MainController::init()
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto serializer = facade->buildSerializer();
-	SET_CHILD(_serializer, serializer);
 	auto simAccess = facade->buildSimulationAccess();
+	auto descHelper = facade->buildDescriptionHelper();
+	SET_CHILD(_serializer, serializer);
 	SET_CHILD(_simAccess, simAccess);
+	SET_CHILD(_descHelper, descHelper);
 	_dataManipulator = new DataManipulator(this);
 	_notifier = new Notifier(this);
 
@@ -76,9 +79,8 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	_simAccess->init(_simController->getContext());
-
-	auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
-	_dataManipulator->init(_notifier, _simAccess, descHelper, _simController->getContext());
+	_descHelper->init(_simController->getContext());
+	_dataManipulator->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
 	_view->setupEditors(_simController, _dataManipulator, _notifier);
 
@@ -115,8 +117,8 @@ bool MainController::onLoadSimulation(string const & filename)
 		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
 
 		auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-		auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
-		_dataManipulator->init(_notifier, _simAccess, descHelper, _simController->getContext());
+		_descHelper->init(_simController->getContext());
+		_dataManipulator->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
 		_view->setupEditors(_simController, _dataManipulator, _notifier);
 
