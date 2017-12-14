@@ -52,7 +52,8 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto controller = facade->buildSimulationController(1, { 1, 1 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess(controller->getContext());
+	auto access = facade->buildSimulationAccess();
+	access->init(controller->getContext());
 
 	createTestData(access);
 	runSimulation(20, controller);
@@ -67,7 +68,8 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto controller = facade->buildSimulationController(1, { 12, 6 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess(controller->getContext());
+	auto access = facade->buildSimulationAccess();
+	access->init(controller->getContext());
 
 	createTestData(access);
 	runSimulation(20, controller);
@@ -82,7 +84,8 @@ TEST_F(Benchmark, benchmarkFourThread)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto controller = facade->buildSimulationController(4, { 12, 6 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess(controller->getContext());
+	auto access = facade->buildSimulationAccess();
+	access->init(controller->getContext());
 
 	createTestData(access);
 	runSimulation(20, controller);
@@ -97,7 +100,8 @@ TEST_F(Benchmark, benchmarkEightThread)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto controller = facade->buildSimulationController(8, { 12, 6 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess(controller->getContext());
+	auto access = facade->buildSimulationAccess();
+	access->init(controller->getContext());
 
 	createTestData(access);
 	runSimulation(20, controller);

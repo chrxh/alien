@@ -24,7 +24,7 @@ protected:
 	SimulationController* _controller = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
-	DescriptionHelper* _connector = nullptr;
+	DescriptionHelper* _descHelper = nullptr;
 
 	IntVector2D _universeSize{ 600, 300 };
 
@@ -41,13 +41,14 @@ CellConnectorTest::CellConnectorTest()
 	_controller = facade->buildSimulationController(1, { 1,1 }, _universeSize, symbols, _parameters);
 	auto context = static_cast<SimulationContextLocal*>(_controller->getContext());
 	_numberGen = context->getNumberGenerator();
-	_connector = facade->buildDescriptionHelper(context);
+	_descHelper = facade->buildDescriptionHelper();
+	_descHelper->init(context);
 }
 
 CellConnectorTest::~CellConnectorTest()
 {
 	delete _controller;
-	delete _connector;
+	delete _descHelper;
 }
 
 bool CellConnectorTest::clusterConsistsOfFollowingCells(ClusterDescription const &cluster, set<uint64_t> const & cellIds)
@@ -66,14 +67,14 @@ TEST_F(CellConnectorTest, testMoveOneCellAway)
 	vector<uint64_t> cellIds;
 	cellIds.push_back(_numberGen->getTag());
 	cellIds.push_back(_numberGen->getTag());
-	_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).addCells(
-	{
-		CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
-		CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
-	}));
+	_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).setPos({ 100.5, 100 }).setAngle(0).setVel({ 0, 0 }).setAngularVel(0.0)
+		.addCells({
+			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
+		}));
 	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 103, 100 });
 
-	_connector->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
+	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -90,8 +91,8 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
@@ -99,7 +100,7 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 	});
 	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 200, 101.1f });
 
-	_connector->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
+	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
@@ -114,20 +115,20 @@ TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100.5, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200.5, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[3] }).setMaxConnections(2),
 			CellDescription().setPos({ 201, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2] }).setMaxConnections(1)
 		})
 	});
 	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 199, 100 });
 
-	_connector->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
+	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -144,24 +145,24 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
 	});
 	_data.clusters->at(0).cells->at(0).pos = QVector2D({ 200, 100 });
 
-	_connector->reconnect(_data, { _data.clusters->at(0).cells->at(0).id });
+	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(0).id });
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
 	ASSERT_EQ(1, _data.clusters->size());
@@ -175,29 +176,29 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
 	});
 	_data.clusters->at(0).cells->at(0).pos = QVector2D({ 200, 100 });
 
-	_connector->reconnect(_data, { _data.clusters->at(0).cells->at(0).id });
+	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(0).id });
 	_navi.update(_data);
 	uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 	uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 	_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 100, 100 });
-	_connector->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
+	_descHelper->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -216,17 +217,17 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		cellIds.push_back(_numberGen->getTag());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).addCells(
-		{
+		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
@@ -237,7 +238,7 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 200, 100 });
-		_connector->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
+		_descHelper->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 		_navi.update(_data);
 
 		auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -247,7 +248,7 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 100, 100 });
-		_connector->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
+		_descHelper->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 		_navi.update(_data);
 
 		cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -266,19 +267,19 @@ TEST_F(CellConnectorTest, testMoveSeveralCells)
 	for (int i = 0; i < 5; ++i) {
 		cellIds.push_back(_numberGen->getTag());
 	}
-	_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).addCells(
-	{
-		CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
-		CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(3),
-		CellDescription().setPos({ 102, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[1], cellIds[3] }).setMaxConnections(5),
-		CellDescription().setPos({ 103, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2], cellIds[4] }).setMaxConnections(3),
-		CellDescription().setPos({ 104, 100 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(4)
-	}));
+	_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).setPos({ 102, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		.addCells({
+			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
+			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(3),
+			CellDescription().setPos({ 102, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[1], cellIds[3] }).setMaxConnections(5),
+			CellDescription().setPos({ 103, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2], cellIds[4] }).setMaxConnections(3),
+			CellDescription().setPos({ 104, 100 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(4)
+		}));
 	for (int i = 0; i < 5; ++i) {
 		_data.clusters->at(0).cells->at(i).pos = QVector2D({ 200 + static_cast<float>(i), 100 });
 	}
 
-	_connector->reconnect(_data,
+	_descHelper->reconnect(_data,
 	{
 		_data.clusters->at(0).cells->at(0).id,
 		_data.clusters->at(0).cells->at(1).id,
@@ -311,28 +312,29 @@ TEST_F(CellConnectorTest, testMoveSeveralCellsOverOtherCells)
 	}
 
 	for (int j = 0; j < 4; ++j) {
-		_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).addCells({
-			CellDescription().setPos({ 100 + static_cast<float>(j) * 25, 100 }).setId(cellIds[0 + j * 5]).setMaxConnections(2).setConnectingCells({ cellIds[1 + j * 5] }),
-			CellDescription().setPos({ 100 + static_cast<float>(j) * 25, 100 }).setId(cellIds[1 + j * 5]).setMaxConnections(3).setConnectingCells({ cellIds[0 + j * 5], cellIds[2 + j * 5] }),
-			CellDescription().setPos({ 100 + static_cast<float>(j) * 25, 100 }).setId(cellIds[2 + j * 5]).setMaxConnections(3).setConnectingCells({ cellIds[1 + j * 5], cellIds[3 + j * 5] }),
-			CellDescription().setPos({ 100 + static_cast<float>(j) * 25, 100 }).setId(cellIds[3 + j * 5]).setMaxConnections(3).setConnectingCells({ cellIds[2 + j * 5], cellIds[4 + j * 5] }),
-			CellDescription().setPos({ 100 + static_cast<float>(j) * 25, 100 }).setId(cellIds[4 + j * 5]).setMaxConnections(2).setConnectingCells({ cellIds[3 + j * 5] })
-		}));
+		_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).setPos({ 102 + static_cast<float>(j) * 25, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+			.addCells({
+				CellDescription().setPos({ 100 + static_cast<float>(j) * 25, 100 }).setId(cellIds[0 + j * 5]).setMaxConnections(2).setConnectingCells({ cellIds[1 + j * 5] }),
+				CellDescription().setPos({ 101 + static_cast<float>(j) * 25, 100 }).setId(cellIds[1 + j * 5]).setMaxConnections(3).setConnectingCells({ cellIds[0 + j * 5], cellIds[2 + j * 5] }),
+				CellDescription().setPos({ 102 + static_cast<float>(j) * 25, 100 }).setId(cellIds[2 + j * 5]).setMaxConnections(3).setConnectingCells({ cellIds[1 + j * 5], cellIds[3 + j * 5] }),
+				CellDescription().setPos({ 103 + static_cast<float>(j) * 25, 100 }).setId(cellIds[3 + j * 5]).setMaxConnections(3).setConnectingCells({ cellIds[2 + j * 5], cellIds[4 + j * 5] }),
+				CellDescription().setPos({ 104 + static_cast<float>(j) * 25, 100 }).setId(cellIds[4 + j * 5]).setMaxConnections(2).setConnectingCells({ cellIds[3 + j * 5] })
+			}));
 	}
 
 	for (int movement = 0; movement < 100; ++movement) {
 		_navi.update(_data);
 
-		list<uint64_t> ids;
+		unordered_set<uint64_t> ids;
 		for (int i = 0; i < 10; ++i) {
 			auto &cluster = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[i]));
 			auto &cell = cluster.cells->at(_navi.cellIndicesByCellIds.at(cellIds[i]));
 			auto pos = *cell.pos;
 			pos.setX(pos.x() + 1);
 			cell.pos = pos;
-			ids.push_back(cell.id);
+			ids.insert(cell.id);
 		}
-		_connector->reconnect(_data, ids);
+		_descHelper->reconnect(_data, ids);
 	}
 	_navi.update(_data);
 
