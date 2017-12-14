@@ -18,7 +18,7 @@ public:
     VisualEditController(QWidget *parent = 0);
     virtual ~VisualEditController();
 
-	virtual void init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator);
+	virtual void init(Notifier* notifier, SimulationController* controller, DataController* manipulator);
 
 	virtual void refresh();
 

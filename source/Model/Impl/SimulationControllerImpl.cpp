@@ -13,10 +13,7 @@ namespace
 
 SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
 	: SimulationController(parent)
-	, _oneSecondTimer(new QTimer(this))
 {
-	connect(_oneSecondTimer, &QTimer::timeout, this, &SimulationControllerImpl::oneSecondTimerTimeout);
-	_oneSecondTimer->start(1000);
 }
 
 void SimulationControllerImpl::init(SimulationContext* context)
@@ -24,7 +21,6 @@ void SimulationControllerImpl::init(SimulationContext* context)
 	SET_CHILD(_context, static_cast<SimulationContextLocal*>(context));
 	connect(_context->getUnitThreadController(), &UnitThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
-		++_timestepsPerSecond;
 		if (_flagSimulationRunning) {
 			if (_timeSinceLastStart.elapsed() > (1000.0 / displayFps)*_displayedFramesSinceLastStart) {
 				++_displayedFramesSinceLastStart;
@@ -59,13 +55,6 @@ SimulationContext * SimulationControllerImpl::getContext() const
 {
 	return _context;
 }
-
-Q_SLOT void SimulationControllerImpl::oneSecondTimerTimeout()
-{
-	Q_EMIT updateTimestepsPerSecond(_timestepsPerSecond);
-	_timestepsPerSecond = 0;
-}
-
 
 
 

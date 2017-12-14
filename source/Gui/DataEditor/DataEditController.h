@@ -3,7 +3,7 @@
 #include <QWidget>
 
 #include "Gui/Definitions.h"
-#include "Gui/DataManipulator.h"
+#include "Gui/DataController.h"
 
 class DataEditController
 	: public QObject
@@ -13,7 +13,7 @@ public:
 	DataEditController(QWidget *parent = nullptr);
 	virtual ~DataEditController() = default;
 
-	void init(IntVector2D const& upperLeftPosition, Notifier* notifier, DataManipulator* manipulator, SimulationContext* context);
+	void init(IntVector2D const& upperLeftPosition, Notifier* notifier, DataController* manipulator, SimulationContext* context);
 
 	DataEditContext* getContext() const;
 
@@ -35,7 +35,7 @@ private:
 	Notifier* _notifier = nullptr;
 	DataEditModel* _model = nullptr;
 	DataEditView* _view = nullptr;
-	DataManipulator* _manipulator = nullptr;
+	DataController* _manipulator = nullptr;
 	DataEditContext* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	SymbolTable* _symbolTable = nullptr;

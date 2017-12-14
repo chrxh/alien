@@ -3,7 +3,7 @@
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "Gui/DataManipulator.h"
+#include "Gui/DataController.h"
 #include "Gui/Notifier.h"
 
 #include "ToolbarView.h"
@@ -18,7 +18,7 @@ ToolbarController::ToolbarController(QWidget* parent)
 	_context = new ToolbarContext(this);
 }
 
-void ToolbarController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataManipulator* manipulator, const SimulationContext* context)
+void ToolbarController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataController* manipulator, const SimulationContext* context)
 {
 	_notifier = notifier;
 	_manipulator = manipulator;

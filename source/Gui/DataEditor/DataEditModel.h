@@ -14,7 +14,7 @@ public:
 	DataEditModel(QObject *parent);
 	virtual ~DataEditModel() = default;
 
-	void init(DataManipulator* manipulator, SimulationParameters const* parameters, SymbolTable* symbols);
+	void init(DataController* manipulator, SimulationParameters const* parameters, SymbolTable* symbols);
 
 	void setClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
 	void setParticle(ParticleDescription const& particle);
@@ -43,7 +43,7 @@ private:
 	unordered_set<uint64_t> _selectedCellIds;
 	unordered_set<uint64_t> _selectedParticleIds;
 
-	DataManipulator* _manipulator = nullptr;
+	DataController* _manipulator = nullptr;
 	SimulationParameters const* _parameters = nullptr;
 	SymbolTable* _symbols = nullptr;
 };

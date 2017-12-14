@@ -11,7 +11,7 @@
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SpaceProperties.h"
 
-#include "DataManipulator.h"
+#include "DataController.h"
 #include "PixelUniverseView.h"
 
 PixelUniverseView::PixelUniverseView(QObject* parent)
@@ -26,7 +26,7 @@ PixelUniverseView::~PixelUniverseView()
 	delete _image;
 }
 
-void PixelUniverseView::init(SimulationController* controller, DataManipulator* manipulator, ViewportInterface* viewport)
+void PixelUniverseView::init(SimulationController* controller, DataController* manipulator, ViewportInterface* viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
@@ -42,7 +42,7 @@ void PixelUniverseView::init(SimulationController* controller, DataManipulator* 
 void PixelUniverseView::activate()
 {
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData));
-	_connections.push_back(connect(_manipulator, &DataManipulator::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection));
+	_connections.push_back(connect(_manipulator, &DataController::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolling, this, &PixelUniverseView::scrolling));
 
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();

@@ -14,10 +14,11 @@
 #include "Model/Api/Serializer.h"
 #include "Model/Api/DescriptionHelper.h"
 
+#include "InfoController.h"
 #include "MainController.h"
 #include "MainView.h"
 #include "MainModel.h"
-#include "DataManipulator.h"
+#include "DataController.h"
 #include "Notifier.h"
 
 MainController::MainController(QObject * parent)
@@ -34,7 +35,8 @@ void MainController::init()
 {
 	_model = new MainModel(this);
 	_view = new MainView();
-	_view->init(_model, this);
+	_infoController = new InfoController(this);
+	_view->init(_model, this, _infoController);
 
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_numberGenerator = factory->buildRandomNumberGenerator();
@@ -47,11 +49,10 @@ void MainController::init()
 	SET_CHILD(_serializer, serializer);
 	SET_CHILD(_simAccess, simAccess);
 	SET_CHILD(_descHelper, descHelper);
-	_dataManipulator = new DataManipulator(this);
+	_dataManipulator = new DataController(this);
 	_notifier = new Notifier(this);
 
 	_serializer->init(_simAccess);
-	
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
 	//default simulation
@@ -78,6 +79,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
+	connectSimController();
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
 	_dataManipulator->init(_notifier, _simAccess, _descHelper, _simController->getContext());
@@ -107,11 +109,10 @@ bool MainController::onLoadSimulation(string const & filename)
 	if(stream.fail()) {
 		return false;
 	}
-
 	try {
 		delete _simController;
-
 		_simController = _serializer->deserializeSimulation(data);
+		connectSimController();
 
 		_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
 		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
@@ -121,13 +122,19 @@ bool MainController::onLoadSimulation(string const & filename)
 		_dataManipulator->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
 		_view->setupEditors(_simController, _dataManipulator, _notifier);
-
 		_view->refresh();
 	}
 	catch(...) {
 		return false;
 	}
 	return true;
+}
+
+void MainController::connectSimController() const
+{
+	connect(_simController, &SimulationController::nextTimestepCalculated, [this]() {
+		_infoController->increaseTimestep();
+	});
 }
 
 void MainController::addRandomEnergy(double amount)

@@ -32,7 +32,7 @@ VisualEditController::~VisualEditController()
     delete ui;
 }
 
-void VisualEditController::init(Notifier* notifier, SimulationController* controller, DataManipulator* manipulator)
+void VisualEditController::init(Notifier* notifier, SimulationController* controller, DataController* manipulator)
 {
 	_pixelUniverseInit = false;
 	_shapeUniverseInit = false;
