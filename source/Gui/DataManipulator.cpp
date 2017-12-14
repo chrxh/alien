@@ -15,10 +15,12 @@ void DataManipulator::init(Notifier* notifier, SimulationAccess * access, Descri
 	_notifier = notifier;
 	_parameters = context->getSimulationParameters();
 
-	disconnect();
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection);
-	connect(_access, &SimulationAccess::imageReady, this, &DataManipulator::imageReady);
-	connect(_notifier, &Notifier::notify, this, &DataManipulator::sendDataChangesToSimulation);
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
+	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection));
+	_connections.push_back(connect(_access, &SimulationAccess::imageReady, this, &DataManipulator::imageReady));
+	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataManipulator::sendDataChangesToSimulation));
 }
 
 DataDescription & DataManipulator::getDataRef()

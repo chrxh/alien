@@ -26,6 +26,8 @@ private:
 	Q_SLOT void retrieveAndDisplayData();
 	Q_SLOT void scrolling();
 
+	list<QMetaObject::Connection> _connections;
+
 	DataManipulator* _manipulator = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;

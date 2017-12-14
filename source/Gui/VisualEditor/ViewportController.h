@@ -33,6 +33,8 @@ private:
 	void setSceneToView(optional<ActiveScene> oldActiveScene, ActiveScene activeScene);
 
 
+	list<QMetaObject::Connection> _connections;
+
 	QGraphicsView* _view = nullptr;
 	QGraphicsScene* _pixelScene = nullptr;
 	QGraphicsScene* _itemScene = nullptr;
