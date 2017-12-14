@@ -14,6 +14,7 @@ public:
 
 	virtual void init(SimulationContext* context) override;
 
+	virtual void clear() override;
 	virtual void updateData(DataChangeDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	virtual void requireImage(IntRect rect, QImage* target) override;

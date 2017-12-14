@@ -1,4 +1,4 @@
-#include "Model/Local/SymbolTable.h"
+#include "Model/Api/SymbolTable.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/SpaceProperties.h"
 
@@ -31,6 +31,16 @@ SpaceProperties * SimulationContextGpuImpl::getSpaceProperties() const
 	return _metric;
 }
 
+IntVector2D SimulationContextGpuImpl::getGridSize() const
+{
+	return IntVector2D();
+}
+
+int SimulationContextGpuImpl::getMaxThreads() const
+{
+	return 0;
+}
+
 SymbolTable * SimulationContextGpuImpl::getSymbolTable() const
 {
 	return _symbolTable;
@@ -39,6 +49,11 @@ SymbolTable * SimulationContextGpuImpl::getSymbolTable() const
 SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
 {
 	return _parameters;
+}
+
+CellComputerCompiler * SimulationContextGpuImpl::getCellComputerCompiler() const
+{
+	return nullptr;
 }
 
 ThreadController * SimulationContextGpuImpl::getGpuThreadController() const
