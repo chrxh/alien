@@ -3,7 +3,6 @@
 
 #include "Base/ServiceLocator.h"
 #include "Model/Api/Settings.h"
-#include "Model/Api/SerializationFacade.h"
 #include "Model/Api/SymbolTable.h"
 #include "Model/Api/ModelBuilderFacade.h"
 #include "gui/Settings.h"
@@ -136,7 +135,8 @@ void SymbolTableDialog::loadButtonClicked ()
 			QDataStream in(&file);
 
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
+			//TODO
+			SymbolTable* symbolTable /*= facade->deserializeSymbolTable(in)*/;
 			_symbolTable = symbolTable;
 			delete symbolTable;
             symbolTableToWidgets();
@@ -159,7 +159,10 @@ void SymbolTableDialog::saveButtonClicked ()
 
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
 			QDataStream out(&file);
+			//TODO
+/*
 			facade->serializeSymbolTable(_symbolTable, out);
+*/
 			file.close();
         }
         else {
@@ -179,7 +182,8 @@ void SymbolTableDialog::mergeWithButtonClicked ()
 
 			QDataStream in(&file);
 			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-			SymbolTable* symbolTable = facade->deserializeSymbolTable(in);
+			//TODO
+			SymbolTable* symbolTable /*= facade->deserializeSymbolTable(in)*/;
 			_symbolTable->mergeEntries(*symbolTable);
 			delete symbolTable;
 			file.close();
