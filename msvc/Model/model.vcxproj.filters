@@ -56,16 +56,10 @@
     <ClInclude Include="..\..\source\Model\Api\ModelServices.h">
       <Filter>Source Files\Api</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Api\SerializationFacade.h">
-      <Filter>Source Files\Api</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Api\Settings.h">
       <Filter>Source Files\Api</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\AccessPortFactory.h">
-      <Filter>Source Files\Local</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Local\Cell.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\CellFeatureFactory.h">
@@ -116,16 +110,10 @@
     <ClInclude Include="..\..\source\Model\Impl\CellFeatureFactoryImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\CellImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\ClusterImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\ContextFactoryImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\DefinitionsImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\EnergyGuidanceImpl.h">
@@ -138,9 +126,6 @@
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\ParticleImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\SerializationFacadeImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h">
@@ -191,12 +176,15 @@
     <ClInclude Include="..\..\source\Model\Local\EntityWithTimestamp.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\Definitions.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Local\Cell.h">
+      <Filter>Source Files\Local</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Model\Api\ChangeDescriptions.cpp">
-      <Filter>Source Files\Api</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Api\Definitions.cpp">
       <Filter>Source Files\Api</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Api\Descriptions.cpp">
@@ -343,9 +331,6 @@
     <ClCompile Include="..\..\source\Model\Impl\CellFeatureFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\CellImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\CellMapImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -387,9 +372,6 @@
     </ClCompile>
     <ClCompile Include="Release\moc_ParticleMapImpl.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\SerializationFacadeImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SignalWrapper.cpp">
       <Filter>Generated Files\Tests</Filter>
@@ -597,6 +579,12 @@
     </ClCompile>
     <ClCompile Include="Release\moc_Serializer.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Local\Definitions.cpp">
+      <Filter>Source Files\Local</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Local\Cell.cpp">
+      <Filter>Source Files\Local</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Api/Definitions.h"
+#include "Definitions.h"
 
 class UnitContext
 	: public QObject

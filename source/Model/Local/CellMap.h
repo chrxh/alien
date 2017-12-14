@@ -1,7 +1,6 @@
-#ifndef CELLMAP_H
-#define CELLMAP_H
+#pragma once
 
-#include "Model/Api/Definitions.h"
+#include "Definitions.h"
 
 class CellMap
 	: public QObject
@@ -38,5 +37,3 @@ Cell * CellMap::getCellFast(IntVector2D const& intPos) const
 {
 	return _cellGrid[intPos.x][intPos.y];
 }
-
-#endif //CELLMAP_H

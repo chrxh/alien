@@ -1,6 +1,5 @@
 #include <QString>
 
-#include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/UnitContext.h"
@@ -10,6 +9,7 @@
 #include "Model/Local/PhysicalQuantityConverter.h"
 #include "Model/Api/SimulationParameters.h"
 
+#include "Cell.h"
 #include "CommunicatorFunction.h"
 
 CommunicatorFunction::CommunicatorFunction(UnitContext* context)
