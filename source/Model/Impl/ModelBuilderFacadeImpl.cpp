@@ -89,21 +89,16 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	return controller;
 }
 
-SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationContext * contextApi) const
+SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess() const
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
 	auto access = factory->buildSimulationAccess();
-	if (contextApi) {
-		access->init(contextApi);
-	}
 	return access;
 }
 
-DescriptionHelper * ModelBuilderFacadeImpl::buildDescriptionHelper(SimulationContext* contextApi) const
+DescriptionHelper * ModelBuilderFacadeImpl::buildDescriptionHelper() const
 {
 	auto descHelper = new DescriptionHelperImpl();
-	auto context = static_cast<SimulationContextLocal*>(contextApi);
-	descHelper->init(context->getSpaceProperties(), context->getSimulationParameters(), context->getNumberGenerator());
 	return descHelper;
 }
 

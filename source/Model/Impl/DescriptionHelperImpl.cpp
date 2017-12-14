@@ -7,13 +7,15 @@
 #include "Model/Api/SpaceProperties.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Local/Physics.h"
+#include "Model/Local/SimulationContextLocal.h"
 
 
-void DescriptionHelperImpl::init(SpaceProperties *metric, SimulationParameters *parameters, NumberGenerator *numberGen)
+void DescriptionHelperImpl::init(SimulationContext* context)
 {
-	_metric = metric;
-	_parameters = parameters;
-	_numberGen = numberGen;
+	auto contextLocal = static_cast<SimulationContextLocal*>(context);
+	_metric = contextLocal->getSpaceProperties();
+	_parameters = contextLocal->getSimulationParameters();
+	_numberGen = contextLocal->getNumberGenerator();
 }
 
 void DescriptionHelperImpl::reconnect(DataDescription &data, unordered_set<uint64_t> const &changedCellIds)
