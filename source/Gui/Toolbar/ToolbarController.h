@@ -28,6 +28,7 @@ private:
 	Q_SLOT void onShow(bool visible);
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
+	list<QMetaObject::Connection> _connections;
 	Notifier* _notifier = nullptr;
 	ToolbarContext* _context = nullptr;
 	ToolbarView* _view = nullptr;

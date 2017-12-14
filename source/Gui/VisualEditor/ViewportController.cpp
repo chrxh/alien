@@ -14,8 +14,11 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	_view->resetTransform();
 	setSceneToView(boost::none, activeScene);
 
-	connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling);
-	connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling);
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
+	_connections.push_back(connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling));
+	_connections.push_back(connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling));
 }
 
 void ViewportController::setModeToUpdate()

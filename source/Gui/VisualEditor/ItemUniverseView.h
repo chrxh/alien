@@ -46,6 +46,8 @@ private:
 	void delegateSelection(Selection const& selection);
 	void startMarking(QPointF const& scenePos);
 
+	list<QMetaObject::Connection> _connections;
+
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
 

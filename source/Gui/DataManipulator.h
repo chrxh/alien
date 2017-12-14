@@ -61,6 +61,8 @@ private:
 
 	QVector2D calcCenter();
 
+	list<QMetaObject::Connection> _connections;
+
 	Notifier* _notifier = nullptr;
 	SimulationAccess* _access = nullptr;
 	DescriptionHelper* _descHelper = nullptr;

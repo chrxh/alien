@@ -25,8 +25,11 @@ void ToolbarController::init(IntVector2D const & upperLeftPosition, Notifier* no
 	_parameters = context->getSimulationParameters();
 	_view->init(upperLeftPosition, this);
 
-	connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow);
-	connect(_notifier, &Notifier::notify, this, &ToolbarController::receivedNotifications);
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
+	_connections.push_back(connect(_context, &ToolbarContext::show, this, &ToolbarController::onShow));
+	_connections.push_back(connect(_notifier, &Notifier::notify, this, &ToolbarController::receivedNotifications));
 
 	onShow(false);
 }

@@ -31,6 +31,7 @@ private:
 
 	void switchToCellEditor(CellDescription const& cell, UpdateDescription update = UpdateDescription::All);
 
+	list<QMetaObject::Connection> _connections;
 	Notifier* _notifier = nullptr;
 	DataEditModel* _model = nullptr;
 	DataEditView* _view = nullptr;
