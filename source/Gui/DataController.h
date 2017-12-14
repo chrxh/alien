@@ -4,13 +4,13 @@
 
 #include "Gui/Definitions.h"
 
-class DataManipulator
+class DataController
 	: public QObject
 {
 	Q_OBJECT
 public:
-	DataManipulator(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~DataManipulator() = default;
+	DataController(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~DataController() = default;
 
 	virtual void init(Notifier* notifier, SimulationAccess* access, DescriptionHelper* connector, SimulationContext* context);
 

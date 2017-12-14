@@ -10,7 +10,7 @@
 #include "Model/Api/SpaceProperties.h"
 #include "Gui/VisualEditor/ViewportInterface.h"
 #include "Gui/Settings.h"
-#include "Gui/DataManipulator.h"
+#include "Gui/DataController.h"
 #include "Gui/Notifier.h"
 
 #include "ItemUniverseView.h"
@@ -26,7 +26,7 @@ ItemUniverseView::ItemUniverseView(QObject *parent)
 }
 
 
-void ItemUniverseView::init(Notifier* notifier, SimulationController * controller, DataManipulator* manipulator, ViewportInterface * viewport)
+void ItemUniverseView::init(Notifier* notifier, SimulationController * controller, DataController* manipulator, ViewportInterface * viewport)
 {
 	_controller = controller;
 	_viewport = viewport;

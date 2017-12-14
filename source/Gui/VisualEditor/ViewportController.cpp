@@ -12,6 +12,7 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	_itemScene = itemScene;
 	_activeScene = activeScene;
 	_view->resetTransform();
+	zoomIn();
 	setSceneToView(boost::none, activeScene);
 
 	for (auto const& connection : _connections) {

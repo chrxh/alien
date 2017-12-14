@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "Model/Api//Definitions.h"
 
 class QGraphicsItem;
 class QGraphicsView;
@@ -20,7 +21,8 @@ class MetadataManager;
 class PixelUniverseView;
 class ItemUniverseView;
 class ItemManager;
-class DataManipulator;
+class DataController;
+class InfoController;
 class ViewportInterface;
 class ViewportController;
 class MarkerItem;
@@ -32,7 +34,7 @@ class ToolbarView;
 class ToolbarModel;
 class DataEditModel;
 class DataEditView;
-class DataManipulator;
+class DataController;
 class ClusterEditTab;
 class CellEditTab;
 class MetadataEditTab;
@@ -49,7 +51,17 @@ class MainModel;
 class MainController;
 
 enum class ActiveScene { PixelScene, ItemScene };
-
 enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
+
+struct NewSimulationConfig
+{
+	uint maxThreads;
+	IntVector2D gridSize;
+	IntVector2D universeSize;
+	SymbolTable* symbolTable;
+	SimulationParameters* parameters;
+
+	double energy;
+};
 

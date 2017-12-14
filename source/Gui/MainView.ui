@@ -193,7 +193,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="frameLabel">
+        <widget class="QLabel" name="infoLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -304,7 +304,7 @@
           </palette>
          </property>
          <property name="text">
-          <string>Frame: 000000001  FPS: 00000  Magnification: 2x</string>
+          <string>Timestep: 000000001  TPS: 00000  Magnification: 2x</string>
          </property>
         </widget>
        </item>

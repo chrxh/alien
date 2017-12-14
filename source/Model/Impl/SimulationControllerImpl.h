@@ -18,8 +18,6 @@ public:
 	virtual SimulationContext* getContext() const override;
 
 private:
-	Q_SLOT void oneSecondTimerTimeout();
-
 	SimulationContextLocal* _context = nullptr;
 
 	bool _flagSimulationRunning = false;
