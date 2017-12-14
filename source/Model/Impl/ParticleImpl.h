@@ -9,7 +9,7 @@ class ParticleImpl
 public:
 	ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
-	virtual ParticleDescription getDescription() const override;
+	virtual ParticleDescription getDescription(ResolveDescription const& resolveDescription) const override;
 	virtual void applyChangeDescription(ParticleChangeDescription const& change) override;
 
 	virtual bool processingMovement(Cluster*& cluster) override;

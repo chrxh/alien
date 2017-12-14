@@ -171,7 +171,8 @@ struct MODEL_EXPORT DataDescription
 
 struct ResolveDescription
 {
-	bool resolveCellLinks = false;
+	bool resolveIds = true;
+	bool resolveCellLinks = true;
 };
 
 struct DescriptionNavigator
