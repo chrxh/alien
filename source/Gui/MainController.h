@@ -55,4 +55,5 @@ private:
 	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;
+	DescriptionHelper* _descHelper = nullptr;
 };

@@ -10,7 +10,7 @@
 
 void DataManipulator::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
 {
-	SET_CHILD(_descHelper, connector);
+	_descHelper = connector;
 	_access = access;
 	_notifier = notifier;
 	_parameters = context->getSimulationParameters();

@@ -10,7 +10,7 @@ public:
 	DescriptionHelperImpl(QObject *parent = nullptr) : DescriptionHelper(parent) { }
 	virtual ~DescriptionHelperImpl() = default;
 
-	virtual void init(SpaceProperties *metric, SimulationParameters *parameters, NumberGenerator *numberGen);
+	virtual void init(SimulationContext* context) override;
 
 	virtual void reconnect(DataDescription& data, unordered_set<uint64_t> const& changedCellIds) override;
 	virtual void recluster(DataDescription& data, unordered_set<uint64_t> const& changedClusterIds) override;
