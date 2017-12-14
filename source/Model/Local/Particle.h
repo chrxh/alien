@@ -13,7 +13,7 @@ public:
 	Particle(UnitContext* context) : EntityWithTimestamp(context) {}
 	virtual ~Particle() = default;
 
-	virtual ParticleDescription getDescription() const = 0;
+	virtual ParticleDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
 	virtual void applyChangeDescription(ParticleChangeDescription const& change) = 0;
 
     virtual bool processingMovement (Cluster*& cluster) = 0;
