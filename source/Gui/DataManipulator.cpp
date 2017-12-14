@@ -10,11 +10,12 @@
 
 void DataManipulator::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
 {
-	SET_CHILD(_access, access);
 	SET_CHILD(_descHelper, connector);
+	_access = access;
 	_notifier = notifier;
 	_parameters = context->getSimulationParameters();
 
+	disconnect();
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataManipulator::dataFromSimulationAvailable, Qt::QueuedConnection);
 	connect(_access, &SimulationAccess::imageReady, this, &DataManipulator::imageReady);
 	connect(_notifier, &Notifier::notify, this, &DataManipulator::sendDataChangesToSimulation);

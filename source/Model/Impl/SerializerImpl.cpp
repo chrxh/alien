@@ -194,27 +194,35 @@ SerializerImpl::SerializerImpl(QObject *parent /*= nullptr*/)
 {
 }
 
-void SerializerImpl::serialize(SimulationController * simController, SimulationAccess * access)
+void SerializerImpl::init(SimulationAccess * access)
 {
-	_serializedSimulation.clear();
-	_serializedUniverse.clear();
+	_access = access;
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
+}
 
-	if (_simAccessForSerialization && _simAccessForSerialization != access) {
-		disconnect(_simAccessForSerialization, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
-	}
-	_simAccessForSerialization = access;
-	_simControllerForSerialization = simController;
-	connect(_simAccessForSerialization, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
+void SerializerImpl::serialize(SimulationController * simController)
+{
+	_serializationInProgress = true;
+	_serializedSimulation.clear();
+	_serializedSimulationContent.clear();
+
+	_configToSerialize = {
+		simController->getContext()->getSimulationParameters(),
+		simController->getContext()->getSymbolTable(),
+		simController->getContext()->getSpaceProperties()->getSize(),
+		simController->getContext()->getGridSize(),
+		simController->getContext()->getMaxThreads()
+	};
 
 	IntVector2D universeSize = simController->getContext()->getSpaceProperties()->getSize();
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
-	access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
+	_access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
 }
 
 string const& SerializerImpl::retrieveSerializedSimulationContent()
 {
-	return _serializedUniverse;
+	return _serializedSimulationContent;
 }
 
 string const& SerializerImpl::retrieveSerializedSimulation()
@@ -222,7 +230,7 @@ string const& SerializerImpl::retrieveSerializedSimulation()
 	return _serializedSimulation;
 }
 
-void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, string const & content) const
+void SerializerImpl::deserializeSimulationContent(string const & content) const
 {
 	istringstream stream(content);
 
@@ -230,11 +238,11 @@ void SerializerImpl::deserializeSimulationContent(SimulationAccess* access, stri
 	boost::archive::binary_iarchive ia(stream);
 	ia >> data;
 
-	access->clear();
-	access->updateData(data);
+	_access->clear();
+	_access->updateData(data);
 }
 
-pair<SimulationController*, SimulationAccess*> SerializerImpl::deserializeSimulation(string const & content) const
+SimulationController* SerializerImpl::deserializeSimulation(string const & content) const
 {
 	istringstream stream(content);
 	boost::archive::binary_iarchive ia(stream);
@@ -245,32 +253,34 @@ pair<SimulationController*, SimulationAccess*> SerializerImpl::deserializeSimula
 	IntVector2D universeSize;
 	IntVector2D gridSize;
 	int maxThreads;
-	ia >> data >> *parameters >> *symbolTable >> universeSize >> gridSize >> maxThreads;
+	ia >> data >> universeSize >> gridSize >> *parameters >> *symbolTable >> maxThreads;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto simController = facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters);
-	auto simAccess = facade->buildSimulationAccess(simController->getContext());
 
-	simAccess->clear();
-	simAccess->updateData(data);
-	return make_pair(simController, simAccess);
+	_access->init(simController->getContext());
+
+	_access->clear();
+	_access->updateData(data);
+	return simController;
 }
 
 void SerializerImpl::dataReadyToRetrieve()
 {
-	ostringstream stream;
-	auto const& data = _simAccessForSerialization->retrieveData();
+	if (_serializationInProgress) {
+		ostringstream stream;
+		boost::archive::binary_oarchive archive(stream);
 
-	boost::archive::binary_oarchive archive(stream);
-	archive << data;
-	_serializedUniverse = stream.str();
-	archive << *_simControllerForSerialization->getContext()->getSimulationParameters();
-	archive << *_simControllerForSerialization->getContext()->getSymbolTable();
-	archive << _simControllerForSerialization->getContext()->getSpaceProperties()->getSize();
-	archive << _simControllerForSerialization->getContext()->getGridSize();
-	archive << _simControllerForSerialization->getContext()->getMaxThreads();
+		auto content = _access->retrieveData();
+		archive << content;
+		_serializedSimulationContent = stream.str();
 
-	_serializedSimulation = stream.str();
+		archive
+			<< _configToSerialize.universeSize << _configToSerialize.gridSize << *_configToSerialize.parameters
+			<< *_configToSerialize.symbolTable << _configToSerialize.maxThreads;
+		_serializedSimulation = stream.str();
 
-	Q_EMIT serializationFinished();
+		_serializationInProgress = false;
+		Q_EMIT serializationFinished();
+	}
 }
