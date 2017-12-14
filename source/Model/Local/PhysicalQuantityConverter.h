@@ -1,5 +1,4 @@
-#ifndef CodingPhysicalQuantities_H
-#define CodingPhysicalQuantities_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -15,5 +14,3 @@ public:
 	static qreal convertDataToUReal(quint8 d);
 	static quint8 convertIntToData(int i);
 };
-
-#endif // CodingPhysicalQuantities_H
