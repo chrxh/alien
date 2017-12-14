@@ -132,7 +132,8 @@ namespace
 void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
-	Selection selection = getSelectionFromItems(itemsClicked);
+	list<QGraphicsItem*> frontItem = !itemsClicked.empty() ? list<QGraphicsItem*>({ itemsClicked.front() }) : list<QGraphicsItem*>();
+	Selection selection = getSelectionFromItems(frontItem);
 
 	bool alreadySelected = _manipulator->isInSelection(selection.cellIds) && _manipulator->isInSelection(selection.particleIds);
 	if (!alreadySelected) {
