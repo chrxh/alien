@@ -93,7 +93,9 @@ SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess(SimulationConte
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
 	auto access = factory->buildSimulationAccess();
-	access->init(contextApi);
+	if (contextApi) {
+		access->init(contextApi);
+	}
 	return access;
 }
 

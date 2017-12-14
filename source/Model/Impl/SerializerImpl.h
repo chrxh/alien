@@ -14,19 +14,29 @@ public:
 	SerializerImpl(QObject *parent = nullptr);
 	virtual ~SerializerImpl() = default;
 
-	virtual void serialize(SimulationController* simController, SimulationAccess* access) override;
+	virtual void init(SimulationAccess* access) override;
+
+	virtual void serialize(SimulationController* simController) override;
 	virtual string const& retrieveSerializedSimulationContent() override;
 	virtual string const& retrieveSerializedSimulation() override;
 
-	virtual void deserializeSimulationContent(SimulationAccess* access, string const& content) const override;
-	virtual pair<SimulationController*, SimulationAccess*> deserializeSimulation(string const& content) const override;
+	virtual void deserializeSimulationContent(string const& content) const override;
+	virtual SimulationController* deserializeSimulation(string const& content) const override;
 
 private:
 	Q_SLOT void dataReadyToRetrieve();
 
-	SimulationController* _simControllerForSerialization = nullptr;
-	SimulationAccess* _simAccessForSerialization = nullptr;
+	SimulationAccess* _access = nullptr;
 
-	string _serializedUniverse;
+	bool _serializationInProgress = false;
+	struct ConfigToSerialize {
+		SimulationParameters* parameters;
+		SymbolTable* symbolTable;
+		IntVector2D universeSize;
+		IntVector2D gridSize;
+		int maxThreads;
+	};
+	ConfigToSerialize _configToSerialize;
+	string _serializedSimulationContent;
 	string _serializedSimulation;
 };
