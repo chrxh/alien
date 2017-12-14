@@ -4,14 +4,14 @@
 
 #include "ParticleImpl.h"
 #include "Cell.h"
-#include "ClusterImpl.h"
+#include "Cluster.h"
 #include "TokenImpl.h"
 #include "EntityFactoryImpl.h"
 
 Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* context) const
 {
 	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getTag() : desc.id;
-	auto result = new ClusterImpl(QList<Cell*>(), id, desc.angle.get_value_or(0.0), desc.pos.get()
+	auto result = new Cluster(QList<Cell*>(), id, desc.angle.get_value_or(0.0), desc.pos.get()
 		, desc.angularVel.get_value_or(0.0), desc.vel.get_value_or(QVector2D()), context);
 
 	if (desc.cells) {
