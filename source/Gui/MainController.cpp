@@ -45,6 +45,7 @@ void MainController::init()
 	SET_CHILD(_serializer, serializer);
 	auto simAccess = facade->buildSimulationAccess();
 	SET_CHILD(_simAccess, simAccess);
+	_dataManipulator = new DataManipulator(this);
 
 	_serializer->init(_simAccess);
 	
@@ -78,14 +79,12 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	_simAccess->init(_simController->getContext());
 
-	_dataManipulator = new DataManipulator(this);
 	_notifier = new Notifier(this);
 	auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
 	_dataManipulator->init(_notifier, _simAccess, descHelper, _simController->getContext());
 
 	_view->setupEditors(_simController, _dataManipulator, _notifier);
 
-	delete origDataManipulator;
 	delete origNotifier;
 	delete origSimController;
 
@@ -114,20 +113,14 @@ bool MainController::onLoadSimulation(string const & filename)
 	}
 
 	try {
-		auto origDataManipulator = _dataManipulator;
-		auto origNotifier = _notifier;
-		auto origSimController = _simController;
-
-		delete origDataManipulator;
-		delete origNotifier;
-		delete origSimController;
+		delete _notifier;
+		delete _simController;
 
 		_simController = _serializer->deserializeSimulation(data);
 
 		_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
 		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
 
-		_dataManipulator = new DataManipulator(this);
 		_notifier = new Notifier(this);
 		auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 		auto descHelper = facade->buildDescriptionHelper(_simController->getContext());
