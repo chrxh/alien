@@ -17,7 +17,7 @@ void InfoController::init(QLabel * infoLabel)
 
 void InfoController::setTimestep(int timestep)
 {
-	_timestep = 0;
+	_timestep = timestep;
 	_tps = 0;
 	_tpsCounting = 0;
 	updateInfoLabel();
@@ -28,6 +28,11 @@ void InfoController::increaseTimestep()
 	++_tpsCounting;
 	++_timestep;
 	updateInfoLabel();
+}
+
+int InfoController::getTimestep() const
+{
+	return _timestep;
 }
 
 void InfoController::oneSecondTimerTimeout()
