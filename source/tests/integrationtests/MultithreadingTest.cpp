@@ -88,7 +88,8 @@ TEST_F(MultithreadingTest, testThreads)
 TEST_F(MultithreadingTest, testOneCellMovement)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto access = facade->buildSimulationAccess(_context);
+	auto access = facade->buildSimulationAccess();
+	access->init(_context);
 
 	_parameters->radiationProb = 0.0;
 
@@ -116,7 +117,8 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 TEST_F(MultithreadingTest, testManyCellsMovement)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto access = facade->buildSimulationAccess(_context);
+	auto access = facade->buildSimulationAccess();
+	access->init(_context);
 	DataChangeDescription desc;
 	for (int i = 0; i < 10000; ++i) {
 		desc.addNewCluster(ClusterChangeDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))

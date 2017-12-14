@@ -18,6 +18,10 @@ void SimulationAccessGpuImpl::init(SimulationContext * context)
 	connect(worker, &WorkerForGpu::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }
 
+void SimulationAccessGpuImpl::clear()
+{
+}
+
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
 {
 }
