@@ -46,7 +46,7 @@ void ItemUniverseView::activate()
 
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
 	_connections.push_back(connect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications));
-	_connections.push_back(connect(_viewport, &ViewportInterface::scrolling, this, &ItemUniverseView::scrolling));
+	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &ItemUniverseView::scrolled));
 	_connections.push_back(connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled));
 
 	requestData();
@@ -83,7 +83,7 @@ void ItemUniverseView::cellInfoToggled(bool showInfo)
 	_itemManager->update(_manipulator);
 }
 
-void ItemUniverseView::scrolling()
+void ItemUniverseView::scrolled()
 {
 	requestData();
 }

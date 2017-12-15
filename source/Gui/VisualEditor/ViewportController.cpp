@@ -18,8 +18,8 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
-	_connections.push_back(connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling));
-	_connections.push_back(connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolling));
+	_connections.push_back(connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
+	_connections.push_back(connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
 }
 
 void ViewportController::setModeToUpdate()
@@ -73,7 +73,14 @@ QVector2D ViewportController::getCenter() const
 
 void ViewportController::zoom(double factor)
 {
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
 	_view->scale(factor, factor);
+	_connections.push_back(connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
+	_connections.push_back(connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
+
+	Q_EMIT scrolled();
 }
 
 qreal ViewportController::getZoomFactor() const
