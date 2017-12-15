@@ -29,8 +29,10 @@ public:
 	virtual void restoreScrollPos();
 
 private:
-	void setSceneToView(optional<ActiveScene> oldActiveScene, ActiveScene activeScene);
+	void connectAll();
+	void disconnectAll();
 
+	void setSceneToView(optional<ActiveScene> oldActiveScene, ActiveScene activeScene);
 
 	list<QMetaObject::Connection> _connections;
 
