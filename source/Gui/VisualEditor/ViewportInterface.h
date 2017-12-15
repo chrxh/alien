@@ -16,5 +16,5 @@ public:
 	virtual QRectF getRect() const = 0;
 	virtual QVector2D getCenter() const = 0;
 
-	Q_SIGNAL void scrolling();
+	Q_SIGNAL void scrolled();
 };

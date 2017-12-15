@@ -24,7 +24,7 @@ public:
 private:
     Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
-	Q_SLOT void scrolling();
+	Q_SLOT void scrolled();
 
 	list<QMetaObject::Connection> _connections;
 
