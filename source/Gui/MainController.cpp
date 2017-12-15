@@ -35,8 +35,7 @@ void MainController::init()
 {
 	_model = new MainModel(this);
 	_view = new MainView();
-	_infoController = new InfoController(this);
-	_view->init(_model, this, _infoController);
+	_view->init(_model, this);
 
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_numberGenerator = factory->buildRandomNumberGenerator();
@@ -80,7 +79,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	connectSimController();
-	_infoController->setTimestep(0);
+	_view->getInfoController()->setTimestep(0);
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
 	_dataManipulator->init(_notifier, _simAccess, _descHelper, _simController->getContext());
@@ -118,7 +117,7 @@ bool MainController::onLoadSimulation(string const & filename)
 		delete _simController;
 		_simController = _serializer->deserializeSimulation(data);
 		connectSimController();
-		_infoController->setTimestep(timestep);
+		_view->getInfoController()->setTimestep(timestep);
 
 		_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
 		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
@@ -139,7 +138,7 @@ bool MainController::onLoadSimulation(string const & filename)
 void MainController::connectSimController() const
 {
 	connect(_simController, &SimulationController::nextTimestepCalculated, [this]() {
-		_infoController->increaseTimestep();
+		_view->getInfoController()->increaseTimestep();
 	});
 }
 
@@ -162,7 +161,7 @@ void MainController::serializationFinished()
 		if (operation.type == SerializationOperation::Type::SaveToFile) {
 			string const& data = _serializer->retrieveSerializedSimulation();
 			std::ofstream stream(operation.filename, std::ios_base::out | std::ios_base::binary);
-			int timestep = _infoController->getTimestep();
+			int timestep = _view->getInfoController()->getTimestep();
 			size_t dataSize = data.size();
 			stream.write(reinterpret_cast<char*>(&timestep), sizeof(int));
 			stream.write(reinterpret_cast<char*>(&dataSize), sizeof(size_t));

@@ -18,10 +18,11 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller, InfoController* infoController);
+	virtual void init(MainModel* model, MainController* controller);
 	virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller, DataController* manipulator, Notifier* notifier);
+	virtual InfoController* getInfoController() const;
 
 private:
 	void connectActions();
@@ -29,11 +30,14 @@ private:
 
 	Q_SLOT void onSetEditorMode();
 	Q_SLOT void onRunClicked(bool run);
+	Q_SLOT void onZoomInClicked();
+	Q_SLOT void onZoomOutClicked();
 	Q_SLOT void onNewSimulation();
 	Q_SLOT void onSaveSimulation();
 	Q_SLOT void onLoadSimulation();
 
 	void cellDefocused();
+	void updateZoomFactor();
 
 	Ui::MainView* ui = nullptr;	//contains VisualEditor
 	MainModel* _model = nullptr;
@@ -41,4 +45,5 @@ private:
 
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
+	InfoController* _infoController = nullptr;
 };

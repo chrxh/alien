@@ -16,6 +16,8 @@ public:
 	virtual void increaseTimestep();
 	virtual int getTimestep() const;
 
+	virtual void setZoomFactor(double factor);
+
 private:
 	Q_SLOT void oneSecondTimerTimeout();
 
@@ -26,5 +28,5 @@ private:
 	int _timestep = 0;
 	int _tpsCounting = 0;
 	int _tps = 0;
-	double _magnification = 2.0;
+	double _zoomFactor = 2.0;
 };

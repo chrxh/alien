@@ -25,11 +25,9 @@ public:
 	virtual void setActiveScene(ActiveScene activeScene);
 	virtual QVector2D getViewCenterWithIncrement ();
 	virtual QGraphicsView* getGraphicsView ();
-	virtual qreal getZoomFactor ();
+	virtual double getZoomFactor ();
 
-public:
-    Q_SLOT void zoomIn ();
-	Q_SLOT void zoomOut ();
+    virtual void zoom (double factor);
 
 private:
     Ui::VisualEditController *ui;
