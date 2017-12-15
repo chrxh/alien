@@ -15,11 +15,8 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	zoom(2.0);
 	setSceneToView(boost::none, activeScene);
 
-	for (auto const& connection : _connections) {
-		disconnect(connection);
-	}
-	_connections.push_back(connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
-	_connections.push_back(connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
+	disconnectAll();
+	connectAll();
 }
 
 void ViewportController::setModeToUpdate()
@@ -73,12 +70,9 @@ QVector2D ViewportController::getCenter() const
 
 void ViewportController::zoom(double factor)
 {
-	for (auto const& connection : _connections) {
-		disconnect(connection);
-	}
+	disconnectAll();
 	_view->scale(factor, factor);
-	_connections.push_back(connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
-	_connections.push_back(connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
+	connectAll();
 
 	Q_EMIT scrolled();
 }
@@ -107,6 +101,19 @@ void ViewportController::setSceneToView(optional<ActiveScene> origActiveScene, A
 		if (origActiveScene) {
 			_view->scale(CoordinateSystem::sceneToModel(1.0), CoordinateSystem::sceneToModel(1.0));
 		}
+	}
+}
+
+void ViewportController::connectAll()
+{
+	_connections.push_back(QObject::connect(_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
+	_connections.push_back(QObject::connect(_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &ViewportController::scrolled));
+}
+
+void ViewportController::disconnectAll()
+{
+	for (auto const& connection : _connections) {
+		QObject::disconnect(connection);
 	}
 }
 

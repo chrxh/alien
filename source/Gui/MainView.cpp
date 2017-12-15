@@ -164,6 +164,7 @@ void MainView::onNewSimulation()
 		};
 		_controller->onNewSimulation(config);
 		updateZoomFactor();
+		ui->actionPlay->setChecked(false);
 		onRunClicked(false);
 	}
 }
@@ -186,6 +187,7 @@ void MainView::onLoadSimulation()
 		}
 		else {
 			updateZoomFactor();
+			ui->actionPlay->setChecked(false);
 			onRunClicked(false);
 		}
 	}
