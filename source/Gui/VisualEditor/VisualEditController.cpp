@@ -88,19 +88,14 @@ QGraphicsView* VisualEditController::getGraphicsView ()
     return ui->simulationView;
 }
 
-qreal VisualEditController::getZoomFactor ()
+double VisualEditController::getZoomFactor ()
 {
 	return _viewport->getZoomFactor();
 }
 
-void VisualEditController::zoomIn ()
+void VisualEditController::zoom (double factor)
 {
-	_viewport->zoomIn();
-}
-
-void VisualEditController::zoomOut ()
-{
-	_viewport->zoomOut();
+	_viewport->zoom(factor);
 }
 
 

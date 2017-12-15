@@ -41,7 +41,6 @@ private:
 
 	SimulationController* _simController = nullptr;
 	DataController* _dataManipulator = nullptr;
-	InfoController* _infoController = nullptr;
 	SimulationAccess* _simAccess = nullptr;
 	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;

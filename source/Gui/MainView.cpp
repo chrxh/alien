@@ -30,13 +30,14 @@ MainView::~MainView()
 
 }
 
-void MainView::init(MainModel* model, MainController* controller, InfoController* infoController)
+void MainView::init(MainModel* model, MainController* controller)
 {
 	_model = model;
 	_controller = controller;
 	_toolbar = new ToolbarController(ui->visualEditController);
 	_dataEditor = new DataEditController(ui->visualEditController);
-	infoController->init(ui->infoLabel);
+	_infoController = new InfoController(this);
+	_infoController->init(ui->infoLabel);
 
 	connectActions();
 	setupTheme();
@@ -60,15 +61,20 @@ void MainView::setupEditors(SimulationController * controller, DataController* m
 	onSetEditorMode();
 }
 
+InfoController * MainView::getInfoController() const
+{
+	return _infoController;
+}
+
 void MainView::connectActions()
 {
 	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
 	connect(ui->actionSaveSimulation, &QAction::triggered, this, &MainView::onSaveSimulation);
 	connect(ui->actionLoadSimulation, &QAction::triggered, this, &MainView::onLoadSimulation);
-	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+	connect(ui->actionExit, &QAction::triggered, this, &MainView::close);
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
-	connect(ui->actionZoomIn, &QAction::triggered, ui->visualEditController, &VisualEditController::zoomIn);
-	connect(ui->actionZoomOut, &QAction::triggered, ui->visualEditController, &VisualEditController::zoomOut);
+	connect(ui->actionZoomIn, &QAction::triggered, this, &MainView::onZoomInClicked);
+	connect(ui->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
 
 	ui->actionEditor->setEnabled(true);
@@ -118,6 +124,18 @@ void MainView::onRunClicked(bool run)
 	_controller->onRunSimulation(run);
 }
 
+void MainView::onZoomInClicked()
+{
+	ui->visualEditController->zoom(2.0);
+	updateZoomFactor();
+}
+
+void MainView::onZoomOutClicked()
+{
+	ui->visualEditController->zoom(0.5);
+	updateZoomFactor();
+}
+
 void MainView::onSetEditorMode()
 {
 	auto editMode = _model->isEditMode();
@@ -145,6 +163,7 @@ void MainView::onNewSimulation()
 			d.getMaxThreads(), d.getGridSize(), d.getUniverseSize(), d.getSymbolTable(), d.getSimulationParameters(), d.getEnergy()
 		};
 		_controller->onNewSimulation(config);
+		updateZoomFactor();
 	}
 }
 
@@ -164,6 +183,9 @@ void MainView::onLoadSimulation()
 			QMessageBox msgBox(QMessageBox::Warning, "Error", "An error occurred. The specified simulation could not loaded.");
 			msgBox.exec();
 		}
+		else {
+			updateZoomFactor();
+		}
 	}
 }
 
@@ -175,5 +197,10 @@ void MainView::cellDefocused()
 	ui->actionCopyCell->setEnabled(false);
 	ui->actionDeleteCell->setEnabled(false);
 	ui->actionDeleteExtension->setEnabled(false);
+}
+
+void MainView::updateZoomFactor()
+{
+	_infoController->setZoomFactor(ui->visualEditController->getZoomFactor());
 }
 

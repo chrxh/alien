@@ -304,7 +304,7 @@
           </palette>
          </property>
          <property name="text">
-          <string>Timestep: 000000001  TPS: 00000  Magnification: 2x</string>
+          <string>Timestep: 000000001  TPS: 00000  Zoom factor: 2x</string>
          </property>
         </widget>
        </item>

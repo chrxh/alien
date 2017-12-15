@@ -35,6 +35,12 @@ int InfoController::getTimestep() const
 	return _timestep;
 }
 
+void InfoController::setZoomFactor(double factor)
+{
+	_zoomFactor = factor;
+	updateInfoLabel();
+}
+
 void InfoController::oneSecondTimerTimeout()
 {
 	_tps = _tpsCounting;
@@ -44,8 +50,8 @@ void InfoController::oneSecondTimerTimeout()
 
 void InfoController::updateInfoLabel()
 {
-	_infoLabel->setText(QString("Timestep: %1  TPS: %2  Magnification: %3x")
+	_infoLabel->setText(QString("Timestep: %1  TPS: %2  Zoom factor: %3x")
 		.arg(_timestep, 9, 10, QLatin1Char('0'))
 		.arg(_tps, 5, 10, QLatin1Char('0'))
-		.arg(_magnification));
+		.arg(_zoomFactor));
 }
