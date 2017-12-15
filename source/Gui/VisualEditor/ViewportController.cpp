@@ -12,7 +12,7 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	_itemScene = itemScene;
 	_activeScene = activeScene;
 	_view->resetTransform();
-	zoomIn();
+	zoom(2.0);
 	setSceneToView(boost::none, activeScene);
 
 	for (auto const& connection : _connections) {
@@ -71,19 +71,17 @@ QVector2D ViewportController::getCenter() const
 	return result;
 }
 
-void ViewportController::zoomIn()
+void ViewportController::zoom(double factor)
 {
-	_view->scale(2.0, 2.0);
-}
-
-void ViewportController::zoomOut()
-{
-	_view->scale(0.5, 0.5);
+	_view->scale(factor, factor);
 }
 
 qreal ViewportController::getZoomFactor() const
 {
-	return  _view->matrix().m11();
+	if (_activeScene == ActiveScene::PixelScene) {
+		return  _view->matrix().m11();
+	}
+	return CoordinateSystem::modelToScene(_view->matrix().m11());
 }
 
 void ViewportController::setSceneToView(optional<ActiveScene> origActiveScene, ActiveScene activeScene)
