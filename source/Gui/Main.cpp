@@ -36,8 +36,10 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- Serialisierung für SimulationParameters im SimulationParametersDialog
+//- Bug: Struktur laden, was ändern und dann speichern
 //- Bug: CellCluster übereinander legen => beide verschwinden
+//- ParticleImpl abrüsten
+//- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 

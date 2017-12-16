@@ -110,7 +110,7 @@ QVector2D Cluster::applyTransformation(QVector2D pos) const
 
 QVector2D Cluster::applyTransformation(QMatrix4x4 const & transform, QVector2D pos) const
 {
-	return QVector2D();
+	return transform.map(QVector3D(pos)).toVector2D();
 }
 
 QVector2D Cluster::applyInverseTransformation(QVector2D pos) const
