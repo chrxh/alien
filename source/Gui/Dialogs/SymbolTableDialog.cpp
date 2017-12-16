@@ -1,3 +1,5 @@
+#include <iostream>
+#include <fstream>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -5,15 +7,17 @@
 #include "Model/Api/Settings.h"
 #include "Model/Api/SymbolTable.h"
 #include "Model/Api/ModelBuilderFacade.h"
-#include "gui/Settings.h"
+#include "Model/Api/Serializer.h"
+#include "Gui/Settings.h"
 
 #include "SymbolTableDialog.h"
 #include "ui_symboltabledialog.h"
 
-SymbolTableDialog::SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent)
+SymbolTableDialog::SymbolTableDialog(SymbolTable* symbolTable, Serializer* serializer, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::SymbolTableDialog)
 	, _symbolTable(symbolTable->clone())
+	, _serializer(serializer)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
@@ -26,7 +30,7 @@ SymbolTableDialog::SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent)
     ui->tableWidget->horizontalHeaderItem(1)->setFont(GuiSettings::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(1)->setTextAlignment(Qt::AlignLeft);
 
-    symbolTableToWidgets();
+    updateWidgetsFromSymbolTable();
 
     //connections
     connect(ui->tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()));
@@ -43,13 +47,13 @@ SymbolTableDialog::~SymbolTableDialog()
     delete ui;
 }
 
-SymbolTable* SymbolTableDialog::getNewSymbolTable()
+SymbolTable* SymbolTableDialog::getSymbolTable()
 {
-	widgetsToSymbolTable();
+	updateSymbolTableFromWidgets();
 	return _symbolTable;
 }
 
-void SymbolTableDialog::widgetsToSymbolTable ()
+void SymbolTableDialog::updateSymbolTableFromWidgets ()
 {
     _symbolTable->clear();
     for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
@@ -59,7 +63,50 @@ void SymbolTableDialog::widgetsToSymbolTable ()
     }
 }
 
-void SymbolTableDialog::symbolTableToWidgets()
+SymbolTable * SymbolTableDialog::loadSymbolTable(string filename)
+{
+	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
+
+	size_t size;
+	string data;
+
+	stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+	data.resize(size);
+	stream.read(&data[0], size);
+	stream.close();
+
+	if (stream.fail()) {
+		return nullptr;
+	}
+
+	try {
+		return _serializer->deserializeSymbolTable(data);
+	}
+	catch (...) {
+		return nullptr;
+	}
+}
+
+bool SymbolTableDialog::saveSymbolTable(string filename, SymbolTable * symbolTable)
+{
+	try {
+		std::ofstream stream(filename, std::ios_base::out | std::ios_base::binary);
+		string const& data = _serializer->serializeSymbolTable(_symbolTable);;
+		size_t dataSize = data.size();
+		stream.write(reinterpret_cast<char*>(&dataSize), sizeof(size_t));
+		stream.write(&data[0], data.size());
+		stream.close();
+		if (stream.fail()) {
+			return false;
+		}
+	}
+	catch (...) {
+		return false;
+	}
+	return true;
+}
+
+void SymbolTableDialog::updateWidgetsFromSymbolTable()
 {
     int row = ui->tableWidget->rowCount();
     for(int i = 0; i < row; ++i)
@@ -123,27 +170,21 @@ void SymbolTableDialog::defaultButtonClicked ()
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 
 	_symbolTable = facade->buildDefaultSymbolTable();
-    symbolTableToWidgets();
+    updateWidgetsFromSymbolTable();
 }
 
 void SymbolTableDialog::loadButtonClicked ()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
-    if( !fileName.isEmpty() ) {
-        QFile file(fileName);
-        if( file.open(QIODevice::ReadOnly) ) {
-			QDataStream in(&file);
-
-			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-			//TODO
-			SymbolTable* symbolTable /*= facade->deserializeSymbolTable(in)*/;
+    QString filename = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
+	if (!filename.isEmpty()) {
+		SymbolTable* symbolTable = loadSymbolTable(filename.toStdString());
+		if (symbolTable) {
+			delete _symbolTable;
 			_symbolTable = symbolTable;
-			delete symbolTable;
-            symbolTableToWidgets();
-            file.close();
-        }
+			updateWidgetsFromSymbolTable();
+		}
         else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
+            QMessageBox msgBox(QMessageBox::Critical,"Error", "An error occurred. The specified symbol table could not loaded.");
             msgBox.exec();
         }
     }
@@ -151,48 +192,31 @@ void SymbolTableDialog::loadButtonClicked ()
 
 void SymbolTableDialog::saveButtonClicked ()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
-    if( !fileName.isEmpty() ) {
-        QFile file(fileName);
-        if( file.open(QIODevice::WriteOnly) ) {
-			widgetsToSymbolTable();
-
-			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-			QDataStream out(&file);
-			//TODO
-/*
-			facade->serializeSymbolTable(_symbolTable, out);
-*/
-			file.close();
-        }
-        else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The symbol table could not saved.");
-            msgBox.exec();
-        }
+    QString filename = QFileDialog::getSaveFileName(this, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
+    if( !filename.isEmpty() ) {
+		updateSymbolTableFromWidgets();
+		if (!saveSymbolTable(filename.toStdString(), _symbolTable)) {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The symbol table could not saved.");
+			msgBox.exec();
+			return;
+		}
     }
 }
 
 void SymbolTableDialog::mergeWithButtonClicked ()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
-    if( !fileName.isEmpty() ) {
-        QFile file(fileName);
-        if( file.open(QIODevice::ReadOnly) ) {
-			widgetsToSymbolTable();
+    QString filename = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
+    if( !filename.isEmpty() ) {
 
-			QDataStream in(&file);
-			SerializationFacade* facade = ServiceLocator::getInstance().getService<SerializationFacade>();
-			//TODO
-			SymbolTable* symbolTable /*= facade->deserializeSymbolTable(in)*/;
+		SymbolTable* symbolTable = loadSymbolTable(filename.toStdString());
+		if (symbolTable) {
 			_symbolTable->mergeEntries(*symbolTable);
 			delete symbolTable;
-			file.close();
-
-			symbolTableToWidgets();
-        }
-        else {
-            QMessageBox msgBox(QMessageBox::Warning,"Error", "An error occurred. The specified symbol table could not loaded.");
-            msgBox.exec();
-        }
+			updateWidgetsFromSymbolTable();
+		}
+		else {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified symbol table could not loaded.");
+			msgBox.exec();
+		}
     }
 }

@@ -7,15 +7,15 @@
 #include "NewSimulationDialog.h"
 #include "ui_newsimulationdialog.h"
 
-NewSimulationDialog::NewSimulationDialog(SimulationParameters* parameters, SymbolTable* symbols, QWidget *parent)
+NewSimulationDialog::NewSimulationDialog(SimulationParameters* parameters, SymbolTable* symbols, Serializer* serializer, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
-	, _localParameters(parameters->clone())
+	, _parameters(parameters->clone())
+	, _symbolTable(symbols->clone())
+	, _serializer(serializer)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
-
-    _symTblDialog = new SymbolTableDialog(symbols);
 
 	updateUniverseSize();
 
@@ -30,7 +30,6 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters* parameters, Symbo
 
 NewSimulationDialog::~NewSimulationDialog()
 {
-    delete _symTblDialog;
     delete ui;
 }
 
@@ -66,25 +65,28 @@ qreal NewSimulationDialog::getEnergy () const
 
 SymbolTable* NewSimulationDialog::getSymbolTable() const
 {
-	return _symTblDialog->getNewSymbolTable();
+	return _symbolTable;
 }
 
 SimulationParameters* NewSimulationDialog::getSimulationParameters() const
 {
-	return _localParameters;
+	return _parameters;
 }
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
-	SimulationParametersDialog d(_localParameters->clone());
+	SimulationParametersDialog d(_parameters->clone(), _serializer);
 	if (d.exec()) {
-		_localParameters = d.getSimulationParameters();
+		_parameters = d.getSimulationParameters();
 	}
 }
 
 void NewSimulationDialog::symbolTableButtonClicked ()
 {
-    _symTblDialog->exec();
+	SymbolTableDialog d(_symbolTable->clone(), _serializer);
+	if (d.exec()) {
+		_symbolTable = d.getSymbolTable();
+	}
 }
 
 void NewSimulationDialog::updateUniverseSize()
