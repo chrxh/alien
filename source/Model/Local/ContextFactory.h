@@ -13,7 +13,7 @@ public:
 	virtual Unit* buildSimulationUnit() const = 0;
 	virtual UnitGrid* buildSimulationGrid() const = 0;
 	virtual UnitThreadController* buildSimulationThreads() const = 0;
-	virtual SpaceMetricLocal* buildSpaceMetric() const = 0;
+	virtual SpacePropertiesLocal* buildSpaceMetric() const = 0;
 	virtual MapCompartment* buildMapCompartment() const = 0;
 	virtual CellMap* buildCellMap() const = 0;
 	virtual ParticleMap* buildEnergyParticleMap() const = 0;

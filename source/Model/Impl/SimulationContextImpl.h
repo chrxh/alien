@@ -10,7 +10,7 @@ public:
 	SimulationContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextImpl();
 
-	virtual void init(NumberGenerator* numberGen, SpaceMetricLocal* metric, UnitGrid* grid, UnitThreadController* threads
+	virtual void init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler) override;
 
 	virtual IntVector2D getGridSize() const override;
@@ -25,7 +25,7 @@ public:
 
 private:
 	NumberGenerator* _numberGen = nullptr;
-	SpaceMetricLocal* _metric = nullptr;
+	SpacePropertiesLocal* _metric = nullptr;
 	UnitGrid* _grid = nullptr;
 	UnitThreadController* _threads = nullptr;
 	SymbolTable* _symbolTable = nullptr;

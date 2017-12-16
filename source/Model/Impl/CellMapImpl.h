@@ -1,5 +1,4 @@
-#ifndef CELLMAPIMPL_H
-#define CELLMAPIMPL_H
+#pragma once
 
 #include "Model/Local/CellMap.h"
 #include "Model/Local/MapCompartment.h"
@@ -13,7 +12,7 @@ public:
 	CellMapImpl(QObject* parent = nullptr);
 	virtual ~CellMapImpl();
 
-	virtual void init(SpaceMetricLocal* metric, MapCompartment* compartment) override;
+	virtual void init(SpacePropertiesLocal* metric, MapCompartment* compartment) override;
 	virtual void clear() override;
 
 	virtual void setCell(QVector2D pos, Cell* cell) override;
@@ -26,14 +25,11 @@ public:
 	using CellSelectFunction = bool(*)(Cell*);
 	virtual QList< Cell* > getNearbySpecificCells(QVector2D const& pos, qreal r, CellSelectFunction selection) const override;
 
-	virtual void serializePrimitives(QDataStream& stream) const override;
-	virtual void deserializePrimitives(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap) override;
-
 private:
 	void deleteCellMap();
 	inline Cell*& locateCell(IntVector2D & intPos) const;
 
-	SpaceMetricLocal* _metric = nullptr;
+	SpacePropertiesLocal* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
 	IntVector2D _size = { 0, 0 };
 };
@@ -56,5 +52,3 @@ Cell*& CellMapImpl::locateCell(IntVector2D & intPos) const
 		return cellMap->_cellGrid[intPos.x][intPos.y];
 	}
 }
-
-#endif //CELLMAPIMPL_H

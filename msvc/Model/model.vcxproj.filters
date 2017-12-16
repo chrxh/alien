@@ -119,9 +119,6 @@
     <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\SpaceMetricImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\TokenImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
@@ -175,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\Particle.h">
       <Filter>Source Files\Local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\SpacePropertiesImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -397,9 +397,6 @@
     <ClCompile Include="Release\moc_SimulationControllerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\SpaceMetricImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\TokenImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -580,6 +577,9 @@
     <ClCompile Include="..\..\source\Model\Local\Particle.cpp">
       <Filter>Source Files\Local</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\SpacePropertiesImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\Api\SimulationAccess.h">
@@ -604,9 +604,6 @@
       <Filter>Source Files\Local</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Local\SimulationContextLocal.h">
-      <Filter>Source Files\Local</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Model\Local\SpaceMetricLocal.h">
       <Filter>Source Files\Local</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Local\Unit.h">
@@ -671,6 +668,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Api\Serializer.h">
       <Filter>Source Files\Api</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Local\SpacePropertiesLocal.h">
+      <Filter>Source Files\Local</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

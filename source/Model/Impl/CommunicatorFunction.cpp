@@ -4,7 +4,7 @@
 #include "Model/Local/Token.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/CellMap.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Local/Physics.h"
 #include "Model/Local/PhysicalQuantityConverter.h"
 #include "Model/Api/SimulationParameters.h"
@@ -50,26 +50,6 @@ CellFeatureChain::ProcessingResult CommunicatorFunction::processImpl (Token* tok
         receiveMessage(token, cell, previousCell);
     return processingResult;
 }
-
-void CommunicatorFunction::serializePrimitives (QDataStream& stream) const
-{
-    stream << _newMessageReceived
-           << _receivedMessage.channel
-           << _receivedMessage.message
-           << _receivedMessage.angle
-           << _receivedMessage.distance;
-}
-
-void CommunicatorFunction::deserializePrimitives (QDataStream& stream)
-{
-    stream >> _newMessageReceived
-           >> _receivedMessage.channel
-           >> _receivedMessage.message
-           >> _receivedMessage.angle
-           >> _receivedMessage.distance;
-}
-
-
 
 QByteArray CommunicatorFunction::getInternalData () const
 {
@@ -139,7 +119,7 @@ bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess (const Mess
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector2D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
-            SpaceMetricLocal* metric = _context->getSpaceProperties();
+            SpacePropertiesLocal* metric = _context->getSpaceProperties();
             QVector2D displacementOfObjectFromReceiver = metric->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();

@@ -1,6 +1,6 @@
 #include <functional>
 
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/Settings.h"
 #include "Model/Local/Cluster.h"
@@ -18,7 +18,7 @@ CellMapImpl::~CellMapImpl()
 	deleteCellMap();
 }
 
-void CellMapImpl::init(SpaceMetricLocal* metric, MapCompartment* compartment)
+void CellMapImpl::init(SpacePropertiesLocal* metric, MapCompartment* compartment)
 {
 	_metric = metric;
 	_compartment = compartment;
@@ -178,40 +178,6 @@ QList<Cell*> CellMapImpl::getNearbySpecificCells(const QVector2D & pos, qreal r,
 				}
 			}
 	return cells;
-}
-
-void CellMapImpl::serializePrimitives(QDataStream & stream) const
-{
-	//determine number of cell entries
-	quint32 numEntries = 0;
-	for (int x = 0; x < _size.x; ++x)
-		for (int y = 0; y < _size.y; ++y)
-			if (_cellGrid[x][y])
-				numEntries++;
-	stream << numEntries;
-
-	//write cell entries
-	for (int x = 0; x < _size.x; ++x)
-		for (int y = 0; y < _size.y; ++y) {
-			Cell* cell = _cellGrid[x][y];
-			if (cell) {
-				stream << x << y << cell->getId();
-			}
-
-		}
-}
-
-void CellMapImpl::deserializePrimitives(QDataStream & stream, const QMap<quint64, Cell*>& oldIdCellMap)
-{
-	quint32 numEntries = 0;
-	qint32 x = 0;
-	qint32 y = 0;
-	quint64 oldId = 0;
-	stream >> numEntries;
-	for (quint32 i = 0; i < numEntries; ++i) {
-		stream >> x >> y >> oldId;
-		_cellGrid[x][y] = oldIdCellMap[oldId];
-	}
 }
 
 void CellMapImpl::deleteCellMap()

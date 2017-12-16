@@ -17,7 +17,7 @@
 #include "Model/Local/CellFeatureFactory.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/ParticleMap.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Local/ContextFactory.h"
 #include "Model/Local/MapCompartment.h"
 #include "Model/Local/UnitThreadController.h"
@@ -112,7 +112,7 @@ Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simulati
 	auto unit = contextFactory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = contextFactory->buildSimulationUnitContext();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
-	auto metric = static_cast<SpaceMetricLocal*>(context->getSpaceProperties())->clone();
+	auto metric = static_cast<SpacePropertiesLocal*>(context->getSpaceProperties())->clone();
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();

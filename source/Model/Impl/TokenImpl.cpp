@@ -62,15 +62,3 @@ QByteArray & TokenImpl::getMemoryRef()
 	return _memory;
 }
 
-void TokenImpl::serializePrimitives(QDataStream& stream) const
-{
-	stream << _memory << _energy;
-}
-
-void TokenImpl::deserializePrimitives(QDataStream& stream)
-{
-	stream >> _memory >> _energy;
-	auto memSize = _context->getSimulationParameters()->tokenMemorySize;
-	_memory = _memory.left(memSize);
-	_memory.resize(memSize);
-}

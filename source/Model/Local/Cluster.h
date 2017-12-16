@@ -77,9 +77,6 @@ public:
 
 	void updateInternals(MaintainCenter maintanCenter = MaintainCenter::No);
 
-    void serializePrimitives (QDataStream& stream) const;
-	virtual void deserializePrimitives(QDataStream& stream);
-
 private:
 	Cluster(QList< Cell* > cells, qreal angle, UnitContext* context);
 

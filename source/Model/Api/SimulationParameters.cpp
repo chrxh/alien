@@ -44,35 +44,3 @@ SimulationParameters * SimulationParameters::clone(QObject * parent) const
 	parameters->radiationVelocityPerturbation = radiationVelocityPerturbation;
 	return parameters;
 }
-
-void SimulationParameters::deserializePrimitives(QDataStream & stream)
-{
-	stream >> cellMinDistance;
-	stream >> cellMaxDistance;
-	stream >> cellMass_Reciprocal;
-	stream >> callMaxForce;
-	stream >> cellMaxForceDecayProb;
-	stream >> cellMaxBonds;
-	stream >> cellMaxToken;
-	stream >> cellMaxTokenBranchNumber;
-	stream >> cellCreationEnergy;
-	stream >> cellCreationMaxConnection;
-	stream >> cellCreationTokenAccessNumber;
-	stream >> cellMinEnergy;
-	stream >> cellTransformationProb;
-	stream >> cellFusionVelocity;
-	stream >> cellFunctionWeaponStrength;
-	stream >> cellFunctionComputerMaxInstructions;
-	stream >> cellFunctionComputerCellMemorySize;
-	stream >> tokenMemorySize;
-	stream >> cellFunctionConstructorOffspringDistance;
-	stream >> cellFunctionSensorRange;
-	stream >> cellFunctionCommunicatorRange;
-	stream >> tokenCreationEnergy;
-	stream >> tokenMinEnergy;
-	stream >> radiationExponent;
-	stream >> radiationFactor;
-	stream >> radiationProb;
-	stream >> radiationVelocityMultiplier;
-	stream >> radiationVelocityPerturbation;
-}

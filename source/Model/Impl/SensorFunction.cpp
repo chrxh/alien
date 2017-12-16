@@ -4,7 +4,7 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Local/CellMap.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Token.h"

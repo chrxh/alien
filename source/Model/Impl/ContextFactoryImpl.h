@@ -13,7 +13,7 @@ public:
 	virtual Unit* buildSimulationUnit() const override;
 	virtual UnitGrid* buildSimulationGrid() const override;
 	virtual UnitThreadController* buildSimulationThreads() const override;
-	virtual SpaceMetricLocal* buildSpaceMetric() const override;
+	virtual SpacePropertiesLocal* buildSpaceMetric() const override;
 	virtual MapCompartment* buildMapCompartment() const override;
 	virtual CellMap* buildCellMap() const override;
 	virtual ParticleMap* buildEnergyParticleMap() const override;

@@ -79,9 +79,6 @@ public:
 	CellMetadata getMetadata() const;
 	void setMetadata(CellMetadata metadata);
 
-    void serializePrimitives (QDataStream& stream) const;
-    void deserializePrimitives(QDataStream& stream);
-
 private:
     friend class Cluster;
 
