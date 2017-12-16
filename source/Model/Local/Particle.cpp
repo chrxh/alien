@@ -3,8 +3,8 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 
-#include "Model/Local/Physics.h"
 #include "Model/Api/Settings.h"
+#include "Model/Local/Physics.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/ParticleMap.h"
 #include "Model/Local/CellMap.h"
@@ -14,11 +14,11 @@
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/EntityFactory.h"
-#include "ParticleImpl.h"
+#include "Particle.h"
 
 
-ParticleImpl::ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D vel, UnitContext* context)
-	: Particle(context)
+Particle::Particle(uint64_t id, qreal energy, QVector2D pos, QVector2D vel, UnitContext* context)
+	: EntityWithTimestamp(context)
 	, _id(id)
 {
 	_energy = energy;
@@ -26,7 +26,7 @@ ParticleImpl::ParticleImpl(uint64_t id, qreal energy, QVector2D pos, QVector2D v
 	_vel = vel;
 }
 
-ParticleDescription ParticleImpl::getDescription(ResolveDescription const& resolveDescription) const
+ParticleDescription Particle::getDescription(ResolveDescription const& resolveDescription) const
 {
 	ParticleDescription result;
 	result.setPos(_pos).setVel(_vel).setEnergy(_energy);
@@ -36,7 +36,7 @@ ParticleDescription ParticleImpl::getDescription(ResolveDescription const& resol
 	return result;
 }
 
-void ParticleImpl::applyChangeDescription(ParticleChangeDescription const & change)
+void Particle::applyChangeDescription(ParticleChangeDescription const & change)
 {
 	if (change.pos) {
 		setPosition(*change.pos);
@@ -54,7 +54,7 @@ void ParticleImpl::applyChangeDescription(ParticleChangeDescription const & chan
 
 //return: false = energy is zero
 //        cluster is nonzero if particle transforms into cell
-bool ParticleImpl::processingMovement(Cluster*& cluster)
+bool Particle::processingMovement(Cluster*& cluster)
 {
 	if (!isTimestampFitting()) {
 		return true;
@@ -112,19 +112,19 @@ bool ParticleImpl::processingMovement(Cluster*& cluster)
 	return true;
 }
 
-void ParticleImpl::clearParticleFromMap()
+void Particle::clearParticleFromMap()
 {
 	auto energyMap = _context->getParticleMap();
 	energyMap->removeParticleIfPresent(getPosition(), this);
 }
 
-void ParticleImpl::drawParticleToMap()
+void Particle::drawParticleToMap()
 {
 	auto energyMap = _context->getParticleMap();
 	energyMap->setParticle(getPosition(), this);
 }
 
-void ParticleImpl::collisionWithCell(Cell* cell)
+void Particle::collisionWithCell(Cell* cell)
 {
 	cell->setEnergy(cell->getEnergy() + _energy);
 	//create token?
@@ -138,7 +138,7 @@ void ParticleImpl::collisionWithCell(Cell* cell)
 	_energy = 0;
 }
 
-CellDescription ParticleImpl::getRandomCellDesciption(double energy) const
+CellDescription Particle::getRandomCellDesciption(double energy) const
 {
 	auto parameters = _context->getSimulationParameters();
 	int randomMaxConnections = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxBonds + 1);
@@ -152,7 +152,7 @@ CellDescription ParticleImpl::getRandomCellDesciption(double energy) const
 		.setMaxConnections(randomMaxConnections).setTokenBranchNumber(randomTokenAccessNumber);
 }
 
-void ParticleImpl::collisionWithEnergyParticle(Particle* otherEnergy)
+void Particle::collisionWithEnergyParticle(Particle* otherEnergy)
 {
 	//particle with most energy inherits color
 	if (otherEnergy->getEnergy() < _energy)
@@ -163,69 +163,69 @@ void ParticleImpl::collisionWithEnergyParticle(Particle* otherEnergy)
 	otherEnergy->setVelocity((otherEnergy->getVelocity() + _vel) / 2.0);
 }
 
-void ParticleImpl::move()
+void Particle::move()
 {
 	_pos += _vel;
 	_context->getSpaceProperties()->correctPosition(_pos);
 }
 
-void ParticleImpl::serializePrimitives(QDataStream& stream) const
+void Particle::serializePrimitives(QDataStream& stream) const
 {
 	stream << _energy << _pos << _vel << _id;
 }
 
-void ParticleImpl::deserializePrimitives(QDataStream& stream)
+void Particle::deserializePrimitives(QDataStream& stream)
 {
 	stream >> _energy >> _pos >> _vel >> _id;
 }
 
-qreal ParticleImpl::getEnergy() const
+qreal Particle::getEnergy() const
 {
 	return _energy;
 }
 
-void ParticleImpl::setEnergy(qreal value)
+void Particle::setEnergy(qreal value)
 {
 	_energy = value;
 }
 
-QVector2D ParticleImpl::getPosition() const
+QVector2D Particle::getPosition() const
 {
 	return _pos;
 }
 
-void ParticleImpl::setPosition(QVector2D value)
+void Particle::setPosition(QVector2D value)
 {
 	_pos = value;
 	_context->getSpaceProperties()->correctPosition(_pos);
 }
 
-QVector2D ParticleImpl::getVelocity() const
+QVector2D Particle::getVelocity() const
 {
 	return _vel;
 }
 
-void ParticleImpl::setVelocity(QVector2D value)
+void Particle::setVelocity(QVector2D value)
 {
 	_vel = value;
 }
 
-quint64 ParticleImpl::getId() const
+quint64 Particle::getId() const
 {
 	return _id;
 }
 
-void ParticleImpl::setId(quint64 value)
+void Particle::setId(quint64 value)
 {
 	_id = value;
 }
 
-ParticleMetadata ParticleImpl::getMetadata() const
+ParticleMetadata Particle::getMetadata() const
 {
 	return _metadata;
 }
 
-void ParticleImpl::setMetadata(ParticleMetadata value)
+void Particle::setMetadata(ParticleMetadata value)
 {
 	_metadata = value;
 }

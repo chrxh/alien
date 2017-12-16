@@ -1,42 +1,53 @@
 #pragma once
 
-#include <QVector2D>
-
 #include "Model/Api/Definitions.h"
 #include "Model/Api/ChangeDescriptions.h"
+#include "Model/Api/Descriptions.h"
 #include "EntityWithTimestamp.h"
 
 class Particle
 	: public EntityWithTimestamp
 {
 public:
-	Particle(UnitContext* context) : EntityWithTimestamp(context) {}
-	virtual ~Particle() = default;
+	Particle(uint64_t id, qreal energy, QVector2D pos, QVector2D vel, UnitContext* context);
 
-	virtual ParticleDescription getDescription(ResolveDescription const& resolveDescription) const = 0;
-	virtual void applyChangeDescription(ParticleChangeDescription const& change) = 0;
+	virtual ParticleDescription getDescription(ResolveDescription const& resolveDescription) const;
+	virtual void applyChangeDescription(ParticleChangeDescription const& change);
 
-    virtual bool processingMovement (Cluster*& cluster) = 0;
+	virtual bool processingMovement(Cluster*& cluster);
 
-	virtual void clearParticleFromMap() = 0;
-	virtual void drawParticleToMap() = 0;
+	virtual void clearParticleFromMap();
+	virtual void drawParticleToMap();
 
-	virtual qreal getEnergy() const = 0;
-	virtual void setEnergy(qreal value) = 0;
+	virtual qreal getEnergy() const;
+	virtual void setEnergy(qreal value);
 
-	virtual QVector2D getPosition () const = 0;
-	virtual void setPosition(QVector2D value) = 0;
+	virtual QVector2D getPosition() const;
+	virtual void setPosition(QVector2D value);
 
-	virtual QVector2D getVelocity() const = 0;
-	virtual void setVelocity(QVector2D value) = 0;
+	virtual QVector2D getVelocity() const;
+	virtual void setVelocity(QVector2D value);
 
-	virtual quint64 getId() const = 0;
-	virtual void setId(quint64 value) = 0;
+	virtual quint64 getId() const;
+	virtual void setId(quint64 value);
 
-	virtual ParticleMetadata getMetadata() const = 0;
-	virtual void setMetadata(ParticleMetadata value) = 0;
+	virtual ParticleMetadata getMetadata() const;
+	virtual void setMetadata(ParticleMetadata value);
 
-    virtual void serializePrimitives (QDataStream& stream) const = 0;
-	virtual void deserializePrimitives (QDataStream& stream) = 0;
+	virtual void serializePrimitives(QDataStream& stream) const;
+	virtual void deserializePrimitives(QDataStream& stream);
+
+private:
+	void move();
+	void collisionWithEnergyParticle(Particle* otherEnergy);
+	void collisionWithCell(Cell* cell);
+
+	CellDescription getRandomCellDesciption(double energy) const;
+
+	quint64 _id = 0;
+	qreal _energy = 0.0;
+	QVector2D _pos;
+	QVector2D _vel;
+	ParticleMetadata _metadata;
 };
 

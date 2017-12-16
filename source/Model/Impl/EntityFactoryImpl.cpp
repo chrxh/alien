@@ -2,7 +2,7 @@
 #include "Base/NumberGenerator.h"
 #include "Model/Local/CellFeatureFactory.h"
 
-#include "ParticleImpl.h"
+#include "Particle.h"
 #include "Cell.h"
 #include "Cluster.h"
 #include "TokenImpl.h"
@@ -75,7 +75,7 @@ Particle* EntityFactoryImpl::build(ParticleDescription const& desc, UnitContext*
 	auto const& pos = *desc.pos;
 	auto const& vel = desc.vel.get_value_or({ 0.0, 0.0 });
 	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getTag() : desc.id;
-	auto particle = new ParticleImpl(id, *desc.energy, pos, vel, context);
+	auto particle = new Particle(id, *desc.energy, pos, vel, context);
 	auto const& metadata = desc.metadata.get_value_or(ParticleMetadata());
 	particle->setMetadata(metadata);
 	return particle;
