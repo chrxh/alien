@@ -194,15 +194,17 @@ SerializerImpl::SerializerImpl(QObject *parent /*= nullptr*/)
 {
 }
 
-void SerializerImpl::init(SimulationAccess * access)
+void SerializerImpl::init()
 {
-	_access = access;
+	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto access = facade->buildSimulationAccess();
+	SET_CHILD(_access, access);
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
 }
 
 void SerializerImpl::serialize(SimulationController * simController)
 {
-	_serializationInProgress = true;
+	_access->init(simController->getContext());
 	_serializedSimulation.clear();
 	_serializedSimulationContent.clear();
 
@@ -267,20 +269,17 @@ SimulationController* SerializerImpl::deserializeSimulation(string const & conte
 
 void SerializerImpl::dataReadyToRetrieve()
 {
-	if (_serializationInProgress) {
-		ostringstream stream;
-		boost::archive::binary_oarchive archive(stream);
+	ostringstream stream;
+	boost::archive::binary_oarchive archive(stream);
 
-		auto content = _access->retrieveData();
-		archive << content;
-		_serializedSimulationContent = stream.str();
+	auto content = _access->retrieveData();
+	archive << content;
+	_serializedSimulationContent = stream.str();
 
-		archive
-			<< _configToSerialize.universeSize << _configToSerialize.gridSize << *_configToSerialize.parameters
-			<< *_configToSerialize.symbolTable << _configToSerialize.maxThreads;
-		_serializedSimulation = stream.str();
+	archive
+		<< _configToSerialize.universeSize << _configToSerialize.gridSize << *_configToSerialize.parameters
+		<< *_configToSerialize.symbolTable << _configToSerialize.maxThreads;
+	_serializedSimulation = stream.str();
 
-		_serializationInProgress = false;
-		Q_EMIT serializationFinished();
-	}
+	Q_EMIT serializationFinished();
 }

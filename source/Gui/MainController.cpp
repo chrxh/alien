@@ -44,16 +44,14 @@ void MainController::init()
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto serializer = facade->buildSerializer();
 	auto simAccessForDataController = facade->buildSimulationAccess();
-	auto simAccessForSerializer = facade->buildSimulationAccess();
 	auto descHelper = facade->buildDescriptionHelper();
 	SET_CHILD(_serializer, serializer);
 	SET_CHILD(_simAccessForDataController, simAccessForDataController);
-	SET_CHILD(_simAccessForSerializer, simAccessForSerializer);
 	SET_CHILD(_descHelper, descHelper);
 	_dataController = new DataController(this);
 	_notifier = new Notifier(this);
 
-	_serializer->init(_simAccessForSerializer);
+	_serializer->init();
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
 	//default simulation
@@ -83,7 +81,6 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	connectSimController();
 	_view->getInfoController()->setTimestep(0);
 	_simAccessForDataController->init(_simController->getContext());
-	_simAccessForSerializer->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
 	_dataController->init(_notifier, _simAccessForDataController, _descHelper, _simController->getContext());
 

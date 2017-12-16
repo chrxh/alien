@@ -13,7 +13,7 @@ public:
 	Serializer(QObject* parent = nullptr) : QObject(parent) { }
 	virtual ~Serializer() = default;
 
-	virtual void init(SimulationAccess* access) = 0;
+	virtual void init() = 0;
 
 	virtual void serialize(SimulationController* simController) = 0;
 	Q_SIGNAL void serializationFinished();
