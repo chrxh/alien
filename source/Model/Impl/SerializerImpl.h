@@ -19,9 +19,14 @@ public:
 	virtual void serialize(SimulationController* simController) override;
 	virtual string const& retrieveSerializedSimulationContent() override;
 	virtual string const& retrieveSerializedSimulation() override;
-
 	virtual void deserializeSimulationContent(string const& content) const override;
-	virtual SimulationController* deserializeSimulation(string const& content) const override;
+	virtual SimulationController* deserializeSimulation(string const& content) override;
+
+	virtual string serializeSymbolTable(SymbolTable* symbolTable) const override;
+	virtual SymbolTable* deserializeSymbolTable(string const& data) override;
+
+	virtual string serializeSimulationParameters(SimulationParameters* parameters) const override;
+	virtual SimulationParameters* deserializeSimulationParameters(string const& data) override;
 
 private:
 	Q_SLOT void dataReadyToRetrieve();

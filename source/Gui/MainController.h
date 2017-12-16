@@ -20,6 +20,8 @@ public:
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
 
+	virtual Serializer* getSerializer() const;
+
 private:
 	void connectSimController() const;
 	void addRandomEnergy(double amount);
@@ -41,7 +43,7 @@ private:
 
 	SimulationController* _simController = nullptr;
 	DataController* _dataController = nullptr;
-	SimulationAccess* _simAccessForDataController = nullptr;
+	SimulationAccess* _simAccess = nullptr;
 	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;

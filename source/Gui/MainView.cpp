@@ -96,11 +96,11 @@ void MainView::setupTheme()
 	ui->menuAddEnsemble->setFont(GuiSettings::getGlobalFont());
 	ui->menuMultiplyExtension->setFont(GuiSettings::getGlobalFont());
 
-	ui->fpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
+	ui->tpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
-	QPalette p = ui->fpsForcingButton->palette();
+	QPalette p = ui->tpsForcingButton->palette();
 	p.setColor(QPalette::ButtonText, GuiSettings::ButtonTextColor);
-	ui->fpsForcingButton->setPalette(p);
+	ui->tpsForcingButton->setPalette(p);
 }
 
 void MainView::onRunClicked(bool run)
@@ -157,7 +157,7 @@ void MainView::onSetEditorMode()
 
 void MainView::onNewSimulation()
 {
-	NewSimulationDialog d(_model->getSimulationParameters(), _model->getSymbolTable());
+	NewSimulationDialog d(_model->getSimulationParameters(), _model->getSymbolTable(), _controller->getSerializer());
 	if (d.exec()) {
 		NewSimulationConfig config{ 
 			d.getMaxThreads(), d.getGridSize(), d.getUniverseSize(), d.getSymbolTable(), d.getSimulationParameters(), d.getEnergy()

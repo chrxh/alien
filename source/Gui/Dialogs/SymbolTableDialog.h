@@ -13,25 +13,29 @@ class SymbolTableDialog : public QDialog
     Q_OBJECT
     
 public:
-	SymbolTableDialog(SymbolTable* symbolTable, QWidget *parent = 0);
+	SymbolTableDialog(SymbolTable* symbolTable, Serializer* serializer, QWidget *parent = 0);
 	virtual ~SymbolTableDialog();
 
-    SymbolTable* getNewSymbolTable ();
-
-private Q_SLOTS:
-    void symbolTableToWidgets ();
-    void itemSelectionChanged ();
-    void addButtonClicked ();
-    void delButtonClicked ();
-    void defaultButtonClicked ();
-    void loadButtonClicked ();
-    void saveButtonClicked ();
-    void mergeWithButtonClicked ();
+    SymbolTable* getSymbolTable ();
 
 private:
-	void widgetsToSymbolTable();
+	Q_SLOT void updateWidgetsFromSymbolTable ();
+	Q_SLOT void itemSelectionChanged ();
+	Q_SLOT void addButtonClicked ();
+	Q_SLOT void delButtonClicked ();
+	Q_SLOT void defaultButtonClicked ();
+	Q_SLOT void loadButtonClicked ();
+	Q_SLOT void saveButtonClicked ();
+	Q_SLOT void mergeWithButtonClicked ();
+
+private:
+	void updateSymbolTableFromWidgets();
+
+	SymbolTable* loadSymbolTable(string filename);
+	bool saveSymbolTable(string filename, SymbolTable* symbolTable);
 
     Ui::SymbolTableDialog *ui;
-	SymbolTable* _symbolTable;
+	SymbolTable* _symbolTable = nullptr;
+	Serializer* _serializer = nullptr;
 };
 

@@ -135,6 +135,7 @@ namespace boost {
 		template<class Archive>
 		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int /*version*/)
 		{
+			ar & data.cellMutationProb;
 			ar & data.cellMinDistance;
 			ar & data.cellMaxDistance;
 			ar & data.cellMass_Reciprocal;
@@ -244,14 +245,14 @@ void SerializerImpl::deserializeSimulationContent(string const & content) const
 	_access->updateData(data);
 }
 
-SimulationController* SerializerImpl::deserializeSimulation(string const & content) const
+SimulationController* SerializerImpl::deserializeSimulation(string const & content)
 {
 	istringstream stream(content);
 	boost::archive::binary_iarchive ia(stream);
 
 	DataDescription data;
-	SimulationParameters* parameters = new SimulationParameters();
-	SymbolTable* symbolTable = new SymbolTable();
+	SimulationParameters* parameters = new SimulationParameters(this);
+	SymbolTable* symbolTable = new SymbolTable(this);
 	IntVector2D universeSize;
 	IntVector2D gridSize;
 	int maxThreads;
@@ -259,12 +260,51 @@ SimulationController* SerializerImpl::deserializeSimulation(string const & conte
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto simController = facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters);
+	simController->setParent(this);
 
 	_access->init(simController->getContext());
 
 	_access->clear();
 	_access->updateData(data);
 	return simController;
+}
+
+string SerializerImpl::serializeSymbolTable(SymbolTable * symbolTable) const
+{
+	ostringstream stream;
+	boost::archive::binary_oarchive archive(stream);
+
+	archive << *symbolTable;
+	return stream.str();
+}
+
+SymbolTable * SerializerImpl::deserializeSymbolTable(string const & data)
+{
+	istringstream stream(data);
+	boost::archive::binary_iarchive ia(stream);
+
+	SymbolTable* symbolTable = new SymbolTable(this);
+	ia >> *symbolTable;
+	return symbolTable;
+}
+
+string SerializerImpl::serializeSimulationParameters(SimulationParameters * parameters) const
+{
+	ostringstream stream;
+	boost::archive::binary_oarchive archive(stream);
+
+	archive << *parameters;
+	return stream.str();
+}
+
+SimulationParameters * SerializerImpl::deserializeSimulationParameters(string const & data)
+{
+	istringstream stream(data);
+	boost::archive::binary_iarchive ia(stream);
+
+	SimulationParameters* parameters = new SimulationParameters(this);
+	ia >> *parameters;
+	return parameters;
 }
 
 void SerializerImpl::dataReadyToRetrieve()

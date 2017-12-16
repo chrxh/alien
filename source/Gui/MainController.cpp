@@ -46,7 +46,7 @@ void MainController::init()
 	auto simAccessForDataController = facade->buildSimulationAccess();
 	auto descHelper = facade->buildDescriptionHelper();
 	SET_CHILD(_serializer, serializer);
-	SET_CHILD(_simAccessForDataController, simAccessForDataController);
+	SET_CHILD(_simAccess, simAccessForDataController);
 	SET_CHILD(_descHelper, descHelper);
 	_dataController = new DataController(this);
 	_notifier = new Notifier(this);
@@ -80,9 +80,9 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	connectSimController();
 	_view->getInfoController()->setTimestep(0);
-	_simAccessForDataController->init(_simController->getContext());
+	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
-	_dataController->init(_notifier, _simAccessForDataController, _descHelper, _simController->getContext());
+	_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
 	_view->setupEditors(_simController, _dataController, _notifier);
 
@@ -116,7 +116,7 @@ bool MainController::onLoadSimulation(string const & filename)
 	try {
 		delete _simController;
 		_simController = _serializer->deserializeSimulation(data);
-		_simAccessForDataController->init(_simController->getContext());
+		_simAccess->init(_simController->getContext());
 		connectSimController();
 		_view->getInfoController()->setTimestep(timestep);
 
@@ -125,7 +125,7 @@ bool MainController::onLoadSimulation(string const & filename)
 
 		auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 		_descHelper->init(_simController->getContext());
-		_dataController->init(_notifier, _simAccessForDataController, _descHelper, _simController->getContext());
+		_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
 		_view->setupEditors(_simController, _dataController, _notifier);
 		_view->refresh();
@@ -134,6 +134,11 @@ bool MainController::onLoadSimulation(string const & filename)
 		return false;
 	}
 	return true;
+}
+
+Serializer * MainController::getSerializer() const
+{
+	return _serializer;
 }
 
 void MainController::connectSimController() const
@@ -153,7 +158,7 @@ void MainController::addRandomEnergy(double amount)
 			.setVel(QVector2D(_numberGenerator->getRandomReal()*2.0 - 1.0, _numberGenerator->getRandomReal()*2.0 - 1.0))
 			.setEnergy(amountPerCell));
 	}
-	_simAccessForDataController->updateData(desc);
+	_simAccess->updateData(desc);
 }
 
 void MainController::serializationFinished()
