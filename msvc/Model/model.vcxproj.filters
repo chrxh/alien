@@ -83,9 +83,6 @@
     <ClInclude Include="..\..\source\Model\Local\EntityFactory.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Local\Particle.h">
-      <Filter>Source Files\Local</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\ParticleMetadata.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
@@ -117,9 +114,6 @@
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\ParticleImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h">
@@ -177,6 +171,9 @@
       <Filter>Source Files\Local</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\Cluster.h">
+      <Filter>Source Files\Local</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Local\Particle.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
   </ItemGroup>
@@ -350,9 +347,6 @@
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\ParticleImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\ParticleMapImpl.cpp">
@@ -581,6 +575,9 @@
       <Filter>Source Files\Local</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Local\Cluster.cpp">
+      <Filter>Source Files\Local</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Local\Particle.cpp">
       <Filter>Source Files\Local</Filter>
     </ClCompile>
   </ItemGroup>

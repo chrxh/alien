@@ -335,7 +335,6 @@
     <ClInclude Include="..\..\source\Model\Impl\EnergyGuidanceImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\EntityFactoryImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.h" />
-    <ClInclude Include="..\..\source\Model\Impl\ParticleImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\SpaceMetricImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\TokenImpl.h" />
@@ -735,7 +734,6 @@
     <ClCompile Include="..\..\source\Model\Impl\EnergyGuidanceImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\EntityFactoryImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.cpp" />
-    <ClCompile Include="..\..\source\Model\Impl\ParticleImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ParticleMapImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationAccessImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationContextImpl.cpp" />
@@ -753,6 +751,7 @@
     <ClCompile Include="..\..\source\Model\Local\CellFunction.cpp" />
     <ClCompile Include="..\..\source\Model\Local\Cluster.cpp" />
     <ClCompile Include="..\..\source\Model\Local\Definitions.cpp" />
+    <ClCompile Include="..\..\source\Model\Local\Particle.cpp" />
     <ClCompile Include="..\..\source\Model\Local\PhysicalQuantityConverter.cpp" />
     <ClCompile Include="..\..\source\Model\Local\Physics.cpp" />
     <ClCompile Include="..\..\source\Model\Local\EntityWithTimestamp.cpp" />
