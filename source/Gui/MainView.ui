@@ -325,7 +325,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QToolButton" name="fpsForcingButton">
+        <widget class="QToolButton" name="tpsForcingButton">
          <property name="palette">
           <palette>
            <active>
@@ -472,7 +472,7 @@
           </palette>
          </property>
          <property name="text">
-          <string>FPS forcing</string>
+          <string>TPS forcing</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
