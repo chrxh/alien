@@ -42,7 +42,6 @@ private:
 	SimulationController* _simController = nullptr;
 	DataController* _dataController = nullptr;
 	SimulationAccess* _simAccessForDataController = nullptr;
-	SimulationAccess* _simAccessForSerializer = nullptr;
 	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;

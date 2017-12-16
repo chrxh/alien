@@ -14,7 +14,7 @@ public:
 	SerializerImpl(QObject *parent = nullptr);
 	virtual ~SerializerImpl() = default;
 
-	virtual void init(SimulationAccess* access) override;
+	virtual void init() override;
 
 	virtual void serialize(SimulationController* simController) override;
 	virtual string const& retrieveSerializedSimulationContent() override;
@@ -28,7 +28,6 @@ private:
 
 	SimulationAccess* _access = nullptr;
 
-	bool _serializationInProgress = false;
 	struct ConfigToSerialize {
 		SimulationParameters* parameters;
 		SymbolTable* symbolTable;
