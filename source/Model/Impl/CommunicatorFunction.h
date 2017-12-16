@@ -11,9 +11,6 @@ public:
     CommunicatorFunction (UnitContext* context);
     CommunicatorFunction (QByteArray data, UnitContext* context);
 
-    void serializePrimitives (QDataStream& stream) const override;
-    void deserializePrimitives (QDataStream& stream) override;
-
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::COMMUNICATOR; }
 	QByteArray getInternalData () const override;
 

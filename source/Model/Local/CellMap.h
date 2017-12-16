@@ -10,7 +10,7 @@ public:
 	CellMap(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CellMap() = default;
 
-	virtual void init(SpaceMetricLocal* topo, MapCompartment* compartment) = 0;
+	virtual void init(SpacePropertiesLocal* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
 
 	virtual void setCell(QVector2D pos, Cell* cell) = 0;
@@ -23,9 +23,6 @@ public:
 	virtual Cluster* getNearbyClusterFast(QVector2D const& pos, qreal r, qreal minMass, qreal maxMass, Cluster* exclude) const = 0;
 	using CellSelectFunction = bool(*)(Cell*);
 	virtual QList< Cell* > getNearbySpecificCells(QVector2D const& pos, qreal r, CellSelectFunction selection) const = 0;
-
-	virtual void serializePrimitives(QDataStream& stream) const = 0;
-	virtual void deserializePrimitives(QDataStream& stream, QMap< quint64, Cell* > const& oldIdCellMap) = 0;
 
 protected:
 	Cell*** _cellGrid = nullptr;

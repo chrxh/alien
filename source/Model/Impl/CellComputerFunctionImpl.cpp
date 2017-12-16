@@ -501,21 +501,6 @@ void CellComputerFunctionImpl::appendDescriptionImpl(CellFeatureDescription & de
 	desc.setVolatileData(_memory);
 }
 
-void CellComputerFunctionImpl::serializePrimitives (QDataStream& stream) const
-{
-    stream << _memory << _code;
-}
-
-void CellComputerFunctionImpl::deserializePrimitives (QDataStream& stream)
-{
-    //load remaining attributes
-    stream >> _memory >> _code;
-	auto parameters = _context->getSimulationParameters();
-	_memory = _memory.left(parameters->cellFunctionComputerCellMemorySize);
-	_memory.resize(parameters->cellFunctionComputerCellMemorySize);
-	_code = _code.left(3 * parameters->cellFunctionComputerMaxInstructions);
-}
-
 QByteArray CellComputerFunctionImpl::getInternalData () const
 {
 	QByteArray data;

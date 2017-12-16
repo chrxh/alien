@@ -23,8 +23,5 @@ public:
 	virtual qreal getEnergy () const = 0;
 
 	virtual QByteArray& getMemoryRef () = 0;
-
-	virtual void serializePrimitives (QDataStream& stream) const = 0;
-	virtual void deserializePrimitives (QDataStream& stream) = 0;
 };
 

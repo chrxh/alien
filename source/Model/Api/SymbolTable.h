@@ -21,9 +21,6 @@ public:
 	virtual void setEntries(map<string, string> const& table);
 	virtual void mergeEntries(SymbolTable const& table);
 
-	virtual void serializePrimitives (QDataStream& stream) const;
-	virtual void deserializePrimitives (QDataStream& stream);
-
 private:
     map<string, string> _symbolsByKey;
 };

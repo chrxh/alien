@@ -12,9 +12,6 @@ public:
 
 	SimulationParameters* clone(QObject* parent = nullptr) const;
 
-	void serializePrimitives(QDataStream& stream);
-	void deserializePrimitives(QDataStream& stream);
-
 	qreal cellMutationProb = 0.0;
 	qreal cellMinDistance = 0.0;
 	qreal cellMaxDistance = 0.0;

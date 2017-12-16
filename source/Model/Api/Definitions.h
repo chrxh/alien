@@ -17,7 +17,7 @@ class Unit;
 class CellMap;
 class ParticleMap;
 class SpaceProperties;
-class SpaceMetricLocal;
+class SpacePropertiesLocal;
 class MapCompartment;
 class UnitGrid;
 class UnitThreadController;

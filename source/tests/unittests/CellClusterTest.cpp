@@ -6,7 +6,7 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/Settings.h"
 #include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/Cluster.h"

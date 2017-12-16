@@ -51,12 +51,3 @@ void SymbolTable::mergeEntries(SymbolTable const& table)
 	_symbolsByKey.insert(table._symbolsByKey.begin(), table._symbolsByKey.end());
 }
 
-void SymbolTable::serializePrimitives(QDataStream& stream) const
-{
-	CHECK(false); //to be implemented
-}
-
-void SymbolTable::deserializePrimitives(QDataStream& stream)
-{
-	CHECK(false); //to be implemented
-}

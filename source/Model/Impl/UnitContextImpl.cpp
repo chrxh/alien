@@ -19,7 +19,7 @@ UnitContextImpl::~UnitContextImpl ()
 	deleteClustersAndEnergyParticles();
 }
 
-void UnitContextImpl::init(NumberGenerator* numberGen, SpaceMetricLocal* metric, CellMap* cellMap, ParticleMap* energyMap
+void UnitContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, CellMap* cellMap, ParticleMap* energyMap
 	, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters)
 {
 	SET_CHILD(_numberGen, numberGen);
@@ -38,7 +38,7 @@ NumberGenerator * UnitContextImpl::getNumberGenerator() const
 	return _numberGen;
 }
 
-SpaceMetricLocal* UnitContextImpl::getSpaceProperties () const
+SpacePropertiesLocal* UnitContextImpl::getSpaceProperties () const
 {
     return _metric;
 }

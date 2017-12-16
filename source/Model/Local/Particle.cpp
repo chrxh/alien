@@ -8,7 +8,7 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/ParticleMap.h"
 #include "Model/Local/CellMap.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Api/SimulationParameters.h"
 
 #include "Model/Local/Cell.h"
@@ -167,16 +167,6 @@ void Particle::move()
 {
 	_pos += _vel;
 	_context->getSpaceProperties()->correctPosition(_pos);
-}
-
-void Particle::serializePrimitives(QDataStream& stream) const
-{
-	stream << _energy << _pos << _vel << _id;
-}
-
-void Particle::deserializePrimitives(QDataStream& stream)
-{
-	stream >> _energy >> _pos >> _vel >> _id;
 }
 
 qreal Particle::getEnergy() const

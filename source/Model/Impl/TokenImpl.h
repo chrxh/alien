@@ -23,9 +23,6 @@ public:
 
 	QByteArray& getMemoryRef() override;
 
-	void serializePrimitives(QDataStream& stream) const override;
-	void deserializePrimitives(QDataStream& stream) override;
-
 private:
 	UnitContext* _context = nullptr;
 

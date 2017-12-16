@@ -12,7 +12,7 @@
 #include "Model/Local/UnitThreadController.h"
 #include "Model/Local/UnitGrid.h"
 #include "Model/Local/Unit.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Local/ParticleMap.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/Cluster.h"

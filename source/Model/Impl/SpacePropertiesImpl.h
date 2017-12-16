@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 
-class SpaceMetricImpl
-	: public SpaceMetricLocal
+class SpacePropertiesImpl
+	: public SpacePropertiesLocal
 {
 public:
-	SpaceMetricImpl(QObject* parent = nullptr);
-	virtual ~SpaceMetricImpl() {}
+	SpacePropertiesImpl(QObject* parent = nullptr);
+	virtual ~SpacePropertiesImpl() {}
 
 	virtual void init(IntVector2D size);
-	virtual SpaceMetricLocal* clone(QObject* parent = nullptr) const override;
+	virtual SpacePropertiesLocal* clone(QObject* parent = nullptr) const override;
 
 	virtual IntVector2D getSize() const override;
 
@@ -26,16 +26,13 @@ public:
 	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const override;
 	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const override;
 
-	virtual void serializePrimitives(QDataStream& stream) const override;
-	virtual void deserializePrimitives(QDataStream& stream) override;
-
 private:
 	inline void correctPositionInline(IntVector2D & pos) const;
 
 	IntVector2D _size{ 0, 0 };
 };
 
-void SpaceMetricImpl::correctPositionInline(IntVector2D & pos) const
+void SpacePropertiesImpl::correctPositionInline(IntVector2D & pos) const
 {
 	pos.x = ((pos.x % _size.x) + _size.x) % _size.x;
 	pos.y = ((pos.y % _size.y) + _size.y) % _size.y;
