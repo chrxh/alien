@@ -13,7 +13,7 @@
 #include "Model/Api/Settings.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/CellMap.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Api/SimulationParameters.h"
 
 #include "Cluster.h"
@@ -915,7 +915,7 @@ qreal Cluster::calcAngularMassWithNewParticle (QVector2D particlePos) const
     center = center / (_cells.size()+1);
 
     //calc new angular mass
-	SpaceMetricLocal* metric = _context->getSpaceProperties();
+	SpacePropertiesLocal* metric = _context->getSpaceProperties();
     QVector2D diff = particleRelPos - center;
 	metric->correctDisplacement(diff);
     qreal aMass = diff.lengthSquared();
@@ -939,7 +939,7 @@ qreal Cluster::calcAngularMassWithoutUpdate () const
 
     //calc new angular mass
     qreal aMass = 0.0;
-	SpaceMetricLocal* metric = _context->getSpaceProperties();
+	SpacePropertiesLocal* metric = _context->getSpaceProperties();
 	foreach(Cell* cell, _cells) {
         QVector2D displacement = cell->getRelPosition() - center;
 		metric->correctDisplacement(displacement);
@@ -1159,23 +1159,6 @@ ClusterMetadata Cluster::getMetadata() const
 void Cluster::setMetadata(ClusterMetadata metadata)
 {
 	_meta = metadata;
-}
-
-void Cluster::serializePrimitives (QDataStream& stream) const
-{
-    stream << _angle << _pos << _angularVel << _vel;
-    /*stream << _cells.size();
-    FactoryFacade *facade = ServiceLocator::getInstance().getService<FactoryFacade>();
-    foreach( Cell* cell, _cells ) {
-        facade->serializeFeaturedCell(cell, stream);
-    }*/
-    stream << _id;
-}
-
-void Cluster::deserializePrimitives(QDataStream& stream)
-{
-	stream >> _angle >> _pos >> _angularVel >> _vel;
-	stream >> _id;
 }
 
 /*

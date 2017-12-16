@@ -23,9 +23,6 @@ public:
     ProcessingResult process (Token* token, Cell* cell, Cell* previousCell);
 	void mutate();
 
-	virtual void serializePrimitives(QDataStream& stream) const {}
-	virtual void deserializePrimitives(QDataStream& stream) {}
-
 protected:
 	virtual void appendDescriptionImpl(CellFeatureDescription& desc) const {};
 	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) = 0;

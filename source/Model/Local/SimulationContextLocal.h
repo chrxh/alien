@@ -10,7 +10,7 @@ public:
 	SimulationContextLocal(QObject* parent = nullptr) : SimulationContext(parent) {}
 	virtual ~SimulationContextLocal() = default;
 
-	virtual void init(NumberGenerator* numberGen, SpaceMetricLocal* metric, UnitGrid* grid, UnitThreadController* threads
+	virtual void init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler) = 0;
 
 	virtual UnitGrid* getUnitGrid() const = 0;

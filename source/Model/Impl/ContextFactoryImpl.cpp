@@ -4,7 +4,7 @@
 #include "UnitContextImpl.h"
 #include "UnitGridImpl.h"
 #include "UnitThreadControllerImpl.h"
-#include "SpaceMetricImpl.h"
+#include "SpacePropertiesImpl.h"
 #include "CellMapImpl.h"
 #include "ParticleMapImpl.h"
 #include "CellComputerCompilerImpl.h"
@@ -34,9 +34,9 @@ UnitThreadController * ContextFactoryImpl::buildSimulationThreads() const
 	return new UnitThreadControllerImpl();
 }
 
-SpaceMetricLocal * ContextFactoryImpl::buildSpaceMetric() const
+SpacePropertiesLocal * ContextFactoryImpl::buildSpaceMetric() const
 {
-	return new SpaceMetricImpl();
+	return new SpacePropertiesImpl();
 }
 
 MapCompartment * ContextFactoryImpl::buildMapCompartment() const

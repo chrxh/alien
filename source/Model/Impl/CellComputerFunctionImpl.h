@@ -21,9 +21,6 @@ public:
 
 	virtual void mutateImpl() override;
 
-	virtual void serializePrimitives (QDataStream& stream) const override;
-	virtual void deserializePrimitives (QDataStream& stream) override;
-
 protected:
 	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) override;
 	virtual void appendDescriptionImpl(CellFeatureDescription & desc) const override;

@@ -9,7 +9,7 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/Settings.h"
-#include "Model/Local/SpaceMetricLocal.h"
+#include "Model/Local/SpacePropertiesLocal.h"
 #include "Model/Api/SimulationParameters.h"
 
 #include "tests/TestSettings.h"

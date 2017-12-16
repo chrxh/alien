@@ -34,9 +34,6 @@ public:
 	virtual ParticleMetadata getMetadata() const;
 	virtual void setMetadata(ParticleMetadata value);
 
-	virtual void serializePrimitives(QDataStream& stream) const;
-	virtual void deserializePrimitives(QDataStream& stream);
-
 private:
 	void move();
 	void collisionWithEnergyParticle(Particle* otherEnergy);
