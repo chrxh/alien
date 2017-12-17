@@ -37,13 +37,14 @@ private:
 	Q_SLOT void onLoadSimulation();
 	Q_SLOT void onEditSimulationParameters();
 	Q_SLOT void onLoadSimulationParameters();
+	Q_SLOT void onSaveSimulationParameters();
 
 	void cellDefocused();
 	void updateZoomFactor();
 
 	Ui::MainView* ui = nullptr;	//contains VisualEditor
 	MainModel* _model = nullptr;
-	MainController* _mainController = nullptr;
+	MainController* _controller = nullptr;
 	Serializer* _serializer = nullptr;
 
 	DataEditController* _dataEditor = nullptr;

@@ -122,11 +122,6 @@ bool MainController::onLoadSimulation(string const & filename)
 	return true;
 }
 
-bool MainController::onLoadSimulationParameters(string const & filename)
-{
-	return true;
-}
-
 void MainController::onUpdateSimulationParametersForRunningSimulation(SimulationParameters * parameters)
 {
 	_simController->getContext()->setSimulationParameters(parameters);
