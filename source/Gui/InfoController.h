@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <QLabel>
 
+#include "Definitions.h"
+
 class InfoController
 	: public QObject
 {
@@ -10,12 +12,9 @@ public:
 	InfoController(QObject * parent = nullptr);
 	virtual ~InfoController() = default;
 
-	virtual void init(QLabel* infoLabel);
+	virtual void init(QLabel* infoLabel, MainController* mainController);
 
-	virtual void setTimestep(int timestep);
 	virtual void increaseTimestep();
-	virtual int getTimestep() const;
-
 	virtual void setZoomFactor(double factor);
 
 private:
@@ -25,7 +24,7 @@ private:
 
 	QTimer* _oneSecondTimer = nullptr;
 	QLabel* _infoLabel = nullptr;
-	int _timestep = 0;
+	MainController* _mainController = nullptr;
 	int _tpsCounting = 0;
 	int _tps = 0;
 	double _zoomFactor = 2.0;

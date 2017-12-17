@@ -214,7 +214,8 @@ void SerializerImpl::serialize(SimulationController * simController)
 		simController->getContext()->getSymbolTable(),
 		simController->getContext()->getSpaceProperties()->getSize(),
 		simController->getContext()->getGridSize(),
-		simController->getContext()->getMaxThreads()
+		simController->getContext()->getMaxThreads(),
+		simController->getTimestep()
 	};
 
 	IntVector2D universeSize = simController->getContext()->getSpaceProperties()->getSize();
@@ -256,11 +257,13 @@ SimulationController* SerializerImpl::deserializeSimulation(string const & conte
 	IntVector2D universeSize;
 	IntVector2D gridSize;
 	int maxThreads;
-	ia >> data >> universeSize >> gridSize >> *parameters >> *symbolTable >> maxThreads;
+	int timestep;
+	ia >> data >> universeSize >> gridSize >> *parameters >> *symbolTable >> maxThreads >> timestep;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto simController = facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters);
 	simController->setParent(this);
+	simController->setTimestep(timestep);
 
 	_access->init(simController->getContext());
 
@@ -318,7 +321,7 @@ void SerializerImpl::dataReadyToRetrieve()
 
 	archive
 		<< _configToSerialize.universeSize << _configToSerialize.gridSize << *_configToSerialize.parameters
-		<< *_configToSerialize.symbolTable << _configToSerialize.maxThreads;
+		<< *_configToSerialize.symbolTable << _configToSerialize.maxThreads << _configToSerialize.timestep;
 	_serializedSimulation = stream.str();
 
 	Q_EMIT serializationFinished();

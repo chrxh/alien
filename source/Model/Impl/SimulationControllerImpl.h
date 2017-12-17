@@ -16,14 +16,16 @@ public:
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
+	virtual int getTimestep() const override;
+	virtual void setTimestep(int value) override;
 
 private:
 	SimulationContextLocal* _context = nullptr;
 
-	bool _flagSimulationRunning = false;
+	bool _flagRunMode = false;
 	QTimer* _oneSecondTimer = nullptr;
-	int _timestepsPerSecond = 0;
 	QTime _timeSinceLastStart;
 	int _displayedFramesSinceLastStart = 0;
+	int _timestep = 0;
 };
 

@@ -23,6 +23,7 @@ public:
 	virtual void onUpdateSimulationParametersForRunningSimulation(SimulationParameters* parameters);
 
 	virtual Serializer* getSerializer() const;
+	virtual int getTimestep() const;
 
 private:
 	void connectSimController() const;

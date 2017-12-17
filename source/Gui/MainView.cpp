@@ -31,14 +31,14 @@ MainView::~MainView()
 
 }
 
-void MainView::init(MainModel* model, MainController* controller)
+void MainView::init(MainModel* model, MainController* mainController)
 {
 	_model = model;
-	_controller = controller;
+	_mainController = mainController;
 	_toolbar = new ToolbarController(ui->visualEditController);
 	_dataEditor = new DataEditController(ui->visualEditController);
 	_infoController = new InfoController(this);
-	_infoController->init(ui->infoLabel);
+	_infoController->init(ui->infoLabel, mainController);
 
 	connectActions();
 	setupTheme();
@@ -124,7 +124,7 @@ void MainView::onRunClicked(bool run)
 	ui->actionDeleteCell->setEnabled(false);
 	ui->actionDeleteExtension->setEnabled(false);
 
-	_controller->onRunSimulation(run);
+	_mainController->onRunSimulation(run);
 }
 
 void MainView::onZoomInClicked()
@@ -160,12 +160,12 @@ void MainView::onSetEditorMode()
 
 void MainView::onNewSimulation()
 {
-	NewSimulationDialog dialog(_model->getSimulationParameters(), _model->getSymbolTable(), _controller->getSerializer(), this);
+	NewSimulationDialog dialog(_model->getSimulationParameters(), _model->getSymbolTable(), _mainController->getSerializer(), this);
 	if (dialog.exec()) {
 		NewSimulationConfig config{ 
 			dialog.getMaxThreads(), dialog.getGridSize(), dialog.getUniverseSize(), dialog.getSymbolTable(), dialog.getSimulationParameters(), dialog.getEnergy()
 		};
-		_controller->onNewSimulation(config);
+		_mainController->onNewSimulation(config);
 		updateZoomFactor();
 		ui->actionPlay->setChecked(false);
 		onRunClicked(false);
@@ -176,7 +176,7 @@ void MainView::onSaveSimulation()
 {
 	QString filename = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
 	if (!filename.isEmpty()) {
-		_controller->onSaveSimulation(filename.toStdString());
+		_mainController->onSaveSimulation(filename.toStdString());
 	}
 }
 
@@ -184,7 +184,7 @@ void MainView::onLoadSimulation()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
 	if (!filename.isEmpty()) {
-		if(_controller->onLoadSimulation(filename.toStdString())) {
+		if(_mainController->onLoadSimulation(filename.toStdString())) {
 			updateZoomFactor();
 			ui->actionPlay->setChecked(false);
 			onRunClicked(false);
@@ -198,9 +198,9 @@ void MainView::onLoadSimulation()
 
 void MainView::onEditSimulationParameters()
 {
-	SimulationParametersDialog dialog(_model->getSimulationParameters(), _controller->getSerializer(), this);
+	SimulationParametersDialog dialog(_model->getSimulationParameters(), _mainController->getSerializer(), this);
 	if (dialog.exec()) {
-		_controller->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
+		_mainController->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
 	}
 }
 
@@ -208,7 +208,7 @@ void MainView::onLoadSimulationParameters()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
 	if (!filename.isEmpty()) {
-		if (_controller->onLoadSimulationParameters(filename.toStdString())) {
+		if (_mainController->onLoadSimulationParameters(filename.toStdString())) {
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
