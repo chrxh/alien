@@ -86,6 +86,8 @@ void MainView::connectActions()
 	connect(ui->actionLoadSimulationParameters, &QAction::triggered, this, &MainView::onLoadSimulationParameters);
 	connect(ui->actionSaveSimulationParameters, &QAction::triggered, this, &MainView::onSaveSimulationParameters);
 	connect(ui->actionEditSymbols, &QAction::triggered, this, &MainView::onEditSymbolTable);
+	connect(ui->actionLoadSymbols, &QAction::triggered, this, &MainView::onLoadSymbolTable);
+	connect(ui->actionSaveSymbols, &QAction::triggered, this, &MainView::onSaveSymbolTable);
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -247,6 +249,35 @@ void MainView::onEditSymbolTable()
 	if (dialog.exec()) {
 		origSymbols->getSymbolsFrom(dialog.getSymbolTable());
 		Q_EMIT _dataEditor->getContext()->refresh();
+	}
+}
+
+void MainView::onLoadSymbolTable()
+{
+	QString filename = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
+	if (!filename.isEmpty()) {
+		SymbolTable* symbolTable;
+		if (SerializationHelper::loadFromFile<SymbolTable*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSymbolTable(data); }, symbolTable)) {
+			_model->getSymbolTable()->getSymbolsFrom(symbolTable);
+			delete symbolTable;
+			Q_EMIT _dataEditor->getContext()->refresh();
+		}
+		else {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified symbol table could not loaded.");
+			msgBox.exec();
+		}
+	}
+}
+
+void MainView::onSaveSymbolTable()
+{
+	QString filename = QFileDialog::getSaveFileName(this, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
+	if (!filename.isEmpty()) {
+		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSymbolTable(_model->getSymbolTable()); })) {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The symbol table could not saved.");
+			msgBox.exec();
+			return;
+		}
 	}
 }
 
