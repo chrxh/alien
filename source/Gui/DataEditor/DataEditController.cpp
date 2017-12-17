@@ -32,6 +32,7 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 		disconnect(connection);
 	}
 	_connections.push_back(connect(_context, &DataEditContext::show, this, &DataEditController::onShow));
+	_connections.push_back(connect(_context, &DataEditContext::refresh, this, &DataEditController::onRefresh));
 	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataEditController::receivedExternalNotifications));
 
 	onShow(false);
@@ -145,6 +146,11 @@ void DataEditController::notificationFromTokenTab()
 void DataEditController::onShow(bool visible)
 {
 	_view->show(visible);
+}
+
+void DataEditController::onRefresh()
+{
+	_view->updateDisplay();
 }
 
 void DataEditController::receivedExternalNotifications(set<Receiver> const& targets, UpdateDescription update)

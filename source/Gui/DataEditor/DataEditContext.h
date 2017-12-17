@@ -14,4 +14,5 @@ public:
 	virtual ~DataEditContext() = default;
 
 	Q_SIGNAL void show(bool visible);
+	Q_SIGNAL void refresh();
 };
