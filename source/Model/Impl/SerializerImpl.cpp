@@ -272,7 +272,7 @@ SimulationController* SerializerImpl::deserializeSimulation(string const & conte
 	return simController;
 }
 
-string SerializerImpl::serializeSymbolTable(SymbolTable * symbolTable) const
+string SerializerImpl::serializeSymbolTable(SymbolTable const* symbolTable) const
 {
 	ostringstream stream;
 	boost::archive::binary_oarchive archive(stream);
@@ -291,7 +291,7 @@ SymbolTable * SerializerImpl::deserializeSymbolTable(string const & data)
 	return symbolTable;
 }
 
-string SerializerImpl::serializeSimulationParameters(SimulationParameters * parameters) const
+string SerializerImpl::serializeSimulationParameters(SimulationParameters const* parameters) const
 {
 	ostringstream stream;
 	boost::archive::binary_oarchive archive(stream);

@@ -22,9 +22,9 @@ public:
 	virtual void deserializeSimulationContent(string const& content) const = 0;
 	virtual SimulationController* deserializeSimulation(string const& content) = 0;
 
-	virtual string serializeSymbolTable(SymbolTable* symbolTable) const = 0;
+	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const = 0;
 	virtual SymbolTable* deserializeSymbolTable(string const& data) = 0;
 
-	virtual string serializeSimulationParameters(SimulationParameters* parameters) const = 0;
+	virtual string serializeSimulationParameters(SimulationParameters const* parameters) const = 0;
 	virtual SimulationParameters* deserializeSimulationParameters(string const& data) = 0;
 };

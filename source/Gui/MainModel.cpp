@@ -13,12 +13,12 @@ void MainModel::setSimulationParameters(SimulationParameters const* parameters)
 	_parameters = parameters;
 }
 
-SymbolTable const* MainModel::getSymbolTable() const
+SymbolTable * MainModel::getSymbolTable() const
 {
 	return _symbols;
 }
 
-void MainModel::setSymbolTable(SymbolTable const* symbols)
+void MainModel::setSymbolTable(SymbolTable * symbols)
 {
 	_symbols = symbols;
 }

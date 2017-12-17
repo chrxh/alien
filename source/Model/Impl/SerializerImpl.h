@@ -22,10 +22,10 @@ public:
 	virtual void deserializeSimulationContent(string const& content) const override;
 	virtual SimulationController* deserializeSimulation(string const& content) override;
 
-	virtual string serializeSymbolTable(SymbolTable* symbolTable) const override;
+	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const override;
 	virtual SymbolTable* deserializeSymbolTable(string const& data) override;
 
-	virtual string serializeSimulationParameters(SimulationParameters* parameters) const override;
+	virtual string serializeSimulationParameters(SimulationParameters const* parameters) const override;
 	virtual SimulationParameters* deserializeSimulationParameters(string const& data) override;
 
 private:

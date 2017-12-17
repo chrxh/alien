@@ -19,7 +19,6 @@ public:
 	virtual void onNewSimulation(NewSimulationConfig config);
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
-	virtual bool onLoadSimulationParameters(string const& filename);
 	virtual void onUpdateSimulationParametersForRunningSimulation(SimulationParameters* parameters);
 
 	virtual int getTimestep() const;

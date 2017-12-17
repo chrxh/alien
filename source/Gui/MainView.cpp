@@ -2,10 +2,12 @@
 #include <QMessageBox>
 
 #include "Model/Api/SimulationController.h"
+#include "Model/Api/Serializer.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
 
+#include "SerializationHelper.h"
 #include "InfoController.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
@@ -34,7 +36,7 @@ MainView::~MainView()
 void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer)
 {
 	_model = model;
-	_mainController = mainController;
+	_controller = mainController;
 	_serializer = serializer;
 	_toolbar = new ToolbarController(ui->visualEditController);
 	_dataEditor = new DataEditController(ui->visualEditController);
@@ -80,6 +82,7 @@ void MainView::connectActions()
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
 	connect(ui->actionEditSimulationParameters, &QAction::triggered, this, &MainView::onEditSimulationParameters);
 	connect(ui->actionLoadSimulationParameters, &QAction::triggered, this, &MainView::onLoadSimulationParameters);
+	connect(ui->actionSaveSimulationParameters, &QAction::triggered, this, &MainView::onSaveSimulationParameters);
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -125,7 +128,7 @@ void MainView::onRunClicked(bool run)
 	ui->actionDeleteCell->setEnabled(false);
 	ui->actionDeleteExtension->setEnabled(false);
 
-	_mainController->onRunSimulation(run);
+	_controller->onRunSimulation(run);
 }
 
 void MainView::onZoomInClicked()
@@ -166,7 +169,7 @@ void MainView::onNewSimulation()
 		NewSimulationConfig config{ 
 			dialog.getMaxThreads(), dialog.getGridSize(), dialog.getUniverseSize(), dialog.getSymbolTable(), dialog.getSimulationParameters(), dialog.getEnergy()
 		};
-		_mainController->onNewSimulation(config);
+		_controller->onNewSimulation(config);
 		updateZoomFactor();
 		ui->actionPlay->setChecked(false);
 		onRunClicked(false);
@@ -177,7 +180,7 @@ void MainView::onSaveSimulation()
 {
 	QString filename = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
 	if (!filename.isEmpty()) {
-		_mainController->onSaveSimulation(filename.toStdString());
+		_controller->onSaveSimulation(filename.toStdString());
 	}
 }
 
@@ -185,7 +188,7 @@ void MainView::onLoadSimulation()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
 	if (!filename.isEmpty()) {
-		if(_mainController->onLoadSimulation(filename.toStdString())) {
+		if(_controller->onLoadSimulation(filename.toStdString())) {
 			updateZoomFactor();
 			ui->actionPlay->setChecked(false);
 			onRunClicked(false);
@@ -201,7 +204,8 @@ void MainView::onEditSimulationParameters()
 {
 	SimulationParametersDialog dialog(_model->getSimulationParameters(), _serializer, this);
 	if (dialog.exec()) {
-		_mainController->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
+		_controller->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
+		_model->setSimulationParameters(dialog.getSimulationParameters());
 	}
 }
 
@@ -209,13 +213,28 @@ void MainView::onLoadSimulationParameters()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
 	if (!filename.isEmpty()) {
-		if (_mainController->onLoadSimulationParameters(filename.toStdString())) {
+		SimulationParameters* parameters;
+		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
+			_controller->onUpdateSimulationParametersForRunningSimulation(parameters);
+			_model->setSimulationParameters(parameters);
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
 			msgBox.exec();
 		}
 	}
+}
+
+void MainView::onSaveSimulationParameters()
+{
+	QString filename = QFileDialog::getSaveFileName(this, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
+	if (!filename.isEmpty()) {
+		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_model->getSimulationParameters()); })) {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The simulation parameters could not saved.");
+			msgBox.exec();
+		}
+	}
+
 }
 
 void MainView::cellDefocused()
