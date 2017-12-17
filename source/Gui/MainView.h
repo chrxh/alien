@@ -18,7 +18,7 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller);
+	virtual void init(MainModel* model, MainController* controller, Serializer* serializer);
 	virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller, DataController* manipulator, Notifier* notifier);
@@ -44,6 +44,7 @@ private:
 	Ui::MainView* ui = nullptr;	//contains VisualEditor
 	MainModel* _model = nullptr;
 	MainController* _mainController = nullptr;
+	Serializer* _serializer = nullptr;
 
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
