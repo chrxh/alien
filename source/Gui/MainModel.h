@@ -13,15 +13,15 @@ public:
 	SimulationParameters const* getSimulationParameters() const;
 	void setSimulationParameters(SimulationParameters const* parameters);
 
-	SymbolTable const* getSymbolTable() const;
-	void setSymbolTable(SymbolTable const* symbols);
+	SymbolTable* getSymbolTable() const;
+	void setSymbolTable(SymbolTable* symbols);
 
 	optional<bool> isEditMode() const;
 	void setEditMode(optional<bool> value);
 
 private:
 	SimulationParameters const* _parameters = nullptr;
-	SymbolTable const* _symbols = nullptr;
+	SymbolTable* _symbols = nullptr;
 
 	optional<bool> _isEditMode;
 };
