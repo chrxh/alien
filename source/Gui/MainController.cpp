@@ -99,6 +99,8 @@ void MainController::onSaveSimulation(string const& filename)
 
 bool MainController::onLoadSimulation(string const & filename)
 {
+	auto origSimController = _simController;
+
 	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
 
 	int timestep;
@@ -114,36 +116,43 @@ bool MainController::onLoadSimulation(string const & filename)
 		return false;
 	}
 	try {
-		delete _simController;
 		_simController = _serializer->deserializeSimulation(data);
-		_simAccess->init(_simController->getContext());
-		connectSimController();
-		_view->getInfoController()->setTimestep(timestep);
-
-		_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
-		_model->setSymbolTable(_simController->getContext()->getSymbolTable());
-
-		auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-		_descHelper->init(_simController->getContext());
-		_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
-
-		_view->setupEditors(_simController, _dataController, _notifier);
-		_view->refresh();
 	}
-	catch(...) {
+	catch (...) {
 		return false;
 	}
+	
+	delete origSimController;
+
+	_simAccess->init(_simController->getContext());
+	connectSimController();
+	_view->getInfoController()->setTimestep(timestep);
+
+	_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
+	_model->setSymbolTable(_simController->getContext()->getSymbolTable());
+
+	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	_descHelper->init(_simController->getContext());
+	_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
+
+	_view->setupEditors(_simController, _dataController, _notifier);
+	_view->refresh();
 	return true;
+}
+
+bool MainController::onLoadSimulationParameters(string const & filename)
+{
+	return true;
+}
+
+void MainController::onUpdateSimulationParametersForRunningSimulation(SimulationParameters * parameters)
+{
+	_simController->getContext()->setSimulationParameters(parameters);
 }
 
 Serializer * MainController::getSerializer() const
 {
 	return _serializer;
-}
-
-void MainController::setSimulationParametersForRunningSimulation(SimulationParameters * parameters)
-{
-	_simController->getContext()->setSimulationParameters(parameters);
 }
 
 void MainController::connectSimController() const
