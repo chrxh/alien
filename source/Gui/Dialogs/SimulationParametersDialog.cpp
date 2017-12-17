@@ -178,7 +178,7 @@ void SimulationParametersDialog::saveButtonClicked ()
     if( !filename.isEmpty() ) {
 		updateSimulationParametersFromWidgets();
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_simulationParameters); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The simulation parameters could not saved.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Simulation parameters could not saved.");
 			msgBox.exec();
 		}
     }

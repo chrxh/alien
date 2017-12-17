@@ -38,6 +38,7 @@ private:
 	Q_SLOT void onEditSimulationParameters();
 	Q_SLOT void onLoadSimulationParameters();
 	Q_SLOT void onSaveSimulationParameters();
+	Q_SLOT void onEditSymbolTable();
 
 	void cellDefocused();
 	void updateZoomFactor();
