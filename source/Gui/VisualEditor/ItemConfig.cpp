@@ -1,6 +1,6 @@
 #include "ItemConfig.h"
 
-void ItemConfig::init(SimulationParameters * parameters)
+void ItemConfig::init(SimulationParameters const* parameters)
 {
 	_parameters = parameters;
 }
@@ -15,7 +15,7 @@ void ItemConfig::setShowCellInfo(bool value)
 	_showCellInfo = value;
 }
 
-SimulationParameters * ItemConfig::getSimulationParameters() const
+SimulationParameters const* ItemConfig::getSimulationParameters() const
 {
 	return _parameters;
 }

@@ -66,7 +66,7 @@ private:
 	Notifier* _notifier = nullptr;
 	SimulationAccess* _access = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
-	SimulationParameters* _parameters = nullptr;
+	SimulationParameters const* _parameters = nullptr;
 	DataDescription _data;
 	DataDescription _unchangedData;
 

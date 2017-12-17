@@ -27,7 +27,7 @@ public:
 
 	Q_SLOT virtual bool calculateTimestep() override;
 
-	virtual bool isNoThreadWorking() const override;
+	virtual bool isNoThreadWorking() const override;	//should be called from the same threads where UnitThreadControllerImpl runs
 	virtual int getMaxRunningThreads() const override;
 
 private:

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Model/Local/SimulationContextLocal.h"
+#include "Model/Local/UnitObserver.h"
+
+#include "Definitions.h"
 
 class SimulationContextImpl
 	: public SimulationContextLocal
@@ -11,7 +14,7 @@ public:
 	virtual ~SimulationContextImpl();
 
 	virtual void init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, UnitGrid* grid, UnitThreadController* threads
-		, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler) override;
+		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler) override;
 
 	virtual IntVector2D getGridSize() const override;
 	virtual int getMaxThreads() const override;
@@ -19,15 +22,18 @@ public:
 	virtual UnitGrid* getUnitGrid() const override;
 	virtual UnitThreadController* getUnitThreadController() const override;
 	virtual SymbolTable* getSymbolTable() const override;
-	virtual SimulationParameters* getSimulationParameters() const override;
+	virtual SimulationParameters const* getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
-private:
+	virtual void setSimulationParameters(SimulationParameters* parameters) override;
+	
 	NumberGenerator* _numberGen = nullptr;
 	SpacePropertiesLocal* _metric = nullptr;
 	UnitGrid* _grid = nullptr;
 	UnitThreadController* _threads = nullptr;
+	SimulationAttributeSetter* _attributeSetter = nullptr;
+
 	SymbolTable* _symbolTable = nullptr;
 	SimulationParameters* _simulationParameters = nullptr;
 	CellComputerCompiler* _compiler = nullptr;

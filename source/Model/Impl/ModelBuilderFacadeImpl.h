@@ -13,7 +13,7 @@ public:
 	virtual SimulationParameters* buildDefaultSimulationParameters() const override;
 
 	virtual SimulationController* buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
-		, SymbolTable* symbolTable, SimulationParameters* parameters) const override;
+		, SymbolTable * symbolTable, SimulationParameters* parameters) const override;
 	virtual SimulationAccess* buildSimulationAccess() const override;
 	virtual DescriptionHelper* buildDescriptionHelper() const override;
 

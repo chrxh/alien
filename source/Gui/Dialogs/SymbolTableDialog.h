@@ -13,7 +13,7 @@ class SymbolTableDialog : public QDialog
     Q_OBJECT
     
 public:
-	SymbolTableDialog(SymbolTable* symbolTable, Serializer* serializer, QWidget *parent = 0);
+	SymbolTableDialog(SymbolTable const* symbolTable, Serializer* serializer, QWidget *parent = nullptr);
 	virtual ~SymbolTableDialog();
 
     SymbolTable* getSymbolTable ();

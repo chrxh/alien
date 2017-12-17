@@ -141,6 +141,11 @@ Serializer * MainController::getSerializer() const
 	return _serializer;
 }
 
+void MainController::setSimulationParametersForRunningSimulation(SimulationParameters * parameters)
+{
+	_simController->getContext()->setSimulationParameters(parameters);
+}
+
 void MainController::connectSimController() const
 {
 	connect(_simController, &SimulationController::nextTimestepCalculated, [this]() {

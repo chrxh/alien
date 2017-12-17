@@ -34,8 +34,8 @@ private:
 	SimulationAccess* _access = nullptr;
 
 	struct ConfigToSerialize {
-		SimulationParameters* parameters;
-		SymbolTable* symbolTable;
+		SimulationParameters const* parameters;
+		SymbolTable const* symbolTable;
 		IntVector2D universeSize;
 		IntVector2D gridSize;
 		int maxThreads;

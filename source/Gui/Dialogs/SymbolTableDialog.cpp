@@ -13,10 +13,10 @@
 #include "SymbolTableDialog.h"
 #include "ui_symboltabledialog.h"
 
-SymbolTableDialog::SymbolTableDialog(SymbolTable* symbolTable, Serializer* serializer, QWidget *parent)
+SymbolTableDialog::SymbolTableDialog(SymbolTable const* symbolTable, Serializer* serializer, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::SymbolTableDialog)
-	, _symbolTable(symbolTable->clone())
+	, _symbolTable(symbolTable->clone(parent))
 	, _serializer(serializer)
 {
     ui->setupUi(this);
