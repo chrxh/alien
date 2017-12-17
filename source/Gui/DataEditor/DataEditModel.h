@@ -34,6 +34,7 @@ public:
 
 	SimulationParameters const* getSimulationParameters() const;
 	SymbolTable* getSymbolTable() const;
+	void setSymbolTable(SymbolTable* symbols);
 
 private:
 	DataDescription _data;

@@ -13,6 +13,11 @@ SymbolTable * SymbolTable::clone(QObject * parent) const
 	return symbolTable;
 }
 
+void SymbolTable::getSymbolsFrom(SymbolTable const* other)
+{
+	_symbolsByKey = other->_symbolsByKey;
+}
+
 void SymbolTable::addEntry(string const& key, string const& value)
 {
 	_symbolsByKey[key] = value;

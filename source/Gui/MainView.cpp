@@ -3,6 +3,7 @@
 
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/Serializer.h"
+#include "Model/Api/SymbolTable.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
@@ -17,6 +18,7 @@
 #include "MainController.h"
 #include "MainModel.h"
 #include "SimulationParametersDialog.h"
+#include "SymbolTableDialog.h"
 
 #include "ui_MainView.h"
 
@@ -83,6 +85,7 @@ void MainView::connectActions()
 	connect(ui->actionEditSimulationParameters, &QAction::triggered, this, &MainView::onEditSimulationParameters);
 	connect(ui->actionLoadSimulationParameters, &QAction::triggered, this, &MainView::onLoadSimulationParameters);
 	connect(ui->actionSaveSimulationParameters, &QAction::triggered, this, &MainView::onSaveSimulationParameters);
+	connect(ui->actionEditSymbols, &QAction::triggered, this, &MainView::onEditSymbolTable);
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -202,7 +205,7 @@ void MainView::onLoadSimulation()
 
 void MainView::onEditSimulationParameters()
 {
-	SimulationParametersDialog dialog(_model->getSimulationParameters(), _serializer, this);
+	SimulationParametersDialog dialog(_model->getSimulationParameters()->clone(), _serializer, this);
 	if (dialog.exec()) {
 		_controller->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
 		_model->setSimulationParameters(dialog.getSimulationParameters());
@@ -235,6 +238,16 @@ void MainView::onSaveSimulationParameters()
 		}
 	}
 
+}
+
+void MainView::onEditSymbolTable()
+{
+	auto origSymbols = _model->getSymbolTable();
+	SymbolTableDialog dialog(origSymbols->clone(), _serializer, this);
+	if (dialog.exec()) {
+		origSymbols->getSymbolsFrom(dialog.getSymbolTable());
+		Q_EMIT _dataEditor->getContext()->refresh();
+	}
 }
 
 void MainView::cellDefocused()

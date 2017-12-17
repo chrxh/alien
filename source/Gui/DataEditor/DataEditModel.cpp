@@ -112,3 +112,8 @@ SymbolTable * DataEditModel::getSymbolTable() const
 	return _symbols;
 }
 
+void DataEditModel::setSymbolTable(SymbolTable * symbols)
+{
+	_symbols = symbols;
+}
+
