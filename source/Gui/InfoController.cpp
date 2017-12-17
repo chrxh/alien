@@ -1,5 +1,6 @@
 ﻿#include <QTimer>
 
+#include "MainController.h"
 #include "InfoController.h"
 
 InfoController::InfoController(QObject * parent)
@@ -10,29 +11,16 @@ InfoController::InfoController(QObject * parent)
 	_oneSecondTimer->start(1000);
 }
 
-void InfoController::init(QLabel * infoLabel)
+void InfoController::init(QLabel * infoLabel, MainController* mainController)
 {
 	_infoLabel = infoLabel;
-}
-
-void InfoController::setTimestep(int timestep)
-{
-	_timestep = timestep;
-	_tps = 0;
-	_tpsCounting = 0;
-	updateInfoLabel();
+	_mainController = mainController;
 }
 
 void InfoController::increaseTimestep()
 {
 	++_tpsCounting;
-	++_timestep;
 	updateInfoLabel();
-}
-
-int InfoController::getTimestep() const
-{
-	return _timestep;
 }
 
 void InfoController::setZoomFactor(double factor)
@@ -51,7 +39,7 @@ void InfoController::oneSecondTimerTimeout()
 void InfoController::updateInfoLabel()
 {
 	_infoLabel->setText(QString("Timestep: %1  TPS: %2  Zoom factor: %3x")
-		.arg(_timestep, 9, 10, QLatin1Char('0'))
+		.arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
 		.arg(_tps, 5, 10, QLatin1Char('0'))
 		.arg(_zoomFactor));
 }

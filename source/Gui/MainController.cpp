@@ -79,7 +79,6 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	connectSimController();
-	_view->getInfoController()->setTimestep(0);
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
 	_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
@@ -103,11 +102,8 @@ bool MainController::onLoadSimulation(string const & filename)
 
 	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
 
-	int timestep;
 	size_t size;
 	string data;
-
-	stream.read(reinterpret_cast<char*>(&timestep), sizeof(int));
 	stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
 	data.resize(size);
 	stream.read(&data[0], size);
@@ -126,7 +122,6 @@ bool MainController::onLoadSimulation(string const & filename)
 
 	_simAccess->init(_simController->getContext());
 	connectSimController();
-	_view->getInfoController()->setTimestep(timestep);
 
 	_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
 	_model->setSymbolTable(_simController->getContext()->getSymbolTable());
@@ -155,6 +150,11 @@ Serializer * MainController::getSerializer() const
 	return _serializer;
 }
 
+int MainController::getTimestep() const
+{
+	return _simController->getTimestep();
+}
+
 void MainController::connectSimController() const
 {
 	connect(_simController, &SimulationController::nextTimestepCalculated, [this]() {
@@ -181,9 +181,7 @@ void MainController::serializationFinished()
 		if (operation.type == SerializationOperation::Type::SaveToFile) {
 			string const& data = _serializer->retrieveSerializedSimulation();
 			std::ofstream stream(operation.filename, std::ios_base::out | std::ios_base::binary);
-			int timestep = _view->getInfoController()->getTimestep();
 			size_t dataSize = data.size();
-			stream.write(reinterpret_cast<char*>(&timestep), sizeof(int));
 			stream.write(reinterpret_cast<char*>(&dataSize), sizeof(size_t));
 			stream.write(&data[0], data.size());
 			stream.close();
