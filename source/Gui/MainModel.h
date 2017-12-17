@@ -10,18 +10,18 @@ public:
 	MainModel(QObject * parent = nullptr);
 	virtual ~MainModel() = default;
 
-	SimulationParameters* getSimulationParameters() const;
-	void setSimulationParameters(SimulationParameters* parameters);
+	SimulationParameters const* getSimulationParameters() const;
+	void setSimulationParameters(SimulationParameters const* parameters);
 
-	SymbolTable* getSymbolTable() const;
-	void setSymbolTable(SymbolTable* symbols);
+	SymbolTable const* getSymbolTable() const;
+	void setSymbolTable(SymbolTable const* symbols);
 
 	optional<bool> isEditMode() const;
 	void setEditMode(optional<bool> value);
 
 private:
-	SimulationParameters* _parameters = nullptr;
-	SymbolTable* _symbols = nullptr;
+	SimulationParameters const* _parameters = nullptr;
+	SymbolTable const* _symbols = nullptr;
 
 	optional<bool> _isEditMode;
 };

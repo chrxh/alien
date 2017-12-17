@@ -37,6 +37,6 @@ private:
 	DataEditView* _view = nullptr;
 	DataController* _manipulator = nullptr;
 	DataEditContext* _context = nullptr;
-	SimulationParameters* _parameters = nullptr;
-	SymbolTable* _symbolTable = nullptr;
+	SimulationParameters const* _parameters = nullptr;
+	SymbolTable const* _symbolTable = nullptr;
 };

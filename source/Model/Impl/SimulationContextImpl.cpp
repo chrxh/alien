@@ -7,6 +7,7 @@
 #include "Model/Local/UnitGrid.h"
 #include "Model/Local/UnitThreadController.h"
 
+#include "SimulationAttributeSetter.h"
 #include "SimulationContextImpl.h"
 
 SimulationContextImpl::SimulationContextImpl(QObject * parent)
@@ -29,6 +30,10 @@ void SimulationContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLoca
 	SET_CHILD(_symbolTable, symbolTable);
 	SET_CHILD(_simulationParameters, parameters);
 	SET_CHILD(_compiler, compiler);
+	auto attributeSetter = new SimulationAttributeSetter();
+	SET_CHILD(_attributeSetter, attributeSetter);
+
+	attributeSetter->init(this);
 }
 
 IntVector2D SimulationContextImpl::getGridSize() const
@@ -56,12 +61,12 @@ UnitThreadController * SimulationContextImpl::getUnitThreadController() const
 	return _threads;
 }
 
-SymbolTable * SimulationContextImpl::getSymbolTable() const
+SymbolTable* SimulationContextImpl::getSymbolTable() const
 {
 	return _symbolTable;
 }
 
-SimulationParameters * SimulationContextImpl::getSimulationParameters() const
+SimulationParameters const * SimulationContextImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
 }
@@ -75,3 +80,10 @@ CellComputerCompiler * SimulationContextImpl::getCellComputerCompiler() const
 {
 	return _compiler;
 }
+
+void SimulationContextImpl::setSimulationParameters(SimulationParameters * parameters)
+{
+	SET_CHILD(_simulationParameters, parameters);
+	_attributeSetter->setSimulationParameters(parameters);
+}
+

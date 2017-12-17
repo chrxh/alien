@@ -20,14 +20,13 @@ UnitContextImpl::~UnitContextImpl ()
 }
 
 void UnitContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, CellMap* cellMap, ParticleMap* energyMap
-	, MapCompartment* mapCompartment, SymbolTable* symbolTable, SimulationParameters* parameters)
+	, MapCompartment* mapCompartment, SimulationParameters* parameters)
 {
 	SET_CHILD(_numberGen, numberGen);
 	SET_CHILD(_metric, metric);
 	SET_CHILD(_cellMap, cellMap);
 	SET_CHILD(_energyParticleMap, energyMap);
 	SET_CHILD(_mapCompartment, mapCompartment);
-	SET_CHILD(_symbolTable, symbolTable);
 	SET_CHILD(_simulationParameters, parameters);
 
 	deleteClustersAndEnergyParticles();
@@ -58,11 +57,6 @@ CellMap* UnitContextImpl::getCellMap () const
     return _cellMap;
 }
 
-SymbolTable* UnitContextImpl::getSymbolTable() const 
-{
-	return _symbolTable;
-}
-
 SimulationParameters* UnitContextImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
@@ -76,6 +70,12 @@ uint64_t UnitContextImpl::getTimestamp() const
 void UnitContextImpl::incTimestamp() 
 {
 	++_timestamp;
+}
+
+void UnitContextImpl::setSimulationParameters(SimulationParameters * parameters)
+{
+	parameters->moveToThread(this->thread());
+	SET_CHILD(_simulationParameters, parameters);
 }
 
 QList<Cluster*>& UnitContextImpl::getClustersRef ()

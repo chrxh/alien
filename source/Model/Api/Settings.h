@@ -19,7 +19,7 @@ const QColor BRANCHNUMBER_INFO_COLOR(0x00, 0x00, 0x00);
 class MODEL_EXPORT ModelSettings
 {
 public:
-    static SymbolTable* loadDefaultSymbolTable();
-	static SimulationParameters* loadDefaultSimulationParameters();
+    static SymbolTable* getDefaultSymbolTable();
+	static SimulationParameters* getDefaultSimulationParameters();
 };
 

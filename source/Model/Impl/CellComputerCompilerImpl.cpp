@@ -7,7 +7,7 @@ CellComputerCompilerImpl::CellComputerCompilerImpl(QObject * parent) : CellCompu
 	
 }
 
-void CellComputerCompilerImpl::init(SymbolTable * symbols, SimulationParameters* parameters)
+void CellComputerCompilerImpl::init(SymbolTable const* symbols, SimulationParameters const* parameters)
 {
 	_symbols = symbols;
 	_parameters = parameters;

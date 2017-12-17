@@ -35,6 +35,7 @@ private:
 	Q_SLOT void onNewSimulation();
 	Q_SLOT void onSaveSimulation();
 	Q_SLOT void onLoadSimulation();
+	Q_SLOT void onEditSimulationParameters();
 
 	void cellDefocused();
 	void updateZoomFactor();

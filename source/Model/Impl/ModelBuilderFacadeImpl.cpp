@@ -116,14 +116,13 @@ Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simulati
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();
-	auto symbolTable = context->getSymbolTable()->clone();
 	auto parameters = context->getSimulationParameters()->clone();
 	uint16_t threadId = gridPos.x + gridPos.y * grid->getSize().x + 1;
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, threadId);
 	compartment->init(grid->calcCompartmentRect(gridPos));
 	cellMap->init(metric, compartment);
 	energyMap->init(metric, compartment);
-	unitContext->init(numberGen, metric, cellMap, energyMap, compartment, symbolTable, parameters);
+	unitContext->init(numberGen, metric, cellMap, energyMap, compartment, parameters);
 	unit->init(unitContext);
 
 	return unit;
@@ -136,10 +135,10 @@ Serializer * ModelBuilderFacadeImpl::buildSerializer() const
 
 SymbolTable * ModelBuilderFacadeImpl::buildDefaultSymbolTable() const
 {
-	return ModelSettings::loadDefaultSymbolTable();
+	return ModelSettings::getDefaultSymbolTable();
 }
 
-SimulationParameters * ModelBuilderFacadeImpl::buildDefaultSimulationParameters() const
+SimulationParameters* ModelBuilderFacadeImpl::buildDefaultSimulationParameters() const
 {
-	return ModelSettings::loadDefaultSimulationParameters();
+	return ModelSettings::getDefaultSimulationParameters();
 }

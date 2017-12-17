@@ -13,7 +13,7 @@ public:
 	ItemManager(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~ItemManager() = default;
 
-	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport, SimulationParameters* parameters);
+	virtual void init(QGraphicsScene* scene, ViewportInterface* viewport, SimulationParameters const* parameters);
 
 	virtual void activate(IntVector2D size);
 	virtual void update(DataController* visualDesc);
@@ -31,10 +31,10 @@ private:
 	void updateConnections(DataController* visualDesc);
 	void updateParticles(DataController* visualDesc);
 		
-	QGraphicsScene *_scene = nullptr;
-	ViewportInterface *_viewport = nullptr;
-	SimulationParameters *_parameters = nullptr;
-	ItemConfig *_config = nullptr;
+	QGraphicsScene* _scene = nullptr;
+	ViewportInterface* _viewport = nullptr;
+	SimulationParameters const* _parameters = nullptr;
+	ItemConfig* _config = nullptr;
 
 	map<uint64_t, CellItem*> _cellsByIds;
 	map<uint64_t, ParticleItem*> _particlesByIds;

@@ -33,6 +33,11 @@
     <Filter Include="Source Files\Local">
       <UniqueIdentifier>{f085e879-c578-40d7-925a-d6916880eddb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Model\Api\CellFeatureEnums.h">
@@ -272,15 +277,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SimulationContextLocal.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_SpaceMetricLocal.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SpaceMetricLocal.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SpaceMetricLocal.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_Unit.cpp">
@@ -580,6 +576,27 @@
     <ClCompile Include="..\..\source\Model\Impl\SpacePropertiesImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_SpacePropertiesLocal.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SpacePropertiesLocal.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SpacePropertiesLocal.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\SimulationAttributeSetter.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationAttributeSetter.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationAttributeSetter.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationAttributeSetter.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\Api\SimulationAccess.h">
@@ -671,6 +688,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Local\SpacePropertiesLocal.h">
       <Filter>Source Files\Local</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Impl\SimulationAttributeSetter.h">
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

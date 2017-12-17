@@ -11,8 +11,8 @@
 #include "SimulationParametersDialog.h"
 #include "ui_simulationparametersdialog.h"
 
-SimulationParametersDialog::SimulationParametersDialog(SimulationParameters* parameters, Serializer* serializer, QWidget *parent)
-	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(parameters->clone())
+SimulationParametersDialog::SimulationParametersDialog(SimulationParameters const* parameters, Serializer* serializer, QWidget *parent)
+	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(parameters->clone(parent))
 	, _serializer(serializer)
 {
     ui->setupUi(this);
@@ -174,7 +174,7 @@ bool SimulationParametersDialog::saveSimulationParameters(string filename, Simul
 void SimulationParametersDialog::defaultButtonClicked ()
 {
 	delete _simulationParameters;
-	_simulationParameters = ModelSettings::loadDefaultSimulationParameters();
+	_simulationParameters = ModelSettings::getDefaultSimulationParameters();
     updateWidgetsFromSimulationParameters();
 }
 

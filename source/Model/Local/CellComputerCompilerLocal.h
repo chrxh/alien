@@ -11,5 +11,5 @@ public:
 	CellComputerCompilerLocal(QObject * parent = nullptr);
 	virtual ~CellComputerCompilerLocal() = default;
 
-	virtual void init(SymbolTable* symbols, SimulationParameters* parameters) = 0;
+	virtual void init(SymbolTable const* symbols, SimulationParameters const* parameters) = 0;
 };
