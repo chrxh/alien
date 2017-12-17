@@ -31,10 +31,11 @@ MainView::~MainView()
 
 }
 
-void MainView::init(MainModel* model, MainController* mainController)
+void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer)
 {
 	_model = model;
 	_mainController = mainController;
+	_serializer = serializer;
 	_toolbar = new ToolbarController(ui->visualEditController);
 	_dataEditor = new DataEditController(ui->visualEditController);
 	_infoController = new InfoController(this);
@@ -160,7 +161,7 @@ void MainView::onSetEditorMode()
 
 void MainView::onNewSimulation()
 {
-	NewSimulationDialog dialog(_model->getSimulationParameters(), _model->getSymbolTable(), _mainController->getSerializer(), this);
+	NewSimulationDialog dialog(_model->getSimulationParameters(), _model->getSymbolTable(), _serializer, this);
 	if (dialog.exec()) {
 		NewSimulationConfig config{ 
 			dialog.getMaxThreads(), dialog.getGridSize(), dialog.getUniverseSize(), dialog.getSymbolTable(), dialog.getSimulationParameters(), dialog.getEnergy()
@@ -198,7 +199,7 @@ void MainView::onLoadSimulation()
 
 void MainView::onEditSimulationParameters()
 {
-	SimulationParametersDialog dialog(_model->getSimulationParameters(), _mainController->getSerializer(), this);
+	SimulationParametersDialog dialog(_model->getSimulationParameters(), _serializer, this);
 	if (dialog.exec()) {
 		_mainController->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
 	}

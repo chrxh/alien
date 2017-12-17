@@ -22,7 +22,6 @@ public:
 	virtual bool onLoadSimulationParameters(string const& filename);
 	virtual void onUpdateSimulationParametersForRunningSimulation(SimulationParameters* parameters);
 
-	virtual Serializer* getSerializer() const;
 	virtual int getTimestep() const;
 
 private:

@@ -845,6 +845,9 @@
     <ClInclude Include="ui_VisualEditController.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SerializationHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="gui.rc">

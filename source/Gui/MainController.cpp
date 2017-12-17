@@ -14,6 +14,7 @@
 #include "Model/Api/Serializer.h"
 #include "Model/Api/DescriptionHelper.h"
 
+#include "SerializationHelper.h"
 #include "InfoController.h"
 #include "MainController.h"
 #include "MainView.h"
@@ -35,11 +36,9 @@ void MainController::init()
 {
 	_model = new MainModel(this);
 	_view = new MainView();
-	_view->init(_model, this);
 
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_numberGenerator = factory->buildRandomNumberGenerator();
-	_numberGenerator->init(12315312, 0);
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto serializer = facade->buildSerializer();
@@ -51,9 +50,13 @@ void MainController::init()
 	_dataController = new DataController(this);
 	_notifier = new Notifier(this);
 
-	_serializer->init();
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
+	_serializer->init();
+	_view->init(_model, this, _serializer);
+	_numberGenerator->init(12315312, 0);
+
+	
 	//default simulation
 	NewSimulationConfig config{
 		8, { 12, 6 },{ 12 * 33 * 3 , 12 * 17 * 3 },
@@ -100,21 +103,7 @@ bool MainController::onLoadSimulation(string const & filename)
 {
 	auto origSimController = _simController;
 
-	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
-
-	size_t size;
-	string data;
-	stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-	data.resize(size);
-	stream.read(&data[0], size);
-	stream.close();
-	if(stream.fail()) {
-		return false;
-	}
-	try {
-		_simController = _serializer->deserializeSimulation(data);
-	}
-	catch (...) {
+	if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
 		return false;
 	}
 	
@@ -143,11 +132,6 @@ bool MainController::onLoadSimulationParameters(string const & filename)
 void MainController::onUpdateSimulationParametersForRunningSimulation(SimulationParameters * parameters)
 {
 	_simController->getContext()->setSimulationParameters(parameters);
-}
-
-Serializer * MainController::getSerializer() const
-{
-	return _serializer;
 }
 
 int MainController::getTimestep() const
@@ -179,12 +163,7 @@ void MainController::serializationFinished()
 {
 	for (SerializationOperation operation : _serializationOperations) {
 		if (operation.type == SerializationOperation::Type::SaveToFile) {
-			string const& data = _serializer->retrieveSerializedSimulation();
-			std::ofstream stream(operation.filename, std::ios_base::out | std::ios_base::binary);
-			size_t dataSize = data.size();
-			stream.write(reinterpret_cast<char*>(&dataSize), sizeof(size_t));
-			stream.write(&data[0], data.size());
-			stream.close();
+			SerializationHelper::saveToFile(operation.filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
 		}
 	}
 	_serializationOperations.clear();
