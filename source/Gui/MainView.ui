@@ -862,8 +862,8 @@
       <string>Symbol table</string>
      </property>
      <addaction name="actionEditSymbols"/>
-     <addaction name="actionLoad_symbols"/>
-     <addaction name="actionSave_symbols"/>
+     <addaction name="actionLoadSymbols"/>
+     <addaction name="actionSaveSymbols"/>
      <addaction name="actionMerge_with"/>
     </widget>
     <addaction name="menuSimulationParameters"/>
@@ -1111,7 +1111,7 @@
     <string>New energy particle</string>
    </property>
   </action>
-  <action name="actionLoad_symbols">
+  <action name="actionLoadSymbols">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -1119,7 +1119,7 @@
     <string>Load</string>
    </property>
   </action>
-  <action name="actionSave_symbols">
+  <action name="actionSaveSymbols">
    <property name="enabled">
     <bool>true</bool>
    </property>
