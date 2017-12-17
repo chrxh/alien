@@ -14,6 +14,7 @@
 #include "MainView.h"
 #include "MainController.h"
 #include "MainModel.h"
+#include "SimulationParametersDialog.h"
 
 #include "ui_MainView.h"
 
@@ -76,6 +77,7 @@ void MainView::connectActions()
 	connect(ui->actionZoomIn, &QAction::triggered, this, &MainView::onZoomInClicked);
 	connect(ui->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
+	connect(ui->actionEditSimulationParameters, &QAction::triggered, this, &MainView::onEditSimulationParameters);
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -157,10 +159,10 @@ void MainView::onSetEditorMode()
 
 void MainView::onNewSimulation()
 {
-	NewSimulationDialog d(_model->getSimulationParameters(), _model->getSymbolTable(), _controller->getSerializer());
-	if (d.exec()) {
+	NewSimulationDialog dialog(_model->getSimulationParameters(), _model->getSymbolTable(), _controller->getSerializer(), this);
+	if (dialog.exec()) {
 		NewSimulationConfig config{ 
-			d.getMaxThreads(), d.getGridSize(), d.getUniverseSize(), d.getSymbolTable(), d.getSimulationParameters(), d.getEnergy()
+			dialog.getMaxThreads(), dialog.getGridSize(), dialog.getUniverseSize(), dialog.getSymbolTable(), dialog.getSimulationParameters(), dialog.getEnergy()
 		};
 		_controller->onNewSimulation(config);
 		updateZoomFactor();
@@ -182,7 +184,7 @@ void MainView::onLoadSimulation()
 	QString fileName = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
 	if (!fileName.isEmpty()) {
 		if(!_controller->onLoadSimulation(fileName.toStdString())) {
-			QMessageBox msgBox(QMessageBox::Warning, "Error", "An error occurred. The specified simulation could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation could not loaded.");
 			msgBox.exec();
 		}
 		else {
@@ -190,6 +192,14 @@ void MainView::onLoadSimulation()
 			ui->actionPlay->setChecked(false);
 			onRunClicked(false);
 		}
+	}
+}
+
+void MainView::onEditSimulationParameters()
+{
+	SimulationParametersDialog dialog(_model->getSimulationParameters(), _controller->getSerializer(), this);
+	if (dialog.exec()) {
+		_controller->setSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
 	}
 }
 

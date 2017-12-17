@@ -21,6 +21,7 @@ public:
 	virtual bool onLoadSimulation(string const& filename);
 
 	virtual Serializer* getSerializer() const;
+	virtual void setSimulationParametersForRunningSimulation(SimulationParameters* parameters);
 
 private:
 	void connectSimController() const;

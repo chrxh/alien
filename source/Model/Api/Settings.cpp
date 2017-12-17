@@ -6,7 +6,7 @@
 #include "SimulationParameters.h"
 #include "Settings.h"
 
-SymbolTable* ModelSettings::loadDefaultSymbolTable()
+SymbolTable* ModelSettings::getDefaultSymbolTable()
 {
 	SymbolTable* symbolTable = new SymbolTable();
     symbolTable->clear();
@@ -148,7 +148,7 @@ SymbolTable* ModelSettings::loadDefaultSymbolTable()
 	return symbolTable;
 }
 
-SimulationParameters* ModelSettings::loadDefaultSimulationParameters()
+SimulationParameters* ModelSettings::getDefaultSimulationParameters()
 {
 	SimulationParameters* parameters = new SimulationParameters();
 	parameters->cellMutationProb = 0.000001;

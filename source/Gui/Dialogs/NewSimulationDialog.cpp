@@ -7,14 +7,16 @@
 #include "NewSimulationDialog.h"
 #include "ui_newsimulationdialog.h"
 
-NewSimulationDialog::NewSimulationDialog(SimulationParameters* parameters, SymbolTable* symbols, Serializer* serializer, QWidget *parent)
+NewSimulationDialog::NewSimulationDialog(SimulationParameters const* parameters, SymbolTable const* symbols, Serializer* serializer, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
 	, _parameters(parameters->clone())
 	, _symbolTable(symbols->clone())
 	, _serializer(serializer)
 {
-    ui->setupUi(this);
+	_parameters->setParent(parent);
+	_symbolTable->setParent(parent);
+	ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
 
 	updateUniverseSize();
@@ -75,7 +77,7 @@ SimulationParameters* NewSimulationDialog::getSimulationParameters() const
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
-	SimulationParametersDialog d(_parameters->clone(), _serializer);
+	SimulationParametersDialog d(_parameters->clone(), _serializer, this);
 	if (d.exec()) {
 		_parameters = d.getSimulationParameters();
 	}
@@ -83,7 +85,7 @@ void NewSimulationDialog::simulationParametersButtonClicked ()
 
 void NewSimulationDialog::symbolTableButtonClicked ()
 {
-	SymbolTableDialog d(_symbolTable->clone(), _serializer);
+	SymbolTableDialog d(_symbolTable->clone(), _serializer, this);
 	if (d.exec()) {
 		_symbolTable = d.getSymbolTable();
 	}
