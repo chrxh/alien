@@ -19,9 +19,10 @@ public:
 	virtual void onNewSimulation(NewSimulationConfig config);
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
+	virtual bool onLoadSimulationParameters(string const& filename);
+	virtual void onUpdateSimulationParametersForRunningSimulation(SimulationParameters* parameters);
 
 	virtual Serializer* getSerializer() const;
-	virtual void setSimulationParametersForRunningSimulation(SimulationParameters* parameters);
 
 private:
 	void connectSimController() const;

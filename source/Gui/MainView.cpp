@@ -78,6 +78,7 @@ void MainView::connectActions()
 	connect(ui->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
 	connect(ui->actionEditSimulationParameters, &QAction::triggered, this, &MainView::onEditSimulationParameters);
+	connect(ui->actionLoadSimulationParameters, &QAction::triggered, this, &MainView::onLoadSimulationParameters);
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -173,24 +174,24 @@ void MainView::onNewSimulation()
 
 void MainView::onSaveSimulation()
 {
-	QString fileName = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
-	if (!fileName.isEmpty()) {
-		_controller->onSaveSimulation(fileName.toStdString());
+	QString filename = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
+	if (!filename.isEmpty()) {
+		_controller->onSaveSimulation(filename.toStdString());
 	}
 }
 
 void MainView::onLoadSimulation()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
-	if (!fileName.isEmpty()) {
-		if(!_controller->onLoadSimulation(fileName.toStdString())) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation could not loaded.");
-			msgBox.exec();
-		}
-		else {
+	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
+	if (!filename.isEmpty()) {
+		if(_controller->onLoadSimulation(filename.toStdString())) {
 			updateZoomFactor();
 			ui->actionPlay->setChecked(false);
 			onRunClicked(false);
+		}
+		else {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation could not loaded.");
+			msgBox.exec();
 		}
 	}
 }
@@ -199,7 +200,20 @@ void MainView::onEditSimulationParameters()
 {
 	SimulationParametersDialog dialog(_model->getSimulationParameters(), _controller->getSerializer(), this);
 	if (dialog.exec()) {
-		_controller->setSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
+		_controller->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
+	}
+}
+
+void MainView::onLoadSimulationParameters()
+{
+	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
+	if (!filename.isEmpty()) {
+		if (_controller->onLoadSimulationParameters(filename.toStdString())) {
+		}
+		else {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
+			msgBox.exec();
+		}
 	}
 }
 
