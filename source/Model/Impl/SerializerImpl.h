@@ -39,6 +39,7 @@ private:
 		IntVector2D universeSize;
 		IntVector2D gridSize;
 		int maxThreads;
+		int timestep;
 	};
 	ConfigToSerialize _configToSerialize;
 	string _serializedSimulationContent;

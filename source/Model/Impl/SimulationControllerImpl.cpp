@@ -21,7 +21,8 @@ void SimulationControllerImpl::init(SimulationContext* context)
 	SET_CHILD(_context, static_cast<SimulationContextLocal*>(context));
 	connect(_context->getUnitThreadController(), &UnitThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
-		if (_flagSimulationRunning) {
+		++_timestep;
+		if (_flagRunMode) {
 			if (_timeSinceLastStart.elapsed() > (1000.0 / displayFps)*_displayedFramesSinceLastStart) {
 				++_displayedFramesSinceLastStart;
 				Q_EMIT nextFrameCalculated();
@@ -38,7 +39,7 @@ void SimulationControllerImpl::init(SimulationContext* context)
 void SimulationControllerImpl::setRun(bool run)
 {
 	_displayedFramesSinceLastStart = 0;
-	_flagSimulationRunning = run;
+	_flagRunMode = run;
 	if (run) {
 		_timeSinceLastStart.restart();
 		_context->getUnitThreadController()->calculateTimestep();
@@ -54,6 +55,16 @@ void SimulationControllerImpl::calculateSingleTimestep()
 SimulationContext * SimulationControllerImpl::getContext() const
 {
 	return _context;
+}
+
+int SimulationControllerImpl::getTimestep() const
+{
+	return _timestep;
+}
+
+void SimulationControllerImpl::setTimestep(int value)
+{
+	_timestep = value;
 }
 
 

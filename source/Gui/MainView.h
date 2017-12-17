@@ -43,7 +43,7 @@ private:
 
 	Ui::MainView* ui = nullptr;	//contains VisualEditor
 	MainModel* _model = nullptr;
-	MainController* _controller = nullptr;
+	MainController* _mainController = nullptr;
 
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
