@@ -102,11 +102,9 @@ void MainController::onSaveSimulation(string const& filename)
 bool MainController::onLoadSimulation(string const & filename)
 {
 	auto origSimController = _simController;
-
 	if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
 		return false;
 	}
-	
 	delete origSimController;
 
 	_simAccess->init(_simController->getContext());
