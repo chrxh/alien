@@ -31,9 +31,6 @@ private:
 private:
 	void updateSymbolTableFromWidgets();
 
-	SymbolTable* loadSymbolTable(string filename);
-	bool saveSymbolTable(string filename, SymbolTable* symbolTable);
-
     Ui::SymbolTableDialog *ui;
 	SymbolTable* _symbolTable = nullptr;
 	Serializer* _serializer = nullptr;

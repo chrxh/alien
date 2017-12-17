@@ -3,11 +3,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "gui/Settings.h"
+#include "Gui/Settings.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/Settings.h"
 #include "Model/Api/Serializer.h"
 
+#include "SerializationHelper.h"
 #include "SimulationParametersDialog.h"
 #include "ui_simulationparametersdialog.h"
 
@@ -129,29 +130,6 @@ qreal SimulationParametersDialog::getItemReal(QString key, int matchPos)
 	return ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(1).toDouble(&ok);
 }
 
-SimulationParameters * SimulationParametersDialog::loadSimulationParameters(string filename)
-{
-	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
-
-	size_t size;
-	string data;
-	stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-	data.resize(size);
-	stream.read(&data[0], size);
-	stream.close();
-
-	if (stream.fail()) {
-		return nullptr;
-	}
-
-	try {
-		return _serializer->deserializeSimulationParameters(data);
-	}
-	catch (...) {
-		return nullptr;
-	}
-}
-
 bool SimulationParametersDialog::saveSimulationParameters(string filename, SimulationParameters * parameters)
 {
 	try {
@@ -182,10 +160,9 @@ void SimulationParametersDialog::loadButtonClicked ()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
     if( !filename.isEmpty() ) {
-		SimulationParameters* simulationParameters = loadSimulationParameters(filename.toStdString());
-		if (simulationParameters) {
-			delete _simulationParameters;
-			_simulationParameters = simulationParameters;
+		auto origSimulationParameters = _simulationParameters;
+		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, _simulationParameters)) {
+			delete origSimulationParameters;
 			updateWidgetsFromSimulationParameters();
 		}
 		else {
@@ -199,12 +176,10 @@ void SimulationParametersDialog::saveButtonClicked ()
 {
     QString filename = QFileDialog::getSaveFileName(this, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
     if( !filename.isEmpty() ) {
-
 		updateSimulationParametersFromWidgets();
-		if (!saveSimulationParameters(filename.toStdString(), _simulationParameters)) {
+		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_simulationParameters); })) {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The simulation parameters could not saved.");
 			msgBox.exec();
-			return;
 		}
     }
 }

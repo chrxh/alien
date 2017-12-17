@@ -31,7 +31,6 @@ private:
 	int getItemInt(QString key, int matchPos);
 	qreal getItemReal(QString key, int matchPos);
 
-	SimulationParameters* loadSimulationParameters(string filename);
 	bool saveSimulationParameters(string filename, SimulationParameters* symbolTable);
 
 
