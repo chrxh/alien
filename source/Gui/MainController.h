@@ -16,6 +16,7 @@ public:
 	virtual void init();
 
 	virtual void onRunSimulation(bool run);
+	virtual void onStepForward();
 	virtual void onNewSimulation(NewSimulationConfig config);
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
@@ -44,6 +45,7 @@ private:
 
 	SimulationController* _simController = nullptr;
 	DataController* _dataController = nullptr;
+	VersionController* _versionController = nullptr;
 	SimulationAccess* _simAccess = nullptr;
 	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;

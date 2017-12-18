@@ -686,7 +686,7 @@
    <addaction name="separator"/>
    <addaction name="actionPlay"/>
    <addaction name="actionStepBack"/>
-   <addaction name="actionStep"/>
+   <addaction name="actionStepForward"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -772,7 +772,7 @@
     <addaction name="actionSaveSimulation"/>
     <addaction name="separator"/>
     <addaction name="actionPlay"/>
-    <addaction name="actionStep"/>
+    <addaction name="actionStepForward"/>
     <addaction name="actionStepBack"/>
     <addaction name="actionSnapshot"/>
     <addaction name="actionRestore"/>
@@ -819,10 +819,10 @@
      <addaction name="actionAddHexagonStructure"/>
     </widget>
     <addaction name="menuAddEnsemble"/>
-    <addaction name="actionLoad_cell_extension"/>
-    <addaction name="actionSave_cell_extension"/>
-    <addaction name="actionCopy_cell_extension"/>
-    <addaction name="actionPaste_cell_extension"/>
+    <addaction name="actionLoadExtendedSelection"/>
+    <addaction name="actionSaveExtendedSelection"/>
+    <addaction name="actionCopyExtendedSelection"/>
+    <addaction name="actionPasteExtendedSelection"/>
     <addaction name="actionDeleteExtension"/>
     <addaction name="menuMultiplyExtension"/>
    </widget>
@@ -900,7 +900,7 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionStep">
+  <action name="actionStepForward">
    <property name="icon">
     <iconset resource="resources/ressources.qrc">
      <normaloff>:/Icons/step.png</normaloff>:/Icons/step.png</iconset>
@@ -968,7 +968,7 @@
     <string>Ctrl+M</string>
    </property>
   </action>
-  <action name="actionCopy_cell_extension">
+  <action name="actionCopyExtendedSelection">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -982,7 +982,7 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionPaste_cell_extension">
+  <action name="actionPasteExtendedSelection">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -993,7 +993,7 @@
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionSave_cell_extension">
+  <action name="actionSaveExtendedSelection">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -1004,7 +1004,7 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="actionLoad_cell_extension">
+  <action name="actionLoadExtendedSelection">
    <property name="enabled">
     <bool>true</bool>
    </property>

@@ -30,6 +30,7 @@ private:
 
 	Q_SLOT void onSetEditorMode();
 	Q_SLOT void onRunClicked(bool run);
+	Q_SLOT void onStepForward();
 	Q_SLOT void onZoomInClicked();
 	Q_SLOT void onZoomOutClicked();
 	Q_SLOT void onNewSimulation();

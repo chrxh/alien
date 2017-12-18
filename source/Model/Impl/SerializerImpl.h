@@ -17,9 +17,7 @@ public:
 	virtual void init() override;
 
 	virtual void serialize(SimulationController* simController) override;
-	virtual string const& retrieveSerializedSimulationContent() override;
 	virtual string const& retrieveSerializedSimulation() override;
-	virtual void deserializeSimulationContent(string const& content) const override;
 	virtual SimulationController* deserializeSimulation(string const& content) override;
 
 	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const override;
@@ -42,6 +40,5 @@ private:
 		int timestep;
 	};
 	ConfigToSerialize _configToSerialize;
-	string _serializedSimulationContent;
 	string _serializedSimulation;
 };
