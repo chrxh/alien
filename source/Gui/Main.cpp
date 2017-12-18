@@ -36,9 +36,8 @@
 //- Zugriff verwendet Desriptions
 
 //Nächstes Mal:
-//- Bug: Struktur laden, was ändern und dann speichern
-//- Bug: CellCluster übereinander legen => beide verschwinden
-//- ParticleImpl abrüsten
+//- seltener Bug: Relative Position von Zellen zu groß
+//- Bug: AccessToUnits nicht zum richtigen Zeitpunkt (z.B. Restore während laufender Simulation)
 //- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell

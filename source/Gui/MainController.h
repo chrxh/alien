@@ -18,6 +18,8 @@ public:
 	virtual void onRunSimulation(bool run);
 	virtual void onStepForward();
 	virtual void onStepBackward(bool& emptyStack);
+	virtual void onMakeSnapshot();
+	virtual void onRestoreSnapshot();
 	virtual void onNewSimulation(NewSimulationConfig config);
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
