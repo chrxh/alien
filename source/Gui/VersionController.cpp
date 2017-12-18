@@ -25,6 +25,16 @@ void VersionController::init(SimulationContext* context)
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &VersionController::dataReadyToRetrieve);
 }
 
+bool VersionController::isStackEmpty()
+{
+	return _stack.empty();
+}
+
+void VersionController::clearStack()
+{
+	_stack.clear();
+}
+
 void VersionController::loadSimulationContentFromStack()
 {
 	if (_stack.empty()) {
@@ -38,7 +48,6 @@ void VersionController::loadSimulationContentFromStack()
 void VersionController::saveSimulationContentToStack()
 {
 	ResolveDescription resolveDesc;
-	resolveDesc.resolveIds = false;
 	_access->requireData({ { 0, 0 }, _universeSize }, resolveDesc);
 }
 

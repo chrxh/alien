@@ -15,6 +15,8 @@ public:
 
 	virtual void init(SimulationContext* context);
 
+	virtual bool isStackEmpty();
+	virtual void clearStack();
 	virtual void loadSimulationContentFromStack();
 	virtual void saveSimulationContentToStack();
 

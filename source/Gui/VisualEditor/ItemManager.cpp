@@ -33,37 +33,36 @@ void ItemManager::activate(IntVector2D size)
 	_connectionsByIds.clear();
 }
 
-void ItemManager::updateCells(DataController* manipulator)
+void ItemManager::updateCells(DataController* dataController)
 {
-	auto const &data = manipulator->getDataRef();
-	if (!data.clusters) {
-		return;
-	}
+	auto const &data = dataController->getDataRef();
 
 	map<uint64_t, CellItem*> newCellsByIds;
-	for (auto const &cluster : *data.clusters) {
-		for (auto const &cell : *cluster.cells) {
-			auto it = _cellsByIds.find(cell.id);
-			CellItem* item;
-			if (it != _cellsByIds.end()) {
-				item = it->second;
-				item->update(cell);
-				newCellsByIds.insert_or_assign(cell.id, item);
-				_cellsByIds.erase(it);
-			}
-			else {
-				item = new CellItem(_config, cell);
-				_scene->addItem(item);
-				newCellsByIds[cell.id] = item;
-			}
-			if (manipulator->isInSelection(cell.id)) {
-				item->setFocusState(CellItem::FOCUS_CELL);
-			}
-			else if (manipulator->isInExtendedSelection(cell.id)) {
-				item->setFocusState(CellItem::FOCUS_CLUSTER);
-			}
-			else {
-				item->setFocusState(CellItem::NO_FOCUS);
+	if (data.clusters) {
+		for (auto const &cluster : *data.clusters) {
+			for (auto const &cell : *cluster.cells) {
+				auto it = _cellsByIds.find(cell.id);
+				CellItem* item;
+				if (it != _cellsByIds.end()) {
+					item = it->second;
+					item->update(cell);
+					newCellsByIds.insert_or_assign(cell.id, item);
+					_cellsByIds.erase(it);
+				}
+				else {
+					item = new CellItem(_config, cell);
+					_scene->addItem(item);
+					newCellsByIds[cell.id] = item;
+				}
+				if (dataController->isInSelection(cell.id)) {
+					item->setFocusState(CellItem::FOCUS_CELL);
+				}
+				else if (dataController->isInExtendedSelection(cell.id)) {
+					item->setFocusState(CellItem::FOCUS_CLUSTER);
+				}
+				else {
+					item->setFocusState(CellItem::NO_FOCUS);
+				}
 			}
 		}
 	}
@@ -76,30 +75,29 @@ void ItemManager::updateCells(DataController* manipulator)
 void ItemManager::updateParticles(DataController* manipulator)
 {
 	auto const &data = manipulator->getDataRef();
-	if (!data.particles) {
-		return;
-	}
 
 	map<uint64_t, ParticleItem*> newParticlesByIds;
-	for (auto const &particle : *data.particles) {
-		auto it = _particlesByIds.find(particle.id);
-		ParticleItem* item;
-		if (it != _particlesByIds.end()) {
-			item = it->second;
-			item->update(particle);
-			newParticlesByIds.insert_or_assign(particle.id, item);
-			_particlesByIds.erase(it);
-		}
-		else {
-			item = new ParticleItem(_config, particle);
-			_scene->addItem(item);
-			newParticlesByIds.insert_or_assign(particle.id, item);
-		}
-		if (manipulator->isInSelection(particle.id)) {
-			item->setFocusState(ParticleItem::FOCUS);
-		}
-		else {
-			item->setFocusState(ParticleItem::NO_FOCUS);
+	if (data.particles) {
+		for (auto const &particle : *data.particles) {
+			auto it = _particlesByIds.find(particle.id);
+			ParticleItem* item;
+			if (it != _particlesByIds.end()) {
+				item = it->second;
+				item->update(particle);
+				newParticlesByIds.insert_or_assign(particle.id, item);
+				_particlesByIds.erase(it);
+			}
+			else {
+				item = new ParticleItem(_config, particle);
+				_scene->addItem(item);
+				newParticlesByIds.insert_or_assign(particle.id, item);
+			}
+			if (manipulator->isInSelection(particle.id)) {
+				item->setFocusState(ParticleItem::FOCUS);
+			}
+			else {
+				item->setFocusState(ParticleItem::NO_FOCUS);
+			}
 		}
 	}
 	for (auto const& particleById : _particlesByIds) {
