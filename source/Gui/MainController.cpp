@@ -14,6 +14,7 @@
 #include "Model/Api/Serializer.h"
 #include "Model/Api/DescriptionHelper.h"
 
+#include "VersionController.h"
 #include "SerializationHelper.h"
 #include "InfoController.h"
 #include "MainController.h"
@@ -44,9 +45,11 @@ void MainController::init()
 	auto serializer = facade->buildSerializer();
 	auto simAccessForDataController = facade->buildSimulationAccess();
 	auto descHelper = facade->buildDescriptionHelper();
+	auto versionController = new VersionController();
 	SET_CHILD(_serializer, serializer);
 	SET_CHILD(_simAccess, simAccessForDataController);
 	SET_CHILD(_descHelper, descHelper);
+	SET_CHILD(_versionController, versionController);
 	_dataController = new DataController(this);
 	_notifier = new Notifier(this);
 
@@ -72,6 +75,12 @@ void MainController::onRunSimulation(bool run)
 	_simController->setRun(run);
 }
 
+void MainController::onStepForward()
+{
+	_versionController->saveSimulationContentToStack();
+	_simController->calculateSingleTimestep();
+}
+
 void MainController::onNewSimulation(NewSimulationConfig config)
 {
 	delete _simController;
@@ -84,6 +93,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	connectSimController();
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
+	_versionController->init(_simController->getContext());
 	_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
 	_view->setupEditors(_simController, _dataController, _notifier);
@@ -115,6 +125,7 @@ bool MainController::onLoadSimulation(string const & filename)
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_descHelper->init(_simController->getContext());
+	_versionController->init(_simController->getContext());
 	_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
 	_view->setupEditors(_simController, _dataController, _notifier);

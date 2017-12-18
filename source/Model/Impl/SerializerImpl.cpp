@@ -9,7 +9,6 @@
 #include <QVector2D>
 
 #include "Base/ServiceLocator.h"
-
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationAccess.h"
@@ -207,7 +206,6 @@ void SerializerImpl::serialize(SimulationController * simController)
 {
 	_access->init(simController->getContext());
 	_serializedSimulation.clear();
-	_serializedSimulationContent.clear();
 
 	_configToSerialize = {
 		simController->getContext()->getSimulationParameters(),
@@ -224,26 +222,9 @@ void SerializerImpl::serialize(SimulationController * simController)
 	_access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
 }
 
-string const& SerializerImpl::retrieveSerializedSimulationContent()
-{
-	return _serializedSimulationContent;
-}
-
 string const& SerializerImpl::retrieveSerializedSimulation()
 {
 	return _serializedSimulation;
-}
-
-void SerializerImpl::deserializeSimulationContent(string const & content) const
-{
-	istringstream stream(content);
-
-	DataDescription data;
-	boost::archive::binary_iarchive ia(stream);
-	ia >> data;
-
-	_access->clear();
-	_access->updateData(data);
 }
 
 SimulationController* SerializerImpl::deserializeSimulation(string const & content)
@@ -316,10 +297,7 @@ void SerializerImpl::dataReadyToRetrieve()
 	boost::archive::binary_oarchive archive(stream);
 
 	auto content = _access->retrieveData();
-	archive << content;
-	_serializedSimulationContent = stream.str();
-
-	archive
+	archive << content
 		<< _configToSerialize.universeSize << _configToSerialize.gridSize << *_configToSerialize.parameters
 		<< *_configToSerialize.symbolTable << _configToSerialize.maxThreads << _configToSerialize.timestep;
 	_serializedSimulation = stream.str();
