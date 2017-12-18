@@ -50,6 +50,7 @@ class MainView;
 class MainModel;
 class MainController;
 class VersionController;
+class VisualEditController;
 
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
