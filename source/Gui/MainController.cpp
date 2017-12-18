@@ -73,12 +73,19 @@ void MainController::init()
 void MainController::onRunSimulation(bool run)
 {
 	_simController->setRun(run);
+	_versionController->clearStack();
 }
 
 void MainController::onStepForward()
 {
 	_versionController->saveSimulationContentToStack();
 	_simController->calculateSingleTimestep();
+}
+
+void MainController::onStepBackward(bool& emptyStack)
+{
+	_versionController->loadSimulationContentFromStack();
+	emptyStack = _versionController->isStackEmpty();
 }
 
 void MainController::onNewSimulation(NewSimulationConfig config)

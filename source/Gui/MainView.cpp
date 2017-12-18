@@ -80,6 +80,7 @@ void MainView::connectActions()
 	connect(ui->actionExit, &QAction::triggered, this, &MainView::close);
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
 	connect(ui->actionStepForward, &QAction::triggered, this, &MainView::onStepForward);
+	connect(ui->actionStepBackward, &QAction::triggered, this, &MainView::onStepBackward);
 	connect(ui->actionZoomIn, &QAction::triggered, this, &MainView::onZoomInClicked);
 	connect(ui->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
@@ -128,7 +129,7 @@ void MainView::onRunClicked(bool run)
 	}
 	ui->actionSaveExtendedSelection->setEnabled(false);
 	ui->actionCopyExtendedSelection->setEnabled(false);
-	ui->actionStepBack->setEnabled(false);
+	ui->actionStepBackward->setEnabled(false);
 	ui->menuMultiplyExtension->setEnabled(false);
 	ui->actionCopyCell->setEnabled(false);
 	ui->actionDeleteCell->setEnabled(false);
@@ -140,6 +141,17 @@ void MainView::onRunClicked(bool run)
 void MainView::onStepForward()
 {
 	_controller->onStepForward();
+	ui->actionStepBackward->setEnabled(true);
+}
+
+void MainView::onStepBackward()
+{
+	bool emptyStack = false;
+	_controller->onStepBackward(emptyStack);
+	if (emptyStack) {
+		ui->actionStepBackward->setEnabled(false);
+	}
+	refresh();
 }
 
 void MainView::onZoomInClicked()

@@ -685,7 +685,7 @@
    <addaction name="actionRestore"/>
    <addaction name="separator"/>
    <addaction name="actionPlay"/>
-   <addaction name="actionStepBack"/>
+   <addaction name="actionStepBackward"/>
    <addaction name="actionStepForward"/>
    <addaction name="separator"/>
   </widget>
@@ -773,7 +773,7 @@
     <addaction name="separator"/>
     <addaction name="actionPlay"/>
     <addaction name="actionStepForward"/>
-    <addaction name="actionStepBack"/>
+    <addaction name="actionStepBackward"/>
     <addaction name="actionSnapshot"/>
     <addaction name="actionRestore"/>
     <addaction name="separator"/>
@@ -1132,7 +1132,7 @@
     <string>Rectangle</string>
    </property>
   </action>
-  <action name="actionStepBack">
+  <action name="actionStepBackward">
    <property name="enabled">
     <bool>false</bool>
    </property>
