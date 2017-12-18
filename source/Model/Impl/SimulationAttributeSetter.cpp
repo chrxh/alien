@@ -28,7 +28,7 @@ void SimulationAttributeSetter::init(SimulationContext * context)
 	_registered = true;
 }
 
-void SimulationAttributeSetter::setSimulationParameters(SimulationParameters * parameters)
+void SimulationAttributeSetter::setSimulationParameters(SimulationParameters const* parameters)
 {
 	_parameters = parameters;
 	_updateSimulationParameters = true;

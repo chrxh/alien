@@ -17,5 +17,5 @@ public:
 	virtual SimulationParameters const* getSimulationParameters() const = 0;
 	virtual CellComputerCompiler* getCellComputerCompiler() const = 0;
 
-	virtual void setSimulationParameters(SimulationParameters* parameters) = 0;
+	virtual void setSimulationParameters(SimulationParameters const* parameters) = 0;
 };

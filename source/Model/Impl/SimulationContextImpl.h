@@ -26,7 +26,7 @@ public:
 	virtual NumberGenerator* getNumberGenerator() const override;
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
-	virtual void setSimulationParameters(SimulationParameters* parameters) override;
+	virtual void setSimulationParameters(SimulationParameters const* parameters) override;
 	
 	NumberGenerator* _numberGen = nullptr;
 	SpacePropertiesLocal* _metric = nullptr;

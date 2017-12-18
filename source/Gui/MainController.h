@@ -23,9 +23,10 @@ public:
 	virtual void onNewSimulation(NewSimulationConfig config);
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
-	virtual void onUpdateSimulationParametersForRunningSimulation(SimulationParameters* parameters);
+	virtual void onUpdateSimulationParametersForRunningSimulation();
 
 	virtual int getTimestep() const;
+	virtual bool areEntitiesSelected() const;
 
 private:
 	void connectSimController() const;

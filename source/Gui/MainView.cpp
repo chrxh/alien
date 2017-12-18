@@ -32,7 +32,6 @@ MainView::MainView(QWidget * parent)
 MainView::~MainView()
 {
 	delete ui;
-
 }
 
 void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer)
@@ -40,12 +39,13 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_model = model;
 	_controller = mainController;
 	_serializer = serializer;
-	_toolbar = new ToolbarController(ui->visualEditController);
-	_dataEditor = new DataEditController(ui->visualEditController);
+	_visualEditor = ui->visualEditController;
+	_toolbar = new ToolbarController(_visualEditor);
+	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
 	_infoController->init(ui->infoLabel, mainController);
 
-	connectActions();
+	connectWidget();
 	setupTheme();
 	setWindowState(windowState() | Qt::WindowFullScreen);
 	show();
@@ -53,14 +53,14 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 
 void MainView::refresh()
 {
-	ui->visualEditController->refresh();
+	_visualEditor->refresh();
 }
 
 void MainView::setupEditors(SimulationController * controller, DataController* manipulator, Notifier* notifier)
 {
 	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext());
 	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());
-	ui->visualEditController->init(notifier, controller, manipulator);
+	_visualEditor->init(notifier, controller, manipulator);
 
 	ui->actionEditor->setChecked(false);
 	_model->setEditMode(boost::none);
@@ -72,7 +72,7 @@ InfoController * MainView::getInfoController() const
 	return _infoController;
 }
 
-void MainView::connectActions()
+void MainView::connectWidget()
 {
 	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
 	connect(ui->actionSaveSimulation, &QAction::triggered, this, &MainView::onSaveSimulation);
@@ -92,6 +92,7 @@ void MainView::connectActions()
 	connect(ui->actionEditSymbols, &QAction::triggered, this, &MainView::onEditSymbolTable);
 	connect(ui->actionLoadSymbols, &QAction::triggered, this, &MainView::onLoadSymbolTable);
 	connect(ui->actionSaveSymbols, &QAction::triggered, this, &MainView::onSaveSymbolTable);
+	connect(_dataEditor->getContext(), &DataEditContext::selectionChanged, this, &MainView::onSelectionChanged);
 
 	ui->actionEditor->setEnabled(true);
 	ui->actionZoomIn->setEnabled(true);
@@ -103,14 +104,14 @@ void MainView::setupTheme()
 	setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
 	ui->menuView->setFont(GuiSettings::getGlobalFont());
-	ui->menuEdit->setFont(GuiSettings::getGlobalFont());
-	ui->menuSelection->setFont(GuiSettings::getGlobalFont());
+	ui->menuEntity->setFont(GuiSettings::getGlobalFont());
+	ui->menuCollection->setFont(GuiSettings::getGlobalFont());
 	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
 	ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
 	ui->menuAddEnsemble->setFont(GuiSettings::getGlobalFont());
-	ui->menuMultiplyExtension->setFont(GuiSettings::getGlobalFont());
+	ui->menuMultiplyCollection->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
@@ -129,13 +130,7 @@ void MainView::onRunClicked(bool run)
 		ui->actionPlay->setIcon(QIcon("://Icons/play.png"));
 		ui->actionStepForward->setEnabled(true);
 	}
-	ui->actionSaveExtendedSelection->setEnabled(false);
-	ui->actionCopyExtendedSelection->setEnabled(false);
 	ui->actionStepBackward->setEnabled(false);
-	ui->menuMultiplyExtension->setEnabled(false);
-	ui->actionCopyCell->setEnabled(false);
-	ui->actionDeleteCell->setEnabled(false);
-	ui->actionDeleteExtension->setEnabled(false);
 
 	_controller->onRunSimulation(run);
 }
@@ -170,13 +165,13 @@ void MainView::onRestoreSnapshot()
 
 void MainView::onZoomInClicked()
 {
-	ui->visualEditController->zoom(2.0);
+	_visualEditor->zoom(2.0);
 	updateZoomFactor();
 }
 
 void MainView::onZoomOutClicked()
 {
-	ui->visualEditController->zoom(0.5);
+	_visualEditor->zoom(0.5);
 	updateZoomFactor();
 }
 
@@ -187,16 +182,16 @@ void MainView::onSetEditorMode()
 	_model->setEditMode(newEditMode);
 
 	_toolbar->getContext()->show(newEditMode);
-	_dataEditor->getContext()->show(newEditMode);
+	_dataEditor->getContext()->onShow(newEditMode);
 	if (newEditMode) {
-		ui->visualEditController->setActiveScene(ActiveScene::ItemScene);
+		_visualEditor->setActiveScene(ActiveScene::ItemScene);
 		ui->actionEditor->setIcon(QIcon("://Icons/PixelView.png"));
 	}
 	else {
-		ui->visualEditController->setActiveScene(ActiveScene::PixelScene);
+		_visualEditor->setActiveScene(ActiveScene::PixelScene);
 		ui->actionEditor->setIcon(QIcon("://Icons/EditorView.png"));
-		cellDefocused();
 	}
+	updateActionsForEntityAndCollection();
 }
 
 void MainView::onNewSimulation()
@@ -245,8 +240,8 @@ void MainView::onEditSimulationParameters()
 {
 	SimulationParametersDialog dialog(_model->getSimulationParameters()->clone(), _serializer, this);
 	if (dialog.exec()) {
-		_controller->onUpdateSimulationParametersForRunningSimulation(dialog.getSimulationParameters());
 		_model->setSimulationParameters(dialog.getSimulationParameters());
+		_controller->onUpdateSimulationParametersForRunningSimulation();
 	}
 }
 
@@ -256,8 +251,8 @@ void MainView::onLoadSimulationParameters()
 	if (!filename.isEmpty()) {
 		SimulationParameters* parameters;
 		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
-			_controller->onUpdateSimulationParametersForRunningSimulation(parameters);
 			_model->setSimulationParameters(parameters);
+			_controller->onUpdateSimulationParametersForRunningSimulation();
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
@@ -284,7 +279,7 @@ void MainView::onEditSymbolTable()
 	SymbolTableDialog dialog(origSymbols->clone(), _serializer, this);
 	if (dialog.exec()) {
 		origSymbols->getSymbolsFrom(dialog.getSymbolTable());
-		Q_EMIT _dataEditor->getContext()->refresh();
+		Q_EMIT _dataEditor->getContext()->onRefresh();
 	}
 }
 
@@ -296,7 +291,7 @@ void MainView::onLoadSymbolTable()
 		if (SerializationHelper::loadFromFile<SymbolTable*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSymbolTable(data); }, symbolTable)) {
 			_model->getSymbolTable()->getSymbolsFrom(symbolTable);
 			delete symbolTable;
-			Q_EMIT _dataEditor->getContext()->refresh();
+			Q_EMIT _dataEditor->getContext()->onRefresh();
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified symbol table could not loaded.");
@@ -317,18 +312,25 @@ void MainView::onSaveSymbolTable()
 	}
 }
 
-void MainView::cellDefocused()
+void MainView::onSelectionChanged()
 {
-	ui->actionSaveExtendedSelection->setEnabled(false);
-	ui->actionCopyExtendedSelection->setEnabled(false);
-	ui->menuMultiplyExtension->setEnabled(false);
-	ui->actionCopyCell->setEnabled(false);
-	ui->actionDeleteCell->setEnabled(false);
-	ui->actionDeleteExtension->setEnabled(false);
+	updateActionsForEntityAndCollection();
+}
+
+void MainView::updateActionsForEntityAndCollection()
+{
+	bool allowEdit = _controller->areEntitiesSelected() && _model->isEditMode() && *_model->isEditMode();
+
+	ui->actionSaveCollection->setEnabled(allowEdit);
+	ui->actionCopyCollection->setEnabled(allowEdit);
+	ui->menuMultiplyCollection->setEnabled(allowEdit);
+	ui->actionCopyCell->setEnabled(allowEdit);
+	ui->actionDeleteCell->setEnabled(allowEdit);
+	ui->actionDeleteCollection->setEnabled(allowEdit);
 }
 
 void MainView::updateZoomFactor()
 {
-	_infoController->setZoomFactor(ui->visualEditController->getZoomFactor());
+	_infoController->setZoomFactor(_visualEditor->getZoomFactor());
 }
 
