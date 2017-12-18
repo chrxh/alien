@@ -49,6 +49,7 @@ class Notifier;
 class MainView;
 class MainModel;
 class MainController;
+class VersionController;
 
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
