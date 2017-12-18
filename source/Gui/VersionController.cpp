@@ -21,6 +21,8 @@ void VersionController::init(SimulationContext* context)
 	SET_CHILD(_access, access);
 	_access->init(context);
 	_universeSize = context->getSpaceProperties()->getSize();
+	_stack.clear();
+	_snapshot.reset();
 
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &VersionController::dataReadyToRetrieve);
 }
@@ -47,11 +49,35 @@ void VersionController::loadSimulationContentFromStack()
 
 void VersionController::saveSimulationContentToStack()
 {
-	ResolveDescription resolveDesc;
-	_access->requireData({ { 0, 0 }, _universeSize }, resolveDesc);
+	_target = TargetForReceivedData::Stack;
+	_access->requireData({ { 0, 0 }, _universeSize }, ResolveDescription());
+}
+
+void VersionController::makeSnapshot()
+{
+	_target = TargetForReceivedData::Snapshot;
+	_access->requireData({ { 0, 0 }, _universeSize }, ResolveDescription());
+}
+
+void VersionController::restoreSnapshot()
+{
+	if (!_snapshot) {
+		return;
+	}
+	_access->clear();
+	_access->updateData(*_snapshot);
 }
 
 void VersionController::dataReadyToRetrieve()
 {
-	_stack.push_back(_access->retrieveData());
+	if (!_target) {
+		return;
+	}
+	if (*_target == TargetForReceivedData::Stack) {
+		_stack.push_back(_access->retrieveData());
+	}
+	if (*_target == TargetForReceivedData::Snapshot) {
+		_snapshot = _access->retrieveData();
+	}
+	_target.reset();
 }

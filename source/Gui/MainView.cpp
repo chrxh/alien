@@ -81,6 +81,8 @@ void MainView::connectActions()
 	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
 	connect(ui->actionStepForward, &QAction::triggered, this, &MainView::onStepForward);
 	connect(ui->actionStepBackward, &QAction::triggered, this, &MainView::onStepBackward);
+	connect(ui->actionSnapshot, &QAction::triggered, this, &MainView::onMakeSnapshot);
+	connect(ui->actionRestore, &QAction::triggered, this, &MainView::onRestoreSnapshot);
 	connect(ui->actionZoomIn, &QAction::triggered, this, &MainView::onZoomInClicked);
 	connect(ui->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
 	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
@@ -154,6 +156,18 @@ void MainView::onStepBackward()
 	refresh();
 }
 
+void MainView::onMakeSnapshot()
+{
+	_controller->onMakeSnapshot();
+	ui->actionRestore->setEnabled(true);
+}
+
+void MainView::onRestoreSnapshot()
+{
+	_controller->onRestoreSnapshot();
+	refresh();
+}
+
 void MainView::onZoomInClicked()
 {
 	ui->visualEditController->zoom(2.0);
@@ -195,6 +209,8 @@ void MainView::onNewSimulation()
 		_controller->onNewSimulation(config);
 		updateZoomFactor();
 		ui->actionPlay->setChecked(false);
+		ui->actionRestore->setEnabled(false);
+		ui->actionStepBackward->setEnabled(false);
 		onRunClicked(false);
 	}
 }
@@ -214,6 +230,8 @@ void MainView::onLoadSimulation()
 		if(_controller->onLoadSimulation(filename.toStdString())) {
 			updateZoomFactor();
 			ui->actionPlay->setChecked(false);
+			ui->actionRestore->setEnabled(false);
+			ui->actionStepBackward->setEnabled(false);
 			onRunClicked(false);
 		}
 		else {

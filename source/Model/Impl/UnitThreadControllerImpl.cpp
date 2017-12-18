@@ -83,8 +83,8 @@ void UnitThreadControllerImpl::threadFinishedCalculation(QObject* sender)
 		thr->setState(UnitThread::State::Finished);
 		--_runningThreads;
 		if (areAllThreadsFinished()) {
-			Q_EMIT timestepCalculated();
 			notifyObservers();
+			Q_EMIT timestepCalculated();
 		}
 		else {
 			searchAndExecuteReadyThreads();

@@ -88,6 +88,16 @@ void MainController::onStepBackward(bool& emptyStack)
 	emptyStack = _versionController->isStackEmpty();
 }
 
+void MainController::onMakeSnapshot()
+{
+	_versionController->makeSnapshot();
+}
+
+void MainController::onRestoreSnapshot()
+{
+	_versionController->restoreSnapshot();
+}
+
 void MainController::onNewSimulation(NewSimulationConfig config)
 {
 	delete _simController;

@@ -2,6 +2,7 @@
 
 #include <QObject>
 
+#include "Model/Api/Descriptions.h"
 #include "Definitions.h"
 
 class VersionController
@@ -20,11 +21,17 @@ public:
 	virtual void loadSimulationContentFromStack();
 	virtual void saveSimulationContentToStack();
 
+	virtual void makeSnapshot();
+	virtual void restoreSnapshot();
+
 private:
 	Q_SLOT void dataReadyToRetrieve();
 
+	IntVector2D _universeSize;
 	SimulationAccess* _access = nullptr;
 
-	IntVector2D _universeSize;
+	enum class TargetForReceivedData { Stack, Snapshot};
+	optional<TargetForReceivedData> _target;
 	list<DataDescription> _stack;
+	optional<DataDescription> _snapshot;
 };
