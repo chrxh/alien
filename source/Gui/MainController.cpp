@@ -150,14 +150,19 @@ bool MainController::onLoadSimulation(string const & filename)
 	return true;
 }
 
-void MainController::onUpdateSimulationParametersForRunningSimulation(SimulationParameters * parameters)
+void MainController::onUpdateSimulationParametersForRunningSimulation()
 {
-	_simController->getContext()->setSimulationParameters(parameters);
+	_simController->getContext()->setSimulationParameters(_model->getSimulationParameters());
 }
 
 int MainController::getTimestep() const
 {
 	return _simController->getTimestep();
+}
+
+bool MainController::areEntitiesSelected() const
+{
+	return _dataController->areEntitiesSelected();
 }
 
 void MainController::connectSimController() const

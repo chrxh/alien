@@ -81,9 +81,8 @@ CellComputerCompiler * SimulationContextImpl::getCellComputerCompiler() const
 	return _compiler;
 }
 
-void SimulationContextImpl::setSimulationParameters(SimulationParameters * parameters)
+void SimulationContextImpl::setSimulationParameters(SimulationParameters const* parameters)
 {
-	SET_CHILD(_simulationParameters, parameters);
 	_attributeSetter->setSimulationParameters(parameters);
 }
 

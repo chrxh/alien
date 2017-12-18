@@ -779,9 +779,9 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
+   <widget class="QMenu" name="menuEntity">
     <property name="title">
-     <string>Particle</string>
+     <string>Entity</string>
     </property>
     <addaction name="separator"/>
     <addaction name="actionNewCell"/>
@@ -797,11 +797,11 @@
     <addaction name="actionPasteToken"/>
     <addaction name="actionDeleteToken"/>
    </widget>
-   <widget class="QMenu" name="menuSelection">
+   <widget class="QMenu" name="menuCollection">
     <property name="title">
-     <string>Ensemble</string>
+     <string>Collection</string>
     </property>
-    <widget class="QMenu" name="menuMultiplyExtension">
+    <widget class="QMenu" name="menuMultiplyCollection">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -819,12 +819,12 @@
      <addaction name="actionAddHexagonStructure"/>
     </widget>
     <addaction name="menuAddEnsemble"/>
-    <addaction name="actionLoadExtendedSelection"/>
-    <addaction name="actionSaveExtendedSelection"/>
-    <addaction name="actionCopyExtendedSelection"/>
-    <addaction name="actionPasteExtendedSelection"/>
-    <addaction name="actionDeleteExtension"/>
-    <addaction name="menuMultiplyExtension"/>
+    <addaction name="actionLoadCollection"/>
+    <addaction name="actionSaveCollection"/>
+    <addaction name="actionCopyCollection"/>
+    <addaction name="actionPasteCollection"/>
+    <addaction name="actionDeleteCollection"/>
+    <addaction name="menuMultiplyCollection"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -872,8 +872,8 @@
    <addaction name="menuSimulation"/>
    <addaction name="menuSettings"/>
    <addaction name="menuView"/>
-   <addaction name="menuEdit"/>
-   <addaction name="menuSelection"/>
+   <addaction name="menuEntity"/>
+   <addaction name="menuCollection"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionEditor">
@@ -968,7 +968,7 @@
     <string>Ctrl+M</string>
    </property>
   </action>
-  <action name="actionCopyExtendedSelection">
+  <action name="actionCopyCollection">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -982,7 +982,7 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionPasteExtendedSelection">
+  <action name="actionPasteCollection">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -993,7 +993,7 @@
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionSaveExtendedSelection">
+  <action name="actionSaveCollection">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -1004,7 +1004,7 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="actionLoadExtendedSelection">
+  <action name="actionLoadCollection">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -1055,7 +1055,7 @@
     <string>New</string>
    </property>
   </action>
-  <action name="actionDeleteExtension">
+  <action name="actionDeleteCollection">
    <property name="enabled">
     <bool>false</bool>
    </property>

@@ -17,7 +17,7 @@ public:
 
 	virtual void init(SimulationContext * context);
 
-	virtual void setSimulationParameters(SimulationParameters* parameters);
+	virtual void setSimulationParameters(SimulationParameters const* parameters);
 
 private:
 	void unregister() override;
@@ -29,5 +29,5 @@ private:
 	bool _registered = false;
 	bool _updateSimulationParameters = false;
 
-	SimulationParameters* _parameters;
+	SimulationParameters const* _parameters;
 };

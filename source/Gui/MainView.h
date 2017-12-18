@@ -25,7 +25,7 @@ public:
 	virtual InfoController* getInfoController() const;
 
 private:
-	void connectActions();
+	void connectWidget();
 	void setupTheme();
 
 	Q_SLOT void onSetEditorMode();
@@ -46,10 +46,13 @@ private:
 	Q_SLOT void onLoadSymbolTable();
 	Q_SLOT void onSaveSymbolTable();
 
-	void cellDefocused();
+	Q_SLOT void onSelectionChanged();
+
+	void updateActionsForEntityAndCollection();
 	void updateZoomFactor();
 
-	Ui::MainView* ui = nullptr;	//contains VisualEditor
+	Ui::MainView* ui = nullptr;
+	VisualEditController* _visualEditor = nullptr;
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;
 	Serializer* _serializer = nullptr;
