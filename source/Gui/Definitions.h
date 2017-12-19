@@ -9,6 +9,7 @@ class QGraphicsScene;
 class QTabWidget;
 class QTableWidgetItem;
 class QSignalMapper;
+class QAction;
 
 class CellItem;
 class ParticleItem;
@@ -51,6 +52,7 @@ class MainModel;
 class MainController;
 class VersionController;
 class VisualEditController;
+class ActionHolder;
 
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };

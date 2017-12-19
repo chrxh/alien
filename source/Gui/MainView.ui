@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainView</class>
- <widget class="QMainWindow" name="mainView">
+ <widget class="QMainWindow" name="MainView">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -674,20 +674,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="separator"/>
-   <addaction name="actionEditor"/>
-   <addaction name="actionAlienMonitor"/>
-   <addaction name="separator"/>
-   <addaction name="actionZoomIn"/>
-   <addaction name="actionZoomOut"/>
-   <addaction name="separator"/>
-   <addaction name="actionSnapshot"/>
-   <addaction name="actionRestore"/>
-   <addaction name="separator"/>
-   <addaction name="actionPlay"/>
-   <addaction name="actionStepBackward"/>
-   <addaction name="actionStepForward"/>
-   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
@@ -767,35 +753,11 @@
     <property name="title">
      <string>Simulation</string>
     </property>
-    <addaction name="actionNewSimulation"/>
-    <addaction name="actionLoadSimulation"/>
-    <addaction name="actionSaveSimulation"/>
-    <addaction name="separator"/>
-    <addaction name="actionPlay"/>
-    <addaction name="actionStepForward"/>
-    <addaction name="actionStepBackward"/>
-    <addaction name="actionSnapshot"/>
-    <addaction name="actionRestore"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEntity">
     <property name="title">
      <string>Entity</string>
     </property>
-    <addaction name="separator"/>
-    <addaction name="actionNewCell"/>
-    <addaction name="actionAddEnergyParticle"/>
-    <addaction name="actionAddRandomEnergy"/>
-    <addaction name="separator"/>
-    <addaction name="actionCopyCell"/>
-    <addaction name="actionPasteCell"/>
-    <addaction name="actionDeleteCell"/>
-    <addaction name="separator"/>
-    <addaction name="actionNewToken"/>
-    <addaction name="actionCopyToken"/>
-    <addaction name="actionPasteToken"/>
-    <addaction name="actionDeleteToken"/>
    </widget>
    <widget class="QMenu" name="menuCollection">
     <property name="title">
@@ -803,47 +765,31 @@
     </property>
     <widget class="QMenu" name="menuMultiplyCollection">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="title">
       <string>Multiply</string>
      </property>
-     <addaction name="actionRandom"/>
-     <addaction name="actionArrangement"/>
     </widget>
-    <widget class="QMenu" name="menuAddEnsemble">
+    <widget class="QMenu" name="menuNewEnsemble">
      <property name="title">
       <string>New</string>
      </property>
-     <addaction name="actionAddBlockStructure"/>
-     <addaction name="actionAddHexagonStructure"/>
     </widget>
-    <addaction name="menuAddEnsemble"/>
-    <addaction name="actionLoadCollection"/>
-    <addaction name="actionSaveCollection"/>
-    <addaction name="actionCopyCollection"/>
-    <addaction name="actionPasteCollection"/>
-    <addaction name="actionDeleteCollection"/>
+    <addaction name="menuNewEnsemble"/>
     <addaction name="menuMultiplyCollection"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionEditor"/>
-    <addaction name="actionAlienMonitor"/>
     <addaction name="separator"/>
-    <addaction name="actionZoomIn"/>
-    <addaction name="actionZoomOut"/>
-    <addaction name="actionFullscreen"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAboutAlien"/>
     <addaction name="separator"/>
-    <addaction name="actionTutorial"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
@@ -853,18 +799,11 @@
      <property name="title">
       <string>Simulation parameters</string>
      </property>
-     <addaction name="actionEditSimulationParameters"/>
-     <addaction name="actionLoadSimulationParameters"/>
-     <addaction name="actionSaveSimulationParameters"/>
     </widget>
     <widget class="QMenu" name="menuSymbolTable">
      <property name="title">
       <string>Symbol table</string>
      </property>
-     <addaction name="actionEditSymbols"/>
-     <addaction name="actionLoadSymbols"/>
-     <addaction name="actionSaveSymbols"/>
-     <addaction name="actionMerge_with"/>
     </widget>
     <addaction name="menuSimulationParameters"/>
     <addaction name="menuSymbolTable"/>
@@ -876,387 +815,6 @@
    <addaction name="menuCollection"/>
    <addaction name="menuHelp"/>
   </widget>
-  <action name="actionEditor">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/EditorView.png</normaloff>:/Icons/EditorView.png</iconset>
-   </property>
-   <property name="text">
-    <string>Editor</string>
-   </property>
-   <property name="iconText">
-    <string>Test</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>true</bool>
-   </property>
-  </action>
-  <action name="actionStepForward">
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/step.png</normaloff>:/Icons/step.png</iconset>
-   </property>
-   <property name="text">
-    <string>Run single step</string>
-   </property>
-  </action>
-  <action name="actionPlay">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/play.png</normaloff>:/Icons/play.png</iconset>
-   </property>
-   <property name="text">
-    <string>Run</string>
-   </property>
-  </action>
-  <action name="actionExit">
-   <property name="text">
-    <string>Exit</string>
-   </property>
-  </action>
-  <action name="actionZoomIn">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/zoom_in.png</normaloff>:/Icons/zoom_in.png</iconset>
-   </property>
-   <property name="text">
-    <string>Zoom in</string>
-   </property>
-  </action>
-  <action name="actionZoomOut">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/zoom_out.png</normaloff>:/Icons/zoom_out.png</iconset>
-   </property>
-   <property name="text">
-    <string>Zoom out</string>
-   </property>
-  </action>
-  <action name="actionAlienMonitor">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/monitor.png</normaloff>:/Icons/monitor.png</iconset>
-   </property>
-   <property name="text">
-    <string>Monitor</string>
-   </property>
-   <property name="iconText">
-    <string>activate alien monitor</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+M</string>
-   </property>
-  </action>
-  <action name="actionCopyCollection">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Copy</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>true</bool>
-   </property>
-  </action>
-  <action name="actionPasteCollection">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Paste</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+V</string>
-   </property>
-  </action>
-  <action name="actionSaveCollection">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="actionLoadCollection">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Load</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+L</string>
-   </property>
-  </action>
-  <action name="actionNewToken">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>New token</string>
-   </property>
-  </action>
-  <action name="actionDeleteToken">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Delete token</string>
-   </property>
-  </action>
-  <action name="actionSaveSimulation">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
-  </action>
-  <action name="actionLoadSimulation">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Load</string>
-   </property>
-  </action>
-  <action name="actionNewSimulation">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>New</string>
-   </property>
-  </action>
-  <action name="actionDeleteCollection">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Delete</string>
-   </property>
-  </action>
-  <action name="actionEditSimulationParameters">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Edit</string>
-   </property>
-  </action>
-  <action name="actionEditSymbols">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Edit</string>
-   </property>
-  </action>
-  <action name="actionLoadSimulationParameters">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Load</string>
-   </property>
-  </action>
-  <action name="actionSaveSimulationParameters">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
-  </action>
-  <action name="actionNewCell">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>New cell</string>
-   </property>
-  </action>
-  <action name="actionAddEnergyParticle">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>New energy particle</string>
-   </property>
-  </action>
-  <action name="actionLoadSymbols">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Load</string>
-   </property>
-  </action>
-  <action name="actionSaveSymbols">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
-  </action>
-  <action name="actionAddBlockStructure">
-   <property name="text">
-    <string>Rectangle</string>
-   </property>
-  </action>
-  <action name="actionStepBackward">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/step_back.png</normaloff>:/Icons/step_back.png</iconset>
-   </property>
-   <property name="text">
-    <string>Step back</string>
-   </property>
-  </action>
-  <action name="actionCopyCell">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Copy cell</string>
-   </property>
-  </action>
-  <action name="actionDeleteCell">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Delete</string>
-   </property>
-  </action>
-  <action name="actionMerge_with">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Merge with</string>
-   </property>
-  </action>
-  <action name="actionSnapshot">
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/snapshot.png</normaloff>:/Icons/snapshot.png</iconset>
-   </property>
-   <property name="text">
-    <string>Snapshot</string>
-   </property>
-  </action>
-  <action name="actionRestore">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources/ressources.qrc">
-     <normaloff>:/Icons/restore_active.png</normaloff>:/Icons/restore_active.png</iconset>
-   </property>
-   <property name="text">
-    <string>Restore</string>
-   </property>
-  </action>
-  <action name="actionCopyToken">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Copy token</string>
-   </property>
-  </action>
-  <action name="actionPasteToken">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Paste token</string>
-   </property>
-  </action>
-  <action name="actionAddRandomEnergy">
-   <property name="text">
-    <string>New energy particles</string>
-   </property>
-  </action>
-  <action name="actionFullscreen">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Fullscreen</string>
-   </property>
-  </action>
-  <action name="actionTutorial">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Documentation</string>
-   </property>
-  </action>
-  <action name="actionAboutAlien">
-   <property name="text">
-    <string>About artificial life environment (alien)</string>
-   </property>
-  </action>
-  <action name="actionAddHexagonStructure">
-   <property name="text">
-    <string>Hexagon</string>
-   </property>
-  </action>
-  <action name="actionRandom">
-   <property name="text">
-    <string>Random</string>
-   </property>
-  </action>
-  <action name="actionArrangement">
-   <property name="text">
-    <string>Arrange in grid</string>
-   </property>
-  </action>
-  <action name="actionPasteCell">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Paste cell</string>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
