@@ -8,6 +8,7 @@
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
 
+#include "ActionHolder.h"
 #include "SerializationHelper.h"
 #include "InfoController.h"
 #include "DataEditController.h"
@@ -43,9 +44,11 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_toolbar = new ToolbarController(_visualEditor);
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
+	_actions = new ActionHolder(this);
 	_infoController->init(ui->infoLabel, mainController);
 
 	connectWidget();
+	setupMenu();
 	setupTheme();
 	setWindowState(windowState() | Qt::WindowFullScreen);
 	show();
@@ -62,7 +65,7 @@ void MainView::setupEditors(SimulationController * controller, DataController* m
 	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());
 	_visualEditor->init(notifier, controller, manipulator);
 
-	ui->actionEditor->setChecked(false);
+	_actions->actionEditor->setChecked(false);
 	_model->setEditMode(boost::none);
 	onSetEditorMode();
 }
@@ -74,29 +77,97 @@ InfoController * MainView::getInfoController() const
 
 void MainView::connectWidget()
 {
-	connect(ui->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
-	connect(ui->actionSaveSimulation, &QAction::triggered, this, &MainView::onSaveSimulation);
-	connect(ui->actionLoadSimulation, &QAction::triggered, this, &MainView::onLoadSimulation);
-	connect(ui->actionExit, &QAction::triggered, this, &MainView::close);
-	connect(ui->actionPlay, &QAction::triggered, this, &MainView::onRunClicked);
-	connect(ui->actionStepForward, &QAction::triggered, this, &MainView::onStepForward);
-	connect(ui->actionStepBackward, &QAction::triggered, this, &MainView::onStepBackward);
-	connect(ui->actionSnapshot, &QAction::triggered, this, &MainView::onMakeSnapshot);
-	connect(ui->actionRestore, &QAction::triggered, this, &MainView::onRestoreSnapshot);
-	connect(ui->actionZoomIn, &QAction::triggered, this, &MainView::onZoomInClicked);
-	connect(ui->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
-	connect(ui->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
-	connect(ui->actionEditSimulationParameters, &QAction::triggered, this, &MainView::onEditSimulationParameters);
-	connect(ui->actionLoadSimulationParameters, &QAction::triggered, this, &MainView::onLoadSimulationParameters);
-	connect(ui->actionSaveSimulationParameters, &QAction::triggered, this, &MainView::onSaveSimulationParameters);
-	connect(ui->actionEditSymbols, &QAction::triggered, this, &MainView::onEditSymbolTable);
-	connect(ui->actionLoadSymbols, &QAction::triggered, this, &MainView::onLoadSymbolTable);
-	connect(ui->actionSaveSymbols, &QAction::triggered, this, &MainView::onSaveSymbolTable);
-	connect(_dataEditor->getContext(), &DataEditContext::selectionChanged, this, &MainView::onSelectionChanged);
+	connect(_actions->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
+	connect(_actions->actionSaveSimulation, &QAction::triggered, this, &MainView::onSaveSimulation);
+	connect(_actions->actionLoadSimulation, &QAction::triggered, this, &MainView::onLoadSimulation);
+	connect(_actions->actionRunSimulation, &QAction::triggered, this, &MainView::onRunClicked);
+	connect(_actions->actionRunStepForward, &QAction::triggered, this, &MainView::onStepForward);
+	connect(_actions->actionRunStepBackward, &QAction::triggered, this, &MainView::onStepBackward);
+	connect(_actions->actionSnapshot, &QAction::triggered, this, &MainView::onMakeSnapshot);
+	connect(_actions->actionRestore, &QAction::triggered, this, &MainView::onRestoreSnapshot);
+	connect(_actions->actionExit, &QAction::triggered, this, &MainView::close);
+	connect(_actions->actionZoomIn, &QAction::triggered, this, &MainView::onZoomInClicked);
+	connect(_actions->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
+	connect(_actions->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
+	connect(_actions->actionEditSimParameters, &QAction::triggered, this, &MainView::onEditSimulationParameters);
+	connect(_actions->actionLoadSimParameters, &QAction::triggered, this, &MainView::onLoadSimulationParameters);
+	connect(_actions->actionSaveSimParameters, &QAction::triggered, this, &MainView::onSaveSimulationParameters);
+	connect(_actions->actionEditSymbols, &QAction::triggered, this, &MainView::onEditSymbolTable);
+	connect(_actions->actionLoadSymbols, &QAction::triggered, this, &MainView::onLoadSymbolTable);
+	connect(_actions->actionSaveSymbols, &QAction::triggered, this, &MainView::onSaveSymbolTable);
+}
 
-	ui->actionEditor->setEnabled(true);
-	ui->actionZoomIn->setEnabled(true);
-	ui->actionZoomOut->setEnabled(true);
+void MainView::setupMenu()
+{
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(_actions->actionEditor);
+	ui->toolBar->addAction(_actions->actionMonitor);
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(_actions->actionZoomIn);
+	ui->toolBar->addAction(_actions->actionZoomOut);
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(_actions->actionSnapshot);
+	ui->toolBar->addAction(_actions->actionRestore);
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(_actions->actionRunSimulation);
+	ui->toolBar->addAction(_actions->actionRunStepBackward);
+	ui->toolBar->addAction(_actions->actionRunStepForward);
+	ui->toolBar->addSeparator();
+
+
+	ui->menuSimulation->addAction(_actions->actionNewSimulation);
+	ui->menuSimulation->addAction(_actions->actionLoadSimulation);
+	ui->menuSimulation->addAction(_actions->actionSaveSimulation);
+	ui->menuSimulation->addSeparator();
+	ui->menuSimulation->addAction(_actions->actionRunSimulation);
+	ui->menuSimulation->addAction(_actions->actionRunStepForward);
+	ui->menuSimulation->addAction(_actions->actionRunStepBackward);
+	ui->menuSimulation->addAction(_actions->actionSnapshot);
+	ui->menuSimulation->addAction(_actions->actionRestore);
+	ui->menuSimulation->addSeparator();
+	ui->menuSimulation->addAction(_actions->actionExit);
+
+	ui->menuSimulationParameters->addAction(_actions->actionEditSimParameters);
+	ui->menuSimulationParameters->addAction(_actions->actionLoadSimParameters);
+	ui->menuSimulationParameters->addAction(_actions->actionSaveSimParameters);
+	ui->menuSymbolTable->addAction(_actions->actionEditSymbols);
+	ui->menuSymbolTable->addAction(_actions->actionLoadSymbols);
+	ui->menuSymbolTable->addAction(_actions->actionSaveSymbols);
+	ui->menuSymbolTable->addAction(_actions->actionMergeWithSymbols);
+
+	ui->menuView->addAction(_actions->actionEditor);
+	ui->menuView->addAction(_actions->actionMonitor);
+	ui->menuView->addSeparator();
+	ui->menuView->addAction(_actions->actionZoomIn);
+	ui->menuView->addAction(_actions->actionZoomOut);
+	ui->menuView->addAction(_actions->actionFullscreen);
+
+	ui->menuEntity->addAction(_actions->actionNewCell);
+	ui->menuEntity->addAction(_actions->actionNewParticle);
+	ui->menuEntity->addSeparator();
+	ui->menuEntity->addAction(_actions->actionCopyEntity);
+	ui->menuEntity->addAction(_actions->actionPasteEntity);
+	ui->menuEntity->addAction(_actions->actionDeleteEntity);
+	ui->menuEntity->addSeparator();
+	ui->menuEntity->addAction(_actions->actionNewToken);
+	ui->menuEntity->addAction(_actions->actionCopyToken);
+	ui->menuEntity->addAction(_actions->actionPasteToken);
+	ui->menuEntity->addAction(_actions->actionDeleteToken);
+
+	ui->menuNewEnsemble->addAction(_actions->actionNewRectangle);
+	ui->menuNewEnsemble->addAction(_actions->actionNewHexagon);
+	ui->menuNewEnsemble->addAction(_actions->actionNewParticles);
+	ui->menuCollection->addAction(_actions->actionLoadCol);
+	ui->menuCollection->addAction(_actions->actionSaveCol);
+	ui->menuCollection->addAction(_actions->actionCopyCol);
+	ui->menuCollection->addAction(_actions->actionPasteCol);
+	ui->menuCollection->addAction(_actions->actionDeleteCol);
+	ui->menuMultiplyCollection->addAction(_actions->actionMultiplyRandom);
+	ui->menuMultiplyCollection->addAction(_actions->actionMultiplyArrangement);
+
+	ui->menuHelp->addAction(_actions->actionAbout);
+	ui->menuEntity->addSeparator();
+	ui->menuHelp->addAction(_actions->actionDocumentation);
 }
 
 void MainView::setupTheme()
@@ -110,7 +181,7 @@ void MainView::setupTheme()
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
 	ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
-	ui->menuAddEnsemble->setFont(GuiSettings::getGlobalFont());
+	ui->menuNewEnsemble->setFont(GuiSettings::getGlobalFont());
 	ui->menuMultiplyCollection->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
@@ -123,14 +194,14 @@ void MainView::setupTheme()
 void MainView::onRunClicked(bool run)
 {
 	if (run) {
-		ui->actionPlay->setIcon(QIcon("://Icons/pause.png"));
-		ui->actionStepForward->setEnabled(false);
+		_actions->actionRunSimulation->setIcon(QIcon("://Icons/pause.png"));
+		_actions->actionRunStepForward->setEnabled(false);
 	}
 	else {
-		ui->actionPlay->setIcon(QIcon("://Icons/play.png"));
-		ui->actionStepForward->setEnabled(true);
+		_actions->actionRunSimulation->setIcon(QIcon("://Icons/play.png"));
+		_actions->actionRunStepForward->setEnabled(true);
 	}
-	ui->actionStepBackward->setEnabled(false);
+	_actions->actionRunStepBackward->setEnabled(false);
 
 	_controller->onRunSimulation(run);
 }
@@ -138,7 +209,7 @@ void MainView::onRunClicked(bool run)
 void MainView::onStepForward()
 {
 	_controller->onStepForward();
-	ui->actionStepBackward->setEnabled(true);
+	_actions->actionRunStepBackward->setEnabled(true);
 }
 
 void MainView::onStepBackward()
@@ -146,7 +217,7 @@ void MainView::onStepBackward()
 	bool emptyStack = false;
 	_controller->onStepBackward(emptyStack);
 	if (emptyStack) {
-		ui->actionStepBackward->setEnabled(false);
+		_actions->actionRunStepBackward->setEnabled(false);
 	}
 	refresh();
 }
@@ -154,7 +225,7 @@ void MainView::onStepBackward()
 void MainView::onMakeSnapshot()
 {
 	_controller->onMakeSnapshot();
-	ui->actionRestore->setEnabled(true);
+	_actions->actionRestore->setEnabled(true);
 }
 
 void MainView::onRestoreSnapshot()
@@ -185,13 +256,12 @@ void MainView::onSetEditorMode()
 	_dataEditor->getContext()->onShow(newEditMode);
 	if (newEditMode) {
 		_visualEditor->setActiveScene(ActiveScene::ItemScene);
-		ui->actionEditor->setIcon(QIcon("://Icons/PixelView.png"));
+		_actions->actionEditor->setIcon(QIcon("://Icons/PixelView.png"));
 	}
 	else {
 		_visualEditor->setActiveScene(ActiveScene::PixelScene);
-		ui->actionEditor->setIcon(QIcon("://Icons/EditorView.png"));
+		_actions->actionEditor->setIcon(QIcon("://Icons/EditorView.png"));
 	}
-	updateActionsForEntityAndCollection();
 }
 
 void MainView::onNewSimulation()
@@ -203,9 +273,9 @@ void MainView::onNewSimulation()
 		};
 		_controller->onNewSimulation(config);
 		updateZoomFactor();
-		ui->actionPlay->setChecked(false);
-		ui->actionRestore->setEnabled(false);
-		ui->actionStepBackward->setEnabled(false);
+		_actions->actionRunSimulation->setChecked(false);
+		_actions->actionRestore->setEnabled(false);
+		_actions->actionRunStepBackward->setEnabled(false);
 		onRunClicked(false);
 	}
 }
@@ -224,9 +294,9 @@ void MainView::onLoadSimulation()
 	if (!filename.isEmpty()) {
 		if(_controller->onLoadSimulation(filename.toStdString())) {
 			updateZoomFactor();
-			ui->actionPlay->setChecked(false);
-			ui->actionRestore->setEnabled(false);
-			ui->actionStepBackward->setEnabled(false);
+			_actions->actionRunSimulation->setChecked(false);
+			_actions->actionRestore->setEnabled(false);
+			_actions->actionRunStepBackward->setEnabled(false);
 			onRunClicked(false);
 		}
 		else {
@@ -310,23 +380,6 @@ void MainView::onSaveSymbolTable()
 			return;
 		}
 	}
-}
-
-void MainView::onSelectionChanged()
-{
-	updateActionsForEntityAndCollection();
-}
-
-void MainView::updateActionsForEntityAndCollection()
-{
-	bool allowEdit = _controller->areEntitiesSelected() && _model->isEditMode() && *_model->isEditMode();
-
-	ui->actionSaveCollection->setEnabled(allowEdit);
-	ui->actionCopyCollection->setEnabled(allowEdit);
-	ui->menuMultiplyCollection->setEnabled(allowEdit);
-	ui->actionCopyCell->setEnabled(allowEdit);
-	ui->actionDeleteCell->setEnabled(allowEdit);
-	ui->actionDeleteCollection->setEnabled(allowEdit);
 }
 
 void MainView::updateZoomFactor()
