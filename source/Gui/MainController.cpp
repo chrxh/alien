@@ -160,11 +160,6 @@ int MainController::getTimestep() const
 	return _simController->getTimestep();
 }
 
-bool MainController::areEntitiesSelected() const
-{
-	return _dataController->areEntitiesSelected();
-}
-
 void MainController::connectSimController() const
 {
 	connect(_simController, &SimulationController::nextTimestepCalculated, [this]() {

@@ -26,6 +26,7 @@ public:
 
 private:
 	void connectWidget();
+	void setupMenu();
 	void setupTheme();
 
 	Q_SLOT void onSetEditorMode();
@@ -46,9 +47,6 @@ private:
 	Q_SLOT void onLoadSymbolTable();
 	Q_SLOT void onSaveSymbolTable();
 
-	Q_SLOT void onSelectionChanged();
-
-	void updateActionsForEntityAndCollection();
 	void updateZoomFactor();
 
 	Ui::MainView* ui = nullptr;
@@ -56,6 +54,7 @@ private:
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;
 	Serializer* _serializer = nullptr;
+	ActionHolder* _actions = nullptr;
 
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;

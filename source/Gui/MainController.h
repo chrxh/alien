@@ -26,7 +26,6 @@ public:
 	virtual void onUpdateSimulationParametersForRunningSimulation();
 
 	virtual int getTimestep() const;
-	virtual bool areEntitiesSelected() const;
 
 private:
 	void connectSimController() const;

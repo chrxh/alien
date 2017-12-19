@@ -180,8 +180,6 @@ void DataEditController::receivedExternalNotifications(set<Receiver> const& targ
 	if (selectedCellIds.empty() && selectedParticleIds.empty()) {
 		_view->switchToNoEditor();
 	}
-
-	Q_EMIT _context->selectionChanged();
 }
 
 void DataEditController::switchToCellEditor(CellDescription const& cell, UpdateDescription update)
