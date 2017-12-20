@@ -486,6 +486,15 @@
     <ClCompile Include="Release\moc_DataRepository.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ActionController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ActionController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ActionController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -705,6 +714,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataRepository.h">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ActionController.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

@@ -16,7 +16,7 @@ class NewSimulationDialog : public QDialog
     Q_OBJECT
 
 public:
-	NewSimulationDialog(SimulationParameters const* parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = 0);
+	NewSimulationDialog(SimulationParameters const* parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = nullptr);
     virtual ~NewSimulationDialog();
 
     IntVector2D getUniverseSize() const;

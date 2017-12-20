@@ -53,6 +53,7 @@ class MainController;
 class VersionController;
 class VisualEditController;
 class ActionHolder;
+class ActionController;
 
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
