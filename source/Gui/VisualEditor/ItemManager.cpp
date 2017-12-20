@@ -2,7 +2,7 @@
 
 #include "Model/Api/ChangeDescriptions.h"
 #include "Gui/Settings.h"
-#include "Gui/DataController.h"
+#include "Gui/DataRepository.h"
 #include "Gui/visualeditor/ViewportInterface.h"
 
 #include "ItemManager.h"
@@ -33,7 +33,7 @@ void ItemManager::activate(IntVector2D size)
 	_connectionsByIds.clear();
 }
 
-void ItemManager::updateCells(DataController* dataController)
+void ItemManager::updateCells(DataRepository* dataController)
 {
 	auto const &data = dataController->getDataRef();
 
@@ -72,7 +72,7 @@ void ItemManager::updateCells(DataController* dataController)
 	_cellsByIds = newCellsByIds;
 }
 
-void ItemManager::updateParticles(DataController* manipulator)
+void ItemManager::updateParticles(DataRepository* manipulator)
 {
 	auto const &data = manipulator->getDataRef();
 
@@ -106,7 +106,7 @@ void ItemManager::updateParticles(DataController* manipulator)
 	_particlesByIds = newParticlesByIds;
 }
 
-void ItemManager::updateConnections(DataController* visualDesc)
+void ItemManager::updateConnections(DataRepository* visualDesc)
 {
 	auto const &data = visualDesc->getDataRef();
 	if (!data.clusters) {
@@ -153,7 +153,7 @@ void ItemManager::updateConnections(DataController* visualDesc)
 	_connectionsByIds = newConnectionsByIds;
 }
 
-void ItemManager::update(DataController* visualDesc)
+void ItemManager::update(DataRepository* visualDesc)
 {
 	_viewport->setModeToNoUpdate();
 

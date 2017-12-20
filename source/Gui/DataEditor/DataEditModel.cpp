@@ -1,14 +1,14 @@
 #include "Model/Api/ChangeDescriptions.h"
 
 #include "DataEditModel.h"
-#include "Gui/DataController.h"
+#include "Gui/DataRepository.h"
 
 DataEditModel::DataEditModel(QObject *parent)
 	: QObject(parent)
 {
 }
 
-void DataEditModel::init(DataController* manipulator, SimulationParameters const* parameters, SymbolTable* symbols)
+void DataEditModel::init(DataRepository* manipulator, SimulationParameters const* parameters, SymbolTable* symbols)
 {
 	_manipulator = manipulator;
 	_parameters = parameters;

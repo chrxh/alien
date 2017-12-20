@@ -15,7 +15,7 @@ public:
     PixelUniverseView(QObject* parent = nullptr);
     virtual ~PixelUniverseView();
 
-	virtual void init(SimulationController* controller, DataController* manipulator, ViewportInterface* viewport);
+	virtual void init(SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 
@@ -28,7 +28,7 @@ private:
 
 	list<QMetaObject::Connection> _connections;
 
-	DataController* _manipulator = nullptr;
+	DataRepository* _manipulator = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;

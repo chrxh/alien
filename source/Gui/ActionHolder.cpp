@@ -88,6 +88,10 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionFullscreen->setEnabled(true);
 	actionFullscreen->setCheckable(true);
 	actionFullscreen->setChecked(true);
+	actionShowCellInfo = new QAction("Cell info", this);
+	actionShowCellInfo->setEnabled(false);
+	actionShowCellInfo->setCheckable(true);
+	actionShowCellInfo->setChecked(false);
 
 	actionNewCell = new QAction("New cell", this);
 	actionNewCell->setEnabled(true);
@@ -108,11 +112,11 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDeleteToken = new QAction("Delete token", this);
 	actionDeleteToken->setEnabled(false);
 
-	actionNewRectangle = new QAction("Rectangle", this);
+	actionNewRectangle = new QAction("New rectangle", this);
 	actionNewRectangle->setEnabled(true);
-	actionNewHexagon = new QAction("Hexagon", this);
+	actionNewHexagon = new QAction("New hexagon", this);
 	actionNewHexagon->setEnabled(true);
-	actionNewParticles = new QAction("Particles", this);
+	actionNewParticles = new QAction("New particles", this);
 	actionNewParticles->setEnabled(true);
 	actionLoadCol = new QAction("Load", this);
 	actionLoadCol->setEnabled(true);
@@ -122,11 +126,13 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionCopyCol->setEnabled(false);
 	actionPasteCol = new QAction("Paste", this);
 	actionPasteCol->setEnabled(false);
-	actionDeleteCol = new QAction("Delete", this);
+	actionDeleteSel = new QAction("Delete selection", this);
+	actionDeleteSel->setEnabled(false);
+	actionDeleteCol = new QAction("Delete extended selection", this);
 	actionDeleteCol->setEnabled(false);
-	actionMultiplyRandom = new QAction("Random", this);
+	actionMultiplyRandom = new QAction("Multiply random", this);
 	actionMultiplyRandom->setEnabled(false);
-	actionMultiplyArrangement = new QAction("Arrangement", this);
+	actionMultiplyArrangement = new QAction("Multiply arrangement", this);
 	actionMultiplyArrangement->setEnabled(false);
 
 	actionAbout = new QAction("About artificial life environment (alien)", this);

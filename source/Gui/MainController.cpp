@@ -20,7 +20,7 @@
 #include "MainController.h"
 #include "MainView.h"
 #include "MainModel.h"
-#include "DataController.h"
+#include "DataRepository.h"
 #include "Notifier.h"
 
 MainController::MainController(QObject * parent)
@@ -50,7 +50,7 @@ void MainController::init()
 	SET_CHILD(_simAccess, simAccessForDataController);
 	SET_CHILD(_descHelper, descHelper);
 	SET_CHILD(_versionController, versionController);
-	_dataController = new DataController(this);
+	_repository = new DataRepository(this);
 	_notifier = new Notifier(this);
 
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
@@ -111,9 +111,9 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
 	_versionController->init(_simController->getContext());
-	_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
+	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
-	_view->setupEditors(_simController, _dataController, _notifier);
+	_view->setupEditors(_simController, _repository, _notifier);
 
 	addRandomEnergy(config.energy);
 
@@ -143,9 +143,9 @@ bool MainController::onLoadSimulation(string const & filename)
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_descHelper->init(_simController->getContext());
 	_versionController->init(_simController->getContext());
-	_dataController->init(_notifier, _simAccess, _descHelper, _simController->getContext());
+	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
-	_view->setupEditors(_simController, _dataController, _notifier);
+	_view->setupEditors(_simController, _repository, _notifier);
 	_view->refresh();
 	return true;
 }

@@ -35,9 +35,9 @@
 //- Zugriff ist asynchron
 //- Zugriff verwendet Desriptions
 
-//Nächstes Mal:
-//- seltener Bug: Relative Position von Zellen zu groß
-//- Bug: AccessToUnits nicht zum richtigen Zeitpunkt (z.B. Restore während laufender Simulation)
+//Nächsten Male:
+//- Actions für Zell-, Token- und Clusterbearbeitung werden im ToolbarView ausgewertet
+//- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell

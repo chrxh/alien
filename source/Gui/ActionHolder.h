@@ -35,6 +35,7 @@ public:
 	QAction* actionMonitor = nullptr;
 	QAction* actionZoomIn = nullptr;
 	QAction* actionZoomOut = nullptr;
+	QAction* actionShowCellInfo = nullptr;
 	QAction* actionFullscreen = nullptr;
 
 	QAction* actionNewCell = nullptr;
@@ -55,6 +56,7 @@ public:
 	QAction* actionCopyCol = nullptr;
 	QAction* actionPasteCol = nullptr;
 	QAction* actionDeleteCol = nullptr;
+	QAction* actionDeleteSel = nullptr;
 	QAction* actionMultiplyRandom = nullptr;
 	QAction* actionMultiplyArrangement = nullptr;
 

@@ -5,10 +5,10 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/DescriptionHelper.h"
 
-#include "DataController.h"
+#include "DataRepository.h"
 #include "Notifier.h"
 
-void DataController::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
+void DataRepository::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
 {
 	_descHelper = connector;
 	_access = access;
@@ -18,46 +18,46 @@ void DataController::init(Notifier* notifier, SimulationAccess * access, Descrip
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
-	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataController::dataFromSimulationAvailable, Qt::QueuedConnection));
-	_connections.push_back(connect(_access, &SimulationAccess::imageReady, this, &DataController::imageReady));
-	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataController::sendDataChangesToSimulation));
+	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataRepository::dataFromSimulationAvailable, Qt::QueuedConnection));
+	_connections.push_back(connect(_access, &SimulationAccess::imageReady, this, &DataRepository::imageReady));
+	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataRepository::sendDataChangesToSimulation));
 }
 
-DataDescription & DataController::getDataRef()
+DataDescription & DataRepository::getDataRef()
 {
 	return _data;
 }
 
-CellDescription & DataController::getCellDescRef(uint64_t cellId)
+CellDescription & DataRepository::getCellDescRef(uint64_t cellId)
 {
 	ClusterDescription &clusterDesc = getClusterDescRef(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
 	return clusterDesc.cells->at(cellIndex);
 }
 
-ClusterDescription & DataController::getClusterDescRef(uint64_t cellId)
+ClusterDescription & DataRepository::getClusterDescRef(uint64_t cellId)
 {
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	return _data.clusters->at(clusterIndex);
 }
 
-ParticleDescription& DataController::getParticleDescRef(uint64_t particleId)
+ParticleDescription& DataRepository::getParticleDescRef(uint64_t particleId)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles->at(particleIndex);
 }
 
-void DataController::setSelectedTokenIndex(optional<uint> const& value)
+void DataRepository::setSelectedTokenIndex(optional<uint> const& value)
 {
 	_selectedTokenIndex = value;
 }
 
-optional<uint> DataController::getSelectedTokenIndex() const
+optional<uint> DataRepository::getSelectedTokenIndex() const
 {
 	return _selectedTokenIndex;
 }
 
-void DataController::addAndSelectCell(QVector2D const & posDelta)
+void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
 	int memorySize = _parameters->cellFunctionComputerCellMemorySize;
@@ -75,7 +75,7 @@ void DataController::addAndSelectCell(QVector2D const & posDelta)
 	_navi.update(_data);
 }
 
-void DataController::addAndSelectParticle(QVector2D const & posDelta)
+void DataRepository::addAndSelectParticle(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
 	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters->cellMinEnergy / 2.0);
@@ -112,7 +112,7 @@ namespace
 }
 
 
-void DataController::deleteSelection()
+void DataRepository::deleteSelection()
 {
 	if (_data.clusters) {
 		unordered_set<uint64_t> modifiedClusterIds;
@@ -157,7 +157,7 @@ void DataController::deleteSelection()
 	_navi.update(_data);
 }
 
-void DataController::deleteExtendedSelection()
+void DataRepository::deleteExtendedSelection()
 {
 	if (_data.clusters) {
 		vector<ClusterDescription> newClusters;
@@ -183,7 +183,7 @@ void DataController::deleteExtendedSelection()
 	_navi.update(_data);
 }
 
-void DataController::addToken()
+void DataRepository::addToken()
 {
 	CHECK(_selectedCellIds.size() == 1);
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
@@ -195,7 +195,7 @@ void DataController::addToken()
 	}
 }
 
-void DataController::deleteToken()
+void DataRepository::deleteToken()
 {
 	CHECK(_selectedCellIds.size() == 1);
 	CHECK(_selectedTokenIndex);
@@ -204,24 +204,24 @@ void DataController::deleteToken()
 	cell.delToken(*_selectedTokenIndex);
 }
 
-bool DataController::isCellPresent(uint64_t cellId)
+bool DataRepository::isCellPresent(uint64_t cellId)
 {
 	return _navi.cellIds.find(cellId) != _navi.cellIds.end();
 }
 
-bool DataController::isParticlePresent(uint64_t particleId)
+bool DataRepository::isParticlePresent(uint64_t particleId)
 {
 	return _navi.particleIds.find(particleId) != _navi.particleIds.end();
 }
 
-void DataController::dataFromSimulationAvailable()
+void DataRepository::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
 	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar }, UpdateDescription::All);
 }
 
-void DataController::sendDataChangesToSimulation(set<Receiver> const& targets)
+void DataRepository::sendDataChangesToSimulation(set<Receiver> const& targets)
 {
 	if (targets.find(Receiver::Simulation) == targets.end()) {
 		return;
@@ -231,7 +231,7 @@ void DataController::sendDataChangesToSimulation(set<Receiver> const& targets)
 	_unchangedData = _data;
 }
 
-void DataController::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
+void DataRepository::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
 	_selectedCellIds = unordered_set<uint64_t>(cellIds.begin(), cellIds.end());
 	_selectedParticleIds = unordered_set<uint64_t>(particleIds.begin(), particleIds.end());
@@ -244,7 +244,7 @@ void DataController::setSelection(list<uint64_t> const &cellIds, list<uint64_t> 
 	}
 }
 
-bool DataController::isInSelection(list<uint64_t> const & ids) const
+bool DataRepository::isInSelection(list<uint64_t> const & ids) const
 {
 	for (uint64_t id : ids) {
 		if (!isInSelection(id)) {
@@ -254,12 +254,12 @@ bool DataController::isInSelection(list<uint64_t> const & ids) const
 	return true;
 }
 
-bool DataController::isInSelection(uint64_t id) const
+bool DataRepository::isInSelection(uint64_t id) const
 {
 	return (_selectedCellIds.find(id) != _selectedCellIds.end() || _selectedParticleIds.find(id) != _selectedParticleIds.end());
 }
 
-bool DataController::isInExtendedSelection(uint64_t id) const
+bool DataRepository::isInExtendedSelection(uint64_t id) const
 {
 	auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(id);
 	if (clusterIdByCellIdIter != _navi.clusterIdsByCellIds.end()) {
@@ -269,22 +269,22 @@ bool DataController::isInExtendedSelection(uint64_t id) const
 	return false;
 }
 
-bool DataController::areEntitiesSelected() const
+bool DataRepository::areEntitiesSelected() const
 {
 	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
 }
 
-unordered_set<uint64_t> DataController::getSelectedCellIds() const
+unordered_set<uint64_t> DataRepository::getSelectedCellIds() const
 {
 	return _selectedCellIds;
 }
 
-unordered_set<uint64_t> DataController::getSelectedParticleIds() const
+unordered_set<uint64_t> DataRepository::getSelectedParticleIds() const
 {
 	return _selectedParticleIds;
 }
 
-void DataController::moveSelection(QVector2D const &delta)
+void DataRepository::moveSelection(QVector2D const &delta)
 {
 	for (uint64_t cellId : _selectedCellIds) {
 		if (isCellPresent(cellId)) {
@@ -303,7 +303,7 @@ void DataController::moveSelection(QVector2D const &delta)
 	}
 }
 
-void DataController::moveExtendedSelection(QVector2D const & delta)
+void DataRepository::moveExtendedSelection(QVector2D const & delta)
 {
 	for (uint64_t selectedClusterId : _selectedClusterIds) {
 		auto selectedClusterIndex = _navi.clusterIndicesByClusterIds.at(selectedClusterId);
@@ -337,13 +337,13 @@ void DataController::moveExtendedSelection(QVector2D const & delta)
 	}
 }
 
-void DataController::reconnectSelectedCells()
+void DataRepository::reconnectSelectedCells()
 {
 	_descHelper->reconnect(getDataRef(), getSelectedCellIds());
 	updateAfterCellReconnections();
 }
 
-void DataController::rotateSelection(double angle)
+void DataRepository::rotateSelection(double angle)
 {
 	QVector3D center = calcCenter();
 
@@ -374,7 +374,7 @@ void DataController::rotateSelection(double angle)
 	}
 }
 
-QVector2D DataController::calcCenter()
+QVector2D DataRepository::calcCenter()
 {
 	QVector2D result;
 	int numEntities = 0;
@@ -402,7 +402,7 @@ QVector2D DataController::calcCenter()
 	return result;
 }
 
-void DataController::updateCluster(ClusterDescription const & cluster)
+void DataRepository::updateCluster(ClusterDescription const & cluster)
 {
 	int clusterIndex = _navi.clusterIndicesByClusterIds.at(cluster.id);
 	_data.clusters->at(clusterIndex) = cluster;
@@ -410,7 +410,7 @@ void DataController::updateCluster(ClusterDescription const & cluster)
 	_navi.update(_data);
 }
 
-void DataController::updateParticle(ParticleDescription const & particle)
+void DataRepository::updateParticle(ParticleDescription const & particle)
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particle.id);
 	_data.particles->at(particleIndex) = particle;
@@ -418,7 +418,7 @@ void DataController::updateParticle(ParticleDescription const & particle)
 	_navi.update(_data);
 }
 
-void DataController::requireDataUpdateFromSimulation(IntRect const& rect)
+void DataRepository::requireDataUpdateFromSimulation(IntRect const& rect)
 {
 	_rect = rect;
 	ResolveDescription resolveDesc;
@@ -426,12 +426,12 @@ void DataController::requireDataUpdateFromSimulation(IntRect const& rect)
 	_access->requireData(rect, resolveDesc);
 }
 
-void DataController::requireImageFromSimulation(IntRect const & rect, QImage * target)
+void DataRepository::requireImageFromSimulation(IntRect const & rect, QImage * target)
 {
 	_access->requireImage(rect, target);
 }
 
-void DataController::updateAfterCellReconnections()
+void DataRepository::updateAfterCellReconnections()
 {
 	_navi.update(_data);
 
@@ -443,7 +443,7 @@ void DataController::updateAfterCellReconnections()
 	}
 }
 
-void DataController::updateInternals(DataDescription const &data)
+void DataRepository::updateInternals(DataDescription const &data)
 {
 	_data = data;
 	_unchangedData = _data;

@@ -4,7 +4,7 @@
 #include "Model/Api/SymbolTable.h"
 #include "Model/Api/SimulationContext.h"
 
-#include "Gui/DataController.h"
+#include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
 
 #include "DataEditController.h"
@@ -19,14 +19,14 @@ DataEditController::DataEditController(QWidget *parent /*= nullptr*/)
 	_context = new DataEditContext(this);
 }
 
-void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataController * manipulator, SimulationContext* context)
+void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataRepository * manipulator, SimulationContext* context)
 {
 	_notifier = notifier;
 	_symbolTable = context->getSymbolTable();
 	_model = new DataEditModel(this);
 	_model->init(manipulator, context->getSimulationParameters(), context->getSymbolTable());
 	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
-	_manipulator = manipulator;
+	_repository = manipulator;
 
 	for (auto const& connection : _connections) {
 		disconnect(connection);
@@ -61,13 +61,13 @@ void DataEditController::notificationFromCellTab()
 	auto& cluster = _model->getClusterToEditRef();
 	cluster.pos = calcCenterPosOfCells(cluster);
 
-	_manipulator->updateCluster(cluster);
-	_manipulator->reconnectSelectedCells();
+	_repository->updateCluster(cluster);
+	_repository->reconnectSelectedCells();
 
 	uint64_t selectedCellId = _model->getCellToEditRef().id;
-	_model->setClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
+	_model->setClusterAndCell(_repository->getClusterDescRef(selectedCellId), selectedCellId);
 
-	switchToCellEditor(_manipulator->getCellDescRef(selectedCellId));
+	switchToCellEditor(_repository->getCellDescRef(selectedCellId));
 
 	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
@@ -100,7 +100,7 @@ void DataEditController::notificationFromClusterTab()
 		}
 	}
 
-	_manipulator->updateCluster(cluster);
+	_repository->updateCluster(cluster);
 
 	_view->updateDisplay();
 	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
@@ -109,7 +109,7 @@ void DataEditController::notificationFromClusterTab()
 void DataEditController::notificationFromParticleTab()
 {
 	auto& particle = _model->getParticleToEditRef();
-	_manipulator->updateParticle(particle);
+	_repository->updateParticle(particle);
 
 	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
@@ -117,7 +117,7 @@ void DataEditController::notificationFromParticleTab()
 void DataEditController::notificationFromMetadataTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
-	_manipulator->updateCluster(cluster);
+	_repository->updateCluster(cluster);
 
 	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
@@ -125,7 +125,7 @@ void DataEditController::notificationFromMetadataTab()
 void DataEditController::notificationFromCellComputerTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
-	_manipulator->updateCluster(cluster);
+	_repository->updateCluster(cluster);
 
 	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
@@ -138,7 +138,7 @@ void DataEditController::notificationFromSymbolTab()
 void DataEditController::notificationFromTokenTab()
 {
 	auto& cluster = _model->getClusterToEditRef();
-	_manipulator->updateCluster(cluster);
+	_repository->updateCluster(cluster);
 
 	Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::All);
 }
@@ -159,22 +159,22 @@ void DataEditController::receivedExternalNotifications(set<Receiver> const& targ
 		return;
 	}
 
-	auto const& selectedCellIds = _manipulator->getSelectedCellIds();
-	auto const& selectedParticleIds = _manipulator->getSelectedParticleIds();
+	auto const& selectedCellIds = _repository->getSelectedCellIds();
+	auto const& selectedParticleIds = _repository->getSelectedParticleIds();
 	if (selectedCellIds.size() == 1 && selectedParticleIds.empty()) {
 
 		uint64_t selectedCellId = *selectedCellIds.begin();
-		_model->setClusterAndCell(_manipulator->getClusterDescRef(selectedCellId), selectedCellId);
-		auto cell = _manipulator->getCellDescRef(selectedCellId);
-		switchToCellEditor(_manipulator->getCellDescRef(selectedCellId), update);
+		_model->setClusterAndCell(_repository->getClusterDescRef(selectedCellId), selectedCellId);
+		auto cell = _repository->getCellDescRef(selectedCellId);
+		switchToCellEditor(_repository->getCellDescRef(selectedCellId), update);
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.size() == 1) {
 		uint64_t selectedParticleId = *selectedParticleIds.begin();
-		_model->setParticle(_manipulator->getParticleDescRef(selectedParticleId));
+		_model->setParticle(_repository->getParticleDescRef(selectedParticleId));
 		_view->switchToParticleEditor();
 	}
 	if (selectedCellIds.size() + selectedParticleIds.size() > 1) {
-		_model->setSelectionIds(_manipulator->getSelectedCellIds(), _manipulator->getSelectedParticleIds());
+		_model->setSelectionIds(_repository->getSelectedCellIds(), _repository->getSelectedParticleIds());
 		_view->switchToSelectionEditor();
 	}
 	if (selectedCellIds.empty() && selectedParticleIds.empty()) {

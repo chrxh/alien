@@ -1,11 +1,14 @@
-﻿#include "ToolbarController.h"
+﻿#include <QAction>
+
+#include "ToolbarController.h"
 
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "Gui/DataController.h"
+#include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
 
+#include "ActionHolder.h"
 #include "ToolbarView.h"
 #include "ToolbarModel.h"
 #include "ToolbarContext.h"
@@ -18,12 +21,14 @@ ToolbarController::ToolbarController(QWidget* parent)
 	_context = new ToolbarContext(this);
 }
 
-void ToolbarController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataController* manipulator, const SimulationContext* context)
+void ToolbarController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataRepository* manipulator
+	, SimulationContext const* context, ActionHolder* actions)
 {
 	_notifier = notifier;
-	_manipulator = manipulator;
+	_repository = manipulator;
 	_parameters = context->getSimulationParameters();
-	_view->init(upperLeftPosition, this);
+	_actions = actions;
+	_view->init(upperLeftPosition, actions, this);
 
 	for (auto const& connection : _connections) {
 		disconnect(connection);
@@ -41,8 +46,8 @@ ToolbarContext * ToolbarController::getContext() const
 
 void ToolbarController::onRequestCell()
 {
-	_manipulator->addAndSelectCell(_model->getPositionDeltaForNewEntity());
-	_manipulator->reconnectSelectedCells();
+	_repository->addAndSelectCell(_model->getPositionDeltaForNewEntity());
+	_repository->reconnectSelectedCells();
 	Q_EMIT _notifier->notify({
 		Receiver::DataEditor,
 		Receiver::Simulation,
@@ -53,7 +58,7 @@ void ToolbarController::onRequestCell()
 
 void ToolbarController::onRequestParticle()
 {
-	_manipulator->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
+	_repository->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notify({
 		Receiver::DataEditor,
 		Receiver::Simulation,
@@ -64,7 +69,7 @@ void ToolbarController::onRequestParticle()
 
 void ToolbarController::onDeleteSelection()
 {
-	_manipulator->deleteSelection();
+	_repository->deleteSelection();
 	Q_EMIT _notifier->notify({
 		Receiver::DataEditor,
 		Receiver::Simulation,
@@ -75,7 +80,7 @@ void ToolbarController::onDeleteSelection()
 
 void ToolbarController::onDeleteExtendedSelection()
 {
-	_manipulator->deleteExtendedSelection();
+	_repository->deleteExtendedSelection();
 	Q_EMIT _notifier->notify({
 		Receiver::DataEditor,
 		Receiver::Simulation,
@@ -86,7 +91,7 @@ void ToolbarController::onDeleteExtendedSelection()
 
 void ToolbarController::onRequestToken()
 {
-	_manipulator->addToken();
+	_repository->addToken();
 	Q_EMIT _notifier->notify({
 		Receiver::DataEditor,
 		Receiver::Simulation,
@@ -97,7 +102,7 @@ void ToolbarController::onRequestToken()
 
 void ToolbarController::onDeleteToken()
 {
-	_manipulator->deleteToken();
+	_repository->deleteToken();
 	Q_EMIT _notifier->notify({
 		Receiver::DataEditor,
 		Receiver::Simulation,
@@ -114,6 +119,7 @@ void ToolbarController::onToggleCellInfo(bool showInfo)
 void ToolbarController::onShow(bool visible)
 {
 	_view->setVisible(visible);
+	updateActionsEnableState();
 }
 
 void ToolbarController::receivedNotifications(set<Receiver> const & targets)
@@ -122,22 +128,59 @@ void ToolbarController::receivedNotifications(set<Receiver> const & targets)
 		return;
 	}
 
-	bool isCellSelected = !_manipulator->getSelectedCellIds().empty();
-	bool isParticleSelected = !_manipulator->getSelectedParticleIds().empty();
-	_view->setEnableDeleteSelections(isCellSelected || isParticleSelected);
+	int selectedCells = _repository->getSelectedCellIds().size();
+	int selectedParticles = _repository->getSelectedParticleIds().size();
+	int tokenOfSelectedCell = 0;
+	int freeTokenOfSelectedCell = 0;
 
-	if (_manipulator->getSelectedCellIds().size() == 1) {
-		uint64_t selectedCellId = *_manipulator->getSelectedCellIds().begin();
-		int numToken = 0;
-		if (auto tokens = _manipulator->getCellDescRef(selectedCellId).tokens) {
-			numToken = tokens->size();
+	if (selectedCells == 1 && selectedParticles == 0) {
+		uint64_t selectedCellId = *_repository->getSelectedCellIds().begin();
+		if (auto tokens = _repository->getCellDescRef(selectedCellId).tokens) {
+			tokenOfSelectedCell = tokens->size();
+			freeTokenOfSelectedCell = _parameters->cellMaxToken - tokenOfSelectedCell;
 		}
+	}
 
-		_view->setEnableAddToken(numToken < _parameters->cellMaxToken);
-		_view->setEnableDeleteToken(numToken > 0);
-	}
-	else {
-		_view->setEnableAddToken(false);
-		_view->setEnableDeleteToken(false);
-	}
+	_model->setEntitySelected(selectedCells == 1 || selectedParticles == 1);
+	_model->setCellWithTokenSelected(tokenOfSelectedCell > 0);
+	_model->setCellWithFreeTokenSelected(freeTokenOfSelectedCell > 0);
+	_model->setCollectionSelected(selectedCells > 0 || selectedParticles > 0);
+
+	updateActionsEnableState();
+}
+
+void ToolbarController::updateActionsEnableState()
+{
+	bool visible = _view->isVisible();
+	bool entitySelected = _model->isEntitySelected();
+	bool entityCopied = _model->isEntityCopied();
+	bool cellWithTokenSelected = _model->isCellWithTokenSelected();
+	bool cellWithFreeTokenSelected = _model->isCellWithFreeTokenSelected();
+	bool tokenCopied = _model->isTokenCopied();
+	bool collectionSelected = _model->isCollectionSelected();
+	bool collectionCopied = _model->isCollectionCopied();
+
+	_actions->actionShowCellInfo->setEnabled(visible);
+
+	_actions->actionNewCell->setEnabled(visible);
+	_actions->actionNewParticle->setEnabled(visible);
+	_actions->actionCopyEntity->setEnabled(visible && entitySelected);
+	_actions->actionPasteEntity->setEnabled(visible && entityCopied);
+	_actions->actionDeleteEntity->setEnabled(visible && entitySelected);
+	_actions->actionNewToken->setEnabled(visible && entitySelected);
+	_actions->actionCopyToken->setEnabled(visible && entitySelected);
+	_actions->actionPasteToken->setEnabled(visible && cellWithFreeTokenSelected && tokenCopied);
+	_actions->actionDeleteToken->setEnabled(visible && cellWithTokenSelected);
+
+	_actions->actionNewRectangle->setEnabled(visible);
+	_actions->actionNewHexagon->setEnabled(visible);
+	_actions->actionNewParticles->setEnabled(visible);
+	_actions->actionLoadCol->setEnabled(visible);
+	_actions->actionSaveCol->setEnabled(visible && collectionSelected);
+	_actions->actionCopyCol->setEnabled(visible && collectionSelected);
+	_actions->actionPasteCol->setEnabled(visible && collectionCopied);
+	_actions->actionDeleteCol->setEnabled(visible && collectionSelected);
+	_actions->actionDeleteSel->setEnabled(visible && collectionSelected);
+	_actions->actionMultiplyRandom->setEnabled(visible && collectionSelected);
+	_actions->actionMultiplyArrangement->setEnabled(visible && collectionSelected);
 }

@@ -9,7 +9,7 @@
 #include "Model/Api/Definitions.h"
 #include "Model/Api/Descriptions.h"
 #include "Gui/Definitions.h"
-#include "Gui/DataController.h"
+#include "Gui/DataRepository.h"
 
 class ItemUniverseView : public QGraphicsScene
 {
@@ -18,7 +18,7 @@ public:
     ItemUniverseView (QObject *parent = nullptr);
 	virtual ~ItemUniverseView() = default;
 
-	virtual void init(Notifier* notifier, SimulationController* controller, DataController* manipulator, ViewportInterface* viewport);
+	virtual void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 
@@ -52,6 +52,6 @@ private:
 	ViewportInterface* _viewport = nullptr;
 
 	ItemManager* _itemManager = nullptr;
-	DataController* _manipulator = nullptr;
+	DataRepository* _manipulator = nullptr;
 	Notifier* _notifier = nullptr;
 };
