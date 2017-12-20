@@ -14,14 +14,13 @@ public:
 	ToolbarView(QWidget * parent = nullptr);
 	virtual ~ToolbarView() = default;
 
-	void init(IntVector2D const& upperLeftPosition, ToolbarController* _controller);
-
-	void setEnableDeleteSelections(bool enable);
-	void setEnableAddToken(bool enable);
-	void setEnableDeleteToken(bool enable);
+	void init(IntVector2D const& upperLeftPosition, ActionHolder* actions, ToolbarController* _controller);
 
 private:
 	Ui::Toolbar ui;
 
+	list<QMetaObject::Connection> _connections;
+
 	ToolbarController* _controller = nullptr;
+	ActionHolder* _actions = nullptr;
 };

@@ -2,6 +2,7 @@
 
 #include "Gui/Settings.h"
 
+#include "ActionHolder.h"
 #include "ToolbarView.h"
 #include "ToolbarController.h"
 
@@ -12,37 +13,22 @@ ToolbarView::ToolbarView(QWidget * parent)
 	setStyleSheet(GuiSettings::ButtonStyleSheet);
 }
 
-void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController* controller)
+void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* actions, ToolbarController* controller)
 {
 	_controller = controller;
+	_actions = actions;
 	setGeometry(upperLeftPosition.x, upperLeftPosition.y, width(), height());
 
-	ui.requestCellButton->disconnect();
-	ui.requestParticleButton->disconnect();
-	ui.delSelectionButton->disconnect();
-	ui.delExtendedSelectionButton->disconnect();
-	ui.requestTokenButton->disconnect();
-	ui.delTokenButton->disconnect();
-	ui.showCellInfoButton->disconnect();
-	connect(ui.requestCellButton, &QPushButton::clicked, [this]() {
-		_controller->onRequestCell();
-	});
-	connect(ui.requestParticleButton, &QPushButton::clicked, [this]() {
-		_controller->onRequestParticle();
-	});
-	connect(ui.delSelectionButton, &QPushButton::clicked, [this]() {
-		_controller->onDeleteSelection();
-	});
-	connect(ui.delExtendedSelectionButton, &QPushButton::clicked, [this]() {
-		_controller->onDeleteExtendedSelection();
-	});
-	connect(ui.requestTokenButton, &QPushButton::clicked, [this]() {
-		_controller->onRequestToken();
-	});
-	connect(ui.delTokenButton, &QPushButton::clicked, [this]() {
-		_controller->onDeleteToken();
-	});
-	connect(ui.showCellInfoButton, &QPushButton::toggled, [this](bool checked) {
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
+	_connections.push_back(connect(ui.requestCellButton, &QPushButton::clicked, [this]() { _controller->onRequestCell(); }));
+	_connections.push_back(connect(ui.requestParticleButton, &QPushButton::clicked, [this]() { _controller->onRequestParticle(); }));
+	_connections.push_back(connect(ui.delSelectionButton, &QPushButton::clicked, [this]() { _controller->onDeleteSelection(); }));
+	_connections.push_back(connect(ui.delExtendedSelectionButton, &QPushButton::clicked, [this]() { _controller->onDeleteExtendedSelection(); }));
+	_connections.push_back(connect(ui.requestTokenButton, &QPushButton::clicked, [this]() { _controller->onRequestToken(); }));
+	_connections.push_back(connect(ui.delTokenButton, &QPushButton::clicked, [this]() { _controller->onDeleteToken(); }));
+	_connections.push_back(connect(ui.showCellInfoButton, &QPushButton::toggled, [this](bool checked) {
 		if (checked) {
 			ui.showCellInfoButton->setIcon(QIcon("://Icons/info_on.png"));
 		}
@@ -50,23 +36,31 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ToolbarController*
 			ui.showCellInfoButton->setIcon(QIcon("://Icons/info_off.png"));
 		}
 		_controller->onToggleCellInfo(checked);
-	});
-	ui.showCellInfoButton->setChecked(false);
-}
+	}));
 
-void ToolbarView::setEnableDeleteSelections(bool enable)
-{
-	ui.delSelectionButton->setEnabled(enable);
-	ui.delExtendedSelectionButton->setEnabled(enable);
-}
+	_connections.push_back(connect(_actions->actionNewCell, &QAction::changed, [&]() {
+		ui.requestCellButton->setEnabled(_actions->actionNewCell->isEnabled());
+	}));
+	_connections.push_back(connect(_actions->actionNewParticle, &QAction::changed, [&]() {
+		ui.requestParticleButton->setEnabled(_actions->actionNewParticle->isEnabled());
+	}));
+	_connections.push_back(connect(_actions->actionDeleteSel, &QAction::changed, [&]() {
+		ui.delSelectionButton->setEnabled(_actions->actionDeleteSel->isEnabled());
+	}));
+	_connections.push_back(connect(_actions->actionDeleteCol, &QAction::changed, [&]() {
+		ui.delExtendedSelectionButton->setEnabled(_actions->actionDeleteCol->isEnabled());
+	}));
+	_connections.push_back(connect(_actions->actionNewToken, &QAction::changed, [&]() {
+		ui.requestTokenButton->setEnabled(_actions->actionNewToken->isEnabled());
+	}));
+	_connections.push_back(connect(_actions->actionDeleteToken, &QAction::changed, [&]() {
+		ui.delTokenButton->setEnabled(_actions->actionDeleteToken->isEnabled());
+	}));
+	_connections.push_back(connect(_actions->actionShowCellInfo, &QAction::changed, [&]() {
+		ui.showCellInfoButton->setEnabled(_actions->actionShowCellInfo->isEnabled());
+	}));
 
-void ToolbarView::setEnableAddToken(bool enable)
-{
-	ui.requestTokenButton->setEnabled(enable);
-}
 
-void ToolbarView::setEnableDeleteToken(bool enable)
-{
-	ui.delTokenButton->setEnabled(enable);
-}
 
+//	ui.showCellInfoButton->setChecked(false);
+}
