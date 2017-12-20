@@ -1,13 +1,11 @@
-﻿#include <QFileDialog>
-#include <QMessageBox>
-
-#include "Model/Api/SimulationController.h"
+﻿#include "Model/Api/SimulationController.h"
 #include "Model/Api/Serializer.h"
 #include "Model/Api/SymbolTable.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
 
+#include "ActionController.h"
 #include "ActionHolder.h"
 #include "SerializationHelper.h"
 #include "InfoController.h"
@@ -44,10 +42,10 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_toolbar = new ToolbarController(_visualEditor);
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
-	_actions = new ActionHolder(this);
+	_actions = new ActionController(this);
 	_infoController->init(ui->infoLabel, mainController);
+	_actions->init(_controller, _model, this, _visualEditor, _serializer, _infoController, _dataEditor, _toolbar);
 
-	connectWidget();
 	setupMenu();
 	setupTheme();
 	setWindowState(windowState() | Qt::WindowFullScreen);
@@ -59,15 +57,15 @@ void MainView::refresh()
 	_visualEditor->refresh();
 }
 
-void MainView::setupEditors(SimulationController * controller, DataRepository* manipulator, Notifier* notifier)
+void MainView::setupEditors(SimulationController * controller, DataRepository* repository, Notifier* notifier)
 {
-	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext(), _actions);
-	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());
-	_visualEditor->init(notifier, controller, manipulator);
+	_toolbar->init({ 10, 10 }, notifier, repository, controller->getContext(), _actions->getActionHolder());
+	_dataEditor->init({ 10, 60 }, notifier, repository, controller->getContext());
+	_visualEditor->init(notifier, controller, repository);
 
-	_actions->actionEditor->setChecked(false);
 	_model->setEditMode(boost::none);
-	onSetEditorMode();
+	_actions->getActionHolder()->actionEditor->setChecked(false);
+	_actions->getActionHolder()->actionEditor->trigger();
 }
 
 InfoController * MainView::getInfoController() const
@@ -75,103 +73,82 @@ InfoController * MainView::getInfoController() const
 	return _infoController;
 }
 
-void MainView::connectWidget()
-{
-	connect(_actions->actionNewSimulation, &QAction::triggered, this, &MainView::onNewSimulation);
-	connect(_actions->actionSaveSimulation, &QAction::triggered, this, &MainView::onSaveSimulation);
-	connect(_actions->actionLoadSimulation, &QAction::triggered, this, &MainView::onLoadSimulation);
-	connect(_actions->actionRunSimulation, &QAction::triggered, this, &MainView::onRunClicked);
-	connect(_actions->actionRunStepForward, &QAction::triggered, this, &MainView::onStepForward);
-	connect(_actions->actionRunStepBackward, &QAction::triggered, this, &MainView::onStepBackward);
-	connect(_actions->actionSnapshot, &QAction::triggered, this, &MainView::onMakeSnapshot);
-	connect(_actions->actionRestore, &QAction::triggered, this, &MainView::onRestoreSnapshot);
-	connect(_actions->actionExit, &QAction::triggered, this, &MainView::close);
-	connect(_actions->actionZoomIn, &QAction::triggered, this, &MainView::onZoomInClicked);
-	connect(_actions->actionZoomOut, &QAction::triggered, this, &MainView::onZoomOutClicked);
-	connect(_actions->actionEditor, &QAction::triggered, this, &MainView::onSetEditorMode);
-	connect(_actions->actionEditSimParameters, &QAction::triggered, this, &MainView::onEditSimulationParameters);
-	connect(_actions->actionLoadSimParameters, &QAction::triggered, this, &MainView::onLoadSimulationParameters);
-	connect(_actions->actionSaveSimParameters, &QAction::triggered, this, &MainView::onSaveSimulationParameters);
-	connect(_actions->actionEditSymbols, &QAction::triggered, this, &MainView::onEditSymbolTable);
-	connect(_actions->actionLoadSymbols, &QAction::triggered, this, &MainView::onLoadSymbolTable);
-	connect(_actions->actionSaveSymbols, &QAction::triggered, this, &MainView::onSaveSymbolTable);
-}
-
 void MainView::setupMenu()
 {
+	auto actions = _actions->getActionHolder();
 	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(_actions->actionEditor);
-	ui->toolBar->addAction(_actions->actionMonitor);
+	ui->toolBar->addAction(actions->actionEditor);
+	ui->toolBar->addAction(actions->actionMonitor);
 	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(_actions->actionZoomIn);
-	ui->toolBar->addAction(_actions->actionZoomOut);
+	ui->toolBar->addAction(actions->actionZoomIn);
+	ui->toolBar->addAction(actions->actionZoomOut);
 	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(_actions->actionSnapshot);
-	ui->toolBar->addAction(_actions->actionRestore);
+	ui->toolBar->addAction(actions->actionSnapshot);
+	ui->toolBar->addAction(actions->actionRestore);
 	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(_actions->actionRunSimulation);
-	ui->toolBar->addAction(_actions->actionRunStepBackward);
-	ui->toolBar->addAction(_actions->actionRunStepForward);
+	ui->toolBar->addAction(actions->actionRunSimulation);
+	ui->toolBar->addAction(actions->actionRunStepBackward);
+	ui->toolBar->addAction(actions->actionRunStepForward);
 	ui->toolBar->addSeparator();
 
-	ui->menuSimulation->addAction(_actions->actionNewSimulation);
-	ui->menuSimulation->addAction(_actions->actionLoadSimulation);
-	ui->menuSimulation->addAction(_actions->actionSaveSimulation);
+	ui->menuSimulation->addAction(actions->actionNewSimulation);
+	ui->menuSimulation->addAction(actions->actionLoadSimulation);
+	ui->menuSimulation->addAction(actions->actionSaveSimulation);
 	ui->menuSimulation->addSeparator();
-	ui->menuSimulation->addAction(_actions->actionRunSimulation);
-	ui->menuSimulation->addAction(_actions->actionRunStepForward);
-	ui->menuSimulation->addAction(_actions->actionRunStepBackward);
-	ui->menuSimulation->addAction(_actions->actionSnapshot);
-	ui->menuSimulation->addAction(_actions->actionRestore);
+	ui->menuSimulation->addAction(actions->actionRunSimulation);
+	ui->menuSimulation->addAction(actions->actionRunStepForward);
+	ui->menuSimulation->addAction(actions->actionRunStepBackward);
+	ui->menuSimulation->addAction(actions->actionSnapshot);
+	ui->menuSimulation->addAction(actions->actionRestore);
 	ui->menuSimulation->addSeparator();
-	ui->menuSimulation->addAction(_actions->actionExit);
+	ui->menuSimulation->addAction(actions->actionExit);
 
-	ui->menuSimulationParameters->addAction(_actions->actionEditSimParameters);
-	ui->menuSimulationParameters->addAction(_actions->actionLoadSimParameters);
-	ui->menuSimulationParameters->addAction(_actions->actionSaveSimParameters);
-	ui->menuSymbolTable->addAction(_actions->actionEditSymbols);
-	ui->menuSymbolTable->addAction(_actions->actionLoadSymbols);
-	ui->menuSymbolTable->addAction(_actions->actionSaveSymbols);
-	ui->menuSymbolTable->addAction(_actions->actionMergeWithSymbols);
+	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
+	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
+	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);
+	ui->menuSymbolTable->addAction(actions->actionEditSymbols);
+	ui->menuSymbolTable->addAction(actions->actionLoadSymbols);
+	ui->menuSymbolTable->addAction(actions->actionSaveSymbols);
+	ui->menuSymbolTable->addAction(actions->actionMergeWithSymbols);
 
-	ui->menuView->addAction(_actions->actionEditor);
-	ui->menuView->addAction(_actions->actionMonitor);
+	ui->menuView->addAction(actions->actionEditor);
+	ui->menuView->addAction(actions->actionMonitor);
 	ui->menuView->addSeparator();
-	ui->menuView->addAction(_actions->actionZoomIn);
-	ui->menuView->addAction(_actions->actionZoomOut);
-	ui->menuView->addAction(_actions->actionFullscreen);
+	ui->menuView->addAction(actions->actionZoomIn);
+	ui->menuView->addAction(actions->actionZoomOut);
+	ui->menuView->addAction(actions->actionFullscreen);
 	ui->menuView->addSeparator();
-	ui->menuView->addAction(_actions->actionShowCellInfo);
+	ui->menuView->addAction(actions->actionShowCellInfo);
 
-	ui->menuEntity->addAction(_actions->actionNewCell);
-	ui->menuEntity->addAction(_actions->actionNewParticle);
+	ui->menuEntity->addAction(actions->actionNewCell);
+	ui->menuEntity->addAction(actions->actionNewParticle);
 	ui->menuEntity->addSeparator();
-	ui->menuEntity->addAction(_actions->actionCopyEntity);
-	ui->menuEntity->addAction(_actions->actionPasteEntity);
-	ui->menuEntity->addAction(_actions->actionDeleteEntity);
+	ui->menuEntity->addAction(actions->actionCopyEntity);
+	ui->menuEntity->addAction(actions->actionPasteEntity);
+	ui->menuEntity->addAction(actions->actionDeleteEntity);
 	ui->menuEntity->addSeparator();
-	ui->menuEntity->addAction(_actions->actionNewToken);
-	ui->menuEntity->addAction(_actions->actionCopyToken);
-	ui->menuEntity->addAction(_actions->actionPasteToken);
-	ui->menuEntity->addAction(_actions->actionDeleteToken);
+	ui->menuEntity->addAction(actions->actionNewToken);
+	ui->menuEntity->addAction(actions->actionCopyToken);
+	ui->menuEntity->addAction(actions->actionPasteToken);
+	ui->menuEntity->addAction(actions->actionDeleteToken);
 
-	ui->menuCollection->addAction(_actions->actionNewRectangle);
-	ui->menuCollection->addAction(_actions->actionNewHexagon);
-	ui->menuCollection->addAction(_actions->actionNewParticles);
+	ui->menuCollection->addAction(actions->actionNewRectangle);
+	ui->menuCollection->addAction(actions->actionNewHexagon);
+	ui->menuCollection->addAction(actions->actionNewParticles);
 	ui->menuCollection->addSeparator();
-	ui->menuCollection->addAction(_actions->actionLoadCol);
-	ui->menuCollection->addAction(_actions->actionSaveCol);
-	ui->menuCollection->addAction(_actions->actionCopyCol);
-	ui->menuCollection->addAction(_actions->actionPasteCol);
-	ui->menuCollection->addAction(_actions->actionDeleteSel);
-	ui->menuCollection->addAction(_actions->actionDeleteCol);
+	ui->menuCollection->addAction(actions->actionLoadCol);
+	ui->menuCollection->addAction(actions->actionSaveCol);
+	ui->menuCollection->addAction(actions->actionCopyCol);
+	ui->menuCollection->addAction(actions->actionPasteCol);
+	ui->menuCollection->addAction(actions->actionDeleteSel);
+	ui->menuCollection->addAction(actions->actionDeleteCol);
 	ui->menuCollection->addSeparator();
-	ui->menuCollection->addAction(_actions->actionMultiplyRandom);
-	ui->menuCollection->addAction(_actions->actionMultiplyArrangement);
+	ui->menuCollection->addAction(actions->actionMultiplyRandom);
+	ui->menuCollection->addAction(actions->actionMultiplyArrangement);
 
-	ui->menuHelp->addAction(_actions->actionAbout);
+	ui->menuHelp->addAction(actions->actionAbout);
 	ui->menuEntity->addSeparator();
-	ui->menuHelp->addAction(_actions->actionDocumentation);
+	ui->menuHelp->addAction(actions->actionDocumentation);
 }
 
 void MainView::setupTheme()
@@ -193,199 +170,4 @@ void MainView::setupTheme()
 	ui->tpsForcingButton->setPalette(p);
 }
 
-void MainView::onRunClicked(bool run)
-{
-	if (run) {
-		_actions->actionRunSimulation->setIcon(QIcon("://Icons/pause.png"));
-		_actions->actionRunStepForward->setEnabled(false);
-	}
-	else {
-		_actions->actionRunSimulation->setIcon(QIcon("://Icons/play.png"));
-		_actions->actionRunStepForward->setEnabled(true);
-	}
-	_actions->actionRunStepBackward->setEnabled(false);
-
-	_controller->onRunSimulation(run);
-}
-
-void MainView::onStepForward()
-{
-	_controller->onStepForward();
-	_actions->actionRunStepBackward->setEnabled(true);
-}
-
-void MainView::onStepBackward()
-{
-	bool emptyStack = false;
-	_controller->onStepBackward(emptyStack);
-	if (emptyStack) {
-		_actions->actionRunStepBackward->setEnabled(false);
-	}
-	refresh();
-}
-
-void MainView::onMakeSnapshot()
-{
-	_controller->onMakeSnapshot();
-	_actions->actionRestore->setEnabled(true);
-}
-
-void MainView::onRestoreSnapshot()
-{
-	_controller->onRestoreSnapshot();
-	refresh();
-}
-
-void MainView::onZoomInClicked()
-{
-	_visualEditor->zoom(2.0);
-	updateZoomFactor();
-}
-
-void MainView::onZoomOutClicked()
-{
-	_visualEditor->zoom(0.5);
-	updateZoomFactor();
-}
-
-void MainView::onSetEditorMode()
-{
-	auto editMode = _model->isEditMode();
-	bool newEditMode = editMode ? !editMode.get() : false;
-	_model->setEditMode(newEditMode);
-
-	_toolbar->getContext()->show(newEditMode);
-	_dataEditor->getContext()->onShow(newEditMode);
-	if (newEditMode) {
-		_visualEditor->setActiveScene(ActiveScene::ItemScene);
-		_actions->actionEditor->setIcon(QIcon("://Icons/PixelView.png"));
-	}
-	else {
-		_visualEditor->setActiveScene(ActiveScene::PixelScene);
-		_actions->actionEditor->setIcon(QIcon("://Icons/EditorView.png"));
-	}
-}
-
-void MainView::onNewSimulation()
-{
-	NewSimulationDialog dialog(_model->getSimulationParameters(), _model->getSymbolTable(), _serializer, this);
-	if (dialog.exec()) {
-		NewSimulationConfig config{ 
-			dialog.getMaxThreads(), dialog.getGridSize(), dialog.getUniverseSize(), dialog.getSymbolTable(), dialog.getSimulationParameters(), dialog.getEnergy()
-		};
-		_controller->onNewSimulation(config);
-		updateZoomFactor();
-		_actions->actionRunSimulation->setChecked(false);
-		_actions->actionRestore->setEnabled(false);
-		_actions->actionRunStepBackward->setEnabled(false);
-		onRunClicked(false);
-	}
-}
-
-void MainView::onSaveSimulation()
-{
-	QString filename = QFileDialog::getSaveFileName(this, "Save Simulation", "", "Alien Simulation(*.sim)");
-	if (!filename.isEmpty()) {
-		_controller->onSaveSimulation(filename.toStdString());
-	}
-}
-
-void MainView::onLoadSimulation()
-{
-	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation", "", "Alien Simulation (*.sim)");
-	if (!filename.isEmpty()) {
-		if(_controller->onLoadSimulation(filename.toStdString())) {
-			updateZoomFactor();
-			_actions->actionRunSimulation->setChecked(false);
-			_actions->actionRestore->setEnabled(false);
-			_actions->actionRunStepBackward->setEnabled(false);
-			onRunClicked(false);
-		}
-		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation could not loaded.");
-			msgBox.exec();
-		}
-	}
-}
-
-void MainView::onEditSimulationParameters()
-{
-	SimulationParametersDialog dialog(_model->getSimulationParameters()->clone(), _serializer, this);
-	if (dialog.exec()) {
-		_model->setSimulationParameters(dialog.getSimulationParameters());
-		_controller->onUpdateSimulationParametersForRunningSimulation();
-	}
-}
-
-void MainView::onLoadSimulationParameters()
-{
-	QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
-	if (!filename.isEmpty()) {
-		SimulationParameters* parameters;
-		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
-			_model->setSimulationParameters(parameters);
-			_controller->onUpdateSimulationParametersForRunningSimulation();
-		}
-		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
-			msgBox.exec();
-		}
-	}
-}
-
-void MainView::onSaveSimulationParameters()
-{
-	QString filename = QFileDialog::getSaveFileName(this, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
-	if (!filename.isEmpty()) {
-		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_model->getSimulationParameters()); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The simulation parameters could not saved.");
-			msgBox.exec();
-		}
-	}
-
-}
-
-void MainView::onEditSymbolTable()
-{
-	auto origSymbols = _model->getSymbolTable();
-	SymbolTableDialog dialog(origSymbols->clone(), _serializer, this);
-	if (dialog.exec()) {
-		origSymbols->getSymbolsFrom(dialog.getSymbolTable());
-		Q_EMIT _dataEditor->getContext()->onRefresh();
-	}
-}
-
-void MainView::onLoadSymbolTable()
-{
-	QString filename = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
-	if (!filename.isEmpty()) {
-		SymbolTable* symbolTable;
-		if (SerializationHelper::loadFromFile<SymbolTable*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSymbolTable(data); }, symbolTable)) {
-			_model->getSymbolTable()->getSymbolsFrom(symbolTable);
-			delete symbolTable;
-			Q_EMIT _dataEditor->getContext()->onRefresh();
-		}
-		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified symbol table could not loaded.");
-			msgBox.exec();
-		}
-	}
-}
-
-void MainView::onSaveSymbolTable()
-{
-	QString filename = QFileDialog::getSaveFileName(this, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
-	if (!filename.isEmpty()) {
-		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSymbolTable(_model->getSymbolTable()); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The symbol table could not saved.");
-			msgBox.exec();
-			return;
-		}
-	}
-}
-
-void MainView::updateZoomFactor()
-{
-	_infoController->setZoomFactor(_visualEditor->getZoomFactor());
-}
 
