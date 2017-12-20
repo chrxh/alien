@@ -59,9 +59,9 @@ void MainView::refresh()
 	_visualEditor->refresh();
 }
 
-void MainView::setupEditors(SimulationController * controller, DataController* manipulator, Notifier* notifier)
+void MainView::setupEditors(SimulationController * controller, DataRepository* manipulator, Notifier* notifier)
 {
-	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext());
+	_toolbar->init({ 10, 10 }, notifier, manipulator, controller->getContext(), _actions);
 	_dataEditor->init({ 10, 60 }, notifier, manipulator, controller->getContext());
 	_visualEditor->init(notifier, controller, manipulator);
 
@@ -114,7 +114,6 @@ void MainView::setupMenu()
 	ui->toolBar->addAction(_actions->actionRunStepForward);
 	ui->toolBar->addSeparator();
 
-
 	ui->menuSimulation->addAction(_actions->actionNewSimulation);
 	ui->menuSimulation->addAction(_actions->actionLoadSimulation);
 	ui->menuSimulation->addAction(_actions->actionSaveSimulation);
@@ -141,6 +140,8 @@ void MainView::setupMenu()
 	ui->menuView->addAction(_actions->actionZoomIn);
 	ui->menuView->addAction(_actions->actionZoomOut);
 	ui->menuView->addAction(_actions->actionFullscreen);
+	ui->menuView->addSeparator();
+	ui->menuView->addAction(_actions->actionShowCellInfo);
 
 	ui->menuEntity->addAction(_actions->actionNewCell);
 	ui->menuEntity->addAction(_actions->actionNewParticle);
@@ -154,16 +155,19 @@ void MainView::setupMenu()
 	ui->menuEntity->addAction(_actions->actionPasteToken);
 	ui->menuEntity->addAction(_actions->actionDeleteToken);
 
-	ui->menuNewEnsemble->addAction(_actions->actionNewRectangle);
-	ui->menuNewEnsemble->addAction(_actions->actionNewHexagon);
-	ui->menuNewEnsemble->addAction(_actions->actionNewParticles);
+	ui->menuCollection->addAction(_actions->actionNewRectangle);
+	ui->menuCollection->addAction(_actions->actionNewHexagon);
+	ui->menuCollection->addAction(_actions->actionNewParticles);
+	ui->menuCollection->addSeparator();
 	ui->menuCollection->addAction(_actions->actionLoadCol);
 	ui->menuCollection->addAction(_actions->actionSaveCol);
 	ui->menuCollection->addAction(_actions->actionCopyCol);
 	ui->menuCollection->addAction(_actions->actionPasteCol);
+	ui->menuCollection->addAction(_actions->actionDeleteSel);
 	ui->menuCollection->addAction(_actions->actionDeleteCol);
-	ui->menuMultiplyCollection->addAction(_actions->actionMultiplyRandom);
-	ui->menuMultiplyCollection->addAction(_actions->actionMultiplyArrangement);
+	ui->menuCollection->addSeparator();
+	ui->menuCollection->addAction(_actions->actionMultiplyRandom);
+	ui->menuCollection->addAction(_actions->actionMultiplyArrangement);
 
 	ui->menuHelp->addAction(_actions->actionAbout);
 	ui->menuEntity->addSeparator();
@@ -181,8 +185,6 @@ void MainView::setupTheme()
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
 	ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
-	ui->menuNewEnsemble->setFont(GuiSettings::getGlobalFont());
-	ui->menuMultiplyCollection->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");

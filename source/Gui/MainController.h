@@ -47,7 +47,7 @@ private:
 	MainModel* _model = nullptr;
 
 	SimulationController* _simController = nullptr;
-	DataController* _dataController = nullptr;
+	DataRepository* _repository = nullptr;
 	VersionController* _versionController = nullptr;
 	SimulationAccess* _simAccess = nullptr;
 	Notifier* _notifier = nullptr;

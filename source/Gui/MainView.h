@@ -21,7 +21,7 @@ public:
 	virtual void init(MainModel* model, MainController* controller, Serializer* serializer);
 	virtual void refresh();
 
-	virtual void setupEditors(SimulationController* controller, DataController* manipulator, Notifier* notifier);
+	virtual void setupEditors(SimulationController* controller, DataRepository* manipulator, Notifier* notifier);
 	virtual InfoController* getInfoController() const;
 
 private:

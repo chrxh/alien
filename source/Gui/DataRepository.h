@@ -4,13 +4,13 @@
 
 #include "Gui/Definitions.h"
 
-class DataController
+class DataRepository
 	: public QObject
 {
 	Q_OBJECT
 public:
-	DataController(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~DataController() = default;
+	DataRepository(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~DataRepository() = default;
 
 	virtual void init(Notifier* notifier, SimulationAccess* access, DescriptionHelper* connector, SimulationContext* context);
 

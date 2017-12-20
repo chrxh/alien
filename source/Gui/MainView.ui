@@ -763,21 +763,6 @@
     <property name="title">
      <string>Collection</string>
     </property>
-    <widget class="QMenu" name="menuMultiplyCollection">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="title">
-      <string>Multiply</string>
-     </property>
-    </widget>
-    <widget class="QMenu" name="menuNewEnsemble">
-     <property name="title">
-      <string>New</string>
-     </property>
-    </widget>
-    <addaction name="menuNewEnsemble"/>
-    <addaction name="menuMultiplyCollection"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
