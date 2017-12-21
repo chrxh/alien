@@ -40,6 +40,9 @@
       <Extensions>h</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
+    <Filter Include="Source Files\Actions">
+      <UniqueIdentifier>{97a890a7-fca7-4ade-a2a1-05c0522170f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">
@@ -312,15 +315,6 @@
     <ClCompile Include="Release\moc_SymbolEditTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_ToolbarModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ToolbarModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarModel.cpp">
-      <Filter>Source Files\Toolbar</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\TokenEditTab.cpp">
       <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
@@ -468,15 +462,6 @@
     <ClCompile Include="Release\moc_VersionController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ActionHolder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ActionHolder.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ActionHolder.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataRepository.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -486,13 +471,31 @@
     <ClCompile Include="Release\moc_DataRepository.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ActionController.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\source\Gui\Actions\ActionController.cpp">
+      <Filter>Source Files\Actions</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ActionController.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_ActionController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Actions\ActionHolder.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ActionHolder.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ActionHolder.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Actions\ActionModel.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ActionModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ActionModel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -646,9 +649,6 @@
     <CustomBuild Include="..\..\source\Gui\DataEditor\SymbolEditTab.ui">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarModel.h">
-      <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTab.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
@@ -706,17 +706,20 @@
     <CustomBuild Include="..\..\source\Gui\InfoController.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ActionHolder.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\VersionController.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataRepository.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ActionController.h">
-      <Filter>Header Files</Filter>
+    <CustomBuild Include="..\..\source\Gui\Actions\ActionController.h">
+      <Filter>Source Files\Actions</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Actions\ActionHolder.h">
+      <Filter>Source Files\Actions</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Actions\ActionModel.h">
+      <Filter>Source Files\Actions</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

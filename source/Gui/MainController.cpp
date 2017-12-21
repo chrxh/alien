@@ -56,7 +56,7 @@ void MainController::init()
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
 	_serializer->init();
-	_view->init(_model, this, _serializer);
+	_view->init(_model, this, _serializer, _repository, _notifier);
 	_numberGenerator->init(12315312, 0);
 
 	
@@ -113,7 +113,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	_versionController->init(_simController->getContext());
 	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
-	_view->setupEditors(_simController, _repository, _notifier);
+	_view->setupEditors(_simController);
 
 	addRandomEnergy(config.energy);
 
@@ -145,7 +145,7 @@ bool MainController::onLoadSimulation(string const & filename)
 	_versionController->init(_simController->getContext());
 	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext());
 
-	_view->setupEditors(_simController, _repository, _notifier);
+	_view->setupEditors(_simController);
 	_view->refresh();
 	return true;
 }

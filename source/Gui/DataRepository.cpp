@@ -218,7 +218,7 @@ void DataRepository::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
-	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::Toolbar }, UpdateDescription::All);
+	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::ActionController }, UpdateDescription::All);
 }
 
 void DataRepository::sendDataChangesToSimulation(set<Receiver> const& targets)

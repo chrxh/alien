@@ -36,7 +36,8 @@
 //- Zugriff verwendet Desriptions
 
 //Nächsten Male:
-//- Actions für Zell-, Token- und Clusterbearbeitung werden im ToolbarView ausgewertet
+//- Aktionen im ToolbarController in ActionController verschieben
+//- editMode vom MainModel ins ActionModel
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl

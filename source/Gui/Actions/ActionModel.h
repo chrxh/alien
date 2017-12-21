@@ -2,15 +2,23 @@
 
 #include <QObject>
 
-class ToolbarModel
+#include "Gui/Definitions.h"
+
+
+class ActionModel
 	: public QObject
 {
 	Q_OBJECT
 public:
-	ToolbarModel(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~ToolbarModel() = default;
+	ActionModel(QObject* parent = nullptr);
+	virtual ~ActionModel() = default;
+
+	virtual ActionHolder* getActionHolder() const;
 
 	virtual QVector2D getPositionDeltaForNewEntity();
+
+	optional<bool> isEditMode() const;
+	void setEditMode(optional<bool> value);
 
 	virtual bool isEntitySelected() const;
 	virtual void setEntitySelected(bool value);
@@ -34,8 +42,11 @@ public:
 	virtual void setCollectionCopied(bool value);
 
 private:
+	ActionHolder* _actions = nullptr;
+
+	optional<bool> _isEditMode;
+
 	double _delta = 0.0;
-	
 	bool _entitySelected = false;
 	bool _entityCopied = false;
 	bool _cellWithTokenSelected = false;

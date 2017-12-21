@@ -32,7 +32,7 @@ class DataEditContext;
 class ToolbarController;
 class ToolbarContext;
 class ToolbarView;
-class ToolbarModel;
+class ActionModel;
 class DataEditModel;
 class DataEditView;
 class DataRepository;
@@ -56,7 +56,7 @@ class ActionHolder;
 class ActionController;
 
 enum class ActiveScene { PixelScene, ItemScene };
-enum class Receiver { Simulation, VisualEditor, DataEditor, Toolbar };
+enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
 
 struct NewSimulationConfig
