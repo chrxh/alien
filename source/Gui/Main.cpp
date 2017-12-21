@@ -36,7 +36,7 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Bug: keine Cell-Connection in der Ansicht vorhanden: Grafik wird nach dem Löschen nicht aktualisiert
+//- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
