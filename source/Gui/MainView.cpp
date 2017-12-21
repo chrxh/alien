@@ -5,8 +5,8 @@
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
 
-#include "ActionController.h"
-#include "ActionHolder.h"
+#include "Gui/Actions/ActionController.h"
+#include "Gui/Actions/ActionHolder.h"
 #include "SerializationHelper.h"
 #include "InfoController.h"
 #include "DataEditController.h"
@@ -33,18 +33,19 @@ MainView::~MainView()
 	delete ui;
 }
 
-void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer)
+void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository, Notifier* notifier)
 {
 	_model = model;
 	_controller = mainController;
-	_serializer = serializer;
+	_repository = repository;
+	_notifier = notifier;
 	_visualEditor = ui->visualEditController;
 	_toolbar = new ToolbarController(_visualEditor);
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
 	_infoController->init(ui->infoLabel, mainController);
-	_actions->init(_controller, _model, this, _visualEditor, _serializer, _infoController, _dataEditor, _toolbar);
+	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar, repository, notifier);
 
 	setupMenu();
 	setupTheme();
@@ -57,13 +58,12 @@ void MainView::refresh()
 	_visualEditor->refresh();
 }
 
-void MainView::setupEditors(SimulationController * controller, DataRepository* repository, Notifier* notifier)
+void MainView::setupEditors(SimulationController * controller)
 {
-	_toolbar->init({ 10, 10 }, notifier, repository, controller->getContext(), _actions->getActionHolder());
-	_dataEditor->init({ 10, 60 }, notifier, repository, controller->getContext());
-	_visualEditor->init(notifier, controller, repository);
+	_toolbar->init({ 10, 10 }, _notifier, _repository, controller->getContext(), _actions->getActionHolder());
+	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
+	_visualEditor->init(_notifier, controller, _repository);
 
-	_model->setEditMode(boost::none);
 	_actions->getActionHolder()->actionEditor->setChecked(false);
 	_actions->getActionHolder()->actionEditor->trigger();
 }

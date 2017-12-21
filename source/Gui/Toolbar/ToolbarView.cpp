@@ -2,7 +2,7 @@
 
 #include "Gui/Settings.h"
 
-#include "ActionHolder.h"
+#include "Gui/Actions/ActionHolder.h"
 #include "ToolbarView.h"
 #include "ToolbarController.h"
 
@@ -19,6 +19,7 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* acti
 	_actions = actions;
 	setGeometry(upperLeftPosition.x, upperLeftPosition.y, width(), height());
 
+/*
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
@@ -60,7 +61,6 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* acti
 		ui.showCellInfoButton->setEnabled(_actions->actionShowCellInfo->isEnabled());
 	}));
 
-
-
-//	ui.showCellInfoButton->setChecked(false);
+	ui.showCellInfoButton->setChecked(false);
+*/
 }
