@@ -39,6 +39,8 @@ private:
 
 	Q_SLOT void onNewCell();
 	Q_SLOT void onNewParticle();
+	Q_SLOT void onCopyCollection();
+	Q_SLOT void onPasteCollection();
 	Q_SLOT void onDeleteSelection();
 	Q_SLOT void onDeleteCollection();
 	Q_SLOT void onNewToken();

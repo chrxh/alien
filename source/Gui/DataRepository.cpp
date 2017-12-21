@@ -41,7 +41,19 @@ ClusterDescription & DataRepository::getClusterDescRef(uint64_t cellId)
 	return _data.clusters->at(clusterIndex);
 }
 
+ClusterDescription const & DataRepository::getClusterDescRef(uint64_t cellId) const
+{
+	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
+	return _data.clusters->at(clusterIndex);
+}
+
 ParticleDescription& DataRepository::getParticleDescRef(uint64_t particleId)
+{
+	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
+	return _data.particles->at(particleIndex);
+}
+
+ParticleDescription const & DataRepository::getParticleDescRef(uint64_t particleId) const
 {
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles->at(particleIndex);
@@ -84,6 +96,38 @@ void DataRepository::addAndSelectParticle(QVector2D const & posDelta)
 	_selectedCellIds = { };
 	_selectedClusterIds = { };
 	_selectedParticleIds = { desc.id };
+	_navi.update(_data);
+}
+
+void DataRepository::addAndSelectData(DataDescription data, QVector2D const & posDelta)
+{
+	QVector2D centerOfData = data.calcCenter();
+	QVector2D targetCenter = _rect.center().toQVector2D() + posDelta;
+	QVector2D delta = targetCenter - centerOfData;
+	data.shift(delta);
+
+	_selectedCellIds = {};
+	_selectedClusterIds = {};
+	_selectedParticleIds = {};
+	if (data.clusters) {
+		for (auto& cluster : *data.clusters) {
+			cluster.id = 0;
+			_descHelper->makeValid(cluster);
+			_data.addCluster(cluster);
+			_selectedClusterIds.insert(cluster.id);
+			if (cluster.cells) {
+				std::transform(cluster.cells->begin(), cluster.cells->end(), std::inserter(_selectedCellIds, _selectedCellIds.begin())
+					, [](auto const& cell) { return cell.id; });
+			}
+		}
+	}
+	if (data.particles) {
+		for (auto& particle : *data.particles) {
+			_descHelper->makeValid(particle);
+			_data.addParticle(particle);
+			_selectedParticleIds.insert(particle.id);
+		}
+	}
 	_navi.update(_data);
 }
 
@@ -282,6 +326,19 @@ unordered_set<uint64_t> DataRepository::getSelectedCellIds() const
 unordered_set<uint64_t> DataRepository::getSelectedParticleIds() const
 {
 	return _selectedParticleIds;
+}
+
+DataDescription DataRepository::getExtendedSelection() const
+{
+	DataDescription result;
+	for (uint64_t clusterId : _selectedClusterIds) {
+		int clusterIndex = _navi.clusterIndicesByClusterIds.at(clusterId);
+		result.addCluster(_data.clusters->at(clusterIndex));
+	}
+	for (uint64_t particleId : _selectedParticleIds) {
+		result.addParticle(getParticleDescRef(particleId));
+	}
+	return result;
 }
 
 void DataRepository::moveSelection(QVector2D const &delta)

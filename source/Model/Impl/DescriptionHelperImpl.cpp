@@ -51,12 +51,19 @@ void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 {
 	if (cluster.id == 0) {
 		cluster.id = _numberGen->getTag();
-	}
-	if (cluster.cells) {
-		CHECK(cluster.cells->size() == 1);	//only one cell supported
+		if (cluster.cells) {
+			unordered_map<uint64_t, uint64_t> newByOldIds;
+			for (auto & cell : *cluster.cells) {
+				uint64_t newId = _numberGen->getTag();
+				newByOldIds.insert_or_assign(cell.id, newId);
+				cell.id = newId;
+			}
 
-		if (cluster.cells->front().id == 0) {
-			cluster.cells->front().id = _numberGen->getTag();
+			for (auto & cell : *cluster.cells) {
+				for (uint64_t& connectingCellId : *cell.connectingCells) {
+					connectingCellId = newByOldIds.at(connectingCellId);
+				}
+			}
 		}
 	}
 }

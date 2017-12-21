@@ -102,3 +102,13 @@ void ActionModel::setCollectionCopied(bool value)
 {
 	_collectionCopied = value;
 }
+
+DataDescription const & ActionModel::getCopiedData() const
+{
+	return _copiedData;
+}
+
+void ActionModel::setCopiedData(DataDescription const &value)
+{
+	_copiedData = value;
+}
