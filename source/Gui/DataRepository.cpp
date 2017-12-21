@@ -123,6 +123,7 @@ void DataRepository::addAndSelectData(DataDescription data, QVector2D const & po
 	}
 	if (data.particles) {
 		for (auto& particle : *data.particles) {
+			particle.id = 0;
 			_descHelper->makeValid(particle);
 			_data.addParticle(particle);
 			_selectedParticleIds.insert(particle.id);
