@@ -413,8 +413,8 @@ void ActionController::updateActionsEnableState()
 	actions->actionSaveCol->setEnabled(visible && collectionSelected);
 	actions->actionCopyCol->setEnabled(visible && collectionSelected);
 	actions->actionPasteCol->setEnabled(visible && collectionCopied);
-	actions->actionDeleteCol->setEnabled(visible && collectionSelected);
 	actions->actionDeleteSel->setEnabled(visible && collectionSelected);
+	actions->actionDeleteCol->setEnabled(visible && collectionSelected);
 	actions->actionMultiplyRandom->setEnabled(visible && collectionSelected);
 	actions->actionMultiplyArrangement->setEnabled(visible && collectionSelected);
 }
