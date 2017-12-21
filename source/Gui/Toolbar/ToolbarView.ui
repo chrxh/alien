@@ -16,7 +16,7 @@
   <property name="windowOpacity">
    <double>1.000000000000000</double>
   </property>
-  <widget class="QToolButton" name="requestCellButton">
+  <widget class="QToolButton" name="newCellButton">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -130,7 +130,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="requestTokenButton">
+  <widget class="QToolButton" name="newTokenButton">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -484,7 +484,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="requestParticleButton">
+  <widget class="QToolButton" name="newParticleButton">
    <property name="geometry">
     <rect>
      <x>51</x>
@@ -715,7 +715,7 @@
     </size>
    </property>
   </widget>
-  <widget class="QToolButton" name="delExtendedSelectionButton">
+  <widget class="QToolButton" name="delCollectionButton">
    <property name="enabled">
     <bool>false</bool>
    </property>

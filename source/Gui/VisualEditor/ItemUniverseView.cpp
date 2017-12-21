@@ -13,6 +13,7 @@
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
 
+#include "ViewportController.h"
 #include "ItemUniverseView.h"
 #include "CellItem.h"
 #include "ParticleItem.h"

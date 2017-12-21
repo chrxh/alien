@@ -33,11 +33,10 @@
 //- parents werden nicht in Fassaden oder Factories übergeben
 //- jeglicher Zugriff auf die Simulation (z.B. Serialisierung, Gui, ...) erfolgt über SimulationAccessApi
 //- Zugriff ist asynchron
-//- Zugriff verwendet Desriptions
+//- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Aktionen im ToolbarController in ActionController verschieben
-//- editMode vom MainModel ins ActionModel
+//- Bug: keine Cell-Connection in der Ansicht vorhanden: Grafik wird nach dem Löschen nicht aktualisiert
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
