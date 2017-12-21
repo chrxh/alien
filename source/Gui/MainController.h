@@ -48,9 +48,9 @@ private:
 
 	SimulationController* _simController = nullptr;
 	DataRepository* _repository = nullptr;
+	Notifier* _notifier = nullptr;
 	VersionController* _versionController = nullptr;
 	SimulationAccess* _simAccess = nullptr;
-	Notifier* _notifier = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;
 	DescriptionHelper* _descHelper = nullptr;

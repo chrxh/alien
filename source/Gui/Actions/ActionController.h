@@ -13,7 +13,8 @@ public:
 	virtual ~ActionController() = default;
 
 	virtual void init(MainController* mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
-		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar);
+		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
+		, DataRepository* repository, Notifier* notifier);
 
 	virtual ActionHolder* getActionHolder();
 
@@ -36,15 +37,29 @@ private:
 	Q_SLOT void onLoadSymbolTable();
 	Q_SLOT void onSaveSymbolTable();
 
-	void updateZoomFactor();
+	Q_SLOT void onNewCell();
+	Q_SLOT void onNewParticle();
+	Q_SLOT void onDeleteSelection();
+	Q_SLOT void onDeleteCollection();
+	Q_SLOT void onNewToken();
+	Q_SLOT void onDeleteToken();
+	Q_SLOT void onToggleCellInfo(bool showInfo);
 
-	ActionHolder* _actions = nullptr;
+	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
+
+	void updateZoomFactor();
+	void updateActionsEnableState();
+
+	ActionModel* _model = nullptr;
 	MainController* _mainController = nullptr;
 	MainModel* _mainModel = nullptr;
 	MainView* _mainView = nullptr;
-	VisualEditController* _visualEditor = nullptr;
+	DataRepository* _repository = nullptr;
+	Notifier* _notifier = nullptr;
 	Serializer* _serializer = nullptr;
-	InfoController* _infoController = nullptr;
+
+	VisualEditController* _visualEditor = nullptr;
 	DataEditController* _dataEditor = nullptr;
+	InfoController* _infoController = nullptr;
 	ToolbarController* _toolbar = nullptr;
 };

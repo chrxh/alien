@@ -18,10 +18,10 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller, Serializer* serializer);
+	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository, Notifier* notifier);
 	virtual void refresh();
 
-	virtual void setupEditors(SimulationController* controller, DataRepository* manipulator, Notifier* notifier);
+	virtual void setupEditors(SimulationController* controller);
 	virtual InfoController* getInfoController() const;
 
 private:
@@ -32,8 +32,9 @@ private:
 	VisualEditController* _visualEditor = nullptr;
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;
-	Serializer* _serializer = nullptr;
 	ActionController* _actions = nullptr;
+	DataRepository* _repository = nullptr;
+	Notifier* _notifier = nullptr;
 
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
