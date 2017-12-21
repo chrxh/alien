@@ -132,7 +132,7 @@
   </widget>
   <widget class="QToolButton" name="newTokenButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -369,7 +369,7 @@
   </widget>
   <widget class="QToolButton" name="delTokenButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -600,7 +600,7 @@
   </widget>
   <widget class="QToolButton" name="delSelectionButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -717,7 +717,7 @@
   </widget>
   <widget class="QToolButton" name="delCollectionButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>

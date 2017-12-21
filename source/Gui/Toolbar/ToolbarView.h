@@ -17,9 +17,9 @@ public:
 	void init(IntVector2D const& upperLeftPosition, ActionHolder* actions, ToolbarController* _controller);
 
 private:
-	Ui::Toolbar ui;
+	void connectActionToButton(QAction*& action, QToolButton*& button);
 
-	list<QMetaObject::Connection> _connections;
+	Ui::Toolbar ui;
 
 	ToolbarController* _controller = nullptr;
 	ActionHolder* _actions = nullptr;

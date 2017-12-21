@@ -93,6 +93,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	iconCellInfo.addFile("://Icons/info_off.png", QSize(), QIcon::Normal, QIcon::Off);
 	iconCellInfo.addFile("://Icons/info_on.png", QSize(), QIcon::Normal, QIcon::On);
 	actionShowCellInfo->setIcon(iconCellInfo);
+	actionShowCellInfo->setIconVisibleInMenu(false);
 	actionShowCellInfo->setEnabled(false);
 	actionShowCellInfo->setCheckable(true);
 	actionShowCellInfo->setChecked(false);
@@ -101,11 +102,13 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	QIcon iconNewCell;
 	iconNewCell.addFile("://Icons/add_cell.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionNewCell->setIcon(iconNewCell);
+	actionNewCell->setIconVisibleInMenu(false);
 	actionNewCell->setEnabled(true);
 	actionNewParticle = new QAction("New particle", this);;
 	QIcon iconNewParticle;
 	iconNewParticle.addFile("://Icons/add_energy.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionNewParticle->setIcon(iconNewParticle);
+	actionNewParticle->setIconVisibleInMenu(false);
 	actionNewParticle->setEnabled(true);
 	actionCopyEntity = new QAction("Copy entity", this);;
 	actionCopyEntity->setEnabled(false);
@@ -117,6 +120,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	QIcon iconNewToken;
 	iconNewToken.addFile("://Icons/add_token.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionNewToken->setIcon(iconNewToken);
+	actionNewToken->setIconVisibleInMenu(false);
 	actionNewToken->setEnabled(false);
 	actionCopyToken = new QAction("Copy token", this);
 	actionCopyToken->setEnabled(false);
@@ -126,6 +130,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	QIcon iconDelToken;
 	iconDelToken.addFile("://Icons/del_token.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionDeleteToken->setIcon(iconDelToken);
+	actionDeleteToken->setIconVisibleInMenu(false);
 	actionDeleteToken->setEnabled(false);
 
 	actionNewRectangle = new QAction("New rectangle", this);
@@ -146,11 +151,13 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	QIcon iconDeleteSel;
 	iconDeleteSel.addFile("://Icons/del_cell.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionDeleteSel->setIcon(iconDeleteSel);
+	actionDeleteSel->setIconVisibleInMenu(false);
 	actionDeleteSel->setEnabled(false);
 	actionDeleteCol = new QAction("Delete extended selection", this);
 	QIcon iconDeleteCol;
 	iconDeleteCol.addFile("://Icons/add_cluster.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionDeleteCol->setIcon(iconDeleteCol);
+	actionDeleteCol->setIconVisibleInMenu(false);
 	actionDeleteCol->setEnabled(false);
 	actionMultiplyRandom = new QAction("Multiply random", this);
 	actionMultiplyRandom->setEnabled(false);
