@@ -2,8 +2,8 @@
 
 #include <QObject>
 
+#include "Model/Api/Descriptions.h"
 #include "Gui/Definitions.h"
-
 
 class ActionModel
 	: public QObject
@@ -41,11 +41,14 @@ public:
 	virtual bool isCollectionCopied() const;
 	virtual void setCollectionCopied(bool value);
 
+	virtual DataDescription const& getCopiedData() const;
+	virtual void setCopiedData(DataDescription const& value);
+
 private:
 	ActionHolder* _actions = nullptr;
 
+	DataDescription _copiedData;
 	optional<bool> _isEditMode;
-
 	double _delta = 0.0;
 	bool _entitySelected = false;
 	bool _entityCopied = false;

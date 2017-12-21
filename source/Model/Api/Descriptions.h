@@ -167,6 +167,8 @@ struct MODEL_EXPORT DataDescription
 		clusters = boost::none;
 		particles = boost::none;
 	}
+	QVector2D calcCenter() const;
+	void shift(QVector2D const& delta);
 };
 
 struct ResolveDescription

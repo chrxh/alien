@@ -71,6 +71,8 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 
 	connect(actions->actionNewCell, &QAction::triggered, this, &ActionController::onNewCell);
 	connect(actions->actionNewParticle, &QAction::triggered, this, &ActionController::onNewParticle);
+	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
+	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
 	connect(actions->actionDeleteSel, &QAction::triggered, this, &ActionController::onDeleteSelection);
 	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteCollection);
 	connect(actions->actionNewToken, &QAction::triggered, this, &ActionController::onNewToken);
@@ -292,6 +294,26 @@ void ActionController::onNewCell()
 void ActionController::onNewParticle()
 {
 	_repository->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::ActionController
+	}, UpdateDescription::All);
+}
+
+void ActionController::onCopyCollection()
+{
+	DataDescription copiedData = _repository->getExtendedSelection();
+	_model->setCopiedData(copiedData);
+	_model->setCollectionCopied(true);
+	updateActionsEnableState();
+}
+
+void ActionController::onPasteCollection()
+{
+	DataDescription copiedData = _model->getCopiedData();
+	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notify({
 		Receiver::DataEditor,
 		Receiver::Simulation,

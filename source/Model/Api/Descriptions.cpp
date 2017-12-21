@@ -49,3 +49,46 @@ ParticleDescription::ParticleDescription(ParticleChangeDescription const & chang
 	energy = static_cast<optional<double>>(change.energy);
 	metadata = static_cast<optional<ParticleMetadata>>(change.metadata);
 }
+
+QVector2D DataDescription::calcCenter() const
+{
+	QVector2D result;
+	int numEntities = 0;
+	if (clusters) {
+		for (auto const& cluster : *clusters) {
+			if (cluster.cells) {
+				for (auto const& cell : *cluster.cells) {
+					result += *cell.pos;
+					++numEntities;
+				}
+			}
+		}
+	}
+	if (particles) {
+		for (auto const& particle : *particles) {
+			result += *particle.pos;
+			++numEntities;
+		}
+	}
+	result /= numEntities;
+	return result;
+}
+
+void DataDescription::shift(QVector2D const & delta)
+{
+	if (clusters) {
+		for (auto & cluster : *clusters) {
+			*cluster.pos += delta;
+			if (cluster.cells) {
+				for (auto & cell : *cluster.cells) {
+					*cell.pos += delta;
+				}
+			}
+		}
+	}
+	if (particles) {
+		for (auto & particle : *particles) {
+			*particle.pos += delta;
+		}
+	}
+}

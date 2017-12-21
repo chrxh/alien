@@ -16,14 +16,17 @@ public:
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
-	virtual ClusterDescription& getClusterDescRef(uint64_t clusterId);
+	virtual ClusterDescription& getClusterDescRef(uint64_t cellId);
+	virtual ClusterDescription const& getClusterDescRef(uint64_t cellId) const;
 	virtual ParticleDescription& getParticleDescRef(uint64_t particleId);
+	virtual ParticleDescription const& getParticleDescRef(uint64_t particleId) const;
 
 	virtual void setSelectedTokenIndex(optional<uint> const& value);
 	virtual optional<uint> getSelectedTokenIndex() const;
 
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
+	virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta);
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
 	virtual void addToken();
@@ -44,6 +47,7 @@ public:
 	virtual bool areEntitiesSelected() const;
 	virtual unordered_set<uint64_t> getSelectedCellIds() const;
 	virtual unordered_set<uint64_t> getSelectedParticleIds() const;
+	virtual DataDescription getExtendedSelection() const;
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
 	virtual void requireImageFromSimulation(IntRect const& rect, QImage* target);
