@@ -12,7 +12,6 @@ ToolbarView::ToolbarView(QWidget * parent)
 {
 	ui.setupUi(this);
 	setStyleSheet(GuiSettings::ButtonStyleSheet);
-
 }
 
 void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* actions, ToolbarController* controller)
@@ -30,7 +29,7 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* acti
 	connectActionToButton(_actions->actionShowCellInfo, ui.showCellInfoButton);
 }
 
-//note: workaround since QToolButton::setDefaultAction does not work as wished
+//note: workaround since QToolButton::setDefaultAction does not function as wished
 //		(VisualEditor is not updated properly after pressing delete cell button)
 void ToolbarView::connectActionToButton(QAction *& action, QToolButton *& button)
 {
