@@ -24,7 +24,6 @@ public:
 
 	virtual void refresh();
 
-
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent* e);
 	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);

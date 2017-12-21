@@ -19,7 +19,14 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* acti
 	_actions = actions;
 	setGeometry(upperLeftPosition.x, upperLeftPosition.y, width(), height());
 
-/*
+	ui.newCellButton->setDefaultAction(actions->actionNewCell);
+	ui.newParticleButton->setDefaultAction(actions->actionNewParticle);
+	ui.delSelectionButton->setDefaultAction(actions->actionDeleteSel);
+	ui.delCollectionButton->setDefaultAction(actions->actionDeleteCol);
+	ui.newTokenButton->setDefaultAction(actions->actionNewToken);
+	ui.delTokenButton->setDefaultAction(actions->actionDeleteToken);
+	ui.showCellInfoButton->setDefaultAction(actions->actionShowCellInfo);
+	/*
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
