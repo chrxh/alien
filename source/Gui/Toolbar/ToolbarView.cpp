@@ -39,5 +39,6 @@ void ToolbarView::connectActionToButton(QAction *& action, QToolButton *& button
 	connect(action, &QAction::changed, [&]() {
 		button->setEnabled(action->isEnabled());
 	});
+	connect(action, &QAction::toggled, button, &QToolButton::setChecked);
 	connect(button, &QToolButton::clicked, action, &QAction::trigger);
 }
