@@ -4,7 +4,7 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "Model/Local/Physics.h"
-#include "tests/predicates.h"
+#include "tests/Predicates2.h"
 
 class PhysicsTest : public ::testing::Test
 {

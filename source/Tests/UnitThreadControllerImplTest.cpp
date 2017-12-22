@@ -11,7 +11,7 @@
 #include "Model/Impl/UnitThreadControllerImpl.h"
 #include "Model/Impl/UnitThread.h"
 
-#include "tests/Predicates.h"
+#include "tests/Predicates2.h"
 
 class UnitThreadControllerImplTest
 	: public ::testing::Test

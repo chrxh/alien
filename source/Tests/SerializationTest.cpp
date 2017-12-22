@@ -15,7 +15,7 @@
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/Serializer.h"
 
-#include "Tests/Predicates.h"
+#include "Tests/Predicates2.h"
 
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
