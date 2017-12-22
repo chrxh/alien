@@ -20,6 +20,9 @@ public:
 	virtual string const& retrieveSerializedSimulation() = 0;
 	virtual SimulationController* deserializeSimulation(string const& content) = 0;
 
+	virtual string serializeDataDescription(DataDescription const& desc) const = 0;
+	virtual DataDescription deserializeDataDescription(string const& data) = 0;
+
 	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const = 0;
 	virtual SymbolTable* deserializeSymbolTable(string const& data) = 0;
 
