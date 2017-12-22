@@ -57,12 +57,12 @@ SimulationContext * SimulationControllerImpl::getContext() const
 	return _context;
 }
 
-int SimulationControllerImpl::getTimestep() const
+uint SimulationControllerImpl::getTimestep() const
 {
 	return _timestep;
 }
 
-void SimulationControllerImpl::setTimestep(int value)
+void SimulationControllerImpl::setTimestep(uint value)
 {
 	_timestep = value;
 }

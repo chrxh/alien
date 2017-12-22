@@ -26,6 +26,7 @@ public:
 	virtual void onUpdateSimulationParametersForRunningSimulation();
 
 	virtual int getTimestep() const;
+	virtual SimulationConfig getSimulationConfig() const;
 
 private:
 	void connectSimController() const;

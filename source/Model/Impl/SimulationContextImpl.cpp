@@ -41,7 +41,7 @@ IntVector2D SimulationContextImpl::getGridSize() const
 	return _grid->getSize();
 }
 
-int SimulationContextImpl::getMaxThreads() const
+uint SimulationContextImpl::getMaxThreads() const
 {
 	return _threads->getMaxRunningThreads();
 }
