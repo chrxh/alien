@@ -17,8 +17,8 @@ public:
 
 	virtual QVector2D getPositionDeltaForNewEntity();
 
-	optional<bool> isEditMode() const;
-	void setEditMode(optional<bool> value);
+	bool isEditMode() const;
+	void setEditMode(bool value);
 
 	virtual bool isEntitySelected() const;
 	virtual void setEntitySelected(bool value);
@@ -48,7 +48,7 @@ private:
 	ActionHolder* _actions = nullptr;
 
 	DataDescription _copiedData;
-	optional<bool> _isEditMode;
+	bool _isEditMode = false;
 	double _delta = 0.0;
 	bool _entitySelected = false;
 	bool _entityCopied = false;

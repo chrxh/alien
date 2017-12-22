@@ -61,9 +61,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionMergeWithSymbols->setEnabled(true);
 
 	actionEditor = new QAction("Editor", this);
+	actionEditor->setCheckable(true);
+	actionEditor->setChecked(false);
 	actionEditor->setEnabled(true);
 	QIcon iconEditor;
-	iconEditor.addFile(":/Icons/EditorView.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconEditor.addFile(":/Icons/EditorView.png", QSize(), QIcon::Normal, QIcon::On);
+	iconEditor.addFile(":/Icons/PixelView.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionEditor->setIcon(iconEditor);
 	actionEditor->setIconVisibleInMenu(false);
 	actionMonitor = new QAction("Monitor", this);
