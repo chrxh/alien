@@ -36,7 +36,7 @@ IntVector2D SimulationContextGpuImpl::getGridSize() const
 	return IntVector2D();
 }
 
-int SimulationContextGpuImpl::getMaxThreads() const
+uint SimulationContextGpuImpl::getMaxThreads() const
 {
 	return 0;
 }
@@ -54,6 +54,10 @@ SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
 CellComputerCompiler * SimulationContextGpuImpl::getCellComputerCompiler() const
 {
 	return nullptr;
+}
+
+void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters const * parameters)
+{
 }
 
 ThreadController * SimulationContextGpuImpl::getGpuThreadController() const

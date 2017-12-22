@@ -12,12 +12,11 @@ public:
 	SimulationControllerImpl(QObject* parent = nullptr);
 	virtual ~SimulationControllerImpl() = default;
 
-	virtual void init(SimulationContext* context);
+	virtual void init(SimulationContext* context, uint timestep);
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
 	virtual uint getTimestep() const override;
-	virtual void setTimestep(uint value) override;
 
 private:
 	SimulationContextLocal* _context = nullptr;
@@ -26,6 +25,6 @@ private:
 	QTimer* _oneSecondTimer = nullptr;
 	QTime _timeSinceLastStart;
 	int _displayedFramesSinceLastStart = 0;
-	int _timestep = 0;
+	uint _timestep = 0;
 };
 

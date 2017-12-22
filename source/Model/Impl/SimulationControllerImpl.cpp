@@ -16,8 +16,9 @@ SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
 {
 }
 
-void SimulationControllerImpl::init(SimulationContext* context)
+void SimulationControllerImpl::init(SimulationContext* context, uint timestep)
 {
+	_timestep = timestep;
 	SET_CHILD(_context, static_cast<SimulationContextLocal*>(context));
 	connect(_context->getUnitThreadController(), &UnitThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
@@ -60,11 +61,6 @@ SimulationContext * SimulationControllerImpl::getContext() const
 uint SimulationControllerImpl::getTimestep() const
 {
 	return _timestep;
-}
-
-void SimulationControllerImpl::setTimestep(uint value)
-{
-	_timestep = value;
 }
 
 

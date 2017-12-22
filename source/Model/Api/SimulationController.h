@@ -14,7 +14,6 @@ public:
 	virtual void calculateSingleTimestep() = 0;
 	virtual SimulationContext* getContext() const = 0;
 	virtual uint getTimestep() const = 0;
-	virtual void setTimestep(uint value) = 0;
 
 	Q_SIGNAL void nextFrameCalculated();
 	Q_SIGNAL void nextTimestepCalculated();
