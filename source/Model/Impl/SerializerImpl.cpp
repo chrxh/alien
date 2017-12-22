@@ -242,9 +242,8 @@ SimulationController* SerializerImpl::deserializeSimulation(string const & conte
 	ia >> data >> universeSize >> gridSize >> *parameters >> *symbolTable >> maxThreads >> timestep;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto simController = facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters);
+	auto simController = facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters, timestep);
 	simController->setParent(this);
-	simController->setTimestep(timestep);
 
 	_access->init(simController->getContext());
 

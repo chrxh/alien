@@ -48,7 +48,7 @@ SerializationTest::SerializationTest()
 	_serializer = _facade->buildSerializer();
 	_metric = _context->getSpaceProperties();
 	_access = _facade->buildSimulationAccess();
-	_serializer->init(_access);
+	_serializer->init();
 	_access->init(_context);
 }
 

@@ -38,8 +38,8 @@ namespace
 	const int ARRAY_SIZE_FOR_RANDOM_NUMBERS = 234327;
 }
 
-SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize, IntVector2D universeSize
-	, SymbolTable* symbolTable, SimulationParameters* parameters) const
+SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxRunngingThreads, IntVector2D gridSize
+	, IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters, uint timestep) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -84,7 +84,7 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 	}
 
 	auto controller = new SimulationControllerImpl();
-	controller->init(static_cast<SimulationContextLocal*>(context));
+	controller->init(static_cast<SimulationContextLocal*>(context), timestep);
 
 	return controller;
 }

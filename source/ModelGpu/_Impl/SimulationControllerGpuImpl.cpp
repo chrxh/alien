@@ -67,6 +67,11 @@ SimulationContext * SimulationControllerGpuImpl::getContext() const
 	return _context;
 }
 
+uint SimulationControllerGpuImpl::getTimestep() const
+{
+	return 0;
+}
+
 void SimulationControllerGpuImpl::oneSecondTimerTimeout()
 {
 	Q_EMIT updateTimestepsPerSecond(_timestepsPerSecond);

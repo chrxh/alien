@@ -18,6 +18,8 @@ public:
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
 
+	virtual uint getTimestep() const override;
+
 private:
 	Q_SLOT void oneSecondTimerTimeout();
 	Q_SLOT void frameTimerTimeout();
