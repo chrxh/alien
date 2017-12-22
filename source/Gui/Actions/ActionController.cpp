@@ -53,7 +53,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
 	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
-	connect(actions->actionRunSimulation, &QAction::triggered, this, &ActionController::onRunClicked);
+	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
 	connect(actions->actionRunStepForward, &QAction::triggered, this, &ActionController::onStepForward);
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
 	connect(actions->actionSnapshot, &QAction::triggered, this, &ActionController::onMakeSnapshot);
@@ -61,7 +61,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
 	connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
-	connect(actions->actionEditor, &QAction::triggered, this, &ActionController::onSetEditorMode);
+	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onSetEditorMode);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
 	connect(actions->actionLoadSimParameters, &QAction::triggered, this, &ActionController::onLoadSimulationParameters);
 	connect(actions->actionSaveSimParameters, &QAction::triggered, this, &ActionController::onSaveSimulationParameters);
@@ -143,24 +143,19 @@ void ActionController::onZoomOutClicked()
 	updateZoomFactor();
 }
 
-void ActionController::onSetEditorMode()
+void ActionController::onSetEditorMode(bool editMode)
 {
-	auto editMode = _model->isEditMode();
-	bool newEditMode = editMode ? !editMode.get() : false;
-	_model->setEditMode(newEditMode);
-
-	_toolbar->getContext()->show(newEditMode);
-	_dataEditor->getContext()->onShow(newEditMode);
-	if (newEditMode) {
+	_model->setEditMode(editMode);
+	if (editMode) {
 		_visualEditor->setActiveScene(ActiveScene::ItemScene);
-		_model->getActionHolder()->actionEditor->setIcon(QIcon("://Icons/PixelView.png"));
 	}
 	else {
 		_visualEditor->setActiveScene(ActiveScene::PixelScene);
-		_model->getActionHolder()->actionEditor->setIcon(QIcon("://Icons/EditorView.png"));
 	}
-
 	updateActionsEnableState();
+
+	Q_EMIT _toolbar->getContext()->show(editMode);
+	Q_EMIT _dataEditor->getContext()->show(editMode);
 }
 
 void ActionController::onNewSimulation()
@@ -248,7 +243,7 @@ void ActionController::onEditSymbolTable()
 	SymbolTableDialog dialog(origSymbols->clone(), _serializer, _mainView);
 	if (dialog.exec()) {
 		origSymbols->getSymbolsFrom(dialog.getSymbolTable());
-		Q_EMIT _dataEditor->getContext()->onRefresh();
+		Q_EMIT _dataEditor->getContext()->refresh();
 	}
 }
 
@@ -260,7 +255,7 @@ void ActionController::onLoadSymbolTable()
 		if (SerializationHelper::loadFromFile<SymbolTable*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSymbolTable(data); }, symbolTable)) {
 			_mainModel->getSymbolTable()->getSymbolsFrom(symbolTable);
 			delete symbolTable;
-			Q_EMIT _dataEditor->getContext()->onRefresh();
+			Q_EMIT _dataEditor->getContext()->refresh();
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified symbol table could not loaded.");
@@ -424,7 +419,7 @@ void ActionController::updateZoomFactor()
 
 void ActionController::updateActionsEnableState()
 {
-	bool visible = _model->isEditMode() ? _model->isEditMode().get() : false;
+	bool visible = _model->isEditMode();
 	bool entitySelected = _model->isEntitySelected();
 	bool entityCopied = _model->isEntityCopied();
 	bool cellWithTokenSelected = _model->isCellWithTokenSelected();

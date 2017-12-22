@@ -23,12 +23,12 @@ QVector2D ActionModel::getPositionDeltaForNewEntity()
 	return QVector2D(_delta, -_delta);
 }
 
-optional<bool> ActionModel::isEditMode() const
+bool ActionModel::isEditMode() const
 {
 	return _isEditMode;
 }
 
-void ActionModel::setEditMode(optional<bool> value)
+void ActionModel::setEditMode(bool value)
 {
 	_isEditMode = value;
 }
