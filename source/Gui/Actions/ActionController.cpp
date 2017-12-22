@@ -14,6 +14,7 @@
 #include "Gui/Dialogs/NewSimulationDialog.h"
 #include "Gui/Dialogs/SimulationParametersDialog.h"
 #include "Gui/Dialogs/SymbolTableDialog.h"
+#include "Gui/Dialogs/SimulationConfigDialog.h"
 #include "Gui/Settings.h"
 #include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
@@ -53,6 +54,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
 	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
+	connect(actions->actionConfig, &QAction::triggered, this, &ActionController::onConfig);
 	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
 	connect(actions->actionRunStepForward, &QAction::triggered, this, &ActionController::onStepForward);
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
@@ -197,6 +199,14 @@ void ActionController::onLoadSimulation()
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation could not loaded.");
 			msgBox.exec();
 		}
+	}
+}
+
+void ActionController::onConfig()
+{
+	SimulationConfigDialog dialog(_mainController->getSimulationConfig(), _mainView);
+	if (dialog.exec()) {
+
 	}
 }
 

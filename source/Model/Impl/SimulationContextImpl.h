@@ -17,7 +17,7 @@ public:
 		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler) override;
 
 	virtual IntVector2D getGridSize() const override;
-	virtual int getMaxThreads() const override;
+	virtual uint getMaxThreads() const override;
 	virtual SpaceProperties* getSpaceProperties() const;
 	virtual UnitGrid* getUnitGrid() const override;
 	virtual UnitThreadController* getUnitThreadController() const override;

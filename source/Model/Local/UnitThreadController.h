@@ -22,5 +22,5 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 	virtual bool isNoThreadWorking() const = 0;
-	virtual int getMaxRunningThreads() const = 0;
+	virtual uint getMaxRunningThreads() const = 0;
 };

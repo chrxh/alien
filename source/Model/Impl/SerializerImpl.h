@@ -39,8 +39,8 @@ private:
 		SymbolTable const* symbolTable;
 		IntVector2D universeSize;
 		IntVector2D gridSize;
-		int maxThreads;
-		int timestep;
+		uint maxThreads;
+		uint timestep;
 	};
 	ConfigToSerialize _configToSerialize;
 	string _serializedSimulation;
