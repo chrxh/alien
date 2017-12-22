@@ -64,8 +64,8 @@ void MainView::setupEditors(SimulationController * controller)
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
 	_visualEditor->init(_notifier, controller, _repository);
 
+	_visualEditor->setActiveScene(ActiveScene::PixelScene);
 	_actions->getActionHolder()->actionEditor->setChecked(false);
-	_actions->getActionHolder()->actionEditor->trigger();
 }
 
 InfoController * MainView::getInfoController() const

@@ -31,8 +31,8 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
-	_connections.push_back(connect(_context, &DataEditContext::onShow, this, &DataEditController::onShow));
-	_connections.push_back(connect(_context, &DataEditContext::onRefresh, this, &DataEditController::onRefresh));
+	_connections.push_back(connect(_context, &DataEditContext::show, this, &DataEditController::onShow));
+	_connections.push_back(connect(_context, &DataEditContext::refresh, this, &DataEditController::onRefresh));
 	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataEditController::receivedExternalNotifications));
 
 	onShow(false);

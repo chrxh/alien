@@ -13,6 +13,6 @@ public:
 	DataEditContext(QObject *parent = nullptr);
 	virtual ~DataEditContext() = default;
 
-	Q_SIGNAL void onShow(bool visible);
-	Q_SIGNAL void onRefresh();
+	Q_SIGNAL void show(bool visible);
+	Q_SIGNAL void refresh();
 };
