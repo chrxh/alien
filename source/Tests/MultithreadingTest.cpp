@@ -18,7 +18,7 @@
 #include "Model/Impl/UnitThread.h"
 #include "Model/Api/SimulationAccess.h"
 
-#include "tests/Predicates2.h"
+#include "tests/Predicates.h"
 #include "IntegrationTestHelper.h"
 
 class MultithreadingTest : public ::testing::Test
