@@ -1,5 +1,4 @@
-#ifndef PREDICATES_H
-#define PREDICATES_H
+#pragma once
 
 #include <QVector2D>
 #include <gtest/gtest.h>
@@ -12,5 +11,3 @@ bool predEqualMediumPrecision(qreal a, qreal b);
 bool predEqualLowPrecision(qreal a, qreal b);
 ::testing::AssertionResult predEqualVectorMediumPrecision(const char* a_expr, const char* b_expr, QVector2D a, QVector2D b);
 
-
-#endif // PREDICATES_H
