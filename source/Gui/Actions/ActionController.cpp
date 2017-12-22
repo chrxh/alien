@@ -301,6 +301,23 @@ void ActionController::onNewParticle()
 
 void ActionController::onLoadCollection()
 {
+	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Collection", "", "Alien Collection (*.aco)");
+	if (!filename.isEmpty()) {
+		DataDescription desc;
+		if (SerializationHelper::loadFromFile<DataDescription>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeDataDescription(data); }, desc)) {
+			_repository->addAndSelectData(desc, _model->getPositionDeltaForNewEntity());
+			Q_EMIT _notifier->notify({
+				Receiver::DataEditor,
+				Receiver::Simulation,
+				Receiver::VisualEditor,
+				Receiver::ActionController
+			}, UpdateDescription::All);
+		}
+		else {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified collection could not loaded.");
+			msgBox.exec();
+		}
+	}
 }
 
 void ActionController::onSaveCollection()
