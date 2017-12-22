@@ -20,6 +20,9 @@ public:
 	virtual string const& retrieveSerializedSimulation() override;
 	virtual SimulationController* deserializeSimulation(string const& content) override;
 
+	virtual string serializeDataDescription(DataDescription const& desc) const override;
+	virtual DataDescription deserializeDataDescription(string const& data) override;
+
 	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const override;
 	virtual SymbolTable* deserializeSymbolTable(string const& data) override;
 

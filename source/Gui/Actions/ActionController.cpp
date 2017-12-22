@@ -71,6 +71,8 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 
 	connect(actions->actionNewCell, &QAction::triggered, this, &ActionController::onNewCell);
 	connect(actions->actionNewParticle, &QAction::triggered, this, &ActionController::onNewParticle);
+	connect(actions->actionLoadCol, &QAction::triggered, this, &ActionController::onLoadCollection);
+	connect(actions->actionSaveCol, &QAction::triggered, this, &ActionController::onSaveCollection);
 	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
 	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
 	connect(actions->actionDeleteSel, &QAction::triggered, this, &ActionController::onDeleteSelection);
@@ -197,7 +199,7 @@ void ActionController::onLoadSimulation()
 			onRunClicked(false);
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation could not loaded.");
 			msgBox.exec();
 		}
 	}
@@ -222,7 +224,7 @@ void ActionController::onLoadSimulationParameters()
 			_mainController->onUpdateSimulationParametersForRunningSimulation();
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation parameter file could not loaded.");
 			msgBox.exec();
 		}
 	}
@@ -233,7 +235,7 @@ void ActionController::onSaveSimulationParameters()
 	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
 	if (!filename.isEmpty()) {
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_mainModel->getSimulationParameters()); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The simulation parameters could not saved.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Simulation parameters could not saved.");
 			msgBox.exec();
 		}
 	}
@@ -261,7 +263,7 @@ void ActionController::onLoadSymbolTable()
 			Q_EMIT _dataEditor->getContext()->onRefresh();
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified symbol table could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified symbol table could not loaded.");
 			msgBox.exec();
 		}
 	}
@@ -272,7 +274,7 @@ void ActionController::onSaveSymbolTable()
 	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
 	if (!filename.isEmpty()) {
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSymbolTable(_mainModel->getSymbolTable()); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The symbol table could not saved.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Symbol table could not saved.");
 			msgBox.exec();
 			return;
 		}
@@ -300,6 +302,22 @@ void ActionController::onNewParticle()
 		Receiver::VisualEditor,
 		Receiver::ActionController
 	}, UpdateDescription::All);
+}
+
+void ActionController::onLoadCollection()
+{
+}
+
+void ActionController::onSaveCollection()
+{
+	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Collection", "", "Alien Collection (*.aco)");
+	if (!filename.isEmpty()) {
+		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeDataDescription(_repository->getExtendedSelection()); })) {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Collection could not saved.");
+			msgBox.exec();
+			return;
+		}
+	}
 }
 
 void ActionController::onCopyCollection()
