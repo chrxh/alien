@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "tests/Predicates2.h"
+#include "tests/Predicates.h"
 
 #include "Base/ServiceLocator.h"
 #include "Model/Local/UnitContext.h"

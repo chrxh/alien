@@ -1,4 +1,4 @@
-#include "Predicates2.h"
+#include "Predicates.h"
 
 bool predEqualIntVector(IntVector2D a, IntVector2D b)
 {
