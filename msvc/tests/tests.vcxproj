@@ -255,29 +255,30 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\Tests\integrationtests\Benchmark.cpp" />
-    <ClCompile Include="..\..\source\Tests\Integrationtests\ComparisonTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\integrationtests\DataDescriptionTransferTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.cpp" />
-    <ClCompile Include="..\..\source\Tests\Integrationtests\MultithreadingTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Integrationtests\ReplicatorTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\integrationtests\SerializationTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
-    <ClCompile Include="..\..\source\Tests\Testsuite.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\CellClusterTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\CellConnectorTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\CommunicatorFunctionTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\unittests\ChangeDescriptionsTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\MapCompartmentTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\NumberGeneratorTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\PhysicsTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\UnitGridTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\Unittests\UnitThreadControllerImplTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Benchmark.cpp" />
+    <ClCompile Include="..\..\source\Tests\CellClusterTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\CellConnectorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\ChangeDescriptionsTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\ClusterSizeTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\CommunicatorFunctionTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\ComparisonTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\IntegrationTestFramework.cpp" />
+    <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\MultithreadingTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\NumberGeneratorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\PhysicsTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\Predicates2.cpp" />
+    <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\SerializationTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\TestSuite2.cpp" />
+    <ClCompile Include="..\..\source\Tests\UnitGridTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\Tests\integrationtests\IntegrationTestFramework.h" />
-    <ClInclude Include="..\..\source\Tests\integrationtests\IntegrationTestHelper.h" />
-    <ClInclude Include="..\..\source\Tests\Predicates.h" />
+    <ClInclude Include="..\..\source\Tests\IntegrationTestFramework.h" />
+    <ClInclude Include="..\..\source\Tests\IntegrationTestHelper.h" />
+    <ClInclude Include="..\..\source\Tests\Predicates2.h" />
     <ClInclude Include="..\..\source\Tests\TestSettings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
