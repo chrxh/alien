@@ -1,6 +1,6 @@
-#include "Gui/Settings.h"
 #include "Model/Local/UnitContext.h"
 
+#include "Gui/Settings.h"
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"
 

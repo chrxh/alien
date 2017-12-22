@@ -148,7 +148,7 @@ bool UnitThreadControllerImpl::isNoThreadWorking() const
 	return result;
 }
 
-int UnitThreadControllerImpl::getMaxRunningThreads() const
+uint UnitThreadControllerImpl::getMaxRunningThreads() const
 {
 	return _maxRunningThreads;
 }

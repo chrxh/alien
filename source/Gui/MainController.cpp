@@ -160,6 +160,12 @@ int MainController::getTimestep() const
 	return _simController->getTimestep();
 }
 
+SimulationConfig MainController::getSimulationConfig() const
+{
+	auto context = _simController->getContext();
+	return{ context->getMaxThreads(), context->getGridSize(), context->getSpaceProperties()->getSize() };
+}
+
 void MainController::connectSimController() const
 {
 	connect(_simController, &SimulationController::nextTimestepCalculated, [this]() {

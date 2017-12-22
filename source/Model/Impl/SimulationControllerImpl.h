@@ -16,8 +16,8 @@ public:
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
-	virtual int getTimestep() const override;
-	virtual void setTimestep(int value) override;
+	virtual uint getTimestep() const override;
+	virtual void setTimestep(uint value) override;
 
 private:
 	SimulationContextLocal* _context = nullptr;

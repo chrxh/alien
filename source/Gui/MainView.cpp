@@ -94,6 +94,7 @@ void MainView::setupMenu()
 	ui->menuSimulation->addAction(actions->actionNewSimulation);
 	ui->menuSimulation->addAction(actions->actionLoadSimulation);
 	ui->menuSimulation->addAction(actions->actionSaveSimulation);
+	ui->menuSimulation->addAction(actions->actionConfig);
 	ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionRunSimulation);
 	ui->menuSimulation->addAction(actions->actionRunStepForward);

@@ -28,7 +28,7 @@ public:
 	Q_SLOT virtual bool calculateTimestep() override;
 
 	virtual bool isNoThreadWorking() const override;	//should be called from the same threads where UnitThreadControllerImpl runs
-	virtual int getMaxRunningThreads() const override;
+	virtual uint getMaxRunningThreads() const override;
 
 private:
 	Q_SLOT void threadFinishedCalculation(QObject* sender);

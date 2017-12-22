@@ -10,6 +10,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionLoadSimulation->setEnabled(true);
 	actionSaveSimulation = new QAction("Save", this);
 	actionSaveSimulation->setEnabled(true);
+	actionConfig = new QAction("Config", this);
+	actionConfig->setEnabled(true);
 	actionRunSimulation = new QAction("Run", this);
 	actionRunSimulation->setEnabled(true);
 	actionRunSimulation->setCheckable(true);
