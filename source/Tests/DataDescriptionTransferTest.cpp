@@ -55,11 +55,9 @@ TEST_F(DataDescriptionTransferTest, testAddRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
 		dataBefore.addCluster(createClusterDescription(i));
 	}
 	for (int i = 1; i <= 100; ++i) {
-		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
 		dataBefore.addParticle(createParticleDescription());
 	}
 	_access->updateData(dataBefore);
@@ -74,11 +72,9 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
 		dataBefore.addCluster(createClusterDescription(i));
 	}
 	for (int i = 1; i <= 100; ++i) {
-		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
 		dataBefore.addParticle(createParticleDescription());
 	}
 	_access->updateData(dataBefore);
@@ -111,7 +107,6 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		QVector2D pos(_numberGen->getRandomReal(0, 499), _numberGen->getRandomReal(0, 299));
 		dataBefore.addParticle(createParticleDescription());
 	}
 	_access->updateData(dataBefore);
@@ -139,7 +134,6 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
 		dataBefore.addParticle(createParticleDescription());
 	}
 	_access->updateData(dataBefore);
@@ -170,7 +164,6 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteAndModifyWithinSimulation)
 
 	DataDescription dataBefore;
 	for (int i = 1; i <= 10000; ++i) {
-		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
 		dataBefore.addParticle(createParticleDescription());
 	}
 	_access->updateData(dataBefore);

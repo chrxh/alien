@@ -75,7 +75,8 @@ ClusterDescription IntegrationTestFramework::createClusterDescription(int numCel
 ParticleDescription IntegrationTestFramework::createParticleDescription() const
 {
 	QVector2D pos(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	return ParticleDescription().setEnergy(_parameters->cellMinEnergy).setPos(pos).setId(_numberGen->getTag());
+	QVector2D vel(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
+	return ParticleDescription().setEnergy(_parameters->cellMinEnergy).setPos(pos).setVel(vel).setId(_numberGen->getTag());
 }
 
 
