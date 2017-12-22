@@ -83,10 +83,10 @@
     <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp">
       <Filter>Source Files\UnitTests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\Predicates2.cpp">
+    <ClCompile Include="..\..\source\Tests\Predicates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\TestSuite2.cpp">
+    <ClCompile Include="..\..\source\Tests\TestSuite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -100,7 +100,7 @@
     <ClInclude Include="..\..\source\Tests\IntegrationTestHelper.h">
       <Filter>Source Files\IntegrationTests</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Tests\Predicates2.h">
+    <ClInclude Include="..\..\source\Tests\Predicates.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

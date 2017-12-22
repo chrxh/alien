@@ -14,7 +14,7 @@
 #include "Model/Api/SpaceProperties.h"
 #include "Model/Api/SimulationAccess.h"
 
-#include "Tests/Predicates2.h"
+#include "Tests/Predicates.h"
 
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"

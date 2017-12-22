@@ -10,7 +10,7 @@
 #include "Model/Local/SimulationContextLocal.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "tests/Predicates2.h"
+#include "tests/Predicates.h"
 
 class CellConnectorTest : public ::testing::Test
 {

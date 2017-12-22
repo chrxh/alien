@@ -2,7 +2,7 @@
 
 #include "Model/Api/ChangeDescriptions.h"
 
-#include "tests/Predicates2.h"
+#include "tests/Predicates.h"
 
 class ChangeDescriptionsTest : public ::testing::Test
 {

@@ -10,7 +10,7 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/MapCompartment.h"
 
-#include "tests/Predicates2.h"
+#include "tests/Predicates.h"
 
 class UnitGridTest : public ::testing::Test
 {
