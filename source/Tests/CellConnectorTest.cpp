@@ -74,7 +74,7 @@ TEST_F(CellConnectorTest, testMoveOneCellAway)
 		}));
 	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 103, 100 });
 
-	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
+	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(1).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -100,7 +100,7 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 	});
 	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 200, 101.1f });
 
-	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
+	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(1).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[1]));
@@ -128,7 +128,7 @@ TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 	});
 	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 199, 100 });
 
-	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(1).id });
+	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(1).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -162,7 +162,7 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 	});
 	_data.clusters->at(0).cells->at(0).pos = QVector2D({ 200, 100 });
 
-	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(0).id });
+	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(0).id });
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
 	ASSERT_EQ(1, _data.clusters->size());
@@ -193,12 +193,12 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 	});
 	_data.clusters->at(0).cells->at(0).pos = QVector2D({ 200, 100 });
 
-	_descHelper->reconnect(_data, { _data.clusters->at(0).cells->at(0).id });
+	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(0).id });
 	_navi.update(_data);
 	uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 	uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 	_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 100, 100 });
-	_descHelper->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
+	_descHelper->reconnect(_data, _data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 
 	_navi.update(_data);
 	auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -238,7 +238,7 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 200, 100 });
-		_descHelper->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
+		_descHelper->reconnect(_data, _data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 		_navi.update(_data);
 
 		auto cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -248,7 +248,7 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 		clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
 		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 100, 100 });
-		_descHelper->reconnect(_data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
+		_descHelper->reconnect(_data, _data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 		_navi.update(_data);
 
 		cluster0 = _data.clusters->at(_navi.clusterIndicesByCellIds.at(cellIds[0]));
@@ -279,7 +279,7 @@ TEST_F(CellConnectorTest, testMoveSeveralCells)
 		_data.clusters->at(0).cells->at(i).pos = QVector2D({ 200 + static_cast<float>(i), 100 });
 	}
 
-	_descHelper->reconnect(_data,
+	_descHelper->reconnect(_data, _data,
 	{
 		_data.clusters->at(0).cells->at(0).id,
 		_data.clusters->at(0).cells->at(1).id,
@@ -334,7 +334,7 @@ TEST_F(CellConnectorTest, testMoveSeveralCellsOverOtherCells)
 			cell.pos = pos;
 			ids.insert(cell.id);
 		}
-		_descHelper->reconnect(_data, ids);
+		_descHelper->reconnect(_data, _data, ids);
 	}
 	_navi.update(_data);
 

@@ -39,7 +39,7 @@ void SpacePropertiesImpl::correctPosition(IntVector2D & pos) const
 	correctPositionInline(pos);
 }
 
-IntVector2D SpacePropertiesImpl::correctPositionAndConvertToIntVector(QVector2D const& pos) const
+IntVector2D SpacePropertiesImpl::convertToIntVector(QVector2D const & pos) const
 {
 	IntVector2D intPos;
 	intPos.x = static_cast<int>(pos.x());
@@ -50,6 +50,12 @@ IntVector2D SpacePropertiesImpl::correctPositionAndConvertToIntVector(QVector2D 
 	if (intPos.y < 0) {
 		--intPos.y;
 	}
+	return intPos;
+}
+
+IntVector2D SpacePropertiesImpl::correctPositionAndConvertToIntVector(QVector2D const& pos) const
+{
+	IntVector2D intPos = convertToIntVector(pos);
 	correctPositionInline(intPos);
 	return intPos;
 }

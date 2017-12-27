@@ -38,7 +38,6 @@
 //Nächsten Male:
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
-//- Serialisierung für SimulationParameters im SimulationParametersDialog
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
 //? Prüfung Protection-Counter für cell und mapCell, setzen des Counters erst für newCell
 
