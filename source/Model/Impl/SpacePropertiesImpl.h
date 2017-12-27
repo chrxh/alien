@@ -16,6 +16,7 @@ public:
 
 	virtual void correctPosition(QVector2D& pos) const override;
 	virtual void correctPosition(IntVector2D & pos) const override;
+	virtual IntVector2D convertToIntVector(QVector2D const &pos) const override;
 	virtual IntVector2D correctPositionAndConvertToIntVector(QVector2D const& pos) const override;
 	virtual void correctDisplacement(QVector2D& displacement) const override;
 	virtual QVector2D correctionIncrement(QVector2D pos1, QVector2D pos2) const override;

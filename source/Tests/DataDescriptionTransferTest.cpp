@@ -191,7 +191,7 @@ TEST_F(DataDescriptionTransferTest, testAddAndDeleteAndModifyWithinSimulation)
 		auto& pos = *particle.pos;
 		pos = pos + QVector2D(1000.0, 420.0);
 	}
-	descHelper->reconnect(extract, cellIdsToModify);
+	descHelper->reconnect(extract, extractOriginal, cellIdsToModify);
 	_access->updateData(DataChangeDescription(extractOriginal, extract));
 
 	runSimulation(100, _controller);

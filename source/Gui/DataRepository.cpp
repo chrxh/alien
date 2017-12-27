@@ -397,7 +397,7 @@ void DataRepository::moveExtendedSelection(QVector2D const & delta)
 
 void DataRepository::reconnectSelectedCells()
 {
-	_descHelper->reconnect(getDataRef(), getSelectedCellIds());
+	_descHelper->reconnect(getDataRef(), _unchangedData, getSelectedCellIds());
 	updateAfterCellReconnections();
 }
 
