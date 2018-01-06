@@ -9,6 +9,7 @@ SimulationParameters::SimulationParameters(QObject * parent)
 SimulationParameters * SimulationParameters::clone(QObject * parent) const
 {
 	auto parameters = new SimulationParameters(parent);
+	parameters->clusterMaxRadius = clusterMaxRadius;
 	parameters->cellMutationProb = cellMutationProb;
 	parameters->cellMinDistance = cellMinDistance;
 	parameters->cellMaxDistance = cellMaxDistance;

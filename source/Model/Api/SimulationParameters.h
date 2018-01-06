@@ -12,6 +12,8 @@ public:
 
 	SimulationParameters* clone(QObject* parent = nullptr) const;
 
+	qreal clusterMaxRadius = 0.0;
+
 	qreal cellMutationProb = 0.0;
 	qreal cellMinDistance = 0.0;
 	qreal cellMaxDistance = 0.0;

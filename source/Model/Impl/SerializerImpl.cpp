@@ -134,6 +134,7 @@ namespace boost {
 		template<class Archive>
 		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int /*version*/)
 		{
+			ar & data.clusterMaxRadius;
 			ar & data.cellMutationProb;
 			ar & data.cellMinDistance;
 			ar & data.cellMaxDistance;
@@ -163,6 +164,14 @@ namespace boost {
 			ar & data.radiationProb;
 			ar & data.radiationVelocityMultiplier;
 			ar & data.radiationVelocityPerturbation;
+			int fillInt = 0;
+			double fillDouble = 0.0;
+			for (int i = 0; i < 50; ++i) {
+				ar & fillInt;
+			}
+			for (int i = 0; i < 50; ++i) {
+				ar & fillDouble;
+			}
 		}
 		template<class Archive>
 		inline void save(Archive& ar, SymbolTable const& data, const unsigned int /*version*/)
