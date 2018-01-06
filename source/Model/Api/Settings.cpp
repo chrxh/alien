@@ -151,6 +151,8 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
 SimulationParameters* ModelSettings::getDefaultSimulationParameters()
 {
 	SimulationParameters* parameters = new SimulationParameters();
+	parameters->clusterMaxRadius = 50.0;
+
 	parameters->cellMutationProb = 0.000001;
 	parameters->cellMinDistance = 0.3;
 	parameters->cellMaxDistance = 1.3;

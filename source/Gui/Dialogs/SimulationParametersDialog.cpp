@@ -42,6 +42,8 @@ SimulationParameters* SimulationParametersDialog::getSimulationParameters ()
 
 void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 {
+	setItem("max radius", 0, _simulationParameters->clusterMaxRadius);
+
 	setItem("mutation probability", 0, _simulationParameters->cellMutationProb);
 	setItem("min distance", 0, _simulationParameters->cellMinDistance);
 	setItem("max distance", 0, _simulationParameters->cellMaxDistance);
@@ -76,7 +78,9 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 
 void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
 {
-    _simulationParameters->cellMutationProb = getItemReal("mutation probability", 0);
+	_simulationParameters->clusterMaxRadius = getItemReal("max radius", 0);
+	
+	_simulationParameters->cellMutationProb = getItemReal("mutation probability", 0);
 	_simulationParameters->cellMinDistance = getItemReal("min distance", 0);
 	_simulationParameters->cellMaxDistance = getItemReal("max distance", 0);
     _simulationParameters->cellMass_Reciprocal = 1.0/ getItemReal("mass", 0);
