@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SimulationConfigDialog</class>
- <widget class="QWidget" name="SimulationConfigDialog">
+ <widget class="QDialog" name="SimulationConfigDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -232,5 +232,38 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SimulationConfigDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>378</x>
+     <y>188</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>218</x>
+     <y>5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SimulationConfigDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>473</x>
+     <y>188</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>416</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
