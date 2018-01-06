@@ -4,8 +4,8 @@
 #include <QtGlobal>
 #include <QString>
 
-const qreal FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
-const qreal FLOATINGPOINT_LOW_PRECISION = 1.0e-1f;
+const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
+const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1f;
 
 const QString INITIAL_DATA_FILENAME = "tests/testdata/comparison/initial.sim";
 const QString COMPUTATION_DATA_FILENAME = "tests/testdata/comparison/computation.dat";

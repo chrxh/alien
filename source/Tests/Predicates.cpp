@@ -5,12 +5,17 @@ bool predEqualIntVector(IntVector2D a, IntVector2D b)
 	return a == b;
 }
 
-bool predEqualMediumPrecision(qreal a, qreal b)
+bool predEqualMediumPrecision(double a, double b)
 {
 	return qAbs(a - b) < FLOATINGPOINT_MEDIUM_PRECISION;
 }
 
-bool predEqualLowPrecision(qreal a, qreal b)
+bool predLessThanMediumPrecision(double a, double b)
+{
+	return a <= b + FLOATINGPOINT_MEDIUM_PRECISION;
+}
+
+bool predEqualLowPrecision(double a, double b)
 {
 	return qAbs(a - b) < FLOATINGPOINT_LOW_PRECISION;
 }
