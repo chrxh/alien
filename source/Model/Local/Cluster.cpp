@@ -372,8 +372,10 @@ void Cluster::processingMovement ()
                             if( colData.movementState == 0 ) {
 
                                 //fusion possible? (velocities high enough?)
-                                if( cell->connectable(tempCell) && ((cell->getVelocity()-tempCell->getVelocity()).length() >= parameters->cellFusionVelocity) )
-                                    colData.movementState = 2;
+								if (cell->connectable(tempCell) && ((cell->getVelocity() - tempCell->getVelocity()).length() >= parameters->cellFusionVelocity)
+									&& connectable(tempCell->getCluster())) {
+									colData.movementState = 2;
+								}
 
                                 //collision possible?
                                 else if( cell->getProtectionCounter() == 0 && tempCell->getProtectionCounter() == 0 )
@@ -385,8 +387,10 @@ void Cluster::processingMovement ()
                             if( colData.movementState == 1 ) {
 
                                 //fusion possible?
-                                if( cell->connectable(tempCell) && ((cell->getVelocity()-tempCell->getVelocity()).length() >= parameters->cellFusionVelocity) )
-                                    colData.movementState = 2;
+								if (cell->connectable(tempCell) && ((cell->getVelocity() - tempCell->getVelocity()).length() >= parameters->cellFusionVelocity)
+									&& connectable(tempCell->getCluster())) {
+									colData.movementState = 2;
+								}
                             }
 
                             //update collision data
@@ -1149,6 +1153,30 @@ void Cluster::radiation (qreal& energy, Cell* originCell, Particle*& energyParti
 		metadata.color = originCell->getMetadata().color;
         energyParticle->setMetadata(metadata);
     }
+}
+
+double Cluster::radius() const
+{
+	double result = 0.0;
+	foreach(Cell* cell, _cells) {
+		auto distance = cell->_relPos.length();
+		if (distance > result) {
+			result = distance;
+		}
+	}
+	return result;
+}
+
+bool Cluster::connectable(Cluster* other) const
+{
+	auto space = _context->getSpaceProperties();
+	auto parameters = _context->getSimulationParameters();
+
+	auto distance = space->distance(_pos, other->_pos);
+	if (radius() + other->radius() + distance > parameters->clusterMaxRadius) {
+		return false;
+	}
+	return true;
 }
 
 ClusterMetadata Cluster::getMetadata() const

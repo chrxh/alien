@@ -81,6 +81,8 @@ private:
 	Cluster(QList< Cell* > cells, qreal angle, UnitContext* context);
 
 	void radiation (qreal& energy, Cell* originCell, Particle*& energyParticle) const;
+	double radius() const;
+	bool connectable(Cluster* other) const;
 	inline QVector2D applyTransformation(QVector2D pos) const;
 	inline QVector2D applyTransformation(QMatrix4x4 const& transform, QVector2D pos) const;
 	inline QVector2D applyInverseTransformation(QVector2D pos) const;
