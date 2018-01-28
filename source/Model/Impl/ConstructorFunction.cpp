@@ -118,6 +118,11 @@ namespace {
            constructorCell->setMaxConnections(constructorCell->getMaxConnections()-1);
         }
     }
+
+	bool checkMaxRadiusOfCluster(Cluster* cluster, double lengthIncrement, SimulationParameters* parameters)
+	{
+		return cluster->getRadius() + lengthIncrement < parameters->clusterMaxRadius;
+	}
 }
 
 CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
@@ -141,6 +146,11 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
         return processingResult;
     }
+
+	if (!checkMaxRadiusOfCluster(cluster, len, parameters)) {
+		tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
+		return processingResult;
+	}
 
     //looking for construction site
     int numCon(cell->getNumConnections());
