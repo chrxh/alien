@@ -51,6 +51,8 @@ private:
 	Q_SLOT void onDeleteToken();
 	Q_SLOT void onToggleCellInfo(bool showInfo);
 
+	Q_SLOT void onNewRectangle();
+
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
 	void updateZoomFactor();

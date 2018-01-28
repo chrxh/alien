@@ -15,6 +15,7 @@
 #include "Gui/Dialogs/SimulationParametersDialog.h"
 #include "Gui/Dialogs/SymbolTableDialog.h"
 #include "Gui/Dialogs/SimulationConfigDialog.h"
+#include "Gui/Dialogs/NewRectangleDialog.h"
 #include "Gui/Settings.h"
 #include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
@@ -82,6 +83,8 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewToken, &QAction::triggered, this, &ActionController::onNewToken);
 	connect(actions->actionDeleteToken, &QAction::triggered, this, &ActionController::onDeleteToken);
 	connect(actions->actionShowCellInfo, &QAction::toggled, this, &ActionController::onToggleCellInfo);
+
+	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
 }
 
 ActionHolder * ActionController::getActionHolder()
@@ -411,6 +414,25 @@ void ActionController::onToggleCellInfo(bool showInfo)
 	Q_EMIT _notifier->toggleCellInfo(showInfo);
 }
 
+void ActionController::onNewRectangle()
+{
+	NewRectangleDialog dialog(_mainModel->getSimulationParameters());
+	if (dialog.exec()) {
+		IntVector2D size = dialog.getBlockSize();
+		double distance = dialog.getDistance();
+		double energy = dialog.getInternalEnergy();
+
+		ClusterDescription cluster;
+		uint64_t id = 0;
+		for (int x = 0; x < size.x; ++x) {
+			for (int y = 0; y < size.y; ++y) {
+				cluster.addCell(CellDescription().setId(++id).setEnergy(energy).setPos({ static_cast<float>(x), static_cast<float>(y) }));
+			}
+		}
+		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
+	}
+}
+
 
 void ActionController::receivedNotifications(set<Receiver> const & targets)
 {
@@ -468,9 +490,9 @@ void ActionController::updateActionsEnableState()
 	actions->actionPasteToken->setEnabled(visible && cellWithFreeTokenSelected && tokenCopied);
 	actions->actionDeleteToken->setEnabled(visible && cellWithTokenSelected);
 
-	actions->actionNewRectangle->setEnabled(visible);
-	actions->actionNewHexagon->setEnabled(visible);
-	actions->actionNewParticles->setEnabled(visible);
+	actions->actionNewRectangle->setEnabled(true);
+	actions->actionNewHexagon->setEnabled(true);
+	actions->actionNewParticles->setEnabled(true);
 	actions->actionLoadCol->setEnabled(visible);
 	actions->actionSaveCol->setEnabled(visible && collectionSelected);
 	actions->actionCopyCol->setEnabled(visible && collectionSelected);
