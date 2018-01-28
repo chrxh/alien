@@ -118,7 +118,8 @@ namespace Enums
 			ERROR_NO_ENERGY,
 			ERROR_OBSTACLE,
 			ERROR_CONNECTION,
-			ERROR_DIST
+			ERROR_DIST,
+			ERROR_MAX_RADIUS
 		};
 	};
 	struct ConstrIn {
