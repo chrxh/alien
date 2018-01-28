@@ -1155,7 +1155,7 @@ void Cluster::radiation (qreal& energy, Cell* originCell, Particle*& energyParti
     }
 }
 
-double Cluster::radius() const
+double Cluster::getRadius() const
 {
 	double result = 0.0;
 	foreach(Cell* cell, _cells) {
@@ -1173,7 +1173,7 @@ bool Cluster::connectable(Cluster* other) const
 	auto parameters = _context->getSimulationParameters();
 
 	auto distance = space->distance(_pos, other->_pos);
-	if (radius() + other->radius() + distance > parameters->clusterMaxRadius) {
+	if (getRadius() + other->getRadius() + distance > parameters->clusterMaxRadius) {
 		return false;
 	}
 	return true;
