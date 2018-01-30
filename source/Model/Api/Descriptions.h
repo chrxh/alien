@@ -52,6 +52,14 @@ struct MODEL_EXPORT CellDescription
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
 	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells = value; return *this; }
+	CellDescription& addConnection(uint64_t value)
+	{
+		if (!connectingCells) {
+			connectingCells = list<uint64_t>();
+		}
+		connectingCells->push_back(value);
+		return *this;
+	}
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }

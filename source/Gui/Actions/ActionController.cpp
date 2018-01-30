@@ -5,6 +5,7 @@
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/Serializer.h"
 #include "Model/Api/SymbolTable.h"
+#include "Model/Api/Descriptions.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
@@ -422,14 +423,61 @@ void ActionController::onNewRectangle()
 		double distance = dialog.getDistance();
 		double energy = dialog.getInternalEnergy();
 
-		ClusterDescription cluster;
 		uint64_t id = 0;
+
+		vector<vector<CellDescription>> cellMatrix;
+		for (int x = 0; x < size.x; ++x) {
+			vector<CellDescription> cellRow;
+			for (int y = 0; y < size.y; ++y) {
+				int maxConn = 4;
+				if (x == 0 || x == size.x - 1) {
+					--maxConn;
+				}
+				if (y == 0 || y == size.y - 1) {
+					--maxConn;
+				}
+				cellRow.push_back(CellDescription().setId(++id).setEnergy(energy)
+					.setPos({ static_cast<float>(x), static_cast<float>(y) })
+					.setMaxConnections(maxConn).setFlagTokenBlocked(false)
+					.setTokenBranchNumber(0).setMetadata(CellMetadata())
+					.setCellFeature(CellFeatureDescription()));
+			}
+			cellMatrix.push_back(cellRow);
+		}
 		for (int x = 0; x < size.x; ++x) {
 			for (int y = 0; y < size.y; ++y) {
-				cluster.addCell(CellDescription().setId(++id).setEnergy(energy).setPos({ static_cast<float>(x), static_cast<float>(y) }));
+				if (x < size.x - 1) {
+					cellMatrix[x][y].addConnection(cellMatrix[x + 1][y].id);
+				}
+				if (x > 0) {
+					cellMatrix[x][y].addConnection(cellMatrix[x - 1][y].id);
+				}
+				if (y < size.y - 1) {
+					cellMatrix[x][y].addConnection(cellMatrix[x][y + 1].id);
+				}
+				if (y > 0) {
+					cellMatrix[x][y].addConnection(cellMatrix[x][y - 1].id);
+				}
 			}
 		}
+
+		auto cluster = ClusterDescription().setPos({ static_cast<float>(size.x) / 2.0f, static_cast<float>(size.y) / 2.0f })
+			.setVel({ 0, 0 })
+			.setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata());
+		for (int x = 0; x < size.x; ++x) {
+			for (int y = 0; y < size.y; ++y) {
+				cluster.addCell(cellMatrix[x][y]);
+			}
+		}
+
 		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
+		Q_EMIT _notifier->notify({
+			Receiver::DataEditor,
+			Receiver::Simulation,
+			Receiver::VisualEditor,
+			Receiver::ActionController
+		}, UpdateDescription::All);
+
 	}
 }
 
