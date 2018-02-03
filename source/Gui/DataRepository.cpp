@@ -486,6 +486,7 @@ void DataRepository::requireDataUpdateFromSimulation(IntRect const& rect)
 
 void DataRepository::requireImageFromSimulation(IntRect const & rect, QImage * target)
 {
+	_rect = rect;
 	_access->requireImage(rect, target);
 }
 
