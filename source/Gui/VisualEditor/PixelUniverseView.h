@@ -15,14 +15,15 @@ public:
     PixelUniverseView(QObject* parent = nullptr);
     virtual ~PixelUniverseView();
 
-	virtual void init(SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport);
+	virtual void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 
 	virtual void refresh();
 
 private:
-    Q_SLOT void requestData();
+	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
+	Q_SLOT void requestData();
 	Q_SLOT void retrieveAndDisplayData();
 	Q_SLOT void scrolled();
 
@@ -33,6 +34,6 @@ private:
 	ViewportInterface* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;
     QImage* _image = nullptr;
-
+	Notifier* _notifier = nullptr;
 };
 

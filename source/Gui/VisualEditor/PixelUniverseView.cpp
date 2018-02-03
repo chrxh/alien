@@ -4,12 +4,13 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "gui/Settings.h"
-#include "gui/visualeditor/ViewportInterface.h"
 #include "Model/Api/ModelBuilderFacade.h"
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SpaceProperties.h"
+#include "Gui/VisualEditor/ViewportInterface.h"
+#include "Gui/Settings.h"
+#include "Gui/Notifier.h"
 
 #include "DataRepository.h"
 #include "PixelUniverseView.h"
@@ -26,12 +27,14 @@ PixelUniverseView::~PixelUniverseView()
 	delete _image;
 }
 
-void PixelUniverseView::init(SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport)
+void PixelUniverseView::init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator
+	, ViewportInterface* viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
 	_manipulator = manipulator;
+	_notifier = notifier;
 
 	delete _image;
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
@@ -42,6 +45,7 @@ void PixelUniverseView::init(SimulationController* controller, DataRepository* m
 void PixelUniverseView::activate()
 {
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData));
+	_connections.push_back(connect(_notifier, &Notifier::notify, this, &PixelUniverseView::receivedNotifications));
 	_connections.push_back(connect(_manipulator, &DataRepository::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &PixelUniverseView::scrolled));
 
@@ -57,6 +61,11 @@ void PixelUniverseView::deactivate()
 }
 
 void PixelUniverseView::refresh()
+{
+	requestData();
+}
+
+void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
 {
 	requestData();
 }
