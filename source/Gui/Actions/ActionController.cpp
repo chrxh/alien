@@ -461,7 +461,7 @@ void ActionController::onNewRectangle()
 			}
 		}
 
-		auto cluster = ClusterDescription().setPos({ static_cast<float>(size.x) / 2.0f, static_cast<float>(size.y) / 2.0f })
+		auto cluster = ClusterDescription().setPos({ static_cast<float>(size.x) / 2.0f - 0.5f, static_cast<float>(size.y) / 2.0f - 0.5f })
 			.setVel({ 0, 0 })
 			.setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata());
 		for (int x = 0; x < size.x; ++x) {
@@ -541,10 +541,10 @@ void ActionController::updateActionsEnableState()
 	actions->actionNewRectangle->setEnabled(true);
 	actions->actionNewHexagon->setEnabled(true);
 	actions->actionNewParticles->setEnabled(true);
-	actions->actionLoadCol->setEnabled(visible);
+	actions->actionLoadCol->setEnabled(true);
 	actions->actionSaveCol->setEnabled(visible && collectionSelected);
 	actions->actionCopyCol->setEnabled(visible && collectionSelected);
-	actions->actionPasteCol->setEnabled(visible && collectionCopied);
+	actions->actionPasteCol->setEnabled(collectionCopied);
 	actions->actionDeleteSel->setEnabled(visible && collectionSelected);
 	actions->actionDeleteCol->setEnabled(visible && collectionSelected);
 	actions->actionMultiplyRandom->setEnabled(visible && collectionSelected);
