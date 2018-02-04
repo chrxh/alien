@@ -507,6 +507,24 @@
     <ClCompile Include="Release\moc_NewRectangleDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Misc\StartScreenWidget.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_StartScreenWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_StartScreenWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Misc\StartScreenController.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_StartScreenController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_StartScreenController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -736,6 +754,15 @@
     <CustomBuild Include="..\..\source\Gui\Dialogs\NewRectangleDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Misc\StartScreenWidget.h">
+      <Filter>Source Files\Misc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Misc\StartScreenWidget.ui">
+      <Filter>Source Files\Misc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Misc\StartScreenController.h">
+      <Filter>Source Files\Misc</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\gui\resources\tutorial\angle.png">
@@ -903,6 +930,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_NewRectangleDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_StartScreenWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

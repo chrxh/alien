@@ -4,9 +4,10 @@
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
-
 #include "Gui/Actions/ActionController.h"
 #include "Gui/Actions/ActionHolder.h"
+#include "Gui/Misc/StartScreenController.h"
+
 #include "SerializationHelper.h"
 #include "InfoController.h"
 #include "DataEditController.h"
@@ -44,6 +45,7 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
+	_startScreen = new StartScreenController(this);
 	_infoController->init(ui->infoLabel, mainController);
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar, repository, notifier);
 
@@ -51,6 +53,8 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	setupTheme();
 	setWindowState(windowState() | Qt::WindowFullScreen);
 	show();
+
+	_startScreen->start();
 }
 
 void MainView::refresh()
@@ -166,9 +170,18 @@ void MainView::setupTheme()
 
 	ui->tpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
-	QPalette p = ui->tpsForcingButton->palette();
-	p.setColor(QPalette::ButtonText, GuiSettings::ButtonTextColor);
-	ui->tpsForcingButton->setPalette(p);
+	{
+		QPalette p = ui->tpsForcingButton->palette();
+		p.setColor(QPalette::ButtonText, GuiSettings::ButtonTextColor);
+		ui->tpsForcingButton->setPalette(p);
+	}
+
+	{
+		QPalette p = palette();
+		p.setColor(QPalette::Background, QColor(0, 0, 0));
+		setPalette(p);
+	}
+
 }
 
 
