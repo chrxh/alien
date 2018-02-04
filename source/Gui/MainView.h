@@ -39,4 +39,6 @@ private:
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
 	InfoController* _infoController = nullptr;
+
+	StartScreenController* _startScreen = nullptr;
 };
