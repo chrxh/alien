@@ -7,7 +7,6 @@ class ActionController
 	: public QObject
 {
 	Q_OBJECT
-
 public:
 	ActionController(QObject * parent = nullptr);
 	virtual ~ActionController() = default;
@@ -49,9 +48,12 @@ private:
 	Q_SLOT void onDeleteCollection();
 	Q_SLOT void onNewToken();
 	Q_SLOT void onDeleteToken();
-	Q_SLOT void onToggleCellInfo(bool showInfo);
+	Q_SLOT void onToggleCellInfo(bool show);
 
 	Q_SLOT void onNewRectangle();
+
+	Q_SLOT void onShowAbout();
+	Q_SLOT void onShowDocumentation(bool show);
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
