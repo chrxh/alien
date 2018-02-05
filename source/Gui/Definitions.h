@@ -16,7 +16,7 @@ class ParticleItem;
 class CellConnectionItem;
 class ItemConfig;
 class SimulationMonitor;
-class TutorialWindow;
+class DocumentationWindow;
 class StartScreenController;
 class MetadataManager;
 class PixelUniverseView;

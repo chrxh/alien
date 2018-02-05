@@ -86,6 +86,9 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionShowCellInfo, &QAction::toggled, this, &ActionController::onToggleCellInfo);
 
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
+
+	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
+	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
 }
 
 ActionHolder * ActionController::getActionHolder()
@@ -410,9 +413,9 @@ void ActionController::onDeleteToken()
 	}, UpdateDescription::All);
 }
 
-void ActionController::onToggleCellInfo(bool showInfo)
+void ActionController::onToggleCellInfo(bool show)
 {
-	Q_EMIT _notifier->toggleCellInfo(showInfo);
+	Q_EMIT _notifier->toggleCellInfo(show);
 }
 
 void ActionController::onNewRectangle()
@@ -479,6 +482,17 @@ void ActionController::onNewRectangle()
 		}, UpdateDescription::All);
 
 	}
+}
+
+void ActionController::onShowAbout()
+{
+	QMessageBox msgBox(QMessageBox::Information, "about artificial life environment (alien)", "Developed by Christian Heinemann.");
+	msgBox.exec();
+}
+
+void ActionController::onShowDocumentation(bool show)
+{
+	_mainView->showDocumentation(show);
 }
 
 

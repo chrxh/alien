@@ -6,6 +6,7 @@
 #include "Gui/Toolbar/ToolbarContext.h"
 #include "Gui/Actions/ActionController.h"
 #include "Gui/Actions/ActionHolder.h"
+#include "Gui/Assistance/DocumentationWindow.h"
 #include "Gui/Misc/StartScreenController.h"
 
 #include "SerializationHelper.h"
@@ -46,6 +47,9 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
 	_startScreen = new StartScreenController(this);
+	_documentationWindow = new DocumentationWindow(this);
+	connect(_documentationWindow, &DocumentationWindow::closed, this, &MainView::documentationWindowClosed);
+
 	_infoController->init(ui->infoLabel, mainController);
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar, repository, notifier);
 
@@ -75,6 +79,11 @@ void MainView::setupEditors(SimulationController * controller)
 InfoController * MainView::getInfoController() const
 {
 	return _infoController;
+}
+
+void MainView::showDocumentation(bool show)
+{
+	_documentationWindow->setVisible(show);
 }
 
 void MainView::setupMenu()
@@ -182,6 +191,11 @@ void MainView::setupTheme()
 		setPalette(p);
 	}
 
+}
+
+void MainView::documentationWindowClosed()
+{
+	_actions->getActionHolder()->actionDocumentation->setChecked(false);
 }
 
 

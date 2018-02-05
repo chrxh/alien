@@ -24,12 +24,18 @@ public:
 	virtual void setupEditors(SimulationController* controller);
 	virtual InfoController* getInfoController() const;
 
+	virtual void showDocumentation(bool show);
+
 private:
 	void setupMenu();
 	void setupTheme();
 
+	Q_SLOT void documentationWindowClosed();
+
 	Ui::MainView* ui = nullptr;
 	VisualEditController* _visualEditor = nullptr;
+	DocumentationWindow* _documentationWindow = nullptr;
+
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;
 	ActionController* _actions = nullptr;
