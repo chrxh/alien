@@ -1,36 +1,36 @@
 #include "gui/Settings.h"
 #include "Model/Api/SimulationParameters.h"
 
-#include "ui_addhexagonstructuredialog.h"
-#include "AddHexagonStructureDialog.h"
+#include "ui_NewHexagonDialog.h"
+#include "NewHexagonDialog.h"
 
 
-AddHexagonStructureDialog::AddHexagonStructureDialog(SimulationParameters* simulationParameters, QWidget *parent)
-	: QDialog(parent), ui(new Ui::AddHexagonStructureDialog)
+NewHexagonDialog::NewHexagonDialog(SimulationParameters const* simulationParameters, QWidget *parent)
+	: QDialog(parent), ui(new Ui::NewHexagonDialog)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
     ui->energyEdit->setText(QString("%1").arg(simulationParameters->cellCreationEnergy));
 }
 
-AddHexagonStructureDialog::~AddHexagonStructureDialog()
+NewHexagonDialog::~NewHexagonDialog()
 {
     delete ui;
 }
 
-int AddHexagonStructureDialog::getLayers ()
+int NewHexagonDialog::getLayers ()
 {
     bool ok(true);
     return ui->layersEdit->text().toInt(&ok);
 }
 
-qreal AddHexagonStructureDialog::getDistance ()
+qreal NewHexagonDialog::getDistance ()
 {
     bool ok(true);
     return ui->distEdit->text().toDouble(&ok);
 }
 
-qreal AddHexagonStructureDialog::getInternalEnergy ()
+qreal NewHexagonDialog::getInternalEnergy ()
 {
     bool ok(true);
     return ui->energyEdit->text().toDouble(&ok);

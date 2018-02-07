@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AddHexagonStructureDialog</class>
- <widget class="QDialog" name="AddHexagonStructureDialog">
+ <class>NewHexagonDialog</class>
+ <widget class="QDialog" name="NewHexagonDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -69,7 +69,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>20</string>
+       <string>10</string>
       </property>
       <property name="frame">
        <bool>false</bool>
@@ -159,7 +159,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>AddHexagonStructureDialog</receiver>
+   <receiver>NewHexagonDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -175,7 +175,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>AddHexagonStructureDialog</receiver>
+   <receiver>NewHexagonDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
