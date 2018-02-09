@@ -20,6 +20,10 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* acti
 	_actions = actions;
 	setGeometry(upperLeftPosition.x, upperLeftPosition.y, width(), height());
 
+	for (auto const& connection : _connections) {
+		disconnect(connection);
+	}
+
 	connectActionToButton(_actions->actionNewCell, ui.newCellButton);
 	connectActionToButton(_actions->actionNewParticle, ui.newParticleButton);
 	connectActionToButton(_actions->actionDeleteSel, ui.delSelectionButton);
@@ -35,9 +39,9 @@ void ToolbarView::connectActionToButton(QAction *& action, QToolButton *& button
 {
 	button->setEnabled(action->isEnabled());
 	button->setIcon(action->icon());
-	connect(action, &QAction::changed, [&]() {
+	_connections.push_back(connect(action, &QAction::changed, [&]() {
 		button->setEnabled(action->isEnabled());
-	});
-	connect(action, &QAction::toggled, button, &QToolButton::setChecked);
-	connect(button, &QToolButton::clicked, action, &QAction::trigger);
+	}));
+	_connections.push_back(connect(action, &QAction::toggled, button, &QToolButton::setChecked));
+	_connections.push_back(connect(button, &QToolButton::clicked, action, &QAction::trigger));
 }
