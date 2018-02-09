@@ -13,7 +13,7 @@ public:
 
 	virtual void init(MainController* mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-		, DataRepository* repository, Notifier* notifier);
+		, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator);
 
 	virtual ActionHolder* getActionHolder();
 
@@ -52,6 +52,7 @@ private:
 
 	Q_SLOT void onNewRectangle();
 	Q_SLOT void onNewHexagon();
+	Q_SLOT void onNewParticles();
 
 	Q_SLOT void onShowAbout();
 	Q_SLOT void onShowDocumentation(bool show);
@@ -73,4 +74,6 @@ private:
 	DataEditController* _dataEditor = nullptr;
 	InfoController* _infoController = nullptr;
 	ToolbarController* _toolbar = nullptr;
+
+	NumberGenerator* _numberGenerator = nullptr;
 };

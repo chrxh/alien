@@ -35,7 +35,8 @@ MainView::~MainView()
 	delete ui;
 }
 
-void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository, Notifier* notifier)
+void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository, Notifier* notifier
+	, NumberGenerator* numberGenerator)
 {
 	_model = model;
 	_controller = mainController;
@@ -51,7 +52,7 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	connect(_documentationWindow, &DocumentationWindow::closed, this, &MainView::documentationWindowClosed);
 
 	_infoController->init(ui->infoLabel, mainController);
-	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar, repository, notifier);
+	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar, repository, notifier, numberGenerator);
 
 	setupMenu();
 	setupTheme();

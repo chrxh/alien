@@ -1,19 +1,25 @@
 #include <QMatrix4x4>
 
+#include "Base/NumberGenerator.h"
+
 #include "Model/Api/SimulationAccess.h"
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/DescriptionHelper.h"
+#include "Model/Api/SpaceProperties.h"
 
 #include "DataRepository.h"
 #include "Notifier.h"
 
-void DataRepository::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector, SimulationContext* context)
+void DataRepository::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector
+	, SimulationContext* context, NumberGenerator* numberGenerator)
 {
 	_descHelper = connector;
 	_access = access;
 	_notifier = notifier;
+	_numberGenerator = numberGenerator;
 	_parameters = context->getSimulationParameters();
+	_universeSize = context->getSpaceProperties()->getSize();
 
 	for (auto const& connection : _connections) {
 		disconnect(connection);
@@ -130,6 +136,42 @@ void DataRepository::addAndSelectData(DataDescription data, QVector2D const & po
 		}
 	}
 	_navi.update(_data);
+}
+
+void DataRepository::addDataAtFixedPosition(DataDescription data)
+{
+	if (data.clusters) {
+		for (auto& cluster : *data.clusters) {
+			cluster.id = 0;
+			_descHelper->makeValid(cluster);
+			_data.addCluster(cluster);
+		}
+	}
+	if (data.particles) {
+		for (auto& particle : *data.particles) {
+			particle.id = 0;
+			_descHelper->makeValid(particle);
+			_data.addParticle(particle);
+		}
+	}
+	_navi.update(_data);
+}
+
+void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerParticle)
+{
+	DataDescription data;
+	double remainingEnergy = totalEnergy;
+	while (remainingEnergy > FLOATINGPOINT_MEDIUM_PRECISION) {
+		double particleEnergy = _numberGenerator->getRandomReal(maxEnergyPerParticle / 100.0, maxEnergyPerParticle);
+		particleEnergy = std::min(particleEnergy, remainingEnergy);
+		data.addParticle(ParticleDescription()
+			.setPos(QVector2D(_numberGenerator->getRandomReal(0.0, _universeSize.x), _numberGenerator->getRandomReal(0.0, _universeSize.y)))
+			.setVel(QVector2D(_numberGenerator->getRandomReal()*2.0 - 1.0, _numberGenerator->getRandomReal()*2.0 - 1.0))
+			.setEnergy(particleEnergy));
+		remainingEnergy -= particleEnergy;
+	}
+
+	addDataAtFixedPosition(data);
 }
 
 namespace
