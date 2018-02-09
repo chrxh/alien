@@ -12,7 +12,8 @@ public:
 	DataRepository(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~DataRepository() = default;
 
-	virtual void init(Notifier* notifier, SimulationAccess* access, DescriptionHelper* connector, SimulationContext* context);
+	virtual void init(Notifier* notifier, SimulationAccess* access, DescriptionHelper* connector
+		, SimulationContext* context, NumberGenerator* numberGenerator);
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
@@ -27,6 +28,8 @@ public:
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
 	virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta);
+	virtual void addDataAtFixedPosition(DataDescription data);
+	virtual void addRandomParticles(double totalEnergy, double maxEnergyPerParticle);
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
 	virtual void addToken();
@@ -71,6 +74,7 @@ private:
 	SimulationAccess* _access = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
 	SimulationParameters const* _parameters = nullptr;
+	NumberGenerator* _numberGenerator = nullptr;
 	DataDescription _data;
 	DataDescription _unchangedData;
 
@@ -81,4 +85,5 @@ private:
 
 	DescriptionNavigator _navi;
 	IntRect _rect;
+	IntVector2D _universeSize;
 };

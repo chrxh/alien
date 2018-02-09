@@ -40,6 +40,9 @@ using std::pair;
 using std::string;
 using boost::optional;
 
+const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
+const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1f;
+
 struct IntRect;
 struct BASE_EXPORT IntVector2D {
 	int x = 0;

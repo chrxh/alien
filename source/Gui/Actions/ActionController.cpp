@@ -2,6 +2,8 @@
 #include <QMessageBox>
 #include <QAction>
 
+#include "Base/NumberGenerator.h"
+
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/Serializer.h"
 #include "Model/Api/SymbolTable.h"
@@ -18,6 +20,7 @@
 #include "Gui/Dialogs/SimulationConfigDialog.h"
 #include "Gui/Dialogs/NewRectangleDialog.h"
 #include "Gui/Dialogs/NewHexagonDialog.h"
+#include "Gui/Dialogs/NewParticlesDialog.h"
 #include "Gui/Settings.h"
 #include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
@@ -38,7 +41,7 @@ ActionController::ActionController(QObject * parent)
 
 void ActionController::init(MainController * mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 	, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-	, DataRepository* repository, Notifier* notifier)
+	, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator)
 {
 	_mainController = mainController;
 	_mainModel = mainModel;
@@ -50,6 +53,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	_toolbar = toolbar;
 	_repository = repository;
 	_notifier = notifier;
+	_numberGenerator = numberGenerator;
 
 	connect(_notifier, &Notifier::notify, this, &ActionController::receivedNotifications);
 
@@ -88,6 +92,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
 	connect(actions->actionNewHexagon, &QAction::triggered, this, &ActionController::onNewHexagon);
+	connect(actions->actionNewParticles, &QAction::triggered, this, &ActionController::onNewParticles);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
 	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
@@ -580,6 +585,23 @@ void ActionController::onNewHexagon()
 			.addCells(cells);
 
 		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
+		Q_EMIT _notifier->notify({
+			Receiver::DataEditor,
+			Receiver::Simulation,
+			Receiver::VisualEditor,
+			Receiver::ActionController
+		}, UpdateDescription::All);
+	}
+}
+
+void ActionController::onNewParticles()
+{
+	NewParticlesDialog dialog;
+	if (dialog.exec()) {
+		double totalEnergy = dialog.getTotalEnergy();
+		double maxEnergyPerParticle = dialog.getMaxEnergyPerParticle();
+
+		_repository->addRandomParticles(totalEnergy, maxEnergyPerParticle);
 		Q_EMIT _notifier->notify({
 			Receiver::DataEditor,
 			Receiver::Simulation,

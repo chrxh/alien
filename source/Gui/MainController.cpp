@@ -39,7 +39,7 @@ void MainController::init()
 	_view = new MainView();
 
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_numberGenerator = factory->buildRandomNumberGenerator();
+	auto numberGenerator = factory->buildRandomNumberGenerator();
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto serializer = facade->buildSerializer();
@@ -50,14 +50,15 @@ void MainController::init()
 	SET_CHILD(_simAccess, simAccessForDataController);
 	SET_CHILD(_descHelper, descHelper);
 	SET_CHILD(_versionController, versionController);
+	SET_CHILD(_numberGenerator, numberGenerator);
 	_repository = new DataRepository(this);
 	_notifier = new Notifier(this);
 
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
 	_serializer->init();
-	_view->init(_model, this, _serializer, _repository, _notifier);
 	_numberGenerator->init(12315312, 0);
+	_view->init(_model, this, _serializer, _repository, _notifier, _numberGenerator);
 
 	
 	//default simulation
@@ -65,7 +66,7 @@ void MainController::init()
 		8, { 12, 6 },{ 12 * 33 * 3 , 12 * 17 * 3 },
 		facade->buildDefaultSymbolTable(),
 		facade->buildDefaultSimulationParameters(),
-		20000 * 9
+		20000 * 9 * 20
 	};
 	onNewSimulation(config);
 }
@@ -111,7 +112,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
 	_versionController->init(_simController->getContext());
-	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext());
+	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
 
 	_view->setupEditors(_simController);
 
@@ -143,7 +144,7 @@ bool MainController::onLoadSimulation(string const & filename)
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_descHelper->init(_simController->getContext());
 	_versionController->init(_simController->getContext());
-	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext());
+	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
 
 	_view->setupEditors(_simController);
 	_view->refresh();
@@ -175,15 +176,15 @@ void MainController::connectSimController() const
 
 void MainController::addRandomEnergy(double amount)
 {
-	DataChangeDescription desc;
-	auto universeSize = _simController->getContext()->getSpaceProperties()->getSize();
-	double amountPerCell = _simController->getContext()->getSimulationParameters()->cellMinEnergy;
-	for (int i = 0; i < amount; ++i) {
-		desc.addNewParticle(ParticleChangeDescription().setPos(QVector2D(_numberGenerator->getRandomInt(universeSize.x), _numberGenerator->getRandomInt(universeSize.y)))
-			.setVel(QVector2D(_numberGenerator->getRandomReal()*2.0 - 1.0, _numberGenerator->getRandomReal()*2.0 - 1.0))
-			.setEnergy(amountPerCell));
-	}
-	_simAccess->updateData(desc);
+	double maxEnergyPerCell = _simController->getContext()->getSimulationParameters()->cellMinEnergy;
+	_repository->addRandomParticles(amount, maxEnergyPerCell);
+	Q_EMIT _notifier->notify({
+		Receiver::DataEditor,
+		Receiver::Simulation,
+		Receiver::VisualEditor,
+		Receiver::ActionController
+	}, UpdateDescription::All);
+
 }
 
 void MainController::serializationFinished()

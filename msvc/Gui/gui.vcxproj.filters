@@ -75,15 +75,6 @@
     <ClCompile Include="Release\moc_ToolbarContext.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\AddEnergyDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_AddEnergyDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_AddEnergyDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\dialogs\NewSimulationDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -525,6 +516,15 @@
     <ClCompile Include="Release\moc_NewHexagonDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\NewParticlesDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_NewParticlesDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_NewParticlesDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -561,12 +561,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarContext.h">
       <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\AddEnergyDialog.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\AddEnergyDialog.ui">
-      <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\NewSimulationDialog.h">
       <Filter>Source Files\Dialogs</Filter>
@@ -763,6 +757,12 @@
     <CustomBuild Include="..\..\source\gui\dialogs\NewHexagonDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\NewParticlesDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\NewParticlesDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\gui\resources\tutorial\angle.png">
@@ -854,9 +854,6 @@
     <ClInclude Include="ui_ToolbarView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_AddEnergyDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_NewSimulationDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -933,6 +930,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_NewHexagonDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_NewParticlesDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

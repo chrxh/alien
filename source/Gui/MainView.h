@@ -18,7 +18,8 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository, Notifier* notifier);
+	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository, Notifier* notifier
+		, NumberGenerator* numberGenerator);
 	virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller);
