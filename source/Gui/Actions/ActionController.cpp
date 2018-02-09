@@ -187,6 +187,7 @@ void ActionController::onNewSimulation()
 		_model->getActionHolder()->actionRestore->setEnabled(false);
 		_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
 		onRunClicked(false);
+		onToggleCellInfo(_model->getActionHolder()->actionShowCellInfo->isChecked());
 	}
 }
 
@@ -208,6 +209,7 @@ void ActionController::onLoadSimulation()
 			_model->getActionHolder()->actionRestore->setEnabled(false);
 			_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
 			onRunClicked(false);
+			onToggleCellInfo(_model->getActionHolder()->actionShowCellInfo->isChecked());
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation could not loaded.");

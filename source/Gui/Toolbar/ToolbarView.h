@@ -21,6 +21,8 @@ private:
 
 	Ui::Toolbar ui;
 
+	list<QMetaObject::Connection> _connections;
+
 	ToolbarController* _controller = nullptr;
 	ActionHolder* _actions = nullptr;
 };

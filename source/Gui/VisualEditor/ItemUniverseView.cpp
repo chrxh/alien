@@ -38,6 +38,8 @@ void ItemUniverseView::init(Notifier* notifier, SimulationController * controlle
 	SET_CHILD(_itemManager, itemManager);
 
 	_itemManager->init(this, viewport, _controller->getContext()->getSimulationParameters());
+
+	connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled);
 }
 
 void ItemUniverseView::activate()
@@ -48,7 +50,6 @@ void ItemUniverseView::activate()
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
 	_connections.push_back(connect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &ItemUniverseView::scrolled));
-	_connections.push_back(connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled));
 
 	requestData();
 }
