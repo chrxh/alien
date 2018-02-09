@@ -314,11 +314,16 @@ DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBa
 	
 	ClusterVelocities result;
 	if (cells.size() == 1) {
-		int clusterIndex = _origNavi.clusterIndicesByCellIds.at(cells.front().id);
-		int cellIndex = _origNavi.cellIndicesByCellIds.at(cells.front().id);
-		auto const& cluster = _origData->clusters->at(clusterIndex);
-		auto const& cell = cluster.cells->at(cellIndex);
-		result.linearVel = Physics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+		auto cell = cells.front();
+		if (_origNavi.clusterIndicesByCellIds.find(cell.id) == _origNavi.clusterIndicesByCellIds.end()
+			|| _origNavi.cellIndicesByCellIds.find(cell.id) == _origNavi.cellIndicesByCellIds.end()) {
+			return result;
+		}
+		int clusterIndex = _origNavi.clusterIndicesByCellIds.at(cell.id);
+		int cellIndex = _origNavi.cellIndicesByCellIds.at(cell.id);
+		auto const& origCluster = _origData->clusters->at(clusterIndex);
+		auto const& origCell = origCluster.cells->at(cellIndex);
+		result.linearVel = Physics::tangentialVelocity(*origCell.pos - *origCluster.pos, *origCluster.vel, *origCluster.angularVel);
 		return result;
 	}
 
