@@ -21,6 +21,7 @@
 #include "Gui/Dialogs/NewRectangleDialog.h"
 #include "Gui/Dialogs/NewHexagonDialog.h"
 #include "Gui/Dialogs/NewParticlesDialog.h"
+#include "Gui/Dialogs/MultiplyRandomDialog.h"
 #include "Gui/Settings.h"
 #include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
@@ -80,12 +81,6 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 
 	connect(actions->actionNewCell, &QAction::triggered, this, &ActionController::onNewCell);
 	connect(actions->actionNewParticle, &QAction::triggered, this, &ActionController::onNewParticle);
-	connect(actions->actionLoadCol, &QAction::triggered, this, &ActionController::onLoadCollection);
-	connect(actions->actionSaveCol, &QAction::triggered, this, &ActionController::onSaveCollection);
-	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
-	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
-	connect(actions->actionDeleteSel, &QAction::triggered, this, &ActionController::onDeleteSelection);
-	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteCollection);
 	connect(actions->actionNewToken, &QAction::triggered, this, &ActionController::onNewToken);
 	connect(actions->actionDeleteToken, &QAction::triggered, this, &ActionController::onDeleteToken);
 	connect(actions->actionShowCellInfo, &QAction::toggled, this, &ActionController::onToggleCellInfo);
@@ -93,6 +88,13 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
 	connect(actions->actionNewHexagon, &QAction::triggered, this, &ActionController::onNewHexagon);
 	connect(actions->actionNewParticles, &QAction::triggered, this, &ActionController::onNewParticles);
+	connect(actions->actionLoadCol, &QAction::triggered, this, &ActionController::onLoadCollection);
+	connect(actions->actionSaveCol, &QAction::triggered, this, &ActionController::onSaveCollection);
+	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
+	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
+	connect(actions->actionDeleteSel, &QAction::triggered, this, &ActionController::onDeleteSelection);
+	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteCollection);
+	connect(actions->actionMultiplyRandom, &QAction::triggered, this, &ActionController::onMultiplyRandom);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
 	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
@@ -400,6 +402,69 @@ void ActionController::onDeleteCollection()
 	}, UpdateDescription::All);
 }
 
+namespace
+{
+	void modifyDescription(DataDescription& data, QVector2D const& posDelta, optional<double> const& velocityX, optional<double> const& velocityY)
+	{
+		if (data.clusters) {
+			for (auto& cluster : data.clusters.get()) {
+				*cluster.pos += posDelta;
+				if (velocityX) {
+					cluster.vel->setX(*velocityX);
+				}
+				if (velocityY) {
+					cluster.vel->setY(*velocityY);
+				}
+				if (cluster.cells) {
+					for (auto& cell : cluster.cells.get()) {
+						*cell.pos += posDelta;
+					}
+				}
+			}
+		}
+		if (data.particles) {
+			for (auto& particle : data.particles.get()) {
+				*particle.pos += posDelta;
+				if (velocityX) {
+					particle.vel->setX(*velocityX);
+				}
+				if (velocityY) {
+					particle.vel->setY(*velocityY);
+				}
+			}
+		}
+	}
+}
+
+void ActionController::onMultiplyRandom()
+{
+	MultiplyRandomDialog dialog;
+	if (dialog.exec()) {
+		DataDescription data = _repository->getExtendedSelection();
+		IntVector2D universeSize = _mainController->getSimulationConfig().universeSize;
+		for (int i = 0; i < dialog.getNumber(); ++i) {
+			DataDescription dataCopied = data;
+			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
+			optional<double> velocityX;
+			optional<double> velocityY;
+			if (dialog.randomizeVelX()) {
+				velocityX = _numberGenerator->getRandomReal(dialog.randomizeVelXMin(), dialog.randomizeVelXMax());
+			}
+			if (dialog.randomizeVelY()) {
+				velocityY = _numberGenerator->getRandomReal(dialog.randomizeVelYMin(), dialog.randomizeVelYMax());
+			}
+			modifyDescription(dataCopied, posDelta, velocityX, velocityY);
+			_repository->addDataAtFixedPosition(dataCopied);
+		}
+		Q_EMIT _notifier->notify({
+			Receiver::DataEditor,
+			Receiver::Simulation,
+			Receiver::VisualEditor,
+			Receiver::ActionController
+		}, UpdateDescription::All);
+	}
+}
+
 void ActionController::onNewToken()
 {
 	_repository->addToken();
@@ -659,7 +724,7 @@ void ActionController::updateZoomFactor()
 
 void ActionController::updateActionsEnableState()
 {
-	bool visible = _model->isEditMode();
+	bool editMode = _model->isEditMode();
 	bool entitySelected = _model->isEntitySelected();
 	bool entityCopied = _model->isEntityCopied();
 	bool cellWithTokenSelected = _model->isCellWithTokenSelected();
@@ -669,27 +734,27 @@ void ActionController::updateActionsEnableState()
 	bool collectionCopied = _model->isCollectionCopied();
 
 	auto actions = _model->getActionHolder();
-	actions->actionShowCellInfo->setEnabled(visible);
+	actions->actionShowCellInfo->setEnabled(editMode);
 
-	actions->actionNewCell->setEnabled(visible);
-	actions->actionNewParticle->setEnabled(visible);
-	actions->actionCopyEntity->setEnabled(visible && entitySelected);
-	actions->actionPasteEntity->setEnabled(visible && entityCopied);
-	actions->actionDeleteEntity->setEnabled(visible && entitySelected);
-	actions->actionNewToken->setEnabled(visible && entitySelected);
-	actions->actionCopyToken->setEnabled(visible && entitySelected);
-	actions->actionPasteToken->setEnabled(visible && cellWithFreeTokenSelected && tokenCopied);
-	actions->actionDeleteToken->setEnabled(visible && cellWithTokenSelected);
+	actions->actionNewCell->setEnabled(editMode);
+	actions->actionNewParticle->setEnabled(editMode);
+	actions->actionCopyEntity->setEnabled(editMode && entitySelected);
+	actions->actionPasteEntity->setEnabled(editMode && entityCopied);
+	actions->actionDeleteEntity->setEnabled(editMode && entitySelected);
+	actions->actionNewToken->setEnabled(editMode && entitySelected);
+	actions->actionCopyToken->setEnabled(editMode && entitySelected);
+	actions->actionPasteToken->setEnabled(editMode && cellWithFreeTokenSelected && tokenCopied);
+	actions->actionDeleteToken->setEnabled(editMode && cellWithTokenSelected);
 
 	actions->actionNewRectangle->setEnabled(true);
 	actions->actionNewHexagon->setEnabled(true);
 	actions->actionNewParticles->setEnabled(true);
 	actions->actionLoadCol->setEnabled(true);
-	actions->actionSaveCol->setEnabled(visible && collectionSelected);
-	actions->actionCopyCol->setEnabled(visible && collectionSelected);
+	actions->actionSaveCol->setEnabled(editMode && collectionSelected);
+	actions->actionCopyCol->setEnabled(editMode && collectionSelected);
 	actions->actionPasteCol->setEnabled(collectionCopied);
-	actions->actionDeleteSel->setEnabled(visible && collectionSelected);
-	actions->actionDeleteCol->setEnabled(visible && collectionSelected);
-	actions->actionMultiplyRandom->setEnabled(visible && collectionSelected);
-	actions->actionMultiplyArrangement->setEnabled(visible && collectionSelected);
+	actions->actionDeleteSel->setEnabled(editMode && collectionSelected);
+	actions->actionDeleteCol->setEnabled(editMode && collectionSelected);
+	actions->actionMultiplyRandom->setEnabled(editMode && collectionSelected);
+	actions->actionMultiplyArrangement->setEnabled(editMode && collectionSelected);
 }
