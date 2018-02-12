@@ -93,15 +93,6 @@
     <ClCompile Include="Release\moc_SelectionMultiplyArrangementDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\SelectionMultiplyRandomDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SelectionMultiplyRandomDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SelectionMultiplyRandomDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\gui\dialogs\SimulationParametersDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -525,6 +516,15 @@
     <ClCompile Include="Release\moc_NewParticlesDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\gui\dialogs\MultiplyRandomDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MultiplyRandomDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MultiplyRandomDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -572,12 +572,6 @@
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\SelectionMultiplyArrangementDialog.ui">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\SelectionMultiplyRandomDialog.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\SelectionMultiplyRandomDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\SimulationParametersDialog.h">
@@ -763,6 +757,12 @@
     <CustomBuild Include="..\..\source\gui\dialogs\NewParticlesDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\MultiplyRandomDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\dialogs\MultiplyRandomDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\gui\resources\tutorial\angle.png">
@@ -860,9 +860,6 @@
     <ClInclude Include="ui_SelectionMultiplyArrangementDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_SelectionMultiplyRandomDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_SimulationParametersDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -933,6 +930,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_NewParticlesDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_MultiplyRandomDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

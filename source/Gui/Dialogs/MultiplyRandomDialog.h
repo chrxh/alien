@@ -1,19 +1,18 @@
-#ifndef SELECTIONMULTIPLYRANDOMDIALOG_H
-#define SELECTIONMULTIPLYRANDOMDIALOG_H
+#pragma once
 
 #include <QDialog>
 
 namespace Ui {
-class SelectionMultiplyRandomDialog;
+class MultiplyRandomDialog;
 }
 
-class SelectionMultiplyRandomDialog : public QDialog
+class MultiplyRandomDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit SelectionMultiplyRandomDialog(QWidget *parent = 0);
-    ~SelectionMultiplyRandomDialog();
+    explicit MultiplyRandomDialog(QWidget *parent = nullptr);
+    virtual ~MultiplyRandomDialog();
 
     int getNumber ();
     bool randomizeAngle ();
@@ -30,7 +29,5 @@ public:
     qreal randomizeAngVelMax ();
 
 private:
-    Ui::SelectionMultiplyRandomDialog *ui;
+    Ui::MultiplyRandomDialog *ui;
 };
-
-#endif // SELECTIONMULTIPLYRANDOMDIALOG_H
