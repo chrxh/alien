@@ -1,90 +1,90 @@
-#include "SelectionMultiplyRandomDialog.h"
-#include "ui_selectionmultiplyrandomdialog.h"
+#include "MultiplyRandomDialog.h"
+#include "ui_MultiplyRandomDialog.h"
 
 #include "gui/Settings.h"
 
-SelectionMultiplyRandomDialog::SelectionMultiplyRandomDialog(QWidget *parent) :
+MultiplyRandomDialog::MultiplyRandomDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::SelectionMultiplyRandomDialog)
+    ui(new Ui::MultiplyRandomDialog)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
 }
 
-SelectionMultiplyRandomDialog::~SelectionMultiplyRandomDialog()
+MultiplyRandomDialog::~MultiplyRandomDialog()
 {
     delete ui;
 }
 
-int SelectionMultiplyRandomDialog::getNumber ()
+int MultiplyRandomDialog::getNumber ()
 {
     bool ok(true);
     return ui->numberEdit->text().toUInt(&ok);
 }
 
-bool SelectionMultiplyRandomDialog::randomizeAngle ()
+bool MultiplyRandomDialog::randomizeAngle ()
 {
     return ui->randomizeAngleCheckBox->isChecked();
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeAngleMin ()
+qreal MultiplyRandomDialog::randomizeAngleMin ()
 {
     bool ok(true);
     return ui->minAngleEdit->text().toDouble(&ok);
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeAngleMax ()
+qreal MultiplyRandomDialog::randomizeAngleMax ()
 {
     bool ok(true);
     return ui->maxAngleEdit->text().toDouble(&ok);
 }
 
-bool SelectionMultiplyRandomDialog::randomizeVelX ()
+bool MultiplyRandomDialog::randomizeVelX ()
 {
     return ui->randomizeVelXcheckBox->isChecked();
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeVelXMin ()
+qreal MultiplyRandomDialog::randomizeVelXMin ()
 {
     bool ok(true);
     return ui->minVelXEdit->text().toDouble(&ok);
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeVelXMax ()
+qreal MultiplyRandomDialog::randomizeVelXMax ()
 {
     bool ok(true);
     return ui->maxVelXEdit->text().toDouble(&ok);
 }
 
-bool SelectionMultiplyRandomDialog::randomizeVelY ()
+bool MultiplyRandomDialog::randomizeVelY ()
 {
     return ui->randomizeVelYcheckBox->isChecked();
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeVelYMin ()
+qreal MultiplyRandomDialog::randomizeVelYMin ()
 {
     bool ok(true);
     return ui->minVelYEdit->text().toDouble(&ok);
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeVelYMax ()
+qreal MultiplyRandomDialog::randomizeVelYMax ()
 {
     bool ok(true);
     return ui->maxVelYEdit->text().toDouble(&ok);
 }
 
-bool SelectionMultiplyRandomDialog::randomizeAngVel ()
+bool MultiplyRandomDialog::randomizeAngVel ()
 {
     return ui->randomizeAngVelcheckBox->isChecked();
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeAngVelMin ()
+qreal MultiplyRandomDialog::randomizeAngVelMin ()
 {
     bool ok(true);
     return ui->minAngVelEdit->text().toDouble(&ok);
 }
 
-qreal SelectionMultiplyRandomDialog::randomizeAngVelMax ()
+qreal MultiplyRandomDialog::randomizeAngVelMax ()
 {
     bool ok(true);
     return ui->maxAngVelEdit->text().toDouble(&ok);

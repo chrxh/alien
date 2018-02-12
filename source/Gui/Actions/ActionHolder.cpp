@@ -149,8 +149,10 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionSaveCol = new QAction("Save", this);
 	actionSaveCol->setEnabled(false);
 	actionCopyCol = new QAction("Copy", this);
+	actionCopyCol->setShortcut(Qt::CTRL + Qt::Key_C);
 	actionCopyCol->setEnabled(false);
 	actionPasteCol = new QAction("Paste", this);
+	actionPasteCol->setShortcut(Qt::CTRL + Qt::Key_V);
 	actionPasteCol->setEnabled(false);
 	actionDeleteSel = new QAction("Delete selection", this);
 	QIcon iconDeleteSel;
@@ -164,9 +166,9 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDeleteCol->setIcon(iconDeleteCol);
 	actionDeleteCol->setIconVisibleInMenu(false);
 	actionDeleteCol->setEnabled(false);
-	actionMultiplyRandom = new QAction("Multiply random", this);
+	actionMultiplyRandom = new QAction("Random multiplier", this);
 	actionMultiplyRandom->setEnabled(false);
-	actionMultiplyArrangement = new QAction("Multiply arrangement", this);
+	actionMultiplyArrangement = new QAction("Arrangement multiplier", this);
 	actionMultiplyArrangement->setEnabled(false);
 
 	actionAbout = new QAction("About artificial life environment (alien)", this);
