@@ -404,16 +404,17 @@ void ActionController::onDeleteCollection()
 
 namespace
 {
-	void modifyDescription(DataDescription& data, QVector2D const& posDelta, optional<double> const& velocityX, optional<double> const& velocityY)
+	void modifyDescription(DataDescription& data, QVector2D const& posDelta, optional<double> const& velocityX
+		, optional<double> const& velocityY)
 	{
 		if (data.clusters) {
 			for (auto& cluster : data.clusters.get()) {
 				*cluster.pos += posDelta;
 				if (velocityX) {
-					cluster.vel->setX(*velocityX);
+					cluster.vel->setX(cluster.vel->x() + *velocityX);
 				}
 				if (velocityY) {
-					cluster.vel->setY(*velocityY);
+					cluster.vel->setY(cluster.vel->y() + *velocityY);
 				}
 				if (cluster.cells) {
 					for (auto& cell : cluster.cells.get()) {
@@ -426,10 +427,10 @@ namespace
 			for (auto& particle : data.particles.get()) {
 				*particle.pos += posDelta;
 				if (velocityX) {
-					particle.vel->setX(*velocityX);
+					particle.vel->setX(particle.vel->x() + *velocityX);
 				}
 				if (velocityY) {
-					particle.vel->setY(*velocityY);
+					particle.vel->setY(particle.vel->y() + *velocityY);
 				}
 			}
 		}
@@ -447,14 +448,18 @@ void ActionController::onMultiplyRandom()
 			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
 			optional<double> velocityX;
 			optional<double> velocityY;
+			optional<double> angle;
 			if (dialog.randomizeVelX()) {
 				velocityX = _numberGenerator->getRandomReal(dialog.randomizeVelXMin(), dialog.randomizeVelXMax());
 			}
 			if (dialog.randomizeVelY()) {
 				velocityY = _numberGenerator->getRandomReal(dialog.randomizeVelYMin(), dialog.randomizeVelYMax());
 			}
+			if (dialog.randomizeAngle()) {
+				angle = _numberGenerator->getRandomReal(dialog.randomizeAngleMin(), dialog.randomizeAngleMax());
+			}
 			modifyDescription(dataCopied, posDelta, velocityX, velocityY);
-			_repository->addDataAtFixedPosition(dataCopied);
+			_repository->addDataAtFixedPosition(dataCopied, angle);
 		}
 		Q_EMIT _notifier->notify({
 			Receiver::DataEditor,

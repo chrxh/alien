@@ -28,7 +28,7 @@ public:
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
 	virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta);
-	virtual void addDataAtFixedPosition(DataDescription data);
+	virtual void addDataAtFixedPosition(DataDescription data, optional<double> rotationAngle = boost::none);
 	virtual void addRandomParticles(double totalEnergy, double maxEnergyPerParticle);
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
@@ -65,8 +65,6 @@ private:
 	void updateInternals(DataDescription const &data);
 	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);
-
-	QVector2D calcCenter();
 
 	list<QMetaObject::Connection> _connections;
 
