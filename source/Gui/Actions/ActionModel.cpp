@@ -16,7 +16,7 @@ ActionHolder * ActionModel::getActionHolder() const
 
 QVector2D ActionModel::getPositionDeltaForNewEntity()
 {
-	_delta += 1.0;
+	_delta += 0.5;
 	if (_delta > 10.0) {
 		_delta = 0.0;
 	}

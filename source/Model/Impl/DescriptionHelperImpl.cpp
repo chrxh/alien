@@ -329,6 +329,10 @@ DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBa
 
 	unordered_map<uint64_t, QVector2D> cellVel;
 	for (auto const& cell : cells) {
+		if (_origNavi.clusterIndicesByCellIds.find(cell.id) == _origNavi.clusterIndicesByCellIds.end()
+			|| _origNavi.cellIndicesByCellIds.find(cell.id) == _origNavi.cellIndicesByCellIds.end()) {
+			return result;
+		}
 		int clusterIndex = _origNavi.clusterIndicesByCellIds.at(cell.id);
 		int cellIndex = _origNavi.cellIndicesByCellIds.at(cell.id);
 		auto const& origCluster = _origData->clusters->at(clusterIndex);
