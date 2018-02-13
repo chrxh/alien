@@ -36,7 +36,6 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Bug: Erstellen von Zellen an der gleichen Stelle führt zum Absturz
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
