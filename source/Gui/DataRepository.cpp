@@ -138,8 +138,77 @@ void DataRepository::addAndSelectData(DataDescription data, QVector2D const & po
 	_navi.update(_data);
 }
 
-void DataRepository::addDataAtFixedPosition(DataDescription data)
+namespace
 {
+	QVector2D calcCenter(int numCluster, int numParticles, std::function<ClusterDescription&(int)> clusterResolver
+		, std::function<ParticleDescription&(int)> particleResolver)
+	{
+		QVector2D result;
+		int numEntities = 0;
+		for (int i = 0; i < numCluster; ++i) {
+			auto const& cluster = clusterResolver(i);
+			if (!cluster.cells) {
+				continue;
+			}
+			for (auto const& cell : *cluster.cells) {
+				result += *cell.pos;
+				++numEntities;
+			}
+		}
+		for (int i = 0; i < numParticles; ++i) {
+			auto const& particle = particleResolver(i);
+			result += *particle.pos;
+			++numEntities;
+		}
+		CHECK(numEntities > 0);
+		result /= numEntities;
+		return result;
+	}
+
+	void rotate(double angle, int numCluster, int numParticles, std::function<ClusterDescription&(int)> clusterResolver
+		, std::function<ParticleDescription&(int)> particleResolver)
+	{
+		QVector3D center = calcCenter(numCluster, numParticles, clusterResolver, particleResolver);
+
+		QMatrix4x4 transform;
+		transform.setToIdentity();
+		transform.translate(center);
+		transform.rotate(angle, 0.0, 0.0, 1.0);
+		transform.translate(-center);
+
+		for (int i = 0; i < numCluster; ++i) {
+			auto& cluster = clusterResolver(i);
+			if (!cluster.cells) {
+				continue;
+			}
+			for (auto& cell : *cluster.cells) {
+				*cell.pos = transform.map(QVector3D(*cell.pos)).toVector2D();
+			}
+			*cluster.angle += angle;
+			*cluster.pos = transform.map(QVector3D(*cluster.pos)).toVector2D();
+		}
+		for (int i = 0; i < numParticles; ++i) {
+			auto& particle = particleResolver(i);
+			*particle.pos = transform.map(QVector3D(*particle.pos)).toVector2D();
+		}
+
+	}
+}
+
+void DataRepository::addDataAtFixedPosition(DataDescription data, optional<double> rotationAngle)
+{
+	if (rotationAngle) {
+		int numClusters = data.clusters.is_initialized() ? data.clusters->size() : 0;
+		int numParticle = data.particles.is_initialized() ? data.particles->size() : 0;
+		auto clusterResolver = [&data](int index) -> ClusterDescription& {
+			return data.clusters->at(index);
+		};
+		auto particleResolver = [&data](int index) -> ParticleDescription& {
+			return data.particles->at(index);
+		};
+		rotate(*rotationAngle, numClusters, numParticle, clusterResolver, particleResolver);
+	}
+
 	if (data.clusters) {
 		for (auto& cluster : *data.clusters) {
 			cluster.id = 0;
@@ -445,61 +514,15 @@ void DataRepository::reconnectSelectedCells()
 
 void DataRepository::rotateSelection(double angle)
 {
-	QVector3D center = calcCenter();
-
-	QMatrix4x4 transform;
-	transform.setToIdentity();
-	transform.translate(center);
-	transform.rotate(angle, 0.0, 0.0, 1.0);
-	transform.translate(-center);
-
-	if (_data.clusters) {
-		for (uint64_t clusterId : _selectedClusterIds) {
-			auto& cluster = _data.clusters->at(_navi.clusterIndicesByClusterIds.at(clusterId));
-			if (!cluster.cells) {
-				continue;
-			}
-			for (auto& cell : *cluster.cells) {
-				*cell.pos = transform.map(QVector3D(*cell.pos)).toVector2D();
-			}
-			*cluster.angle += angle;
-			*cluster.pos = transform.map(QVector3D(*cluster.pos)).toVector2D();
-		}
-	}
-	if (_data.particles) {
-		for (uint64_t particleId : _selectedParticleIds) {
-			auto& particle = getParticleDescRef(particleId);
-			*particle.pos = transform.map(QVector3D(*particle.pos)).toVector2D();
-		}
-	}
-}
-
-QVector2D DataRepository::calcCenter()
-{
-	QVector2D result;
-	int numEntities = 0;
-	if (_data.clusters) {
-		for (uint64_t clusterId : _selectedClusterIds) {
-			auto const& cluster = _data.clusters->at(_navi.clusterIndicesByClusterIds.at(clusterId));
-			if (!cluster.cells) {
-				continue;
-			}
-			for (auto const& cell : *cluster.cells) {
-				result += *cell.pos;
-				++numEntities;
-			}
-		}
-	}
-	if (_data.particles) {
-		for (uint64_t particleId: _selectedParticleIds) {
-			auto const& particle = getParticleDescRef(particleId);
-			result += *particle.pos;
-			++numEntities;
-		}
-	}
-	CHECK(numEntities > 0);
-	result /= numEntities;
-	return result;
+	vector<uint64_t> selectedClusterIds(_selectedClusterIds.begin(), _selectedClusterIds.end());
+	vector<uint64_t> selectedParticleIds(_selectedParticleIds.begin(), _selectedParticleIds.end());
+	auto clusterResolver = [&selectedClusterIds, this](int index) -> ClusterDescription&  {
+		return _data.clusters->at(_navi.clusterIndicesByClusterIds.at(selectedClusterIds.at(index)));
+	};
+	auto particleResolver = [&selectedParticleIds, this](int index) -> ParticleDescription& {
+		return getParticleDescRef(selectedParticleIds.at(index));
+	};
+	rotate(angle, _selectedClusterIds.size(), _selectedParticleIds.size(), clusterResolver, particleResolver);
 }
 
 void DataRepository::updateCluster(ClusterDescription const & cluster)
