@@ -87,6 +87,12 @@ void MainView::showDocumentation(bool show)
 	_documentationWindow->setVisible(show);
 }
 
+void MainView::closeEvent(QCloseEvent * event)
+{
+	_controller->autoSave();
+	QMainWindow::closeEvent(event);
+}
+
 void MainView::setupMenu()
 {
 	auto actions = _actions->getActionHolder();
