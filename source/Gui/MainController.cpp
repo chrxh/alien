@@ -1,6 +1,9 @@
 ﻿#include <iostream>
 #include <fstream>
 
+#include <QTime>
+#include <QCoreApplication>
+
 #include "Base/GlobalFactory.h"
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
@@ -61,14 +64,35 @@ void MainController::init()
 	_view->init(_model, this, _serializer, _repository, _notifier, _numberGenerator);
 
 	
-	//default simulation
-	NewSimulationConfig config{
-		8, { 12, 6 },{ 12 * 33 * 3 , 12 * 17 * 3 },
-		facade->buildDefaultSymbolTable(),
-		facade->buildDefaultSimulationParameters(),
-		20000 * 9 * 20
-	};
-	onNewSimulation(config);
+	if (!onLoadSimulation("autosave.sim")) {
+
+		//default simulation
+		NewSimulationConfig config{
+			8, { 12, 6 },{ 12 * 33 * 2 , 12 * 17 * 2 },
+			facade->buildDefaultSymbolTable(),
+			facade->buildDefaultSimulationParameters(),
+			0/*20000 * 9 * 20*/
+		};
+		onNewSimulation(config);
+	}
+}
+
+namespace
+{
+	void processEventForMilliSec(int millisec)
+	{
+		QTime dieTime = QTime::currentTime().addMSecs(millisec);
+		while (QTime::currentTime() < dieTime)
+		{
+			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+		}
+	}
+}
+
+void MainController::autoSave()
+{
+	onSaveSimulation("autosave.sim");
+	processEventForMilliSec(200);
 }
 
 void MainController::onRunSimulation(bool run)

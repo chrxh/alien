@@ -27,6 +27,9 @@ public:
 
 	virtual void showDocumentation(bool show);
 
+protected:
+	virtual void closeEvent(QCloseEvent* event);
+
 private:
 	void setupMenu();
 	void setupTheme();
