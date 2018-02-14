@@ -15,6 +15,8 @@ public:
 
 	virtual void init();
 
+	virtual void autoSave();
+
 	virtual void onRunSimulation(bool run);
 	virtual void onStepForward();
 	virtual void onStepBackward(bool& emptyStack);
