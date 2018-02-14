@@ -404,17 +404,20 @@ void ActionController::onDeleteCollection()
 
 namespace
 {
-	void modifyDescription(DataDescription& data, QVector2D const& posDelta, optional<double> const& velocityX
-		, optional<double> const& velocityY)
+	void modifyDescription(DataDescription& data, QVector2D const& posDelta, optional<double> const& velocityXDelta
+		, optional<double> const& velocityYDelta, optional<double> const& angularVelocityDelta)
 	{
 		if (data.clusters) {
 			for (auto& cluster : data.clusters.get()) {
 				*cluster.pos += posDelta;
-				if (velocityX) {
-					cluster.vel->setX(cluster.vel->x() + *velocityX);
+				if (velocityXDelta) {
+					cluster.vel->setX(cluster.vel->x() + *velocityXDelta);
 				}
-				if (velocityY) {
-					cluster.vel->setY(cluster.vel->y() + *velocityY);
+				if (velocityYDelta) {
+					cluster.vel->setY(cluster.vel->y() + *velocityYDelta);
+				}
+				if (angularVelocityDelta) {
+					*cluster.angularVel += *angularVelocityDelta;
 				}
 				if (cluster.cells) {
 					for (auto& cell : cluster.cells.get()) {
@@ -426,11 +429,11 @@ namespace
 		if (data.particles) {
 			for (auto& particle : data.particles.get()) {
 				*particle.pos += posDelta;
-				if (velocityX) {
-					particle.vel->setX(particle.vel->x() + *velocityX);
+				if (velocityXDelta) {
+					particle.vel->setX(particle.vel->x() + *velocityXDelta);
 				}
-				if (velocityY) {
-					particle.vel->setY(particle.vel->y() + *velocityY);
+				if (velocityYDelta) {
+					particle.vel->setY(particle.vel->y() + *velocityYDelta);
 				}
 			}
 		}
@@ -449,6 +452,7 @@ void ActionController::onMultiplyRandom()
 			optional<double> velocityX;
 			optional<double> velocityY;
 			optional<double> angle;
+			optional<double> angularVelocity;
 			if (dialog.randomizeVelX()) {
 				velocityX = _numberGenerator->getRandomReal(dialog.randomizeVelXMin(), dialog.randomizeVelXMax());
 			}
@@ -458,7 +462,10 @@ void ActionController::onMultiplyRandom()
 			if (dialog.randomizeAngle()) {
 				angle = _numberGenerator->getRandomReal(dialog.randomizeAngleMin(), dialog.randomizeAngleMax());
 			}
-			modifyDescription(dataCopied, posDelta, velocityX, velocityY);
+			if (dialog.randomizeAngVel()) {
+				angularVelocity = _numberGenerator->getRandomReal(dialog.randomizeAngVelMin(), dialog.randomizeAngVelMax());
+			}
+			modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
 			_repository->addDataAtFixedPosition(dataCopied, angle);
 		}
 		Q_EMIT _notifier->notify({
