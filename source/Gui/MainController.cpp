@@ -79,7 +79,7 @@ void MainController::init()
 
 namespace
 {
-	void processEventForMilliSec(int millisec)
+	void processEventsForMilliSec(int millisec)
 	{
 		QTime dieTime = QTime::currentTime().addMSecs(millisec);
 		while (QTime::currentTime() < dieTime)
@@ -92,7 +92,7 @@ namespace
 void MainController::autoSave()
 {
 	onSaveSimulation("autosave.sim");
-	processEventForMilliSec(200);
+	processEventsForMilliSec(200);
 }
 
 void MainController::onRunSimulation(bool run)
