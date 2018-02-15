@@ -1,20 +1,20 @@
-#ifndef SELECTIONMULTIPLYARRANGEMENTDIALOG_H
-#define SELECTIONMULTIPLYARRANGEMENTDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QVector2D>
 
 namespace Ui {
-class SelectionMultiplyArrangementDialog;
+class GridMultiplierDialog;
 }
 
-class SelectionMultiplyArrangementDialog : public QDialog
+class GridMultiplierDialog
+	: public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit SelectionMultiplyArrangementDialog (QVector2D centerPos, QWidget *parent = 0);
-    ~SelectionMultiplyArrangementDialog();
+    GridMultiplierDialog (QVector2D centerPos, QWidget *parent = nullptr);
+    virtual ~GridMultiplierDialog();
 
     qreal getInitialPosX ();
     qreal getInitialPosY ();
@@ -43,7 +43,5 @@ public:
 
 
 private:
-    Ui::SelectionMultiplyArrangementDialog *ui;
+    Ui::GridMultiplierDialog *ui;
 };
-
-#endif // SELECTIONMULTIPLYARRANGEMENTDIALOG_H
