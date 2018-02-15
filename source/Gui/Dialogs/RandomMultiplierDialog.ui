@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MultiplyRandomDialog</class>
- <widget class="QDialog" name="MultiplyRandomDialog">
+ <class>RandomMultiplierDialog</class>
+ <widget class="QDialog" name="RandomMultiplierDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -292,7 +292,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>MultiplyRandomDialog</receiver>
+   <receiver>RandomMultiplierDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -308,7 +308,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>MultiplyRandomDialog</receiver>
+   <receiver>RandomMultiplierDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

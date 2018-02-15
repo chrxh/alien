@@ -166,10 +166,10 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDeleteCol->setIcon(iconDeleteCol);
 	actionDeleteCol->setIconVisibleInMenu(false);
 	actionDeleteCol->setEnabled(false);
-	actionMultiplyRandom = new QAction("Random multiplier", this);
-	actionMultiplyRandom->setEnabled(false);
-	actionMultiplyArrangement = new QAction("Arrangement multiplier", this);
-	actionMultiplyArrangement->setEnabled(false);
+	actionRandomMultiplier = new QAction("Random multiplier", this);
+	actionRandomMultiplier->setEnabled(false);
+	actionGridMultiplier = new QAction("Grid multiplier", this);
+	actionGridMultiplier->setEnabled(false);
 
 	actionAbout = new QAction("About artificial life environment (alien)", this);
 	actionAbout->setEnabled(true);

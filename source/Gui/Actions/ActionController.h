@@ -54,7 +54,8 @@ private:
 	Q_SLOT void onPasteCollection();
 	Q_SLOT void onDeleteSelection();
 	Q_SLOT void onDeleteCollection();
-	Q_SLOT void onMultiplyRandom();
+	Q_SLOT void onRandomMultiplier();
+	Q_SLOT void onGridMultiplier();
 
 	Q_SLOT void onShowAbout();
 	Q_SLOT void onShowDocumentation(bool show);

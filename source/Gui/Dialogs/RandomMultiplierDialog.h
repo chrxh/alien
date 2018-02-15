@@ -3,16 +3,16 @@
 #include <QDialog>
 
 namespace Ui {
-class MultiplyRandomDialog;
+class RandomMultiplierDialog;
 }
 
-class MultiplyRandomDialog : public QDialog
+class RandomMultiplierDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MultiplyRandomDialog(QWidget *parent = nullptr);
-    virtual ~MultiplyRandomDialog();
+    explicit RandomMultiplierDialog(QWidget *parent = nullptr);
+    virtual ~RandomMultiplierDialog();
 
     int getNumber ();
     bool randomizeAngle ();
@@ -29,5 +29,5 @@ public:
     qreal randomizeAngVelMax ();
 
 private:
-    Ui::MultiplyRandomDialog *ui;
+    Ui::RandomMultiplierDialog *ui;
 };

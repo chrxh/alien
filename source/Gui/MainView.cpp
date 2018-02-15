@@ -164,8 +164,8 @@ void MainView::setupMenu()
 	ui->menuCollection->addAction(actions->actionDeleteSel);
 	ui->menuCollection->addAction(actions->actionDeleteCol);
 	ui->menuCollection->addSeparator();
-	ui->menuCollection->addAction(actions->actionMultiplyRandom);
-	ui->menuCollection->addAction(actions->actionMultiplyArrangement);
+	ui->menuCollection->addAction(actions->actionRandomMultiplier);
+	ui->menuCollection->addAction(actions->actionGridMultiplier);
 
 	ui->menuHelp->addAction(actions->actionAbout);
 	ui->menuEntity->addSeparator();

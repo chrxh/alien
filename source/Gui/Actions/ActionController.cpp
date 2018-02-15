@@ -21,7 +21,8 @@
 #include "Gui/Dialogs/NewRectangleDialog.h"
 #include "Gui/Dialogs/NewHexagonDialog.h"
 #include "Gui/Dialogs/NewParticlesDialog.h"
-#include "Gui/Dialogs/MultiplyRandomDialog.h"
+#include "Gui/Dialogs/RandomMultiplierDialog.h"
+#include "Gui/Dialogs/GridMultiplierDialog.h"
 #include "Gui/Settings.h"
 #include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
@@ -94,7 +95,8 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
 	connect(actions->actionDeleteSel, &QAction::triggered, this, &ActionController::onDeleteSelection);
 	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteCollection);
-	connect(actions->actionMultiplyRandom, &QAction::triggered, this, &ActionController::onMultiplyRandom);
+	connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
+	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
 	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
@@ -440,9 +442,9 @@ namespace
 	}
 }
 
-void ActionController::onMultiplyRandom()
+void ActionController::onRandomMultiplier()
 {
-	MultiplyRandomDialog dialog;
+	RandomMultiplierDialog dialog;
 	if (dialog.exec()) {
 		DataDescription data = _repository->getExtendedSelection();
 		IntVector2D universeSize = _mainController->getSimulationConfig().universeSize;
@@ -467,6 +469,40 @@ void ActionController::onMultiplyRandom()
 			}
 			modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
 			_repository->addDataAtFixedPosition(dataCopied, angle);
+		}
+		Q_EMIT _notifier->notify({
+			Receiver::DataEditor,
+			Receiver::Simulation,
+			Receiver::VisualEditor,
+			Receiver::ActionController
+		}, UpdateDescription::All);
+	}
+}
+
+void ActionController::onGridMultiplier()
+{
+	DataDescription data = _repository->getExtendedSelection();
+	QVector2D center = data.calcCenter();
+	GridMultiplierDialog dialog(center);
+	if (dialog.exec()) {
+		QVector2D initialDelta(dialog.getInitialPosX(), dialog.getInitialPosY());
+		initialDelta -= center;
+		for (int i = 0; i < dialog.getHorizontalNumber(); ++i) {
+			for (int j = 0; j < dialog.getVerticalNumber(); ++j) {
+				if (i == 0 && j == 0 && initialDelta.lengthSquared() < FLOATINGPOINT_MEDIUM_PRECISION) {
+					continue;
+				}
+				DataDescription dataCopied = data;
+				optional<double> velocityX;
+				optional<double> velocityY;
+				optional<double> angle;
+				optional<double> angularVelocity;
+				QVector2D posDelta(i*dialog.getHorizontalInterval(), j*dialog.getVerticalInterval());
+				posDelta += initialDelta;
+
+				modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
+				_repository->addDataAtFixedPosition(dataCopied, angle);
+			}
 		}
 		Q_EMIT _notifier->notify({
 			Receiver::DataEditor,
@@ -767,6 +803,6 @@ void ActionController::updateActionsEnableState()
 	actions->actionPasteCol->setEnabled(collectionCopied);
 	actions->actionDeleteSel->setEnabled(editMode && collectionSelected);
 	actions->actionDeleteCol->setEnabled(editMode && collectionSelected);
-	actions->actionMultiplyRandom->setEnabled(editMode && collectionSelected);
-	actions->actionMultiplyArrangement->setEnabled(editMode && collectionSelected);
+	actions->actionRandomMultiplier->setEnabled(collectionSelected);
+	actions->actionGridMultiplier->setEnabled(collectionSelected);
 }
