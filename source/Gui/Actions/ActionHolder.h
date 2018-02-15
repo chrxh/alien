@@ -58,8 +58,8 @@ public:
 	QAction* actionPasteCol = nullptr;
 	QAction* actionDeleteCol = nullptr;
 	QAction* actionDeleteSel = nullptr;
-	QAction* actionMultiplyRandom = nullptr;
-	QAction* actionMultiplyArrangement = nullptr;
+	QAction* actionRandomMultiplier = nullptr;
+	QAction* actionGridMultiplier = nullptr;
 
 	QAction* actionAbout = nullptr;
 	QAction* actionDocumentation = nullptr;
