@@ -497,6 +497,19 @@ void ActionController::onGridMultiplier()
 				optional<double> velocityY;
 				optional<double> angle;
 				optional<double> angularVelocity;
+				if (dialog.changeAngle()) {
+					angle = dialog.getInitialAngle() + i*dialog.getHorizontalAngleIncrement() + j*dialog.getVerticalAngleIncrement();
+				}
+				if (dialog.changeVelocityX()) {
+					velocityX = dialog.getInitialVelX() + i*dialog.getHorizontalVelocityXIncrement() + j*dialog.getVerticalVelocityXIncrement();
+				}
+				if (dialog.changeVelocityY()) {
+					velocityY = dialog.getInitialVelY() + j*dialog.getHorizontalVelocityYIncrement() + j*dialog.getVerticalVelocityYIncrement();
+				}
+				if (dialog.changeAngularVelocity()) {
+					angularVelocity = dialog.getInitialAngVel() + i*dialog.getHorizontalAngularVelocityIncrement() + j*dialog.getVerticalAngularVelocityIncrement();
+				}
+
 				QVector2D posDelta(i*dialog.getHorizontalInterval(), j*dialog.getVerticalInterval());
 				posDelta += initialDelta;
 
