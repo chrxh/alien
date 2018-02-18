@@ -211,7 +211,7 @@ void SerializerImpl::init()
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
 }
 
-void SerializerImpl::serialize(SimulationController * simController)
+void SerializerImpl::serialize(SimulationController * simController, SerializeOptions options /*= SerializeOptions()*/)
 {
 	_access->init(simController->getContext());
 	_serializedSimulation.clear();
@@ -219,9 +219,9 @@ void SerializerImpl::serialize(SimulationController * simController)
 	_configToSerialize = {
 		simController->getContext()->getSimulationParameters(),
 		simController->getContext()->getSymbolTable(),
-		simController->getContext()->getSpaceProperties()->getSize(),
-		simController->getContext()->getGridSize(),
-		simController->getContext()->getMaxThreads(),
+		options.universeSize ? *options.universeSize : simController->getContext()->getSpaceProperties()->getSize(),
+		options.gridSize ? *options.gridSize : simController->getContext()->getGridSize(),
+		options.maxThreads ? *options.maxThreads : simController->getContext()->getMaxThreads(),
 		simController->getTimestep()
 	};
 

@@ -15,7 +15,6 @@ public:
 	QAction* actionNewSimulation = nullptr;
 	QAction* actionLoadSimulation = nullptr;
 	QAction* actionSaveSimulation = nullptr;
-	QAction* actionConfig = nullptr;
 	QAction* actionRunSimulation = nullptr;
 	QAction* actionRunStepForward = nullptr;
 	QAction* actionRunStepBackward = nullptr;
@@ -23,6 +22,7 @@ public:
 	QAction* actionRestore = nullptr;
 	QAction* actionExit = nullptr;
 
+	QAction* actionRecreate = nullptr;
 	QAction* actionEditSimParameters = nullptr;
 	QAction* actionLoadSimParameters = nullptr;
 	QAction* actionSaveSimParameters = nullptr;

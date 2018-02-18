@@ -15,7 +15,13 @@ public:
 
 	virtual void init() = 0;
 
-	virtual void serialize(SimulationController* simController) = 0;
+	struct SerializeOptions
+	{
+		optional<IntVector2D> universeSize;
+		optional<IntVector2D> gridSize;
+		optional<uint> maxThreads;
+	};
+	virtual void serialize(SimulationController* simController, SerializeOptions options = SerializeOptions()) = 0;
 	Q_SIGNAL void serializationFinished();
 	virtual string const& retrieveSerializedSimulation() = 0;
 	virtual SimulationController* deserializeSimulation(string const& content) = 0;
