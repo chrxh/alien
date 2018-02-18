@@ -139,12 +139,12 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 void MainController::recreateSimulation(string const & serializedSimulation)
 {
-	auto symbolTable = _simController->getContext()->getSymbolTable();
-	auto simulationParameters = _simController->getContext()->getSimulationParameters();
-
 	auto origSimController = _simController;
 	_simController = _serializer->deserializeSimulation(serializedSimulation);
 	delete origSimController;
+
+	auto symbolTable = _simController->getContext()->getSymbolTable();
+	auto simulationParameters = _simController->getContext()->getSimulationParameters();
 
 	initSimulation(symbolTable, simulationParameters);
 
