@@ -17,4 +17,72 @@ SimulationConfigDialog::SimulationConfigDialog(SimulationConfig const& config, Q
 	ui.universeSizeXLabel->setText(QString::number(config.universeSize.x));
 	ui.universeSizeYLabel->setText(QString::number(config.universeSize.y));
 	ui.maxThreadsEdit->setText(QString::number(config.maxThreads));
+
+	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
+	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
+	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
+	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
 }
+
+optional<uint> SimulationConfigDialog::getMaxThreads() const
+{
+	bool ok(true);
+	double energy = ui.maxThreadsEdit->text().toUInt(&ok);
+	if (!ok) {
+		return boost::none;
+	}
+	return energy;
+}
+
+optional<IntVector2D> SimulationConfigDialog::getGridSize() const
+{
+	IntVector2D result;
+	bool ok(true);
+	result.x = ui.gridSizeXEdit->text().toUInt(&ok);
+	if (!ok) {
+		return boost::none;
+	}
+	result.y = ui.gridSizeYEdit->text().toUInt(&ok);
+	if (!ok) {
+		return boost::none;
+	}
+
+	return result;
+}
+
+optional<IntVector2D> SimulationConfigDialog::getUniverseSize() const
+{
+	IntVector2D result;
+	bool ok(true);
+	result.x = ui.universeSizeXLabel->text().toUInt(&ok);
+	if (!ok) {
+		return boost::none;
+	}
+	result.y = ui.universeSizeYLabel->text().toUInt(&ok);
+	if (!ok) {
+		return boost::none;
+	}
+
+	return result;
+}
+
+void SimulationConfigDialog::updateUniverseSize()
+{
+	bool ok = false;
+	int gridSizeX = ui.gridSizeXEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	int gridSizeY = ui.gridSizeYEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	int unitSizeX = ui.unitSizeXEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	int unitSizeY = ui.unitSizeYEdit->text().toUInt(&ok);
+	if (!ok) { return; }
+
+	IntVector2D universeSize = { gridSizeX * unitSizeX, gridSizeY * unitSizeY };
+	ui.universeSizeXLabel->setText(QString::fromStdString(std::to_string(universeSize.x)));
+	ui.universeSizeYLabel->setText(QString::fromStdString(std::to_string(universeSize.y)));
+}
+

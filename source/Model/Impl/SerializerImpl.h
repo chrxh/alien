@@ -16,7 +16,7 @@ public:
 
 	virtual void init() override;
 
-	virtual void serialize(SimulationController* simController) override;
+	virtual void serialize(SimulationController* simController, SerializeOptions options = SerializeOptions()) override;
 	virtual string const& retrieveSerializedSimulation() override;
 	virtual SimulationController* deserializeSimulation(string const& content) override;
 
