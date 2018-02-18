@@ -63,7 +63,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
 	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
-	connect(actions->actionConfig, &QAction::triggered, this, &ActionController::onConfig);
+	connect(actions->actionRecreate, &QAction::triggered, this, &ActionController::onRecreate);
 	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
 	connect(actions->actionRunStepForward, &QAction::triggered, this, &ActionController::onStepForward);
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
@@ -186,12 +186,7 @@ void ActionController::onNewSimulation()
 			dialog.getMaxThreads(), dialog.getGridSize(), dialog.getUniverseSize(), dialog.getSymbolTable(), dialog.getSimulationParameters(), dialog.getEnergy()
 		};
 		_mainController->onNewSimulation(config);
-		updateZoomFactor();
-		_model->getActionHolder()->actionRunSimulation->setChecked(false);
-		_model->getActionHolder()->actionRestore->setEnabled(false);
-		_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
-		onRunClicked(false);
-		onToggleCellInfo(_model->getActionHolder()->actionShowCellInfo->isChecked());
+		settingUpNewSimulation();
 	}
 }
 
@@ -208,12 +203,7 @@ void ActionController::onLoadSimulation()
 	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Simulation", "", "Alien Simulation (*.sim)");
 	if (!filename.isEmpty()) {
 		if (_mainController->onLoadSimulation(filename.toStdString())) {
-			updateZoomFactor();
-			_model->getActionHolder()->actionRunSimulation->setChecked(false);
-			_model->getActionHolder()->actionRestore->setEnabled(false);
-			_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
-			onRunClicked(false);
-			onToggleCellInfo(_model->getActionHolder()->actionShowCellInfo->isChecked());
+			settingUpNewSimulation();
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation could not loaded.");
@@ -222,11 +212,21 @@ void ActionController::onLoadSimulation()
 	}
 }
 
-void ActionController::onConfig()
+void ActionController::onRecreate()
 {
 	SimulationConfigDialog dialog(_mainController->getSimulationConfig(), _mainView);
 	if (dialog.exec()) {
+		optional<uint> maxThreads = dialog.getMaxThreads();
+		optional<IntVector2D> gridSize = dialog.getGridSize();
+		optional<IntVector2D> universeSize = dialog.getUniverseSize();
 
+		if (!maxThreads || !gridSize || !universeSize) {
+			QMessageBox msgBox(QMessageBox::Critical, "Error", "Wrong input.");
+			return;
+		}
+
+		_mainController->onRecreateSimulation({ *maxThreads, *gridSize, *universeSize });
+		settingUpNewSimulation();
 	}
 }
 
@@ -776,6 +776,16 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 	_model->setCollectionSelected(selectedCells > 0 || selectedParticles > 0);
 
 	updateActionsEnableState();
+}
+
+void ActionController::settingUpNewSimulation()
+{
+	updateZoomFactor();
+	_model->getActionHolder()->actionRunSimulation->setChecked(false);
+	_model->getActionHolder()->actionRestore->setEnabled(false);
+	_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
+	onRunClicked(false);
+	onToggleCellInfo(_model->getActionHolder()->actionShowCellInfo->isChecked());
 }
 
 void ActionController::updateZoomFactor()

@@ -123,15 +123,11 @@ void MainController::onRestoreSnapshot()
 	_versionController->restoreSnapshot();
 }
 
-void MainController::onNewSimulation(NewSimulationConfig config)
+void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const* parameters)
 {
-	delete _simController;
+	_model->setSimulationParameters(parameters);
+	_model->setSymbolTable(symbolTable);
 
-	_model->setSimulationParameters(config.parameters);
-	_model->setSymbolTable(config.symbolTable);
-
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 	connectSimController();
 	_simAccess->init(_simController->getContext());
 	_descHelper->init(_simController->getContext());
@@ -139,6 +135,29 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
 
 	_view->setupEditors(_simController);
+}
+
+void MainController::recreateSimulation(string const & serializedSimulation)
+{
+	auto symbolTable = _simController->getContext()->getSymbolTable();
+	auto simulationParameters = _simController->getContext()->getSimulationParameters();
+
+	auto origSimController = _simController;
+	_simController = _serializer->deserializeSimulation(serializedSimulation);
+	delete origSimController;
+
+	initSimulation(symbolTable, simulationParameters);
+
+	_view->refresh();
+}
+
+void MainController::onNewSimulation(NewSimulationConfig config)
+{
+	delete _simController;
+	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
+
+	initSimulation(config.symbolTable, config.parameters);
 
 	addRandomEnergy(config.energy);
 
@@ -147,7 +166,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 
 void MainController::onSaveSimulation(string const& filename)
 {
-	_serializationOperations.push_back({ SerializationOperation::Type::SaveToFile, filename });
+	_jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
 	_serializer->serialize(_simController);
 }
 
@@ -159,20 +178,16 @@ bool MainController::onLoadSimulation(string const & filename)
 	}
 	delete origSimController;
 
-	_simAccess->init(_simController->getContext());
-	connectSimController();
+	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
 
-	_model->setSimulationParameters(_simController->getContext()->getSimulationParameters());
-	_model->setSymbolTable(_simController->getContext()->getSymbolTable());
-
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	_descHelper->init(_simController->getContext());
-	_versionController->init(_simController->getContext());
-	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
-
-	_view->setupEditors(_simController);
 	_view->refresh();
 	return true;
+}
+
+void MainController::onRecreateSimulation(SimulationConfig const& simConfig)
+{
+	_jobsAfterSerialization.push_back(boost::make_shared<_RecreateJob>());
+	_serializer->serialize(_simController, { simConfig.universeSize, simConfig.gridSize, simConfig.maxThreads });
 }
 
 void MainController::onUpdateSimulationParametersForRunningSimulation()
@@ -213,10 +228,15 @@ void MainController::addRandomEnergy(double amount)
 
 void MainController::serializationFinished()
 {
-	for (SerializationOperation operation : _serializationOperations) {
-		if (operation.type == SerializationOperation::Type::SaveToFile) {
-			SerializationHelper::saveToFile(operation.filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
+	for (auto job : _jobsAfterSerialization) {
+		if (job->type == _AsyncJob::Type::SaveToFile) {
+			auto saveToFileJob = boost::static_pointer_cast<_SaveToFileJob>(job);
+			SerializationHelper::saveToFile(saveToFileJob->filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
+		}
+		if (job->type == _AsyncJob::Type::Recreate) {
+			auto recreateJob = boost::static_pointer_cast<_RecreateJob>(job);
+			recreateSimulation(_serializer->retrieveSerializedSimulation());
 		}
 	}
-	_serializationOperations.clear();
+	_jobsAfterSerialization.clear();
 }

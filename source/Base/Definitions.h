@@ -10,6 +10,8 @@
 #include <QDataStream>
 #include <qmath.h>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include <string>
 #include <set>
@@ -39,6 +41,7 @@ using std::unordered_map;
 using std::pair;
 using std::string;
 using boost::optional;
+using boost::shared_ptr;
 
 const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
 const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1f;

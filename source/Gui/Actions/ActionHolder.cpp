@@ -10,8 +10,6 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionLoadSimulation->setEnabled(true);
 	actionSaveSimulation = new QAction("Save", this);
 	actionSaveSimulation->setEnabled(true);
-	actionConfig = new QAction("Config", this);
-	actionConfig->setEnabled(true);
 	actionRunSimulation = new QAction("Run", this);
 	actionRunSimulation->setEnabled(true);
 	actionRunSimulation->setCheckable(true);
@@ -46,6 +44,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionExit = new QAction("Exit", this);
 	actionExit->setEnabled(true);
 
+	actionRecreate = new QAction("Recreate", this);
+	actionRecreate->setEnabled(true);
 	actionEditSimParameters = new QAction("Edit", this);
 	actionEditSimParameters->setEnabled(true);
 	actionLoadSimParameters = new QAction("Load", this);

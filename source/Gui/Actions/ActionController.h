@@ -22,7 +22,7 @@ private:
 	Q_SLOT void onSaveSimulation();
 	Q_SLOT void onLoadSimulation();
 
-	Q_SLOT void onConfig();
+	Q_SLOT void onRecreate();
 	Q_SLOT void onRunClicked(bool run);
 	Q_SLOT void onStepForward();
 	Q_SLOT void onStepBackward();
@@ -61,6 +61,8 @@ private:
 	Q_SLOT void onShowDocumentation(bool show);
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
+
+	void settingUpNewSimulation();
 
 	void updateZoomFactor();
 	void updateActionsEnableState();

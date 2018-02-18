@@ -123,7 +123,7 @@ void MainView::setupMenu()
 	ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionExit);
 
-	ui->menuSettings->addAction(actions->actionConfig);
+	ui->menuSettings->addAction(actions->actionRecreate);
 	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);

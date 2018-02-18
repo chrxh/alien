@@ -25,25 +25,55 @@ public:
 	virtual void onNewSimulation(NewSimulationConfig config);
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
+	virtual void onRecreateSimulation(SimulationConfig const& simConfig);
 	virtual void onUpdateSimulationParametersForRunningSimulation();
 
 	virtual int getTimestep() const;
 	virtual SimulationConfig getSimulationConfig() const;
 
 private:
+	void initSimulation(SymbolTable* symbolTable, SimulationParameters const* parameters);
+	void recreateSimulation(string const& serializedSimulation);
 	void connectSimController() const;
 	void addRandomEnergy(double amount);
 
-	//asynchronous processing
-	struct SerializationOperation 
+	class _AsyncJob
 	{
+	public:
+		virtual ~_AsyncJob() = default;
+
 		enum class Type {
-			SaveToFile
+			SaveToFile,
+			Recreate
 		};
 		Type type;
-		string filename;
+
+		_AsyncJob(Type type) : type(type) {}
 	};
-	list<SerializationOperation> _serializationOperations;
+	using AsyncJob = shared_ptr<_AsyncJob>;
+
+	class _SaveToFileJob : public _AsyncJob
+	{
+	public:
+		virtual ~_SaveToFileJob() = default;
+
+		string filename;
+
+		_SaveToFileJob(string filename) : _AsyncJob(Type::SaveToFile), filename(filename) {}
+	};
+	using SaveToFileJob = shared_ptr<_SaveToFileJob>;
+
+	class _RecreateJob : public _AsyncJob
+	{
+	public:
+		virtual ~_RecreateJob() = default;
+
+		_RecreateJob()
+			: _AsyncJob(Type::Recreate) {}
+	};
+	using RecreateOperation = shared_ptr<_RecreateJob>;
+
+	list<AsyncJob> _jobsAfterSerialization;
 	Q_SLOT void serializationFinished();
 
 	MainView* _view = nullptr;
