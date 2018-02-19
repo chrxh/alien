@@ -44,8 +44,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionExit = new QAction("Exit", this);
 	actionExit->setEnabled(true);
 
-	actionRecreate = new QAction("Recreate", this);
-	actionRecreate->setEnabled(true);
+	actionComputationGrid = new QAction("Computation grid", this);
+	actionComputationGrid->setEnabled(true);
 	actionEditSimParameters = new QAction("Edit", this);
 	actionEditSimParameters->setEnabled(true);
 	actionLoadSimParameters = new QAction("Load", this);
@@ -176,5 +176,10 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDocumentation = new QAction("Documentation", this);
 	actionDocumentation->setEnabled(true);
 	actionDocumentation->setCheckable(true);
+
+	actionRestrictTPS = new QAction("restrict TPS", this);
+	actionRestrictTPS->setCheckable(true);
+	actionRestrictTPS->setChecked(false);
+	actionRestrictTPS->setEnabled(true);
 }
 

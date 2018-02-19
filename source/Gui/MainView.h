@@ -32,7 +32,8 @@ protected:
 
 private:
 	void setupMenu();
-	void setupTheme();
+	void setupFontsAndColors();
+	void setupWidgets();
 
 	Q_SLOT void documentationWindowClosed();
 

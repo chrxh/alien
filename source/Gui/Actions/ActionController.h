@@ -21,23 +21,23 @@ private:
 	Q_SLOT void onNewSimulation();
 	Q_SLOT void onSaveSimulation();
 	Q_SLOT void onLoadSimulation();
-
-	Q_SLOT void onRecreate();
 	Q_SLOT void onRunClicked(bool run);
 	Q_SLOT void onStepForward();
 	Q_SLOT void onStepBackward();
 	Q_SLOT void onMakeSnapshot();
 	Q_SLOT void onRestoreSnapshot();
 
-	Q_SLOT void onSetEditorMode(bool editMode);
-	Q_SLOT void onZoomInClicked();
-	Q_SLOT void onZoomOutClicked();
+	Q_SLOT void onComputationGrid();
 	Q_SLOT void onEditSimulationParameters();
 	Q_SLOT void onLoadSimulationParameters();
 	Q_SLOT void onSaveSimulationParameters();
 	Q_SLOT void onEditSymbolTable();
 	Q_SLOT void onLoadSymbolTable();
 	Q_SLOT void onSaveSymbolTable();
+
+	Q_SLOT void onSetEditorMode(bool editMode);
+	Q_SLOT void onZoomInClicked();
+	Q_SLOT void onZoomOutClicked();
 
 	Q_SLOT void onNewCell();
 	Q_SLOT void onNewParticle();
@@ -59,6 +59,8 @@ private:
 
 	Q_SLOT void onShowAbout();
 	Q_SLOT void onShowDocumentation(bool show);
+
+	Q_SLOT void onToggleRestrictTPS(bool triggered);
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 

@@ -1,8 +1,7 @@
-﻿
-#include "Gui/Settings.h"
-#include "SimulationConfigDialog.h"
+﻿#include "Gui/Settings.h"
+#include "ComputationGridDialog.h"
 
-SimulationConfigDialog::SimulationConfigDialog(SimulationConfig const& config, QWidget * parent)
+ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, QWidget * parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
@@ -18,13 +17,13 @@ SimulationConfigDialog::SimulationConfigDialog(SimulationConfig const& config, Q
 	ui.universeSizeYLabel->setText(QString::number(config.universeSize.y));
 	ui.maxThreadsEdit->setText(QString::number(config.maxThreads));
 
-	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
-	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
-	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
-	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &SimulationConfigDialog::updateUniverseSize);
+	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
+	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
+	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
+	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
 }
 
-optional<uint> SimulationConfigDialog::getMaxThreads() const
+optional<uint> ComputationGridDialog::getMaxThreads() const
 {
 	bool ok(true);
 	double energy = ui.maxThreadsEdit->text().toUInt(&ok);
@@ -34,7 +33,7 @@ optional<uint> SimulationConfigDialog::getMaxThreads() const
 	return energy;
 }
 
-optional<IntVector2D> SimulationConfigDialog::getGridSize() const
+optional<IntVector2D> ComputationGridDialog::getGridSize() const
 {
 	IntVector2D result;
 	bool ok(true);
@@ -50,7 +49,7 @@ optional<IntVector2D> SimulationConfigDialog::getGridSize() const
 	return result;
 }
 
-optional<IntVector2D> SimulationConfigDialog::getUniverseSize() const
+optional<IntVector2D> ComputationGridDialog::getUniverseSize() const
 {
 	IntVector2D result;
 	bool ok(true);
@@ -66,7 +65,7 @@ optional<IntVector2D> SimulationConfigDialog::getUniverseSize() const
 	return result;
 }
 
-void SimulationConfigDialog::updateUniverseSize()
+void ComputationGridDialog::updateUniverseSize()
 {
 	bool ok = false;
 	int gridSizeX = ui.gridSizeXEdit->text().toUInt(&ok);
