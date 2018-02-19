@@ -480,7 +480,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="fpsForcingSpinBox">
+        <widget class="QSpinBox" name="tpsSpinBox">
          <property name="enabled">
           <bool>true</bool>
          </property>

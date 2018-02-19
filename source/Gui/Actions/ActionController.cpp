@@ -17,7 +17,7 @@
 #include "Gui/Dialogs/NewSimulationDialog.h"
 #include "Gui/Dialogs/SimulationParametersDialog.h"
 #include "Gui/Dialogs/SymbolTableDialog.h"
-#include "Gui/Dialogs/SimulationConfigDialog.h"
+#include "Gui/Dialogs/ComputationGridDialog.h"
 #include "Gui/Dialogs/NewRectangleDialog.h"
 #include "Gui/Dialogs/NewHexagonDialog.h"
 #include "Gui/Dialogs/NewParticlesDialog.h"
@@ -63,7 +63,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
 	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
-	connect(actions->actionRecreate, &QAction::triggered, this, &ActionController::onRecreate);
+	connect(actions->actionComputationGrid, &QAction::triggered, this, &ActionController::onComputationGrid);
 	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
 	connect(actions->actionRunStepForward, &QAction::triggered, this, &ActionController::onStepForward);
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
@@ -100,6 +100,8 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
 	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
+
+	connect(actions->actionRestrictTPS, &QAction::triggered, this, &ActionController::onToggleRestrictTPS);
 }
 
 ActionHolder * ActionController::getActionHolder()
@@ -212,9 +214,9 @@ void ActionController::onLoadSimulation()
 	}
 }
 
-void ActionController::onRecreate()
+void ActionController::onComputationGrid()
 {
-	SimulationConfigDialog dialog(_mainController->getSimulationConfig(), _mainView);
+	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainView);
 	if (dialog.exec()) {
 		optional<uint> maxThreads = dialog.getMaxThreads();
 		optional<IntVector2D> gridSize = dialog.getGridSize();
@@ -750,6 +752,10 @@ void ActionController::onShowDocumentation(bool show)
 	_mainView->showDocumentation(show);
 }
 
+void ActionController::onToggleRestrictTPS(bool triggered)
+{
+	_mainController->onRestrictTPS(_mainModel->getTPS());
+}
 
 void ActionController::receivedNotifications(set<Receiver> const & targets)
 {
@@ -781,11 +787,13 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 void ActionController::settingUpNewSimulation()
 {
 	updateZoomFactor();
-	_model->getActionHolder()->actionRunSimulation->setChecked(false);
-	_model->getActionHolder()->actionRestore->setEnabled(false);
-	_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
+	auto actions = _model->getActionHolder();
+	actions->actionRunSimulation->setChecked(false);
+	actions->actionRestore->setEnabled(false);
+	actions->actionRunStepBackward->setEnabled(false);
 	onRunClicked(false);
-	onToggleCellInfo(_model->getActionHolder()->actionShowCellInfo->isChecked());
+	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
+	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
 }
 
 void ActionController::updateZoomFactor()
