@@ -55,7 +55,8 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar, repository, notifier, numberGenerator);
 
 	setupMenu();
-	setupTheme();
+	setupFontsAndColors();
+	setupWidgets();
 	setWindowState(windowState() | Qt::WindowFullScreen);
 	show();
 
@@ -123,7 +124,7 @@ void MainView::setupMenu()
 	ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionExit);
 
-	ui->menuSettings->addAction(actions->actionRecreate);
+	ui->menuSettings->addAction(actions->actionComputationGrid);
 	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);
@@ -172,7 +173,7 @@ void MainView::setupMenu()
 	ui->menuHelp->addAction(actions->actionDocumentation);
 }
 
-void MainView::setupTheme()
+void MainView::setupFontsAndColors()
 {
 	setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
@@ -198,6 +199,17 @@ void MainView::setupTheme()
 		setPalette(p);
 	}
 
+}
+
+void MainView::setupWidgets()
+{
+	auto actions = _actions->getActionHolder();
+	ui->tpsForcingButton->setDefaultAction(actions->actionRestrictTPS);
+
+	ui->tpsSpinBox->setValue(_model->getTPS());
+	connect(ui->tpsSpinBox, (void(QSpinBox::*)(int))(&QSpinBox::valueChanged), [this](int value) {
+		_model->setTPS(value);
+	});
 }
 
 void MainView::documentationWindowClosed()

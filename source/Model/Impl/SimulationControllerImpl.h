@@ -17,6 +17,7 @@ public:
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
 	virtual uint getTimestep() const override;
+	virtual void setRestrictTimestepsPreSecond(optional<int> tps) override;
 
 private:
 	SimulationContextLocal* _context = nullptr;

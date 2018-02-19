@@ -17,8 +17,8 @@ public:
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
-
 	virtual uint getTimestep() const override;
+	virtual void setRestrictTimestepsPreSecond(optional<int> tps) override;
 
 private:
 	Q_SLOT void oneSecondTimerTimeout();

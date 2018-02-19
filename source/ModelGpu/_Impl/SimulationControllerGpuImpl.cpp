@@ -4,7 +4,6 @@
 #include "SimulationContextGpuImpl.h"
 #include "SimulationControllerGpuImpl.h"
 
-
 namespace
 {
 	const int updateFrameInMilliSec = 50.0;
@@ -72,9 +71,12 @@ uint SimulationControllerGpuImpl::getTimestep() const
 	return 0;
 }
 
+void SimulationControllerGpuImpl::setRestrictTimestepsPreSecond(optional<int> tps)
+{
+}
+
 void SimulationControllerGpuImpl::oneSecondTimerTimeout()
 {
-	Q_EMIT updateTimestepsPerSecond(_timestepsPerSecond);
 	_timestepsPerSecond = 0;
 }
 

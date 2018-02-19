@@ -27,6 +27,7 @@ public:
 	virtual bool onLoadSimulation(string const& filename);
 	virtual void onRecreateSimulation(SimulationConfig const& simConfig);
 	virtual void onUpdateSimulationParametersForRunningSimulation();
+	virtual void onRestrictTPS(optional<int> const& tps);
 
 	virtual int getTimestep() const;
 	virtual SimulationConfig getSimulationConfig() const;

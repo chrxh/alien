@@ -195,6 +195,11 @@ void MainController::onUpdateSimulationParametersForRunningSimulation()
 	_simController->getContext()->setSimulationParameters(_model->getSimulationParameters());
 }
 
+void MainController::onRestrictTPS(optional<int> const& tps)
+{
+	_simController->setRestrictTimestepsPreSecond(tps);
+}
+
 int MainController::getTimestep() const
 {
 	return _simController->getTimestep();

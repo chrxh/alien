@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SimulationConfigDialog</class>
- <widget class="QDialog" name="SimulationConfigDialog">
+ <class>ComputationGridDialog</class>
+ <widget class="QDialog" name="ComputationGridDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>simulation config</string>
+   <string>computation grid</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -173,7 +173,7 @@
       </size>
      </property>
      <property name="title">
-      <string>computations</string>
+      <string>parallelization</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -236,7 +236,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SimulationConfigDialog</receiver>
+   <receiver>ComputationGridDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -252,7 +252,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SimulationConfigDialog</receiver>
+   <receiver>ComputationGridDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

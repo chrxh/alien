@@ -296,7 +296,7 @@
       </size>
      </property>
      <property name="title">
-      <string>computations</string>
+      <string>parallelization</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>

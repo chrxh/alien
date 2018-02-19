@@ -63,5 +63,9 @@ uint SimulationControllerImpl::getTimestep() const
 	return _timestep;
 }
 
+void SimulationControllerImpl::setRestrictTimestepsPreSecond(optional<int> tps)
+{
+}
+
 
 
