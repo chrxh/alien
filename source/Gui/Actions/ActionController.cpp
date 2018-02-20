@@ -754,7 +754,12 @@ void ActionController::onShowDocumentation(bool show)
 
 void ActionController::onToggleRestrictTPS(bool triggered)
 {
-	_mainController->onRestrictTPS(_mainModel->getTPS());
+	if (triggered) {
+		_mainController->onRestrictTPS(_mainModel->getTPS());
+	}
+	else {
+		_mainController->onRestrictTPS(boost::none);
+	}
 }
 
 void ActionController::receivedNotifications(set<Receiver> const & targets)
