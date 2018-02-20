@@ -209,6 +209,8 @@ void MainView::setupWidgets()
 	ui->tpsSpinBox->setValue(_model->getTPS());
 	connect(ui->tpsSpinBox, (void(QSpinBox::*)(int))(&QSpinBox::valueChanged), [this](int value) {
 		_model->setTPS(value);
+		_actions->getActionHolder()->actionRestrictTPS->setChecked(true);
+		Q_EMIT _actions->getActionHolder()->actionRestrictTPS->triggered(true);
 	});
 }
 
