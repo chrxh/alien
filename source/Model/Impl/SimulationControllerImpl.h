@@ -20,12 +20,18 @@ public:
 	virtual void setRestrictTimestepsPreSecond(optional<int> tps) override;
 
 private:
+	Q_SLOT void nextTimestepCalculatedIntern();
+	Q_SLOT void restrictTpsTimerTimeout();
+
 	SimulationContextLocal* _context = nullptr;
 
-	bool _flagRunMode = false;
-	QTimer* _oneSecondTimer = nullptr;
+	bool _runMode = false;
+	bool _calculationRunning = false;
+	bool _triggerNewTimestep = false;
+	QTimer* _restrictTpsTimer = nullptr;
 	QTime _timeSinceLastStart;
 	int _displayedFramesSinceLastStart = 0;
 	uint _timestep = 0;
+	optional<int> _restrictTps;
 };
 
