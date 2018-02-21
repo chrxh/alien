@@ -35,9 +35,10 @@ private:
 	Q_SLOT void onLoadSymbolTable();
 	Q_SLOT void onSaveSymbolTable();
 
-	Q_SLOT void onSetEditorMode(bool editMode);
+	Q_SLOT void onToggleEditorMode(bool editMode);
 	Q_SLOT void onZoomInClicked();
 	Q_SLOT void onZoomOutClicked();
+	Q_SLOT void onToggleFullscreen(bool fullscreen);
 
 	Q_SLOT void onNewCell();
 	Q_SLOT void onNewParticle();
