@@ -15,6 +15,7 @@ SimulationControllerImpl::SimulationControllerImpl(QObject* parent)
 	: SimulationController(parent)
 {
 	_restrictTpsTimer = new QTimer(this);
+	_restrictTpsTimer->setTimerType(Qt::PreciseTimer);
 	connect(_restrictTpsTimer, &QTimer::timeout, this, &SimulationControllerImpl::restrictTpsTimerTimeout);
 }
 
@@ -58,7 +59,12 @@ void SimulationControllerImpl::setRestrictTimestepsPreSecond(optional<int> tps)
 {
 	_restrictTps = tps;
 	if (tps) {
-		_restrictTpsTimer->start(1000 / *tps);
+		if (*tps > 0) {
+			_restrictTpsTimer->start(1000 / *tps);
+		}
+		else {
+			_restrictTpsTimer->start(1000);
+		}
 	}
 	else {
 		_restrictTpsTimer->stop();
