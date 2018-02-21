@@ -70,9 +70,12 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionSnapshot, &QAction::triggered, this, &ActionController::onMakeSnapshot);
 	connect(actions->actionRestore, &QAction::triggered, this, &ActionController::onRestoreSnapshot);
 	connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
+
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
 	connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
-	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onSetEditorMode);
+	connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
+
+	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
 	connect(actions->actionLoadSimParameters, &QAction::triggered, this, &ActionController::onLoadSimulationParameters);
 	connect(actions->actionSaveSimParameters, &QAction::triggered, this, &ActionController::onSaveSimulationParameters);
@@ -165,7 +168,19 @@ void ActionController::onZoomOutClicked()
 	updateZoomFactor();
 }
 
-void ActionController::onSetEditorMode(bool editMode)
+void ActionController::onToggleFullscreen(bool fullscreen)
+{
+	Qt::WindowStates state = _mainView->windowState();
+	if (fullscreen) {
+		state |= Qt::WindowFullScreen;
+	}
+	else {
+		state &= ~Qt::WindowFullScreen;
+	}
+	_mainView->setWindowState(state);
+}
+
+void ActionController::onToggleEditorMode(bool editMode)
 {
 	_model->setEditMode(editMode);
 	if (editMode) {
