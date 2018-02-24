@@ -48,7 +48,7 @@ void ItemUniverseView::activate()
 	_itemManager->activate(size);
 
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
-	_connections.push_back(connect(_notifier, &Notifier::notify, this, &ItemUniverseView::receivedNotifications));
+	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemUniverseView::receivedNotifications));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &ItemUniverseView::scrolled));
 
 	requestData();
@@ -147,10 +147,10 @@ void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	}
 
 	if (alreadySelected) {
-		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::AllExceptToken);
+		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::AllExceptToken);
 	}
 	else {
-		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::All);
+		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::All);
 	}
 }
 
@@ -189,7 +189,7 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		}
 	}
 	if (leftButton || rightButton) {
-		Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::AllExceptToken);
+		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::AllExceptToken);
 	}
 }
 
@@ -201,7 +201,7 @@ void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 	else {
 		if (_manipulator->areEntitiesSelected()) {
-			Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::AllExceptToken);
+			Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation }, UpdateDescription::AllExceptToken);
 		}
 	}
 }

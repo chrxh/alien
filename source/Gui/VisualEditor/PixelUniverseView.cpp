@@ -12,13 +12,16 @@
 #include "Gui/Settings.h"
 #include "Gui/Notifier.h"
 
+#include "CoordinateSystem.h"
 #include "DataRepository.h"
+#include "Manipulator.h"
 #include "PixelUniverseView.h"
 
 PixelUniverseView::PixelUniverseView(QObject* parent)
 {
 	setBackgroundBrush(QBrush(BACKGROUND_COLOR));
     _pixmap = addPixmap(QPixmap());
+	_manipulator = new Manipulator(this);
     update();
 }
 
@@ -27,14 +30,16 @@ PixelUniverseView::~PixelUniverseView()
 	delete _image;
 }
 
-void PixelUniverseView::init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator
+void PixelUniverseView::init(Notifier* notifier, SimulationController* controller, DataRepository* repository
 	, ViewportInterface* viewport)
 {
 	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
-	_manipulator = manipulator;
+	_repository = repository;
 	_notifier = notifier;
+
+	_manipulator->init(controller->getContext());
 
 	delete _image;
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
@@ -45,12 +50,12 @@ void PixelUniverseView::init(Notifier* notifier, SimulationController* controlle
 void PixelUniverseView::activate()
 {
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData));
-	_connections.push_back(connect(_notifier, &Notifier::notify, this, &PixelUniverseView::receivedNotifications));
-	_connections.push_back(connect(_manipulator, &DataRepository::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection));
+	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &PixelUniverseView::receivedNotifications));
+	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &PixelUniverseView::scrolled));
 
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-	_manipulator->requireImageFromSimulation({ { 0, 0 }, size }, _image);
+	_repository->requireImageFromSimulation({ { 0, 0 }, size }, _image);
 }
 
 void PixelUniverseView::deactivate()
@@ -65,15 +70,29 @@ void PixelUniverseView::refresh()
 	requestData();
 }
 
+void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
+{
+	if (e->buttons() == Qt::MouseButton::LeftButton) {
+		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
+		auto lastPos = CoordinateSystem::sceneToModel(e->lastScenePos());
+		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
+		_manipulator->applyForce({ static_cast<float>(pos.x()), static_cast<float>(pos.y()) }, delta);
+	}
+}
+
 void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
 {
+	if (targets.find(Receiver::VisualEditor) == targets.end()) {
+		return;
+	}
+
 	requestData();
 }
 
 void PixelUniverseView::requestData()
 {
 	IntRect rect = _viewport->getRect();
-	_manipulator->requireImageFromSimulation(rect, _image);
+	_repository->requireImageFromSimulation(rect, _image);
 }
 
 void PixelUniverseView::retrieveAndDisplayData()

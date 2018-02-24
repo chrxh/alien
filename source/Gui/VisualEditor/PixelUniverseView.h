@@ -4,7 +4,7 @@
 #include <QVector2D>
 #include <QTimer>
 
-#include "gui/Definitions.h"
+#include "Gui/Definitions.h"
 #include "Model/Api/Definitions.h"
 #include "Model/Api/Descriptions.h"
 
@@ -21,6 +21,9 @@ public:
 
 	virtual void refresh();
 
+protected:
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+
 private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void requestData();
@@ -29,7 +32,8 @@ private:
 
 	list<QMetaObject::Connection> _connections;
 
-	DataRepository* _manipulator = nullptr;
+	Manipulator* _manipulator = nullptr;
+	DataRepository* _repository = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
     QGraphicsPixmapItem* _pixmap = nullptr;

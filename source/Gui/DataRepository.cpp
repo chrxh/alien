@@ -26,7 +26,7 @@ void DataRepository::init(Notifier* notifier, SimulationAccess * access, Descrip
 	}
 	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &DataRepository::dataFromSimulationAvailable, Qt::QueuedConnection));
 	_connections.push_back(connect(_access, &SimulationAccess::imageReady, this, &DataRepository::imageReady));
-	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataRepository::sendDataChangesToSimulation));
+	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &DataRepository::sendDataChangesToSimulation));
 }
 
 DataDescription & DataRepository::getDataRef()
@@ -374,7 +374,7 @@ void DataRepository::dataFromSimulationAvailable()
 {
 	updateInternals(_access->retrieveData());
 
-	Q_EMIT _notifier->notify({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::ActionController }, UpdateDescription::All);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::ActionController }, UpdateDescription::All);
 }
 
 void DataRepository::sendDataChangesToSimulation(set<Receiver> const& targets)
