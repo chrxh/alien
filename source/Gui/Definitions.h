@@ -56,6 +56,7 @@ class ActionHolder;
 class ActionController;
 class StartScreenWidget;
 class StartScreenController;
+class Manipulator;
 
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };

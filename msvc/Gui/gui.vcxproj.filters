@@ -35,11 +35,6 @@
     <Filter Include="Source Files\Toolbar">
       <UniqueIdentifier>{800aeef2-dba6-4418-8130-3bb7f83b1200}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
     <Filter Include="Source Files\Actions">
       <UniqueIdentifier>{97a890a7-fca7-4ade-a2a1-05c0522170f1}</UniqueIdentifier>
     </Filter>
@@ -525,6 +520,15 @@
     <ClCompile Include="Release\moc_ComputationGridDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_Manipulator.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_Manipulator.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\VisualEditor\Manipulator.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -762,6 +766,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Dialogs\ComputationGridDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\VisualEditor\Manipulator.h">
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

@@ -690,7 +690,7 @@
       <Filter>Source Files\Local</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Impl\SimulationAttributeSetter.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Impl</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

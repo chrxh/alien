@@ -33,7 +33,7 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 	}
 	_connections.push_back(connect(_context, &DataEditContext::show, this, &DataEditController::onShow));
 	_connections.push_back(connect(_context, &DataEditContext::refresh, this, &DataEditController::onRefresh));
-	_connections.push_back(connect(_notifier, &Notifier::notify, this, &DataEditController::receivedExternalNotifications));
+	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &DataEditController::receivedExternalNotifications));
 
 	onShow(false);
 }
@@ -69,7 +69,7 @@ void DataEditController::notificationFromCellTab()
 
 	switchToCellEditor(_repository->getCellDescRef(selectedCellId));
 
-	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
 
 void DataEditController::notificationFromClusterTab()
@@ -103,7 +103,7 @@ void DataEditController::notificationFromClusterTab()
 	_repository->updateCluster(cluster);
 
 	_view->updateDisplay();
-	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
 
 void DataEditController::notificationFromParticleTab()
@@ -111,7 +111,7 @@ void DataEditController::notificationFromParticleTab()
 	auto& particle = _model->getParticleToEditRef();
 	_repository->updateParticle(particle);
 
-	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
 
 void DataEditController::notificationFromMetadataTab()
@@ -119,7 +119,7 @@ void DataEditController::notificationFromMetadataTab()
 	auto& cluster = _model->getClusterToEditRef();
 	_repository->updateCluster(cluster);
 
-	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
 
 void DataEditController::notificationFromCellComputerTab()
@@ -127,12 +127,12 @@ void DataEditController::notificationFromCellComputerTab()
 	auto& cluster = _model->getClusterToEditRef();
 	_repository->updateCluster(cluster);
 
-	Q_EMIT _notifier->notify({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
 }
 
 void DataEditController::notificationFromSymbolTab()
 {
-	Q_EMIT _notifier->notify({ Receiver::DataEditor }, UpdateDescription::AllExceptSymbols);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor }, UpdateDescription::AllExceptSymbols);
 }
 
 void DataEditController::notificationFromTokenTab()
@@ -140,7 +140,7 @@ void DataEditController::notificationFromTokenTab()
 	auto& cluster = _model->getClusterToEditRef();
 	_repository->updateCluster(cluster);
 
-	Q_EMIT _notifier->notify({ Receiver::Simulation }, UpdateDescription::All);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation }, UpdateDescription::All);
 }
 
 void DataEditController::onShow(bool visible)
