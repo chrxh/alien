@@ -57,7 +57,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	_notifier = notifier;
 	_numberGenerator = numberGenerator;
 
-	connect(_notifier, &Notifier::notify, this, &ActionController::receivedNotifications);
+	connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ActionController::receivedNotifications);
 
 	auto actions = _model->getActionHolder();
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
@@ -327,7 +327,7 @@ void ActionController::onNewCell()
 {
 	_repository->addAndSelectCell(_model->getPositionDeltaForNewEntity());
 	_repository->reconnectSelectedCells();
-	Q_EMIT _notifier->notify({
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
 		Receiver::Simulation,
 		Receiver::VisualEditor,
@@ -338,7 +338,7 @@ void ActionController::onNewCell()
 void ActionController::onNewParticle()
 {
 	_repository->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
-	Q_EMIT _notifier->notify({
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
 		Receiver::Simulation,
 		Receiver::VisualEditor,
@@ -353,7 +353,7 @@ void ActionController::onLoadCollection()
 		DataDescription desc;
 		if (SerializationHelper::loadFromFile<DataDescription>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeDataDescription(data); }, desc)) {
 			_repository->addAndSelectData(desc, _model->getPositionDeltaForNewEntity());
-			Q_EMIT _notifier->notify({
+			Q_EMIT _notifier->notifyDataRepositoryChanged({
 				Receiver::DataEditor,
 				Receiver::Simulation,
 				Receiver::VisualEditor,
@@ -391,7 +391,7 @@ void ActionController::onPasteCollection()
 {
 	DataDescription copiedData = _model->getCopiedData();
 	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
-	Q_EMIT _notifier->notify({
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
 		Receiver::Simulation,
 		Receiver::VisualEditor,
@@ -402,7 +402,7 @@ void ActionController::onPasteCollection()
 void ActionController::onDeleteSelection()
 {
 	_repository->deleteSelection();
-	Q_EMIT _notifier->notify({
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
 		Receiver::Simulation,
 		Receiver::VisualEditor,
@@ -413,7 +413,7 @@ void ActionController::onDeleteSelection()
 void ActionController::onDeleteCollection()
 {
 	_repository->deleteExtendedSelection();
-	Q_EMIT _notifier->notify({
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
 		Receiver::Simulation,
 		Receiver::VisualEditor,
@@ -487,7 +487,7 @@ void ActionController::onRandomMultiplier()
 			modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
 			_repository->addDataAtFixedPosition(dataCopied, angle);
 		}
-		Q_EMIT _notifier->notify({
+		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
 			Receiver::VisualEditor,
@@ -534,7 +534,7 @@ void ActionController::onGridMultiplier()
 				_repository->addDataAtFixedPosition(dataCopied, angle);
 			}
 		}
-		Q_EMIT _notifier->notify({
+		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
 			Receiver::VisualEditor,
@@ -546,7 +546,7 @@ void ActionController::onGridMultiplier()
 void ActionController::onNewToken()
 {
 	_repository->addToken();
-	Q_EMIT _notifier->notify({
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
 		Receiver::Simulation,
 		Receiver::VisualEditor,
@@ -557,7 +557,7 @@ void ActionController::onNewToken()
 void ActionController::onDeleteToken()
 {
 	_repository->deleteToken();
-	Q_EMIT _notifier->notify({
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
 		Receiver::Simulation,
 		Receiver::VisualEditor,
@@ -626,7 +626,7 @@ void ActionController::onNewRectangle()
 		}
 
 		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
-		Q_EMIT _notifier->notify({
+		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
 			Receiver::VisualEditor,
@@ -730,7 +730,7 @@ void ActionController::onNewHexagon()
 			.addCells(cells);
 
 		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
-		Q_EMIT _notifier->notify({
+		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
 			Receiver::VisualEditor,
@@ -747,7 +747,7 @@ void ActionController::onNewParticles()
 		double maxEnergyPerParticle = dialog.getMaxEnergyPerParticle();
 
 		_repository->addRandomParticles(totalEnergy, maxEnergyPerParticle);
-		Q_EMIT _notifier->notify({
+		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
 			Receiver::VisualEditor,
