@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SimulationMonitor</class>
- <widget class="QMainWindow" name="SimulationMonitor">
+ <class>Monitor</class>
+ <widget class="QMainWindow" name="Monitor">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>

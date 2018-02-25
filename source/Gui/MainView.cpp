@@ -83,6 +83,10 @@ InfoController * MainView::getInfoController() const
 	return _infoController;
 }
 
+void MainView::showMonitor(bool show)
+{
+}
+
 void MainView::showDocumentation(bool show)
 {
 	_documentationWindow->setVisible(show);

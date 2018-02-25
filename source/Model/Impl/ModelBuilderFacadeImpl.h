@@ -16,6 +16,7 @@ public:
 		, IntVector2D universeSize, SymbolTable * symbolTable, SimulationParameters* parameters
 		, uint timestep) const override;
 	virtual SimulationAccess* buildSimulationAccess() const override;
+	virtual SimulationMonitor* buildSimulationMonitor() const override;
 	virtual DescriptionHelper* buildDescriptionHelper() const override;
 
 private:
