@@ -7,6 +7,11 @@
 
 #include "Manipulator.h"
 
+namespace
+{
+	double Sensitivity = 0.05;
+	int CaptureLength = 10;
+}
 
 Manipulator::Manipulator(QObject *parent)
 	: QObject(parent)
@@ -28,12 +33,15 @@ void Manipulator::init(SimulationContext* context)
 
 void Manipulator::applyForce(QVector2D const& pos, QVector2D const& force)
 {
-	if (!_waitingForData) {
+	if (!_waitingForData && force.lengthSquared() > FLOATINGPOINT_MEDIUM_PRECISION) {
 		_waitingForData = true;
 		_applyAtPos = pos;
 		_applyForce = force;
 		IntVector2D intPos(pos);
-		IntRect updateRect({ { intPos.x - 10, intPos.y - 10 },{ intPos.x + 10, intPos.y + 10 } });
+		IntRect updateRect({
+			{ intPos.x - CaptureLength / 2, intPos.y - CaptureLength / 2 },
+			{ intPos.x + CaptureLength / 2, intPos.y + CaptureLength / 2 }
+		});
 
 		ResolveDescription resolveDesc;
 		resolveDesc.resolveCellLinks = false;
@@ -49,7 +57,7 @@ void Manipulator::dataReadyToRetrieve()
 		DataDescription data = origData;
 		if (data.clusters) {
 			for (ClusterDescription& cluster : *data.clusters) {
-				*cluster.vel += _applyForce / 10.0;
+				*cluster.vel += _applyForce * Sensitivity;
 			}
 		}
 		_access->updateData(DataChangeDescription(origData, data));
