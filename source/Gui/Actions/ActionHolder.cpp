@@ -74,6 +74,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionMonitor = new QAction("Monitor", this);
 	actionMonitor->setEnabled(true);
 	QIcon iconMonitor;
+	iconMonitor.addFile(":/Icons/monitor_active.png", QSize(), QIcon::Normal, QIcon::On);
 	iconMonitor.addFile(":/Icons/monitor.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionMonitor->setIcon(iconMonitor);
 	actionMonitor->setIconVisibleInMenu(false);

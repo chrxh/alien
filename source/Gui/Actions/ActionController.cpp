@@ -76,6 +76,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
 
 	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
+	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleMonitor);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
 	connect(actions->actionLoadSimParameters, &QAction::triggered, this, &ActionController::onLoadSimulationParameters);
 	connect(actions->actionSaveSimParameters, &QAction::triggered, this, &ActionController::onSaveSimulationParameters);
@@ -193,6 +194,10 @@ void ActionController::onToggleEditorMode(bool editMode)
 
 	Q_EMIT _toolbar->getContext()->show(editMode);
 	Q_EMIT _dataEditor->getContext()->show(editMode);
+}
+
+void ActionController::onToggleMonitor(bool show)
+{
 }
 
 void ActionController::onNewSimulation()
