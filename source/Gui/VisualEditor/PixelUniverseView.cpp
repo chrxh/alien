@@ -73,8 +73,8 @@ void PixelUniverseView::refresh()
 void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 {
 	if (e->buttons() == Qt::MouseButton::LeftButton) {
-		auto pos = CoordinateSystem::sceneToModel(e->scenePos());
-		auto lastPos = CoordinateSystem::sceneToModel(e->lastScenePos());
+		auto pos = e->scenePos();
+		auto lastPos = e->lastScenePos();
 		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
 		_manipulator->applyForce({ static_cast<float>(pos.x()), static_cast<float>(pos.y()) }, delta);
 	}
