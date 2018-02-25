@@ -25,6 +25,7 @@ public:
 	virtual void setupEditors(SimulationController* controller);
 	virtual InfoController* getInfoController() const;
 
+	virtual void showMonitor(bool show);
 	virtual void showDocumentation(bool show);
 
 protected:

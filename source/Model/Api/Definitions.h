@@ -44,3 +44,4 @@ class SerializationFacade;
 class DescriptionHelper;
 class CellComputerCompiler;
 class Serializer;
+class SimulationMonitor;

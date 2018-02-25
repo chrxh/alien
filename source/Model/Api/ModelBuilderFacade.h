@@ -18,6 +18,7 @@ public:
 		, IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters
 		, uint timestep = 0) const = 0;
 	virtual SimulationAccess* buildSimulationAccess() const = 0;
+	virtual SimulationMonitor* buildSimulationMonitor() const = 0;
 	virtual DescriptionHelper* buildDescriptionHelper() const = 0;
 };
 

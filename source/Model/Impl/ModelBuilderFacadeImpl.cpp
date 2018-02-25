@@ -27,6 +27,7 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/AccessPortFactory.h"
 
+#include "SimulationMonitorImpl.h"
 #include "SimulationControllerImpl.h"
 #include "CellComputerCompilerImpl.h"
 #include "ModelBuilderFacadeImpl.h"
@@ -92,14 +93,17 @@ SimulationController* ModelBuilderFacadeImpl::buildSimulationController(int maxR
 SimulationAccess * ModelBuilderFacadeImpl::buildSimulationAccess() const
 {
 	AccessPortFactory* factory = ServiceLocator::getInstance().getService<AccessPortFactory>();
-	auto access = factory->buildSimulationAccess();
-	return access;
+	return factory->buildSimulationAccess();;
+}
+
+SimulationMonitor * ModelBuilderFacadeImpl::buildSimulationMonitor() const
+{
+	return new SimulationMonitorImpl();
 }
 
 DescriptionHelper * ModelBuilderFacadeImpl::buildDescriptionHelper() const
 {
-	auto descHelper = new DescriptionHelperImpl();
-	return descHelper;
+	return new DescriptionHelperImpl();
 }
 
 Unit * ModelBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextLocal* context) const

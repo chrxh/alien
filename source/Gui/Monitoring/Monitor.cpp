@@ -1,22 +1,22 @@
-#include "SimulationMonitor.h"
-#include "ui_simulationmonitor.h"
+#include "Monitor.h"
+#include "ui_Monitor.h"
 
 #include <QPaintEvent>
 
-SimulationMonitor::SimulationMonitor(QWidget *parent) :
+Monitor::Monitor(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::SimulationMonitor)
+    ui(new Ui::Monitor)
 {
     ui->setupUi(this);
 }
 
 
-SimulationMonitor::~SimulationMonitor()
+Monitor::~Monitor()
 {
     delete ui;
 }
 
-void SimulationMonitor::update (QMap< QString, qreal > data)
+void Monitor::update (QMap< QString, qreal > data)
 {
     ui->numberCellsLabel->setText(QString::number(data["cells"]));
     ui->numberClustersLabel->setText(QString::number(data["clusters"]));
@@ -29,7 +29,7 @@ void SimulationMonitor::update (QMap< QString, qreal > data)
     ui->totalEnergyLabel->setText(QString::number(data["internalEnergy"]+data["transEnergy"]+data["rotEnergy"],'f',2));
 }
 
-bool SimulationMonitor::event(QEvent* event)
+bool Monitor::event(QEvent* event)
 {
     if( event->type() == QEvent::Close) {
         Q_EMIT closed();

@@ -38,6 +38,11 @@
     <Filter Include="Source Files\Actions">
       <UniqueIdentifier>{97a890a7-fca7-4ade-a2a1-05c0522170f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">
@@ -95,15 +100,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SymbolTableDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\gui\monitoring\SimulationMonitor.cpp">
-      <Filter>Source Files\Monitoring</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationMonitor.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationMonitor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\VisualEditor\AbstractItem.cpp">
@@ -529,6 +525,24 @@
     <ClCompile Include="..\..\source\Gui\VisualEditor\Manipulator.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\gui\monitoring\Monitor.cpp">
+      <Filter>Source Files\Monitoring</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_Monitor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_Monitor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MonitorController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MonitorController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Monitoring\MonitorController.cpp">
+      <Filter>Source Files\Monitoring</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -583,12 +597,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\gui\dialogs\SymbolTableDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\monitoring\SimulationMonitor.h">
-      <Filter>Source Files\Monitoring</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\monitoring\SimulationMonitor.ui">
-      <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\VisualEditor\CoordinateSystem.h">
       <Filter>Source Files\VisualEditor</Filter>
@@ -770,6 +778,15 @@
     <CustomBuild Include="..\..\source\Gui\VisualEditor\Manipulator.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\monitoring\Monitor.h">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\monitoring\Monitor.ui">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Monitoring\MonitorController.h">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\gui\resources\tutorial\angle.png">
@@ -870,9 +887,6 @@
     <ClInclude Include="ui_SymbolTableDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_SimulationMonitor.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\VisualEditor\AbstractItem.h">
       <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
@@ -940,6 +954,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_ComputationGridDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_Monitor.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

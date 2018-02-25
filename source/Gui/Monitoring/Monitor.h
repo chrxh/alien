@@ -3,16 +3,16 @@
 #include <QMainWindow>
 
 namespace Ui {
-class SimulationMonitor;
+class Monitor;
 }
 
-class SimulationMonitor : public QMainWindow
+class Monitor : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit SimulationMonitor(QWidget *parent = 0);
-    ~SimulationMonitor();
+    Monitor(QWidget *parent = nullptr);
+    virtual ~Monitor();
 
     void update (QMap< QString, qreal > data);
 
@@ -23,6 +23,6 @@ protected:
     bool event(QEvent* event);
 
 private:
-    Ui::SimulationMonitor *ui;
+    Ui::Monitor *ui;
 };
 

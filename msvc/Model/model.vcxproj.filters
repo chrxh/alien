@@ -597,6 +597,27 @@
     <ClCompile Include="Release\moc_SimulationAttributeSetter.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationMonitor.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationMonitor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationMonitor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\SimulationMonitorImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationMonitorImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationMonitorImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationMonitorImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Model\Api\SimulationAccess.h">
@@ -690,6 +711,12 @@
       <Filter>Source Files\Local</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Model\Impl\SimulationAttributeSetter.h">
+      <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Api\SimulationMonitor.h">
+      <Filter>Source Files\Api</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Model\Impl\SimulationMonitorImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
   </ItemGroup>

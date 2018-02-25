@@ -36,6 +36,7 @@ private:
 	Q_SLOT void onSaveSymbolTable();
 
 	Q_SLOT void onToggleEditorMode(bool editMode);
+	Q_SLOT void onToggleMonitor(bool show);
 	Q_SLOT void onZoomInClicked();
 	Q_SLOT void onZoomOutClicked();
 	Q_SLOT void onToggleFullscreen(bool fullscreen);
