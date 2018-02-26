@@ -8,6 +8,7 @@
 #include "Gui/Actions/ActionHolder.h"
 #include "Gui/Assistance/DocumentationWindow.h"
 #include "Gui/Misc/StartScreenController.h"
+#include "Gui/Monitoring/MonitorController.h"
 
 #include "SerializationHelper.h"
 #include "InfoController.h"
@@ -28,20 +29,6 @@ MainView::MainView(QWidget * parent)
 	, ui(new Ui::MainView)
 {
 	ui->setupUi(this);
-}
-
-MainView::~MainView()
-{
-	delete ui;
-}
-
-void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository, Notifier* notifier
-	, NumberGenerator* numberGenerator)
-{
-	_model = model;
-	_controller = mainController;
-	_repository = repository;
-	_notifier = notifier;
 	_visualEditor = ui->visualEditController;
 	_toolbar = new ToolbarController(_visualEditor);
 	_dataEditor = new DataEditController(_visualEditor);
@@ -49,10 +36,29 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_actions = new ActionController(this);
 	_startScreen = new StartScreenController(this);
 	_documentationWindow = new DocumentationWindow(this);
+	_monitor = new MonitorController(this);
 	connect(_documentationWindow, &DocumentationWindow::closed, this, &MainView::documentationWindowClosed);
+	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
+
+}
+
+MainView::~MainView()
+{
+	delete ui;
+}
+
+void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository
+	, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator)
+{
+	_model = model;
+	_controller = mainController;
+	_repository = repository;
+	_notifier = notifier;
 
 	_infoController->init(ui->infoLabel, mainController);
-	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar, repository, notifier, numberGenerator);
+	_monitor->init(simMonitor);
+	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar
+		, _monitor, repository, notifier, numberGenerator);
 
 	setupMenu();
 	setupFontsAndColors();
@@ -81,10 +87,6 @@ void MainView::setupEditors(SimulationController * controller)
 InfoController * MainView::getInfoController() const
 {
 	return _infoController;
-}
-
-void MainView::showMonitor(bool show)
-{
 }
 
 void MainView::showDocumentation(bool show)
@@ -221,6 +223,11 @@ void MainView::setupWidgets()
 void MainView::documentationWindowClosed()
 {
 	_actions->getActionHolder()->actionDocumentation->setChecked(false);
+}
+
+void MainView::monitorClosed()
+{
+	_actions->getActionHolder()->actionMonitor->setChecked(false);
 }
 
 

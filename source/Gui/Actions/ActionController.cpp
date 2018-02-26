@@ -23,6 +23,7 @@
 #include "Gui/Dialogs/NewParticlesDialog.h"
 #include "Gui/Dialogs/RandomMultiplierDialog.h"
 #include "Gui/Dialogs/GridMultiplierDialog.h"
+#include "Gui/Monitoring/MonitorController.h"
 #include "Gui/Settings.h"
 #include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
@@ -43,7 +44,7 @@ ActionController::ActionController(QObject * parent)
 
 void ActionController::init(MainController * mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 	, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-	, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator)
+	, MonitorController* monitor, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator)
 {
 	_mainController = mainController;
 	_mainModel = mainModel;
@@ -53,6 +54,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	_infoController = infoController;
 	_dataEditor = dataEditor;
 	_toolbar = toolbar;
+	_monitor = monitor;
 	_repository = repository;
 	_notifier = notifier;
 	_numberGenerator = numberGenerator;
@@ -198,6 +200,7 @@ void ActionController::onToggleEditorMode(bool editMode)
 
 void ActionController::onToggleMonitor(bool show)
 {
+	_monitor->onShow(show);
 }
 
 void ActionController::onNewSimulation()
