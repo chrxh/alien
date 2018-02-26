@@ -78,6 +78,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	iconMonitor.addFile(":/Icons/monitor.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionMonitor->setIcon(iconMonitor);
 	actionMonitor->setIconVisibleInMenu(false);
+	actionMonitor->setCheckable(true);
+	actionMonitor->setChecked(false);
 	actionZoomIn = new QAction("Zoom in", this);
 	actionZoomIn->setEnabled(true);
 	QIcon iconZoomIn;

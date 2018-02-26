@@ -14,8 +14,7 @@ public:
      DocumentationWindow(QWidget *parent = 0);
 	 virtual ~DocumentationWindow();
     
-Q_SIGNALS:
-    void closed ();
+	Q_SIGNAL void closed ();
 
 protected:
     bool event(QEvent* event);

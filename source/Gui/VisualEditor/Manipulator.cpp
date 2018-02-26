@@ -9,8 +9,8 @@
 
 namespace
 {
-	double Sensitivity = 0.05;
-	int CaptureLength = 10;
+	double Sensitivity = 0.07;
+	int CaptureLength = 15;
 }
 
 Manipulator::Manipulator(QObject *parent)
@@ -58,6 +58,11 @@ void Manipulator::dataReadyToRetrieve()
 		if (data.clusters) {
 			for (ClusterDescription& cluster : *data.clusters) {
 				*cluster.vel += _applyForce * Sensitivity;
+			}
+		}
+		if (data.particles) {
+			for (ParticleDescription& particle : *data.particles) {
+				*particle.vel += _applyForce * Sensitivity;
 			}
 		}
 		_access->updateData(DataChangeDescription(origData, data));

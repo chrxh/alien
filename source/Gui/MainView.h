@@ -18,14 +18,13 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository, Notifier* notifier
-		, NumberGenerator* numberGenerator);
+	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository
+		, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator);
 	virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller);
 	virtual InfoController* getInfoController() const;
 
-	virtual void showMonitor(bool show);
 	virtual void showDocumentation(bool show);
 
 protected:
@@ -37,6 +36,7 @@ private:
 	void setupWidgets();
 
 	Q_SLOT void documentationWindowClosed();
+	Q_SLOT void monitorClosed();
 
 	Ui::MainView* ui = nullptr;
 	VisualEditController* _visualEditor = nullptr;
@@ -51,6 +51,7 @@ private:
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
 	InfoController* _infoController = nullptr;
+	MonitorController* _monitor = nullptr;
 
 	StartScreenController* _startScreen = nullptr;
 };

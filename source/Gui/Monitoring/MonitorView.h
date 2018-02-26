@@ -3,26 +3,26 @@
 #include <QMainWindow>
 
 namespace Ui {
-class Monitor;
+class MonitorView;
 }
 
-class Monitor : public QMainWindow
+class MonitorView
+	: public QMainWindow
 {
     Q_OBJECT
 
 public:
-    Monitor(QWidget *parent = nullptr);
-    virtual ~Monitor();
+    MonitorView(QWidget *parent = nullptr);
+    virtual ~MonitorView();
 
     void update (QMap< QString, qreal > data);
 
-Q_SIGNALS:
-    void closed ();
+	Q_SIGNAL void closed ();
 
 protected:
     bool event(QEvent* event);
 
 private:
-    Ui::Monitor *ui;
+    Ui::MonitorView *ui;
 };
 

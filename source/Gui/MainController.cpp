@@ -16,6 +16,7 @@
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/Serializer.h"
 #include "Model/Api/DescriptionHelper.h"
+#include "Model/Api/SimulationMonitor.h"
 
 #include "VersionController.h"
 #include "SerializationHelper.h"
@@ -49,11 +50,13 @@ void MainController::init()
 	auto simAccessForDataController = facade->buildSimulationAccess();
 	auto descHelper = facade->buildDescriptionHelper();
 	auto versionController = new VersionController();
+	auto simMonitor = facade->buildSimulationMonitor();
 	SET_CHILD(_serializer, serializer);
 	SET_CHILD(_simAccess, simAccessForDataController);
 	SET_CHILD(_descHelper, descHelper);
 	SET_CHILD(_versionController, versionController);
 	SET_CHILD(_numberGenerator, numberGenerator);
+	SET_CHILD(_simMonitor, simMonitor);
 	_repository = new DataRepository(this);
 	_notifier = new Notifier(this);
 
@@ -61,7 +64,7 @@ void MainController::init()
 
 	_serializer->init();
 	_numberGenerator->init(12315312, 0);
-	_view->init(_model, this, _serializer, _repository, _notifier, _numberGenerator);
+	_view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _numberGenerator);
 
 	
 	if (!onLoadSimulation("autosave.sim")) {
@@ -133,7 +136,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_descHelper->init(_simController->getContext());
 	_versionController->init(_simController->getContext());
 	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
-
+	_simMonitor->init(_simController->getContext());
 	_view->setupEditors(_simController);
 }
 
