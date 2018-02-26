@@ -17,5 +17,5 @@ void MonitorController::init(SimulationMonitor* simMonitor)
 
 void MonitorController::onShow(bool show)
 {
-	_widget->setVisible(true);
+	_widget->setVisible(show);
 }
