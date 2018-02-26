@@ -15,7 +15,7 @@ class CellItem;
 class ParticleItem;
 class CellConnectionItem;
 class ItemConfig;
-class Monitor;
+class MonitorView;
 class DocumentationWindow;
 class StartScreenController;
 class MetadataManager;
@@ -57,6 +57,7 @@ class ActionController;
 class StartScreenWidget;
 class StartScreenController;
 class Manipulator;
+class MonitorController;
 
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };

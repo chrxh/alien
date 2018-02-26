@@ -9,11 +9,15 @@ class MonitorController
 	Q_OBJECT
 
 public:
-	MonitorController(QObject * parent = nullptr);
+	MonitorController(QWidget* parent = nullptr);
 	virtual ~MonitorController() = default;
 
-	virtual void init(SimulationContext* context);
+	virtual void init(SimulationMonitor* simMonitor);
+
+	virtual void onShow(bool show);
+
+	Q_SIGNAL void closed();
 
 private:
-	
+	MonitorView* _widget = nullptr;
 };

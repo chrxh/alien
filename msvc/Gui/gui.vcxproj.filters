@@ -525,15 +525,6 @@
     <ClCompile Include="..\..\source\Gui\VisualEditor\Manipulator.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\monitoring\Monitor.cpp">
-      <Filter>Source Files\Monitoring</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_Monitor.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_Monitor.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_MonitorController.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -542,6 +533,15 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\Monitoring\MonitorController.cpp">
       <Filter>Source Files\Monitoring</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\gui\monitoring\MonitorView.cpp">
+      <Filter>Source Files\Monitoring</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MonitorView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MonitorView.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -778,13 +778,13 @@
     <CustomBuild Include="..\..\source\Gui\VisualEditor\Manipulator.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\monitoring\Monitor.h">
-      <Filter>Source Files\Monitoring</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\monitoring\Monitor.ui">
-      <Filter>Source Files\Monitoring</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Monitoring\MonitorController.h">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\monitoring\MonitorView.h">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\gui\monitoring\MonitorView.ui">
       <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -956,7 +956,7 @@
     <ClInclude Include="ui_ComputationGridDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_Monitor.h">
+    <ClInclude Include="ui_MonitorView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
