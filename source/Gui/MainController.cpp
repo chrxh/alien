@@ -142,9 +142,8 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 void MainController::recreateSimulation(string const & serializedSimulation)
 {
-	auto origSimController = _simController;
+	delete _simController;
 	_simController = _serializer->deserializeSimulation(serializedSimulation);
-	delete origSimController;
 
 	auto symbolTable = _simController->getContext()->getSymbolTable();
 	auto simulationParameters = _simController->getContext()->getSimulationParameters();
@@ -175,7 +174,7 @@ void MainController::onSaveSimulation(string const& filename)
 
 bool MainController::onLoadSimulation(string const & filename)
 {
-	auto origSimController = _simController;
+	auto origSimController = _simController;	//delete later if loading failed
 	if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
 		return false;
 	}
