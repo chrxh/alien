@@ -959,6 +959,12 @@
     <ClInclude Include="ui_MonitorView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\StringHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Monitoring\MonitorModel.h">
+      <Filter>Source Files\Monitoring</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="gui.rc">

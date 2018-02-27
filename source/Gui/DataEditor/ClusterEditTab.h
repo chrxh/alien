@@ -27,8 +27,6 @@ private:
 	void requestUpdate();
 
     qreal generateNumberFromFormattedString (QString s);
-    QString generateFormattedRealString (QString s);
-    QString generateFormattedRealString (qreal r);
 
 	DataEditModel* _model = nullptr;
 	DataEditController* _controller = nullptr;

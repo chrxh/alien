@@ -2,6 +2,8 @@
 
 #include <QMainWindow>
 
+#include "Gui/Definitions.h"
+
 namespace Ui {
 class MonitorView;
 }
@@ -15,7 +17,9 @@ public:
     MonitorView(QWidget *parent = nullptr);
     virtual ~MonitorView();
 
-    void update (QMap< QString, qreal > data);
+	void init(MonitorModel const& model);
+
+	void update();
 
 	Q_SIGNAL void closed ();
 
@@ -23,6 +27,9 @@ protected:
     bool event(QEvent* event);
 
 private:
+	QString generateString() const;
+
+	MonitorModel _model;
     Ui::MonitorView *ui;
 };
 

@@ -1,21 +1,24 @@
 ﻿#include <QWidget>
 
 #include "MonitorView.h"
+#include "MonitorModel.h"
 #include "MonitorController.h"
 
 MonitorController::MonitorController(QWidget* parent)
 	: QObject(parent)
 {
-	_widget = new MonitorView(parent);
-	_widget->setVisible(false);
-	connect(_widget, &MonitorView::closed, this, &MonitorController::closed);
+	_view = new MonitorView(parent);
+	_view->setVisible(false);
+	connect(_view, &MonitorView::closed, this, &MonitorController::closed);
 }
 
 void MonitorController::init(SimulationMonitor* simMonitor)
 {
+	_model = boost::make_shared<_MonitorModel>();
+	_view->init(_model);
 }
 
 void MonitorController::onShow(bool show)
 {
-	_widget->setVisible(show);
+	_view->setVisible(show);
 }

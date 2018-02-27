@@ -5,8 +5,8 @@
 
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"
-#include "Gui/Settings.h"
 
+#include "Gui/StringHelper.h"
 #include "DataEditModel.h"
 #include "DataEditController.h"
 #include "ClusterEditTab.h"
@@ -270,17 +270,17 @@ void ClusterEditTab::updateDisplay ()
     text = parStart+colorTextStart+ "number of cells: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
     text += colorDataStart+QString("%1").arg(cluster.cells->size())+colorEnd+parEnd;
     text += parStart+colorTextStart+ "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(cluster.pos->x())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster.pos->x())+parEnd;
     text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(cluster.pos->y())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster.pos->y())+parEnd;
     text += parStart+colorTextStart+ "velocity x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(cluster.vel->x())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster.vel->x())+parEnd;
     text += parStart+colorTextStart+ "velocity y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(cluster.vel->y())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster.vel->y())+parEnd;
     text += parStart+colorTextStart+ "angle: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*cluster.angle)+parEnd;
+    text += StringHelper::generateFormattedRealString(*cluster.angle)+parEnd;
     text += parStart+colorTextStart+ "angular vel: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*cluster.angularVel)+parEnd;
+    text += StringHelper::generateFormattedRealString(*cluster.angularVel)+parEnd;
 
     QTextEdit::setText(text);
 
@@ -306,40 +306,4 @@ qreal ClusterEditTab::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString ClusterEditTab::generateFormattedRealString (QString s)
-{
-    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
-    QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
-    QString colorEnd = "</span>";
-    QString iS, reS;
-    int i = s.indexOf(".");
-    if( i == -1 )
-        iS = s;
-    else {
-        iS = s.left(i);
-        reS = s.remove(0,i+1);
-    }
-    return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
-}
-
-QString ClusterEditTab::generateFormattedRealString (qreal r)
-{
-    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
-    QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
-    QString colorEnd = "</span>";
-    bool negativeSign = false;
-    if( r < 0.0 ) {
-        r = -r;
-        negativeSign = true;
-    }
-    int i = qFloor(r);
-    int re = (r-qFloor(r))*10000.0;
-    QString iS = QString("%1").arg(i);
-    QString reS = QString("%1").arg(re, 4);
-    reS.replace(" ", "0");
-    if( negativeSign)
-        return colorDataStart+"-"+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
-    else
-        return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
-}
 

@@ -28,8 +28,6 @@ private:
     void updateModelAndNotifyController ();
 
     qreal generateNumberFromFormattedString (QString s);
-    QString generateFormattedRealString (QString s);
-    QString generateFormattedRealString (qreal r);
     QString generateFormattedCellFunctionString (Enums::CellFunction::Type type);
 
 	DataEditModel* _model = nullptr;
