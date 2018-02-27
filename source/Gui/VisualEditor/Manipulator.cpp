@@ -28,7 +28,7 @@ void Manipulator::init(SimulationContext* context)
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
-	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Manipulator::dataReadyToRetrieve));
+	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Manipulator::dataReadyToRetrieve, Qt::QueuedConnection));
 }
 
 void Manipulator::applyForce(QVector2D const& pos, QVector2D const& force)
