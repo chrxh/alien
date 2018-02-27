@@ -19,5 +19,6 @@ public:
 	Q_SIGNAL void closed();
 
 private:
-	MonitorView* _widget = nullptr;
+	MonitorView* _view = nullptr;
+	MonitorModel _model;
 };

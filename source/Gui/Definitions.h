@@ -59,6 +59,9 @@ class StartScreenController;
 class Manipulator;
 class MonitorController;
 
+struct _MonitorModel;
+using MonitorModel = shared_ptr<_MonitorModel>;
+
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
