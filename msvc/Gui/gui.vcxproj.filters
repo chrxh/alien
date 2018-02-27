@@ -360,9 +360,6 @@
     <ClCompile Include="Release\moc_MainModel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\MainViewTemp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\MainView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -692,9 +689,6 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\MainModel.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\MainViewTemp.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\MainView.h">
