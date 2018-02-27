@@ -208,7 +208,7 @@ void SerializerImpl::init()
 	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
 	SET_CHILD(_access, access);
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve);
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve, Qt::QueuedConnection);
 }
 
 void SerializerImpl::serialize(SimulationController * simController, SerializeOptions options /*= SerializeOptions()*/)
