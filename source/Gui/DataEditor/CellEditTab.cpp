@@ -4,7 +4,7 @@
 #include <qmath.h>
 
 #include "Model/Api/SimulationParameters.h"
-#include "Gui/Settings.h"
+#include "Gui/StringHelper.h"
 
 #include "CellEditTab.h"
 #include "DataEditModel.h"
@@ -351,11 +351,11 @@ void CellEditTab::updateDisplay ()
 
     //create string of display
     text = parStart+colorTextStart+ "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(cell.pos->x())+parEnd;
+    text += StringHelper::generateFormattedRealString(cell.pos->x())+parEnd;
     text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(cell.pos->y())+parEnd;
+    text += StringHelper::generateFormattedRealString(cell.pos->y())+parEnd;
     text += parStart+colorTextStart+ "internal energy: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*cell.energy)+parEnd;
+    text += StringHelper::generateFormattedRealString(*cell.energy)+parEnd;
     text += parStart+colorTextStart+ "current bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
     text += colorDataStart+QString("%1").arg(cell.connectingCells->size())+colorEnd+parEnd;
     text += parStart+colorTextStart+ "max bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
@@ -396,55 +396,6 @@ qreal CellEditTab::generateNumberFromFormattedString (QString s)
     return 0.0;
 }
 
-QString CellEditTab::generateFormattedRealString (QString s)
-{
-    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
-    QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
-    QString colorEnd = "</span>";
-    QString iS, reS;
-    int i = s.indexOf(".");
-    if( i == -1 )
-        iS = s;
-    else {
-        iS = s.left(i);
-        reS = s.remove(0,i+1);
-    }
-    return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
-}
-
-QString CellEditTab::generateFormattedRealString (qreal r)
-{
-    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
-    QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
-    QString colorEnd = "</span>";
-    bool negativeSign = false;
-    if( r < 0.0 ) {
-        r = -r;
-        negativeSign = true;
-    }
-    int i = qFloor(r);
-    int re = (r-qFloor(r))*10000.0;
-    QString iS = QString("%1").arg(i);
-    QString reS = QString("%1").arg(re, 4);
-    reS.replace(" ", "0");
-    if( negativeSign)
-        return colorDataStart+"-"+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
-    else
-        return colorDataStart+iS+colorEnd+colorData2Start+"."+reS+colorEnd;
-}
-
-namespace
-{
-	QString ws(int num)
-	{
-		QString result;
-		for (int i = 0; i < num; ++i) {
-			result += "&nbsp;";
-		}
-		return result;
-	}
-}
-
 QString CellEditTab::generateFormattedCellFunctionString (Enums::CellFunction::Type type)
 {
     //define auxiliary strings
@@ -457,35 +408,35 @@ QString CellEditTab::generateFormattedCellFunctionString (Enums::CellFunction::T
     QString text;
 
     //generate formatted string
-    text += parStart+colorTextStart+ "cell function:" + ws(7)+colorEnd;
+    text += parStart+colorTextStart+ "cell function:" + StringHelper::ws(7)+colorEnd;
     if( type == Enums::CellFunction::COMPUTER )
         text += colorDataStart+" > computer"+colorEnd+parEnd;
     else
-        text += colorData2Start+ws(3)+"computer"+colorEnd+parEnd;
+        text += colorData2Start+ StringHelper::ws(3)+"computer"+colorEnd+parEnd;
     if( type == Enums::CellFunction::PROPULSION )
-        text += parStart+colorDataStart+ws(22)+"> propulsion"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ StringHelper::ws(22)+"> propulsion"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+ws(24)+"propulsion"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ StringHelper::ws(24)+"propulsion"+colorEnd+parEnd;
     if( type == Enums::CellFunction::SCANNER )
-        text += parStart+colorDataStart+ws(22)+"> scanner"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ StringHelper::ws(22)+"> scanner"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+ws(24)+"scanner"+colorEnd+parEnd;
+        text += parStart+colorData2Start+ StringHelper::ws(24)+"scanner"+colorEnd+parEnd;
     if( type == Enums::CellFunction::WEAPON )
-        text += parStart+colorDataStart+ws(22)+"> weapon"+colorEnd+parEnd;
+        text += parStart+colorDataStart+ StringHelper::ws(22)+"> weapon"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+ws(24)+"weapon"+colorEnd+parEnd;
+        text += parStart+colorData2Start+StringHelper::ws(24)+"weapon"+colorEnd+parEnd;
     if( type == Enums::CellFunction::CONSTRUCTOR )
-        text += parStart+colorDataStart+ws(22)+"> constructor"+colorEnd+parEnd;
+        text += parStart+colorDataStart+StringHelper::ws(22)+"> constructor"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+ws(24)+"constructor"+colorEnd+parEnd;
+        text += parStart+colorData2Start+StringHelper::ws(24)+"constructor"+colorEnd+parEnd;
     if( type == Enums::CellFunction::SENSOR )
-        text += parStart+colorDataStart+ws(22)+"> sensor"+colorEnd+parEnd;
+        text += parStart+colorDataStart+StringHelper::ws(22)+"> sensor"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+ws(24)+"sensor"+colorEnd+parEnd;
+        text += parStart+colorData2Start+StringHelper::ws(24)+"sensor"+colorEnd+parEnd;
     if( type == Enums::CellFunction::COMMUNICATOR )
-        text += parStart+colorDataStart+ws(22)+"> communicator"+colorEnd+parEnd;
+        text += parStart+colorDataStart+StringHelper::ws(22)+"> communicator"+colorEnd+parEnd;
     else
-        text += parStart+colorData2Start+ws(24)+"communicator"+colorEnd+parEnd;
+        text += parStart+colorData2Start+StringHelper::ws(24)+"communicator"+colorEnd+parEnd;
     return text;
 }
 
