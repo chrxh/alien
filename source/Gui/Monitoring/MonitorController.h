@@ -19,6 +19,12 @@ public:
 	Q_SIGNAL void closed();
 
 private:
+	Q_SLOT void dataReadyToRetrieve();
+
 	MonitorView* _view = nullptr;
+	QTimer* _updateTimer = nullptr;
 	MonitorModel _model;
+	SimulationMonitor* _simMonitor = nullptr;
+
+	list<QMetaObject::Connection> _connections;
 };
