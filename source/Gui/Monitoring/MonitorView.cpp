@@ -13,16 +13,6 @@ MonitorView::MonitorView(QWidget *parent) :
 {
     ui->setupUi(this);
 	ui->infoLabel->setText("number of clusters");
-	//number of clusters
-	//number of cells
-	//number of particles
-	//number of token
-	//total internal energy
-	//token kinetic energy
-	//-> translational part
-	//-> rotational part
-	//overall energy
-
 }
 
 
@@ -63,9 +53,24 @@ QString MonitorView::generateString() const
 	QString text;
 
 	//generate formatted string
-	text += parStart + colorTextStart + "number of clusters:" + StringHelper::ws(7) + colorEnd;
+	text += parStart + colorTextStart + "number of clusters:" + StringHelper::ws(5) + colorEnd;
 	text += " " + StringHelper::generateFormattedIntString(_model->numClusters)+ " " + parEnd;
-
+	text += parStart + colorTextStart + "number of cells:" + StringHelper::ws(8) + colorEnd;
+	text += " " + StringHelper::generateFormattedIntString(_model->numCells) + " " + parEnd;
+	text += parStart + colorTextStart + "number of particles:" + StringHelper::ws(4) + colorEnd;
+	text += " " + StringHelper::generateFormattedIntString(_model->numParticles) + " " + parEnd;
+	text += parStart + colorTextStart + "number of tokens:" + StringHelper::ws(7) + colorEnd;
+	text += " " + StringHelper::generateFormattedIntString(_model->numTokens) + " " + parEnd;
+	text += parStart + colorTextStart + "total internal energy:" + StringHelper::ws(2) + colorEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalInternalEnergy) + " " + parEnd;
+	text += parStart + colorTextStart + "total kinetic energy:" + StringHelper::ws(3) + colorEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalKineticEnergy) + " " + parEnd;
+	text += parStart + colorTextStart + "&#47;linear part:" + StringHelper::ws(11) + colorEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalKineticEnergyTranslationalPart) + " " + parEnd;
+	text += parStart + colorTextStart + "&#47;rotational part:" + StringHelper::ws(7) + colorEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalKineticEnergyRotationalPart) + " " + parEnd;
+	text += parStart + colorTextStart + "overall energy:" + StringHelper::ws(9) + colorEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalInternalEnergy + _model->totalKineticEnergy) + " " + parEnd;
 	return text;
 }
 

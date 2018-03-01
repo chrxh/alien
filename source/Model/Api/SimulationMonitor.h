@@ -8,11 +8,11 @@ struct MonitorData
 	int numClusters = 0;
 	int numCells = 0;
 	int numParticles = 0;
-	int numToken = 0;
+	int numTokens = 0;
 	double totalInternalEnergy = 0.0;
 	double totalKineticEnergy = 0.0;
-	double totalTranslationalEnergy = 0.0;
-	double totalRotationalEnergy = 0.0;
+	double totalKineticEnergyTranslationalPart = 0.0;
+	double totalKineticEnergyRotationalPart = 0.0;
 };
 
 class MODEL_EXPORT SimulationMonitor

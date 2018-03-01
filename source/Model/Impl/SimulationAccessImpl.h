@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Local/UnitObserver.h"
 #include "Model/Api/ChangeDescriptions.h"
 #include "Model/Api/SimulationAccess.h"
+#include "Model/Local/SimulationContextLocal.h"
+#include "Model/Local/UnitObserver.h"
 
 class SimulationAccessImpl
 	: public SimulationAccess
@@ -21,6 +21,7 @@ public:
 	virtual void requireImage(IntRect rect, QImage* target) override;
 	virtual DataDescription const& retrieveData() override;
 	 
+	//from UnitObserver
 	virtual void unregister() override;
 	virtual void accessToUnits() override;
 
