@@ -15,12 +15,12 @@ class Cluster
 public:
     Cluster (QList< Cell* > cells, uint64_t id, qreal angle, QVector2D pos, qreal angularVel, QVector2D vel, UnitContext* context);
 
-    virtual ~Cluster ();
+    ~Cluster ();
 
-	virtual void setContext(UnitContext* context);
+	void setContext(UnitContext* context);
 
-	virtual ClusterDescription getDescription(ResolveDescription const& resolveDescription) const;
-	virtual void applyChangeDescription(ClusterChangeDescription const& change);
+	ClusterDescription getDescription(ResolveDescription const& resolveDescription) const;
+	void applyChangeDescription(ClusterChangeDescription const& change);
 
     void clearCellsFromMap ();
     void clearCellFromMap (Cell* cell);
@@ -46,6 +46,8 @@ public:
     QList< Cluster* > decompose () const;
     qreal calcAngularMassWithNewParticle (QVector2D particlePos) const;
     qreal calcAngularMassWithoutUpdate () const;
+	double calcLinearKineticEnergy() const;
+	double calcRotationalKineticEnergy() const;
 
     bool isEmpty() const;
 
