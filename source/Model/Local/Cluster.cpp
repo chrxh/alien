@@ -956,12 +956,14 @@ double Cluster::calcLinearKineticEnergy() const
 {
 	double mass = getMass();
 	QVector2D vel = getVelocity();
-	return 0.5 * mass * vel.lengthSquared();
+	return Physics::linearKineticEnergy(mass, vel);
 }
 
 double Cluster::calcRotationalKineticEnergy() const
 {
-	return 0.0;
+	double angularMass = getAngularMass();
+	double angularVel = getAngularVel();
+	return Physics::rotationalKineticEnergy(angularMass, angularVel);
 }
 
 bool Cluster::isEmpty() const
