@@ -113,10 +113,20 @@ QVector2D Physics::tangentialVelocity (QVector2D r, QVector2D vel, qreal angular
 }
 
 
-qreal Physics::kineticEnergy (qreal mass, QVector2D vel, qreal angularMass, qreal angularVel)
+double Physics::kineticEnergy (qreal mass, QVector2D vel, qreal angularMass, qreal angularVel)
 {
-    angularVel *= degToRad;
-    return 0.5*angularMass*angularVel*angularVel+0.5*mass*vel.lengthSquared();
+	return linearKineticEnergy(mass, vel) + rotationalKineticEnergy(angularMass, angularVel);
+}
+
+double Physics::linearKineticEnergy(qreal mass, QVector2D vel)
+{
+	return 0.5*mass*vel.lengthSquared();
+}
+
+double Physics::rotationalKineticEnergy(qreal angularMass, qreal angularVel)
+{
+	angularVel *= degToRad;
+	return 0.5*angularMass*angularVel*angularVel;
 }
 
 qreal Physics::newAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld)
