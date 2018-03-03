@@ -952,6 +952,18 @@ qreal Cluster::calcAngularMassWithoutUpdate () const
     return aMass;
 }
 
+double Cluster::calcLinearKineticEnergy() const
+{
+	double mass = getMass();
+	QVector2D vel = getVelocity();
+	return 0.5 * mass * vel.lengthSquared();
+}
+
+double Cluster::calcRotationalKineticEnergy() const
+{
+	return 0.0;
+}
+
 bool Cluster::isEmpty() const
 {
     return _cells.isEmpty();
