@@ -7,7 +7,6 @@ struct _MonitorModel
 	int numParticles = 0;
 	int numTokens = 0;
 	double totalInternalEnergy = 0.0;
-	double totalKineticEnergy = 0.0;
-	double totalKineticEnergyTranslationalPart = 0.0;
-	double totalKineticEnergyRotationalPart = 0.0;
+	double totalLinearKineticEnergy = 0.0;
+	double totalRotationalKineticEnergy = 0.0;
 };

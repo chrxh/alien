@@ -15,10 +15,10 @@ public:
 
     ~Cell();
 
-	virtual void setContext(UnitContext* context);
+	void setContext(UnitContext* context);
 
-	virtual CellDescription getDescription(ResolveDescription const& resolveDescription) const;
-	virtual void applyChangeDescription(CellChangeDescription const& change);
+	CellDescription getDescription(ResolveDescription const& resolveDescription) const;
+	void applyChangeDescription(CellChangeDescription const& change);
 
     void registerFeatures (CellFeatureChain* features);
     CellFeatureChain* getFeatures () const;

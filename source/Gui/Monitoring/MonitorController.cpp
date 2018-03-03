@@ -54,8 +54,7 @@ void MonitorController::dataReadyToRetrieve()
 	_model->numParticles = data.numParticles;
 	_model->numTokens = data.numTokens;
 	_model->totalInternalEnergy = data.totalInternalEnergy;
-	_model->totalKineticEnergy = data.totalKineticEnergy;
-	_model->totalKineticEnergyTranslationalPart = data.totalKineticEnergyTranslationalPart;
-	_model->totalKineticEnergyRotationalPart = data.totalKineticEnergyRotationalPart;
+	_model->totalLinearKineticEnergy = data.totalLinearKineticEnergy;
+	_model->totalRotationalKineticEnergy = data.totalRotationalKineticEnergy;
 	_view->update();
 }
