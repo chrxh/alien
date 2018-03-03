@@ -44,6 +44,7 @@ private:
 	Q_SLOT void onNewCell();
 	Q_SLOT void onNewParticle();
 	Q_SLOT void onNewToken();
+	Q_SLOT void onCopyToken();
 	Q_SLOT void onDeleteToken();
 	Q_SLOT void onToggleCellInfo(bool show);
 
