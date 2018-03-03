@@ -175,6 +175,16 @@ struct MODEL_EXPORT DataDescription
 		clusters = boost::none;
 		particles = boost::none;
 	}
+	bool isEmpty() const
+	{
+		if (clusters && !clusters->empty()) {
+			return false;
+		}
+		if (particles && !particles->empty()) {
+			return false;
+		}
+		return true;
+	}
 	QVector2D calcCenter() const;
 	void shift(QVector2D const& delta);
 };
