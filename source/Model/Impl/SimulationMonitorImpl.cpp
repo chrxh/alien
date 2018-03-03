@@ -7,6 +7,7 @@
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Particle.h"
+#include "Model/Local/Token.h"
 
 #include "SimulationMonitorImpl.h"
 
@@ -83,8 +84,13 @@ void SimulationMonitorImpl::calcMonitorDataForUnit(Unit * unit)
 		_data.totalLinearKineticEnergy += cluster->calcLinearKineticEnergy();
 		_data.totalRotationalKineticEnergy += cluster->calcRotationalKineticEnergy();
 		for (Cell* const& cell : cells) {
-			_data.numTokens += cell->getNumToken();
+			int numToken = cell->getNumToken();
+			_data.numTokens += numToken;
 			_data.totalInternalEnergy += cell->getEnergy();
+			for (int i = 0; i < numToken; ++i) {
+				Token* token = cell->getToken(i);
+				_data.totalInternalEnergy += token->getEnergy();
+			}
 		}
 	}
 	auto const& particles = unit->getContext()->getParticlesRef();
