@@ -33,28 +33,30 @@ public:
 	virtual void setCellWithFreeTokenSelected(bool value);
 
 	virtual bool isTokenCopied() const;
-	virtual void setTokenCopied(bool value);
 
 	virtual bool isCollectionSelected() const;
 	virtual void setCollectionSelected(bool value);
 
 	virtual bool isCollectionCopied() const;
-	virtual void setCollectionCopied(bool value);
 
-	virtual DataDescription const& getCopiedData() const;
-	virtual void setCopiedData(DataDescription const& value);
+	virtual DataDescription const& getCopiedCollection() const;
+	virtual void setCopiedCollection(DataDescription const& value);
+
+	virtual TokenDescription const& getCopiedToken() const;
+	virtual void setCopiedToken(TokenDescription const& value);
 
 private:
 	ActionHolder* _actions = nullptr;
 
-	DataDescription _copiedData;
+
 	bool _isEditMode = false;
 	double _delta = 0.0;
 	bool _entitySelected = false;
 	bool _entityCopied = false;
 	bool _cellWithTokenSelected = false;
 	bool _cellWithFreeTokenSelected = false;
-	bool _tokenCopied = false;
 	bool _collectionSelected = false;
-	bool _collectionCopied = false;
+
+	DataDescription _copiedCollection;
+	optional<TokenDescription> _copiedToken;
 };

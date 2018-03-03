@@ -89,6 +89,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewCell, &QAction::triggered, this, &ActionController::onNewCell);
 	connect(actions->actionNewParticle, &QAction::triggered, this, &ActionController::onNewParticle);
 	connect(actions->actionNewToken, &QAction::triggered, this, &ActionController::onNewToken);
+	connect(actions->actionCopyToken, &QAction::triggered, this, &ActionController::onCopyToken);
 	connect(actions->actionDeleteToken, &QAction::triggered, this, &ActionController::onDeleteToken);
 	connect(actions->actionShowCellInfo, &QAction::toggled, this, &ActionController::onToggleCellInfo);
 
@@ -390,14 +391,13 @@ void ActionController::onSaveCollection()
 void ActionController::onCopyCollection()
 {
 	DataDescription copiedData = _repository->getExtendedSelection();
-	_model->setCopiedData(copiedData);
-	_model->setCollectionCopied(true);
+	_model->setCopiedCollection(copiedData);
 	updateActionsEnableState();
 }
 
 void ActionController::onPasteCollection()
 {
-	DataDescription copiedData = _model->getCopiedData();
+	DataDescription copiedData = _model->getCopiedCollection();
 	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
@@ -560,6 +560,19 @@ void ActionController::onNewToken()
 		Receiver::VisualEditor,
 		Receiver::ActionController
 	}, UpdateDescription::All);
+}
+
+void ActionController::onCopyToken()
+{
+	auto cellIds = _repository->getSelectedCellIds();
+	CHECK(cellIds.size() == 1);
+	auto tokenIndex = _repository->getSelectedTokenIndex();
+	CHECK(tokenIndex);
+	auto const& cell = _repository->getCellDescRef(*cellIds.begin());
+	auto const& token = cell.tokens->at(*tokenIndex);
+
+	_model->setCopiedToken(token);
+	updateActionsEnableState();
 }
 
 void ActionController::onDeleteToken()
@@ -849,7 +862,7 @@ void ActionController::updateActionsEnableState()
 	actions->actionPasteEntity->setEnabled(editMode && entityCopied);
 	actions->actionDeleteEntity->setEnabled(editMode && entitySelected);
 	actions->actionNewToken->setEnabled(editMode && entitySelected);
-	actions->actionCopyToken->setEnabled(editMode && entitySelected);
+	actions->actionCopyToken->setEnabled(editMode && cellWithTokenSelected);
 	actions->actionPasteToken->setEnabled(editMode && cellWithFreeTokenSelected && tokenCopied);
 	actions->actionDeleteToken->setEnabled(editMode && cellWithTokenSelected);
 

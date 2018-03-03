@@ -75,12 +75,7 @@ void ActionModel::setCellWithFreeTokenSelected(bool value)
 
 bool ActionModel::isTokenCopied() const
 {
-	return _tokenCopied;
-}
-
-void ActionModel::setTokenCopied(bool value)
-{
-	_tokenCopied = value;
+	return _copiedToken.is_initialized();
 }
 
 bool ActionModel::isCollectionSelected() const
@@ -95,20 +90,25 @@ void ActionModel::setCollectionSelected(bool value)
 
 bool ActionModel::isCollectionCopied() const
 {
-	return _collectionCopied;
+	return _copiedCollection.isEmpty();
 }
 
-void ActionModel::setCollectionCopied(bool value)
+DataDescription const & ActionModel::getCopiedCollection() const
 {
-	_collectionCopied = value;
+	return _copiedCollection;
 }
 
-DataDescription const & ActionModel::getCopiedData() const
+void ActionModel::setCopiedCollection(DataDescription const &value)
 {
-	return _copiedData;
+	_copiedCollection = value;
 }
 
-void ActionModel::setCopiedData(DataDescription const &value)
+TokenDescription const & ActionModel::getCopiedToken() const
 {
-	_copiedData = value;
+	return *_copiedToken;
+}
+
+void ActionModel::setCopiedToken(TokenDescription const & value)
+{
+	_copiedToken = value;
 }
