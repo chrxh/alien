@@ -105,6 +105,15 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionShowCellInfo->setEnabled(false);
 	actionShowCellInfo->setCheckable(true);
 	actionShowCellInfo->setChecked(false);
+	actionCenterSelection = new QAction("Center selection", this);
+	QIcon iconCenterSelection;
+	iconCenterSelection.addFile("://Icons/center_off.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconCenterSelection.addFile("://Icons/center_on.png", QSize(), QIcon::Normal, QIcon::On);
+	actionCenterSelection->setIcon(iconCenterSelection);
+	actionCenterSelection->setIconVisibleInMenu(false);
+	actionCenterSelection->setEnabled(false);
+	actionCenterSelection->setCheckable(true);
+	actionCenterSelection->setChecked(false);
 
 	actionNewCell = new QAction("New cell", this);
 	QIcon iconNewCell;

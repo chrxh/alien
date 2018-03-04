@@ -25,6 +25,7 @@ public:
 	virtual void zoom(double factor);
 	virtual qreal getZoomFactor() const;
 
+	virtual void scrollToPos(QVector2D pos, NotifyScrollChanged notify) override;
 	virtual void saveScrollPos();
 	virtual void restoreScrollPos();
 

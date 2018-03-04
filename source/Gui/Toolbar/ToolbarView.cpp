@@ -31,6 +31,7 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* acti
 	connectActionToButton(_actions->actionNewToken, ui.newTokenButton);
 	connectActionToButton(_actions->actionDeleteToken, ui.delTokenButton);
 	connectActionToButton(_actions->actionShowCellInfo, ui.showCellInfoButton);
+	connectActionToButton(_actions->actionCenterSelection, ui.centerSelectionButton);
 }
 
 //note: workaround since QToolButton::setDefaultAction does not function as wished

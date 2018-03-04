@@ -48,6 +48,7 @@ private:
 	Q_SLOT void onPasteToken();
 	Q_SLOT void onDeleteToken();
 	Q_SLOT void onToggleCellInfo(bool show);
+	Q_SLOT void onCenterSelection(bool show);
 
 	Q_SLOT void onNewRectangle();
 	Q_SLOT void onNewHexagon();
@@ -68,8 +69,8 @@ private:
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
+private:
 	void settingUpNewSimulation();
-
 	void updateZoomFactor();
 	void updateActionsEnableState();
 

@@ -29,5 +29,7 @@
         <file>tutorial/tutorial.html</file>
         <file>Icons/EditorView.png</file>
         <file>Icons/PixelView.png</file>
+        <file>Icons/center_off.png</file>
+        <file>Icons/center_on.png</file>
     </qresource>
 </RCC>

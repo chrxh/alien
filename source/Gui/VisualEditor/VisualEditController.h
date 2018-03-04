@@ -28,6 +28,7 @@ public:
 	virtual double getZoomFactor ();
 
     virtual void zoom (double factor);
+	virtual void toggleCenterSelection(bool value);
 
 private:
     Ui::VisualEditController *ui;

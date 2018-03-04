@@ -93,6 +93,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionDeleteToken, &QAction::triggered, this, &ActionController::onDeleteToken);
 	connect(actions->actionPasteToken, &QAction::triggered, this, &ActionController::onPasteToken);
 	connect(actions->actionShowCellInfo, &QAction::toggled, this, &ActionController::onToggleCellInfo);
+	connect(actions->actionCenterSelection, &QAction::toggled, this, &ActionController::onCenterSelection);
 
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
 	connect(actions->actionNewHexagon, &QAction::triggered, this, &ActionController::onNewHexagon);
@@ -598,6 +599,11 @@ void ActionController::onToggleCellInfo(bool show)
 	Q_EMIT _notifier->toggleCellInfo(show);
 }
 
+void ActionController::onCenterSelection(bool centerSelection)
+{
+	_visualEditor->toggleCenterSelection(centerSelection);
+}
+
 void ActionController::onNewRectangle()
 {
 	NewRectangleDialog dialog(_mainModel->getSimulationParameters());
@@ -862,6 +868,7 @@ void ActionController::updateActionsEnableState()
 
 	auto actions = _model->getActionHolder();
 	actions->actionShowCellInfo->setEnabled(editMode);
+	actions->actionCenterSelection->setEnabled(editMode);
 
 	actions->actionNewCell->setEnabled(editMode);
 	actions->actionNewParticle->setEnabled(editMode);
