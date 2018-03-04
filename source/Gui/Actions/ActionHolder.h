@@ -36,8 +36,9 @@ public:
 	QAction* actionMonitor = nullptr;
 	QAction* actionZoomIn = nullptr;
 	QAction* actionZoomOut = nullptr;
-	QAction* actionShowCellInfo = nullptr;
 	QAction* actionFullscreen = nullptr;
+	QAction* actionShowCellInfo = nullptr;
+	QAction* actionCenterSelection = nullptr;
 
 	QAction* actionNewCell = nullptr;
 	QAction* actionNewParticle = nullptr;

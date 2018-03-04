@@ -24,6 +24,8 @@ public:
 
 	virtual void refresh();
 
+	virtual void toggleCenterSelection(bool value);
+
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent* e);
 	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
@@ -31,6 +33,7 @@ protected:
 
 private:
 	void requestData();
+	optional<QVector2D> getCenterPosOfSelection();
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void cellInfoToggled(bool showInfo);
@@ -51,6 +54,8 @@ private:
 	ViewportInterface* _viewport = nullptr;
 
 	ItemManager* _itemManager = nullptr;
-	DataRepository* _manipulator = nullptr;
+	DataRepository* _repository = nullptr;
 	Notifier* _notifier = nullptr;
+
+	bool _centerSelection = false;
 };
