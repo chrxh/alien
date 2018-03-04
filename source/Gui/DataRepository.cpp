@@ -341,13 +341,18 @@ void DataRepository::deleteExtendedSelection()
 
 void DataRepository::addToken()
 {
+	addToken(TokenDescription().setEnergy(_parameters->tokenCreationEnergy).setData(QByteArray(_parameters->tokenMemorySize, 0)));
+}
+
+void DataRepository::addToken(TokenDescription const & token)
+{
 	CHECK(_selectedCellIds.size() == 1);
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
 
 	int numToken = cell.tokens ? cell.tokens->size() : 0;
 	if (numToken < _parameters->cellMaxToken) {
 		uint pos = _selectedTokenIndex ? *_selectedTokenIndex : numToken;
-		cell.addToken(pos, TokenDescription().setEnergy(_parameters->tokenCreationEnergy).setData(QByteArray(_parameters->tokenMemorySize, 0)));
+		cell.addToken(pos, token);
 	}
 }
 

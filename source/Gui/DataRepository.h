@@ -33,6 +33,7 @@ public:
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
 	virtual void addToken();
+	virtual void addToken(TokenDescription const& token);
 	virtual void deleteToken();
 
 	virtual void setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds);

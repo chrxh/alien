@@ -91,6 +91,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewToken, &QAction::triggered, this, &ActionController::onNewToken);
 	connect(actions->actionCopyToken, &QAction::triggered, this, &ActionController::onCopyToken);
 	connect(actions->actionDeleteToken, &QAction::triggered, this, &ActionController::onDeleteToken);
+	connect(actions->actionPasteToken, &QAction::triggered, this, &ActionController::onPasteToken);
 	connect(actions->actionShowCellInfo, &QAction::toggled, this, &ActionController::onToggleCellInfo);
 
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
@@ -575,14 +576,20 @@ void ActionController::onCopyToken()
 	updateActionsEnableState();
 }
 
+void ActionController::onPasteToken()
+{ 
+	auto const& token = _model->getCopiedToken();
+	_repository->addToken(token);
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
+		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
+	}, UpdateDescription::All);
+}
+
 void ActionController::onDeleteToken()
 {
 	_repository->deleteToken();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
-		Receiver::DataEditor,
-		Receiver::Simulation,
-		Receiver::VisualEditor,
-		Receiver::ActionController
+		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
 }
 
@@ -863,7 +870,7 @@ void ActionController::updateActionsEnableState()
 	actions->actionDeleteEntity->setEnabled(editMode && entitySelected);
 	actions->actionNewToken->setEnabled(editMode && entitySelected);
 	actions->actionCopyToken->setEnabled(editMode && cellWithTokenSelected);
-	actions->actionPasteToken->setEnabled(editMode && cellWithFreeTokenSelected && tokenCopied);
+	actions->actionPasteToken->setEnabled(editMode && entitySelected && tokenCopied);
 	actions->actionDeleteToken->setEnabled(editMode && cellWithTokenSelected);
 
 	actions->actionNewRectangle->setEnabled(true);
