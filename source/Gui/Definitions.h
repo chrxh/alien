@@ -65,6 +65,8 @@ using MonitorModel = shared_ptr<_MonitorModel>;
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
+enum class NotifyScrollChanged { No, Yes };
+
 
 struct SimulationConfig
 {

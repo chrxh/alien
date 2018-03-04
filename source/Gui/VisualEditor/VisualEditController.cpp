@@ -97,5 +97,10 @@ void VisualEditController::zoom (double factor)
 	_viewport->zoom(factor);
 }
 
+void VisualEditController::toggleCenterSelection(bool value)
+{
+	_itemUniverse->toggleCenterSelection(value);
+}
+
 
 

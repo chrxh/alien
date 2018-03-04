@@ -147,6 +147,7 @@ void MainView::setupMenu()
 	ui->menuView->addAction(actions->actionFullscreen);
 	ui->menuView->addSeparator();
 	ui->menuView->addAction(actions->actionShowCellInfo);
+	ui->menuView->addAction(actions->actionCenterSelection);
 
 	ui->menuEntity->addAction(actions->actionNewCell);
 	ui->menuEntity->addAction(actions->actionNewParticle);

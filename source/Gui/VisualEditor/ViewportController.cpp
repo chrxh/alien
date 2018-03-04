@@ -117,6 +117,20 @@ void ViewportController::disconnectAll()
 	}
 }
 
+void ViewportController::scrollToPos(QVector2D pos, NotifyScrollChanged notify)
+{
+	if (notify == NotifyScrollChanged::No) {
+		disconnectAll();
+	}
+	if (_activeScene == ActiveScene::ItemScene) {
+		pos = CoordinateSystem::modelToScene(pos);
+	}
+	_view->centerOn(pos.x(), pos.y());
+	if (notify == NotifyScrollChanged::No) {
+		connectAll();
+	}
+}
+
 void ViewportController::saveScrollPos()
 {
 	_sceneScrollbarPos.x = _view->horizontalScrollBar()->value();

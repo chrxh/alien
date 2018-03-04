@@ -31,7 +31,7 @@ void ItemUniverseView::init(Notifier* notifier, SimulationController * controlle
 {
 	_controller = controller;
 	_viewport = viewport;
-	_manipulator = manipulator;
+	_repository = manipulator;
 	_notifier = notifier;
 
 	auto itemManager = new ItemManager();
@@ -66,9 +66,45 @@ void ItemUniverseView::refresh()
 	requestData();
 }
 
+void ItemUniverseView::toggleCenterSelection(bool value)
+{
+	_centerSelection = value;
+	if (_centerSelection) {
+		if (auto const& centerPos = getCenterPosOfSelection()) {
+			_viewport->scrollToPos(*centerPos, NotifyScrollChanged::Yes);
+		}
+	}
+}
+
 void ItemUniverseView::requestData()
 {
-	_manipulator->requireDataUpdateFromSimulation(_viewport->getRect());
+	if (_centerSelection) {
+		if (auto const& centerPos = getCenterPosOfSelection()) {
+			_viewport->scrollToPos(*centerPos, NotifyScrollChanged::No);
+		}
+	}
+	_repository->requireDataUpdateFromSimulation(_viewport->getRect());
+}
+
+optional<QVector2D> ItemUniverseView::getCenterPosOfSelection()
+{
+	QVector2D result;
+	int numEntities = 0;
+	for (auto selectedCellId : _repository->getSelectedCellIds()) {
+		auto const& cell = _repository->getCellDescRef(selectedCellId);
+		result += *cell.pos;
+		++numEntities;
+	}
+	for (auto selectedParticleId : _repository->getSelectedParticleIds()) {
+		auto const& particle = _repository->getParticleDescRef(selectedParticleId);
+		result += *particle.pos;
+		++numEntities;
+	}
+	if (numEntities == 0) {
+		return boost::none;
+	}
+	result /= numEntities;
+	return result;
 }
 
 void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
@@ -76,13 +112,13 @@ void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
 	if (targets.find(Receiver::VisualEditor) == targets.end()) {
 		return;
 	}
-	_itemManager->update(_manipulator);
+	_itemManager->update(_repository);
 }
 
 void ItemUniverseView::cellInfoToggled(bool showInfo)
 {
 	_itemManager->toggleCellInfo(showInfo);
-	_itemManager->update(_manipulator);
+	_itemManager->update(_repository);
 }
 
 void ItemUniverseView::scrolled()
@@ -106,16 +142,16 @@ ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(std::list<QG
 
 void ItemUniverseView::delegateSelection(Selection const & selection)
 {
-	_manipulator->setSelection(selection.cellIds, selection.particleIds);
-	_itemManager->update(_manipulator);
+	_repository->setSelection(selection.cellIds, selection.particleIds);
+	_itemManager->update(_repository);
 }
 
 void ItemUniverseView::startMarking(QPointF const& scenePos)
 {
-	_manipulator->setSelection(list<uint64_t>(), list<uint64_t>());
+	_repository->setSelection(list<uint64_t>(), list<uint64_t>());
 	auto pos = CoordinateSystem::sceneToModel(scenePos);
 	_itemManager->setMarkerItem(pos, pos);
-	_itemManager->update(_manipulator);
+	_itemManager->update(_repository);
 }
 
 namespace
@@ -137,7 +173,7 @@ void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	list<QGraphicsItem*> frontItem = !itemsClicked.empty() ? list<QGraphicsItem*>({ itemsClicked.front() }) : list<QGraphicsItem*>();
 	Selection selection = getSelectionFromItems(frontItem);
 
-	bool alreadySelected = _manipulator->isInSelection(selection.cellIds) && _manipulator->isInSelection(selection.particleIds);
+	bool alreadySelected = _repository->isInSelection(selection.cellIds) && _repository->isInSelection(selection.particleIds);
 	if (!alreadySelected) {
 		delegateSelection(selection);
 	}
@@ -166,8 +202,8 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		list<uint64_t> cellIds;
 		list<uint64_t> particleIds;
 		auto selection = getSelectionFromItems(itemsWithinMarker);
-		_manipulator->setSelection(selection.cellIds, selection.particleIds);
-		_itemManager->update(_manipulator);
+		_repository->setSelection(selection.cellIds, selection.particleIds);
+		_itemManager->update(_repository);
 	}
 	if (!_itemManager->isMarkerActive()) {
 		auto lastPos = e->lastScenePos();
@@ -175,17 +211,17 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
 		delta = CoordinateSystem::sceneToModel(delta);
 		if (leftButton && !rightButton) {
-			_manipulator->moveSelection(delta);
-			_manipulator->reconnectSelectedCells();
-			_itemManager->update(_manipulator);
+			_repository->moveSelection(delta);
+			_repository->reconnectSelectedCells();
+			_itemManager->update(_repository);
 		}
 		if (rightButton && !leftButton) {
-			_manipulator->moveExtendedSelection(delta);
-			_itemManager->update(_manipulator);
+			_repository->moveExtendedSelection(delta);
+			_itemManager->update(_repository);
 		}
 		if (leftButton && rightButton) {
-			_manipulator->rotateSelection(delta.y()*10);
-			_itemManager->update(_manipulator);
+			_repository->rotateSelection(delta.y()*10);
+			_itemManager->update(_repository);
 		}
 	}
 	if (leftButton || rightButton) {
@@ -200,7 +236,7 @@ void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 
 	}
 	else {
-		if (_manipulator->areEntitiesSelected()) {
+		if (_repository->areEntitiesSelected()) {
 			Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation }, UpdateDescription::AllExceptToken);
 		}
 	}
