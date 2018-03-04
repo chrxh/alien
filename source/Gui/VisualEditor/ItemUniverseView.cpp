@@ -80,7 +80,9 @@ void ItemUniverseView::requestData()
 {
 	if (_centerSelection) {
 		if (auto const& centerPos = getCenterPosOfSelection()) {
+			_viewport->setModeToNoUpdate();
 			_viewport->scrollToPos(*centerPos, NotifyScrollChanged::No);
+			_viewport->setModeToUpdate();
 		}
 	}
 	_repository->requireDataUpdateFromSimulation(_viewport->getRect());
