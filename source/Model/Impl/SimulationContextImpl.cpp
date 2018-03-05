@@ -30,6 +30,7 @@ void SimulationContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLoca
 	SET_CHILD(_symbolTable, symbolTable);
 	SET_CHILD(_simulationParameters, parameters);
 	SET_CHILD(_compiler, compiler);
+
 	auto attributeSetter = new SimulationAttributeSetter();
 	SET_CHILD(_attributeSetter, attributeSetter);
 
@@ -66,7 +67,7 @@ SymbolTable* SimulationContextImpl::getSymbolTable() const
 	return _symbolTable;
 }
 
-SimulationParameters const * SimulationContextImpl::getSimulationParameters() const
+SimulationParameters* SimulationContextImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
 }
@@ -81,8 +82,9 @@ CellComputerCompiler * SimulationContextImpl::getCellComputerCompiler() const
 	return _compiler;
 }
 
-void SimulationContextImpl::setSimulationParameters(SimulationParameters const* parameters)
+void SimulationContextImpl::setSimulationParameters(SimulationParameters * parameters)
 {
 	_attributeSetter->setSimulationParameters(parameters);
+	_simulationParameters = parameters;
 }
 

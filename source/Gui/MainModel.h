@@ -10,8 +10,8 @@ public:
 	MainModel(QObject * parent = nullptr);
 	virtual ~MainModel() = default;
 
-	SimulationParameters const* getSimulationParameters() const;
-	void setSimulationParameters(SimulationParameters const* parameters);
+	SimulationParameters* getSimulationParameters() const;
+	void setSimulationParameters(SimulationParameters* parameters);
 
 	SymbolTable* getSymbolTable() const;
 	void setSymbolTable(SymbolTable* symbols);
@@ -20,7 +20,7 @@ public:
 	void setTPS(int value);
 
 private:
-	SimulationParameters const* _parameters = nullptr;
+	SimulationParameters* _parameters = nullptr;
 	SymbolTable* _symbols = nullptr;
 
 	int _tps = 50;

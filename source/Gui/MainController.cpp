@@ -126,7 +126,7 @@ void MainController::onRestoreSnapshot()
 	_versionController->restoreSnapshot();
 }
 
-void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const* parameters)
+void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters* parameters)
 {
 	_model->setSimulationParameters(parameters);
 	_model->setSymbolTable(symbolTable);

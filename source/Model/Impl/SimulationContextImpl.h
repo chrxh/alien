@@ -22,11 +22,11 @@ public:
 	virtual UnitGrid* getUnitGrid() const override;
 	virtual UnitThreadController* getUnitThreadController() const override;
 	virtual SymbolTable* getSymbolTable() const override;
-	virtual SimulationParameters const* getSimulationParameters() const override;
+	virtual SimulationParameters * getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
-	virtual void setSimulationParameters(SimulationParameters const* parameters) override;
+	virtual void setSimulationParameters(SimulationParameters* parameters) override;
 	
 	NumberGenerator* _numberGen = nullptr;
 	SpacePropertiesLocal* _metric = nullptr;
@@ -35,7 +35,7 @@ public:
 	SimulationAttributeSetter* _attributeSetter = nullptr;
 
 	SymbolTable* _symbolTable = nullptr;
-	SimulationParameters* _simulationParameters = nullptr;
+	SimulationParameters * _simulationParameters = nullptr;
 	CellComputerCompiler* _compiler = nullptr;
 };
 

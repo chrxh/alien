@@ -33,7 +33,7 @@ public:
 	virtual SimulationConfig getSimulationConfig() const;
 
 private:
-	void initSimulation(SymbolTable* symbolTable, SimulationParameters const* parameters);
+	void initSimulation(SymbolTable* symbolTable, SimulationParameters* parameters);
 	void recreateSimulation(string const& serializedSimulation);
 	void connectSimController() const;
 	void addRandomEnergy(double amount);

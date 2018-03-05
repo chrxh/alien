@@ -36,7 +36,7 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Bug: SimulationParameters werden nicht mitgespeichert. SymbolTable auch nicht?
+//- Bug: erstelle 2x40 Rechteck. Oberes Teil kann mit beiden Maustasten nicht gedreht werden
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
