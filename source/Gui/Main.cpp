@@ -36,7 +36,7 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Feature: centrieren von Auswahl als toggled Action
+//- Bug: SimulationParameters werden nicht mitgespeichert. SymbolTable auch nicht?
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl

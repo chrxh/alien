@@ -74,8 +74,8 @@ void UnitContextImpl::incTimestamp()
 
 void UnitContextImpl::setSimulationParameters(SimulationParameters * parameters)
 {
-	parameters->moveToThread(this->thread());
 	SET_CHILD(_simulationParameters, parameters);
+	parameters->moveToThread(this->thread());
 }
 
 QList<Cluster*>& UnitContextImpl::getClustersRef ()
