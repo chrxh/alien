@@ -45,12 +45,30 @@ void ActionModel::setEntitySelected(bool value)
 
 bool ActionModel::isEntityCopied() const
 {
-	return _entityCopied;
+	return !_copiedEntity.isEmpty();
 }
 
-void ActionModel::setEntityCopied(bool value)
+DataDescription const & ActionModel::getCopiedEntity() const
 {
-	_entityCopied = value;
+	return _copiedEntity;
+}
+
+void ActionModel::setCellCopied(CellDescription cell, QVector2D const& vel)
+{
+	if (cell.connectingCells) {
+		cell.connectingCells->clear();
+	}
+	_copiedEntity.clear();
+	_copiedEntity.addCluster(
+		ClusterDescription().setVel(vel).setAngle(0.0).setPos(*cell.pos).setAngularVel(0.0).addCell(cell)
+		.setMetadata(ClusterMetadata())
+	);
+}
+
+void ActionModel::setParticleCopied(ParticleDescription const & value)
+{
+	_copiedEntity.clear();
+	_copiedEntity.addParticle(value);
 }
 
 bool ActionModel::isCellWithTokenSelected() const
@@ -90,7 +108,7 @@ void ActionModel::setCollectionSelected(bool value)
 
 bool ActionModel::isCollectionCopied() const
 {
-	return _copiedCollection.isEmpty();
+	return !_copiedCollection.isEmpty();
 }
 
 DataDescription const & ActionModel::getCopiedCollection() const

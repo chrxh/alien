@@ -24,7 +24,9 @@ public:
 	virtual void setEntitySelected(bool value);
 
 	virtual bool isEntityCopied() const;
-	virtual void setEntityCopied(bool value);
+	virtual DataDescription const& getCopiedEntity() const;
+	virtual void setCellCopied(CellDescription cell, QVector2D const& vel);
+	virtual void setParticleCopied(ParticleDescription const& value);
 
 	virtual bool isCellWithTokenSelected() const;
 	virtual void setCellWithTokenSelected(bool value);
@@ -38,7 +40,6 @@ public:
 	virtual void setCollectionSelected(bool value);
 
 	virtual bool isCollectionCopied() const;
-
 	virtual DataDescription const& getCopiedCollection() const;
 	virtual void setCopiedCollection(DataDescription const& value);
 
@@ -52,11 +53,11 @@ private:
 	bool _isEditMode = false;
 	double _delta = 0.0;
 	bool _entitySelected = false;
-	bool _entityCopied = false;
 	bool _cellWithTokenSelected = false;
 	bool _cellWithFreeTokenSelected = false;
 	bool _collectionSelected = false;
 
 	DataDescription _copiedCollection;
+	DataDescription _copiedEntity;
 	optional<TokenDescription> _copiedToken;
 };
