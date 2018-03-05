@@ -3,7 +3,7 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/PhysicalQuantityConverter.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Cluster.h"

@@ -5,7 +5,7 @@
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/CellFeatureChain.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/EntityFactory.h"

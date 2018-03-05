@@ -165,9 +165,10 @@ qreal Physics::angularVelocity (qreal angularMomentum, qreal angularMass)
         return angularMomentum/angularMass*radToDeg;
 }
 
-void Physics::applyImpulse (QVector2D impulse, QVector2D rAPp, qreal mass, QVector2D vel, qreal angularMass, qreal angularVel, QVector2D& newVel, qreal& newAngularVel)
+void Physics::applyImpulse (QVector2D const& impulse, QVector2D const& relPos, qreal mass, QVector2D const& vel, qreal angularMass, qreal angularVel, QVector2D& newVel, qreal& newAngularVel)
 {
-    newVel = vel + impulse/mass;
+	QVector2D rAPp = Physics::rotateQuarterCounterClockwise(relPos);
+	newVel = vel + impulse / mass;
     newAngularVel = angularVel - QVector2D::dotProduct(rAPp, impulse)/angularMass*radToDeg;
 }
 

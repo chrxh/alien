@@ -4,7 +4,7 @@
 #include "Base/NumberGenerator.h"
 
 #include "Model/Api/Settings.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/ParticleMap.h"
 #include "Model/Local/CellMap.h"

@@ -4,7 +4,7 @@
 #include "Model/Api/SimulationContext.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Local/Cell.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/SpacePropertiesLocal.h"
 

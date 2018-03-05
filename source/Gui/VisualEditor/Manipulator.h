@@ -14,9 +14,11 @@ public:
 
 	void init(SimulationContext* context);
 
-	void applyForce(QVector2D const& pos, QVector2D const& force);
+	void applyForce(QVector2D const& pos, QVector2D const& deltaPos);
+	void applyRotation(QVector2D const& pos, QVector2D const& deltaPos);
 
 private:
+	void proceedManipulation(QVector2D const& pos, QVector2D const& deltaPos);
 	Q_SLOT void dataReadyToRetrieve();
 
 	list<QMetaObject::Connection> _connections;
@@ -26,4 +28,6 @@ private:
 	bool _waitingForData = false;
 	QVector2D _applyAtPos;
 	QVector2D _applyForce;
+	enum class Mode { ApplyForce, ApplyRotation };
+	Mode _mode = Mode::ApplyForce;
 };

@@ -9,7 +9,7 @@
 #include "Model/Local/EntityFactory.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/Particle.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Api/Settings.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/CellMap.h"

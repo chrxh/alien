@@ -33,7 +33,7 @@ public:
     static qreal angularMomentum (QVector2D r, QVector2D v);
     static qreal angularVelocity (qreal angularMomentum, qreal angularMass);
 
-    static void applyImpulse (QVector2D impulse, QVector2D rAPp, qreal mass, QVector2D vel, qreal angularMass
+    static void applyImpulse (QVector2D const& impulse, QVector2D const& relPos, qreal mass, QVector2D const& vel, qreal angularMass
 		, qreal angularVel, QVector2D& newVel, qreal& newAngularVel);
 
     //angles are returned in [0,360]
