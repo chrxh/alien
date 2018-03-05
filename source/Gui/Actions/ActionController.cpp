@@ -65,7 +65,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
 	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
-	connect(actions->actionComputationGrid, &QAction::triggered, this, &ActionController::onComputationGrid);
+	connect(actions->actionConfigureGrid, &QAction::triggered, this, &ActionController::onConfigureGrid);
 	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
 	connect(actions->actionRunStepForward, &QAction::triggered, this, &ActionController::onStepForward);
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
@@ -240,7 +240,7 @@ void ActionController::onLoadSimulation()
 	}
 }
 
-void ActionController::onComputationGrid()
+void ActionController::onConfigureGrid()
 {
 	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainView);
 	if (dialog.exec()) {

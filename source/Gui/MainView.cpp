@@ -130,7 +130,7 @@ void MainView::setupMenu()
 	ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionExit);
 
-	ui->menuSettings->addAction(actions->actionComputationGrid);
+	ui->menuSettings->addAction(actions->actionConfigureGrid);
 	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);

@@ -60,7 +60,7 @@ private:
 
 		string filename;
 
-		_SaveToFileJob(string filename) : _AsyncJob(Type::SaveToFile), filename(filename) {}
+		_SaveToFileJob(string filename) : _AsyncJob(Type::SaveToFile), filename(filename) {} 
 	};
 	using SaveToFileJob = shared_ptr<_SaveToFileJob>;
 
