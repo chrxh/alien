@@ -69,26 +69,15 @@ void ItemUniverseView::refresh()
 void ItemUniverseView::toggleCenterSelection(bool value)
 {
 	_centerSelection = value;
-	if (_centerSelection) {
-		if (auto const& centerPos = getCenterPosOfSelection()) {
-			_viewport->scrollToPos(*centerPos, NotifyScrollChanged::Yes);
-		}
-	}
+	centerSelectionIfEnabled(NotifyScrollChanged::Yes);
 }
 
 void ItemUniverseView::requestData()
 {
-	if (_centerSelection) {
-		if (auto const& centerPos = getCenterPosOfSelection()) {
-			_viewport->setModeToNoUpdate();
-			_viewport->scrollToPos(*centerPos, NotifyScrollChanged::No);
-			_viewport->setModeToUpdate();
-		}
-	}
 	_repository->requireDataUpdateFromSimulation(_viewport->getRect());
 }
 
-optional<QVector2D> ItemUniverseView::getCenterPosOfSelection()
+optional<QVector2D> ItemUniverseView::getCenterPosOfSelection() const
 {
 	QVector2D result;
 	int numEntities = 0;
@@ -109,11 +98,23 @@ optional<QVector2D> ItemUniverseView::getCenterPosOfSelection()
 	return result;
 }
 
+void ItemUniverseView::centerSelectionIfEnabled(NotifyScrollChanged notify)
+{
+	if (_centerSelection && !_mouseButtonPressed) {
+		if (auto const& centerPos = getCenterPosOfSelection()) {
+			_viewport->setModeToNoUpdate();
+			_viewport->scrollToPos(*centerPos, notify);
+			_viewport->setModeToNoUpdate();
+		}
+	}
+}
+
 void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
 {
 	if (targets.find(Receiver::VisualEditor) == targets.end()) {
 		return;
 	}
+	centerSelectionIfEnabled(NotifyScrollChanged::No);
 	_itemManager->update(_repository);
 }
 
@@ -171,6 +172,7 @@ namespace
 
 void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
+	_mouseButtonPressed = true;
 	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
 	list<QGraphicsItem*> frontItem = !itemsClicked.empty() ? list<QGraphicsItem*>({ itemsClicked.front() }) : list<QGraphicsItem*>();
 	Selection selection = getSelectionFromItems(frontItem);
@@ -233,6 +235,7 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
 void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
+	_mouseButtonPressed = false;
 	if (_itemManager->isMarkerActive()) {
 		_itemManager->deleteMarker();
 
