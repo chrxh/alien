@@ -4,10 +4,11 @@
 
 #include "Base/NumberGenerator.h"
 
+#include "Model/Api/Descriptions.h"
 #include "Model/Api/SimulationController.h"
 #include "Model/Api/Serializer.h"
 #include "Model/Api/SymbolTable.h"
-#include "Model/Api/Descriptions.h"
+#include "Model/Api/Physics.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
@@ -88,6 +89,9 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 
 	connect(actions->actionNewCell, &QAction::triggered, this, &ActionController::onNewCell);
 	connect(actions->actionNewParticle, &QAction::triggered, this, &ActionController::onNewParticle);
+	connect(actions->actionCopyEntity, &QAction::triggered, this, &ActionController::onCopyEntity);
+	connect(actions->actionPasteEntity, &QAction::triggered, this, &ActionController::onPasteEntity);
+	connect(actions->actionDeleteEntity, &QAction::triggered, this, &ActionController::onDeleteEntity);
 	connect(actions->actionNewToken, &QAction::triggered, this, &ActionController::onNewToken);
 	connect(actions->actionCopyToken, &QAction::triggered, this, &ActionController::onCopyToken);
 	connect(actions->actionDeleteToken, &QAction::triggered, this, &ActionController::onDeleteToken);
@@ -357,6 +361,25 @@ void ActionController::onNewParticle()
 	}, UpdateDescription::All);
 }
 
+void ActionController::onCopyEntity()
+{
+	auto const& selectedCellIds = _repository->getSelectedCellIds();
+	auto const& selectedParticleIds = _repository->getSelectedParticleIds();
+	if (!selectedCellIds.empty()) {
+		CHECK(selectedParticleIds.empty());
+		auto const& cell = _repository->getCellDescRef(*selectedCellIds.begin());
+		auto const& cluster = _repository->getClusterDescRef(*selectedCellIds.begin());
+		QVector2D vel = Physics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+		_model->setCellCopied(cell, vel);
+	}
+	if (!selectedParticleIds.empty()) {
+		CHECK(selectedCellIds.empty());
+		auto const& particle = _repository->getParticleDescRef(*selectedParticleIds.begin());
+		_model->setParticleCopied(particle);
+	}
+	updateActionsEnableState();
+}
+
 void ActionController::onLoadCollection()
 {
 	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Collection", "", "Alien Collection (*.aco)");
@@ -402,10 +425,7 @@ void ActionController::onPasteCollection()
 	DataDescription copiedData = _model->getCopiedCollection();
 	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
-		Receiver::DataEditor,
-		Receiver::Simulation,
-		Receiver::VisualEditor,
-		Receiver::ActionController
+		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
 	}, UpdateDescription::All);
 }
 
@@ -413,10 +433,7 @@ void ActionController::onDeleteSelection()
 {
 	_repository->deleteSelection();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
-		Receiver::DataEditor,
-		Receiver::Simulation,
-		Receiver::VisualEditor,
-		Receiver::ActionController
+		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
 }
 
@@ -424,10 +441,7 @@ void ActionController::onDeleteCollection()
 {
 	_repository->deleteExtendedSelection();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
-		Receiver::DataEditor,
-		Receiver::Simulation,
-		Receiver::VisualEditor,
-		Receiver::ActionController
+		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
 }
 
@@ -553,14 +567,25 @@ void ActionController::onGridMultiplier()
 	}
 }
 
+void ActionController::onDeleteEntity()
+{
+	onDeleteSelection();
+}
+
+void ActionController::onPasteEntity()
+{
+	DataDescription copiedData = _model->getCopiedEntity();
+	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
+	Q_EMIT _notifier->notifyDataRepositoryChanged({
+		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
+	}, UpdateDescription::All);
+}
+
 void ActionController::onNewToken()
 {
 	_repository->addToken();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
-		Receiver::DataEditor,
-		Receiver::Simulation,
-		Receiver::VisualEditor,
-		Receiver::ActionController
+		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
 }
 
