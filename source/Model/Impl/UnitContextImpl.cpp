@@ -17,6 +17,7 @@ UnitContextImpl::UnitContextImpl(QObject* parent)
 UnitContextImpl::~UnitContextImpl ()
 {
 	deleteClustersAndEnergyParticles();
+	delete _simulationParameters;
 }
 
 void UnitContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, CellMap* cellMap, ParticleMap* energyMap
@@ -27,7 +28,10 @@ void UnitContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLocal* met
 	SET_CHILD(_cellMap, cellMap);
 	SET_CHILD(_energyParticleMap, energyMap);
 	SET_CHILD(_mapCompartment, mapCompartment);
-	SET_CHILD(_simulationParameters, parameters);
+
+	delete _simulationParameters;	//no SET_CHILD here because thread of "_simulationParameters" may differs from that of "parameters"
+	_simulationParameters = parameters;
+	_simulationParameters->moveToThread(this->thread());
 
 	deleteClustersAndEnergyParticles();
 }
@@ -74,8 +78,9 @@ void UnitContextImpl::incTimestamp()
 
 void UnitContextImpl::setSimulationParameters(SimulationParameters * parameters)
 {
-	SET_CHILD(_simulationParameters, parameters);
-	parameters->moveToThread(this->thread());
+	delete _simulationParameters;	//no SET_CHILD here because thread of "_simulationParameters" may differs from that of "parameters"
+	_simulationParameters = parameters;
+	_simulationParameters->moveToThread(this->thread());
 }
 
 QList<Cluster*>& UnitContextImpl::getClustersRef ()
