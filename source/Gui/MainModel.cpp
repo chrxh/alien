@@ -3,12 +3,12 @@
 MainModel::MainModel(QObject * parent) : QObject(parent) {
 }
 
-SimulationParameters const* MainModel::getSimulationParameters() const
+SimulationParameters * MainModel::getSimulationParameters() const
 {
 	return _parameters;
 }
 
-void MainModel::setSimulationParameters(SimulationParameters const* parameters)
+void MainModel::setSimulationParameters(SimulationParameters * parameters)
 {
 	_parameters = parameters;
 }
