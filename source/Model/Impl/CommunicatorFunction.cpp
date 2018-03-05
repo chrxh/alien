@@ -5,7 +5,7 @@
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/PhysicalQuantityConverter.h"
 #include "Model/Api/SimulationParameters.h"
 
