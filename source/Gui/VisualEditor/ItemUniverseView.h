@@ -33,7 +33,8 @@ protected:
 
 private:
 	void requestData();
-	optional<QVector2D> getCenterPosOfSelection();
+	optional<QVector2D> getCenterPosOfSelection() const;
+	void centerSelectionIfEnabled(NotifyScrollChanged notify);
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void cellInfoToggled(bool showInfo);
@@ -57,5 +58,6 @@ private:
 	DataRepository* _repository = nullptr;
 	Notifier* _notifier = nullptr;
 
+	bool _mouseButtonPressed = true;
 	bool _centerSelection = false;
 };
