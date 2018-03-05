@@ -85,7 +85,9 @@ IntVector2D IntRect::center() const
 
 #define SET_CHILD(previousChild, newChild)\
 	if (previousChild != newChild) { \
-		delete previousChild; \
+		if(previousChild) { \
+			previousChild->deleteLater(); \
+		} \
 		previousChild = newChild; \
 		previousChild->setParent(this); \
 	}
