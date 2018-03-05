@@ -94,9 +94,6 @@
     <ClInclude Include="..\..\source\Model\Local\PhysicalQuantityConverter.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Local\Physics.h">
-      <Filter>Source Files\Local</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Local\Token.h">
       <Filter>Source Files\Local</Filter>
     </ClInclude>
@@ -180,6 +177,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\SpacePropertiesImpl.h">
       <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Api\Physics.h">
+      <Filter>Source Files\Api</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -265,9 +265,6 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Local\PhysicalQuantityConverter.cpp">
-      <Filter>Source Files\Local</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Local\Physics.cpp">
       <Filter>Source Files\Local</Filter>
     </ClCompile>
     <ClCompile Include="Tests\moc_SimulationContextLocal.cpp">
@@ -617,6 +614,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_SimulationMonitorImpl.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Api\Physics.cpp">
+      <Filter>Source Files\Api</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

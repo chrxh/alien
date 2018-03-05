@@ -5,7 +5,7 @@
 #include "Model/Local/Particle.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/EntityFactory.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/PhysicalQuantityConverter.h"
 #include "Model/Api/Settings.h"
 #include "Model/Local/UnitContext.h"
@@ -79,7 +79,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     //calc impact of impulse to cell structure
     QVector2D newVel;
     qreal newAngularVel;
-    Physics::applyImpulse(impulse, rAPp, cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
+    Physics::applyImpulse(impulse, cellRelPos, cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
 
     //only for damping: prove if its too much
     if( cmd == Enums::PropIn::DAMP_ROTATION ) {

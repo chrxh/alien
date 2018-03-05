@@ -389,8 +389,15 @@ void SimulationAccessImpl::collectClustersFromUnit(Unit * unit)
 	auto metric = unit->getContext()->getSpaceProperties();
 	auto const& clusters = unit->getContext()->getClustersRef();
 	for (auto const& cluster : clusters) {
+		bool contained = false;
+		for (Cell* cell : cluster->getCellsRef()) {
+			if (_requiredRect.isContained(cell->calcPosition(true))) {
+				contained = true;
+				break;
+			}
+		}
 		IntVector2D pos = cluster->getPosition();
-		if (_requiredRect.isContained(pos)) {
+		if (contained) {
 			_dataCollected.addCluster(cluster->getDescription(_resolveDesc));
 		}
 	}

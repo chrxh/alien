@@ -6,7 +6,7 @@
 
 #include "Model/Api/SpaceProperties.h"
 #include "Model/Api/SimulationParameters.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/SimulationContextLocal.h"
 
 

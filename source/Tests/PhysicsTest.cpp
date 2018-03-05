@@ -3,7 +3,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Local/Physics.h"
+#include "Model/Api/Physics.h"
 #include "tests/Predicates.h"
 
 class PhysicsTest : public ::testing::Test

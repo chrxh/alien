@@ -78,6 +78,12 @@ void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
 		_manipulator->applyForce({ static_cast<float>(pos.x()), static_cast<float>(pos.y()) }, delta);
 	}
+	if (e->buttons() == (Qt::MouseButton::LeftButton | Qt::MouseButton::RightButton)) {
+		auto pos = e->scenePos();
+		auto lastPos = e->lastScenePos();
+		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
+		_manipulator->applyRotation({ static_cast<float>(pos.x()), static_cast<float>(pos.y()) }, delta);
+	}
 }
 
 void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
