@@ -75,7 +75,7 @@
     <ClCompile Include="Release\moc_ToolbarContext.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\NewSimulationDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\dialogs\NewSimulationDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_NewSimulationDialog.cpp">
@@ -84,7 +84,7 @@
     <ClCompile Include="Release\moc_NewSimulationDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\SimulationParametersDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\dialogs\SimulationParametersDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_SimulationParametersDialog.cpp">
@@ -93,7 +93,7 @@
     <ClCompile Include="Release\moc_SimulationParametersDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\SymbolTableDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\dialogs\SymbolTableDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_SymbolTableDialog.cpp">
@@ -105,16 +105,16 @@
     <ClCompile Include="..\..\source\Gui\VisualEditor\AbstractItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\CellConnectionItem.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\CellConnectionItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\CellItem.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\CellItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\VisualEditor\CoordinateSystem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ItemConfig.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\ItemConfig.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ItemConfig.cpp">
@@ -123,7 +123,7 @@
     <ClCompile Include="Release\moc_ItemConfig.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ItemManager.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\ItemManager.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ItemManager.cpp">
@@ -132,13 +132,13 @@
     <ClCompile Include="Release\moc_ItemManager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\MarkerItem.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\MarkerItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ParticleItem.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\ParticleItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ViewportController.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\ViewportController.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ViewportController.cpp">
@@ -147,7 +147,7 @@
     <ClCompile Include="Release\moc_ViewportController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ViewportInterface.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\ViewportInterface.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ViewportInterface.cpp">
@@ -156,10 +156,10 @@
     <ClCompile Include="Release\moc_ViewportInterface.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\Main.cpp">
+    <ClCompile Include="..\..\source\Gui\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\Settings.cpp">
+    <ClCompile Include="..\..\source\Gui\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\DataEditor\CodeEditWidget.cpp">
@@ -324,7 +324,7 @@
     <ClCompile Include="Release\moc_DataEditView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\ItemUniverseView.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\ItemUniverseView.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ItemUniverseView.cpp">
@@ -333,7 +333,7 @@
     <ClCompile Include="Release\moc_ItemUniverseView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\PixelUniverseView.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\PixelUniverseView.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_PixelUniverseView.cpp">
@@ -369,7 +369,7 @@
     <ClCompile Include="Release\moc_MainView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\visualeditor\VisualEditController.cpp">
+    <ClCompile Include="..\..\source\Gui\visualeditor\VisualEditController.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_VisualEditController.cpp">
@@ -459,7 +459,7 @@
     <ClCompile Include="Release\moc_StartScreenController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\assistance\DocumentationWindow.cpp">
+    <ClCompile Include="..\..\source\Gui\assistance\DocumentationWindow.cpp">
       <Filter>Source Files\Assistance</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_DocumentationWindow.cpp">
@@ -468,7 +468,7 @@
     <ClCompile Include="Release\moc_DocumentationWindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\NewHexagonDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\dialogs\NewHexagonDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_NewHexagonDialog.cpp">
@@ -477,7 +477,7 @@
     <ClCompile Include="Release\moc_NewHexagonDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\NewParticlesDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\dialogs\NewParticlesDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_NewParticlesDialog.cpp">
@@ -486,7 +486,7 @@
     <ClCompile Include="Release\moc_NewParticlesDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\RandomMultiplierDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\dialogs\RandomMultiplierDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_RandomMultiplierDialog.cpp">
@@ -495,7 +495,7 @@
     <ClCompile Include="Release\moc_RandomMultiplierDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\dialogs\GridMultiplierDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\dialogs\GridMultiplierDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_GridMultiplierDialog.cpp">
@@ -531,7 +531,7 @@
     <ClCompile Include="..\..\source\Gui\Monitoring\MonitorController.cpp">
       <Filter>Source Files\Monitoring</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\gui\monitoring\MonitorView.cpp">
+    <ClCompile Include="..\..\source\Gui\monitoring\MonitorView.cpp">
       <Filter>Source Files\Monitoring</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_MonitorView.cpp">
@@ -562,7 +562,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\source\gui\resources\ressources.qrc">
+    <CustomBuild Include="..\..\source\Gui\resources\ressources.qrc">
       <Filter>Resources</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarView.h">
@@ -577,37 +577,37 @@
     <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarContext.h">
       <Filter>Source Files\Toolbar</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\NewSimulationDialog.h">
+    <CustomBuild Include="..\..\source\Gui\dialogs\NewSimulationDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\NewSimulationDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\dialogs\NewSimulationDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\SimulationParametersDialog.h">
+    <CustomBuild Include="..\..\source\Gui\dialogs\SimulationParametersDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\SimulationParametersDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\dialogs\SimulationParametersDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\SymbolTableDialog.h">
+    <CustomBuild Include="..\..\source\Gui\dialogs\SymbolTableDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\SymbolTableDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\dialogs\SymbolTableDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\VisualEditor\CoordinateSystem.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\ItemConfig.h">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\ItemConfig.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\ItemManager.h">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\ItemManager.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\ViewportController.h">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\ViewportController.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\ViewportInterface.h">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\ViewportInterface.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\DataEditor\CodeEditWidget.h">
@@ -676,16 +676,16 @@
     <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditView.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\ItemUniverseView.h">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\ItemUniverseView.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\PixelUniverseView.h">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\PixelUniverseView.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\MainController.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\MainView.ui">
+    <CustomBuild Include="..\..\source\Gui\MainView.ui">
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\MainModel.h">
@@ -694,10 +694,10 @@
     <CustomBuild Include="..\..\source\Gui\MainView.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\VisualEditController.h">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\VisualEditController.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\visualeditor\VisualEditController.ui">
+    <CustomBuild Include="..\..\source\Gui\visualeditor\VisualEditController.ui">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\InfoController.h">
@@ -733,34 +733,34 @@
     <CustomBuild Include="..\..\source\Gui\Misc\StartScreenController.h">
       <Filter>Source Files\Misc</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\assistance\DocumentationWindow.h">
+    <CustomBuild Include="..\..\source\Gui\assistance\DocumentationWindow.h">
       <Filter>Source Files\Assistance</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\assistance\DocumentationWindow.ui">
+    <CustomBuild Include="..\..\source\Gui\assistance\DocumentationWindow.ui">
       <Filter>Source Files\Assistance</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\NewHexagonDialog.h">
+    <CustomBuild Include="..\..\source\Gui\dialogs\NewHexagonDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\NewHexagonDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\dialogs\NewHexagonDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\NewParticlesDialog.h">
+    <CustomBuild Include="..\..\source\Gui\dialogs\NewParticlesDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\NewParticlesDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\dialogs\NewParticlesDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\RandomMultiplierDialog.h">
+    <CustomBuild Include="..\..\source\Gui\dialogs\RandomMultiplierDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\RandomMultiplierDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\dialogs\RandomMultiplierDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\GridMultiplierDialog.h">
+    <CustomBuild Include="..\..\source\Gui\dialogs\GridMultiplierDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\dialogs\GridMultiplierDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\dialogs\GridMultiplierDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Dialogs\ComputationGridDialog.h">
@@ -775,93 +775,93 @@
     <CustomBuild Include="..\..\source\Gui\Monitoring\MonitorController.h">
       <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\monitoring\MonitorView.h">
+    <CustomBuild Include="..\..\source\Gui\monitoring\MonitorView.h">
       <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\gui\monitoring\MonitorView.ui">
+    <CustomBuild Include="..\..\source\Gui\monitoring\MonitorView.ui">
       <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\source\gui\resources\tutorial\angle.png">
+    <None Include="..\..\source\Gui\resources\tutorial\angle.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\tutorial\branching.png">
+    <None Include="..\..\source\Gui\resources\tutorial\branching.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\tutorial\constructor.png">
+    <None Include="..\..\source\Gui\resources\tutorial\constructor.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\tutorial\constructor2.png">
+    <None Include="..\..\source\Gui\resources\tutorial\constructor2.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\del_cell.png">
+    <None Include="..\..\source\Gui\resources\Icons\del_cell.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\del_token.png">
+    <None Include="..\..\source\Gui\resources\Icons\del_token.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\editor.png">
+    <None Include="..\..\source\Gui\resources\Icons\editor.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\editor_active.png">
+    <None Include="..\..\source\Gui\resources\Icons\editor_active.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\tutorial\logo.png">
+    <None Include="..\..\source\Gui\resources\tutorial\logo.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\microscope_active.png">
+    <None Include="..\..\source\Gui\resources\Icons\microscope_active.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\monitor.png">
+    <None Include="..\..\source\Gui\resources\Icons\monitor.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\monitor_active.png">
+    <None Include="..\..\source\Gui\resources\Icons\monitor_active.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\pause.png">
+    <None Include="..\..\source\Gui\resources\Icons\pause.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\play.png">
+    <None Include="..\..\source\Gui\resources\Icons\play.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\restore_active.png">
+    <None Include="..\..\source\Gui\resources\Icons\restore_active.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\tutorial\scanner.png">
+    <None Include="..\..\source\Gui\resources\tutorial\scanner.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\snapshot.png">
+    <None Include="..\..\source\Gui\resources\Icons\snapshot.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\step.png">
+    <None Include="..\..\source\Gui\resources\Icons\step.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\step_back.png">
+    <None Include="..\..\source\Gui\resources\Icons\step_back.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\tutorial\tutorial.html">
+    <None Include="..\..\source\Gui\resources\tutorial\tutorial.html">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\zoom_in.png">
+    <None Include="..\..\source\Gui\resources\Icons\zoom_in.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\zoom_out.png">
+    <None Include="..\..\source\Gui\resources\Icons\zoom_out.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\add_cell.png">
+    <None Include="..\..\source\Gui\resources\Icons\add_cell.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\add_cluster.png">
+    <None Include="..\..\source\Gui\resources\Icons\add_cluster.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\add_energy.png">
+    <None Include="..\..\source\Gui\resources\Icons\add_energy.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\add_token.png">
+    <None Include="..\..\source\Gui\resources\Icons\add_token.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\gui\resources\Icons\EditorView.png">
+    <None Include="..\..\source\Gui\resources\Icons\EditorView.png">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>
@@ -884,22 +884,22 @@
     <ClInclude Include="..\..\source\Gui\VisualEditor\AbstractItem.h">
       <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\CellConnectionItem.h">
+    <ClInclude Include="..\..\source\Gui\visualeditor\CellConnectionItem.h">
       <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\CellItem.h">
+    <ClInclude Include="..\..\source\Gui\visualeditor\CellItem.h">
       <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\MarkerItem.h">
+    <ClInclude Include="..\..\source\Gui\visualeditor\MarkerItem.h">
       <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\visualeditor\ParticleItem.h">
+    <ClInclude Include="..\..\source\Gui\visualeditor\ParticleItem.h">
       <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\Definitions.h">
+    <ClInclude Include="..\..\source\Gui\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\gui\Settings.h">
+    <ClInclude Include="..\..\source\Gui\Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_CellComputerEditTab.h">
@@ -961,7 +961,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="gui.rc">
+    <ResourceCompile Include="Gui.rc">
       <Filter>Resources</Filter>
     </ResourceCompile>
   </ItemGroup>
