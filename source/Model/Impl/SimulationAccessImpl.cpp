@@ -236,6 +236,17 @@ void SimulationAccessImpl::updateParticleData()
 	_dataToUpdate.particles.clear();
 }
 
+namespace
+{
+	void includeNeighborUnits(IntVector2D& gridPosUpperLeft, IntVector2D& gridPosLowerRight, IntVector2D const& gridSize)
+	{
+		gridPosUpperLeft.x = std::max(gridPosUpperLeft.x - 1, 0);
+		gridPosUpperLeft.y = std::max(gridPosUpperLeft.y - 1, 0);
+		gridPosLowerRight.x = std::min(gridPosLowerRight.x + 1, gridSize.x - 1);
+		gridPosLowerRight.y = std::min(gridPosLowerRight.y + 1, gridSize.y - 1);
+	}
+}
+
 void SimulationAccessImpl::callBackCollectData()
 {
 	if (!_dataRequired) {
@@ -247,6 +258,7 @@ void SimulationAccessImpl::callBackCollectData()
 	auto grid = _context->getUnitGrid();
 	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
 	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
+	includeNeighborUnits(gridPosUpperLeft, gridPosLowerRight, grid->getSize());
 	IntVector2D gridPos;
 	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
 		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
