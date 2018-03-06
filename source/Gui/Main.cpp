@@ -36,7 +36,7 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Bug: erstelle 2x40 Rechteck. Oberes Teil kann mit beiden Maustasten nicht gedreht werden
+//- Check: wird SimulationAccessImpl::callBackCollectData zweimal aufgerufen bei PixelUniverseView::mouseMoveEvent? 
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
 //- keine Impl-Implementierung für ClusterImpl, CellImpl, TokenImpl
