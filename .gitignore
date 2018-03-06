@@ -577,9 +577,14 @@ __pycache__/
 *ui_*
 *moc_*
 .ssh/
-misc/
 temp/
 *qrc_ressources*
 stable/
 *computation.dat
+external/boost_1_65_1
 external/boost_1_64_0
+source/tests/testdata/comparison/computation.dat
+misc/error.txt
+misc/lines of code.txt
+misc/msvc.txt
+*autosave.sim

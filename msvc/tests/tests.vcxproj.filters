@@ -1,34 +1,107 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\source\tests\testsuite.cpp" />
-    <ClCompile Include="..\..\source\tests\predicates.cpp" />
-    <ClCompile Include="..\..\source\tests\integrationtests\integrationtestreplicator.cpp">
-      <Filter>Integrationtests</Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files\Tests">
+      <UniqueIdentifier>{1d3a50fc-7f01-43c7-8599-3adc27041d64}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{c21dafc5-bb52-4b22-9d84-682be24ae898}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{d765ae42-0ba0-421d-9060-7d89740f7408}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{6941b21d-8d5c-424e-8b9e-80bfd6f9a835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\IntegrationTests">
+      <UniqueIdentifier>{6365e238-939b-4705-8fc8-dad83792a6ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UnitTests">
+      <UniqueIdentifier>{759055df-0c1a-4a24-8460-a029547b12e7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\source\Tests\Benchmark.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\tests\integrationtests\integrationtestcomparison.cpp">
-      <Filter>Integrationtests</Filter>
+    <ClCompile Include="..\..\source\Tests\ClusterSizeTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\tests\unittests\unittestcellcluster.cpp">
-      <Filter>Unittests</Filter>
+    <ClCompile Include="..\..\source\Tests\ComparisonTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\tests\unittests\unittestcellfunctioncommunicator.cpp">
-      <Filter>Unittests</Filter>
+    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\tests\unittests\unittestphysics.cpp">
-      <Filter>Unittests</Filter>
+    <ClCompile Include="..\..\source\Tests\IntegrationTestFramework.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\MultithreadingTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\SerializationTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CellClusterTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CellConnectorTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ChangeDescriptionsTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CommunicatorFunctionTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\NumberGeneratorTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\PhysicsTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\UnitGridTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp">
+      <Filter>Source Files\UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\Predicates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\TestSuite.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\tests\settings.h" />
-    <ClInclude Include="..\..\source\tests\predicates.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Integrationtests">
-      <UniqueIdentifier>{d26dbd90-83d9-4195-ae5c-39868733045e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Unittests">
-      <UniqueIdentifier>{2e03eb9e-78b7-4476-983a-1279835df123}</UniqueIdentifier>
-    </Filter>
+    <ClInclude Include="..\..\source\Tests\TestSettings.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Tests\IntegrationTestFramework.h">
+      <Filter>Source Files\IntegrationTests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Tests\IntegrationTestHelper.h">
+      <Filter>Source Files\IntegrationTests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Tests\Predicates.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
