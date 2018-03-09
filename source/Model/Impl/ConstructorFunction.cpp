@@ -41,9 +41,13 @@ namespace {
 		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		CellMetadata meta;
 		meta.color = metadata;
+
+		int length = static_cast<int>(static_cast<uint8_t>(cellFunctionData[0]));
+		QByteArray constData = cellFunctionData.mid(1, length);
+
 		auto desc = CellDescription().setEnergy(context->getSimulationParameters()->cellCreationEnergy).setMaxConnections(maxConnections)
 			.setTokenBranchNumber(tokenAccessNumber).setFlagTokenBlocked(true).setMetadata(meta)
-			.setCellFeature(CellFeatureDescription().setType(convertCellTypeNumberToName(cellType)).setConstData(cellFunctionData))
+			.setCellFeature(CellFeatureDescription().setType(convertCellTypeNumberToName(cellType)).setConstData(constData))
 			.setPos(posOfNewCell);
 		auto cell = factory->build(desc, baseCell->getCluster(), context);
 		return cell;
