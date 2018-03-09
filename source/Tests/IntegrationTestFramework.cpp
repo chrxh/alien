@@ -48,6 +48,29 @@ void IntegrationTestFramework::runSimulation(int timesteps, SimulationController
 	pause.exec();
 }
 
+ClusterDescription IntegrationTestFramework::createClusterDescriptionWithCompleteCell(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
+{
+	QByteArray code("123123123");
+	QByteArray cellMemory("12345678");
+	QByteArray tokenMemory("test");
+	CellMetadata cellMetadata;
+	cellMetadata.color = 2;
+	cellMetadata.name = "name1";
+	cellMetadata.computerSourcecode = "code";
+	cellMetadata.description = "desc";
+	ClusterMetadata clusterMetadata;
+	clusterMetadata.name = "name2";
+
+	return ClusterDescription().addCell(
+		CellDescription().setCellFeature(
+			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setConstData(code).setVolatileData(cellMemory)
+		).setId(cellId).setPos({ 1, 2 }).setEnergy(56).setFlagTokenBlocked(false).setMaxConnections(3).setMetadata(cellMetadata)
+		.setTokenBranchNumber(2).setTokens({
+			TokenDescription().setData(tokenMemory).setEnergy(89)
+	})
+	).setId(clusterId).setPos({ 1, 2 }).setVel({ -1, 1 }).setAngle(23).setAngularVel(1.2).setMetadata(clusterMetadata);
+}
+
 ClusterDescription IntegrationTestFramework::createClusterDescription(int numCells) const
 {
 	ClusterDescription cluster;
@@ -56,7 +79,7 @@ ClusterDescription IntegrationTestFramework::createClusterDescription(int numCel
 	for (int j = 0; j < numCells; ++j) {
 		cluster.addCell(
 			CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
-			.setMaxConnections(2).setId(_numberGen->getTag())
+			.setMaxConnections(2).setId(_numberGen->getTag()).setCellFeature(CellFeatureDescription())
 		);
 	}
 	for (int j = 0; j < numCells; ++j) {
@@ -97,7 +120,36 @@ template<>
 bool isCompatible<TokenDescription>(TokenDescription token1, TokenDescription token2)
 {
 	return isCompatible(token1.energy, token2.energy)
-		&& isCompatible(token1.data, token2.data);
+		&& isCompatible(token1.data->mid(1), token2.data->mid(1));	//do not compare first byte (overriden branch number)
+}
+
+namespace
+{
+	void removeZerosAtEnd(QByteArray& data)
+	{
+		while (true) {
+			if (data.isEmpty()) {
+				break;
+			}
+			if (data.at(data.size() - 1) == 0) {
+				data.chop(1);
+			}
+			else {
+				break;
+			}
+		}
+	}
+}
+
+template<>
+bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2)
+{
+	removeZerosAtEnd(feature1.volatileData);
+	removeZerosAtEnd(feature2.volatileData);
+	return isCompatible(feature1.type, feature2.type)
+		&& isCompatible(feature1.constData, feature2.constData)
+		&& isCompatible(feature1.volatileData, feature2.volatileData)
+		;
 }
 
 template<>

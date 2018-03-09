@@ -51,7 +51,46 @@ DataDescriptionTransferTest::~DataDescriptionTransferTest()
 	delete _controller;
 }
 
-TEST_F(DataDescriptionTransferTest, testAddRandomData)
+TEST_F(DataDescriptionTransferTest, testCreateClusterDescriptionWithCompleteCell)
+{
+	DataDescription dataBefore;
+	dataBefore.addCluster(createClusterDescriptionWithCompleteCell());
+	_access->updateData(dataBefore);
+
+	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+}
+
+TEST_F(DataDescriptionTransferTest, testModifyClusterDescriptionWithCompleteCell)
+{
+	const uint64_t clusterId = 1;
+	const uint64_t cellId = 2;
+	DataDescription dataInit;
+	auto cluster = ClusterDescription().addCell(
+		CellDescription().setId(cellId).setCellFeature(
+			CellFeatureDescription().setType(Enums::CellFunction::SCANNER)
+		).setPos({ 2, 1 }).setEnergy(36).setFlagTokenBlocked(true).setMaxConnections(2)
+		.setTokenBranchNumber(1).setTokens({
+			TokenDescription().setEnergy(75),
+			TokenDescription().setEnergy(8)
+	})
+	).setId(clusterId).setPos({ 2, 1 }).setVel({ -0.3f, -0.1f }).setAngle(121.3).setAngularVel(-0.2);
+	dataInit.addCluster(cluster);
+	_access->updateData(dataInit);
+
+	DataDescription dataBefore;
+	dataBefore.addCluster(createClusterDescriptionWithCompleteCell(clusterId, cellId));
+	_access->updateData(DataChangeDescription(dataInit, dataBefore));
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+}
+
+TEST_F(DataDescriptionTransferTest, testCreateRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
@@ -68,7 +107,7 @@ TEST_F(DataDescriptionTransferTest, testAddRandomData)
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testAddAndDeleteRandomData)
+TEST_F(DataDescriptionTransferTest, testCreateAndDeleteRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
@@ -157,7 +196,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testAddAndDeleteAndModifyWithinSimulation)
+TEST_F(DataDescriptionTransferTest, testCreateAndDeleteAndModifyWithinSimulation)
 {
 	auto descHelper = _facade->buildDescriptionHelper();
 	descHelper->init(_context);

@@ -11,23 +11,16 @@
 #include "Cell.h"
 #include "CellComputerFunctionImpl.h"
 
-CellComputerFunctionImpl::CellComputerFunctionImpl (UnitContext* context)
-    : CellComputerFunction(context)
-    , _memory(context->getSimulationParameters()->cellFunctionComputerCellMemorySize, 0)
+CellComputerFunctionImpl::CellComputerFunctionImpl (QByteArray const& code, QByteArray const& memory, UnitContext* context)
+	: CellComputerFunction(context)
+	, _memory(context->getSimulationParameters()->cellFunctionComputerCellMemorySize, 0)
 {
-}
+	int numInstructions = code.size() / 3;
+	int copySize = 3 * std::min(numInstructions, context->getSimulationParameters()->cellFunctionComputerMaxInstructions);
+	_code = code.left(copySize);
 
-CellComputerFunctionImpl::CellComputerFunctionImpl (QByteArray const& data, UnitContext* context)
-	: CellComputerFunctionImpl(context)
-{
-	if (!data.isEmpty()) {
-		int numInstructions = static_cast<int>(static_cast<uint8_t>(data[0]));
-		int minSize = 3 * std::min(numInstructions, context->getSimulationParameters()->cellFunctionComputerMaxInstructions);
-		_code = data.mid(1, minSize);
-		if (_code.size() != minSize) {
-			_code.clear();
-		}
-	}
+	int lenToReplace = std::min(memory.size(), _memory.size());
+	_memory.replace(0, lenToReplace, memory.left(lenToReplace));
 }
 
 namespace {
