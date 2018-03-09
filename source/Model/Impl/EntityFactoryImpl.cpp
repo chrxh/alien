@@ -14,6 +14,10 @@ Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* c
 	auto result = new Cluster(QList<Cell*>(), id, desc.angle.get_value_or(0.0), desc.pos.get()
 		, desc.angularVel.get_value_or(0.0), desc.vel.get_value_or(QVector2D()), context);
 
+	if(desc.metadata) {
+		result->setMetadata(*desc.metadata);
+	}
+
 	if (desc.cells) {
 		map<uint64_t, Cell*> cellsByIds;
 		for (auto const &cellDesc : *desc.cells) {
@@ -43,21 +47,26 @@ Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* c
 
 Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluster, UnitContext* context) const
 {
-	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
 	auto const& energy = *cellDesc.energy;
 	auto const& maxConnections = cellDesc.maxConnections.get_value_or(0);
 	auto const& tokenAccessNumber = cellDesc.tokenBranchNumber.get_value_or(0);
 	uint64_t id = cellDesc.id == 0 ? context->getNumberGenerator()->getTag() : cellDesc.id;
 	auto cell = new Cell(id, energy, context, maxConnections, tokenAccessNumber);
-	cell->setFlagTokenBlocked(cellDesc.tokenBlocked.get_value_or(false));
-	cell->setMetadata(cellDesc.metadata.get_value_or(CellMetadata()));
-
+	if (cellDesc.tokenBlocked) {
+		cell->setFlagTokenBlocked(*cellDesc.tokenBlocked);
+	}
+	if (cellDesc.metadata) {
+		cell->setMetadata(*cellDesc.metadata);
+	}
 	auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
-	featureFactory->addCellFunction(cell, cellFunction.type, cellFunction.constData, context);
-	featureFactory->addEnergyGuidance(cell, context);
-	auto const& tokensDesc = cellDesc.tokens.get_value_or(vector<TokenDescription>());
-	for (auto const& tokenDesc : tokensDesc) {
-		cell->addToken(build(tokenDesc, context));
+
+	CellFeatureFactory* featureFactory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
+	auto features = featureFactory->build(cellFunction, context);
+	cell->registerFeatures(features);
+	if (cellDesc.tokens) {
+		for (auto const& tokenDesc : *cellDesc.tokens) {
+			cell->addToken(build(tokenDesc, context));
+		}
 	}
 	cluster->addCell(cell, cellDesc.pos.get_value_or({ 0.0, 0.0 }), Cluster::UpdateInternals::No);
 	return cell;

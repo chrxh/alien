@@ -38,6 +38,7 @@ struct DataDescription;
 struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
+struct CellFeatureDescription;
 class SimulationAccess;
 class ModelBuilderFacade;
 class SerializationFacade;

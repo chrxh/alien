@@ -10,6 +10,7 @@
 #include "EnergyGuidanceImpl.h"
 #include "Cell.h"
 
+/*
 namespace {
     CellFeatureChain* registerNewFeature (Cell* cell, CellFeatureChain* newFeature)
     {
@@ -22,6 +23,39 @@ namespace {
         return newFeature;
     }
 }
+*/
+
+CellFeatureChain * CellFeatureFactoryImpl::build(CellFeatureDescription const & desc, UnitContext * context) const
+{
+	CellFeatureChain* result = nullptr;
+	switch (desc.type) {
+	case Enums::CellFunction::COMPUTER:
+		result = new CellComputerFunctionImpl(desc.constData, desc.volatileData, context);
+		break;
+	case Enums::CellFunction::PROPULSION:
+		result = new PropulsionFunction(context);
+		break;
+	case Enums::CellFunction::SCANNER:
+		result = new ScannerFunction(context);
+		break;
+	case Enums::CellFunction::WEAPON:
+		result = new WeaponFunction(context);
+		break;
+	case Enums::CellFunction::CONSTRUCTOR:
+		result = new ConstructorFunction(context);
+		break;
+	case Enums::CellFunction::SENSOR:
+		result = new SensorFunction(context);
+		break;
+	case Enums::CellFunction::COMMUNICATOR:
+		result = new CommunicatorFunction(desc.constData, context);
+		break;
+	}
+	CHECK(result);
+	result->registerNextFeature(new EnergyGuidanceImpl(context));
+	return result;
+}
+/*
 
 CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const
 {
@@ -45,8 +79,8 @@ CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::Ce
     }
 }
 
-CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data
-    , UnitContext* context) const
+CellFeatureChain* CellFeatureFactoryImpl::addCellFunction (Cell* cell, Enums::CellFunction::Type type
+	, QByteArray const& constData, QByteArray const& volatileData, UnitContext* context) const
 {
     switch( type ) {
         case Enums::CellFunction::COMPUTER :
@@ -62,4 +96,5 @@ CellFeatureChain* CellFeatureFactoryImpl::addEnergyGuidance (Cell* cell, UnitCon
 {
     return registerNewFeature(cell, new EnergyGuidanceImpl(context));
 }
+*/
 

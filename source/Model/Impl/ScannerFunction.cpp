@@ -162,7 +162,8 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
 	CellFunction* scanCellFunction = scanCell->getFeatures()->findObject<CellFunction>();
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<quint8>(scanCellFunction->getType());
     QByteArray data = scanCellFunction->getInternalData();
-	tokenMem.replace(Enums::Scanner::OUT_CELL_FUNCTION_DATA, data.size(), data);
+	tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA] = data.size();
+	tokenMem.replace(Enums::Scanner::OUT_CELL_FUNCTION_DATA + 1, data.size(), data);
 	tokenMem.left(_context->getSimulationParameters()->tokenMemorySize);
 
     //scan cluster
