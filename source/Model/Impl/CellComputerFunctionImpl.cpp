@@ -497,7 +497,6 @@ void CellComputerFunctionImpl::appendDescriptionImpl(CellFeatureDescription & de
 QByteArray CellComputerFunctionImpl::getInternalData () const
 {
 	QByteArray data;
-	data.push_back(_code.size() / 3);
 	data.push_back(_code);
 	return data;
 }
