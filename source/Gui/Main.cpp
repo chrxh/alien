@@ -36,8 +36,6 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- ConstructorFunction::constructNewCell Länge aus constData rausschneiden
-//- CellFeatureFactory refaktorisieren
 //- Bug: applyChangeDescription in Cell sollte CellFunction berücksichtigen
 //- Check: wird SimulationAccessImpl::callBackCollectData zweimal aufgerufen bei PixelUniverseView::mouseMoveEvent? 
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
