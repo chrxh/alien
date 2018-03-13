@@ -28,7 +28,7 @@ void StartScreenController::start()
 	_startScreenWidget = new StartScreenWidget();
 	_startScreenWidget->setVisible(true);
 
-	QSize size(_parent->width() * 0.6, _parent->width() * 0.17);
+	QSize size(1000, 350);
 
 	QRect parentRect = _parent->frameGeometry();
 	QPoint center = parentRect.center();
