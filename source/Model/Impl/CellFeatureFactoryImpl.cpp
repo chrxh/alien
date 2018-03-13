@@ -25,10 +25,21 @@ namespace {
 }
 */
 
+namespace
+{
+	Enums::CellFunction::Type modulo(Enums::CellFunction::Type value)
+	{
+		int intValue = static_cast<int>(value);
+		int maxValue = static_cast<int>(Enums::CellFunction::_COUNTER);
+		intValue = ((intValue % maxValue) + maxValue) % maxValue;
+		return static_cast<Enums::CellFunction::Type>(intValue);
+	}
+}
+
 CellFeatureChain * CellFeatureFactoryImpl::build(CellFeatureDescription const & desc, UnitContext * context) const
 {
 	CellFeatureChain* result = nullptr;
-	switch (desc.type) {
+	switch (modulo(desc.type)) {
 	case Enums::CellFunction::COMPUTER:
 		result = new CellComputerFunctionImpl(desc.constData, desc.volatileData, context);
 		break;
@@ -51,7 +62,6 @@ CellFeatureChain * CellFeatureFactoryImpl::build(CellFeatureDescription const & 
 		result = new CommunicatorFunction(desc.constData, context);
 		break;
 	}
-	CHECK(result);
 	result->registerNextFeature(new EnergyGuidanceImpl(context));
 	return result;
 }
