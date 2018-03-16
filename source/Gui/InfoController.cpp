@@ -34,7 +34,6 @@ void InfoController::oneSecondTimerTimeout()
 	_tps = _tpsCounting;
 	_tpsCounting = 0;
 	updateInfoLabel();
-	static int i = 0;
 }
 
 void InfoController::updateInfoLabel()
