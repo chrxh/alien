@@ -235,22 +235,6 @@
  <connections>
   <connection>
    <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>ComputationGridDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>378</x>
-     <y>188</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>218</x>
-     <y>5</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>ComputationGridDialog</receiver>
    <slot>reject()</slot>

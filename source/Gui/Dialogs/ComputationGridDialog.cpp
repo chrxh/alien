@@ -1,8 +1,11 @@
 ﻿#include "Gui/Settings.h"
+
+#include "SimulationParametersValidation.h"
 #include "ComputationGridDialog.h"
 
-ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, QWidget * parent)
-	: QDialog(parent)
+ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, SimulationParameters const* parameters
+	, QWidget * parent)
+	: QDialog(parent), _parameters(parameters)
 {
 	ui.setupUi(this);
 	setFont(GuiSettings::getGlobalFont());
@@ -21,6 +24,7 @@ ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, QWi
 	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
 	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
 	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
+	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &ComputationGridDialog::okClicked);
 }
 
 optional<uint> ComputationGridDialog::getMaxThreads() const
@@ -83,5 +87,20 @@ void ComputationGridDialog::updateUniverseSize()
 	IntVector2D universeSize = { gridSizeX * unitSizeX, gridSizeY * unitSizeY };
 	ui.universeSizeXLabel->setText(QString::fromStdString(std::to_string(universeSize.x)));
 	ui.universeSizeYLabel->setText(QString::fromStdString(std::to_string(universeSize.y)));
+}
+
+void ComputationGridDialog::okClicked()
+{
+	optional<IntVector2D> universeSize = getUniverseSize();
+	optional<IntVector2D> gridSize = getGridSize();
+	optional<uint> maxThreads = getMaxThreads();
+	if (!universeSize || !gridSize || !maxThreads) {
+		QMessageBox msgBox(QMessageBox::Critical, "Error", "Wrong input.");
+		return;
+	}
+
+	if (SimulationParametersValidation::validate(*universeSize, *gridSize, _parameters)) {
+		accept();
+	}
 }
 

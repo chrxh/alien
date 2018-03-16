@@ -9,7 +9,8 @@ class ComputationGridDialog
 {
 	Q_OBJECT
 public:
-	ComputationGridDialog(SimulationConfig const& config, QWidget * parent = nullptr);
+	ComputationGridDialog(SimulationConfig const& config, SimulationParameters const* parameters
+		, QWidget * parent = nullptr);
 	virtual ~ComputationGridDialog() = default;
 
 	optional<uint> getMaxThreads() const;
@@ -19,5 +20,8 @@ public:
 private:
 	void updateUniverseSize();
 
+	Q_SLOT void okClicked();
+
 	Ui::ComputationGridDialog ui;
+	SimulationParameters const* _parameters;
 };
