@@ -30,6 +30,7 @@ private:
 	Q_SLOT void simulationParametersButtonClicked();
 	Q_SLOT void symbolTableButtonClicked();
 	Q_SLOT void updateUniverseSize();
+	Q_SLOT void okClicked();
 
 private:
     Ui::NewSimulationDialog *ui;

@@ -959,6 +959,9 @@
     <ClInclude Include="..\..\source\Gui\Monitoring\MonitorModel.h">
       <Filter>Source Files\Monitoring</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\dialogs\SimulationParametersValidation.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Gui.rc">
