@@ -1,8 +1,11 @@
+#include <QMessageBox>
+
 #include "Model/Local/UnitContext.h"
 
 #include "Gui/Settings.h"
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"
+#include "SimulationParametersValidation.h"
 
 #include "NewSimulationDialog.h"
 #include "ui_newsimulationdialog.h"
@@ -27,6 +30,7 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const* parameters,
 	connect(ui->gridSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
 	connect(ui->unitSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
 	connect(ui->unitSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
+	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewSimulationDialog::okClicked);
 }
 
 
@@ -110,6 +114,13 @@ void NewSimulationDialog::updateUniverseSize()
 	_gridSize = { gridSizeX, gridSizeY };
 	ui->universeSizeXLabel->setText(QString::fromStdString(std::to_string(_universeSize.x)));
 	ui->universeSizeYLabel->setText(QString::fromStdString(std::to_string(_universeSize.y)));
+}
+
+void NewSimulationDialog::okClicked()
+{
+	if (SimulationParametersValidation::validate(getUniverseSize(), getGridSize(), getSimulationParameters())) {
+		accepted();
+	}
 }
 
 
