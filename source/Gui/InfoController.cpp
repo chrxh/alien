@@ -35,10 +35,6 @@ void InfoController::oneSecondTimerTimeout()
 	_tpsCounting = 0;
 	updateInfoLabel();
 	static int i = 0;
-	if (++i == 5) {
-		_mainController->autoSave();	//für debugging-Zwecke
-		i = 0;
-	}
 }
 
 void InfoController::updateInfoLabel()
