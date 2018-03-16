@@ -246,16 +246,11 @@ void ActionController::onLoadSimulation()
 
 void ActionController::onConfigureGrid()
 {
-	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainView);
+	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainModel->getSimulationParameters(), _mainView);
 	if (dialog.exec()) {
 		optional<uint> maxThreads = dialog.getMaxThreads();
 		optional<IntVector2D> gridSize = dialog.getGridSize();
 		optional<IntVector2D> universeSize = dialog.getUniverseSize();
-
-		if (!maxThreads || !gridSize || !universeSize) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "Wrong input.");
-			return;
-		}
 
 		_mainController->onRecreateSimulation({ *maxThreads, *gridSize, *universeSize });
 		settingUpNewSimulation();

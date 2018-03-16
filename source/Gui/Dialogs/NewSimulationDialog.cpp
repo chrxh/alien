@@ -119,7 +119,7 @@ void NewSimulationDialog::updateUniverseSize()
 void NewSimulationDialog::okClicked()
 {
 	if (SimulationParametersValidation::validate(getUniverseSize(), getGridSize(), getSimulationParameters())) {
-		accepted();
+		accept();
 	}
 }
 
