@@ -36,6 +36,7 @@
 #include "ActionModel.h"
 #include "ActionController.h"
 #include "ActionHolder.h"
+#include "Gui/Dialogs/SimulationParametersValidation.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
@@ -259,7 +260,8 @@ void ActionController::onConfigureGrid()
 
 void ActionController::onEditSimulationParameters()
 {
-	SimulationParametersDialog dialog(_mainModel->getSimulationParameters()->clone(), _serializer, _mainView);
+	auto const& config = _mainController->getSimulationConfig();
+	SimulationParametersDialog dialog(config.universeSize, config.gridSize, _mainModel->getSimulationParameters()->clone(), _serializer, _mainView);
 	if (dialog.exec()) {
 		_mainModel->setSimulationParameters(dialog.getSimulationParameters());
 		_mainController->onUpdateSimulationParametersForRunningSimulation();
@@ -272,8 +274,11 @@ void ActionController::onLoadSimulationParameters()
 	if (!filename.isEmpty()) {
 		SimulationParameters* parameters;
 		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
-			_mainModel->setSimulationParameters(parameters);
-			_mainController->onUpdateSimulationParametersForRunningSimulation();
+			auto const& config = _mainController->getSimulationConfig();
+			if (SimulationParametersValidation::validate(config.universeSize, config.gridSize, parameters)) {
+				_mainModel->setSimulationParameters(parameters);
+				_mainController->onUpdateSimulationParametersForRunningSimulation();
+			}
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation parameter file could not loaded.");

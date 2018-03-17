@@ -8,13 +8,15 @@
 #include "Model/Api/Settings.h"
 #include "Model/Api/Serializer.h"
 
+#include "SimulationParametersValidation.h"
 #include "SerializationHelper.h"
 #include "SimulationParametersDialog.h"
 #include "ui_simulationparametersdialog.h"
 
-SimulationParametersDialog::SimulationParametersDialog(SimulationParameters const* parameters, Serializer* serializer, QWidget *parent)
+SimulationParametersDialog::SimulationParametersDialog(IntVector2D const& universeSize, IntVector2D const& gridSize
+	, SimulationParameters const* parameters, Serializer* serializer, QWidget *parent)
 	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(parameters->clone(parent))
-	, _serializer(serializer)
+	, _serializer(serializer), _universeSize(universeSize), _gridSize(gridSize)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
@@ -28,6 +30,7 @@ SimulationParametersDialog::SimulationParametersDialog(SimulationParameters cons
     connect(ui->defaultButton, SIGNAL(clicked()), this, SLOT(defaultButtonClicked()));
     connect(ui->loadButton, SIGNAL(clicked()), this, SLOT(loadButtonClicked()));
     connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(saveButtonClicked()));
+	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &SimulationParametersDialog::okClicked);
 }
 
 SimulationParametersDialog::~SimulationParametersDialog()
@@ -38,6 +41,13 @@ SimulationParametersDialog::~SimulationParametersDialog()
 SimulationParameters* SimulationParametersDialog::getSimulationParameters ()
 {
     return _simulationParameters;
+}
+
+void SimulationParametersDialog::okClicked()
+{
+	if (SimulationParametersValidation::validate(_universeSize, _gridSize, getSimulationParameters())) {
+		accept();
+	}
 }
 
 void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
