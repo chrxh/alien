@@ -151,7 +151,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
         return processingResult;
     }
 
-	if (!checkMaxRadiusOfCluster(cluster, len, parameters)) {
+	if (!checkMaxRadiusOfCluster(cluster, len + 2, parameters)) {	//+2 because neighbor pixels are also retrieved
 		tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
 		return processingResult;
 	}

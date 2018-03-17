@@ -81,7 +81,7 @@ SimulationParameters* NewSimulationDialog::getSimulationParameters() const
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
-	SimulationParametersDialog d(_parameters->clone(), _serializer, this);
+	SimulationParametersDialog d(_universeSize, _gridSize, _parameters->clone(), _serializer, this);
 	if (d.exec()) {
 		_parameters = d.getSimulationParameters();
 	}
