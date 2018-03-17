@@ -36,7 +36,7 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Bug: applyChangeDescription in Cell sollte CellFunction berücksichtigen
+//- SimulationParametersDialog: prüfen, ob valide
 //- Check: wird SimulationAccessImpl::callBackCollectData zweimal aufgerufen bei PixelUniverseView::mouseMoveEvent? 
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
