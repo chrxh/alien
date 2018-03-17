@@ -359,6 +359,7 @@ void Cell::delAllTokens ()
 void Cell::setCluster (Cluster* cluster)
 {
     _cluster = cluster;
+	_context = cluster->getContext();
 }
 
 Cluster* Cell::getCluster() const
