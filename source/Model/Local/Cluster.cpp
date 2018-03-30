@@ -1168,17 +1168,12 @@ void Cluster::radiation (qreal& energy, Cell* originCell, Particle*& energyParti
 double Cluster::getRadius() const
 {
 	double result = 0.0;
-	QVector2D center;
 	foreach(Cell* cell, _cells) {
 		auto distance = cell->_relPos.length();
 		if (distance > result) {
 			result = distance;
 		}
-		center += cell->_relPos;
 	}
-
-	//center only for tests
-	center /= _cells.size();
 	return result;
 }
 
