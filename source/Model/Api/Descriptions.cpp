@@ -15,7 +15,7 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	energy = static_cast<optional<double>>(change.energy);
 	maxConnections = static_cast<optional<int>>(change.maxConnections);
 	connectingCells = static_cast<optional<list<uint64_t>>>(change.connectingCells);
-	tokenBlocked = change.tokenBlocked.getOptionalValue();	//static_cast<optional<bool>> doesn't work for same reason
+	tokenBlocked = change.tokenBlocked.getOptionalValue();	//static_cast<optional<bool>> doesn't work for some reason
 	tokenBranchNumber = static_cast<optional<int>>(change.tokenBranchNumber);
 	metadata = static_cast<optional<CellMetadata>>(change.metadata);
 	cellFeature = static_cast<optional<CellFeatureDescription>>(change.cellFeatures);

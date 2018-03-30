@@ -741,15 +741,11 @@ void Cluster::processingCompletion ()
     }
 }
 
-void Cluster::addCell (Cell* cell, QVector2D absPos, UpdateInternals update /*= UpdateInternals::Yes*/)
+void Cluster::addCell (Cell* cell, QVector2D absPos)
 {
     cell->setRelPosition(absToRelPos(absPos));
     cell->setCluster(this);
     _cells << cell;
-
-	if (update == Cluster::UpdateInternals::Yes) {
-		updateInternals(MaintainCenter::Yes);
-	}
 }
 
 void Cluster::removeCell (Cell* cell, MaintainCenter maintainCenter /*= MaintainCenter::Yes*/)
@@ -1172,12 +1168,17 @@ void Cluster::radiation (qreal& energy, Cell* originCell, Particle*& energyParti
 double Cluster::getRadius() const
 {
 	double result = 0.0;
+	QVector2D center;
 	foreach(Cell* cell, _cells) {
 		auto distance = cell->_relPos.length();
 		if (distance > result) {
 			result = distance;
 		}
+		center += cell->_relPos;
 	}
+
+	//center only for tests
+	center /= _cells.size();
 	return result;
 }
 

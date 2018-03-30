@@ -34,7 +34,7 @@ public:
     void processingCompletion ();
 
 	enum class UpdateInternals { No, Yes };
-	void addCell(Cell* cell, QVector2D absPos, UpdateInternals update = UpdateInternals::Yes);
+	void addCell(Cell* cell, QVector2D absPos);
 	enum MaintainCenter { No, Yes };
 	void removeCell(Cell* cell, MaintainCenter maintainCenter = MaintainCenter::Yes);
     void updateCellVel (bool forceCheck = true);
