@@ -68,7 +68,7 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 			cell->addToken(build(tokenDesc, context), Cell::ActivateToken::Now, Cell::UpdateTokenBranchNumber::No);
 		}
 	}
-	cluster->addCell(cell, cellDesc.pos.get_value_or({ 0.0, 0.0 }), Cluster::UpdateInternals::No);
+	cluster->addCell(cell, cellDesc.pos.get_value_or({ 0.0, 0.0 }));
 	return cell;
 }
 

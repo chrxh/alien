@@ -50,6 +50,7 @@ namespace {
 			.setCellFeature(CellFeatureDescription().setType(convertCellTypeNumberToName(cellType)).setConstData(constData))
 			.setPos(posOfNewCell);
 		auto cell = factory->build(desc, baseCell->getCluster(), context);
+		baseCell->getCluster()->updateInternals();
 		return cell;
     }
 
