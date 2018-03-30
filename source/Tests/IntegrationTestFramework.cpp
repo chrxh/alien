@@ -51,8 +51,12 @@ void IntegrationTestFramework::runSimulation(int timesteps, SimulationController
 ClusterDescription IntegrationTestFramework::createClusterDescriptionWithCompleteCell(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
 {
 	QByteArray code("123123123");
-	QByteArray cellMemory("12345678");
-	QByteArray tokenMemory("test");
+	QByteArray cellMemory(_parameters->cellFunctionComputerCellMemorySize, 0);
+	QByteArray tokenMemory(_parameters->tokenMemorySize, 0);
+	cellMemory[1] = 'a';
+	cellMemory[2] = 'b';
+	tokenMemory[0] = 't';
+	tokenMemory[3] = 's';
 	CellMetadata cellMetadata;
 	cellMetadata.color = 2;
 	cellMetadata.name = "name1";
@@ -64,7 +68,7 @@ ClusterDescription IntegrationTestFramework::createClusterDescriptionWithComplet
 	return ClusterDescription().addCell(
 		CellDescription().setCellFeature(
 			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setConstData(code).setVolatileData(cellMemory)
-		).setId(cellId).setPos({ 1, 2 }).setEnergy(56).setFlagTokenBlocked(false).setMaxConnections(3).setMetadata(cellMetadata)
+		).setId(cellId).setPos({ 1, 2 }).setEnergy(56).setFlagTokenBlocked(true).setMaxConnections(3).setMetadata(cellMetadata)
 		.setTokenBranchNumber(2).setTokens({
 			TokenDescription().setData(tokenMemory).setEnergy(89)
 	})
@@ -155,11 +159,11 @@ bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellF
 template<>
 bool isCompatible<CellDescription>(CellDescription cell1, CellDescription cell2)
 {
-	return isCompatible(cell1.pos, cell2.pos)
+	return isCompatible(cell1.tokenBlocked, cell2.tokenBlocked)
+		&& isCompatible(cell1.pos, cell2.pos)
 		&& isCompatible(cell1.energy, cell2.energy)
 		&& isCompatible(cell1.maxConnections, cell2.maxConnections)
 		&& isCompatible(cell1.connectingCells, cell2.connectingCells)
-		&& isCompatible(cell1.tokenBlocked, cell2.tokenBlocked)
 		&& isCompatible(cell1.tokenBranchNumber, cell2.tokenBranchNumber)
 		&& isCompatible(cell1.metadata, cell2.metadata)
 		&& isCompatible(cell1.cellFeature, cell2.cellFeature)

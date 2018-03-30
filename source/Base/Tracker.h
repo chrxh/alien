@@ -23,6 +23,7 @@ public:
 	explicit operator boost::optional<T>() const { return _value; }
 
 	T const& getValue() const { return *_value; }
+	boost::optional<T> const& getOptionalValue() const { return _value; }
 	T & getValue() { return *_value; }
 	T const& getOldValue() const { return *_oldValue; }
 	T & getOldValue() { return *_oldValue; }
