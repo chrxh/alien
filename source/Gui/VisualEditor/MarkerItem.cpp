@@ -40,7 +40,7 @@ QRectF MarkerItem::boundingRect () const
 
 void MarkerItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->setPen(QPen(QBrush(MARKER_COLOR), 0.00));
-    painter->setBrush(QBrush(MARKER_COLOR));
+    painter->setPen(QPen(QBrush(Const::MarkerColor), 0.00));
+    painter->setBrush(QBrush(Const::MarkerColor));
     painter->drawRect(QRectF(0.0, 0.0, _dx, _dy));
 }

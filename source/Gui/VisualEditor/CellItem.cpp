@@ -36,7 +36,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
         painter->setPen(QPen(QBrush(QColor(0,0,0,0)), CoordinateSystem::modelToScene(0.03)));
     }
     else {
-        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), CoordinateSystem::modelToScene(0.03)));
+        painter->setPen(QPen(QBrush(Const::ClusterPenFocusColor), CoordinateSystem::modelToScene(0.03)));
     }
 
     //set brush color
@@ -71,10 +71,10 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 	int numToken = getNumToken();
     if( numToken > 0 ) {
         if( _focusState == NO_FOCUS )
-            painter->setBrush(QBrush(TOKEN_COLOR));
+            painter->setBrush(QBrush(Const::TokenColor));
         else
-            painter->setBrush(QBrush(TOKEN_FOCUS_COLOR));
-        painter->setPen(QPen(QBrush(CELL_CLUSTER_PEN_FOCUS_COLOR), CoordinateSystem::modelToScene(0.03)));
+            painter->setBrush(QBrush(Const::TokenFocusColor));
+        painter->setPen(QPen(QBrush(Const::ClusterPenFocusColor), CoordinateSystem::modelToScene(0.03)));
         qreal shift1 = -0.5*0.20*(qreal)(numToken-1);
         if( numToken > 3)
             shift1 = -0.5*0.20*2.0;

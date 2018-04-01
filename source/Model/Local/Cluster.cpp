@@ -705,8 +705,9 @@ void Cluster::processingCompletion ()
         cell->activatingNewTokens();
 
         //kill cells which are too far from cluster center
-        if(cell->getRelPosition().length() > (maxClusterRadius-1.0) )
-            cell->setToBeKilled(true);
+		if (cell->getRelPosition().length() > (maxClusterRadius - 1.0)) {
+			cell->setToBeKilled(true);
+		}
 
         //find nearby cells and kill if they are too close
         QVector2D pos = calcPosition(cell, true);
@@ -971,12 +972,6 @@ QList< Cell* >& Cluster::getCellsRef ()
 {
     return _cells;
 }
-
-/*QVector2D CellClusterImpl::getCoordinate (Cell* cell)
-{
-    return _transform.map(cell->getRelPosition());
-}
-*/
 
 void Cluster::findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell2) const
 {

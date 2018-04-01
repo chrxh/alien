@@ -16,31 +16,33 @@ public:
     GridMultiplierDialog (QVector2D centerPos, QWidget *parent = nullptr);
     virtual ~GridMultiplierDialog();
 
-    qreal getInitialPosX ();
-    qreal getInitialPosY ();
-    bool changeVelocityX ();
-    bool changeVelocityY ();
-    bool changeAngle();
-    bool changeAngularVelocity ();
-    qreal getInitialVelX ();
-    qreal getInitialVelY ();
-    qreal getInitialAngle ();
-    qreal getInitialAngVel ();
+    double getInitialPosX () const;
+    double getInitialPosY () const;
+    bool isChangeVelocityX () const;
+    bool isChangeVelocityY () const;
+    bool isChangeAngle() const;
+    bool isChangeAngularVelocity () const;
+    double getInitialVelX () const;
+    double getInitialVelY () const;
+    double getInitialAngle () const;
+    double getInitialAngVel () const;
 
-    int getHorizontalNumber ();
-    qreal getHorizontalInterval ();
-    qreal getHorizontalVelocityXIncrement ();
-    qreal getHorizontalVelocityYIncrement ();
-    qreal getHorizontalAngleIncrement ();
-    qreal getHorizontalAngularVelocityIncrement ();
+    int getHorizontalNumber () const;
+    double getHorizontalInterval () const;
+    double getHorizontalVelocityXIncrement () const;
+    double getHorizontalVelocityYIncrement () const;
+    double getHorizontalAngleIncrement () const;
+    double getHorizontalAngularVelocityIncrement () const;
 
-    int getVerticalNumber ();
-    qreal getVerticalInterval ();
-    qreal getVerticalVelocityXIncrement ();
-    qreal getVerticalVelocityYIncrement ();
-    qreal getVerticalAngleIncrement ();
-    qreal getVerticalAngularVelocityIncrement ();
+    int getVerticalNumber () const;
+    double getVerticalInterval () const;
+    double getVerticalVelocityXIncrement () const;
+    double getVerticalVelocityYIncrement () const;
+    double getVerticalAngleIncrement () const;
+    double getVerticalAngularVelocityIncrement () const;
 
+private:
+	Q_SLOT void okClicked();
 
 private:
     Ui::GridMultiplierDialog *ui;

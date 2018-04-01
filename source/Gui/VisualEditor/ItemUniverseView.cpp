@@ -23,7 +23,7 @@
 ItemUniverseView::ItemUniverseView(QObject *parent)
 	: QGraphicsScene(parent)
 {
-    setBackgroundBrush(QBrush(UNIVERSE_COLOR));
+    setBackgroundBrush(QBrush(Const::UniverseColor));
 }
 
 

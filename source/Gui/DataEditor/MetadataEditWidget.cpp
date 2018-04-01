@@ -47,8 +47,8 @@ void MetadataEditWidget::updateDisplay ()
 	//define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
-    QString colorTextStart = "<span style=\"color:"+CELL_EDIT_TEXT_COLOR1.name()+"\">";
-    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_METADATA_COLOR.name()+"\">";
+    QString colorTextStart = "<span style=\"color:"+Const::CellEditTextColor1.name()+"\">";
+    QString colorDataStart = "<span style=\"color:"+Const::CellEditMetadataColor.name()+"\">";
     QString colorBlack = "<span style=\"color:#000000\">";
     QString colorWhite = "<span style=\"color:#FFFFFF\">";
     QString color1 = "<span style=\"color:"+INDIVIDUAL_CELL_COLOR1.name()+"\">";
@@ -108,7 +108,7 @@ void MetadataEditWidget::updateDisplay ()
 
     //set cursor color
     QPalette p(QTextEdit::palette());
-    p.setColor(QPalette::Text, CELL_EDIT_METADATA_CURSOR_COLOR);
+    p.setColor(QPalette::Text, Const::CellEditMetadataCursorColor);
     QTextEdit::setPalette(p);
 
     //create string of display

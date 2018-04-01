@@ -34,12 +34,12 @@ void ParticleItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *opt
 {
     if( _focusState == NO_FOCUS ) {
         painter->setPen(QPen(QBrush(QColor(0,0,0,0)), CoordinateSystem::modelToScene(0.03)));
-        painter->setBrush(QBrush(ENERGY_COLOR));
+        painter->setBrush(QBrush(Const::EnergyColor));
         painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.20), CoordinateSystem::modelToScene(0.20));
     }
     else {
-        painter->setPen(QPen(QBrush(ENERGY_PEN_FOCUS_COLOR), CoordinateSystem::modelToScene(0.03)));
-        painter->setBrush(QBrush(ENERGY_FOCUS_COLOR));
+        painter->setPen(QPen(QBrush(Const::EnergyPenFocusColor), CoordinateSystem::modelToScene(0.03)));
+        painter->setBrush(QBrush(Const::EnergyFocusColor));
         painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.4), CoordinateSystem::modelToScene(0.4));
     }
 }

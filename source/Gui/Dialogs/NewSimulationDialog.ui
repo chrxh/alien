@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>413</height>
+    <height>434</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -248,7 +248,7 @@
          </size>
         </property>
         <property name="text">
-         <string>total energy</string>
+         <string>energy</string>
         </property>
        </widget>
       </item>
