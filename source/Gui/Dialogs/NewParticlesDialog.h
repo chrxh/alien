@@ -14,8 +14,11 @@ public:
     NewParticlesDialog(QWidget *parent = nullptr);
     virtual ~NewParticlesDialog();
 
-    qreal getTotalEnergy ();
-    qreal getMaxEnergyPerParticle ();
+    double getTotalEnergy () const;
+    double getMaxEnergyPerParticle () const;
+
+private:
+	Q_SLOT void okClicked();
 
 private:
     Ui::NewParticlesDialog *ui;
