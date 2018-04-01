@@ -1,5 +1,6 @@
-#include "gui/Settings.h"
 #include "Model/Api/SimulationParameters.h"
+#include "Gui/Settings.h"
+#include "Gui/StringHelper.h"
 
 #include "ui_NewHexagonDialog.h"
 #include "NewHexagonDialog.h"
@@ -10,7 +11,15 @@ NewHexagonDialog::NewHexagonDialog(SimulationParameters const* simulationParamet
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
-    ui->energyEdit->setText(QString("%1").arg(simulationParameters->cellCreationEnergy));
+
+	ui->layersEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::NewHexagonLayersKey, Const::NewHexagonLayersDefault)));
+	ui->distEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::NewHexagonDistanceKey, Const::NewHexagonDistanceDefault)));
+	ui->energyEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::NewHexagonCellEnergyKey, Const::NewHexagonCellEnergyDefault)));
+
+	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewHexagonDialog::okClicked);
 }
 
 NewHexagonDialog::~NewHexagonDialog()
@@ -18,20 +27,29 @@ NewHexagonDialog::~NewHexagonDialog()
     delete ui;
 }
 
-int NewHexagonDialog::getLayers ()
+int NewHexagonDialog::getLayers () const
 {
     bool ok(true);
     return ui->layersEdit->text().toInt(&ok);
 }
 
-qreal NewHexagonDialog::getDistance ()
+double NewHexagonDialog::getDistance () const
 {
     bool ok(true);
     return ui->distEdit->text().toDouble(&ok);
 }
 
-qreal NewHexagonDialog::getInternalEnergy ()
+double NewHexagonDialog::getCellEnergy () const
 {
     bool ok(true);
     return ui->energyEdit->text().toDouble(&ok);
+}
+
+void NewHexagonDialog::okClicked()
+{
+	GuiSettings::setSettingsValue(Const::NewHexagonLayersKey, getLayers());
+	GuiSettings::setSettingsValue(Const::NewHexagonDistanceKey, getDistance());
+	GuiSettings::setSettingsValue(Const::NewHexagonCellEnergyKey, getCellEnergy());
+
+	accept();
 }

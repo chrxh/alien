@@ -719,7 +719,7 @@ void ActionController::onNewHexagon()
 
 		int layers = dialog.getLayers();
 		double dist = dialog.getDistance();
-		double energy = dialog.getInternalEnergy();
+		double energy = dialog.getCellEnergy();
 		std::vector<std::vector<CellDescription>> cellMatrix(2 * layers - 1, std::vector<CellDescription>(2 * layers - 1));
 		list<CellDescription> cells;
 
