@@ -36,6 +36,7 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
+//- SimulationParametersValidation nach Model
 //- Check: wird SimulationAccessImpl::callBackCollectData zweimal aufgerufen bei PixelUniverseView::mouseMoveEvent? 
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
@@ -100,7 +101,10 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-/*
+	QCoreApplication::setOrganizationName("alien");
+	QCoreApplication::setApplicationName("alien");
+
+	/*
 	ModelServices modelServices;
 	ModelGpuServices modelGpuServices;
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();

@@ -11,7 +11,7 @@ ToolbarView::ToolbarView(QWidget * parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
-	setStyleSheet(GuiSettings::ButtonStyleSheet);
+	setStyleSheet(Const::ButtonStyleSheet);
 }
 
 void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* actions, ToolbarController* controller)

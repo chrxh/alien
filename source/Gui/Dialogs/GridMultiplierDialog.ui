@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>510</width>
+    <width>615</width>
     <height>563</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>510</width>
+    <width>550</width>
     <height>563</height>
    </size>
   </property>
@@ -53,9 +53,9 @@
      <widget class="QLineEdit" name="horizontalNumberEdit">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>170</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -97,7 +97,7 @@
        <rect>
         <x>10</x>
         <y>150</y>
-        <width>451</width>
+        <width>561</width>
         <height>16</height>
        </rect>
       </property>
@@ -110,7 +110,7 @@
        <rect>
         <x>10</x>
         <y>320</y>
-        <width>451</width>
+        <width>561</width>
         <height>16</height>
        </rect>
       </property>
@@ -147,9 +147,9 @@
      <widget class="QLineEdit" name="horIntervalEdit">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>200</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -166,9 +166,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>230</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -185,9 +185,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>470</x>
         <y>230</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -204,9 +204,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>290</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -233,9 +233,9 @@
      <widget class="QLineEdit" name="initialPosXEdit">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>30</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -249,9 +249,9 @@
      <widget class="QLineEdit" name="initialPosYEdit">
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>470</x>
         <y>30</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -304,9 +304,9 @@
      <widget class="QLineEdit" name="verticalNumberEdit">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>340</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -323,9 +323,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>400</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -342,9 +342,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>470</x>
         <y>400</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -371,9 +371,9 @@
      <widget class="QLineEdit" name="verIntervalEdit">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>370</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -390,9 +390,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>460</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -409,7 +409,7 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>60</y>
         <width>71</width>
         <height>22</height>
@@ -428,9 +428,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>470</x>
         <y>60</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -447,9 +447,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>120</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -465,7 +465,7 @@
        <rect>
         <x>10</x>
         <y>60</y>
-        <width>151</width>
+        <width>161</width>
         <height>20</height>
        </rect>
       </property>
@@ -476,9 +476,9 @@
      <widget class="QCheckBox" name="velYCheckBox">
       <property name="geometry">
        <rect>
-        <x>170</x>
+        <x>190</x>
         <y>60</y>
-        <width>131</width>
+        <width>151</width>
         <height>20</height>
        </rect>
       </property>
@@ -518,7 +518,7 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>90</y>
         <width>71</width>
         <height>22</height>
@@ -550,9 +550,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>260</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -569,9 +569,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>370</x>
         <y>430</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -595,28 +595,50 @@
        <string>angle increment</string>
       </property>
      </widget>
+     <widget class="QLineEdit" name="initialAngleEdit_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>90</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>0.0</string>
+      </property>
+      <property name="frame">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="initialVelXEdit_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>60</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>0.0</string>
+      </property>
+      <property name="frame">
+       <bool>false</bool>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>GridMultiplierDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>280</x>
-     <y>546</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>

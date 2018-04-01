@@ -489,24 +489,24 @@ void ActionController::onRandomMultiplier()
 	if (dialog.exec()) {
 		DataDescription data = _repository->getExtendedSelection();
 		IntVector2D universeSize = _mainController->getSimulationConfig().universeSize;
-		for (int i = 0; i < dialog.getNumber(); ++i) {
+		for (int i = 0; i < dialog.getNumberOfCopies(); ++i) {
 			DataDescription dataCopied = data;
 			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
 			optional<double> velocityX;
 			optional<double> velocityY;
 			optional<double> angle;
 			optional<double> angularVelocity;
-			if (dialog.randomizeVelX()) {
-				velocityX = _numberGenerator->getRandomReal(dialog.randomizeVelXMin(), dialog.randomizeVelXMax());
+			if (dialog.isChangeVelX()) {
+				velocityX = _numberGenerator->getRandomReal(dialog.getVelXMin(), dialog.getVelXMax());
 			}
-			if (dialog.randomizeVelY()) {
-				velocityY = _numberGenerator->getRandomReal(dialog.randomizeVelYMin(), dialog.randomizeVelYMax());
+			if (dialog.isChangeVelY()) {
+				velocityY = _numberGenerator->getRandomReal(dialog.getVelYMin(), dialog.getVelYMax());
 			}
-			if (dialog.randomizeAngle()) {
-				angle = _numberGenerator->getRandomReal(dialog.randomizeAngleMin(), dialog.randomizeAngleMax());
+			if (dialog.isChangeAngle()) {
+				angle = _numberGenerator->getRandomReal(dialog.getAngleMin(), dialog.getAngleMax());
 			}
-			if (dialog.randomizeAngVel()) {
-				angularVelocity = _numberGenerator->getRandomReal(dialog.randomizeAngVelMin(), dialog.randomizeAngVelMax());
+			if (dialog.isChangeAngVel()) {
+				angularVelocity = _numberGenerator->getRandomReal(dialog.getAngVelMin(), dialog.getAngVelMax());
 			}
 			modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
 			_repository->addDataAtFixedPosition(dataCopied, angle);
@@ -538,16 +538,16 @@ void ActionController::onGridMultiplier()
 				optional<double> velocityY;
 				optional<double> angle;
 				optional<double> angularVelocity;
-				if (dialog.changeAngle()) {
+				if (dialog.isChangeAngle()) {
 					angle = dialog.getInitialAngle() + i*dialog.getHorizontalAngleIncrement() + j*dialog.getVerticalAngleIncrement();
 				}
-				if (dialog.changeVelocityX()) {
+				if (dialog.isChangeVelocityX()) {
 					velocityX = dialog.getInitialVelX() + i*dialog.getHorizontalVelocityXIncrement() + j*dialog.getVerticalVelocityXIncrement();
 				}
-				if (dialog.changeVelocityY()) {
+				if (dialog.isChangeVelocityY()) {
 					velocityY = dialog.getInitialVelY() + j*dialog.getHorizontalVelocityYIncrement() + j*dialog.getVerticalVelocityYIncrement();
 				}
-				if (dialog.changeAngularVelocity()) {
+				if (dialog.isChangeAngularVelocity()) {
 					angularVelocity = dialog.getInitialAngVel() + i*dialog.getHorizontalAngularVelocityIncrement() + j*dialog.getVerticalAngularVelocityIncrement();
 				}
 

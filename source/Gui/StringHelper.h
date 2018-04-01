@@ -6,17 +6,27 @@
 class StringHelper
 {
 public:
+	static QString toString(int value)
+	{
+		return QString::fromStdString(std::to_string(value));
+	}
+
+	static QString toString(double value)
+	{
+		return QString::fromStdString(std::to_string(value));
+	}
+
 	static QString generateFormattedIntString(int i)
 	{
-		QString colorDataStart = "<span style=\"color:" + CELL_EDIT_DATA_COLOR1.name() + "\">";
+		QString colorDataStart = "<span style=\"color:" + Const::CellEditDataColor1.name() + "\">";
 		QString colorEnd = "</span>";
 		return colorDataStart + QString("%1").arg(i) + colorEnd;
 	}
 
 	static QString generateFormattedRealString(qreal r)
 	{
-		QString colorDataStart = "<span style=\"color:" + CELL_EDIT_DATA_COLOR1.name() + "\">";
-		QString colorData2Start = "<span style=\"color:" + CELL_EDIT_DATA_COLOR2.name() + "\">";
+		QString colorDataStart = "<span style=\"color:" + Const::CellEditDataColor1.name() + "\">";
+		QString colorData2Start = "<span style=\"color:" + Const::CellEditDataColor2.name() + "\">";
 		QString colorEnd = "</span>";
 		bool negativeSign = false;
 		if (r < 0.0) {

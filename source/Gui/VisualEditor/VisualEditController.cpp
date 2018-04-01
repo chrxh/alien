@@ -23,8 +23,8 @@ VisualEditController::VisualEditController(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->simulationView->horizontalScrollBar()->setStyleSheet(GuiSettings::ScrollbarStyleSheet);
-    ui->simulationView->verticalScrollBar()->setStyleSheet(GuiSettings::ScrollbarStyleSheet);
+    ui->simulationView->horizontalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
+    ui->simulationView->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
 }
 
 VisualEditController::~VisualEditController()

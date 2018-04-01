@@ -19,7 +19,7 @@
 
 PixelUniverseView::PixelUniverseView(QObject* parent)
 {
-	setBackgroundBrush(QBrush(BACKGROUND_COLOR));
+	setBackgroundBrush(QBrush(Const::BackgroundColor));
     _pixmap = addPixmap(QPixmap());
 	_manipulator = new Manipulator(this);
     update();

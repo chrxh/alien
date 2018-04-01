@@ -14,19 +14,22 @@ public:
     explicit RandomMultiplierDialog(QWidget *parent = nullptr);
     virtual ~RandomMultiplierDialog();
 
-    int getNumber ();
-    bool randomizeAngle ();
-    qreal randomizeAngleMin ();
-    qreal randomizeAngleMax ();
-    bool randomizeVelX ();
-    qreal randomizeVelXMin ();
-    qreal randomizeVelXMax ();
-    bool randomizeVelY ();
-    qreal randomizeVelYMin ();
-    qreal randomizeVelYMax ();
-    bool randomizeAngVel ();
-    qreal randomizeAngVelMin ();
-    qreal randomizeAngVelMax ();
+    int getNumberOfCopies ();
+    bool isChangeAngle ();
+    double getAngleMin ();
+    double getAngleMax ();
+    bool isChangeVelX ();
+    double getVelXMin ();
+    double getVelXMax ();
+    bool isChangeVelY ();
+    double getVelYMin ();
+    double getVelYMax ();
+    bool isChangeAngVel ();
+    double getAngVelMin ();
+    double getAngVelMax ();
+
+private:
+	Q_SLOT void okClicked();
 
 private:
     Ui::RandomMultiplierDialog *ui;

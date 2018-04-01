@@ -3,6 +3,7 @@
 #include "Model/Local/UnitContext.h"
 
 #include "Gui/Settings.h"
+#include "Gui/StringHelper.h"
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"
 #include "SimulationParametersValidation.h"
@@ -21,6 +22,18 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const* parameters,
 	_symbolTable->setParent(parent);
 	ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
+	ui->gridSizeXEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::GridSizeXKey, Const::GridSizeXDefault)));
+	ui->gridSizeYEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::GridSizeYKey, Const::GridSizeYDefault)));
+	ui->unitSizeXEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::UnitSizeXKey, Const::UnitSizeXDefault)));
+	ui->unitSizeYEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::UnitSizeYKey, Const::UnitSizeYDefault)));
+	ui->maxThreadsEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::MaxThreadsKey, Const::MaxThreadsDefault)));
+	ui->energyEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));
 
 	updateUniverseSize();
 
@@ -44,6 +57,13 @@ IntVector2D NewSimulationDialog::getUniverseSize () const
 	return _universeSize;
 }
 
+IntVector2D NewSimulationDialog::getUnitSize() const
+{
+	IntVector2D gridSize = getGridSize();
+	IntVector2D universeSize = getUniverseSize();
+	return{ universeSize.x / gridSize.x, universeSize.y / gridSize.y };
+}
+
 IntVector2D NewSimulationDialog::getGridSize() const
 {
 	return _gridSize;
@@ -59,7 +79,7 @@ uint NewSimulationDialog::getMaxThreads() const
 	return maxThreads;
 }
 
-qreal NewSimulationDialog::getEnergy () const
+double NewSimulationDialog::getEnergy () const
 {
     bool ok(true);
 	double energy = ui->energyEdit->text().toDouble(&ok);
@@ -112,13 +132,19 @@ void NewSimulationDialog::updateUniverseSize()
 
 	_universeSize = { gridSizeX * unitSizeX, gridSizeY * unitSizeY };
 	_gridSize = { gridSizeX, gridSizeY };
-	ui->universeSizeXLabel->setText(QString::fromStdString(std::to_string(_universeSize.x)));
-	ui->universeSizeYLabel->setText(QString::fromStdString(std::to_string(_universeSize.y)));
+	ui->universeSizeXLabel->setText(StringHelper::toString(_universeSize.x));
+	ui->universeSizeYLabel->setText(StringHelper::toString(_universeSize.y));
 }
 
 void NewSimulationDialog::okClicked()
 {
 	if (SimulationParametersValidation::validate(getUniverseSize(), getGridSize(), getSimulationParameters())) {
+		GuiSettings::setSettingsValue(Const::GridSizeXKey, getGridSize().x);
+		GuiSettings::setSettingsValue(Const::GridSizeYKey, getGridSize().y);
+		GuiSettings::setSettingsValue(Const::UnitSizeXKey, getUnitSize().x);
+		GuiSettings::setSettingsValue(Const::UnitSizeYKey, getUnitSize().y);
+		GuiSettings::setSettingsValue(Const::MaxThreadsKey, static_cast<int>(getMaxThreads()));
+		GuiSettings::setSettingsValue(Const::MaxThreadsKey, getEnergy());
 		accept();
 	}
 }
