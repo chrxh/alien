@@ -17,9 +17,12 @@ public:
     NewHexagonDialog(SimulationParameters const* simulationParameters, QWidget *parent = nullptr);
     virtual ~NewHexagonDialog();
 
-    int getLayers ();
-    qreal getDistance ();
-    qreal getInternalEnergy ();
+    int getLayers () const;
+    double getDistance () const;
+    double getCellEnergy () const;
+
+private:
+	Q_SLOT void okClicked();
 
 private:
     Ui::NewHexagonDialog *ui;

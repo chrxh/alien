@@ -126,6 +126,13 @@ namespace Const
 	const double RandomMulMinAngVelDefault = 0.0;
 	const std::string RandomMulMaxAngVelKey = "randomMul/maxAngVel";
 	const double RandomMulMaxAngVelDefault = 0.0;
+
+	const std::string NewHexagonLayersKey = "newHaxagon/layers";
+	const int NewHexagonLayersDefault = 10;
+	const std::string NewHexagonDistanceKey = "newHaxagon/distance";
+	const double NewHexagonDistanceDefault = 1.0;
+	const std::string NewHexagonCellEnergyKey = "newHaxagon/cellEnergy";
+	const double NewHexagonCellEnergyDefault = 100.0;
 }
 
 class GuiSettings
