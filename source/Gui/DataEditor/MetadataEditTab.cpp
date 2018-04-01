@@ -15,11 +15,11 @@ MetadataEditTab::MetadataEditTab(QWidget *parent)
     ui->setupUi(this);
 
     QPalette p = ui->cellDescriptionLabel->palette();
-    p.setColor(QPalette::WindowText, CELL_EDIT_CAPTION_COLOR1);
+    p.setColor(QPalette::WindowText, Const::CellEditCaptionColor1);
     ui->cellDescriptionLabel->setPalette(p);
 
     p = ui->metadataDescriptionEdit->palette();
-    p.setColor(QPalette::Text, CELL_EDIT_METADATA_CURSOR_COLOR);
+    p.setColor(QPalette::Text, Const::CellEditMetadataCursorColor);
     ui->metadataDescriptionEdit->setPalette(p);
 
     connect(ui->metadataDescriptionEdit, &QTextEdit::textChanged, this, &MetadataEditTab::changesFromMetadataDescriptionEditor);

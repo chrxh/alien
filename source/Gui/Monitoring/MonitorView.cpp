@@ -46,9 +46,9 @@ QString MonitorView::generateString() const
 	//define auxiliary strings
 	QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
 	QString parEnd = "</p>";
-	QString colorTextStart = "<span style=\"color:" + CELL_EDIT_TEXT_COLOR1.name() + "\">";
-	QString colorDataStart = "<span style=\"color:" + CELL_EDIT_DATA_COLOR1.name() + "\">";
-	QString colorData2Start = "<span style=\"color:" + CELL_EDIT_DATA_COLOR2.name() + "\">";
+	QString colorTextStart = "<span style=\"color:" + Const::CellEditTextColor1.name() + "\">";
+	QString colorDataStart = "<span style=\"color:" + Const::CellEditDataColor1.name() + "\">";
+	QString colorData2Start = "<span style=\"color:" + Const::CellEditDataColor2.name() + "\">";
 	QString colorEnd = "</span>";
 	QString text;
 

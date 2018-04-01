@@ -1,9 +1,11 @@
+#include <QSettings>
+
 #include "Settings.h"
 
 QFont GuiSettings::getGlobalFont ()
 {
     //set font
-    QFont f(GuiSettings::StandardFont, 8, QFont::Bold);
+    QFont f(Const::StandardFont, 8, QFont::Bold);
     f.setStyleStrategy(QFont::PreferBitmap);
     return f;
 }
@@ -11,7 +13,7 @@ QFont GuiSettings::getGlobalFont ()
 QFont GuiSettings::getCellFont()
 {
 	//set font
-	QFont f(GuiSettings::StandardFont, 2, QFont::Normal);
+	QFont f(Const::StandardFont, 2, QFont::Normal);
 	f.setStyleStrategy(QFont::PreferBitmap);
 	return f;
 }
@@ -65,9 +67,38 @@ QPalette GuiSettings::getPaletteForTab()
 	return result;
 }
 
-const QString GuiSettings::ButtonStyleSheet = "background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px";
-const QString GuiSettings::TableStyleSheet = "background-color: #000000; color: #EEEEEE; gridline-color: #303030; selection-color: #EEEEEE; selection-background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px;";
-const QString GuiSettings::ScrollbarStyleSheet = "background-color: #303030; color: #B0B0B0; gridline-color: #303030;";
-const QColor GuiSettings::ButtonTextColor(0xC2, 0xC2, 0xC2);
-const QColor GuiSettings::ButtonTextHighlightColor(0x90, 0x90, 0xFF);
-const QString GuiSettings::StandardFont = "Courier New";
+int GuiSettings::getSettingsValue(std::string const & key, int defaultValue)
+{
+	QSettings settings;
+	return settings.value(QString::fromStdString(key), QVariant(defaultValue)).toInt();
+}
+
+double GuiSettings::getSettingsValue(std::string const & key, double defaultValue)
+{
+	QSettings settings;
+	return settings.value(QString::fromStdString(key), QVariant(defaultValue)).toDouble();
+}
+
+bool GuiSettings::getSettingsValue(std::string const & key, bool defaultValue)
+{
+	QSettings settings;
+	return settings.value(QString::fromStdString(key), QVariant(defaultValue)).toBool();
+}
+
+void GuiSettings::setSettingsValue(std::string const & key, int value)
+{
+	QSettings settings;
+	settings.setValue(QString::fromStdString(key), QVariant(value));
+}
+
+void GuiSettings::setSettingsValue(std::string const & key, double value)
+{
+	QSettings settings;
+	settings.setValue(QString::fromStdString(key), QVariant(value));
+}
+
+void GuiSettings::setSettingsValue(std::string const & key, bool value)
+{
+	QSettings settings;
+	settings.setValue(QString::fromStdString(key), QVariant(value));
+}

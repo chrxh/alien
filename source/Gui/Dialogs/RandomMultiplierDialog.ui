@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>530</width>
+    <width>581</width>
     <height>260</height>
    </rect>
   </property>
@@ -50,15 +50,15 @@
        </rect>
       </property>
       <property name="text">
-       <string>number</string>
+       <string>number of copies</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="numberEdit">
       <property name="geometry">
        <rect>
-        <x>330</x>
+        <x>350</x>
         <y>30</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -75,9 +75,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>330</x>
+        <x>350</x>
         <y>150</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -94,9 +94,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>410</x>
+        <x>450</x>
         <y>150</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -113,9 +113,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>410</x>
+        <x>450</x>
         <y>90</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -132,9 +132,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>330</x>
+        <x>350</x>
         <y>90</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -151,9 +151,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>330</x>
+        <x>350</x>
         <y>120</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -170,9 +170,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>410</x>
+        <x>450</x>
         <y>120</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -188,7 +188,7 @@
        <rect>
         <x>10</x>
         <y>90</y>
-        <width>301</width>
+        <width>321</width>
         <height>20</height>
        </rect>
       </property>
@@ -201,7 +201,7 @@
        <rect>
         <x>10</x>
         <y>120</y>
-        <width>291</width>
+        <width>321</width>
         <height>20</height>
        </rect>
       </property>
@@ -209,12 +209,12 @@
        <string>randomize velocity y (min-max)</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="randomizeAngVelcheckBox">
+     <widget class="QCheckBox" name="randomizeAngVelCheckBox">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>150</y>
-        <width>301</width>
+        <width>331</width>
         <height>20</height>
        </rect>
       </property>
@@ -227,7 +227,7 @@
        <rect>
         <x>10</x>
         <y>60</y>
-        <width>301</width>
+        <width>321</width>
         <height>20</height>
        </rect>
       </property>
@@ -241,9 +241,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>330</x>
+        <x>350</x>
         <y>60</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -260,9 +260,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>410</x>
+        <x>450</x>
         <y>60</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -289,22 +289,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>RandomMultiplierDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>264</x>
-     <y>244</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>260</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
@@ -386,7 +370,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>randomizeAngVelcheckBox</sender>
+   <sender>randomizeAngVelCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>minAngVelEdit</receiver>
    <slot>setEnabled(bool)</slot>
@@ -402,7 +386,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>randomizeAngVelcheckBox</sender>
+   <sender>randomizeAngVelCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>maxAngVelEdit</receiver>
    <slot>setEnabled(bool)</slot>

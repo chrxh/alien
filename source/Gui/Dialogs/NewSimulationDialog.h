@@ -24,7 +24,10 @@ public:
 	uint getMaxThreads() const;
 	SymbolTable* getSymbolTable() const;
 	SimulationParameters* getSimulationParameters() const;
-	qreal getEnergy() const;
+	double getEnergy() const;
+
+private:
+	IntVector2D getUnitSize() const;
 
 private:
 	Q_SLOT void simulationParametersButtonClicked();
