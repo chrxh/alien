@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>add random energy</string>
+   <string>new particles</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -71,7 +71,7 @@
        <rect>
         <x>220</x>
         <y>30</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -87,7 +87,7 @@
        <rect>
         <x>220</x>
         <y>60</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -114,22 +114,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>NewParticlesDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
