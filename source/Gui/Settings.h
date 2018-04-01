@@ -133,6 +133,11 @@ namespace Const
 	const double NewHexagonDistanceDefault = 1.0;
 	const std::string NewHexagonCellEnergyKey = "newHaxagon/cellEnergy";
 	const double NewHexagonCellEnergyDefault = 100.0;
+
+	const std::string NewParticlesTotalEnergyKey = "newParticles/totalEnergy";
+	const double NewParticlesTotalEnergyDefault = 1000000.0;
+	const std::string NewParticlesMaxEnergyPerParticleKey = "newParticles/maxEnergyPerParticle";
+	const double NewParticlesMaxEnergyPerParticleDefault = 50.0;
 }
 
 class GuiSettings
