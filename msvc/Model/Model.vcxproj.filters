@@ -181,6 +181,9 @@
     <ClInclude Include="..\..\source\Model\Api\Physics.h">
       <Filter>Source Files\Api</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Model\Api\Validation.h">
+      <Filter>Source Files\Api</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Model\Api\ChangeDescriptions.cpp">
@@ -616,6 +619,9 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Api\Physics.cpp">
+      <Filter>Source Files\Api</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Api\Validation.cpp">
       <Filter>Source Files\Api</Filter>
     </ClCompile>
   </ItemGroup>

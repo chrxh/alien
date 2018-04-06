@@ -3,12 +3,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "Gui/Settings.h"
 #include "Model/Api/SimulationParameters.h"
 #include "Model/Api/Settings.h"
 #include "Model/Api/Serializer.h"
+#include "Model/Api/Validation.h"
+#include "Gui/Settings.h"
 
-#include "SimulationParametersValidation.h"
 #include "SerializationHelper.h"
 #include "SimulationParametersDialog.h"
 #include "ui_simulationparametersdialog.h"
@@ -45,8 +45,16 @@ SimulationParameters* SimulationParametersDialog::getSimulationParameters ()
 
 void SimulationParametersDialog::okClicked()
 {
-	if (SimulationParametersValidation::validate(_universeSize, _gridSize, getSimulationParameters())) {
+	auto valResult = Validation::validate(_universeSize, _gridSize, getSimulationParameters());
+	if (valResult == ValidationResult::Ok) {
 		accept();
+	}
+	else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
+		QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+		msgBox.exec();
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
 	}
 }
 
