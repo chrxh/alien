@@ -1,6 +1,8 @@
-﻿#include "Gui/Settings.h"
+﻿#include <QMessageBox>
 
-#include "SimulationParametersValidation.h"
+#include "Model/Api/Validation.h"
+#include "Gui/Settings.h"
+
 #include "ComputationGridDialog.h"
 
 ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, SimulationParameters const* parameters
@@ -99,8 +101,16 @@ void ComputationGridDialog::okClicked()
 		return;
 	}
 
-	if (SimulationParametersValidation::validate(*universeSize, *gridSize, _parameters)) {
+	auto valResult = Validation::validate(*universeSize, *gridSize, _parameters);
+	if (valResult == ValidationResult::Ok) {
 		accept();
+	}
+	else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
+		QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+		msgBox.exec();
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
 	}
 }
 

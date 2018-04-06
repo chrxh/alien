@@ -9,6 +9,7 @@
 #include "Model/Api/Serializer.h"
 #include "Model/Api/SymbolTable.h"
 #include "Model/Api/Physics.h"
+#include "Model/Api/Validation.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
@@ -36,7 +37,6 @@
 #include "ActionModel.h"
 #include "ActionController.h"
 #include "ActionHolder.h"
-#include "Gui/Dialogs/SimulationParametersValidation.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
@@ -275,9 +275,17 @@ void ActionController::onLoadSimulationParameters()
 		SimulationParameters* parameters;
 		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
 			auto const& config = _mainController->getSimulationConfig();
-			if (SimulationParametersValidation::validate(config.universeSize, config.gridSize, parameters)) {
+			auto valResult = Validation::validate(config.universeSize, config.gridSize, parameters);
+			if (valResult == ValidationResult::Ok) {
 				_mainModel->setSimulationParameters(parameters);
 				_mainController->onUpdateSimulationParametersForRunningSimulation();
+			}
+			else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
+				QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+				msgBox.exec();
+			}
+			else {
+				THROW_NOT_IMPLEMENTED();
 			}
 		}
 		else {
