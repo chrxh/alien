@@ -356,6 +356,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>gridSizeXEdit</tabstop>
+  <tabstop>gridSizeYEdit</tabstop>
+  <tabstop>unitSizeXEdit</tabstop>
+  <tabstop>unitSizeYEdit</tabstop>
+  <tabstop>maxThreadsEdit</tabstop>
+  <tabstop>energyEdit</tabstop>
+  <tabstop>simulationParametersButton</tabstop>
+  <tabstop>symbolTableButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
