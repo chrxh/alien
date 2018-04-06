@@ -448,7 +448,7 @@ void Cluster::processingMovement ()
             qreal angularVelA2 = 0;
             qreal angularVelB2 = 0;
             n.normalize();
-            if( n.length() < ALIEN_PRECISION )
+            if( n.length() < Const::AlienPrecision )
                 n.setX(1.0);
 
             Physics::collision(_vel, otherCluster->getVelocity(),//, clusterPos, otherClusterPos, centerPos,
@@ -552,7 +552,7 @@ void Cluster::processingMovement ()
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
                 qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew) / static_cast<qreal>(fusedCells.size())) / parameters->cellMass_Reciprocal;
-                if( eDiff > ALIEN_PRECISION ) {
+                if( eDiff > Const::AlienPrecision ) {
                     for (Cell* cell : fusedCells) {
 
                         //create token?
