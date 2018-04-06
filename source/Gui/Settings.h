@@ -138,6 +138,15 @@ namespace Const
 	const double NewParticlesTotalEnergyDefault = 1000000.0;
 	const std::string NewParticlesMaxEnergyPerParticleKey = "newParticles/maxEnergyPerParticle";
 	const double NewParticlesMaxEnergyPerParticleDefault = 50.0;
+
+	const std::string NewRectangleSizeXKey = "newRectangle/size/x";
+	const int NewRectangleSizeXDefault = 10;
+	const std::string NewRectangleSizeYKey = "newRectangle/size/y";
+	const int NewRectangleSizeYDefault = 10;
+	const std::string NewRectangleDistKey = "newRectangle/distance";
+	const double NewRectangleDistDefault = 1.0;
+	const std::string NewRectangleCellEnergyKey = "newRectangle/cellEnergy";
+	const double NewRectangleCellEnergyDefault = 100.0;
 }
 
 class GuiSettings

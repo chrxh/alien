@@ -287,6 +287,21 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>numberEdit</tabstop>
+  <tabstop>randomizeAngleCheckBox</tabstop>
+  <tabstop>minAngleEdit</tabstop>
+  <tabstop>maxAngleEdit</tabstop>
+  <tabstop>randomizeVelXcheckBox</tabstop>
+  <tabstop>minVelXEdit</tabstop>
+  <tabstop>maxVelXEdit</tabstop>
+  <tabstop>randomizeVelYcheckBox</tabstop>
+  <tabstop>minVelYEdit</tabstop>
+  <tabstop>maxVelYEdit</tabstop>
+  <tabstop>randomizeAngVelCheckBox</tabstop>
+  <tabstop>minAngVelEdit</tabstop>
+  <tabstop>maxAngVelEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

@@ -77,7 +77,7 @@
        <rect>
         <x>220</x>
         <y>20</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -93,7 +93,7 @@
        <rect>
         <x>220</x>
         <y>50</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -122,7 +122,7 @@
        <rect>
         <x>220</x>
         <y>80</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -158,7 +158,7 @@
        <rect>
         <x>220</x>
         <y>20</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -187,29 +187,13 @@
  <connections>
   <connection>
    <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>NewRectangleDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>264</x>
-     <y>177</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>NewRectangleDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>332</x>
-     <y>177</y>
+     <x>333</x>
+     <y>238</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

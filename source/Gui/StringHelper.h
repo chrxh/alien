@@ -13,7 +13,7 @@ public:
 
 	static QString toString(double value)
 	{
-		return QString::fromStdString(std::to_string(value));
+		return QString("%1").arg(value);// QString::fromStdString(std::to_string(value));
 	}
 
 	static QString generateFormattedIntString(int i)

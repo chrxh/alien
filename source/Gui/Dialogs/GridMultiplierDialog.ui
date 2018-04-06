@@ -411,7 +411,7 @@
        <rect>
         <x>370</x>
         <y>60</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -520,7 +520,7 @@
        <rect>
         <x>370</x>
         <y>90</y>
-        <width>71</width>
+        <width>91</width>
         <height>22</height>
        </rect>
       </property>
@@ -595,48 +595,34 @@
        <string>angle increment</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="initialAngleEdit_2">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>370</x>
-        <y>90</y>
-        <width>91</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>0.0</string>
-      </property>
-      <property name="frame">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="initialVelXEdit_2">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>370</x>
-        <y>60</y>
-        <width>91</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>0.0</string>
-      </property>
-      <property name="frame">
-       <bool>false</bool>
-      </property>
-     </widget>
     </widget>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>initialPosXEdit</tabstop>
+  <tabstop>initialPosYEdit</tabstop>
+  <tabstop>velXCheckBox</tabstop>
+  <tabstop>velYCheckBox</tabstop>
+  <tabstop>initialVelXEdit</tabstop>
+  <tabstop>initialVelYEdit</tabstop>
+  <tabstop>angleCheckBox</tabstop>
+  <tabstop>initialAngleEdit</tabstop>
+  <tabstop>angVelCheckBox</tabstop>
+  <tabstop>initialAngVelEdit</tabstop>
+  <tabstop>horizontalNumberEdit</tabstop>
+  <tabstop>horIntervalEdit</tabstop>
+  <tabstop>horVelXIncEdit</tabstop>
+  <tabstop>horVelYIncEdit</tabstop>
+  <tabstop>horAngleIncEdit</tabstop>
+  <tabstop>horAngVelIncEdit</tabstop>
+  <tabstop>verticalNumberEdit</tabstop>
+  <tabstop>verIntervalEdit</tabstop>
+  <tabstop>verVelXIncEdit</tabstop>
+  <tabstop>verVelYIncEdit</tabstop>
+  <tabstop>verAngleIncEdit</tabstop>
+  <tabstop>verAngVelIncEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

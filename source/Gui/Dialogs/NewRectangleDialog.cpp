@@ -1,5 +1,6 @@
-#include "Gui/Settings.h"
 #include "Model/Api/SimulationParameters.h"
+#include "Gui/Settings.h"
+#include "Gui/StringHelper.h"
 
 #include "NewRectangleDialog.h"
 #include "ui_NewRectangleDialog.h"
@@ -11,6 +12,17 @@ NewRectangleDialog::NewRectangleDialog(SimulationParameters const* simulationPar
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
     ui->energyEdit->setText(QString("%1").arg(simulationParameters->cellCreationEnergy));
+
+	ui->sizeXEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::NewRectangleSizeXKey, Const::NewRectangleSizeXDefault)));
+	ui->sizeYEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::NewRectangleSizeYKey, Const::NewRectangleSizeYDefault)));
+	ui->distEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::NewRectangleDistKey, Const::NewRectangleDistDefault)));
+	ui->energyEdit->setText(StringHelper::toString(
+		GuiSettings::getSettingsValue(Const::NewRectangleCellEnergyKey, Const::NewRectangleCellEnergyDefault)));
+
+	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewRectangleDialog::okClicked);
 }
 
 NewRectangleDialog::~NewRectangleDialog()
@@ -34,6 +46,16 @@ double NewRectangleDialog::getInternalEnergy () const
 {
     bool ok(true);
     return ui->energyEdit->text().toDouble(&ok);
+}
+
+void NewRectangleDialog::okClicked()
+{
+	GuiSettings::setSettingsValue(Const::NewRectangleSizeXKey, getBlockSize().x);
+	GuiSettings::setSettingsValue(Const::NewRectangleSizeYKey, getBlockSize().y);
+	GuiSettings::setSettingsValue(Const::NewRectangleDistKey, getDistance());
+	GuiSettings::setSettingsValue(Const::NewRectangleCellEnergyKey, getInternalEnergy());
+
+	accept();
 }
 
 

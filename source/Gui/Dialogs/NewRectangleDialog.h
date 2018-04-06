@@ -20,5 +20,8 @@ public:
 	double getInternalEnergy () const;
 
 private:
+	Q_SLOT void okClicked();
+
+private:
     Ui::NewRectangleDialog *ui;
 };
