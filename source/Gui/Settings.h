@@ -41,7 +41,10 @@ namespace Const
 	const QColor ButtonTextHighlightColor(0x90, 0x90, 0xFF);
 	const QString StandardFont = "Courier New";
 
-	//setting keys
+	//setting keys and default values
+	const std::string MainViewFullScreenKey = "mainView/fullScreen";
+	const bool MainViewFullScreenDefault = true;
+
 	const std::string GridSizeXKey = "newSim/gridSize/x";
 	const int GridSizeXDefault = 12;
 	const std::string GridSizeYKey = "newSim/gridSize/y";

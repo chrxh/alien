@@ -189,6 +189,8 @@ void ActionController::onToggleFullscreen(bool fullscreen)
 		state &= ~Qt::WindowFullScreen;
 	}
 	_mainView->setWindowState(state);
+
+	GuiSettings::setSettingsValue(Const::MainViewFullScreenKey, fullscreen);
 }
 
 void ActionController::onToggleEditorMode(bool editMode)
