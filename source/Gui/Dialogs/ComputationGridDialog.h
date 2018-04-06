@@ -18,7 +18,7 @@ public:
 	optional<IntVector2D> getUniverseSize() const;
 
 private:
-	void updateUniverseSize();
+	void updateLabels();
 
 	Q_SLOT void okClicked();
 

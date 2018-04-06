@@ -2,6 +2,7 @@
 
 #include "Model/Api/Validation.h"
 #include "Gui/Settings.h"
+#include "Gui/StringHelper.h"
 
 #include "ComputationGridDialog.h"
 
@@ -22,10 +23,11 @@ ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, Sim
 	ui.universeSizeYLabel->setText(QString::number(config.universeSize.y));
 	ui.maxThreadsEdit->setText(QString::number(config.maxThreads));
 
-	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
-	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
-	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
-	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateUniverseSize);
+	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
+	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
+	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
+	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
+	connect(ui.maxThreadsEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &ComputationGridDialog::okClicked);
 }
 
@@ -71,7 +73,7 @@ optional<IntVector2D> ComputationGridDialog::getUniverseSize() const
 	return result;
 }
 
-void ComputationGridDialog::updateUniverseSize()
+void ComputationGridDialog::updateLabels()
 {
 	bool ok = false;
 	int gridSizeX = ui.gridSizeXEdit->text().toUInt(&ok);
@@ -89,6 +91,13 @@ void ComputationGridDialog::updateUniverseSize()
 	IntVector2D universeSize = { gridSizeX * unitSizeX, gridSizeY * unitSizeY };
 	ui.universeSizeXLabel->setText(QString::fromStdString(std::to_string(universeSize.x)));
 	ui.universeSizeYLabel->setText(QString::fromStdString(std::to_string(universeSize.y)));
+
+	int limitThreads = *getMaxThreads();
+	int activeThreads = std::min((gridSizeX / 3) * (gridSizeY / 3), limitThreads);
+	int totalThreads = gridSizeX * gridSizeY;
+	ui.activeThreadsLabel->setText(StringHelper::toString(activeThreads) + QString(" (active)"));
+	ui.totalThreadsLabel->setText(StringHelper::toString(totalThreads) + QString(" (total)"));
+
 }
 
 void ComputationGridDialog::okClicked()

@@ -6,20 +6,20 @@
 #include "Model/Api/SimulationParameters.h"
 
 namespace Ui {
-class NewSimulationDialog;
+	class NewSimulationDialog;
 }
 
 class SimulationParametersDialog;
 class SymbolTableDialog;
 class NewSimulationDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	NewSimulationDialog(SimulationParameters const* parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = nullptr);
-    virtual ~NewSimulationDialog();
+	virtual ~NewSimulationDialog();
 
-    IntVector2D getUniverseSize() const;
+	IntVector2D getUniverseSize() const;
 	IntVector2D getGridSize() const;
 	uint getMaxThreads() const;
 	SymbolTable* getSymbolTable() const;
@@ -32,11 +32,11 @@ private:
 private:
 	Q_SLOT void simulationParametersButtonClicked();
 	Q_SLOT void symbolTableButtonClicked();
-	Q_SLOT void updateUniverseSize();
+	Q_SLOT void updateLabels();
 	Q_SLOT void okClicked();
 
 private:
-    Ui::NewSimulationDialog *ui;
+	Ui::NewSimulationDialog *ui;
 	Serializer* _serializer = nullptr;
 
 	SimulationParameters* _parameters = nullptr;
