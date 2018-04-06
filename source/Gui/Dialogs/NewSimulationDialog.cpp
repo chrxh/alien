@@ -1,12 +1,11 @@
 #include <QMessageBox>
 
-#include "Model/Local/UnitContext.h"
+#include "Model/Api/Validation.h"
 
 #include "Gui/Settings.h"
 #include "Gui/StringHelper.h"
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"
-#include "SimulationParametersValidation.h"
 
 #include "NewSimulationDialog.h"
 #include "ui_newsimulationdialog.h"
@@ -138,7 +137,8 @@ void NewSimulationDialog::updateUniverseSize()
 
 void NewSimulationDialog::okClicked()
 {
-	if (SimulationParametersValidation::validate(getUniverseSize(), getGridSize(), getSimulationParameters())) {
+	auto valResult = Validation::validate(getUniverseSize(), getGridSize(), getSimulationParameters());
+	if (valResult == ValidationResult::Ok) {
 		GuiSettings::setSettingsValue(Const::GridSizeXKey, getGridSize().x);
 		GuiSettings::setSettingsValue(Const::GridSizeYKey, getGridSize().y);
 		GuiSettings::setSettingsValue(Const::UnitSizeXKey, getUnitSize().x);
@@ -146,6 +146,13 @@ void NewSimulationDialog::okClicked()
 		GuiSettings::setSettingsValue(Const::MaxThreadsKey, static_cast<int>(getMaxThreads()));
 		GuiSettings::setSettingsValue(Const::MaxThreadsKey, getEnergy());
 		accept();
+	}
+	else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
+		QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+		msgBox.exec();
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
 	}
 }
 
