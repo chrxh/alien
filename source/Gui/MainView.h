@@ -20,6 +20,8 @@ public:
 
 	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository
 		, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator);
+
+
 	virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller);
@@ -34,10 +36,13 @@ private:
 	void setupMenu();
 	void setupFontsAndColors();
 	void setupWidgets();
+	void setupFullScreen();
 
+private:
 	Q_SLOT void documentationWindowClosed();
 	Q_SLOT void monitorClosed();
 
+private:
 	Ui::MainView* ui = nullptr;
 	VisualEditController* _visualEditor = nullptr;
 	DocumentationWindow* _documentationWindow = nullptr;
