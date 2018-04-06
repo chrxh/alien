@@ -280,7 +280,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //not enough energy?
-                if( token->getEnergy() <= (parameters->cellCreationEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellCreationEnergy + eDiff + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore cluster
@@ -356,7 +356,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                     tokenEnergy = parameters->tokenCreationEnergy;
 
                 //not enough energy?
-                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore construction site
@@ -415,7 +415,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                     if( (otherCell->getNumConnections() < parameters->cellMaxBonds)
                             && (newCell->getNumConnections() < parameters->cellMaxBonds)
                             && (otherCell !=constructionCell ) ) {
-                        if (metric->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (parameters->cellMaxDistance + ALIEN_PRECISION) ) {
+                        if (metric->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (parameters->cellMaxDistance + Const::AlienPrecision) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( tokenMem.at(Enums::Constr::IN_CELL_MAX_CONNECTIONS) == 0 ) {
@@ -566,7 +566,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                     tokenEnergy = parameters->tokenCreationEnergy;
 
                 //not enough energy?
-                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
                     return processingResult;
                 }

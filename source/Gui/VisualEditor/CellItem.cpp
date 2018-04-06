@@ -43,19 +43,19 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 	QColor brushColor;
 	uint8_t colorCode = getColorCode();
     if( colorCode == 0 )
-       brushColor = INDIVIDUAL_CELL_COLOR1;
+       brushColor = Const::IndividualCellColor1;
     if( colorCode == 1 )
-        brushColor = INDIVIDUAL_CELL_COLOR2;
+        brushColor = Const::IndividualCellColor2;
     if( colorCode == 2 )
-        brushColor = INDIVIDUAL_CELL_COLOR3;
+        brushColor = Const::IndividualCellColor3;
     if( colorCode == 3 )
-        brushColor = INDIVIDUAL_CELL_COLOR4;
+        brushColor = Const::IndividualCellColor4;
     if( colorCode == 4 )
-        brushColor = INDIVIDUAL_CELL_COLOR5;
+        brushColor = Const::IndividualCellColor5;
     if( colorCode == 5 )
-        brushColor = INDIVIDUAL_CELL_COLOR6;
+        brushColor = Const::IndividualCellColor6;
     if( colorCode >= 6 )
-        brushColor = INDIVIDUAL_CELL_COLOR7;
+        brushColor = Const::IndividualCellColor7;
 	if (!isConnectable()) {
 		brushColor.setHsl(brushColor.hslHue(), brushColor.hslSaturation(), qMax(0, brushColor.lightness() - 60), brushColor.alpha());
 	}
@@ -92,10 +92,10 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 	if (_config->isShowCellInfo()) {
 		auto font = GuiSettings::getCellFont();
 		painter->setFont(font);
-		painter->setPen(QPen(QBrush(CELLFUNCTION_INFO_COLOR), CoordinateSystem::modelToScene(0.03)));
+		painter->setPen(QPen(QBrush(Const::CellFunctionInfoColor), CoordinateSystem::modelToScene(0.03)));
 		painter->drawText(QRectF(CoordinateSystem::modelToScene(-1.5), CoordinateSystem::modelToScene(0.1), CoordinateSystem::modelToScene(3.0)
 			, CoordinateSystem::modelToScene(1.0)), Qt::AlignCenter, _displayString);
-		painter->setPen(QPen(QBrush(BRANCHNUMBER_INFO_COLOR), CoordinateSystem::modelToScene(0.03)));
+		painter->setPen(QPen(QBrush(Const::BranchNumberInfoColor), CoordinateSystem::modelToScene(0.03)));
 		painter->drawText(QRectF(CoordinateSystem::modelToScene(-0.49), CoordinateSystem::modelToScene(-0.47)
 			, CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0)), Qt::AlignCenter, QString::number(getBranchNumber()));
 	}
