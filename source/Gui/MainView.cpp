@@ -63,7 +63,7 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	setupMenu();
 	setupFontsAndColors();
 	setupWidgets();
-	setWindowState(windowState() | Qt::WindowFullScreen);
+	setupFullScreen();
 	show();
 
 	_startScreen->start();
@@ -219,6 +219,14 @@ void MainView::setupWidgets()
 		_actions->getActionHolder()->actionRestrictTPS->setChecked(true);
 		Q_EMIT _actions->getActionHolder()->actionRestrictTPS->triggered(true);
 	});
+}
+
+void MainView::setupFullScreen()
+{
+	bool fullScreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
+	if (fullScreen) {
+		setWindowState(windowState() | Qt::WindowFullScreen);
+	}
 }
 
 void MainView::documentationWindowClosed()
