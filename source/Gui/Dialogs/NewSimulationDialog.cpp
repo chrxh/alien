@@ -34,14 +34,15 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const* parameters,
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));
 
-	updateUniverseSize();
+	updateLabels();
 
     connect(ui->simulationParametersButton, &QPushButton::clicked, this, &NewSimulationDialog::simulationParametersButtonClicked);
     connect(ui->symbolTableButton, &QPushButton::clicked, this, &NewSimulationDialog::symbolTableButtonClicked);
-	connect(ui->gridSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
-	connect(ui->gridSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
-	connect(ui->unitSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
-	connect(ui->unitSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateUniverseSize);
+	connect(ui->gridSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateLabels);
+	connect(ui->gridSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateLabels);
+	connect(ui->unitSizeXEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateLabels);
+	connect(ui->unitSizeYEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateLabels);
+	connect(ui->maxThreadsEdit, &QLineEdit::textEdited, this, &NewSimulationDialog::updateLabels);
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewSimulationDialog::okClicked);
 }
 
@@ -114,7 +115,7 @@ void NewSimulationDialog::symbolTableButtonClicked ()
 	}
 }
 
-void NewSimulationDialog::updateUniverseSize()
+void NewSimulationDialog::updateLabels()
 {
 	bool ok = false;
 	int gridSizeX = ui->gridSizeXEdit->text().toUInt(&ok);
@@ -133,6 +134,11 @@ void NewSimulationDialog::updateUniverseSize()
 	_gridSize = { gridSizeX, gridSizeY };
 	ui->universeSizeXLabel->setText(StringHelper::toString(_universeSize.x));
 	ui->universeSizeYLabel->setText(StringHelper::toString(_universeSize.y));
+	int limitThreads = getMaxThreads();
+	int activeThreads = std::min((gridSizeX / 3) * (gridSizeY / 3), limitThreads);
+	int totalThreads = gridSizeX * gridSizeY;
+	ui->activeThreadsLabel->setText(StringHelper::toString(activeThreads) + QString(" (active)"));
+	ui->totalThreadsLabel->setText(StringHelper::toString(totalThreads) + QString(" (total)"));
 }
 
 void NewSimulationDialog::okClicked()
@@ -144,7 +150,7 @@ void NewSimulationDialog::okClicked()
 		GuiSettings::setSettingsValue(Const::UnitSizeXKey, getUnitSize().x);
 		GuiSettings::setSettingsValue(Const::UnitSizeYKey, getUnitSize().y);
 		GuiSettings::setSettingsValue(Const::MaxThreadsKey, static_cast<int>(getMaxThreads()));
-		GuiSettings::setSettingsValue(Const::MaxThreadsKey, getEnergy());
+		GuiSettings::setSettingsValue(Const::InitialEnergyKey, getEnergy());
 		accept();
 	}
 	else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
