@@ -306,39 +306,39 @@ namespace
 		uint8_t b = 0;
 		auto const& color = meta.color;
 		if (color == 0) {
-			r = INDIVIDUAL_CELL_COLOR1.red();
-			g = INDIVIDUAL_CELL_COLOR1.green();
-			b = INDIVIDUAL_CELL_COLOR1.blue();
+			r = Const::IndividualCellColor1.red();
+			g = Const::IndividualCellColor1.green();
+			b = Const::IndividualCellColor1.blue();
 		}
 		if (color == 1) {
-			r = INDIVIDUAL_CELL_COLOR2.red();
-			g = INDIVIDUAL_CELL_COLOR2.green();
-			b = INDIVIDUAL_CELL_COLOR2.blue();
+			r = Const::IndividualCellColor2.red();
+			g = Const::IndividualCellColor2.green();
+			b = Const::IndividualCellColor2.blue();
 		}
 		if (color == 2) {
-			r = INDIVIDUAL_CELL_COLOR3.red();
-			g = INDIVIDUAL_CELL_COLOR3.green();
-			b = INDIVIDUAL_CELL_COLOR3.blue();
+			r = Const::IndividualCellColor3.red();
+			g = Const::IndividualCellColor3.green();
+			b = Const::IndividualCellColor3.blue();
 		}
 		if (color == 3) {
-			r = INDIVIDUAL_CELL_COLOR4.red();
-			g = INDIVIDUAL_CELL_COLOR4.green();
-			b = INDIVIDUAL_CELL_COLOR4.blue();
+			r = Const::IndividualCellColor4.red();
+			g = Const::IndividualCellColor4.green();
+			b = Const::IndividualCellColor4.blue();
 		}
 		if (color == 4) {
-			r = INDIVIDUAL_CELL_COLOR5.red();
-			g = INDIVIDUAL_CELL_COLOR5.green();
-			b = INDIVIDUAL_CELL_COLOR5.blue();
+			r = Const::IndividualCellColor5.red();
+			g = Const::IndividualCellColor5.green();
+			b = Const::IndividualCellColor5.blue();
 		}
 		if (color == 5) {
-			r = INDIVIDUAL_CELL_COLOR6.red();
-			g = INDIVIDUAL_CELL_COLOR6.green();
-			b = INDIVIDUAL_CELL_COLOR6.blue();
+			r = Const::IndividualCellColor6.red();
+			g = Const::IndividualCellColor6.green();
+			b = Const::IndividualCellColor6.blue();
 		}
 		if (color == 6) {
-			r = INDIVIDUAL_CELL_COLOR7.red();
-			g = INDIVIDUAL_CELL_COLOR7.green();
-			b = INDIVIDUAL_CELL_COLOR7.blue();
+			r = Const::IndividualCellColor7.red();
+			g = Const::IndividualCellColor7.green();
+			b = Const::IndividualCellColor7.blue();
 		}
 		quint32 e = energy / 2.0 + 20.0;
 		if (e > 150) {

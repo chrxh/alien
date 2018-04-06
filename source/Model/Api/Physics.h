@@ -41,7 +41,7 @@ public:
     static QVector2D rotateQuarterCounterClockwise (QVector2D v);
     static qreal angleOfVector (QVector2D v);   //0 DEG corresponds to (0,-1)
     static QVector2D unitVectorOfAngle (qreal angle);
-    static bool compareEqualAngle (qreal angle1, qreal angle2, qreal precision = ALIEN_PRECISION);
+    static bool compareEqualAngle (qreal angle1, qreal angle2, qreal precision = Const::AlienPrecision);
     static qreal subtractAngle (qreal angleMinuend, qreal angleSubtrahend);
     static qreal clockwiseAngleFromFirstToSecondVector (QVector2D v1, QVector2D v2);
 };
