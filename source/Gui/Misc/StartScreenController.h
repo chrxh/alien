@@ -11,6 +11,7 @@ public:
 	virtual ~StartScreenController();
 
 	void start();
+	bool isFinished() const;
 
 private:
 	Q_SLOT void timerTimeout();
@@ -20,6 +21,6 @@ private:
 
 	QTimer* _timer = nullptr;
 
-	enum class State { HideWidget, ShowWidget, FadeoutWidget };
+	enum class State { HideWidget, ShowWidget, FadeoutWidget, Finished };
 	State _state = State::HideWidget;
 };
