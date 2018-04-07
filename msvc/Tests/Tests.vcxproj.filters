@@ -65,9 +65,6 @@
     <ClCompile Include="..\..\source\Tests\ChangeDescriptionsTest.cpp">
       <Filter>Source Files\UnitTests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\CommunicatorFunctionTest.cpp">
-      <Filter>Source Files\UnitTests</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp">
       <Filter>Source Files\UnitTests</Filter>
     </ClCompile>
@@ -88,6 +85,9 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Tests\TestSuite.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CommunicatorFunctionTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

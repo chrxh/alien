@@ -1,5 +1,4 @@
-#ifndef GLOBALFACTORY_H
-#define GLOBALFACTORY_H
+#pragma once
 
 #include "Definitions.h"
 
@@ -10,5 +9,3 @@ public:
 
 	virtual NumberGenerator* buildRandomNumberGenerator() const = 0;
 };
-
-#endif // GLOBALFACTORY_H

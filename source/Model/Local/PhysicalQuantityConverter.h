@@ -2,7 +2,9 @@
 
 #include <QtGlobal>
 
-class PhysicalQuantityConverter
+#include "Model/Api/Definitions.h"
+
+class MODEL_EXPORT PhysicalQuantityConverter
 {
 public:
 	//Notice: all angles below are in DEG

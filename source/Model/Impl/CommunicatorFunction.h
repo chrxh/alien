@@ -12,6 +12,17 @@ public:
     CommunicatorFunction (QByteArray data, UnitContext* context);
 
     Enums::CellFunction::Type getType () const { return Enums::CellFunction::COMMUNICATOR; }
+	
+	struct InternalDataSemantic {
+		enum Type {
+			NewMessageReceived = 0,
+			Channel,
+			MessageCode,
+			OriginAngle,
+			OriginDistance,
+			_Count
+		};
+	};
 	QByteArray getInternalData () const override;
 
 	struct MessageData {
@@ -20,8 +31,6 @@ public:
 		quint8 angle = 0;
 		quint8 distance = 0;
 	};
-    bool& getNewMessageReceivedRef();
-    MessageData& getReceivedMessageRef();
 
 protected:
 	virtual ProcessingResult processImpl(Token* token, Cell* cell, Cell* previousCell) override;
