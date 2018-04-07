@@ -59,7 +59,7 @@ CellFeatureChain * CellFeatureFactoryImpl::build(CellFeatureDescription const & 
 		result = new SensorFunction(context);
 		break;
 	case Enums::CellFunction::COMMUNICATOR:
-		result = new CommunicatorFunction(desc.constData, context);
+		result = new CommunicatorFunction(desc.volatileData, context);
 		break;
 	}
 	result->registerNextFeature(new EnergyGuidanceImpl(context));

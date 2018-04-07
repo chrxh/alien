@@ -114,6 +114,20 @@ void SimulationAccessImpl::callBackUpdateData()
 	updateParticleData();
 }
 
+namespace
+{
+	void getClusterPosFromCells(ClusterDescription& desc)
+	{
+		if (!desc.pos && desc.cells) {
+			desc.pos = QVector2D();
+			for (CellDescription const& cell : *desc.cells) {
+				*desc.pos += *cell.pos;
+			}
+			*desc.pos /= desc.cells->size();
+		}
+	}
+}
+
 void SimulationAccessImpl::updateClusterData()
 {
 	if (_dataToUpdate.clusters.empty()) {
@@ -130,8 +144,10 @@ void SimulationAccessImpl::updateClusterData()
 	for (auto const& clusterTracker : _dataToUpdate.clusters) {
 		auto const& clusterDesc = clusterTracker.getValue();
 		if (clusterTracker.isAdded()) {
-			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
-			auto cluster = factory->build(clusterDesc, unitContext);
+			ClusterDescription clusterDescToAdd(clusterDesc);
+			getClusterPosFromCells(clusterDescToAdd);
+			auto unitContext = grid->getUnitOfMapPos(*clusterDescToAdd.pos)->getContext();
+			auto cluster = factory->build(clusterDescToAdd, unitContext);
 			unitContext->getClustersRef().push_back(cluster);
 		}
 		if (clusterTracker.isDeleted()) {
