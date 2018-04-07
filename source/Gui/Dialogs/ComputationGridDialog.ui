@@ -257,6 +257,13 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>gridSizeXEdit</tabstop>
+  <tabstop>gridSizeYEdit</tabstop>
+  <tabstop>unitSizeXEdit</tabstop>
+  <tabstop>unitSizeYEdit</tabstop>
+  <tabstop>maxThreadsEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

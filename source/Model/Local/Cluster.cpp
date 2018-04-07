@@ -551,22 +551,28 @@ void Cluster::processingMovement ()
                 qreal eKinNew = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
-                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew) / static_cast<qreal>(fusedCells.size())) / parameters->cellMass_Reciprocal;
+                qreal eDiff = (eKinOld1 + eKinOld2 - eKinNew) / (parameters->cellMass_Reciprocal * fusedCells.size());
                 if( eDiff > Const::AlienPrecision ) {
-                    for (Cell* cell : fusedCells) {
+					for (Cell* cell : fusedCells) {
 
-                        //create token?
-                        if( (cell->getNumToken() < parameters->cellMaxToken) && (eDiff > parameters->tokenMinEnergy) ) {
+						//create token?
+						if ((cell->getNumToken() < parameters->cellMaxToken) && (cell->getEnergy() + eDiff > parameters->tokenMinEnergy)) {
 							auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 							int tokenMemSize = _context->getSimulationParameters()->tokenMemorySize;
 							auto desc = TokenDescription().setEnergy(eDiff).setData(_context->getNumberGenerator()->getRandomArray(tokenMemSize));
-                            auto token = factory->build(desc, _context);
-                            cell->addToken(token, Cell::ActivateToken::Now, Cell::UpdateTokenBranchNumber::Yes);
-                        }
-                        //if not add to internal cell energy
-                        else
-                            cell->setEnergy(cell->getEnergy() + eDiff);
-                    }
+							if (desc.energy < parameters->tokenMinEnergy) {
+								double energyFromCell = parameters->tokenMinEnergy - *desc.energy;
+								cell->setEnergy(cell->getEnergy() - energyFromCell);
+								desc.setEnergy(parameters->tokenMinEnergy);
+							}
+							auto token = factory->build(desc, _context);
+							cell->addToken(token, Cell::ActivateToken::Now, Cell::UpdateTokenBranchNumber::Yes);
+						}
+						//if not add to internal cell energy
+						else {
+							cell->setEnergy(cell->getEnergy() + eDiff);
+						}
+					}
                 }
             }
         }
