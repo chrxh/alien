@@ -56,7 +56,7 @@ namespace Const
 	const std::string MaxThreadsKey = "newSim/maxThreads";
 	const int MaxThreadsDefault = 8;
 	const std::string InitialEnergyKey = "newSim/initialEnergy";
-	const int InitialEnergyDefault = 0;
+	const double InitialEnergyDefault = 0.0;
 
 	const std::string GridMulChangeVelXKey = "gridMul/changeVel/x";
 	const bool GridMulChangeVelXDefault = false;
