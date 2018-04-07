@@ -374,6 +374,7 @@
   <tabstop>gridSizeYEdit</tabstop>
   <tabstop>unitSizeXEdit</tabstop>
   <tabstop>unitSizeYEdit</tabstop>
+  <tabstop>maxThreadsEdit</tabstop>
   <tabstop>energyEdit</tabstop>
   <tabstop>simulationParametersButton</tabstop>
   <tabstop>symbolTableButton</tabstop>
