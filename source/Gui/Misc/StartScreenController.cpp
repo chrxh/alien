@@ -41,6 +41,11 @@ void StartScreenController::start()
 	_state = State::ShowWidget;
 }
 
+bool StartScreenController::isFinished() const
+{
+	return _state == State::Finished;
+}
+
 void StartScreenController::timerTimeout()
 {
 	switch (_state) {
@@ -58,7 +63,7 @@ void StartScreenController::timerTimeout()
 			delete _startScreenWidget;
 			_startScreenWidget = nullptr;
 			_timer->stop();
-			_state = State::HideWidget;
+			_state = State::Finished;
 		}
 	} break;
 	}
