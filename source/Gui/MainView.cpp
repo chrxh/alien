@@ -67,6 +67,7 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	show();
 
 	_startScreen->start();
+	_initialied = true;
 }
 
 void MainView::refresh()
@@ -92,6 +93,14 @@ InfoController * MainView::getInfoController() const
 void MainView::showDocumentation(bool show)
 {
 	_documentationWindow->setVisible(show);
+}
+
+void MainView::resizeEvent(QResizeEvent *event)
+{
+	QMainWindow::resizeEvent(event);
+	if (_initialied) {
+		refresh();
+	}
 }
 
 void MainView::closeEvent(QCloseEvent * event)

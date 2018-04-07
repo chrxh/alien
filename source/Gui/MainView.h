@@ -30,6 +30,7 @@ public:
 	virtual void showDocumentation(bool show);
 
 protected:
+	virtual void resizeEvent(QResizeEvent *event);
 	virtual void closeEvent(QCloseEvent* event);
 
 private:
@@ -59,4 +60,5 @@ private:
 	MonitorController* _monitor = nullptr;
 
 	StartScreenController* _startScreen = nullptr;
+	bool _initialied = false;
 };

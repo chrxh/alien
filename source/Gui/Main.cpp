@@ -36,7 +36,6 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
-//- Bild aktualisieren bei Fenstervergrößerungen
 //- kein Editieren der Namen der Simulationsparameter zulassen
 //- Check: wird SimulationAccessImpl::callBackCollectData zweimal aufgerufen bei PixelUniverseView::mouseMoveEvent? 
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
