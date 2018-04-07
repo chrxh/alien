@@ -8,7 +8,7 @@ class IntegrationTestFramework : public ::testing::Test
 {
 public:
 	IntegrationTestFramework(IntVector2D const& universeSize);
-	~IntegrationTestFramework();
+	virtual ~IntegrationTestFramework();
 
 protected:
 	void runSimulation(int timesteps, SimulationController* controller);

@@ -21,21 +21,14 @@ CommunicatorFunction::CommunicatorFunction(UnitContext* context)
 CommunicatorFunction::CommunicatorFunction (QByteArray data, UnitContext* context)
 	: CellFunction(context), _parameters(context->getSimulationParameters())
 {
-    _newMessageReceived = static_cast<bool>(data[0]);
-    _receivedMessage.channel = data[1];
-    _receivedMessage.message = data[2];
-    _receivedMessage.angle = data[3];
-    _receivedMessage.distance = data[4];
-}
-
-bool & CommunicatorFunction::getNewMessageReceivedRef()
-{
-	return _newMessageReceived;
-}
-
-CommunicatorFunction::MessageData & CommunicatorFunction::getReceivedMessageRef()
-{
-	return _receivedMessage;
+	if (data.size() < InternalDataSemantic::_Count) {
+		data.append(InternalDataSemantic::_Count - data.size(), 0);
+	}
+    _newMessageReceived = data[InternalDataSemantic::NewMessageReceived];
+    _receivedMessage.channel = data[InternalDataSemantic::Channel];
+    _receivedMessage.message = data[InternalDataSemantic::MessageCode];
+    _receivedMessage.angle = data[InternalDataSemantic::OriginAngle];
+    _receivedMessage.distance = data[InternalDataSemantic::OriginDistance];
 }
 
 CellFeatureChain::ProcessingResult CommunicatorFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
@@ -54,11 +47,11 @@ CellFeatureChain::ProcessingResult CommunicatorFunction::processImpl (Token* tok
 QByteArray CommunicatorFunction::getInternalData () const
 {
 	QByteArray data(5, 0);
-    data[0] = static_cast<quint8>(_newMessageReceived);
-    data[1] = _receivedMessage.channel;
-    data[2] = _receivedMessage.message;
-    data[3] = _receivedMessage.angle;
-    data[4] = _receivedMessage.distance;
+    data[InternalDataSemantic::NewMessageReceived] = static_cast<quint8>(_newMessageReceived);
+    data[InternalDataSemantic::Channel] = _receivedMessage.channel;
+    data[InternalDataSemantic::MessageCode] = _receivedMessage.message;
+    data[InternalDataSemantic::OriginAngle] = _receivedMessage.angle;
+    data[InternalDataSemantic::OriginDistance] = _receivedMessage.distance;
 	return data;
 }
 
@@ -91,9 +84,11 @@ int CommunicatorFunction::sendMessageToNearbyCommunicatorsAndReturnNumber (const
     int numMsg = 0;
     QList< Cell* > nearbyCommunicatorCells = findNearbyCommunicator (senderCell);
     foreach(Cell* nearbyCell, nearbyCommunicatorCells)
-        if( nearbyCell != senderCell )
-            if( sendMessageToCommunicatorAndReturnSuccess(messageDataToSend, senderCell, senderPreviousCell, nearbyCell) )
-                ++numMsg;
+		if (nearbyCell != senderCell) {
+			if (sendMessageToCommunicatorAndReturnSuccess(messageDataToSend, senderCell, senderPreviousCell, nearbyCell)) {
+				++numMsg;
+			}
+		}
     return numMsg;
 }
 
@@ -110,10 +105,8 @@ QList< Cell* > CommunicatorFunction::findNearbyCommunicator(Cell* cell) const
     return _context->getCellMap()->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 
-bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend,
-                                                                       Cell* senderCell,
-                                                                       Cell* senderPreviousCell,
-                                                                       Cell* receiverCell) const
+bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess (const MessageData& messageDataToSend
+	, Cell* senderCell, Cell* senderPreviousCell, Cell* receiverCell) const
 {
     CommunicatorFunction* communicator = receiverCell->getFeatures()->findObject<CommunicatorFunction>();
     if( communicator ) {
