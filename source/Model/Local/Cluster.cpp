@@ -560,7 +560,7 @@ void Cluster::processingMovement ()
 							auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 							int tokenMemSize = _context->getSimulationParameters()->tokenMemorySize;
 							auto desc = TokenDescription().setEnergy(eDiff).setData(_context->getNumberGenerator()->getRandomArray(tokenMemSize));
-							if (desc.energy < parameters->tokenMinEnergy) {
+							if (*desc.energy < parameters->tokenMinEnergy) {
 								double energyFromCell = parameters->tokenMinEnergy - *desc.energy;
 								cell->setEnergy(cell->getEnergy() - energyFromCell);
 								desc.setEnergy(parameters->tokenMinEnergy);

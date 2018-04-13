@@ -36,6 +36,8 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
+//- Total-Energy nimmt immer mehr ab
+//- graue Farbe nicht sichtbar in PixelView
 //- kein Editieren der Namen der Simulationsparameter zulassen
 //- Check: wird SimulationAccessImpl::callBackCollectData zweimal aufgerufen bei PixelUniverseView::mouseMoveEvent? 
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz

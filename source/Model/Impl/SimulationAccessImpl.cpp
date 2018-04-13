@@ -376,20 +376,69 @@ namespace
 	}
 }
 
+namespace
+{
+	void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
+	{
+		QRgb const& origColor = image->pixel(pos.x, pos.y);
+
+		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
+		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
+		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
+		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
+	}
+}
+
 void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 {
 	auto metric = unit->getContext()->getSpaceProperties();
 	auto const &clusters = unit->getContext()->getClustersRef();
+	list<IntVector2D> tokenPos;
 	for (auto const &cluster : clusters) {
 		for (auto const &cell : cluster->getCellsRef()) {
 			auto pos = metric->correctPositionAndConvertToIntVector(cell->calcPosition(true));
 			if (_requiredRect.isContained(pos)) {
 				if (cell->getNumToken() > 0) {
-					_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
+					tokenPos.push_back(pos);
 				} else {
 					_requiredImage->setPixel(pos.x, pos.y, calcCellColor(cell->getMetadata(), cell->getEnergy()));
 				}
 			}
+		}
+		if (!tokenPos.empty()) {
+			for (IntVector2D const& pos : tokenPos) {
+				_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
+
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x, pos.y - i };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i*255/4);
+					}
+				}
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x + i, pos.y };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+					}
+				}
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x, pos.y + i };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+					}
+				}
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x - i, pos.y };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+					}
+				}
+			}
+			tokenPos.clear();
 		}
 	}
 }
