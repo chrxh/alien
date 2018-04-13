@@ -5,7 +5,7 @@
 
 namespace
 {
-	const int showDuration = 2000;
+	const int showDuration = 3000;
 	const int fadeoutDuration = 500;
 	const int fadeoutSteps = 50;
 }
@@ -28,7 +28,10 @@ void StartScreenController::start()
 	_startScreenWidget = new StartScreenWidget();
 	_startScreenWidget->setVisible(true);
 
-	QSize size(1000, 350);
+	QImage dummy ("://Tutorial/logo.png");
+	QSize size = dummy.size();
+	size.setHeight(size.height() / 2);
+	size.setWidth(size.width() / 2);
 
 	QRect parentRect = _parent->frameGeometry();
 	QPoint center = parentRect.center();
