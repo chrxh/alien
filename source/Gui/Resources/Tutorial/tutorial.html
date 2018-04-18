@@ -45,6 +45,7 @@
             <h3> <a href="#weapon"><font face="Courier" color="#FFFFFF">2.2.2.4 Weapon</font><a></h3>
             <h3> <a href="#constructor"><font face="Courier" color="#FFFFFF">2.2.2.5 Constructor</font><a></h3>
             <h3> <a href="#sensor"><font face="Courier" color="#FFFFFF">2.2.2.6 Sensor</font><a></h3>
+            <h3> <a href="#communicator"><font face="Courier" color="#FFFFFF">2.2.2.7 Communicator</font><a></h3>
             <h3> <a href="#energyguidance"><font face="Courier" color="#FFFFFF">2.3 Energy guidance system</font></a></h3>
             <h3> <a href="#globalparameters"><font face="Courier" color="#FFFFFF">2.4 Global parameters</font></a></h3>
             <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">3 alien simulator</font></a></h3>
@@ -1804,6 +1805,220 @@
              <br />
 
             </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="communicator">2.2.2.7 Communicator</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+            The `communicator cell function' allows to transmit and receive messages form other communicator cells
+            in the vicinity. The message can be sent in one of the 256 channels.
+            Furthermore relative position information given in angle and distance can be transmitted.
+            As always, all angles are measured clockwise with respect
+            to the axis given by the invoked cell and the cell where the token came from.
+            The receivers obtains the transformed position (in angle and distance) with respect to their
+            position and orientation.
+            The following bytes are used to program the communicator.
+            <br />
+            <table border="1">
+             <tr>
+              <th>
+               byte name
+              </th>
+              <th>
+               type
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+                COMMUNICATOR_IN
+              </td>
+              <td>
+                input byte
+              </td>
+              <td>
+                contains the command (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+                COMMUNICATOR_IN_ANGLE
+              </td>
+              <td>
+                input byte
+              </td>
+              <td>
+                relative angle of a transmitted position
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_IN_DISTANCE
+              </td>
+              <td>
+               input
+              </td>
+              <td>
+                relative distance of a transmitted position
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_IN_CHANNEL
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               channel where to transmit the message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_IN_MESSAGE
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_ANGLE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               relative angle of a position information belonging to a received message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_DISTANCE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               relative distance of a position information belonging to a received message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_MESSAGE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               received message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               indicates if a message has been received since last retrieve (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_SENT_NUM_MESSAGE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               number of communicator cells who have received the transmitted message
+              </td>
+             </tr>
+            </table>
+            </p>
+            <br />
+            <br />
+            The following commands can be processed.
+            <br />
+             <table border="1">
+             <tr>
+              <th>
+               values of COMMUNICATOR_IN
+               <br />
+               (modulo 4)
+              </th>
+              <th>
+               symbolic name
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+               0
+              </td>
+              <td>
+               COMMUNICATOR_IN::DO_NOTHING
+              </td>
+              <td>
+               do nothing
+              </td>
+             </tr>
+             <tr>
+              <td>
+               1
+              </td>
+              <td>
+               COMMUNICATOR_IN::SET_LISTENING_CHANNEL
+              </td>
+              <td>
+               Sets the channel where the communicator can listen for messages sent by other communicator cells.
+               The channel itself is set in COMMUNICATOR_IN_CHANNEL (see above).
+              </td>
+             </tr>
+             <tr>
+              <td>
+               2
+              </td>
+              <td>
+               COMMUNICATOR_IN::SEND_MESSAGE
+              </td>
+              <td>
+               Sends a message given by COMMUNICATOR_IN_MESSAGE to the channel COMMUNICATOR_IN_CHANNEL
+               to nearby communicator cells. Nearby means in radius specified by the simulation
+               parameter <i>[cell function properties]->[communicator]->[range]</i>.
+               Furthermore a relative position information can be transmitted in COMMUNICATOR_IN_ANGLE
+               and COMMUNICATOR_IN_DISTANCE as explained above.
+               The output COMMUNICATOR_OUT_SENT_NUM_MESSAGE returns the number of communicator cells
+               who received the message.
+              </td>
+             </tr>
+             <tr>
+              <td>
+               3
+              </td>
+              <td>
+               COMMUNICATOR_IN::RECEIVE_MESSAGE
+              </td>
+              <td>
+               If a message has been received since the last invoke COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE
+               is set to COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES otherwise
+               COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO.
+               The message is saved in COMMUNICATOR_OUT_RECEIVED_MESSAGE and the position information
+               in COMMUNICATOR_OUT_RECEIVED_ANGLE and COMMUNICATOR_OUT_RECEIVED_DISTANCE.
+              </td>
+             </tr>
+             </table>
+             <br />
         </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="energyguidance">2.3 Energy guidance system</h2></p>
