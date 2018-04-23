@@ -20,6 +20,8 @@ void DataRepository::init(Notifier* notifier, SimulationAccess * access, Descrip
 	_numberGenerator = numberGenerator;
 	_parameters = context->getSimulationParameters();
 	_universeSize = context->getSpaceProperties()->getSize();
+	_unchangedData.clear();
+	_data.clear();
 
 	for (auto const& connection : _connections) {
 		disconnect(connection);
