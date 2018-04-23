@@ -52,6 +52,7 @@ void ItemUniverseView::activate()
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &ItemUniverseView::scrolled));
 
 	requestData();
+	_activated = true;
 }
 
 void ItemUniverseView::deactivate()
@@ -59,6 +60,7 @@ void ItemUniverseView::deactivate()
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
+	_activated = false;
 }
 
 void ItemUniverseView::refresh()
@@ -121,7 +123,9 @@ void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
 void ItemUniverseView::cellInfoToggled(bool showInfo)
 {
 	_itemManager->toggleCellInfo(showInfo);
-	_itemManager->update(_repository);
+	if (_activated) {
+		_itemManager->update(_repository);
+	}
 }
 
 void ItemUniverseView::scrolled()
