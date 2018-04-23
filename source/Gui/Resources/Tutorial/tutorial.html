@@ -4,6 +4,11 @@
 <title></title>
 <meta name="author" content="Customer">
 <meta name="editor" content="html-editor phase 5">
+    <style type="text/css">
+        .auto-style1 {
+            height: 22px;
+        }
+    </style>
 </head>
 <body text="#7070FF" bgcolor="#00001b" link="#FF0000" alink="#FF0000" vlink="#FF0000">
     <table>
@@ -47,7 +52,7 @@
             <h3> <a href="#sensor"><font face="Courier" color="#FFFFFF">2.2.2.6 Sensor</font><a></h3>
             <h3> <a href="#communicator"><font face="Courier" color="#FFFFFF">2.2.2.7 Communicator</font><a></h3>
             <h3> <a href="#energyguidance"><font face="Courier" color="#FFFFFF">2.3 Energy guidance system</font></a></h3>
-            <h3> <a href="#globalparameters"><font face="Courier" color="#FFFFFF">2.4 Global parameters</font></a></h3>
+            <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">2.4 Simulation parameters</font></a></h3>
             <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">3 Program documentation</font></a></h3>
             <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">3.1 Getting started</font></a></h3>
             <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">3.1 Global functions</font></a></h3>
@@ -2207,7 +2212,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="globalparameters">2.4 Global Parameters</h2></p>
+            <p><h2 id="simulationparameters">2.4 Simulation Parameters</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2219,14 +2224,262 @@
                         <th>
                             description
                         </th>
-                        <th>
-                            
-                        </th>
-                        <th>
-                            description
-                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cluster properties]->[max radius]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[mutation probability]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[min distance]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max distance]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[mass]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max force]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max force decay probability]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max bonds]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max token]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max token branch number]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[creation energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[min energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[transformation probability]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[fusion velocity]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[computer]->[max instructions]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[computer]->[memory size]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[constructor]->[offspring distance]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[sensor]->[range]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[weapon]->[strength]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[communicator]->[range]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[token properties]->[memory size]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[token properties]->[creation energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[token properties]->[min energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[exponent]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[factor]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="auto-style1">
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[probability]</i>
+                            </font>
+                        </td>
+                        <td class="auto-style1">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[velocity multiplier]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[velocity perturbation]</i>
+                            </font>
+                        </td>
+                        <td>
+                        </td>
                     </tr>
                 </table>
+                <br />
+                <br />
             </p>
         </font>
         <font face="Courier" color="#70B070">
