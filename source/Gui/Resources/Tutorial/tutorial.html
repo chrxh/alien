@@ -2057,7 +2057,7 @@
                 input byte
               </td>
               <td>
-                contains the command (see below)
+                contains the mode (see below)
               </td>
              </tr>
              <tr>
@@ -2087,10 +2087,147 @@
             </table>
             <br />
             <br />
+                In the following E denotes a fixed amount of energy which will be transferred from cell to token
+                or from token to cell depending on the mode. In the alien program E is set to 10 units.
+                The following modes are possible.
+                <br />
+                <table border="1">
+                    <tr>
+                        <th>
+                            values of ENERGY_GUIDANCE_IN
+                            <br />
+                            (modulo 6)
+                        </th>
+                        <th>
+                            symbolic name
+                        </th>
+                        <th>
+                            description
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            0
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::DEACTIVATED
+                        </td>
+                        <td>
+                            no energy transfer
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            1
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::BALANCE_CELL
+                        </td>
+                        <td>
+                            If the energy of the cell exceeds
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token
+                            otherwise and if token energy exceeds
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            then the energy amount E is transferred from token to cell.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::BALANCE_TOKEN
+                        </td>
+                        <td>
+                            If the energy of the token exceeds
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            then the energy amount E is transferred from token to cell
+                            otherwise and if cell energy exceeds
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            3
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::BALANCE_BOTH
+                        </td>
+                        <td>
+                        <p>
+                            If token energy is greater than
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            and cell energy is less than
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL
+                            then the energy amount E is transferred from token to cell.
+                        </p>
+                        <p>
+                            If token energy is less than
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN
+                            and cell energy is greater than
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token.
+                        </p>
+                        </td>
+                    </tr>
+                <tr>
+                    <td>
+                        4
+                    </td>
+                    <td>
+                        ENERGY_GUIDANCE_IN::HARVEST_CELL
+                    </td>
+                    <td>
+                        <p>
+                            If cell energy is greater than
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        5
+                    </td>
+                    <td>
+                        ENERGY_GUIDANCE_IN::HARVEST_TOKEN
+                    </td>
+                    <td>
+                        <p>
+                            If token energy is greater than
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            then the energy amount E is transferred from token to cell.
+                        </p>
+                    </td>
+                </tr>
+                </table>
+                <br />
             </p>
         </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="globalparameters">2.4 Global Parameters</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                <table border="1">
+                    <tr>
+                        <th>
+                            parameter
+                        </th>
+                        <th>
+                            description
+                        </th>
+                        <th>
+                            
+                        </th>
+                        <th>
+                            description
+                        </th>
+                    </tr>
+                </table>
+            </p>
         </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="simulator">3 alien simulator</h2></p>
