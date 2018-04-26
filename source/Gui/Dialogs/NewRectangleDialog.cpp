@@ -11,7 +11,7 @@ NewRectangleDialog::NewRectangleDialog(SimulationParameters const* simulationPar
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
-    ui->energyEdit->setText(QString("%1").arg(simulationParameters->cellCreationEnergy));
+    ui->energyEdit->setText(QString("%1").arg(simulationParameters->cellFunctionConstructorOffspringCellEnergy));
 
 	ui->sizeXEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::NewRectangleSizeXKey, Const::NewRectangleSizeXDefault)));
