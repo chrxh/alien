@@ -82,7 +82,7 @@ ClusterDescription IntegrationTestFramework::createClusterDescription(int numCel
 	cluster.setId(_numberGen->getTag()).setPos(pos).setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)));
 	for (int j = 0; j < numCells; ++j) {
 		cluster.addCell(
-			CellDescription().setEnergy(_parameters->cellCreationEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
+			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
 			.setMaxConnections(2).setId(_numberGen->getTag()).setCellFeature(CellFeatureDescription())
 		);
 	}

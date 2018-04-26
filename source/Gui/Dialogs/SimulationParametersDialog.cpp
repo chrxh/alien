@@ -71,20 +71,20 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
     setItem("max bonds", 0, _simulationParameters->cellMaxBonds);
     setItem("max token", 0, _simulationParameters->cellMaxToken);
     setItem("max token branch number", 0, _simulationParameters->cellMaxTokenBranchNumber);
-    setItem("creation energy", 0, _simulationParameters->cellCreationEnergy);
     setItem("min energy", 0, _simulationParameters->cellMinEnergy);
     setItem("transformation probability", 0, _simulationParameters->cellTransformationProb);
     setItem("fusion velocity", 0, _simulationParameters->cellFusionVelocity);
 
     setItem("max instructions", 0, _simulationParameters->cellFunctionComputerMaxInstructions);
     setItem("memory size", 0, _simulationParameters->cellFunctionComputerCellMemorySize);
-    setItem("offspring distance", 0, _simulationParameters->cellFunctionConstructorOffspringDistance);
+    setItem("offspring cell energy", 0, _simulationParameters->cellFunctionConstructorOffspringCellEnergy);
+    setItem("offspring cell distance", 0, _simulationParameters->cellFunctionConstructorOffspringCellDistance);
+	setItem("offspring token energy", 0, _simulationParameters->cellFunctionConstructorOffspringTokenEnergy);
     setItem("range", 0, _simulationParameters->cellFunctionSensorRange);
     setItem("strength", 0, _simulationParameters->cellFunctionWeaponStrength);
     setItem("range", 1, _simulationParameters->cellFunctionCommunicatorRange);
 
 	setItem("memory size", 1, _simulationParameters->tokenMemorySize);
-	setItem("creation energy", 1, _simulationParameters->tokenCreationEnergy);
 	setItem("min energy", 1, _simulationParameters->tokenMinEnergy);
 
     setItem("exponent", 0, _simulationParameters->radiationExponent);
@@ -107,20 +107,20 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
     _simulationParameters->cellMaxBonds = getItemInt("max bonds", 0);
     _simulationParameters->cellMaxToken = getItemInt("max token", 0);
     _simulationParameters->cellMaxTokenBranchNumber = getItemInt("max token branch number", 0);
-    _simulationParameters->cellCreationEnergy = getItemReal("creation energy", 0);
+    _simulationParameters->cellFunctionConstructorOffspringCellEnergy = getItemReal("offspring cell energy", 0);
     _simulationParameters->cellMinEnergy = getItemReal("min energy", 0);
     _simulationParameters->cellTransformationProb = getItemReal("transformation probability", 0);
     _simulationParameters->cellFusionVelocity = getItemReal("fusion velocity", 0);
 
     _simulationParameters->cellFunctionComputerMaxInstructions = getItemInt("max instructions", 0);
     _simulationParameters->cellFunctionComputerCellMemorySize = getItemInt("memory size", 0);
-    _simulationParameters->cellFunctionConstructorOffspringDistance = getItemReal("offspring distance", 0);
+    _simulationParameters->cellFunctionConstructorOffspringCellDistance = getItemReal("offspring cell distance", 0);
     _simulationParameters->cellFunctionWeaponStrength = getItemReal("strength", 0);
     _simulationParameters->cellFunctionSensorRange = getItemReal("range", 0);
     _simulationParameters->cellFunctionCommunicatorRange = getItemReal("range", 1);
 
 	_simulationParameters->tokenMemorySize = getItemInt("memory size", 1);
-	_simulationParameters->tokenCreationEnergy = getItemReal("creation energy", 1);
+	_simulationParameters->cellFunctionConstructorOffspringTokenEnergy = getItemReal("offspring token energy", 0);
     _simulationParameters->tokenMinEnergy = getItemReal("min energy", 1);
 
     _simulationParameters->radiationExponent = getItemReal("exponent", 0);
