@@ -118,9 +118,6 @@
     <ClInclude Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Model\Impl\TokenImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
@@ -183,6 +180,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Model\Api\Validation.h">
       <Filter>Source Files\Api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -365,9 +365,6 @@
     </ClCompile>
     <ClCompile Include="Release\moc_SignalWrapper.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Model\Impl\SimulationAccessImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Impl\SimulationContextImpl.cpp">
       <Filter>Source Files\Impl</Filter>
@@ -623,6 +620,9 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Model\Api\Validation.cpp">
       <Filter>Source Files\Api</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Model\Impl\SimulationAccessImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

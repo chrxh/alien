@@ -1,5 +1,4 @@
-#ifndef MAPCOMPARTMENT_H
-#define MAPCOMPARTMENT_H
+#pragma once
 
 #include "Model/Api/Definitions.h"
 #include "Model/Local/UnitContext.h"
@@ -80,5 +79,3 @@ void MapCompartment::convertAbsToRelPosition(IntVector2D & intPos) const
 	intPos.x = intPos.x - intPos.x / _size.x * _size.x;
 	intPos.y = intPos.y - intPos.y / _size.y * _size.y;
 }
-
-#endif // MAPCOMPARTMENT_H

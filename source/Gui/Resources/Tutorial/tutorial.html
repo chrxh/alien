@@ -33,7 +33,7 @@
             </p>
         </font>
             <p>
-            <h3> <a href="#introduction"><font face="Courier" color="#FFFFFF">1 Introduction</font></a></h3>
+            <h3> <a href="#introduction"><font face="Courier" color="#FFFFFF">1 Brief introduction</font></a></h3>
             <h3> <a href="#gettingstarted"><font face="Courier" color="#FFFFFF">2 Getting started</font></a></h3>
             <h3> <a href="#alienmodel"><font face="Courier" color="#FFFFFF">3 alien model</font></a></h3>
             <h3> <a href="#physics"><font face="Courier" color="#FFFFFF">3.1 Physics</font></a></h3>
@@ -79,7 +79,7 @@
         <font face="Courier" color="#70B070">
             <p>
                 <br />
-                <h2 id="introduction">1 Introduction</h2>
+                <h2 id="introduction">1 Brief introduction</h2>
             </p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
@@ -120,6 +120,26 @@
         </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="gettingstarted">2 Getting started</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In this section you will get to know the alien simulator. A detailed reference is given in
+                <a href="#simulator"><font face="Courier" color="#FFFFFF">Section 4</font></a>
+                whereas in
+                <a href="#alienmodel"><font face="Courier" color="#FFFFFF">Section 3</font></a>
+                you find information about the model it is based on.
+                <br />
+            </p>
+            <p>
+                At first you should start a new simulation by clicking <i>Simulation -> New</i> in the menu.
+                A universe can be divided into units which are calculated in own threads.
+                The size of a universe results from grid size and unit size.
+                Furthermore you should place some initial energy in the simulation. It is represented as
+                particles that move around the space. For a universe of size 600 x 300 you can choose, e.g.,
+                a value of 1e+7.
+                The simulation parameters and symbol table have meaningful default values and can be keept as they are for the moment.
+                Clicking <i>OK</i> generates a new universe which particles carrying the initial energy.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="alienmodel">3 alien model</h2></p>
@@ -2463,6 +2483,7 @@
                             </font>
                         </td>
                         <td>
+                            minimal energy of a token; if a token has energy below below this value it will vanish
                         </td>
                     </tr>
                     <tr>
@@ -2472,6 +2493,11 @@
                             </font>
                         </td>
                         <td>
+                            together with <i>[radiation]->[factor]</i> it determines the amount of energy
+                            which is radiated by cells and tokens in average over time; it calculates as:
+                            <p>
+                            power(current energy of cell/token, <i>[radiation]->[exponent]</i>) * <i>[radiation]->[factor]</i>
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -2481,6 +2507,7 @@
                             </font>
                         </td>
                         <td>
+                            see above
                         </td>
                     </tr>
                     <tr>
@@ -2489,7 +2516,10 @@
                             <i>[radiation]->[probability]</i>
                             </font>
                         </td>
-                        <td class="auto-style1">
+                        <td>
+                            frequency of which an particle is radiated from a cell or token per time step;
+                            note that a higher frequency does not result in more energy radiation in average
+                            because a higher frequency yields to lower energy per particle
                         </td>
                     </tr>
                     <tr>
@@ -2499,6 +2529,11 @@
                             </font>
                         </td>
                         <td>
+                            the velocity of an emmitted particle calculates as:
+                            <p>
+                            (velocity of cell) * <i>[radiation]->[velocity multiplier]</i>
+                            +<i>[radiation]->[velocity perturbation]</i>
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -2508,6 +2543,7 @@
                             </font>
                         </td>
                         <td>
+                            see above
                         </td>
                     </tr>
                 </table>

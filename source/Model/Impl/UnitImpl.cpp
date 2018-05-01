@@ -105,6 +105,7 @@ void UnitImpl::processingClustersToken()
 			energyParticles.clear();
 			bool decompose = false;
 			cluster->processingToken(energyParticles, decompose);
+			debugging_validate(energyParticles);
 			_context->getParticlesRef() << energyParticles;
 
 			//decompose cluster?
@@ -143,6 +144,7 @@ void UnitImpl::processingClustersDissipation()
 		Cluster* cluster(i.next());
 		energyParticles.clear();
 		cluster->processingDissipation(fragments, energyParticles);
+		debugging_validate(energyParticles);
 		_context->getParticlesRef() << energyParticles;
 
 		//new cell cluster fragments?
@@ -229,6 +231,22 @@ void UnitImpl::processingParticlesCompartmentAllocation()
 			auto otherContext = compartment->getNeighborContext(intPos);
 			otherContext->getParticlesRef().push_back(particle);
 			particle->setContext(otherContext);
+		}
+	}
+}
+
+void UnitImpl::debugging_validate(QList<Particle*> particles)
+{
+	auto compartment = _context->getMapCompartment();
+	auto spaceMetric = _context->getSpaceProperties();
+
+	for (Particle* particle : particles) {
+		QVector2D nextPos = particle->getPosition() + particle->getVelocity();
+		_context->getSpaceProperties()->correctPosition(nextPos);
+
+		IntVector2D intPos = spaceMetric->correctPositionAndConvertToIntVector(nextPos);
+		if (!compartment->isPointInCompartment(intPos) && !compartment->getNeighborContext(intPos)) {
+			int dummy = 0;
 		}
 	}
 }
