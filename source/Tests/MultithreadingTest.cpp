@@ -96,7 +96,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 
 	DataChangeDescription desc;
 	desc.addNewCluster(ClusterChangeDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
-		.addNewCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy)));
+		.addNewCell(CellChangeDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)));
 	access->updateData(desc);
 
 	runSimulation(300);
@@ -122,7 +122,7 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	for (int i = 0; i < 10000; ++i) {
 		desc.addNewCluster(ClusterChangeDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
 			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5 ))
-			.addNewCell(CellChangeDescription().setEnergy(_parameters->cellCreationEnergy).setMaxConnections(4)));
+			.addNewCell(CellChangeDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setMaxConnections(4)));
 	}
 	access->updateData(desc);
 

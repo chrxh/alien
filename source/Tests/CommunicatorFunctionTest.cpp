@@ -70,16 +70,16 @@ TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
 		.setId(clusterId1)
 		.addCells({
 			CellDescription()
-			.setId(cellId1).setPos({ 500, 500 }).setEnergy(_parameters->cellCreationEnergy).setFlagTokenBlocked(false)
+			.setId(cellId1).setPos({ 500, 500 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
 			.setConnectingCells({ cellId2 }).setMaxConnections(1).setTokenBranchNumber(0)
 			.setCellFeature(
 				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
 			)
 			.setTokens({
-				TokenDescription().setEnergy(_parameters->tokenCreationEnergy).setData(tokenData)
+				TokenDescription().setEnergy(_parameters->cellFunctionConstructorOffspringTokenEnergy).setData(tokenData)
 			}),
 			CellDescription()
-			.setId(cellId2).setPos({ 500, 501 }).setEnergy(_parameters->cellCreationEnergy).setFlagTokenBlocked(false)
+			.setId(cellId2).setPos({ 500, 501 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
 			.setConnectingCells({ cellId1 }).setMaxConnections(1).setTokenBranchNumber(1)
 			.setCellFeature(
 				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
@@ -89,7 +89,7 @@ TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
 		.setId(clusterId2)
 		.addCells({
 			CellDescription()
-			.setId(cellId3).setPos({ 500 + distCommRange / 2, 501 + distCommRange / 2 }).setEnergy(_parameters->cellCreationEnergy)
+			.setId(cellId3).setPos({ 500 + distCommRange / 2, 501 + distCommRange / 2 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
 			.setFlagTokenBlocked(false).setMaxConnections(0).setTokenBranchNumber(0)
 			.setCellFeature(
 				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
