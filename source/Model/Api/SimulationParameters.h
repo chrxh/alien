@@ -44,7 +44,6 @@ public:
 	qreal radiationExponent = 0.0;
 	qreal radiationFactor = 0.0;
 	qreal radiationProb = 0.0;
-
 	qreal radiationVelocityMultiplier = 0.0;
 	qreal radiationVelocityPerturbation = 0.0;
 };
