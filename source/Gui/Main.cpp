@@ -36,6 +36,8 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
+//- Validierung: Geschwindigkeit begrenzen
+//- Warum wird Energie negativ?
 //- Total-Energy nimmt immer mehr ab
 //- graue Farbe nicht sichtbar in PixelView
 //- kein Editieren der Namen der Simulationsparameter zulassen
