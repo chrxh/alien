@@ -57,24 +57,22 @@
             <h3> <a href="#communicator"><font face="Courier" color="#FFFFFF">3.2.2.7 Communicator</font><a></h3>
             <h3> <a href="#energyguidance"><font face="Courier" color="#FFFFFF">3.3 Energy guidance system</font></a></h3>
             <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">3.4 Simulation parameters</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4 Program documentation</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.1 Global functions</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.2 Views</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.2.1 Pixel view</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.2.1 Editor view</font></a></h3>
-            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.2.1.1 Cluster editor</font></a></h3>
-            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.2.1.2 Cell Computer editor</font></a></h3>
-            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.2.1.3 Token editor</font></a></h3>
-            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.2.1.4 Symbols editor</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.3 Manipulation tools</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.3.1 Entities</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.3.2 Collections</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.3.3 Particles</font></a></h3>
-            <h3> <a href="#simulator"><font face="Courier" color="#FFFFFF">4.4 Settings</font></a></h3>
-            <h3> <a href="#metadata"><font face="Courier" color="#FFFFFF">4.4.1 Grid</font></a></h3>
-            <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.4.2 Simulation parameters</font></a></h3>
-            <h3> <a href="#metadata"><font face="Courier" color="#FFFFFF">4.4.3 Metadata</font></a></h3>
-            <h3> <a href="#monitoring"><font face="Courier" color="#FFFFFF">4.5 Monitoring</font></a></h3>
+            <h3> <a href="#programdocu"><font face="Courier" color="#FFFFFF">4 Program documentation</font></a></h3>
+            <h3> <a href="#views"><font face="Courier" color="#FFFFFF">4.1 Views</font></a></h3>
+            <h3> <a href="#pixel"><font face="Courier" color="#FFFFFF">4.1.1 Pixel view</font></a></h3>
+            <h3> <a href="#item"><font face="Courier" color="#FFFFFF">4.1.2 Item view</font></a></h3>
+            <h3> <a href="#clustereditor"><font face="Courier" color="#FFFFFF">4.1.1.1 Cluster editor</font></a></h3>
+            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.1.1.2 Cell Computer editor</font></a></h3>
+            <h3> <a href="#tokeneditor"><font face="Courier" color="#FFFFFF">4.1.1.3 Token editor</font></a></h3>
+            <h3> <a href="#symbolseditor"><font face="Courier" color="#FFFFFF">4.1.1.4 Symbol map editor</font></a></h3>
+            <h3> <a href="#tools"><font face="Courier" color="#FFFFFF">4.2 Manipulation tools</font></a></h3>
+            <h3> <a href="#entities"><font face="Courier" color="#FFFFFF">4.2.1 Single entities</font></a></h3>
+            <h3> <a href="#collections"><font face="Courier" color="#FFFFFF">4.2.2 Collections</font></a></h3>
+            <h3> <a href="#settings"><font face="Courier" color="#FFFFFF">4.3 Settings</font></a></h3>
+            <h3> <a href="#grid"><font face="Courier" color="#FFFFFF">4.3.1 Grid</font></a></h3>
+            <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.3.2 Simulation parameters</font></a></h3>
+            <h3> <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.3.3 Symbol map</font></a></h3>
+            <h3> <a href="#monitoring"><font face="Courier" color="#FFFFFF">4.4 Monitoring</font></a></h3>
         </p>
         <font face="Courier" color="#70B070">
             <p>
@@ -90,7 +88,7 @@
                 for the simulated world with a computational model that allows to describe the behavior and purposeful interventions of the organisms.
                 The organisms form <i>cell clusters</i>, which are modeled by planary graphs where the nodes corresponds to elementary <i>cells</i>
                 and the edges to communication channels (<i>connections</i>).
-                In the following we briefly explain the underlying computational as well as the physical model:
+                In the following we briefly explain the underlying computational as well as the physical model.
                 <br />
                 <br />
                 <b>Information processing model:</b>
@@ -102,18 +100,18 @@
                 After a cell has executed its function the token spreads to adjacent cells by a specific rule.
                 This will be decided on the basis of the <i>branch number</i> attributed to every token and cell.
                 The rule is that the token spreads to an adjacent cell if the branch number of the cell is one larger
-                than the token branch number modulo a fixed constant (see <i>[cell properties]->[max token branch number]</i>).
+                than the token branch number modulo a fixed constant.
                 <br />
                 <br />
                 <b>Physical model:</b>
                 Every cell cluster is embedded into a physical 2D space and performs rigid body motions.
                 They possess associated linear and angular momentums.
-                If two clusters collide they may merge provided the velocities are high enough (see <i>[cell properties]->[fusion velocity]</i>)
-                and the touching cells on both clusters are able to form bonds (see <i>[cell properties]->[max bonds]</i>).
+                If two clusters collide they may merge provided the velocities are high enough
+                and the touching cells on both clusters are able to form bonds.
                 Otherwise a collision takes place.
-                Single cells of a cluster might be destroyed after a collision if the forces exceeds a certain threshold (see <i>[cell properties]->[max force]</i>).
-                Furthermore cells as well as tokens have internal energy value and
-                Q_EMIT<i>energy particles</i> from time to time.
+                Single cells of a cluster might be destroyed after a collision if the forces exceeds a certain threshold.
+                Furthermore cells as well as tokens have an internal energy value and
+                emit <i>energy particles</i> from time to time.
                 Radiation lowers their internal energy and may finally lead to disintegration.
                 But if on the contrary energy particles collide they may form a new cell if their energy values together are high enough.
             </p>
@@ -133,12 +131,42 @@
             <p>
                 At first you should start a new simulation by clicking <i>Simulation -> New</i> in the menu.
                 A universe can be divided into units which are calculated in own threads.
-                The size of a universe results from grid size and unit size.
+                The size of a universe results from grid and unit size.
                 Furthermore you should place some initial energy in the simulation. It is represented as
-                particles that move around the space. For a universe of size 600 x 300 you can choose, e.g.,
+                particles that move around the space. For a universe of size 1200 x 600 one can choose, e.g.,
                 a value of 1e+7.
-                The simulation parameters and symbol table have meaningful default values and can be keept as they are for the moment.
+                The simulation parameters and symbol map have meaningful default values and can be keept as they are for the moment.
                 Clicking <i>OK</i> generates a new universe which particles carrying the initial energy.
+            </p>
+            <p>
+                There are two modes for viewing the simulation: pixel view and item view.
+                The pixel view is set as default and gives a overview about where the particles and cells are situated. Cells can have
+                different colors. The default color is blue. The particles are shown in red.
+                The item view however gives a much more detailed insign. One can not only inspect precise position, velocity,
+                energy and internal states but also change them.
+                To switch between these modes <i>View -> Editor</i> has to be toggled in the menu.
+                It is recommended to zoom into the universe before switching to the item view.
+                In that view one can select one or more particles or cells. If one selects just one entity by clicked on
+                it all the internal informations on additional windows in the upper left corner are shown.
+            </p>
+            <p>
+                It is also possible to load some collection of cells and particles into the simulation.
+                Some standard examples are provided with this software. One can load them in
+                <i>Collection -> Load</i> into the current universe. For instance one may load a <i>replicator</i>
+                collection.
+                It is recommended to use the item view for loading collections.
+                If one would like to load the collection more then one time at different positions
+                please click on <i>Collection -> Random multiplier</i> to clone the collections as many times
+                as desired.
+            </p>
+            <p>
+                To start the simulation please toggle <i>Simulation -> Run</i>.
+                On the bottom status line one should see the current timestep and the timesteps per second (TPS).
+                Toggling again <i>Simulation -> Run</i> will pause the simulation.
+                Loading and saving is also possible via the <i>Simulation</i> menu entries.
+                Sometimes it is convenient to restore a universe via snapshots.
+                In <i>Simulation -> Snapshot</i> and <i>Simulation -> Restore</i> one can save the universe
+                in temporary memory and restore it at any time later.
             </p>
         </font>
         <font face="Courier" color="#70B070">
@@ -147,6 +175,11 @@
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
                 The alien model combines a physical and a computation model and can be seen some realization of artificial programmable matter.
+            </p>
+            <p>
+                Throughout this section simulation parameters (such as <i>mutation probability</i>) are denoted by
+                the bracket notation <i>[...] -> ... -> [...]</i>. A overview of the parameters is given in
+                <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.3.2 Simulation parameters</font></a>.
             </p>
         </font>
         <font face="Courier" color="#70B070">
@@ -290,9 +323,9 @@
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
-                The `computer cell function' provides different types of computations and is programmed by machine code.
-                The machine code is stored in the cell and their instructions can access the memory storage of the cell as well as of the token.
-                Both memory storages can have a masximum size of 256 bytes and all variables and addresses are one byte long.
+                The `computer cell function' provides a little executable program consisting of instructions in machine code.
+                The machine code is stored in the cell. Their instructions can access the memory storage of the cell as well as of the token.
+                Both memory storages can have a maximum size of 256 bytes and all variables and addresses are one byte long.
                 In calculations all values are interpreted as 8 bit signed integers.
                 The number of instructions a `computer cell function' can have is indicated in
                 <i>[cell properties]->[computer]->[max instructions]</i>,
@@ -2067,57 +2100,57 @@
                 Tokens carry an amount of energy. They dissipate energy via radiation as cells do.
                 Furthermore each time they pass to a cell energy can be transferred to or from the cell.
                 This process can be controlled via memory entries in the token.
-            <br />
-            <table border="1">
-             <tr>
-              <th>
-               byte name
-              </th>
-              <th>
-               type
-              </th>
-              <th>
-               description
-              </th>
-             </tr>
-             <tr>
-              <td>
-                ENERGY_GUIDANCE_IN
-              </td>
-              <td>
-                input byte
-              </td>
-              <td>
-                contains the mode (see below)
-              </td>
-             </tr>
-             <tr>
-              <td>
-                ENERGY_GUIDANCE_IN_VALUE_CELL
-              </td>
-              <td>
-                input byte
-              </td>
-              <td>
-                specifies an amount of energy for the cell; it can only be interpreted in context
-                with a command (see below)
-              </td>
-             </tr>
-             <tr>
-              <td>
-                ENERGY_GUIDANCE_IN_VALUE_TOKEN
-              </td>
-              <td>
-                input byte
-              </td>
-              <td>
-                specifies an amount of energy for the token; it can only be interpreted in context
-                with a command (see below)
-              </td>
-             </tr>
-            </table>
-            <br />
-            <br />
+                <br />
+                <table border="1">
+                 <tr>
+                  <th>
+                   byte name
+                  </th>
+                  <th>
+                   type
+                  </th>
+                  <th>
+                   description
+                  </th>
+                 </tr>
+                 <tr>
+                  <td>
+                    ENERGY_GUIDANCE_IN
+                  </td>
+                  <td>
+                    input byte
+                  </td>
+                  <td>
+                    contains the mode (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                    ENERGY_GUIDANCE_IN_VALUE_CELL
+                  </td>
+                  <td>
+                    input byte
+                  </td>
+                  <td>
+                    specifies an amount of energy for the cell; it can only be interpreted in context
+                    with a command (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                    ENERGY_GUIDANCE_IN_VALUE_TOKEN
+                  </td>
+                  <td>
+                    input byte
+                  </td>
+                  <td>
+                    specifies an amount of energy for the token; it can only be interpreted in context
+                    with a command (see below)
+                  </td>
+                 </tr>
+                </table>
+                <br />
+                <br />
                 In the following E denotes a fixed amount of energy which will be transferred from cell to token
                 or from token to cell depending on the mode. In the alien program E is set to 10 units.
                 The following modes are possible.
@@ -2552,39 +2585,558 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="simulator">4 alien simulator</h2></p>
+            <p><h2 id="programdocu">4 Program documentation</h2></p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="conductingsimulations">4.1 Conducting simulations</h2></p>
+            <p><h2 id="views">4.1 Views</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                After starting the program one will find a menu bar and a tool bar on the top,
+                a view of the artificial universe (initially empty) in the center and a status bar on the buttom.
+            </p>
+            <p>
+                The main programm provides two different views designed for different purposes: pixel and item view.
+                To toggle between these views please click on <i>View -> Editor</i>.
+                The item view is also referred to as editor because it offers editor tabs that allow to change
+                physical states and internals of cells, tokens and particles.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="simulationparameters">4.1.1 Simulation parameters</h2></p>
+            <p><h2 id="pixel">4.1.1 Pixel view</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The pixel view is the default view when creating or loading a universe.
+                In that view each cell and particle is visually presented as a pixel. The color of a cell depends
+                on the information specified in its metadata and its amount of energy.
+                Tokens are visualized as white glowing dots.
+                One can zoom in and zoom out by clicking on <i>View -> Zoom in</i> and
+                <i>View -> Zoom out</i>, respectively.
+                A fullscreen mode can be toggled via <i>View -> Fullscreen</i>.
+            </p>
+            <p>
+                To some extend it is possible to manipulate velocities and angular velocities of entities
+                within this view. By pressing the left mouse button and moving the mouse cursor
+                nearby entities are accelerated in the direction where the cursor moves.
+                By pressing both mouse buttons simultaneously entities close to the moving cursor
+                get an angular acceleration.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="Metadata">4.1.2 Metadata</h2></p>
+            <p><h2 id="item">4.1.2 Item view</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In the item view entities are rendered with vector graphic in order to exhibit more details
+                and enable precise manipulation capabilities.
+                When the item view is active an extended toolbar appears on the upper left corner.
+                It is recommended to zoom in before toggling to this view.
+                More precise position information, connections between cells,
+                token branch numbers and cell functions are visualized.
+                The latter on can be toggled by clicking <i>View -> Cell info</i>.
+                If an arrow between two cells is shown it means that a token can pass in this direction, i.e.,
+                the token branch number to the cell where the arrow goes is by +1 higher modulo the value of
+                <i>branch number</i>.
+                If, however, only a line is rendered between two cells it stands for a cell connection.
+            </p>
+            <p>
+                One particularity is that entities can be selected and manipulated.
+                There are two methods available:<br />
+                1) Selecting a single entity (cell or particle)
+                by clicking on it with the left mouse button. <br />
+                2) Defining a rectangle in order to select all entities inside.
+                To do this click on some empty space and hold the left mouse button
+                while moving the cursor.
+            </p>
+            <p>
+                To center a selection on the view please click on <i>View -> Center selection</i>
+                or on the corresponding button in the extended toolbar.
+            </p>
+            <p>
+                Once entities are selected one can move them by drag and drop quite easily:
+                <table border="0">
+                    <tr>
+                        <td>
+                            &#149; By pressing the left mouse button on the selection and moving the cursor
+                            the entire selection will be moved. Current cell connections may be broken or
+                            established depending on the distance and the ``max bonds'' attribute of the cells.
+                            Cell clusters can be assembled and disassembled in this way.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149; By pressing the right mouse button on the selection and moving the cursor
+                            the entire selection and their associated cell clusters will be moved.
+                            The clusters will not be disassembled.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149; By pressing both mouse buttons on the selection and moving the cursor
+                            the entire selection including their associated cell clusters will be rotated.
+                            The cluster's structure will be maintained.
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <p>
+                In the case when only one cell or particle is selected subwindows with editor tabs appear on
+                the upper left corner of the center view.
+                If a cell is selected one finds tabs for cluster, cell and metadata properties (cluster editor).
+                If, additionally, one or more token exist on that cell further tabs for each token appear (token editor).
+                When the selected cell has a computer cell function two more tabs showing the symbol map
+                and a cell computer editor. Note that the symbol map can also be edited via
+                <i>Settings -> Symbol map -> Edit</i> (see <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.3.3 Symbol map</font></a>).
+                However for convenvience in this context it is also shown
+                in a tab.<br/>
+                For a selected particle only one tab that allows to edit its physical properties is shown.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="views">4.2 Views and manipulation tools</h2></p>
+            <p><h2 id="clustereditor">4.1.1.1 Cluster editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The cluster editor consists of three tabs: one tab for the properties of the entire cluster (tab named ``cluster''),
+                one for the selected cell (tab named ``cell'') and one for the metadata (tab named ``metadata'').<br/>
+                <table border="0">
+                    <tr>
+                        <td>
+                            &#149;
+                            In the cluster tab one is allowed to edit the physical properties (including center position)
+                            of the cell cluster to which the selected cell belongs.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149;
+                            In the cell tab one can edit the physical properties as well as the internal state
+                            of the selected cell.
+                            In particular one can choose the cell function.
+                            The attribute ``current bond'' is readonly and shows the number of connections to adjacent
+                            cells.
+                            Note that if you change the position the center position of the corresponding cluster
+                            is also changed. However if the new cell position is too far from the current
+                            connected cells the bonds will be broken.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149;
+                            Cells as well as their clusters can carry metadata information.
+                            One can give the cluster or cell a name. A cell may also have a description and a color.
+                            The color of a cell is utilized in the item as well as in the pixel view.
+                        </td>
+                    </tr>
+                </table>
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="macroview">4.2.1 Macroscopic view</h2></p>
+            <p><h2 id="celleditor">4.1.1.2 Cell Computer editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                For a cell having a computer functions a cell computer editor tab is shown.
+                There on can edit the cell memory as well as a source code which will be
+                executed when a token passes that cell.
+                When the source code is changed one should click on the ``compiler'' button
+                in order to inject the executable program to the cell.
+                An immediate feedback if there are compilation errors or not.
+                Each line in the source code field should correspond to one instruction.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="microview">4.2.2 Microscopic view</h2></p>
+            <p><h2 id="tokeneditor">4.1.1.3 Token editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In the token editor one can edit the energy value and each memory byte of a token.
+                The memory is partitioned into blocks. There are two type of blocks.
+                If a symbol name from the symbol map refers to a token memory byte, e.g. <i>[13]</i>,
+                a block with size 1 corresponding to the memory byte, e.g. 13, is created and carries
+                the symbol's name.
+                Memory bytes where no symbols refer to are named as <i>pure data block</i>.
+                If more than one symbols refer to the same byte the block carries all their names.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="celleditor">4.2.2.1 Cell editor</h2></p>
+            <p><h2 id="symbolseditor">4.1.1.4 Symbol map editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The symbol editor is simultaneously shown with the cell computer editor.
+                One reason why the symbol editor is shown here in a tab (it can also be edited in
+                <i>Settings -> Symbol map -> Edit</i>) is that
+                it is very convenient to look up or introduce new symbols when
+                using them in the source code for the cell computer.
+                For more information about symbol map see
+                <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.3.3 Symbol map</font></a>.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="tokeneditor">4.2.2.2 Token editor</h2></p>
+            <p><h2 id="tools">4.2 Manipulation tools</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Besides creating and manipulating single entites alien also tools for mass creation.
+                Both functionalities are explained in this subsection.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="ensembles">4.3 Managing ensembles</h2></p>
+            <p><h2 id="entities">4.2.1 Single entities</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                One can create, copy, paste and delete cells, token on cells as well as particles as follows.
+                <br />
+                <table border="1">
+                    <tr>
+                        <th>
+                            entity
+                        </th>
+                        <th>
+                            operation
+                        </th>
+                        <th>
+                            prerequisite
+                        </th>
+                        <th>
+                            execution
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell
+                        </td>
+                        <td>
+                            create
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Entity -> New cell</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            particle
+                        </td>
+                        <td>
+                            create
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Entity -> New particle</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell or particle
+                        </td>
+                        <td>
+                            copy
+                        </td>
+                        <td>
+                            single entity has been selected
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Copy entity</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell or particle
+                        </td>
+                        <td>
+                            paste
+                        </td>
+                        <td>
+                            single entity has been copied
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Paste entity</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell or particle
+                        </td>
+                        <td>
+                            delete
+                        </td>
+                        <td>
+                            single entity has been selected
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Delete entity</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            create
+                        </td>
+                        <td>
+                            single cell has been selected
+                        </td>
+                        <td>
+                            via menu <i>Entity -> New token</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            copy
+                        </td>
+                        <td>
+                            single cell with at least one token has been selected, an existing token has been chosen
+                            in the token editor tab
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Copy token</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            paste
+                        </td>
+                        <td>
+                            single cell with space for one more token (limited by parameter
+                            <i>[cell properties]->[max token]</i>) has been selected;
+                            a token has been copied
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Paste token</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            delete
+                        </td>
+                        <td>
+                            single cell with at least one token has been selected, an existing token has been chosen
+                            in the token editor tab
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Delete token</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                </table>
+                <br />
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="collections">4.2.2 Collections</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                A collection is a set of entities in the alien universe: particles, cells and tokens on them.
+                Is is usually an rectangle section from the universe. Collections can be created, saved, loaded, deleted, moved
+                and multiplied. For some of these operations a collection has to be selected.
+                This can be performed in the item view.
+                In Section <a href="#item"><font face="Courier" color="#FFFFFF">4.1.2 Item view</font></a>
+                we have already learned how to move collections.
+                It is convenient to distinguish between two sets:
+                <table border="0">
+                    <tr>
+                        <td>
+                            &#149; selection: all selected particles and cells;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149; extended selection: all selected particles and clusters where at least one cell of them is selected.
+                        </td>
+                    </tr>
+                </table>
+                The operations for collections are described in the following.
+                <br />
+                <table border="1">
+                    <tr>
+                        <th>
+                            operation
+                        </th>
+                        <th>
+                            prerequisite
+                        </th>
+                        <th>
+                            execution
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            create a cluster of cells in rectangular shape
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> New rectangle</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            create a cluster of cells in hexagonal shape
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> New hexagon</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            create particles
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> New particles</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            load
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Load</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            save extended selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Save</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            copy extended selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Copy</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            paste
+                        </td>
+                        <td>
+                            a collection has been copied
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Paste</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            delete selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Delete selection</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            delete extended selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Delete selection</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiply extended selection on random positions
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Random multiplier</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiply extended selection on a grid
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Grid multiplier</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                </table>
+                <br />
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="settings">4.3 Settings</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="grid">4.3.1 Grid</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="simulationparameters">4.3.2 Simulation parameters</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="symboltable">4.3.3 Symbol map</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Symbol map allows to defined aliases for constant or variables.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="monitoring">4.4 Monitoring</h2></p>
         </font>
-    </td> </tr>
-    </table>
+        </td> </tr>
+        </table>
 </body>
 </html>
