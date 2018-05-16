@@ -682,7 +682,7 @@
      <x>0</x>
      <y>0</y>
      <width>1240</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <property name="palette">
@@ -785,13 +785,13 @@
       <string>Simulation parameters</string>
      </property>
     </widget>
-    <widget class="QMenu" name="menuSymbolTable">
+    <widget class="QMenu" name="menuSymbolMap">
      <property name="title">
-      <string>Symbol table</string>
+      <string>Symbol map</string>
      </property>
     </widget>
     <addaction name="menuSimulationParameters"/>
-    <addaction name="menuSymbolTable"/>
+    <addaction name="menuSymbolMap"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuSettings"/>

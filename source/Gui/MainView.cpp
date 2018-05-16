@@ -143,10 +143,10 @@ void MainView::setupMenu()
 	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);
-	ui->menuSymbolTable->addAction(actions->actionEditSymbols);
-	ui->menuSymbolTable->addAction(actions->actionLoadSymbols);
-	ui->menuSymbolTable->addAction(actions->actionSaveSymbols);
-	ui->menuSymbolTable->addAction(actions->actionMergeWithSymbols);
+	ui->menuSymbolMap->addAction(actions->actionEditSymbols);
+	ui->menuSymbolMap->addAction(actions->actionLoadSymbols);
+	ui->menuSymbolMap->addAction(actions->actionSaveSymbols);
+	ui->menuSymbolMap->addAction(actions->actionMergeWithSymbols);
 
 	ui->menuView->addAction(actions->actionEditor);
 	ui->menuView->addAction(actions->actionMonitor);
@@ -199,7 +199,7 @@ void MainView::setupFontsAndColors()
 	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
-	ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
+	ui->menuSymbolMap->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
