@@ -242,7 +242,7 @@ void DataEditView::switchToCellEditorWithComputerWithoutToken()
 		_computerTabWidget->clear();
 		_computerTabWidget->addTab(_computerTab, "cell computer");
 		_symbolTabWidget->clear();
-		_symbolTabWidget->addTab(_symbolTab, "symbols");
+		_symbolTabWidget->addTab(_symbolTab, "symbol map");
 		_editorSelector = EditorSelector::CellWithComputerWithoutToken;
 	}
 	updateDisplay();
