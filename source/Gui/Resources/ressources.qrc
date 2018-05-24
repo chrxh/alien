@@ -31,5 +31,6 @@
         <file>Icons/center_off.png</file>
         <file>Icons/center_on.png</file>
         <file>Tutorial/logo.png</file>
+        <file>Tutorial/units.png</file>
     </qresource>
 </RCC>

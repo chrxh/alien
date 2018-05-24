@@ -58,21 +58,22 @@
             <h3> <a href="#energyguidance"><font face="Courier" color="#FFFFFF">3.3 Energy guidance system</font></a></h3>
             <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">3.4 Simulation parameters</font></a></h3>
             <h3> <a href="#programdocu"><font face="Courier" color="#FFFFFF">4 Program documentation</font></a></h3>
-            <h3> <a href="#views"><font face="Courier" color="#FFFFFF">4.1 Views</font></a></h3>
-            <h3> <a href="#pixel"><font face="Courier" color="#FFFFFF">4.1.1 Pixel view</font></a></h3>
-            <h3> <a href="#item"><font face="Courier" color="#FFFFFF">4.1.2 Item view</font></a></h3>
-            <h3> <a href="#clustereditor"><font face="Courier" color="#FFFFFF">4.1.1.1 Cluster editor</font></a></h3>
-            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.1.1.2 Cell Computer editor</font></a></h3>
-            <h3> <a href="#tokeneditor"><font face="Courier" color="#FFFFFF">4.1.1.3 Token editor</font></a></h3>
-            <h3> <a href="#symbolseditor"><font face="Courier" color="#FFFFFF">4.1.1.4 Symbol map editor</font></a></h3>
-            <h3> <a href="#tools"><font face="Courier" color="#FFFFFF">4.2 Manipulation tools</font></a></h3>
-            <h3> <a href="#entities"><font face="Courier" color="#FFFFFF">4.2.1 Single entities</font></a></h3>
-            <h3> <a href="#collections"><font face="Courier" color="#FFFFFF">4.2.2 Collections</font></a></h3>
-            <h3> <a href="#settings"><font face="Courier" color="#FFFFFF">4.3 Settings</font></a></h3>
-            <h3> <a href="#grid"><font face="Courier" color="#FFFFFF">4.3.1 Grid</font></a></h3>
-            <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.3.2 Simulation parameters</font></a></h3>
-            <h3> <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.3.3 Symbol map</font></a></h3>
-            <h3> <a href="#monitoring"><font face="Courier" color="#FFFFFF">4.4 Monitoring</font></a></h3>
+            <h3> <a href="#mainprogram"><font face="Courier" color="#FFFFFF">4.1 Main program</font></a></h3>
+            <h3> <a href="#views"><font face="Courier" color="#FFFFFF">4.2 Views</font></a></h3>
+            <h3> <a href="#pixel"><font face="Courier" color="#FFFFFF">4.2.1 Pixel view</font></a></h3>
+            <h3> <a href="#item"><font face="Courier" color="#FFFFFF">4.2.2 Item view</font></a></h3>
+            <h3> <a href="#clustereditor"><font face="Courier" color="#FFFFFF">4.2.2.1 Cluster editor</font></a></h3>
+            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.2.2.2 Cell Computer editor</font></a></h3>
+            <h3> <a href="#tokeneditor"><font face="Courier" color="#FFFFFF">4.2.2.3 Token editor</font></a></h3>
+            <h3> <a href="#symbolseditor"><font face="Courier" color="#FFFFFF">4.2.2.4 Symbol map editor</font></a></h3>
+            <h3> <a href="#tools"><font face="Courier" color="#FFFFFF">4.3 Manipulation tools</font></a></h3>
+            <h3> <a href="#entities"><font face="Courier" color="#FFFFFF">4.3.1 Single entities</font></a></h3>
+            <h3> <a href="#collections"><font face="Courier" color="#FFFFFF">4.3.2 Collections</font></a></h3>
+            <h3> <a href="#settings"><font face="Courier" color="#FFFFFF">4.4 Settings</font></a></h3>
+            <h3> <a href="#grid"><font face="Courier" color="#FFFFFF">4.4.1 Grid</font></a></h3>
+            <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.4.2 Simulation parameters</font></a></h3>
+            <h3> <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a></h3>
+            <h3> <a href="#monitoring"><font face="Courier" color="#FFFFFF">4.5 Monitoring</font></a></h3>
         </p>
         <font face="Courier" color="#70B070">
             <p>
@@ -162,6 +163,7 @@
             <p>
                 To start the simulation please toggle <i>Simulation -> Run</i>.
                 On the bottom status line one should see the current timestep and the timesteps per second (TPS).
+                Also limiting TPS is possible there.
                 Toggling again <i>Simulation -> Run</i> will pause the simulation.
                 Loading and saving is also possible via the <i>Simulation</i> menu entries.
                 Sometimes it is convenient to restore a universe via snapshots.
@@ -179,7 +181,7 @@
             <p>
                 Throughout this section simulation parameters (such as <i>mutation probability</i>) are denoted by
                 the bracket notation <i>[...] -> ... -> [...]</i>. A overview of the parameters is given in
-                <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.3.2 Simulation parameters</font></a>.
+                <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.4.2 Simulation parameters</font></a>.
             </p>
         </font>
         <font face="Courier" color="#70B070">
@@ -2588,13 +2590,41 @@
             <p><h2 id="programdocu">4 Program documentation</h2></p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="views">4.1 Views</h2></p>
+            <p><h2 id="mainprogram">4.1 Main Program</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
                 After starting the program one will find a menu bar and a tool bar on the top,
                 a view of the artificial universe (initially empty) in the center and a status bar on the buttom.
+                A alien simulation consists of the universe with its entities, simulation parameters and
+                some information for convenience such as metadata and a symbol map.
+                Entire simulations can be created, loaded, saved, run and paused via the menu entries in <i>Simulation</i>.
             </p>
+            <p>
+                If a new simulation should be created a dialog appears which allows one to specify the
+                grid (see <a href="#grid"><font face="Courier" color="#FFFFFF">4.4.1 Grid</font></a>),
+                the initial amount of energy, simulation parameters (see <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.4.2 Simulation parameters</font></a>)
+                and a symbol map (see <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a>).
+            </p>
+            <p>
+                Assume a new simulation has been created.
+                By toggling <i>Simulation -> Run</i> the simulation starts.
+                That means new timesteps are calculated on separate threads consecutively.
+                By toggling <i>Simulation -> Run</i> again the simulation is paused.
+            </p>
+            <p>
+                In order to facilitate experimenting with simulations one can take snapshots via <i>Simulation -> Snapshot</i>.
+                The simulation will then be saved in some temporary internal memory. After clicking on
+                <i>Simulation -> Restore</i> it will be loaded.
+                It is also possible to compute only one timestep and showing the result by invoking
+                <i>Simulation -> Step forward</i>. In that case one can step back via
+                <i>Simulation -> Step backward</i>. These functionalities are also accessible through the toolbar.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="views">4.2 Views</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
             <p>
                 The main programm provides two different views designed for different purposes: pixel and item view.
                 To toggle between these views please click on <i>View -> Editor</i>.
@@ -2603,7 +2633,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="pixel">4.1.1 Pixel view</h2></p>
+            <p><h2 id="pixel">4.2.1 Pixel view</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2624,7 +2654,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="item">4.1.2 Item view</h2></p>
+            <p><h2 id="item">4.2.2 Item view</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2687,14 +2717,14 @@
                 If, additionally, one or more token exist on that cell further tabs for each token appear (token editor).
                 When the selected cell has a computer cell function two more tabs showing the symbol map
                 and a cell computer editor. Note that the symbol map can also be edited via
-                <i>Settings -> Symbol map -> Edit</i> (see <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.3.3 Symbol map</font></a>).
+                <i>Settings -> Symbol map -> Edit</i> (see <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a>).
                 However for convenvience in this context it is also shown
                 in a tab.<br/>
                 For a selected particle only one tab that allows to edit its physical properties is shown.
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="clustereditor">4.1.1.1 Cluster editor</h2></p>
+            <p><h2 id="clustereditor">4.2.2.1 Cluster editor</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2733,7 +2763,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="celleditor">4.1.1.2 Cell Computer editor</h2></p>
+            <p><h2 id="celleditor">4.2.2.2 Cell Computer editor</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2747,7 +2777,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="tokeneditor">4.1.1.3 Token editor</h2></p>
+            <p><h2 id="tokeneditor">4.2.2.3 Token editor</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2761,7 +2791,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="symbolseditor">4.1.1.4 Symbol map editor</h2></p>
+            <p><h2 id="symbolseditor">4.2.2.4 Symbol map editor</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2771,11 +2801,11 @@
                 it is very convenient to look up or introduce new symbols when
                 using them in the source code for the cell computer.
                 For more information about symbol map see
-                <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.3.3 Symbol map</font></a>.
+                <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a>.
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="tools">4.2 Manipulation tools</h2></p>
+            <p><h2 id="tools">4.3 Manipulation tools</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2784,7 +2814,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="entities">4.2.1 Single entities</h2></p>
+            <p><h2 id="entities">4.3.1 Single entities</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2946,7 +2976,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="collections">4.2.2 Collections</h2></p>
+            <p><h2 id="collections">4.3.2 Collections</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -2954,7 +2984,7 @@
                 Is is usually an rectangle section from the universe. Collections can be created, saved, loaded, deleted, moved
                 and multiplied. For some of these operations a collection has to be selected.
                 This can be performed in the item view.
-                In Section <a href="#item"><font face="Courier" color="#FFFFFF">4.1.2 Item view</font></a>
+                In Section <a href="#item"><font face="Courier" color="#FFFFFF">4.2.2 Item view</font></a>
                 we have already learned how to move collections.
                 It is convenient to distinguish between two sets:
                 <table border="0">
@@ -3117,16 +3147,34 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="settings">4.3 Settings</h2></p>
+            <p><h2 id="settings">4.4 Settings</h2></p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="grid">4.3.1 Grid</h2></p>
+            <p><h2 id="grid">4.4.1 Grid</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In order to allow multithreaded computations the universe is partitioned into
+                units. A unit is a rectangular extrait of the universe. All units are arranged in a grid.
+                The universe size in each direction (x or y) is thus the unit size times the number of units in that direction.
+                Each unit has an associated thread for computation.
+                <br />
+                <br />
+                <img src="qrc:///tutorial/units.png" alt="logo" width="800">
+                <br />
+                <br />
+            </p>
+            <p>
+                The grid with its units are setted up when creating a new simulation via <i>Simulation -> New</i>.
+                It is also possible to change the grid during a simulation by opening <i>Settings -> Grid</i>.
+                Note that the resulting universe size can possibly be changed.
+            </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="simulationparameters">4.3.2 Simulation parameters</h2></p>
+            <p><h2 id="simulationparameters">4.4.2 Simulation parameters</h2></p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="symboltable">4.3.3 Symbol map</h2></p>
+            <p><h2 id="symboltable">4.4.3 Symbol map</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
@@ -3134,7 +3182,7 @@
             </p>
         </font>
         <font face="Courier" color="#70B070">
-            <p><h2 id="monitoring">4.4 Monitoring</h2></p>
+            <p><h2 id="monitoring">4.5 Monitoring</h2></p>
         </font>
         </td> </tr>
         </table>
