@@ -2078,6 +2078,9 @@
   <ItemGroup>
     <ResourceCompile Include="Gui.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\source\Gui\Resources\Tutorial\units.png" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F9C0C391-A913-45C6-85BF-CE5FBF7D1876}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>

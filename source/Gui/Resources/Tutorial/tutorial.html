@@ -48,13 +48,13 @@
             <h3> <a href="#programmablematter"><font face="Courier" color="#FFFFFF">3.2 Information processing model</font></a></h3>
             <h3> <a href="#processingscheme"><font face="Courier" color="#FFFFFF">3.2.1 Processing scheme</font></a></h3>
             <h3> <a href="#cellfunctions"><font face="Courier" color="#FFFFFF">3.2.2 Cell function programming</font></a></h3>
-            <h3> <a href="#computer"><font face="Courier" color="#FFFFFF">3.2.2.1 Computer</font><a></h3>
-            <h3> <a href="#propulsion"><font face="Courier" color="#FFFFFF">3.2.2.2 Propulsion</font><a></h3>
-            <h3> <a href="#scanner"><font face="Courier" color="#FFFFFF">3.2.2.3 Scanner</font><a></h3>
-            <h3> <a href="#weapon"><font face="Courier" color="#FFFFFF">3.2.2.4 Weapon</font><a></h3>
-            <h3> <a href="#constructor"><font face="Courier" color="#FFFFFF">3.2.2.5 Constructor</font><a></h3>
-            <h3> <a href="#sensor"><font face="Courier" color="#FFFFFF">3.2.2.6 Sensor</font><a></h3>
-            <h3> <a href="#communicator"><font face="Courier" color="#FFFFFF">3.2.2.7 Communicator</font><a></h3>
+            <h3> <a href="#computer"><font face="Courier" color="#FFFFFF">3.2.2.1 Computer</font></a></h3>
+            <h3> <a href="#propulsion"><font face="Courier" color="#FFFFFF">3.2.2.2 Propulsion</font></a></h3>
+            <h3> <a href="#scanner"><font face="Courier" color="#FFFFFF">3.2.2.3 Scanner</font></a></h3>
+            <h3> <a href="#weapon"><font face="Courier" color="#FFFFFF">3.2.2.4 Weapon</font></a></h3>
+            <h3> <a href="#constructor"><font face="Courier" color="#FFFFFF">3.2.2.5 Constructor</font></a></h3>
+            <h3> <a href="#sensor"><font face="Courier" color="#FFFFFF">3.2.2.6 Sensor</font></a></h3>
+            <h3> <a href="#communicator"><font face="Courier" color="#FFFFFF">3.2.2.7 Communicator</font></a></h3>
             <h3> <a href="#energyguidance"><font face="Courier" color="#FFFFFF">3.3 Energy guidance system</font></a></h3>
             <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">3.4 Simulation parameters</font></a></h3>
             <h3> <a href="#programdocu"><font face="Courier" color="#FFFFFF">4 Program documentation</font></a></h3>
@@ -163,7 +163,8 @@
             <p>
                 To start the simulation please toggle <i>Simulation -> Run</i>.
                 On the bottom status line one should see the current timestep and the timesteps per second (TPS).
-                Also limiting TPS is possible there.
+                Also limiting TPS is possible there by clicking on the <i>restrict TPS</i>-button. Beside that button
+                one can enter a TPS limit.
                 Toggling again <i>Simulation -> Run</i> will pause the simulation.
                 Loading and saving is also possible via the <i>Simulation</i> menu entries.
                 Sometimes it is convenient to restore a universe via snapshots.
@@ -3160,7 +3161,7 @@
                 Each unit has an associated thread for computation.
                 <br />
                 <br />
-                <img src="qrc:///tutorial/units.png" alt="logo" width="800">
+                <img src="qrc:///Tutorial/units.png" alt="logo" width="350">
                 <br />
                 <br />
             </p>
@@ -3173,16 +3174,42 @@
         <font face="Courier" color="#70B070">
             <p><h2 id="simulationparameters">4.4.2 Simulation parameters</h2></p>
         </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Simulation parameters can be setted up in the new simulation dialog
+                or by invoking <i>Settings -> Simulation parameters -> Edit</i> at any later time.
+                After clicking on <i>OK</i>-button the new simulation parameters are active in the current
+                possibly runngin simulation.
+            </p>
+        </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="symboltable">4.4.3 Symbol map</h2></p>
         </font>
         <font face="Courier" color="#FFFFFF" size="4">
             <p>
                 Symbol map allows to defined aliases for constant or variables.
+                For instance, a symbol <i>SOME_CONSTANT</i> could be <i>4</i> whereas
+                <i>SOME_VARIABLE</i> could be <i>[4]</i>.
+                The bracket [...] indicates a memory access. See
+                <a href="#computer"><font face="Courier" color="#FFFFFF">3.2.2.1 Computer</font></a>
+                for more details.
+            </p>
+            <p>
+                There are two possibilities for editing the symbol map: via dialog
+                <i>Settings -> Symbol map -> Edit</i> or in a tab in item view, cf.
+                <a href="#symbolseditor"><font face="Courier" color="#FFFFFF">4.2.2.4 Symbol map editor</font></a>.
             </p>
         </font>
         <font face="Courier" color="#70B070">
             <p><h2 id="monitoring">4.5 Monitoring</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                It is possible the monitor some characteristic values such as <i>total energy</i>, 
+                <i>number of cells</i> or <i>number of clusters</i>  etc.
+                To this end, one can open a monitor by toggling <i>View -> Monitor</i> (or in the toolbar).
+                The monitor is a partially transparent sub-window showing such informations.
+            </p>
         </font>
         </td> </tr>
         </table>
