@@ -36,6 +36,7 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
+//- siehe SimulationParameters.h
 //- Validierung: Geschwindigkeit begrenzen
 //- Warum wird Energie negativ?
 //- Total-Energy nimmt immer mehr ab
