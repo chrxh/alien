@@ -1,51 +1,125 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
+
+#include "Model/Api/ModelBuilderFacade.h"
+#include "Model/Api/Settings.h"
+#include "Model/Api/SimulationParameters.h"
+#include "Model/Api/SimulationController.h"
+#include "Model/Api/SimulationAccess.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Cell.h"
 #include "Model/Local/Token.h"
-#include "Model/Impl/CommunicatorFunction.h"
 #include "Model/Local/PhysicalQuantityConverter.h"
 #include "Model/Local/UnitContext.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
 #include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Api/SimulationParameters.h"
+#include "Model/Impl/CommunicatorFunction.h"
 
-#include "tests/TestSettings.h"
+#include "Tests/TestSettings.h"
 
-class CommunicatorFunctionTest : public ::testing::Test
+#include "IntegrationTestFramework.h"
+#include "IntegrationTestHelper.h"
+
+class CommunicatorFunctionTest : public IntegrationTestFramework
 {
 public:
 	CommunicatorFunctionTest();
 	~CommunicatorFunctionTest();
 
 protected:
-    UnitContext* _context;
-
-    //data for cluster1
-    Cluster* _cluster1 = nullptr;
-    Cell* _cellWithToken = nullptr;
-    Cell* _cellWithoutToken = nullptr;
-    CommunicatorFunction* _communicator1a = nullptr;
-	CommunicatorFunction* _communicator1b = nullptr;
-    Token* _token = nullptr;
-
-    //data for cluster2
-    Cluster* _cluster2 = nullptr;
-	CommunicatorFunction* _communicator2 = nullptr;
+    SimulationController* _controller = nullptr;
+	SimulationAccess* _access = nullptr;
 };
 
 CommunicatorFunctionTest::CommunicatorFunctionTest()
+	: IntegrationTestFramework({ 1000, 1000 })
 {
-/*
-	BuilderFacade* facade = ServiceLocator::getInstance().getService<BuilderFacade>();
+	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	_controller = facade->buildSimulationController(1, { 1, 1 }, _universeSize, _symbols, _parameters);
+	auto context = _controller->getContext();
 
-	_context = facade->buildSimulationContext();
-	auto metric = facade->buildSpaceMetric();
-	metric->init({ 1000, 1000 });
-	_context->init(metric);
+	_access = facade->buildSimulationAccess();
+	_access->init(context);
+}
 
+TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
+{
+	const float distCommRange = _parameters->cellFunctionCommunicatorRange / 2.0;
+	const uint8_t channel = 1;
+	const uint8_t differentChannel = 2;
+	const uint8_t message = 100;
+	const uint8_t angle = PhysicalQuantityConverter::convertAngleToData(180.0);
+
+	QByteArray tokenData(_parameters->tokenMemorySize, 0);
+	tokenData[Enums::Communicator::IN] = Enums::CommunicatorIn::SEND_MESSAGE;
+	tokenData[Enums::Communicator::IN_CHANNEL] = channel;
+	tokenData[Enums::Communicator::IN_MESSAGE] = message;
+	tokenData[Enums::Communicator::IN_ANGLE] = angle;
+	tokenData[Enums::Communicator::IN_DISTANCE] = static_cast<uint8_t>(distCommRange);
+
+	QByteArray cellData(5, 0);
+	cellData[CommunicatorFunction::InternalDataSemantic::Channel] = channel;
+
+	const uint64_t clusterId1 = 1;
+	const uint64_t clusterId2 = 2;
+	const uint64_t cellId1 = 3;
+	const uint64_t cellId2 = 4;
+	const uint64_t cellId3 = 5;
+	auto dataInit = DataDescription().addClusters({
+		ClusterDescription()
+		.setId(clusterId1)
+		.addCells({
+			CellDescription()
+			.setId(cellId1).setPos({ 500, 500 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
+			.setConnectingCells({ cellId2 }).setMaxConnections(1).setTokenBranchNumber(0)
+			.setCellFeature(
+				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
+			)
+			.setTokens({
+				TokenDescription().setEnergy(_parameters->cellFunctionConstructorOffspringTokenEnergy).setData(tokenData)
+			}),
+			CellDescription()
+			.setId(cellId2).setPos({ 500, 501 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
+			.setConnectingCells({ cellId1 }).setMaxConnections(1).setTokenBranchNumber(1)
+			.setCellFeature(
+				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
+			)
+		}),
+		ClusterDescription()
+		.setId(clusterId2)
+		.addCells({
+			CellDescription()
+			.setId(cellId3).setPos({ 500 + distCommRange / 2, 501 + distCommRange / 2 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			.setFlagTokenBlocked(false).setMaxConnections(0).setTokenBranchNumber(0)
+			.setCellFeature(
+				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
+			)
+		})
+	});
+	_access->updateData(dataInit);
+
+	runSimulation(1, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
+	unordered_map<uint64_t, CellDescription> cellById = IntegrationTestHelper::getCellById(dataAfter);
+
+	QByteArray cellMem1 = cellById.at(cellId1).cellFeature->volatileData;
+	QByteArray cellMem2 = cellById.at(cellId2).cellFeature->volatileData;
+	QByteArray cellMem3 = cellById.at(cellId3).cellFeature->volatileData;
+
+	EXPECT_TRUE(bool(cellMem1.at(CommunicatorFunction::InternalDataSemantic::NewMessageReceived)));
+	EXPECT_FALSE(bool(cellMem2.at(CommunicatorFunction::InternalDataSemantic::NewMessageReceived)));
+	EXPECT_TRUE(bool(cellMem3.at(CommunicatorFunction::InternalDataSemantic::NewMessageReceived)));
+
+	EXPECT_EQ(100, cellMem1.at(CommunicatorFunction::InternalDataSemantic::MessageCode));
+	EXPECT_EQ(100, cellMem3.at(CommunicatorFunction::InternalDataSemantic::MessageCode));
+	qreal receivedAngle1 = PhysicalQuantityConverter::convertDataToAngle(cellMem1.at(CommunicatorFunction::InternalDataSemantic::OriginAngle));
+	qreal receivedAngle3 = PhysicalQuantityConverter::convertDataToAngle(cellMem3.at(CommunicatorFunction::InternalDataSemantic::OriginAngle));
+
+	EXPECT_TRUE(std::abs(180 - receivedAngle1) < 2.0);
+	EXPECT_TRUE(std::abs(-135  - receivedAngle3) < 2.0);
+	/*
 	{
 		//create cells, cell functions and token for cluster1
 		qreal cellEnergy = 0.0;
@@ -164,7 +238,6 @@ TEST_F (TestCellFunctionCommunicator, testSendMessage)
 
 CommunicatorFunctionTest::~CommunicatorFunctionTest()
 {
-	delete _cluster1;
-	delete _cluster2;
-	delete _context;
+	delete _controller;
+	delete _access;
 }

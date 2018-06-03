@@ -144,7 +144,7 @@ namespace boost {
 			ar & data.cellMaxBonds;
 			ar & data.cellMaxToken;
 			ar & data.cellMaxTokenBranchNumber;
-			ar & data.cellCreationEnergy;
+			ar & data.cellFunctionConstructorOffspringCellEnergy;
 			ar & data.cellCreationMaxConnection;
 			ar & data.cellCreationTokenAccessNumber;
 			ar & data.cellMinEnergy;
@@ -154,10 +154,10 @@ namespace boost {
 			ar & data.cellFunctionComputerMaxInstructions;
 			ar & data.cellFunctionComputerCellMemorySize;
 			ar & data.tokenMemorySize;
-			ar & data.cellFunctionConstructorOffspringDistance;
+			ar & data.cellFunctionConstructorOffspringCellDistance;
 			ar & data.cellFunctionSensorRange;
 			ar & data.cellFunctionCommunicatorRange;
-			ar & data.tokenCreationEnergy;
+			ar & data.cellFunctionConstructorOffspringTokenEnergy;
 			ar & data.tokenMinEnergy;
 			ar & data.radiationExponent;
 			ar & data.radiationFactor;

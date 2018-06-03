@@ -76,9 +76,9 @@ void HexEditWidget::keyPressEvent (QKeyEvent* e)
         int pos = QTextEdit::textCursor().positionInBlock();
         QString s1;
         if( ((pos % 6) == 0) || ((pos % 6) == 1))
-            s1 = "<span style=\"color:"+HEX_EDIT_COLOR1.name()+"\">";
+            s1 = "<span style=\"color:"+Const::HexEditColor1.name()+"\">";
         else if( ((pos % 6) == 3) || ((pos % 6) == 4))
-            s1 = "<span style=\"color:"+HEX_EDIT_COLOR2.name()+"\">";
+            s1 = "<span style=\"color:"+Const::HexEditColor2.name()+"\">";
         QTextEdit::textCursor().insertHtml(s1+k+"</span>");
 
         //read and Q_EMIT data
@@ -136,9 +136,9 @@ void HexEditWidget::keyPressEvent (QKeyEvent* e)
     pos = QTextEdit::textCursor().positionInBlock();
     QPalette p(QTextEdit::palette());
     if( ((pos % 6) == 0) || ((pos % 6) == 1) )
-        p.setColor(QPalette::Text, HEX_EDIT_COLOR1);
+        p.setColor(QPalette::Text, Const::HexEditColor1);
     else if( ((pos % 6) == 3) || ((pos % 6) == 4) )
-        p.setColor(QPalette::Text, HEX_EDIT_COLOR2);
+        p.setColor(QPalette::Text, Const::HexEditColor2);
     QTextEdit::setPalette(p);
 
 }
@@ -160,9 +160,9 @@ void HexEditWidget::mousePressEvent(QMouseEvent* e)
     pos = QTextEdit::textCursor().positionInBlock();
     QPalette p(QTextEdit::palette());
     if( ((pos % 6) == 0) || ((pos % 6) == 1) )
-        p.setColor(QPalette::Text, HEX_EDIT_COLOR1);
+        p.setColor(QPalette::Text, Const::HexEditColor1);
     else if( ((pos % 6) == 3) || ((pos % 6) == 4) )
-        p.setColor(QPalette::Text, HEX_EDIT_COLOR2);
+        p.setColor(QPalette::Text, Const::HexEditColor2);
     QTextEdit::setPalette(p);
 }
 
@@ -198,9 +198,9 @@ void HexEditWidget::updateDisplay (QByteArray const& data)
         QString s1(QString("%1").arg(byte >>4, 1, 16, QLatin1Char('0')));
         QString s2(QString("%1").arg(byte &15, 1, 16, QLatin1Char('0')));
         if( (i%2) == 0 )
-            text += "<span style=\"color:"+HEX_EDIT_COLOR1.name()+"\">"+s1.toUpper()+s2.toUpper()+"  "+colorEnd;
+            text += "<span style=\"color:"+Const::HexEditColor1.name()+"\">"+s1.toUpper()+s2.toUpper()+"  "+colorEnd;
         else
-            text += "<span style=\"color:"+HEX_EDIT_COLOR2.name()+"\">"+s1.toUpper()+s2.toUpper()+" "+colorEnd;
+            text += "<span style=\"color:"+Const::HexEditColor2.name()+"\">"+s1.toUpper()+s2.toUpper()+" "+colorEnd;
     }
     text += parEnd;
     QTextEdit::setText(text);

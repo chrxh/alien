@@ -1,5 +1,7 @@
 ﻿#include <QAction>
 
+#include "Gui/Settings.h"
+
 #include "ActionHolder.h"
 
 ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
@@ -104,7 +106,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionFullscreen = new QAction("Fullscreen", this);
 	actionFullscreen->setEnabled(true);
 	actionFullscreen->setCheckable(true);
-	actionFullscreen->setChecked(true);
+	bool fullScreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
+	actionFullscreen->setChecked(fullScreen);
 
 	actionShowCellInfo = new QAction("Cell info", this);
 	QIcon iconCellInfo;

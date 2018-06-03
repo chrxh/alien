@@ -1,0 +1,3217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+<meta name="author" content="Customer">
+<meta name="editor" content="html-editor phase 5">
+    <style type="text/css">
+        .auto-style1 {
+            height: 22px;
+        }
+        .auto-style2 {
+            height: 41px;
+        }
+    </style>
+</head>
+<body text="#7070FF" bgcolor="#00001b" link="#FF0000" alink="#FF0000" vlink="#FF0000">
+    <table>
+    <tr> <td width="800">
+        <font face="Courier" color="#E0FFB0" size="4">
+        <p>
+            <img src="qrc:///Tutorial/logo.png" alt="logo" width="800">
+            <br />
+            <i>alien</i> is a shortform for `artificial life environment'
+            and denotes a research tool aiming to simulate digital organisms in an artificial ecosystem and (pre-)biotic evolution.
+            The main feature is that it combines a realistic physical framework including kinematic and thermodynamic processes
+            for the simulated world with a computational model that allows to describe the behavior and purposeful interventions of the organisms.
+            In this document an overview of the underlying model and the simulation software is given.
+        </p>
+        </font>
+        <font face="Courier" color="#B0D0B0">
+            <p>
+                <h2> Content</h2>
+            </p>
+        </font>
+            <p>
+            <h3> <a href="#introduction"><font face="Courier" color="#FFFFFF">1 Brief introduction</font></a></h3>
+            <h3> <a href="#gettingstarted"><font face="Courier" color="#FFFFFF">2 Getting started</font></a></h3>
+            <h3> <a href="#alienmodel"><font face="Courier" color="#FFFFFF">3 alien model</font></a></h3>
+            <h3> <a href="#physics"><font face="Courier" color="#FFFFFF">3.1 Physics</font></a></h3>
+            <h3> <a href="#rigidbody"><font face="Courier" color="#FFFFFF">3.1.1 Rigid body motion</font></a></h3>
+            <h3> <a href="#thermodynamics"><font face="Courier" color="#FFFFFF">3.1.2 Thermodynamics</font></a></h3>
+            <h3> <a href="#space"><font face="Courier" color="#FFFFFF">3.1.3 Space</font></a></h3>
+            <h3> <a href="#entities"><font face="Courier" color="#FFFFFF">3.1.4 Entities</font></a></h3>
+            <h3> <a href="#cell"><font face="Courier" color="#FFFFFF">3.1.4.1 Cell</font></a></h3>
+            <h3> <a href="#cellcluster"><font face="Courier" color="#FFFFFF">3.1.4.2 Cell cluster</font></a></h3>
+            <h3> <a href="#energyparticle"><font face="Courier" color="#FFFFFF">3.1.4.3 Energy particle</font></a></h3>
+            <h3> <a href="#token"><font face="Courier" color="#FFFFFF">3.1.4.4 Token</font></a></h3>
+            <h3> <a href="#programmablematter"><font face="Courier" color="#FFFFFF">3.2 Information processing model</font></a></h3>
+            <h3> <a href="#processingscheme"><font face="Courier" color="#FFFFFF">3.2.1 Processing scheme</font></a></h3>
+            <h3> <a href="#cellfunctions"><font face="Courier" color="#FFFFFF">3.2.2 Cell function programming</font></a></h3>
+            <h3> <a href="#computer"><font face="Courier" color="#FFFFFF">3.2.2.1 Computer</font></a></h3>
+            <h3> <a href="#propulsion"><font face="Courier" color="#FFFFFF">3.2.2.2 Propulsion</font></a></h3>
+            <h3> <a href="#scanner"><font face="Courier" color="#FFFFFF">3.2.2.3 Scanner</font></a></h3>
+            <h3> <a href="#weapon"><font face="Courier" color="#FFFFFF">3.2.2.4 Weapon</font></a></h3>
+            <h3> <a href="#constructor"><font face="Courier" color="#FFFFFF">3.2.2.5 Constructor</font></a></h3>
+            <h3> <a href="#sensor"><font face="Courier" color="#FFFFFF">3.2.2.6 Sensor</font></a></h3>
+            <h3> <a href="#communicator"><font face="Courier" color="#FFFFFF">3.2.2.7 Communicator</font></a></h3>
+            <h3> <a href="#energyguidance"><font face="Courier" color="#FFFFFF">3.3 Energy guidance system</font></a></h3>
+            <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">3.4 Simulation parameters</font></a></h3>
+            <h3> <a href="#programdocu"><font face="Courier" color="#FFFFFF">4 Program documentation</font></a></h3>
+            <h3> <a href="#mainprogram"><font face="Courier" color="#FFFFFF">4.1 Main program</font></a></h3>
+            <h3> <a href="#views"><font face="Courier" color="#FFFFFF">4.2 Views</font></a></h3>
+            <h3> <a href="#pixel"><font face="Courier" color="#FFFFFF">4.2.1 Pixel view</font></a></h3>
+            <h3> <a href="#item"><font face="Courier" color="#FFFFFF">4.2.2 Item view</font></a></h3>
+            <h3> <a href="#clustereditor"><font face="Courier" color="#FFFFFF">4.2.2.1 Cluster editor</font></a></h3>
+            <h3> <a href="#celleditor"><font face="Courier" color="#FFFFFF">4.2.2.2 Cell Computer editor</font></a></h3>
+            <h3> <a href="#tokeneditor"><font face="Courier" color="#FFFFFF">4.2.2.3 Token editor</font></a></h3>
+            <h3> <a href="#symbolseditor"><font face="Courier" color="#FFFFFF">4.2.2.4 Symbol map editor</font></a></h3>
+            <h3> <a href="#tools"><font face="Courier" color="#FFFFFF">4.3 Manipulation tools</font></a></h3>
+            <h3> <a href="#entities"><font face="Courier" color="#FFFFFF">4.3.1 Single entities</font></a></h3>
+            <h3> <a href="#collections"><font face="Courier" color="#FFFFFF">4.3.2 Collections</font></a></h3>
+            <h3> <a href="#settings"><font face="Courier" color="#FFFFFF">4.4 Settings</font></a></h3>
+            <h3> <a href="#grid"><font face="Courier" color="#FFFFFF">4.4.1 Grid</font></a></h3>
+            <h3> <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.4.2 Simulation parameters</font></a></h3>
+            <h3> <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a></h3>
+            <h3> <a href="#monitoring"><font face="Courier" color="#FFFFFF">4.5 Monitoring</font></a></h3>
+        </p>
+        <font face="Courier" color="#70B070">
+            <p>
+                <br />
+                <h2 id="introduction">1 Brief introduction</h2>
+            </p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                <i>alien</i> is a shortform for `artificial life environment'
+                and denotes a research tool aiming to simulate digital organisms in an artificial ecosystem and (pre-)biotic evolution.
+                The main feature is that it combines a realistic physical framework including kinematic and thermodynamic processes
+                for the simulated world with a computational model that allows to describe the behavior and purposeful interventions of the organisms.
+                The organisms form <i>cell clusters</i>, which are modeled by planary graphs where the nodes corresponds to elementary <i>cells</i>
+                and the edges to communication channels (<i>connections</i>).
+                In the following we briefly explain the underlying computational as well as the physical model.
+                <br />
+                <br />
+                <b>Information processing model:</b>
+                Cell clusters implement their behavior algorithms in the cells and their connections.
+                The topology of the cluster allows to implement loops, branches, distributed algorithm etc.
+                Computations as well as input and output operations of the clusters are performed on the <i>cells</i> via <i>tokens</i>.
+                Every token contains a memory and provokes execution of <i>cell functions</i>.
+                Various cell functions such as computations, sensoring, constructing, attacking external cells etc. are available.
+                After a cell has executed its function the token spreads to adjacent cells by a specific rule.
+                This will be decided on the basis of the <i>branch number</i> attributed to every token and cell.
+                The rule is that the token spreads to an adjacent cell if the branch number of the cell is one larger
+                than the token branch number modulo a fixed constant.
+                <br />
+                <br />
+                <b>Physical model:</b>
+                Every cell cluster is embedded into a physical 2D space and performs rigid body motions.
+                They possess associated linear and angular momentums.
+                If two clusters collide they may merge provided the velocities are high enough
+                and the touching cells on both clusters are able to form bonds.
+                Otherwise a collision takes place.
+                Single cells of a cluster might be destroyed after a collision if the forces exceeds a certain threshold.
+                Furthermore cells as well as tokens have an internal energy value and
+                emit <i>energy particles</i> from time to time.
+                Radiation lowers their internal energy and may finally lead to disintegration.
+                But if on the contrary energy particles collide they may form a new cell if their energy values together are high enough.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="gettingstarted">2 Getting started</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In this section you will get to know the alien simulator. A detailed reference is given in
+                <a href="#simulator"><font face="Courier" color="#FFFFFF">Section 4</font></a>
+                whereas in
+                <a href="#alienmodel"><font face="Courier" color="#FFFFFF">Section 3</font></a>
+                you find information about the model it is based on.
+                <br />
+            </p>
+            <p>
+                At first you should start a new simulation by clicking <i>Simulation -> New</i> in the menu.
+                A universe can be divided into units which are calculated in own threads.
+                The size of a universe results from grid and unit size.
+                Furthermore you should place some initial energy in the simulation. It is represented as
+                particles that move around the space. For a universe of size 1200 x 600 one can choose, e.g.,
+                a value of 1e+7.
+                The simulation parameters and symbol map have meaningful default values and can be keept as they are for the moment.
+                Clicking <i>OK</i> generates a new universe which particles carrying the initial energy.
+            </p>
+            <p>
+                There are two modes for viewing the simulation: pixel view and item view.
+                The pixel view is set as default and gives a overview about where the particles and cells are situated. Cells can have
+                different colors. The default color is blue. The particles are shown in red.
+                The item view however gives a much more detailed insign. One can not only inspect precise position, velocity,
+                energy and internal states but also change them.
+                To switch between these modes <i>View -> Editor</i> has to be toggled in the menu.
+                It is recommended to zoom into the universe before switching to the item view.
+                In that view one can select one or more particles or cells. If one selects just one entity by clicked on
+                it all the internal informations on additional windows in the upper left corner are shown.
+            </p>
+            <p>
+                It is also possible to load some collection of cells and particles into the simulation.
+                Some standard examples are provided with this software. One can load them in
+                <i>Collection -> Load</i> into the current universe. For instance one may load a <i>replicator</i>
+                collection.
+                It is recommended to use the item view for loading collections.
+                If one would like to load the collection more then one time at different positions
+                please click on <i>Collection -> Random multiplier</i> to clone the collections as many times
+                as desired.
+            </p>
+            <p>
+                To start the simulation please toggle <i>Simulation -> Run</i>.
+                On the bottom status line one should see the current timestep and the timesteps per second (TPS).
+                Also limiting TPS is possible there by clicking on the <i>restrict TPS</i>-button. Beside that button
+                one can enter a TPS limit.
+                Toggling again <i>Simulation -> Run</i> will pause the simulation.
+                Loading and saving is also possible via the <i>Simulation</i> menu entries.
+                Sometimes it is convenient to restore a universe via snapshots.
+                In <i>Simulation -> Snapshot</i> and <i>Simulation -> Restore</i> one can save the universe
+                in temporary memory and restore it at any time later.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="alienmodel">3 alien model</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The alien model combines a physical and a computation model and can be seen some realization of artificial programmable matter.
+            </p>
+            <p>
+                Throughout this section simulation parameters (such as <i>mutation probability</i>) are denoted by
+                the bracket notation <i>[...] -> ... -> [...]</i>. A overview of the parameters is given in
+                <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.4.2 Simulation parameters</font></a>.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="physics">3.1 Physics</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="rigidbody">3.1.1 Rigid body motion</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                A motion of the cell clusters is calculated via rigid body dynamics.
+                Thus every cluster performs a linear movement and a rotation with respect to its center position.
+                Collision of two clusters result in one of the following scenario: cluster fusion or collision.
+                The former case takes place if the relative velocities of the touching cells exceeds the fusion velocity
+                and if each cell is able to establish new bonds.
+                In the fusion process kinetic energy is transformed into internal energy
+                whereas the linear and angular momentum is preserved.
+                In the latter case a rigid collision is conducted, which preserves the overall kinetic energy (rotation and linear part)
+                of the involving objects.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="thermodynamics">3.1.2 Thermodynamics</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Each cell object looses internal energy through radiation.
+                This process is realized by emitting energy particles to its environment.
+                These particles have a velocity but no mass and they carry a specific amount of energy.
+                Whenever the internal energy of a cell is below some value (see <i>[cell properties]->[min value]</i>)
+                it becomes unstable and transforms itself into an energy particle.
+                It may also lead to a destruction of the superordinate cell cluster into two or more separated parts.
+                If two energy particles collide they form a single particle with the combined energy.
+                When the amount of energy exceeds a given value needed to form a cell (see <i>[cell properties]->[min value]</i>)
+                and its kinetic energy, the particle transforms with a fixed probability (see <i>[cell properties]->[transformation probability]</i>)
+                into a cell.
+                Therefore dynamic creation and destruction processes of cells are implemented.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="space">3.1.3 Space</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Every cell cluster and energy particle object is embedded in a common space where all the physical actions take place.
+                Topologically the space is 2D torus, which means that the opposite boundaries are to be considered as the same.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="entities">3.1.4 Entities</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="cell">3.1.4.1 Cell</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The cells are the main entities in alien.
+                They have a position in space, an internal energy value,
+                they can establish bonds with other cells, and, moreover,
+                they have an associated cell function and may store tokens.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="cellcluster">3.1.4.2 Cell cluster</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Cells are able to form bonds with other cells (see <i>[cell properties]->[max bonds]</i>).
+                Cell clusters are simply set of cells connected together.
+                Physically they rotate and move with respect to their center position.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="energyparticles">3.1.4.3 Energy particle</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                This type of entity carries energy through space.
+                It moves with a particular velocity but has no mass.
+                Energy particle can fuse if they collide together and
+                be absorbed if they collisde with cells.
+                Furthermore every cell emits energy particle from time to time and thus looses
+                internal energy.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="token">3.1.4.4 Token</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Token are used to coordinate the information processing
+                capability of the cells.
+                They carry a memory storage and have an internal energy.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="programmablematter">3.2 Information processing model</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="processingscheme">3.2.1 Processing scheme</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The cells feature information processing capabilities.
+                As soon as a token passes a cell the specific cell function
+                is invoked (see next section for more details).
+                During this process memory of the cell as well as of the token
+                might be changed. Also certain physical operations might be performed.
+                After the cell function has finished its processing the token
+                invokes its <i>energy guidance system</i>, increments its so-called
+                <i>branch number</i> and spreads to adjacent cells
+                that possess the same branch number. Hence cells and tokens have associated
+                branch numbers that might change during processing.
+                The branch number is incremented by using a modulo arithmetic, see
+                <i>[cell properties]->[max token branch number]</i>.
+                If there are more than one cells to be considered the token is duplicated
+                and the required energy is consumed from the cells.
+                By making use of duplicating tokens parallel algorithms can be implemented.
+                If there is no cell on which the token can pass the token will be destroyed
+                and its internal energy is transferred to the current cell.
+                <br />
+                The token branching is illustrated in the picture below.
+                It shows token spreading on certain cells which are part of a cluster.
+                The branch numbers are revealed for the cells and the tokens (red circles) before invoking the cell function.
+                In this example
+                the tokens possess the same branch number as the underlying cell.
+                However the cell function may change this number if desired (this is not the case in the example).
+                In this way the token branching can be controlled.
+                <br />
+                <br />
+                <img src="qrc:///tutorial/branching.png" alt="logo" width="800">
+                <br />
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="cellfunctions">3.2.2 Cell function programming</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="computer">3.2.2.1 Computer</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The `computer cell function' provides a little executable program consisting of instructions in machine code.
+                The machine code is stored in the cell. Their instructions can access the memory storage of the cell as well as of the token.
+                Both memory storages can have a maximum size of 256 bytes and all variables and addresses are one byte long.
+                In calculations all values are interpreted as 8 bit signed integers.
+                The number of instructions a `computer cell function' can have is indicated in
+                <i>[cell properties]->[computer]->[max instructions]</i>,
+                the size of the cell memory in <i>[cell properties]->[computer]->[cell memory size]</i>
+                and the size of the token memory in <i>[cell properties]->[computer]->[token memory size]</i>.
+                <br />
+                Each instruction consists of three bytes (3x8=24 bits) with the following assigment
+                <br />
+                <table border="1">
+                 <tr>
+                  <th>23</th>
+                  <th>22</th>
+                  <th>21</th>
+                  <th>20</th>
+                  <th>19</th>
+                  <th>18</th>
+                  <th>17</th>
+                  <th>16</th>
+                  <th>15</th>
+                  <th>14</th>
+                  <th>13</th>
+                  <th>12</th>
+                  <th>11</th>
+                  <th>10</th>
+                  <th>9</th>
+                  <th>8</th>
+                  <th>7</th>
+                  <th>6</th>
+                  <th>5</th>
+                  <th>4</th>
+                  <th>3</th>
+                  <th>2</th>
+                  <th>1</th>
+                  <th>0</th>
+                 </tr>
+                 <tr>
+                 <td colspan="4"> opcode </td>
+                 <td colspan="2"> opType1 </td>
+                 <td colspan="2"> opType2 </td>
+                 <td colspan="8"> opValue1 </td>
+                 <td colspan="8"> opValue2</td>
+                 </tr>
+                </table>
+                <br />
+                <br />
+                with the following values for opcode
+                <br />
+                <table border="1">
+                 <tr>
+                  <th> opcode </th>
+                  <th> symbolic name </th>
+                  <th> description </th>
+                 </tr>
+                 <tr>
+                  <td> 0 </td>
+                  <td> mov </td>
+                  <td> copy operand: op1 := op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 1 </td>
+                  <td> add </td>
+                  <td> add operands: op1 := op1 + op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 2 </td>
+                  <td> sub </td>
+                  <td> subtract operands: op1 := op1 - op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 3 </td>
+                  <td> mul </td>
+                  <td> multiply operands: op1 := op1 * op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 4 </td>
+                  <td> div </td>
+                  <td> divide operands: op1 := op1 / op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 5 </td>
+                  <td> xor </td>
+                  <td> bitwise XOR of operands: op1 := op1 XOR op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 6 </td>
+                  <td> or </td>
+                  <td> bitwise OR of operands: op1 := op1 OR op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 7 </td>
+                  <td> and </td>
+                  <td> bitwise AND of operands: op1 := op1 AND op2 </td>
+                 </tr>
+                 <tr>
+                  <td> 8 </td>
+                  <td> if op1 > op2 </td>
+                  <td> compare if operand1 is greater than operand2 </td>
+                 </tr>
+                 <tr>
+                  <td> 9 </td>
+                  <td> if op1 >= op2 </td>
+                  <td> compare if operand1 is greater or equal than operand2 </td>
+                 </tr>
+                 <tr>
+                  <td> 10 </td>
+                  <td> if op1 = op2 </td>
+                  <td> compare if operand1 is equal to operand2 </td>
+                 </tr>
+                 <tr>
+                  <td> 11 </td>
+                  <td> if op1 != op2 </td>
+                  <td> compare if operand1 is not equal to operand2 </td>
+                 </tr>
+                 <tr>
+                  <td> 12 </td>
+                  <td> if op1 &lt;= op2 </td>
+                  <td> compare if operand1 is less or equal than operand2</td>
+                 </tr>
+                 <tr>
+                  <td> 13 </td>
+                  <td> if op1 &lt; op2</td>
+                  <td> compare if operand1 is less than operand2</td>
+                 </tr>
+                 <tr>
+                  <td> 14 </td>
+                  <td> else </td>
+                  <td> invoke else-clause in comparison </td>
+                 </tr>
+                 <tr>
+                  <td> 15 </td>
+                  <td> endif</td>
+                  <td> finish comparison</td>
+                 </tr>
+                 </table>
+                 <br />
+                 <br />
+                 opValue1 and opValue2 refer to 8 bit values with
+                 a variable meaning determined by opType1 and opType2, respectively.
+                 Note that there are no instructions for loops. They can be realized
+                 with circular constructions of cell connections.
+                 <br />
+                 <table border="1">
+                 <tr>
+                  <th> opType1 </th>
+                  <th> symbolic name </th>
+                  <th> description </th>
+                 </tr>
+                 <tr>
+                  <td> 0 or 3</td>
+                  <td> [opValue1] </td>
+                  <td> operand1 points to a byte in token memory </td>
+                 </tr>
+                 <tr>
+                  <td> 1 </td>
+                  <td> [[opValue1]] </td>
+                  <td> operand1 points to a pointer to a byte in token memory </td>
+                 </tr>
+                 <tr>
+                  <td> 2 </td>
+                  <td> (opValue1) </td>
+                  <td> operand1 points to a byte in cell memory  </td>
+                 </tr>
+                 </table>
+                 <br />
+                 <br />
+                 <table border="1">
+                  <tr>
+                  <th> opType2</th>
+                  <th> symbolic name </th>
+                  <th> description </th>
+                  </tr>
+                  <tr>
+                   <td> 0 </td>
+                   <td> [opValue2] </td>
+                   <td> operand2 points to a byte in token memory </td>
+                  </tr>
+                  <tr>
+                   <td> 1 </td>
+                   <td> [[opValue2]] </td>
+                   <td> operand2 points to a pointer to a byte in token memory </td>
+                  </tr>
+                  <tr>
+                   <td> 2 </td>
+                   <td> (opValue2) </td>
+                   <td> operand2 points to a byte in cell memory  </td>
+                  </tr>
+                  <tr>
+                   <td> 3 </td>
+                   <td> opValue2 </td>
+                   <td> operand2 is a constant </td>
+                  </tr>
+                 </table>
+                 <br />
+                 <br />
+                 <font face="Courier" color="#FFFFB0" size="4">
+                    <strong>Examples</strong>
+                 </font>
+                 <br />
+                 Let us give some examples in the more readable assembler notation
+                 (hexadecimal values are preceded by 0x).
+                 <br />
+                 <table border="1">
+                 <tr>
+                  <th> assembler notation </th>
+                  <th> description </th>
+                  <th> opcode </th>
+                  <th> opType1 </th>
+                  <th> opType2 </th>
+                  <th> opValue1 </th>
+                  <th> opValue2 </th>
+                  <th> hex code </th>
+                 </tr>
+                 <tr>
+                  <td> mov (128), 10 </td>
+                  <td> copy the value 10 to cell memory at address 128 </td>
+                  <td> 0 </td>
+                  <td> 2 </td>
+                  <td> 3 </td>
+                  <td> 128 </td>
+                  <td> 10 </td>
+                  <td> 0x0B800A </td>
+                 </tr>
+                 <tr>
+                  <td> mul (32), [[64]] </td>
+                  <td> multiply the value from cell memory at address 32 with the value from token memory at the address that is found in token memory at address 64</td>
+                  <td> 3 </td>
+                  <td> 2 </td>
+                  <td> 1 </td>
+                  <td> 32 </td>
+                  <td> 64 </td>
+                  <td> 0x392040 </td>
+                 </tr>
+                </table>
+                <br />
+                <br />
+                A simple cell program consisting of 5 instructions may look like as follows:
+                <br />
+                if [10] = (0)
+                <br />
+                &nbsp;&nbsp;mov [10], 0
+                <br />
+                else
+                <br />
+                &nbsp;&nbsp;add [10], 1
+                <br />
+                endif
+                <br />
+                <br />
+                On the first line it is checked if the content of token memory at address 10 equals
+                the content of cell memory at address 0.
+                If this is true the content of token memory at address 10 is set to 0
+                otherwise it is incremented by 1.
+                <br />
+                A `computer cell function' stores <i>n</i> instructions where
+                <i>n</i> is specified by
+                <i>[cell function properties]->[computer]->[max instructions]</i>.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="propulsion">3.2.2.2 Propulsion</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                A controlled acceleration can be performed by the `propulsion cell function'.
+                It uses three input bytes and produces
+                one output byte. Both are read and stored in the token memory.
+                Their addresses depend on the implementation.
+                In the following we introduce symbolic names for them.
+                <br />
+                <table border="1">
+                 <tr>
+                  <th>
+                   byte name
+                  </th>
+                  <th>
+                   type
+                  </th>
+                  <th>
+                   description
+                  </th>
+                 </tr>
+                 <tr>
+                  <td>
+                   PROP_OUT
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the state of the after the process (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   PROP_IN
+                  </td>
+                  <td>
+                    input byte
+                  </td>
+                  <td>
+                   contains the command (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   PROP_IN_ANGLE
+                  </td>
+                  <td>
+                   input byte
+                  </td>
+                  <td>
+                   contains CODED_ANGLE(alpha) where alpha is the
+                   angle in which the acceleration takes place
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   PROP_IN_POWER
+                  </td>
+                  <td>
+                   input byte
+                  </td>
+                  <td>
+                   determines the intensity of the acceleration
+                  </td>
+                 </tr>
+                </table>
+                <br />
+                <br />
+                The direction of acceleration is determined by the command
+                PROP_IN and possibly by PROP_IN_ANGLE.
+                All angles are always measured clockwise with respect
+                to the axis given by the invoked cell and the cell where the token came from (see picture below).
+                <br />
+                <br />
+                <img src="qrc:///tutorial/angle.png" alt="logo" width="200">
+                <br />
+                <br />
+                The function CODED_ANGLE above transforms an angle from degree into an 8 bit representations.
+                More precisely, angles from 0 to 179 degree are mapped to 0 until 128 (dec) and
+                the angles from -180 to 0 degree are mapped to 128 until 256 (= 0).
+                <br />
+                PROP_IN may take the following values.
+                <br />
+                <table border="1">
+                 <tr>
+                  <th>
+                   values of PROP_IN
+                   <br />
+                   (modulo 7)
+                  </th>
+                  <th>
+                   symbolic name
+                  </th>
+                  <th>
+                   description
+                  </th>
+                 </tr>
+                 <tr>
+                  <td>
+                   0
+                  </td>
+                  <td>
+                   PROP_IN::NOTHING
+                  </td>
+                  <td>
+                   do nothing
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   1
+                  </td>
+                  <td>
+                   PROP_IN::BY_ANGLE
+                  </td>
+                  <td>
+                   accelerate in direction specified by the angle in PROP_IN_ANGLE
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   2
+                  </td>
+                  <td>
+                   PROP_IN::FROM_CENTER
+                  </td>
+                  <td>
+                   accelerate in the direction given by the vector posCell - posMassCenter (i.e. away from mass center) where
+                   posMassCenter denotes position of the mass center of the current cell cluster and posCell the position of the invoked cell;
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   3
+                  </td>
+                  <td>
+                   PROP_IN::TOWARD_CENTER
+                  </td>
+                  <td>
+                   accelerate in the direction given by the vector posMassCenter - posCell (i.e. toward mass center; cf. above)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   4
+                  </td>
+                  <td>
+                   PROP_IN::ROTATION_CLOCKWISE
+                  </td>
+                  <td>
+                   accelerate in a direction that increases clockwise rotation
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   5
+                  </td>
+                  <td>
+                   PROP_IN::ROTATION_COUNTERCLOCKWISE
+                  </td>
+                  <td>
+                   accelerate in a direction that increases counterclockwise rotation
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   6
+                  </td>
+                  <td>
+                   PROP_IN::DAMP_ROTATION
+                  </td>
+                  <td>
+                   accelerate in a direction that decreases current rotation
+                  </td>
+                 </tr>
+                </table>
+                <br />
+                <br />
+                The output given in PROP_OUT can attain the values given below.
+                <br />
+                <table border="1">
+                <tr>
+                 <th>
+                  values of PROP_OUT
+                 </th>
+                 <th>
+                  symbolic name
+                 </th>
+                 <th>
+                  description
+                 </th>
+                </tr>
+                <tr>
+                 <td>
+                  0
+                 </td>
+                 <td>
+                  PROP_OUT::SUCCESS
+                 </td>
+                 <td>
+                  acceleration performed
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  1
+                 </td>
+                 <td>
+                  PROP_OUT::SUCCESS_DAMPING_FINISHED
+                 </td>
+                 <td>
+                  rotation of the cluster is approximately 0, no further damping possible
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  2
+                 </td>
+                 <td>
+                  PROP_OUT::ERROR_NO_ENERGY
+                 </td>
+                 <td>
+                  not enough energy available for acceleration
+                 </td>
+                </tr>
+                </table>
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="scanner">3.2.2.3 Scanner</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The task of the `scanner cell function' is to determine the cells of its own cluster.
+                It provides the relative position and the precise internal data of the cells in an iterative procedure.
+                The iteration depth is controlled by an index. The algorithm works as follows (the cell on which the scanner points to
+                at index i is denoted by C(i)).
+                <table border="0">
+                 <tr>
+                  <td>
+                   &#149; index = 0:
+                  </td>
+                  <td>
+                   scanner points to the cell itself, which is C(0)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   &#149; index = 1:
+                  </td>
+                  <td>
+                   scanner points to the cell C(1) where the token which invokes the scan comes from
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   &#149; index = 2:
+                  </td>
+                  <td>
+                   scanner points to the cell C(2) which is connected to C(1) and next to C(0) in a clockwise sense
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   &nbsp;&nbsp;...
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   &#149; index = i:
+                  </td>
+                  <td>
+                   scanner points to the cell C(i) which is connected to C(i-1) and next to C(i-2) in a clockwise sense
+                   and different from C(0) to C(i-3)
+                  </td>
+                 </tr>
+                </table>
+                <br />
+                <br />
+                This lookup algorithm is illustrated in the following picture. There, the cell that contains the token (red circle)
+                invokes the `scanner cell function'. The token comes from the cell C(1).
+                The curved arrows indicate the clockwise search for the next cell.
+                We see that the cells are indexed (counterclockwise) in a spiral manner.
+                <br />
+                <br />
+                <img src="qrc:///tutorial/scanner.png" alt="logo" width="300">
+                <br />
+                <br />
+                The `scanner cell function' works with the subsequent byte.
+                <br />
+                <table border="1">
+                 <tr>
+                  <th>
+                   byte name
+                  </th>
+                  <th>
+                   type
+                  </th>
+                  <th>
+                   description
+                  </th>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the state after the process (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_INOUT_CELL_NUMBER
+                  </td>
+                  <td>
+                   input and output byte
+                  </td>
+                  <td>
+                   index i of the cell C(i), value will be incremented after scanning
+                   or set to 1 if a ``restart'' takes place
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_MASS
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the mass (number of cells) of the cluster
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_ENERGY
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the energy value of the cell C(i)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_ANGLE
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns CODED_ANGLE(180-alpha) where alpha is the angle (in degree) between the vectors C(i)-C(i-1) and C(i-2)-C(i-1)
+                   (see above for a definition of CODED_ANGLE)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_DISTANCE
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns CODED_LEN(len) where len is the distance between C(i-1) and C(i)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_CELL_MAX_CONNECTIONS
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the maximal number of possible connections of cell C(i)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_CELL_BRANCH_NO
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the branch number of cell C(i)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_CELL_FUNCTION
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the cell function of cell C(i) (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                   SCANNER_OUT_CELL_FUNCTION_DATA
+                  </td>
+                  <td>
+                   output byte
+                  </td>
+                  <td>
+                   returns the internal data for the cell function of cell C(i) (if the cell has a `computer cell function' it contains the coded instructions)
+                  </td>
+                 </tr>
+                </table>
+                <br />
+                <br />
+                The reason why SCANNER_OUT_ANGLE returns CODED_ANGLE(180-alpha) and not simply
+                CODED_ANGLE(alpha) is to be compatible with the 'constructor cell function' (see below).
+                <br />
+                <br />
+                The function CODED_LEN converts a spatial length unit into an 8 bit representation.
+                The length 0.0 is mapped to 0 and 1.0 is mapped to 100 (dec).
+                Results above 255 are coded as 255.
+                <br />
+                <br />
+                The state of the 'scanner cell function' after processing is stored in SCANNER_OUT, which can attain the following values.
+                <br />
+                <table border="1">
+                <tr>
+                 <th>
+                  values of SCANNER_OUT
+                 </th>
+                 <th>
+                  symbolic name
+                 </th>
+                 <th>
+                  description
+                 </th>
+                </tr>
+                <tr>
+                 <td>
+                  0
+                 </td>
+                 <td>
+                  SCANNER_OUT::SUCCESS
+                 </td>
+                 <td>
+                  scanning has been performed
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  1
+                 </td>
+                 <td>
+                  SCANNER_OUT::FINISHED
+                 </td>
+                 <td>
+                  scanning has been performed at last reachable cell
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  2
+                 </td>
+                 <td>
+                  SCANNER_OUT::RESTART
+                 </td>
+                 <td>
+                  scanning has been restarted and performed at C(0) and SCANNER_INOUT_CELL_NUMBER has been set to 1; this happens when i is higher than the number of reachable cells
+                 </td>
+                </tr>
+                </table>
+                <br />
+                <br />
+                The 'cell function' of the scanned cell is stored in SCANNER_OUT_CELL_TYPE and attains the following values.
+                <br />
+                <table border="1">
+                <tr>
+                 <th>
+                  values of SCANNER_OUT_CELL_FUNCTION
+                 </th>
+                 <th>
+                  symbolic name
+                 </th>
+                 <th>
+                  description
+                 </th>
+                </tr>
+                <tr>
+                 <td>
+                  0
+                 </td>
+                 <td>
+                  SCANNER_OUT_CELL_FUNCTION::COMPUTER
+                 </td>
+                 <td>
+                  scanned cell has a 'computer cell function'
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  1
+                 </td>
+                 <td>
+                  SCANNER_OUT_CELL_FUNCTION::PROP
+                 </td>
+                 <td>
+                  scanned cell has a 'propulsion cell function'
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  2
+                 </td>
+                 <td>
+                  SCANNER_OUT_CELL_FUNCTION::SCANNER
+                 </td>
+                 <td>
+                  scanned cell has a 'scanner cell function'
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  3
+                 </td>
+                 <td>
+                  SCANNER_OUT_CELL_FUNCTION::WEAPON
+                 </td>
+                 <td>
+                  scanned cell has a 'weapon cell function'
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  4
+                 </td>
+                 <td>
+                  SCANNER_OUT_CELL_FUNCTION::CONSTR
+                 </td>
+                 <td>
+                  scanned cell has a 'construction cell function'
+                 </td>
+                </tr>
+                <tr>
+                 <td>
+                  5
+                 </td>
+                 <td>
+                  SCANNER_OUT_CELL_FUNCTION::SENSOR
+                 </td>
+                 <td>
+                  scanned cell has a 'sensor cell function'
+                 </td>
+                </tr>
+                </table>
+                <br />
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="weapon">3.2.2.4 Weapon</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+            If invoked, the `weapon cell function' looks for neighboring cells that are not part of the cluster and in the direct vicinity.
+            If such cells are present, a part of their energy amount indicated in <i>[cell properties]->[weaon]->[strength]</i>
+            will be `stolen'. One half of the stolen energy amount is tranferred to the invoking token while the half to the cell itself.
+
+            There is no input only one output byte, which is named as WEAPON_OUT and takes the following values.
+            <br />
+            <table border="1">
+            <tr>
+             <th>
+              values of WEAPON_OUT
+             </th>
+             <th>
+              symbolic name
+             </th>
+             <th>
+              description
+             </th>
+            </tr>
+            <tr>
+             <td>
+              0
+             </td>
+             <td>
+              WEAPON_OUT::NO_TARGET
+             </td>
+             <td>
+              no neighboring cells have been found
+             </td>
+            </tr>
+            <tr>
+             <td>
+              1
+             </td>
+             <td>
+              WEAPON_OUT::STRIKE_SUCCESSFUL
+             </td>
+             <td>
+              neighboring cells have been found and attacked
+             </td>
+            </tr>
+            </table>
+            <br />
+            <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="constructor">3.2.2.5 Constructor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+            The aim of the 'constructor cell function' (the corresponding cell will be denoted as `constructor') is not only to create a new cell
+            but also to bond and create new cell structures.
+            To this end, a part of the surrounding of the cell is be taken as a construction site.
+            When the constructor creates a new cell the whole construction site will be moved and rotated
+            if necessary (the remaining part as well) in order to obtain free space for the new cell. This may take several processing steps.
+            When this is completed the new desired cell is placed and bonded to the construction site.
+            The constructor can be seen as an artificial equivalent to a biological ribosome, which creates and folds
+            proteins from amino acides.
+            <br />
+            A typical situation is illustrated in the subsequent picture.
+            <br />
+            <br />
+            <img src="qrc:///tutorial/constructor.png" alt="logo" width="600">
+            <br />
+            <br />
+            In the next picture a typical construction process is shown.
+            <br />
+            <br />
+            <img src="qrc:///tutorial/constructor2.png" alt="logo" width="700">
+            <br />
+            <br />
+            After this introductory example we are going to explain the programming of the constructor.
+            For convenience, most arguments coincide with output bytes of the scanner and thus share the same addresses in the token memory.
+            This allows us to use certain output bytes of the scanner directly as input bytes for the constructor
+            in order to easily replicate the cluster's own structure.
+            The constructor uses the following bytes.
+            <br />
+            <table border="1">
+             <tr>
+              <th>
+               byte name
+              </th>
+              <th>
+               type
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_OUT
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               returns the state after the process (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_IN
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               contains the command (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_IN_OPTION
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               additional parameters for construction (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_INOUT_ANGLE
+               (address coincides with SCANNER_OUT_ANGLE)
+              </td>
+              <td>
+               input and output byte
+              </td>
+              <td>
+               contains CODED_ANGLE(alpha) where alpha is the angle of which the construction site should still be rotated
+               (see above for a definition of CODED_ANGLE)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_IN_DIST
+               (address coincides with SCANNER_OUT_DISTANCE)
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               CODED_LEN(len)
+               where len is the distance of which the
+               the construction site should be moved
+               (see CODED_LEN from 'scanner cell function')
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_IN_CELL_MAX_CONNECTIONS
+               (address coincides with SCANNER_OUT_CELL_MAX_CONNECTIONS)
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               contains the maximal number of possible connections for the new cell;
+               if 0 then the maximal number of connections will be automatically determined
+               such that no further connections will be possible
+               (recommended as standard setting)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_IN_CELL_BRANCH_NO
+               (address coincides with SCANNER_OUT_CELL_BRANCH_NO)
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               contains the branch number
+               for the new cell
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_IN_CELL_FUNCTION
+               (address coincides with SCANNER_OUT_CELL_FUNCTION)
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               contains the cell function
+               for the new cell (same values as SCANNER_OUT_CELL FUNCTION)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               CONSTR_IN_CELL_FUNCTION_DATA
+               (address coincides with SCANNER_OUT_CELL_FUNCTION_DATA)
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               contains the internal data for the cell function
+               for the new cell
+              </td>
+             </tr>
+            </table>
+            <br />
+            <br />
+            The output byte CONSTR_OUT has one of the following values.
+            <br />
+            <table border="1">
+            <tr>
+             <th>
+              values of CONSTR_OUT
+             </th>
+             <th>
+              symbolic name
+             </th>
+             <th>
+              description
+             </th>
+            </tr>
+            <tr>
+             <td>
+              0
+             </td>
+             <td>
+              CONSTR_OUT::SUCCESS
+             </td>
+             <td>
+              construction of a new cell was successful
+             </td>
+            </tr>
+            <tr>
+             <td>
+              1
+             </td>
+             <td>
+              CONSTR_OUT::SUCCESS_ROT
+             </td>
+             <td>
+              Operation was successful although
+              a new cell has not been constructed because
+              the construction site needs to be rotated first.
+              A part of the rotation has been achieved
+              and CONSTR_INOUT_ANGLE has been updated.
+              To continue the construction process, the constructor
+              should be invoked again with the current token.
+             </td>
+            </tr>
+            <tr>
+             <td>
+              2
+             </td>
+             <td>
+              CONSTR_OUT::ERROR_NO_ENERGY
+             </td>
+             <td>
+              not enough energy to perform the construction
+             </td>
+            </tr>
+            <tr>
+             <td>
+              3
+             </td>
+             <td>
+              CONSTR_OUT::ERROR_OBSTACLE
+             </td>
+             <td>
+              construction could not be performed because of
+              overlapping cells (i.e. obstacle(s))
+             </td>
+            </tr>
+            <tr>
+             <td>
+              4
+             </td>
+             <td>
+              CONSTR_OUT::ERROR_CONNECTION
+             </td>
+             <td>
+              construction site is connected to the remaing cluster besides the constructor
+             </td>
+            </tr>
+            <tr>
+             <td>
+              5
+             </td>
+             <td>
+              CONSTR_OUT::ERROR_DIST
+             </td>
+             <td>
+              CONSTR_IN_DIST is too large (which means that their value converted to spatial units exceeds <i>[cell properties]->[max distance]</i>)
+             </td>
+            </tr>
+            </table>
+            <br />
+            <br />
+            The following commands are possible.
+             <br />
+             <table border="1">
+             <tr>
+              <th>
+               values of CONSTR_IN
+               <br />
+               (modulo 4)
+              </th>
+              <th>
+               symbolic name
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+               0
+              </td>
+              <td>
+               CONSTR_IN::NOTHING
+              </td>
+              <td>
+               do nothing
+              </td>
+             </tr>
+             <tr>
+              <td>
+               1
+              </td>
+              <td>
+               CONSTR_IN::SAFE
+              </td>
+              <td>
+               move construction site and construct new cell
+               only if there are no overlapping cells including the cluster's own cells
+              </td>
+             </tr>
+             <tr>
+              <td>
+               2
+              </td>
+              <td>
+               CONSTR_IN::UNSAFE
+              </td>
+              <td>
+               move construction site and construct new cell
+               only if there are no overlapping cells with other clusters
+              </td>
+             </tr>
+             <tr>
+              <td>
+               3
+              </td>
+              <td>
+               CONSTR_IN::BRUTEFORCE
+              </td>
+              <td>
+               rotate and move construction site and construct new cell
+               regardless of overlapping cells (which may lead to destruction)
+              </td>
+             </tr>
+             </table>
+             <br />
+             <br />
+             Additionally, the following options are possible.
+             <br />
+             <table border="1">
+             <tr>
+              <th>
+               values of CONSTR_IN_OPTION
+               <br />
+               (modulo 7)
+              </th>
+              <th>
+               symbolic name
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+               0
+              </td>
+              <td>
+               CONSTR_IN_OPTION::STANDARD
+              </td>
+              <td>
+               standard construction process
+              </td>
+             </tr>
+             <tr>
+              <td>
+               1
+              </td>
+              <td>
+               CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN
+              </td>
+              <td>
+               perform cell construction process and
+               create an empty token on the new cell
+              </td>
+             </tr>
+             <tr>
+              <td>
+               2
+              </td>
+              <td>
+               CONSTR_IN_OPTION::CREATE_DUP_TOKEN
+              </td>
+              <td>
+               perform cell construction process and
+               create a copy of the current token on the new cell
+              </td>
+             </tr>
+             <tr>
+              <td>
+               3
+              </td>
+              <td>
+               CONSTR_IN_OPTION::FINISH_NO_SEP
+              </td>
+              <td>
+               perform cell construction process and
+               finalize the construction size but let them connected to
+               the constructor
+              </td>
+             </tr>
+             <tr>
+              <td>
+               4
+              </td>
+              <td>
+               CONSTR_IN_OPTION::FINISH_WITH_SEP
+              </td>
+              <td>
+               perform cell construction process,
+               finalize the construction size and disconnect it from the constructor
+              </td>
+             </tr>
+             <tr>
+              <td>
+               5
+              </td>
+              <td>
+               CONSTR_IN_OPTION::FINISH_WITH_SEP_RED
+              </td>
+              <td>
+               perform cell construction process,
+               finalize the construction size and disconnect it from the constructor,
+               reduce number of maximal connections of the cell that becomes disconnected from the constructor by 1
+              </td>
+             </tr>
+             <tr>
+              <td>
+               6
+              </td>
+              <td>
+               CONSTR_IN_OPTION::FINISH_TOKEN_WITH_SEP_RED
+              </td>
+              <td>
+               perform cell construction process,
+               finalize the construction size and disconnect it from the constructor,
+               reduce number of maximal connections of the cell that becomes disconnected from the constructor by 1,
+               create empty token
+              </td>
+             </tr>
+             </table>
+             <br />
+             <br />
+             The construction procedure works in the following way (compare with the illustration above): When the token first invokes the constructor
+             it will rotate the construction site and the remaining part (contrariwise) around the constructor
+             in order to reach the specified angle in CONSTR_INOUT_ANGLE.
+             When the whole cell cluster or the angle is large this process may take several steps and, in this case,
+             the constructor performs only a partial rotation and returns the remaining angle in CONSTR_INOUT_ANGLE.
+             After invoking the constructor with the resulting token again and again it will finish the rotation.
+             Then the construction site will be shifted with a distance specified in CONSTR_IN_DIST and a new cell will be created and connected to the constructor.
+             The new cell will also bond to neighboring cells in the construction site (the maximal number of connections are speficied in CONSTR_IN_CELL_MAX_CONNECTIONS).
+             We remark that the token on the constructor cannot pass to the construction site because the token passage is blocked
+             in this situation.
+             For the completion of the construction process (see CONSTR_IN_OPTION) the construction site will be disconnected from the constructor.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="sensor">3.2.2.6 Sensor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+            The task of the `sensor cell function' is to detect other cell clusters in the vicinity.
+            There are essentially two different modes.
+            In the first mode (called mode I in the following) the sensor scans a particular direction up to a certain distance
+            (specified by <i>[cell function properties]->[sensor]->[range]</i>)
+            and, if successful, returns the distance of the closest other cell cluster.
+            In the second mode (mode II) the sensor scans its whole vicinity to detect a cell cluster.
+            If successful it returns the angle and the distance of that cluster.
+            In both modes a minimum and a maximum mass for detection can be specified in advance.
+            The mass corresponds to the number of cells of a cluster.
+            The sensor uses the following bytes.
+            <br />
+            <table border="1">
+             <tr>
+              <th>
+               byte name
+              </th>
+              <th>
+               type
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+               SENSOR_OUT
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               returns the state after the process (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               SENSOR_IN
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               contains the command (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               SENSOR_INOUT_ANGLE
+              </td>
+              <td>
+               input and output byte
+              </td>
+              <td>
+               CODED_ANGLE(alpha) where
+               in mode I alpha specifies the angle for scanning (input byte);
+               in mode II alpha contains the angle in which a cell cluster has been found (output byte)
+               (see above for a definition of CODED_ANGLE)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               SENSOR_IN_MIN_MASS
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               minimum mass of the cell clusters to detect
+              </td>
+             </tr>
+             <tr>
+              <td>
+               SENSOR_IN_MAX_MASS
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               maximum mass of the cell clusters to detect
+              </td>
+             </tr>
+             <tr>
+              <td>
+               SENSOR_OUT_MASS
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               mass of the detected cell cluster;
+               it has the values 127 if the mass is above 127
+              </td>
+             </tr>
+             <tr>
+              <td>
+               SENSOR_OUT_DISTANCE
+              </td>
+              <td>
+               output byte;
+               it has the values 127 if the distance is above 127
+              </td>
+              <td>
+               distance of the detected cell cluster
+              </td>
+             </tr>
+            </table>
+            <br />
+            <br />
+            The output byte SENSOR_OUT has one of the following values.
+            <br />
+            <table border="1">
+            <tr>
+             <th>
+              values of SENSOR_OUT
+             </th>
+             <th>
+              symbolic name
+             </th>
+             <th>
+              description
+             </th>
+            </tr>
+            <tr>
+             <td>
+              0
+             </td>
+             <td>
+              SENSOR_OUT::NOTHING_FOUND
+             </td>
+             <td>
+              sensor has nothing found
+             </td>
+            </tr>
+            <tr>
+             <td>
+              1
+             </td>
+             <td>
+              SENSOR_OUT::CLUSTER_FOUND
+             </td>
+             <td>
+              sensor has detected an other cell cluster;
+              its mass is stored in SENSOR::OUT_MASS,
+              its distance in SENSOR::OUT_DISTANCE
+              and its angle in SENSOR::INOUT_ANGLE
+             </td>
+            </tr>
+            </table>
+            <br />
+            <br />
+            A sensor can process the following commands.
+             <br />
+             <table border="1">
+             <tr>
+              <th>
+               values of SENSOR_IN
+               <br />
+               (modulo 5)
+              </th>
+              <th>
+               symbolic name
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+               0
+              </td>
+              <td>
+               SENSOR_IN::DO_NOTHING
+              </td>
+              <td>
+               do nothing
+              </td>
+             </tr>
+             <tr>
+              <td>
+               1
+              </td>
+              <td>
+               SENSOR_IN::SEARCH_VICINITY
+              </td>
+              <td>
+               It invokes a wide-area scan for other cell clusters in all directions of the vicinity
+               with radius specified in <i>[cell function properties]->[sensor]->[range]</i>.
+               If a cell cluster is found with mass between SENSOR_IN_MIN_MASS and SENSOR_IN_MAX_MASS
+               (then SENSOR_OUT is set to SENSOR_OUT::CLUSTER_FOUND) its
+               angle is returned in SENSOR_INOUT_ANGLE, its distance in SENSOR_OUT_DISTANCE
+               and its mass in SENSOR_OUT_MASS.
+               Note that it is not guaranteed that all clusters can be detected in this way since the sensor
+               uses a certain raster. The raster length is given by sqrt(SENSOR_IN_MIN_MASS)+3.
+              </td>
+             </tr>
+             <tr>
+              <td>
+               2
+              </td>
+              <td>
+               SENSOR_IN::SEARCH_BY_ANGLE
+              </td>
+              <td>
+               invokes a scan for other cell clusters in a particular direction specified by the angle
+               in SENSOR_INOUT_ANGLE; output behavior is similar to SENSOR_IN::SEARCH_VICINITY
+              </td>
+             </tr>
+             <tr>
+              <td>
+               3
+              </td>
+              <td>
+               SENSOR_IN::SEARCH_FROM_CENTER
+              </td>
+              <td>
+              invokes a scan for other cell clusters in the direction given by the vector posCell - posMassCenter where
+              posMassCenter denotes position of the mass center of the current cell cluster and posCell the position of the invoked cell;
+              output behavior is similar to SENSOR_IN::SEARCH_VICINITY
+              </td>
+             </tr>
+             <tr>
+              <td>
+               4
+              </td>
+              <td>
+               SENSOR_IN::SEARCH_TOWARD_CENTER
+              </td>
+              <td>
+              invokes a scan for other cell clusters in the direction given by the vector posMassCenter - posCell (cf. above);
+              output behavior is similar to SENSOR_IN::SEARCH_VICINITY
+              </td>
+             </tr>
+             </table>
+             <br />
+             <br />
+
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="communicator">3.2.2.7 Communicator</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+            The `communicator cell function' allows to transmit and receive messages form other communicator cells
+            in the vicinity. The message can be sent in one of the 256 channels.
+            Furthermore relative position information given in angle and distance can be transmitted.
+            As always, all angles are measured clockwise with respect
+            to the axis given by the invoked cell and the cell where the token came from.
+            The receivers obtains the transformed position (in angle and distance) with respect to their
+            position and orientation.
+            The following bytes are used to program the communicator.
+            <br />
+            <table border="1">
+             <tr>
+              <th>
+               byte name
+              </th>
+              <th>
+               type
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+                COMMUNICATOR_IN
+              </td>
+              <td>
+                input byte
+              </td>
+              <td>
+                contains the command (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+                COMMUNICATOR_IN_ANGLE
+              </td>
+              <td>
+                input byte
+              </td>
+              <td>
+                relative angle of a transmitted position
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_IN_DISTANCE
+              </td>
+              <td>
+               input
+              </td>
+              <td>
+                relative distance of a transmitted position
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_IN_CHANNEL
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               channel where to transmit the message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_IN_MESSAGE
+              </td>
+              <td>
+               input byte
+              </td>
+              <td>
+               message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_ANGLE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               relative angle of a position information belonging to a received message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_DISTANCE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               relative distance of a position information belonging to a received message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_MESSAGE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               received message
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               indicates if a message has been received since last retrieve (see below)
+              </td>
+             </tr>
+             <tr>
+              <td>
+               COMMUNICATOR_OUT_SENT_NUM_MESSAGE
+              </td>
+              <td>
+               output byte
+              </td>
+              <td>
+               number of communicator cells who have received the transmitted message
+              </td>
+             </tr>
+            </table>
+            <br />
+            <br />
+            The following commands can be processed.
+            <br />
+             <table border="1">
+             <tr>
+              <th>
+               values of COMMUNICATOR_IN
+               <br />
+               (modulo 4)
+              </th>
+              <th>
+               symbolic name
+              </th>
+              <th>
+               description
+              </th>
+             </tr>
+             <tr>
+              <td>
+               0
+              </td>
+              <td>
+               COMMUNICATOR_IN::DO_NOTHING
+              </td>
+              <td>
+               do nothing
+              </td>
+             </tr>
+             <tr>
+              <td>
+               1
+              </td>
+              <td>
+               COMMUNICATOR_IN::SET_LISTENING_CHANNEL
+              </td>
+              <td>
+               Sets the channel where the communicator can listen for messages sent by other communicator cells.
+               The channel itself is set in COMMUNICATOR_IN_CHANNEL (see above).
+              </td>
+             </tr>
+             <tr>
+              <td>
+               2
+              </td>
+              <td>
+               COMMUNICATOR_IN::SEND_MESSAGE
+              </td>
+              <td>
+               Sends a message given by COMMUNICATOR_IN_MESSAGE to the channel COMMUNICATOR_IN_CHANNEL
+               to nearby communicator cells. Nearby means in radius specified by the simulation
+               parameter <i>[cell function properties]->[communicator]->[range]</i>.
+               Furthermore a relative position information can be transmitted in COMMUNICATOR_IN_ANGLE
+               and COMMUNICATOR_IN_DISTANCE as explained above.
+               The output COMMUNICATOR_OUT_SENT_NUM_MESSAGE returns the number of communicator cells
+               who received the message.
+              </td>
+             </tr>
+             <tr>
+              <td>
+               3
+              </td>
+              <td>
+               COMMUNICATOR_IN::RECEIVE_MESSAGE
+              </td>
+              <td>
+               If a message has been received since the last invoke COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE
+               is set to COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES otherwise
+               COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO.
+               The message is saved in COMMUNICATOR_OUT_RECEIVED_MESSAGE and the position information
+               in COMMUNICATOR_OUT_RECEIVED_ANGLE and COMMUNICATOR_OUT_RECEIVED_DISTANCE.
+              </td>
+             </tr>
+             </table>
+             <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="energyguidance">3.3 Energy guidance system</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Tokens carry an amount of energy. They dissipate energy via radiation as cells do.
+                Furthermore each time they pass to a cell energy can be transferred to or from the cell.
+                This process can be controlled via memory entries in the token.
+                <br />
+                <table border="1">
+                 <tr>
+                  <th>
+                   byte name
+                  </th>
+                  <th>
+                   type
+                  </th>
+                  <th>
+                   description
+                  </th>
+                 </tr>
+                 <tr>
+                  <td>
+                    ENERGY_GUIDANCE_IN
+                  </td>
+                  <td>
+                    input byte
+                  </td>
+                  <td>
+                    contains the mode (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                    ENERGY_GUIDANCE_IN_VALUE_CELL
+                  </td>
+                  <td>
+                    input byte
+                  </td>
+                  <td>
+                    specifies an amount of energy for the cell; it can only be interpreted in context
+                    with a command (see below)
+                  </td>
+                 </tr>
+                 <tr>
+                  <td>
+                    ENERGY_GUIDANCE_IN_VALUE_TOKEN
+                  </td>
+                  <td>
+                    input byte
+                  </td>
+                  <td>
+                    specifies an amount of energy for the token; it can only be interpreted in context
+                    with a command (see below)
+                  </td>
+                 </tr>
+                </table>
+                <br />
+                <br />
+                In the following E denotes a fixed amount of energy which will be transferred from cell to token
+                or from token to cell depending on the mode. In the alien program E is set to 10 units.
+                The following modes are possible.
+                <br />
+                <table border="1">
+                    <tr>
+                        <th>
+                            values of ENERGY_GUIDANCE_IN
+                            <br />
+                            (modulo 6)
+                        </th>
+                        <th>
+                            symbolic name
+                        </th>
+                        <th>
+                            description
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            0
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::DEACTIVATED
+                        </td>
+                        <td>
+                            no energy transfer
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            1
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::BALANCE_CELL
+                        </td>
+                        <td>
+                            If the energy of the cell exceeds
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token
+                            otherwise and if token energy exceeds
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            then the energy amount E is transferred from token to cell.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::BALANCE_TOKEN
+                        </td>
+                        <td>
+                            If the energy of the token exceeds
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            then the energy amount E is transferred from token to cell
+                            otherwise and if cell energy exceeds
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            3
+                        </td>
+                        <td>
+                            ENERGY_GUIDANCE_IN::BALANCE_BOTH
+                        </td>
+                        <td>
+                        <p>
+                            If token energy is greater than
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            and cell energy is less than
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL
+                            then the energy amount E is transferred from token to cell.
+                        </p>
+                        <p>
+                            If token energy is less than
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN
+                            and cell energy is greater than
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token.
+                        </p>
+                        </td>
+                    </tr>
+                <tr>
+                    <td>
+                        4
+                    </td>
+                    <td>
+                        ENERGY_GUIDANCE_IN::HARVEST_CELL
+                    </td>
+                    <td>
+                        <p>
+                            If cell energy is greater than
+                            <i>[cell properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_CELL + E
+                            then the energy amount E is transferred from cell to token.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        5
+                    </td>
+                    <td>
+                        ENERGY_GUIDANCE_IN::HARVEST_TOKEN
+                    </td>
+                    <td>
+                        <p>
+                            If token energy is greater than
+                            <i>[token properties]->[min energy]</i> + ENERGY_GUIDANCE_IN_VALUE_TOKEN + E
+                            then the energy amount E is transferred from token to cell.
+                        </p>
+                    </td>
+                </tr>
+                </table>
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="simulationparameters">3.4 Simulation Parameters</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                <table border="1">
+                    <tr>
+                        <th>
+                            parameter
+                        </th>
+                        <th>
+                            description
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cluster properties]->[max radius]</i>
+                            </font>
+                        </td>
+                        <td>
+                            maximum radius of a cluster which can be archieved after fusion and
+                            construction via cell functions
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[mutation probability]</i>
+                            </font>
+                        </td>
+                        <td>
+                            probability of changing each cells internals after a timestep
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[min distance]</i>
+                            </font>
+                        </td>
+                        <td>
+                            minimal distance where cells are not destroyed
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max distance]</i>
+                            </font>
+                        </td>
+                        <td>
+                            maximal distance where connections between two cells are possible
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[mass]</i>
+                            </font>
+                        </td>
+                        <td>
+                            mass of a cell
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max force]</i>
+                            </font>
+                        </td>
+                        <td>
+                            max force which a cell can endure
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max force decay probability]</i>
+                            </font>
+                        </td>
+                        <td>
+                            probability for destroying a cell after max force is reached
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max bonds]</i>
+                            </font>
+                        </td>
+                        <td>
+                            maximal number of cells which can be connected to a cell
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max token]</i>
+                            </font>
+                        </td>
+                        <td>
+                            maximal number of token which can be placed on a cell
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[max token branch number]</i>
+                            </font>
+                        </td>
+                        <td>
+                            maximal number of branch numbers (see <a href="#processingscheme"><font face="Courier" color="#FFFFFF">3.2.1 Processing scheme</font></a>)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[min energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                            minimal energy of cell; below this value the cell turns into a particle
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[transformation probability]</i>
+                            </font>
+                        </td>
+                        <td>
+                            probability that a particle turns into a cell if its energy is
+                            greater or equal <i>[cell properties]->[min energy]</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="auto-style2">
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell properties]->[fusion velocity]</i>
+                            </font>
+                        </td>
+                        <td>
+                            this value defines the critical relative velocity
+                            when fusion is possible between two cells which are close;
+                            if successful the cells are connected
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[computer]->[max instructions]</i>
+                            </font>
+                        </td>
+                        <td>
+                            maximal number of instructions for a computer cell function
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[computer]->[memory size]</i>
+                            </font>
+                        </td>
+                        <td>
+                            number of byte for a memory of a computer cell function
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[constructor]->[offspring cell energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                            initial energy of a created cell from a constructor
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[constructor]->[offspring cell distance]</i>
+                            </font>
+                        </td>
+                        <td>
+                            distance of a created cell from the constructor cell
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[constructor]->[offspring token energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                            energy of created token from the constructor cell
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[sensor]->[range]</i>
+                            </font>
+                        </td>
+                        <td>
+                            radius in which the sensor can detect objects
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[weapon]->[strength]</i>
+                            </font>
+                        </td>
+                        <td>
+                            fraction of the energy which is absorbed from other cells by
+                            the weapon cell function
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[cell function properties]->[communicator]->[range]</i>
+                            </font>
+                        </td>
+                        <td>
+                            radius to which the communicator can send messages to other communicators
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[token properties]->[memory size]</i>
+                            </font>
+                        </td>
+                        <td>
+                            number of bytes of the token memory
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[token properties]->[min energy]</i>
+                            </font>
+                        </td>
+                        <td>
+                            minimal energy of a token; if a token has energy below below this value it will vanish
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[exponent]</i>
+                            </font>
+                        </td>
+                        <td>
+                            together with <i>[radiation]->[factor]</i> it determines the amount of energy
+                            which is radiated by cells and tokens in average over time; it calculates as:
+                            <p>
+                            power(current energy of cell/token, <i>[radiation]->[exponent]</i>) * <i>[radiation]->[factor]</i>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[factor]</i>
+                            </font>
+                        </td>
+                        <td>
+                            see above
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="auto-style1">
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[probability]</i>
+                            </font>
+                        </td>
+                        <td>
+                            frequency of which an particle is radiated from a cell or token per time step;
+                            note that a higher frequency does not result in more energy radiation in average
+                            because a higher frequency yields to lower energy per particle
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[velocity multiplier]</i>
+                            </font>
+                        </td>
+                        <td>
+                            the velocity of an emmitted particle calculates as:
+                            <p>
+                            (velocity of cell) * <i>[radiation]->[velocity multiplier]</i>
+                            +<i>[radiation]->[velocity perturbation]</i>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font face="Courier" color="#BBBBFF" size="4">
+                            <i>[radiation]->[velocity perturbation]</i>
+                            </font>
+                        </td>
+                        <td>
+                            see above
+                        </td>
+                    </tr>
+                </table>
+                <br />
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="programdocu">4 Program documentation</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="mainprogram">4.1 Main Program</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                After starting the program one will find a menu bar and a tool bar on the top,
+                a view of the artificial universe (initially empty) in the center and a status bar on the buttom.
+                A alien simulation consists of the universe with its entities, simulation parameters and
+                some information for convenience such as metadata and a symbol map.
+                Entire simulations can be created, loaded, saved, run and paused via the menu entries in <i>Simulation</i>.
+            </p>
+            <p>
+                If a new simulation should be created a dialog appears which allows one to specify the
+                grid (see <a href="#grid"><font face="Courier" color="#FFFFFF">4.4.1 Grid</font></a>),
+                the initial amount of energy, simulation parameters (see <a href="#simulationparameters"><font face="Courier" color="#FFFFFF">4.4.2 Simulation parameters</font></a>)
+                and a symbol map (see <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a>).
+            </p>
+            <p>
+                Assume a new simulation has been created.
+                By toggling <i>Simulation -> Run</i> the simulation starts.
+                That means new timesteps are calculated on separate threads consecutively.
+                By toggling <i>Simulation -> Run</i> again the simulation is paused.
+            </p>
+            <p>
+                In order to facilitate experimenting with simulations one can take snapshots via <i>Simulation -> Snapshot</i>.
+                The simulation will then be saved in some temporary internal memory. After clicking on
+                <i>Simulation -> Restore</i> it will be loaded.
+                It is also possible to compute only one timestep and showing the result by invoking
+                <i>Simulation -> Step forward</i>. In that case one can step back via
+                <i>Simulation -> Step backward</i>. These functionalities are also accessible through the toolbar.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="views">4.2 Views</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The main programm provides two different views designed for different purposes: pixel and item view.
+                To toggle between these views please click on <i>View -> Editor</i>.
+                The item view is also referred to as editor because it offers editor tabs that allow to change
+                physical states and internals of cells, tokens and particles.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="pixel">4.2.1 Pixel view</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The pixel view is the default view when creating or loading a universe.
+                In that view each cell and particle is visually presented as a pixel. The color of a cell depends
+                on the information specified in its metadata and its amount of energy.
+                Tokens are visualized as white glowing dots.
+                One can zoom in and zoom out by clicking on <i>View -> Zoom in</i> and
+                <i>View -> Zoom out</i>, respectively.
+                A fullscreen mode can be toggled via <i>View -> Fullscreen</i>.
+            </p>
+            <p>
+                To some extend it is possible to manipulate velocities and angular velocities of entities
+                within this view. By pressing the left mouse button and moving the mouse cursor
+                nearby entities are accelerated in the direction where the cursor moves.
+                By pressing both mouse buttons simultaneously entities close to the moving cursor
+                get an angular acceleration.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="item">4.2.2 Item view</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In the item view entities are rendered with vector graphic in order to exhibit more details
+                and enable precise manipulation capabilities.
+                When the item view is active an extended toolbar appears on the upper left corner.
+                It is recommended to zoom in before toggling to this view.
+                More precise position information, connections between cells,
+                token branch numbers and cell functions are visualized.
+                The latter on can be toggled by clicking <i>View -> Cell info</i>.
+                If an arrow between two cells is shown it means that a token can pass in this direction, i.e.,
+                the token branch number to the cell where the arrow goes is by +1 higher modulo the value of
+                <i>branch number</i>.
+                If, however, only a line is rendered between two cells it stands for a cell connection.
+            </p>
+            <p>
+                One particularity is that entities can be selected and manipulated.
+                There are two methods available:<br />
+                1) Selecting a single entity (cell or particle)
+                by clicking on it with the left mouse button. <br />
+                2) Defining a rectangle in order to select all entities inside.
+                To do this click on some empty space and hold the left mouse button
+                while moving the cursor.
+            </p>
+            <p>
+                To center a selection on the view please click on <i>View -> Center selection</i>
+                or on the corresponding button in the extended toolbar.
+            </p>
+            <p>
+                Once entities are selected one can move them by drag and drop quite easily:
+                <table border="0">
+                    <tr>
+                        <td>
+                            &#149; By pressing the left mouse button on the selection and moving the cursor
+                            the entire selection will be moved. Current cell connections may be broken or
+                            established depending on the distance and the ``max bonds'' attribute of the cells.
+                            Cell clusters can be assembled and disassembled in this way.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149; By pressing the right mouse button on the selection and moving the cursor
+                            the entire selection and their associated cell clusters will be moved.
+                            The clusters will not be disassembled.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149; By pressing both mouse buttons on the selection and moving the cursor
+                            the entire selection including their associated cell clusters will be rotated.
+                            The cluster's structure will be maintained.
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <p>
+                In the case when only one cell or particle is selected subwindows with editor tabs appear on
+                the upper left corner of the center view.
+                If a cell is selected one finds tabs for cluster, cell and metadata properties (cluster editor).
+                If, additionally, one or more token exist on that cell further tabs for each token appear (token editor).
+                When the selected cell has a computer cell function two more tabs showing the symbol map
+                and a cell computer editor. Note that the symbol map can also be edited via
+                <i>Settings -> Symbol map -> Edit</i> (see <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a>).
+                However for convenvience in this context it is also shown
+                in a tab.<br/>
+                For a selected particle only one tab that allows to edit its physical properties is shown.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="clustereditor">4.2.2.1 Cluster editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The cluster editor consists of three tabs: one tab for the properties of the entire cluster (tab named ``cluster''),
+                one for the selected cell (tab named ``cell'') and one for the metadata (tab named ``metadata'').<br/>
+                <table border="0">
+                    <tr>
+                        <td>
+                            &#149;
+                            In the cluster tab one is allowed to edit the physical properties (including center position)
+                            of the cell cluster to which the selected cell belongs.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149;
+                            In the cell tab one can edit the physical properties as well as the internal state
+                            of the selected cell.
+                            In particular one can choose the cell function.
+                            The attribute ``current bond'' is readonly and shows the number of connections to adjacent
+                            cells.
+                            Note that if you change the position the center position of the corresponding cluster
+                            is also changed. However if the new cell position is too far from the current
+                            connected cells the bonds will be broken.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149;
+                            Cells as well as their clusters can carry metadata information.
+                            One can give the cluster or cell a name. A cell may also have a description and a color.
+                            The color of a cell is utilized in the item as well as in the pixel view.
+                        </td>
+                    </tr>
+                </table>
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="celleditor">4.2.2.2 Cell Computer editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                For a cell having a computer functions a cell computer editor tab is shown.
+                There on can edit the cell memory as well as a source code which will be
+                executed when a token passes that cell.
+                When the source code is changed one should click on the ``compiler'' button
+                in order to inject the executable program to the cell.
+                An immediate feedback if there are compilation errors or not.
+                Each line in the source code field should correspond to one instruction.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="tokeneditor">4.2.2.3 Token editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In the token editor one can edit the energy value and each memory byte of a token.
+                The memory is partitioned into blocks. There are two type of blocks.
+                If a symbol name from the symbol map refers to a token memory byte, e.g. <i>[13]</i>,
+                a block with size 1 corresponding to the memory byte, e.g. 13, is created and carries
+                the symbol's name.
+                Memory bytes where no symbols refer to are named as <i>pure data block</i>.
+                If more than one symbols refer to the same byte the block carries all their names.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="symbolseditor">4.2.2.4 Symbol map editor</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                The symbol editor is simultaneously shown with the cell computer editor.
+                One reason why the symbol editor is shown here in a tab (it can also be edited in
+                <i>Settings -> Symbol map -> Edit</i>) is that
+                it is very convenient to look up or introduce new symbols when
+                using them in the source code for the cell computer.
+                For more information about symbol map see
+                <a href="#symboltable"><font face="Courier" color="#FFFFFF">4.4.3 Symbol map</font></a>.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="tools">4.3 Manipulation tools</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Besides creating and manipulating single entites alien also tools for mass creation.
+                Both functionalities are explained in this subsection.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="entities">4.3.1 Single entities</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                One can create, copy, paste and delete cells, token on cells as well as particles as follows.
+                <br />
+                <table border="1">
+                    <tr>
+                        <th>
+                            entity
+                        </th>
+                        <th>
+                            operation
+                        </th>
+                        <th>
+                            prerequisite
+                        </th>
+                        <th>
+                            execution
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell
+                        </td>
+                        <td>
+                            create
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Entity -> New cell</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            particle
+                        </td>
+                        <td>
+                            create
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Entity -> New particle</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell or particle
+                        </td>
+                        <td>
+                            copy
+                        </td>
+                        <td>
+                            single entity has been selected
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Copy entity</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell or particle
+                        </td>
+                        <td>
+                            paste
+                        </td>
+                        <td>
+                            single entity has been copied
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Paste entity</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            cell or particle
+                        </td>
+                        <td>
+                            delete
+                        </td>
+                        <td>
+                            single entity has been selected
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Delete entity</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            create
+                        </td>
+                        <td>
+                            single cell has been selected
+                        </td>
+                        <td>
+                            via menu <i>Entity -> New token</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            copy
+                        </td>
+                        <td>
+                            single cell with at least one token has been selected, an existing token has been chosen
+                            in the token editor tab
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Copy token</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            paste
+                        </td>
+                        <td>
+                            single cell with space for one more token (limited by parameter
+                            <i>[cell properties]->[max token]</i>) has been selected;
+                            a token has been copied
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Paste token</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            token
+                        </td>
+                        <td>
+                            delete
+                        </td>
+                        <td>
+                            single cell with at least one token has been selected, an existing token has been chosen
+                            in the token editor tab
+                        </td>
+                        <td>
+                            via menu <i>Entity -> Delete token</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                </table>
+                <br />
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="collections">4.3.2 Collections</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                A collection is a set of entities in the alien universe: particles, cells and tokens on them.
+                Is is usually an rectangle section from the universe. Collections can be created, saved, loaded, deleted, moved
+                and multiplied. For some of these operations a collection has to be selected.
+                This can be performed in the item view.
+                In Section <a href="#item"><font face="Courier" color="#FFFFFF">4.2.2 Item view</font></a>
+                we have already learned how to move collections.
+                It is convenient to distinguish between two sets:
+                <table border="0">
+                    <tr>
+                        <td>
+                            &#149; selection: all selected particles and cells;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &#149; extended selection: all selected particles and clusters where at least one cell of them is selected.
+                        </td>
+                    </tr>
+                </table>
+                The operations for collections are described in the following.
+                <br />
+                <table border="1">
+                    <tr>
+                        <th>
+                            operation
+                        </th>
+                        <th>
+                            prerequisite
+                        </th>
+                        <th>
+                            execution
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            create a cluster of cells in rectangular shape
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> New rectangle</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            create a cluster of cells in hexagonal shape
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> New hexagon</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            create particles
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> New particles</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            load
+                        </td>
+                        <td>
+                            ---
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Load</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            save extended selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Save</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            copy extended selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Copy</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            paste
+                        </td>
+                        <td>
+                            a collection has been copied
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Paste</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            delete selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Delete selection</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            delete extended selection
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Delete selection</i>
+                            or via extended toolbar in item view
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiply extended selection on random positions
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Random multiplier</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiply extended selection on a grid
+                        </td>
+                        <td>
+                            entities have been selected in item view
+                        </td>
+                        <td>
+                            via menu <i>Collection -> Grid multiplier</i>
+                            (a dialog then appears)
+                        </td>
+                    </tr>
+                </table>
+                <br />
+                <br />
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="settings">4.4 Settings</h2></p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="grid">4.4.1 Grid</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                In order to allow multithreaded computations the universe is partitioned into
+                units. A unit is a rectangular extrait of the universe. All units are arranged in a grid.
+                The universe size in each direction (x or y) is thus the unit size times the number of units in that direction.
+                Each unit has an associated thread for computation.
+                <br />
+                <br />
+                <img src="qrc:///Tutorial/units.png" alt="logo" width="350">
+                <br />
+                <br />
+            </p>
+            <p>
+                The grid with its units are setted up when creating a new simulation via <i>Simulation -> New</i>.
+                It is also possible to change the grid during a simulation by opening <i>Settings -> Grid</i>.
+                Note that the resulting universe size can possibly be changed.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="simulationparameters">4.4.2 Simulation parameters</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Simulation parameters can be setted up in the new simulation dialog
+                or by invoking <i>Settings -> Simulation parameters -> Edit</i> at any later time.
+                After clicking on <i>OK</i>-button the new simulation parameters are active in the current
+                possibly runngin simulation.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="symboltable">4.4.3 Symbol map</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                Symbol map allows to defined aliases for constant or variables.
+                For instance, a symbol <i>SOME_CONSTANT</i> could be <i>4</i> whereas
+                <i>SOME_VARIABLE</i> could be <i>[4]</i>.
+                The bracket [...] indicates a memory access. See
+                <a href="#computer"><font face="Courier" color="#FFFFFF">3.2.2.1 Computer</font></a>
+                for more details.
+            </p>
+            <p>
+                There are two possibilities for editing the symbol map: via dialog
+                <i>Settings -> Symbol map -> Edit</i> or in a tab in item view, cf.
+                <a href="#symbolseditor"><font face="Courier" color="#FFFFFF">4.2.2.4 Symbol map editor</font></a>.
+            </p>
+        </font>
+        <font face="Courier" color="#70B070">
+            <p><h2 id="monitoring">4.5 Monitoring</h2></p>
+        </font>
+        <font face="Courier" color="#FFFFFF" size="4">
+            <p>
+                It is possible the monitor some characteristic values such as <i>total energy</i>, 
+                <i>number of cells</i> or <i>number of clusters</i>  etc.
+                To this end, one can open a monitor by toggling <i>View -> Monitor</i> (or in the toolbar).
+                The monitor is a partially transparent sub-window showing such informations.
+            </p>
+        </font>
+        </td> </tr>
+        </table>
+</body>
+</html>

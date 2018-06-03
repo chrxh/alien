@@ -33,6 +33,10 @@ private:
 	void processingClustersCompartmentAllocation();
 	void processingParticlesCompartmentAllocation();
 
+private:
+	void debugging_validate(QList<Particle*> particles);
+
+private:
 	UnitContext* _context = nullptr;
 };
 

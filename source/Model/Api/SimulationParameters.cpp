@@ -19,7 +19,7 @@ SimulationParameters * SimulationParameters::clone(QObject * parent) const
 	parameters->cellMaxBonds = cellMaxBonds;
 	parameters->cellMaxToken = cellMaxToken;
 	parameters->cellMaxTokenBranchNumber = cellMaxTokenBranchNumber;
-	parameters->cellCreationEnergy = cellCreationEnergy;
+	parameters->cellFunctionConstructorOffspringCellEnergy = cellFunctionConstructorOffspringCellEnergy;
 	parameters->cellCreationMaxConnection = cellCreationMaxConnection;
 	parameters->cellCreationTokenAccessNumber = cellCreationTokenAccessNumber;
 	parameters->cellMinEnergy = cellMinEnergy;
@@ -29,12 +29,12 @@ SimulationParameters * SimulationParameters::clone(QObject * parent) const
 	parameters->cellFunctionWeaponStrength = cellFunctionWeaponStrength;
 	parameters->cellFunctionComputerMaxInstructions = cellFunctionComputerMaxInstructions;
 	parameters->cellFunctionComputerCellMemorySize = cellFunctionComputerCellMemorySize;
-	parameters->cellFunctionConstructorOffspringDistance = cellFunctionConstructorOffspringDistance;
+	parameters->cellFunctionConstructorOffspringCellDistance = cellFunctionConstructorOffspringCellDistance;
 	parameters->cellFunctionSensorRange = cellFunctionSensorRange;
 	parameters->cellFunctionCommunicatorRange = cellFunctionCommunicatorRange;
 
 	parameters->tokenMemorySize = tokenMemorySize;
-	parameters->tokenCreationEnergy = tokenCreationEnergy;
+	parameters->cellFunctionConstructorOffspringTokenEnergy = cellFunctionConstructorOffspringTokenEnergy;
 	parameters->tokenMinEnergy = tokenMinEnergy;
 
 	parameters->radiationExponent = radiationExponent;

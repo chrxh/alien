@@ -6,15 +6,19 @@
 #include "TokenImpl.h"
 
 TokenImpl::TokenImpl(UnitContext * context)
-	: _context(context)
+	: _context(context), _memory(context->getSimulationParameters()->tokenMemorySize, 0)
 {
-	_memory = QByteArray(context->getSimulationParameters()->tokenMemorySize, 0);
 }
 
 TokenImpl::TokenImpl(UnitContext* context, qreal energy, QByteArray const& memory)
-	: _energy(energy), _context(context)
+	: _context(context), _energy(energy)
 {
-	_memory = memory.left(context->getSimulationParameters()->tokenMemorySize);
+
+	int memorySize = context->getSimulationParameters()->tokenMemorySize;
+	_memory = memory.left(memorySize);
+	if (memorySize > _memory.size()) {
+		_memory.append(memorySize - _memory.size(), 0);
+	}
 }
 
 void TokenImpl::setContext(UnitContext * context)
