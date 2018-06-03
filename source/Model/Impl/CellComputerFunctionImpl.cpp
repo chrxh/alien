@@ -11,22 +11,17 @@
 #include "Cell.h"
 #include "CellComputerFunctionImpl.h"
 
-CellComputerFunctionImpl::CellComputerFunctionImpl (UnitContext* context)
-    : CellComputerFunction(context)
-    , _memory(context->getSimulationParameters()->cellFunctionComputerCellMemorySize, 0)
+CellComputerFunctionImpl::CellComputerFunctionImpl(QByteArray const& code, QByteArray const& memory, UnitContext* context)
+	: CellComputerFunction(context)
 {
-}
+	int numInstructions = code.size() / 3;
+	int copySize = 3 * std::min(numInstructions, context->getSimulationParameters()->cellFunctionComputerMaxInstructions);
+	_code = code.left(copySize);
 
-CellComputerFunctionImpl::CellComputerFunctionImpl (QByteArray const& data, UnitContext* context)
-	: CellComputerFunctionImpl(context)
-{
-	if (!data.isEmpty()) {
-		int numInstructions = static_cast<int>(static_cast<uint8_t>(data[0]));
-		int minSize = 3 * std::min(numInstructions, context->getSimulationParameters()->cellFunctionComputerMaxInstructions);
-		_code = data.mid(1, minSize);
-		if (_code.size() != minSize) {
-			_code.clear();
-		}
+	int memorySize = context->getSimulationParameters()->cellFunctionComputerCellMemorySize;
+	_memory = memory.left(memorySize);
+	if (memorySize > _memory.size()) {
+		_memory.append(memorySize - _memory.size(), 0);
 	}
 }
 
@@ -504,7 +499,6 @@ void CellComputerFunctionImpl::appendDescriptionImpl(CellFeatureDescription & de
 QByteArray CellComputerFunctionImpl::getInternalData () const
 {
 	QByteArray data;
-	data.push_back(_code.size() / 3);
 	data.push_back(_code);
 	return data;
 }

@@ -36,6 +36,12 @@
 //- Zugriff verwendet Descriptions
 
 //Nächsten Male:
+//- siehe SimulationParameters.h
+//- Validierung: Geschwindigkeit begrenzen
+//- Warum wird Energie negativ?
+//- Total-Energy nimmt immer mehr ab
+//- graue Farbe nicht sichtbar in PixelView
+//- kein Editieren der Namen der Simulationsparameter zulassen
 //- Check: wird SimulationAccessImpl::callBackCollectData zweimal aufgerufen bei PixelUniverseView::mouseMoveEvent? 
 //- Bug: schneller Wechsel zwischen Pixel und ItemView => Absturz
 //- seltener Bug: Absturz am Anfang; Grund: relative Position von Zellen im Cluster zu groß
@@ -100,7 +106,10 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-/*
+	QCoreApplication::setOrganizationName("alien");
+	QCoreApplication::setApplicationName("alien");
+
+	/*
 	ModelServices modelServices;
 	ModelGpuServices modelGpuServices;
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();

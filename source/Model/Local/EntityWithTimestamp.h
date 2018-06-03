@@ -9,7 +9,8 @@ public:
 	inline EntityWithTimestamp(UnitContext* context);
 	virtual ~EntityWithTimestamp() = default;
 
-	virtual void setContext(UnitContext * context);
+	void setContext(UnitContext * context);
+	UnitContext* getContext() const;
 	inline void incTimestampIfFit();
 
 protected:

@@ -48,8 +48,8 @@ void ClusterEditTab::requestUpdate ()
 void ClusterEditTab::keyPressEvent (QKeyEvent* e)
 {
     //auxilliary data
-    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
-    QString colorData2Start = "<span style=\"color:"+CELL_EDIT_DATA_COLOR2.name()+"\">";
+    QString colorDataStart = "<span style=\"color:"+Const::CellEditDataColor1.name()+"\">";
+    QString colorData2Start = "<span style=\"color:"+Const::CellEditDataColor2.name()+"\">";
     QString colorEnd = "</span>";
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
@@ -255,15 +255,15 @@ void ClusterEditTab::updateDisplay ()
     //define auxilliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
-    QString colorCaptionStart = "<span style=\"color:"+CELL_EDIT_CAPTION_COLOR1.name()+"\">";
-    QString colorTextStart = "<span style=\"color:"+CELL_EDIT_TEXT_COLOR1.name()+"\">";
-    QString colorDataStart = "<span style=\"color:"+CELL_EDIT_DATA_COLOR1.name()+"\">";
+    QString colorCaptionStart = "<span style=\"color:"+Const::CellEditCaptionColor1.name()+"\">";
+    QString colorTextStart = "<span style=\"color:"+Const::CellEditTextColor1.name()+"\">";
+    QString colorDataStart = "<span style=\"color:"+Const::CellEditDataColor1.name()+"\">";
     QString colorEnd = "</span>";
     QString text;
 
     //set cursor color
     QPalette p(QTextEdit::palette());
-    p.setColor(QPalette::Text, CELL_EDIT_CURSOR_COLOR);
+    p.setColor(QPalette::Text, Const::CellEditCursorColor);
     QTextEdit::setPalette(p);
 
     //create string of display
