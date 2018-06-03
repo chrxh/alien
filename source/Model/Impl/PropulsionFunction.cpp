@@ -100,7 +100,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     qreal energyDiff((eKinNew-eKinOld)/ parameters->cellMass_Reciprocal);
 
     //has token enough energy?
-    if( token->getEnergy() >= (energyDiff + qAbs(energyDiff) + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+    if( token->getEnergy() >= (energyDiff + qAbs(energyDiff) + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
 
         //create energy particle with difference energy
 		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();

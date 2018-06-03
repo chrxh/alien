@@ -41,11 +41,16 @@ namespace {
 		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		CellMetadata meta;
 		meta.color = metadata;
-		auto desc = CellDescription().setEnergy(context->getSimulationParameters()->cellCreationEnergy).setMaxConnections(maxConnections)
+
+		int length = static_cast<int>(static_cast<uint8_t>(cellFunctionData[0]));
+		QByteArray constData = cellFunctionData.mid(1, length);
+
+		auto desc = CellDescription().setEnergy(context->getSimulationParameters()->cellFunctionConstructorOffspringCellEnergy).setMaxConnections(maxConnections)
 			.setTokenBranchNumber(tokenAccessNumber).setFlagTokenBlocked(true).setMetadata(meta)
-			.setCellFeature(CellFeatureDescription().setType(convertCellTypeNumberToName(cellType)).setConstData(cellFunctionData))
+			.setCellFeature(CellFeatureDescription().setType(convertCellTypeNumberToName(cellType)).setConstData(constData))
 			.setPos(posOfNewCell);
 		auto cell = factory->build(desc, baseCell->getCluster(), context);
+		baseCell->getCluster()->updateInternals();
 		return cell;
     }
 
@@ -147,7 +152,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
         return processingResult;
     }
 
-	if (!checkMaxRadiusOfCluster(cluster, len, parameters)) {
+	if (!checkMaxRadiusOfCluster(cluster, len + 2, parameters)) {	//+2 because neighbor pixels are also retrieved
 		tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
 		return processingResult;
 	}
@@ -275,7 +280,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //not enough energy?
-                if( token->getEnergy() <= (parameters->cellCreationEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellFunctionConstructorOffspringCellEnergy + eDiff + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore cluster
@@ -348,10 +353,10 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED ))
-                    tokenEnergy = parameters->tokenCreationEnergy;
+                    tokenEnergy = parameters->cellFunctionConstructorOffspringTokenEnergy;
 
                 //not enough energy?
-                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellFunctionConstructorOffspringCellEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore construction site
@@ -410,7 +415,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                     if( (otherCell->getNumConnections() < parameters->cellMaxBonds)
                             && (newCell->getNumConnections() < parameters->cellMaxBonds)
                             && (otherCell !=constructionCell ) ) {
-                        if (metric->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (parameters->cellMaxDistance + ALIEN_PRECISION) ) {
+                        if (metric->displacement(newCell->getRelPosition(), otherCell->getRelPosition()).length() <= (parameters->cellMaxDistance + Const::AlienPrecision) ) {
 
                             //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
                             if( tokenMem.at(Enums::Constr::IN_CELL_MAX_CONNECTIONS) == 0 ) {
@@ -477,18 +482,18 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
                     if( newCell->getNumToken(true) < parameters->cellMaxToken ) {
 						auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
-						auto desc = TokenDescription().setEnergy(parameters->tokenCreationEnergy);
+						auto desc = TokenDescription().setEnergy(parameters->cellFunctionConstructorOffspringTokenEnergy);
 						auto newToken = factory->build(desc, _context);
                         newCell->addToken(newToken, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
-                        token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
+                        token->setEnergy(token->getEnergy() - parameters->cellFunctionConstructorOffspringTokenEnergy);
                     }
                 }
                 if( opt == Enums::ConstrInOption::CREATE_DUP_TOKEN ) {
                     if( newCell->getNumToken(true) < parameters->cellMaxToken ) {
                         auto dup = token->duplicate();
-                        dup->setEnergy(parameters->tokenCreationEnergy);
+                        dup->setEnergy(parameters->cellFunctionConstructorOffspringTokenEnergy);
                         newCell->addToken(dup, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
-                        token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
+                        token->setEnergy(token->getEnergy() - parameters->cellFunctionConstructorOffspringTokenEnergy);
                     }
                 }
             }
@@ -538,7 +543,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 angleGap = angleGap + PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
                 //calc coordinates for new cell from angle gap and construct cell
-                QVector2D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringDistance;
+                QVector2D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringCellDistance;
                 QVector2D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
@@ -558,10 +563,10 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 if( (opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::CREATE_DUP_TOKEN )
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) )
-                    tokenEnergy = parameters->tokenCreationEnergy;
+                    tokenEnergy = parameters->cellFunctionConstructorOffspringTokenEnergy;
 
                 //not enough energy?
-                if( token->getEnergy() <= (parameters->cellCreationEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + ALIEN_PRECISION) ) {
+                if( token->getEnergy() <= (parameters->cellFunctionConstructorOffspringCellEnergy + tokenEnergy + eDiff + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
                     tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
                     return processingResult;
                 }
@@ -646,16 +651,16 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 				auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 				if ((opt == Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED) ) {
-					auto desc = TokenDescription().setEnergy(parameters->tokenCreationEnergy);
-					auto token = factory->build(desc, _context);
-                    newCell->addToken(token, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
-                    token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
+					auto desc = TokenDescription().setEnergy(parameters->cellFunctionConstructorOffspringTokenEnergy);
+					auto newToken = factory->build(desc, _context);
+                    newCell->addToken(newToken, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
+                    token->setEnergy(token->getEnergy() - parameters->cellFunctionConstructorOffspringTokenEnergy);
                 }
                 if( opt == Enums::ConstrInOption::CREATE_DUP_TOKEN ) {
                     auto dup = token->duplicate();
-                    dup->setEnergy(parameters->tokenCreationEnergy);
+                    dup->setEnergy(parameters->cellFunctionConstructorOffspringTokenEnergy);
                     newCell->addToken(dup, ACTIVATE_TOKEN::Later, UPDATE_TOKEN_ACCESS_NUMBER::Yes);
-                    token->setEnergy(token->getEnergy() - parameters->tokenCreationEnergy);
+                    token->setEnergy(token->getEnergy() - parameters->cellFunctionConstructorOffspringTokenEnergy);
                 }
 
             }

@@ -63,10 +63,11 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	setupMenu();
 	setupFontsAndColors();
 	setupWidgets();
-	setWindowState(windowState() | Qt::WindowFullScreen);
+	setupFullScreen();
 	show();
 
 	_startScreen->start();
+	_initialied = true;
 }
 
 void MainView::refresh()
@@ -92,6 +93,14 @@ InfoController * MainView::getInfoController() const
 void MainView::showDocumentation(bool show)
 {
 	_documentationWindow->setVisible(show);
+}
+
+void MainView::resizeEvent(QResizeEvent *event)
+{
+	QMainWindow::resizeEvent(event);
+	if (_initialied) {
+		refresh();
+	}
 }
 
 void MainView::closeEvent(QCloseEvent * event)
@@ -134,10 +143,10 @@ void MainView::setupMenu()
 	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);
-	ui->menuSymbolTable->addAction(actions->actionEditSymbols);
-	ui->menuSymbolTable->addAction(actions->actionLoadSymbols);
-	ui->menuSymbolTable->addAction(actions->actionSaveSymbols);
-	ui->menuSymbolTable->addAction(actions->actionMergeWithSymbols);
+	ui->menuSymbolMap->addAction(actions->actionEditSymbols);
+	ui->menuSymbolMap->addAction(actions->actionLoadSymbols);
+	ui->menuSymbolMap->addAction(actions->actionSaveSymbols);
+	ui->menuSymbolMap->addAction(actions->actionMergeWithSymbols);
 
 	ui->menuView->addAction(actions->actionEditor);
 	ui->menuView->addAction(actions->actionMonitor);
@@ -190,13 +199,13 @@ void MainView::setupFontsAndColors()
 	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
-	ui->menuSymbolTable->setFont(GuiSettings::getGlobalFont());
+	ui->menuSymbolMap->setFont(GuiSettings::getGlobalFont());
 
-	ui->tpsForcingButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
+	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
 	{
 		QPalette p = ui->tpsForcingButton->palette();
-		p.setColor(QPalette::ButtonText, GuiSettings::ButtonTextColor);
+		p.setColor(QPalette::ButtonText, Const::ButtonTextColor);
 		ui->tpsForcingButton->setPalette(p);
 	}
 
@@ -219,6 +228,14 @@ void MainView::setupWidgets()
 		_actions->getActionHolder()->actionRestrictTPS->setChecked(true);
 		Q_EMIT _actions->getActionHolder()->actionRestrictTPS->triggered(true);
 	});
+}
+
+void MainView::setupFullScreen()
+{
+	bool fullScreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
+	if (fullScreen) {
+		setWindowState(windowState() | Qt::WindowFullScreen);
+	}
 }
 
 void MainView::documentationWindowClosed()

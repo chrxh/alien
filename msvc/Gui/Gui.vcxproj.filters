@@ -965,4 +965,9 @@
       <Filter>Resources</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\source\Gui\Resources\Tutorial\units.png">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

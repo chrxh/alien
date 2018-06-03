@@ -114,6 +114,20 @@ void SimulationAccessImpl::callBackUpdateData()
 	updateParticleData();
 }
 
+namespace
+{
+	void getClusterPosFromCells(ClusterDescription& desc)
+	{
+		if (!desc.pos && desc.cells) {
+			desc.pos = QVector2D();
+			for (CellDescription const& cell : *desc.cells) {
+				*desc.pos += *cell.pos;
+			}
+			*desc.pos /= desc.cells->size();
+		}
+	}
+}
+
 void SimulationAccessImpl::updateClusterData()
 {
 	if (_dataToUpdate.clusters.empty()) {
@@ -130,8 +144,10 @@ void SimulationAccessImpl::updateClusterData()
 	for (auto const& clusterTracker : _dataToUpdate.clusters) {
 		auto const& clusterDesc = clusterTracker.getValue();
 		if (clusterTracker.isAdded()) {
-			auto unitContext = grid->getUnitOfMapPos(*clusterDesc.pos)->getContext();
-			auto cluster = factory->build(clusterDesc, unitContext);
+			ClusterDescription clusterDescToAdd(clusterDesc);
+			getClusterPosFromCells(clusterDescToAdd);
+			auto unitContext = grid->getUnitOfMapPos(*clusterDescToAdd.pos)->getContext();
+			auto cluster = factory->build(clusterDescToAdd, unitContext);
 			unitContext->getClustersRef().push_back(cluster);
 		}
 		if (clusterTracker.isDeleted()) {
@@ -306,39 +322,39 @@ namespace
 		uint8_t b = 0;
 		auto const& color = meta.color;
 		if (color == 0) {
-			r = INDIVIDUAL_CELL_COLOR1.red();
-			g = INDIVIDUAL_CELL_COLOR1.green();
-			b = INDIVIDUAL_CELL_COLOR1.blue();
+			r = Const::IndividualCellColor1.red();
+			g = Const::IndividualCellColor1.green();
+			b = Const::IndividualCellColor1.blue();
 		}
 		if (color == 1) {
-			r = INDIVIDUAL_CELL_COLOR2.red();
-			g = INDIVIDUAL_CELL_COLOR2.green();
-			b = INDIVIDUAL_CELL_COLOR2.blue();
+			r = Const::IndividualCellColor2.red();
+			g = Const::IndividualCellColor2.green();
+			b = Const::IndividualCellColor2.blue();
 		}
 		if (color == 2) {
-			r = INDIVIDUAL_CELL_COLOR3.red();
-			g = INDIVIDUAL_CELL_COLOR3.green();
-			b = INDIVIDUAL_CELL_COLOR3.blue();
+			r = Const::IndividualCellColor3.red();
+			g = Const::IndividualCellColor3.green();
+			b = Const::IndividualCellColor3.blue();
 		}
 		if (color == 3) {
-			r = INDIVIDUAL_CELL_COLOR4.red();
-			g = INDIVIDUAL_CELL_COLOR4.green();
-			b = INDIVIDUAL_CELL_COLOR4.blue();
+			r = Const::IndividualCellColor4.red();
+			g = Const::IndividualCellColor4.green();
+			b = Const::IndividualCellColor4.blue();
 		}
 		if (color == 4) {
-			r = INDIVIDUAL_CELL_COLOR5.red();
-			g = INDIVIDUAL_CELL_COLOR5.green();
-			b = INDIVIDUAL_CELL_COLOR5.blue();
+			r = Const::IndividualCellColor5.red();
+			g = Const::IndividualCellColor5.green();
+			b = Const::IndividualCellColor5.blue();
 		}
 		if (color == 5) {
-			r = INDIVIDUAL_CELL_COLOR6.red();
-			g = INDIVIDUAL_CELL_COLOR6.green();
-			b = INDIVIDUAL_CELL_COLOR6.blue();
+			r = Const::IndividualCellColor6.red();
+			g = Const::IndividualCellColor6.green();
+			b = Const::IndividualCellColor6.blue();
 		}
 		if (color == 6) {
-			r = INDIVIDUAL_CELL_COLOR7.red();
-			g = INDIVIDUAL_CELL_COLOR7.green();
-			b = INDIVIDUAL_CELL_COLOR7.blue();
+			r = Const::IndividualCellColor7.red();
+			g = Const::IndividualCellColor7.green();
+			b = Const::IndividualCellColor7.blue();
 		}
 		quint32 e = energy / 2.0 + 20.0;
 		if (e > 150) {
@@ -360,20 +376,69 @@ namespace
 	}
 }
 
+namespace
+{
+	void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
+	{
+		QRgb const& origColor = image->pixel(pos.x, pos.y);
+
+		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
+		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
+		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
+		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
+	}
+}
+
 void SimulationAccessImpl::drawClustersFromUnit(Unit * unit)
 {
 	auto metric = unit->getContext()->getSpaceProperties();
 	auto const &clusters = unit->getContext()->getClustersRef();
+	list<IntVector2D> tokenPos;
 	for (auto const &cluster : clusters) {
 		for (auto const &cell : cluster->getCellsRef()) {
 			auto pos = metric->correctPositionAndConvertToIntVector(cell->calcPosition(true));
 			if (_requiredRect.isContained(pos)) {
 				if (cell->getNumToken() > 0) {
-					_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
+					tokenPos.push_back(pos);
 				} else {
 					_requiredImage->setPixel(pos.x, pos.y, calcCellColor(cell->getMetadata(), cell->getEnergy()));
 				}
 			}
+		}
+		if (!tokenPos.empty()) {
+			for (IntVector2D const& pos : tokenPos) {
+				_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
+
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x, pos.y - i };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i*255/4);
+					}
+				}
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x + i, pos.y };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+					}
+				}
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x, pos.y + i };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+					}
+				}
+				{
+					for (int i = 1; i < 4; ++i) {
+						IntVector2D posMod{ pos.x - i, pos.y };
+						metric->correctPosition(posMod);
+						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+					}
+				}
+			}
+			tokenPos.clear();
 		}
 	}
 }

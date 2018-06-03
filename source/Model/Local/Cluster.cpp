@@ -448,7 +448,7 @@ void Cluster::processingMovement ()
             qreal angularVelA2 = 0;
             qreal angularVelB2 = 0;
             n.normalize();
-            if( n.length() < ALIEN_PRECISION )
+            if( n.length() < Const::AlienPrecision )
                 n.setX(1.0);
 
             Physics::collision(_vel, otherCluster->getVelocity(),//, clusterPos, otherClusterPos, centerPos,
@@ -551,22 +551,28 @@ void Cluster::processingMovement ()
                 qreal eKinNew = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
-                qreal eDiff = ((eKinOld1 + eKinOld2 - eKinNew) / static_cast<qreal>(fusedCells.size())) / parameters->cellMass_Reciprocal;
-                if( eDiff > ALIEN_PRECISION ) {
-                    for (Cell* cell : fusedCells) {
+                qreal eDiff = (eKinOld1 + eKinOld2 - eKinNew) / (parameters->cellMass_Reciprocal * fusedCells.size());
+                if( eDiff > Const::AlienPrecision ) {
+					for (Cell* cell : fusedCells) {
 
-                        //create token?
-                        if( (cell->getNumToken() < parameters->cellMaxToken) && (eDiff > parameters->tokenMinEnergy) ) {
+						//create token?
+						if ((cell->getNumToken() < parameters->cellMaxToken) && (cell->getEnergy() + eDiff > parameters->tokenMinEnergy)) {
 							auto factory = ServiceLocator::getInstance().getService<EntityFactory>();
 							int tokenMemSize = _context->getSimulationParameters()->tokenMemorySize;
 							auto desc = TokenDescription().setEnergy(eDiff).setData(_context->getNumberGenerator()->getRandomArray(tokenMemSize));
-                            auto token = factory->build(desc, _context);
-                            cell->addToken(token, Cell::ActivateToken::Now, Cell::UpdateTokenBranchNumber::Yes);
-                        }
-                        //if not add to internal cell energy
-                        else
-                            cell->setEnergy(cell->getEnergy() + eDiff);
-                    }
+							if (*desc.energy < parameters->tokenMinEnergy) {
+								double energyFromCell = parameters->tokenMinEnergy - *desc.energy;
+								cell->setEnergy(cell->getEnergy() - energyFromCell);
+								desc.setEnergy(parameters->tokenMinEnergy);
+							}
+							auto token = factory->build(desc, _context);
+							cell->addToken(token, Cell::ActivateToken::Now, Cell::UpdateTokenBranchNumber::Yes);
+						}
+						//if not add to internal cell energy
+						else {
+							cell->setEnergy(cell->getEnergy() + eDiff);
+						}
+					}
                 }
             }
         }
@@ -705,8 +711,9 @@ void Cluster::processingCompletion ()
         cell->activatingNewTokens();
 
         //kill cells which are too far from cluster center
-        if(cell->getRelPosition().length() > (maxClusterRadius-1.0) )
-            cell->setToBeKilled(true);
+		if (cell->getRelPosition().length() > (maxClusterRadius - 1.0)) {
+			cell->setToBeKilled(true);
+		}
 
         //find nearby cells and kill if they are too close
         QVector2D pos = calcPosition(cell, true);
@@ -741,15 +748,11 @@ void Cluster::processingCompletion ()
     }
 }
 
-void Cluster::addCell (Cell* cell, QVector2D absPos, UpdateInternals update /*= UpdateInternals::Yes*/)
+void Cluster::addCell (Cell* cell, QVector2D absPos)
 {
     cell->setRelPosition(absToRelPos(absPos));
     cell->setCluster(this);
     _cells << cell;
-
-	if (update == Cluster::UpdateInternals::Yes) {
-		updateInternals(MaintainCenter::Yes);
-	}
 }
 
 void Cluster::removeCell (Cell* cell, MaintainCenter maintainCenter /*= MaintainCenter::Yes*/)
@@ -975,12 +978,6 @@ QList< Cell* >& Cluster::getCellsRef ()
 {
     return _cells;
 }
-
-/*QVector2D CellClusterImpl::getCoordinate (Cell* cell)
-{
-    return _transform.map(cell->getRelPosition());
-}
-*/
 
 void Cluster::findNearestCells (QVector2D pos, Cell*& cell1, Cell*& cell2) const
 {

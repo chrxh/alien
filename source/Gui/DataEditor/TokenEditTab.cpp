@@ -22,15 +22,15 @@ TokenEditTab::TokenEditTab(QWidget *parent) :
 
     //set color
     QPalette p = ui->tokenMemoryLabel->palette();
-    p.setColor(QPalette::WindowText, CELL_EDIT_CAPTION_COLOR1);
+    p.setColor(QPalette::WindowText, Const::CellEditCaptionColor1);
     ui->tokenMemoryLabel->setPalette(p);
-    p.setColor(QPalette::WindowText, CELL_EDIT_DATA_COLOR1);
-    p.setColor(QPalette::Text, CELL_EDIT_DATA_COLOR1);
+    p.setColor(QPalette::WindowText, Const::CellEditDataColor1);
+    p.setColor(QPalette::Text, Const::CellEditDataColor1);
     p.setColor(QPalette::Base, QColor(0,0,0));
     p.setColor(QPalette::Window, QColor(0,0,0));
     ui->tableWidget->setPalette(p);
     ui->tableWidget->setStyleSheet("background-color: #000000; color: #B0B0B0; gridline-color: #303030;");
-    ui->tableWidget->verticalScrollBar()->setStyleSheet(GuiSettings::ScrollbarStyleSheet);
+    ui->tableWidget->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
 
     //set font
     ui->tableWidget->setFont(GuiSettings::getGlobalFont());
@@ -121,10 +121,10 @@ void TokenEditTab::updateDisplay()
 			ui->tableWidget->setItem(row, 1, new QTableWidgetItem(v.join(QChar('\n'))));
 			ui->tableWidget->item(row, 0)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 0)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 0)->setTextColor(CELL_EDIT_TEXT_COLOR1);
+			ui->tableWidget->item(row, 0)->setTextColor(Const::CellEditTextColor1);
 			ui->tableWidget->item(row, 1)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 1)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 1)->setTextColor(CELL_EDIT_TEXT_COLOR2);
+			ui->tableWidget->item(row, 1)->setTextColor(Const::CellEditTextColor2);
 			ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 
 			//create hex editor
@@ -177,10 +177,10 @@ void TokenEditTab::updateDisplay()
 			ui->tableWidget->setItem(row, 1, new QTableWidgetItem("(pure data block)"));
 			ui->tableWidget->item(row, 0)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 0)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 0)->setTextColor(CELL_EDIT_TEXT_COLOR1);
+			ui->tableWidget->item(row, 0)->setTextColor(Const::CellEditTextColor1);
 			ui->tableWidget->item(row, 1)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 1)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 1)->setTextColor(CELL_EDIT_TEXT_COLOR2);
+			ui->tableWidget->item(row, 1)->setTextColor(Const::CellEditTextColor2);
 			ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 
 			int size = (kNew - k) / 6;

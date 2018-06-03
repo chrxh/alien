@@ -6,10 +6,15 @@ class CellFeatureFactoryImpl
 	: public CellFeatureFactory
 {
 public:
-    ~CellFeatureFactoryImpl () {}
+	virtual ~CellFeatureFactoryImpl() = default;
 
-    CellFeatureChain* addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const override;
-    CellFeatureChain* addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray data, UnitContext* context) const override;
+	virtual CellFeatureChain* build(CellFeatureDescription const& desc, UnitContext* context) const override;
 
-    CellFeatureChain* addEnergyGuidance (Cell* cell, UnitContext* context) const override;
+/*
+private:
+    CellFeatureChain* addCellFunction (Cell* cell, Enums::CellFunction::Type type, UnitContext* context) const;
+    CellFeatureChain* addCellFunction (Cell* cell, Enums::CellFunction::Type type, QByteArray const& constData, QByteArray const& volatileData, UnitContext* context) const;
+
+    CellFeatureChain* addEnergyGuidance (Cell* cell, UnitContext* context) const;
+*/
 };

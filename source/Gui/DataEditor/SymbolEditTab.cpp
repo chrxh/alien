@@ -14,13 +14,13 @@ SymbolEditTab::SymbolEditTab(QWidget *parent)
     ui->setupUi(this);
 
     setStyleSheet("background-color: #000000");
-    ui->tableWidget->setStyleSheet(GuiSettings::TableStyleSheet);
-    ui->tableWidget->verticalScrollBar()->setStyleSheet(GuiSettings::ScrollbarStyleSheet);
-    ui->addSymbolButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
-    ui->delSymbolButton->setStyleSheet(GuiSettings::ButtonStyleSheet);
+    ui->tableWidget->setStyleSheet(Const::TableStyleSheet);
+    ui->tableWidget->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
+    ui->addSymbolButton->setStyleSheet(Const::ButtonStyleSheet);
+    ui->delSymbolButton->setStyleSheet(Const::ButtonStyleSheet);
 
     QPalette p = ui->addSymbolButton->palette();
-    p.setColor(QPalette::ButtonText, GuiSettings::ButtonTextColor);
+    p.setColor(QPalette::ButtonText, Const::ButtonTextColor);
     ui->addSymbolButton->setPalette(p);
     ui->delSymbolButton->setPalette(p);
 
@@ -65,8 +65,8 @@ void SymbolEditTab::updateDisplay()
 		string value = keyAndValue.second;
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(key)));
         ui->tableWidget->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(value)));
-        ui->tableWidget->item(i, 0)->setTextColor(CELL_EDIT_DATA_COLOR1);
-        ui->tableWidget->item(i, 1)->setTextColor(CELL_EDIT_DATA_COLOR1);
+        ui->tableWidget->item(i, 0)->setTextColor(Const::CellEditDataColor1);
+        ui->tableWidget->item(i, 1)->setTextColor(Const::CellEditDataColor1);
         ++i;
     }
 
@@ -89,13 +89,13 @@ void SymbolEditTab::addSymbolButtonClicked()
 	ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 	{
 		QTableWidgetItem* item = new QTableWidgetItem("");
-		item->setTextColor(CELL_EDIT_DATA_COLOR1);
+		item->setTextColor(Const::CellEditDataColor1);
 		ui->tableWidget->setItem(row, 0, item);
 		ui->tableWidget->editItem(item);
 	}
 	{
 		QTableWidgetItem* item = new QTableWidgetItem("");
-		item->setTextColor(CELL_EDIT_DATA_COLOR1);
+		item->setTextColor(Const::CellEditDataColor1);
 		ui->tableWidget->setItem(row, 1, item);
 		ui->tableWidget->setCurrentCell(row, 0);
 	}

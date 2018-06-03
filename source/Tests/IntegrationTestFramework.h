@@ -8,12 +8,13 @@ class IntegrationTestFramework : public ::testing::Test
 {
 public:
 	IntegrationTestFramework(IntVector2D const& universeSize);
-	~IntegrationTestFramework();
+	virtual ~IntegrationTestFramework();
 
 protected:
 	void runSimulation(int timesteps, SimulationController* controller);
 
 	ClusterDescription createClusterDescription(int numCells) const;
+	ClusterDescription createClusterDescriptionWithCompleteCell(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	ParticleDescription createParticleDescription() const;
 
 	ModelBuilderFacade* _facade = nullptr;
@@ -55,6 +56,7 @@ bool isCompatible(vector<T> a, vector<T> b)
 template<> bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2);
 template<> bool isCompatible<double>(double a, double b);
 template<> bool isCompatible<TokenDescription>(TokenDescription token1, TokenDescription token2);
+template<> bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2);
 template<> bool isCompatible<CellDescription>(CellDescription cell1, CellDescription cell2);
 template<> bool isCompatible<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2);
 template<> bool isCompatible<ParticleDescription>(ParticleDescription particle1, ParticleDescription particle2);

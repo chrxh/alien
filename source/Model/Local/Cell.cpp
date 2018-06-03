@@ -2,13 +2,14 @@
 #include "Base/NumberGenerator.h"
 
 #include "Model/Api/SimulationParameters.h"
+#include "Model/Api/Physics.h"
 #include "Model/Local/Cluster.h"
 #include "Model/Local/Token.h"
 #include "Model/Local/CellFeatureChain.h"
-#include "Model/Api/Physics.h"
 #include "Model/Local/UnitContext.h"
 #include "Model/Local/CellMap.h"
 #include "Model/Local/EntityFactory.h"
+#include "Model/Local/CellFeatureFactory.h"
 
 #include "Cell.h"
 
@@ -81,9 +82,15 @@ void Cell::applyChangeDescription(CellChangeDescription const & change)
 	if (change.metadata) {
 		setMetadata(*change.metadata);
 	}
+	if (change.cellFeatures) {
+		delete _features;
+		CellFeatureFactory* factory = ServiceLocator::getInstance().getService<CellFeatureFactory>();
+		auto features = factory->build(*change.cellFeatures, _context);
+		registerFeatures(features);
+	}
 	if (change.tokens) {
-		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		delAllTokens();
+		EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
 		for (auto const& tokenDesc : *change.tokens) {
 			addToken(factory->build(tokenDesc, _context));
 		}
@@ -352,6 +359,7 @@ void Cell::delAllTokens ()
 void Cell::setCluster (Cluster* cluster)
 {
     _cluster = cluster;
+	setContext(cluster->getContext());
 }
 
 Cluster* Cell::getCluster() const

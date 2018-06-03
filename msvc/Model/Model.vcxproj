@@ -308,6 +308,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODEL_LIB -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -D_WINDLL "-I$(SolutionDir)\..\..\external\boost_1_65_1" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Model" "-I.\..\..\source\Model\Local" "-I.\..\..\source\Model\Impl"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\source\Model\Api\Validation.h" />
     <ClInclude Include="..\..\source\Model\Impl\AccessPortFactoryImpl.h" />
     <CustomBuild Include="..\..\source\Model\Impl\CellComputerCompilerImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -372,13 +373,13 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODEL_LIB -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -D_WINDLL "-I$(SolutionDir)\..\..\external\boost_1_65_1" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\Model" "-I.\..\..\source\Model\Local" "-I.\..\..\source\Model\Impl"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\WeaponFunction.h" />
     <ClInclude Include="..\..\source\Model\Impl\ContextFactoryImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\Definitions.h" />
     <ClInclude Include="..\..\source\Model\Impl\EnergyGuidanceImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\EntityFactoryImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.h" />
-    <ClInclude Include="..\..\source\Model\Impl\SimulationAccessImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\SpacePropertiesImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\TokenImpl.h" />
     <ClInclude Include="..\..\source\Model\Impl\UnitContextImpl.h" />
@@ -760,6 +761,7 @@
     <ClCompile Include="..\..\source\Model\Api\Settings.cpp" />
     <ClCompile Include="..\..\source\Model\Api\SimulationParameters.cpp" />
     <ClCompile Include="..\..\source\Model\Api\SymbolTable.cpp" />
+    <ClCompile Include="..\..\source\Model\Api\Validation.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\AccessPortFactoryImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\CellComputerCompilerImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\CommunicatorFunction.cpp" />
@@ -772,6 +774,7 @@
     <ClCompile Include="..\..\source\Model\Impl\ScannerFunction.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SensorFunction.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SerializerImpl.cpp" />
+    <ClCompile Include="..\..\source\Model\Impl\SimulationAccessImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationAttributeSetter.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationMonitorImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\WeaponFunction.cpp" />
@@ -780,7 +783,6 @@
     <ClCompile Include="..\..\source\Model\Impl\EntityFactoryImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ModelBuilderFacadeImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\ParticleMapImpl.cpp" />
-    <ClCompile Include="..\..\source\Model\Impl\SimulationAccessImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationContextImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SimulationControllerImpl.cpp" />
     <ClCompile Include="..\..\source\Model\Impl\SpacePropertiesImpl.cpp" />

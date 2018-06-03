@@ -11,8 +11,7 @@ class CellComputerFunctionImpl
 	: public CellComputerFunction
 {
 public:
-    CellComputerFunctionImpl (UnitContext* context);
-    CellComputerFunctionImpl (QByteArray const& data, UnitContext* context);
+    CellComputerFunctionImpl (QByteArray const& code, QByteArray const& memory, UnitContext* context);
 
 	virtual QByteArray getInternalData () const override;
 

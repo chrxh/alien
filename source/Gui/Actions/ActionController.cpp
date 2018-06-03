@@ -9,6 +9,7 @@
 #include "Model/Api/Serializer.h"
 #include "Model/Api/SymbolTable.h"
 #include "Model/Api/Physics.h"
+#include "Model/Api/Validation.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"
@@ -188,6 +189,8 @@ void ActionController::onToggleFullscreen(bool fullscreen)
 		state &= ~Qt::WindowFullScreen;
 	}
 	_mainView->setWindowState(state);
+
+	GuiSettings::setSettingsValue(Const::MainViewFullScreenKey, fullscreen);
 }
 
 void ActionController::onToggleEditorMode(bool editMode)
@@ -246,16 +249,11 @@ void ActionController::onLoadSimulation()
 
 void ActionController::onConfigureGrid()
 {
-	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainView);
+	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainModel->getSimulationParameters(), _mainView);
 	if (dialog.exec()) {
 		optional<uint> maxThreads = dialog.getMaxThreads();
 		optional<IntVector2D> gridSize = dialog.getGridSize();
 		optional<IntVector2D> universeSize = dialog.getUniverseSize();
-
-		if (!maxThreads || !gridSize || !universeSize) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "Wrong input.");
-			return;
-		}
 
 		_mainController->onRecreateSimulation({ *maxThreads, *gridSize, *universeSize });
 		settingUpNewSimulation();
@@ -264,7 +262,8 @@ void ActionController::onConfigureGrid()
 
 void ActionController::onEditSimulationParameters()
 {
-	SimulationParametersDialog dialog(_mainModel->getSimulationParameters()->clone(), _serializer, _mainView);
+	auto const& config = _mainController->getSimulationConfig();
+	SimulationParametersDialog dialog(config.universeSize, config.gridSize, _mainModel->getSimulationParameters()->clone(), _serializer, _mainView);
 	if (dialog.exec()) {
 		_mainModel->setSimulationParameters(dialog.getSimulationParameters());
 		_mainController->onUpdateSimulationParametersForRunningSimulation();
@@ -277,8 +276,19 @@ void ActionController::onLoadSimulationParameters()
 	if (!filename.isEmpty()) {
 		SimulationParameters* parameters;
 		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
-			_mainModel->setSimulationParameters(parameters);
-			_mainController->onUpdateSimulationParametersForRunningSimulation();
+			auto const& config = _mainController->getSimulationConfig();
+			auto valResult = Validation::validate(config.universeSize, config.gridSize, parameters);
+			if (valResult == ValidationResult::Ok) {
+				_mainModel->setSimulationParameters(parameters);
+				_mainController->onUpdateSimulationParametersForRunningSimulation();
+			}
+			else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
+				QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+				msgBox.exec();
+			}
+			else {
+				THROW_NOT_IMPLEMENTED();
+			}
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation parameter file could not loaded.");
@@ -489,24 +499,24 @@ void ActionController::onRandomMultiplier()
 	if (dialog.exec()) {
 		DataDescription data = _repository->getExtendedSelection();
 		IntVector2D universeSize = _mainController->getSimulationConfig().universeSize;
-		for (int i = 0; i < dialog.getNumber(); ++i) {
+		for (int i = 0; i < dialog.getNumberOfCopies(); ++i) {
 			DataDescription dataCopied = data;
 			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
 			optional<double> velocityX;
 			optional<double> velocityY;
 			optional<double> angle;
 			optional<double> angularVelocity;
-			if (dialog.randomizeVelX()) {
-				velocityX = _numberGenerator->getRandomReal(dialog.randomizeVelXMin(), dialog.randomizeVelXMax());
+			if (dialog.isChangeVelX()) {
+				velocityX = _numberGenerator->getRandomReal(dialog.getVelXMin(), dialog.getVelXMax());
 			}
-			if (dialog.randomizeVelY()) {
-				velocityY = _numberGenerator->getRandomReal(dialog.randomizeVelYMin(), dialog.randomizeVelYMax());
+			if (dialog.isChangeVelY()) {
+				velocityY = _numberGenerator->getRandomReal(dialog.getVelYMin(), dialog.getVelYMax());
 			}
-			if (dialog.randomizeAngle()) {
-				angle = _numberGenerator->getRandomReal(dialog.randomizeAngleMin(), dialog.randomizeAngleMax());
+			if (dialog.isChangeAngle()) {
+				angle = _numberGenerator->getRandomReal(dialog.getAngleMin(), dialog.getAngleMax());
 			}
-			if (dialog.randomizeAngVel()) {
-				angularVelocity = _numberGenerator->getRandomReal(dialog.randomizeAngVelMin(), dialog.randomizeAngVelMax());
+			if (dialog.isChangeAngVel()) {
+				angularVelocity = _numberGenerator->getRandomReal(dialog.getAngVelMin(), dialog.getAngVelMax());
 			}
 			modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
 			_repository->addDataAtFixedPosition(dataCopied, angle);
@@ -538,16 +548,16 @@ void ActionController::onGridMultiplier()
 				optional<double> velocityY;
 				optional<double> angle;
 				optional<double> angularVelocity;
-				if (dialog.changeAngle()) {
+				if (dialog.isChangeAngle()) {
 					angle = dialog.getInitialAngle() + i*dialog.getHorizontalAngleIncrement() + j*dialog.getVerticalAngleIncrement();
 				}
-				if (dialog.changeVelocityX()) {
+				if (dialog.isChangeVelocityX()) {
 					velocityX = dialog.getInitialVelX() + i*dialog.getHorizontalVelocityXIncrement() + j*dialog.getVerticalVelocityXIncrement();
 				}
-				if (dialog.changeVelocityY()) {
+				if (dialog.isChangeVelocityY()) {
 					velocityY = dialog.getInitialVelY() + j*dialog.getHorizontalVelocityYIncrement() + j*dialog.getVerticalVelocityYIncrement();
 				}
-				if (dialog.changeAngularVelocity()) {
+				if (dialog.isChangeAngularVelocity()) {
 					angularVelocity = dialog.getInitialAngVel() + i*dialog.getHorizontalAngularVelocityIncrement() + j*dialog.getVerticalAngularVelocityIncrement();
 				}
 
@@ -719,7 +729,7 @@ void ActionController::onNewHexagon()
 
 		int layers = dialog.getLayers();
 		double dist = dialog.getDistance();
-		double energy = dialog.getInternalEnergy();
+		double energy = dialog.getCellEnergy();
 		std::vector<std::vector<CellDescription>> cellMatrix(2 * layers - 1, std::vector<CellDescription>(2 * layers - 1));
 		list<CellDescription> cells;
 

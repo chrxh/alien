@@ -1,0 +1,78 @@
+randomWalk:
+-----------
+0: comp
+mov CONSTR_IN, CONSTR_IN::SAFE
+mov CONSTR_IN_OPTION, CONSTR_IN_OPTION::STANDARD
+mov CONSTR_IN_DIST, 0x70
+mov i, 0x11
+mov j,0
+mov k,0
+
+1: comp
+mov CONSTR_INOUT_ANGLE,i
+add j,1
+if j > k
+  sub i, 1
+  if i = 0xFb
+    mov i,k
+    mov k,0
+  endif
+  mov j,0
+  if k < 8
+    add k,1
+  else
+    mov k,0
+  endif
+endif
+
+2: constr
+
+3: comp
+if CONSTR_OUT>1
+  mov [0],1
+else
+  mov [0],0
+endif
+add l,1
+if l > 3
+  mov [0],0
+  
+5: comp + token (e:60.000)
+  
+spiral:
+-------
+0: comp
+mov CONSTR_IN, CONSTR_IN::SAFE
+mov CONSTR_IN_OPTION, CONSTR_IN_OPTION::STANDARD
+mov CONSTR_IN_DIST, 0x80
+mov CONSTR_INOUT_ANGLE,0xC0
+mov i, 0x0C
+mov j,0
+mov k,0
+mov l,0
+
+1: comp
+add j,1
+if j > k
+  mov j,0
+  add k,1
+endif
+if k > l
+  mov k,0
+  add l,1
+  mov [250],0xFF
+  if i > 0
+    sub i,1
+endif
+
+2: constr
+
+3: comp
+mov CONSTR_INOUT_ANGLE,i
+if CONSTR_OUT>1
+  mov [0],1
+else
+  mov [0],0
+endif
+
+5: comp + token (e:46.000)

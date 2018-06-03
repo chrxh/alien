@@ -151,7 +151,7 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
 SimulationParameters* ModelSettings::getDefaultSimulationParameters()
 {
 	SimulationParameters* parameters = new SimulationParameters();
-	parameters->clusterMaxRadius = 50.0;
+	parameters->clusterMaxRadius = 40.0;
 
 	parameters->cellMutationProb = 0.000001;
 	parameters->cellMinDistance = 0.3;
@@ -162,7 +162,7 @@ SimulationParameters* ModelSettings::getDefaultSimulationParameters()
 	parameters->cellMaxBonds = 6;
 	parameters->cellMaxToken = 9;
 	parameters->cellMaxTokenBranchNumber = 6;
-	parameters->cellCreationEnergy = 100.0;
+	parameters->cellFunctionConstructorOffspringCellEnergy = 100.0;
 	parameters->cellCreationMaxConnection = 4;
 	parameters->cellCreationTokenAccessNumber = 0;
 	parameters->cellMinEnergy = 50.0;
@@ -172,12 +172,12 @@ SimulationParameters* ModelSettings::getDefaultSimulationParameters()
 	parameters->cellFunctionWeaponStrength = 0.1;
 	parameters->cellFunctionComputerMaxInstructions = 15;
 	parameters->cellFunctionComputerCellMemorySize = 8;
-	parameters->cellFunctionConstructorOffspringDistance = 1.0;
-	parameters->cellFunctionSensorRange = 100.0;
-	parameters->cellFunctionCommunicatorRange = 30.0;
+	parameters->cellFunctionConstructorOffspringCellDistance = 1.0;
+	parameters->cellFunctionSensorRange = 50.0;
+	parameters->cellFunctionCommunicatorRange = 50.0;
 
 	parameters->tokenMemorySize = 256;
-	parameters->tokenCreationEnergy = 60.0;
+	parameters->cellFunctionConstructorOffspringTokenEnergy = 60.0;
 	parameters->tokenMinEnergy = 3.0;
 
 	parameters->radiationExponent = 1.0;
