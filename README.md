@@ -7,6 +7,11 @@ Complex and interconnected structures have the potential to perform arbitrary hi
 
 You have full control of space, time and matter. Explore intriguing worlds which are beyond imagination!
 
+How to build
+============
+You can build using Microsoft Visual Studio 2015. You need to install boost library version 1.65.1 in external/boost_1_65_1.
+There are also binaries with installer for Microsoft Windows available at alien-project.org.
+
 License
 =======
 alien is licensed under the [GPLv3](source/gpl.txt).
