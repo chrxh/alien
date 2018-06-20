@@ -10,7 +10,7 @@ You have full control of space, time and matter. Explore intriguing worlds which
 How to build
 ============
 You can build using Microsoft Visual Studio 2015. You need to install boost library version 1.65.1 in external/boost_1_65_1.
-There are also binaries with installer for Microsoft Windows available at alien-project.org.
+There are also binaries with installer for Microsoft Windows available at [alien-project.org](https://alien-project.org).
 
 License
 =======
