@@ -56,7 +56,7 @@ CellComputerCompiler * SimulationContextGpuImpl::getCellComputerCompiler() const
 	return nullptr;
 }
 
-void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters const * parameters)
+void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters * parameters)
 {
 }
 

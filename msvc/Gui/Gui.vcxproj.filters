@@ -964,6 +964,9 @@
     <ResourceCompile Include="Gui.rc">
       <Filter>Resources</Filter>
     </ResourceCompile>
+    <ResourceCompile Include="icon.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\source\Gui\Resources\Tutorial\units.png">
