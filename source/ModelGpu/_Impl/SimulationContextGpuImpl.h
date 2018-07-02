@@ -22,7 +22,7 @@ public:
 	virtual SimulationParameters* getSimulationParameters() const override;
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
-	virtual void setSimulationParameters(SimulationParameters const* parameters) override;
+	virtual void setSimulationParameters(SimulationParameters* parameters) override;
 
 	virtual ThreadController* getGpuThreadController() const;
 
