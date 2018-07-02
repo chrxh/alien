@@ -22,4 +22,4 @@ There is also a Windows installer with 64 bit binaries available at [alien-proje
 
 License
 =======
-alien is licensed under the [GPLv3](source/gpl.txt).
+alien is licensed under the [GPLv3](LICENSE).
