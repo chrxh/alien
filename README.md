@@ -13,8 +13,11 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 
 How to build
 ============
-You can build using Microsoft Visual Studio 2015. You need to install boost library version 1.65.1 in external/boost_1_65_1 as well as Qt 5.8 or higher.
-Please note that the GPU project in source/ModelGpu/ is not necessary to build alien.
+You can build alien using Microsoft Visual Studio 2015 or higher. The following external libaries are necessary:
+- Qt 5.8 or higher should be installed
+- boost library [version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) should be installed in external/boost_1_65_1 of the repository
+- gtest framework is already contained in the repository in external/gtest
+Please note that the (experimental) GPU project in source/ModelGpu/ requiring Nvidia CUDA is not necessary to build alien.
 
 Installer
 =========
