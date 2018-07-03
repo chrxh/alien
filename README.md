@@ -13,7 +13,7 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 
 How to build
 ============
-You can build alien using Microsoft Visual Studio 2015 or higher. The following external libaries are necessary:
+You can build alien using Microsoft Visual Studio 2015 or higher. The solution file is contained in msvc/Gui/alien.sln. The following external libaries are necessary:
 - Qt 5.8 or higher should be installed
 - boost library [version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) should be installed in external/boost_1_65_1 of the repository
 - gtest framework is already contained in the repository in external/gtest
