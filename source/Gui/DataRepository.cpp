@@ -22,7 +22,11 @@ void DataRepository::init(Notifier* notifier, SimulationAccess * access, Descrip
 	_universeSize = context->getSpaceProperties()->getSize();
 	_unchangedData.clear();
 	_data.clear();
-
+	_selectedCellIds.clear();
+	_selectedClusterIds.clear();
+	_selectedParticleIds.clear();
+	_selectedTokenIndex.reset();
+	
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
@@ -437,14 +441,25 @@ bool DataRepository::areEntitiesSelected() const
 	return !_selectedCellIds.empty() || !_selectedParticleIds.empty();
 }
 
+namespace
+{
+	template<typename T>
+	unordered_set<T> calcDifference(unordered_set<T> const& set1, unordered_set<T> const& set2)
+	{
+		unordered_set<T> result;
+		std::set_difference(set1.begin(), set1.end(), set2.begin(), set2.begin(), std::inserter(result, result.begin()));
+		return result;
+	}
+}
+
 unordered_set<uint64_t> DataRepository::getSelectedCellIds() const
 {
-	return _selectedCellIds;
+	return calcDifference<uint64_t>(_selectedCellIds, _navi.cellIds);
 }
 
 unordered_set<uint64_t> DataRepository::getSelectedParticleIds() const
 {
-	return _selectedParticleIds;
+	return calcDifference<uint64_t>(_selectedParticleIds, _navi.particleIds);
 }
 
 DataDescription DataRepository::getExtendedSelection() const
