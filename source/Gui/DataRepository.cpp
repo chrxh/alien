@@ -454,12 +454,12 @@ namespace
 
 unordered_set<uint64_t> DataRepository::getSelectedCellIds() const
 {
-	return calcDifference<uint64_t>(_selectedCellIds, _navi.cellIds);
+	return calcDifference<uint64_t>(_selectedCellIds, _navi.cellIds);	//really necessary?
 }
 
 unordered_set<uint64_t> DataRepository::getSelectedParticleIds() const
 {
-	return calcDifference<uint64_t>(_selectedParticleIds, _navi.particleIds);
+	return calcDifference<uint64_t>(_selectedParticleIds, _navi.particleIds);	//really necessary?
 }
 
 DataDescription DataRepository::getExtendedSelection() const
