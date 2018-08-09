@@ -197,8 +197,8 @@ struct ResolveDescription
 
 struct DescriptionNavigator
 {
-	set<uint64_t> cellIds;
-	set<uint64_t> particleIds;
+	unordered_set<uint64_t> cellIds;
+	unordered_set<uint64_t> particleIds;
 	map<uint64_t, uint64_t> clusterIdsByCellIds;
 	map<uint64_t, int> clusterIndicesByClusterIds;
 	map<uint64_t, int> clusterIndicesByCellIds;

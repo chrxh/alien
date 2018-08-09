@@ -8,10 +8,13 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 {
 	actionNewSimulation = new QAction("New", this);
 	actionNewSimulation->setEnabled(true);
+	actionNewSimulation->setShortcut(Qt::CTRL + Qt::Key_N);
 	actionLoadSimulation = new QAction("Load", this);
 	actionLoadSimulation->setEnabled(true);
+	actionLoadSimulation->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionSaveSimulation = new QAction("Save", this);
 	actionSaveSimulation->setEnabled(true);
+	actionLoadSimulation->setShortcut(Qt::CTRL + Qt::Key_S);
 	actionRunSimulation = new QAction("Run", this);
 	actionRunSimulation->setEnabled(true);
 	actionRunSimulation->setCheckable(true);
@@ -208,6 +211,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDeleteSel->setIcon(iconDeleteSel);
 	actionDeleteSel->setIconVisibleInMenu(false);
 	actionDeleteSel->setEnabled(false);
+	actionDeleteSel->setShortcut(Qt::Key_Delete);
 	actionDeleteSel->setToolTip("delete selection");
 
 	actionDeleteCol = new QAction("Delete extended selection", this);
