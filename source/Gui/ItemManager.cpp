@@ -3,7 +3,7 @@
 #include "ModelInterface/ChangeDescriptions.h"
 #include "Gui/Settings.h"
 #include "Gui/DataRepository.h"
-#include "Gui/visualeditor/ViewportInterface.h"
+#include "Gui/ViewportInterface.h"
 
 #include "ItemManager.h"
 #include "CellItem.h"
