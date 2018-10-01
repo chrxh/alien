@@ -1,6 +1,6 @@
-#include "Model/Api/SymbolTable.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SpaceProperties.h"
+#include "ModelInterface/SymbolTable.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/SpaceProperties.h"
 
 #include "WorkerForGpu.h"
 #include "ThreadController.h"

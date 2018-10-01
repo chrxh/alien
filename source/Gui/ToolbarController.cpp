@@ -7,7 +7,7 @@
 
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
-#include "Gui/Actions/ActionHolder.h"
+#include "Gui/ActionHolder.h"
 #include "ToolbarView.h"
 #include "ToolbarContext.h"
 

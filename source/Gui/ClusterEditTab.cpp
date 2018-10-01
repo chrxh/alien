@@ -3,9 +3,6 @@
 #include <QTextLayout>
 #include <qmath.h>
 
-#include "Model/Local/Cell.h"
-#include "Model/Local/Cluster.h"
-
 #include "Gui/StringHelper.h"
 #include "DataEditModel.h"
 #include "DataEditController.h"

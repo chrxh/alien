@@ -772,12 +772,12 @@
   <customwidget>
    <class>HexEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>Gui/DataEditor/HexEditWidget.h</header>
+   <header>Gui/HexEditWidget.h</header>
   </customwidget>
   <customwidget>
    <class>CodeEditWidget</class>
    <extends>QTextEdit</extends>
-   <header>Gui/DataEditor/CodeEditWidget.h</header>
+   <header>Gui/CodeEditWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
