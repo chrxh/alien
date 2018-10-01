@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Model/Api/SimulationAccess.h"
+#include "ModelInterface/SimulationAccess.h"
 #include "Model/Local/SimulationContextLocal.h"
 #include "Model/Local/UnitObserver.h"
-#include "Model/Api/ChangeDescriptions.h"
+#include "ModelInterface/ChangeDescriptions.h"
 
 class SimulationAccessGpuImpl
 	: public SimulationAccess
