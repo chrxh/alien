@@ -4,10 +4,10 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SpaceProperties.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelInterface/SimulationContext.h"
+#include "ModelInterface/SpaceProperties.h"
 #include "Gui/VisualEditor/ViewportInterface.h"
 #include "Gui/Settings.h"
 #include "Gui/Notifier.h"

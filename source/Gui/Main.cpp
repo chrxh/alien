@@ -5,13 +5,13 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SymbolTable.h"
-#include "Model/Api/ModelServices.h"
+#include "ModelInterface/SimulationAccess.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/SymbolTable.h"
+#include "ModelCpu/ModelCpuServices.h"
 
 #include "Gui/MainController.h"
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
 */
 
-	ModelServices modelServices;
+	ModelCpuServices modelServices;
 /*
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();

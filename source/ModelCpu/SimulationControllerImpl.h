@@ -2,7 +2,8 @@
 
 #include <QTime>
 
-#include "Model/Api/SimulationController.h"
+#include "Definitions.h"
+#include "ModelInterface/SimulationController.h"
 
 class SimulationControllerImpl
 	: public SimulationController
@@ -23,7 +24,7 @@ private:
 	Q_SLOT void nextTimestepCalculatedIntern();
 	Q_SLOT void restrictTpsTimerTimeout();
 
-	SimulationContextLocal* _context = nullptr;
+	SimulationContextImpl* _context = nullptr;
 
 	bool _runMode = false;
 	bool _calculationRunning = false;

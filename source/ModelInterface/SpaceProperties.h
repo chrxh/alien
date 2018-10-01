@@ -2,12 +2,12 @@
 
 #include "Definitions.h"
 
-class SpaceProperties
+class MODELINTERFACE_EXPORT SpaceProperties
 	: public QObject
 {
 	Q_OBJECT
 public:
-	SpaceProperties(QObject* parent = nullptr) : QObject(parent) {}
+	SpaceProperties(QObject* parent = nullptr);
 	virtual ~SpaceProperties() = default;
 
 	virtual IntVector2D getSize() const = 0;

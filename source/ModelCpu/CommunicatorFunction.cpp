@@ -1,13 +1,13 @@
 #include <QString>
 
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Token.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/CellMap.h"
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Api/Physics.h"
-#include "Model/Local/PhysicalQuantityConverter.h"
-#include "Model/Api/SimulationParameters.h"
+#include "Cluster.h"
+#include "Token.h"
+#include "UnitContext.h"
+#include "CellMap.h"
+#include "SpacePropertiesImpl.h"
+#include "ModelInterface/Physics.h"
+#include "PhysicalQuantityConverter.h"
+#include "ModelInterface/SimulationParameters.h"
 
 #include "Cell.h"
 #include "CommunicatorFunction.h"
@@ -112,7 +112,7 @@ bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess (const Mess
     if( communicator ) {
         if( communicator->_receivedMessage.channel == messageDataToSend.channel ) {
             QVector2D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
-            SpacePropertiesLocal* metric = _context->getSpaceProperties();
+            SpacePropertiesImpl* metric = _context->getSpaceProperties();
             QVector2D displacementOfObjectFromReceiver = metric->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();

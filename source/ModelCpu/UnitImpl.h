@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Local/Unit.h"
+#include "Unit.h"
 
 class UnitImpl
 	: public Unit

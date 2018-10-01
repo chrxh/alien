@@ -1,9 +1,9 @@
 #include <functional>
 
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Api/Settings.h"
-#include "Model/Local/Cluster.h"
+#include "SpacePropertiesImpl.h"
+#include "UnitContext.h"
+#include "ModelInterface/Settings.h"
+#include "Cluster.h"
 
 #include "Cell.h"
 #include "CellMapImpl.h"
@@ -18,7 +18,7 @@ CellMapImpl::~CellMapImpl()
 	deleteCellMap();
 }
 
-void CellMapImpl::init(SpacePropertiesLocal* metric, MapCompartment* compartment)
+void CellMapImpl::init(SpacePropertiesImpl* metric, MapCompartment* compartment)
 {
 	_metric = metric;
 	_compartment = compartment;

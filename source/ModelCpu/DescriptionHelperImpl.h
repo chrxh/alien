@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Api/DescriptionHelper.h"
+#include "ModelInterface/DescriptionHelper.h"
 
 class DescriptionHelperImpl
 	: public DescriptionHelper

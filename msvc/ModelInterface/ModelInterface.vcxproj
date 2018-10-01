@@ -259,10 +259,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelInterface\ChangeDescriptions.cpp" />
+    <ClCompile Include="..\..\source\ModelInterface\DescriptionHelper.cpp" />
     <ClCompile Include="..\..\source\ModelInterface\Descriptions.cpp" />
     <ClCompile Include="..\..\source\ModelInterface\Physics.cpp" />
     <ClCompile Include="..\..\source\ModelInterface\Settings.cpp" />
     <ClCompile Include="..\..\source\ModelInterface\SimulationParameters.cpp" />
+    <ClCompile Include="..\..\source\ModelInterface\SpaceProperties.cpp" />
     <ClCompile Include="..\..\source\ModelInterface\SymbolTable.cpp" />
     <ClCompile Include="..\..\source\ModelInterface\Validation.cpp" />
     <ClCompile Include="Debug\moc_CellComputerCompiler.cpp">
@@ -377,9 +379,28 @@
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelInterface\CellFeatureEnums.h" />
     <ClInclude Include="..\..\source\ModelInterface\ChangeDescriptions.h" />
+    <CustomBuild Include="..\..\source\ModelInterface\DescriptionHelper.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
+      </Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
+      </Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+    </CustomBuild>
     <ClInclude Include="..\..\source\ModelInterface\Metadata.h" />
     <ClInclude Include="..\..\source\ModelInterface\Definitions.h" />
-    <ClInclude Include="..\..\source\ModelInterface\DescriptionHelper.h" />
     <ClInclude Include="..\..\source\ModelInterface\Descriptions.h" />
     <ClInclude Include="..\..\source\ModelInterface\DllExport.h" />
     <ClInclude Include="..\..\source\ModelInterface\ModelBuilderFacade.h" />

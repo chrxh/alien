@@ -4,15 +4,15 @@
 
 #include "Base/NumberGenerator.h"
 
-#include "Model/Api/SpaceProperties.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/Physics.h"
-#include "Model/Local/SimulationContextLocal.h"
+#include "ModelInterface/SpaceProperties.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/Physics.h"
+#include "SimulationContextImpl.h"
 
 
 void DescriptionHelperImpl::init(SimulationContext* context)
 {
-	auto contextLocal = static_cast<SimulationContextLocal*>(context);
+	auto contextLocal = static_cast<SimulationContextImpl*>(context);
 	_metric = contextLocal->getSpaceProperties();
 	_parameters = contextLocal->getSimulationParameters();
 	_numberGen = contextLocal->getNumberGenerator();

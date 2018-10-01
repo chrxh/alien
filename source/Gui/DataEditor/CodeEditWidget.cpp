@@ -2,7 +2,7 @@
 #include <QTextBlock>
 #include <QScrollBar>
 
-#include "Model/Api/CellComputerCompiler.h"
+#include "ModelInterface/CellComputerCompiler.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 

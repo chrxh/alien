@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Local/UnitGrid.h"
-#include "Model/Local/Unit.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/MapCompartment.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelCpu/UnitGrid.h"
+#include "ModelCpu/Unit.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelCpu/MapCompartment.h"
 
 #include "tests/Predicates.h"
 
@@ -22,7 +22,7 @@ protected:
 	IntVector2D correctUniversePosition(IntVector2D const& pos);
 
 	SimulationController* _controller = nullptr;
-	SimulationContextLocal* _context = nullptr;
+	SimulationContextImpl* _context = nullptr;
 	UnitGrid* _grid = nullptr;
 	const IntVector2D _gridSize{ 6, 8 };
 	const IntVector2D _universeSize{ 1200, 800 };
@@ -36,7 +36,7 @@ MapCompartmentTest::MapCompartmentTest()
 	auto parameters = facade->buildDefaultSimulationParameters();
 
 	_controller = facade->buildSimulationController(4, _gridSize, _universeSize, symbols, parameters);
-	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
+	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
 
 	_grid = _context->getUnitGrid();
 	_compartmentSize = { _universeSize.x / _gridSize.x, _universeSize.y / _gridSize.y };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Local/Token.h"
+#include "Token.h"
 
 class TokenImpl
 	: public Token

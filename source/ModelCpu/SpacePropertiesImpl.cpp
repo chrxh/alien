@@ -1,9 +1,9 @@
 #include "SpacePropertiesImpl.h"
 
-#include "Model/Local/Cell.h"
+#include "Cell.h"
 
 SpacePropertiesImpl::SpacePropertiesImpl(QObject * parent)
-	: SpacePropertiesLocal(parent)
+	: SpaceProperties(parent)
 {
 }
 
@@ -12,7 +12,7 @@ void SpacePropertiesImpl::init(IntVector2D size)
 	_size = size;
 }
 
-SpacePropertiesLocal * SpacePropertiesImpl::clone(QObject * parent) const
+SpacePropertiesImpl * SpacePropertiesImpl::clone(QObject * parent) const
 {
 	auto metric = new SpacePropertiesImpl(parent);
 	metric->_size = _size;

@@ -3,10 +3,10 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/Serializer.h"
-#include "Model/Api/Validation.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/Serializer.h"
+#include "ModelInterface/Validation.h"
 #include "Gui/Settings.h"
 
 #include "SerializationHelper.h"

@@ -1,13 +1,13 @@
 ﻿
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Local/UnitThreadController.h"
-#include "Model/Local/UnitGrid.h"
-#include "Model/Local/Unit.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Cell.h"
-#include "Model/Local/Particle.h"
-#include "Model/Local/Token.h"
+#include "SimulationContextImpl.h"
+#include "UnitThreadController.h"
+#include "UnitGrid.h"
+#include "Unit.h"
+#include "UnitContext.h"
+#include "Cluster.h"
+#include "Cell.h"
+#include "Particle.h"
+#include "Token.h"
 
 #include "SimulationMonitorImpl.h"
 
@@ -26,7 +26,7 @@ SimulationMonitorImpl::~SimulationMonitorImpl()
 
 void SimulationMonitorImpl::init(SimulationContext * context)
 {
-	_context = static_cast<SimulationContextLocal*>(context);
+	_context = static_cast<SimulationContextImpl*>(context);
 	_context->getUnitThreadController()->registerObserver(this);
 	_registered = true;
 }

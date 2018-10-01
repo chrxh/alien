@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Model/Api/Descriptions.h"
+#include "ModelInterface/Descriptions.h"
 #include "Gui/Definitions.h"
 
 class DataEditModel

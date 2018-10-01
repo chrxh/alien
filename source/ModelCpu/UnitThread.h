@@ -1,9 +1,10 @@
 #pragma once
 
 #include <QThread>
-#include "Model/Api/Definitions.h"
 
-class MODEL_EXPORT UnitThread
+#include "Definitions.h"
+
+class MODELCPU_EXPORT UnitThread
 	: public QThread
 {
 	Q_OBJECT

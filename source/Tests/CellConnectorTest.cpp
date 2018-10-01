@@ -3,12 +3,12 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/DescriptionHelper.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Api/SimulationParameters.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelInterface/DescriptionHelper.h"
+#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelInterface/SimulationParameters.h"
 
 #include "tests/Predicates.h"
 
@@ -39,7 +39,7 @@ CellConnectorTest::CellConnectorTest()
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
 	_controller = facade->buildSimulationController(1, { 1,1 }, _universeSize, symbols, _parameters);
-	auto context = static_cast<SimulationContextLocal*>(_controller->getContext());
+	auto context = static_cast<SimulationContextImpl*>(_controller->getContext());
 	_numberGen = context->getNumberGenerator();
 	_descHelper = facade->buildDescriptionHelper();
 	_descHelper->init(context);

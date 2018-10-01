@@ -1,7 +1,7 @@
 #include "Base/ServiceLocator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/Physics.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/SimulationAccess.h"
+#include "ModelInterface/Physics.h"
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
 

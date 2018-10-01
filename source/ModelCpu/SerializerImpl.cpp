@@ -9,15 +9,15 @@
 #include <QVector2D>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SpaceProperties.h"
-#include "Model/Api/Descriptions.h"
-#include "Model/Api/ChangeDescriptions.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SymbolTable.h"
-#include "Model/Api/ModelBuilderFacade.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelInterface/SimulationContext.h"
+#include "ModelInterface/SimulationAccess.h"
+#include "ModelInterface/SpaceProperties.h"
+#include "ModelInterface/Descriptions.h"
+#include "ModelInterface/ChangeDescriptions.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/SymbolTable.h"
+#include "ModelInterface/ModelBuilderFacade.h"
 
 #include "SerializerImpl.h"
 

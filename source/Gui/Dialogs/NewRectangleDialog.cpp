@@ -1,4 +1,4 @@
-#include "Model/Api/SimulationParameters.h"
+#include "ModelInterface/SimulationParameters.h"
 #include "Gui/Settings.h"
 #include "Gui/StringHelper.h"
 

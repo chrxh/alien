@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "ChangeDescriptions.h"
 
@@ -6,7 +6,7 @@ class MODELINTERFACE_EXPORT DescriptionHelper
 	: public QObject
 {
 public:
-	DescriptionHelper(QObject* parent = nullptr) : QObject(parent) {}
+	DescriptionHelper(QObject* parent = nullptr);
 	virtual ~DescriptionHelper() = default;
 
 	virtual void init(SimulationContext* context) = 0;

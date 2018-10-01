@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Local/CellFunction.h"
+#include "CellFunction.h"
 
 class SensorFunction
 	: public CellFunction

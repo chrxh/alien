@@ -1,7 +1,7 @@
 #include <QScrollBar>
 #include <QSignalMapper>
 
-#include "Model/Api/SymbolTable.h"
+#include "ModelInterface/SymbolTable.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 
