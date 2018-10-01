@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Local/EnergyGuidance.h"
+#include "EnergyGuidance.h"
 
 class EnergyGuidanceImpl
 	: public EnergyGuidance

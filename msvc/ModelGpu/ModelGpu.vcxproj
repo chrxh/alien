@@ -197,7 +197,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ProjectReference Include="..\Base\Base.vcxproj">
       <Project>{21bb3377-a473-473c-a064-396ec67979ab}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Model\ModelInterface.vcxproj">
+    <ProjectReference Include="..\ModelInterface\ModelInterface.vcxproj">
       <Project>{046b2f85-571f-35cc-b683-6c420049404b}</Project>
     </ProjectReference>
   </ItemGroup>

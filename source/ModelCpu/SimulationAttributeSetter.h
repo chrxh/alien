@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Model/Local/Definitions.h"
+#include "Definitions.h"
 #include "UnitObserver.h"
 
 class SimulationAttributeSetter

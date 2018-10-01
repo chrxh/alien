@@ -1,6 +1,6 @@
-﻿#include "Model/Api/SimulationController.h"
-#include "Model/Api/Serializer.h"
-#include "Model/Api/SymbolTable.h"
+﻿#include "ModelInterface/SimulationController.h"
+#include "ModelInterface/Serializer.h"
+#include "ModelInterface/SymbolTable.h"
 
 #include "Gui/Toolbar/ToolbarController.h"
 #include "Gui/Toolbar/ToolbarContext.h"

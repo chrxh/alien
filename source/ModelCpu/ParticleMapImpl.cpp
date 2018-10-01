@@ -1,5 +1,5 @@
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Local/Particle.h"
+#include "SpacePropertiesImpl.h"
+#include "Particle.h"
 
 #include "ParticleMapImpl.h"
 
@@ -14,7 +14,7 @@ ParticleMapImpl::~ParticleMapImpl()
 }
 
 
-void ParticleMapImpl::init(SpacePropertiesLocal* metric, MapCompartment* compartment)
+void ParticleMapImpl::init(SpacePropertiesImpl* metric, MapCompartment* compartment)
 {
 	_metric = metric;
 	_compartment = compartment;

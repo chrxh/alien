@@ -1,15 +1,16 @@
 #include <QtCore/qmath.h>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Particle.h"
-#include "Model/Local/Token.h"
-#include "Model/Local/EntityFactory.h"
-#include "Model/Api/Physics.h"
-#include "Model/Local/PhysicalQuantityConverter.h"
-#include "Model/Api/Settings.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Api/SimulationParameters.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/Physics.h"
+
+#include "Cluster.h"
+#include "Particle.h"
+#include "Token.h"
+#include "EntityFactory.h"
+#include "PhysicalQuantityConverter.h"
+#include "UnitContext.h"
 
 #include "Cell.h"
 #include "PropulsionFunction.h"

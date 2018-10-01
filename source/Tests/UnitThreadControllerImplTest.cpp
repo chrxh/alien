@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Local/Unit.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/MapCompartment.h"
-#include "Model/Impl/UnitThreadControllerImpl.h"
-#include "Model/Impl/UnitThread.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelCpu/Unit.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelCpu/MapCompartment.h"
+#include "ModelCpu/UnitThreadControllerImpl.h"
+#include "ModelCpu/UnitThread.h"
 
 #include "tests/Predicates.h"
 
@@ -22,7 +22,7 @@ public:
 
 protected:
 	SimulationController* _controller = nullptr;
-	SimulationContextLocal* _context = nullptr;
+	SimulationContextImpl* _context = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	const IntVector2D _gridSize{ 9, 6 };
 	const IntVector2D _universeSize{ 900, 600 };
@@ -39,7 +39,7 @@ UnitThreadControllerImplTest::UnitThreadControllerImplTest()
 	auto parameters = facade->buildDefaultSimulationParameters();
 
 	_controller = facade->buildSimulationController(4, _gridSize, _universeSize, symbols, parameters);
-	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
+	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
 
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 }

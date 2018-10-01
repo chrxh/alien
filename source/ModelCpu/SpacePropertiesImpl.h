@@ -1,16 +1,13 @@
 #pragma once
 
-#include "Model/Local/SpacePropertiesLocal.h"
+#include "ModelInterface/SpaceProperties.h"
 
 class SpacePropertiesImpl
-	: public SpacePropertiesLocal
+	: public SpaceProperties
 {
 public:
 	SpacePropertiesImpl(QObject* parent = nullptr);
 	virtual ~SpacePropertiesImpl() {}
-
-	virtual void init(IntVector2D size);
-	virtual SpacePropertiesLocal* clone(QObject* parent = nullptr) const override;
 
 	virtual IntVector2D getSize() const override;
 
@@ -19,13 +16,15 @@ public:
 	virtual IntVector2D convertToIntVector(QVector2D const &pos) const override;
 	virtual IntVector2D correctPositionAndConvertToIntVector(QVector2D const& pos) const override;
 	virtual void correctDisplacement(QVector2D& displacement) const override;
-	virtual QVector2D correctionIncrement(QVector2D pos1, QVector2D pos2) const override;
+	virtual QVector2D correctionIncrement(QVector2D pos1, QVector2D pos2) const;
 
-	virtual void truncatePosition(IntVector2D& pos) const override;
+	virtual void init(IntVector2D size);
+	virtual SpacePropertiesImpl* clone(QObject* parent = nullptr) const;
 
-	virtual QVector2D displacement(QVector2D fromPoint, QVector2D toPoint) const override;
-	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const override;
-	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const override;
+	virtual void truncatePosition(IntVector2D& pos) const;
+	virtual QVector2D displacement(QVector2D fromPoint, QVector2D toPoint) const;
+	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const;
+	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const;
 
 private:
 	inline void correctPositionInline(IntVector2D & pos) const;

@@ -4,8 +4,8 @@
 #include <QChar>
 #include <QVector>
 
-#include "Model/Api/CellComputerCompiler.h"
-#include "Model/Local/CellComputerFunction.h"
+#include "ModelInterface/CellComputerCompiler.h"
+#include "CellComputerFunction.h"
 
 class CellComputerFunctionImpl
 	: public CellComputerFunction

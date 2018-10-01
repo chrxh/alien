@@ -1,10 +1,10 @@
-﻿#include "Model/Api/ModelBuilderFacade.h"
+﻿#include "ModelInterface/ModelBuilderFacade.h"
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SpaceProperties.h"
+#include "ModelInterface/SimulationAccess.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelInterface/SimulationContext.h"
+#include "ModelInterface/SpaceProperties.h"
 
 #include "VersionController.h"
 

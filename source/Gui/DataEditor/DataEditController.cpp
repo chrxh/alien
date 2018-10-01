@@ -1,8 +1,8 @@
 #include <QMatrix4x4>
 
-#include "Model/Api/ChangeDescriptions.h"
-#include "Model/Api/SymbolTable.h"
-#include "Model/Api/SimulationContext.h"
+#include "ModelInterface/ChangeDescriptions.h"
+#include "ModelInterface/SymbolTable.h"
+#include "ModelInterface/SimulationContext.h"
 
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"

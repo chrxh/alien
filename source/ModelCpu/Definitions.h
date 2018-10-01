@@ -1,10 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
-#include "Model/Api/Definitions.h"
-#include "Model/Local/CellMetadata.h"
-#include "Model/Local/ClusterMetadata.h"
-#include "Model/Local/ParticleMetadata.h"
+#include "ModelInterface/Definitions.h"
 
 #include "DllExport.h"
 
@@ -18,12 +15,12 @@ class Unit;
 class CellMap;
 class ParticleMap;
 class SpaceProperties;
-class SpacePropertiesLocal;
+class SpacePropertiesImpl;
 class MapCompartment;
 class UnitGrid;
 class UnitThreadController;
 class UnitContext;
-class SimulationContextLocal;
+class SimulationContextImpl;
 class SimulationContext;
 class SimulationParameters;
 class SimulationController;
@@ -48,7 +45,7 @@ class CellComputerCompiler;
 class Serializer;
 class SimulationMonitor;
 
-class CellComputerCompilerLocal;
+class CellComputerCompilerImpl;
 class Cell;
 class Cluster;
 class UnitThread;

@@ -1,11 +1,11 @@
 #include "Base/NumberGenerator.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SymbolTable.h"
-#include "Model/Local/CellMap.h"
-#include "Model/Local/ParticleMap.h"
-#include "Model/Local/MapCompartment.h"
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Particle.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/SymbolTable.h"
+#include "CellMap.h"
+#include "ParticleMap.h"
+#include "MapCompartment.h"
+#include "Cluster.h"
+#include "Particle.h"
 
 #include "UnitContextImpl.h"
 
@@ -20,11 +20,11 @@ UnitContextImpl::~UnitContextImpl ()
 	delete _simulationParameters;
 }
 
-void UnitContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, CellMap* cellMap, ParticleMap* energyMap
+void UnitContextImpl::init(NumberGenerator* numberGen, SpacePropertiesImpl* spaceProperties, CellMap* cellMap, ParticleMap* energyMap
 	, MapCompartment* mapCompartment, SimulationParameters* parameters)
 {
 	SET_CHILD(_numberGen, numberGen);
-	SET_CHILD(_metric, metric);
+	SET_CHILD(_spaceProperties, spaceProperties);
 	SET_CHILD(_cellMap, cellMap);
 	SET_CHILD(_energyParticleMap, energyMap);
 	SET_CHILD(_mapCompartment, mapCompartment);
@@ -41,9 +41,9 @@ NumberGenerator * UnitContextImpl::getNumberGenerator() const
 	return _numberGen;
 }
 
-SpacePropertiesLocal* UnitContextImpl::getSpaceProperties () const
+SpacePropertiesImpl* UnitContextImpl::getSpaceProperties () const
 {
-    return _metric;
+    return _spaceProperties;
 }
 
 ParticleMap* UnitContextImpl::getParticleMap () const

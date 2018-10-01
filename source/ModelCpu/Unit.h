@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QThread>
-#include "Model/Api/Definitions.h"
+#include "Definitions.h"
 
 class Unit
 	: public QObject

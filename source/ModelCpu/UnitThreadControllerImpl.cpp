@@ -1,7 +1,7 @@
-#include "Model/Local/Unit.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/MapCompartment.h"
-#include "Model/Local/UnitObserver.h"
+#include "Unit.h"
+#include "UnitContext.h"
+#include "MapCompartment.h"
+#include "UnitObserver.h"
 
 #include "UnitThreadControllerImpl.h"
 #include "UnitThread.h"

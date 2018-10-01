@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Model/Api/ModelBuilderFacade.h"
+#include "Definitions.h"
+#include "ModelInterface/ModelBuilderFacade.h"
 
 class ModelBuilderFacadeImpl
 	: public ModelBuilderFacade
@@ -20,5 +21,5 @@ public:
 	virtual DescriptionHelper* buildDescriptionHelper() const override;
 
 private:
-	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContextLocal* context) const;
+	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContextImpl* context) const;
 };

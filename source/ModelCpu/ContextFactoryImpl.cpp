@@ -9,7 +9,7 @@
 #include "ParticleMapImpl.h"
 #include "CellComputerCompilerImpl.h"
 
-SimulationContextLocal * ContextFactoryImpl::buildSimulationContext() const
+SimulationContextImpl * ContextFactoryImpl::buildSimulationContext() const
 {
 	return new SimulationContextImpl();
 }
@@ -34,7 +34,7 @@ UnitThreadController * ContextFactoryImpl::buildSimulationThreads() const
 	return new UnitThreadControllerImpl();
 }
 
-SpacePropertiesLocal * ContextFactoryImpl::buildSpaceMetric() const
+SpacePropertiesImpl * ContextFactoryImpl::buildSpaceMetric() const
 {
 	return new SpacePropertiesImpl();
 }
@@ -54,7 +54,7 @@ ParticleMap * ContextFactoryImpl::buildEnergyParticleMap() const
 	return new ParticleMapImpl();
 }
 
-CellComputerCompilerLocal* ContextFactoryImpl::buildCellComputerCompiler() const
+CellComputerCompilerImpl* ContextFactoryImpl::buildCellComputerCompiler() const
 {
 	return new CellComputerCompilerImpl();
 }

@@ -2,8 +2,9 @@
 
 #include <QVector>
 
-#include "Model/Api/Definitions.h"
-#include "Model/Api/Descriptions.h"
+#include "Definitions.h"
+
+#include "ModelInterface/Descriptions.h"
 
 class Token
 {

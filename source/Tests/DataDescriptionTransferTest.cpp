@@ -5,14 +5,14 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/DescriptionHelper.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SpaceProperties.h"
-#include "Model/Api/SimulationAccess.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelInterface/DescriptionHelper.h"
+#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/SpaceProperties.h"
+#include "ModelInterface/SimulationAccess.h"
 
 #include "Tests/Predicates.h"
 
@@ -28,7 +28,7 @@ public:
 
 protected:
 	SimulationController* _controller = nullptr;
-	SimulationContextLocal* _context = nullptr;
+	SimulationContextImpl* _context = nullptr;
 	SpaceProperties* _metric = nullptr;
 	SimulationAccess* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
@@ -39,7 +39,7 @@ DataDescriptionTransferTest::DataDescriptionTransferTest()
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
-	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
+	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
 	_metric = _context->getSpaceProperties();
 	_access = _facade->buildSimulationAccess();
 	_access->init(_context);

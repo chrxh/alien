@@ -2,13 +2,15 @@
 
 #include <QObject>
 
+#include "Definitions.h"
+
 struct CompilationResult {
 	bool compilationOk = true;
 	int lineOfFirstError = 0;
 	QByteArray compilation;
 };
 
-class CellComputerCompiler
+class MODELINTERFACE_EXPORT CellComputerCompiler
 	: public QObject
 {
 	Q_OBJECT

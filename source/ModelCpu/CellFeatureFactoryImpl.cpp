@@ -10,21 +10,6 @@
 #include "EnergyGuidanceImpl.h"
 #include "Cell.h"
 
-/*
-namespace {
-    CellFeatureChain* registerNewFeature (Cell* cell, CellFeatureChain* newFeature)
-    {
-        CellFeatureChain* features = cell->getFeatures();
-        if( features ) {
-            features->registerNextFeature(newFeature);
-        }
-        else
-            cell->registerFeatures(newFeature);
-        return newFeature;
-    }
-}
-*/
-
 namespace
 {
 	Enums::CellFunction::Type modulo(Enums::CellFunction::Type value)

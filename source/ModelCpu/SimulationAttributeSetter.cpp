@@ -1,9 +1,9 @@
-﻿#include "Model/Api/SimulationParameters.h"
-#include "Model/Local/UnitThreadController.h"
-#include "Model/Local/UnitGrid.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/Unit.h"
-#include "Model/Local/SimulationContextLocal.h"
+﻿#include "ModelInterface/SimulationParameters.h"
+#include "UnitThreadController.h"
+#include "UnitGrid.h"
+#include "UnitContext.h"
+#include "Unit.h"
+#include "SimulationContextImpl.h"
 
 #include "SimulationAttributeSetter.h"
 
@@ -22,8 +22,8 @@ SimulationAttributeSetter::~SimulationAttributeSetter()
 
 void SimulationAttributeSetter::init(SimulationContext * context)
 {
-	_threadController = static_cast<SimulationContextLocal*>(context)->getUnitThreadController();
-	_grid = static_cast<SimulationContextLocal*>(context)->getUnitGrid();
+	_threadController = static_cast<SimulationContextImpl*>(context)->getUnitThreadController();
+	_grid = static_cast<SimulationContextImpl*>(context)->getUnitGrid();
 	_threadController->registerObserver(this);
 	_registered = true;
 }

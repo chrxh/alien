@@ -4,12 +4,12 @@
 #include <QMutex>
 #include "gtest/gtest_prod.h"
 
-#include "Model/Local/UnitThreadController.h"
+#include "UnitThreadController.h"
 
 #include "Definitions.h"
 #include "SignalWrapper.h"
 
-class MODEL_EXPORT UnitThreadControllerImpl
+class MODELCPU_EXPORT UnitThreadControllerImpl
 	: public UnitThreadController
 {
 	Q_OBJECT

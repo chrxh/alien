@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QMainWindow>
 
-#include "Model/Api/Definitions.h"
+#include "ModelInterface/Definitions.h"
 
 #include "Definitions.h"
 

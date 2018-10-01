@@ -90,7 +90,7 @@ struct MODELINTERFACE_EXPORT CellDescription
 	}
 };
 
-struct ClusterDescription
+struct MODELINTERFACE_EXPORT ClusterDescription
 {
 	uint64_t id = 0;
 
@@ -126,7 +126,7 @@ struct ClusterDescription
 	}
 };
 
-struct ParticleDescription
+struct MODELINTERFACE_EXPORT ParticleDescription
 {
 	uint64_t id = 0;
 
@@ -136,6 +136,7 @@ struct ParticleDescription
 	optional<ParticleMetadata> metadata;
 
 	ParticleDescription() = default;
+	~ParticleDescription() = default;
 	ParticleDescription(ParticleChangeDescription const& change);
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }

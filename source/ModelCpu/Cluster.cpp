@@ -3,18 +3,18 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Local/Cell.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Local/CellFeatureChain.h"
-#include "Model/Local/EntityFactory.h"
-#include "Model/Local/Token.h"
-#include "Model/Local/Particle.h"
-#include "Model/Api/Physics.h"
-#include "Model/Api/Settings.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/CellMap.h"
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Api/SimulationParameters.h"
+#include "Cell.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "CellFeatureChain.h"
+#include "EntityFactory.h"
+#include "Token.h"
+#include "Particle.h"
+#include "ModelInterface/Physics.h"
+#include "ModelInterface/Settings.h"
+#include "UnitContext.h"
+#include "CellMap.h"
+#include "SpacePropertiesImpl.h"
+#include "ModelInterface/SimulationParameters.h"
 
 #include "Cluster.h"
 
@@ -922,7 +922,7 @@ qreal Cluster::calcAngularMassWithNewParticle (QVector2D particlePos) const
     center = center / (_cells.size()+1);
 
     //calc new angular mass
-	SpacePropertiesLocal* metric = _context->getSpaceProperties();
+	SpacePropertiesImpl* metric = _context->getSpaceProperties();
     QVector2D diff = particleRelPos - center;
 	metric->correctDisplacement(diff);
     qreal aMass = diff.lengthSquared();
@@ -946,7 +946,7 @@ qreal Cluster::calcAngularMassWithoutUpdate () const
 
     //calc new angular mass
     qreal aMass = 0.0;
-	SpacePropertiesLocal* metric = _context->getSpaceProperties();
+	SpacePropertiesImpl* metric = _context->getSpaceProperties();
 	foreach(Cell* cell, _cells) {
         QVector2D displacement = cell->getRelPosition() - center;
 		metric->correctDisplacement(displacement);
