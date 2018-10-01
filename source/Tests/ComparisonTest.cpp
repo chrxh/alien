@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 #include <QFile>
 
-#include "Model/Api/SimulationController.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Api/Settings.h"
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Cell.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelInterface/Settings.h"
+#include "ModelCpu/Cluster.h"
+#include "ModelCpu/Cell.h"
 
 #include "tests/TestSettings.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Api/Definitions.h"
+#include "Definitions.h"
 
 class ParticleMap
 	: public QObject
@@ -10,7 +10,7 @@ public:
 	ParticleMap(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~ParticleMap() = default;
 
-	virtual void init(SpacePropertiesLocal* topo, MapCompartment* compartment) = 0;
+	virtual void init(SpacePropertiesImpl* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
 	
 	virtual void removeParticleIfPresent(QVector2D pos, Particle* particleToRemove) = 0;

@@ -2,7 +2,7 @@
 
 #include "CellComputerFunctionImpl.h"
 
-CellComputerCompilerImpl::CellComputerCompilerImpl(QObject * parent) : CellComputerCompilerLocal(parent)
+CellComputerCompilerImpl::CellComputerCompilerImpl(QObject * parent) : CellComputerCompiler(parent)
 {
 	
 }

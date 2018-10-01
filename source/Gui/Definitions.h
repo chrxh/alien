@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
-#include "Model/Api/Definitions.h"
+#include "ModelInterface/Definitions.h"
 
 class QGraphicsItem;
 class QGraphicsView;

@@ -4,10 +4,10 @@
 #include <QMessageBox>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SymbolTable.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Serializer.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SymbolTable.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/Serializer.h"
 #include "Gui/Settings.h"
 
 #include "SerializationHelper.h"

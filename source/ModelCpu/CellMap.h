@@ -10,7 +10,7 @@ public:
 	CellMap(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CellMap() = default;
 
-	virtual void init(SpacePropertiesLocal* topo, MapCompartment* compartment) = 0;
+	virtual void init(SpacePropertiesImpl* topo, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
 
 	virtual void setCell(QVector2D pos, Cell* cell) = 0;

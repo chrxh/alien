@@ -5,10 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;cxx;c;def</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h</Extensions>
-    </Filter>
     <Filter Include="Form Files">
       <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
       <Extensions>ui</Extensions>
@@ -157,15 +153,6 @@
     <ClCompile Include="Release\moc_CellComputerCompilerImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\CellComputerCompilerLocal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CellComputerCompilerLocal.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellComputerCompilerLocal.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\CellComputerFunctionImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -301,12 +288,6 @@
     <ClCompile Include="Release\moc_SimulationContextImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationContextLocal.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationContextLocal.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\SimulationControllerImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -327,12 +308,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\SpacePropertiesImpl.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SpacePropertiesLocal.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SpacePropertiesLocal.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\TokenImpl.cpp">
       <Filter>Source Files</Filter>
@@ -411,9 +386,6 @@
     <CustomBuild Include="..\..\source\ModelCpu\CellComputerCompilerImpl.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelCpu\CellComputerCompilerLocal.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\CellMap.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
@@ -444,16 +416,10 @@
     <CustomBuild Include="..\..\source\ModelCpu\SimulationContextImpl.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelCpu\SimulationContextLocal.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\SimulationControllerImpl.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\SimulationMonitorImpl.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelCpu\SpacePropertiesLocal.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\Unit.h">

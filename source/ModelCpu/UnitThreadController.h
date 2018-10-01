@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Model/Api/Definitions.h"
+#include "Definitions.h"
 
-class MODEL_EXPORT UnitThreadController
+class MODELCPU_EXPORT UnitThreadController
 	: public QObject
 {
 	Q_OBJECT

@@ -1,12 +1,12 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Local/Cell.h"
-#include "Model/Api/Physics.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/SpacePropertiesLocal.h"
+#include "ModelInterface/SimulationContext.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "Cell.h"
+#include "ModelInterface/Physics.h"
+#include "UnitContext.h"
+#include "SpacePropertiesImpl.h"
 
 #include "CellFunction.h"
 
@@ -24,7 +24,7 @@ void CellFunction::appendDescriptionImpl(CellFeatureDescription & desc) const
 
 qreal CellFunction::calcAngle (Cell* origin, Cell* ref1, Cell* ref2) const
 {
-	SpacePropertiesLocal* topo = _context->getSpaceProperties();
+	SpacePropertiesImpl* topo = _context->getSpaceProperties();
     QVector2D v1 = topo->displacement(origin->calcPosition(), ref1->calcPosition());
     QVector2D v2 = topo->displacement(origin->calcPosition(), ref2->calcPosition());
     return Physics::clockwiseAngleFromFirstToSecondVector(v1, v2);

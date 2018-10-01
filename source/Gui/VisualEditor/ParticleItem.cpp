@@ -1,6 +1,6 @@
 #include <QPainter>
 
-#include "Model/Api/ChangeDescriptions.h"
+#include "ModelInterface/ChangeDescriptions.h"
 #include "gui/Settings.h"
 
 #include "ParticleItem.h"

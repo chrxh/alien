@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Model/Api/Serializer.h"
+#include "ModelInterface/Serializer.h"
 #include "Definitions.h"
 
 class SerializerImpl

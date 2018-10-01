@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Model/Api/CellComputerCompiler.h"
-#include "Model/Api/Definitions.h"
+#include "ModelInterface/CellComputerCompiler.h"
+#include "ModelInterface/Definitions.h"
 
 class CellComputerCompilerLocal
 	: public CellComputerCompiler

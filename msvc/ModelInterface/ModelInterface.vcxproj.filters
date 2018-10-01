@@ -22,7 +22,9 @@
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{e2a3578b-787f-4ebe-a066-e4317a3fea10}</UniqueIdentifier>
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+      <ParseFiles>true</ParseFiles>
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
@@ -56,6 +58,9 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelInterface\SymbolTable.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelInterface\DescriptionHelper.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -162,6 +167,12 @@
     <ClCompile Include="..\..\source\ModelInterface\Validation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelInterface\DescriptionHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelInterface\SpaceProperties.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelInterface\CellFeatureEnums.h">
@@ -171,9 +182,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelInterface\Definitions.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelInterface\DescriptionHelper.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelInterface\Descriptions.h">

@@ -1,8 +1,8 @@
 #pragma once
 #include <QDialog>
 
-#include "Model/Api/Definitions.h"
-#include "Model/Api/SymbolTable.h"
+#include "ModelInterface/Definitions.h"
+#include "ModelInterface/SymbolTable.h"
 
 namespace Ui {
 class SymbolTableDialog;

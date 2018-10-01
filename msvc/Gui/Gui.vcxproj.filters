@@ -38,11 +38,6 @@
     <Filter Include="Source Files\Actions">
       <UniqueIdentifier>{97a890a7-fca7-4ade-a2a1-05c0522170f1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">

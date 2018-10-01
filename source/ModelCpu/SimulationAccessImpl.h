@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Model/Api/ChangeDescriptions.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Local/UnitObserver.h"
+#include "ModelInterface/ChangeDescriptions.h"
+#include "ModelInterface/SimulationAccess.h"
+#include "SimulationContextImpl.h"
+#include "UnitObserver.h"
 
 class SimulationAccessImpl
 	: public SimulationAccess
@@ -42,7 +42,7 @@ private:
 	void collectClustersFromUnit(Unit* unit);
 	void collectParticlesFromUnit(Unit* unit);
 
-	SimulationContextLocal* _context = nullptr;
+	SimulationContextImpl* _context = nullptr;
 	bool _registered = false;
 
 	bool _dataRequired = false;

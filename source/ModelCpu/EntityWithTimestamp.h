@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Model/Api/Definitions.h"
-#include "Model/Local/UnitContext.h"
+#include "ModelInterface/Definitions.h"
+#include "UnitContext.h"
 
 class EntityWithTimestamp
 {

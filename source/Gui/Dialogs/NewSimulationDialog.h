@@ -2,8 +2,8 @@
 
 #include <QDialog>
 
-#include "Model/Api/Definitions.h"
-#include "Model/Api/SimulationParameters.h"
+#include "ModelInterface/Definitions.h"
+#include "ModelInterface/SimulationParameters.h"
 
 namespace Ui {
 	class NewSimulationDialog;

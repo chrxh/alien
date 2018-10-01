@@ -2,8 +2,8 @@
 
 #include "ToolbarController.h"
 
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SimulationParameters.h"
+#include "ModelInterface/SimulationContext.h"
+#include "ModelInterface/SimulationParameters.h"
 
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
