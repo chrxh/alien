@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Local/EntityFactory.h"
+#include "EntityFactory.h"
 
 class EntityFactoryImpl
 	: public EntityFactory

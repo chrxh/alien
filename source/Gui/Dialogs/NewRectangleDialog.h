@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "Model/Api/Definitions.h"
+#include "ModelInterface/Definitions.h"
 
 namespace Ui {
 class NewRectangleDialog;

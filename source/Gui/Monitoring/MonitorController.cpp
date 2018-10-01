@@ -1,7 +1,7 @@
 ﻿#include <QTimer>
 #include <QWidget>
 
-#include "Model/Api/SimulationMonitor.h"
+#include "ModelInterface/SimulationMonitor.h"
 
 #include "MonitorView.h"
 #include "MonitorModel.h"

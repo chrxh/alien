@@ -5,18 +5,18 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Local/EntityFactory.h"
-#include "Model/Local/Cell.h"
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Token.h"
-#include "Model/Api/Physics.h"
-#include "Model/Local/PhysicalQuantityConverter.h"
-#include "Model/Api/Settings.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/CellMap.h"
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Api/SimulationParameters.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "EntityFactory.h"
+#include "Cell.h"
+#include "Cluster.h"
+#include "Token.h"
+#include "ModelInterface/Physics.h"
+#include "PhysicalQuantityConverter.h"
+#include "ModelInterface/Settings.h"
+#include "UnitContext.h"
+#include "CellMap.h"
+#include "SpacePropertiesImpl.h"
+#include "ModelInterface/SimulationParameters.h"
 
 #include "ConstructorFunction.h"
 
@@ -54,7 +54,7 @@ namespace {
 		return cell;
     }
 
-    Cell* obstacleCheck (Cluster* cluster, bool safeMode, CellMap* cellMap, SpacePropertiesLocal* metric, SimulationParameters* parameters)
+    Cell* obstacleCheck (Cluster* cluster, bool safeMode, CellMap* cellMap, SpacePropertiesImpl* metric, SimulationParameters* parameters)
     {
         foreach( Cell* cell, cluster->getCellsRef() ) {
             QVector2D pos = cluster->calcPosition(cell, true);

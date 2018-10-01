@@ -2,11 +2,11 @@
 
 #include "Base/NumberGenerator.h"
 
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/DescriptionHelper.h"
-#include "Model/Api/SpaceProperties.h"
+#include "ModelInterface/SimulationAccess.h"
+#include "ModelInterface/SimulationContext.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/DescriptionHelper.h"
+#include "ModelInterface/SpaceProperties.h"
 
 #include "DataRepository.h"
 #include "Notifier.h"

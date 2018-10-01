@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Model/Local/CellMap.h"
-#include "Model/Local/MapCompartment.h"
-#include "Model/Local/UnitContext.h"
+#include "CellMap.h"
+#include "MapCompartment.h"
+#include "UnitContext.h"
 
 class CellMapImpl
 	: public CellMap
@@ -12,7 +12,7 @@ public:
 	CellMapImpl(QObject* parent = nullptr);
 	virtual ~CellMapImpl();
 
-	virtual void init(SpacePropertiesLocal* metric, MapCompartment* compartment) override;
+	virtual void init(SpacePropertiesImpl* metric, MapCompartment* compartment) override;
 	virtual void clear() override;
 
 	virtual void setCell(QVector2D pos, Cell* cell) override;
@@ -29,7 +29,7 @@ private:
 	void deleteCellMap();
 	inline Cell*& locateCell(IntVector2D & intPos) const;
 
-	SpacePropertiesLocal* _metric = nullptr;
+	SpacePropertiesImpl* _metric = nullptr;
 	MapCompartment* _compartment = nullptr;
 	IntVector2D _size = { 0, 0 };
 };

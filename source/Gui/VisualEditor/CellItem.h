@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Api/ChangeDescriptions.h"
+#include "ModelInterface/ChangeDescriptions.h"
 
 #include "AbstractItem.h"
 

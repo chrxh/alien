@@ -4,8 +4,8 @@
 #include <QMatrix4x4>
 #include <QVector2D>
 
-#include "Model/Api/Definitions.h"
-#include "Model/Api/ChangeDescriptions.h"
+#include "ModelInterface/Definitions.h"
+#include "ModelInterface/ChangeDescriptions.h"
 #include "EntityWithTimestamp.h"
 
 

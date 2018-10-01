@@ -1,6 +1,6 @@
 #include <QScrollBar>
 
-#include "Model/Api/SymbolTable.h"
+#include "ModelInterface/SymbolTable.h"
 #include "Gui/Settings.h"
 
 #include "DataEditModel.h"

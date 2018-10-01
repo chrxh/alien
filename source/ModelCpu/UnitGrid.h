@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Api/Definitions.h"
+#include "Definitions.h"
 
 class UnitGrid
 	: public QObject
@@ -10,7 +10,7 @@ public:
 	UnitGrid(QObject* parent) : QObject(parent) {}
 	virtual ~UnitGrid() = default;
 
-	virtual void init(IntVector2D gridSize, SpacePropertiesLocal* metric) = 0;
+	virtual void init(IntVector2D gridSize, SpacePropertiesImpl* metric) = 0;
 
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) = 0;
 	virtual IntVector2D getSize() const = 0;

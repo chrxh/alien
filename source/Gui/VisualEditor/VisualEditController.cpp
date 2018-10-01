@@ -3,9 +3,7 @@
 #include <QGraphicsItem>
 
 #include "Gui/Settings.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/SpacePropertiesLocal.h"
+#include "ModelInterface/SimulationAccess.h"
 #include "PixelUniverseView.h"
 #include "ItemUniverseView.h"
 #include "ViewportController.h"

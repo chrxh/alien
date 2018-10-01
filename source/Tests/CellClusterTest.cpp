@@ -2,15 +2,15 @@
 #include "tests/Predicates.h"
 
 #include "Base/ServiceLocator.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Local/Cell.h"
-#include "Model/Local/Token.h"
-#include "Model/Local/Cluster.h"
-#include "Model/Local/EntityFactory.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelCpu/SpacePropertiesImpl.h"
+#include "ModelCpu/Cell.h"
+#include "ModelCpu/Token.h"
+#include "ModelCpu/Cluster.h"
+#include "ModelCpu/EntityFactory.h"
 
 class CellClusterTest : public ::testing::Test
 {

@@ -5,18 +5,18 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Local/UnitGrid.h"
-#include "Model/Local/Unit.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/MapCompartment.h"
-#include "Model/Impl/UnitThreadControllerImpl.h"
-#include "Model/Impl/UnitThread.h"
-#include "Model/Api/SimulationAccess.h"
+#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationController.h"
+#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelCpu/UnitGrid.h"
+#include "ModelCpu/Unit.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelCpu/MapCompartment.h"
+#include "ModelCpu/UnitThreadControllerImpl.h"
+#include "ModelCpu/UnitThread.h"
+#include "ModelInterface/SimulationAccess.h"
 
 #include "tests/Predicates.h"
 #include "IntegrationTestHelper.h"
@@ -31,7 +31,7 @@ protected:
 	void runSimulation(int timesteps);
 
 	SimulationController* _controller = nullptr;
-	SimulationContextLocal* _context = nullptr;
+	SimulationContextImpl* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
@@ -47,7 +47,7 @@ MultithreadingTest::MultithreadingTest()
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
 	_controller = facade->buildSimulationController(_threads, _gridSize, _universeSize, symbols, _parameters);
-	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
+	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 	_numberGen = factory->buildRandomNumberGenerator();
 	_numberGen->init(123123, 0);

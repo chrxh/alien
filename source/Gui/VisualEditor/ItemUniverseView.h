@@ -6,8 +6,8 @@
 #include <QMap>
 #include <QVector2D>
 
-#include "Model/Api/Definitions.h"
-#include "Model/Api/Descriptions.h"
+#include "ModelInterface/Definitions.h"
+#include "ModelInterface/Descriptions.h"
 #include "Gui/Definitions.h"
 #include "Gui/DataRepository.h"
 

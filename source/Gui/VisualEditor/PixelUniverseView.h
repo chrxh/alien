@@ -5,8 +5,8 @@
 #include <QTimer>
 
 #include "Gui/Definitions.h"
-#include "Model/Api/Definitions.h"
-#include "Model/Api/Descriptions.h"
+#include "ModelInterface/Definitions.h"
+#include "ModelInterface/Descriptions.h"
 
 class PixelUniverseView : public QGraphicsScene
 {

@@ -1,35 +1,37 @@
 #pragma once
 
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Local/UnitObserver.h"
+#include "ModelInterface/SimulationContext.h"
+#include "UnitObserver.h"
 
 #include "Definitions.h"
 
 class SimulationContextImpl
-	: public SimulationContextLocal
+	: public SimulationContext
 {
 	Q_OBJECT
 public:
 	SimulationContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextImpl();
 
-	virtual void init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, UnitGrid* grid, UnitThreadController* threads
-		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler) override;
 
 	virtual IntVector2D getGridSize() const override;
 	virtual uint getMaxThreads() const override;
 	virtual SpaceProperties* getSpaceProperties() const;
-	virtual UnitGrid* getUnitGrid() const override;
-	virtual UnitThreadController* getUnitThreadController() const override;
+	virtual UnitGrid* getUnitGrid() const;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters * getSimulationParameters() const override;
-	virtual NumberGenerator* getNumberGenerator() const override;
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
+
+	virtual void init(NumberGenerator* numberGen, SpacePropertiesImpl* metric, UnitGrid* grid, UnitThreadController* threads
+		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler);
+
+	virtual UnitThreadController* getUnitThreadController() const;
+	virtual NumberGenerator* getNumberGenerator() const;
 	
 	NumberGenerator* _numberGen = nullptr;
-	SpacePropertiesLocal* _metric = nullptr;
+	SpacePropertiesImpl* _metric = nullptr;
 	UnitGrid* _grid = nullptr;
 	UnitThreadController* _threads = nullptr;
 	SimulationAttributeSetter* _attributeSetter = nullptr;

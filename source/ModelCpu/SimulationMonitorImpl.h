@@ -1,8 +1,10 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "Model/Api/SimulationMonitor.h"
-#include "Model/Local/UnitObserver.h"
+#include "ModelInterface/SimulationMonitor.h"
+
+#include "Definitions.h"
+#include "UnitObserver.h"
 
 class SimulationMonitorImpl
 	: public SimulationMonitor
@@ -27,7 +29,7 @@ private:
 	void calcMonitorData();
 	void calcMonitorDataForUnit(Unit* unit);
 
-	SimulationContextLocal* _context = nullptr;
+	SimulationContextImpl* _context = nullptr;
 	bool _registered = false;
 
 	bool _dataRequired = false;

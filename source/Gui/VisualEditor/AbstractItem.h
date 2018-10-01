@@ -2,7 +2,7 @@
 
 #include <QGraphicsItem>
 
-#include "Model/Api/Definitions.h"
+#include "ModelInterface/Definitions.h"
 #include "Gui/Definitions.h"
 
 class AbstractItem

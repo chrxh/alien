@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Local/AccessPortFactory.h"
+#include "AccessPortFactory.h"
 
 class AccessPortFactoryImpl
 	: public AccessPortFactory

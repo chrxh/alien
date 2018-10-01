@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Local/UnitGrid.h"
+#include "UnitGrid.h"
 
 class UnitGridImpl
 	: public UnitGrid
@@ -10,7 +10,7 @@ public:
 	UnitGridImpl(QObject* parent = nullptr);
 	virtual ~UnitGridImpl();
 
-	virtual void init(IntVector2D gridSize, SpacePropertiesLocal* metric) override;
+	virtual void init(IntVector2D gridSize, SpacePropertiesImpl* metric) override;
 
 	virtual void registerUnit(IntVector2D gridPos, Unit* unit) override;
 	virtual IntVector2D getSize() const override;
@@ -22,7 +22,7 @@ public:
 private:
 	IntVector2D calcCompartmentSize() const;
 
-	SpacePropertiesLocal* _metric = nullptr;
+	SpacePropertiesImpl* _metric = nullptr;
 	IntVector2D _gridSize = { 0, 0 };
 	vector<vector<Unit*>> _units;
 };

@@ -1,17 +1,17 @@
 #include "Base/NumberGenerator.h"
 
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/CellComputerCompiler.h"
-#include "Model/Api/SymbolTable.h"
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Local/UnitGrid.h"
-#include "Model/Local/UnitThreadController.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "ModelInterface/CellComputerCompiler.h"
+#include "ModelInterface/SymbolTable.h"
+#include "SpacePropertiesImpl.h"
+#include "UnitGrid.h"
+#include "UnitThreadController.h"
 
 #include "SimulationAttributeSetter.h"
 #include "SimulationContextImpl.h"
 
 SimulationContextImpl::SimulationContextImpl(QObject * parent)
-	: SimulationContextLocal(parent)
+	: SimulationContext(parent)
 {
 }
 
@@ -20,7 +20,7 @@ SimulationContextImpl::~SimulationContextImpl()
 	delete _threads;
 }
 
-void SimulationContextImpl::init(NumberGenerator* numberGen, SpacePropertiesLocal* metric, UnitGrid* grid, UnitThreadController* threads
+void SimulationContextImpl::init(NumberGenerator* numberGen, SpacePropertiesImpl* metric, UnitGrid* grid, UnitThreadController* threads
 	, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler)
 {
 	SET_CHILD(_numberGen, numberGen);

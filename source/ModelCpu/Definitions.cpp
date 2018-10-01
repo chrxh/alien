@@ -1,5 +1,5 @@
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Cell.h"
+#include "Cluster.h"
+#include "Cell.h"
 
 #include "Definitions.h"
 

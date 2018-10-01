@@ -1,7 +1,7 @@
 #include "Base/NumberGenerator.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Local/UnitContext.h"
+#include "ModelInterface/Settings.h"
+#include "ModelInterface/SimulationParameters.h"
+#include "UnitContext.h"
 
 #include "TokenImpl.h"
 
