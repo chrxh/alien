@@ -8,7 +8,7 @@
 #include "ModelInterface/ModelBuilderFacade.h"
 #include "ModelInterface/SimulationContext.h"
 #include "ModelInterface/SpaceProperties.h"
-#include "Gui/VisualEditor/ViewportInterface.h"
+#include "Gui/ViewportInterface.h"
 #include "Gui/Settings.h"
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"

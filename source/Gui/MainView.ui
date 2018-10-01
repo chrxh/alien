@@ -806,7 +806,7 @@
   <customwidget>
    <class>VisualEditController</class>
    <extends>QWidget</extends>
-   <header>Gui/VisualEditor/VisualEditController.h</header>
+   <header>Gui/VisualEditController.h</header>
   </customwidget>
  </customwidgets>
  <resources>

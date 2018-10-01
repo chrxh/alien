@@ -3,8 +3,8 @@
 #include <mutex>
 #include <QObject>
 
-#include "Model/Api/ChangeDescriptions.h"
-#include "Cuda/CudaInterface.cuh"
+#include "ModelInterface/ChangeDescriptions.h"
+#include "CudaInterface.cuh"
 #include "DefinitionsImpl.h"
 
 class WorkerForGpu

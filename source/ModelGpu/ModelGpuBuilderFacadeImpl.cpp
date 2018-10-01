@@ -1,8 +1,8 @@
 #include "Base/ServiceLocator.h"
 
-#include "Model/Local/SpacePropertiesLocal.h"
+#include "Model/Local/SpacePropertiesImpl.h"
 #include "Model/Local/ContextFactory.h"
-#include "Model/Api/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBuilderFacade.h"
 
 #include "SimulationControllerGpuImpl.h"
 #include "SimulationContextGpuImpl.h"
@@ -14,7 +14,7 @@ SimulationController * ModelGpuBuilderFacadeImpl::buildSimulationController(IntV
 	auto context = new SimulationContextGpuImpl();
 	auto contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 
-	SpacePropertiesLocal* metric = static_cast<SpacePropertiesLocal*>(contextFactory->buildSpaceMetric());
+	SpacePropertiesImpl* metric = static_cast<SpacePropertiesImpl*>(contextFactory->buildSpaceMetric());
 	metric->init(universeSize);
 	context->init(metric, symbolTable, parameters);
 

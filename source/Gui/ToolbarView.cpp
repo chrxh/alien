@@ -3,7 +3,7 @@
 
 #include "Gui/Settings.h"
 
-#include "Gui/Actions/ActionHolder.h"
+#include "Gui/ActionHolder.h"
 #include "ToolbarView.h"
 #include "ToolbarController.h"
 
