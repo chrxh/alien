@@ -17,7 +17,7 @@
 #include "ModelInterface/ChangeDescriptions.h"
 #include "ModelInterface/SimulationParameters.h"
 #include "ModelInterface/SymbolTable.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 
 #include "SerializerImpl.h"
 
@@ -205,7 +205,7 @@ SerializerImpl::SerializerImpl(QObject *parent /*= nullptr*/)
 
 void SerializerImpl::init()
 {
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
 	SET_CHILD(_access, access);
 	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SerializerImpl::dataReadyToRetrieve, Qt::QueuedConnection);
@@ -250,7 +250,7 @@ SimulationController* SerializerImpl::deserializeSimulation(string const & conte
 	int timestep;
 	ia >> data >> universeSize >> gridSize >> *parameters >> *symbolTable >> maxThreads >> timestep;
 
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto simController = facade->buildSimulationController(maxThreads, gridSize, universeSize, symbolTable, parameters, timestep);
 	simController->setParent(this);
 

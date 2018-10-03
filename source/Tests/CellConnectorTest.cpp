@@ -3,7 +3,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/Settings.h"
 #include "ModelInterface/SimulationController.h"
 #include "ModelInterface/DescriptionHelper.h"
@@ -34,7 +34,7 @@ protected:
 
 CellConnectorTest::CellConnectorTest()
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();

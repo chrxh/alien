@@ -3,7 +3,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/Settings.h"
 #include "ModelInterface/SimulationController.h"
 #include "ModelInterface/SimulationParameters.h"
@@ -21,7 +21,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	: _universeSize(universeSize)
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	_facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	_symbols = _facade->buildDefaultSymbolTable();
 	_parameters = _facade->buildDefaultSimulationParameters();
 	_numberGen = factory->buildRandomNumberGenerator();
