@@ -180,12 +180,6 @@
     <ClCompile Include="..\..\source\ModelCpu\Definitions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_DescriptionHelperImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DescriptionHelperImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\EntityWithTimestamp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -339,9 +333,6 @@
     <ClCompile Include="..\..\source\ModelCpu\ContextFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\DescriptionHelperImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\EnergyGuidanceImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -423,9 +414,6 @@
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\CellMapImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelCpu\DescriptionHelperImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\ParticleMapImpl.h">

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/Settings.h"
 #include "ModelInterface/SimulationController.h"
 #include "ModelCpu/SimulationContextImpl.h"
@@ -34,7 +34,7 @@ protected:
 
 UnitThreadControllerImplTest::UnitThreadControllerImplTest()
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	auto parameters = facade->buildDefaultSimulationParameters();
 

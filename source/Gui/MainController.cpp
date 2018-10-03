@@ -8,7 +8,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/SimulationController.h"
 #include "ModelInterface/SimulationContext.h"
 #include "ModelInterface/SpaceProperties.h"
@@ -45,7 +45,7 @@ void MainController::init()
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGenerator = factory->buildRandomNumberGenerator();
 
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto serializer = facade->buildSerializer();
 	auto simAccessForDataController = facade->buildSimulationAccess();
 	auto descHelper = facade->buildDescriptionHelper();
@@ -156,7 +156,7 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 void MainController::onNewSimulation(NewSimulationConfig config)
 {
 	delete _simController;
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
 
 	initSimulation(config.symbolTable, config.parameters);

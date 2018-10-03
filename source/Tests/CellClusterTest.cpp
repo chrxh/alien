@@ -5,7 +5,7 @@
 #include "ModelCpu/UnitContext.h"
 #include "ModelInterface/SimulationParameters.h"
 #include "ModelInterface/Settings.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelCpu/SpacePropertiesImpl.h"
 #include "ModelCpu/Cell.h"
 #include "ModelCpu/Token.h"
@@ -30,7 +30,7 @@ protected:
 
 CellClusterTest::CellClusterTest()
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 
 /*
 	_context = facade->buildSimulationContext();

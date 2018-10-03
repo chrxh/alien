@@ -17,7 +17,7 @@ struct ParticleDescription;
 struct CellFeatureDescription;
 class SimulationAccess;
 class SimulationContext;
-class ModelBuilderFacade;
+class ModelBasicBuilderFacade;
 class SerializationFacade;
 class DescriptionHelper;
 class CellComputerCompiler;

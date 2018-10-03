@@ -16,6 +16,7 @@ public:
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;
 	virtual CellComputerCompiler* getCellComputerCompiler() const = 0;
+	virtual NumberGenerator* getNumberGenerator() const = 0;
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) = 0;
 };

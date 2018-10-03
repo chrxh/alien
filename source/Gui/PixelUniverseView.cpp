@@ -4,7 +4,7 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/SimulationController.h"
 #include "ModelInterface/SimulationContext.h"
 #include "ModelInterface/SpaceProperties.h"
@@ -33,7 +33,7 @@ PixelUniverseView::~PixelUniverseView()
 void PixelUniverseView::init(Notifier* notifier, SimulationController* controller, DataRepository* repository
 	, ViewportInterface* viewport)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
 	_repository = repository;

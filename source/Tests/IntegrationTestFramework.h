@@ -17,7 +17,7 @@ protected:
 	ClusterDescription createClusterDescriptionWithCompleteCell(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	ParticleDescription createParticleDescription() const;
 
-	ModelBuilderFacade* _facade = nullptr;
+	ModelBasicBuilderFacade* _facade = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 	SymbolTable* _symbols = nullptr;

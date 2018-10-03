@@ -2,7 +2,7 @@
 
 #include "Model/Local/SpacePropertiesImpl.h"
 #include "Model/Local/ContextFactory.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 
 #include "SimulationControllerGpuImpl.h"
 #include "SimulationContextGpuImpl.h"

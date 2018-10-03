@@ -1,4 +1,4 @@
-﻿#include "ModelInterface/ModelBuilderFacade.h"
+﻿#include "ModelInterface/ModelBasicBuilderFacade.h"
 
 #include "Base/ServiceLocator.h"
 #include "ModelInterface/SimulationAccess.h"
@@ -16,7 +16,7 @@ VersionController::VersionController(QObject * parent) : QObject(parent)
 
 void VersionController::init(SimulationContext* context)
 {
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
 	SET_CHILD(_access, access);
 	_access->init(context);

@@ -2,7 +2,7 @@
 
 #include "Base/ServiceLocator.h"
 
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/Settings.h"
 #include "ModelInterface/SimulationParameters.h"
 #include "ModelInterface/SimulationController.h"
@@ -33,7 +33,7 @@ protected:
 CommunicatorFunctionTest::CommunicatorFunctionTest()
 	: IntegrationTestFramework({ 1000, 1000 })
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	_controller = facade->buildSimulationController(1, { 1, 1 }, _universeSize, _symbols, _parameters);
 	auto context = _controller->getContext();
 

@@ -6,7 +6,7 @@
 #include "Base/ServiceLocator.h"
 #include "ModelInterface/Settings.h"
 #include "ModelInterface/SymbolTable.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/Serializer.h"
 #include "Gui/Settings.h"
 
@@ -125,7 +125,7 @@ void SymbolTableDialog::delButtonClicked ()
 
 void SymbolTableDialog::defaultButtonClicked ()
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 
 	_symbolTable = facade->buildDefaultSymbolTable();
     updateWidgetsFromSymbolTable();
