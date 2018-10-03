@@ -16,7 +16,7 @@ ModelCpuServices::ModelCpuServices()
 	static EntityFactoryImpl entityFactory;
 	static CellFeatureFactoryImpl featureFactory;
 
-	ServiceLocator::getInstance().registerService<ModelBuilderFacade>(&modelBuilder);
+	ServiceLocator::getInstance().registerService<ModelBasicBuilderFacade>(&modelBuilder);
 	ServiceLocator::getInstance().registerService<AccessPortFactory>(&accessPortFactory);
 	ServiceLocator::getInstance().registerService<ContextFactory>(&contextFactory);
 	ServiceLocator::getInstance().registerService<EntityFactory>(&entityFactory);

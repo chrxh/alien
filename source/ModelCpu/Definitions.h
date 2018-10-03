@@ -38,7 +38,7 @@ struct CellDescription;
 struct ParticleDescription;
 struct CellFeatureDescription;
 class SimulationAccess;
-class ModelBuilderFacade;
+class ModelBasicBuilderFacade;
 class SerializationFacade;
 class DescriptionHelper;
 class CellComputerCompiler;

@@ -5,7 +5,7 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "EntityFactory.h"
 #include "Cell.h"
 #include "Cluster.h"

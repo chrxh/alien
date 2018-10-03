@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Definitions.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 
 class ModelBuilderFacadeImpl
-	: public ModelBuilderFacade
+	: public ModelBasicBuilderFacade
 {
 public:
 	virtual ~ModelBuilderFacadeImpl() = default;
