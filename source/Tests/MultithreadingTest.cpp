@@ -5,7 +5,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/Settings.h"
 #include "ModelInterface/SimulationController.h"
 #include "ModelCpu/SimulationContextImpl.h"
@@ -42,7 +42,7 @@ protected:
 
 MultithreadingTest::MultithreadingTest()
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
@@ -88,7 +88,7 @@ TEST_F(MultithreadingTest, testThreads)
 
 TEST_F(MultithreadingTest, testOneCellMovement)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
 	access->init(_context);
 
@@ -115,7 +115,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 
 TEST_F(MultithreadingTest, testManyCellsMovement)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
 	access->init(_context);
 	DataChangeDescription desc;

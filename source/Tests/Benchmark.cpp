@@ -5,7 +5,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/Settings.h"
 #include "ModelInterface/SimulationController.h"
 #include "ModelCpu/SimulationContextImpl.h"
@@ -50,7 +50,7 @@ void Benchmark::createTestData(SimulationAccess * access)
 
 TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto controller = facade->buildSimulationController(1, { 1, 1 }, _universeSize, _symbols, _parameters);
 	auto access = facade->buildSimulationAccess();
 	access->init(controller->getContext());
@@ -66,7 +66,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 
 TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto controller = facade->buildSimulationController(1, { 12, 6 }, _universeSize, _symbols, _parameters);
 	auto access = facade->buildSimulationAccess();
 	access->init(controller->getContext());
@@ -82,7 +82,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 
 TEST_F(Benchmark, benchmarkFourThread)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto controller = facade->buildSimulationController(4, { 12, 6 }, _universeSize, _symbols, _parameters);
 	auto access = facade->buildSimulationAccess();
 	access->init(controller->getContext());
@@ -98,7 +98,7 @@ TEST_F(Benchmark, benchmarkFourThread)
 
 TEST_F(Benchmark, benchmarkEightThread)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto controller = facade->buildSimulationController(8, { 12, 6 }, _universeSize, _symbols, _parameters);
 	auto access = facade->buildSimulationAccess();
 	access->init(controller->getContext());

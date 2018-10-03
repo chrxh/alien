@@ -1,21 +1,20 @@
 #include <algorithm>
 
-#include "DescriptionHelperImpl.h"
-
 #include "Base/NumberGenerator.h"
 
-#include "ModelInterface/SpaceProperties.h"
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/Physics.h"
-#include "SimulationContextImpl.h"
+#include "DescriptionHelperImpl.h"
+
+#include "SpaceProperties.h"
+#include "SimulationParameters.h"
+#include "SimulationContext.h"
+#include "Physics.h"
 
 
 void DescriptionHelperImpl::init(SimulationContext* context)
 {
-	auto contextLocal = static_cast<SimulationContextImpl*>(context);
-	_metric = contextLocal->getSpaceProperties();
-	_parameters = contextLocal->getSimulationParameters();
-	_numberGen = contextLocal->getNumberGenerator();
+	_metric = context->getSpaceProperties();
+	_parameters = context->getSimulationParameters();
+	_numberGen = context->getNumberGenerator();
 }
 
 void DescriptionHelperImpl::reconnect(DataDescription &data, DataDescription& orgData, unordered_set<uint64_t> const& idsOfChangedCells)

@@ -5,7 +5,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/Definitions.h"
 #include "ModelInterface/SimulationController.h"
-#include "ModelInterface/ModelBuilderFacade.h"
+#include "ModelInterface/ModelBasicBuilderFacade.h"
 #include "ModelInterface/SimulationContext.h"
 #include "ModelInterface/SpaceProperties.h"
 #include "Gui/ViewportInterface.h"

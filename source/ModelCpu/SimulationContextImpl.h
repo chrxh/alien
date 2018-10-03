@@ -23,13 +23,14 @@ public:
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
+	virtual NumberGenerator* getNumberGenerator() const override;
 
 	virtual void init(NumberGenerator* numberGen, SpacePropertiesImpl* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler);
 
 	virtual UnitThreadController* getUnitThreadController() const;
-	virtual NumberGenerator* getNumberGenerator() const;
 	
+private:
 	NumberGenerator* _numberGen = nullptr;
 	SpacePropertiesImpl* _metric = nullptr;
 	UnitGrid* _grid = nullptr;
