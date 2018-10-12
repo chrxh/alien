@@ -1,7 +1,7 @@
 #include <QPainter>
 
-#include "ModelInterface/ChangeDescriptions.h"
-#include "gui/Settings.h"
+#include "ModelBasic/ChangeDescriptions.h"
+#include "Gui/Settings.h"
 
 #include "ParticleItem.h"
 #include "CoordinateSystem.h"

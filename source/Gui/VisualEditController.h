@@ -4,8 +4,8 @@
 #include <QVector2D>
 #include <QMatrix>
 
-#include "ModelInterface/Definitions.h"
-#include "gui/Definitions.h"
+#include "ModelBasic/Definitions.h"
+#include "Gui/Definitions.h"
 
 namespace Ui {
 	class VisualEditController;
@@ -18,7 +18,8 @@ public:
     VisualEditController(QWidget *parent = 0);
     virtual ~VisualEditController();
 
-	virtual void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator);
+	virtual void init(Notifier* notifier, SimulationController* controller
+		, SimulationAccess* access, DataRepository* manipulator);
 
 	virtual void refresh();
 

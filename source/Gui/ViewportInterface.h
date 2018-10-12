@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/Definitions.h"
+#include "Gui/Definitions.h"
 
 class ViewportInterface
 	: public QObject

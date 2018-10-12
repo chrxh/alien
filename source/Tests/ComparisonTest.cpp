@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <QFile>
 
-#include "ModelInterface/SimulationController.h"
+#include "ModelBasic/SimulationController.h"
 #include "ModelCpu/UnitContext.h"
-#include "ModelInterface/Settings.h"
+#include "ModelBasic/Settings.h"
 #include "ModelCpu/Cluster.h"
 #include "ModelCpu/Cell.h"
 
