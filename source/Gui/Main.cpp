@@ -11,6 +11,7 @@
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/ModelBasicServices.h"
 #include "ModelCpu/ModelCpuServices.h"
 
 #include "Gui/MainController.h"
@@ -39,7 +40,8 @@ int main(int argc, char *argv[])
 	auto access = gpuFacade->buildSimulationAccess(controller->getContext());
 */
 
-	ModelCpuServices modelServices;
+	ModelBasicServices modelBasicServices;
+	ModelCpuServices modelCpuServices;
 /*
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
