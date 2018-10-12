@@ -68,17 +68,19 @@ void MainController::init()
 
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
-	_controllerBuildFunc = [&modelCpuFacade](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
+	_controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
 		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationControllerCpu*
 	{
+		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 		if (typeId == 0) {
 			ModelCpuData data(typeSpecificData);
 			return modelCpuFacade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
 		}
 		return nullptr;
 	};
-	_accessBuildFunc = [&modelCpuFacade](SimulationController* controller) -> SimulationAccess*
+	_accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
 	{
+		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 		SimulationAccessCpu* access = modelCpuFacade->buildSimulationAccess();
 		if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
 			access->init(controllerCpu);
