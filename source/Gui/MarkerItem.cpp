@@ -1,6 +1,6 @@
 #include <QPainter>
 
-#include "gui/Settings.h"
+#include "Gui/Settings.h"
 
 #include "MarkerItem.h"
 #include "CoordinateSystem.h"

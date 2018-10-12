@@ -3,13 +3,13 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 
-#include "ModelInterface/Settings.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/Physics.h"
 #include "UnitContext.h"
 #include "ParticleMap.h"
 #include "CellMap.h"
 #include "SpacePropertiesImpl.h"
-#include "ModelInterface/SimulationParameters.h"
+#include "ModelBasic/SimulationParameters.h"
 
 #include "Cell.h"
 #include "Cluster.h"

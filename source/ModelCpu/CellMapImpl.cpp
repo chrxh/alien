@@ -2,7 +2,7 @@
 
 #include "SpacePropertiesImpl.h"
 #include "UnitContext.h"
-#include "ModelInterface/Settings.h"
+#include "ModelBasic/Settings.h"
 #include "Cluster.h"
 
 #include "Cell.h"

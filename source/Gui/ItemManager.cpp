@@ -1,6 +1,6 @@
 #include <QGraphicsScene>
 
-#include "ModelInterface/ChangeDescriptions.h"
+#include "ModelBasic/ChangeDescriptions.h"
 #include "Gui/Settings.h"
 #include "Gui/DataRepository.h"
 #include "Gui/ViewportInterface.h"

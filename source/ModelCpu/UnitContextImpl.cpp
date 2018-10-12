@@ -1,6 +1,6 @@
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/SymbolTable.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/SymbolTable.h"
 #include "CellMap.h"
 #include "ParticleMap.h"
 #include "MapCompartment.h"

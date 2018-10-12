@@ -1,7 +1,7 @@
 #include <functional>
 #include <QImage>
 
-#include "ModelInterface/SpaceProperties.h"
+#include "ModelBasic/SpaceProperties.h"
 #include "CudaInterface.cuh"
 
 #include "WorkerForGpu.h"

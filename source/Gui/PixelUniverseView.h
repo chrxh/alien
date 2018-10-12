@@ -5,8 +5,8 @@
 #include <QTimer>
 
 #include "Gui/Definitions.h"
-#include "ModelInterface/Definitions.h"
-#include "ModelInterface/Descriptions.h"
+#include "ModelBasic/Definitions.h"
+#include "ModelBasic/Descriptions.h"
 
 class PixelUniverseView : public QGraphicsScene
 {
@@ -15,7 +15,8 @@ public:
     PixelUniverseView(QObject* parent = nullptr);
     virtual ~PixelUniverseView();
 
-	virtual void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport);
+	virtual void init(Notifier* notifier, SimulationController* controller, SimulationAccess* access
+		, DataRepository* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 

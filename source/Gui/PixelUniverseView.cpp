@@ -4,10 +4,10 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/ModelBasicBuilderFacade.h"
-#include "ModelInterface/SimulationController.h"
-#include "ModelInterface/SimulationContext.h"
-#include "ModelInterface/SpaceProperties.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/SpaceProperties.h"
 #include "Gui/ViewportInterface.h"
 #include "Gui/Settings.h"
 #include "Gui/Notifier.h"
@@ -30,16 +30,15 @@ PixelUniverseView::~PixelUniverseView()
 	delete _image;
 }
 
-void PixelUniverseView::init(Notifier* notifier, SimulationController* controller, DataRepository* repository
-	, ViewportInterface* viewport)
+void PixelUniverseView::init(Notifier* notifier, SimulationController* controller
+	, SimulationAccess* access, DataRepository* repository, ViewportInterface* viewport)
 {
-	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	_controller = controller;
 	_viewport = viewport;
 	_repository = repository;
 	_notifier = notifier;
 
-	_manipulator->init(controller->getContext());
+	_manipulator->init(controller->getContext(), access);
 
 	delete _image;
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();

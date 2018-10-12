@@ -1,6 +1,6 @@
 #include <QTimer>
 
-#include "ModelInterface/CellComputerCompiler.h"
+#include "ModelBasic/CellComputerCompiler.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 

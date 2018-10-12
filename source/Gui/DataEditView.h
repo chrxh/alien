@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/Definitions.h"
 #include "Gui/Definitions.h"
 
 class DataEditView

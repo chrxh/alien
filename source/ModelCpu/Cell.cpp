@@ -1,8 +1,8 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Physics.h"
 #include "Cluster.h"
 #include "Token.h"
 #include "CellFeatureChain.h"

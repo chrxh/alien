@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Gui/Definitions.h"
+#include "Definitions.h"
 
 class Manipulator : public QObject
 {
@@ -12,7 +12,7 @@ public:
 	Manipulator(QObject *parent = nullptr);
 	virtual ~Manipulator() = default;
 
-	void init(SimulationContext* context);
+	void init(SimulationContext* context, SimulationAccess* access);
 
 	void applyForce(QVector2D const& pos, QVector2D const& deltaPos);
 	void applyRotation(QVector2D const& pos, QVector2D const& deltaPos);
