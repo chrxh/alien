@@ -1,7 +1,7 @@
 #include <QMouseEvent>
 #include <QTextBlock>
 
-#include "ModelInterface/Settings.h"
+#include "ModelBasic/Settings.h"
 
 #include "Gui/Settings.h"
 

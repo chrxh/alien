@@ -1,11 +1,13 @@
 #include "Base/NumberGenerator.h"
 
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/CellComputerCompiler.h"
-#include "ModelInterface/SymbolTable.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/CellComputerCompiler.h"
+#include "ModelBasic/SymbolTable.h"
+
 #include "SpacePropertiesImpl.h"
 #include "UnitGrid.h"
 #include "UnitThreadController.h"
+#include "ModelCpuData.h"
 
 #include "SimulationAttributeSetter.h"
 #include "SimulationContextImpl.h"
@@ -37,16 +39,6 @@ void SimulationContextImpl::init(NumberGenerator* numberGen, SpacePropertiesImpl
 	attributeSetter->init(this);
 }
 
-IntVector2D SimulationContextImpl::getGridSize() const
-{
-	return _grid->getSize();
-}
-
-uint SimulationContextImpl::getMaxThreads() const
-{
-	return _threads->getMaxRunningThreads();
-}
-
 SpaceProperties * SimulationContextImpl::getSpaceProperties() const
 {
 	return _metric;
@@ -75,6 +67,12 @@ SimulationParameters* SimulationContextImpl::getSimulationParameters() const
 NumberGenerator * SimulationContextImpl::getNumberGenerator() const
 {
 	return _numberGen;
+}
+
+map<string, int> SimulationContextImpl::getSpecificData() const
+{
+	ModelCpuData data(_threads->getMaxRunningThreads(), _grid->getSize());
+	return data.getData();
 }
 
 CellComputerCompiler * SimulationContextImpl::getCellComputerCompiler() const

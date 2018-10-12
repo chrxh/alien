@@ -1,9 +1,9 @@
 #include <QtCore/qmath.h>
 
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/Settings.h"
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Physics.h"
 
 #include "Cluster.h"
 #include "Particle.h"

@@ -2,11 +2,11 @@
 
 #include "Base/ServiceLocator.h"
 
-#include "ModelInterface/ModelBasicBuilderFacade.h"
-#include "ModelInterface/Settings.h"
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/SimulationController.h"
-#include "ModelInterface/SimulationAccess.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationAccess.h"
 #include "ModelCpu/Cluster.h"
 #include "ModelCpu/Cell.h"
 #include "ModelCpu/Token.h"

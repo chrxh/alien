@@ -8,7 +8,7 @@
 #include "Cell.h"
 #include "Particle.h"
 #include "Token.h"
-
+#include "ModelCpuData.h"
 #include "SimulationMonitorImpl.h"
 
 SimulationMonitorImpl::SimulationMonitorImpl(QObject * parent)
@@ -64,8 +64,9 @@ void SimulationMonitorImpl::accessToUnits()
 void SimulationMonitorImpl::calcMonitorData()
 {
 	_data = MonitorData();
+	ModelCpuData data(_context->getSpecificData());
 	UnitGrid* grid = _context->getUnitGrid();
-	IntVector2D gridSize = _context->getGridSize();
+	IntVector2D gridSize = data.getGridSize();
 	IntVector2D gridPos;
 	for (gridPos.x = 0; gridPos.x < gridSize.x; ++gridPos.x) {
 		for (gridPos.y = 0; gridPos.y < gridSize.y; ++gridPos.y) {

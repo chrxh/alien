@@ -1,9 +1,9 @@
-#include "SimulationAccessImpl.h"
+#include "SimulationAccessCpuImpl.h"
 #include "AccessPortFactoryImpl.h"
 
-SimulationAccess * AccessPortFactoryImpl::buildSimulationAccess() const
+SimulationAccessCpu * AccessPortFactoryImpl::buildSimulationAccess() const
 {
-	return new SimulationAccessImpl();
+	return new SimulationAccessCpuImpl();
 }
 
 

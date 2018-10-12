@@ -3,9 +3,9 @@
 
 #include "Base/ServiceLocator.h"
 #include "ModelCpu/UnitContext.h"
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/Settings.h"
-#include "ModelInterface/ModelBasicBuilderFacade.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelCpu/SpacePropertiesImpl.h"
 #include "ModelCpu/Cell.h"
 #include "ModelCpu/Token.h"

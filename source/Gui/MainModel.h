@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 class MainModel : public QObject {
 	Q_OBJECT

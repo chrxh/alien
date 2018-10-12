@@ -8,5 +8,5 @@ class AccessPortFactoryImpl
 public:
 	virtual ~AccessPortFactoryImpl() = default;
 
-	virtual SimulationAccess* buildSimulationAccess() const override;
+	virtual SimulationAccessCpu* buildSimulationAccess() const override;
 };

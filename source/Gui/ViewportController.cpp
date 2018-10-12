@@ -1,7 +1,7 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 
-#include "gui/Settings.h"
+#include "Gui/Settings.h"
 #include "ViewportController.h"
 #include "CoordinateSystem.h"
 

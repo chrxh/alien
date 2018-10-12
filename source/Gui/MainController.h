@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 #include "Definitions.h"
 
@@ -89,4 +89,7 @@ private:
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
+
+	SimulationControllerBuildFunc _controllerBuildFunc;
+	SimulationAccessBuildFunc _accessBuildFunc;
 };

@@ -1,6 +1,6 @@
 ﻿#include "Base/ServiceLocator.h"
 
-#include "ModelBuilderFacadeImpl.h"
+#include "ModelCpuBuilderFacadeImpl.h"
 #include "AccessPortFactoryImpl.h"
 #include "ContextFactoryImpl.h"
 #include "EntityFactoryImpl.h"
@@ -10,13 +10,13 @@
 
 ModelCpuServices::ModelCpuServices()
 {
-	static ModelBuilderFacadeImpl modelBuilder;
+	static ModelCpuBuilderFacadeImpl modelBuilder;
 	static AccessPortFactoryImpl accessPortFactory;
 	static ContextFactoryImpl contextFactory;
 	static EntityFactoryImpl entityFactory;
 	static CellFeatureFactoryImpl featureFactory;
 
-	ServiceLocator::getInstance().registerService<ModelBasicBuilderFacade>(&modelBuilder);
+	ServiceLocator::getInstance().registerService<ModelCpuBuilderFacade>(&modelBuilder);
 	ServiceLocator::getInstance().registerService<AccessPortFactory>(&accessPortFactory);
 	ServiceLocator::getInstance().registerService<ContextFactory>(&contextFactory);
 	ServiceLocator::getInstance().registerService<EntityFactory>(&entityFactory);

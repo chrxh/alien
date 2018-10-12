@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 #include "DllExport.h"
 
@@ -37,13 +37,14 @@ struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
 struct CellFeatureDescription;
-class SimulationAccess;
-class ModelBasicBuilderFacade;
+class SimulationAccessCpu;
 class SerializationFacade;
 class DescriptionHelper;
 class CellComputerCompiler;
 class Serializer;
 class SimulationMonitor;
+class ModelCpuData;
+class SimulationControllerCpu;
 
 class CellComputerCompilerImpl;
 class Cell;

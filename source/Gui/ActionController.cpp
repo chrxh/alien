@@ -4,12 +4,12 @@
 
 #include "Base/NumberGenerator.h"
 
-#include "ModelInterface/Descriptions.h"
-#include "ModelInterface/SimulationController.h"
-#include "ModelInterface/Serializer.h"
-#include "ModelInterface/SymbolTable.h"
-#include "ModelInterface/Physics.h"
-#include "ModelInterface/Validation.h"
+#include "ModelBasic/Descriptions.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/Serializer.h"
+#include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/Physics.h"
+#include "ModelBasic/Validation.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"

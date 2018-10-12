@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelInterface/SimulationContext.h"
+#include "ModelBasic/SimulationContext.h"
 #include "UnitObserver.h"
 
 #include "Definitions.h"
@@ -13,9 +13,6 @@ public:
 	SimulationContextImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextImpl();
 
-
-	virtual IntVector2D getGridSize() const override;
-	virtual uint getMaxThreads() const override;
 	virtual SpaceProperties* getSpaceProperties() const;
 	virtual UnitGrid* getUnitGrid() const;
 	virtual SymbolTable* getSymbolTable() const override;
@@ -24,6 +21,8 @@ public:
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
 	virtual NumberGenerator* getNumberGenerator() const override;
+
+	virtual map<string, int> getSpecificData() const override;
 
 	virtual void init(NumberGenerator* numberGen, SpacePropertiesImpl* metric, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler);

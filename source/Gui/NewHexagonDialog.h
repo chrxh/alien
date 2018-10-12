@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 namespace Ui {
 class NewHexagonDialog;

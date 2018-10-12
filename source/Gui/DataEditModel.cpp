@@ -1,4 +1,4 @@
-#include "ModelInterface/ChangeDescriptions.h"
+#include "ModelBasic/ChangeDescriptions.h"
 
 #include "DataEditModel.h"
 #include "Gui/DataRepository.h"
