@@ -2,7 +2,7 @@
 
 #include <QDataStream>
 
-#include "ModelInterface/Descriptions.h"
+#include "ModelBasic/Descriptions.h"
 #include "Definitions.h"
 
 class CellFeatureChain

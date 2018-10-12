@@ -1,7 +1,9 @@
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/ModelBasicBuilderFacade.h"
-#include "ModelInterface/SimulationAccess.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/SimulationAccess.h"
+#include "ModelBasic/Physics.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+#include "ModelGpu/ModelGpuBuilderFacade.h"
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
 
@@ -17,14 +19,11 @@ namespace
 Manipulator::Manipulator(QObject *parent)
 	: QObject(parent)
 {
-	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-
-	_access = facade->buildSimulationAccess();
 }
 
-void Manipulator::init(SimulationContext* context)
+void Manipulator::init(SimulationContext* context, SimulationAccess* access)
 {
-	_access->init(context);
+	SET_CHILD(_access, access);
 
 	for (auto const& connection : _connections) {
 		disconnect(connection);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelInterface/SpaceProperties.h"
+#include "ModelBasic/SpaceProperties.h"
 
 class SpacePropertiesImpl
 	: public SpaceProperties

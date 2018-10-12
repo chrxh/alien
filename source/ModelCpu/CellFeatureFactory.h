@@ -2,8 +2,8 @@
 
 #include <QString>
 
-#include "ModelInterface/CellFeatureEnums.h"
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/CellFeatureEnums.h"
+#include "ModelBasic/Definitions.h"
 #include "Definitions.h"
 
 class CellFeatureFactory

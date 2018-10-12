@@ -3,9 +3,9 @@
 #include <gtest/gtest.h>
 
 #include "ModelCpu/Cluster.h"
-#include "ModelInterface/SimulationController.h"
+#include "ModelBasic/SimulationController.h"
 #include "ModelCpu/UnitContext.h"
-#include "ModelInterface/Settings.h"
+#include "ModelBasic/Settings.h"
 #include "tests/TestSettings.h"
 
 

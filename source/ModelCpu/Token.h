@@ -4,7 +4,7 @@
 
 #include "Definitions.h"
 
-#include "ModelInterface/Descriptions.h"
+#include "ModelBasic/Descriptions.h"
 
 class Token
 {

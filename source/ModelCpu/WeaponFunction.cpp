@@ -3,8 +3,8 @@
 #include "Cell.h"
 #include "Cluster.h"
 #include "Token.h"
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/Settings.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Settings.h"
 
 #include "WeaponFunction.h"
 

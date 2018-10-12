@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QMap>
 
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/Definitions.h"
 #include "Gui/Definitions.h"
 
 namespace Ui {

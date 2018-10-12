@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelInterface/Definitions.h"
+#include "ModelBasic/Definitions.h"
 #include "UnitContext.h"
 
 class EntityWithTimestamp

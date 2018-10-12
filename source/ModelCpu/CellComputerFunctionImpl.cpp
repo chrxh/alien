@@ -2,9 +2,9 @@
 #include <qdebug.h>
 
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/SimulationParameters.h"
-#include "ModelInterface/Settings.h"
-#include "ModelInterface/SymbolTable.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SymbolTable.h"
 #include "UnitContext.h"
 #include "Token.h"
 

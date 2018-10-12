@@ -5,18 +5,18 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/ModelBasicBuilderFacade.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "EntityFactory.h"
 #include "Cell.h"
 #include "Cluster.h"
 #include "Token.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/Physics.h"
 #include "PhysicalQuantityConverter.h"
-#include "ModelInterface/Settings.h"
+#include "ModelBasic/Settings.h"
 #include "UnitContext.h"
 #include "CellMap.h"
 #include "SpacePropertiesImpl.h"
-#include "ModelInterface/SimulationParameters.h"
+#include "ModelBasic/SimulationParameters.h"
 
 #include "ConstructorFunction.h"
 

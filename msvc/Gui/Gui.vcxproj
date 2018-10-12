@@ -514,7 +514,7 @@
     <ProjectReference Include="..\ModelCpu\ModelCpu.vcxproj">
       <Project>{c908aae6-8426-43c2-bbef-77fab49231fc}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\ModelInterface\ModelInterface.vcxproj">
+    <ProjectReference Include="..\ModelBasic\ModelBasic.vcxproj">
       <Project>{046b2f85-571f-35cc-b683-6c420049404b}</Project>
     </ProjectReference>
   </ItemGroup>

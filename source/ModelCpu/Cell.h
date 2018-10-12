@@ -4,7 +4,7 @@
 #include <QVector>
 #include <QVector2D>
 
-#include "ModelInterface/ChangeDescriptions.h"
+#include "ModelBasic/ChangeDescriptions.h"
 #include "Definitions.h"
 
 class Cell

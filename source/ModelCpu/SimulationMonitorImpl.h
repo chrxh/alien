@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "ModelInterface/SimulationMonitor.h"
+#include "ModelBasic/SimulationMonitor.h"
 
 #include "Definitions.h"
 #include "UnitObserver.h"

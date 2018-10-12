@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
 #include "Base/ServiceLocator.h"
-#include "ModelInterface/ModelBasicBuilderFacade.h"
-#include "ModelInterface/Settings.h"
-#include "ModelInterface/SimulationController.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationController.h"
 #include "ModelCpu/SimulationContextImpl.h"
 #include "ModelCpu/Unit.h"
 #include "ModelCpu/UnitContext.h"

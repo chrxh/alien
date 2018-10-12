@@ -5,9 +5,9 @@
 #include "UnitContext.h"
 #include "CellMap.h"
 #include "SpacePropertiesImpl.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/Physics.h"
 #include "PhysicalQuantityConverter.h"
-#include "ModelInterface/SimulationParameters.h"
+#include "ModelBasic/SimulationParameters.h"
 
 #include "Cell.h"
 #include "CommunicatorFunction.h"

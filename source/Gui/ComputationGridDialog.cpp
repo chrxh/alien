@@ -1,6 +1,6 @@
 ﻿#include <QMessageBox>
 
-#include "ModelInterface/Validation.h"
+#include "ModelBasic/Validation.h"
 #include "Gui/Settings.h"
 #include "Gui/StringHelper.h"
 

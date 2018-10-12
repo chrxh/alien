@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ModelInterface/Definitions.h"
-#include "ModelInterface/ChangeDescriptions.h"
-#include "ModelInterface/Descriptions.h"
+#include "ModelBasic/Definitions.h"
+#include "ModelBasic/ChangeDescriptions.h"
+#include "ModelBasic/Descriptions.h"
 #include "EntityWithTimestamp.h"
 
 class Particle

@@ -1,10 +1,10 @@
 #include <QString>
 #include <QtCore/qmath.h>
 
-#include "ModelInterface/SimulationContext.h"
-#include "ModelInterface/SimulationParameters.h"
+#include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/SimulationParameters.h"
 #include "Cell.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/Physics.h"
 #include "UnitContext.h"
 #include "SpacePropertiesImpl.h"
 

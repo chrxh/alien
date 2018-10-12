@@ -3,13 +3,13 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/Physics.h"
+#include "ModelBasic/Physics.h"
 #include "PhysicalQuantityConverter.h"
 #include "Cell.h"
 #include "Cluster.h"
 #include "Token.h"
 #include "UnitContext.h"
-#include "ModelInterface/SimulationParameters.h"
+#include "ModelBasic/SimulationParameters.h"
 
 #include "ScannerFunction.h"
 

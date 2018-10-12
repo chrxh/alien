@@ -1,6 +1,6 @@
 #include "Base/NumberGenerator.h"
-#include "ModelInterface/Settings.h"
-#include "ModelInterface/SimulationParameters.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationParameters.h"
 #include "UnitContext.h"
 
 #include "TokenImpl.h"
