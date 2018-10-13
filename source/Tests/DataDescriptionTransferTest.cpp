@@ -9,10 +9,15 @@
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/DescriptionHelper.h"
-#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SpaceProperties.h"
 #include "ModelBasic/SimulationAccess.h"
+
+#include "ModelCpu/SimulationContextCpuImpl.h"
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/SimulationAccessCpu.h"
+#include "ModelCpu/ModelCpuData.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
 
 #include "Tests/Predicates.h"
 
@@ -27,22 +32,21 @@ public:
 	~DataDescriptionTransferTest();
 
 protected:
-	SimulationController* _controller = nullptr;
+	SimulationControllerCpu* _controller = nullptr;
 	SimulationContextCpuImpl* _context = nullptr;
-	SpaceProperties* _metric = nullptr;
-	SimulationAccess* _access = nullptr;
+	SpaceProperties* _spaceProp = nullptr;
+	SimulationAccessCpu* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
 };
 
 DataDescriptionTransferTest::DataDescriptionTransferTest()
 	: IntegrationTestFramework({ 600, 300 })
 {
-	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
+	_controller = _cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, _gridSize), 0);
 	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
-	_metric = _context->getSpaceProperties();
-	_access = _facade->buildSimulationAccess();
-	_access->init(_context);
+	_spaceProp = _context->getSpaceProperties();
+	_access = _cpuFacade->buildSimulationAccess();
+	_access->init(_controller);
 }
 
 DataDescriptionTransferTest::~DataDescriptionTransferTest()
@@ -158,7 +162,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
 			auto &pos = *particle.pos;
 			pos = pos + QVector2D(100.0, 0);
 			dataChange.addModifiedParticle(ParticleChangeDescription(particleOriginal, particle));
-			_metric->correctPosition(pos);
+			_spaceProp->correctPosition(pos);
 		}
 	}
 	_access->updateData(dataChange);
@@ -185,7 +189,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 			auto &pos = *particle.pos;
 			pos = pos + QVector2D(1000.0, 0);
 			dataChange.addModifiedParticle(ParticleChangeDescription(particleOriginal, particle));
-			_metric->correctPosition(pos);
+			_spaceProp->correctPosition(pos);
 		}
 	}
 	_access->updateData(dataChange);
@@ -198,8 +202,11 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 
 TEST_F(DataDescriptionTransferTest, testCreateAndDeleteAndModifyWithinSimulation)
 {
-	auto descHelper = _facade->buildDescriptionHelper();
-	descHelper->init(_context);
+	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	auto descHelper = _basicFacade->buildDescriptionHelper();
+	auto numberGen = factory->buildRandomNumberGenerator();
+	numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
+	descHelper->init(_context, numberGen);
 
 	DataDescription dataBefore;
 	for (int i = 1; i <= 10000; ++i) {

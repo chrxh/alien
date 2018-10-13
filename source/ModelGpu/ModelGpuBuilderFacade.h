@@ -15,7 +15,7 @@ public:
 	};
 	virtual SimulationControllerGpu* buildSimulationController(Config const& config
 		, ModelGpuData const& specificData
-		, uint timestepAtBeginning) const = 0;
+		, uint timestepAtBeginning = 0) const = 0;
 	virtual SimulationAccessGpu* buildSimulationAccess() const = 0;
 
 };
