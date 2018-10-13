@@ -6,6 +6,7 @@
 #include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
+#include "SimulationControllerGpu.h"
 
 SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 {
@@ -13,7 +14,7 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 
 void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
-	_context = static_cast<SimulationContextGpuImpl*>(context);
+	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 	auto worker = _context->getGpuThreadController()->getGpuWorker();
 	connect(worker, &GpuWorker::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }

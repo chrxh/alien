@@ -31,16 +31,6 @@ SpaceProperties * SimulationContextGpuImpl::getSpaceProperties() const
 	return _metric;
 }
 
-IntVector2D SimulationContextGpuImpl::getGridSize() const
-{
-	return IntVector2D();
-}
-
-uint SimulationContextGpuImpl::getMaxThreads() const
-{
-	return 0;
-}
-
 SymbolTable * SimulationContextGpuImpl::getSymbolTable() const
 {
 	return _symbolTable;
@@ -54,6 +44,11 @@ SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
 CellComputerCompiler * SimulationContextGpuImpl::getCellComputerCompiler() const
 {
 	return nullptr;
+}
+
+map<string, int> SimulationContextGpuImpl::getSpecificData() const
+{
+	return map<string, int>();
 }
 
 void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters * parameters)

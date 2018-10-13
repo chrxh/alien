@@ -59,7 +59,7 @@ SimulationControllerCpu * ModelCpuBuilderFacadeImpl::buildSimulationController(C
 	grid->init(gridSize, spaceProp);
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, 0);
 	compiler->init(config.symbolTable, config.parameters);
-	context->init(numberGen, spaceProp, grid, threads, config.symbolTable, config.parameters, compiler);
+	context->init(spaceProp, grid, threads, config.symbolTable, config.parameters, compiler);
 
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
