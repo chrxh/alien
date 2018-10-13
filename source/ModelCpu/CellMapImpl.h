@@ -12,7 +12,7 @@ public:
 	CellMapImpl(QObject* parent = nullptr);
 	virtual ~CellMapImpl();
 
-	virtual void init(SpacePropertiesImpl* metric, MapCompartment* compartment) override;
+	virtual void init(SpaceProperties* spaceProp, MapCompartment* compartment) override;
 	virtual void clear() override;
 
 	virtual void setCell(QVector2D pos, Cell* cell) override;
@@ -29,7 +29,7 @@ private:
 	void deleteCellMap();
 	inline Cell*& locateCell(IntVector2D & intPos) const;
 
-	SpacePropertiesImpl* _metric = nullptr;
+	SpaceProperties* _spaceProp = nullptr;
 	MapCompartment* _compartment = nullptr;
 	IntVector2D _size = { 0, 0 };
 };

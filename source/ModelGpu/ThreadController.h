@@ -15,7 +15,7 @@ public:
 
 	void init(SpaceProperties *metric);
 
-	virtual WorkerForGpu* getGpuWorker() const;
+	virtual GpuWorker* getGpuWorker() const;
 
 	void calculate(RunningMode mode);
 
@@ -28,6 +28,6 @@ private:
 	SpaceProperties *_metric = nullptr;
 
 	QThread _thread;
-	WorkerForGpu* _worker = nullptr;
+	GpuWorker* _worker = nullptr;
 	bool _gpuThreadWorking = false;
 };

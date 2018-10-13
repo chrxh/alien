@@ -10,7 +10,7 @@ namespace
 }
 
 SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
-	: SimulationController(parent)
+	: SimulationControllerGpu(parent)
 	, _oneSecondTimer(new QTimer(this))
 	, _frameTimer(new QTimer(this))
 {

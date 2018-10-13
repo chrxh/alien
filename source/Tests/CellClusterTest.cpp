@@ -6,7 +6,6 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelCpu/SpacePropertiesImpl.h"
 #include "ModelCpu/Cell.h"
 #include "ModelCpu/Token.h"
 #include "ModelCpu/Cluster.h"

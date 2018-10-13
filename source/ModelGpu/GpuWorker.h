@@ -7,13 +7,13 @@
 #include "CudaInterface.cuh"
 #include "DefinitionsImpl.h"
 
-class WorkerForGpu
+class GpuWorker
 	: public QObject
 {
 	Q_OBJECT
 public:
-	WorkerForGpu(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~WorkerForGpu();
+	GpuWorker(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~GpuWorker();
 
 	virtual void init(SpaceProperties* metric);
 	virtual void requireData();

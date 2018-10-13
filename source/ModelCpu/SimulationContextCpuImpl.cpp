@@ -3,30 +3,30 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/CellComputerCompiler.h"
 #include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/SpaceProperties.h"
 
-#include "SpacePropertiesImpl.h"
 #include "UnitGrid.h"
 #include "UnitThreadController.h"
 #include "ModelCpuData.h"
 
 #include "SimulationAttributeSetter.h"
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 
-SimulationContextImpl::SimulationContextImpl(QObject * parent)
+SimulationContextCpuImpl::SimulationContextCpuImpl(QObject * parent)
 	: SimulationContext(parent)
 {
 }
 
-SimulationContextImpl::~SimulationContextImpl()
+SimulationContextCpuImpl::~SimulationContextCpuImpl()
 {
 	delete _threads;
 }
 
-void SimulationContextImpl::init(NumberGenerator* numberGen, SpacePropertiesImpl* metric, UnitGrid* grid, UnitThreadController* threads
+void SimulationContextCpuImpl::init(NumberGenerator* numberGen, SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
 	, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler)
 {
 	SET_CHILD(_numberGen, numberGen);
-	SET_CHILD(_metric, metric);
+	SET_CHILD(_spaceProp, spaceProp);
 	SET_CHILD(_grid, grid);
 	SET_CHILD(_threads, threads);
 	SET_CHILD(_symbolTable, symbolTable);
@@ -39,48 +39,48 @@ void SimulationContextImpl::init(NumberGenerator* numberGen, SpacePropertiesImpl
 	attributeSetter->init(this);
 }
 
-SpaceProperties * SimulationContextImpl::getSpaceProperties() const
+SpaceProperties * SimulationContextCpuImpl::getSpaceProperties() const
 {
-	return _metric;
+	return _spaceProp;
 }
 
-UnitGrid * SimulationContextImpl::getUnitGrid() const
+UnitGrid * SimulationContextCpuImpl::getUnitGrid() const
 {
 	return _grid;
 }
 
-UnitThreadController * SimulationContextImpl::getUnitThreadController() const
+UnitThreadController * SimulationContextCpuImpl::getUnitThreadController() const
 {
 	return _threads;
 }
 
-SymbolTable* SimulationContextImpl::getSymbolTable() const
+SymbolTable* SimulationContextCpuImpl::getSymbolTable() const
 {
 	return _symbolTable;
 }
 
-SimulationParameters* SimulationContextImpl::getSimulationParameters() const
+SimulationParameters* SimulationContextCpuImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
 }
 
-NumberGenerator * SimulationContextImpl::getNumberGenerator() const
+NumberGenerator * SimulationContextCpuImpl::getNumberGenerator() const
 {
 	return _numberGen;
 }
 
-map<string, int> SimulationContextImpl::getSpecificData() const
+map<string, int> SimulationContextCpuImpl::getSpecificData() const
 {
 	ModelCpuData data(_threads->getMaxRunningThreads(), _grid->getSize());
 	return data.getData();
 }
 
-CellComputerCompiler * SimulationContextImpl::getCellComputerCompiler() const
+CellComputerCompiler * SimulationContextCpuImpl::getCellComputerCompiler() const
 {
 	return _compiler;
 }
 
-void SimulationContextImpl::setSimulationParameters(SimulationParameters * parameters)
+void SimulationContextCpuImpl::setSimulationParameters(SimulationParameters * parameters)
 {
 	_attributeSetter->setSimulationParameters(parameters);
 	_simulationParameters = parameters;

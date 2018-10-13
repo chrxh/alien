@@ -72,7 +72,7 @@ void MainController::init()
 		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationControllerCpu*
 	{
 		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-		if (typeId == 0) {
+		if (ModelComputationType(typeId) == ModelComputationType::Cpu) {
 			ModelCpuData data(typeSpecificData);
 			return modelCpuFacade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
 		}
@@ -200,7 +200,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 void MainController::onSaveSimulation(string const& filename)
 {
 	_jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
-	_serializer->serialize(_simController, 0);
+	_serializer->serialize(_simController, int(ModelComputationType::Cpu));
 }
 
 bool MainController::onLoadSimulation(string const & filename)
@@ -222,7 +222,7 @@ void MainController::onRecreateSimulation(SimulationConfig const& simConfig)
 	_jobsAfterSerialization.push_back(boost::make_shared<_RecreateJob>());
 	ModelCpuData data(simConfig.maxThreads, simConfig.gridSize);
 	Serializer::Settings settings{ simConfig.universeSize, data.getData() };
-	_serializer->serialize(_simController, 0, settings);
+	_serializer->serialize(_simController, int(ModelComputationType::Cpu), settings);
 }
 
 void MainController::onUpdateSimulationParametersForRunningSimulation()

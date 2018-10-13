@@ -4,7 +4,7 @@
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
-#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelCpu/Unit.h"
 #include "ModelCpu/UnitContext.h"
 #include "ModelCpu/MapCompartment.h"
@@ -22,7 +22,7 @@ public:
 
 protected:
 	SimulationController* _controller = nullptr;
-	SimulationContextImpl* _context = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	const IntVector2D _gridSize{ 9, 6 };
 	const IntVector2D _universeSize{ 900, 600 };
@@ -39,7 +39,7 @@ UnitThreadControllerImplTest::UnitThreadControllerImplTest()
 	auto parameters = facade->buildDefaultSimulationParameters();
 
 	_controller = facade->buildSimulationController(4, _gridSize, _universeSize, symbols, parameters);
-	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
+	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
 
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 }
