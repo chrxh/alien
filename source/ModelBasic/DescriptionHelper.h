@@ -9,7 +9,7 @@ public:
 	DescriptionHelper(QObject* parent = nullptr);
 	virtual ~DescriptionHelper() = default;
 
-	virtual void init(SimulationContext* context) = 0;
+	virtual void init(SimulationContext* context, NumberGenerator* numberGen) = 0;
 
 	virtual void reconnect(DataDescription& data, DataDescription& orgData, unordered_set<uint64_t> const& idsOfChangedCells) = 0;
 	virtual void recluster(DataDescription& data, unordered_set<uint64_t> const& idsOfChangedClusters) = 0;
