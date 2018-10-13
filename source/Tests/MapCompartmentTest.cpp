@@ -9,6 +9,9 @@
 #include "ModelCpu/Unit.h"
 #include "ModelCpu/UnitContext.h"
 #include "ModelCpu/MapCompartment.h"
+#include "ModelCpu/ModelCpuData.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+#include "ModelCpu/SimulationControllerCpu.h"
 
 #include "tests/Predicates.h"
 
@@ -21,7 +24,7 @@ public:
 protected:
 	IntVector2D correctUniversePosition(IntVector2D const& pos);
 
-	SimulationController* _controller = nullptr;
+	SimulationControllerCpu* _controller = nullptr;
 	SimulationContextCpuImpl* _context = nullptr;
 	UnitGrid* _grid = nullptr;
 	const IntVector2D _gridSize{ 6, 8 };
@@ -32,10 +35,12 @@ protected:
 MapCompartmentTest::MapCompartmentTest()
 {
 	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	ModelCpuBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto symbols = facade->buildDefaultSymbolTable();
 	auto parameters = facade->buildDefaultSimulationParameters();
 
-	_controller = facade->buildSimulationController(4, _gridSize, _universeSize, symbols, parameters);
+	_controller = cpuFacade->buildSimulationController({ _universeSize, symbols, parameters }, ModelCpuData(4, _gridSize), 0);
+
 	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
 
 	_grid = _context->getUnitGrid();

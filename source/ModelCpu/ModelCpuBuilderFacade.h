@@ -14,7 +14,7 @@ public:
 	};
 	virtual SimulationControllerCpu* buildSimulationController(Config const& config
 		, ModelCpuData const& specificData
-		, uint timestepAtBeginning) const = 0;
+		, uint timestepAtBeginning = 0) const = 0;
 	virtual SimulationAccessCpu* buildSimulationAccess() const = 0;
 	virtual SimulationMonitor* buildSimulationMonitor() const = 0;
 };
