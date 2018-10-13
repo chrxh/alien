@@ -20,17 +20,15 @@ public:
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
-	virtual NumberGenerator* getNumberGenerator() const override;
 
 	virtual map<string, int> getSpecificData() const override;
 
-	virtual void init(NumberGenerator* numberGen, SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
+	virtual void init(SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler);
 
 	virtual UnitThreadController* getUnitThreadController() const;
 	
 private:
-	NumberGenerator* _numberGen = nullptr;
 	SpaceProperties* _spaceProp = nullptr;
 	UnitGrid* _grid = nullptr;
 	UnitThreadController* _threads = nullptr;

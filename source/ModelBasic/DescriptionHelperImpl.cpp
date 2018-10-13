@@ -10,11 +10,11 @@
 #include "Physics.h"
 
 
-void DescriptionHelperImpl::init(SimulationContext* context)
+void DescriptionHelperImpl::init(SimulationContext* context, NumberGenerator* numberGen)
 {
 	_metric = context->getSpaceProperties();
 	_parameters = context->getSimulationParameters();
-	_numberGen = context->getNumberGenerator();
+	_numberGen = numberGen;
 }
 
 void DescriptionHelperImpl::reconnect(DataDescription &data, DataDescription& orgData, unordered_set<uint64_t> const& idsOfChangedCells)

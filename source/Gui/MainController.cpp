@@ -160,7 +160,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	connectSimController();
 
 	_simAccess = _accessBuildFunc(_simController);
-	_descHelper->init(_simController->getContext());
+	_descHelper->init(_simController->getContext(), _numberGenerator);
 	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
 	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
 	_simMonitor->init(_simController->getContext());

@@ -16,11 +16,11 @@ public:
 	void init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters);
 
 	virtual SpaceProperties* getSpaceProperties() const override;
-	virtual IntVector2D getGridSize() const override;
-	virtual uint getMaxThreads() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
 	virtual CellComputerCompiler* getCellComputerCompiler() const override;
+
+	virtual map<string, int> getSpecificData() const override;
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
 
