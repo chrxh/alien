@@ -7,16 +7,18 @@
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/Settings.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelBasic/SimulationParameters.h"
+#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelCpu/UnitGrid.h"
 #include "ModelCpu/Unit.h"
 #include "ModelCpu/UnitContext.h"
 #include "ModelCpu/MapCompartment.h"
 #include "ModelCpu/UnitThreadControllerImpl.h"
 #include "ModelCpu/UnitThread.h"
-#include "ModelBasic/SimulationAccess.h"
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+#include "ModelCpu/ModelCpuData.h"
+#include "ModelCpu/SimulationAccessCpu.h"
 
 #include "tests/Predicates.h"
 
@@ -50,10 +52,10 @@ void Benchmark::createTestData(SimulationAccess * access)
 
 TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 {
-	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto controller = facade->buildSimulationController(1, { 1, 1 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess();
-	access->init(controller->getContext());
+	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 1,1 }));
+	auto access = cpuFacade->buildSimulationAccess();
+	access->init(controller);
 
 	createTestData(access);
 	runSimulation(20, controller);
@@ -66,10 +68,10 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 
 TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 {
-	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto controller = facade->buildSimulationController(1, { 12, 6 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess();
-	access->init(controller->getContext());
+	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 12, 6 }));
+	auto access = cpuFacade->buildSimulationAccess();
+	access->init(controller);
 
 	createTestData(access);
 	runSimulation(20, controller);
@@ -82,10 +84,10 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 
 TEST_F(Benchmark, benchmarkFourThread)
 {
-	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto controller = facade->buildSimulationController(4, { 12, 6 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess();
-	access->init(controller->getContext());
+	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(4, { 12, 6 }));
+	auto access = cpuFacade->buildSimulationAccess();
+	access->init(controller);
 
 	createTestData(access);
 	runSimulation(20, controller);
@@ -98,10 +100,10 @@ TEST_F(Benchmark, benchmarkFourThread)
 
 TEST_F(Benchmark, benchmarkEightThread)
 {
-	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto controller = facade->buildSimulationController(8, { 12, 6 }, _universeSize, _symbols, _parameters);
-	auto access = facade->buildSimulationAccess();
-	access->init(controller->getContext());
+	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(8, { 12, 6 }));
+	auto access = cpuFacade->buildSimulationAccess();
+	access->init(controller);
 
 	createTestData(access);
 	runSimulation(20, controller);
