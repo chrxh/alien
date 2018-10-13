@@ -58,9 +58,6 @@
     <ClInclude Include="..\..\source\ModelCpu\EntityFactoryImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelCpu\SpacePropertiesImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelCpu\TokenImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
@@ -198,12 +195,6 @@
     <ClCompile Include="Release\moc_SimulationAttributeSetter.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationContextImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationContextImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_SimulationMonitorImpl.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -285,13 +276,7 @@
     <ClCompile Include="..\..\source\ModelCpu\ParticleMapImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\SimulationContextImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\SimulationMonitorImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\SpacePropertiesImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\TokenImpl.cpp">
@@ -387,6 +372,15 @@
     <ClCompile Include="Release\moc_SimulationControllerCpu.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelCpu\SimulationContextCpuImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationContextCpuImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationContextCpuImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\ModelCpu\CellComputerCompilerImpl.h">
@@ -396,9 +390,6 @@
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\ParticleMapImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelCpu\SimulationContextImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\SimulationMonitorImpl.h">
@@ -451,6 +442,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\SimulationControllerCpu.h">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelCpu\SimulationContextCpuImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

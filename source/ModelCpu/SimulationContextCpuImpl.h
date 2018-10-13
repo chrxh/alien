@@ -5,13 +5,13 @@
 
 #include "Definitions.h"
 
-class SimulationContextImpl
+class SimulationContextCpuImpl
 	: public SimulationContext
 {
 	Q_OBJECT
 public:
-	SimulationContextImpl(QObject* parent = nullptr);
-	virtual ~SimulationContextImpl();
+	SimulationContextCpuImpl(QObject* parent = nullptr);
+	virtual ~SimulationContextCpuImpl();
 
 	virtual SpaceProperties* getSpaceProperties() const;
 	virtual UnitGrid* getUnitGrid() const;
@@ -24,14 +24,14 @@ public:
 
 	virtual map<string, int> getSpecificData() const override;
 
-	virtual void init(NumberGenerator* numberGen, SpacePropertiesImpl* metric, UnitGrid* grid, UnitThreadController* threads
+	virtual void init(NumberGenerator* numberGen, SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
 		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler);
 
 	virtual UnitThreadController* getUnitThreadController() const;
 	
 private:
 	NumberGenerator* _numberGen = nullptr;
-	SpacePropertiesImpl* _metric = nullptr;
+	SpaceProperties* _spaceProp = nullptr;
 	UnitGrid* _grid = nullptr;
 	UnitThreadController* _threads = nullptr;
 	SimulationAttributeSetter* _attributeSetter = nullptr;

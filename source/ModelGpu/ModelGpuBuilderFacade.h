@@ -8,8 +8,15 @@ class ModelGpuBuilderFacade
 public:
 	virtual ~ModelGpuBuilderFacade() = default;
 
-	virtual SimulationController* buildSimulationController(IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
-	virtual SimulationAccess* buildSimulationAccess() const = 0;
+	struct Config {
+		IntVector2D universeSize;
+		SymbolTable* symbolTable;
+		SimulationParameters* parameters;
+	};
+	virtual SimulationControllerGpu* buildSimulationController(Config const& config
+		, ModelGpuData const& specificData
+		, uint timestepAtBeginning) const = 0;
+	virtual SimulationAccessGpu* buildSimulationAccess() const = 0;
 
 };
 

@@ -72,6 +72,9 @@
     <ClInclude Include="..\..\source\ModelGpu\SimulationData.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
@@ -110,13 +113,25 @@
     <ClCompile Include="Release\moc_ThreadController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\WorkerForGpu.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_WorkerForGpu.cpp">
+    <ClCompile Include="Debug\moc_SimulationControllerGpu.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_WorkerForGpu.cpp">
+    <ClCompile Include="Release\moc_SimulationControllerGpu.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\ModelGpuData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationAccessGpu.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\GpuWorker.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GpuWorker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_GpuWorker.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -130,7 +145,13 @@
     <CustomBuild Include="..\..\source\ModelGpu\ThreadController.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelGpu\WorkerForGpu.h">
+    <CustomBuild Include="..\..\source\ModelGpu\SimulationControllerGpu.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelGpu\SimulationAccessGpu.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelGpu\GpuWorker.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
   </ItemGroup>

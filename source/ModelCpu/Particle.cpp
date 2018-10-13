@@ -5,12 +5,12 @@
 
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/SimulationParameters.h"
+
 #include "UnitContext.h"
 #include "ParticleMap.h"
 #include "CellMap.h"
-#include "SpacePropertiesImpl.h"
-#include "ModelBasic/SimulationParameters.h"
-
 #include "Cell.h"
 #include "Cluster.h"
 #include "EntityFactory.h"

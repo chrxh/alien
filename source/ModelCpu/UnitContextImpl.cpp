@@ -1,6 +1,8 @@
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/SpaceProperties.h"
+
 #include "CellMap.h"
 #include "ParticleMap.h"
 #include "MapCompartment.h"
@@ -20,7 +22,7 @@ UnitContextImpl::~UnitContextImpl ()
 	delete _simulationParameters;
 }
 
-void UnitContextImpl::init(NumberGenerator* numberGen, SpacePropertiesImpl* spaceProperties, CellMap* cellMap, ParticleMap* energyMap
+void UnitContextImpl::init(NumberGenerator* numberGen, SpaceProperties* spaceProperties, CellMap* cellMap, ParticleMap* energyMap
 	, MapCompartment* mapCompartment, SimulationParameters* parameters)
 {
 	SET_CHILD(_numberGen, numberGen);
@@ -41,7 +43,7 @@ NumberGenerator * UnitContextImpl::getNumberGenerator() const
 	return _numberGen;
 }
 
-SpacePropertiesImpl* UnitContextImpl::getSpaceProperties () const
+SpaceProperties* UnitContextImpl::getSpaceProperties () const
 {
     return _spaceProperties;
 }

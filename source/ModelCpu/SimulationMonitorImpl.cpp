@@ -1,5 +1,5 @@
 ﻿
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 #include "UnitThreadController.h"
 #include "UnitGrid.h"
 #include "Unit.h"
@@ -26,7 +26,7 @@ SimulationMonitorImpl::~SimulationMonitorImpl()
 
 void SimulationMonitorImpl::init(SimulationContext * context)
 {
-	_context = static_cast<SimulationContextImpl*>(context);
+	_context = static_cast<SimulationContextCpuImpl*>(context);
 	_context->getUnitThreadController()->registerObserver(this);
 	_registered = true;
 }

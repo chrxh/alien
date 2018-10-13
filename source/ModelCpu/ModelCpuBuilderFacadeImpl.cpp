@@ -6,6 +6,8 @@
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/SpaceProperties.h"
+
 #include "Cell.h"
 #include "Cluster.h"
 #include "Particle.h"
@@ -17,12 +19,11 @@
 #include "CellFeatureFactory.h"
 #include "CellMap.h"
 #include "ParticleMap.h"
-#include "SpacePropertiesImpl.h"
 #include "ContextFactory.h"
 #include "MapCompartment.h"
 #include "UnitThreadController.h"
 #include "UnitGrid.h"
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 #include "Unit.h"
 #include "UnitContext.h"
 #include "AccessPortFactory.h"
@@ -44,21 +45,21 @@ SimulationControllerCpu * ModelCpuBuilderFacadeImpl::buildSimulationController(C
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	SimulationContextImpl* context = contextFactory->buildSimulationContext();
+	SimulationContextCpuImpl* context = contextFactory->buildSimulationContext();
 
 	auto compiler = contextFactory->buildCellComputerCompiler();
 	auto threads = contextFactory->buildSimulationThreads();
 	auto grid = contextFactory->buildSimulationGrid();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
-	auto metric = contextFactory->buildSpaceMetric();
+	auto spaceProp = new SpaceProperties();
 
 	IntVector2D gridSize = specificData.getGridSize();
-	metric->init(config.universeSize);
+	spaceProp->init(config.universeSize);
 	threads->init(specificData.getMaxRunningThreads());
-	grid->init(gridSize, metric);
+	grid->init(gridSize, spaceProp);
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, 0);
 	compiler->init(config.symbolTable, config.parameters);
-	context->init(numberGen, metric, grid, threads, config.symbolTable, config.parameters, compiler);
+	context->init(numberGen, spaceProp, grid, threads, config.symbolTable, config.parameters, compiler);
 
 	for (int x = 0; x < gridSize.x; ++x) {
 		for (int y = 0; y < gridSize.y; ++y) {
@@ -87,7 +88,7 @@ SimulationControllerCpu * ModelCpuBuilderFacadeImpl::buildSimulationController(C
 	}
 
 	auto controller = new SimulationControllerCpuImpl();
-	controller->init(static_cast<SimulationContextImpl*>(context), timestepAtBeginning);
+	controller->init(static_cast<SimulationContextCpuImpl*>(context), timestepAtBeginning);
 
 	return controller;
 }
@@ -103,7 +104,7 @@ SimulationMonitor * ModelCpuBuilderFacadeImpl::buildSimulationMonitor() const
 	return new SimulationMonitorImpl();
 }
 
-Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextImpl* context) const
+Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextCpuImpl* context) const
 {
 	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -113,7 +114,7 @@ Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simul
 	auto unit = contextFactory->buildSimulationUnit();		//unit has no parent due to an QObject::moveToThread call later
 	auto unitContext = contextFactory->buildSimulationUnitContext();
 	auto numberGen = globalFactory->buildRandomNumberGenerator();
-	auto metric = static_cast<SpacePropertiesImpl*>(context->getSpaceProperties())->clone();
+	auto spaceProp = context->getSpaceProperties()->clone();
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();
@@ -121,9 +122,9 @@ Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simul
 	uint16_t threadId = gridPos.x + gridPos.y * grid->getSize().x + 1;
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, threadId);
 	compartment->init(grid->calcCompartmentRect(gridPos));
-	cellMap->init(metric, compartment);
-	energyMap->init(metric, compartment);
-	unitContext->init(numberGen, metric, cellMap, energyMap, compartment, parameters);
+	cellMap->init(spaceProp, compartment);
+	energyMap->init(spaceProp, compartment);
+	unitContext->init(numberGen, spaceProp, cellMap, energyMap, compartment, parameters);
 	unit->init(unitContext);
 
 	return unit;

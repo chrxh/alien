@@ -8,7 +8,7 @@
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
-#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelCpu/UnitGrid.h"
 #include "ModelCpu/Unit.h"
@@ -31,7 +31,7 @@ protected:
 	void runSimulation(int timesteps);
 
 	SimulationController* _controller = nullptr;
-	SimulationContextImpl* _context = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
@@ -47,7 +47,7 @@ MultithreadingTest::MultithreadingTest()
 	auto symbols = facade->buildDefaultSymbolTable();
 	_parameters = facade->buildDefaultSimulationParameters();
 	_controller = facade->buildSimulationController(_threads, _gridSize, _universeSize, symbols, _parameters);
-	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
+	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 	_numberGen = factory->buildRandomNumberGenerator();
 	_numberGen->init(123123, 0);

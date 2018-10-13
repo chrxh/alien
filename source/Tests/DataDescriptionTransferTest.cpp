@@ -9,7 +9,7 @@
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/DescriptionHelper.h"
-#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SpaceProperties.h"
 #include "ModelBasic/SimulationAccess.h"
@@ -28,7 +28,7 @@ public:
 
 protected:
 	SimulationController* _controller = nullptr;
-	SimulationContextImpl* _context = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 	SpaceProperties* _metric = nullptr;
 	SimulationAccess* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
@@ -39,7 +39,7 @@ DataDescriptionTransferTest::DataDescriptionTransferTest()
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
-	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
+	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
 	_metric = _context->getSpaceProperties();
 	_access = _facade->buildSimulationAccess();
 	_access->init(_context);

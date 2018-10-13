@@ -1,7 +1,7 @@
 #include <QTimer>
 
 #include "Base/ServiceLocator.h"
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 #include "UnitThreadController.h"
 
 #include "SimulationControllerCpuImpl.h"
@@ -22,7 +22,7 @@ SimulationControllerCpuImpl::SimulationControllerCpuImpl(QObject* parent)
 void SimulationControllerCpuImpl::init(SimulationContext* context, uint timestep)
 {
 	_timestep = timestep;
-	SET_CHILD(_context, static_cast<SimulationContextImpl*>(context));
+	SET_CHILD(_context, static_cast<SimulationContextCpuImpl*>(context));
 	connect(_context->getUnitThreadController(), &UnitThreadController::timestepCalculated, this, &SimulationControllerCpuImpl::nextTimestepCalculatedIntern);
 	_context->getUnitThreadController()->start();
 }

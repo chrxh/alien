@@ -1,14 +1,14 @@
-#include "WorkerForGpu.h"
+#include "GpuWorker.h"
 
 #include "ThreadController.h"
 
 ThreadController::ThreadController(QObject* parent /*= nullptr*/)
 	: QObject(parent)
 {
-	_worker = new WorkerForGpu;
+	_worker = new GpuWorker;
 	_worker->moveToThread(&_thread);
-	connect(this, &ThreadController::runSimulationWithGpu, _worker, &WorkerForGpu::runSimulation);
-	connect(_worker, &WorkerForGpu::timestepCalculated, this, &ThreadController::timestepCalculatedWithGpu);
+	connect(this, &ThreadController::runSimulationWithGpu, _worker, &GpuWorker::runSimulation);
+	connect(_worker, &GpuWorker::timestepCalculated, this, &ThreadController::timestepCalculatedWithGpu);
 	_thread.start();
 }
 
@@ -28,7 +28,7 @@ void ThreadController::init(SpaceProperties *metric)
 	_worker->init(metric);
 }
 
-WorkerForGpu * ThreadController::getGpuWorker() const
+GpuWorker * ThreadController::getGpuWorker() const
 {
 	return _worker;
 }

@@ -29,7 +29,7 @@ private:
 	void calcMonitorData();
 	void calcMonitorDataForUnit(Unit* unit);
 
-	SimulationContextImpl* _context = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 	bool _registered = false;
 
 	bool _dataRequired = false;

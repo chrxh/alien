@@ -1,14 +1,15 @@
 #include <QtCore/qmath.h>
 
 #include "ModelBasic/Settings.h"
-#include "UnitContext.h"
 #include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/Physics.h"
+
+#include "UnitContext.h"
 #include "CellMap.h"
-#include "SpacePropertiesImpl.h"
 #include "Cell.h"
 #include "Cluster.h"
 #include "Token.h"
-#include "ModelBasic/Physics.h"
 #include "PhysicalQuantityConverter.h"
 
 #include "SensorFunction.h"
