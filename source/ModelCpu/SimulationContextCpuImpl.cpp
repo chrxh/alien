@@ -22,10 +22,9 @@ SimulationContextCpuImpl::~SimulationContextCpuImpl()
 	delete _threads;
 }
 
-void SimulationContextCpuImpl::init(NumberGenerator* numberGen, SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
+void SimulationContextCpuImpl::init(SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
 	, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler)
 {
-	SET_CHILD(_numberGen, numberGen);
 	SET_CHILD(_spaceProp, spaceProp);
 	SET_CHILD(_grid, grid);
 	SET_CHILD(_threads, threads);
@@ -62,11 +61,6 @@ SymbolTable* SimulationContextCpuImpl::getSymbolTable() const
 SimulationParameters* SimulationContextCpuImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
-}
-
-NumberGenerator * SimulationContextCpuImpl::getNumberGenerator() const
-{
-	return _numberGen;
 }
 
 map<string, int> SimulationContextCpuImpl::getSpecificData() const
