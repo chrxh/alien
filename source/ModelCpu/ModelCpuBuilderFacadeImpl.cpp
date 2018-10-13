@@ -50,14 +50,12 @@ SimulationControllerCpu * ModelCpuBuilderFacadeImpl::buildSimulationController(C
 	auto compiler = contextFactory->buildCellComputerCompiler();
 	auto threads = contextFactory->buildSimulationThreads();
 	auto grid = contextFactory->buildSimulationGrid();
-	auto numberGen = globalFactory->buildRandomNumberGenerator();
 	auto spaceProp = new SpaceProperties();
 
 	IntVector2D gridSize = specificData.getGridSize();
 	spaceProp->init(config.universeSize);
 	threads->init(specificData.getMaxRunningThreads());
 	grid->init(gridSize, spaceProp);
-	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, 0);
 	compiler->init(config.symbolTable, config.parameters);
 	context->init(spaceProp, grid, threads, config.symbolTable, config.parameters, compiler);
 

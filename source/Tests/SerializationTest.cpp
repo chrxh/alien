@@ -15,6 +15,11 @@
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/Serializer.h"
 
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/SimulationAccessCpu.h"
+#include "ModelCpu/ModelCpuData.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+
 #include "Tests/Predicates.h"
 
 #include "IntegrationTestHelper.h"
@@ -31,10 +36,10 @@ protected:
 	string const& serializeSimulation() const;
 	void deserializeSimulation(string const& data);
 
-	SimulationController* _controller = nullptr;
+	SimulationControllerCpu* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	SpaceProperties* _metric = nullptr;
-	SimulationAccess* _access = nullptr;
+	SimulationAccessCpu* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
 	Serializer* _serializer = nullptr;
 };
@@ -43,13 +48,30 @@ SerializationTest::SerializationTest()
 	: IntegrationTestFramework({ 600, 300 })
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
+	_controller = _cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, _gridSize), 0);
 	_context = _controller->getContext();
-	_serializer = _facade->buildSerializer();
+	_serializer = _basicFacade->buildSerializer();
 	_metric = _context->getSpaceProperties();
-	_access = _facade->buildSimulationAccess();
-	_serializer->init();
-	_access->init(_context);
+	_access = _cpuFacade->buildSimulationAccess();
+
+	auto controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
+		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationControllerCpu*
+	{
+		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+		ModelCpuData data(typeSpecificData);
+		return modelCpuFacade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
+	};
+	auto accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
+	{
+		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+		SimulationAccessCpu* access = modelCpuFacade->buildSimulationAccess();
+		auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller);
+		access->init(controllerCpu);
+		return access;
+	};
+
+	_serializer->init(controllerBuildFunc, accessBuildFunc);
+	_access->init(_controller);
 }
 
 SerializationTest::~SerializationTest()
@@ -66,7 +88,7 @@ string const & SerializationTest::serializeSimulation() const
 		serializationFinished = true;
 		pause.quit();
 	});
-	_serializer->serialize(_controller);
+	_serializer->serialize(_controller, 0);
 	if (!serializationFinished) {
 		pause.exec();
 	}
@@ -75,7 +97,7 @@ string const & SerializationTest::serializeSimulation() const
 
 void SerializationTest::deserializeSimulation(string const & data)
 {
-	_controller = _serializer->deserializeSimulation(data);
+	_controller = static_cast<SimulationControllerCpu*>(_serializer->deserializeSimulation(data));
 }
 
 TEST_F(SerializationTest, testCheckIds)

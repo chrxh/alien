@@ -15,6 +15,12 @@
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/Serializer.h"
 
+#include "ModelCpu/SimulationContextCpuImpl.h"
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/SimulationAccessCpu.h"
+#include "ModelCpu/ModelCpuData.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+
 #include "Tests/Predicates.h"
 
 #include "IntegrationTestHelper.h"
@@ -28,10 +34,10 @@ public:
 	~ClusterSizeTest();
 
 protected:
-	SimulationController* _controller = nullptr;
+	SimulationControllerCpu* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	SpaceProperties* _space = nullptr;
-	SimulationAccess* _access = nullptr;
+	SimulationAccessCpu* _access = nullptr;
 	IntVector2D _gridSize{ 12, 6 };
 };
 
@@ -39,11 +45,11 @@ ClusterSizeTest::ClusterSizeTest()
 	: IntegrationTestFramework({ 600, 300 })
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_controller = _facade->buildSimulationController(1, _gridSize, _universeSize, _symbols, _parameters);
+	_controller = _cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, _gridSize), 0);
 	_context = _controller->getContext();
 	_space = _context->getSpaceProperties();
-	_access = _facade->buildSimulationAccess();
-	_access->init(_context);
+	_access = _cpuFacade->buildSimulationAccess();
+	_access->init(_controller);
 }
 
 ClusterSizeTest::~ClusterSizeTest()

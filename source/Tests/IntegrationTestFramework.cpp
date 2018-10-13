@@ -21,11 +21,12 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	: _universeSize(universeSize)
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	_symbols = _facade->buildDefaultSymbolTable();
-	_parameters = _facade->buildDefaultSimulationParameters();
+	_basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	_cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	_symbols = _basicFacade->buildDefaultSymbolTable();
+	_parameters = _basicFacade->buildDefaultSimulationParameters();
 	_numberGen = factory->buildRandomNumberGenerator();
-	_numberGen->init(123123, 0);
+	_numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
