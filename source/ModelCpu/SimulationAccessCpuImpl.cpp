@@ -3,16 +3,17 @@
 #include "Base/ServiceLocator.h"
 #include "ModelBasic/ChangeDescriptions.h"
 #include "ModelBasic/Settings.h"
+#include "ModelBasic/SpaceProperties.h"
+
 #include "EntityFactory.h"
 #include "Cluster.h"
 #include "Cell.h"
 #include "Particle.h"
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 #include "UnitContext.h"
 #include "UnitThreadController.h"
 #include "UnitGrid.h"
 #include "Unit.h"
-#include "SpacePropertiesImpl.h"
 #include "ParticleMap.h"
 #include "CellMap.h"
 #include "Cluster.h"
@@ -30,7 +31,7 @@ SimulationAccessCpuImpl::~SimulationAccessCpuImpl()
 
 void SimulationAccessCpuImpl::init(SimulationControllerCpu* controller)
 {
-	_context = static_cast<SimulationContextImpl*>(controller->getContext());
+	_context = static_cast<SimulationContextCpuImpl*>(controller->getContext());
 	_context->getUnitThreadController()->registerObserver(this);
 	_registered = true;
 }

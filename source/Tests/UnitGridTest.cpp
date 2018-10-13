@@ -4,7 +4,7 @@
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
-#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelCpu/UnitGrid.h"
 #include "ModelCpu/Unit.h"
 #include "ModelCpu/UnitContext.h"
@@ -20,7 +20,7 @@ public:
 
 protected:
 	SimulationController* _controller = nullptr;
-	SimulationContextImpl* _context = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 	UnitGrid* _grid = nullptr;
 	const IntVector2D _gridSize{ 6, 6 };
 	const IntVector2D _universeSize{ 1200, 600 };
@@ -34,7 +34,7 @@ UnitGridTest::UnitGridTest()
 	auto parameters = facade->buildDefaultSimulationParameters();
 
 	_controller = facade->buildSimulationController(4, _gridSize, _universeSize, symbols, parameters);
-	_context = static_cast<SimulationContextImpl*>(_controller->getContext());
+	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
 
 	_grid = _context->getUnitGrid();
 	_compartmentSize = { _universeSize.x / _gridSize.x, _universeSize.y / _gridSize.y };

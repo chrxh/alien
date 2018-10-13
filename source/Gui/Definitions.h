@@ -86,3 +86,8 @@ struct NewSimulationConfig
 	double energy;
 };
 
+enum class ModelComputationType
+{
+	Cpu,
+	Gpu
+};

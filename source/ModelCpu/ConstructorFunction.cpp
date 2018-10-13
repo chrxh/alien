@@ -6,17 +6,18 @@
 
 #include "Base/ServiceLocator.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Physics.h"
+#include "ModelBasic/Settings.h"
+
 #include "EntityFactory.h"
 #include "Cell.h"
 #include "Cluster.h"
 #include "Token.h"
-#include "ModelBasic/Physics.h"
 #include "PhysicalQuantityConverter.h"
-#include "ModelBasic/Settings.h"
 #include "UnitContext.h"
 #include "CellMap.h"
-#include "SpacePropertiesImpl.h"
-#include "ModelBasic/SimulationParameters.h"
 
 #include "ConstructorFunction.h"
 
@@ -54,7 +55,7 @@ namespace {
 		return cell;
     }
 
-    Cell* obstacleCheck (Cluster* cluster, bool safeMode, CellMap* cellMap, SpacePropertiesImpl* metric, SimulationParameters* parameters)
+    Cell* obstacleCheck (Cluster* cluster, bool safeMode, CellMap* cellMap, SpaceProperties* spaceProp, SimulationParameters* parameters)
     {
         foreach( Cell* cell, cluster->getCellsRef() ) {
             QVector2D pos = cluster->calcPosition(cell, true);
@@ -65,7 +66,7 @@ namespace {
 
                     //obstacle found?
                     if( obstacleCell ) {
-                        if( metric->displacement(obstacleCell->getCluster()->calcPosition(obstacleCell), pos).length() <  parameters->cellMinDistance ) {
+                        if( spaceProp->displacement(obstacleCell->getCluster()->calcPosition(obstacleCell), pos).length() <  parameters->cellMinDistance ) {
                             if( safeMode ) {
                                 if( obstacleCell != cell ) {
                                     cluster->clearCellsFromMap();
@@ -82,7 +83,7 @@ namespace {
                         //check also connected cells
                         for(int i = 0; i < obstacleCell->getNumConnections(); ++i) {
                             Cell* connectedObstacleCell = obstacleCell->getConnection(i);
-                            if( metric->displacement(connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell), pos).length() < parameters->cellMinDistance ) {
+                            if( spaceProp->displacement(connectedObstacleCell->getCluster()->calcPosition(connectedObstacleCell), pos).length() < parameters->cellMinDistance ) {
                                 if( safeMode ) {
                                     if( connectedObstacleCell != cell ) {
                                         cluster->clearCellsFromMap();

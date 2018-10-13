@@ -2,7 +2,7 @@
 
 #include "ModelBasic/SpaceProperties.h"
 
-#include "WorkerForGpu.h"
+#include "GpuWorker.h"
 #include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
@@ -11,11 +11,11 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 {
 }
 
-void SimulationAccessGpuImpl::init(SimulationContext * context)
+void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(context);
 	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	connect(worker, &WorkerForGpu::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
+	connect(worker, &GpuWorker::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }
 
 void SimulationAccessGpuImpl::clear()

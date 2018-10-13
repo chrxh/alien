@@ -1,18 +1,18 @@
 #pragma once
 
 #include "ModelBasic/SimulationAccess.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Local/UnitObserver.h"
 #include "ModelBasic/ChangeDescriptions.h"
 
+#include "SimulationAccessGpu.h"
+
 class SimulationAccessGpuImpl
-	: public SimulationAccess
+	: public SimulationAccessGpu
 {
 public:
-	SimulationAccessGpuImpl(QObject* parent = nullptr) : SimulationAccess(parent) {}
+	SimulationAccessGpuImpl(QObject* parent = nullptr) : SimulationAccessGpu(parent) {}
 	virtual ~SimulationAccessGpuImpl();
 
-	virtual void init(SimulationContext* context) override;
+	virtual void init(SimulationControllerGpu* controller) override;
 
 	virtual void clear() override;
 	virtual void updateData(DataChangeDescription const &desc) override;

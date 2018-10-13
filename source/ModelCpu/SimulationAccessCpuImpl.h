@@ -2,7 +2,7 @@
 
 #include "ModelBasic/ChangeDescriptions.h"
 #include "SimulationAccessCpu.h"
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 #include "UnitObserver.h"
 
 class SimulationAccessCpuImpl
@@ -42,7 +42,7 @@ private:
 	void collectClustersFromUnit(Unit* unit);
 	void collectParticlesFromUnit(Unit* unit);
 
-	SimulationContextImpl* _context = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 	bool _registered = false;
 
 	bool _dataRequired = false;

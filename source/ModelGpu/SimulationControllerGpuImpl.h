@@ -2,11 +2,11 @@
 
 #include <QTime>
 
-#include "ModelBasic/SimulationController.h"
+#include "SimulationControllerGpu.h"
 #include "DefinitionsImpl.h"
 
 class SimulationControllerGpuImpl
-	: public SimulationController
+	: public SimulationControllerGpu
 {
 	Q_OBJECT
 public:

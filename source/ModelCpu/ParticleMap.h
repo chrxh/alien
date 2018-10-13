@@ -10,7 +10,7 @@ public:
 	ParticleMap(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~ParticleMap() = default;
 
-	virtual void init(SpacePropertiesImpl* topo, MapCompartment* compartment) = 0;
+	virtual void init(SpaceProperties* spaceProp, MapCompartment* compartment) = 0;
 	virtual void clear() = 0;
 	
 	virtual void removeParticleIfPresent(QVector2D pos, Particle* particleToRemove) = 0;

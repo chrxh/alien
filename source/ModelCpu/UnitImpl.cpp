@@ -1,10 +1,11 @@
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/SpaceProperties.h"
+
 #include "Cell.h"
 #include "Cluster.h"
 #include "Particle.h"
 #include "Token.h"
 #include "UnitContext.h"
-#include "SpacePropertiesImpl.h"
 #include "MapCompartment.h"
 
 #include "UnitImpl.h"
