@@ -3,7 +3,7 @@
 #include "UnitGrid.h"
 #include "UnitContext.h"
 #include "Unit.h"
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 
 #include "SimulationAttributeSetter.h"
 
@@ -22,8 +22,8 @@ SimulationAttributeSetter::~SimulationAttributeSetter()
 
 void SimulationAttributeSetter::init(SimulationContext * context)
 {
-	_threadController = static_cast<SimulationContextImpl*>(context)->getUnitThreadController();
-	_grid = static_cast<SimulationContextImpl*>(context)->getUnitGrid();
+	_threadController = static_cast<SimulationContextCpuImpl*>(context)->getUnitThreadController();
+	_grid = static_cast<SimulationContextCpuImpl*>(context)->getUnitGrid();
 	_threadController->registerObserver(this);
 	_registered = true;
 }

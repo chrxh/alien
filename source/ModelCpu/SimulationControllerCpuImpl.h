@@ -24,7 +24,7 @@ private:
 	Q_SLOT void nextTimestepCalculatedIntern();
 	Q_SLOT void restrictTpsTimerTimeout();
 
-	SimulationContextImpl* _context = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 
 	bool _runMode = false;
 	bool _calculationRunning = false;

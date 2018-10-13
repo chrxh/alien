@@ -2,7 +2,7 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SpaceProperties.h"
 
-#include "WorkerForGpu.h"
+#include "GpuWorker.h"
 #include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 

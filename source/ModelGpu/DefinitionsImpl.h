@@ -2,8 +2,12 @@
 
 class SimulationControllerGpuImpl;
 class SimulationContextGpuImpl;
-class WorkerForGpu;
+class GpuWorker;
 class GpuObserver;
 class ThreadController;
 	
-enum RunningMode { DoNothing, CalcSingleTimestep, OpenEndedSimulation };
+enum RunningMode {
+	DoNothing, 
+	CalcSingleTimestep, 
+	OpenEndedSimulation
+};

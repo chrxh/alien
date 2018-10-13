@@ -1,7 +1,5 @@
 #include "Base/ServiceLocator.h"
 
-#include "Model/Local/SpacePropertiesImpl.h"
-#include "Model/Local/ContextFactory.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 
 #include "SimulationControllerGpuImpl.h"
@@ -9,21 +7,22 @@
 #include "SimulationAccessGpuImpl.h"
 #include "ModelGpuBuilderFacadeImpl.h"
 
-SimulationController * ModelGpuBuilderFacadeImpl::buildSimulationController(IntVector2D universeSize, SymbolTable * symbolTable, SimulationParameters * parameters) const
+SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(Config const & config, 
+	ModelGpuData const & specificData, uint timestepAtBeginning) const
 {
 	auto context = new SimulationContextGpuImpl();
 	auto contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
 
-	SpacePropertiesImpl* metric = static_cast<SpacePropertiesImpl*>(contextFactory->buildSpaceMetric());
-	metric->init(universeSize);
-	context->init(metric, symbolTable, parameters);
+	SpaceProperties* spaceProp = new SpaceProperties();
+	spaceProp->init(universeSize);
+	context->init(spaceProp, symbolTable, parameters);
 
 	auto controller = new SimulationControllerGpuImpl();
 	controller->init(context);
 	return controller;
 }
 
-SimulationAccess * ModelGpuBuilderFacadeImpl::buildSimulationAccess(SimulationContext * context) const
+SimulationAccessGpu * ModelGpuBuilderFacadeImpl::buildSimulationAccess() const
 {
 	auto access = new SimulationAccessGpuImpl();
 	access->init(context);

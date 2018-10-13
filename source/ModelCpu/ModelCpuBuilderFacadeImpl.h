@@ -16,5 +16,5 @@ public:
 	SimulationMonitor* buildSimulationMonitor() const override;
 
 private:
-	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContextImpl* context) const;
+	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContextCpuImpl* context) const;
 };

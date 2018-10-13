@@ -1,8 +1,9 @@
 #include <functional>
 
-#include "SpacePropertiesImpl.h"
-#include "UnitContext.h"
+#include "ModelBasic/SpaceProperties.h"
 #include "ModelBasic/Settings.h"
+
+#include "UnitContext.h"
 #include "Cluster.h"
 
 #include "Cell.h"
@@ -18,9 +19,9 @@ CellMapImpl::~CellMapImpl()
 	deleteCellMap();
 }
 
-void CellMapImpl::init(SpacePropertiesImpl* metric, MapCompartment* compartment)
+void CellMapImpl::init(SpaceProperties* spaceProp, MapCompartment* compartment)
 {
-	_metric = metric;
+	_spaceProp = spaceProp;
 	_compartment = compartment;
 
 	deleteCellMap();
@@ -41,7 +42,7 @@ void CellMapImpl::clear()
 
 void CellMapImpl::setCell(QVector2D pos, Cell * cell)
 {
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	locateCell(intPos) = cell;
 }
 
@@ -60,9 +61,9 @@ void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 	}
 */
 
-	IntVector2D intPosC = _metric->correctPositionAndConvertToIntVector(pos);
-	IntVector2D intPosM = _metric->shiftPosition(intPosC, { -1, -1 });
-	IntVector2D intPosP = _metric->shiftPosition(intPosC, { +1, +1 });
+	IntVector2D intPosC = _spaceProp->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPosM = _spaceProp->shiftPosition(intPosC, { -1, -1 });
+	IntVector2D intPosP = _spaceProp->shiftPosition(intPosC, { +1, +1 });
 
 	std::function<void(IntVector2D &&, Cell*)> removeCellIfPresent;
 	if (_compartment->isPointInCompartment(intPosM) && _compartment->isPointInCompartment(intPosP)) {
@@ -104,7 +105,7 @@ void CellMapImpl::removeCellIfPresent(QVector2D pos, Cell * cellToRemove)
 
 Cell* CellMapImpl::getCell(QVector2D pos) const
 {
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	return locateCell(intPos);
 }
 
@@ -134,11 +135,11 @@ Cluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, qrea
 	Cluster* closestCluster = 0;
 	qreal closestClusterDist = 0.0;
 
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	for (int rx = -rc; rx <= rc; rx += step)
 		for (int ry = -rc; ry <= rc; ry += step) {
 			if (static_cast<qreal>(rx*rx + ry*ry) < rs) {
-				Cell*& cell = locateCell(_metric->shiftPosition(intPos, { rx, ry }));
+				Cell*& cell = locateCell(_spaceProp->shiftPosition(intPos, { rx, ry }));
 				if (cell) {
 					Cluster* cluster = cell->getCluster();
 					if (cluster != exclude) {
@@ -148,7 +149,7 @@ Cluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, qrea
 						if (mass >= (minMass - Const::AlienPrecision) && mass <= (maxMass + Const::AlienPrecision)) {
 
 							//calc and compare dist
-							qreal dist = _metric->displacement(cell->calcPosition(), pos).length();
+							qreal dist = _spaceProp->displacement(cell->calcPosition(), pos).length();
 							if (!closestCluster || (dist < closestClusterDist)) {
 								closestCluster = cluster;
 								closestClusterDist = dist;
@@ -166,11 +167,11 @@ QList<Cell*> CellMapImpl::getNearbySpecificCells(const QVector2D & pos, qreal r,
 	QList< Cell* > cells;
 	int rCeil = qCeil(r);
 	qreal rs = r*r + Const::AlienPrecision;
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	for (int rx = -rCeil; rx <= rCeil; ++rx)
 		for (int ry = -rCeil; ry <= rCeil; ++ry)
 			if (static_cast<qreal>(rx*rx + ry*ry) < rs) {
-				Cell*& cell = locateCell(_metric->shiftPosition(intPos, { rx, ry }));
+				Cell*& cell = locateCell(_spaceProp->shiftPosition(intPos, { rx, ry }));
 				if (cell) {
 					if (selection(cell)) {
 						cells << cell;

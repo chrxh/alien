@@ -8,7 +8,7 @@
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
-#include "ModelCpu/SimulationContextImpl.h"
+#include "ModelCpu/SimulationContextCpuImpl.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelCpu/UnitGrid.h"
 #include "ModelCpu/Unit.h"

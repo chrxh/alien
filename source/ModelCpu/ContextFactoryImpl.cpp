@@ -1,17 +1,16 @@
 #include "ContextFactoryImpl.h"
-#include "SimulationContextImpl.h"
+#include "SimulationContextCpuImpl.h"
 #include "UnitImpl.h"
 #include "UnitContextImpl.h"
 #include "UnitGridImpl.h"
 #include "UnitThreadControllerImpl.h"
-#include "SpacePropertiesImpl.h"
 #include "CellMapImpl.h"
 #include "ParticleMapImpl.h"
 #include "CellComputerCompilerImpl.h"
 
-SimulationContextImpl * ContextFactoryImpl::buildSimulationContext() const
+SimulationContextCpuImpl * ContextFactoryImpl::buildSimulationContext() const
 {
-	return new SimulationContextImpl();
+	return new SimulationContextCpuImpl();
 }
 
 UnitContext * ContextFactoryImpl::buildSimulationUnitContext() const
@@ -32,11 +31,6 @@ UnitGrid * ContextFactoryImpl::buildSimulationGrid() const
 UnitThreadController * ContextFactoryImpl::buildSimulationThreads() const
 {
 	return new UnitThreadControllerImpl();
-}
-
-SpacePropertiesImpl * ContextFactoryImpl::buildSpaceMetric() const
-{
-	return new SpacePropertiesImpl();
 }
 
 MapCompartment * ContextFactoryImpl::buildMapCompartment() const

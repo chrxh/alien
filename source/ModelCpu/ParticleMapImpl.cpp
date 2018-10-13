@@ -1,4 +1,4 @@
-#include "SpacePropertiesImpl.h"
+#include "ModelBasic/SpaceProperties.h"
 #include "Particle.h"
 
 #include "ParticleMapImpl.h"
@@ -14,9 +14,9 @@ ParticleMapImpl::~ParticleMapImpl()
 }
 
 
-void ParticleMapImpl::init(SpacePropertiesImpl* metric, MapCompartment* compartment)
+void ParticleMapImpl::init(SpaceProperties* spaceProp, MapCompartment* compartment)
 {
-	_metric = metric;
+	_spaceProp = spaceProp;
 	_compartment = compartment;
 
 	deleteGrid();
@@ -37,7 +37,7 @@ void ParticleMapImpl::clear()
 
 void ParticleMapImpl::removeParticleIfPresent(QVector2D pos, Particle * particleToRemove)
 {
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	Particle*& particle = locateParticle(intPos);
 	if (particle == particleToRemove) {
 		particle = nullptr;
@@ -46,13 +46,13 @@ void ParticleMapImpl::removeParticleIfPresent(QVector2D pos, Particle * particle
 
 void ParticleMapImpl::setParticle(QVector2D pos, Particle * particle)
 {
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	locateParticle(intPos) = particle;
 }
 
 Particle * ParticleMapImpl::getParticle(QVector2D pos) const
 {
-	IntVector2D intPos = _metric->correctPositionAndConvertToIntVector(pos);
+	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	return locateParticle(intPos);
 }
 
