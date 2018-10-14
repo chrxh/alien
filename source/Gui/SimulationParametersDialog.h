@@ -16,8 +16,7 @@ class SimulationParametersDialog
     Q_OBJECT
 
 public:
-    SimulationParametersDialog(IntVector2D const& universeSize, IntVector2D const& gridSize
-		, SimulationParameters const* parameters, Serializer* serializer, QWidget *parent = nullptr);
+    SimulationParametersDialog(SimulationConfig const& config, Serializer* serializer, QWidget *parent = nullptr);
     virtual ~SimulationParametersDialog();
 
 	SimulationParameters* getSimulationParameters ();
@@ -43,6 +42,5 @@ private:
 	Serializer* _serializer = nullptr;
     SimulationParameters* _simulationParameters = nullptr;
 
-	IntVector2D const _universeSize;
-	IntVector2D const _gridSize;
+	SimulationConfig _config;
 };

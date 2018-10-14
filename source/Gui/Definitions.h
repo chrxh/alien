@@ -67,24 +67,12 @@ enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
 enum class NotifyScrollChanged { No, Yes };
 
-
-struct SimulationConfig
-{
-	uint maxThreads;
-	IntVector2D gridSize;
-	IntVector2D universeSize;
-};
-
-struct NewSimulationConfig
-{
-	uint maxThreads;
-	IntVector2D gridSize;
-	IntVector2D universeSize;
-	SymbolTable* symbolTable;
-	SimulationParameters* parameters;
-
-	double energy;
-};
+class _SimulationConfig;
+using SimulationConfig = boost::shared_ptr<_SimulationConfig>;
+class _SimulationConfigCpu;
+using SimulationConfigCpu = boost::shared_ptr<_SimulationConfigCpu>;
+class _SimulationConfigGpu;
+using SimulationConfigGpu = boost::shared_ptr<_SimulationConfigGpu>;
 
 enum class ModelComputationType
 {

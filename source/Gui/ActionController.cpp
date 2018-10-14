@@ -9,7 +9,6 @@
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/Physics.h"
-#include "ModelBasic/Validation.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
@@ -37,6 +36,7 @@
 #include "ActionModel.h"
 #include "ActionController.h"
 #include "ActionHolder.h"
+#include "SimulationConfig.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
@@ -217,10 +217,14 @@ void ActionController::onNewSimulation()
 {
 	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolTable(), _serializer, _mainView);
 	if (dialog.exec()) {
-		NewSimulationConfig config{
-			dialog.getMaxThreads(), dialog.getGridSize(), dialog.getUniverseSize(), dialog.getSymbolTable(), dialog.getSimulationParameters(), dialog.getEnergy()
-		};
-		_mainController->onNewSimulation(config);
+		auto config = boost::make_shared<_SimulationConfigCpu>();
+		config->maxThreads = dialog.getMaxThreads();
+		config->gridSize = dialog.getGridSize();
+		config->universeSize = dialog.getUniverseSize();
+		config->symbolTable = dialog.getSymbolTable();
+		config->parameters = dialog.getSimulationParameters();
+		_mainController->onNewSimulation(config, dialog.getEnergy());
+
 		settingUpNewSimulation();
 	}
 }
@@ -249,21 +253,25 @@ void ActionController::onLoadSimulation()
 
 void ActionController::onConfigureGrid()
 {
-	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainModel->getSimulationParameters(), _mainView);
+	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainView);
 	if (dialog.exec()) {
 		optional<uint> maxThreads = dialog.getMaxThreads();
 		optional<IntVector2D> gridSize = dialog.getGridSize();
 		optional<IntVector2D> universeSize = dialog.getUniverseSize();
 
-		_mainController->onRecreateSimulation({ *maxThreads, *gridSize, *universeSize });
+		auto config = boost::make_shared<_SimulationConfigCpu>();
+		config->maxThreads = *maxThreads;
+		config->gridSize = *gridSize;
+		config->universeSize = *universeSize;
+		_mainController->onRecreateSimulation(config);
 		settingUpNewSimulation();
 	}
 }
 
 void ActionController::onEditSimulationParameters()
 {
-	auto const& config = _mainController->getSimulationConfig();
-	SimulationParametersDialog dialog(config.universeSize, config.gridSize, _mainModel->getSimulationParameters()->clone(), _serializer, _mainView);
+	auto config = _mainController->getSimulationConfig();
+	SimulationParametersDialog dialog(config, _serializer, _mainView);
 	if (dialog.exec()) {
 		_mainModel->setSimulationParameters(dialog.getSimulationParameters());
 		_mainController->onUpdateSimulationParametersForRunningSimulation();
@@ -276,14 +284,16 @@ void ActionController::onLoadSimulationParameters()
 	if (!filename.isEmpty()) {
 		SimulationParameters* parameters;
 		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
-			auto const& config = _mainController->getSimulationConfig();
-			auto valResult = Validation::validate(config.universeSize, config.gridSize, parameters);
-			if (valResult == ValidationResult::Ok) {
+			auto config = _mainController->getSimulationConfig();
+			config->parameters = parameters;
+			string errorMsg;
+			auto valResult = config->validate(errorMsg);
+			if (valResult == _SimulationConfig::ValidationResult::Ok) {
 				_mainModel->setSimulationParameters(parameters);
 				_mainController->onUpdateSimulationParametersForRunningSimulation();
 			}
-			else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
-				QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+			else if (valResult == _SimulationConfig::ValidationResult::Error) {
+				QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
 				msgBox.exec();
 			}
 			else {
@@ -498,7 +508,7 @@ void ActionController::onRandomMultiplier()
 	RandomMultiplierDialog dialog;
 	if (dialog.exec()) {
 		DataDescription data = _repository->getExtendedSelection();
-		IntVector2D universeSize = _mainController->getSimulationConfig().universeSize;
+		IntVector2D universeSize = _mainController->getSimulationConfig()->universeSize;
 		for (int i = 0; i < dialog.getNumberOfCopies(); ++i) {
 			DataDescription dataCopied = data;
 			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
