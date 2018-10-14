@@ -38,273 +38,16 @@
     <Filter Include="Source Files\Actions">
       <UniqueIdentifier>{97a890a7-fca7-4ade-a2a1-05c0522170f1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">
       <Filter>Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ToolbarView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ToolbarView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarView.cpp">
-      <Filter>Source Files\Toolbar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarController.cpp">
-      <Filter>Source Files\Toolbar</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ToolbarController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ToolbarController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Toolbar\ToolbarContext.cpp">
-      <Filter>Source Files\Toolbar</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ToolbarContext.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ToolbarContext.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\dialogs\NewSimulationDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_NewSimulationDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_NewSimulationDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\dialogs\SimulationParametersDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationParametersDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationParametersDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\dialogs\SymbolTableDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SymbolTableDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SymbolTableDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\VisualEditor\AbstractItem.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\CellConnectionItem.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\CellItem.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\VisualEditor\CoordinateSystem.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\ItemConfig.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ItemConfig.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ItemConfig.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\ItemManager.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ItemManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ItemManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\MarkerItem.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\ParticleItem.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\ViewportController.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ViewportController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ViewportController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\ViewportInterface.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ViewportInterface.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ViewportInterface.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\Settings.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\CodeEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CodeEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CodeEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\HexEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_HexEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_HexEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\ClusterEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ClusterEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ClusterEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\CellComputerEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CellComputerEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellComputerEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\CellEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CellEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_MetadataEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_MetadataEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\ParticleEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ParticleEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ParticleEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\SelectionEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SelectionEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SelectionEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\MetadataEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_MetadataEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_MetadataEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\SymbolEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SymbolEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SymbolEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\TokenEditTab.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_TokenEditTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_TokenEditTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\TokenEditWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_TokenEditWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_TokenEditWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditContext.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditContext.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditContext.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditController.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditModel.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\TokenEditTabWidget.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_TokenEditTabWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_TokenEditTabWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\Notifier.cpp">
       <Filter>Source Files</Filter>
@@ -313,33 +56,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_Notifier.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DataEditor\DataEditView.cpp">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DataEditView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DataEditView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\ItemUniverseView.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ItemUniverseView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ItemUniverseView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\PixelUniverseView.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_PixelUniverseView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_PixelUniverseView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\MainController.cpp">
@@ -369,15 +85,6 @@
     <ClCompile Include="Release\moc_MainView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\visualeditor\VisualEditController.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_VisualEditController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_VisualEditController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\InfoController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -405,7 +112,7 @@
     <ClCompile Include="Release\moc_DataRepository.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Actions\ActionController.cpp">
+    <ClCompile Include="..\..\source\Gui\ActionController.cpp">
       <Filter>Source Files\Actions</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ActionController.cpp">
@@ -414,7 +121,7 @@
     <ClCompile Include="Release\moc_ActionController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Actions\ActionHolder.cpp">
+    <ClCompile Include="..\..\source\Gui\ActionHolder.cpp">
       <Filter>Source Files\Actions</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ActionHolder.cpp">
@@ -423,7 +130,7 @@
     <ClCompile Include="Release\moc_ActionHolder.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Actions\ActionModel.cpp">
+    <ClCompile Include="..\..\source\Gui\ActionModel.cpp">
       <Filter>Source Files\Actions</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ActionModel.cpp">
@@ -432,34 +139,7 @@
     <ClCompile Include="Release\moc_ActionModel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Dialogs\NewRectangleDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_NewRectangleDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_NewRectangleDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Misc\StartScreenWidget.cpp">
-      <Filter>Source Files\Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_StartScreenWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_StartScreenWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Misc\StartScreenController.cpp">
-      <Filter>Source Files\Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_StartScreenController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_StartScreenController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\assistance\DocumentationWindow.cpp">
+    <ClCompile Include="..\..\source\Gui\DocumentationWindow.cpp">
       <Filter>Source Files\Assistance</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_DocumentationWindow.cpp">
@@ -468,43 +148,160 @@
     <ClCompile Include="Release\moc_DocumentationWindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\dialogs\NewHexagonDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
+    <ClCompile Include="..\..\source\Gui\CellComputerEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_NewHexagonDialog.cpp">
+    <ClCompile Include="Debug\moc_CellComputerEditTab.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_NewHexagonDialog.cpp">
+    <ClCompile Include="Release\moc_CellComputerEditTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\dialogs\NewParticlesDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
+    <ClCompile Include="..\..\source\Gui\CellEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_NewParticlesDialog.cpp">
+    <ClCompile Include="Debug\moc_CellEditTab.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_NewParticlesDialog.cpp">
+    <ClCompile Include="Release\moc_CellEditTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\dialogs\RandomMultiplierDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
+    <ClCompile Include="..\..\source\Gui\ClusterEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_RandomMultiplierDialog.cpp">
+    <ClCompile Include="Debug\moc_ClusterEditTab.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_RandomMultiplierDialog.cpp">
+    <ClCompile Include="Release\moc_ClusterEditTab.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\dialogs\GridMultiplierDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
+    <ClCompile Include="..\..\source\Gui\CodeEditWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_GridMultiplierDialog.cpp">
+    <ClCompile Include="Debug\moc_CodeEditWidget.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_GridMultiplierDialog.cpp">
+    <ClCompile Include="Release\moc_CodeEditWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Dialogs\ComputationGridDialog.cpp">
+    <ClCompile Include="..\..\source\Gui\DataEditContext.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditContext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditController.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditModel.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataEditView.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataEditView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataEditView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\HexEditWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_HexEditWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_HexEditWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MetadataEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MetadataEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MetadataEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MetadataEditWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_MetadataEditWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_MetadataEditWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ParticleEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ParticleEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ParticleEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SelectionEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SelectionEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SelectionEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SymbolEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SymbolEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SymbolEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\TokenEditTab.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_TokenEditTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_TokenEditTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\TokenEditTabWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_TokenEditTabWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_TokenEditTabWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\TokenEditWidget.cpp">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_TokenEditWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_TokenEditWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ComputationGridDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ComputationGridDialog.cpp">
@@ -513,14 +310,98 @@
     <ClCompile Include="Release\moc_ComputationGridDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_Manipulator.cpp">
+    <ClCompile Include="..\..\source\Gui\GridMultiplierDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GridMultiplierDialog.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_Manipulator.cpp">
+    <ClCompile Include="Release\moc_GridMultiplierDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\VisualEditor\Manipulator.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
+    <ClCompile Include="..\..\source\Gui\NewHexagonDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_NewHexagonDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_NewHexagonDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\NewParticlesDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_NewParticlesDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_NewParticlesDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\NewRectangleDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_NewRectangleDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_NewRectangleDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\NewSimulationDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_NewSimulationDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_NewSimulationDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\RandomMultiplierDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_RandomMultiplierDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_RandomMultiplierDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SimulationParametersDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationParametersDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationParametersDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SymbolTableDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SymbolTableDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SymbolTableDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\StartScreenController.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_StartScreenController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_StartScreenController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\StartScreenWidget.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_StartScreenWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_StartScreenWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MonitorController.cpp">
+      <Filter>Source Files\Monitoring</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_MonitorController.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -528,10 +409,7 @@
     <ClCompile Include="Release\moc_MonitorController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Monitoring\MonitorController.cpp">
-      <Filter>Source Files\Monitoring</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\monitoring\MonitorView.cpp">
+    <ClCompile Include="..\..\source\Gui\MonitorView.cpp">
       <Filter>Source Files\Monitoring</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_MonitorView.cpp">
@@ -539,6 +417,126 @@
     </ClCompile>
     <ClCompile Include="Release\moc_MonitorView.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ToolbarContext.cpp">
+      <Filter>Source Files\Toolbar</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ToolbarContext.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ToolbarContext.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ToolbarController.cpp">
+      <Filter>Source Files\Toolbar</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ToolbarController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ToolbarController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ToolbarView.cpp">
+      <Filter>Source Files\Toolbar</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ToolbarView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ToolbarView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\AbstractItem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\CellConnectionItem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\CellItem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\CoordinateSystem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ItemConfig.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ItemConfig.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ItemConfig.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ItemManager.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ItemManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ItemManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ItemUniverseView.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ItemUniverseView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ItemUniverseView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Manipulator.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_Manipulator.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_Manipulator.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MarkerItem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ParticleItem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\PixelUniverseView.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_PixelUniverseView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_PixelUniverseView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ViewportController.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ViewportController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ViewportController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ViewportInterface.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ViewportInterface.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ViewportInterface.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\VisualEditController.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_VisualEditController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_VisualEditController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SimulationConfig.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -565,122 +563,8 @@
     <CustomBuild Include="..\..\source\Gui\resources\ressources.qrc">
       <Filter>Resources</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarView.h">
-      <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarView.ui">
-      <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarController.h">
-      <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Toolbar\ToolbarContext.h">
-      <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\NewSimulationDialog.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\NewSimulationDialog.ui">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\SimulationParametersDialog.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\SimulationParametersDialog.ui">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\SymbolTableDialog.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\SymbolTableDialog.ui">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\VisualEditor\CoordinateSystem.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\ItemConfig.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\ItemManager.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\ViewportController.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\ViewportInterface.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\CodeEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\HexEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\ClusterEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\CellComputerEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\CellEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\CellComputerEditTab.ui">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditTab.ui">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\ParticleEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\SelectionEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\MetadataEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\SymbolEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\SymbolEditTab.ui">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTab.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTab.ui">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditContext.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditController.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditModel.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\TokenEditTabWidget.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\Notifier.h">
       <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DataEditor\DataEditView.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\ItemUniverseView.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\PixelUniverseView.h">
-      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\MainController.h">
       <Filter>Source Files</Filter>
@@ -694,12 +578,6 @@
     <CustomBuild Include="..\..\source\Gui\MainView.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\VisualEditController.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\visualeditor\VisualEditController.ui">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\InfoController.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
@@ -709,77 +587,194 @@
     <CustomBuild Include="..\..\source\Gui\DataRepository.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Actions\ActionController.h">
+    <CustomBuild Include="..\..\source\Gui\ActionController.h">
       <Filter>Source Files\Actions</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Actions\ActionHolder.h">
+    <CustomBuild Include="..\..\source\Gui\ActionHolder.h">
       <Filter>Source Files\Actions</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Actions\ActionModel.h">
+    <CustomBuild Include="..\..\source\Gui\ActionModel.h">
       <Filter>Source Files\Actions</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\NewRectangleDialog.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Dialogs\NewRectangleDialog.ui">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Misc\StartScreenWidget.h">
-      <Filter>Source Files\Misc</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Misc\StartScreenWidget.ui">
-      <Filter>Source Files\Misc</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Misc\StartScreenController.h">
-      <Filter>Source Files\Misc</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\assistance\DocumentationWindow.h">
+    <CustomBuild Include="..\..\source\Gui\DocumentationWindow.h">
       <Filter>Source Files\Assistance</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\assistance\DocumentationWindow.ui">
+    <CustomBuild Include="..\..\source\Gui\DocumentationWindow.ui">
       <Filter>Source Files\Assistance</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\NewHexagonDialog.h">
+    <CustomBuild Include="..\..\source\Gui\CellComputerEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\CellComputerEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\CellEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ClusterEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\CodeEditWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditContext.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditController.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditModel.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataEditView.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\HexEditWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MetadataEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MetadataEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MetadataEditWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ParticleEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\SelectionEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\SymbolEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\SymbolEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\TokenEditTab.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\TokenEditTab.ui">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\TokenEditTabWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\TokenEditWidget.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ComputationGridDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\NewHexagonDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\ComputationGridDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\NewParticlesDialog.h">
+    <CustomBuild Include="..\..\source\Gui\GridMultiplierDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\NewParticlesDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\GridMultiplierDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\RandomMultiplierDialog.h">
+    <CustomBuild Include="..\..\source\Gui\NewHexagonDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\RandomMultiplierDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\NewHexagonDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\GridMultiplierDialog.h">
+    <CustomBuild Include="..\..\source\Gui\NewParticlesDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\dialogs\GridMultiplierDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\NewParticlesDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Dialogs\ComputationGridDialog.h">
+    <CustomBuild Include="..\..\source\Gui\NewRectangleDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Dialogs\ComputationGridDialog.ui">
+    <CustomBuild Include="..\..\source\Gui\NewRectangleDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\VisualEditor\Manipulator.h">
+    <CustomBuild Include="..\..\source\Gui\NewSimulationDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\NewSimulationDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\RandomMultiplierDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\RandomMultiplierDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\SimulationParametersDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\SimulationParametersDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\SymbolTableDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\SymbolTableDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\StartScreenController.h">
+      <Filter>Source Files\Misc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\StartScreenWidget.h">
+      <Filter>Source Files\Misc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\StartScreenWidget.ui">
+      <Filter>Source Files\Misc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MonitorController.h">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MonitorView.h">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\MonitorView.ui">
+      <Filter>Source Files\Monitoring</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ToolbarContext.h">
+      <Filter>Source Files\Toolbar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ToolbarController.h">
+      <Filter>Source Files\Toolbar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ToolbarView.h">
+      <Filter>Source Files\Toolbar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ToolbarView.ui">
+      <Filter>Source Files\Toolbar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ItemConfig.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Monitoring\MonitorController.h">
-      <Filter>Source Files\Monitoring</Filter>
+    <CustomBuild Include="..\..\source\Gui\ItemManager.h">
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\monitoring\MonitorView.h">
-      <Filter>Source Files\Monitoring</Filter>
+    <CustomBuild Include="..\..\source\Gui\ItemUniverseView.h">
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\monitoring\MonitorView.ui">
-      <Filter>Source Files\Monitoring</Filter>
+    <CustomBuild Include="..\..\source\Gui\Manipulator.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\PixelUniverseView.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ViewportController.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ViewportInterface.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\VisualEditController.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\VisualEditController.ui">
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -869,38 +864,23 @@
     <ClInclude Include="resource.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_ToolbarView.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_NewSimulationDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_SimulationParametersDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_SymbolTableDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\VisualEditor\AbstractItem.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\visualeditor\CellConnectionItem.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\visualeditor\CellItem.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\visualeditor\MarkerItem.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\visualeditor\ParticleItem.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\Settings.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_MainView.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SerializationHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\StringHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_DocumentationWindow.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_CellComputerEditTab.h">
       <Filter>Generated Files</Filter>
@@ -911,28 +891,16 @@
     <ClInclude Include="ui_SymbolEditTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\TabWidgetHelper.h">
+      <Filter>Source Files\DataEditor</Filter>
+    </ClInclude>
     <ClInclude Include="ui_TokenEditTab.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\DataEditor\TabWidgetHelper.h">
-      <Filter>Source Files\DataEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_MainView.h">
+    <ClInclude Include="ui_ComputationGridDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_VisualEditController.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\SerializationHelper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_NewRectangleDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_StartScreenWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_DocumentationWindow.h">
+    <ClInclude Include="ui_GridMultiplierDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_NewHexagonDialog.h">
@@ -941,23 +909,56 @@
     <ClInclude Include="ui_NewParticlesDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="ui_NewRectangleDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_NewSimulationDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
     <ClInclude Include="ui_RandomMultiplierDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_GridMultiplierDialog.h">
+    <ClInclude Include="ui_SimulationParametersDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_ComputationGridDialog.h">
+    <ClInclude Include="ui_SymbolTableDialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_StartScreenWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MonitorModel.h">
+      <Filter>Source Files\Monitoring</Filter>
     </ClInclude>
     <ClInclude Include="ui_MonitorView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\StringHelper.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="ui_ToolbarView.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\Monitoring\MonitorModel.h">
-      <Filter>Source Files\Monitoring</Filter>
+    <ClInclude Include="..\..\source\Gui\AbstractItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\CellConnectionItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\CellItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\CoordinateSystem.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MarkerItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\ParticleItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_VisualEditController.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SimulationConfig.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

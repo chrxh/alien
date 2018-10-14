@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "Model/Api/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 #include "Definitions.h"
 
@@ -22,10 +22,10 @@ public:
 	virtual void onStepBackward(bool& emptyStack);
 	virtual void onMakeSnapshot();
 	virtual void onRestoreSnapshot();
-	virtual void onNewSimulation(NewSimulationConfig config);
+	virtual void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
 	virtual void onSaveSimulation(string const& filename);
 	virtual bool onLoadSimulation(string const& filename);
-	virtual void onRecreateSimulation(SimulationConfig const& simConfig);
+	virtual void onRecreateSimulation(SimulationConfig const& config);
 	virtual void onUpdateSimulationParametersForRunningSimulation();
 	virtual void onRestrictTPS(optional<int> const& tps);
 
@@ -89,4 +89,7 @@ private:
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
+
+	SimulationControllerBuildFunc _controllerBuildFunc;
+	SimulationAccessBuildFunc _accessBuildFunc;
 };

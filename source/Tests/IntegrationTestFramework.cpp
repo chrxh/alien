@@ -3,18 +3,17 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Local/UnitGrid.h"
-#include "Model/Local/Unit.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/MapCompartment.h"
-#include "Model/Impl/UnitThreadControllerImpl.h"
-#include "Model/Impl/UnitThread.h"
-#include "Model/Api/SimulationAccess.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelCpu/UnitGrid.h"
+#include "ModelCpu/Unit.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelCpu/MapCompartment.h"
+#include "ModelCpu/UnitThreadControllerImpl.h"
+#include "ModelCpu/UnitThread.h"
+#include "ModelBasic/SimulationAccess.h"
 
 #include "IntegrationTestFramework.h"
 
@@ -22,11 +21,12 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	: _universeSize(universeSize)
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	_symbols = _facade->buildDefaultSymbolTable();
-	_parameters = _facade->buildDefaultSimulationParameters();
+	_basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	_cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	_symbols = _basicFacade->buildDefaultSymbolTable();
+	_parameters = _basicFacade->buildDefaultSimulationParameters();
 	_numberGen = factory->buildRandomNumberGenerator();
-	_numberGen->init(123123, 0);
+	_numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
