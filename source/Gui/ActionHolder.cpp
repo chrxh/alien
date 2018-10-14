@@ -49,8 +49,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionExit = new QAction("Exit", this);
 	actionExit->setEnabled(true);
 
-	actionConfigureGrid = new QAction("Configure grid", this);
-	actionConfigureGrid->setEnabled(true);
+	actionComputationSettings = new QAction("Computation", this);
+	actionComputationSettings->setEnabled(true);
 
 	actionEditSimParameters = new QAction("Edit", this);
 	actionEditSimParameters->setEnabled(true);

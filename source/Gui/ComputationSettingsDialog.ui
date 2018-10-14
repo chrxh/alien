@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ComputationGridDialog</class>
- <widget class="QDialog" name="ComputationGridDialog">
+ <class>ComputationSettingsDialog</class>
+ <widget class="QDialog" name="ComputationSettingsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>computation grid</string>
+   <string>computation settings</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0">
@@ -275,7 +275,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ComputationGridDialog</receiver>
+   <receiver>ComputationSettingsDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

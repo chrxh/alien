@@ -21,16 +21,16 @@ public:
 	NewSimulationDialog(SimulationParameters const* parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = nullptr);
 	virtual ~NewSimulationDialog();
 
+	SimulationConfig getConfig() const;
+	double getEnergy() const;
+
+private:
 	IntVector2D getUniverseSize() const;
 	IntVector2D getGridSize() const;
 	uint getMaxThreads() const;
 	SymbolTable* getSymbolTable() const;
 	SimulationParameters* getSimulationParameters() const;
-	double getEnergy() const;
-
-private:
 	IntVector2D getUnitSize() const;
-	SimulationConfig createConfig() const;
 
 private:
 	Q_SLOT void simulationParametersButtonClicked();

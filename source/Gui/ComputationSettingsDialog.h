@@ -1,16 +1,16 @@
 ﻿#pragma once
 #include <QDialog>
-#include "ui_ComputationGridDialog.h"
+#include "ui_ComputationSettingsDialog.h"
 
 #include "Gui/Definitions.h"
 
-class ComputationGridDialog
+class ComputationSettingsDialog
 	: public QDialog
 {
 	Q_OBJECT
 public:
-	ComputationGridDialog(SimulationConfig const& config, QWidget * parent = nullptr);
-	virtual ~ComputationGridDialog() = default;
+	ComputationSettingsDialog(SimulationConfig const& config, QWidget * parent = nullptr);
+	virtual ~ComputationSettingsDialog() = default;
 
 	optional<uint> getMaxThreads() const;
 	optional<IntVector2D> getGridSize() const;
@@ -21,6 +21,6 @@ private:
 
 	Q_SLOT void okClicked();
 
-	Ui::ComputationGridDialog ui;
+	Ui::ComputationSettingsDialog ui;
 	SimulationConfig _config;
 };
