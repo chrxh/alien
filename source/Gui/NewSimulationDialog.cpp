@@ -32,6 +32,7 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const* parameters,
 		GuiSettings::getSettingsValue(Const::MaxThreadsKey, Const::MaxThreadsDefault)));
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));
+	ui->gpuFrame->hide();
 
 	updateLabels();
 
@@ -63,7 +64,7 @@ IntVector2D NewSimulationDialog::getUnitSize() const
 	return{ universeSize.x / gridSize.x, universeSize.y / gridSize.y };
 }
 
-SimulationConfig NewSimulationDialog::createConfig() const
+SimulationConfig NewSimulationDialog::getConfig() const
 {
 	auto config = boost::make_shared<_SimulationConfigCpu>();
 	config->maxThreads = getMaxThreads();
@@ -113,7 +114,7 @@ SimulationParameters* NewSimulationDialog::getSimulationParameters() const
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
 
-	SimulationParametersDialog d(createConfig(), _serializer, this);
+	SimulationParametersDialog d(getConfig(), _serializer, this);
 	if (d.exec()) {
 		_parameters = d.getSimulationParameters();
 	}
@@ -155,7 +156,7 @@ void NewSimulationDialog::updateLabels()
 
 void NewSimulationDialog::okClicked()
 {
-	SimulationConfig config = createConfig();
+	SimulationConfig config = getConfig();
 	string errorMsg;
 	auto valResult = config->validate(errorMsg);
 	if (valResult == _SimulationConfig::ValidationResult::Ok) {
