@@ -217,7 +217,6 @@ void ActionController::onNewSimulation()
 {
 	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolTable(), _serializer, _mainView);
 	if (dialog.exec()) {
-		auto config = boost::make_shared<_SimulationConfigCpu>();
 		_mainController->onNewSimulation(dialog.getConfig(), dialog.getEnergy());
 
 		settingUpNewSimulation();
