@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ModelCpu/Definitions.h"
 #include "Tests/TestSettings.h"
 
 class IntegrationTestFramework : public ::testing::Test
@@ -17,7 +18,8 @@ protected:
 	ClusterDescription createClusterDescriptionWithCompleteCell(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	ParticleDescription createParticleDescription() const;
 
-	ModelBuilderFacade* _facade = nullptr;
+	ModelBasicBuilderFacade* _basicFacade = nullptr;
+	ModelCpuBuilderFacade* _cpuFacade = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 	SymbolTable* _symbols = nullptr;

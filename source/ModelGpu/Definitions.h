@@ -1,7 +1,9 @@
-#ifndef DEFINITIONS_H
-#define MODEL_GPU_DEFINITIONS_H
+#pragma once
 
 #include "Base/Definitions.h"
 #include "DllExport.h"
 
-#endif // MODEL_GPU_DEFINITIONS_H
+class SimulationControllerGpu;
+class SimulationAccessGpu;
+class ModelGpuData;
+

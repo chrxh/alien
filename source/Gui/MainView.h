@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QMainWindow>
 
-#include "Model/Api/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 #include "Definitions.h"
 
@@ -24,7 +24,7 @@ public:
 
 	virtual void refresh();
 
-	virtual void setupEditors(SimulationController* controller);
+	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);
 	virtual InfoController* getInfoController() const;
 
 	virtual void showDocumentation(bool show);

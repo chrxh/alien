@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Model/Api/Descriptions.h"
+#include "ModelBasic/Descriptions.h"
 #include "Definitions.h"
 
 class VersionController
@@ -14,7 +14,7 @@ public:
 	VersionController(QObject * parent = nullptr);
 	virtual ~VersionController() = default;
 
-	virtual void init(SimulationContext* context);
+	virtual void init(SimulationContext* context, SimulationAccess* access);
 
 	virtual bool isStackEmpty();
 	virtual void clearStack();

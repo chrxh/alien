@@ -250,7 +250,10 @@
     <ProjectReference Include="..\Base\Base.vcxproj">
       <Project>{21bb3377-a473-473c-a064-396ec67979ab}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Model\model.vcxproj">
+    <ProjectReference Include="..\ModelCpu\ModelCpu.vcxproj">
+      <Project>{c908aae6-8426-43c2-bbef-77fab49231fc}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ModelBasic\ModelBasic.vcxproj">
       <Project>{046b2f85-571f-35cc-b683-6c420049404b}</Project>
     </ProjectReference>
   </ItemGroup>

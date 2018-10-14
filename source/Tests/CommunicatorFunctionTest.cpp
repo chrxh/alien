@@ -2,18 +2,20 @@
 
 #include "Base/ServiceLocator.h"
 
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Local/Cluster.h"
-#include "Model/Local/Cell.h"
-#include "Model/Local/Token.h"
-#include "Model/Local/PhysicalQuantityConverter.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/SpacePropertiesLocal.h"
-#include "Model/Impl/CommunicatorFunction.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelCpu/SimulationAccessCpu.h"
+#include "ModelCpu/Cluster.h"
+#include "ModelCpu/Cell.h"
+#include "ModelCpu/Token.h"
+#include "ModelCpu/PhysicalQuantityConverter.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelCpu/CommunicatorFunction.h"
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+#include "ModelCpu/ModelCpuData.h"
 
 #include "Tests/TestSettings.h"
 
@@ -27,19 +29,19 @@ public:
 	~CommunicatorFunctionTest();
 
 protected:
-    SimulationController* _controller = nullptr;
-	SimulationAccess* _access = nullptr;
+    SimulationControllerCpu* _controller = nullptr;
+	SimulationAccessCpu* _access = nullptr;
 };
 
 CommunicatorFunctionTest::CommunicatorFunctionTest()
 	: IntegrationTestFramework({ 1000, 1000 })
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	_controller = facade->buildSimulationController(1, { 1, 1 }, _universeSize, _symbols, _parameters);
+	auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	_controller = facade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 1,1 }));
 	auto context = _controller->getContext();
 
 	_access = facade->buildSimulationAccess();
-	_access->init(context);
+	_access->init(_controller);
 }
 
 TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
