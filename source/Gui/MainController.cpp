@@ -23,6 +23,11 @@
 #include "ModelCpu/ModelCpuBuilderFacade.h"
 #include "ModelCpu/ModelCpuData.h"
 
+#include "ModelGpu/SimulationAccessGpu.h"
+#include "ModelGpu/SimulationControllerGpu.h"
+#include "ModelGpu/ModelGpuBuilderFacade.h"
+#include "ModelGpu/ModelGpuData.h"
+
 #include "VersionController.h"
 #include "SerializationHelper.h"
 #include "InfoController.h"
@@ -70,24 +75,39 @@ void MainController::init()
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
 	_controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
-		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationControllerCpu*
+		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
 	{
-		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 		if (ModelComputationType(typeId) == ModelComputationType::Cpu) {
+			auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 			ModelCpuData data(typeSpecificData);
-			return modelCpuFacade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
+			return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
 		}
-		return nullptr;
+		else if (ModelComputationType(typeId) == ModelComputationType::Gpu) {
+			auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+			ModelGpuData data(typeSpecificData);
+			return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
+		}
+		else {
+			THROW_NOT_IMPLEMENTED();
+		}
 	};
 	_accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
 	{
-		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-		SimulationAccessCpu* access = modelCpuFacade->buildSimulationAccess();
 		if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
+			auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+			SimulationAccessCpu* access = modelCpuFacade->buildSimulationAccess();
 			access->init(controllerCpu);
 			return access;
 		}
-		return nullptr;
+		else if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
+			auto modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+			SimulationAccessGpu* access = modelGpuFacade->buildSimulationAccess();
+			access->init(controllerGpu);
+			return access;
+		}
+		else {
+			THROW_NOT_IMPLEMENTED();
+		}
 	};
 	_serializer->init(_controllerBuildFunc, _accessBuildFunc);
 	_numberGenerator->init(12315312, 0);
@@ -190,7 +210,16 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 		auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 		ModelCpuBuilderFacade::Config simulationControllerConfig{ configCpu->universeSize, configCpu->symbolTable, configCpu->parameters };
 		ModelCpuData data(configCpu->maxThreads, configCpu->gridSize);
-		_simController = facade->buildSimulationController(simulationControllerConfig, data, 0);
+		_simController = facade->buildSimulationController(simulationControllerConfig, data);
+	}
+	else if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+		auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+		ModelGpuBuilderFacade::Config simulationControllerConfig{ configGpu->universeSize, configGpu->symbolTable, configGpu->parameters };
+		ModelGpuData data;
+		_simController = facade->buildSimulationController(simulationControllerConfig, data);
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
 	}
 
 	initSimulation(config->symbolTable, config->parameters);
@@ -203,7 +232,12 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 void MainController::onSaveSimulation(string const& filename)
 {
 	_jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
-	_serializer->serialize(_simController, int(ModelComputationType::Cpu));
+	if (dynamic_cast<SimulationControllerCpu*>(_simController)) {
+		_serializer->serialize(_simController, int(ModelComputationType::Cpu));
+	}
+	else if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
+		_serializer->serialize(_simController, int(ModelComputationType::Gpu));
+	}
 }
 
 bool MainController::onLoadSimulation(string const & filename)
