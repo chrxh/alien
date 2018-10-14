@@ -52,28 +52,52 @@ NewSimulationDialog::~NewSimulationDialog()
     delete ui;
 }
 
-IntVector2D NewSimulationDialog::getUniverseSize () const
+IntVector2D NewSimulationDialog::getUniverseSizeForModelCpu () const
 {
-	return _universeSize;
+	return _universeSizeForModelCpu;
+}
+
+IntVector2D NewSimulationDialog::getUniverseSizeForModelGpu() const
+{
+	IntVector2D result;
+	bool ok;
+	result.x = ui->gpuUniverseSizeXEdit->text().toUInt(&ok);
+	if (!ok) { result.x = 1; }
+
+	result.y = ui->gpuUniverseSizeYEdit->text().toUInt(&ok);
+	if (!ok) { result.y = 1; }
+
+	return result;
 }
 
 IntVector2D NewSimulationDialog::getUnitSize() const
 {
 	IntVector2D gridSize = getGridSize();
-	IntVector2D universeSize = getUniverseSize();
+	IntVector2D universeSize = getUniverseSizeForModelCpu();
 	return{ universeSize.x / gridSize.x, universeSize.y / gridSize.y };
 }
 
 SimulationConfig NewSimulationDialog::getConfig() const
 {
-	auto config = boost::make_shared<_SimulationConfigCpu>();
-	config->maxThreads = getMaxThreads();
-	config->universeSize = getUniverseSize();
-	config->gridSize = getGridSize();
-	config->parameters = getSimulationParameters();
-	config->symbolTable = getSymbolTable();
-
-	return config;
+	if (ui->cpuDeviceRadioButton->isChecked()) {
+		auto config = boost::make_shared<_SimulationConfigCpu>();
+		config->maxThreads = getMaxThreads();
+		config->universeSize = getUniverseSizeForModelCpu();
+		config->gridSize = getGridSize();
+		config->parameters = getSimulationParameters();
+		config->symbolTable = getSymbolTable();
+		return config;
+	}
+	else if (ui->gpuDeviceRadioButton->isChecked()) {
+		auto config = boost::make_shared<_SimulationConfigGpu>();
+		config->universeSize = getUniverseSizeForModelGpu();
+		config->parameters = getSimulationParameters();
+		config->symbolTable = getSymbolTable();
+		return config;
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
+	}
 }
 
 IntVector2D NewSimulationDialog::getGridSize() const
@@ -143,10 +167,10 @@ void NewSimulationDialog::updateLabels()
 	int unitSizeY = ui->unitSizeYEdit->text().toUInt(&ok);
 	if (!ok) { return; }
 
-	_universeSize = { gridSizeX * unitSizeX, gridSizeY * unitSizeY };
+	_universeSizeForModelCpu = { gridSizeX * unitSizeX, gridSizeY * unitSizeY };
 	_gridSize = { gridSizeX, gridSizeY };
-	ui->universeSizeXLabel->setText(StringHelper::toString(_universeSize.x));
-	ui->universeSizeYLabel->setText(StringHelper::toString(_universeSize.y));
+	ui->universeSizeXLabel->setText(StringHelper::toString(_universeSizeForModelCpu.x));
+	ui->universeSizeYLabel->setText(StringHelper::toString(_universeSizeForModelCpu.y));
 	int limitThreads = getMaxThreads();
 	int activeThreads = std::min((gridSizeX / 3) * (gridSizeY / 3), limitThreads);
 	int totalThreads = gridSizeX * gridSizeY;
