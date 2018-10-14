@@ -263,11 +263,9 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
+
 	simController->setParent(this);
 
-/*
-	_access->init(simController->getContext());
-*/
 	buildAccess(simController);
 	_access->clear();
 	_access->updateData(data);

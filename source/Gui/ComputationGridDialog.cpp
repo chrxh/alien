@@ -1,27 +1,27 @@
 ﻿#include <QMessageBox>
 
-#include "ModelBasic/Validation.h"
-#include "Gui/Settings.h"
-#include "Gui/StringHelper.h"
-
+#include "Settings.h"
+#include "StringHelper.h"
 #include "ComputationGridDialog.h"
+#include "SimulationConfig.h"
 
-ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, SimulationParameters const* parameters
-	, QWidget * parent)
-	: QDialog(parent), _parameters(parameters)
+ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, QWidget * parent /*= nullptr*/)
+	: QDialog(parent), _config(config)
 {
 	ui.setupUi(this);
 	setFont(GuiSettings::getGlobalFont());
 
-	CHECK(config.universeSize.x % config.gridSize.x == 0);
-	CHECK(config.universeSize.y % config.gridSize.y == 0);
-	ui.gridSizeXEdit->setText(QString::number(config.gridSize.x));
-	ui.gridSizeYEdit->setText(QString::number(config.gridSize.y));
-	ui.unitSizeXEdit->setText(QString::number(config.universeSize.x / config.gridSize.x));
-	ui.unitSizeYEdit->setText(QString::number(config.universeSize.y / config.gridSize.y));
-	ui.universeSizeXLabel->setText(QString::number(config.universeSize.x));
-	ui.universeSizeYLabel->setText(QString::number(config.universeSize.y));
-	ui.maxThreadsEdit->setText(QString::number(config.maxThreads));
+	if (auto configCpu = boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+		CHECK(configCpu->universeSize.x % configCpu->gridSize.x == 0);
+		CHECK(configCpu->universeSize.y % configCpu->gridSize.y == 0);
+		ui.gridSizeXEdit->setText(QString::number(configCpu->gridSize.x));
+		ui.gridSizeYEdit->setText(QString::number(configCpu->gridSize.y));
+		ui.maxThreadsEdit->setText(QString::number(configCpu->maxThreads));
+		ui.unitSizeXEdit->setText(QString::number(configCpu->universeSize.x / configCpu->gridSize.x));
+		ui.unitSizeYEdit->setText(QString::number(configCpu->universeSize.y / configCpu->gridSize.y));
+	}
+	ui.universeSizeXLabel->setText(QString::number(config->universeSize.x));
+	ui.universeSizeYLabel->setText(QString::number(config->universeSize.y));
 
 	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
 	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
@@ -110,12 +110,18 @@ void ComputationGridDialog::okClicked()
 		return;
 	}
 
-	auto valResult = Validation::validate(*universeSize, *gridSize, _parameters);
-	if (valResult == ValidationResult::Ok) {
+	_config->universeSize = *universeSize;
+	if (auto configCpu = boost::dynamic_pointer_cast<_SimulationConfigCpu>(_config)) {
+		configCpu->gridSize = *gridSize;
+		configCpu->maxThreads = *maxThreads;
+	}
+	string errorMsg;
+	auto valResult = _config->validate(errorMsg);
+	if (valResult == _SimulationConfig::ValidationResult::Ok) {
 		accept();
 	}
-	else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
-		QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+	else if (valResult == _SimulationConfig::ValidationResult::Error) {
+		QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
 		msgBox.exec();
 	}
 	else {

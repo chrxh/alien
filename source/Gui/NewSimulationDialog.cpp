@@ -1,11 +1,10 @@
 #include <QMessageBox>
 
-#include "ModelBasic/Validation.h"
-
 #include "Gui/Settings.h"
 #include "Gui/StringHelper.h"
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"
+#include "SimulationConfig.h"
 
 #include "NewSimulationDialog.h"
 #include "ui_newsimulationdialog.h"
@@ -64,6 +63,18 @@ IntVector2D NewSimulationDialog::getUnitSize() const
 	return{ universeSize.x / gridSize.x, universeSize.y / gridSize.y };
 }
 
+SimulationConfig NewSimulationDialog::createConfig() const
+{
+	auto config = boost::make_shared<_SimulationConfigCpu>();
+	config->maxThreads = getMaxThreads();
+	config->universeSize = getUniverseSize();
+	config->gridSize = getGridSize();
+	config->parameters = getSimulationParameters();
+	config->symbolTable = getSymbolTable();
+
+	return config;
+}
+
 IntVector2D NewSimulationDialog::getGridSize() const
 {
 	return _gridSize;
@@ -101,7 +112,8 @@ SimulationParameters* NewSimulationDialog::getSimulationParameters() const
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
-	SimulationParametersDialog d(_universeSize, _gridSize, _parameters->clone(), _serializer, this);
+
+	SimulationParametersDialog d(createConfig(), _serializer, this);
 	if (d.exec()) {
 		_parameters = d.getSimulationParameters();
 	}
@@ -143,8 +155,10 @@ void NewSimulationDialog::updateLabels()
 
 void NewSimulationDialog::okClicked()
 {
-	auto valResult = Validation::validate(getUniverseSize(), getGridSize(), getSimulationParameters());
-	if (valResult == ValidationResult::Ok) {
+	SimulationConfig config = createConfig();
+	string errorMsg;
+	auto valResult = config->validate(errorMsg);
+	if (valResult == _SimulationConfig::ValidationResult::Ok) {
 		GuiSettings::setSettingsValue(Const::GridSizeXKey, getGridSize().x);
 		GuiSettings::setSettingsValue(Const::GridSizeYKey, getGridSize().y);
 		GuiSettings::setSettingsValue(Const::UnitSizeXKey, getUnitSize().x);
@@ -153,8 +167,8 @@ void NewSimulationDialog::okClicked()
 		GuiSettings::setSettingsValue(Const::InitialEnergyKey, getEnergy());
 		accept();
 	}
-	else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
-		QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+	else if (valResult == _SimulationConfig::ValidationResult::Error) {
+		QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
 		msgBox.exec();
 	}
 	else {

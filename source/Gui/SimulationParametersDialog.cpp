@@ -6,17 +6,16 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/Serializer.h"
-#include "ModelBasic/Validation.h"
-#include "Gui/Settings.h"
 
+#include "Settings.h"
 #include "SerializationHelper.h"
 #include "SimulationParametersDialog.h"
+#include "SimulationConfig.h"
 #include "ui_simulationparametersdialog.h"
 
-SimulationParametersDialog::SimulationParametersDialog(IntVector2D const& universeSize, IntVector2D const& gridSize
-	, SimulationParameters const* parameters, Serializer* serializer, QWidget *parent)
-	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(parameters->clone(parent))
-	, _serializer(serializer), _universeSize(universeSize), _gridSize(gridSize)
+SimulationParametersDialog::SimulationParametersDialog(SimulationConfig const& config, Serializer* serializer, QWidget *parent)
+	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(config->parameters->clone(parent))
+	, _serializer(serializer), _config(config)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
@@ -45,12 +44,13 @@ SimulationParameters* SimulationParametersDialog::getSimulationParameters ()
 
 void SimulationParametersDialog::okClicked()
 {
-	auto valResult = Validation::validate(_universeSize, _gridSize, getSimulationParameters());
-	if (valResult == ValidationResult::Ok) {
+	string errorMsg;
+	auto valResult = _config->validate(errorMsg);
+	if (valResult == _SimulationConfig::ValidationResult::Ok) {
 		accept();
 	}
-	else if (valResult == ValidationResult::ErrorUnitSizeTooSmall) {
-		QMessageBox msgBox(QMessageBox::Critical, "error", "Unit size is too small for simulation parameters.");
+	else if (valResult == _SimulationConfig::ValidationResult::Error) {
+		QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
 		msgBox.exec();
 	}
 	else {
