@@ -22,7 +22,7 @@ public:
 	QAction* actionRestore = nullptr;
 	QAction* actionExit = nullptr;
 
-	QAction* actionConfigureGrid = nullptr;
+	QAction* actionComputationSettings = nullptr;
 	QAction* actionEditSimParameters = nullptr;
 	QAction* actionLoadSimParameters = nullptr;
 	QAction* actionSaveSimParameters = nullptr;

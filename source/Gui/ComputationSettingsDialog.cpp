@@ -2,10 +2,10 @@
 
 #include "Settings.h"
 #include "StringHelper.h"
-#include "ComputationGridDialog.h"
+#include "ComputationSettingsDialog.h"
 #include "SimulationConfig.h"
 
-ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, QWidget * parent /*= nullptr*/)
+ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& config, QWidget * parent /*= nullptr*/)
 	: QDialog(parent), _config(config)
 {
 	ui.setupUi(this);
@@ -23,15 +23,15 @@ ComputationGridDialog::ComputationGridDialog(SimulationConfig const& config, QWi
 	ui.universeSizeXLabel->setText(QString::number(config->universeSize.x));
 	ui.universeSizeYLabel->setText(QString::number(config->universeSize.y));
 
-	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
-	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
-	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
-	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
-	connect(ui.maxThreadsEdit, &QLineEdit::textEdited, this, &ComputationGridDialog::updateLabels);
-	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &ComputationGridDialog::okClicked);
+	connect(ui.gridSizeXEdit, &QLineEdit::textEdited, this, &ComputationSettingsDialog::updateLabels);
+	connect(ui.gridSizeYEdit, &QLineEdit::textEdited, this, &ComputationSettingsDialog::updateLabels);
+	connect(ui.unitSizeXEdit, &QLineEdit::textEdited, this, &ComputationSettingsDialog::updateLabels);
+	connect(ui.unitSizeYEdit, &QLineEdit::textEdited, this, &ComputationSettingsDialog::updateLabels);
+	connect(ui.maxThreadsEdit, &QLineEdit::textEdited, this, &ComputationSettingsDialog::updateLabels);
+	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &ComputationSettingsDialog::okClicked);
 }
 
-optional<uint> ComputationGridDialog::getMaxThreads() const
+optional<uint> ComputationSettingsDialog::getMaxThreads() const
 {
 	bool ok(true);
 	double energy = ui.maxThreadsEdit->text().toUInt(&ok);
@@ -41,7 +41,7 @@ optional<uint> ComputationGridDialog::getMaxThreads() const
 	return energy;
 }
 
-optional<IntVector2D> ComputationGridDialog::getGridSize() const
+optional<IntVector2D> ComputationSettingsDialog::getGridSize() const
 {
 	IntVector2D result;
 	bool ok(true);
@@ -57,7 +57,7 @@ optional<IntVector2D> ComputationGridDialog::getGridSize() const
 	return result;
 }
 
-optional<IntVector2D> ComputationGridDialog::getUniverseSize() const
+optional<IntVector2D> ComputationSettingsDialog::getUniverseSize() const
 {
 	IntVector2D result;
 	bool ok(true);
@@ -73,7 +73,7 @@ optional<IntVector2D> ComputationGridDialog::getUniverseSize() const
 	return result;
 }
 
-void ComputationGridDialog::updateLabels()
+void ComputationSettingsDialog::updateLabels()
 {
 	bool ok = false;
 	int gridSizeX = ui.gridSizeXEdit->text().toUInt(&ok);
@@ -100,7 +100,7 @@ void ComputationGridDialog::updateLabels()
 
 }
 
-void ComputationGridDialog::okClicked()
+void ComputationSettingsDialog::okClicked()
 {
 	optional<IntVector2D> universeSize = getUniverseSize();
 	optional<IntVector2D> gridSize = getGridSize();
