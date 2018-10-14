@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
-#include "Model/Api/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 class QGraphicsItem;
 class QGraphicsView;
@@ -67,22 +67,15 @@ enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
 enum class NotifyScrollChanged { No, Yes };
 
+class _SimulationConfig;
+using SimulationConfig = boost::shared_ptr<_SimulationConfig>;
+class _SimulationConfigCpu;
+using SimulationConfigCpu = boost::shared_ptr<_SimulationConfigCpu>;
+class _SimulationConfigGpu;
+using SimulationConfigGpu = boost::shared_ptr<_SimulationConfigGpu>;
 
-struct SimulationConfig
+enum class ModelComputationType
 {
-	uint maxThreads;
-	IntVector2D gridSize;
-	IntVector2D universeSize;
+	Cpu,
+	Gpu
 };
-
-struct NewSimulationConfig
-{
-	uint maxThreads;
-	IntVector2D gridSize;
-	IntVector2D universeSize;
-	SymbolTable* symbolTable;
-	SimulationParameters* parameters;
-
-	double energy;
-};
-

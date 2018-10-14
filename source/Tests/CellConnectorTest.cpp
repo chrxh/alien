@@ -3,12 +3,16 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/DescriptionHelper.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Api/SimulationParameters.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/DescriptionHelper.h"
+#include "ModelBasic/SimulationParameters.h"
+
+#include "ModelCpu/SimulationContextCpuImpl.h"
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+#include "ModelCpu/ModelCpuData.h"
 
 #include "tests/Predicates.h"
 
@@ -34,15 +38,19 @@ protected:
 
 CellConnectorTest::CellConnectorTest()
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto symbols = facade->buildDefaultSymbolTable();
-	_parameters = facade->buildDefaultSimulationParameters();
-	_controller = facade->buildSimulationController(1, { 1,1 }, _universeSize, symbols, _parameters);
-	auto context = static_cast<SimulationContextLocal*>(_controller->getContext());
-	_numberGen = context->getNumberGenerator();
-	_descHelper = facade->buildDescriptionHelper();
-	_descHelper->init(context);
+	auto symbols = basicFacade->buildDefaultSymbolTable();
+	_parameters = basicFacade->buildDefaultSimulationParameters();
+	_controller = cpuFacade->buildSimulationController({ _universeSize, symbols, _parameters }, ModelCpuData(1, { 1,1 }));
+	auto context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
+
+	_numberGen = factory->buildRandomNumberGenerator();
+	_numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
+
+	_descHelper = basicFacade->buildDescriptionHelper();
+	_descHelper->init(context, _numberGen);
 }
 
 CellConnectorTest::~CellConnectorTest()

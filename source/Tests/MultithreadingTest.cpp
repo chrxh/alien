@@ -5,18 +5,21 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/Settings.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Local/SimulationContextLocal.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Local/UnitGrid.h"
-#include "Model/Local/Unit.h"
-#include "Model/Local/UnitContext.h"
-#include "Model/Local/MapCompartment.h"
-#include "Model/Impl/UnitThreadControllerImpl.h"
-#include "Model/Impl/UnitThread.h"
-#include "Model/Api/SimulationAccess.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/Settings.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelCpu/SimulationContextCpuImpl.h"
+#include "ModelCpu/SimulationAccessCpu.h"
+#include "ModelCpu/UnitGrid.h"
+#include "ModelCpu/Unit.h"
+#include "ModelCpu/UnitContext.h"
+#include "ModelCpu/MapCompartment.h"
+#include "ModelCpu/UnitThreadControllerImpl.h"
+#include "ModelCpu/UnitThread.h"
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+#include "ModelCpu/ModelCpuData.h"
 
 #include "tests/Predicates.h"
 #include "IntegrationTestHelper.h"
@@ -30,8 +33,8 @@ public:
 protected:
 	void runSimulation(int timesteps);
 
-	SimulationController* _controller = nullptr;
-	SimulationContextLocal* _context = nullptr;
+	SimulationControllerCpu* _controller = nullptr;
+	SimulationContextCpuImpl* _context = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
@@ -42,12 +45,14 @@ protected:
 
 MultithreadingTest::MultithreadingTest()
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto symbols = facade->buildDefaultSymbolTable();
-	_parameters = facade->buildDefaultSimulationParameters();
-	_controller = facade->buildSimulationController(_threads, _gridSize, _universeSize, symbols, _parameters);
-	_context = static_cast<SimulationContextLocal*>(_controller->getContext());
+	auto symbols = basicFacade->buildDefaultSymbolTable();
+	_parameters = basicFacade->buildDefaultSimulationParameters();
+	_controller = cpuFacade->buildSimulationController({ _universeSize, symbols, _parameters }, ModelCpuData(_threads, _gridSize));
+	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
 	_numberGen = factory->buildRandomNumberGenerator();
 	_numberGen->init(123123, 0);
@@ -88,9 +93,9 @@ TEST_F(MultithreadingTest, testThreads)
 
 TEST_F(MultithreadingTest, testOneCellMovement)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
-	access->init(_context);
+	access->init(_controller);
 
 	_parameters->radiationProb = 0.0;
 
@@ -115,9 +120,10 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 
 TEST_F(MultithreadingTest, testManyCellsMovement)
 {
-	ModelBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
-	access->init(_context);
+	access->init(_controller);
+
 	DataChangeDescription desc;
 	for (int i = 0; i < 10000; ++i) {
 		desc.addNewCluster(ClusterChangeDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))

@@ -1,7 +1,7 @@
 #pragma once
 #include <QEventLoop>
 
-#include "Model/Api/SimulationAccess.h"
+#include "ModelBasic/SimulationAccess.h"
 
 class IntegrationTestHelper
 {
