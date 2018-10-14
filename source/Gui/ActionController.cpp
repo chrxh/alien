@@ -18,7 +18,7 @@
 #include "Gui/NewSimulationDialog.h"
 #include "Gui/SimulationParametersDialog.h"
 #include "Gui/SymbolTableDialog.h"
-#include "Gui/ComputationGridDialog.h"
+#include "Gui/ComputationSettingsDialog.h"
 #include "Gui/NewRectangleDialog.h"
 #include "Gui/NewHexagonDialog.h"
 #include "Gui/NewParticlesDialog.h"
@@ -67,7 +67,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
 	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
-	connect(actions->actionConfigureGrid, &QAction::triggered, this, &ActionController::onConfigureGrid);
+	connect(actions->actionComputationSettings, &QAction::triggered, this, &ActionController::onConfigureGrid);
 	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
 	connect(actions->actionRunStepForward, &QAction::triggered, this, &ActionController::onStepForward);
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
@@ -218,12 +218,7 @@ void ActionController::onNewSimulation()
 	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolTable(), _serializer, _mainView);
 	if (dialog.exec()) {
 		auto config = boost::make_shared<_SimulationConfigCpu>();
-		config->maxThreads = dialog.getMaxThreads();
-		config->gridSize = dialog.getGridSize();
-		config->universeSize = dialog.getUniverseSize();
-		config->symbolTable = dialog.getSymbolTable();
-		config->parameters = dialog.getSimulationParameters();
-		_mainController->onNewSimulation(config, dialog.getEnergy());
+		_mainController->onNewSimulation(dialog.getConfig(), dialog.getEnergy());
 
 		settingUpNewSimulation();
 	}
@@ -253,7 +248,7 @@ void ActionController::onLoadSimulation()
 
 void ActionController::onConfigureGrid()
 {
-	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainView);
+	ComputationSettingsDialog dialog(_mainController->getSimulationConfig(), _mainView);
 	if (dialog.exec()) {
 		optional<uint> maxThreads = dialog.getMaxThreads();
 		optional<IntVector2D> gridSize = dialog.getGridSize();
