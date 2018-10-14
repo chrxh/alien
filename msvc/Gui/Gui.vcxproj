@@ -64,6 +64,7 @@
     <ClCompile Include="..\..\source\Gui\SelectionEditTab.cpp" />
     <ClCompile Include="..\..\source\Gui\Settings.cpp" />
     <ClCompile Include="..\..\source\Gui\Main.cpp" />
+    <ClCompile Include="..\..\source\Gui\SimulationConfig.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationParametersDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\StartScreenController.cpp" />
     <ClCompile Include="..\..\source\Gui\StartScreenWidget.cpp" />
@@ -1090,6 +1091,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\source\Gui\SimulationConfig.h" />
     <ClInclude Include="ui_VisualEditController.h" />
     <CustomBuild Include="..\..\source\Gui\InfoController.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

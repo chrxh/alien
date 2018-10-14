@@ -5,6 +5,8 @@
 #include "ModelBasic/Definitions.h"
 #include "ModelBasic/SimulationParameters.h"
 
+#include "Definitions.h"
+
 namespace Ui {
 	class NewSimulationDialog;
 }
@@ -28,6 +30,7 @@ public:
 
 private:
 	IntVector2D getUnitSize() const;
+	SimulationConfig createConfig() const;
 
 private:
 	Q_SLOT void simulationParametersButtonClicked();

@@ -270,7 +270,6 @@
     <ClCompile Include="..\..\source\ModelBasic\SimulationParameters.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\SpaceProperties.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\SymbolTable.cpp" />
-    <ClCompile Include="..\..\source\ModelBasic\Validation.cpp" />
     <ClCompile Include="Debug\moc_CellComputerCompiler.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -431,7 +430,6 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODELBASIC_LIB -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -D_WINDLL "-I$(SolutionDir)\..\..\external\boost_1_65_1" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I.\..\..\source\gui\dialogs" "-I.\..\..\source\ModelBasic"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\source\ModelBasic\Settings.h" />
-    <ClInclude Include="..\..\source\ModelBasic\Validation.h" />
     <CustomBuild Include="..\..\source\ModelBasic\SymbolTable.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing SymbolTable.h...</Message>

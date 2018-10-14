@@ -180,9 +180,6 @@
     <ClCompile Include="Release\moc_SymbolTable.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelBasic\Validation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelBasic\ModelBasicBuilderFacadeImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -234,9 +231,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelBasic\Settings.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelBasic\Validation.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicBuilderFacadeImpl.h">
