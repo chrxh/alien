@@ -25,7 +25,8 @@ public:
 	double getEnergy() const;
 
 private:
-	IntVector2D getUniverseSize() const;
+	IntVector2D getUniverseSizeForModelCpu() const;
+	IntVector2D getUniverseSizeForModelGpu() const;
 	IntVector2D getGridSize() const;
 	uint getMaxThreads() const;
 	SymbolTable* getSymbolTable() const;
@@ -45,7 +46,8 @@ private:
 	SimulationParameters* _parameters = nullptr;
 	SymbolTable* _symbolTable = nullptr;
 
-	IntVector2D _universeSize;
+	IntVector2D _universeSizeForModelCpu;
+	IntVector2D _universeSizeForModelGpu;
 	IntVector2D _gridSize;
 };
 
