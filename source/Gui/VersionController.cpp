@@ -1,10 +1,10 @@
-﻿#include "Model/Api/ModelBuilderFacade.h"
+﻿#include "ModelBasic/ModelBasicBuilderFacade.h"
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SpaceProperties.h"
+#include "ModelBasic/SimulationAccess.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/SpaceProperties.h"
 
 #include "VersionController.h"
 
@@ -14,12 +14,9 @@ VersionController::VersionController(QObject * parent) : QObject(parent)
 	
 }
 
-void VersionController::init(SimulationContext* context)
+void VersionController::init(SimulationContext* context, SimulationAccess* access)
 {
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto access = facade->buildSimulationAccess();
 	SET_CHILD(_access, access);
-	_access->init(context);
 	_universeSize = context->getSpaceProperties()->getSize();
 	_stack.clear();
 	_snapshot.reset();

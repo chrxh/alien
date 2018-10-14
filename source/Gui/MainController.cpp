@@ -8,15 +8,20 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SpaceProperties.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/Serializer.h"
-#include "Model/Api/DescriptionHelper.h"
-#include "Model/Api/SimulationMonitor.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/SimulationAccess.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Serializer.h"
+#include "ModelBasic/DescriptionHelper.h"
+#include "ModelBasic/SimulationMonitor.h"
+
+#include "ModelCpu/SimulationControllerCpu.h"
+#include "ModelCpu/SimulationAccessCpu.h"
+#include "ModelCpu/ModelCpuBuilderFacade.h"
+#include "ModelCpu/ModelCpuData.h"
 
 #include "VersionController.h"
 #include "SerializationHelper.h"
@@ -26,6 +31,7 @@
 #include "MainModel.h"
 #include "DataRepository.h"
 #include "Notifier.h"
+#include "SimulationConfig.h"
 
 MainController::MainController(QObject * parent)
 	: QObject(parent)
@@ -45,12 +51,13 @@ void MainController::init()
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGenerator = factory->buildRandomNumberGenerator();
 
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto serializer = facade->buildSerializer();
-	auto simAccessForDataController = facade->buildSimulationAccess();
-	auto descHelper = facade->buildDescriptionHelper();
+	auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	auto serializer = modelBasicFacade->buildSerializer();
+	auto simAccessForDataController = modelCpuFacade->buildSimulationAccess();
+	auto descHelper = modelBasicFacade->buildDescriptionHelper();
 	auto versionController = new VersionController();
-	auto simMonitor = facade->buildSimulationMonitor();
+	auto simMonitor = modelCpuFacade->buildSimulationMonitor();
 	SET_CHILD(_serializer, serializer);
 	SET_CHILD(_simAccess, simAccessForDataController);
 	SET_CHILD(_descHelper, descHelper);
@@ -62,7 +69,27 @@ void MainController::init()
 
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
-	_serializer->init();
+	_controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
+		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationControllerCpu*
+	{
+		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+		if (ModelComputationType(typeId) == ModelComputationType::Cpu) {
+			ModelCpuData data(typeSpecificData);
+			return modelCpuFacade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
+		}
+		return nullptr;
+	};
+	_accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
+	{
+		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+		SimulationAccessCpu* access = modelCpuFacade->buildSimulationAccess();
+		if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
+			access->init(controllerCpu);
+			return access;
+		}
+		return nullptr;
+	};
+	_serializer->init(_controllerBuildFunc, _accessBuildFunc);
 	_numberGenerator->init(12315312, 0);
 	_view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _numberGenerator);
 
@@ -70,13 +97,13 @@ void MainController::init()
 	if (!onLoadSimulation("autosave.sim")) {
 
 		//default simulation
-		NewSimulationConfig config{
-			8, { 12, 6 },{ 12 * 33 * 2 , 12 * 17 * 2 },
-			facade->buildDefaultSymbolTable(),
-			facade->buildDefaultSimulationParameters(),
-			0/*20000 * 9 * 20*/
-		};
-		onNewSimulation(config);
+		auto config = boost::make_shared<_SimulationConfigCpu>();
+		config->maxThreads = 8;
+		config->gridSize = IntVector2D({ 12, 6 });
+		config->universeSize = IntVector2D({ 12 * 33 * 2 , 12 * 17 * 2 });
+		config->symbolTable = modelBasicFacade->buildDefaultSymbolTable();
+		config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
+		onNewSimulation(config, 0);
 	}
 }
 
@@ -132,12 +159,15 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_model->setSymbolTable(symbolTable);
 
 	connectSimController();
-	_simAccess->init(_simController->getContext());
-	_descHelper->init(_simController->getContext());
-	_versionController->init(_simController->getContext());
+
+	_simAccess = _accessBuildFunc(_simController);
+	_descHelper->init(_simController->getContext(), _numberGenerator);
+	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
 	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
 	_simMonitor->init(_simController->getContext());
-	_view->setupEditors(_simController);
+
+	SimulationAccess* accessForWidgets;
+	_view->setupEditors(_simController, _accessBuildFunc(_simController));
 }
 
 void MainController::recreateSimulation(string const & serializedSimulation)
@@ -153,15 +183,19 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 	_view->refresh();
 }
 
-void MainController::onNewSimulation(NewSimulationConfig config)
+void MainController::onNewSimulation(SimulationConfig const& config, double energyAtBeginning)
 {
 	delete _simController;
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
+	if (auto configCpu = boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+		auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+		ModelCpuBuilderFacade::Config simulationControllerConfig{ configCpu->universeSize, configCpu->symbolTable, configCpu->parameters };
+		ModelCpuData data(configCpu->maxThreads, configCpu->gridSize);
+		_simController = facade->buildSimulationController(simulationControllerConfig, data, 0);
+	}
 
-	initSimulation(config.symbolTable, config.parameters);
+	initSimulation(config->symbolTable, config->parameters);
 
-	addRandomEnergy(config.energy);
+	addRandomEnergy(energyAtBeginning);
 
 	_view->refresh();
 }
@@ -169,7 +203,7 @@ void MainController::onNewSimulation(NewSimulationConfig config)
 void MainController::onSaveSimulation(string const& filename)
 {
 	_jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
-	_serializer->serialize(_simController);
+	_serializer->serialize(_simController, int(ModelComputationType::Cpu));
 }
 
 bool MainController::onLoadSimulation(string const & filename)
@@ -186,10 +220,15 @@ bool MainController::onLoadSimulation(string const & filename)
 	return true;
 }
 
-void MainController::onRecreateSimulation(SimulationConfig const& simConfig)
+void MainController::onRecreateSimulation(SimulationConfig const& config)
 {
 	_jobsAfterSerialization.push_back(boost::make_shared<_RecreateJob>());
-	_serializer->serialize(_simController, { simConfig.universeSize, simConfig.gridSize, simConfig.maxThreads });
+
+	if (auto configCpu = boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+		ModelCpuData data(configCpu->maxThreads, configCpu->gridSize);
+		Serializer::Settings settings{ configCpu->universeSize, data.getData() };
+		_serializer->serialize(_simController, int(ModelComputationType::Cpu), settings);
+	}
 }
 
 void MainController::onUpdateSimulationParametersForRunningSimulation()
@@ -210,7 +249,16 @@ int MainController::getTimestep() const
 SimulationConfig MainController::getSimulationConfig() const
 {
 	auto context = _simController->getContext();
-	return{ context->getMaxThreads(), context->getGridSize(), context->getSpaceProperties()->getSize() };
+	ModelCpuData data(context->getSpecificData());
+
+	auto result = boost::make_shared<_SimulationConfigCpu>();
+	result->maxThreads = data.getMaxRunningThreads();
+	result->gridSize = data.getGridSize();
+	result->universeSize = context->getSpaceProperties()->getSize();
+	result->symbolTable = context->getSymbolTable();
+	result->parameters = context->getSimulationParameters();
+
+	return result;
 }
 
 void MainController::connectSimController() const

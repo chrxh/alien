@@ -4,9 +4,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{8b764653-cbe9-4735-84de-574686f4e801}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\_Impl">
-      <UniqueIdentifier>{51fd42e9-88f4-406a-a0ff-bb8846c4b507}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Generated Files">
       <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
       <Extensions>moc;h;cpp</Extensions>
@@ -22,8 +19,11 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
-    <Filter Include="Source Files\_Impl\Cuda">
-      <UniqueIdentifier>{7c3e939f-08cf-4336-a997-e2d0d6676c59}</UniqueIdentifier>
+    <Filter Include="Source Files\Impl">
+      <UniqueIdentifier>{51fd42e9-88f4-406a-a0ff-bb8846c4b507}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Impl\CUDA">
+      <UniqueIdentifier>{0cdf0860-f930-496c-9318-2f9e1eb67ff9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,64 +33,61 @@
     <ClInclude Include="..\..\source\ModelGpu\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.h">
-      <Filter>Source Files\_Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\DllExport.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\DefinitionsImpl.h">
-      <Filter>Source Files\_Impl</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\DefinitionsImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.h">
-      <Filter>Source Files\_Impl</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\ModelGpuBuilderFacadeImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\Base.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\SimulationAccessGpuImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\Constants.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\Base.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\HostHelper.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\Constants.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\Map.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\CudaInterface.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\HostHelper.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\Physics.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\Map.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\SimulationData.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\Physics.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\_Impl\Cuda\Simulation.cuh">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <ClInclude Include="..\..\source\ModelGpu\Simulation.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\SimulationData.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\ModelGpu\_Impl\ModelGpuBuilderFacadeImpl.cpp">
-      <Filter>Source Files\_Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationControllerGpuImpl.cpp">
-      <Filter>Source Files\_Impl</Filter>
+    <ClCompile Include="..\..\source\ModelGpu\ModelGpuBuilderFacadeImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationContextGpuImpl.cpp">
-      <Filter>Source Files\_Impl</Filter>
+    <ClCompile Include="..\..\source\ModelGpu\SimulationAccessGpuImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationControllerGpuImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationControllerGpuImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
+    <ClCompile Include="..\..\source\ModelGpu\SimulationContextGpuImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_SimulationContextGpuImpl.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -98,20 +95,17 @@
     <ClCompile Include="Release\moc_SimulationContextGpuImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\_Impl\SimulationAccessGpuImpl.cpp">
-      <Filter>Source Files\_Impl</Filter>
+    <ClCompile Include="..\..\source\ModelGpu\SimulationControllerGpuImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\_Impl\WorkerForGpu.cpp">
-      <Filter>Source Files\_Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_WorkerForGpu.cpp">
+    <ClCompile Include="Debug\moc_SimulationControllerGpuImpl.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_WorkerForGpu.cpp">
+    <ClCompile Include="Release\moc_SimulationControllerGpuImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\_Impl\ThreadController.cpp">
-      <Filter>Source Files\_Impl</Filter>
+    <ClCompile Include="..\..\source\ModelGpu\ThreadController.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ThreadController.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -119,24 +113,54 @@
     <ClCompile Include="Release\moc_ThreadController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationControllerGpu.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationControllerGpu.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\ModelGpuData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\GpuWorker.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GpuWorker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_GpuWorker.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationAccessGpu.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationAccessGpu.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationControllerGpuImpl.h">
-      <Filter>Source Files\_Impl</Filter>
+    <CustomBuild Include="..\..\source\ModelGpu\SimulationContextGpuImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelGpu\_Impl\SimulationContextGpuImpl.h">
-      <Filter>Source Files\_Impl</Filter>
+    <CustomBuild Include="..\..\source\ModelGpu\SimulationControllerGpuImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelGpu\_Impl\WorkerForGpu.h">
-      <Filter>Source Files\_Impl</Filter>
+    <CustomBuild Include="..\..\source\ModelGpu\ThreadController.h">
+      <Filter>Source Files\Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelGpu\_Impl\ThreadController.h">
-      <Filter>Source Files\_Impl</Filter>
+    <CustomBuild Include="..\..\source\ModelGpu\SimulationControllerGpu.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelGpu\GpuWorker.h">
+      <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelGpu\SimulationAccessGpu.h">
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\source\ModelGpu\_Impl\Cuda\CudaMain.cu">
-      <Filter>Source Files\_Impl\Cuda</Filter>
+    <CudaCompile Include="..\..\source\ModelGpu\CudaMain.cu">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

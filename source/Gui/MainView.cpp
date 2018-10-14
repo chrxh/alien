@@ -1,14 +1,14 @@
-﻿#include "Model/Api/SimulationController.h"
-#include "Model/Api/Serializer.h"
-#include "Model/Api/SymbolTable.h"
+﻿#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/Serializer.h"
+#include "ModelBasic/SymbolTable.h"
 
-#include "Gui/Toolbar/ToolbarController.h"
-#include "Gui/Toolbar/ToolbarContext.h"
-#include "Gui/Actions/ActionController.h"
-#include "Gui/Actions/ActionHolder.h"
-#include "Gui/Assistance/DocumentationWindow.h"
-#include "Gui/Misc/StartScreenController.h"
-#include "Gui/Monitoring/MonitorController.h"
+#include "Gui/ToolbarController.h"
+#include "Gui/ToolbarContext.h"
+#include "Gui/ActionController.h"
+#include "Gui/ActionHolder.h"
+#include "Gui/DocumentationWindow.h"
+#include "Gui/StartScreenController.h"
+#include "Gui/MonitorController.h"
 
 #include "SerializationHelper.h"
 #include "InfoController.h"
@@ -75,11 +75,11 @@ void MainView::refresh()
 	_visualEditor->refresh();
 }
 
-void MainView::setupEditors(SimulationController * controller)
+void MainView::setupEditors(SimulationController * controller, SimulationAccess* access)
 {
 	_toolbar->init({ 10, 10 }, _notifier, _repository, controller->getContext(), _actions->getActionHolder());
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
-	_visualEditor->init(_notifier, controller, _repository);
+	_visualEditor->init(_notifier, controller, access, _repository);
 
 	_visualEditor->setActiveScene(ActiveScene::PixelScene);
 	_actions->getActionHolder()->actionEditor->setChecked(false);

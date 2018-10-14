@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/Api/Descriptions.h"
+#include "ModelBasic/Descriptions.h"
 
 #include "Gui/Definitions.h"
 
