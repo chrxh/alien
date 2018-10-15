@@ -4,18 +4,18 @@
 #include "SimulationData.cuh"
 #include "Map.cuh"
 
-class SimulationManager
+class SimulationDataManager
 {
 public:
 	SimulationData data;
 	DataForAccess access;
 
-	SimulationManager(int2 const &size)
+	SimulationDataManager(int2 const &size)
 	{
 		data.size = size;
 
-		data.clustersAC1 = ArrayController<CellClusterData>(MAX_CELLCLUSTERS);
-		data.clustersAC2 = ArrayController<CellClusterData>(MAX_CELLCLUSTERS);
+		data.clustersAC1 = ArrayController<ClusterData>(MAX_CELLCLUSTERS);
+		data.clustersAC2 = ArrayController<ClusterData>(MAX_CELLCLUSTERS);
 		data.cellsAC1 = ArrayController<CellData>(MAX_CELLS);
 		data.cellsAC2 = ArrayController<CellData>(MAX_CELLS);
 		data.particlesAC1 = ArrayController<ParticleData>(MAX_ENERGY_PARTICLES);
@@ -27,7 +27,7 @@ public:
 		cudaMallocManaged(&data.particleMap2, size.x * size.y * sizeof(ParticleData*));
 		checkCudaErrors(cudaGetLastError());
 
-		access.clusters = static_cast<CellClusterData*>(malloc(sizeof(CellClusterData) * static_cast<int>(MAX_CELLCLUSTERS)));
+		access.clusters = static_cast<ClusterData*>(malloc(sizeof(ClusterData) * static_cast<int>(MAX_CELLCLUSTERS)));
 		access.cells = static_cast<CellData*>(malloc(sizeof(CellData) * static_cast<int>(MAX_CELLS)));
 		access.particles = static_cast<ParticleData*>(malloc(sizeof(ParticleData) * static_cast<int>(MAX_ENERGY_PARTICLES)));
 
@@ -41,7 +41,7 @@ public:
 		data.numberGen.init(RANDOM_NUMBER_BLOCK_SIZE);
 	}
 
-	~SimulationManager()
+	~SimulationDataManager()
 	{
 		data.clustersAC1.free();
 		data.clustersAC2.free();
@@ -80,7 +80,7 @@ public:
 	DataForAccess getDataForAccess()
 	{
 		access.numClusters = data.clustersAC2.getNumEntries();
-		cudaMemcpy(access.clusters, data.clustersAC2.getEntireArray(), sizeof(CellClusterData) * data.clustersAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		cudaMemcpy(access.clusters, data.clustersAC2.getEntireArray(), sizeof(ClusterData) * data.clustersAC2.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
 		access.numCells = data.cellsAC2.getNumEntries();
 		cudaMemcpy(access.cells, data.cellsAC2.getEntireArray(), sizeof(CellData) * data.cellsAC2.getNumEntries(), cudaMemcpyDeviceToHost);
@@ -89,30 +89,29 @@ public:
 		cudaMemcpy(access.particles, data.particlesAC2.getEntireArray(), sizeof(ParticleData) * data.particlesAC2.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
 
+		dataPtrCorrection();
 		return access;
 	}
 
 	void dataPtrCorrection()
 	{
-		auto cellPtrCorrection = access.cells - data.cellsAC2.getEntireArray();
+		auto cellPtrCorrection = int64_t(access.cells) - int64_t(data.cellsAC2.getEntireArray());
 		for (int i = 0; i < access.numClusters; ++i) {
-			auto cellIndex = access.clusters[i].cells - data.cellsAC2.getEntireArray();
-			access.clusters[i].cells = access.cells + cellIndex;
-
+			access.clusters[i].cells = (CellData*)(int64_t(access.clusters[i].cells) + int64_t(cellPtrCorrection));
 		}
 
 		for (int i = 0; i < access.numCells; ++i) {
 			auto &cell = access.cells[i];
 			for (int j = 0; j < cell.numConnections; ++j) {
-				auto cellIndex = cell.connections[j] - data.cellsAC2.getEntireArray();
-				cell.connections[j] = access.cells + cellIndex;
+				cell.connections[j] = (CellData*)(int64_t(cell.connections[j]) + int64_t(cellPtrCorrection));
 			}
 		}
+
 
 	}
 };
 
-void updateAngularMass(CellClusterData* cluster)
+void updateAngularMass(ClusterData* cluster)
 {
 	cluster->angularMass = 0.0;
 	for (int i = 0; i < cluster->numCells; ++i) {
@@ -121,7 +120,7 @@ void updateAngularMass(CellClusterData* cluster)
 	}
 }
 
-void centerCluster(CellClusterData* cluster)
+void centerCluster(ClusterData* cluster)
 {
 	float2 center = { 0.0, 0.0 };
 	for (int i = 0; i < cluster->numCells; ++i) {
@@ -138,7 +137,7 @@ void centerCluster(CellClusterData* cluster)
 	}
 }
 
-void updateAbsPos(CellClusterData *cluster)
+void updateAbsPos(ClusterData *cluster)
 {
 
 	float rotMatrix[2][2];
@@ -156,7 +155,7 @@ void updateAbsPos(CellClusterData *cluster)
 	};
 }
 
-bool isClusterPositionFree(CellClusterData* cluster, SimulationData* data)
+bool isClusterPositionFree(ClusterData* cluster, SimulationData* data)
 {
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto &absPos = cluster->cells[i].absPos;
@@ -179,7 +178,7 @@ bool isClusterPositionFree(CellClusterData* cluster, SimulationData* data)
 	return true;
 }
 
-void drawClusterToMap(CellClusterData* cluster, SimulationData* data)
+void drawClusterToMap(ClusterData* cluster, SimulationData* data)
 {
 	for (int i = 0; i < cluster->numCells; ++i) {
 		auto &absPos = cluster->cells[i].absPos;
@@ -187,7 +186,7 @@ void drawClusterToMap(CellClusterData* cluster, SimulationData* data)
 	}
 }
 
-void createCluster(SimulationData &data, CellClusterData* cluster, float2 pos, float2 vel, float angle, float angVel, float energy, int2 clusterSize, int2 const &size)
+void createCluster(SimulationData &data, ClusterData* cluster, float2 pos, float2 vel, float angle, float angVel, float energy, int2 clusterSize, int2 const &size)
 {
 	cluster->pos = pos;
 	cluster->vel = vel;

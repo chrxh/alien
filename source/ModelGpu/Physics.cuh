@@ -11,7 +11,7 @@
 
 struct CollisionEntry
 {
-	CellClusterData* cluster;
+	ClusterData* cluster;
 	int numCollisions;
 	float2 collisionPos;
 	float2 normalVec;
@@ -29,7 +29,7 @@ public:
 		numEntries = 0;
 	}
 
-	__device__ CollisionEntry* getOrCreateEntry(CellClusterData* cluster)
+	__device__ CollisionEntry* getOrCreateEntry(ClusterData* cluster)
 	{
 		int old;
 		int curr;
@@ -119,14 +119,14 @@ __device__ __inline__ float2 calcNormalToCell_Kernel(CellData *cell, float2 outw
 	normalize(result);
 	return result;
 }
-__device__ __inline__ void calcCollision(CellClusterData *clusterA, CollisionEntry *collisionEntry, int2 const& size)
+__device__ __inline__ void calcCollision(ClusterData *clusterA, CollisionEntry *collisionEntry, int2 const& size)
 {
 	float2 posA = clusterA->pos;
 	float2 velA = clusterA->vel;
 	float angVelA = clusterA->angularVel * DEG_TO_RAD;
 	float angMassA = clusterA->angularMass;
 
-	CellClusterData *clusterB = collisionEntry->cluster;
+	ClusterData *clusterB = collisionEntry->cluster;
 	float2 posB = clusterB->pos;
 	float2 velB = clusterB->vel;
 	float angVelB = clusterB->angularVel * DEG_TO_RAD;
@@ -216,12 +216,12 @@ __device__ __inline__ void calcCollision(CellClusterData *clusterA, CollisionEnt
 
 __device__ __inline__ float2 calcOutwardVector_Kernel(CellData* cellA, CellData* cellB, int2 const &size)
 {
-	CellClusterData* clusterA = cellA->cluster;
+	ClusterData* clusterA = cellA->cluster;
 	float2 posA = clusterA->pos;
 	float2 velA = clusterA->vel;
 	float angVelA = clusterA->angularVel * DEG_TO_RAD;
 
-	CellClusterData* clusterB = cellB->cluster;
+	ClusterData* clusterB = cellB->cluster;
 	float2 posB = clusterB->pos;
 	float2 velB = clusterB->vel;
 	float angVelB = clusterB->angularVel * DEG_TO_RAD;
@@ -245,7 +245,7 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellData *cel
 	if (mapCell->protectionCounter > 0) {
 		return;
 	}
-	CellClusterData* mapCluster = mapCell->cluster;
+	ClusterData* mapCluster = mapCell->cluster;
 	if (mapCluster != cell->cluster) {
 		if (mapDistanceSquared(cell->absPos, mapCell->absPos, size) < CELL_MAX_DISTANCE*CELL_MAX_DISTANCE) {
 

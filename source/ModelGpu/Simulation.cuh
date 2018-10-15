@@ -9,9 +9,9 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 
-__shared__ CellClusterData clusterCopy;
-__shared__ CellClusterData *oldCluster;
-__shared__ CellClusterData *newCluster;
+__shared__ ClusterData clusterCopy;
+__shared__ ClusterData *oldCluster;
+__shared__ ClusterData *newCluster;
 __shared__ CellData *newCells;
 __shared__ float rotMatrix[2][2];
 __shared__ CollisionData collisionData;
