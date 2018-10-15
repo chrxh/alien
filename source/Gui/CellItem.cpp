@@ -9,6 +9,30 @@
 #include "CellItem.h"
 #include "CoordinateSystem.h"
 
+namespace
+{
+	QString getTypeString(Enums::CellFunction::Type type)
+	{
+		if (type == Enums::CellFunction::Type::COMPUTER)
+			return "Computer";
+		else if (type == Enums::CellFunction::Type::PROPULSION)
+			return "Propulsion";
+		else if (type == Enums::CellFunction::Type::SCANNER)
+			return "Scanner";
+		else if (type == Enums::CellFunction::Type::WEAPON)
+			return "Weapon";
+		else if (type == Enums::CellFunction::Type::CONSTRUCTOR)
+			return "Constructor";
+		else if (type == Enums::CellFunction::Type::SENSOR)
+			return "Sensor";
+		else if (type == Enums::CellFunction::Type::COMMUNICATOR)
+			return "Communicator";
+		else
+			return QString();
+	}
+
+}
+
 CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
     : AbstractItem(parent), _config(config)
 {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ModelBasic/Definitions.h"
-#include "ModelBasic/CellFeatureEnums.h"
 
 #include "CellFeatureChain.h"
 

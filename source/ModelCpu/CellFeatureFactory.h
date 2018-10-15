@@ -2,7 +2,6 @@
 
 #include <QString>
 
-#include "ModelBasic/CellFeatureEnums.h"
 #include "ModelBasic/Definitions.h"
 #include "Definitions.h"
 

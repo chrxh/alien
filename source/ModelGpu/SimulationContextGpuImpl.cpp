@@ -41,11 +41,6 @@ SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
 	return _parameters;
 }
 
-CellComputerCompiler * SimulationContextGpuImpl::getCellComputerCompiler() const
-{
-	return nullptr;
-}
-
 map<string, int> SimulationContextGpuImpl::getSpecificData() const
 {
 	return map<string, int>();

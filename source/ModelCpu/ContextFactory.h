@@ -16,5 +16,4 @@ public:
 	virtual MapCompartment* buildMapCompartment() const = 0;
 	virtual CellMap* buildCellMap() const = 0;
 	virtual ParticleMap* buildEnergyParticleMap() const = 0;
-	virtual CellComputerCompilerImpl* buildCellComputerCompiler() const = 0;
 };

@@ -11,4 +11,5 @@ public:
 	SymbolTable* buildDefaultSymbolTable() const override;
 	SimulationParameters* buildDefaultSimulationParameters() const override;
 	DescriptionHelper* buildDescriptionHelper() const override;
+	CellComputerCompiler* buildCellComputerCompiler(SymbolTable* symbolTable, SimulationParameters* parameters) const override;
 };

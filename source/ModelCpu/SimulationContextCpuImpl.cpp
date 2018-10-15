@@ -69,11 +69,6 @@ map<string, int> SimulationContextCpuImpl::getSpecificData() const
 	return data.getData();
 }
 
-CellComputerCompiler * SimulationContextCpuImpl::getCellComputerCompiler() const
-{
-	return _compiler;
-}
-
 void SimulationContextCpuImpl::setSimulationParameters(SimulationParameters * parameters)
 {
 	_attributeSetter->setSimulationParameters(parameters);
