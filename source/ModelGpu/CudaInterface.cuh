@@ -12,11 +12,11 @@ struct ParticleData
 	float2 vel;
 };
 
-struct CellClusterData;
+struct ClusterData;
 struct CellData
 {
 	uint64_t id;
-	CellClusterData* cluster;
+	ClusterData* cluster;
 	float2 relPos;
 	float2 absPos;
 	float energy;
@@ -28,7 +28,7 @@ struct CellData
 	bool alive;
 };
 
-struct CellClusterData
+struct ClusterData
 {
 	float2 pos;
 	float2 vel;
@@ -42,7 +42,7 @@ struct CellClusterData
 struct DataForAccess
 {
 	int numClusters;
-	CellClusterData* clusters;
+	ClusterData* clusters;
 	int numCells;
 	CellData* cells;
 	int numParticles;
