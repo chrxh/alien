@@ -144,12 +144,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Debug\moc_CellComputerCompilerImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellComputerCompilerImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_CellMap.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -244,9 +238,6 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\AccessPortFactoryImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\CellComputerCompilerImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\CellComputerFunctionImpl.cpp">
@@ -389,9 +380,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\source\ModelCpu\CellComputerCompilerImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\CellMapImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>

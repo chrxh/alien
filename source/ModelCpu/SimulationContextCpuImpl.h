@@ -17,7 +17,6 @@ public:
 	virtual UnitGrid* getUnitGrid() const;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters * getSimulationParameters() const override;
-	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
 
