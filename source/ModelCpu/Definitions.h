@@ -30,7 +30,7 @@ class ContextFactory;
 class SimulationAccessCpu;
 class DescriptionHelper;
 class CellComputerCompiler;
-class SimulationMonitor;
+class SimulationMonitorCpu;
 class ModelCpuData;
 class SimulationControllerCpu;
 class ModelCpuBuilderFacade;

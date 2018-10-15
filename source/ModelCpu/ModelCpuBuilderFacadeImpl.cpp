@@ -29,7 +29,7 @@
 #include "AccessPortFactory.h"
 #include "ModelCpuData.h"
 
-#include "SimulationMonitorImpl.h"
+#include "SimulationMonitorCpuImpl.h"
 #include "SimulationControllerCpuImpl.h"
 #include "CellComputerCompilerImpl.h"
 #include "ModelCpuBuilderFacadeImpl.h"
@@ -97,9 +97,9 @@ SimulationAccessCpu * ModelCpuBuilderFacadeImpl::buildSimulationAccess() const
 	return factory->buildSimulationAccess();;
 }
 
-SimulationMonitor * ModelCpuBuilderFacadeImpl::buildSimulationMonitor() const
+SimulationMonitorCpu * ModelCpuBuilderFacadeImpl::buildSimulationMonitor() const
 {
-	return new SimulationMonitorImpl();
+	return new SimulationMonitorCpuImpl();
 }
 
 Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextCpuImpl* context) const
