@@ -56,7 +56,7 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_notifier = notifier;
 
 	_infoController->init(ui->infoLabel, mainController);
-	_monitor->init(simMonitor);
+	_monitor->init(mainController);
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar
 		, _monitor, repository, notifier, numberGenerator);
 

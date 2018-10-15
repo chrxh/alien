@@ -22,11 +22,13 @@
 #include "ModelCpu/SimulationAccessCpu.h"
 #include "ModelCpu/ModelCpuBuilderFacade.h"
 #include "ModelCpu/ModelCpuData.h"
+#include "ModelCpu/SimulationMonitorCpu.h"
 
 #include "ModelGpu/SimulationAccessGpu.h"
 #include "ModelGpu/SimulationControllerGpu.h"
 #include "ModelGpu/ModelGpuBuilderFacade.h"
 #include "ModelGpu/ModelGpuData.h"
+#include "ModelGpu/SimulationMonitorGpu.h"
 
 #include "VersionController.h"
 #include "SerializationHelper.h"
@@ -52,27 +54,6 @@ void MainController::init()
 {
 	_model = new MainModel(this);
 	_view = new MainView();
-
-	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto numberGenerator = factory->buildRandomNumberGenerator();
-
-	auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-	auto serializer = modelBasicFacade->buildSerializer();
-	auto simAccessForDataController = modelCpuFacade->buildSimulationAccess();
-	auto descHelper = modelBasicFacade->buildDescriptionHelper();
-	auto versionController = new VersionController();
-	auto simMonitor = modelCpuFacade->buildSimulationMonitor();
-	SET_CHILD(_serializer, serializer);
-	SET_CHILD(_simAccess, simAccessForDataController);
-	SET_CHILD(_descHelper, descHelper);
-	SET_CHILD(_versionController, versionController);
-	SET_CHILD(_numberGenerator, numberGenerator);
-	SET_CHILD(_simMonitor, simMonitor);
-	_repository = new DataRepository(this);
-	_notifier = new Notifier(this);
-
-	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
 	_controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
 		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
@@ -109,11 +90,48 @@ void MainController::init()
 			THROW_NOT_IMPLEMENTED();
 		}
 	};
+	_monitorBuildFunc = [](SimulationController* controller) -> SimulationMonitor*
+	{
+		if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
+			auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+			SimulationMonitorCpu* moni = facade->buildSimulationMonitor();
+			moni->init(controllerCpu);
+			return moni;
+		}
+		else if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
+			auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+			SimulationMonitorGpu* moni = facade->buildSimulationMonitor();
+			moni->init(controllerGpu);
+			return moni;
+		}
+		else {
+			THROW_NOT_IMPLEMENTED();
+		}
+	};
+
+	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	auto numberGenerator = factory->buildRandomNumberGenerator();
+
+	auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	auto serializer = modelBasicFacade->buildSerializer();
+	auto simAccessForDataController = modelCpuFacade->buildSimulationAccess();
+	auto descHelper = modelBasicFacade->buildDescriptionHelper();
+	auto versionController = new VersionController();
+	SET_CHILD(_serializer, serializer);
+	SET_CHILD(_simAccess, simAccessForDataController);
+	SET_CHILD(_descHelper, descHelper);
+	SET_CHILD(_versionController, versionController);
+	SET_CHILD(_numberGenerator, numberGenerator);
+	_repository = new DataRepository(this);
+	_notifier = new Notifier(this);
+
+	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
+
 	_serializer->init(_controllerBuildFunc, _accessBuildFunc);
 	_numberGenerator->init(12315312, 0);
 	_view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _numberGenerator);
 
-	
 	if (!onLoadSimulation("autosave.sim")) {
 
 		//default simulation
@@ -184,7 +202,9 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_descHelper->init(_simController->getContext(), _numberGenerator);
 	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
 	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
-	_simMonitor->init(_simController->getContext());
+
+	auto simMonitor = _monitorBuildFunc(_simController);
+	SET_CHILD(_simMonitor, simMonitor);
 
 	SimulationAccess* accessForWidgets;
 	_view->setupEditors(_simController, _accessBuildFunc(_simController));
@@ -293,6 +313,11 @@ SimulationConfig MainController::getSimulationConfig() const
 	result->parameters = context->getSimulationParameters();
 
 	return result;
+}
+
+SimulationMonitor * MainController::getSimulationMonitor() const
+{
+	return _simMonitor;
 }
 
 void MainController::connectSimController() const

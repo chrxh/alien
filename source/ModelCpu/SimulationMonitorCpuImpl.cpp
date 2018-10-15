@@ -1,5 +1,6 @@
 ﻿
 #include "SimulationContextCpuImpl.h"
+#include "SimulationControllerCpu.h"
 #include "UnitThreadController.h"
 #include "UnitGrid.h"
 #include "Unit.h"
@@ -9,29 +10,29 @@
 #include "Particle.h"
 #include "Token.h"
 #include "ModelCpuData.h"
-#include "SimulationMonitorImpl.h"
+#include "SimulationMonitorCpuImpl.h"
 
-SimulationMonitorImpl::SimulationMonitorImpl(QObject * parent)
-	: SimulationMonitor(parent)
+SimulationMonitorCpuImpl::SimulationMonitorCpuImpl(QObject * parent)
+	: SimulationMonitorCpu(parent)
 {
 	
 }
 
-SimulationMonitorImpl::~SimulationMonitorImpl()
+SimulationMonitorCpuImpl::~SimulationMonitorCpuImpl()
 {
 	if (_registered) {
 		_context->getUnitThreadController()->unregisterObserver(this);
 	}
 }
 
-void SimulationMonitorImpl::init(SimulationContext * context)
+void SimulationMonitorCpuImpl::init(SimulationControllerCpu* controller)
 {
-	_context = static_cast<SimulationContextCpuImpl*>(context);
+	_context = static_cast<SimulationContextCpuImpl*>(controller->getContext());
 	_context->getUnitThreadController()->registerObserver(this);
 	_registered = true;
 }
 
-void SimulationMonitorImpl::requireData()
+void SimulationMonitorCpuImpl::requireData()
 {
 	_dataRequired = true;
 	if (_context->getUnitThreadController()->isNoThreadWorking()) {
@@ -39,17 +40,17 @@ void SimulationMonitorImpl::requireData()
 	}
 }
 
-MonitorData const & SimulationMonitorImpl::retrieveData()
+MonitorData const & SimulationMonitorCpuImpl::retrieveData()
 {
 	return _data;
 }
 
-void SimulationMonitorImpl::unregister()
+void SimulationMonitorCpuImpl::unregister()
 {
 	_registered = false;
 }
 
-void SimulationMonitorImpl::accessToUnits()
+void SimulationMonitorCpuImpl::accessToUnits()
 {
 	if (!_dataRequired) {
 		return;
@@ -61,7 +62,7 @@ void SimulationMonitorImpl::accessToUnits()
 	Q_EMIT dataReadyToRetrieve();
 }
 
-void SimulationMonitorImpl::calcMonitorData()
+void SimulationMonitorCpuImpl::calcMonitorData()
 {
 	_data = MonitorData();
 	ModelCpuData data(_context->getSpecificData());
@@ -75,7 +76,7 @@ void SimulationMonitorImpl::calcMonitorData()
 	}
 }
 
-void SimulationMonitorImpl::calcMonitorDataForUnit(Unit * unit)
+void SimulationMonitorCpuImpl::calcMonitorDataForUnit(Unit * unit)
 {
 	auto const& clusters = unit->getContext()->getClustersRef();
 	_data.numClusters += clusters.size();
