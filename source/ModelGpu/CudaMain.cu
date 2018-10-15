@@ -13,7 +13,7 @@
 
 namespace {
 	cudaStream_t cudaStream;
-	SimulationManager *simulationManager;
+	SimulationDataManager *simulationManager;
 }
 
 void cudaInit(int2 const &size)
@@ -21,7 +21,7 @@ void cudaInit(int2 const &size)
 	cudaStreamCreate(&cudaStream);
 	cudaSetDevice(0);
 
-	simulationManager = new SimulationManager(size);
+	simulationManager = new SimulationDataManager(size);
 	
 	auto clusters = simulationManager->data.clustersAC1.getArray(NUM_CLUSTERS);
 
@@ -59,11 +59,6 @@ void cudaCalcNextTimestep()
 DataForAccess cudaGetData()
 {
 	return simulationManager->getDataForAccess();
-}
-
-void cudaDataPtrCorrection()
-{
-	simulationManager->dataPtrCorrection();
 }
 
 void cudaShutdown()

@@ -2,7 +2,7 @@
 
 #include "ModelBasic/SpaceProperties.h"
 
-#include "GpuWorker.h"
+#include "CudaBridge.h"
 #include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
@@ -16,7 +16,7 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	connect(worker, &GpuWorker::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
+	connect(worker, &CudaBridge::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
 }
 
 void SimulationAccessGpuImpl::clear()
@@ -109,17 +109,33 @@ void SimulationAccessGpuImpl::createData()
 	DataForAccess cudaData = worker->retrieveData();
 
 	worker->lockData();
-	worker->ptrCorrectionForRetrievedData();
 
+	list<uint64_t> connectingCellIds;
 	for (int i = 0; i < cudaData.numClusters; ++i) {
-		ClusterDescription clusterDesc;
-		if (_requiredRect.isContained({ static_cast<int>(cudaData.clusters[i].pos.x), static_cast<int>(cudaData.clusters[i].pos.y) }))
-			for (int j = 0; j < cudaData.clusters[i].numCells; ++j) {
-				auto pos = cudaData.clusters[i].cells[j].absPos;
-				auto id = cudaData.clusters[i].cells[j].id;
-				clusterDesc.addCell(CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata()).setEnergy(100.0f).setId(id));
+		ClusterData const& cluster = cudaData.clusters[i];
+		if (_requiredRect.isContained({ int(cluster.pos.x), int(cluster.pos.y) })) {
+			auto clusterDesc = ClusterDescription().setPos({ cluster.pos.x, cluster.pos.y })
+				.setVel({ cluster.vel.x, cluster.vel.y })
+				.setAngle(cluster.angle)
+				.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
+
+			for (int j = 0; j < cluster.numCells; ++j) {
+				CellData const& cell = cluster.cells[j];
+				auto pos = cell.absPos;
+				auto id = cell.id;
+				connectingCellIds.clear();
+				for (int i = 0; i < cell.numConnections; ++i) {
+					connectingCellIds.emplace_back(cell.connections[i]->id);
+				}
+				clusterDesc.addCell(
+					CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
+					.setEnergy(100.0f).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
+					.setConnectingCells(connectingCellIds).setMaxConnections(CELL_MAX_BONDS).setFlagTokenBlocked(false)
+					.setTokenBranchNumber(0).setMetadata(CellMetadata())
+				);
 			}
-		_dataCollected.addCluster(clusterDesc);
+			_dataCollected.addCluster(clusterDesc);
+		}
 	}
 
 	worker->unlockData();
