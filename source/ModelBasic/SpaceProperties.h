@@ -10,6 +10,9 @@ public:
 	SpaceProperties(QObject* parent = nullptr);
 	virtual ~SpaceProperties() {}
 
+	virtual void init(IntVector2D size);
+	virtual SpaceProperties* clone(QObject* parent = nullptr) const;
+
 	virtual IntVector2D getSize() const;
 	virtual IntVector2D convertToIntVector(QVector2D const &pos) const;
 	virtual IntVector2D correctPositionAndConvertToIntVector(QVector2D const& pos) const;
@@ -18,10 +21,7 @@ public:
 	virtual void correctDisplacement(QVector2D& displacement) const;
 
 	virtual QVector2D correctionIncrement(QVector2D pos1, QVector2D pos2) const;
-
-	virtual void init(IntVector2D size);
-	virtual SpaceProperties* clone(QObject* parent = nullptr) const;
-
+	
 	virtual void truncatePosition(IntVector2D& pos) const;
 	virtual QVector2D displacement(QVector2D fromPoint, QVector2D toPoint) const;
 	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const;

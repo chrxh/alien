@@ -7,19 +7,18 @@
 #include "CudaInterface.cuh"
 #include "DefinitionsImpl.h"
 
-class GpuWorker
+class CudaBridge
 	: public QObject
 {
 	Q_OBJECT
 public:
-	GpuWorker(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~GpuWorker();
+	CudaBridge(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~CudaBridge();
 
 	virtual void init(SpaceProperties* metric);
 	virtual void requireData();
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual DataForAccess retrieveData();
-	virtual void ptrCorrectionForRetrievedData();
 	virtual void lockData();
 	virtual void unlockData();
 
@@ -30,7 +29,7 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 private:
-	SpaceProperties* _metric;
+	SpaceProperties* _spaceProp;
 
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;
