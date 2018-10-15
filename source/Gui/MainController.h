@@ -11,26 +11,27 @@ class MainController
 	Q_OBJECT
 public:
 	MainController(QObject * parent = nullptr);
-	virtual ~MainController();
+	~MainController();
 
-	virtual void init();
+	void init();
 
-	virtual void autoSave();
+	void autoSave();
 
-	virtual void onRunSimulation(bool run);
-	virtual void onStepForward();
-	virtual void onStepBackward(bool& emptyStack);
-	virtual void onMakeSnapshot();
-	virtual void onRestoreSnapshot();
-	virtual void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
-	virtual void onSaveSimulation(string const& filename);
-	virtual bool onLoadSimulation(string const& filename);
-	virtual void onRecreateSimulation(SimulationConfig const& config);
-	virtual void onUpdateSimulationParametersForRunningSimulation();
-	virtual void onRestrictTPS(optional<int> const& tps);
+	void onRunSimulation(bool run);
+	void onStepForward();
+	void onStepBackward(bool& emptyStack);
+	void onMakeSnapshot();
+	void onRestoreSnapshot();
+	void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
+	void onSaveSimulation(string const& filename);
+	bool onLoadSimulation(string const& filename);
+	void onRecreateSimulation(SimulationConfig const& config);
+	void onUpdateSimulationParametersForRunningSimulation();
+	void onRestrictTPS(optional<int> const& tps);
 
-	virtual int getTimestep() const;
-	virtual SimulationConfig getSimulationConfig() const;
+	int getTimestep() const;
+	SimulationConfig getSimulationConfig() const;
+	SimulationMonitor* getSimulationMonitor() const;
 
 private:
 	void initSimulation(SymbolTable* symbolTable, SimulationParameters* parameters);
@@ -92,4 +93,7 @@ private:
 
 	SimulationControllerBuildFunc _controllerBuildFunc;
 	SimulationAccessBuildFunc _accessBuildFunc;
+
+	using SimulationMonitorBuildFunc = std::function<SimulationMonitor*(SimulationController*)>;
+	SimulationMonitorBuildFunc _monitorBuildFunc;
 };
