@@ -39,7 +39,7 @@ void CellComputerEditTab::init(DataEditModel * model, DataEditController * contr
 {
 	_model = model;
 	_controller = controller;
-	_compiler = compiler;
+	SET_CHILD(_compiler, compiler);
 	ui->codeEditWidget->init(model, controller, compiler);
 }
 

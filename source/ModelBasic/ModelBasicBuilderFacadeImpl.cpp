@@ -1,5 +1,6 @@
 ﻿#include "ModelBasicBuilderFacadeImpl.h"
 
+#include "CellComputerCompilerImpl.h"
 #include "DescriptionHelperImpl.h"
 #include "SerializerImpl.h"
 #include "Settings.h"
@@ -7,6 +8,13 @@
 DescriptionHelper * ModelBasicBuilderFacadeImpl::buildDescriptionHelper() const
 {
 	return new DescriptionHelperImpl();
+}
+
+CellComputerCompiler * ModelBasicBuilderFacadeImpl::buildCellComputerCompiler(SymbolTable* symbolTable, SimulationParameters* parameters) const
+{
+	auto result = new CellComputerCompilerImpl();
+	result->init(symbolTable, parameters);
+	return result;
 }
 
 Serializer * ModelBasicBuilderFacadeImpl::buildSerializer() const

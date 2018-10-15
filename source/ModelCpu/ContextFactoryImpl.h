@@ -16,6 +16,5 @@ public:
 	virtual MapCompartment* buildMapCompartment() const override;
 	virtual CellMap* buildCellMap() const override;
 	virtual ParticleMap* buildEnergyParticleMap() const override;
-	virtual CellComputerCompilerImpl* buildCellComputerCompiler() const override;
 };
 
