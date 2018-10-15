@@ -17,6 +17,7 @@ public:
 		, ModelGpuData const& specificData
 		, uint timestepAtBeginning = 0) const = 0;
 	virtual SimulationAccessGpu* buildSimulationAccess() const = 0;
+	virtual SimulationMonitorGpu* buildSimulationMonitor() const = 0;
 
 };
 

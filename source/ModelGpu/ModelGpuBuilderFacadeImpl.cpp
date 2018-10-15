@@ -5,6 +5,7 @@
 #include "SimulationControllerGpuImpl.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
+#include "SimulationMonitorGpuImpl.h"
 #include "ModelGpuBuilderFacadeImpl.h"
 
 SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(Config const & config, 
@@ -24,4 +25,9 @@ SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(C
 SimulationAccessGpu * ModelGpuBuilderFacadeImpl::buildSimulationAccess() const
 {
 	return new SimulationAccessGpuImpl();
+}
+
+SimulationMonitorGpu * ModelGpuBuilderFacadeImpl::buildSimulationMonitor() const
+{
+	return new SimulationMonitorGpuImpl();
 }

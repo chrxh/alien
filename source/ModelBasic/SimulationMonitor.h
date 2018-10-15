@@ -22,8 +22,6 @@ public:
 	SimulationMonitor(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~SimulationMonitor() = default;
 
-	virtual void init(SimulationContext* context) = 0;
-
 	virtual void requireData() = 0;
 	Q_SIGNAL void dataReadyToRetrieve();
 	virtual MonitorData const& retrieveData() = 0;

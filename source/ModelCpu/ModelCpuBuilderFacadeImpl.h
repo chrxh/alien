@@ -13,7 +13,7 @@ public:
 		, ModelCpuData const& specificData
 		, uint timestepAtBeginning) const override;
 	SimulationAccessCpu* buildSimulationAccess() const override;
-	SimulationMonitor* buildSimulationMonitor() const override;
+	SimulationMonitorCpu* buildSimulationMonitor() const override;
 
 private:
 	Unit* buildSimulationUnit(IntVector2D gridPos, SimulationContextCpuImpl* context) const;

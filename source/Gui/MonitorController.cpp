@@ -6,6 +6,7 @@
 #include "MonitorView.h"
 #include "MonitorModel.h"
 #include "MonitorController.h"
+#include "MainController.h"
 
 namespace
 {
@@ -17,22 +18,18 @@ MonitorController::MonitorController(QWidget* parent)
 {
 	_view = new MonitorView(parent);
 	_view->setVisible(false);
-	connect(_view, &MonitorView::closed, this, &MonitorController::closed);
 
 	_updateTimer = new QTimer(this);
+
+	connect(_view, &MonitorView::closed, this, &MonitorController::closed);
+	connect(_updateTimer, &QTimer::timeout, this, &MonitorController::timerTimeout);
 }
 
-void MonitorController::init(SimulationMonitor* simMonitor)
+void MonitorController::init(MainController* mainController)
 {
 	_model = boost::make_shared<_MonitorModel>();
+	_mainController = mainController;
 	_view->init(_model);
-	_simMonitor = simMonitor;
-
-	for (auto const& connection : _connections) {
-		disconnect(connection);
-	}
-	_connections.push_back(connect(simMonitor, &SimulationMonitor::dataReadyToRetrieve, this, &MonitorController::dataReadyToRetrieve, Qt::QueuedConnection));
-	_connections.push_back(connect(_updateTimer, &QTimer::timeout, _simMonitor, &SimulationMonitor::requireData));
 }
 
 void MonitorController::onShow(bool show)
@@ -46,9 +43,20 @@ void MonitorController::onShow(bool show)
 	}
 }
 
+void MonitorController::timerTimeout()
+{
+	for (auto const& connection : _monitorConnections) {
+		disconnect(connection);
+	}
+	SimulationMonitor* simMonitor = _mainController->getSimulationMonitor();
+	_monitorConnections.push_back(connect(simMonitor, &SimulationMonitor::dataReadyToRetrieve, this, &MonitorController::dataReadyToRetrieve, Qt::QueuedConnection));
+	simMonitor->requireData();
+}
+
 void MonitorController::dataReadyToRetrieve()
 {
-	MonitorData const& data = _simMonitor->retrieveData();
+	SimulationMonitor* simMonitor = _mainController->getSimulationMonitor();
+	MonitorData const& data = simMonitor->retrieveData();
 	_model->numClusters= data.numClusters;
 	_model->numCells = data.numCells;
 	_model->numParticles = data.numParticles;
