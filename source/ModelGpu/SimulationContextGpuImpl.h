@@ -18,7 +18,6 @@ public:
 	virtual SpaceProperties* getSpaceProperties() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
-	virtual CellComputerCompiler* getCellComputerCompiler() const override;
 
 	virtual map<string, int> getSpecificData() const override;
 

@@ -1,6 +1,5 @@
 #pragma once
 #include "Definitions.h"
-#include "CellFeatureEnums.h"
 #include "Metadata.h"
 
 struct CellFeatureDescription

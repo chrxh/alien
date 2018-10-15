@@ -13,7 +13,6 @@ public:
 	virtual SpaceProperties* getSpaceProperties() const = 0;
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters* getSimulationParameters() const = 0;
-	virtual CellComputerCompiler* getCellComputerCompiler() const = 0;
 
 	virtual map<string, int> getSpecificData() const = 0;
 
