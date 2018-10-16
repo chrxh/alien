@@ -57,9 +57,6 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\HostHelper.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Map.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
@@ -74,6 +71,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\SimulationDataManager.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
