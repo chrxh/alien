@@ -208,7 +208,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\Definitions.h" />
     <ClInclude Include="..\..\source\ModelGpu\DefinitionsImpl.h" />
     <ClInclude Include="..\..\source\ModelGpu\DllExport.h" />
-    <ClInclude Include="..\..\source\ModelGpu\HostHelper.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\SimulationDataManager.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Map.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuBuilderFacade.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuBuilderFacadeImpl.h" />

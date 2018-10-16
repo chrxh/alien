@@ -15,8 +15,8 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
-	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	connect(worker, &CudaBridge::dataReadyToRetrieve, this, &SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu);
+	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
+	connect(cudaBridge, &CudaBridge::dataAccessGranted, this, &SimulationAccessGpuImpl::dataAccessGrantedFromGpu);
 }
 
 void SimulationAccessGpuImpl::clear()
@@ -25,6 +25,7 @@ void SimulationAccessGpuImpl::clear()
 
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
 {
+
 }
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
@@ -33,8 +34,8 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_requiredRect = rect;
 	_resolveDesc = resolveDesc;
 
-	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	worker->requireData();
+	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
+	cudaBridge->requireAccess();
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
@@ -43,8 +44,8 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredRect = rect;
 	_requiredImage = target;
 
-	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	worker->requireData();
+	auto worker = _context->getGpuThreadController()->getCudaBridge();
+	worker->requireAccess();
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -52,28 +53,42 @@ DataDescription const & SimulationAccessGpuImpl::retrieveData()
 	return _dataCollected;
 }
 
-void SimulationAccessGpuImpl::dataReadyToRetrieveFromGpu()
+void SimulationAccessGpuImpl::dataAccessGrantedFromGpu()
 {
+	if (_dataUpdate) {
+		_dataUpdate = false;
+		updateDataToGpuModel();
+	}
 
 	if (_imageRequired) {
 		_imageRequired = false;
-		createImage();
+		createImageFromGpuModel();
 		Q_EMIT imageReady();
 
 	}
 
 	if (_dataRequired) {
 		_dataRequired = false;
-		createData();
+		createDataFromGpuModel();
 		Q_EMIT dataReadyToRetrieve();
 	}
 }
 
-void SimulationAccessGpuImpl::createImage()
+void SimulationAccessGpuImpl::updateDataToGpuModel()
 {
-	auto metric = _context->getSpaceProperties();
-	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	DataForAccess cudaData = worker->retrieveData();
+	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
+	SimulationDataForAccess cudaData = cudaBridge->retrieveData();
+
+	cudaBridge->lockData();
+
+	cudaBridge->unlockData();
+}
+
+void SimulationAccessGpuImpl::createImageFromGpuModel()
+{
+	auto spaceProp = _context->getSpaceProperties();
+	auto worker = _context->getGpuThreadController()->getCudaBridge();
+	SimulationDataForAccess cudaData = worker->retrieveData();
 
 	_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
 
@@ -84,7 +99,7 @@ void SimulationAccessGpuImpl::createImage()
 		float2& pos = particle.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		if (_requiredRect.isContained(intPos)) {
-			metric->correctPosition(intPos);
+			spaceProp->correctPosition(intPos);
 			_requiredImage->setPixel(intPos.x, intPos.y, 0x902020);
 		}
 	}
@@ -94,7 +109,7 @@ void SimulationAccessGpuImpl::createImage()
 		float2& pos = cell.absPos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		if (_requiredRect.isContained(intPos)) {
-			metric->correctPosition(intPos);
+			spaceProp->correctPosition(intPos);
 			_requiredImage->setPixel(intPos.x, intPos.y, 0xFF);
 		}
 	}
@@ -102,13 +117,13 @@ void SimulationAccessGpuImpl::createImage()
 	worker->unlockData();
 }
 
-void SimulationAccessGpuImpl::createData()
+void SimulationAccessGpuImpl::createDataFromGpuModel()
 {
 	_dataCollected.clear();
-	auto worker = _context->getGpuThreadController()->getGpuWorker();
-	DataForAccess cudaData = worker->retrieveData();
+	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
+	SimulationDataForAccess cudaData = cudaBridge->retrieveData();
 
-	worker->lockData();
+	cudaBridge->lockData();
 
 	list<uint64_t> connectingCellIds;
 	for (int i = 0; i < cudaData.numClusters; ++i) {
@@ -146,6 +161,6 @@ void SimulationAccessGpuImpl::createData()
 		}
 	}
 
-	worker->unlockData();
+	cudaBridge->unlockData();
 }
 
