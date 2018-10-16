@@ -21,19 +21,24 @@ public:
 	virtual DataDescription const& retrieveData() override;
 
 private:
-	Q_SLOT void dataReadyToRetrieveFromGpu();
-	void createImage();
-	void createData();
+	Q_SLOT void dataAccessGrantedFromGpu();
+	void updateDataToGpuModel();
+	void createImageFromGpuModel();
+	void createDataFromGpuModel();
 
 	SimulationContextGpuImpl* _context = nullptr;
 
-	bool _dataRequired = false;
-	bool _imageRequired = false;
+	bool _dataUpdate = false;
+	DataChangeDescription _dataToUpdate;
 
+	bool _dataRequired = false;
+	ResolveDescription _resolveDesc;	//not used yet
+	DataDescription _dataCollected;
+
+	bool _imageRequired = false;
 	IntRect _requiredRect;
-	ResolveDescription _resolveDesc;
 	QImage* _requiredImage = nullptr;
 
-	DataDescription _dataCollected;
+
 };
 

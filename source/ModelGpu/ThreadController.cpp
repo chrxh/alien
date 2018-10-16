@@ -28,7 +28,7 @@ void ThreadController::init(SpaceProperties *metric)
 	_worker->init(metric);
 }
 
-CudaBridge * ThreadController::getGpuWorker() const
+CudaBridge * ThreadController::getCudaBridge() const
 {
 	return _worker;
 }

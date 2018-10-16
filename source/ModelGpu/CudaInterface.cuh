@@ -40,7 +40,7 @@ struct ClusterData
 	CellData* cells;
 };
 
-struct DataForAccess
+struct SimulationDataForAccess
 {
 	int numClusters;
 	ClusterData* clusters;
@@ -52,7 +52,7 @@ struct DataForAccess
 
 extern void cudaInit(int2 const &size);
 extern void cudaCalcNextTimestep();
-extern DataForAccess cudaGetData();
+extern SimulationDataForAccess cudaGetData();
 extern void cudaDataPtrCorrection();
 extern void cudaShutdown();
 
