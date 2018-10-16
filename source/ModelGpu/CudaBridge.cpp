@@ -18,32 +18,45 @@ void CudaBridge::init(SpaceProperties* spaceProp)
 	cudaInit({ size.x, size.y });
 }
 
-void CudaBridge::requireData()
+void CudaBridge::setRequireData(bool require)
 {
-	_mutexForRequirement.lock();
-	_requireData = true;
-	_mutexForRequirement.unlock();
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	_requireData = require;
+
+	if (require && !_simRunning) {
+		_mutexForData.lock();
+		_cudaData = cudaGetData();
+		_mutexForData.unlock();
+		_requireData = false;
+		Q_EMIT dataObtained();
+	}
 }
 
 bool CudaBridge::isDataRequired()
 {
 	bool result;
-
-	_mutexForRequirement.lock();
+	_mutexForFlags.lock();
 	result = _requireData;
-	_mutexForRequirement.unlock();
-
+	_mutexForFlags.unlock();
 	return result;
 }
 
-void CudaBridge::dataObtainedIntern()
+void CudaBridge::setSimulationRunning(bool running)
 {
-	_mutexForRequirement.lock();
-	_requireData = false;
-	_mutexForRequirement.unlock();
-
-	Q_EMIT dataObtained();
+	_mutexForFlags.lock();
+	_simRunning = running;
+	_mutexForFlags.unlock();
 }
+
+bool CudaBridge::isSimulationRunning()
+{
+	bool result;
+	_mutexForFlags.lock();
+	result = _simRunning;
+	_mutexForFlags.unlock();
+	return result;
+}
+
 
 SimulationDataForAccess CudaBridge::retrieveData()
 {
@@ -60,11 +73,6 @@ void CudaBridge::unlockData()
 	_mutexForData.unlock();
 }
 
-bool CudaBridge::isSimulationRunning()
-{
-	return _simRunning;
-}
-
 void CudaBridge::setFlagStopAfterNextTimestep(bool value)
 {
 	_stopAfterNextTimestep = value;
@@ -73,7 +81,7 @@ void CudaBridge::setFlagStopAfterNextTimestep(bool value)
 
 void CudaBridge::runSimulation()
 {
-	_simRunning = true;
+	setSimulationRunning(true);
 	do {
 		cudaCalcNextTimestep();
 		Q_EMIT timestepCalculated();
@@ -81,9 +89,10 @@ void CudaBridge::runSimulation()
 			if (_mutexForData.try_lock()) {
 				_cudaData = cudaGetData();
 				_mutexForData.unlock();
-				dataObtainedIntern();
+				setRequireData(false);
+				Q_EMIT dataObtained();
 			}
 		}
 	} while (!_stopAfterNextTimestep);
-	_simRunning = false;
+	setSimulationRunning(false);
 }
