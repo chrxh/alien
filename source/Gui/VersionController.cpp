@@ -21,7 +21,7 @@ void VersionController::init(SimulationContext* context, SimulationAccess* acces
 	_stack.clear();
 	_snapshot.reset();
 
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &VersionController::dataReadyToRetrieve, Qt::QueuedConnection);
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &VersionController::dataReadyToRetrieve);
 }
 
 bool VersionController::isStackEmpty()
