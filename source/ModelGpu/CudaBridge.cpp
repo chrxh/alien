@@ -18,11 +18,31 @@ void CudaBridge::init(SpaceProperties* spaceProp)
 	cudaInit({ size.x, size.y });
 }
 
-void CudaBridge::requireAccess()
+void CudaBridge::requireData()
 {
-	lockData();
+	_mutexForRequirement.lock();
 	_requireData = true;
-	unlockData();
+	_mutexForRequirement.unlock();
+}
+
+bool CudaBridge::isDataRequired()
+{
+	bool result;
+
+	_mutexForRequirement.lock();
+	result = _requireData;
+	_mutexForRequirement.unlock();
+
+	return result;
+}
+
+void CudaBridge::dataObtainedIntern()
+{
+	_mutexForRequirement.lock();
+	_requireData = false;
+	_mutexForRequirement.unlock();
+
+	Q_EMIT dataObtained();
 }
 
 SimulationDataForAccess CudaBridge::retrieveData()
@@ -32,12 +52,12 @@ SimulationDataForAccess CudaBridge::retrieveData()
 
 void CudaBridge::lockData()
 {
-	_mutex.lock();
+	_mutexForData.lock();
 }
 
 void CudaBridge::unlockData()
 {
-	_mutex.unlock();
+	_mutexForData.unlock();
 }
 
 bool CudaBridge::isSimulationRunning()
@@ -57,13 +77,12 @@ void CudaBridge::runSimulation()
 	do {
 		cudaCalcNextTimestep();
 		Q_EMIT timestepCalculated();
-		if (_mutex.try_lock()) {
-			if (_requireData) {
+		if (isDataRequired()) {
+			if (_mutexForData.try_lock()) {
 				_cudaData = cudaGetData();
-				_requireData = false;
+				_mutexForData.unlock();
+				dataObtainedIntern();
 			}
-			_mutex.unlock();
-			Q_EMIT dataAccessGranted();
 		}
 	} while (!_stopAfterNextTimestep);
 	_simRunning = false;

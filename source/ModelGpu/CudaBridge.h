@@ -16,8 +16,10 @@ public:
 	virtual ~CudaBridge();
 
 	virtual void init(SpaceProperties* metric);
-	virtual void requireAccess();
-	Q_SIGNAL void dataAccessGranted();
+	virtual void requireData();
+	virtual bool isDataRequired();
+	Q_SIGNAL void dataObtained();
+
 	virtual SimulationDataForAccess retrieveData();
 	virtual void lockData();
 	virtual void unlockData();
@@ -29,11 +31,15 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 private:
+	virtual void dataObtainedIntern();
+
+private:
 	SpaceProperties* _spaceProp;
 
 	bool _simRunning = false;
 	bool _stopAfterNextTimestep = true;
 	bool _requireData = false;
-	std::mutex _mutex;
+	std::mutex _mutexForData;
+	std::mutex _mutexForRequirement;
 	SimulationDataForAccess _cudaData;
 };
