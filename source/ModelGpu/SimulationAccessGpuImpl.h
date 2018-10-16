@@ -21,7 +21,7 @@ public:
 	virtual DataDescription const& retrieveData() override;
 
 private:
-	Q_SLOT void dataAccessGrantedFromGpu();
+	Q_SLOT void dataRequiredFromGpu();
 	void updateDataToGpuModel();
 	void createImageFromGpuModel();
 	void createDataFromGpuModel();
@@ -31,7 +31,7 @@ private:
 	bool _dataUpdate = false;
 	DataChangeDescription _dataToUpdate;
 
-	bool _dataRequired = false;
+	bool _dataDescRequired = false;
 	ResolveDescription _resolveDesc;	//not used yet
 	DataDescription _dataCollected;
 
