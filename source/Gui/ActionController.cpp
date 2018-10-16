@@ -909,8 +909,8 @@ void ActionController::updateActionsEnableState()
 	actions->actionShowCellInfo->setEnabled(editMode);
 	actions->actionCenterSelection->setEnabled(editMode);
 
-	actions->actionNewCell->setEnabled(editMode);
-	actions->actionNewParticle->setEnabled(editMode);
+	actions->actionNewCell->setEnabled(true);
+	actions->actionNewParticle->setEnabled(true);
 	actions->actionCopyEntity->setEnabled(editMode && entitySelected);
 	actions->actionPasteEntity->setEnabled(editMode && entityCopied);
 	actions->actionDeleteEntity->setEnabled(editMode && entitySelected);
