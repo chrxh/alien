@@ -114,7 +114,7 @@ void SimulationAccessGpuImpl::createData()
 	for (int i = 0; i < cudaData.numClusters; ++i) {
 		ClusterData const& cluster = cudaData.clusters[i];
 		if (_requiredRect.isContained({ int(cluster.pos.x), int(cluster.pos.y) })) {
-			auto clusterDesc = ClusterDescription().setPos({ cluster.pos.x, cluster.pos.y })
+			auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
 				.setVel({ cluster.vel.x, cluster.vel.y })
 				.setAngle(cluster.angle)
 				.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
@@ -135,6 +135,14 @@ void SimulationAccessGpuImpl::createData()
 				);
 			}
 			_dataCollected.addCluster(clusterDesc);
+		}
+	}
+
+	for (int i = 0; i < cudaData.numParticles; ++i) {
+		ParticleData const& particle = cudaData.particles[i];
+		if (_requiredRect.isContained({ int(particle.pos.x), int(particle.pos.y) })) {
+			_dataCollected.addParticle(ParticleDescription().setId(particle.id).setPos({ particle.pos.x, particle.pos.y })
+				.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
 		}
 	}
 
