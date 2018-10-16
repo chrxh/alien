@@ -188,6 +188,7 @@ void drawClusterToMap(ClusterData* cluster, SimulationData* data)
 
 void createCluster(SimulationData &data, ClusterData* cluster, float2 pos, float2 vel, float angle, float angVel, float energy, int2 clusterSize, int2 const &size)
 {
+	cluster->id = data.numberGen.newId();
 	cluster->pos = pos;
 	cluster->vel = vel;
 	cluster->angle = angle;

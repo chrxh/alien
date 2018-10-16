@@ -30,6 +30,7 @@ struct CellData
 
 struct ClusterData
 {
+	uint64_t id;
 	float2 pos;
 	float2 vel;
 	float angle;
