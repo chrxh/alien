@@ -9,7 +9,7 @@
 #include "Constants.cuh"
 #include "CudaInterface.cuh"
 #include "Simulation.cuh"
-#include "HostHelper.cuh"
+#include "SimulationDataManager.cuh"
 
 namespace {
 	cudaStream_t cudaStream;
@@ -26,16 +26,16 @@ void cudaInit(int2 const &size)
 	auto clusters = simulationManager->data.clustersAC1.getArray(NUM_CLUSTERS);
 
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
-		createCluster(simulationManager->data, &clusters[i], { 0.0f, 0.0f }, { random(1.0f) - 0.5f, random(1.0f) - 0.5f }, random(360.0f), random(0.4f) - 0.2f, 100.0, { rand() % 20 + 1, rand() % 20 + 1 }, size);
+		simulationManager->createCluster(simulationManager->data, &clusters[i], { 0.0f, 0.0f }, { random(1.0f) - 0.5f, random(1.0f) - 0.5f }, random(360.0f), random(0.4f) - 0.2f, 100.0, { rand() % 20 + 1, rand() % 20 + 1 }, size);
 		do {
 			clusters[i].pos = { random(static_cast<float>(size.x)), random(static_cast<float>(size.y)) };
-			centerCluster(&clusters[i]);
-			updateAbsPos(&clusters[i]);
+			simulationManager->centerCluster(&clusters[i]);
+			simulationManager->updateAbsPos(&clusters[i]);
 
-		} while (!isClusterPositionFree(&clusters[i], &simulationManager->data));
+		} while (!simulationManager->isClusterPositionFree(&clusters[i], &simulationManager->data));
 
-		drawClusterToMap(&clusters[i], &simulationManager->data);
-		updateAngularMass(&clusters[i]);
+		simulationManager->drawClusterToMap(&clusters[i], &simulationManager->data);
+		simulationManager->updateAngularMass(&clusters[i]);
 	}
 }
 
@@ -56,7 +56,7 @@ void cudaCalcNextTimestep()
 	simulationManager->swapData();
 }
 
-DataForAccess cudaGetData()
+SimulationDataForAccess cudaGetData()
 {
 	return simulationManager->getDataForAccess();
 }
