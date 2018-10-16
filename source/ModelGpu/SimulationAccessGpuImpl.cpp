@@ -35,7 +35,7 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_resolveDesc = resolveDesc;
 
 	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
-	cudaBridge->requireData();
+	cudaBridge->setRequireData(true);
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
@@ -44,8 +44,8 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredRect = rect;
 	_requiredImage = target;
 
-	auto worker = _context->getGpuThreadController()->getCudaBridge();
-	worker->requireData();
+	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
+	cudaBridge->setRequireData(true);
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
