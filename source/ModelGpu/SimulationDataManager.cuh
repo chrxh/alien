@@ -79,14 +79,14 @@ public:
 
 	SimulationDataForAccess getDataForAccess()
 	{
-		access.numClusters = data.clustersAC2.getNumEntries();
-		cudaMemcpy(access.clusters, data.clustersAC2.getEntireArray(), sizeof(ClusterData) * data.clustersAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		access.numClusters = data.clustersAC1.getNumEntries();
+		cudaMemcpy(access.clusters, data.clustersAC1.getEntireArray(), sizeof(ClusterData) * data.clustersAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
-		access.numCells = data.cellsAC2.getNumEntries();
-		cudaMemcpy(access.cells, data.cellsAC2.getEntireArray(), sizeof(CellData) * data.cellsAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		access.numCells = data.cellsAC1.getNumEntries();
+		cudaMemcpy(access.cells, data.cellsAC1.getEntireArray(), sizeof(CellData) * data.cellsAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
-		access.numParticles = data.particlesAC2.getNumEntries();
-		cudaMemcpy(access.particles, data.particlesAC2.getEntireArray(), sizeof(ParticleData) * data.particlesAC2.getNumEntries(), cudaMemcpyDeviceToHost);
+		access.numParticles = data.particlesAC1.getNumEntries();
+		cudaMemcpy(access.particles, data.particlesAC1.getEntireArray(), sizeof(ParticleData) * data.particlesAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
 
 		correctPointersAfterCopy();
@@ -212,7 +212,7 @@ public:
 private:
 	void correctPointersAfterCopy()
 	{
-		auto cellPtrCorrection = int64_t(access.cells) - int64_t(data.cellsAC2.getEntireArray());
+		auto cellPtrCorrection = int64_t(access.cells) - int64_t(data.cellsAC1.getEntireArray());
 		for (int i = 0; i < access.numClusters; ++i) {
 			access.clusters[i].cells = (CellData*)(int64_t(access.clusters[i].cells) + int64_t(cellPtrCorrection));
 		}
