@@ -64,8 +64,8 @@ SimulationDataForAccess cudaGetData()
 void cudaShutdown()
 {
 	cudaDeviceSynchronize();
+	delete simulationManager;
 	cudaDeviceReset();
 
-	delete simulationManager;
 }
 
