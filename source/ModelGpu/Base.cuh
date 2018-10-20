@@ -161,6 +161,11 @@ public:
 		return &_data[oldIndex];
 	}
 
+	__host__ __device__ __inline__ T* at(int index)
+	{
+		return &_data[index];
+	}
+
 	__host__ __device__ __inline__ int getNumEntries() const
 	{
 		return *_numEntries;
