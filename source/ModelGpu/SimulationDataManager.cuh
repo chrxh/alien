@@ -103,7 +103,13 @@ public:
 		cudaMemcpy(access.particles, data.particlesAC1.getEntireArray(), sizeof(ParticleData) * data.particlesAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 		checkCudaErrors(cudaGetLastError());
 
-		correctPointersAfterCopy(int64_t(access.cells) - int64_t(data.cellsAC1.getEntireArray()));
+		for (int i = 0; i < access.numClusters; ++i) {
+			correctPointersAfterClusterCopy(&access.clusters[i], int64_t(access.clusters) - int64_t(data.clustersAC1.getEntireArray()));
+		}
+		for (int i = 0; i < access.numCells; ++i) {
+			correctPointersAfterCellCopy(&access.cells[i], int64_t(access.cells) - int64_t(data.cellsAC1.getEntireArray()));
+		}
+
 		return access;
 	}
 
@@ -121,7 +127,12 @@ public:
 		cudaMemcpy(data.particlesAC1.getEntireArray(), access.particles, sizeof(ParticleData) * data.particlesAC1.getNumEntries(), cudaMemcpyHostToDevice);
 		checkCudaErrors(cudaGetLastError());
 
-		correctPointersAfterCopy(int64_t(data.cellsAC1.getEntireArray()) - int64_t(access.cells));
+		for (int i = 0; i < data.clustersAC1.getNumEntries(); ++i) {
+			correctPointersAfterClusterCopy(data.clustersAC1.at(i), int64_t(data.clustersAC1.getEntireArray()) - int64_t(access.clusters));
+		}
+		for (int i = 0; i < data.cellsAC1.getNumEntries(); ++i) {
+			correctPointersAfterCellCopy(data.cellsAC1.at(i), int64_t(data.cellsAC1.getEntireArray()) - int64_t(access.cells));
+		}
 	}
 
 private:
@@ -141,19 +152,18 @@ private:
 		swap(data.particleMap1, data.particleMap2);
 	}
 
-	void correctPointersAfterCopy(int64_t addressShift)
+	void correctPointersAfterCellCopy(CellData* cell, int64_t addressShift)
 	{
-		auto cellPtrCorrection = int64_t(access.cells) - int64_t(data.cellsAC1.getEntireArray());
-		for (int i = 0; i < access.numClusters; ++i) {
-			access.clusters[i].cells = (CellData*)(int64_t(access.clusters[i].cells) + addressShift);
+		cell->cluster = (ClusterData*)(int64_t(cell->cluster) + addressShift);
+		for (int j = 0; j < cell->numConnections; ++j) {
+			cell->connections[j] = (CellData*)(int64_t(cell->connections[j]) + addressShift);
 		}
+		cell->nextTimestep = nullptr;
+	}
 
-		for (int i = 0; i < access.numCells; ++i) {
-			auto &cell = access.cells[i];
-			for (int j = 0; j < cell.numConnections; ++j) {
-				cell.connections[j] = (CellData*)(int64_t(cell.connections[j]) + addressShift);
-			}
-		}
+	void correctPointersAfterClusterCopy(ClusterData* cluster, int64_t addressShift)
+	{
+		cluster->cells = (CellData*)(int64_t(cluster->cells) + addressShift);
 	}
 
 	//deprecated methods
