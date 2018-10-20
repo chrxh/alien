@@ -66,9 +66,11 @@ void DataConverter::resolveConnections(CellDescription const & cellToAdd, unorde
 	, CellData& cudaCell)
 {
 	int index = 0;
-	for (uint64_t connectingCellId : *cellToAdd.connectingCells) {
-		cudaCell.connections[index] = cellByIds.at(connectingCellId);
-		++index;
+	if (cellToAdd.connectingCells) {
+		for (uint64_t connectingCellId : *cellToAdd.connectingCells) {
+			cudaCell.connections[index] = cellByIds.at(connectingCellId);
+			++index;
+		}
 	}
 }
 
