@@ -48,7 +48,7 @@ MainView::~MainView()
 }
 
 void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository
-	, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator)
+	, SimulationMonitor* simMonitor, Notifier* notifier)
 {
 	_model = model;
 	_controller = mainController;
@@ -58,7 +58,7 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_infoController->init(ui->infoLabel, mainController);
 	_monitor->init(mainController);
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar
-		, _monitor, repository, notifier, numberGenerator);
+		, _monitor, repository, notifier);
 
 	setupMenu();
 	setupFontsAndColors();

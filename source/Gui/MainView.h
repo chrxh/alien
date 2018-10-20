@@ -19,7 +19,7 @@ public:
 	virtual ~MainView();
 
 	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository
-		, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator);
+		, SimulationMonitor* simMonitor, Notifier* notifier);
 
 
 	virtual void refresh();

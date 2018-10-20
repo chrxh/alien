@@ -1,3 +1,5 @@
+#include "Base/ServiceLocator.h"
+#include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 
 #include "ModelBasic/SimulationParameters.h"
@@ -25,12 +27,17 @@ SimulationContextCpuImpl::~SimulationContextCpuImpl()
 void SimulationContextCpuImpl::init(SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
 	, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler)
 {
+	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	auto numberGen = factory->buildRandomNumberGenerator();
+	numberGen->init();
+
 	SET_CHILD(_spaceProp, spaceProp);
 	SET_CHILD(_grid, grid);
 	SET_CHILD(_threads, threads);
 	SET_CHILD(_symbolTable, symbolTable);
 	SET_CHILD(_simulationParameters, parameters);
 	SET_CHILD(_compiler, compiler);
+	SET_CHILD(_numberGen, numberGen);
 
 	auto attributeSetter = new SimulationAttributeSetter();
 	SET_CHILD(_attributeSetter, attributeSetter);
@@ -61,6 +68,11 @@ SymbolTable* SimulationContextCpuImpl::getSymbolTable() const
 SimulationParameters* SimulationContextCpuImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
+}
+
+NumberGenerator * SimulationContextCpuImpl::getNumberGenerator() const
+{
+	return _numberGen;
 }
 
 map<string, int> SimulationContextCpuImpl::getSpecificData() const

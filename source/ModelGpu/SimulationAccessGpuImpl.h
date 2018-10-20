@@ -23,10 +23,12 @@ public:
 private:
 	Q_SLOT void dataRequiredFromGpu();
 	void updateDataToGpuModel();
+
 	void createImageFromGpuModel();
 	void createDataFromGpuModel();
 
 	SimulationContextGpuImpl* _context = nullptr;
+	NumberGenerator* _numberGen = nullptr;
 
 	bool _dataUpdate = false;
 	DataChangeDescription _dataToUpdate;
@@ -38,7 +40,5 @@ private:
 	bool _imageRequired = false;
 	IntRect _requiredRect;
 	QImage* _requiredImage = nullptr;
-
-
 };
 

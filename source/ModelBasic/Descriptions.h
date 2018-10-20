@@ -52,41 +52,16 @@ struct MODELBASIC_EXPORT CellDescription
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
 	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells = value; return *this; }
-	CellDescription& addConnection(uint64_t value)
-	{
-		if (!connectingCells) {
-			connectingCells = list<uint64_t>();
-		}
-		connectingCells->push_back(value);
-		return *this;
-	}
+	CellDescription& addConnection(uint64_t value);
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
 	CellDescription& setCellFeature(CellFeatureDescription const& value) { cellFeature = value; return *this; }
 	CellDescription& setTokens(vector<TokenDescription> const& value) { tokens = value; return *this; }
-	CellDescription& addToken(TokenDescription const& value)
-	{
-		if (!tokens) {
-			tokens = vector<TokenDescription>();
-		}
-		tokens->push_back(value);
-		return *this;
-	}
-	CellDescription& addToken(uint pos, TokenDescription const& value)
-	{
-		if (!tokens) {
-			tokens = vector<TokenDescription>();
-		}
-		tokens->insert(tokens->begin() + pos, value);
-		return *this;
-	}
-	CellDescription& delToken(uint pos)
-	{
-		CHECK(tokens);
-		tokens->erase(tokens->begin() + pos);
-		return *this;
-	}
+	CellDescription& addToken(TokenDescription const& value);
+	CellDescription& addToken(uint index, TokenDescription const& value);
+	CellDescription& delToken(uint index);
+	QVector2D getPosRelativeTo(ClusterDescription const& cluster) const;
 };
 
 struct MODELBASIC_EXPORT ClusterDescription
@@ -123,6 +98,8 @@ struct MODELBASIC_EXPORT ClusterDescription
 		addCells({ value });
 		return *this;
 	}
+
+	QVector2D getClusterPosFromCells() const;
 };
 
 struct MODELBASIC_EXPORT ParticleDescription

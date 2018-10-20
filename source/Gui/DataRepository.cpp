@@ -12,12 +12,12 @@
 #include "Notifier.h"
 
 void DataRepository::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector
-	, SimulationContext* context, NumberGenerator* numberGenerator)
+	, SimulationContext* context)
 {
 	_descHelper = connector;
 	_access = access;
 	_notifier = notifier;
-	_numberGenerator = numberGenerator;
+	_numberGenerator = context->getNumberGenerator();
 	_parameters = context->getSimulationParameters();
 	_universeSize = context->getSpaceProperties()->getSize();
 	_unchangedData.clear();
@@ -446,9 +446,12 @@ namespace
 	template<typename T>
 	unordered_set<T> calcDifference(unordered_set<T> const& set1, unordered_set<T> const& set2)
 	{
-		unordered_set<T> result;
-		std::set_difference(set1.begin(), set1.end(), set2.begin(), set2.begin(), std::inserter(result, result.begin()));
-		return result;
+		set<T> orderedSet1(set1.begin(), set1.end());
+		set<T> orderedSet2(set2.begin(), set2.end());
+
+		set<T> result;
+		std::set_difference(orderedSet1.begin(), orderedSet1.end(), set2.begin(), set2.begin(), std::inserter(result, result.begin()));
+		return unordered_set<T>(result.begin(), result.end());
 	}
 }
 

@@ -6,7 +6,6 @@
 
 #include "Base/GlobalFactory.h"
 #include "Base/ServiceLocator.h"
-#include "Base/NumberGenerator.h"
 
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/SimulationController.h"
@@ -109,9 +108,6 @@ void MainController::init()
 		}
 	};
 
-	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto numberGenerator = factory->buildRandomNumberGenerator();
-
 	auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto serializer = modelBasicFacade->buildSerializer();
@@ -122,15 +118,13 @@ void MainController::init()
 	SET_CHILD(_simAccess, simAccessForDataController);
 	SET_CHILD(_descHelper, descHelper);
 	SET_CHILD(_versionController, versionController);
-	SET_CHILD(_numberGenerator, numberGenerator);
 	_repository = new DataRepository(this);
 	_notifier = new Notifier(this);
 
 	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
 	_serializer->init(_controllerBuildFunc, _accessBuildFunc);
-	_numberGenerator->init(12315312, 0);
-	_view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _numberGenerator);
+	_view->init(_model, this, _serializer, _repository, _simMonitor, _notifier);
 
 	if (!onLoadSimulation("autosave.sim")) {
 
@@ -199,9 +193,10 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	connectSimController();
 
 	_simAccess = _accessBuildFunc(_simController);
-	_descHelper->init(_simController->getContext(), _numberGenerator);
+	auto context = _simController->getContext();
+	_descHelper->init(context);
 	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
-	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
+	_repository->init(_notifier, _simAccess, _descHelper, context);
 
 	auto simMonitor = _monitorBuildFunc(_simController);
 	SET_CHILD(_simMonitor, simMonitor);
