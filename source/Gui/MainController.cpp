@@ -298,16 +298,27 @@ int MainController::getTimestep() const
 SimulationConfig MainController::getSimulationConfig() const
 {
 	auto context = _simController->getContext();
-	ModelCpuData data(context->getSpecificData());
 
-	auto result = boost::make_shared<_SimulationConfigCpu>();
-	result->maxThreads = data.getMaxRunningThreads();
-	result->gridSize = data.getGridSize();
-	result->universeSize = context->getSpaceProperties()->getSize();
-	result->symbolTable = context->getSymbolTable();
-	result->parameters = context->getSimulationParameters();
-
-	return result;
+	if (dynamic_cast<SimulationControllerCpu*>(_simController)) {
+		ModelCpuData data(context->getSpecificData());
+		auto result = boost::make_shared<_SimulationConfigCpu>();
+		result->maxThreads = data.getMaxRunningThreads();
+		result->gridSize = data.getGridSize();
+		result->universeSize = context->getSpaceProperties()->getSize();
+		result->symbolTable = context->getSymbolTable();
+		result->parameters = context->getSimulationParameters();
+		return result;
+	}
+	else if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
+		auto result = boost::make_shared<_SimulationConfigGpu>();
+		result->universeSize = context->getSpaceProperties()->getSize();
+		result->symbolTable = context->getSymbolTable();
+		result->parameters = context->getSimulationParameters();
+		return result;
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
+	}
 }
 
 SimulationMonitor * MainController::getSimulationMonitor() const
