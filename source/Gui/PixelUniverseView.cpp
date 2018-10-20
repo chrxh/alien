@@ -48,6 +48,7 @@ void PixelUniverseView::init(Notifier* notifier, SimulationController* controlle
 
 void PixelUniverseView::activate()
 {
+	deactivate();
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData));
 	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &PixelUniverseView::receivedNotifications));
 	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection));
@@ -62,6 +63,7 @@ void PixelUniverseView::deactivate()
 	for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
+	_connections.clear();
 }
 
 void PixelUniverseView::refresh()
