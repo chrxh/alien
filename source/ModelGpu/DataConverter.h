@@ -11,7 +11,8 @@ public:
 
 	void add(ClusterDescription const& clusterToAdd);
 
-	SimulationDataForAccess getResult() const;
+	SimulationDataForAccess getGpuData() const;
+	DataDescription getDataDescription(IntRect const& requiredRect) const;
 
 private:
 	void addCell(CellDescription const& cellToAdd, ClusterDescription const& cluster, ClusterData& cudaCluster

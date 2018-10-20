@@ -23,6 +23,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	_cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+	_gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	_symbols = _basicFacade->buildDefaultSymbolTable();
 	_parameters = _basicFacade->buildDefaultSimulationParameters();
 	_numberGen = factory->buildRandomNumberGenerator();

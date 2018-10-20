@@ -15,7 +15,7 @@ public:
 
 	void init(SpaceProperties *metric);
 
-	virtual CudaBridge* getCudaBridge() const;
+	virtual CudaWorker* getCudaBridge() const;
 
 	void calculate(RunningMode mode);
 
@@ -28,6 +28,6 @@ private:
 	SpaceProperties *_metric = nullptr;
 
 	QThread _thread;
-	CudaBridge* _worker = nullptr;
+	CudaWorker* _worker = nullptr;
 	bool _gpuThreadWorking = false;
 };

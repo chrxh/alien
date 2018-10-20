@@ -7,13 +7,13 @@
 #include "CudaInterface.cuh"
 #include "DefinitionsImpl.h"
 
-class CudaBridge
+class CudaWorker
 	: public QObject
 {
 	Q_OBJECT
 public:
-	CudaBridge(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~CudaBridge();
+	CudaWorker(QObject* parent = nullptr) : QObject(parent) {}
+	virtual ~CudaWorker();
 
 	void init(SpaceProperties* metric);
 

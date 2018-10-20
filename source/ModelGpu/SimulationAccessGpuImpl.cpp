@@ -2,7 +2,7 @@
 
 #include "ModelBasic/SpaceProperties.h"
 
-#include "CudaBridge.h"
+#include "CudaWorker.h"
 #include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
@@ -18,7 +18,7 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 	_numberGen = _context->getNumberGenerator();
 	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
-	connect(cudaBridge, &CudaBridge::dataObtained, this, &SimulationAccessGpuImpl::dataRequiredFromGpu, Qt::QueuedConnection);
+	connect(cudaBridge, &CudaWorker::dataObtained, this, &SimulationAccessGpuImpl::dataRequiredFromGpu, Qt::QueuedConnection);
 }
 
 void SimulationAccessGpuImpl::clear()
@@ -137,42 +137,8 @@ void SimulationAccessGpuImpl::createDataFromGpuModel()
 
 	cudaBridge->lockData();
 	SimulationDataForAccess cudaData = cudaBridge->retrieveData();
-
-	list<uint64_t> connectingCellIds;
-	for (int i = 0; i < cudaData.numClusters; ++i) {
-		ClusterData const& cluster = cudaData.clusters[i];
-		if (_requiredRect.isContained({ int(cluster.pos.x), int(cluster.pos.y) })) {
-			auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
-				.setVel({ cluster.vel.x, cluster.vel.y })
-				.setAngle(cluster.angle)
-				.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
-
-			for (int j = 0; j < cluster.numCells; ++j) {
-				CellData const& cell = cluster.cells[j];
-				auto pos = cell.absPos;
-				auto id = cell.id;
-				connectingCellIds.clear();
-				for (int i = 0; i < cell.numConnections; ++i) {
-					connectingCellIds.emplace_back(cell.connections[i]->id);
-				}
-				clusterDesc.addCell(
-					CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
-					.setEnergy(100.0f).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
-					.setConnectingCells(connectingCellIds).setMaxConnections(CELL_MAX_BONDS).setFlagTokenBlocked(false)
-					.setTokenBranchNumber(0).setMetadata(CellMetadata())
-				);
-			}
-			_dataCollected.addCluster(clusterDesc);
-		}
-	}
-
-	for (int i = 0; i < cudaData.numParticles; ++i) {
-		ParticleData const& particle = cudaData.particles[i];
-		if (_requiredRect.isContained({ int(particle.pos.x), int(particle.pos.y) })) {
-			_dataCollected.addParticle(ParticleDescription().setId(particle.id).setPos({ particle.pos.x, particle.pos.y })
-				.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
-		}
-	}
+	DataConverter converter(cudaData, _numberGen);
+	_dataCollected = converter.getDataDescription(_requiredRect);
 
 	cudaBridge->unlockData();
 }

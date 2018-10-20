@@ -256,6 +256,9 @@
     <ProjectReference Include="..\ModelBasic\ModelBasic.vcxproj">
       <Project>{046b2f85-571f-35cc-b683-6c420049404b}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\ModelGpu\ModelGpu.vcxproj">
+      <Project>{2a5d1c28-f6ee-4a46-9c5d-b393990d335b}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Tests\Benchmark.cpp" />
@@ -265,6 +268,7 @@
     <ClCompile Include="..\..\source\Tests\ClusterSizeTest.cpp" />
     <ClCompile Include="..\..\source\Tests\CommunicatorFunctionTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ComparisonTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\DataDescriptionTransferTest.cpp" />
     <ClCompile Include="..\..\source\Tests\IntegrationTestFramework.cpp" />
     <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp" />

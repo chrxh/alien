@@ -3,10 +3,12 @@
 
 #include "ModelBasic/ModelBasicServices.h"
 #include "ModelCpu/ModelCpuServices.h"
+#include "ModelGpu/ModelGpuServices.h"
 
 int main(int argc, char** argv) {
 	ModelBasicServices _modelBasicServices;
 	ModelCpuServices _modelCpuServices;
+	ModelGpuServices _modelGpuServices;
 
     QApplication app(argc, argv);
 
