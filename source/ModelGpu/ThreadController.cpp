@@ -1,14 +1,14 @@
-#include "CudaBridge.h"
+#include "CudaWorker.h"
 
 #include "ThreadController.h"
 
 ThreadController::ThreadController(QObject* parent /*= nullptr*/)
 	: QObject(parent)
 {
-	_worker = new CudaBridge;
+	_worker = new CudaWorker;
 	_worker->moveToThread(&_thread);
-	connect(this, &ThreadController::runSimulationWithGpu, _worker, &CudaBridge::runSimulation);
-	connect(_worker, &CudaBridge::timestepCalculated, this, &ThreadController::timestepCalculatedWithGpu);
+	connect(this, &ThreadController::runSimulationWithGpu, _worker, &CudaWorker::runSimulation);
+	connect(_worker, &CudaWorker::timestepCalculated, this, &ThreadController::timestepCalculatedWithGpu);
 	_thread.start();
 }
 
@@ -28,7 +28,7 @@ void ThreadController::init(SpaceProperties *metric)
 	_worker->init(metric);
 }
 
-CudaBridge * ThreadController::getCudaBridge() const
+CudaWorker * ThreadController::getCudaBridge() const
 {
 	return _worker;
 }
