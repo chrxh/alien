@@ -61,8 +61,10 @@ void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 			}
 
 			for (auto & cell : *cluster.cells) {
-				for (uint64_t& connectingCellId : *cell.connectingCells) {
-					connectingCellId = newByOldIds.at(connectingCellId);
+				if (cell.connectingCells) {
+					for (uint64_t& connectingCellId : *cell.connectingCells) {
+						connectingCellId = newByOldIds.at(connectingCellId);
+					}
 				}
 			}
 		}
