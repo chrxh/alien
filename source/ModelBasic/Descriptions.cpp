@@ -1,3 +1,5 @@
+#include <QMatrix4x4>
+
 #include "Descriptions.h"
 #include "ChangeDescriptions.h"
 #include "Settings.h"
@@ -22,6 +24,50 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	tokens = static_cast<optional<vector<TokenDescription>>>(change.tokens);
 }
 
+CellDescription& CellDescription::addConnection(uint64_t value)
+{
+	if (!connectingCells) {
+		connectingCells = list<uint64_t>();
+	}
+	connectingCells->push_back(value);
+	return *this;
+}
+
+CellDescription& CellDescription::addToken(TokenDescription const& value)
+{
+	if (!tokens) {
+		tokens = vector<TokenDescription>();
+	}
+	tokens->push_back(value);
+	return *this;
+}
+
+CellDescription& CellDescription::addToken(uint index, TokenDescription const& value)
+{
+	if (!tokens) {
+		tokens = vector<TokenDescription>();
+	}
+	tokens->insert(tokens->begin() + index, value);
+	return *this;
+}
+
+CellDescription& CellDescription::delToken(uint index)
+{
+	CHECK(tokens);
+	tokens->erase(tokens->begin() + index);
+	return *this;
+}
+
+QVector2D CellDescription::getPosRelativeTo(ClusterDescription const & cluster) const
+{
+	QMatrix4x4 transform;
+	transform.setToIdentity();
+	transform.translate(*cluster.pos);
+	transform.rotate(*cluster.angle, 0.0, 0.0, 1.0);
+	transform = transform.inverted();
+	return transform.map(QVector3D(*pos)).toVector2D();
+}
+
 ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
 {
 	id = change.id;
@@ -39,6 +85,18 @@ ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
 		}
 	}
 
+}
+
+QVector2D ClusterDescription::getClusterPosFromCells() const
+{
+	QVector2D result;
+	if (cells) {
+		for (CellDescription const& cell : *cells) {
+			result += *cell.pos;
+		}
+		result /= cells->size();
+	}
+	return result;
 }
 
 ParticleDescription::ParticleDescription(ParticleChangeDescription const & change)

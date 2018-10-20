@@ -13,7 +13,7 @@ public:
 
 	virtual void init(MainController* mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-		, MonitorController* monitor, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator);
+		, MonitorController* monitor, DataRepository* repository, Notifier* notifier);
 
 	virtual ActionHolder* getActionHolder();
 

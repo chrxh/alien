@@ -23,6 +23,7 @@ void cudaInit(int2 const &size)
 
 	simulationManager = new SimulationDataManager(size);
 	
+/*
 	auto clusters = simulationManager->data.clustersAC1.getArray(NUM_CLUSTERS);
 
 	for (int i = 0; i < NUM_CLUSTERS; ++i) {
@@ -37,6 +38,7 @@ void cudaInit(int2 const &size)
 		simulationManager->drawClusterToMap(&clusters[i], &simulationManager->data);
 		simulationManager->updateAngularMass(&clusters[i]);
 	}
+*/
 }
 
 
@@ -59,6 +61,11 @@ void cudaCalcNextTimestep()
 SimulationDataForAccess cudaGetData()
 {
 	return simulationManager->getDataForAccess();
+}
+
+void cudaSetData(SimulationDataForAccess const& access)
+{
+	simulationManager->setDataForAccess(access);
 }
 
 void cudaShutdown()

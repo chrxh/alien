@@ -205,6 +205,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Constants.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\DataConverter.h" />
     <ClInclude Include="..\..\source\ModelGpu\Definitions.h" />
     <ClInclude Include="..\..\source\ModelGpu\DefinitionsImpl.h" />
     <ClInclude Include="..\..\source\ModelGpu\DllExport.h" />
@@ -364,6 +365,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\source\ModelGpu\DataConverter.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuBuilderFacadeImpl.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuData.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp" />
