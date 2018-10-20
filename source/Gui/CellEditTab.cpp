@@ -357,7 +357,7 @@ void CellEditTab::updateDisplay ()
     text += parStart+colorTextStart+ "internal energy: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
     text += StringHelper::generateFormattedRealString(*cell.energy)+parEnd;
     text += parStart+colorTextStart+ "current bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+QString("%1").arg(cell.connectingCells->size())+colorEnd+parEnd;
+    text += colorDataStart+QString("%1").arg(cell.connectingCells ? cell.connectingCells->size() : 0)+colorEnd+parEnd;
     text += parStart+colorTextStart+ "max bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
     text += colorDataStart+QString("%1").arg(*cell.maxConnections)+colorEnd+parEnd;
     text += parStart+colorTextStart+ "allow token: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
