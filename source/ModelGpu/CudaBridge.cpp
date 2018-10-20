@@ -18,12 +18,12 @@ void CudaBridge::init(SpaceProperties* spaceProp)
 	cudaInit({ size.x, size.y });
 }
 
-void CudaBridge::setRequireData(bool require)
+void CudaBridge::requireData()
 {
 	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	_requireData = require;
+	_requireData = true;
 
-	if (require && !_simRunning) {
+	if (!_simRunning) {
 		_mutexForData.lock();
 		_cudaData = cudaGetData();
 		_mutexForData.unlock();
@@ -34,11 +34,32 @@ void CudaBridge::setRequireData(bool require)
 
 bool CudaBridge::isDataRequired()
 {
-	bool result;
-	_mutexForFlags.lock();
-	result = _requireData;
-	_mutexForFlags.unlock();
-	return result;
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	return _requireData;
+}
+
+void CudaBridge::requireDataFinished()
+{
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	_requireData = false;
+}
+
+bool CudaBridge::isDataUpdated()
+{
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	return _updateData;
+}
+
+void CudaBridge::updateDataFinished()
+{
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	_updateData = false;
+}
+
+bool CudaBridge::stopAfterNextTimestep()
+{
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	return _stopAfterNextTimestep;
 }
 
 void CudaBridge::setSimulationRunning(bool running)
@@ -50,17 +71,8 @@ void CudaBridge::setSimulationRunning(bool running)
 
 bool CudaBridge::isSimulationRunning()
 {
-	bool result;
-	_mutexForFlags.lock();
-	result = _simRunning;
-	_mutexForFlags.unlock();
-	return result;
-}
-
-
-SimulationDataForAccess CudaBridge::retrieveData()
-{
-	return _cudaData;
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	return _simRunning;
 }
 
 void CudaBridge::lockData()
@@ -73,8 +85,25 @@ void CudaBridge::unlockData()
 	_mutexForData.unlock();
 }
 
+SimulationDataForAccess& CudaBridge::retrieveData()
+{
+	return _cudaData;
+}
+
+void CudaBridge::updateData()
+{
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	_updateData = true;
+
+	if (!_simRunning) {
+		cudaSetData(_cudaData);
+		_updateData = false;
+	}
+}
+
 void CudaBridge::setFlagStopAfterNextTimestep(bool value)
 {
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
 	_stopAfterNextTimestep = value;
 }
 
@@ -83,16 +112,26 @@ void CudaBridge::runSimulation()
 {
 	setSimulationRunning(true);
 	do {
+		if (isDataUpdated()) {
+			if (_mutexForData.try_lock()) {
+				cudaSetData(_cudaData);
+				updateDataFinished();
+				_mutexForData.unlock();
+			}
+		}
+
 		cudaCalcNextTimestep();
+
 		Q_EMIT timestepCalculated();
+
 		if (isDataRequired()) {
 			if (_mutexForData.try_lock()) {
 				_cudaData = cudaGetData();
+				requireDataFinished();
 				_mutexForData.unlock();
-				setRequireData(false);
 				Q_EMIT dataObtained();
 			}
 		}
-	} while (!_stopAfterNextTimestep);
+	} while (!stopAfterNextTimestep());
 	setSimulationRunning(false);
 }

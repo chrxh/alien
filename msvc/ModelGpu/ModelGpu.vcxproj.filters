@@ -75,6 +75,9 @@
     <ClInclude Include="..\..\source\ModelGpu\SimulationDataManager.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\DataConverter.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
@@ -151,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_CudaBridge.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\DataConverter.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

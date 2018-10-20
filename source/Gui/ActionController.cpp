@@ -2,6 +2,8 @@
 #include <QMessageBox>
 #include <QAction>
 
+#include "Base/ServiceLocator.h"
+#include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 
 #include "ModelBasic/Descriptions.h"
@@ -46,8 +48,12 @@ ActionController::ActionController(QObject * parent)
 
 void ActionController::init(MainController * mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 	, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-	, MonitorController* monitor, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator)
+	, MonitorController* monitor, DataRepository* repository, Notifier* notifier)
 {
+	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	auto numberGenerator = factory->buildRandomNumberGenerator();
+	numberGenerator->init();
+
 	_mainController = mainController;
 	_mainModel = mainModel;
 	_mainView = mainView;
@@ -59,7 +65,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	_monitor = monitor;
 	_repository = repository;
 	_notifier = notifier;
-	_numberGenerator = numberGenerator;
+	SET_CHILD(_numberGenerator, numberGenerator);
 
 	connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ActionController::receivedNotifications);
 
