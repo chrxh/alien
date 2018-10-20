@@ -21,6 +21,8 @@ void cudaInit(int2 const &size)
 	cudaStreamCreate(&cudaStream);
 	cudaSetDevice(0);
 
+	std::cout << "CUDA stream initialized" << std::endl;
+
 	simulationManager = new SimulationDataManager(size);
 	
 /*
@@ -62,6 +64,5 @@ void cudaShutdown()
 	cudaDeviceSynchronize();
 	delete simulationManager;
 	cudaDeviceReset();
-
 }
 
