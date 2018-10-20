@@ -24,23 +24,6 @@ void cudaInit(int2 const &size)
 	std::cout << "CUDA stream initialized" << std::endl;
 
 	simulationManager = new SimulationDataManager(size);
-	
-/*
-	auto clusters = simulationManager->data.clustersAC1.getArray(NUM_CLUSTERS);
-
-	for (int i = 0; i < NUM_CLUSTERS; ++i) {
-		simulationManager->createCluster(simulationManager->data, &clusters[i], { 0.0f, 0.0f }, { random(1.0f) - 0.5f, random(1.0f) - 0.5f }, random(360.0f), random(0.4f) - 0.2f, 100.0, { rand() % 20 + 1, rand() % 20 + 1 }, size);
-		do {
-			clusters[i].pos = { random(static_cast<float>(size.x)), random(static_cast<float>(size.y)) };
-			simulationManager->centerCluster(&clusters[i]);
-			simulationManager->updateAbsPos(&clusters[i]);
-
-		} while (!simulationManager->isClusterPositionFree(&clusters[i], &simulationManager->data));
-
-		simulationManager->drawClusterToMap(&clusters[i], &simulationManager->data);
-		simulationManager->updateAngularMass(&clusters[i]);
-	}
-*/
 }
 
 
@@ -64,5 +47,7 @@ void cudaShutdown()
 	cudaDeviceSynchronize();
 	delete simulationManager;
 	cudaDeviceReset();
+
+	std::cout << "CUDA stream closed" << std::endl;
 }
 
