@@ -53,6 +53,7 @@ struct SimulationDataForAccess
 extern void cudaInit(int2 const &size);
 extern void cudaCalcNextTimestep();
 extern SimulationDataForAccess cudaGetData();
+extern void cudaSetData(SimulationDataForAccess const& access);
 extern void cudaDataPtrCorrection();
 extern void cudaShutdown();
 

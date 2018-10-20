@@ -7,4 +7,4 @@ class SimulationControllerGpu;
 class SimulationAccessGpu;
 class ModelGpuData;
 class SimulationMonitorGpu;
-
+struct SimulationDataForAccess;

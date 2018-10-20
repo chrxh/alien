@@ -18,6 +18,7 @@ public:
 	virtual SpaceProperties* getSpaceProperties() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters* getSimulationParameters() const override;
+	virtual NumberGenerator* getNumberGenerator() const override;
 
 	virtual map<string, int> getSpecificData() const override;
 
@@ -30,4 +31,5 @@ private:
 	SymbolTable *_symbolTable = nullptr;
 	SimulationParameters *_parameters = nullptr;
 	ThreadController *_threadController = nullptr;
+	NumberGenerator* _numberGen = nullptr;
 };

@@ -170,6 +170,11 @@ public:
 	{
 		return _data;
 	}
+
+	__host__ __device__ __inline__ void setNumEntries(int value) const
+	{
+		*_numEntries = value;
+	}
 };
 
 __device__ __inline__ void calcPartition(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)

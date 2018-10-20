@@ -17,6 +17,7 @@ public:
 	virtual UnitGrid* getUnitGrid() const;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters * getSimulationParameters() const override;
+	virtual NumberGenerator* getNumberGenerator() const override;
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
 
@@ -36,5 +37,6 @@ private:
 	SymbolTable* _symbolTable = nullptr;
 	SimulationParameters * _simulationParameters = nullptr;
 	CellComputerCompiler* _compiler = nullptr;
+	NumberGenerator* _numberGen = nullptr;
 };
 

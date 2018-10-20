@@ -7,6 +7,7 @@
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
 #include "SimulationControllerGpu.h"
+#include "DataConverter.h"
 
 SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 {
@@ -15,8 +16,9 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
+	_numberGen = _context->getNumberGenerator();
 	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
-	connect(cudaBridge, &CudaBridge::dataObtained, this, &SimulationAccessGpuImpl::dataRequiredFromGpu);
+	connect(cudaBridge, &CudaBridge::dataObtained, this, &SimulationAccessGpuImpl::dataRequiredFromGpu, Qt::QueuedConnection);
 }
 
 void SimulationAccessGpuImpl::clear()
@@ -25,7 +27,11 @@ void SimulationAccessGpuImpl::clear()
 
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
 {
+	_dataUpdate = true;
+	_dataToUpdate = desc;
 
+	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
+	cudaBridge->requireData();
 }
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
@@ -35,7 +41,7 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_resolveDesc = resolveDesc;
 
 	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
-	cudaBridge->setRequireData(true);
+	cudaBridge->requireData();
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
@@ -45,7 +51,7 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredImage = target;
 
 	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
-	cudaBridge->setRequireData(true);
+	cudaBridge->requireData();
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -64,7 +70,6 @@ void SimulationAccessGpuImpl::dataRequiredFromGpu()
 		_imageRequired = false;
 		createImageFromGpuModel();
 		Q_EMIT imageReady();
-
 	}
 
 	if (_dataDescRequired) {
@@ -77,9 +82,17 @@ void SimulationAccessGpuImpl::dataRequiredFromGpu()
 void SimulationAccessGpuImpl::updateDataToGpuModel()
 {
 	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
-	SimulationDataForAccess cudaData = cudaBridge->retrieveData();
 
 	cudaBridge->lockData();
+	SimulationDataForAccess& cudaData = cudaBridge->retrieveData();
+	DataConverter converter(cudaData, _numberGen);
+
+	for (auto const& cluster : _dataToUpdate.clusters) {
+		if (cluster.isAdded()) {
+			converter.add(cluster.getValue());
+		}
+	}
+	cudaBridge->updateData();
 
 	cudaBridge->unlockData();
 }

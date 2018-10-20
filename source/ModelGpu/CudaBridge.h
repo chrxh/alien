@@ -15,22 +15,28 @@ public:
 	CudaBridge(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CudaBridge();
 
-	virtual void init(SpaceProperties* metric);
-	virtual void setRequireData(bool require);
-	virtual bool isDataRequired();
-	Q_SIGNAL void dataObtained();
+	void init(SpaceProperties* metric);
 
-	virtual SimulationDataForAccess retrieveData();
-	virtual void lockData();
-	virtual void unlockData();
+	void requireData();
+	Q_SIGNAL void dataObtained();	//only for queued connection (due to mutex)
+	void lockData();
+	void unlockData();
+	SimulationDataForAccess& retrieveData();
+	void updateData();
 
-	virtual bool isSimulationRunning();
-	virtual void setFlagStopAfterNextTimestep(bool value);
+	bool isSimulationRunning();
+	void setFlagStopAfterNextTimestep(bool value);
 
-	Q_SLOT void runSimulation();
+	Q_SLOT void runSimulation();		
 	Q_SIGNAL void timestepCalculated();
 
 private:
+	bool isDataRequired();
+	void requireDataFinished();
+	bool isDataUpdated();
+	void updateDataFinished();
+
+	bool stopAfterNextTimestep();
 	void setSimulationRunning(bool running);
 
 private:
@@ -38,8 +44,9 @@ private:
 	bool _stopAfterNextTimestep = true;
 	bool _simRunning = false;
 	bool _requireData = false;
+	bool _updateData = false;
 
-	SimulationDataForAccess _cudaData;
 	std::mutex _mutexForFlags;
 	std::mutex _mutexForData;
+	SimulationDataForAccess _cudaData;
 };
