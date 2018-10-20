@@ -50,7 +50,7 @@ CellConnectorTest::CellConnectorTest()
 	_numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
 
 	_descHelper = basicFacade->buildDescriptionHelper();
-	_descHelper->init(context, _numberGen);
+	_descHelper->init(context);
 }
 
 CellConnectorTest::~CellConnectorTest()

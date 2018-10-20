@@ -20,9 +20,15 @@ void DataConverter::add(ClusterDescription const& clusterDesc)
 	cudaCluster.vel = { clusterDesc.vel->x(), clusterDesc.vel->y() };
 	cudaCluster.angle = *clusterDesc.angle;
 	cudaCluster.angularVel = *clusterDesc.angularVel;
+	cudaCluster.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
 	unordered_map<uint64_t, CellData*> cellByIds;
+	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
 		addCell(cellDesc, clusterDesc, cudaCluster, cellByIds);
+		if (firstIndex) {
+			cudaCluster.cells = cellByIds.begin()->second;
+			firstIndex = false;
+		}
 	}
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
 		if (cellDesc.id != 0) {
@@ -33,9 +39,51 @@ void DataConverter::add(ClusterDescription const& clusterDesc)
 	updateAngularMass(cudaCluster);
 }
 
-SimulationDataForAccess DataConverter::getResult() const
+SimulationDataForAccess DataConverter::getGpuData() const
 {
 	return _cudaData;
+}
+
+DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) const
+{
+	DataDescription result;
+	list<uint64_t> connectingCellIds;
+	for (int i = 0; i < _cudaData.numClusters; ++i) {
+		ClusterData const& cluster = _cudaData.clusters[i];
+		if (requiredRect.isContained({ int(cluster.pos.x), int(cluster.pos.y) })) {
+			auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
+				.setVel({ cluster.vel.x, cluster.vel.y })
+				.setAngle(cluster.angle)
+				.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
+
+			for (int j = 0; j < cluster.numCells; ++j) {
+				CellData const& cell = cluster.cells[j];
+				auto pos = cell.absPos;
+				auto id = cell.id;
+				connectingCellIds.clear();
+				for (int i = 0; i < cell.numConnections; ++i) {
+					connectingCellIds.emplace_back(cell.connections[i]->id);
+				}
+				clusterDesc.addCell(
+					CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
+					.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
+					.setConnectingCells(connectingCellIds).setMaxConnections(CELL_MAX_BONDS).setFlagTokenBlocked(false)
+					.setTokenBranchNumber(0).setMetadata(CellMetadata())
+				);
+			}
+			result.addCluster(clusterDesc);
+		}
+	}
+
+	for (int i = 0; i < _cudaData.numParticles; ++i) {
+		ParticleData const& particle = _cudaData.particles[i];
+		if (requiredRect.isContained({ int(particle.pos.x), int(particle.pos.y) })) {
+			result.addParticle(ParticleDescription().setId(particle.id).setPos({ particle.pos.x, particle.pos.y })
+				.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
+		}
+	}
+
+	return result;
 }
 
 void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription const& cluster, ClusterData& cudaCluster
@@ -57,9 +105,9 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cudaCell.protectionCounter = 0;
 	cudaCell.setProtectionCounterForNextTimestep = false;
 	cudaCell.alive = true;
+	cudaCell.nextTimestep = nullptr;
 
 	cellByIds.insert_or_assign(cudaCell.id, &cudaCell);
-	++_cudaData.numCells;
 }
 
 void DataConverter::resolveConnections(CellDescription const & cellToAdd, unordered_map<uint64_t, CellData*> const & cellByIds

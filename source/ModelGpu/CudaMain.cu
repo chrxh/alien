@@ -44,18 +44,7 @@ void cudaInit(int2 const &size)
 
 void cudaCalcNextTimestep()
 {
-	simulationManager->prepareTargetData();
-
-	clusterMovement <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (simulationManager->data);
-	cudaDeviceSynchronize();
-	particleMovement << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (simulationManager->data);
-	cudaDeviceSynchronize();
-	clearMaps <<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (simulationManager->data);
-	cudaDeviceSynchronize();
-
-	checkCudaErrors(cudaGetLastError());
-	
-	simulationManager->swapData();
+	simulationManager->calcNextTimestep(cudaStream);
 }
 
 SimulationDataForAccess cudaGetData()

@@ -6,7 +6,7 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SpaceProperties.h"
 
-#include "CudaBridge.h"
+#include "CudaWorker.h"
 #include "ThreadController.h"
 #include "SimulationContextGpuImpl.h"
 

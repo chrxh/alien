@@ -3,7 +3,9 @@
 #include <gtest/gtest.h>
 
 #include "ModelCpu/Definitions.h"
-#include "Tests/TestSettings.h"
+#include "ModelGpu/Definitions.h"
+
+#include "TestSettings.h"
 
 class IntegrationTestFramework : public ::testing::Test
 {
@@ -20,6 +22,7 @@ protected:
 
 	ModelBasicBuilderFacade* _basicFacade = nullptr;
 	ModelCpuBuilderFacade* _cpuFacade = nullptr;
+	ModelGpuBuilderFacade* _gpuFacade = nullptr;
 	SimulationParameters* _parameters = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 	SymbolTable* _symbols = nullptr;

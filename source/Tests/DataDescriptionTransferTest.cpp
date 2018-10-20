@@ -204,9 +204,7 @@ TEST_F(DataDescriptionTransferTest, testCreateAndDeleteAndModifyWithinSimulation
 {
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto descHelper = _basicFacade->buildDescriptionHelper();
-	auto numberGen = factory->buildRandomNumberGenerator();
-	numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
-	descHelper->init(_context, numberGen);
+	descHelper->init(_context);
 
 	DataDescription dataBefore;
 	for (int i = 1; i <= 10000; ++i) {
