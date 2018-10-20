@@ -2,7 +2,7 @@
 
 class SimulationControllerGpuImpl;
 class SimulationContextGpuImpl;
-class CudaBridge;
+class CudaWorker;
 class GpuObserver;
 class ThreadController;
 	

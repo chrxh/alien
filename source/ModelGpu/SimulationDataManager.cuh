@@ -72,20 +72,23 @@ public:
 		free(access.particles);
 	}
 
-	void swapData()
+	void calcNextTimestep(cudaStream_t& cudaStream)
 	{
-		swap(data.clustersAC1, data.clustersAC2);
-		swap(data.cellsAC1, data.cellsAC2);
-		swap(data.particlesAC1, data.particlesAC2);
-		swap(data.cellMap1, data.cellMap2);
-		swap(data.particleMap1, data.particleMap2);
-	}
+		prepareTargetData();
 
-	void prepareTargetData()
-	{
-		data.clustersAC2.reset();
-		data.cellsAC2.reset();
-		data.particlesAC2.reset();
+		clusterMovement << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (data);
+		cudaDeviceSynchronize();
+		checkCudaErrors(cudaGetLastError());
+
+		particleMovement << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (data);
+		cudaDeviceSynchronize();
+		checkCudaErrors(cudaGetLastError());
+
+		clearMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (data);
+		cudaDeviceSynchronize();
+		checkCudaErrors(cudaGetLastError());
+
+		swapData();
 	}
 
 	SimulationDataForAccess getDataForAccess()
@@ -119,6 +122,80 @@ public:
 		checkCudaErrors(cudaGetLastError());
 
 		correctPointersAfterCopy(int64_t(data.cellsAC1.getEntireArray()) - int64_t(access.cells));
+	}
+
+private:
+	void prepareTargetData()
+	{
+		data.clustersAC2.reset();
+		data.cellsAC2.reset();
+		data.particlesAC2.reset();
+	}
+
+	void swapData()
+	{
+		swap(data.clustersAC1, data.clustersAC2);
+		swap(data.cellsAC1, data.cellsAC2);
+		swap(data.particlesAC1, data.particlesAC2);
+		swap(data.cellMap1, data.cellMap2);
+		swap(data.particleMap1, data.particleMap2);
+	}
+
+	void correctPointersAfterCopy(int64_t addressShift)
+	{
+		auto cellPtrCorrection = int64_t(access.cells) - int64_t(data.cellsAC1.getEntireArray());
+		for (int i = 0; i < access.numClusters; ++i) {
+			access.clusters[i].cells = (CellData*)(int64_t(access.clusters[i].cells) + addressShift);
+		}
+
+		for (int i = 0; i < access.numCells; ++i) {
+			auto &cell = access.cells[i];
+			for (int j = 0; j < cell.numConnections; ++j) {
+				cell.connections[j] = (CellData*)(int64_t(cell.connections[j]) + addressShift);
+			}
+		}
+	}
+
+	//deprecated methods
+	void createCluster(SimulationData &data, ClusterData* cluster, float2 pos, float2 vel, float angle, float angVel, float energy, int2 clusterSize, int2 const &size)
+	{
+		cluster->id = data.numberGen.newId();
+		cluster->pos = pos;
+		cluster->vel = vel;
+		cluster->angle = angle;
+		cluster->angularVel = angVel;
+		cluster->numCells = clusterSize.x * clusterSize.y;
+		cluster->cells = data.cellsAC1.getArray(clusterSize.x*clusterSize.y);
+
+		for (int x = 0; x < clusterSize.x; ++x) {
+			for (int y = 0; y < clusterSize.y; ++y) {
+				CellData *cell = &cluster->cells[x + y*clusterSize.x];
+				cell->id = data.numberGen.newId();
+				cell->relPos = { static_cast<float>(x), static_cast<float>(y) };
+				cell->cluster = cluster;
+				cell->nextTimestep = nullptr;
+				cell->protectionCounter = 0;
+				cell->numConnections = 0;
+				cell->energy = energy;
+				cell->setProtectionCounterForNextTimestep = false;
+				cell->alive = true;
+				if (x > 0) {
+					cell->connections[cell->numConnections++] = &cluster->cells[x - 1 + y * clusterSize.x];
+				}
+				if (y > 0) {
+					cell->connections[cell->numConnections++] = &cluster->cells[x + (y - 1) * clusterSize.x];
+				}
+				if (x < clusterSize.x - 1) {
+					cell->connections[cell->numConnections++] = &cluster->cells[x + 1 + y * clusterSize.x];
+				}
+				if (y < clusterSize.y - 1) {
+					cell->connections[cell->numConnections++] = &cluster->cells[x + (y + 1) * clusterSize.x];
+				}
+			}
+		}
+		centerCluster(cluster);
+		updateAbsPos(cluster);
+		updateAngularMass(cluster);
 	}
 
 	void updateAngularMass(ClusterData* cluster)
@@ -194,65 +271,6 @@ public:
 			auto &absPos = cluster->cells[i].absPos;
 			setToMap({ static_cast<int>(absPos.x),static_cast<int>(absPos.y) }, &cluster->cells[i], data->cellMap1, data->size);
 		}
-	}
-
-	void createCluster(SimulationData &data, ClusterData* cluster, float2 pos, float2 vel, float angle, float angVel, float energy, int2 clusterSize, int2 const &size)
-	{
-		cluster->id = data.numberGen.newId();
-		cluster->pos = pos;
-		cluster->vel = vel;
-		cluster->angle = angle;
-		cluster->angularVel = angVel;
-		cluster->numCells = clusterSize.x * clusterSize.y;
-		cluster->cells = data.cellsAC1.getArray(clusterSize.x*clusterSize.y);
-
-		for (int x = 0; x < clusterSize.x; ++x) {
-			for (int y = 0; y < clusterSize.y; ++y) {
-				CellData *cell = &cluster->cells[x + y*clusterSize.x];
-				cell->id = data.numberGen.newId();
-				cell->relPos = { static_cast<float>(x), static_cast<float>(y) };
-				cell->cluster = cluster;
-				cell->nextTimestep = nullptr;
-				cell->protectionCounter = 0;
-				cell->numConnections = 0;
-				cell->energy = energy;
-				cell->setProtectionCounterForNextTimestep = false;
-				cell->alive = true;
-				if (x > 0) {
-					cell->connections[cell->numConnections++] = &cluster->cells[x - 1 + y * clusterSize.x];
-				}
-				if (y > 0) {
-					cell->connections[cell->numConnections++] = &cluster->cells[x + (y - 1) * clusterSize.x];
-				}
-				if (x < clusterSize.x - 1) {
-					cell->connections[cell->numConnections++] = &cluster->cells[x + 1 + y * clusterSize.x];
-				}
-				if (y < clusterSize.y - 1) {
-					cell->connections[cell->numConnections++] = &cluster->cells[x + (y + 1) * clusterSize.x];
-				}
-			}
-		}
-		centerCluster(cluster);
-		updateAbsPos(cluster);
-		updateAngularMass(cluster);
-	}
-
-private:
-	void correctPointersAfterCopy(int64_t addressShift)
-	{
-		auto cellPtrCorrection = int64_t(access.cells) - int64_t(data.cellsAC1.getEntireArray());
-		for (int i = 0; i < access.numClusters; ++i) {
-			access.clusters[i].cells = (CellData*)(int64_t(access.clusters[i].cells) + addressShift);
-		}
-
-		for (int i = 0; i < access.numCells; ++i) {
-			auto &cell = access.cells[i];
-			for (int j = 0; j < cell.numConnections; ++j) {
-				cell.connections[j] = (CellData*)(int64_t(cell.connections[j]) + addressShift);
-			}
-		}
-
-
 	}
 };
 

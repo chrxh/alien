@@ -146,17 +146,17 @@
     <ClCompile Include="Release\moc_SimulationMonitorGpu.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\CudaBridge.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_CudaBridge.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CudaBridge.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelGpu\DataConverter.cpp">
       <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\CudaWorker.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_CudaWorker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_CudaWorker.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -181,7 +181,7 @@
     <CustomBuild Include="..\..\source\ModelGpu\SimulationMonitorGpuImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelGpu\CudaBridge.h">
+    <CustomBuild Include="..\..\source\ModelGpu\CudaWorker.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
   </ItemGroup>
