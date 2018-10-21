@@ -39,6 +39,15 @@ void DataConverter::add(ClusterDescription const& clusterDesc)
 	updateAngularMass(cudaCluster);
 }
 
+void DataConverter::add(ParticleDescription const & particleDesc)
+{
+	ParticleData& cudaParticle = _cudaData.particles[_cudaData.numParticles++];
+	cudaParticle.id = cudaParticle.id == 0 ? _numberGen->getTag() : particleDesc.id;
+	cudaParticle.pos = { particleDesc.pos->x(), particleDesc.pos->y() };
+	cudaParticle.vel = { particleDesc.vel->x(), particleDesc.vel->y() };
+	cudaParticle.energy = *particleDesc.energy;
+}
+
 SimulationDataForAccess DataConverter::getGpuData() const
 {
 	return _cudaData;
