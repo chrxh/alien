@@ -122,13 +122,23 @@ private:
 
 public:
 
-	ArrayController() = default;
+	ArrayController()
+		: _size(0)
+	{
+		cudaMallocManaged(&_numEntries, sizeof(int));
+		checkCudaErrors(cudaGetLastError());
+
+		*_numEntries = 0;
+	}
+
 	ArrayController(int size)
 		: _size(size)
 	{
 		cudaMallocManaged(&_data, sizeof(T) * size);
 		cudaMallocManaged(&_numEntries, sizeof(int));
 		checkCudaErrors(cudaGetLastError());
+
+		*_numEntries = 0;
 	}
 
 	void free()
