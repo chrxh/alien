@@ -92,8 +92,13 @@ void SimulationAccessGpuImpl::updateDataToGpuModel()
 			converter.add(cluster.getValue());
 		}
 	}
-	cudaBridge->updateData();
+	for (auto const& particle : _dataToUpdate.particles) {
+		if (particle.isAdded()) {
+			converter.add(particle.getValue());
+		}
+	}
 
+	cudaBridge->updateData();
 	cudaBridge->unlockData();
 }
 
