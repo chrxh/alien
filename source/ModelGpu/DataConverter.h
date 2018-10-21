@@ -9,7 +9,8 @@ class DataConverter
 public:
 	DataConverter(SimulationDataForAccess& cudaData, NumberGenerator* numberGen);
 
-	void add(ClusterDescription const& clusterToAdd);
+	void add(ClusterDescription const& clusterDesc);
+	void add(ParticleDescription const& particleDesc);
 
 	SimulationDataForAccess getGpuData() const;
 	DataDescription getDataDescription(IntRect const& requiredRect) const;
