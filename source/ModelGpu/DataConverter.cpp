@@ -48,6 +48,78 @@ void DataConverter::add(ParticleDescription const & particleDesc)
 	cudaParticle.energy = *particleDesc.energy;
 }
 
+void DataConverter::del(uint64_t clusterId)
+{
+	_clusterIdsToDelete.insert(clusterId);
+}
+
+void DataConverter::finalize()
+{
+	if (_clusterIdsToDelete.empty()) {
+		return;
+	}
+
+	//delete clusters
+	std::unordered_set<uint64_t> cellIdsToDelete;
+	std::unordered_map<CellData*, CellData*> newByOldCellData;
+	std::unordered_map<ClusterData*, ClusterData*> newByOldClusterData;
+	int clusterIndexCopyOffset = 0;
+	int cellIndexCopyOffset = 0;
+	for (int clusterIndex = 0; clusterIndex < _cudaData.numClusters; ++clusterIndex) {
+		ClusterData& cluster = _cudaData.clusters[clusterIndex];
+		uint64_t clusterId = cluster.id;
+		if (_clusterIdsToDelete.find(clusterId) != _clusterIdsToDelete.end()) {
+			++clusterIndexCopyOffset;
+			cellIndexCopyOffset += cluster.numCells;
+			for (int cellIndex = 0; cellIndex < cluster.numCells; ++cellIndex) {
+				cellIdsToDelete.insert(cluster.cells[cellIndex].id);
+			}
+		}
+		else if (clusterIndexCopyOffset > 0) {
+			newByOldCellData.insert_or_assign(cluster.cells, cluster.cells - cellIndexCopyOffset);
+			newByOldClusterData.insert_or_assign(&cluster, &_cudaData.clusters[clusterIndex - clusterIndexCopyOffset]);
+			_cudaData.clusters[clusterIndex - clusterIndexCopyOffset] = cluster;
+		}
+	}
+	_cudaData.numClusters -= clusterIndexCopyOffset;
+
+	//delete cells
+	cellIndexCopyOffset = 0;
+	for (int cellIndex = 0; cellIndex < _cudaData.numCells; ++cellIndex) {
+		CellData& cell = _cudaData.cells[cellIndex];
+		uint64_t cellId = cell.id;
+		if (cellIdsToDelete.find(cellId) != cellIdsToDelete.end()) {
+			++cellIndexCopyOffset;
+		}
+		else if (cellIndexCopyOffset > 0) {
+			_cudaData.cells[cellIndex - cellIndexCopyOffset] = cell;
+		}
+	}
+	_cudaData.numCells -= cellIndexCopyOffset;
+
+	//adjust cell and cluster pointers
+	for (int clusterIndex = 0; clusterIndex < _cudaData.numClusters; ++clusterIndex) {
+		ClusterData& cluster = _cudaData.clusters[clusterIndex];
+		auto it = newByOldCellData.find(cluster.cells);
+		if (it != newByOldCellData.end()) {
+			cluster.cells = it->second;
+		}
+	}
+	for (int cellIndex = 0; cellIndex < _cudaData.numCells; ++cellIndex) {
+		CellData& cell = _cudaData.cells[cellIndex];
+		auto it = newByOldClusterData.find(cell.cluster);
+		if (it != newByOldClusterData.end()) {
+			cell.cluster = it->second;
+		}
+		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
+			auto it = newByOldCellData.find(cell.connections[connectionIndex]);
+			if (it != newByOldCellData.end()) {
+				cell.connections[connectionIndex] = it->second;
+			}
+		}
+	}
+}
+
 SimulationDataForAccess DataConverter::getGpuData() const
 {
 	return _cudaData;

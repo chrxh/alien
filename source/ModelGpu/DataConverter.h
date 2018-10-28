@@ -11,6 +11,9 @@ public:
 
 	void add(ClusterDescription const& clusterDesc);
 	void add(ParticleDescription const& particleDesc);
+	void del(uint64_t clusterId);
+
+	void finalize();
 
 	SimulationDataForAccess getGpuData() const;
 	DataDescription getDataDescription(IntRect const& requiredRect) const;
@@ -26,4 +29,6 @@ private:
 private:
 	SimulationDataForAccess& _cudaData;
 	NumberGenerator* _numberGen;
+
+	std::unordered_set<uint64_t> _clusterIdsToDelete;
 };
