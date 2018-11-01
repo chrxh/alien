@@ -9,9 +9,10 @@ class DataConverter
 public:
 	DataConverter(SimulationDataForAccess& cudaData, NumberGenerator* numberGen);
 
-	void add(ClusterDescription const& clusterDesc);
-	void add(ParticleDescription const& particleDesc);
-	void del(uint64_t clusterId);
+	void addCluster(ClusterDescription const& clusterDesc);
+	void addParticle(ParticleDescription const& particleDesc);
+	void delCluster(uint64_t clusterId);
+	void delParticle(uint64_t particleId);
 
 	void finalize();
 
@@ -31,4 +32,5 @@ private:
 	NumberGenerator* _numberGen;
 
 	std::unordered_set<uint64_t> _clusterIdsToDelete;
+	std::unordered_set<uint64_t> _particleIdsToDelete;
 };
