@@ -61,22 +61,18 @@ void DataConverter::finalize()
 
 	//delete clusters
 	std::unordered_set<uint64_t> cellIdsToDelete;
-	std::unordered_map<CellData*, CellData*> newByOldCellData;
 	std::unordered_map<ClusterData*, ClusterData*> newByOldClusterData;
 	int clusterIndexCopyOffset = 0;
-	int cellIndexCopyOffset = 0;
 	for (int clusterIndex = 0; clusterIndex < _cudaData.numClusters; ++clusterIndex) {
 		ClusterData& cluster = _cudaData.clusters[clusterIndex];
 		uint64_t clusterId = cluster.id;
 		if (_clusterIdsToDelete.find(clusterId) != _clusterIdsToDelete.end()) {
 			++clusterIndexCopyOffset;
-			cellIndexCopyOffset += cluster.numCells;
 			for (int cellIndex = 0; cellIndex < cluster.numCells; ++cellIndex) {
 				cellIdsToDelete.insert(cluster.cells[cellIndex].id);
 			}
 		}
 		else if (clusterIndexCopyOffset > 0) {
-			newByOldCellData.insert_or_assign(cluster.cells, cluster.cells - cellIndexCopyOffset);
 			newByOldClusterData.insert_or_assign(&cluster, &_cudaData.clusters[clusterIndex - clusterIndexCopyOffset]);
 			_cudaData.clusters[clusterIndex - clusterIndexCopyOffset] = cluster;
 		}
@@ -84,7 +80,8 @@ void DataConverter::finalize()
 	_cudaData.numClusters -= clusterIndexCopyOffset;
 
 	//delete cells
-	cellIndexCopyOffset = 0;
+	int cellIndexCopyOffset = 0;
+	std::unordered_map<CellData*, CellData*> newByOldCellData;
 	for (int cellIndex = 0; cellIndex < _cudaData.numCells; ++cellIndex) {
 		CellData& cell = _cudaData.cells[cellIndex];
 		uint64_t cellId = cell.id;
@@ -92,6 +89,7 @@ void DataConverter::finalize()
 			++cellIndexCopyOffset;
 		}
 		else if (cellIndexCopyOffset > 0) {
+			newByOldCellData.insert_or_assign(&cell, &_cudaData.cells[cellIndex - cellIndexCopyOffset]);
 			_cudaData.cells[cellIndex - cellIndexCopyOffset] = cell;
 		}
 	}
