@@ -400,11 +400,20 @@ void DataRepository::sendDataChangesToSimulation(set<Receiver> const& targets)
 
 void DataRepository::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
-	_selectedCellIds = unordered_set<uint64_t>(cellIds.begin(), cellIds.end());
-	_selectedParticleIds = unordered_set<uint64_t>(particleIds.begin(), particleIds.end());
+	for (uint64_t particleId : cellIds) {
+		if (_navi.cellIds.find(particleId) != _navi.cellIds.end()) {
+			_selectedCellIds.insert(particleId);
+		}
+	}
+	for (uint64_t particleId : particleIds) {
+		if (_navi.particleIds.find(particleId) != _navi.particleIds.end()) {
+			_selectedParticleIds.insert(particleId);
+		}
+	}
+
 	_selectedClusterIds.clear();
-	for (uint64_t cellId : cellIds) {
-		auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(cellId);
+	for (uint64_t particleId : cellIds) {
+		auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(particleId);
 		if (clusterIdByCellIdIter != _navi.clusterIdsByCellIds.end()) {
 			_selectedClusterIds.insert(clusterIdByCellIdIter->second);
 		}
@@ -457,12 +466,12 @@ namespace
 
 unordered_set<uint64_t> DataRepository::getSelectedCellIds() const
 {
-	return calcDifference<uint64_t>(_selectedCellIds, _navi.cellIds);	//really necessary?
+	return _selectedCellIds;
 }
 
 unordered_set<uint64_t> DataRepository::getSelectedParticleIds() const
 {
-	return calcDifference<uint64_t>(_selectedParticleIds, _navi.particleIds);	//really necessary?
+	return _selectedParticleIds;
 }
 
 DataDescription DataRepository::getExtendedSelection() const

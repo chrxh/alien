@@ -7,7 +7,7 @@ DataConverter::DataConverter(SimulationDataForAccess& cudaData, NumberGenerator*
 	: _cudaData(cudaData), _numberGen(numberGen)
 {}
 
-void DataConverter::add(ClusterDescription const& clusterDesc)
+void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 {
 	if (!clusterDesc.cells) {
 		return;
@@ -39,7 +39,7 @@ void DataConverter::add(ClusterDescription const& clusterDesc)
 	updateAngularMass(cudaCluster);
 }
 
-void DataConverter::add(ParticleDescription const & particleDesc)
+void DataConverter::addParticle(ParticleDescription const & particleDesc)
 {
 	ParticleData& cudaParticle = _cudaData.particles[_cudaData.numParticles++];
 	cudaParticle.id = cudaParticle.id == 0 ? _numberGen->getTag() : particleDesc.id;
@@ -48,14 +48,19 @@ void DataConverter::add(ParticleDescription const & particleDesc)
 	cudaParticle.energy = *particleDesc.energy;
 }
 
-void DataConverter::del(uint64_t clusterId)
+void DataConverter::delCluster(uint64_t clusterId)
 {
 	_clusterIdsToDelete.insert(clusterId);
 }
 
+void DataConverter::delParticle(uint64_t particleId)
+{
+	_particleIdsToDelete.insert(particleId);
+}
+
 void DataConverter::finalize()
 {
-	if (_clusterIdsToDelete.empty()) {
+	if (_clusterIdsToDelete.empty() && _particleIdsToDelete.empty()) {
 		return;
 	}
 
@@ -82,18 +87,32 @@ void DataConverter::finalize()
 	//delete cells
 	int cellIndexCopyOffset = 0;
 	std::unordered_map<CellData*, CellData*> newByOldCellData;
-	for (int cellIndex = 0; cellIndex < _cudaData.numCells; ++cellIndex) {
-		CellData& cell = _cudaData.cells[cellIndex];
+	for (int index = 0; index < _cudaData.numCells; ++index) {
+		CellData& cell = _cudaData.cells[index];
 		uint64_t cellId = cell.id;
 		if (cellIdsToDelete.find(cellId) != cellIdsToDelete.end()) {
 			++cellIndexCopyOffset;
 		}
 		else if (cellIndexCopyOffset > 0) {
-			newByOldCellData.insert_or_assign(&cell, &_cudaData.cells[cellIndex - cellIndexCopyOffset]);
-			_cudaData.cells[cellIndex - cellIndexCopyOffset] = cell;
+			newByOldCellData.insert_or_assign(&cell, &_cudaData.cells[index - cellIndexCopyOffset]);
+			_cudaData.cells[index - cellIndexCopyOffset] = cell;
 		}
 	}
 	_cudaData.numCells -= cellIndexCopyOffset;
+
+	//delete particles
+	int particleIndexCopyOffset = 0;
+	for (int index = 0; index < _cudaData.numParticles; ++index) {
+		ParticleData& particle = _cudaData.particles[index];
+		uint64_t particleId = particle.id;
+		if (_particleIdsToDelete.find(particleId) != _particleIdsToDelete.end()) {
+			++particleIndexCopyOffset;
+		}
+		else if (particleIndexCopyOffset > 0) {
+			_cudaData.particles[index - particleIndexCopyOffset] = particle;
+		}
+	}
+	_cudaData.numParticles -= particleIndexCopyOffset;
 
 	//adjust cell and cluster pointers
 	for (int clusterIndex = 0; clusterIndex < _cudaData.numClusters; ++clusterIndex) {
