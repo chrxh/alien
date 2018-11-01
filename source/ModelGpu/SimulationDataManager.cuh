@@ -137,6 +137,17 @@ public:
 		for (int i = 0; i < data.cellsAC1.getNumEntries(); ++i) {
 			correctPointersAfterCellCopy(data.cellsAC1.at(i), addrShiftCell, addrShiftCluster);
 		}
+
+		for (int i = 0; i < data.size.x * data.size.y; ++i) {
+			data.cellMap1[i] = nullptr;
+			data.particleMap1[i] = nullptr;
+		}
+		for (int index = 0; index < data.cellsAC1.getNumEntries(); ++index) {
+			CellData* cell = data.cellsAC1.at(index);
+			auto& absPos = cell->absPos;
+			setToMap({ int(absPos.x), int(absPos.y) }, cell, data.cellMap1, data.size);
+		}
+
 	}
 
 private:
