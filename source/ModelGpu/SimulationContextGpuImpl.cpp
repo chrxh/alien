@@ -23,7 +23,7 @@ void SimulationContextGpuImpl::init(SpaceProperties *metric, SymbolTable *symbol
 {
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
-	numberGen->init();
+	numberGen->init(1323781, 1);
 
 	SET_CHILD(_metric, metric);
 	SET_CHILD(_symbolTable, symbolTable);
