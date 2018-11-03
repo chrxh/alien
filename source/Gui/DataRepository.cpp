@@ -400,11 +400,14 @@ void DataRepository::sendDataChangesToSimulation(set<Receiver> const& targets)
 
 void DataRepository::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
+	_selectedCellIds.clear();
 	for (uint64_t particleId : cellIds) {
 		if (_navi.cellIds.find(particleId) != _navi.cellIds.end()) {
 			_selectedCellIds.insert(particleId);
 		}
 	}
+
+	_selectedParticleIds.clear();
 	for (uint64_t particleId : particleIds) {
 		if (_navi.particleIds.find(particleId) != _navi.particleIds.end()) {
 			_selectedParticleIds.insert(particleId);
