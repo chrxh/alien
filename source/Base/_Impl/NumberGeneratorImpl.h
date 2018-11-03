@@ -1,5 +1,4 @@
-#ifndef NUMBERGENERATORIMPL_H
-#define NUMBERGENERATORIMPL_H
+#pragma once
 
 #include "Base/NumberGenerator.h"
 
@@ -30,4 +29,3 @@ private:
 	uint64_t _threadId = 0;
 };
 
-#endif // NUMBERGENERATORIMPL_H
