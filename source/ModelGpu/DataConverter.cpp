@@ -48,17 +48,17 @@ void DataConverter::addParticle(ParticleDescription const & particleDesc)
 	cudaParticle.energy = *particleDesc.energy;
 }
 
-void DataConverter::delCluster(uint64_t clusterId)
+void DataConverter::markDelCluster(uint64_t clusterId)
 {
 	_clusterIdsToDelete.insert(clusterId);
 }
 
-void DataConverter::delParticle(uint64_t particleId)
+void DataConverter::markDelParticle(uint64_t particleId)
 {
 	_particleIdsToDelete.insert(particleId);
 }
 
-void DataConverter::finalize()
+void DataConverter::deleteEntities()
 {
 	if (_clusterIdsToDelete.empty() && _particleIdsToDelete.empty()) {
 		return;
