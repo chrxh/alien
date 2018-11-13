@@ -11,10 +11,10 @@ public:
 
 	void addCluster(ClusterDescription const& clusterDesc);
 	void addParticle(ParticleDescription const& particleDesc);
-	void delCluster(uint64_t clusterId);
-	void delParticle(uint64_t particleId);
+	void markDelCluster(uint64_t clusterId);
+	void markDelParticle(uint64_t particleId);
 
-	void finalize();
+	void deleteEntities();
 
 	SimulationDataForAccess getGpuData() const;
 	DataDescription getDataDescription(IntRect const& requiredRect) const;
