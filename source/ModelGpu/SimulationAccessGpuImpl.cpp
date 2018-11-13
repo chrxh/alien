@@ -88,22 +88,27 @@ void SimulationAccessGpuImpl::updateDataToGpuModel()
 
 	DataConverter converter(cudaData, _numberGen);
 	for (auto const& cluster : _dataToUpdate.clusters) {
+		if (cluster.isDeleted()) {
+			converter.markDelCluster(cluster.getValue().id);
+		}
+	}
+	for (auto const& particle : _dataToUpdate.particles) {
+		if (particle.isDeleted()) {
+			converter.markDelParticle(particle.getValue().id);
+		}
+	}
+	converter.deleteEntities();
+
+	for (auto const& cluster : _dataToUpdate.clusters) {
 		if (cluster.isAdded()) {
 			converter.addCluster(cluster.getValue());
-		}
-		if (cluster.isDeleted()) {
-			converter.delCluster(cluster.getValue().id);
 		}
 	}
 	for (auto const& particle : _dataToUpdate.particles) {
 		if (particle.isAdded()) {
 			converter.addParticle(particle.getValue());
 		}
-		if (particle.isDeleted()) {
-			converter.delParticle(particle.getValue().id);
-		}
 	}
-	converter.finalize();
 
 	cudaBridge->updateData();
 	cudaBridge->unlockData();
