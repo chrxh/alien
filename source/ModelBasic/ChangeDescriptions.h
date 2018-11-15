@@ -155,6 +155,10 @@ struct MODELBASIC_EXPORT DataChangeDescription
 		clusters.clear();
 		particles.clear();
 	}
+	bool empty()
+	{
+		return clusters.empty() && particles.empty();
+	}
 };
 
 

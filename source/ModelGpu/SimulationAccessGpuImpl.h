@@ -30,7 +30,6 @@ private:
 	SimulationContextGpuImpl* _context = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 
-	bool _dataUpdate = false;
 	DataChangeDescription _dataToUpdate;
 
 	bool _dataDescRequired = false;

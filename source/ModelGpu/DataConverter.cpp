@@ -1,11 +1,44 @@
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/Descriptions.h"
+#include "ModelBasic/ChangeDescriptions.h"
 
 #include "DataConverter.h"
 
 DataConverter::DataConverter(SimulationDataForAccess& cudaData, NumberGenerator* numberGen)
 	: _cudaData(cudaData), _numberGen(numberGen)
 {}
+
+void DataConverter::updateData(DataChangeDescription const & data)
+{
+	for (auto const& cluster : data.clusters) {
+		if (cluster.isDeleted()) {
+			markDelCluster(cluster.getValue().id);
+		}
+		if (cluster.isModified()) {
+			markModifyCluster(cluster.getValue());
+		}
+	}
+	for (auto const& particle : data.particles) {
+		if (particle.isDeleted()) {
+			markDelParticle(particle.getValue().id);
+		}
+		if (particle.isModified()) {
+			markModifyParticle(particle.getValue());
+		}
+	}
+	processDeletionsAndModifications();
+
+	for (auto const& cluster : data.clusters) {
+		if (cluster.isAdded()) {
+			addCluster(cluster.getValue());
+		}
+	}
+	for (auto const& particle : data.particles) {
+		if (particle.isAdded()) {
+			addParticle(particle.getValue());
+		}
+	}
+}
 
 void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 {
@@ -58,13 +91,28 @@ void DataConverter::markDelParticle(uint64_t particleId)
 	_particleIdsToDelete.insert(particleId);
 }
 
-void DataConverter::deleteEntities()
+void DataConverter::markModifyCluster(ClusterChangeDescription const & clusterDesc)
 {
-	if (_clusterIdsToDelete.empty() && _particleIdsToDelete.empty()) {
+	_clusterToModifyById.insert_or_assign(clusterDesc.id, clusterDesc);
+	for (auto const& cellTracker : clusterDesc.cells) {
+		if (cellTracker.isModified()) {
+			_cellToModifyById.insert_or_assign(cellTracker->id, cellTracker.getValue());
+		}
+	}
+}
+
+void DataConverter::markModifyParticle(ParticleChangeDescription const & particleDesc)
+{
+	_particleToModifyById.insert_or_assign(particleDesc.id, particleDesc);
+}
+
+void DataConverter::processDeletionsAndModifications()
+{
+	if (_clusterIdsToDelete.empty() && _particleIdsToDelete.empty() && _clusterToModifyById.empty()) {
 		return;
 	}
 
-	//delete clusters
+	//delete and modify clusters
 	std::unordered_set<uint64_t> cellIdsToDelete;
 	std::unordered_map<ClusterData*, ClusterData*> newByOldClusterData;
 	int clusterIndexCopyOffset = 0;
@@ -81,10 +129,14 @@ void DataConverter::deleteEntities()
 			newByOldClusterData.insert_or_assign(&cluster, &_cudaData.clusters[clusterIndex - clusterIndexCopyOffset]);
 			_cudaData.clusters[clusterIndex - clusterIndexCopyOffset] = cluster;
 		}
+
+		if (_clusterToModifyById.find(clusterId) != _clusterToModifyById.end()) {
+			applyChangeDescription(cluster, _clusterToModifyById.at(clusterId));
+		}
 	}
 	_cudaData.numClusters -= clusterIndexCopyOffset;
 
-	//delete cells
+	//delete and modify cells
 	int cellIndexCopyOffset = 0;
 	std::unordered_map<CellData*, CellData*> newByOldCellData;
 	for (int index = 0; index < _cudaData.numCells; ++index) {
@@ -97,10 +149,15 @@ void DataConverter::deleteEntities()
 			newByOldCellData.insert_or_assign(&cell, &_cudaData.cells[index - cellIndexCopyOffset]);
 			_cudaData.cells[index - cellIndexCopyOffset] = cell;
 		}
+
+		if (_cellToModifyById.find(cellId) != _cellToModifyById.end()) {
+			uint64_t clusterId = cell.cluster->id;
+			applyChangeDescription(cell, _cellToModifyById.at(cellId), _clusterToModifyById.at(clusterId));
+		}
 	}
 	_cudaData.numCells -= cellIndexCopyOffset;
 
-	//delete particles
+	//delete and modify particles
 	int particleIndexCopyOffset = 0;
 	for (int index = 0; index < _cudaData.numParticles; ++index) {
 		ParticleData& particle = _cudaData.particles[index];
@@ -110,6 +167,10 @@ void DataConverter::deleteEntities()
 		}
 		else if (particleIndexCopyOffset > 0) {
 			_cudaData.particles[index - particleIndexCopyOffset] = particle;
+		}
+
+		if (_particleToModifyById.find(particleId) != _particleToModifyById.end()) {
+			applyChangeDescription(particle, _particleToModifyById.at(particleId));
 		}
 	}
 	_cudaData.numParticles -= particleIndexCopyOffset;
@@ -218,6 +279,67 @@ void DataConverter::resolveConnections(CellDescription const & cellToAdd, unorde
 			++index;
 		}
 	}
+}
+
+namespace
+{
+	void convert(QVector2D const& input, float2& output)
+	{
+		output.x = input.x();
+		output.y = input.y();
+	}
+}
+
+void DataConverter::applyChangeDescription(ParticleData & particle, ParticleChangeDescription const & particleChanges)
+{
+	if (particleChanges.pos) {
+		QVector2D newPos = particleChanges.pos.getValue();
+		convert(newPos, particle.pos);
+	}
+	if (particleChanges.vel) {
+		QVector2D newVel = particleChanges.pos.getValue();
+		convert(newVel, particle.vel);
+	}
+	if (particleChanges.energy) {
+		particle.energy = particleChanges.energy.getValue();
+	}
+}
+
+void DataConverter::applyChangeDescription(ClusterData & cluster, ClusterChangeDescription const & clusterChanges)
+{
+	if (clusterChanges.pos) {
+		QVector2D newPos = clusterChanges.pos.getValue();
+		convert(newPos, cluster.pos);
+	}
+	if (clusterChanges.vel) {
+		QVector2D newVel = clusterChanges.vel.getValue();
+		convert(newVel, cluster.vel);
+	}
+	if (clusterChanges.angle) {
+		cluster.angle = clusterChanges.angle.getValue();
+	}
+	if (clusterChanges.angularVel) {
+		cluster.angularVel = clusterChanges.angularVel.getValue();
+	}
+	updateAngularMass(cluster);
+}
+
+void DataConverter::applyChangeDescription(CellData & cell, CellChangeDescription const & cellChanges
+	, ClusterChangeDescription const& clusterChanges)
+{
+	if (cellChanges.pos) {
+		QVector2D newAbsPos = cellChanges.pos.getValue();
+		convert(newAbsPos, cell.absPos);
+
+		CellDescription newCell(cellChanges);
+		ClusterDescription newCluster(clusterChanges);
+		QVector2D newRelPos = newCell.getPosRelativeTo(newCluster);
+		convert(newRelPos, cell.relPos);
+	}
+	if (cellChanges.energy) {
+		cell.energy = cellChanges.energy.getValue();
+	}
+
 }
 
 void DataConverter::updateAngularMass(ClusterData& cluster)
