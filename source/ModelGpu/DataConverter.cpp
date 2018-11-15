@@ -108,7 +108,8 @@ void DataConverter::markModifyParticle(ParticleChangeDescription const & particl
 
 void DataConverter::processDeletionsAndModifications()
 {
-	if (_clusterIdsToDelete.empty() && _particleIdsToDelete.empty() && _clusterToModifyById.empty()) {
+	if (_clusterIdsToDelete.empty() && _particleIdsToDelete.empty() && _clusterToModifyById.empty()
+		&& _cellToModifyById.empty() && _particleToModifyById.empty()) {
 		return;
 	}
 
