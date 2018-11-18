@@ -81,6 +81,9 @@
     <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForCluster.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CollisionData.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">

@@ -42,7 +42,9 @@ __global__ void clusterMovement(SimulationData data)
 __device__ void particleMovement(SimulationData &data, int particleIndex)
 {
 	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
-	auto cell = getFromMap(toInt2(oldParticle->pos), data.cellMap1, data.size);
+	__shared__ Map<CellData> map;
+	map.init(data.size, data.cellMap1, data.cellMap2);
+	auto cell = map.getFromOrigMap(toInt2(oldParticle->pos));
 	if (cell) {
 		auto nextCell = cell->nextTimestep;
 		atomicAdd(&nextCell->energy, oldParticle->energy);
@@ -51,7 +53,7 @@ __device__ void particleMovement(SimulationData &data, int particleIndex)
 	ParticleData *newParticle = data.particlesAC2.getNewElement();
 	*newParticle = *oldParticle;
 	newParticle->pos = add(newParticle->pos, newParticle->vel);
-	mapPosCorrection(newParticle->pos, data.size);
+	map.mapPosCorrection(newParticle->pos);
 }
 
 __global__ void particleMovement(SimulationData data)
@@ -80,18 +82,23 @@ __device__ void clearCellCluster(SimulationData const &data, int clusterIndex)
 	if (threadIdx.x >= oldNumCells) {
 		return;
 	}
+	Map<CellData> map;
+	map.init(size, data.cellMap1, data.cellMap2);
 
 	calcPartition(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		float2 absPos = oldCluster.cells[cellIndex].absPos;
-		setToMap<CellData>({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, nullptr, data.cellMap1, size);
+		map.setToOrigMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, nullptr);
 	}
 }
 
 __device__ void clearParticle(SimulationData const &data, int particleIndex)
 {
+	Map<ParticleData> map;
+	map.init(data.size, data.particleMap1, data.particleMap2);
+
 	auto const &particle = data.particlesAC1.getEntireArray()[particleIndex];
-	setToMap<ParticleData>(toInt2(particle.pos), nullptr, data.particleMap1, data.size);
+	map.setToOrigMap(toInt2(particle.pos), nullptr);
 }
 
 __global__ void clearMaps(SimulationData data)
