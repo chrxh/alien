@@ -273,7 +273,7 @@ __device__ __inline__ void updateCollisionData_Kernel(int2 posInt, CellData *cel
 	}
 }
 
-__device__ __inline__ void collectCollisionData(SimulationData const &data, CellData *cell, CollisionData &collisionData)
+__device__ __inline__ void collectCollisionDataForCell(SimulationData const &data, CellData *cell, CollisionData &collisionData)
 {
 	if (cell->protectionCounter > 0) {
 		return;
@@ -309,3 +309,14 @@ __device__ __inline__ void collectCollisionData(SimulationData const &data, Cell
 	++posInt.x;
 	updateCollisionData_Kernel(posInt, cell, map, size, collisionData);
 }
+
+__inline__ __device__ void calcRotationMatrix(float angle, float (&rotMatrix)[2][2])
+{
+	float sinAngle = __sinf(angle*DEG_TO_RAD);
+	float cosAngle = __cosf(angle*DEG_TO_RAD);
+	rotMatrix[0][0] = cosAngle;
+	rotMatrix[0][1] = -sinAngle;
+	rotMatrix[1][0] = sinAngle;
+	rotMatrix[1][1] = cosAngle;
+}
+
