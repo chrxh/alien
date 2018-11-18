@@ -159,13 +159,13 @@ public:
 		return &_data[oldIndex];
 	}
 
-	__device__ __inline__ T* getArray_Kernel(int size)
+	__device__ __inline__ T* getNewSubarray(int size)
 	{
 		int oldIndex = atomicAdd(_numEntries, size);
 		return &_data[oldIndex];
 	}
 
-	__device__ __inline__ T* getElement()
+	__device__ __inline__ T* getNewElement()
 	{
 		int oldIndex = atomicAdd(_numEntries, 1);
 		return &_data[oldIndex];
