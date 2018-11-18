@@ -204,6 +204,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForCluster.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\CollisionData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Constants.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h" />
