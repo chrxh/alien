@@ -27,6 +27,8 @@ private:
 	__inline__ __device__ void createNewParticle(CellData *cell);
 
 	SimulationData* _data;
+	Map<CellData> _cellMap;
+
 	ClusterData _clusterCopy;
 	ClusterData *_origCluster;
 	ClusterData *_newCluster;
@@ -38,7 +40,7 @@ private:
 
 
 /************************************************************************/
-/* Implementations                                                      */
+/* Implementation                                                       */
 /************************************************************************/
 __inline__ __device__ void BlockProcessorForCluster::init(SimulationData& data, int clusterIndex)
 {
@@ -48,9 +50,10 @@ __inline__ __device__ void BlockProcessorForCluster::init(SimulationData& data, 
 		_clusterCopy = *_origCluster;
 		_newCells = _data->cellsAC2.getNewSubarray(_clusterCopy.numCells);
 		_newCluster = _data->clustersAC2.getNewElement();
-		calcRotationMatrix(_clusterCopy.angle, _rotMatrix);
+		Physics::calcRotationMatrix(_clusterCopy.angle, _rotMatrix);
 		_atLeastOneCellDestroyed = false;
 		_collisionData.init();
+		_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 	}
 	__syncthreads();
 }
@@ -64,7 +67,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingCollision(int sta
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
-		collectCollisionDataForCell(*_data, origCell, _collisionData);
+		Physics::getCollisionDataForCell(_cellMap, origCell, _collisionData);
 		if (!origCell->alive) {
 			_atLeastOneCellDestroyed = true;
 		}
@@ -81,13 +84,13 @@ __inline__ __device__ void BlockProcessorForCluster::processingCollision(int sta
 			entry->collisionPos.y /= numCollisions;
 			entry->normalVec.x /= numCollisions;
 			entry->normalVec.y /= numCollisions;
-			calcCollision(&_clusterCopy, entry, _data->size);
+			Physics::calcCollision(&_clusterCopy, entry, _cellMap);
 		}
 
 		_clusterCopy.angle += _clusterCopy.angularVel;
-		angleCorrection(_clusterCopy.angle);
+		Physics::angleCorrection(_clusterCopy.angle);
 		_clusterCopy.pos = add(_clusterCopy.pos, _clusterCopy.vel);
-		mapPosCorrection(_clusterCopy.pos, _data->size);
+		_cellMap.mapPosCorrection(_clusterCopy.pos);
 		_clusterCopy.numCells = 0;
 		_clusterCopy.cells = _newCells;
 	}
@@ -149,7 +152,7 @@ __inline__ __device__  void BlockProcessorForCluster::copyAndMoveCell(int cellIn
 	int newCellIndex = atomicAdd(&_clusterCopy.numCells, 1);
 	CellData *newCell = &_newCells[newCellIndex];
 	*newCell = cellCopy;
-	setToMap<CellData>({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell, _data->cellMap2, _data->size);
+	_cellMap.setToNewMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell);
 
 	origCell->nextTimestep = newCell;
 }
@@ -179,7 +182,7 @@ __inline__ __device__ void BlockProcessorForCluster::createNewParticle(CellData 
 	auto &pos = cell->absPos;
 	particle->id = _data->numberGen.newId_Kernel();
 	particle->pos = { pos.x + _data->numberGen.random(2.0f) - 1.0f, pos.y + _data->numberGen.random(2.0f) - 1.0f };
-	mapPosCorrection(particle->pos, _data->size);
+	_cellMap.mapPosCorrection(particle->pos);
 	particle->vel = { (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION
 		, (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
 	float radiationEnergy = powf(cell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;

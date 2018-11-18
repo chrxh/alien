@@ -142,10 +142,12 @@ public:
 			data.cellMap1[i] = nullptr;
 			data.particleMap1[i] = nullptr;
 		}
+		Map<CellData> map;
+		map.init(data.size, data.cellMap1, data.cellMap2);
 		for (int index = 0; index < data.cellsAC1.getNumEntries(); ++index) {
 			CellData* cell = data.cellsAC1.at(index);
 			auto& absPos = cell->absPos;
-			setToMap({ int(absPos.x), int(absPos.y) }, cell, data.cellMap1, data.size);
+			map.setToOrigMap({ int(absPos.x), int(absPos.y) }, cell);
 		}
 
 	}
