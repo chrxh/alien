@@ -263,7 +263,6 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 		cudaCell.numConnections = 0;
 	}
 	cudaCell.protectionCounter = 0;
-	cudaCell.setProtectionCounterForNextTimestep = false;
 	cudaCell.alive = true;
 	cudaCell.nextTimestep = nullptr;
 

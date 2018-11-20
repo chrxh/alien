@@ -246,8 +246,7 @@ __device__ __inline__ void Physics::updateCollisionData(int2 posInt, CellData *c
 			atomicAdd(&entry->normalVec.x, n.x);
 			atomicAdd(&entry->normalVec.y, n.y);
 
-			//			cell->protectionCounter = PROTECTION_TIMESTEPS;
-			cell->setProtectionCounterForNextTimestep = true;
+			cell->protectionCounter = PROTECTION_TIMESTEPS;
 		}
 	}
 }
