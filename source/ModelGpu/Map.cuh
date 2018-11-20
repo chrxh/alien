@@ -54,7 +54,7 @@ public:
 	{
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * BasicMap::_size.x;
-		return _map1[mapEntry] == entity;	//TODO: check
+		return _map1[mapEntry] == entity;	
 
 	}
 

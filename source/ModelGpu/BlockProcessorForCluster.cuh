@@ -16,6 +16,7 @@ public:
 
 	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingDecay(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 
 	__inline__ __device__ int getNumOrigCells() const;
@@ -68,9 +69,6 @@ __inline__ __device__ void BlockProcessorForCluster::processingCollision(int sta
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
 		Physics::getCollisionDataForCell(_cellMap, origCell, _collisionData);
-		if (!origCell->alive) {
-			_atLeastOneCellDestroyed = true;
-		}
 	}
 
 	__syncthreads();
@@ -120,6 +118,24 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovement(int star
 	__syncthreads();
 }
 
+__inline__ __device__ void BlockProcessorForCluster::processingDecay(int startCellIndex, int endCellIndex)
+{
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		if (_origCluster->cells[cellIndex].alive) {
+			_atLeastOneCellDestroyed = true;
+		}
+	}
+	__syncthreads();
+
+	if (_atLeastOneCellDestroyed) {
+		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+			_origCluster->cells[cellIndex].tag = cellIndex;
+		}
+
+		__syncthreads();
+	}
+}
+
 __inline__ __device__ void BlockProcessorForCluster::processingRadiation(int startCellIndex, int endCellIndex)
 {
 	int numOrigCells = _origCluster->numCells;
@@ -144,10 +160,6 @@ __inline__ __device__  void BlockProcessorForCluster::copyAndMoveCell(int cellIn
 	cellCopy.cluster = _newCluster;
 	if (cellCopy.protectionCounter > 0) {
 		--cellCopy.protectionCounter;
-	}
-	if (cellCopy.setProtectionCounterForNextTimestep) {
-		cellCopy.protectionCounter = PROTECTION_TIMESTEPS;
-		cellCopy.setProtectionCounterForNextTimestep = false;
 	}
 	int newCellIndex = atomicAdd(&_clusterCopy.numCells, 1);
 	CellData *newCell = &_newCells[newCellIndex];
