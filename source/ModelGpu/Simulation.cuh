@@ -20,6 +20,7 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 
 	blockProcessor.processingCollision(startCellIndex, endCellIndex);
 	blockProcessor.processingMovement(startCellIndex, endCellIndex);
+	blockProcessor.processingDecay(startCellIndex, endCellIndex);
 	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
 }
 
