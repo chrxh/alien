@@ -24,8 +24,8 @@ struct CellData
 	CellData* connections[CELL_MAX_BONDS];
 	CellData* nextTimestep;
 	int protectionCounter;
-	bool setProtectionCounterForNextTimestep;
 	bool alive;
+	int tag;
 };
 
 struct ClusterData
