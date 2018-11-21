@@ -9,7 +9,7 @@
 #include "Map.cuh"
 #include "BlockProcessorForCluster.cuh"
 
-__device__ void clusterMovement(SimulationData &data, int clusterIndex)
+__device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 {
 	__shared__ BlockProcessorForCluster blockProcessor;
 	blockProcessor.init(data, clusterIndex);
@@ -24,7 +24,7 @@ __device__ void clusterMovement(SimulationData &data, int clusterIndex)
 	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
 }
 
-__global__ void clusterMovement(SimulationData data)
+__global__ void clusterMovement(SimulationDataInternal data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
@@ -40,7 +40,7 @@ __global__ void clusterMovement(SimulationData data)
 	}
 }
 
-__device__ void particleMovement(SimulationData &data, int particleIndex)
+__device__ void particleMovement(SimulationDataInternal &data, int particleIndex)
 {
 	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
 	__shared__ Map<CellData> map;
@@ -57,7 +57,7 @@ __device__ void particleMovement(SimulationData &data, int particleIndex)
 	map.mapPosCorrection(newParticle->pos);
 }
 
-__global__ void particleMovement(SimulationData data)
+__global__ void particleMovement(SimulationDataInternal data)
 {
 	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
 	int numEntities = data.particlesAC1.getNumEntries();
@@ -72,7 +72,7 @@ __global__ void particleMovement(SimulationData data)
 	}
 }
 
-__device__ void clearCellCluster(SimulationData const &data, int clusterIndex)
+__device__ void clearCellCluster(SimulationDataInternal const &data, int clusterIndex)
 {
 	auto const &oldCluster = data.clustersAC1.getEntireArray()[clusterIndex];
 
@@ -93,7 +93,7 @@ __device__ void clearCellCluster(SimulationData const &data, int clusterIndex)
 	}
 }
 
-__device__ void clearParticle(SimulationData const &data, int particleIndex)
+__device__ void clearParticle(SimulationDataInternal const &data, int particleIndex)
 {
 	Map<ParticleData> map;
 	map.init(data.size, data.particleMap1, data.particleMap2);
@@ -102,7 +102,7 @@ __device__ void clearParticle(SimulationData const &data, int particleIndex)
 	map.setToOrigMap(toInt2(particle.pos), nullptr);
 }
 
-__global__ void clearMaps(SimulationData data)
+__global__ void clearMaps(SimulationDataInternal data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
