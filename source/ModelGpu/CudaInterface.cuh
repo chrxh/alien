@@ -4,6 +4,7 @@
 
 #include "Constants.cuh"
 
+
 struct ParticleData
 {
 	uint64_t id;
@@ -50,11 +51,33 @@ struct SimulationDataForAccess
 	ParticleData* particles;
 };
 
-extern void cudaInit(int2 const &size);
-extern void cudaCalcNextTimestep();
-extern SimulationDataForAccess cudaGetData();
+/*
+extern int cudaInit(int2 const &size);
+extern void cudaCalcNextTimestep(int handler);
+extern SimulationDataForAccess cudaGetData(int handler);
 extern void cudaSetData(SimulationDataForAccess const& access);
 extern void cudaDataPtrCorrection();
 extern void cudaShutdown();
+*/
 
+struct SimulationData;
+class SimulationDataManager
+{
+public:
+	cudaStream_t cudaStream;
+	SimulationData* data;
+	SimulationDataForAccess access;
 
+	SimulationDataManager(int2 const &size);
+	~SimulationDataManager();
+
+	void calcNextTimestep();
+	SimulationDataForAccess getDataForAccess();
+	void setDataForAccess(SimulationDataForAccess const& newAccess);
+
+private:
+	void prepareTargetData();
+	void swapData();
+	void correctPointersAfterCellCopy(CellData* cell, int64_t addressShiftCell, int64_t addressShiftCluster);
+	void correctPointersAfterClusterCopy(ClusterData* cluster, int64_t addressShiftCell);
+};

@@ -49,4 +49,5 @@ private:
 	std::mutex _mutexForFlags;
 	std::mutex _mutexForData;
 	SimulationDataForAccess _cudaData;
+	SimulationDataManager* _simDataManager = nullptr;
 };
