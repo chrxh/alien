@@ -63,17 +63,8 @@
     <ClInclude Include="..\..\source\ModelGpu\Physics.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\Simulation.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\SimulationData.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\SimulationDataManager.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h">
       <Filter>Source Files\Impl</Filter>
@@ -82,6 +73,12 @@
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CollisionData.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\SimulationDataInternal.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaSimulatorFunctions.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
@@ -192,7 +189,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\source\ModelGpu\CudaMain.cu">
+    <CudaCompile Include="..\..\source\ModelGpu\CudaSimulator.cu">
       <Filter>Source Files\Impl\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>

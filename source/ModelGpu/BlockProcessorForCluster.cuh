@@ -12,7 +12,7 @@
 class BlockProcessorForCluster
 {
 public:
-	__inline__ __device__ void init(SimulationData& data, int clusterIndex);
+	__inline__ __device__ void init(SimulationDataInternal& data, int clusterIndex);
 
 	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
@@ -27,7 +27,7 @@ private:
 	__inline__ __device__ void cellRadiation(CellData *cell);
 	__inline__ __device__ void createNewParticle(CellData *cell);
 
-	SimulationData* _data;
+	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
 
 	ClusterData _clusterCopy;
@@ -43,7 +43,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void BlockProcessorForCluster::init(SimulationData& data, int clusterIndex)
+__inline__ __device__ void BlockProcessorForCluster::init(SimulationDataInternal& data, int clusterIndex)
 {
 	if (0 == threadIdx.x) {
 		_data = &data;

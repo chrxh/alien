@@ -51,25 +51,16 @@ struct SimulationDataForAccess
 	ParticleData* particles;
 };
 
-/*
-extern int cudaInit(int2 const &size);
-extern void cudaCalcNextTimestep(int handler);
-extern SimulationDataForAccess cudaGetData(int handler);
-extern void cudaSetData(SimulationDataForAccess const& access);
-extern void cudaDataPtrCorrection();
-extern void cudaShutdown();
-*/
-
-struct SimulationData;
-class SimulationDataManager
+struct SimulationDataInternal;
+class CudaSimulator
 {
 public:
 	cudaStream_t cudaStream;
-	SimulationData* data;
+	SimulationDataInternal* data;
 	SimulationDataForAccess access;
 
-	SimulationDataManager(int2 const &size);
-	~SimulationDataManager();
+	CudaSimulator(int2 const &size);
+	~CudaSimulator();
 
 	void calcNextTimestep();
 	SimulationDataForAccess getDataForAccess();

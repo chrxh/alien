@@ -7,7 +7,7 @@
 #include "Base.cuh"
 #include "Constants.cuh"
 #include "Map.cuh"
-#include "SimulationData.cuh"
+#include "SimulationDataInternal.cuh"
 #include "CollisionData.cuh"
 
 

@@ -16,7 +16,7 @@ void CudaWorker::init(SpaceProperties* spaceProp)
 	_spaceProp = spaceProp;
 	auto size = spaceProp->getSize();
 	delete _simDataManager;
-	_simDataManager = new SimulationDataManager({ size.x, size.y });
+	_simDataManager = new CudaSimulator({ size.x, size.y });
 }
 
 void CudaWorker::requireData()
