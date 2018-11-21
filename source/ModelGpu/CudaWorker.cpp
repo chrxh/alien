@@ -8,14 +8,15 @@
 
 CudaWorker::~CudaWorker()
 {
-	cudaShutdown();
+	delete _simDataManager;
 }
 
 void CudaWorker::init(SpaceProperties* spaceProp)
 {
 	_spaceProp = spaceProp;
 	auto size = spaceProp->getSize();
-	cudaInit({ size.x, size.y });
+	delete _simDataManager;
+	_simDataManager = new SimulationDataManager({ size.x, size.y });
 }
 
 void CudaWorker::requireData()
@@ -25,7 +26,7 @@ void CudaWorker::requireData()
 
 	if (!_simRunning) {
 		_mutexForData.lock();
-		_cudaData = cudaGetData();
+		_cudaData = _simDataManager->getDataForAccess();
 		_mutexForData.unlock();
 		_requireData = false;
 		Q_EMIT dataObtained();
@@ -96,7 +97,7 @@ void CudaWorker::updateData()
 	_updateData = true;
 
 	if (!_simRunning) {
-		cudaSetData(_cudaData);
+		_simDataManager->setDataForAccess(_cudaData);
 		_updateData = false;
 	}
 }
@@ -114,19 +115,19 @@ void CudaWorker::runSimulation()
 	do {
 		if (isDataUpdated()) {
 			if (_mutexForData.try_lock()) {
-				cudaSetData(_cudaData);
+				_simDataManager->setDataForAccess(_cudaData);
 				updateDataFinished();
 				_mutexForData.unlock();
 			}
 		}
 
-		cudaCalcNextTimestep();
+		_simDataManager->calcNextTimestep();
 
 		Q_EMIT timestepCalculated();
 
 		if (isDataRequired()) {
 			if (_mutexForData.try_lock()) {
-				_cudaData = cudaGetData();
+				_cudaData = _simDataManager->getDataForAccess();
 				requireDataFinished();
 				_mutexForData.unlock();
 				Q_EMIT dataObtained();
