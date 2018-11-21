@@ -4,7 +4,7 @@
 #include "CudaInterface.cuh"
 #include "Map.cuh"
 
-struct SimulationData
+struct SimulationDataInternal
 {
 	int2 size;
 

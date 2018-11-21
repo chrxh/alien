@@ -1,23 +1,50 @@
-#pragma once
-
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <helper_cuda.h>
+#include <list>
 #include <iostream>
+#include <functional>
+
+#include "Base.cuh"
+#include "Constants.cuh"
+#include "CudaInterface.cuh"
+#include "CudaSimulatorFunctions.cuh"
 
 #include "CudaInterface.cuh"
-#include "SimulationData.cuh"
+#include "SimulationDataInternal.cuh"
 #include "Map.cuh"
 
 namespace
 {
-	int _instances = 0;
+	class CudaInitializer
+	{
+	public:
+		static CudaInitializer& getInstance()
+		{
+			static CudaInitializer instance;
+			return instance;
+		}
+		
+		CudaInitializer()
+		{
+			cudaSetDevice(0);
+			std::cout << "[CUDA] initialized" << std::endl;
+		}
+
+		~CudaInitializer()
+		{
+			cudaDeviceReset();
+			std::cout << "[CUDA] closed" << std::endl;
+		}
+	};
 }
 
-SimulationDataManager::SimulationDataManager(int2 const &size)
+CudaSimulator::CudaSimulator(int2 const &size)
 {
-	if (0 == _instances++) {
-		cudaSetDevice(0);
-		std::cout << "CUDA stream initialized" << std::endl;
-	}
+	CudaInitializer::getInstance();
+
 	cudaStreamCreate(&cudaStream);
+	std::cout << "[CUDA] stream created" << std::endl;
 
 	int totalVideoMemory = 0;
 	totalVideoMemory += 2 * sizeof(ClusterData) * MAX_CELLCLUSTERS;
@@ -26,9 +53,9 @@ SimulationDataManager::SimulationDataManager(int2 const &size)
 	totalVideoMemory += 2 * size.x * size.y * sizeof(ParticleData*);
 	totalVideoMemory += 2 * size.x * size.y * sizeof(CellData*);
 	totalVideoMemory += sizeof(int) * RANDOM_NUMBER_BLOCK_SIZE;
-	std::cout << "Total video memory needed for CUDA: " << totalVideoMemory/1024/1024 << "mb" << std::endl;
+	std::cout << "[CUDA] acquire " << totalVideoMemory/1024/1024 << "mb of video memory" << std::endl;
 
-	data = new SimulationData();
+	data = new SimulationDataInternal();
 	data->size = size;
 
 	data->clustersAC1 = ArrayController<ClusterData>(MAX_CELLCLUSTERS);
@@ -58,7 +85,7 @@ SimulationDataManager::SimulationDataManager(int2 const &size)
 	data->numberGen.init(RANDOM_NUMBER_BLOCK_SIZE);
 }
 
-SimulationDataManager::~SimulationDataManager()
+CudaSimulator::~CudaSimulator()
 {
 	cudaDeviceSynchronize();
 
@@ -80,13 +107,10 @@ SimulationDataManager::~SimulationDataManager()
 	free(access.particles);
 
 	delete data;
-	if (--_instances == 0) {
-		cudaDeviceReset();
-		std::cout << "CUDA stream closed" << std::endl;
-	}
+	std::cout << "[CUDA] stream closed" << std::endl;
 }
 
-void SimulationDataManager::calcNextTimestep()
+void CudaSimulator::calcNextTimestep()
 {
 	prepareTargetData();
 
@@ -105,7 +129,7 @@ void SimulationDataManager::calcNextTimestep()
 	swapData();
 }
 
-SimulationDataForAccess SimulationDataManager::getDataForAccess()
+SimulationDataForAccess CudaSimulator::getDataForAccess()
 {
 	access.numClusters = data->clustersAC1.getNumEntries();
 	cudaMemcpy(access.clusters, data->clustersAC1.getEntireArray(), sizeof(ClusterData) * data->clustersAC1.getNumEntries(), cudaMemcpyDeviceToHost);
@@ -129,7 +153,7 @@ SimulationDataForAccess SimulationDataManager::getDataForAccess()
 	return access;
 }
 
-void SimulationDataManager::setDataForAccess(SimulationDataForAccess const& newAccess)
+void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 {
 	access = newAccess;
 
@@ -166,14 +190,14 @@ void SimulationDataManager::setDataForAccess(SimulationDataForAccess const& newA
 
 }
 
-void SimulationDataManager::prepareTargetData()
+void CudaSimulator::prepareTargetData()
 {
 	data->clustersAC2.reset();
 	data->cellsAC2.reset();
 	data->particlesAC2.reset();
 }
 
-void SimulationDataManager::swapData()
+void CudaSimulator::swapData()
 {
 	swap(data->clustersAC1, data->clustersAC2);
 	swap(data->cellsAC1, data->cellsAC2);
@@ -182,7 +206,7 @@ void SimulationDataManager::swapData()
 	swap(data->particleMap1, data->particleMap2);
 }
 
-void SimulationDataManager::correctPointersAfterCellCopy(CellData* cell, int64_t addressShiftCell, int64_t addressShiftCluster)
+void CudaSimulator::correctPointersAfterCellCopy(CellData* cell, int64_t addressShiftCell, int64_t addressShiftCluster)
 {
 	cell->cluster = (ClusterData*)(int64_t(cell->cluster) + addressShiftCluster);
 	for (int j = 0; j < cell->numConnections; ++j) {
@@ -191,7 +215,7 @@ void SimulationDataManager::correctPointersAfterCellCopy(CellData* cell, int64_t
 	cell->nextTimestep = nullptr;
 }
 
-void SimulationDataManager::correctPointersAfterClusterCopy(ClusterData* cluster, int64_t addressShiftCell)
+void CudaSimulator::correctPointersAfterClusterCopy(ClusterData* cluster, int64_t addressShiftCell)
 {
 	cluster->cells = (CellData*)(int64_t(cluster->cells) + addressShiftCell);
 }
