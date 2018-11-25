@@ -22,7 +22,8 @@ public:
 	__inline__ __device__ int getNumOrigCells() const;
 
 private:
-	__inline__ __device__ void copyAndMoveCell(CellData *origCell, CellData* newCell, ClusterData* newCluster);
+	__inline__ __device__ void copyAndMoveCell(CellData *origCell, CellData* newCell, ClusterData* origCluster
+		, ClusterData* newCluster, float (&rotMatrix)[2][2]);
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
 	__inline__ __device__ void cellRadiation(CellData *cell);
 	__inline__ __device__ void createNewParticle(CellData *cell);
@@ -30,9 +31,8 @@ private:
 	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
 
-	ClusterData _clusterCopy;
+	ClusterData _origClusterCopy;
 	ClusterData *_origCluster;
-	float _rotMatrix[2][2];
 	CollisionData _collisionData;
 };
 
@@ -45,8 +45,7 @@ __inline__ __device__ void BlockProcessorForCluster::init(SimulationDataInternal
 	if (0 == threadIdx.x) {
 		_data = &data;
 		_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
-		_clusterCopy = *_origCluster;
-		Physics::calcRotationMatrix(_clusterCopy.angle, _rotMatrix);
+		_origClusterCopy = *_origCluster;
 		_collisionData.init();
 		_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 	}
@@ -76,13 +75,13 @@ __inline__ __device__ void BlockProcessorForCluster::processingCollision(int sta
 			entry->collisionPos.y /= numCollisions;
 			entry->normalVec.x /= numCollisions;
 			entry->normalVec.y /= numCollisions;
-			Physics::calcCollision(&_clusterCopy, entry, _cellMap);
+			Physics::calcCollision(&_origClusterCopy, entry, _cellMap);
 		}
 
-		_clusterCopy.angle += _clusterCopy.angularVel;
-		Physics::angleCorrection(_clusterCopy.angle);
-		_clusterCopy.pos = add(_clusterCopy.pos, _clusterCopy.vel);
-		_cellMap.mapPosCorrection(_clusterCopy.pos);
+		_origClusterCopy.angle += _origClusterCopy.angularVel;
+		Physics::angleCorrection(_origClusterCopy.angle);
+		_origClusterCopy.pos = add(_origClusterCopy.pos, _origClusterCopy.vel);
+		_cellMap.mapPosCorrection(_origClusterCopy.pos);
 	}
 	__syncthreads();
 }
@@ -126,26 +125,28 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovement(int star
 */
 		__shared__ ClusterData* newCluster;
 		__shared__ CellData* newCells;
+		__shared__ float rotMatrix[2][2];
 
 		if (threadIdx.x == 0) {
 			newCluster = _data->clustersAC2.getNewElement();
-			newCells = _data->cellsAC2.getNewSubarray(_clusterCopy.numCells);
-			_clusterCopy.numCells = 0;
-			_clusterCopy.cells = newCells;
+			newCells = _data->cellsAC2.getNewSubarray(_origClusterCopy.numCells);
+			Physics::calcRotationMatrix(_origClusterCopy.angle, rotMatrix);
+			_origClusterCopy.numCells = 0;
+			_origClusterCopy.cells = newCells;
 		}
 		__syncthreads();
 
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CellData *origCell = &_origCluster->cells[cellIndex];
 
-			int newCellIndex = atomicAdd(&_clusterCopy.numCells, 1);
+			int newCellIndex = atomicAdd(&_origClusterCopy.numCells, 1);
 			CellData *newCell = &newCells[newCellIndex];
-			copyAndMoveCell(origCell, newCell, newCluster);
+			copyAndMoveCell(origCell, newCell, _origCluster, newCluster, rotMatrix);
 		}
 
 		__syncthreads();
 		if (threadIdx.x == 0) {
-			*newCluster = _clusterCopy;
+			*newCluster = _origClusterCopy;
 		}
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CellData* newCell = &newCells[cellIndex];
@@ -195,13 +196,14 @@ __inline__ __device__ void BlockProcessorForCluster::processingRadiation(int sta
 	__syncthreads();
 }
 
-__inline__ __device__  void BlockProcessorForCluster::copyAndMoveCell(CellData *origCell, CellData* newCell, ClusterData* newCluster)
+__inline__ __device__  void BlockProcessorForCluster::copyAndMoveCell(CellData *origCell, CellData* newCell
+	, ClusterData* origCluster, ClusterData* newCluster, float (&rotMatrix)[2][2])
 {
 	CellData cellCopy = *origCell;
 
 	float2 absPos;
-	absPos.x = cellCopy.relPos.x*_rotMatrix[0][0] + cellCopy.relPos.y*_rotMatrix[0][1] + _clusterCopy.pos.x;
-	absPos.y = cellCopy.relPos.x*_rotMatrix[1][0] + cellCopy.relPos.y*_rotMatrix[1][1] + _clusterCopy.pos.y;
+	absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + origCluster->pos.x;
+	absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + origCluster->pos.y;
 	cellCopy.absPos = absPos;
 	cellCopy.cluster = newCluster;
 	if (cellCopy.protectionCounter > 0) {
