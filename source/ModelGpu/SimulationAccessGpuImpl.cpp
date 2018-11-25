@@ -1,6 +1,7 @@
 #include <QImage>
 
 #include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/EntityRenderer.h"
 
 #include "CudaWorker.h"
 #include "ThreadController.h"
@@ -109,7 +110,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		if (_requiredRect.isContained(intPos)) {
 			spaceProp->correctPosition(intPos);
-			_requiredImage->setPixel(intPos.x, intPos.y, 0x902020);
+			_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
 		}
 	}
 
