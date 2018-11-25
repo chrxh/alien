@@ -4,6 +4,7 @@
 #include "ModelBasic/ChangeDescriptions.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/EntityRenderer.h"
 
 #include "EntityFactory.h"
 #include "Cluster.h"
@@ -355,15 +356,6 @@ namespace
 		b = b*e / 150;
 		return (r << 16) | (g << 8) | b;
 	}
-
-	uint32_t calcParticleColor(double energy)
-	{
-		quint32 e = (energy + 10) * 5;
-		if (e > 150) {
-			e = 150;
-		}
-		return (e << 16) | 0x30;
-	}
 }
 
 namespace
@@ -440,7 +432,7 @@ void SimulationAccessCpuImpl::drawParticlesFromUnit(Unit * unit)
 	for (auto const &particle : particles) {
 		IntVector2D pos = particle->getPosition();
 		if (_requiredRect.isContained(pos)) {
-			_requiredImage->setPixel(pos.x, pos.y, calcParticleColor(particle->getEnergy()));
+			_requiredImage->setPixel(pos.x, pos.y, EntityRenderer::calcParticleColor(particle->getEnergy()));
 		}
 	}
 }
