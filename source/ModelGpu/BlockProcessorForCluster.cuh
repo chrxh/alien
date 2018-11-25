@@ -13,15 +13,20 @@ class BlockProcessorForCluster
 {
 public:
 	__inline__ __device__ void init(SimulationDataInternal& data, int clusterIndex);
+	__inline__ __device__ int getNumOrigCells() const;
 
+	//synchronizing threads
 	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
 
-	__inline__ __device__ int getNumOrigCells() const;
-
 private:
+	//synchronizing threads
+	__inline__ __device__ void processingMovementWithDecomposition(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingMovementWithoutDecomposition(int startCellIndex, int endCellIndex);
+
+	//not synchronizing threads
 	__inline__ __device__ void copyAndMoveCell(CellData *origCell, CellData* newCell, ClusterData* origCluster
 		, ClusterData* newCluster, float (&rotMatrix)[2][2]);
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
@@ -57,6 +62,83 @@ __inline__ __device__ int BlockProcessorForCluster::getNumOrigCells() const
 	return _origCluster->numCells;
 }
 
+__inline__ __device__ void BlockProcessorForCluster::processingMovementWithDecomposition(int startCellIndex, int endCellIndex)
+{
+	__shared__ int numDecompositions;
+	struct Entry {
+		int tag;
+		int numCells;
+	};
+	__shared__ Entry entries[MAX_DECOMPOSITIONS];
+
+	numDecompositions = 0;
+	for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
+		entries[i].tag = -1;
+		entries[i].numCells = 0;
+	}
+	__syncthreads();
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData& cell = _origCluster->cells[cellIndex];
+		bool foundMatch = false;
+		for (int index = 0; index < MAX_DECOMPOSITIONS; ++index) {
+			int origTag = atomicCAS(&entries[index].tag, cell.tag, cell.tag);
+			if (-1 == origTag || cell.tag == origTag) {	//use free or matching entry
+				atomicAdd(&numDecompositions, 1);
+				atomicAdd(&entries[index].numCells, 1);
+				foundMatch = true;
+				break;
+			}
+		}
+		if (!foundMatch) {	//no match? use last entry
+			cell.tag = entries[MAX_DECOMPOSITIONS - 1].tag;
+			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].numCells, 1);
+		}
+	}
+	__syncthreads();
+	int startDecompositionIndex;
+	int endDecompositionIndex;
+	calcPartition(numDecompositions, threadIdx.x, blockDim.x, startDecompositionIndex, endDecompositionIndex);
+	for (int decompositionIndex = startDecompositionIndex; decompositionIndex <= endDecompositionIndex; ++decompositionIndex) {
+		ClusterData* newCluster = _data->clustersAC2.getNewElement();
+		CellData* newCells = _data->cellsAC2.getNewSubarray(entries[decompositionIndex].numCells);
+//	todo: fill cluster and cell data
+	}
+}
+
+__inline__ __device__ void BlockProcessorForCluster::processingMovementWithoutDecomposition(int startCellIndex, int endCellIndex)
+{
+	__shared__ ClusterData* newCluster;
+	__shared__ CellData* newCells;
+	__shared__ float rotMatrix[2][2];
+
+	if (threadIdx.x == 0) {
+		newCluster = _data->clustersAC2.getNewElement();
+		newCells = _data->cellsAC2.getNewSubarray(_origClusterCopy.numCells);
+		Physics::calcRotationMatrix(_origClusterCopy.angle, rotMatrix);
+		_origClusterCopy.numCells = 0;
+		_origClusterCopy.cells = newCells;
+	}
+	__syncthreads();
+
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData *origCell = &_origCluster->cells[cellIndex];
+
+		int newCellIndex = atomicAdd(&_origClusterCopy.numCells, 1);
+		CellData *newCell = &newCells[newCellIndex];
+		copyAndMoveCell(origCell, newCell, _origCluster, newCluster, rotMatrix);
+	}
+
+	__syncthreads();
+	if (threadIdx.x == 0) {
+		*newCluster = _origClusterCopy;
+	}
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData* newCell = &newCells[cellIndex];
+		correctCellConnections(newCell);
+	}
+	__syncthreads();
+}
+
 __inline__ __device__ void BlockProcessorForCluster::processingCollision(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
@@ -88,74 +170,13 @@ __inline__ __device__ void BlockProcessorForCluster::processingCollision(int sta
 
 __inline__ __device__ void BlockProcessorForCluster::processingMovement(int startCellIndex, int endCellIndex)
 {
-/*
 	if (_origCluster->decompositionRequired) {
-		__shared__ int numDecompositions;
-		struct Entry {
-			int tag;
-			int numCells;
-		};
-		__shared__ Entry entries[MAX_DECOMPOSITIONS];
-
-		numDecompositions = 0;
-		for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
-			entries[i].tag = -1;
-			entries[i].numCells = 0;
-		}
-		__syncthreads();
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellData& cell = _origCluster->cells[cellIndex];
-			bool foundMatch = false;
-			for (int index = 0; index < MAX_DECOMPOSITIONS; ++index) {
-				int origTag = atomicCAS(&entries[index].tag, cell.tag, cell.tag);
-				if (-1 == origTag || cell.tag == origTag) {	//use free or matching entry
-					atomicAdd(&numDecompositions, 1);
-					atomicAdd(&entries[index].numCells, 1);
-					foundMatch = true;
-					break;
-				}
-			}
-			if (!foundMatch) {	//no match? use last entry
-				cell.tag = entries[MAX_DECOMPOSITIONS - 1].tag;
-				atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].numCells, 1);
-			}
-		}
+//		processingMovementWithDecomposition(startCellIndex, endCellIndex);
+		processingMovementWithoutDecomposition(startCellIndex, endCellIndex);
 	}
 	else {
-*/
-		__shared__ ClusterData* newCluster;
-		__shared__ CellData* newCells;
-		__shared__ float rotMatrix[2][2];
-
-		if (threadIdx.x == 0) {
-			newCluster = _data->clustersAC2.getNewElement();
-			newCells = _data->cellsAC2.getNewSubarray(_origClusterCopy.numCells);
-			Physics::calcRotationMatrix(_origClusterCopy.angle, rotMatrix);
-			_origClusterCopy.numCells = 0;
-			_origClusterCopy.cells = newCells;
-		}
-		__syncthreads();
-
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellData *origCell = &_origCluster->cells[cellIndex];
-
-			int newCellIndex = atomicAdd(&_origClusterCopy.numCells, 1);
-			CellData *newCell = &newCells[newCellIndex];
-			copyAndMoveCell(origCell, newCell, _origCluster, newCluster, rotMatrix);
-		}
-
-		__syncthreads();
-		if (threadIdx.x == 0) {
-			*newCluster = _origClusterCopy;
-		}
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellData* newCell = &newCells[cellIndex];
-			correctCellConnections(newCell);
-		}
-		__syncthreads();
-/*
+		processingMovementWithoutDecomposition(startCellIndex, endCellIndex);
 	}
-*/
 }
 
 __inline__ __device__ void BlockProcessorForCluster::processingDecomposition(int startCellIndex, int endCellIndex)
