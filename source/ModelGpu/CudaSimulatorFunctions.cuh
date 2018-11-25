@@ -19,9 +19,9 @@ __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 	calcPartition(blockProcessor.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 	blockProcessor.processingCollision(startCellIndex, endCellIndex);
-	blockProcessor.processingMovement(startCellIndex, endCellIndex);
-	blockProcessor.processingDecay(startCellIndex, endCellIndex);
 	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
+	blockProcessor.processingDecomposition(startCellIndex, endCellIndex);
+	blockProcessor.processingMovement(startCellIndex, endCellIndex);
 }
 
 __global__ void clusterMovement(SimulationDataInternal data)
