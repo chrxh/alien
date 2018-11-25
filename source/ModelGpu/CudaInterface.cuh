@@ -24,6 +24,7 @@ struct CellData
 	int numConnections;
 	CellData* connections[CELL_MAX_BONDS];
 	CellData* nextTimestep;
+
 	int protectionCounter;
 	bool alive;
 	int tag;
@@ -39,6 +40,8 @@ struct ClusterData
 	float angularMass;
 	int numCells;
 	CellData* cells;
+
+	bool decompositionRequired;
 };
 
 struct SimulationDataForAccess

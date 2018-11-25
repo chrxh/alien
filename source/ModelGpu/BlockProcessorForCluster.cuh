@@ -15,9 +15,9 @@ public:
 	__inline__ __device__ void init(SimulationDataInternal& data, int clusterIndex);
 
 	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingDecay(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
 
 	__inline__ __device__ int getNumOrigCells() const;
 
@@ -36,7 +36,6 @@ private:
 	CellData *_newCells;
 	float _rotMatrix[2][2];
 	CollisionData _collisionData;
-	bool _atLeastOneCellDestroyed;
 };
 
 
@@ -52,7 +51,6 @@ __inline__ __device__ void BlockProcessorForCluster::init(SimulationDataInternal
 		_newCells = _data->cellsAC2.getNewSubarray(_clusterCopy.numCells);
 		_newCluster = _data->clustersAC2.getNewElement();
 		Physics::calcRotationMatrix(_clusterCopy.angle, _rotMatrix);
-		_atLeastOneCellDestroyed = false;
 		_collisionData.init();
 		_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 	}
@@ -97,18 +95,13 @@ __inline__ __device__ void BlockProcessorForCluster::processingCollision(int sta
 
 __inline__ __device__ void BlockProcessorForCluster::processingMovement(int startCellIndex, int endCellIndex)
 {
-	int numOrigCells = _origCluster->numCells;
-	if (threadIdx.x < numOrigCells) {
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			copyAndMoveCell(cellIndex);
-		}
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		copyAndMoveCell(cellIndex);
 	}
 	__syncthreads();
 
-	if (threadIdx.x < numOrigCells) {
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			correctCellConnections(cellIndex);
-		}
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		correctCellConnections(cellIndex);
 	}
 	__syncthreads();
 
@@ -118,32 +111,40 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovement(int star
 	__syncthreads();
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingDecay(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster::processingDecomposition(int startCellIndex, int endCellIndex)
 {
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		if (_origCluster->cells[cellIndex].alive) {
-			_atLeastOneCellDestroyed = true;
-		}
-	}
-	__syncthreads();
+	if (_origCluster->decompositionRequired) {
+		__shared__ bool changes;
+		changes = false;
 
-	if (_atLeastOneCellDestroyed) {
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			_origCluster->cells[cellIndex].tag = cellIndex;
 		}
-
 		__syncthreads();
+		while (changes) {
+			for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+				CellData& cell = _origCluster->cells[cellIndex];
+				if (cell.alive) {
+					for (int i = 0; i < cell.numConnections; ++i) {
+						CellData& otherCell = *cell.connections[i];
+						if (otherCell.tag < cell.tag) {
+							cell.tag = otherCell.tag;
+							changes = true;
+						}
+					}
+				}
+			}
+			__syncthreads();
+			changes = false;
+		}
 	}
 }
 
 __inline__ __device__ void BlockProcessorForCluster::processingRadiation(int startCellIndex, int endCellIndex)
 {
-	int numOrigCells = _origCluster->numCells;
-	if (threadIdx.x < numOrigCells) {
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellData *origCell = &_origCluster->cells[cellIndex];
-			cellRadiation(origCell);
-		}
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData *origCell = &_origCluster->cells[cellIndex];
+		cellRadiation(origCell);
 	}
 	__syncthreads();
 }
@@ -185,6 +186,7 @@ __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cel
 	}
 	if (cell->energy < CELL_MIN_ENERGY) {
 		cell->alive = false;
+		cell->cluster->decompositionRequired = true;
 	}
 }
 
