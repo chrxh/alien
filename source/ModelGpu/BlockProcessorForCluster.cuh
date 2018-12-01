@@ -88,7 +88,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 		CellData& cell = _origCluster->cells[cellIndex];
 		bool foundMatch = false;
 		for (int index = 0; index < MAX_DECOMPOSITIONS; ++index) {
-			int origTag = atomicCAS(&entries[index].tag, cell.tag, cell.tag);
+			int origTag = atomicCAS(&entries[index].tag, -1, cell.tag);
 			if (-1 == origTag) {	//use free 
 				atomicAdd(&numDecompositions, 1);
 				atomicAdd(&entries[index].cluster.numCells, 1);
