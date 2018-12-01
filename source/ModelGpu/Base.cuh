@@ -94,12 +94,12 @@ public:
 		return static_cast<float>(number) / RAND_MAX;
 	}
 
-	__host__ __inline__ uint64_t newId()
+	__host__ __inline__ uint64_t createNewId()
 	{
 		return (*_currentId)++;
 	}
 
-	__device__ __inline__ uint64_t newId_Kernel()
+	__device__ __inline__ uint64_t createNewId_kernel()
 	{
 		return atomicAdd(_currentId, 1);
 	}
@@ -257,7 +257,7 @@ float random(float max)
 }
 
 template<typename T>
-void swap(T &a, T &b)
+__host__ __device__ __inline__ void swap(T &a, T &b)
 {
 	T temp = a;
 	a = b;

@@ -16,18 +16,18 @@ public:
 	__inline__ __device__ int getNumOrigCells() const;
 
 	//synchronizing threads
-	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingDataCopy(int startCellIndex, int endCellIndex);
 
 private:
 	//synchronizing threads
-	__inline__ __device__ void processingMovementWithDecomposition(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingMovementWithoutDecomposition(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingDataCopyWithoutDecomposition(int startCellIndex, int endCellIndex);
 
 	//not synchronizing threads
-	__inline__ __device__ void copyAndMoveCell(CellData *origCell, CellData* newCell, ClusterData* origCluster
+	__inline__ __device__ void copyAndUpdateCell(CellData *origCell, CellData* newCell, ClusterData* origCluster
 		, ClusterData* newCluster, float (&rotMatrix)[2][2]);
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
 	__inline__ __device__ void cellRadiation(CellData *cell);
@@ -36,7 +36,7 @@ private:
 	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
 
-	ClusterData _origClusterCopy;
+	ClusterData _newCluster;
 	ClusterData *_origCluster;
 	CollisionData _collisionData;
 };
@@ -50,7 +50,7 @@ __inline__ __device__ void BlockProcessorForCluster::init(SimulationDataInternal
 	if (0 == threadIdx.x) {
 		_data = &data;
 		_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
-		_origClusterCopy = *_origCluster;
+		_newCluster = *_origCluster;
 		_collisionData.init();
 		_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 	}
@@ -62,19 +62,26 @@ __inline__ __device__ int BlockProcessorForCluster::getNumOrigCells() const
 	return _origCluster->numCells;
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingMovementWithDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex)
 {
 	__shared__ int numDecompositions;
 	struct Entry {
 		int tag;
-		int numCells;
+		float rotMatrix[2][2];
+		ClusterData cluster;
 	};
 	__shared__ Entry entries[MAX_DECOMPOSITIONS];
 
 	numDecompositions = 0;
 	for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
 		entries[i].tag = -1;
-		entries[i].numCells = 0;
+		entries[i].cluster.pos = { 0.0f, 0.0f };
+		entries[i].cluster.vel = _newCluster.vel;		//TODO: calculate
+		entries[i].cluster.angle = _newCluster.angle;
+		entries[i].cluster.angularVel = _newCluster.angularVel;		//TODO: calculate
+		entries[i].cluster.angularMass = 0.0f;
+		entries[i].cluster.numCells = 0;
+		entries[i].cluster.decompositionRequired = false;
 	}
 	__syncthreads();
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
@@ -82,30 +89,80 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovementWithDecom
 		bool foundMatch = false;
 		for (int index = 0; index < MAX_DECOMPOSITIONS; ++index) {
 			int origTag = atomicCAS(&entries[index].tag, cell.tag, cell.tag);
-			if (-1 == origTag || cell.tag == origTag) {	//use free or matching entry
+			if (-1 == origTag) {	//use free 
 				atomicAdd(&numDecompositions, 1);
-				atomicAdd(&entries[index].numCells, 1);
+				atomicAdd(&entries[index].cluster.numCells, 1);
+				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
+				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
+				entries[index].cluster.id = _data->numberGen.createNewId_kernel();
+				Physics::calcRotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
+				foundMatch = true;
+				break;
+			}
+			if (cell.tag == origTag) {	//matching entry
+				atomicAdd(&entries[index].cluster.numCells, 1);
+				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
+				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
 				foundMatch = true;
 				break;
 			}
 		}
 		if (!foundMatch) {	//no match? use last entry
 			cell.tag = entries[MAX_DECOMPOSITIONS - 1].tag;
-			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].numCells, 1);
+			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.numCells, 1);
+			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.x, cell.absPos.x);
+			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.y, cell.absPos.y);
+			entries[MAX_DECOMPOSITIONS - 1].cluster.decompositionRequired = true;
 		}
 	}
 	__syncthreads();
+
 	int startDecompositionIndex;
 	int endDecompositionIndex;
+	__shared__ ClusterData* newClusters[MAX_DECOMPOSITIONS];
 	calcPartition(numDecompositions, threadIdx.x, blockDim.x, startDecompositionIndex, endDecompositionIndex);
-	for (int decompositionIndex = startDecompositionIndex; decompositionIndex <= endDecompositionIndex; ++decompositionIndex) {
-		ClusterData* newCluster = _data->clustersAC2.getNewElement();
-		CellData* newCells = _data->cellsAC2.getNewSubarray(entries[decompositionIndex].numCells);
-//	todo: fill cluster and cell data
+	for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
+		entries[index].cluster.pos.x /= entries[index].cluster.numCells;
+		entries[index].cluster.pos.y /= entries[index].cluster.numCells;
+		entries[index].cluster.cells = _data->cellsAC2.getNewSubarray(entries[index].cluster.numCells);
+		entries[index].cluster.numCells = 0;
+
+		newClusters[index] = _data->clustersAC2.getNewElement();
+		*newClusters[index] = entries[index].cluster;
 	}
+	__syncthreads();
+
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData& cell = _origCluster->cells[cellIndex];
+		for (int index = 0; index < MAX_DECOMPOSITIONS; ++index) {
+			if (cell.tag == entries[index].tag) {
+				ClusterData* newCluster = newClusters[index];
+				float2 deltaPos = { cell.absPos.x - newCluster->pos.x, cell.absPos.y - newCluster->pos.y };
+				newCluster->angularMass += deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
+
+				int newCellIndex = atomicAdd(&newCluster->numCells, 1);
+				CellData& newCell = newCluster->cells[newCellIndex];
+
+				copyAndUpdateCell(&cell, &newCell, _origCluster, newCluster, entries[index].rotMatrix);
+
+				float(&invRotMatrix)[2][2] = entries[index].rotMatrix;
+				swap(invRotMatrix[0][1], invRotMatrix[1][0]);
+				cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
+				cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
+			}
+		}
+	}
+	__syncthreads();
+
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData& cell = _origCluster->cells[cellIndex];
+		correctCellConnections(cell.nextTimestep);
+	}
+	__syncthreads();
+
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingMovementWithoutDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithoutDecomposition(int startCellIndex, int endCellIndex)
 {
 	__shared__ ClusterData* newCluster;
 	__shared__ CellData* newCells;
@@ -113,24 +170,24 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovementWithoutDe
 
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
-		newCells = _data->cellsAC2.getNewSubarray(_origClusterCopy.numCells);
-		Physics::calcRotationMatrix(_origClusterCopy.angle, rotMatrix);
-		_origClusterCopy.numCells = 0;
-		_origClusterCopy.cells = newCells;
+		newCells = _data->cellsAC2.getNewSubarray(_newCluster.numCells);
+		Physics::calcRotationMatrix(_newCluster.angle, rotMatrix);
+		_newCluster.numCells = 0;
+		_newCluster.cells = newCells;
 	}
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
 
-		int newCellIndex = atomicAdd(&_origClusterCopy.numCells, 1);
+		int newCellIndex = atomicAdd(&_newCluster.numCells, 1);
 		CellData *newCell = &newCells[newCellIndex];
-		copyAndMoveCell(origCell, newCell, _origCluster, newCluster, rotMatrix);
+		copyAndUpdateCell(origCell, newCell, _origCluster, newCluster, rotMatrix);
 	}
 
 	__syncthreads();
 	if (threadIdx.x == 0) {
-		*newCluster = _origClusterCopy;
+		*newCluster = _newCluster;
 	}
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData* newCell = &newCells[cellIndex];
@@ -139,7 +196,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovementWithoutDe
 	__syncthreads();
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingCollision(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster::processingMovement(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
@@ -157,25 +214,24 @@ __inline__ __device__ void BlockProcessorForCluster::processingCollision(int sta
 			entry->collisionPos.y /= numCollisions;
 			entry->normalVec.x /= numCollisions;
 			entry->normalVec.y /= numCollisions;
-			Physics::calcCollision(&_origClusterCopy, entry, _cellMap);
+			Physics::calcCollision(&_newCluster, entry, _cellMap);
 		}
 
-		_origClusterCopy.angle += _origClusterCopy.angularVel;
-		Physics::angleCorrection(_origClusterCopy.angle);
-		_origClusterCopy.pos = add(_origClusterCopy.pos, _origClusterCopy.vel);
-		_cellMap.mapPosCorrection(_origClusterCopy.pos);
+		_newCluster.angle += _newCluster.angularVel;
+		Physics::angleCorrection(_newCluster.angle);
+		_newCluster.pos = add(_newCluster.pos, _newCluster.vel);
+		_cellMap.mapPosCorrection(_newCluster.pos);
 	}
 	__syncthreads();
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingMovement(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster::processingDataCopy(int startCellIndex, int endCellIndex)
 {
 	if (_origCluster->decompositionRequired) {
-//		processingMovementWithDecomposition(startCellIndex, endCellIndex);
-		processingMovementWithoutDecomposition(startCellIndex, endCellIndex);
+		processingDataCopyWithDecomposition(startCellIndex, endCellIndex);
 	}
 	else {
-		processingMovementWithoutDecomposition(startCellIndex, endCellIndex);
+		processingDataCopyWithoutDecomposition(startCellIndex, endCellIndex);
 	}
 }
 
@@ -195,11 +251,23 @@ __inline__ __device__ void BlockProcessorForCluster::processingDecomposition(int
 				if (cell.alive) {
 					for (int i = 0; i < cell.numConnections; ++i) {
 						CellData& otherCell = *cell.connections[i];
-						if (otherCell.tag < cell.tag) {
-							cell.tag = otherCell.tag;
-							changes = true;
+						if (otherCell.alive) {
+							if (otherCell.tag < cell.tag) {
+								cell.tag = otherCell.tag;
+								changes = true;
+							}
+						}
+						else {
+							for (int j = i + 1; j < cell.numConnections; ++j) {
+								cell.connections[j - 1] = cell.connections[j];
+							}
+							--cell.numConnections;
+							--i;
 						}
 					}
+				}
+				else {
+					cell.numConnections = 0;
 				}
 			}
 			__syncthreads();
@@ -217,7 +285,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingRadiation(int sta
 	__syncthreads();
 }
 
-__inline__ __device__  void BlockProcessorForCluster::copyAndMoveCell(CellData *origCell, CellData* newCell
+__inline__ __device__  void BlockProcessorForCluster::copyAndUpdateCell(CellData *origCell, CellData* newCell
 	, ClusterData* origCluster, ClusterData* newCluster, float (&rotMatrix)[2][2])
 {
 	CellData cellCopy = *origCell;
@@ -259,7 +327,7 @@ __inline__ __device__ void BlockProcessorForCluster::createNewParticle(CellData 
 {
 	auto particle = _data->particlesAC2.getNewElement();
 	auto &pos = cell->absPos;
-	particle->id = _data->numberGen.newId_Kernel();
+	particle->id = _data->numberGen.createNewId_kernel();
 	particle->pos = { pos.x + _data->numberGen.random(2.0f) - 1.0f, pos.y + _data->numberGen.random(2.0f) - 1.0f };
 	_cellMap.mapPosCorrection(particle->pos);
 	particle->vel = { (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION
