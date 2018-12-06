@@ -92,6 +92,9 @@
     <ClCompile Include="..\..\source\Tests\DataDescriptionTransferGpuTest.cpp">
       <Filter>Source Files\IntegrationTests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Tests\SimulationGpuTest.cpp">
+      <Filter>Source Files\IntegrationTests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Tests\TestSettings.h">

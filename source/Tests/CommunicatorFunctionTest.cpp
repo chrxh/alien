@@ -100,7 +100,7 @@ TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
 	});
 	_access->updateData(dataInit);
 
-	runSimulation(1, _controller);
+	IntegrationTestHelper::runSimulation(1, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
