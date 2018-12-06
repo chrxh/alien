@@ -62,7 +62,7 @@ namespace
 Cluster::Cluster(QList< Cell* > cells, qreal angle, UnitContext* context)
     : EntityWithTimestamp(context), _angle(angle), _cells(cells)
 {
-	_id = _context->getNumberGenerator()->getTag();
+	_id = _context->getNumberGenerator()->getId();
 	setCenterPosition(calcCenterPosition(_cells));
 	setRelPositionInCluster(_cells, this);
     updateAngularMass();
@@ -253,7 +253,7 @@ void Cluster::processingDissipation (QList< Cluster* >& fragments, QList< Partic
 
             //find fragment
             QList< Cell* > component;
-			quint64 tag = _context->getNumberGenerator()->getTag();
+			quint64 tag = _context->getNumberGenerator()->getId();
             getConnectedComponent(_cells[0], tag, component);
             if( component.size() < size ) {
                 EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
@@ -891,7 +891,7 @@ QList< Cluster* > Cluster::decompose () const
 
         //find fragment
         QList< Cell* > component;
-        quint64 tag(numberGen->getTag());
+        quint64 tag(numberGen->getId());
         getConnectedComponent(_cells[0], tag, component);
 
         //remove fragment from clusters
@@ -1109,7 +1109,7 @@ void Cluster::getConnectedComponent(Cell* cell, QList< Cell* >& component) const
 {
     component.clear();
 	auto tagGen = ServiceLocator::getInstance().getService<TagGenerator>();
-    getConnectedComponent(cell, _context->getNumberGenerator()->getTag(), component);
+    getConnectedComponent(cell, _context->getNumberGenerator()->getId(), component);
 }
 
 void Cluster::getConnectedComponent(Cell* cell, const quint64& tag, QList< Cell* >& component) const

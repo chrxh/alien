@@ -35,20 +35,6 @@ IntegrationTestFramework::~IntegrationTestFramework()
 	delete _numberGen;
 }
 
-void IntegrationTestFramework::runSimulation(int timesteps, SimulationController* controller)
-{
-	QEventLoop pause;
-	int t = 0;
-	controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
-		if (++t == timesteps) {
-			controller->setRun(false);
-			pause.quit();
-		}
-	});
-	controller->setRun(true);
-	pause.exec();
-}
-
 ClusterDescription IntegrationTestFramework::createClusterDescriptionWithCompleteCell(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
 {
 	QByteArray code("123123123");
@@ -80,11 +66,11 @@ ClusterDescription IntegrationTestFramework::createClusterDescription(int numCel
 {
 	ClusterDescription cluster;
 	QVector2D pos(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	cluster.setId(_numberGen->getTag()).setPos(pos).setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)));
+	cluster.setId(_numberGen->getId()).setPos(pos).setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)));
 	for (int j = 0; j < numCells; ++j) {
 		cluster.addCell(
 			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
-			.setMaxConnections(2).setId(_numberGen->getTag()).setCellFeature(CellFeatureDescription())
+			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
 		);
 	}
 	for (int j = 0; j < numCells; ++j) {
@@ -104,7 +90,7 @@ ParticleDescription IntegrationTestFramework::createParticleDescription() const
 {
 	QVector2D pos(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
-	return ParticleDescription().setEnergy(_parameters->cellMinEnergy).setPos(pos).setVel(vel).setId(_numberGen->getTag());
+	return ParticleDescription().setEnergy(_parameters->cellMinEnergy).setPos(pos).setVel(vel).setId(_numberGen->getId());
 }
 
 

@@ -31,7 +31,6 @@ public:
 	~MultithreadingTest();
 
 protected:
-	void runSimulation(int timesteps);
 
 	SimulationControllerCpu* _controller = nullptr;
 	SimulationContextCpuImpl* _context = nullptr;
@@ -64,20 +63,6 @@ MultithreadingTest::~MultithreadingTest()
 	delete _numberGen;
 }
 
-void MultithreadingTest::runSimulation(int timesteps)
-{
-	QEventLoop pause;
-	int t = 0;
-	_controller->connect(_controller, &SimulationController::nextTimestepCalculated, [&]() {
-		if (++t == timesteps) {
-			_controller->setRun(false);
-			pause.quit();
-		}
-	});
-	_controller->setRun(true);
-	pause.exec();
-}
-
 TEST_F(MultithreadingTest, testThreads)
 {
 	QEventLoop pause;
@@ -104,7 +89,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 		.addNewCell(CellChangeDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)));
 	access->updateData(desc);
 
-	runSimulation(300);
+	IntegrationTestHelper::runSimulation(300, _controller);
 
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription data = IntegrationTestHelper::getContent(access, rect);
@@ -132,7 +117,7 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	}
 	access->updateData(desc);
 
-	runSimulation(300);
+	IntegrationTestHelper::runSimulation(300, _controller);
 
 	delete access;
 }

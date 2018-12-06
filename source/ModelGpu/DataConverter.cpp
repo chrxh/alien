@@ -47,7 +47,7 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 	}
 
 	ClusterData& cudaCluster = _cudaData.clusters[_cudaData.numClusters++];
-	cudaCluster.id = clusterDesc.id == 0 ? _numberGen->getTag() : clusterDesc.id;
+	cudaCluster.id = clusterDesc.id == 0 ? _numberGen->getId() : clusterDesc.id;
 	QVector2D clusterPos = clusterDesc.pos ? clusterPos = *clusterDesc.pos : clusterPos = clusterDesc.getClusterPosFromCells();
 	cudaCluster.pos = { clusterPos.x(), clusterPos.y() };
 	cudaCluster.vel = { clusterDesc.vel->x(), clusterDesc.vel->y() };
@@ -75,7 +75,7 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 void DataConverter::addParticle(ParticleDescription const & particleDesc)
 {
 	ParticleData& cudaParticle = _cudaData.particles[_cudaData.numParticles++];
-	cudaParticle.id = cudaParticle.id == 0 ? _numberGen->getTag() : particleDesc.id;
+	cudaParticle.id = cudaParticle.id == 0 ? _numberGen->getId() : particleDesc.id;
 	cudaParticle.pos = { particleDesc.pos->x(), particleDesc.pos->y() };
 	cudaParticle.vel = { particleDesc.vel->x(), particleDesc.vel->y() };
 	cudaParticle.energy = *particleDesc.energy;
@@ -250,7 +250,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	, unordered_map<uint64_t, CellData*>& cellByIds)
 {
 	CellData& cudaCell = _cudaData.cells[_cudaData.numCells++];
-	cudaCell.id = cellDesc.id == 0 ? _numberGen->getTag() : cellDesc.id;
+	cudaCell.id = cellDesc.id == 0 ? _numberGen->getId() : cellDesc.id;
 	cudaCell.cluster = &cudaCluster;
 	cudaCell.absPos = { cellDesc.pos->x(), cellDesc.pos->y() };
 	QVector2D relPos = cellDesc.getPosRelativeTo(cluster);

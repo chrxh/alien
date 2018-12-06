@@ -23,6 +23,20 @@ public:
 		return access->retrieveData();
 	}
 
+	static void runSimulation(int timesteps, SimulationController* controller)
+	{
+		QEventLoop pause;
+		int t = 0;
+		controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
+			if (++t == timesteps) {
+				controller->setRun(false);
+				pause.quit();
+			}
+		});
+		controller->setRun(true);
+		pause.exec();
+	}
+
 	static unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data)
 	{
 		unordered_map<uint64_t, CellDescription> result;
