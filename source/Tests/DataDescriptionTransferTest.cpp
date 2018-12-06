@@ -212,7 +212,7 @@ TEST_F(DataDescriptionTransferTest, testCreateAndDeleteAndModifyWithinSimulation
 	}
 	_access->updateData(dataBefore);
 
-	runSimulation(100, _controller);
+	IntegrationTestHelper::runSimulation(100, _controller);
 
 	DataDescription extract = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x / 2, _universeSize.y / 2 } });
 	DataDescription extractOriginal = extract;
@@ -238,7 +238,7 @@ TEST_F(DataDescriptionTransferTest, testCreateAndDeleteAndModifyWithinSimulation
 	descHelper->reconnect(extract, extractOriginal, cellIdsToModify);
 	_access->updateData(DataChangeDescription(extractOriginal, extract));
 
-	runSimulation(100, _controller);
+	IntegrationTestHelper::runSimulation(100, _controller);
 
 	EXPECT_TRUE(true);
 }

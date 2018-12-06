@@ -18,7 +18,7 @@ public:
 	virtual double getRandomReal() override;
 	virtual QByteArray getRandomArray(int length) override;
 
-	virtual uint64_t getTag() override;
+	virtual uint64_t getId() override;
 
 private:
 	quint32 getNumberFromArray();

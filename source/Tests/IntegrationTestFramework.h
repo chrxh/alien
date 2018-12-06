@@ -14,7 +14,6 @@ public:
 	virtual ~IntegrationTestFramework();
 
 protected:
-	void runSimulation(int timesteps, SimulationController* controller);
 
 	ClusterDescription createClusterDescription(int numCells) const;
 	ClusterDescription createClusterDescriptionWithCompleteCell(uint64_t clusterId = 0, uint64_t cellId = 0) const;

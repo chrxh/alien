@@ -274,6 +274,7 @@
     <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\Tests\MultithreadingTest.cpp" />
     <ClCompile Include="..\..\source\Tests\NumberGeneratorTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\SimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\PhysicsTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp" />

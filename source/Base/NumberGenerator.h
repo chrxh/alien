@@ -19,5 +19,5 @@ public:
 	virtual double getRandomReal() = 0;
 	virtual QByteArray getRandomArray(int length) = 0;
 
-	virtual uint64_t getTag() = 0;
+	virtual uint64_t getId() = 0;
 };
