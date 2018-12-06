@@ -73,9 +73,9 @@ bool CellConnectorTest::clusterConsistsOfFollowingCells(ClusterDescription const
 TEST_F(CellConnectorTest, testMoveOneCellAway)
 {
 	vector<uint64_t> cellIds;
-	cellIds.push_back(_numberGen->getTag());
-	cellIds.push_back(_numberGen->getTag());
-	_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).setPos({ 100.5, 100 }).setAngle(0).setVel({ 0, 0 }).setAngularVel(0.0)
+	cellIds.push_back(_numberGen->getId());
+	cellIds.push_back(_numberGen->getId());
+	_data.addCluster(ClusterDescription().setId(_numberGen->getId()).setPos({ 100.5, 100 }).setAngle(0).setVel({ 0, 0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
@@ -96,10 +96,10 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 3; ++i) {
-		cellIds.push_back(_numberGen->getTag());
+		cellIds.push_back(_numberGen->getId());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200, 101 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(2),
@@ -120,15 +120,15 @@ TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 4; ++i) {
-		cellIds.push_back(_numberGen->getTag());
+		cellIds.push_back(_numberGen->getId());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100.5, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 100.5, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200.5, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200.5, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 100 }).setId(cellIds[2]).setConnectingCells({ cellIds[3] }).setMaxConnections(2),
 			CellDescription().setPos({ 201, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2] }).setMaxConnections(1)
@@ -150,19 +150,19 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
-		cellIds.push_back(_numberGen->getTag());
+		cellIds.push_back(_numberGen->getId());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
@@ -181,19 +181,19 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
-		cellIds.push_back(_numberGen->getTag());
+		cellIds.push_back(_numberGen->getId());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
@@ -222,19 +222,19 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
-		cellIds.push_back(_numberGen->getTag());
+		cellIds.push_back(_numberGen->getId());
 	}
 	_data.addClusters({
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 100, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setMaxConnections(2),
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200, 98.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 98 }).setId(cellIds[1]).setConnectingCells({ cellIds[2] }).setMaxConnections(1),
 			CellDescription().setPos({ 200, 99 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(2)
 		}),
-		ClusterDescription().setId(_numberGen->getTag()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		ClusterDescription().setId(_numberGen->getId()).setPos({ 200, 101.5 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 200, 101 }).setId(cellIds[3]).setConnectingCells({ cellIds[4] }).setMaxConnections(2),
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
@@ -273,9 +273,9 @@ TEST_F(CellConnectorTest, testMoveSeveralCells)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
-		cellIds.push_back(_numberGen->getTag());
+		cellIds.push_back(_numberGen->getId());
 	}
-	_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).setPos({ 102, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+	_data.addCluster(ClusterDescription().setId(_numberGen->getId()).setPos({ 102, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 		.addCells({
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0], cellIds[2] }).setMaxConnections(3),
@@ -316,11 +316,11 @@ TEST_F(CellConnectorTest, testMoveSeveralCellsOverOtherCells)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 20; ++i) {
-		cellIds.push_back(_numberGen->getTag());
+		cellIds.push_back(_numberGen->getId());
 	}
 
 	for (int j = 0; j < 4; ++j) {
-		_data.addCluster(ClusterDescription().setId(_numberGen->getTag()).setPos({ 102 + static_cast<float>(j) * 25, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
+		_data.addCluster(ClusterDescription().setId(_numberGen->getId()).setPos({ 102 + static_cast<float>(j) * 25, 100 }).setAngle(0.0).setVel({ 0.0, 0.0 }).setAngularVel(0.0)
 			.addCells({
 				CellDescription().setPos({ 100 + static_cast<float>(j) * 25, 100 }).setId(cellIds[0 + j * 5]).setMaxConnections(2).setConnectingCells({ cellIds[1 + j * 5] }),
 				CellDescription().setPos({ 101 + static_cast<float>(j) * 25, 100 }).setId(cellIds[1 + j * 5]).setMaxConnections(3).setConnectingCells({ cellIds[0 + j * 5], cellIds[2 + j * 5] }),

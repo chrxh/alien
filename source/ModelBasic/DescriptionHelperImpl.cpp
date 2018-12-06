@@ -51,11 +51,11 @@ void DescriptionHelperImpl::recluster(DataDescription & data, unordered_set<uint
 void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 {
 	if (cluster.id == 0) {
-		cluster.id = _numberGen->getTag();
+		cluster.id = _numberGen->getId();
 		if (cluster.cells) {
 			unordered_map<uint64_t, uint64_t> newByOldIds;
 			for (auto & cell : *cluster.cells) {
-				uint64_t newId = _numberGen->getTag();
+				uint64_t newId = _numberGen->getId();
 				newByOldIds.insert_or_assign(cell.id, newId);
 				cell.id = newId;
 			}
@@ -74,7 +74,7 @@ void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 void DescriptionHelperImpl::makeValid(ParticleDescription & particle)
 {
 	if (particle.id == 0) {
-		particle.id = _numberGen->getTag();
+		particle.id = _numberGen->getId();
 	}
 }
 
@@ -136,7 +136,7 @@ void DescriptionHelperImpl::reclustering(unordered_set<uint64_t> const& clusterI
 		ClusterDescription newCluster;
 		lookUpCell(*remainingCellIds.begin(), newCluster, lookedUpCellIds, remainingCellIds);
 		if (newCluster.cells && !newCluster.cells->empty()) {
-			newCluster.id = _numberGen->getTag();
+			newCluster.id = _numberGen->getId();
 			setClusterAttributes(newCluster);
 			newClusters.push_back(newCluster);
 		}

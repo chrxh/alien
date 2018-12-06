@@ -92,7 +92,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
 	ProcessingResult processingResult{ false, 0 };
 	auto& tokenMem = token->getMemoryRef();
 	int n = tokenMem[Enums::Scanner::INOUT_CELL_NUMBER];
-    quint64 tag(numberGen->getTag());
+    quint64 tag(numberGen->getId());
     Cell* scanCellPre1 = previousCell;
     Cell* scanCellPre2 = previousCell;
     Cell* scanCell = cell;
@@ -112,7 +112,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
         tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::SUCCESS;
 
         //prove whether finished or not
-        tag = numberGen->getTag();
+        tag = numberGen->getId();
         Cell* scanCellPreTemp1 = previousCell;
         Cell* scanCellPreTemp2 = previousCell;
         Cell* scanCellTemp = cell;

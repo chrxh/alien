@@ -22,6 +22,7 @@
 
 #include "tests/Predicates.h"
 
+#include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
 class Benchmark
@@ -58,7 +59,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 	access->init(controller);
 
 	createTestData(access);
-	runSimulation(20, controller);
+	IntegrationTestHelper::runSimulation(20, controller);
 
 	delete access;
 	delete controller;
@@ -74,7 +75,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 	access->init(controller);
 
 	createTestData(access);
-	runSimulation(20, controller);
+	IntegrationTestHelper::runSimulation(20, controller);
 
 	delete access;
 	delete controller;
@@ -90,7 +91,7 @@ TEST_F(Benchmark, benchmarkFourThread)
 	access->init(controller);
 
 	createTestData(access);
-	runSimulation(20, controller);
+	IntegrationTestHelper::runSimulation(20, controller);
 
 	delete access;
 	delete controller;
@@ -106,7 +107,7 @@ TEST_F(Benchmark, benchmarkEightThread)
 	access->init(controller);
 
 	createTestData(access);
-	runSimulation(20, controller);
+	IntegrationTestHelper::runSimulation(20, controller);
 
 	delete access;
 	delete controller;
