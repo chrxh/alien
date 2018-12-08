@@ -59,7 +59,7 @@ DataDescriptionTransferGpuTest::~DataDescriptionTransferGpuTest()
 TEST_F(DataDescriptionTransferGpuTest, testCreateClusterDescriptionWithCompleteCell)
 {
 	DataDescription dataBefore;
-	dataBefore.addCluster(createClusterDescriptionWithCompleteCell());
+	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
 	_access->updateData(dataBefore);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
