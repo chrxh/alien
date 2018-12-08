@@ -6,6 +6,7 @@
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationContext.h"
 #include "ModelCpu/SimulationAccessCpu.h"
 #include "ModelCpu/Cluster.h"
 #include "ModelCpu/Cell.h"
@@ -42,6 +43,8 @@ CommunicatorFunctionTest::CommunicatorFunctionTest()
 
 	_access = facade->buildSimulationAccess();
 	_access->init(_controller);
+
+	_numberGen = context->getNumberGenerator();
 }
 
 TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
@@ -104,7 +107,7 @@ TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
-	unordered_map<uint64_t, CellDescription> cellById = IntegrationTestHelper::getCellById(dataAfter);
+	unordered_map<uint64_t, CellDescription> cellById = IntegrationTestHelper::getCellByCellId(dataAfter);
 
 	QByteArray cellMem1 = cellById.at(cellId1).cellFeature->volatileData;
 	QByteArray cellMem2 = cellById.at(cellId2).cellFeature->volatileData;
