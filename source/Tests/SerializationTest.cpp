@@ -72,6 +72,7 @@ SerializationTest::SerializationTest()
 
 	_serializer->init(controllerBuildFunc, accessBuildFunc);
 	_access->init(_controller);
+	_numberGen = _context->getNumberGenerator();
 }
 
 SerializationTest::~SerializationTest()

@@ -53,14 +53,12 @@ MultithreadingTest::MultithreadingTest()
 	_controller = cpuFacade->buildSimulationController({ _universeSize, symbols, _parameters }, ModelCpuData(_threads, _gridSize));
 	_context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
 	_threadController = static_cast<UnitThreadControllerImpl*>(_context->getUnitThreadController());
-	_numberGen = factory->buildRandomNumberGenerator();
-	_numberGen->init(123123, 0);
+	_numberGen = _context->getNumberGenerator();
 }
 
 MultithreadingTest::~MultithreadingTest()
 {
 	delete _controller;
-	delete _numberGen;
 }
 
 TEST_F(MultithreadingTest, testThreads)

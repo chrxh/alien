@@ -26,13 +26,10 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	_gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	_symbols = _basicFacade->buildDefaultSymbolTable();
 	_parameters = _basicFacade->buildDefaultSimulationParameters();
-	_numberGen = factory->buildRandomNumberGenerator();
-	_numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
 {
-	delete _numberGen;
 }
 
 ClusterDescription IntegrationTestFramework::createClusterDescriptionWithCompleteCell(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
