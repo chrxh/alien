@@ -95,8 +95,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 		origData.addCluster(cluster);
 	}
 
-	_access->updateData(origData);
-
+	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(2, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
