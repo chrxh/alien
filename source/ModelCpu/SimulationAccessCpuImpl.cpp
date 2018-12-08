@@ -113,8 +113,11 @@ void SimulationAccessCpuImpl::callBackClear()
 
 void SimulationAccessCpuImpl::callBackUpdateData()
 {
-	updateClusterData();
-	updateParticleData();
+	if (!_dataToUpdate.empty()) {
+		updateClusterData();
+		updateParticleData();
+		Q_EMIT dataUpdated();
+	}
 }
 
 void SimulationAccessCpuImpl::updateClusterData()
