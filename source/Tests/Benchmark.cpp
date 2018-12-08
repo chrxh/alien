@@ -57,6 +57,8 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 1,1 }));
 	auto access = cpuFacade->buildSimulationAccess();
 	access->init(controller);
+	_numberGen = controller->getContext()->getNumberGenerator();
+
 
 	createTestData(access);
 	IntegrationTestHelper::runSimulation(20, controller);
@@ -73,6 +75,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 12, 6 }));
 	auto access = cpuFacade->buildSimulationAccess();
 	access->init(controller);
+	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
 	IntegrationTestHelper::runSimulation(20, controller);
@@ -89,6 +92,7 @@ TEST_F(Benchmark, benchmarkFourThread)
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(4, { 12, 6 }));
 	auto access = cpuFacade->buildSimulationAccess();
 	access->init(controller);
+	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
 	IntegrationTestHelper::runSimulation(20, controller);
@@ -105,6 +109,7 @@ TEST_F(Benchmark, benchmarkEightThread)
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(8, { 12, 6 }));
 	auto access = cpuFacade->buildSimulationAccess();
 	access->init(controller);
+	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
 	IntegrationTestHelper::runSimulation(20, controller);

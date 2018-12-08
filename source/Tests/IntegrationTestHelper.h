@@ -53,13 +53,26 @@ public:
 		}
 	}
 
-	static unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data)
+	static unordered_map<uint64_t, CellDescription> getCellByCellId(DataDescription const& data)
 	{
 		unordered_map<uint64_t, CellDescription> result;
 		if (data.clusters) {
 			for (ClusterDescription const& cluster : *data.clusters) {
 				for (CellDescription const& cell : *cluster.cells) {
 					result.insert_or_assign(cell.id, cell);
+				}
+			}
+		}
+		return result;
+	}
+
+	static unordered_map<uint64_t, ClusterDescription> getClusterByCellId(DataDescription const& data)
+	{
+		unordered_map<uint64_t, ClusterDescription> result;
+		if (data.clusters) {
+			for (ClusterDescription const& cluster : *data.clusters) {
+				for (CellDescription const& cell : *cluster.cells) {
+					result.insert_or_assign(cell.id, cluster);
 				}
 			}
 		}

@@ -47,6 +47,7 @@ DataDescriptionTransferTest::DataDescriptionTransferTest()
 	_spaceProp = _context->getSpaceProperties();
 	_access = _cpuFacade->buildSimulationAccess();
 	_access->init(_controller);
+	_numberGen = _context->getNumberGenerator();
 }
 
 DataDescriptionTransferTest::~DataDescriptionTransferTest()
