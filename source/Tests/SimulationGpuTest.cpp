@@ -37,7 +37,6 @@ protected:
 	SpaceProperties* _spaceProp = nullptr;
 	SimulationAccessGpu* _access = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
-	NumberGenerator* _numberGen = nullptr;
 };
 
 SimulationGpuTest::SimulationGpuTest()
@@ -65,7 +64,7 @@ SimulationGpuTest::~SimulationGpuTest()
 TEST_F(SimulationGpuTest, testCollisionOfSingleCells_horizontal)
 {
 	DataDescription origData;
-	auto cellEnergy = _parameters->cellMinEnergy * 2;
+	auto cellEnergy = _parameters->cellFunctionConstructorOffspringCellEnergy;
 
 	auto cellId1 = _numberGen->getId();
 	auto cell1 = CellDescription().setId(cellId1).setPos({ 100, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
@@ -111,7 +110,7 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_horizontal)
 TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 {
 	DataDescription origData;
-	auto cellEnergy = _parameters->cellMinEnergy * 2;
+	auto cellEnergy = _parameters->cellFunctionConstructorOffspringCellEnergy;
 
 	auto cellId1 = _numberGen->getId();
 	auto cell1 = CellDescription().setId(cellId1).setPos({ 100, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
@@ -221,4 +220,19 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 			EXPECT_TRUE(isCompatible(cell.pos, origCell.pos));
 		}
 	}
+}
+
+TEST_F(SimulationGpuTest, testCollisionOfLineStructures)
+{
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 110 }, QVector2D{ 0, -0.1f }));
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(150, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_EQ(2, newData.clusters->size());
 }
