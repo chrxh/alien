@@ -32,7 +32,7 @@ IntegrationTestFramework::~IntegrationTestFramework()
 {
 }
 
-ClusterDescription IntegrationTestFramework::createClusterDescriptionWithCompleteCell(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
+ClusterDescription IntegrationTestFramework::createSingleCellClusterWithCompleteData(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
 {
 	QByteArray code("123123123");
 	QByteArray cellMemory(_parameters->cellFunctionComputerCellMemorySize, 0);
@@ -59,14 +59,18 @@ ClusterDescription IntegrationTestFramework::createClusterDescriptionWithComplet
 	).setId(clusterId).setPos({ 1, 2 }).setVel({ -1, 1 }).setAngle(23).setAngularVel(1.2).setMetadata(clusterMetadata);
 }
 
-ClusterDescription IntegrationTestFramework::createClusterDescription(int numCells) const
+ClusterDescription IntegrationTestFramework::createHorizontalCluster(int numCells, optional<QVector2D> const& centerPos,
+	optional<QVector2D> const& centerVel) const
 {
+	QVector2D pos = centerPos ? * centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
+	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+
 	ClusterDescription cluster;
-	QVector2D pos(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	cluster.setId(_numberGen->getId()).setPos(pos).setVel(QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1)));
+	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
 	for (int j = 0; j < numCells; ++j) {
 		cluster.addCell(
-			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
+			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			.setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
 			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
 		);
 	}
@@ -83,7 +87,7 @@ ClusterDescription IntegrationTestFramework::createClusterDescription(int numCel
 	return cluster;
 }
 
-ParticleDescription IntegrationTestFramework::createParticleDescription() const
+ParticleDescription IntegrationTestFramework::createParticle() const
 {
 	QVector2D pos(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));

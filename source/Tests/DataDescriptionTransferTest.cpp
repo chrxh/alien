@@ -59,7 +59,7 @@ DataDescriptionTransferTest::~DataDescriptionTransferTest()
 TEST_F(DataDescriptionTransferTest, testCreateClusterDescriptionWithCompleteCell)
 {
 	DataDescription dataBefore;
-	dataBefore.addCluster(createClusterDescriptionWithCompleteCell());
+	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
 	_access->updateData(dataBefore);
 
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
@@ -86,7 +86,7 @@ TEST_F(DataDescriptionTransferTest, testModifyClusterDescriptionWithCompleteCell
 	_access->updateData(dataInit);
 
 	DataDescription dataBefore;
-	dataBefore.addCluster(createClusterDescriptionWithCompleteCell(clusterId, cellId));
+	dataBefore.addCluster(createSingleCellClusterWithCompleteData(clusterId, cellId));
 	_access->updateData(DataChangeDescription(dataInit, dataBefore));
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
@@ -99,10 +99,10 @@ TEST_F(DataDescriptionTransferTest, testCreateRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		dataBefore.addCluster(createClusterDescription(i));
+		dataBefore.addCluster(createHorizontalCluster(i));
 	}
 	for (int i = 1; i <= 100; ++i) {
-		dataBefore.addParticle(createParticleDescription());
+		dataBefore.addParticle(createParticle());
 	}
 	_access->updateData(dataBefore);
 
@@ -116,10 +116,10 @@ TEST_F(DataDescriptionTransferTest, testCreateAndDeleteRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		dataBefore.addCluster(createClusterDescription(i));
+		dataBefore.addCluster(createHorizontalCluster(i));
 	}
 	for (int i = 1; i <= 100; ++i) {
-		dataBefore.addParticle(createParticleDescription());
+		dataBefore.addParticle(createParticle());
 	}
 	_access->updateData(dataBefore);
 
@@ -151,7 +151,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		dataBefore.addParticle(createParticleDescription());
+		dataBefore.addParticle(createParticle());
 	}
 	_access->updateData(dataBefore);
 
@@ -178,7 +178,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
-		dataBefore.addParticle(createParticleDescription());
+		dataBefore.addParticle(createParticle());
 	}
 	_access->updateData(dataBefore);
 
@@ -209,7 +209,7 @@ TEST_F(DataDescriptionTransferTest, testCreateAndDeleteAndModifyWithinSimulation
 
 	DataDescription dataBefore;
 	for (int i = 1; i <= 10000; ++i) {
-		dataBefore.addParticle(createParticleDescription());
+		dataBefore.addParticle(createParticle());
 	}
 	_access->updateData(dataBefore);
 

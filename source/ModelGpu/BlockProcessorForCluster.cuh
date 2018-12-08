@@ -74,17 +74,18 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 		ClusterData cluster;
 	};
 	__shared__ Entry entries[MAX_DECOMPOSITIONS];
-
-	numDecompositions = 0;
-	for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
-		entries[i].tag = -1;
-		entries[i].cluster.pos = { 0.0f, 0.0f };
-		entries[i].cluster.vel = _modifiedCluster.vel;		//TODO: calculate
-		entries[i].cluster.angle = _modifiedCluster.angle;
-		entries[i].cluster.angularVel = _modifiedCluster.angularVel;		//TODO: calculate
-		entries[i].cluster.angularMass = 0.0f;
-		entries[i].cluster.numCells = 0;
-		entries[i].cluster.decompositionRequired = false;
+	if (0 == threadIdx.x) {
+		numDecompositions = 0;
+		for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
+			entries[i].tag = -1;
+			entries[i].cluster.pos = { 0.0f, 0.0f };
+			entries[i].cluster.vel = _modifiedCluster.vel;		//TODO: calculate
+			entries[i].cluster.angle = _modifiedCluster.angle;
+			entries[i].cluster.angularVel = _modifiedCluster.angularVel;		//TODO: calculate
+			entries[i].cluster.angularMass = 0.0f;
+			entries[i].cluster.numCells = 0;
+			entries[i].cluster.decompositionRequired = false;
+		}
 	}
 	__syncthreads();
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
