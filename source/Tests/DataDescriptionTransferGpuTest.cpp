@@ -47,6 +47,7 @@ DataDescriptionTransferGpuTest::DataDescriptionTransferGpuTest()
 	_spaceProp = _context->getSpaceProperties();
 	_access = _gpuFacade->buildSimulationAccess();
 	_access->init(_controller);
+	_numberGen = _context->getNumberGenerator();
 }
 
 DataDescriptionTransferGpuTest::~DataDescriptionTransferGpuTest()
