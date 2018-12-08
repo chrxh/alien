@@ -63,7 +63,7 @@ TEST_F(ClusterSizeTest, testDistanceToNeighbors)
 {
 	DataDescription data;
 	for (int i = 1; i <= 10000; ++i) {
-		data.addParticle(createParticleDescription());
+		data.addParticle(createParticle());
 	}
 	_access->updateData(data);
 

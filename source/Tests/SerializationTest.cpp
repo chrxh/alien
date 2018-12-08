@@ -106,7 +106,7 @@ TEST_F(SerializationTest, testCheckIds)
 	DataDescription dataBefore;
 	for (int i = 1; i <= 10000; ++i) {
 		QVector2D pos(_numberGen->getRandomReal(0, 599), _numberGen->getRandomReal(0, 299));
-		dataBefore.addParticle(createParticleDescription());
+		dataBefore.addParticle(createParticle());
 	}
 	_access->updateData(dataBefore);
 
