@@ -17,6 +17,7 @@ public:
 	virtual void requireImage(IntRect rect, QImage* target) = 0;
 
 	Q_SIGNAL void dataReadyToRetrieve();
+	Q_SIGNAL void dataUpdated();
 	Q_SIGNAL void imageReady();
 	virtual DataDescription const& retrieveData() = 0;
 };

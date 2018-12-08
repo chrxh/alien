@@ -64,6 +64,7 @@ void SimulationAccessGpuImpl::dataRequiredFromGpu()
 {
 	if (!_dataToUpdate.empty()) {
 		updateDataToGpuModel();
+		Q_EMIT dataUpdated();
 	}
 
 	if (_imageRequired) {
