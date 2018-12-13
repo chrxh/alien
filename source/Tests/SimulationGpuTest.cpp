@@ -150,8 +150,46 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 }
 
 /**
- * Situation: cluster where one cell connecting 4 parts has low energy            
- * Expected result: cluster decomposes into 4 parts
+* Situation:
+*	- vertical center collision of two horizontal cell clusters
+*	- first cluster has no velocity while second cluster moves upward
+* Expected result: first cluster moves upward while second cluster stand stills
+*/
+TEST_F(SimulationGpuTest, testCenterCollisionOfTwoLineStructures)
+{
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 110 }, QVector2D{ 0, -0.1f }));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(150, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_EQ(100, cluster.pos->x());
+		EXPECT_GE(99, cluster.pos->y());
+		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->x()));
+		EXPECT_TRUE(isCompatible(-0.1f, cluster.vel->y()));
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_EQ(100, cluster.pos->x());
+		EXPECT_LE(101, cluster.pos->y());
+		EXPECT_TRUE(isCompatible(QVector2D(0, 0), *cluster.vel));
+	}
+}
+
+/**
+ * Situation: cluster with cross structure where middle cell connecting 4 parts has low energy            
+ * Expected result: cluster decomposes into at least 4 parts
  */
 TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 {
@@ -199,9 +237,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
 
 	auto numClusters = newData.clusters ? newData.clusters->size() : 0;
-	auto numParticles = newData.particles ? newData.particles->size() : 0;
 	ASSERT_LE(4, numClusters);
-	ASSERT_EQ(5, numClusters + numParticles);
 
 	unordered_map<int, vector<ClusterDescription>> clustersBySize;
 	for (ClusterDescription const& cluster : *newData.clusters) {
@@ -220,19 +256,4 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 			EXPECT_TRUE(isCompatible(cell.pos, origCell.pos));
 		}
 	}
-}
-
-TEST_F(SimulationGpuTest, testCollisionOfLineStructures)
-{
-	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 110 }, QVector2D{ 0, -0.1f }));
-
-	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(150, _controller);
-
-	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
-	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
-
-	ASSERT_EQ(2, newData.clusters->size());
 }

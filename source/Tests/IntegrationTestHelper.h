@@ -78,4 +78,15 @@ public:
 		}
 		return result;
 	}
+
+	static unordered_map<uint64_t, ClusterDescription> getClusterByClusterId(DataDescription const& data)
+	{
+		unordered_map<uint64_t, ClusterDescription> result;
+		if (data.clusters) {
+			for (ClusterDescription const& cluster : *data.clusters) {
+				result.insert_or_assign(cluster.id, cluster);
+			}
+		}
+		return result;
+	}
 };
