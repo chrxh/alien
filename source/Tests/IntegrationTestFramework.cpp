@@ -87,6 +87,33 @@ ClusterDescription IntegrationTestFramework::createHorizontalCluster(int numCell
 	return cluster;
 }
 
+ClusterDescription IntegrationTestFramework::createVerticalCluster(int numCells, optional<QVector2D> const & centerPos, optional<QVector2D> const & centerVel) const
+{
+	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
+	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+
+	ClusterDescription cluster;
+	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
+	for (int j = 0; j < numCells; ++j) {
+		cluster.addCell(
+			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			.setPos(pos + QVector2D(0, -static_cast<float>(numCells - 1) / 2.0 + j))
+			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
+		);
+	}
+	for (int j = 0; j < numCells; ++j) {
+		list<uint64_t> connectingCells;
+		if (j > 0) {
+			connectingCells.emplace_back(cluster.cells->at(j - 1).id);
+		}
+		if (j < numCells - 1) {
+			connectingCells.emplace_back(cluster.cells->at(j + 1).id);
+		}
+		cluster.cells->at(j).setConnectingCells(connectingCells);
+	}
+	return cluster;
+}
+
 ParticleDescription IntegrationTestFramework::createParticle() const
 {
 	QVector2D pos(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
