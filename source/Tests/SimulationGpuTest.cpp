@@ -229,7 +229,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 * Situation:
 *	- sidewise collision of two orthogonal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
-* Expected result: both clusters move upwards and rotate counterclockwise
+* Expected result: first clusters move upwards and rotate counterclockwise, second cluster does not move in x axis
 */
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 {
