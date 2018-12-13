@@ -151,11 +151,11 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 
 /**
 * Situation:
-*	- vertical center collision of two horizontal cell clusters
+*	- center collision of two horizontal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: first cluster moves upward while second cluster stand stills
 */
-TEST_F(SimulationGpuTest, testCenterCollisionOfTwoLineStructures)
+TEST_F(SimulationGpuTest, testCenterCollisionOfTwoClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -189,11 +189,11 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoLineStructures)
 
 /**
 * Situation:
-*	- vertical sidewise collision of two horizontal cell clusters
+*	- sidewise collision of two horizontal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: both clusters move upwards and rotate counterclockwise
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoLineStructures)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -222,6 +222,44 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoLineStructures)
 		EXPECT_LE(-NearlyZero, cluster.vel->x());
 		EXPECT_GE(NearlyZero, cluster.vel->y());
 		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+}
+
+/**
+* Situation:
+*	- sidewise collision of two orthogonal cell clusters
+*	- first cluster has no velocity while second cluster moves upward
+* Expected result: both clusters move upwards and rotate counterclockwise
+*/
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
+{
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createVerticalCluster(100, QVector2D{ 148, 160 }, QVector2D{ 0, -0.1f }));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(120, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_GE(NearlyZero, cluster.vel->x());
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->x()));
+		EXPECT_GE(NearlyZero, cluster.vel->y());
+		EXPECT_TRUE(abs(*cluster.angularVel) < 0.01);
 	}
 }
 
