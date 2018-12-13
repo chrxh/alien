@@ -188,6 +188,44 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoLineStructures)
 }
 
 /**
+* Situation:
+*	- vertical sidewise collision of two horizontal cell clusters
+*	- first cluster has no velocity while second cluster moves upward
+* Expected result: both clusters move upwards and rotate counterclockwise
+*/
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoLineStructures)
+{
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 199, 110 }, QVector2D{ 0, -0.1f }));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(120, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_GE(NearlyZero, cluster.vel->x());
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_LE(-NearlyZero, cluster.vel->x());
+		EXPECT_GE(NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+}
+
+/**
  * Situation: cluster with cross structure where middle cell connecting 4 parts has low energy            
  * Expected result: cluster decomposes into at least 4 parts
  */
