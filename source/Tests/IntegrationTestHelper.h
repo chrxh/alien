@@ -2,6 +2,9 @@
 #include <QEventLoop>
 
 #include "ModelBasic/SimulationAccess.h"
+#include "ModelBasic/Physics.h"
+
+#include "IntegrationTestFramework.h"
 
 class IntegrationTestHelper
 {
@@ -88,5 +91,34 @@ public:
 			}
 		}
 		return result;
+	}
+
+	static void checkEnergy(DataDescription const& origData, DataDescription const& newData)
+	{
+		auto energyBefore = 0.0;
+		for (auto const& cluster : *origData.clusters) {
+			energyBefore += IntegrationTestHelper::calcKineticEnergy(cluster);
+		}
+
+		auto energyAfter = 0.0;
+		for (auto const& cluster : *newData.clusters) {
+			energyAfter += IntegrationTestHelper::calcKineticEnergy(cluster);
+		}
+
+		EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
+	}
+
+private:
+
+	static double calcKineticEnergy(ClusterDescription const& cluster)
+	{
+		auto mass = cluster.cells->size();
+		auto vel = *cluster.vel;
+		auto angularMass = 0.0;
+		for (CellDescription const& cell : *cluster.cells) {
+			angularMass += (*cell.pos - *cluster.pos).lengthSquared();
+		}
+		auto angularVel = *cluster.angularVel;
+		return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
 	}
 };
