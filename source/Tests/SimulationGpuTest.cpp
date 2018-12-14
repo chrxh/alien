@@ -185,6 +185,8 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoClusters)
 		EXPECT_LE(101, cluster.pos->y());
 		EXPECT_TRUE(isCompatible(QVector2D(0, 0), *cluster.vel));
 	}
+
+	IntegrationTestHelper::checkEnergy(origData, newData);
 }
 
 /**
@@ -223,13 +225,17 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 		EXPECT_GE(NearlyZero, cluster.vel->y());
 		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
+
+	IntegrationTestHelper::checkEnergy(origData, newData);
 }
 
 /**
 * Situation:
 *	- sidewise collision of two orthogonal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
-* Expected result: first clusters move upwards and rotate counterclockwise, second cluster does not move in x axis
+* Expected result:
+*	- first clusters move upwards and rotate counterclockwise
+*	- second cluster does not move on x axis and does not rotate
 */
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 {
@@ -261,6 +267,8 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 		EXPECT_GE(NearlyZero, cluster.vel->y());
 		EXPECT_TRUE(abs(*cluster.angularVel) < 0.01);
 	}
+
+	IntegrationTestHelper::checkEnergy(origData, newData);
 }
 
 /**
