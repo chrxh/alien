@@ -65,6 +65,13 @@ public:
 		return _map1[mapEntry];
 	}
 
+	__inline__ __host__ __device__ T* getFromNewMap(int2 posInt) const
+	{
+		mapPosCorrection(posInt);
+		auto mapEntry = posInt.x + posInt.y * _size.x;
+		return _map2[mapEntry];
+	}
+
 	__inline__ __host__ __device__ void setToOrigMap(int2 posInt, T* entity)
 	{
 		mapPosCorrection(posInt);
