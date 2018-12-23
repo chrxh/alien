@@ -45,9 +45,8 @@ struct SharedMemory
 class CudaNumberGenerator
 {
 private:
-	int *_currentIndex;
+	unsigned int *_currentIndex;
 	int *_array;
-	int _warpSize;
 	int _size;
 
 	uint64_t *_currentId;
@@ -62,15 +61,12 @@ public:
 		cudaGetDevice(&device);
 		cudaGetDeviceProperties(&prop, device);
 
-		_warpSize = prop.warpSize;
-		cudaMallocManaged(&_currentIndex, sizeof(int)*_warpSize);
+		cudaMallocManaged(&_currentIndex, sizeof(unsigned int));
 		cudaMallocManaged(&_array, sizeof(int)*size);
 		cudaMallocManaged(&_currentId, sizeof(uint64_t));
 		checkCudaErrors(cudaGetLastError());
 
-		for (int i = 0; i < _warpSize; ++i) {
-			_currentIndex[i] = i*_warpSize;
-		}
+		*_currentIndex = 0;
 
 		for (int i = 0; i < size; ++i) {
 			_array[i] = rand();
@@ -80,17 +76,15 @@ public:
 
 	__device__ __inline__ float random(float maxVal)
 	{
-		int &index = _currentIndex[threadIdx.x % _warpSize];
+		int index = atomicInc(_currentIndex, _size);
 		int number = _array[index];
-		index = (index + 1) % _size;
 		return maxVal* static_cast<float>(number) / RAND_MAX;
 	}
 
 	__device__ __inline__ float random()
 	{
-		int &index = _currentIndex[threadIdx.x % _warpSize];
+		int index = atomicInc(_currentIndex, _size);
 		int number = _array[index];
-		index = (index + 1) % _size;
 		return static_cast<float>(number) / RAND_MAX;
 	}
 
