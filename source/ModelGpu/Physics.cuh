@@ -24,7 +24,7 @@ private:
 	__device__ __inline__ static void rotateQuarterCounterClockwise(float2 &v);
 	__device__ __inline__ static float2 calcNormalToCell(CellData *cell, float2 outward);
 	__device__ __inline__ static float2 calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map);
-	__device__ __inline__ static void updateCollisionData(int2 posInt, CellData *cell, Map<CellData> const& cellMap
+	__device__ __inline__ static void updateCollisionData(float2 pos, CellData *cell, Map<CellData> const& cellMap
 		, CollisionData &collisionData);
 	__inline__ __device__ static void angleCorrection(int &angle);
 };
@@ -214,10 +214,10 @@ __device__ __inline__ float2 Physics::calcOutwardVector(CellData* cellA, CellDat
 	return sub(sub(velB, mul(rBPp, angVelB)), sub(velA, mul(rAPp, angVelA)));
 }
 
-__device__ __inline__ void Physics::updateCollisionData(int2 posInt, CellData *cell
+__device__ __inline__ void Physics::updateCollisionData(float2 pos, CellData *cell
 	, Map<CellData> const& cellMap, CollisionData &collisionData)
 {
-	auto mapCell = cellMap.getFromOrigMap(posInt);
+	auto mapCell = cellMap.getFromOrigMap(pos);
 	if (!mapCell) {
 		return;
 	}
@@ -258,32 +258,31 @@ __device__ __inline__ void Physics::getCollisionDataForCell(Map<CellData> const 
 	}
 
 	auto absPos = cell->absPos;
-	int2 posInt = { static_cast<int>(absPos.x) , static_cast<int>(absPos.y) };
-	if (!map.isEntityPresentAtOrigMap(posInt, cell)) {
+	if (!map.isEntityPresentAtOrigMap(absPos, cell)) {
 		return;
 	}
 
-	--posInt.x;
-	--posInt.y;
-	updateCollisionData(posInt, cell, map, collisionData);
-	++posInt.x;
-	updateCollisionData(posInt, cell, map, collisionData);
-	++posInt.x;
-	updateCollisionData(posInt, cell, map, collisionData);
+	--absPos.x;
+	--absPos.y;
+	updateCollisionData(absPos, cell, map, collisionData);
+	++absPos.x;
+	updateCollisionData(absPos, cell, map, collisionData);
+	++absPos.x;
+	updateCollisionData(absPos, cell, map, collisionData);
 
-	++posInt.y;
-	posInt.x -= 2;
-	updateCollisionData(posInt, cell, map, collisionData);
-	posInt.x += 2;
-	updateCollisionData(posInt, cell, map, collisionData);
+	++absPos.y;
+	absPos.x -= 2;
+	updateCollisionData(absPos, cell, map, collisionData);
+	absPos.x += 2;
+	updateCollisionData(absPos, cell, map, collisionData);
 
-	++posInt.y;
-	posInt.x -= 2;
-	updateCollisionData(posInt, cell, map, collisionData);
-	++posInt.x;
-	updateCollisionData(posInt, cell, map, collisionData);
-	++posInt.x;
-	updateCollisionData(posInt, cell, map, collisionData);
+	++absPos.y;
+	absPos.x -= 2;
+	updateCollisionData(absPos, cell, map, collisionData);
+	++absPos.x;
+	updateCollisionData(absPos, cell, map, collisionData);
+	++absPos.x;
+	updateCollisionData(absPos, cell, map, collisionData);
 }
 
 __inline__ __device__ void Physics::calcRotationMatrix(float angle, float(&rotMatrix)[2][2])

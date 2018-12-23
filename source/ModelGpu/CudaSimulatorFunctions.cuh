@@ -45,7 +45,7 @@ __device__ void particleMovement(SimulationDataInternal &data, int particleIndex
 	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
 	__shared__ Map<CellData> map;
 	map.init(data.size, data.cellMap1, data.cellMap2);
-	auto cell = map.getFromNewMap(toInt2(oldParticle->pos));
+	auto cell = map.getFromNewMap(oldParticle->pos);
 	if (cell) {
 //		auto nextCell = cell->nextTimestep;
 		atomicAdd(&cell->energy, oldParticle->energy);
@@ -89,7 +89,7 @@ __device__ void clearCellCluster(SimulationDataInternal const &data, int cluster
 	calcPartition(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		float2 absPos = oldCluster.cells[cellIndex].absPos;
-		map.setToOrigMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, nullptr);
+		map.setToOrigMap(absPos, nullptr);
 	}
 }
 
@@ -99,7 +99,7 @@ __device__ void clearParticle(SimulationDataInternal const &data, int particleIn
 	map.init(data.size, data.particleMap1, data.particleMap2);
 
 	auto const &particle = data.particlesAC1.getEntireArray()[particleIndex];
-	map.setToOrigMap(toInt2(particle.pos), nullptr);
+	map.setToOrigMap(particle.pos, nullptr);
 }
 
 __global__ void clearMaps(SimulationDataInternal data)
