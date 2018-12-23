@@ -185,7 +185,7 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 	for (int index = 0; index < data->cellsAC1.getNumEntries(); ++index) {
 		CellData* cell = data->cellsAC1.at(index);
 		auto& absPos = cell->absPos;
-		map.setToOrigMap({ int(absPos.x), int(absPos.y) }, cell);
+		map.setToOrigMap(absPos, cell);
 	}
 
 }
