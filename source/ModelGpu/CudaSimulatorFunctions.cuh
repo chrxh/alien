@@ -45,10 +45,10 @@ __device__ void particleMovement(SimulationDataInternal &data, int particleIndex
 	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
 	__shared__ Map<CellData> map;
 	map.init(data.size, data.cellMap1, data.cellMap2);
-	auto cell = map.getFromOrigMap(toInt2(oldParticle->pos));
+	auto cell = map.getFromNewMap(toInt2(oldParticle->pos));
 	if (cell) {
-		auto nextCell = cell->nextTimestep;
-		atomicAdd(&nextCell->energy, oldParticle->energy);
+//		auto nextCell = cell->nextTimestep;
+		atomicAdd(&cell->energy, oldParticle->energy);
 		return;
 	}
 	ParticleData *newParticle = data.particlesAC2.getNewElement();

@@ -9,9 +9,6 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 
-//TODO:
-//copyAndUpdateCell: kein origCluster als Übergabe
-//processingMovement: pos += vel am ende
 class BlockProcessorForCluster
 {
 public:
@@ -34,7 +31,7 @@ private:
 		, ClusterData* newCluster, float2 const& clusterPos, float (&rotMatrix)[2][2]);
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
 	__inline__ __device__ void cellRadiation(CellData *cell);
-	__inline__ __device__ void createNewParticle(CellData *cell);
+	__inline__ __device__ ParticleData* createNewParticle();
 
 	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
@@ -231,6 +228,10 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovement(int star
 
 __inline__ __device__ void BlockProcessorForCluster::processingDataCopy(int startCellIndex, int endCellIndex)
 {
+	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive) {
+		__syncthreads();
+		return;
+	}
 	if (_origCluster->decompositionRequired) {
 		processingDataCopyWithDecomposition(startCellIndex, endCellIndex);
 	}
@@ -318,29 +319,36 @@ __inline__ __device__ void BlockProcessorForCluster::correctCellConnections(Cell
 __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cell)
 {
 	if (_data->numberGen.random() < RADIATION_PROB) {
-		createNewParticle(cell);
+		auto particle = createNewParticle();
+		auto &pos = cell->absPos;
+		particle->pos = { pos.x + _data->numberGen.random(2.0f) - 1.0f, pos.y + _data->numberGen.random(2.0f) - 1.0f };
+		_cellMap.mapPosCorrection(particle->pos);
+		particle->vel = { (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION
+			, (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
+		float radiationEnergy = powf(cell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
+		radiationEnergy = radiationEnergy / RADIATION_PROB;
+		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
+		if (radiationEnergy > cell->energy - 1) {
+			radiationEnergy = cell->energy - 1;
+		}
+		particle->energy = radiationEnergy;
+		cell->energy -= radiationEnergy;
 	}
 	if (cell->energy < CELL_MIN_ENERGY) {
 		cell->alive = false;
 		cell->cluster->decompositionRequired = true;
 	}
+	if (1 == cell->cluster->numCells && !cell->alive) {
+		auto particle = createNewParticle();
+		particle->pos = cell->absPos;
+		particle->vel = cell->cluster->vel;
+		particle->energy = cell->energy;
+	}
 }
 
-__inline__ __device__ void BlockProcessorForCluster::createNewParticle(CellData *cell)
+__inline__ __device__ ParticleData* BlockProcessorForCluster::createNewParticle()
 {
 	auto particle = _data->particlesAC2.getNewElement();
-	auto &pos = cell->absPos;
 	particle->id = _data->numberGen.createNewId_kernel();
-	particle->pos = { pos.x + _data->numberGen.random(2.0f) - 1.0f, pos.y + _data->numberGen.random(2.0f) - 1.0f };
-	_cellMap.mapPosCorrection(particle->pos);
-	particle->vel = { (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION
-		, (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
-	float radiationEnergy = powf(cell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
-	radiationEnergy = radiationEnergy / RADIATION_PROB;
-	radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
-	if (radiationEnergy > cell->energy - 1) {
-		radiationEnergy = cell->energy - 1;
-	}
-	particle->energy = radiationEnergy;
-	cell->energy -= radiationEnergy;
+	return particle;
 }
