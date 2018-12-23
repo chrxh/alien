@@ -50,37 +50,42 @@ public:
 		_map2 = map2;
 	}
 
-	__inline__ __host__ __device__ bool isEntityPresentAtOrigMap(int2 posInt, T* entity) const
+	__inline__ __host__ __device__ bool isEntityPresentAtOrigMap(float2 pos, T* entity) const
 	{
+		int2 posInt = { static_cast<int>(pos.x + 0.5f), static_cast<int>(pos.y + 0.5f) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * BasicMap::_size.x;
 		return _map1[mapEntry] == entity;	
 
 	}
 
-	__inline__ __host__ __device__ T* getFromOrigMap(int2 posInt) const
+	__inline__ __host__ __device__ T* getFromOrigMap(float2 pos) const
 	{
+		int2 posInt = { static_cast<int>(pos.x + 0.5f), static_cast<int>(pos.y + 0.5f) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		return _map1[mapEntry];
 	}
 
-	__inline__ __host__ __device__ T* getFromNewMap(int2 posInt) const
+	__inline__ __host__ __device__ T* getFromNewMap(float2 pos) const
 	{
+		int2 posInt = { static_cast<int>(pos.x + 0.5f), static_cast<int>(pos.y + 0.5f) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		return _map2[mapEntry];
 	}
 
-	__inline__ __host__ __device__ void setToOrigMap(int2 posInt, T* entity)
+	__inline__ __host__ __device__ void setToOrigMap(float2 pos, T* entity)
 	{
+		int2 posInt = { static_cast<int>(pos.x + 0.5f), static_cast<int>(pos.y + 0.5f) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		_map1[mapEntry] = entity;
 	}
 
-	__inline__ __host__ __device__ void setToNewMap(int2 posInt, T* entity)
+	__inline__ __host__ __device__ void setToNewMap(float2 pos, T* entity)
 	{
+		int2 posInt = { static_cast<int>(pos.x + 0.5f), static_cast<int>(pos.y + 0.5f) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		_map2[mapEntry] = entity;
