@@ -303,7 +303,7 @@ __inline__ __device__  void BlockProcessorForCluster::copyAndUpdateCell(CellData
 		--cellCopy.protectionCounter;
 	}
 	*newCell = cellCopy;
-	_cellMap.setToNewMap({ static_cast<int>(absPos.x), static_cast<int>(absPos.y) }, newCell);
+	_cellMap.setToNewMap(absPos, newCell);
 
 	origCell->nextTimestep = newCell;
 }
