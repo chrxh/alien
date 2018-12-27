@@ -4,7 +4,7 @@
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
 
-#include "Constants.cuh"
+#include "TechnicalConstants.cuh"
 
 
 #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600

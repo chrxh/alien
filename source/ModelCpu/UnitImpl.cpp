@@ -26,7 +26,7 @@ qreal UnitImpl::calcTransEnergy() const
 	qreal transEnergy(0.0);
 	foreach(Cluster* cluster, _context->getClustersRef()) {
 		if (!cluster->isEmpty()) {
-			transEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), 0.0, 0.0);
+			transEnergy += CudaPhysics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), 0.0, 0.0);
 		}
 	}
 	return transEnergy;
@@ -37,7 +37,7 @@ qreal UnitImpl::calcRotEnergy() const
 	qreal rotEnergy(0.0);
 	foreach(Cluster* cluster, _context->getClustersRef()) {
 		if (cluster->getMass() > 1.0) {
-			rotEnergy += Physics::kineticEnergy(0.0, QVector2D(), cluster->getAngularMass(), cluster->getAngularVel());
+			rotEnergy += CudaPhysics::kineticEnergy(0.0, QVector2D(), cluster->getAngularMass(), cluster->getAngularVel());
 		}
 	}
 	return rotEnergy;

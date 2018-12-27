@@ -4,7 +4,7 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaInterface.cuh"
-#include "Constants.cuh"
+#include "TechnicalConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "BlockProcessorForCluster.cuh"

@@ -2,8 +2,8 @@
 
 #include <cuda_runtime.h>
 
-#include "Constants.cuh"
-
+#include "CudaSimulator.cuh"
+#include "TechnicalConstants.cuh"
 
 struct ParticleData
 {
@@ -22,7 +22,7 @@ struct CellData
 	float2 absPos;
 	float energy;
 	int numConnections;
-	CellData* connections[CELL_MAX_BONDS];
+	CellData* connections[MAX_CELL_BONDS];
 	CellData* nextTimestep;
 
 	int protectionCounter;
@@ -54,24 +54,3 @@ struct SimulationDataForAccess
 	ParticleData* particles;
 };
 
-struct SimulationDataInternal;
-class CudaSimulator
-{
-public:
-	cudaStream_t cudaStream;
-	SimulationDataInternal* data;
-	SimulationDataForAccess access;
-
-	CudaSimulator(int2 const &size);
-	~CudaSimulator();
-
-	void calcNextTimestep();
-	SimulationDataForAccess getDataForAccess();
-	void setDataForAccess(SimulationDataForAccess const& newAccess);
-
-private:
-	void prepareTargetData();
-	void swapData();
-	void correctPointersAfterCellCopy(CellData* cell, int64_t addressShiftCell, int64_t addressShiftCluster);
-	void correctPointersAfterClusterCopy(ClusterData* cluster, int64_t addressShiftCell);
-};

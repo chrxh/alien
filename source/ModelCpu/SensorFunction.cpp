@@ -54,8 +54,8 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
 
             //calc relative angle
             QVector2D dir  = metric->displacement(cell->calcPosition(), otherCluster->getPosition()).normalized();
-            qreal cellOrientationAngle = Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition());
-            qreal relAngle = Physics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
+            qreal cellOrientationAngle = CudaPhysics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition());
+            qreal relAngle = CudaPhysics::angleOfVector(dir) - cellOrientationAngle - cluster->getAngle();
             tokenMem[Enums::Sensor::INOUT_ANGLE] = PhysicalQuantityConverter::convertAngleToData(relAngle);
 
             //calc distance by scanning along beam
@@ -90,8 +90,8 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
     QVector2D dir;
     if( cmd == Enums::SensorIn::SEARCH_BY_ANGLE ) {
         qreal relAngle = PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Sensor::INOUT_ANGLE]);
-        qreal angle = Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition()) + cluster->getAngle() + relAngle;
-        dir = Physics::unitVectorOfAngle(angle);
+        qreal angle = CudaPhysics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition()) + cluster->getAngle() + relAngle;
+        dir = CudaPhysics::unitVectorOfAngle(angle);
     }
     if( cmd == Enums::SensorIn::SEARCH_FROM_CENTER ) {
         dir = cellRelPos.normalized();
