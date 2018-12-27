@@ -8,7 +8,7 @@
 constexpr qreal degToRad = 3.14159265358979/180.0;
 constexpr qreal radToDeg = 180.0/3.14159265358979;
 
-class MODELBASIC_EXPORT Physics
+class MODELBASIC_EXPORT CudaPhysics
 {
 public:
     //Notice: all angles below are in DEG

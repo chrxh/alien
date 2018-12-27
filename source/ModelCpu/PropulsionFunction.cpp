@@ -43,16 +43,16 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     }
 
     //calc old kinetic energy
-    qreal eKinOld(Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel()));
+    qreal eKinOld(CudaPhysics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel()));
 
     //calc old tangential velocity
     QVector2D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector2D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVelocity(), cluster->getAngularVel()));
+    QVector2D tangVel(CudaPhysics::tangentialVelocity(cellRelPos, cluster->getVelocity(), cluster->getAngularVel()));
 
     //calc impulse angle
     QVector2D impulse;
     if( cmd == Enums::PropIn::BY_ANGLE ) {
-        qreal thrustAngle = (Physics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition())+cluster->getAngle()+ angle)*degToRad;
+        qreal thrustAngle = (CudaPhysics::angleOfVector(-cell->getRelPosition() + previousCell->getRelPosition())+cluster->getAngle()+ angle)*degToRad;
         impulse = QVector2D(qSin(thrustAngle), -qCos(thrustAngle))*power;
     }
     if( cmd == Enums::PropIn::FROM_CENTER ) {
@@ -63,7 +63,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     }
 
     QVector2D rAPp = cellRelPos;
-    rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
+    rAPp = CudaPhysics::rotateQuarterCounterClockwise(rAPp);
     if( cmd == Enums::PropIn::ROTATION_CLOCKWISE ) {
         impulse = -rAPp.normalized()*power;
     }
@@ -80,7 +80,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     //calc impact of impulse to cell structure
     QVector2D newVel;
     qreal newAngularVel;
-    Physics::applyImpulse(impulse, cellRelPos, cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
+    CudaPhysics::applyImpulse(impulse, cellRelPos, cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel(), newVel, newAngularVel);
 
     //only for damping: prove if its too much
     if( cmd == Enums::PropIn::DAMP_ROTATION ) {
@@ -97,7 +97,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
 
     //calc new kinetic energy
 	auto parameters = _context->getSimulationParameters();
-    qreal eKinNew(Physics::kineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
+    qreal eKinNew(CudaPhysics::kineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
     qreal energyDiff((eKinNew-eKinOld)/ parameters->cellMass_Reciprocal);
 
     //has token enough energy?
