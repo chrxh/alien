@@ -394,9 +394,11 @@ D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\tuple
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Base.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_launch_parameters.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Constants.cuh
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaInterface.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\TechnicalConstants.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\SimulationConstants.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaDataInterface.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaSimulator.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaSimulatorFunctions.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h

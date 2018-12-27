@@ -5,7 +5,7 @@
 
 #include "CudaInterface.cuh"
 #include "Base.cuh"
-#include "Constants.cuh"
+#include "TechnicalConstants.cuh"
 #include "Map.cuh"
 
 struct CollisionEntry

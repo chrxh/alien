@@ -185,7 +185,7 @@ void Cluster::processingDissipation (QList< Cluster* >& fragments, QList< Partic
 	auto parameters = _context->getSimulationParameters();
 
     //determine energies (the new kinetic energy will be calculated later)
-    qreal oldEnergy = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
+    qreal oldEnergy = CudaPhysics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
     qreal newEnergy = 0.0;
 
     //dissipation
@@ -216,7 +216,7 @@ void Cluster::processingDissipation (QList< Cluster* >& fragments, QList< Partic
 
         //kill cell?
         if( (cell->isToBeKilled() || (cell->getEnergy() < parameters->cellMinEnergy)) ) {
-            qreal kinEnergy = Physics::kineticEnergy(1.0, cell->getVelocity(), 0.0, 0.0);
+            qreal kinEnergy = CudaPhysics::kineticEnergy(1.0, cell->getVelocity(), 0.0, 0.0);
             qreal internalEnergy = cell->getEnergyIncludingTokens();
             EntityFactory* factory = ServiceLocator::getInstance().getService<EntityFactory>();
             qreal energyForParticle = internalEnergy + kinEnergy / parameters->cellMass_Reciprocal;
@@ -273,7 +273,7 @@ void Cluster::processingDissipation (QList< Cluster* >& fragments, QList< Partic
                 updateVel_angularVel_via_cellVelocities();
 
                 //calc energy difference
-                newEnergy += Physics::kineticEnergy(size, _vel, _angularMass, _angularVel);
+                newEnergy += CudaPhysics::kineticEnergy(size, _vel, _angularMass, _angularVel);
                 qreal diffEnergy = oldEnergy-newEnergy;
 
                 //spread energy difference on cells
@@ -289,7 +289,7 @@ void Cluster::processingDissipation (QList< Cluster* >& fragments, QList< Partic
 
         //calc energy difference
         foreach(Cluster* cluster, fragments) {
-            newEnergy += Physics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
+            newEnergy += CudaPhysics::kineticEnergy(cluster->getCellsRef().size(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
         }
         qreal diffEnergy = oldEnergy-newEnergy;
 
@@ -431,10 +431,10 @@ void Cluster::processingMovement ()
             //calc negative velocity at the center position (later used as outerSpace vector)
             QVector2D rAPp = centerPos-_pos;
             metric->correctDisplacement(rAPp);
-            rAPp = Physics::rotateQuarterCounterClockwise(rAPp);
+            rAPp = CudaPhysics::rotateQuarterCounterClockwise(rAPp);
             QVector2D rBPp = centerPos-otherCluster->getPosition();
             metric->correctDisplacement(rBPp);
-            rBPp = Physics::rotateQuarterCounterClockwise(rBPp);
+            rBPp = CudaPhysics::rotateQuarterCounterClockwise(rBPp);
             QVector2D outwardVector = (otherCluster->getVelocity()-rBPp*otherCluster->getAngularVel()*degToRad)-(_vel-rAPp*_angularVel*degToRad);
 
             //calc center normal vector of the overlapping cells from the other cluster
@@ -453,7 +453,7 @@ void Cluster::processingMovement ()
             if( n.length() < Const::AlienPrecision )
                 n.setX(1.0);
 
-            Physics::collision(_vel, otherCluster->getVelocity(),//, clusterPos, otherClusterPos, centerPos,
+            CudaPhysics::collision(_vel, otherCluster->getVelocity(),//, clusterPos, otherClusterPos, centerPos,
                                rAPp, rBPp,
                                _angularVel, otherCluster->getAngularVel(), n,
                                _angularMass, otherCluster->getAngularMass(), mA, mB, vA2, vB2, angularVelA2,
@@ -512,8 +512,8 @@ void Cluster::processingMovement ()
                 //calc old kinetic energy of both clusters
                 qreal mA = _cells.size();
                 qreal mB = otherCluster->getCellsRef().size();
-                qreal eKinOld1 = Physics::kineticEnergy(mA, _vel, _angularMass, _angularVel);
-                qreal eKinOld2 = Physics::kineticEnergy(mB, otherCluster->getVelocity(), otherCluster->getAngularMass(), otherCluster->getAngularVel());
+                qreal eKinOld1 = CudaPhysics::kineticEnergy(mA, _vel, _angularMass, _angularVel);
+                qreal eKinOld2 = CudaPhysics::kineticEnergy(mB, otherCluster->getVelocity(), otherCluster->getAngularMass(), otherCluster->getAngularVel());
 
                 //calculate new center
                 QVector2D center;
@@ -550,7 +550,7 @@ void Cluster::processingMovement ()
                 updateVel_angularVel_via_cellVelocities();
 
                 //calc newkinetic energy of united cluster
-                qreal eKinNew = Physics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
+                qreal eKinNew = CudaPhysics::kineticEnergy(_cells.size(), _vel, _angularMass, _angularVel);
 
                 //spread lost kinetic energy to tokens and internal energy of the fused cells
                 qreal eDiff = (eKinOld1 + eKinOld2 - eKinNew) / (parameters->cellMass_Reciprocal * fusedCells.size());
@@ -775,7 +775,7 @@ void Cluster::updateCellVel (bool forceCheck)
         //calc cell velocities
 		auto parameters = _context->getSimulationParameters();
 		foreach(Cell* cell, _cells) {
-            QVector2D vel = Physics::tangentialVelocity(calcCellDistWithoutTorusCorrection(cell), _vel, _angularVel);
+            QVector2D vel = CudaPhysics::tangentialVelocity(calcCellDistWithoutTorusCorrection(cell), _vel, _angularVel);
             if( cell->getVelocity().isNull() ) {
                 cell->setVelocity(vel);
             }
@@ -854,11 +854,11 @@ void Cluster::updateVel_angularVel_via_cellVelocities ()
         foreach( Cell* cell, _cells ) {
             QVector2D r = calcPosition(cell)-_pos;
             QVector2D v = cell->getVelocity() - _vel;
-            angularMomentum += Physics::angularMomentum(r, v);     //we only need the 3rd component of the 3D cross product
+            angularMomentum += CudaPhysics::angularMomentum(r, v);     //we only need the 3rd component of the 3D cross product
         }
 
         //third step: calc angular velocity via the third component of the angular momentum
-        _angularVel = Physics::angularVelocity(angularMomentum, _angularMass);
+        _angularVel = CudaPhysics::angularVelocity(angularMomentum, _angularMass);
 
     }
     else if( _cells.size() == 1 ) {
@@ -961,14 +961,14 @@ double Cluster::calcLinearKineticEnergy() const
 {
 	double mass = getMass();
 	QVector2D vel = getVelocity();
-	return Physics::linearKineticEnergy(mass, vel);
+	return CudaPhysics::linearKineticEnergy(mass, vel);
 }
 
 double Cluster::calcRotationalKineticEnergy() const
 {
 	double angularMass = getAngularMass();
 	double angularVel = getAngularVel();
-	return Physics::rotationalKineticEnergy(angularMass, angularVel);
+	return CudaPhysics::rotationalKineticEnergy(angularMass, angularVel);
 }
 
 bool Cluster::isEmpty() const

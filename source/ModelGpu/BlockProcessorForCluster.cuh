@@ -4,9 +4,9 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaInterface.cuh"
-#include "Constants.cuh"
+#include "TechnicalConstants.cuh"
 #include "Base.cuh"
-#include "Physics.cuh"
+#include "CudaPhysics.cuh"
 #include "Map.cuh"
 
 class BlockProcessorForCluster
@@ -96,7 +96,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
 				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
 				entries[index].cluster.id = _data->numberGen.createNewId_kernel();
-				Physics::calcRotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
+				CudaPhysics::calcRotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
 				foundMatch = true;
 				break;
 			}
@@ -172,7 +172,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithoutDe
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
 		newCells = _data->cellsAC2.getNewSubarray(_modifiedCluster.numCells);
-		Physics::calcRotationMatrix(_modifiedCluster.angle, rotMatrix);
+		CudaPhysics::calcRotationMatrix(_modifiedCluster.angle, rotMatrix);
 		_modifiedCluster.numCells = 0;
 		_modifiedCluster.cells = newCells;
 	}
@@ -201,7 +201,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovement(int star
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
-		Physics::getCollisionDataForCell(_cellMap, origCell, _collisionData);
+		CudaPhysics::getCollisionDataForCell(_cellMap, origCell, _collisionData);
 	}
 
 	__syncthreads();
@@ -215,11 +215,11 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovement(int star
 			entry->collisionPos.y /= numCollisions;
 			entry->normalVec.x /= numCollisions;
 			entry->normalVec.y /= numCollisions;
-			Physics::calcCollision(&_modifiedCluster, entry, _cellMap);
+			CudaPhysics::calcCollision(&_modifiedCluster, entry, _cellMap);
 		}
 
 		_modifiedCluster.angle += _modifiedCluster.angularVel;
-		Physics::angleCorrection(_modifiedCluster.angle);
+		CudaPhysics::angleCorrection(_modifiedCluster.angle);
 		_modifiedCluster.pos = add(_modifiedCluster.pos, _modifiedCluster.vel);
 		_cellMap.mapPosCorrection(_modifiedCluster.pos);
 	}
@@ -318,15 +318,15 @@ __inline__ __device__ void BlockProcessorForCluster::correctCellConnections(Cell
 
 __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cell)
 {
-	if (_data->numberGen.random() < RADIATION_PROB) {
+	if (_data->numberGen.random() < RadiationProbability) {
 		auto particle = createNewParticle();
 		auto &pos = cell->absPos;
 		particle->pos = { pos.x + _data->numberGen.random(2.0f) - 1.0f, pos.y + _data->numberGen.random(2.0f) - 1.0f };
 		_cellMap.mapPosCorrection(particle->pos);
-		particle->vel = { (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION
-			, (_data->numberGen.random() - 0.5f) * RADIATION_VELOCITY_PERTURBATION };
-		float radiationEnergy = powf(cell->energy, RADIATION_EXPONENT) * RADIATION_FACTOR;
-		radiationEnergy = radiationEnergy / RADIATION_PROB;
+		particle->vel = { (_data->numberGen.random() - 0.5f) * RadiationVelocityPerturbation
+			, (_data->numberGen.random() - 0.5f) * RadiationVelocityPerturbation };
+		float radiationEnergy = powf(cell->energy, RadiationExponent) * RadiationFactor;
+		radiationEnergy = radiationEnergy / RadiationProbability;
 		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
 		if (radiationEnergy > cell->energy - 1) {
 			radiationEnergy = cell->energy - 1;
@@ -334,7 +334,7 @@ __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cel
 		particle->energy = radiationEnergy;
 		cell->energy -= radiationEnergy;
 	}
-	if (cell->energy < CELL_MIN_ENERGY) {
+	if (cell->energy < CellMinEnergy) {
 		cell->alive = false;
 		cell->cluster->decompositionRequired = true;
 	}
