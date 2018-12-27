@@ -5,13 +5,14 @@
 
 #include "CudaInterface.cuh"
 #include "Base.cuh"
-#include "Constants.cuh"
+#include "TechnicalConstants.cuh"
+#include "CudaSimulationParameters.cuh"
 #include "Map.cuh"
 #include "SimulationDataInternal.cuh"
 #include "CollisionData.cuh"
 
 
-class Physics
+class CudaPhysics
 {
 public:
 	__device__ __inline__ static void calcCollision(ClusterData *clusterA, CollisionEntry *collisionEntry, BasicMap const& map);
@@ -33,14 +34,14 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__device__ __inline__ void Physics::rotateQuarterCounterClockwise(float2 &v)
+__device__ __inline__ void CudaPhysics::rotateQuarterCounterClockwise(float2 &v)
 {
 	float temp = v.x;
 	v.x = v.y;
 	v.y = -temp;
 }
 
-__device__ __inline__ float2 Physics::calcNormalToCell(CellData *cell, float2 outward)
+__device__ __inline__ float2 CudaPhysics::calcNormalToCell(CellData *cell, float2 outward)
 {
 	normalize(outward);
 	if (cell->numConnections < 2) {
@@ -98,7 +99,7 @@ __device__ __inline__ float2 Physics::calcNormalToCell(CellData *cell, float2 ou
 	return result;
 }
 
-__device__ __inline__ void Physics::calcCollision(ClusterData *clusterA, CollisionEntry *collisionEntry, BasicMap const& map)
+__device__ __inline__ void CudaPhysics::calcCollision(ClusterData *clusterA, CollisionEntry *collisionEntry, BasicMap const& map)
 {
 	float2 posA = clusterA->pos;
 	float2 velA = clusterA->vel;
@@ -193,7 +194,7 @@ __device__ __inline__ void Physics::calcCollision(ClusterData *clusterA, Collisi
 
 }
 
-__device__ __inline__ float2 Physics::calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map)
+__device__ __inline__ float2 CudaPhysics::calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map)
 {
 	ClusterData* clusterA = cellA->cluster;
 	float2 posA = clusterA->pos;
@@ -214,7 +215,7 @@ __device__ __inline__ float2 Physics::calcOutwardVector(CellData* cellA, CellDat
 	return sub(sub(velB, mul(rBPp, angVelB)), sub(velA, mul(rAPp, angVelA)));
 }
 
-__device__ __inline__ void Physics::updateCollisionData(float2 pos, CellData *cell
+__device__ __inline__ void CudaPhysics::updateCollisionData(float2 pos, CellData *cell
 	, Map<CellData> const& cellMap, CollisionData &collisionData)
 {
 	auto mapCell = cellMap.getFromOrigMap(pos);
@@ -226,7 +227,7 @@ __device__ __inline__ void Physics::updateCollisionData(float2 pos, CellData *ce
 	}
 	ClusterData* mapCluster = mapCell->cluster;
 	if (mapCluster != cell->cluster) {
-		if (cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos) < CELL_MAX_DISTANCE*CELL_MAX_DISTANCE) {
+		if (cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos) < CellMaxDistance*CellMaxDistance) {
 
 			CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
 
@@ -251,7 +252,7 @@ __device__ __inline__ void Physics::updateCollisionData(float2 pos, CellData *ce
 	}
 }
 
-__device__ __inline__ void Physics::getCollisionDataForCell(Map<CellData> const &map, CellData *cell, CollisionData &collisionData)
+__device__ __inline__ void CudaPhysics::getCollisionDataForCell(Map<CellData> const &map, CellData *cell, CollisionData &collisionData)
 {
 	if (cell->protectionCounter > 0) {
 		return;
@@ -285,7 +286,7 @@ __device__ __inline__ void Physics::getCollisionDataForCell(Map<CellData> const 
 	updateCollisionData(absPos, cell, map, collisionData);
 }
 
-__inline__ __device__ void Physics::calcRotationMatrix(float angle, float(&rotMatrix)[2][2])
+__inline__ __device__ void CudaPhysics::calcRotationMatrix(float angle, float(&rotMatrix)[2][2])
 {
 	float sinAngle = __sinf(angle*DEG_TO_RAD);
 	float cosAngle = __cosf(angle*DEG_TO_RAD);
@@ -295,12 +296,12 @@ __inline__ __device__ void Physics::calcRotationMatrix(float angle, float(&rotMa
 	rotMatrix[1][1] = cosAngle;
 }
 
-__inline__ __device__ void Physics::angleCorrection(int &angle)
+__inline__ __device__ void CudaPhysics::angleCorrection(int &angle)
 {
 	angle = ((angle % 360) + 360) % 360;
 }
 
-__inline__ __device__ void Physics::angleCorrection(float &angle)
+__inline__ __device__ void CudaPhysics::angleCorrection(float &angle)
 {
 	int intPart = (int)angle;
 	float fracPart = angle - intPart;

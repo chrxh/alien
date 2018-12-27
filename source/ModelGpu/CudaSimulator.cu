@@ -6,11 +6,11 @@
 #include <functional>
 
 #include "Base.cuh"
-#include "Constants.cuh"
+#include "TechnicalConstants.cuh"
+#include "CudaSimulationParameters.cuh"
 #include "CudaInterface.cuh"
 #include "CudaSimulatorFunctions.cuh"
 
-#include "CudaInterface.cuh"
 #include "SimulationDataInternal.cuh"
 #include "Map.cuh"
 
@@ -19,10 +19,9 @@ namespace
 	class CudaInitializer
 	{
 	public:
-		static CudaInitializer& getInstance()
+		static void init()
 		{
 			static CudaInitializer instance;
-			return instance;
 		}
 		
 		CudaInitializer()
@@ -41,7 +40,9 @@ namespace
 
 CudaSimulator::CudaSimulator(int2 const &size)
 {
-	CudaInitializer::getInstance();
+	CudaInitializer::init();
+
+	setSimulationConstants();
 
 	cudaStreamCreate(&cudaStream);
 	std::cout << "[CUDA] stream created" << std::endl;
@@ -71,9 +72,10 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	cudaMallocManaged(&data->particleMap2, size.x * size.y * sizeof(ParticleData*));
 	checkCudaErrors(cudaGetLastError());
 
-	access.clusters = static_cast<ClusterData*>(malloc(sizeof(ClusterData) * static_cast<int>(MAX_CELLCLUSTERS)));
-	access.cells = static_cast<CellData*>(malloc(sizeof(CellData) * static_cast<int>(MAX_CELLS)));
-	access.particles = static_cast<ParticleData*>(malloc(sizeof(ParticleData) * static_cast<int>(MAX_PARTICLES)));
+	access = new SimulationDataForAccess();
+	access->clusters = static_cast<ClusterData*>(malloc(sizeof(ClusterData) * static_cast<int>(MAX_CELLCLUSTERS)));
+	access->cells = static_cast<CellData*>(malloc(sizeof(CellData) * static_cast<int>(MAX_CELLS)));
+	access->particles = static_cast<ParticleData*>(malloc(sizeof(ParticleData) * static_cast<int>(MAX_PARTICLES)));
 
 	for (int i = 0; i < size.x * size.y; ++i) {
 		data->cellMap1[i] = nullptr;
@@ -102,11 +104,12 @@ CudaSimulator::~CudaSimulator()
 	cudaFree(data->particleMap2);
 	data->numberGen.free();
 
-	free(access.clusters);
-	free(access.cells);
-	free(access.particles);
+	free(access->clusters);
+	free(access->cells);
+	free(access->particles);
 
 	delete data;
+	delete access;
 	std::cout << "[CUDA] stream closed" << std::endl;
 }
 
@@ -129,46 +132,46 @@ void CudaSimulator::calcNextTimestep()
 	swapData();
 }
 
-SimulationDataForAccess CudaSimulator::getDataForAccess()
+SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 {
-	access.numClusters = data->clustersAC1.getNumEntries();
-	cudaMemcpy(access.clusters, data->clustersAC1.getEntireArray(), sizeof(ClusterData) * data->clustersAC1.getNumEntries(), cudaMemcpyDeviceToHost);
+	access->numClusters = data->clustersAC1.getNumEntries();
+	cudaMemcpy(access->clusters, data->clustersAC1.getEntireArray(), sizeof(ClusterData) * data->clustersAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 	checkCudaErrors(cudaGetLastError());
-	access.numCells = data->cellsAC1.getNumEntries();
-	cudaMemcpy(access.cells, data->cellsAC1.getEntireArray(), sizeof(CellData) * data->cellsAC1.getNumEntries(), cudaMemcpyDeviceToHost);
+	access->numCells = data->cellsAC1.getNumEntries();
+	cudaMemcpy(access->cells, data->cellsAC1.getEntireArray(), sizeof(CellData) * data->cellsAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 	checkCudaErrors(cudaGetLastError());
-	access.numParticles = data->particlesAC1.getNumEntries();
-	cudaMemcpy(access.particles, data->particlesAC1.getEntireArray(), sizeof(ParticleData) * data->particlesAC1.getNumEntries(), cudaMemcpyDeviceToHost);
+	access->numParticles = data->particlesAC1.getNumEntries();
+	cudaMemcpy(access->particles, data->particlesAC1.getEntireArray(), sizeof(ParticleData) * data->particlesAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 	checkCudaErrors(cudaGetLastError());
 
-	int64_t addrShiftCell = int64_t(access.cells) - int64_t(data->cellsAC1.getEntireArray());
-	int64_t addrShiftCluster = int64_t(access.clusters) - int64_t(data->clustersAC1.getEntireArray());
-	for (int i = 0; i < access.numClusters; ++i) {
-		correctPointersAfterClusterCopy(&access.clusters[i], addrShiftCell);
+	int64_t addrShiftCell = int64_t(access->cells) - int64_t(data->cellsAC1.getEntireArray());
+	int64_t addrShiftCluster = int64_t(access->clusters) - int64_t(data->clustersAC1.getEntireArray());
+	for (int i = 0; i < access->numClusters; ++i) {
+		correctPointersAfterClusterCopy(&access->clusters[i], addrShiftCell);
 	}
-	for (int i = 0; i < access.numCells; ++i) {
-		correctPointersAfterCellCopy(&access.cells[i], addrShiftCell, addrShiftCluster);
+	for (int i = 0; i < access->numCells; ++i) {
+		correctPointersAfterCellCopy(&access->cells[i], addrShiftCell, addrShiftCluster);
 	}
 
-	return access;
+	return *access;
 }
 
 void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 {
-	access = newAccess;
+	*access = newAccess;
 
-	data->clustersAC1.setNumEntries(access.numClusters);
-	cudaMemcpy(data->clustersAC1.getEntireArray(), access.clusters, sizeof(ClusterData) * data->clustersAC1.getNumEntries(), cudaMemcpyHostToDevice);
+	data->clustersAC1.setNumEntries(access->numClusters);
+	cudaMemcpy(data->clustersAC1.getEntireArray(), access->clusters, sizeof(ClusterData) * data->clustersAC1.getNumEntries(), cudaMemcpyHostToDevice);
 	checkCudaErrors(cudaGetLastError());
-	data->cellsAC1.setNumEntries(access.numCells);
-	cudaMemcpy(data->cellsAC1.getEntireArray(), access.cells, sizeof(CellData) * data->cellsAC1.getNumEntries(), cudaMemcpyHostToDevice);
+	data->cellsAC1.setNumEntries(access->numCells);
+	cudaMemcpy(data->cellsAC1.getEntireArray(), access->cells, sizeof(CellData) * data->cellsAC1.getNumEntries(), cudaMemcpyHostToDevice);
 	checkCudaErrors(cudaGetLastError());
-	data->particlesAC1.setNumEntries(access.numParticles);
-	cudaMemcpy(data->particlesAC1.getEntireArray(), access.particles, sizeof(ParticleData) * data->particlesAC1.getNumEntries(), cudaMemcpyHostToDevice);
+	data->particlesAC1.setNumEntries(access->numParticles);
+	cudaMemcpy(data->particlesAC1.getEntireArray(), access->particles, sizeof(ParticleData) * data->particlesAC1.getNumEntries(), cudaMemcpyHostToDevice);
 	checkCudaErrors(cudaGetLastError());
 
-	int64_t addrShiftCell = int64_t(data->cellsAC1.getEntireArray()) - int64_t(access.cells);
-	int64_t addrShiftCluster = int64_t(data->clustersAC1.getEntireArray()) - int64_t(access.clusters);
+	int64_t addrShiftCell = int64_t(data->cellsAC1.getEntireArray()) - int64_t(access->cells);
+	int64_t addrShiftCluster = int64_t(data->clustersAC1.getEntireArray()) - int64_t(access->clusters);
 	for (int i = 0; i < data->clustersAC1.getNumEntries(); ++i) {
 		correctPointersAfterClusterCopy(data->clustersAC1.at(i), addrShiftCell);
 	}
@@ -220,3 +223,6 @@ void CudaSimulator::correctPointersAfterClusterCopy(ClusterData* cluster, int64_
 	cluster->cells = (CellData*)(int64_t(cluster->cells) + addressShiftCell);
 }
 
+void CudaSimulator::setSimulationConstants()
+{
+}
