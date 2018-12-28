@@ -42,7 +42,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 {
 	CudaInitializer::init();
 
-	setSimulationConstants();
+	setCudaSimulationParameters();
 
 	cudaStreamCreate(&cudaStream);
 	std::cout << "[CUDA] stream created" << std::endl;
@@ -223,6 +223,17 @@ void CudaSimulator::correctPointersAfterClusterCopy(ClusterData* cluster, int64_
 	cluster->cells = (CellData*)(int64_t(cluster->cells) + addressShiftCell);
 }
 
-void CudaSimulator::setSimulationConstants()
+void CudaSimulator::setCudaSimulationParameters()
 {
+	CudaSimulationParameters parametersToCopy;
+
+	parametersToCopy.cellMaxDistance = 1.3f;
+	parametersToCopy.cellMinEnergy = 50.0f;
+	parametersToCopy.radiationProbability = 0.2f;
+	parametersToCopy.radiationExponent = 1.0f;
+	parametersToCopy.radiationFactor = 0.0002f;
+	parametersToCopy.radiationVelocityPerturbation = 0.5f;
+
+	cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters) , 0, cudaMemcpyHostToDevice);
+	checkCudaErrors(cudaGetLastError());
 }

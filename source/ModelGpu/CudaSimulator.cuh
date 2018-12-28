@@ -24,5 +24,5 @@ private:
 	void swapData();
 	void correctPointersAfterCellCopy(CellData* cell, int64_t addressShiftCell, int64_t addressShiftCluster);
 	void correctPointersAfterClusterCopy(ClusterData* cluster, int64_t addressShiftCell);
-	void setSimulationConstants();
+	void setCudaSimulationParameters();
 };
