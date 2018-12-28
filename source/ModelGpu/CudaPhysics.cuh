@@ -227,7 +227,7 @@ __device__ __inline__ void CudaPhysics::updateCollisionData(float2 pos, CellData
 	}
 	ClusterData* mapCluster = mapCell->cluster;
 	if (mapCluster != cell->cluster) {
-		if (cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos) < CellMaxDistance*CellMaxDistance) {
+		if (cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos) < cudaSimulationParameters.cellMaxDistance*cudaSimulationParameters.cellMaxDistance) {
 
 			CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
 

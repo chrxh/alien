@@ -318,15 +318,15 @@ __inline__ __device__ void BlockProcessorForCluster::correctCellConnections(Cell
 
 __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cell)
 {
-	if (_data->numberGen.random() < RadiationProbability) {
+	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
 		auto particle = createNewParticle();
 		auto &pos = cell->absPos;
 		particle->pos = { pos.x + _data->numberGen.random(2.0f) - 1.0f, pos.y + _data->numberGen.random(2.0f) - 1.0f };
 		_cellMap.mapPosCorrection(particle->pos);
-		particle->vel = { (_data->numberGen.random() - 0.5f) * RadiationVelocityPerturbation
-			, (_data->numberGen.random() - 0.5f) * RadiationVelocityPerturbation };
-		float radiationEnergy = powf(cell->energy, RadiationExponent) * RadiationFactor;
-		radiationEnergy = radiationEnergy / RadiationProbability;
+		particle->vel = { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation
+			, (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
+		float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
+		radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
 		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
 		if (radiationEnergy > cell->energy - 1) {
 			radiationEnergy = cell->energy - 1;
@@ -334,7 +334,7 @@ __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cel
 		particle->energy = radiationEnergy;
 		cell->energy -= radiationEnergy;
 	}
-	if (cell->energy < CellMinEnergy) {
+	if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
 		cell->alive = false;
 		cell->cluster->decompositionRequired = true;
 	}
