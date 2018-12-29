@@ -3,6 +3,7 @@
 struct CudaSimulationParameters
 {
 	float cellMaxDistance;
+	float cellMinDistance;
 	float cellMinEnergy;
 	float radiationProbability;
 	float radiationExponent;
