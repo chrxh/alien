@@ -34,6 +34,12 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+
+//math constants
+#define PI 3.1415926535897932384626433832795
+#define DEG_TO_RAD PI/180.0
+#define RAD_TO_DEG 180.0/PI
+
 __device__ __inline__ void CudaPhysics::rotateQuarterCounterClockwise(float2 &v)
 {
 	float temp = v.x;
@@ -218,38 +224,41 @@ __device__ __inline__ float2 CudaPhysics::calcOutwardVector(CellData* cellA, Cel
 __device__ __inline__ void CudaPhysics::updateCollisionData(float2 pos, CellData *cell
 	, Map<CellData> const& cellMap, CollisionData &collisionData)
 {
-	auto mapCell = cellMap.getFromOrigMap(pos);
+	CellData* mapCell = cellMap.getFromOrigMap(pos);
 	if (!mapCell) {
+		return;
+	}
+	ClusterData* mapCluster = mapCell->cluster;
+	if (mapCluster == cell->cluster) {
 		return;
 	}
 	if (mapCell->protectionCounter > 0) {
 		return;
 	}
-	ClusterData* mapCluster = mapCell->cluster;
-	if (mapCluster != cell->cluster) {
-		if (cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos) < cudaSimulationParameters.cellMaxDistance*cudaSimulationParameters.cellMaxDistance) {
-
-			CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
-
-			atomicAdd(&entry->numCollisions, 2);
-			atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
-			atomicAdd(&entry->collisionPos.y, mapCell->absPos.y);
-			atomicAdd(&entry->collisionPos.x, cell->absPos.x);
-			atomicAdd(&entry->collisionPos.y, cell->absPos.y);
-
-			float2 outward = calcOutwardVector(cell, mapCell, cellMap);
-			float2 n = calcNormalToCell(mapCell, outward);
-			atomicAdd(&entry->normalVec.x, n.x);
-			atomicAdd(&entry->normalVec.y, n.y);
-
-			outward = calcOutwardVector(mapCell, cell, cellMap);
-			n = minus(calcNormalToCell(cell, outward));
-			atomicAdd(&entry->normalVec.x, n.x);
-			atomicAdd(&entry->normalVec.y, n.y);
-
-			cell->protectionCounter = PROTECTION_TIMESTEPS;
-		}
+	auto distanceSquared = cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos);
+	if (distanceSquared > cudaSimulationParameters.cellMaxDistance * cudaSimulationParameters.cellMaxDistance) {
+		return;
 	}
+
+	CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
+
+	atomicAdd(&entry->numCollisions, 2);
+	atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
+	atomicAdd(&entry->collisionPos.y, mapCell->absPos.y);
+	atomicAdd(&entry->collisionPos.x, cell->absPos.x);
+	atomicAdd(&entry->collisionPos.y, cell->absPos.y);
+
+	float2 outward = calcOutwardVector(cell, mapCell, cellMap);
+	float2 n = calcNormalToCell(mapCell, outward);
+	atomicAdd(&entry->normalVec.x, n.x);
+	atomicAdd(&entry->normalVec.y, n.y);
+
+	outward = calcOutwardVector(mapCell, cell, cellMap);
+	n = minus(calcNormalToCell(cell, outward));
+	atomicAdd(&entry->normalVec.x, n.x);
+	atomicAdd(&entry->normalVec.y, n.y);
+
+	cell->protectionCounter = PROTECTION_TIMESTEPS;
 }
 
 __device__ __inline__ void CudaPhysics::getCollisionDataForCell(Map<CellData> const &map, CellData *cell, CollisionData &collisionData)

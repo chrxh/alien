@@ -32,6 +32,8 @@ private:
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
 	__inline__ __device__ void cellRadiation(CellData *cell);
 	__inline__ __device__ ParticleData* createNewParticle();
+	__inline__ __device__ void killCloseCells(Map<CellData> const &map, CellData *cell);
+	__inline__ __device__ void killCloseCell(float2 const& pos, Map<CellData> const &map, CellData *cell);
 
 	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
@@ -202,6 +204,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovement(int star
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
 		CudaPhysics::getCollisionDataForCell(_cellMap, origCell, _collisionData);
+		killCloseCells(_cellMap, origCell);
 	}
 
 	__syncthreads();
@@ -351,4 +354,56 @@ __inline__ __device__ ParticleData* BlockProcessorForCluster::createNewParticle(
 	auto particle = _data->particlesAC2.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
 	return particle;
+}
+
+__inline__ __device__ void BlockProcessorForCluster::killCloseCells(Map<CellData> const & map, CellData * cell)
+{
+	if (cell->protectionCounter > 0) {
+		return;
+	}
+
+	float2 absPos = cell->absPos;
+	--absPos.x;
+	--absPos.y;
+	killCloseCell(absPos, map, cell);
+	++absPos.x;
+	killCloseCell(absPos, map, cell);
+	++absPos.x;
+	killCloseCell(absPos, map, cell);
+
+	++absPos.y;
+	absPos.x -= 2;
+	killCloseCell(absPos, map, cell);
+	absPos.x += 2;
+	killCloseCell(absPos, map, cell);
+
+	++absPos.y;
+	absPos.x -= 2;
+	killCloseCell(absPos, map, cell);
+	++absPos.x;
+	killCloseCell(absPos, map, cell);
+	++absPos.x;
+	killCloseCell(absPos, map, cell);
+}
+
+__inline__ __device__ void BlockProcessorForCluster::killCloseCell(float2 const & pos, Map<CellData> const & map, CellData * cell)
+{
+	CellData* mapCell = map.getFromOrigMap(pos);
+	if (!mapCell || mapCell == cell) {
+		return;
+	}
+
+	ClusterData* mapCluster = mapCell->cluster;
+	auto distanceSquared = map.mapDistanceSquared(cell->absPos, mapCell->absPos);
+	if (distanceSquared < cudaSimulationParameters.cellMinDistance * cudaSimulationParameters.cellMinDistance) {
+		ClusterData* cluster = cell->cluster;
+		if (mapCluster->numCells < cluster->numCells) {
+			mapCell->alive = false;
+			mapCluster->decompositionRequired = true;
+		}
+		else {
+			cell->alive = false;
+			cluster->decompositionRequired = true;
+		}
+	}
 }
