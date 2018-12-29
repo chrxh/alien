@@ -1,12 +1,7 @@
 #pragma once
 
-//math constants
-#define PI 3.1415926535897932384626433832795
-#define DEG_TO_RAD PI/180.0
-#define RAD_TO_DEG 180.0/PI
-
 //technical constants
-#define PROTECTION_TIMESTEPS 60
+#define PROTECTION_TIMESTEPS 14
 #define NUM_THREADS_PER_BLOCK 32
 #define NUM_BLOCKS 128
 #define MAX_CELLCLUSTERS 10000
