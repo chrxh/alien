@@ -72,9 +72,6 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulatorFunctions.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\TechnicalConstants.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulator.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
@@ -85,6 +82,12 @@
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
+      <Filter>Source Files\Impl\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForParticles.cuh">
       <Filter>Source Files\Impl\CUDA</Filter>
     </ClInclude>
   </ItemGroup>

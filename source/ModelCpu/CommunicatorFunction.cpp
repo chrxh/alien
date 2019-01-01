@@ -115,7 +115,7 @@ bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess (const Mess
             QVector2D displacementOfObjectFromSender = calcDisplacementOfObjectFromSender(messageDataToSend, senderCell, senderPreviousCell);
             SpaceProperties* spaceProp = _context->getSpaceProperties();
             QVector2D displacementOfObjectFromReceiver = spaceProp->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
-            qreal angleSeenFromReceiver = CudaPhysics::angleOfVector(displacementOfObjectFromReceiver);
+            qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
             communicator->_receivedMessage.angle = PhysicalQuantityConverter::convertAngleToData(angleSeenFromReceiver);
             communicator->_receivedMessage.distance = PhysicalQuantityConverter::convertURealToData(distanceSeenFromReceiver);
@@ -132,7 +132,7 @@ QVector2D CommunicatorFunction::calcDisplacementOfObjectFromSender (const Messag
 {
     QVector2D displacementFromSender = senderPreviousCell->calcPosition() - senderCell->calcPosition();
     displacementFromSender.normalize();
-    displacementFromSender = CudaPhysics::rotateClockwise(displacementFromSender, PhysicalQuantityConverter::convertDataToAngle(messageDataToSend.angle));
+    displacementFromSender = Physics::rotateClockwise(displacementFromSender, PhysicalQuantityConverter::convertDataToAngle(messageDataToSend.angle));
     displacementFromSender = displacementFromSender * PhysicalQuantityConverter::convertDataToUReal(messageDataToSend.distance);
     return displacementFromSender;
 }
@@ -158,8 +158,8 @@ void CommunicatorFunction::calcReceivedMessageAngle (Cell* receiverCell,
                                                               Cell* receiverPreviousCell)
 {
     QVector2D displacement = receiverPreviousCell->calcPosition() - receiverCell->calcPosition();
-    qreal localAngle = CudaPhysics::angleOfVector(displacement);
+    qreal localAngle = Physics::angleOfVector(displacement);
     qreal messageAngle = PhysicalQuantityConverter::convertDataToAngle(_receivedMessage.angle);
-    qreal relAngle = CudaPhysics::subtractAngle(messageAngle, localAngle);
+    qreal relAngle = Physics::subtractAngle(messageAngle, localAngle);
     _receivedMessage.angle = PhysicalQuantityConverter::convertAngleToData(relAngle);
 }

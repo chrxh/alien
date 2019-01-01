@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 
 #include "CudaSimulator.cuh"
-#include "TechnicalConstants.cuh"
+#include "CudaConstants.cuh"
 
 struct ParticleData
 {

@@ -4,15 +4,19 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaInterface.cuh"
-#include "TechnicalConstants.cuh"
+#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "BlockProcessorForCluster.cuh"
+#include "BlockProcessorForParticles.cuh"
 
 __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 {
 	__shared__ BlockProcessorForCluster blockProcessor;
-	blockProcessor.init(data, clusterIndex);
+	if (0 == threadIdx.x) {
+		blockProcessor.init(data, clusterIndex);
+	}
+	__syncthreads();
 
 	int startCellIndex;
 	int endCellIndex;
@@ -42,12 +46,31 @@ __global__ void clusterMovement(SimulationDataInternal data)
 
 __device__ void particleMovement(SimulationDataInternal &data, int particleIndex)
 {
+/*
+	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
+	__shared__ Map<CellData> cellMap;
+	__shared__ Map<ParticleData> particleMap;
+	if (0 == threadIdx.x) {
+		cellMap.init(data.size, data.cellMap1, data.cellMap2);
+		particleMap.init(data.size, data.particleMap1, data.particleMap2);
+	}
+	__syncthreads();
+	if(auto cell = cellMap.getFromNewMap(oldParticle->pos)) {
+		atomicAdd(&cell->energy, oldParticle->energy);
+		return;
+	}
+	ParticleData *newParticle = data.particlesAC2.getNewElement();
+	*newParticle = *oldParticle;
+	newParticle->pos = add(newParticle->pos, newParticle->vel);
+	particleMap.mapPosCorrection(newParticle->pos);
+	particleMap.setToNewMap(newParticle->pos, newParticle);
+*/
 	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
 	__shared__ Map<CellData> map;
 	map.init(data.size, data.cellMap1, data.cellMap2);
 	auto cell = map.getFromNewMap(oldParticle->pos);
 	if (cell) {
-//		auto nextCell = cell->nextTimestep;
+		//		auto nextCell = cell->nextTimestep;
 		atomicAdd(&cell->energy, oldParticle->energy);
 		return;
 	}
@@ -59,6 +82,20 @@ __device__ void particleMovement(SimulationDataInternal &data, int particleIndex
 
 __global__ void particleMovement(SimulationDataInternal data)
 {
+	__shared__ BlockProcessorForParticles blockProcessor;
+	if (0 == threadIdx.x) {
+		blockProcessor.init(data);
+	}
+	__syncthreads();
+
+	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
+	int numEntities = data.particlesAC1.getNumEntries();
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
+	blockProcessor.processingMovement(startIndex, endIndex);
+/*
 	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
 	int numEntities = data.particlesAC1.getNumEntries();
 	if (indexResource >= numEntities) {
@@ -70,6 +107,7 @@ __global__ void particleMovement(SimulationDataInternal data)
 	for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
 		particleMovement(data, particleIndex);
 	}
+*/
 }
 
 __device__ void clearCellCluster(SimulationDataInternal const &data, int clusterIndex)

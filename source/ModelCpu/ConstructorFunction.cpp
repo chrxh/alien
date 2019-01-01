@@ -274,10 +274,10 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 cell->newConnection(constructionCell);
 
                 //estimate expended energy for new cell
-                qreal kinEnergyOld = CudaPhysics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
+                qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithoutUpdate();
-                qreal angularVelNew = CudaPhysics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
-                qreal kinEnergyNew = CudaPhysics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), angularMassNew, angularVelNew);
+                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //not enough energy?
@@ -343,10 +343,10 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 QVector2D pos = cluster->relToAbsPos(cell->getRelPosition() + transOld + transFinish);
 
                 //estimate expended energy for new cell
-                qreal kinEnergyOld = CudaPhysics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
+                qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
-                qreal angularVelNew = CudaPhysics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
-                qreal kinEnergyNew = CudaPhysics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
+                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //energy for possible new token
@@ -523,7 +523,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 for(int i = 0; i < numCon; ++i) {
                     QVector2D displacement = cluster->calcPosition(cell->getConnection(i),true)-cluster->calcPosition(cell, true);
                     metric->correctDisplacement(displacement);
-                    angles[i] = CudaPhysics::angleOfVector(displacement);
+                    angles[i] = Physics::angleOfVector(displacement);
                 }
                 qSort(angles);
                 qreal largestAnglesDiff = 0.0;
@@ -544,7 +544,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 angleGap = angleGap + PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
                 //calc coordinates for new cell from angle gap and construct cell
-                QVector2D angleGapPos = CudaPhysics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringCellDistance;
+                QVector2D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters->cellFunctionConstructorOffspringCellDistance;
                 QVector2D pos = cluster->calcPosition(cell)+angleGapPos;
                 if( (opt == Enums::ConstrInOption::FINISH_WITH_SEP)
                         || (opt == Enums::ConstrInOption::FINISH_WITH_SEP_RED)
@@ -553,10 +553,10 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 
 
                 //estimate expended energy for new cell
-                qreal kinEnergyOld = CudaPhysics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
+                qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
-                qreal angularVelNew = CudaPhysics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
-                qreal kinEnergyNew = CudaPhysics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
+                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
                 //energy for possible new token
