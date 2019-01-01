@@ -93,12 +93,12 @@ void Manipulator::dataReadyToRetrieve()
 							QVector2D newVel;
 							double newAngularVel = 0.0;
 							if (_mode == Mode::ApplyForce) {
-								CudaPhysics::applyImpulse(_applyForce * ForceSensitivity, relPos, mass, *cluster.vel, angularMass, *cluster.angularVel, newVel, newAngularVel);
+								Physics::applyImpulse(_applyForce * ForceSensitivity, relPos, mass, *cluster.vel, angularMass, *cluster.angularVel, newVel, newAngularVel);
 								cluster.vel = newVel;
 								cluster.angularVel = newAngularVel;
 							}
 							if (_mode == Mode::ApplyRotation) {
-								CudaPhysics::applyImpulse(_applyForce * RotationSensitivity, relPos, mass, *cluster.vel, angularMass, *cluster.angularVel, newVel, newAngularVel);
+								Physics::applyImpulse(_applyForce * RotationSensitivity, relPos, mass, *cluster.vel, angularMass, *cluster.angularVel, newVel, newAngularVel);
 								cluster.angularVel = newAngularVel;
 							}
 						}

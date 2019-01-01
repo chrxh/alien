@@ -4,7 +4,7 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaInterface.cuh"
-#include "TechnicalConstants.cuh"
+#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "CudaPhysics.cuh"
 #include "Map.cuh"
@@ -49,14 +49,11 @@ private:
 /************************************************************************/
 __inline__ __device__ void BlockProcessorForCluster::init(SimulationDataInternal& data, int clusterIndex)
 {
-	if (0 == threadIdx.x) {
-		_data = &data;
-		_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
-		_modifiedCluster = *_origCluster;
-		_collisionData.init();
-		_cellMap.init(data.size, data.cellMap1, data.cellMap2);
-	}
-	__syncthreads();
+	_data = &data;
+	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+	_modifiedCluster = *_origCluster;
+	_collisionData.init();
+	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 }
 
 __inline__ __device__ int BlockProcessorForCluster::getNumOrigCells() const
@@ -324,7 +321,7 @@ __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cel
 	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
 		auto particle = createNewParticle();
 		auto &pos = cell->absPos;
-		particle->pos = { pos.x + _data->numberGen.random(2.0f) - 1.0f, pos.y + _data->numberGen.random(2.0f) - 1.0f };
+		particle->pos = { static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f, static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f };
 		_cellMap.mapPosCorrection(particle->pos);
 		particle->vel = { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation
 			, (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
@@ -397,13 +394,9 @@ __inline__ __device__ void BlockProcessorForCluster::killCloseCell(float2 const 
 	auto distanceSquared = map.mapDistanceSquared(cell->absPos, mapCell->absPos);
 	if (distanceSquared < cudaSimulationParameters.cellMinDistance * cudaSimulationParameters.cellMinDistance) {
 		ClusterData* cluster = cell->cluster;
-		if (mapCluster->numCells < cluster->numCells) {
-			mapCell->alive = false;
-			mapCluster->decompositionRequired = true;
-		}
-		else {
+		if (mapCluster->numCells >= cluster->numCells) {
 			cell->alive = false;
-			cluster->decompositionRequired = true;
+			_modifiedCluster.decompositionRequired = true;
 		}
 	}
 }
