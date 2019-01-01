@@ -4,7 +4,7 @@
 #include <QMatrix4x4>
 
 //calculate collision of two moving and rotating rigid bodies
-void CudaPhysics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp,
+void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp,
                          /*QVector2D posA, QVector2D posB, QVector2D posP, */qreal angularVelA1,
                          qreal angularVelB1, QVector2D n, qreal angularMassA, qreal angularMassB,
                          qreal massA, qreal massB,
@@ -63,7 +63,7 @@ void CudaPhysics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVect
     angularVelB2 *= radToDeg;
 }
 
-void CudaPhysics::fusion (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp, qreal angularVelA1
+void Physics::fusion (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp, qreal angularVelA1
 	, qreal angularVelB1, QVector2D n, qreal angularMassA, qreal angularMassB, qreal angularMassAB
 	, qreal massA, qreal massB, QVector2D& v2, qreal& angularVel2)
 {
@@ -82,7 +82,7 @@ void CudaPhysics::fusion (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2
     qreal angularVelA2(0.0);
     qreal angularVelB2(0.0);
 
-    CudaPhysics::collision(vA1, vB1, rAPp, rBPp, angularVelA1,
+    Physics::collision(vA1, vB1, rAPp, rBPp, angularVelA1,
                        angularVelB1, n, angularMassA, angularMassB,
                        massA, massB,
                        vA2, vB2, angularVelA2, angularVelB2);
@@ -92,7 +92,7 @@ void CudaPhysics::fusion (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2
 
 
 //calculate velocity and angular velocity for new center via energies
-void CudaPhysics::changeCenterOfMass (qreal mass, QVector2D vel, qreal angularVel, qreal oldAngularMass,
+void Physics::changeCenterOfMass (qreal mass, QVector2D vel, qreal angularVel, qreal oldAngularMass,
                               qreal newAngularMass, QVector2D centerDiff,
                               QVector2D& newVel, qreal& newAngularVel)
 {
@@ -107,29 +107,29 @@ void CudaPhysics::changeCenterOfMass (qreal mass, QVector2D vel, qreal angularVe
 }
 
 //remember that the coordinate system in a computer system is mirrored at the x-axis...
-QVector2D CudaPhysics::tangentialVelocity (QVector2D r, QVector2D vel, qreal angularVel)
+QVector2D Physics::tangentialVelocity (QVector2D r, QVector2D vel, qreal angularVel)
 {
     return vel - angularVel*rotateQuarterCounterClockwise(r)*degToRad;
 }
 
 
-double CudaPhysics::kineticEnergy (qreal mass, QVector2D vel, qreal angularMass, qreal angularVel)
+double Physics::kineticEnergy (qreal mass, QVector2D vel, qreal angularMass, qreal angularVel)
 {
 	return linearKineticEnergy(mass, vel) + rotationalKineticEnergy(angularMass, angularVel);
 }
 
-double CudaPhysics::linearKineticEnergy(qreal mass, QVector2D vel)
+double Physics::linearKineticEnergy(qreal mass, QVector2D vel)
 {
 	return 0.5*mass*vel.lengthSquared();
 }
 
-double CudaPhysics::rotationalKineticEnergy(qreal angularMass, qreal angularVel)
+double Physics::rotationalKineticEnergy(qreal angularMass, qreal angularVel)
 {
 	angularVel *= degToRad;
 	return 0.5*angularMass*angularVel*angularVel;
 }
 
-qreal CudaPhysics::newAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld)
+qreal Physics::newAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld)
 {
     angularVelOld = angularVelOld*degToRad;
     qreal rotEnergyDouble = angularMassOld*angularVelOld*angularVelOld;
@@ -137,7 +137,7 @@ qreal CudaPhysics::newAngularVelocity (qreal angularMassOld, qreal angularMassNe
     return angularVelNew*radToDeg;
 }
 
-qreal CudaPhysics::newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld)
+qreal Physics::newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld)
 {
     qreal Erot = Ekin - Etrans;
     if( Erot > 0.0 ) {
@@ -152,12 +152,12 @@ qreal CudaPhysics::newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularM
     }
 }
 
-qreal CudaPhysics::angularMomentum (QVector2D r, QVector2D v)
+qreal Physics::angularMomentum (QVector2D r, QVector2D v)
 {
     return r.x()*v.y()-r.y()*v.x();     //we only calc the 3rd component of the 3D cross product
 }
 
-qreal CudaPhysics::angularVelocity (qreal angularMomentum, qreal angularMass)
+qreal Physics::angularVelocity (qreal angularMomentum, qreal angularMass)
 {
     if( qAbs(angularMass) < Const::AlienPrecision )
         return 0;
@@ -165,21 +165,21 @@ qreal CudaPhysics::angularVelocity (qreal angularMomentum, qreal angularMass)
         return angularMomentum/angularMass*radToDeg;
 }
 
-void CudaPhysics::applyImpulse (QVector2D const& impulse, QVector2D const& relPos, qreal mass, QVector2D const& vel, qreal angularMass, qreal angularVel, QVector2D& newVel, qreal& newAngularVel)
+void Physics::applyImpulse (QVector2D const& impulse, QVector2D const& relPos, qreal mass, QVector2D const& vel, qreal angularMass, qreal angularVel, QVector2D& newVel, qreal& newAngularVel)
 {
-	QVector2D rAPp = CudaPhysics::rotateQuarterCounterClockwise(relPos);
+	QVector2D rAPp = Physics::rotateQuarterCounterClockwise(relPos);
 	newVel = vel + impulse / mass;
     newAngularVel = angularVel - QVector2D::dotProduct(rAPp, impulse)/angularMass*radToDeg;
 }
 
-QVector2D CudaPhysics::rotateClockwise (QVector2D v, qreal angle)
+QVector2D Physics::rotateClockwise (QVector2D v, qreal angle)
 {
     QMatrix4x4 transform;
     transform.rotate(angle, 0.0, 0.0, 1.0);
     return transform.map(QVector3D(v)).toVector2D();
 }
 
-QVector2D CudaPhysics::rotateQuarterCounterClockwise (QVector2D v)
+QVector2D Physics::rotateQuarterCounterClockwise (QVector2D v)
 {
 
     //90 degree counterclockwise rotation of vector r
@@ -189,7 +189,7 @@ QVector2D CudaPhysics::rotateQuarterCounterClockwise (QVector2D v)
     return v;
 }
 
-qreal CudaPhysics::angleOfVector (QVector2D v)
+qreal Physics::angleOfVector (QVector2D v)
 {
     qreal angle(0.0);
     qreal angleSin(qAsin(-v.y()/v.length())*radToDeg);
@@ -200,12 +200,12 @@ qreal CudaPhysics::angleOfVector (QVector2D v)
     return angle;
 }
 
-QVector2D CudaPhysics::unitVectorOfAngle (qreal angle)
+QVector2D Physics::unitVectorOfAngle (qreal angle)
 {
     return QVector2D(qSin(angle*degToRad),-qCos(angle*degToRad));
 }
 
-bool CudaPhysics::compareEqualAngle (qreal angle1, qreal angle2, qreal precision)
+bool Physics::compareEqualAngle (qreal angle1, qreal angle2, qreal precision)
 {
     if( qAbs(angle1-angle2) < precision )
         return true;
@@ -216,7 +216,7 @@ bool CudaPhysics::compareEqualAngle (qreal angle1, qreal angle2, qreal precision
     return false;
 }
 
-qreal CudaPhysics::subtractAngle (qreal angleMinuend, qreal angleSubtrahend)
+qreal Physics::subtractAngle (qreal angleMinuend, qreal angleSubtrahend)
 {
     qreal angleDiff = angleMinuend- angleSubtrahend;
     if( angleDiff > 360.0 )
@@ -226,9 +226,9 @@ qreal CudaPhysics::subtractAngle (qreal angleMinuend, qreal angleSubtrahend)
     return angleDiff;
 }
 
-qreal CudaPhysics::clockwiseAngleFromFirstToSecondVector (QVector2D v1, QVector2D v2)
+qreal Physics::clockwiseAngleFromFirstToSecondVector (QVector2D v1, QVector2D v2)
 {
-    qreal a1 = CudaPhysics::angleOfVector(v1);
-    qreal a2 = CudaPhysics::angleOfVector(v2);
+    qreal a1 = Physics::angleOfVector(v1);
+    qreal a2 = Physics::angleOfVector(v2);
     return subtractAngle(a2, a1);
 }

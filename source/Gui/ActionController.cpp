@@ -389,7 +389,7 @@ void ActionController::onCopyEntity()
 		CHECK(selectedParticleIds.empty());
 		auto const& cell = _repository->getCellDescRef(*selectedCellIds.begin());
 		auto const& cluster = _repository->getClusterDescRef(*selectedCellIds.begin());
-		QVector2D vel = CudaPhysics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+		QVector2D vel = Physics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
 		_model->setCellCopied(cell, vel);
 	}
 	if (!selectedParticleIds.empty()) {

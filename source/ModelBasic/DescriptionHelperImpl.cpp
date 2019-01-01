@@ -324,7 +324,7 @@ DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBa
 		int cellIndex = _origNavi.cellIndicesByCellIds.at(cell.id);
 		auto const& origCluster = _origData->clusters->at(clusterIndex);
 		auto const& origCell = origCluster.cells->at(cellIndex);
-		result.linearVel = CudaPhysics::tangentialVelocity(*origCell.pos - *origCluster.pos, *origCluster.vel, *origCluster.angularVel);
+		result.linearVel = Physics::tangentialVelocity(*origCell.pos - *origCluster.pos, *origCluster.vel, *origCluster.angularVel);
 		return result;
 	}
 
@@ -338,7 +338,7 @@ DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBa
 		int cellIndex = _origNavi.cellIndicesByCellIds.at(cell.id);
 		auto const& origCluster = _origData->clusters->at(clusterIndex);
 		auto const& origCell = origCluster.cells->at(cellIndex);
-		cellVel.insert_or_assign(cell.id, CudaPhysics::tangentialVelocity(*origCell.pos - *origCluster.pos, *origCluster.vel, *origCluster.angularVel));
+		cellVel.insert_or_assign(cell.id, Physics::tangentialVelocity(*origCell.pos - *origCluster.pos, *origCluster.vel, *origCluster.angularVel));
 		result.linearVel += cellVel.at(cell.id);
 	}
 	result.linearVel /= cells.size();
@@ -348,9 +348,9 @@ DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBa
 	for (auto const& cell : cells) {
 		QVector2D r = *cell.pos - center;
 		QVector2D v = cellVel.at(cell.id) - result.linearVel;
-		angularMomentum += CudaPhysics::angularMomentum(r, v);
+		angularMomentum += Physics::angularMomentum(r, v);
 	}
-	result.angularVel = CudaPhysics::angularVelocity(angularMomentum, calcAngularMass(cells));
+	result.angularVel = Physics::angularVelocity(angularMomentum, calcAngularMass(cells));
 
 	return result;
 }
