@@ -30,7 +30,7 @@ namespace {
             return;
 
         //calc angle from previousCell to baseCell
-        qreal originAngle = CudaPhysics::angleOfVector(previousCell1->getRelPosition() - cell->getRelPosition());
+        qreal originAngle = Physics::angleOfVector(previousCell1->getRelPosition() - cell->getRelPosition());
 
         //iterate over all connected base cells
         bool nextCellFound = false;
@@ -44,7 +44,7 @@ namespace {
     //         && nextCandCell->isConnectedTo(previousCell1) ) {
 
                 //calc angle from "nextCandCell"
-                qreal angle = CudaPhysics::angleOfVector(nextCandCell->getRelPosition() - cell->getRelPosition());
+                qreal angle = Physics::angleOfVector(nextCandCell->getRelPosition() - cell->getRelPosition());
 
                 //another cell already found? => compare angles
                 if( nextCellFound ) {
@@ -139,8 +139,8 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
     if( n > 1 ) {
 
         //calc angle from cell n to cell n-1
-        qreal a1 = CudaPhysics::angleOfVector(scanCellPre2->getRelPosition() - scanCellPre1->getRelPosition());
-        qreal a2 = CudaPhysics::angleOfVector(-scanCell->getRelPosition() + scanCellPre1->getRelPosition());
+        qreal a1 = Physics::angleOfVector(scanCellPre2->getRelPosition() - scanCellPre1->getRelPosition());
+        qreal a2 = Physics::angleOfVector(-scanCell->getRelPosition() + scanCellPre1->getRelPosition());
         qreal angle = a1 - a2;
         tokenMem[Enums::Scanner::OUT_ANGLE] = PhysicalQuantityConverter::convertAngleToData(angle);
 //        qDebug("-> v: %f, n: %f", -angle, convertDataToAngle(convertAngleToData(-angle)));

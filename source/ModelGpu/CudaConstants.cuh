@@ -1,7 +1,7 @@
 #pragma once
 
-//technical constants
 #define PROTECTION_TIMESTEPS 14
+
 #define NUM_THREADS_PER_BLOCK 32
 #define NUM_BLOCKS 128
 #define MAX_CELLCLUSTERS 10000

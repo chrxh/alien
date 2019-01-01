@@ -119,6 +119,6 @@ private:
 			angularMass += (*cell.pos - *cluster.pos).lengthSquared();
 		}
 		auto angularVel = *cluster.angularVel;
-		return CudaPhysics::kineticEnergy(mass, vel, angularMass, angularVel);
+		return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
 	}
 };
