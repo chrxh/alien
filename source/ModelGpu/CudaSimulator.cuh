@@ -8,10 +8,6 @@ struct SimulationDataForAccess;
 class CudaSimulator
 {
 public:
-	cudaStream_t cudaStream;
-	SimulationDataInternal* data;
-	SimulationDataForAccess* access;
-
 	CudaSimulator(int2 const &size);
 	~CudaSimulator();
 
@@ -25,4 +21,8 @@ private:
 	void correctPointersAfterCellCopy(CellData* cell, int64_t addressShiftCell, int64_t addressShiftCluster);
 	void correctPointersAfterClusterCopy(ClusterData* cluster, int64_t addressShiftCell);
 	void setCudaSimulationParameters();
+
+	cudaStream_t _cudaStream;
+	SimulationDataInternal* _data = nullptr;
+	SimulationDataForAccess* _access = nullptr;
 };
