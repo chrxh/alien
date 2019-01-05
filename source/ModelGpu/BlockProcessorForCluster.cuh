@@ -16,7 +16,7 @@ public:
 	__inline__ __device__ int getNumOrigCells() const;
 
 	//synchronizing threads
-	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingMovementAndCollision(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDataCopy(int startCellIndex, int endCellIndex);
@@ -196,7 +196,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithoutDe
 	__syncthreads();
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingMovement(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster::processingMovementAndCollision(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
@@ -348,8 +348,9 @@ __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cel
 
 __inline__ __device__ ParticleData* BlockProcessorForCluster::createNewParticle()
 {
-	auto particle = _data->particlesAC2.getNewElement();
+	ParticleData* particle = _data->particlesAC2.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
+	particle->locked = 0;
 	return particle;
 }
 

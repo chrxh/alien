@@ -22,7 +22,7 @@ __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 	int endCellIndex;
 	calcPartition(blockProcessor.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	blockProcessor.processingMovement(startCellIndex, endCellIndex);
+	blockProcessor.processingMovementAndCollision(startCellIndex, endCellIndex);
 	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
 	blockProcessor.processingDecomposition(startCellIndex, endCellIndex);
 	blockProcessor.processingDataCopy(startCellIndex, endCellIndex);
@@ -44,40 +44,21 @@ __global__ void clusterMovement(SimulationDataInternal data)
 	}
 }
 
-__device__ void particleMovement(SimulationDataInternal &data, int particleIndex)
+__global__ void particleCollision(SimulationDataInternal data)
 {
-/*
-	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
-	__shared__ Map<CellData> cellMap;
-	__shared__ Map<ParticleData> particleMap;
+	__shared__ BlockProcessorForParticles blockProcessor;
 	if (0 == threadIdx.x) {
-		cellMap.init(data.size, data.cellMap1, data.cellMap2);
-		particleMap.init(data.size, data.particleMap1, data.particleMap2);
+		blockProcessor.init(data);
 	}
 	__syncthreads();
-	if(auto cell = cellMap.getFromNewMap(oldParticle->pos)) {
-		atomicAdd(&cell->energy, oldParticle->energy);
-		return;
-	}
-	ParticleData *newParticle = data.particlesAC2.getNewElement();
-	*newParticle = *oldParticle;
-	newParticle->pos = add(newParticle->pos, newParticle->vel);
-	particleMap.mapPosCorrection(newParticle->pos);
-	particleMap.setToNewMap(newParticle->pos, newParticle);
-*/
-	ParticleData *oldParticle = &data.particlesAC1.getEntireArray()[particleIndex];
-	__shared__ Map<CellData> map;
-	map.init(data.size, data.cellMap1, data.cellMap2);
-	auto cell = map.getFromNewMap(oldParticle->pos);
-	if (cell) {
-		//		auto nextCell = cell->nextTimestep;
-		atomicAdd(&cell->energy, oldParticle->energy);
-		return;
-	}
-	ParticleData *newParticle = data.particlesAC2.getNewElement();
-	*newParticle = *oldParticle;
-	newParticle->pos = add(newParticle->pos, newParticle->vel);
-	map.mapPosCorrection(newParticle->pos);
+
+	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
+	int numEntities = data.particlesAC2.getNumEntries();
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
+	blockProcessor.processingCollision(startIndex, endIndex);
 }
 
 __global__ void particleMovement(SimulationDataInternal data)
@@ -95,19 +76,6 @@ __global__ void particleMovement(SimulationDataInternal data)
 	int endIndex;
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
 	blockProcessor.processingMovement(startIndex, endIndex);
-/*
-	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	int numEntities = data.particlesAC1.getNumEntries();
-	if (indexResource >= numEntities) {
-		return;
-	}
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
-	for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
-		particleMovement(data, particleIndex);
-	}
-*/
 }
 
 __device__ void clearCellCluster(SimulationDataInternal const &data, int clusterIndex)

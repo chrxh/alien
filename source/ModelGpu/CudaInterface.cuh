@@ -11,6 +11,7 @@ struct ParticleData
 	float energy;
 	float2 pos;
 	float2 vel;
+	int locked;	//0 = unlocked, 1 = locked
 };
 
 struct ClusterData;

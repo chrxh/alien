@@ -80,6 +80,7 @@ void DataConverter::addParticle(ParticleDescription const & particleDesc)
 	cudaParticle.pos = { particleDesc.pos->x(), particleDesc.pos->y() };
 	cudaParticle.vel = { particleDesc.vel->x(), particleDesc.vel->y() };
 	cudaParticle.energy = *particleDesc.energy;
+	cudaParticle.locked = 0;
 }
 
 void DataConverter::markDelCluster(uint64_t clusterId)
