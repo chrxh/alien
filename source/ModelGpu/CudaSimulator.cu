@@ -117,15 +117,19 @@ void CudaSimulator::calcNextTimestep()
 {
 	prepareTargetData();
 
-	clusterMovement << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (*data);
+	clusterMovement<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (*data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	particleMovement << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (*data);
+	particleMovement<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (*data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	clearMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream >> > (*data);
+	particleCollision<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (*data);
+	cudaDeviceSynchronize();
+	checkCudaErrors(cudaGetLastError());
+
+	clearMaps<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, cudaStream>>> (*data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
@@ -134,6 +138,7 @@ void CudaSimulator::calcNextTimestep()
 
 SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 {
+	cudaDeviceSynchronize();
 	access->numClusters = data->clustersAC1.getNumEntries();
 	cudaMemcpy(access->clusters, data->clustersAC1.getEntireArray(), sizeof(ClusterData) * data->clustersAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 	checkCudaErrors(cudaGetLastError());
@@ -143,6 +148,7 @@ SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 	access->numParticles = data->particlesAC1.getNumEntries();
 	cudaMemcpy(access->particles, data->particlesAC1.getEntireArray(), sizeof(ParticleData) * data->particlesAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 	checkCudaErrors(cudaGetLastError());
+	cudaDeviceSynchronize();
 
 	int64_t addrShiftCell = int64_t(access->cells) - int64_t(data->cellsAC1.getEntireArray());
 	int64_t addrShiftCluster = int64_t(access->clusters) - int64_t(data->clustersAC1.getEntireArray());
@@ -159,7 +165,7 @@ SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 {
 	*access = newAccess;
-
+	cudaDeviceSynchronize();
 	data->clustersAC1.setNumEntries(access->numClusters);
 	cudaMemcpy(data->clustersAC1.getEntireArray(), access->clusters, sizeof(ClusterData) * data->clustersAC1.getNumEntries(), cudaMemcpyHostToDevice);
 	checkCudaErrors(cudaGetLastError());
@@ -190,6 +196,7 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 		auto& absPos = cell->absPos;
 		map.setToOrigMap(absPos, cell);
 	}
+	cudaDeviceSynchronize();
 
 }
 

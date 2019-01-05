@@ -15,6 +15,7 @@ public:
 	__inline__ __device__ void init(SimulationDataInternal& data);
 	
 	__inline__ __device__ void processingMovement(int startParticleIndex, int endParticleIndex);
+	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);
 
 private:
 
@@ -38,15 +39,39 @@ __inline__ __device__ void BlockProcessorForParticles::init(SimulationDataIntern
 __inline__ __device__ void BlockProcessorForParticles::processingMovement(int startParticleIndex, int endParticleIndex)
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
-		ParticleData *oldParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
-		if (auto cell = _cellMap.getFromNewMap(oldParticle->pos)) {
-			atomicAdd(&cell->energy, oldParticle->energy);
+		ParticleData *origParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
+		if (0.0f == origParticle->energy) {
 			continue;
 		}
-		ParticleData *newParticle = _data->particlesAC2.getNewElement();
-		*newParticle = *oldParticle;
-		newParticle->pos = add(newParticle->pos, newParticle->vel);
+		if (auto cell = _cellMap.getFromNewMap(origParticle->pos)) {
+			atomicAdd(&cell->energy, origParticle->energy);
+			continue;
+		}
+		ParticleData* newParticle = _data->particlesAC2.getNewElement();
+		*newParticle = *origParticle;
+		newParticle->pos = add(origParticle->pos, origParticle->vel);
 		_particleMap.mapPosCorrection(newParticle->pos);
 		_particleMap.setToNewMap(newParticle->pos, newParticle);
+	}
+}
+
+__inline__ __device__ void BlockProcessorForParticles::processingCollision(int startParticleIndex, int endParticleIndex)
+{
+	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
+		ParticleData* particle = &_data->particlesAC2.getEntireArray()[particleIndex];
+		ParticleData* otherParticle = _particleMap.getFromNewMap(particle->pos);
+		if (otherParticle && otherParticle != particle) {
+			int particleLocked = static_cast<bool>(atomicExch((int*)(&particle->locked), 1));
+			int otherParticleLocked = static_cast<bool>(atomicExch((int*)(&otherParticle->locked), 1));
+			if (0 == particleLocked && 0 == otherParticleLocked) {
+				float factor1 = particle->energy / (particle->energy + otherParticle->energy);
+				float factor2 = 1.0f - factor1;
+				particle->vel = add(mul(particle->vel, factor1), mul(otherParticle->vel, factor2));
+				particle->energy += otherParticle->energy;
+				otherParticle->energy = 0.0f;
+				particle->locked = 0;
+				otherParticle->locked = 0;
+			}
+		}
 	}
 }
