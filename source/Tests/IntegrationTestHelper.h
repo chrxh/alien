@@ -56,6 +56,18 @@ public:
 		}
 	}
 
+	static unordered_map<uint64_t, ParticleDescription> getParticleByParticleId(DataDescription const& data)
+	{
+		unordered_map<uint64_t, ParticleDescription> result;
+		if (data.particles) {
+			std::transform(data.particles->begin(), data.particles->end(), std::inserter(result, result.begin()),
+				[](ParticleDescription const& desc) {
+					return std::make_pair(desc.id, desc);
+				});
+		}
+		return result;
+	}
+
 	static unordered_map<uint64_t, CellDescription> getCellByCellId(DataDescription const& data)
 	{
 		unordered_map<uint64_t, CellDescription> result;
