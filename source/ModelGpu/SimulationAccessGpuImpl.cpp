@@ -121,7 +121,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		if (_requiredRect.isContained(intPos)) {
 			spaceProp->correctPosition(intPos);
-			_requiredImage->setPixel(intPos.x, intPos.y, 0xFF);
+			_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcCellColor(0, 0, cell.energy));
 		}
 	}
 
