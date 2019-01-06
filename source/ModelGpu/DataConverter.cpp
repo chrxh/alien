@@ -299,7 +299,7 @@ void DataConverter::applyChangeDescription(ParticleData & particle, ParticleChan
 		convert(newPos, particle.pos);
 	}
 	if (particleChanges.vel) {
-		QVector2D newVel = particleChanges.pos.getValue();
+		QVector2D newVel = particleChanges.vel.getValue();
 		convert(newVel, particle.vel);
 	}
 	if (particleChanges.energy) {
