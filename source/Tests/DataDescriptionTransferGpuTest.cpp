@@ -60,10 +60,36 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateClusterDescriptionWithCompleteC
 {
 	DataDescription dataBefore;
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
-	_access->updateData(dataBefore);
+	IntegrationTestHelper::updateData(_access, dataBefore);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+}
+
+/**
+* Situation: change particle properties
+* Expected result: particle in simulation changed
+*/
+TEST_F(DataDescriptionTransferGpuTest, testChangeParticleDescription)
+{
+	DataDescription dataBefore;
+	auto particleEnergy1 = _parameters->cellMinEnergy / 2.0;
+	auto particleId = _numberGen->getId();
+	auto particleBefore = ParticleDescription().setId(particleId).setEnergy(particleEnergy1).setPos({ 100, 100 }).setVel({ 0.5f, 0.0f });
+	dataBefore.addParticle(particleBefore);
+	
+	DataDescription dataChanged;
+	auto particleEnergy2 = _parameters->cellMinEnergy / 3.0;
+	auto particleChange = ParticleDescription().setId(particleId).setEnergy(particleEnergy2).setPos({ 150, 150 }).setVel({ 0.0f, -0.3f });
+	dataChanged.addParticle(particleChange);
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
 }

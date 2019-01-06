@@ -26,7 +26,7 @@ public:
 		return access->retrieveData();
 	}
 
-	static void updateData(SimulationAccess* access, DataDescription const& data)
+	static void updateData(SimulationAccess* access, DataChangeDescription const& data)
 	{
 		QEventLoop pause;
 		bool finished = false;
