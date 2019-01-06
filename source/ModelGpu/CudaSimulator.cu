@@ -41,6 +41,7 @@ namespace
 CudaSimulator::CudaSimulator(int2 const &size)
 {
 	CudaInitializer::init();
+	cudaDeviceSynchronize();
 
 	setCudaSimulationParameters();
 
@@ -139,6 +140,7 @@ void CudaSimulator::calcNextTimestep()
 
 SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 {
+	cudaDeviceSynchronize();
 	_access->numClusters = _data->clustersAC1.getNumEntries();
 	cudaMemcpy(_access->clusters, _data->clustersAC1.getEntireArray(), sizeof(ClusterData) * _data->clustersAC1.getNumEntries(), cudaMemcpyDeviceToHost);
 	checkCudaErrors(cudaGetLastError());
@@ -164,6 +166,7 @@ SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 
 void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 {
+	cudaDeviceSynchronize();
 	*_access = newAccess;
 	_data->clustersAC1.setNumEntries(_access->numClusters);
 	cudaMemcpy(_data->clustersAC1.getEntireArray(), _access->clusters, sizeof(ClusterData) * _data->clustersAC1.getNumEntries(), cudaMemcpyHostToDevice);
@@ -196,7 +199,6 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 		map.setToOrigMap(absPos, cell);
 	}
 	cudaDeviceSynchronize();
-
 }
 
 void CudaSimulator::prepareTargetData()
