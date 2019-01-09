@@ -129,27 +129,12 @@ double Physics::rotationalKineticEnergy(qreal angularMass, qreal angularVel)
 	return 0.5*angularMass*angularVel*angularVel;
 }
 
-qreal Physics::newAngularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld)
+qreal Physics::angularVelocity (qreal angularMassOld, qreal angularMassNew, qreal angularVelOld)
 {
     angularVelOld = angularVelOld*degToRad;
     qreal rotEnergyDouble = angularMassOld*angularVelOld*angularVelOld;
     qreal angularVelNew = qSqrt(rotEnergyDouble/angularMassNew);
     return angularVelNew*radToDeg;
-}
-
-qreal Physics::newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld)
-{
-    qreal Erot = Ekin - Etrans;
-    if( Erot > 0.0 ) {
-        qreal angularVelNew = qSqrt(2.0*Erot/angularMass)*radToDeg;
-        if( angularVelOld > 0.0 )
-            return qAbs(angularVelNew);
-        else
-            return -qAbs(angularVelNew);
-    }
-    else {
-        return 0.0;
-    }
 }
 
 qreal Physics::angularMomentum (QVector2D r, QVector2D v)
