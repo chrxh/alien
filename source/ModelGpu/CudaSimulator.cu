@@ -233,6 +233,7 @@ void CudaSimulator::correctPointersAfterClusterCopy(ClusterData* cluster, int64_
 
 void CudaSimulator::setCudaSimulationParameters()
 {
+	cudaDeviceSynchronize();
 	CudaSimulationParameters parametersToCopy;
 
 	parametersToCopy.cellMaxDistance = 1.3f;
@@ -245,4 +246,5 @@ void CudaSimulator::setCudaSimulationParameters()
 
 	cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters) , 0, cudaMemcpyHostToDevice);
 	checkCudaErrors(cudaGetLastError());
+	cudaDeviceSynchronize();
 }

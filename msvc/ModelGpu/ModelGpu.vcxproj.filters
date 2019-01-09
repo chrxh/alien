@@ -22,7 +22,7 @@
     <Filter Include="Source Files\Impl">
       <UniqueIdentifier>{51fd42e9-88f4-406a-a0ff-bb8846c4b507}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Impl\CUDA">
+    <Filter Include="Source Files\CUDA">
       <UniqueIdentifier>{0cdf0860-f930-496c-9318-2f9e1eb67ff9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -49,10 +49,10 @@
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Map.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h">
       <Filter>Source Files</Filter>
@@ -61,34 +61,34 @@
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForCluster.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CollisionData.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\SimulationDataInternal.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulatorFunctions.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulator.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaPhysics.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForParticles.cuh">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -199,7 +199,7 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\..\source\ModelGpu\CudaSimulator.cu">
-      <Filter>Source Files\Impl\CUDA</Filter>
+      <Filter>Source Files\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

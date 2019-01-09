@@ -386,14 +386,12 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 				if (cell->getNumToken() > 0) {
 					tokenPos.push_back(pos);
 				} else {
-					_requiredImage->setPixel(pos.x, pos.y, calcCellColor(cell->getMetadata(), cell->getEnergy()));
+					_requiredImage->setPixel(pos.x, pos.y, EntityRenderer::calcCellColor(cell->getNumToken(), cell->getMetadata().color, cell->getEnergy()));
 				}
 			}
 		}
 		if (!tokenPos.empty()) {
 			for (IntVector2D const& pos : tokenPos) {
-				_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
-
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x, pos.y - i };
