@@ -32,6 +32,15 @@ public:
 	~SimulationGpuTest();
 
 protected:
+	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
+	struct Velocities {
+		QVector2D linear;
+		double angular = 0.0;
+	};
+	Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
+	double calcKineticEnergy(ClusterDescription const& cluster) const;
+
+protected:
 	SimulationControllerGpu* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	SpaceProperties* _spaceProp = nullptr;
@@ -55,6 +64,63 @@ SimulationGpuTest::~SimulationGpuTest()
 {
 	delete _access;
 	delete _controller;
+}
+
+void SimulationGpuTest::checkEnergy(DataDescription const& origData, DataDescription const& newData) const
+{
+	auto energyBefore = 0.0;
+	for (auto const& cluster : *origData.clusters) {
+		energyBefore += calcKineticEnergy(cluster);
+	}
+
+	auto energyAfter = 0.0;
+	for (auto const& cluster : *newData.clusters) {
+		energyAfter += calcKineticEnergy(cluster);
+	}
+
+	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
+}
+
+auto SimulationGpuTest::calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const -> Velocities
+{
+	CHECK(!cellIds.empty());
+	Velocities result;
+	for(CellDescription const& cell : *cluster.cells) {
+		if (cellIds.find(cell.id) != cellIds.end()) {
+			result.linear += Physics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+		}
+	}
+	result.linear /= cellIds.size();
+	if (cellIds.size() == 1) {
+		return result;
+	}
+
+	double angularMomentum = 0.0;
+	double angularMass = 0.0;
+	for (CellDescription const& cell : *cluster.cells) {
+		if (cellIds.find(cell.id) != cellIds.end()) {
+			QVector2D r = *cell.pos - *cluster.pos;
+			QVector2D tangentialVel = Physics::tangentialVelocity(r, *cluster.vel, *cluster.angularVel);
+			QVector2D v = tangentialVel - result.linear;
+			angularMomentum += Physics::angularMomentum(r, v);
+			angularMass += r.lengthSquared();
+		}
+	}
+
+	result.angular = Physics::angularVelocity(angularMomentum, angularMass);
+	return result;
+}
+
+double SimulationGpuTest::calcKineticEnergy(ClusterDescription const& cluster) const
+{
+	auto mass = cluster.cells->size();
+	auto vel = *cluster.vel;
+	auto angularMass = 0.0;
+	for (CellDescription const& cell : *cluster.cells) {
+		angularMass += (*cell.pos - *cluster.pos).lengthSquared();
+	}
+	auto angularVel = *cluster.angularVel;
+	return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
 }
 
 /**
@@ -186,7 +252,7 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoClusters)
 		EXPECT_TRUE(isCompatible(QVector2D(0, 0), *cluster.vel));
 	}
 
-	IntegrationTestHelper::checkEnergy(origData, newData);
+	checkEnergy(origData, newData);
 }
 
 /**
@@ -226,7 +292,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
 
-	IntegrationTestHelper::checkEnergy(origData, newData);
+	checkEnergy(origData, newData);
 }
 
 /**
@@ -268,12 +334,41 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 		EXPECT_TRUE(abs(*cluster.angularVel) < 0.01);
 	}
 
-	IntegrationTestHelper::checkEnergy(origData, newData);
+	checkEnergy(origData, newData);
+}
+
+/**
+* Situation: collision of two particles
+* Expected result: one particle remains with average velocity
+*/
+TEST_F(SimulationGpuTest, testCollisionOfSingleParticles)
+{
+	DataDescription origData;
+	auto particleEnergy = _parameters->cellMinEnergy / 2.0;
+
+	auto particleId1 = _numberGen->getId();
+	auto particle1 = ParticleDescription().setId(particleId1).setEnergy(particleEnergy).setPos({ 100, 100 }).setVel({ 0.5, 0.0 });
+	origData.addParticle(particle1);
+
+	auto particleId2 = _numberGen->getId();
+	auto particle2 = ParticleDescription().setId(particleId1).setEnergy(particleEnergy).setPos({ 110, 100 }).setVel({ -0.5, 0.0 });
+	origData.addParticle(particle2);
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(30, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_FALSE(newData.clusters);
+	ASSERT_EQ(1, newData.particles->size());
+	auto newParticle = newData.particles->front();
+	EXPECT_TRUE(isCompatible(QVector2D(0, 0), *newParticle.vel));
 }
 
 /**
  * Situation: cluster with cross structure where middle cell connecting 4 parts has low energy            
- * Expected result: cluster decomposes into at least 4 parts
+ * Expected result: cluster decomposes into 4 parts
  */
 TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 {
@@ -317,11 +412,10 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(3, _controller);
 
-	IntRect rect = { { 0, 0 }, { _universeSize.x, _universeSize.y } };
-	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	auto numClusters = newData.clusters ? newData.clusters->size() : 0;
-	ASSERT_LE(4, numClusters);
+	ASSERT_EQ(4, numClusters);
 
 	unordered_map<int, vector<ClusterDescription>> clustersBySize;
 	for (ClusterDescription const& cluster : *newData.clusters) {
@@ -341,32 +435,40 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 		}
 	}
 }
-
 /**
-* Situation: collision of two particles
-* Expected result: one particle remains with average velocity
+* Situation: cluster with line structure where middle cell has low energy
+* Expected result: cluster decomposes into 2 parts
 */
-TEST_F(SimulationGpuTest, testCollisionOfSingleParticles)
+TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 {
 	DataDescription origData;
-	auto particleEnergy = _parameters->cellMinEnergy / 2.0;
+	origData.addCluster(createHorizontalCluster(31, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 1.0));
 
-	auto particleId1 = _numberGen->getId();
-	auto particle1 = ParticleDescription().setId(particleId1).setEnergy(particleEnergy).setPos({ 100, 100 }).setVel({ 0.5, 0.0 });
-	origData.addParticle(particle1);
-
-	auto particleId2 = _numberGen->getId();
-	auto particle2 = ParticleDescription().setId(particleId1).setEnergy(particleEnergy).setPos({ 110, 100 }).setVel({ -0.5, 0.0 });
-	origData.addParticle(particle2);
+	auto lowEnergy = _parameters->cellMinEnergy / 2.0;
+	origData.clusters->at(0).cells->at(15).energy = lowEnergy;
 
 	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(30, _controller);
+	IntegrationTestHelper::runSimulation(3, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
-	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
 
-	ASSERT_FALSE(newData.clusters);
-	ASSERT_EQ(1, newData.particles->size());
-	auto newParticle = newData.particles->front();
-	EXPECT_TRUE(isCompatible(QVector2D(0, 0), *newParticle.vel));
+	{
+		set<uint64_t> firstFragmentCellIds;
+		ClusterDescription firstFragment = newData.clusters->at(0);
+		std::transform(firstFragment.cells->begin(), firstFragment.cells->end(), std::inserter(firstFragmentCellIds, firstFragmentCellIds.begin()),
+			[](CellDescription const& cell) { return cell.id; });
+		Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(0), firstFragmentCellIds);
+		EXPECT_TRUE(isCompatible(velocities.linear, *firstFragment.vel));
+		EXPECT_TRUE(isCompatible(velocities.angular, *firstFragment.angularVel));
+	}
+	{
+		set<uint64_t> secondFragmentCellIds;
+		ClusterDescription secondFragment = newData.clusters->at(1);
+		std::transform(secondFragment.cells->begin(), secondFragment.cells->end(), std::inserter(secondFragmentCellIds, secondFragmentCellIds.begin()),
+			[](CellDescription const& cell) { return cell.id; });
+		Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(1), secondFragmentCellIds);
+		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
+		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
+	}
 }

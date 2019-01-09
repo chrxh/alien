@@ -28,9 +28,8 @@ public:
     static double kineticEnergy (qreal mass, QVector2D vel, qreal angularMass, qreal angularVel);
 	static double linearKineticEnergy(qreal mass, QVector2D vel);
 	static double rotationalKineticEnergy(qreal angularMass, qreal angularVel);
-	static qreal newAngularVelocity(qreal angularMassOld, qreal angularMassNew, qreal angularVelOld);
-    static qreal newAngularVelocity2 (qreal Ekin, qreal Etrans, qreal angularMass, qreal angularVelOld);
     static qreal angularMomentum (QVector2D r, QVector2D v);
+	static qreal angularVelocity(qreal angularMassOld, qreal angularMassNew, qreal angularVelOld);
     static qreal angularVelocity (qreal angularMomentum, qreal angularMass);
 
     static void applyImpulse (QVector2D const& impulse, QVector2D const& relPos, qreal mass, QVector2D const& vel, qreal angularMass

@@ -276,7 +276,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 //estimate expended energy for new cell
                 qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithoutUpdate();
-                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal angularVelNew = Physics::angularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
@@ -345,7 +345,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 //estimate expended energy for new cell
                 qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
-                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal angularVelNew = Physics::angularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
@@ -555,7 +555,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 //estimate expended energy for new cell
                 qreal kinEnergyOld = Physics::kineticEnergy(cluster->getMass(), cluster->getVelocity(), cluster->getAngularMass(), cluster->getAngularVel());
                 qreal angularMassNew = cluster->calcAngularMassWithNewParticle(pos);
-                qreal angularVelNew = Physics::newAngularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
+                qreal angularVelNew = Physics::angularVelocity(cluster->getAngularMass(), angularMassNew, cluster->getAngularVel());
                 qreal kinEnergyNew = Physics::kineticEnergy(cluster->getMass()+1.0, cluster->getVelocity(), angularMassNew, angularVelNew);
                 qreal eDiff = (kinEnergyNew-kinEnergyOld)/parameters->cellMass_Reciprocal;
 
