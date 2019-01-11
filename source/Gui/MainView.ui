@@ -304,7 +304,7 @@
           </palette>
          </property>
          <property name="text">
-          <string>Timestep: 000000001  TPS: 00000  Zoom factor: 2x</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -682,7 +682,7 @@
      <x>0</x>
      <y>0</y>
      <width>1240</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="palette">
