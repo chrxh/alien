@@ -10,12 +10,14 @@ class InfoController
 
 public:
 	InfoController(QObject * parent = nullptr);
-	virtual ~InfoController() = default;
+	~InfoController() = default;
 
-	virtual void init(QLabel* infoLabel, MainController* mainController);
+	void init(QLabel* infoLabel, MainController* mainController);
 
-	virtual void increaseTimestep();
-	virtual void setZoomFactor(double factor);
+	void increaseTimestep();
+	void setZoomFactor(double factor);
+	enum class Device { CPU, GPU };
+	void setDevice(Device value);
 
 private:
 	Q_SLOT void oneSecondTimerTimeout();
@@ -28,4 +30,5 @@ private:
 	int _tpsCounting = 0;
 	int _tps = 0;
 	double _zoomFactor = 2.0;
+	Device _device = Device::CPU;
 };

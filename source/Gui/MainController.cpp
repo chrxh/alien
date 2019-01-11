@@ -137,6 +137,14 @@ void MainController::init()
 		config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
 		onNewSimulation(config, 0);
 	}
+
+	auto config = getSimulationConfig();
+	if (boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+		_view->getInfoController()->setDevice(InfoController::Device::CPU);
+	}
+	else if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+		_view->getInfoController()->setDevice(InfoController::Device::GPU);
+	}
 }
 
 namespace
