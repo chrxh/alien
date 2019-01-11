@@ -109,8 +109,8 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		ParticleData& particle = cudaData.particles[i];
 		float2& pos = particle.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
+		spaceProp->correctPosition(intPos);
 		if (_requiredRect.isContained(intPos)) {
-			spaceProp->correctPosition(intPos);
 			_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
 		}
 	}
@@ -119,8 +119,8 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		CellData& cell = cudaData.cells[i];
 		float2& pos = cell.absPos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
+		spaceProp->correctPosition(intPos);
 		if (_requiredRect.isContained(intPos)) {
-			spaceProp->correctPosition(intPos);
 			_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcCellColor(0, 0, cell.energy));
 		}
 	}
