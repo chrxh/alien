@@ -225,7 +225,7 @@ void ActionController::onNewSimulation()
 	if (dialog.exec()) {
 		_mainController->onNewSimulation(dialog.getConfig(), dialog.getEnergy());
 
-		settingUpNewSimulation();
+		settingUpNewSimulation(_mainController->getSimulationConfig());
 	}
 }
 
@@ -242,7 +242,7 @@ void ActionController::onLoadSimulation()
 	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Simulation", "", "Alien Simulation (*.sim)");
 	if (!filename.isEmpty()) {
 		if (_mainController->onLoadSimulation(filename.toStdString())) {
-			settingUpNewSimulation();
+			settingUpNewSimulation(_mainController->getSimulationConfig());
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation could not loaded.");
@@ -264,7 +264,7 @@ void ActionController::onConfigureGrid()
 		config->gridSize = *gridSize;
 		config->universeSize = *universeSize;
 		_mainController->onRecreateSimulation(config);
-		settingUpNewSimulation();
+		settingUpNewSimulation(config);
 	}
 }
 
@@ -883,7 +883,7 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 	updateActionsEnableState();
 }
 
-void ActionController::settingUpNewSimulation()
+void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
 	updateZoomFactor();
 	auto actions = _model->getActionHolder();
@@ -893,6 +893,13 @@ void ActionController::settingUpNewSimulation()
 	onRunClicked(false);
 	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
 	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
+
+	if (boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+		_infoController->setDevice(InfoController::Device::CPU);
+	}
+	else if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+		_infoController->setDevice(InfoController::Device::GPU);
+	}
 }
 
 void ActionController::updateZoomFactor()

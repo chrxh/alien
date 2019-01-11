@@ -33,11 +33,7 @@ public:
 
 protected:
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
-	struct Velocities {
-		QVector2D linear;
-		double angular = 0.0;
-	};
-	Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
+	Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
 	double calcKineticEnergy(ClusterDescription const& cluster) const;
 
 protected:
@@ -81,44 +77,28 @@ void SimulationGpuTest::checkEnergy(DataDescription const& origData, DataDescrip
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
 }
 
-auto SimulationGpuTest::calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const -> Velocities
+Physics::Velocities SimulationGpuTest::calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const
 {
 	CHECK(!cellIds.empty());
-	Velocities result;
+	vector<QVector2D> relPositionOfMasses;
 	for(CellDescription const& cell : *cluster.cells) {
 		if (cellIds.find(cell.id) != cellIds.end()) {
-			result.linear += Physics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+			relPositionOfMasses.emplace_back(*cell.pos - *cluster.pos);
 		}
 	}
-	result.linear /= cellIds.size();
-	if (cellIds.size() == 1) {
-		return result;
-	}
-
-	double angularMomentum = 0.0;
-	double angularMass = 0.0;
-	for (CellDescription const& cell : *cluster.cells) {
-		if (cellIds.find(cell.id) != cellIds.end()) {
-			QVector2D r = *cell.pos - *cluster.pos;
-			QVector2D tangentialVel = Physics::tangentialVelocity(r, *cluster.vel, *cluster.angularVel);
-			QVector2D v = tangentialVel - result.linear;
-			angularMomentum += Physics::angularMomentum(r, v);
-			angularMass += r.lengthSquared();
-		}
-	}
-
-	result.angular = Physics::angularVelocity(angularMomentum, angularMass);
-	return result;
+	return Physics::velocitiesOfCenter({ *cluster.vel, *cluster.angularVel }, relPositionOfMasses);
 }
 
 double SimulationGpuTest::calcKineticEnergy(ClusterDescription const& cluster) const
 {
 	auto mass = cluster.cells->size();
 	auto vel = *cluster.vel;
-	auto angularMass = 0.0;
-	for (CellDescription const& cell : *cluster.cells) {
-		angularMass += (*cell.pos - *cluster.pos).lengthSquared();
-	}
+
+	vector<QVector2D> relPositions;
+	std::transform(cluster.cells->begin(), cluster.cells->end(), relPositions.begin(),
+		[&cluster](CellDescription const& cell) { return *cell.pos - *cluster.pos; });
+
+	auto angularMass = Physics::angularMass(relPositions);
 	auto angularVel = *cluster.angularVel;
 	return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
 }
@@ -458,7 +438,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 		ClusterDescription firstFragment = newData.clusters->at(0);
 		std::transform(firstFragment.cells->begin(), firstFragment.cells->end(), std::inserter(firstFragmentCellIds, firstFragmentCellIds.begin()),
 			[](CellDescription const& cell) { return cell.id; });
-		Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(0), firstFragmentCellIds);
+		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(0), firstFragmentCellIds);
 		EXPECT_TRUE(isCompatible(velocities.linear, *firstFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *firstFragment.angularVel));
 	}
@@ -467,7 +447,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 		ClusterDescription secondFragment = newData.clusters->at(1);
 		std::transform(secondFragment.cells->begin(), secondFragment.cells->end(), std::inserter(secondFragmentCellIds, secondFragmentCellIds.begin()),
 			[](CellDescription const& cell) { return cell.id; });
-		Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(1), secondFragmentCellIds);
+		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(1), secondFragmentCellIds);
 		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}

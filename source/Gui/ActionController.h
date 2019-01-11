@@ -73,7 +73,7 @@ private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
 private:
-	void settingUpNewSimulation();
+	void settingUpNewSimulation(SimulationConfig const& config);
 	void updateZoomFactor();
 	void updateActionsEnableState();
 
