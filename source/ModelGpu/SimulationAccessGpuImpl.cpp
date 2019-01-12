@@ -31,6 +31,8 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
 	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
 	_dataToUpdate.particles.insert(_dataToUpdate.particles.end(), desc.particles.begin(), desc.particles.end());
 
+	metricCorrection(_dataToUpdate);
+
 	auto cudaBridge = _context->getGpuThreadController()->getCudaBridge();
 	cudaBridge->requireData();
 }
@@ -141,3 +143,27 @@ void SimulationAccessGpuImpl::createDataFromGpuModel()
 	cudaBridge->unlockData();
 }
 
+void SimulationAccessGpuImpl::metricCorrection(DataChangeDescription & data) const
+{
+	SpaceProperties* space = _context->getSpaceProperties();
+	for (auto& cluster : data.clusters) {
+		QVector2D origPos = cluster->pos.getValue();
+		auto pos = origPos;
+		space->correctPosition(pos);
+		auto correctionDelta = pos - origPos;
+		if (!correctionDelta.isNull()) {
+			cluster->pos.setValue(pos);
+		}
+		for (auto& cell : cluster->cells) {
+			cell->pos.setValue(cell->pos.getValue() + correctionDelta);
+		}
+	}
+	for (auto& particle : data.particles) {
+		QVector2D origPos = particle->pos.getValue();
+		auto pos = origPos;
+		space->correctPosition(pos);
+		if (pos != origPos) {
+			particle->pos.setValue(pos);
+		}
+	}
+}

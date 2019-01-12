@@ -208,7 +208,6 @@ SimulationDataForAccess DataConverter::getGpuData() const
 
 DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) const
 {
-	//TODO: correct position via metric
 	DataDescription result;
 	list<uint64_t> connectingCellIds;
 	for (int i = 0; i < _cudaData.numClusters; ++i) {
