@@ -1,5 +1,5 @@
+#include <boost/range/adaptors.hpp>
 #include <gtest/gtest.h>
-
 #include <QEventLoop>
 
 #include "Base/ServiceLocator.h"
@@ -56,7 +56,7 @@ DataDescriptionTransferGpuTest::~DataDescriptionTransferGpuTest()
 	delete _controller;
 }
 
-TEST_F(DataDescriptionTransferGpuTest, testCreateClusterDescriptionWithCompleteCell)
+TEST_F(DataDescriptionTransferGpuTest, testCreateClusterWithCompleteCell)
 {
 	DataDescription dataBefore;
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
@@ -72,7 +72,7 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateClusterDescriptionWithCompleteC
 * Situation: change particle properties
 * Expected result: particle in simulation changed
 */
-TEST_F(DataDescriptionTransferGpuTest, testChangeParticleDescription)
+TEST_F(DataDescriptionTransferGpuTest, testChangeParticle)
 {
 	DataDescription dataBefore;
 	auto particleEnergy1 = _parameters->cellMinEnergy / 2.0;
@@ -92,4 +92,37 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeParticleDescription)
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
 	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+}
+
+/**
+* Situation: create cluster and particle at a position outside universe
+* Expected result: cluster and particle should be positioned inside universe due to torus topology
+*/
+TEST_F(DataDescriptionTransferGpuTest, testCreateDataOutsideBoundaries)
+{
+	auto universeSize = _spaceProp->getSize();
+	DataDescription dataBefore;
+	dataBefore.addCluster(createHorizontalCluster(3, QVector2D{ 2.5f * universeSize.x, 2.5f * universeSize.y}));
+	dataBefore.addParticle(createParticle(QVector2D{ 2.5f * universeSize.x + 2.0f, 2.5f * universeSize.y + 2.0f }));
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } });
+	EXPECT_EQ(1, dataAfter.clusters->size());
+	auto origCluster = dataBefore.clusters->at(0);
+	auto newCluster = dataAfter.clusters->at(0);
+	EXPECT_TRUE(isCompatible(*origCluster.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newCluster.pos));
+
+	unordered_map<uint64_t, CellDescription> origCellById = IntegrationTestHelper::getCellByCellId(dataBefore);
+	unordered_map<uint64_t, CellDescription> newCellById = IntegrationTestHelper::getCellByCellId(dataAfter);
+	for (CellDescription const& origCell : origCellById | boost::adaptors::map_values) {
+		CellDescription newCell = newCellById.at(origCell.id);
+		EXPECT_TRUE(isCompatible(*origCell.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newCell.pos));
+	}
+
+	EXPECT_EQ(1, dataAfter.particles->size());
+	auto origParticle = dataBefore.particles->at(0);
+	auto newParticle = dataAfter.particles->at(0);
+	EXPECT_TRUE(isCompatible(*origParticle.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newParticle.pos));
+
 }
