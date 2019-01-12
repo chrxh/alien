@@ -18,7 +18,7 @@ SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(C
 	context->init(spaceProp, config.symbolTable, config.parameters);
 
 	auto controller = new SimulationControllerGpuImpl();
-	controller->init(context);
+	controller->init(context, timestepAtBeginning);
 	return controller;
 }
 
