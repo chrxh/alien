@@ -15,10 +15,6 @@ SimulationContextGpuImpl::SimulationContextGpuImpl(QObject* parent /*= nullptr*/
 {
 }
 
-SimulationContextGpuImpl::~SimulationContextGpuImpl()
-{
-}
-
 void SimulationContextGpuImpl::init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
 {
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
