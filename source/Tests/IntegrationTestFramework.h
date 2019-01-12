@@ -23,7 +23,8 @@ protected:
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none) const;	//boost::none means random
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0) const;
-	ParticleDescription createParticle() const;
+	ParticleDescription createParticle(
+		optional<QVector2D> const& pos = boost::none) const;
 
 	ModelBasicBuilderFacade* _basicFacade = nullptr;
 	ModelCpuBuilderFacade* _cpuFacade = nullptr;

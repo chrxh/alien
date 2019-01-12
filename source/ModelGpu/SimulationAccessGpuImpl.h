@@ -27,6 +27,8 @@ private:
 	void createImageFromGpuModel();
 	void createDataFromGpuModel();
 
+	void metricCorrection(DataChangeDescription& data) const;
+
 	SimulationContextGpuImpl* _context = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 
