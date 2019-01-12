@@ -21,12 +21,14 @@ SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nul
 	_frameTimer->start(updateFrameInMilliSec);
 }
 
-void SimulationControllerGpuImpl::init(SimulationContext * context)
+void SimulationControllerGpuImpl::init(SimulationContext * context, uint timestep)
 {
+	_timestep = timestep;
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
 	connect(_context->getGpuThreadController(), &ThreadController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
 		++_timestepsPerSecond;
+		++_timestep;
 		if (_mode == RunningMode::OpenEndedSimulation) {
 			if (_timeSinceLastStart.elapsed() > updateFrameInMilliSec*_displayedFramesSinceLastStart) {
 				++_displayedFramesSinceLastStart;
@@ -68,7 +70,7 @@ SimulationContext * SimulationControllerGpuImpl::getContext() const
 
 uint SimulationControllerGpuImpl::getTimestep() const
 {
-	return 0;
+	return _timestep;
 }
 
 void SimulationControllerGpuImpl::setRestrictTimestepsPreSecond(optional<int> tps)

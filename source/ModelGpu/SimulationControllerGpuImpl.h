@@ -13,7 +13,7 @@ public:
 	SimulationControllerGpuImpl(QObject* parent = nullptr);
 	virtual ~SimulationControllerGpuImpl() = default;
 
-	virtual void init(SimulationContext* context);
+	virtual void init(SimulationContext* context, uint timestep);
 	virtual void setRun(bool run) override;
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
@@ -30,6 +30,7 @@ private:
 	QTime _timeSinceLastStart;
 	int _timestepsPerSecond = 0;
 	int _displayedFramesSinceLastStart = 0;
+	uint _timestep = 0;
 	QTimer* _frameTimer = nullptr;
 	QTimer* _oneSecondTimer = nullptr;
 };

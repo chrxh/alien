@@ -11,7 +11,7 @@ class SimulationContextGpuImpl
 	Q_OBJECT
 public:
 	SimulationContextGpuImpl(QObject* parent = nullptr);
-	virtual ~SimulationContextGpuImpl();
+	virtual ~SimulationContextGpuImpl() = default;
 
 	void init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters);
 
