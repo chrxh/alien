@@ -16,21 +16,21 @@ public:
 template<typename EntityType>
 inline bool SerializationHelper::loadFromFile(string const & filename, std::function<EntityType(string const&)> deserializer, EntityType & entity)
 {
-	std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
-
-	size_t size;
-	string data;
-
-	stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-	data.resize(size);
-	stream.read(&data[0], size);
-	stream.close();
-
-	if (stream.fail()) {
-		return false;
-	}
-
 	try {
+		std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
+
+		size_t size;
+		string data;
+
+		stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+		data.resize(size);
+		stream.read(&data[0], size);
+		stream.close();
+
+		if (stream.fail()) {
+			return false;
+		}
+
 		entity = deserializer(data);
 		return true;
 	}

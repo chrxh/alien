@@ -118,7 +118,7 @@ ParticleDescription IntegrationTestFramework::createParticle(optional<QVector2D>
 {
 	auto pos = optPos ? *optPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
-	return ParticleDescription().setEnergy(_parameters->cellMinEnergy).setPos(pos).setVel(vel).setId(_numberGen->getId());
+	return ParticleDescription().setEnergy(_parameters->cellMinEnergy / 2).setPos(pos).setVel(vel).setId(_numberGen->getId());
 }
 
 
