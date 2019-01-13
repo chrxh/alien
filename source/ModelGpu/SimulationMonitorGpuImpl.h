@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimulationMonitorGpu.h"
+#include "DefinitionsImpl.h"
 
 class SimulationMonitorGpuImpl
 	: public SimulationMonitorGpu
@@ -16,6 +17,14 @@ public:
 	virtual MonitorData const& retrieveData() override;
 
 private:
+	Q_SLOT void dataObtainedFromGpu();
+
+	void calcMonitorData(SimulationDataForAccess const& access);
+
+private:
+	list<QMetaObject::Connection> _connections;
+
+	SimulationContextGpuImpl* _context = nullptr;
 	MonitorData _data;
 };
 
