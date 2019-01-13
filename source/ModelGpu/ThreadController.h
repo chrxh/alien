@@ -15,7 +15,7 @@ public:
 
 	void init(SpaceProperties *metric);
 
-	virtual CudaWorker* getCudaBridge() const;
+	virtual CudaWorker* getCudaWorker() const;
 
 	void calculate(RunningMode mode);
 
