@@ -15,16 +15,17 @@ public:
 
 protected:
 
+	//boost::none means random
 	ClusterDescription createHorizontalCluster(int numCells, 
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none,
-		optional<double> const& angularVel = boost::none) const;	//boost::none means random
+		optional<double> const& angularVel = boost::none) const;	
 	ClusterDescription createVerticalCluster(int numCells,
 		optional<QVector2D> const& centerPos = boost::none,
-		optional<QVector2D> const& centerVel = boost::none) const;	//boost::none means random
+		optional<QVector2D> const& centerVel = boost::none) const;	
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	ParticleDescription createParticle(
-		optional<QVector2D> const& pos = boost::none) const;
+		optional<QVector2D> const& pos = boost::none) const;		
 
 	ModelBasicBuilderFacade* _basicFacade = nullptr;
 	ModelCpuBuilderFacade* _cpuFacade = nullptr;
