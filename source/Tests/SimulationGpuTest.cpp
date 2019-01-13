@@ -34,6 +34,7 @@ public:
 protected:
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
 	Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
+	double calcEnergy(DataDescription const& data) const;
 	double calcKineticEnergy(ClusterDescription const& cluster) const;
 
 protected:
@@ -64,15 +65,8 @@ SimulationGpuTest::~SimulationGpuTest()
 
 void SimulationGpuTest::checkEnergy(DataDescription const& origData, DataDescription const& newData) const
 {
-	auto energyBefore = 0.0;
-	for (auto const& cluster : *origData.clusters) {
-		energyBefore += calcKineticEnergy(cluster);
-	}
-
-	auto energyAfter = 0.0;
-	for (auto const& cluster : *newData.clusters) {
-		energyAfter += calcKineticEnergy(cluster);
-	}
+	auto energyBefore = calcEnergy(origData);
+	auto energyAfter = calcEnergy(newData);
 
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
 }
@@ -87,6 +81,24 @@ Physics::Velocities SimulationGpuTest::calcVelocitiesOfClusterPart(ClusterDescri
 		}
 	}
 	return Physics::velocitiesOfCenter({ *cluster.vel, *cluster.angularVel }, relPositionOfMasses);
+}
+
+double SimulationGpuTest::calcEnergy(DataDescription const & data) const
+{
+	auto result = 0.0;
+	if (data.clusters) {
+		for (auto const& cluster : *data.clusters) {
+			result += calcKineticEnergy(cluster);
+			todo: add inner energy
+		}
+	}
+	if (data.particles) {
+		for (auto const& particle : *data.particles) {
+			result += *particle.energy;
+		}
+	}
+
+	return result;
 }
 
 double SimulationGpuTest::calcKineticEnergy(ClusterDescription const& cluster) const
@@ -318,10 +330,10 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 }
 
 /**
-* Situation: collision of two particles
+* Situation: fusion of two particles
 * Expected result: one particle remains with average velocity
 */
-TEST_F(SimulationGpuTest, testCollisionOfSingleParticles)
+TEST_F(SimulationGpuTest, testFusionOfSingleParticles)
 {
 	DataDescription origData;
 	auto particleEnergy = _parameters->cellMinEnergy / 2.0;
@@ -344,6 +356,24 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleParticles)
 	ASSERT_EQ(1, newData.particles->size());
 	auto newParticle = newData.particles->front();
 	EXPECT_TRUE(isCompatible(QVector2D(0, 0), *newParticle.vel));
+}
+
+/**
+* Situation: fusion of two particles
+* Expected result: one particle remains with average velocity
+*/
+TEST_F(SimulationGpuTest, testFusionOfManyParticles)
+{
+	DataDescription origData;
+	for (int i = 0; i < 100000; ++i) {
+		origData.addParticle(createParticle());
+	}
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(300, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	checkEnergy(origData, newData);
 }
 
 /**
@@ -415,6 +445,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 		}
 	}
 }
+
 /**
 * Situation: cluster with line structure where middle cell has low energy
 * Expected result: cluster decomposes into 2 parts
