@@ -21,13 +21,16 @@ public:
 	virtual DataDescription const& retrieveData() override;
 
 private:
-	Q_SLOT void dataRequiredFromGpu();
+	Q_SLOT void dataObtainedFromGpu();
 	void updateDataToGpuModel();
 
 	void createImageFromGpuModel();
 	void createDataFromGpuModel();
 
 	void metricCorrection(DataChangeDescription& data) const;
+
+private:
+	list<QMetaObject::Connection> _connections;
 
 	SimulationContextGpuImpl* _context = nullptr;
 	NumberGenerator* _numberGen = nullptr;
