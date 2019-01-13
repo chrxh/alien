@@ -69,7 +69,11 @@ __inline__ __device__ void BlockProcessorForParticles::processingCollision(int s
 				particle->vel = add(mul(particle->vel, factor1), mul(otherParticle->vel, factor2));
 				particle->energy += otherParticle->energy;
 				otherParticle->energy = 0.0f;
+			}
+			if (0 == particleLocked) {
 				particle->locked = 0;
+			}
+			if (0 == otherParticleLocked) {
 				otherParticle->locked = 0;
 			}
 		}
