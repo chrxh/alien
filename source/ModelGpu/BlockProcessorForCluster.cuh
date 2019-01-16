@@ -75,7 +75,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 		for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
 			entries[i].tag = -1;
 			entries[i].cluster.pos = { 0.0f, 0.0f };
-			entries[i].cluster.vel = _modifiedCluster.vel;		//TODO: calculate
+			entries[i].cluster.vel = { 0.0f, 0.0f };// _modifiedCluster.vel;		//TODO: calculate
 			entries[i].cluster.angle = _modifiedCluster.angle;
 			entries[i].cluster.angularVel = _modifiedCluster.angularVel;		//TODO: calculate
 			entries[i].cluster.angularMass = 0.0f;
@@ -94,8 +94,13 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 				atomicAdd(&entries[index].cluster.numCells, 1);
 				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
 				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
+
+				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+				atomicAdd(&entries[index].cluster.vel.x, tangentialVel.x);
+				atomicAdd(&entries[index].cluster.vel.y, tangentialVel.y);
+
 				entries[index].cluster.id = _data->numberGen.createNewId_kernel();
-				CudaPhysics::calcRotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
+				CudaPhysics::rotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
 				foundMatch = true;
 				break;
 			}
@@ -103,6 +108,11 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 				atomicAdd(&entries[index].cluster.numCells, 1);
 				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
 				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
+
+				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+				atomicAdd(&entries[index].cluster.vel.x, tangentialVel.x);
+				atomicAdd(&entries[index].cluster.vel.y, tangentialVel.y);
+
 				foundMatch = true;
 				break;
 			}
@@ -112,6 +122,11 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.numCells, 1);
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.x, cell.absPos.x);
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.y, cell.absPos.y);
+
+			float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.x, tangentialVel.x);
+			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.y, tangentialVel.y);
+
 			entries[MAX_DECOMPOSITIONS - 1].cluster.decompositionRequired = true;
 		}
 	}
@@ -124,6 +139,8 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 	for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
 		entries[index].cluster.pos.x /= entries[index].cluster.numCells;
 		entries[index].cluster.pos.y /= entries[index].cluster.numCells;
+		entries[index].cluster.vel.x /= entries[index].cluster.numCells;
+		entries[index].cluster.vel.y /= entries[index].cluster.numCells;
 		entries[index].cluster.cells = _data->cellsAC2.getNewSubarray(entries[index].cluster.numCells);
 		entries[index].cluster.numCells = 0;
 
@@ -171,7 +188,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithoutDe
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
 		newCells = _data->cellsAC2.getNewSubarray(_modifiedCluster.numCells);
-		CudaPhysics::calcRotationMatrix(_modifiedCluster.angle, rotMatrix);
+		CudaPhysics::rotationMatrix(_modifiedCluster.angle, rotMatrix);
 		_modifiedCluster.numCells = 0;
 		_modifiedCluster.cells = newCells;
 	}
