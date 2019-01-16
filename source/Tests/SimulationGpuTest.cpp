@@ -33,8 +33,11 @@ public:
 
 protected:
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
+	void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
 	Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
 	double calcEnergy(DataDescription const& data) const;
+	double calcEnergy(ClusterDescription const& cluster) const;
+	double calcKineticEnergy(DataDescription const& data) const;
 	double calcKineticEnergy(ClusterDescription const& cluster) const;
 
 protected:
@@ -71,6 +74,14 @@ void SimulationGpuTest::checkEnergy(DataDescription const& origData, DataDescrip
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
 }
 
+void SimulationGpuTest::checkKineticEnergy(DataDescription const & origData, DataDescription const & newData) const
+{
+	auto energyBefore = calcKineticEnergy(origData);
+	auto energyAfter = calcKineticEnergy(newData);
+
+	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
+}
+
 Physics::Velocities SimulationGpuTest::calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const
 {
 	CHECK(!cellIds.empty());
@@ -88,8 +99,7 @@ double SimulationGpuTest::calcEnergy(DataDescription const & data) const
 	auto result = 0.0;
 	if (data.clusters) {
 		for (auto const& cluster : *data.clusters) {
-			result += calcKineticEnergy(cluster);
-			todo: add inner energy
+			result += calcEnergy(cluster);
 		}
 	}
 	if (data.particles) {
@@ -98,6 +108,28 @@ double SimulationGpuTest::calcEnergy(DataDescription const & data) const
 		}
 	}
 
+	return result;
+}
+
+double SimulationGpuTest::calcEnergy(ClusterDescription const & cluster) const
+{
+	auto result = calcKineticEnergy(cluster);
+	if (cluster.cells) {
+		for (CellDescription const& cell : *cluster.cells) {
+			result += *cell.energy;
+		}
+	}
+	return result;
+}
+
+double SimulationGpuTest::calcKineticEnergy(DataDescription const & data) const
+{
+	auto result = 0.0;
+	if (data.clusters) {
+		for (auto const& cluster : *data.clusters) {
+			result += calcKineticEnergy(cluster);
+		}
+	}
 	return result;
 }
 
@@ -244,7 +276,7 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoClusters)
 		EXPECT_TRUE(isCompatible(QVector2D(0, 0), *cluster.vel));
 	}
 
-	checkEnergy(origData, newData);
+	checkKineticEnergy(origData, newData);
 }
 
 /**
@@ -284,7 +316,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
 
-	checkEnergy(origData, newData);
+	checkKineticEnergy(origData, newData);
 }
 
 /**
@@ -326,7 +358,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 		EXPECT_TRUE(abs(*cluster.angularVel) < 0.01);
 	}
 
-	checkEnergy(origData, newData);
+	checkKineticEnergy(origData, newData);
 }
 
 /**
@@ -469,7 +501,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 		ClusterDescription firstFragment = newData.clusters->at(0);
 		std::transform(firstFragment.cells->begin(), firstFragment.cells->end(), std::inserter(firstFragmentCellIds, firstFragmentCellIds.begin()),
 			[](CellDescription const& cell) { return cell.id; });
-		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(0), firstFragmentCellIds);
+		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->front(), firstFragmentCellIds);
 		EXPECT_TRUE(isCompatible(velocities.linear, *firstFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *firstFragment.angularVel));
 	}
@@ -478,7 +510,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 		ClusterDescription secondFragment = newData.clusters->at(1);
 		std::transform(secondFragment.cells->begin(), secondFragment.cells->end(), std::inserter(secondFragmentCellIds, secondFragmentCellIds.begin()),
 			[](CellDescription const& cell) { return cell.id; });
-		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->at(1), secondFragmentCellIds);
+		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->front(), secondFragmentCellIds);
 		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}
