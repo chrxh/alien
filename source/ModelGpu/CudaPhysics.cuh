@@ -18,8 +18,9 @@ public:
 	__device__ __inline__ static void calcCollision(ClusterData *clusterA, CollisionEntry *collisionEntry, BasicMap const& map);
 	__device__ __inline__ static void getCollisionDataForCell(Map<CellData> const &map, CellData *cell
 		, CollisionData &collisionData);
-	__inline__ __device__ static void calcRotationMatrix(float angle, float(&rotMatrix)[2][2]);
+	__inline__ __device__ static void rotationMatrix(float angle, float(&rotMatrix)[2][2]);
 	__inline__ __device__ static void angleCorrection(float &angle);
+	__inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
 
 private:
 	__device__ __inline__ static void rotateQuarterCounterClockwise(float2 &v);
@@ -295,7 +296,7 @@ __device__ __inline__ void CudaPhysics::getCollisionDataForCell(Map<CellData> co
 	updateCollisionData(absPos, cell, map, collisionData);
 }
 
-__inline__ __device__ void CudaPhysics::calcRotationMatrix(float angle, float(&rotMatrix)[2][2])
+__inline__ __device__ void CudaPhysics::rotationMatrix(float angle, float(&rotMatrix)[2][2])
 {
 	float sinAngle = __sinf(angle*DEG_TO_RAD);
 	float cosAngle = __cosf(angle*DEG_TO_RAD);
@@ -316,4 +317,9 @@ __inline__ __device__ void CudaPhysics::angleCorrection(float &angle)
 	float fracPart = angle - intPart;
 	angleCorrection(intPart);
 	angle = (float)intPart + fracPart;
+}
+
+__inline__ __device__ float2 CudaPhysics::tangentialVelocity(float2 const& r, float2 const& vel, float angularVel)
+{
+	return { vel.x - angularVel*r.y * DEG_TO_RAD, vel.y + angularVel*r.x * DEG_TO_RAD };
 }

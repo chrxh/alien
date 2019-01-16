@@ -185,7 +185,6 @@ QVector2D Physics::rotateClockwise (QVector2D v, double angle)
 
 QVector2D Physics::rotateQuarterCounterClockwise (QVector2D v)
 {
-
     //90 degree counterclockwise rotation of vector r
     double temp(v.x());
     v.setX(v.y());
