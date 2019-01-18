@@ -161,8 +161,8 @@ auto Physics::velocitiesOfCenter(Velocities const& velocities, vector<QVector2D>
 	double angularMass = Physics::angularMass(relPositionOfMasses);
 	for (QVector2D const& relPositionOfMass : relPositionOfMasses) {
 		QVector2D tangentialVel = Physics::tangentialVelocity(relPositionOfMass, velocities.linear, velocities.angular);
-		QVector2D v = tangentialVel - result.linear;
-		angularMomentum += Physics::angularMomentum(relPositionOfMass, v);
+		QVector2D relVel = tangentialVel - result.linear;
+		angularMomentum += Physics::angularMomentum(relPositionOfMass, relVel);
 	}
 
 	result.angular = Physics::angularVelocity(angularMomentum, angularMass);

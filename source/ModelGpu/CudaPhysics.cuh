@@ -21,6 +21,8 @@ public:
 	__inline__ __device__ static void rotationMatrix(float angle, float(&rotMatrix)[2][2]);
 	__inline__ __device__ static void angleCorrection(float &angle);
 	__inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
+	__inline__ __device__ static float angularMomentum(float2 const& positionFromCenter, float2 const& velocityOfCenter);
+	__inline__ __device__ static float angularVelocity(float angularMomentum, float angularMass);
 
 private:
 	__device__ __inline__ static void rotateQuarterCounterClockwise(float2 &v);
@@ -40,6 +42,7 @@ private:
 #define PI 3.1415926535897932384626433832795
 #define DEG_TO_RAD PI/180.0
 #define RAD_TO_DEG 180.0/PI
+#define ALIEN_PRECISION 0.00001
 
 __device__ __inline__ void CudaPhysics::rotateQuarterCounterClockwise(float2 &v)
 {
@@ -322,4 +325,17 @@ __inline__ __device__ void CudaPhysics::angleCorrection(float &angle)
 __inline__ __device__ float2 CudaPhysics::tangentialVelocity(float2 const& r, float2 const& vel, float angularVel)
 {
 	return { vel.x - angularVel*r.y * DEG_TO_RAD, vel.y + angularVel*r.x * DEG_TO_RAD };
+}
+
+__inline__ __device__ float CudaPhysics::angularMomentum(float2 const & positionFromCenter, float2 const & velocityOfCenter)
+{
+	return positionFromCenter.x*velocityOfCenter.y - positionFromCenter.y*velocityOfCenter.x;
+}
+
+__inline__ __device__ float CudaPhysics::angularVelocity(float angularMomentum, float angularMass)
+{
+	if (std::abs(angularMass) < ALIEN_PRECISION)
+		return 0;
+	else
+		return angularMomentum / angularMass * RAD_TO_DEG;
 }

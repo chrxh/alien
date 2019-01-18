@@ -491,7 +491,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 	origData.clusters->at(0).cells->at(15).energy = lowEnergy;
 
 	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(3, _controller);
+	IntegrationTestHelper::runSimulation(2, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(2, newData.clusters->size());

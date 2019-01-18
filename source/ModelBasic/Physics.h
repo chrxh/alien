@@ -25,7 +25,7 @@ public:
 	static double linearKineticEnergy(double mass, QVector2D vel);
 	static double rotationalKineticEnergy(double angularMass, double angularVel);
 	static double angularMass(vector<QVector2D> const& relPositionOfMasses);
-	static double angularMomentum(QVector2D positionFromCenter, QVector2D v);
+	static double angularMomentum(QVector2D positionFromCenter, QVector2D velocityOfCenter);
 	static double angularVelocity(double angularMassOld, double angularMassNew, double angularVelOld);
     static double angularVelocity (double angularMomentum, double angularMass);
 
