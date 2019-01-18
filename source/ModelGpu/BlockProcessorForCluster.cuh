@@ -67,6 +67,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 	struct Entry {
 		int tag;
 		float rotMatrix[2][2];
+		float angularMassOfOrigCenter;
 		ClusterData cluster;
 	};
 	__shared__ Entry entries[MAX_DECOMPOSITIONS];
@@ -74,10 +75,11 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 		numDecompositions = 0;
 		for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
 			entries[i].tag = -1;
+			entries[i].angularMassOfOrigCenter = 0.0f;
 			entries[i].cluster.pos = { 0.0f, 0.0f };
-			entries[i].cluster.vel = { 0.0f, 0.0f };// _modifiedCluster.vel;		//TODO: calculate
+			entries[i].cluster.vel = { 0.0f, 0.0f };
 			entries[i].cluster.angle = _modifiedCluster.angle;
-			entries[i].cluster.angularVel = _modifiedCluster.angularVel;		//TODO: calculate
+			entries[i].cluster.angularVel = 0.0f;			
 			entries[i].cluster.angularMass = 0.0f;
 			entries[i].cluster.numCells = 0;
 			entries[i].cluster.decompositionRequired = false;
@@ -95,9 +97,11 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
 				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
 
-				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+				auto tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
 				atomicAdd(&entries[index].cluster.vel.x, tangentialVel.x);
 				atomicAdd(&entries[index].cluster.vel.y, tangentialVel.y);
+				auto angularMass = cell.relPos.x * cell.relPos.x + cell.relPos.y * cell.relPos.y;
+				atomicAdd(&entries[index].angularMassOfOrigCenter, angularMass);
 
 				entries[index].cluster.id = _data->numberGen.createNewId_kernel();
 				CudaPhysics::rotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
@@ -112,6 +116,8 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
 				atomicAdd(&entries[index].cluster.vel.x, tangentialVel.x);
 				atomicAdd(&entries[index].cluster.vel.y, tangentialVel.y);
+				auto angularMass = cell.relPos.x * cell.relPos.x + cell.relPos.y * cell.relPos.y;
+				atomicAdd(&entries[index].angularMassOfOrigCenter, angularMass);
 
 				foundMatch = true;
 				break;
@@ -126,6 +132,8 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 			float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.x, tangentialVel.x);
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.y, tangentialVel.y);
+			auto angularMass = cell.relPos.x * cell.relPos.x + cell.relPos.y * cell.relPos.y;
+			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].angularMassOfOrigCenter, angularMass);
 
 			entries[MAX_DECOMPOSITIONS - 1].cluster.decompositionRequired = true;
 		}
@@ -156,6 +164,12 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 				ClusterData* newCluster = newClusters[index];
 				float2 deltaPos = { cell.absPos.x - newCluster->pos.x, cell.absPos.y - newCluster->pos.y };
 				newCluster->angularMass += deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
+
+				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+				float2 relVel = { tangentialVel.x - newCluster->vel.x, tangentialVel.y - newCluster->vel.y };
+				float angularMomentum = CudaPhysics::angularMomentum(cell.relPos, relVel);
+				float angularVel = CudaPhysics::angularVelocity(angularMomentum, entries[index].angularMassOfOrigCenter);
+				atomicAdd(&newCluster->angularVel, angularVel);
 
 				float(&invRotMatrix)[2][2] = entries[index].rotMatrix;
 				swap(invRotMatrix[0][1], invRotMatrix[1][0]);
