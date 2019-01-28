@@ -55,6 +55,7 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 	cudaCluster.angularVel = *clusterDesc.angularVel;
 	cudaCluster.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
 	cudaCluster.decompositionRequired = false;
+	cudaCluster.locked = 0;
 	unordered_map<uint64_t, CellData*> cellByIds;
 	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
