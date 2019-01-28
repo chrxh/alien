@@ -10,9 +10,13 @@
 #include "BlockProcessorForCluster.cuh"
 #include "BlockProcessorForParticles.cuh"
 
+/************************************************************************/
+/* Clusters																*/
+/************************************************************************/
+
 __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 {
-	__shared__ BlockProcessorForCluster blockProcessor;
+	__shared__ BlockProcessorForCluster1 blockProcessor;
 	if (0 == threadIdx.x) {
 		blockProcessor.init(data, clusterIndex);
 	}
@@ -43,6 +47,41 @@ __global__ void clusterMovement(SimulationDataInternal data)
 		clusterMovement(data, clusterIndex);
 	}
 }
+
+__device__ void clusterCollision(SimulationDataInternal &data, int clusterIndex)
+{
+	__shared__ BlockProcessorForCluster2 blockProcessor;
+	if (0 == threadIdx.x) {
+		blockProcessor.init(data, clusterIndex);
+	}
+	__syncthreads();
+
+	int startCellIndex;
+	int endCellIndex;
+	calcPartition(blockProcessor.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+
+	blockProcessor.processingCollision(startCellIndex, endCellIndex);
+}
+
+__global__ void clusterCollision(SimulationDataInternal data)
+{
+	int indexResource = blockIdx.x;
+	int numEntities = data.clustersAC1.getNumEntries();
+	if (indexResource >= numEntities) {
+		return;
+	}
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
+	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+		clusterCollision(data, clusterIndex);
+	}
+}
+
+/************************************************************************/
+/* Particles															*/
+/************************************************************************/
 
 __global__ void particleCollision(SimulationDataInternal data)
 {
