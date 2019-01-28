@@ -11,6 +11,8 @@ struct ParticleData
 	float energy;
 	float2 pos;
 	float2 vel;
+
+	//auxiliary data
 	int locked;	//0 = unlocked, 1 = locked
 };
 
@@ -26,6 +28,7 @@ struct CellData
 	CellData* connections[MAX_CELL_BONDS];
 	CellData* nextTimestep;
 
+	//auxiliary data
 	int protectionCounter;
 	bool alive;
 	int tag;
@@ -42,7 +45,9 @@ struct ClusterData
 	int numCells;
 	CellData* cells;
 
+	//auxiliary data
 	bool decompositionRequired;
+	int locked;	//0 = unlocked, 1 = locked
 };
 
 struct SimulationDataForAccess
