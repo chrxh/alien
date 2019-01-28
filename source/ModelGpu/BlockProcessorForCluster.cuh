@@ -9,7 +9,7 @@
 #include "CudaPhysics.cuh"
 #include "Map.cuh"
 
-class BlockProcessorForCluster
+class BlockProcessorForCluster1
 {
 public:
 	__inline__ __device__ void init(SimulationDataInternal& data, int clusterIndex);
@@ -43,11 +43,29 @@ private:
 	CollisionData _collisionData;
 };
 
+//experimental
+class BlockProcessorForCluster2
+{
+public:
+	__inline__ __device__ void init(SimulationDataInternal& data, int clusterIndex);
+	__inline__ __device__ int getNumCells() const;
+
+	//synchronizing threads
+	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);	//uses new maps
+
+private:
+
+	SimulationDataInternal* _data;
+	Map<CellData> _cellMap;
+
+	ClusterData *_cluster;
+};
+
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void BlockProcessorForCluster::init(SimulationDataInternal& data, int clusterIndex)
+__inline__ __device__ void BlockProcessorForCluster1::init(SimulationDataInternal& data, int clusterIndex)
 {
 	_data = &data;
 	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
@@ -56,12 +74,12 @@ __inline__ __device__ void BlockProcessorForCluster::init(SimulationDataInternal
 	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 }
 
-__inline__ __device__ int BlockProcessorForCluster::getNumOrigCells() const
+__inline__ __device__ int BlockProcessorForCluster1::getNumOrigCells() const
 {
 	return _origCluster->numCells;
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster1::processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex)
 {
 	__shared__ int numDecompositions;
 	struct Entry {
@@ -193,7 +211,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithDecom
 
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithoutDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster1::processingDataCopyWithoutDecomposition(int startCellIndex, int endCellIndex)
 {
 	__shared__ ClusterData* newCluster;
 	__shared__ CellData* newCells;
@@ -227,18 +245,20 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopyWithoutDe
 	__syncthreads();
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingMovementAndCollision(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster1::processingMovementAndCollision(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
+/*
 		CudaPhysics::getCollisionDataForCell(_cellMap, origCell, _collisionData);
+*/
 		killCloseCells(_cellMap, origCell);
 	}
 
 	__syncthreads();
 
 	if (0 == threadIdx.x) {
-
+/*
 		for (int i = 0; i < _collisionData.numEntries; ++i) {
 			CollisionEntry* entry = &_collisionData.entries[i];
 			float numCollisions = static_cast<float>(entry->numCollisions);
@@ -248,6 +268,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovementAndCollis
 			entry->normalVec.y /= numCollisions;
 			CudaPhysics::calcCollision(&_modifiedCluster, entry, _cellMap);
 		}
+*/
 
 		_modifiedCluster.angle += _modifiedCluster.angularVel;
 		CudaPhysics::angleCorrection(_modifiedCluster.angle);
@@ -257,7 +278,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingMovementAndCollis
 	__syncthreads();
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingDataCopy(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster1::processingDataCopy(int startCellIndex, int endCellIndex)
 {
 	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive) {
 		__syncthreads();
@@ -271,7 +292,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDataCopy(int star
 	}
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster1::processingDecomposition(int startCellIndex, int endCellIndex)
 {
 	if (_origCluster->decompositionRequired) {
 		__shared__ bool changes;
@@ -311,7 +332,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingDecomposition(int
 	}
 }
 
-__inline__ __device__ void BlockProcessorForCluster::processingRadiation(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster1::processingRadiation(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
@@ -320,7 +341,7 @@ __inline__ __device__ void BlockProcessorForCluster::processingRadiation(int sta
 	__syncthreads();
 }
 
-__inline__ __device__  void BlockProcessorForCluster::copyAndUpdateCell(CellData *origCell, CellData* newCell
+__inline__ __device__  void BlockProcessorForCluster1::copyAndUpdateCell(CellData *origCell, CellData* newCell
 	, ClusterData* newCluster, float2 const& clusterPos, float (&rotMatrix)[2][2])
 {
 	CellData cellCopy = *origCell;
@@ -339,7 +360,7 @@ __inline__ __device__  void BlockProcessorForCluster::copyAndUpdateCell(CellData
 	origCell->nextTimestep = newCell;
 }
 
-__inline__ __device__ void BlockProcessorForCluster::correctCellConnections(CellData* cell)
+__inline__ __device__ void BlockProcessorForCluster1::correctCellConnections(CellData* cell)
 {
 	int numConnections = cell->numConnections;
 	for (int i = 0; i < numConnections; ++i) {
@@ -347,7 +368,7 @@ __inline__ __device__ void BlockProcessorForCluster::correctCellConnections(Cell
 	}
 }
 
-__inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cell)
+__inline__ __device__ void BlockProcessorForCluster1::cellRadiation(CellData *cell)
 {
 	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
 		auto particle = createNewParticle();
@@ -377,7 +398,7 @@ __inline__ __device__ void BlockProcessorForCluster::cellRadiation(CellData *cel
 	}
 }
 
-__inline__ __device__ ParticleData* BlockProcessorForCluster::createNewParticle()
+__inline__ __device__ ParticleData* BlockProcessorForCluster1::createNewParticle()
 {
 	ParticleData* particle = _data->particlesAC2.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
@@ -385,7 +406,7 @@ __inline__ __device__ ParticleData* BlockProcessorForCluster::createNewParticle(
 	return particle;
 }
 
-__inline__ __device__ void BlockProcessorForCluster::killCloseCells(Map<CellData> const & map, CellData * cell)
+__inline__ __device__ void BlockProcessorForCluster1::killCloseCells(Map<CellData> const & map, CellData * cell)
 {
 	if (cell->protectionCounter > 0) {
 		return;
@@ -415,7 +436,7 @@ __inline__ __device__ void BlockProcessorForCluster::killCloseCells(Map<CellData
 	killCloseCell(absPos, map, cell);
 }
 
-__inline__ __device__ void BlockProcessorForCluster::killCloseCell(float2 const & pos, Map<CellData> const & map, CellData * cell)
+__inline__ __device__ void BlockProcessorForCluster1::killCloseCell(float2 const & pos, Map<CellData> const & map, CellData * cell)
 {
 	CellData* mapCell = map.getFromOrigMap(pos);
 	if (!mapCell || mapCell == cell) {
@@ -431,4 +452,172 @@ __inline__ __device__ void BlockProcessorForCluster::killCloseCell(float2 const 
 			_modifiedCluster.decompositionRequired = true;
 		}
 	}
+}
+
+__inline__ __device__ void BlockProcessorForCluster2::init(SimulationDataInternal & data, int clusterIndex)
+{
+	_data = &data;
+	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
+}
+
+__inline__ __device__ int BlockProcessorForCluster2::getNumCells() const
+{
+	return _cluster->numCells;
+}
+
+__inline__ __device__ void BlockProcessorForCluster2::processingCollision(int startCellIndex, int endCellIndex)
+{
+	__shared__ ClusterData* cluster;
+	__shared__ ClusterData* firstOtherCluster;
+	__shared__ int firstOtherClusterId;
+	__shared__ int clusterLocked;
+	__shared__ int firstOtherClusterLocked;
+	__shared__ int numberOfCollidingCells;
+	__shared__ float2 collisionCenterPos;
+	__shared__ bool avoidCollision;
+	if (0 == threadIdx.x) {
+		cluster = _data->cellsAC2.getEntireArray()[0].cluster;
+		firstOtherCluster = nullptr;
+		firstOtherClusterId = 0;
+		clusterLocked = 1;// atomicExch(&cluster->locked, 1);
+		firstOtherClusterLocked = 1;
+		collisionCenterPos.x = 0;
+		collisionCenterPos.y = 0;
+		numberOfCollidingCells = 0;
+		avoidCollision = false;
+	}
+	__syncthreads();
+
+	//find colliding cluster
+	for (int index = startCellIndex; index <= endCellIndex; ++index) {
+		CellData* cell = &_data->cellsAC2.getEntireArray()[index];
+		CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
+		if (!otherCell || otherCell == cell) {
+			continue;
+		}
+		if (cluster == otherCell->cluster) {
+			continue;
+		}
+		if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
+			continue;
+		}
+		int origFirstOtherClusterId = atomicCAS(&firstOtherClusterId, 0, otherCell->cluster->id);
+		if (0 != origFirstOtherClusterId) {
+			continue;
+		}
+
+		firstOtherCluster = otherCell->cluster;
+	}
+	__syncthreads();
+
+	if (firstOtherCluster) {
+
+		//try locking both clusters (TODO: using one atomic operation)
+		clusterLocked = atomicExch(&cluster->locked, 1);
+		firstOtherClusterLocked = atomicExch(&firstOtherCluster->locked, 1);
+		if (0 != clusterLocked || 0 != firstOtherClusterLocked) {
+			if (0 == clusterLocked) {
+				cluster->locked = 0;
+			}
+			if (0 == firstOtherClusterLocked) {
+				firstOtherCluster->locked = 0;
+			}
+		}
+
+		if (0 == clusterLocked && 0 == firstOtherClusterLocked) {
+			for (int index = startCellIndex; index <= endCellIndex; ++index) {
+				CellData* cell = &_data->cellsAC2.getEntireArray()[index];
+				CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
+				if (!otherCell || otherCell == cell) {
+					continue;
+				}
+				if (firstOtherCluster != otherCell->cluster) {
+					continue;
+				}
+				if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
+					avoidCollision = true;
+					break;
+				}
+
+				atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
+				atomicAdd(&collisionCenterPos.y, otherCell->absPos.y);
+				atomicAdd(&numberOfCollidingCells, 1);
+				cell->protectionCounter = PROTECTION_TIMESTEPS;
+				otherCell->protectionCounter = PROTECTION_TIMESTEPS;
+			}
+			__syncthreads();
+
+			if (!avoidCollision) {
+				__shared__ float2 rAPp;
+				__shared__ float2 rBPp;
+				__shared__ float2 outwardVector;
+				__shared__ float2 n;
+				if (0 == threadIdx.x) {
+					collisionCenterPos = div(collisionCenterPos, numberOfCollidingCells);
+					rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
+					// 				metric->correctDisplacement(rAPp);
+					rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
+					// 				metric->correctDisplacement(rBPp);
+					outwardVector = sub(
+						CudaPhysics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
+						CudaPhysics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
+					CudaPhysics::rotateQuarterCounterClockwise(rAPp);
+					CudaPhysics::rotateQuarterCounterClockwise(rBPp);
+					n.x = 0.0f;
+					n.y = 0.0f;
+				}
+				__syncthreads();
+
+				for (int index = startCellIndex; index <= endCellIndex; ++index) {
+					CellData* cell = &_data->cellsAC2.getEntireArray()[index];
+					CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
+					if (!otherCell || otherCell == cell) {
+						continue;
+					}
+					if (firstOtherCluster != otherCell->cluster) {
+						continue;
+					}
+					float2 normal = CudaPhysics::calcNormalToCell(cell, outwardVector);
+					atomicAdd(&n.x, normal.x);
+					atomicAdd(&n.y, normal.y);
+				}
+				__syncthreads();
+
+				if (0 == threadIdx.x) {
+					float mA = cluster->numCells;
+					float mB = firstOtherCluster->numCells;
+					float2 vA2{ 0.0f, 0.0f };
+					float2 vB2{ 0.0f, 0.0f };
+					float angularVelA2{ 0.0f };
+					float angularVelB2{ 0.0f };
+					float length = sqrtf(n.x*n.x + n.y*n.y);
+					if (length < FP_PRECISION) {
+						n = { 1.0f, 0.0f };
+					}
+					else {
+						n = div(n, length);
+					}
+					CudaPhysics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
+						firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
+						mA, mB, vA2, vB2, angularVelA2, angularVelB2);
+					cluster->vel = vA2;
+					cluster->angularVel = angularVelA2;
+					firstOtherCluster->vel = vB2;
+					firstOtherCluster->angularVel = angularVelB2;
+				}
+			}
+		}
+		__syncthreads();
+
+		if (0 == threadIdx.x) {
+			if (0 == clusterLocked) {
+				cluster->locked = 0;
+			}
+			if (0 == firstOtherClusterLocked) {
+				firstOtherCluster->locked = 0;
+			}
+		}
+	}
+	__syncthreads();
 }

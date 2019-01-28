@@ -15,7 +15,7 @@ public:
 	__inline__ __device__ void init(SimulationDataInternal& data);
 	
 	__inline__ __device__ void processingMovement(int startParticleIndex, int endParticleIndex);
-	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);
+	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);	//uses on new maps
 
 private:
 
