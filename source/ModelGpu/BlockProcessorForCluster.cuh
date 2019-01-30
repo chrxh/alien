@@ -598,13 +598,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 					float2 vB2{ 0.0f, 0.0f };
 					float angularVelA2{ 0.0f };
 					float angularVelB2{ 0.0f };
-					float length = sqrtf(n.x*n.x + n.y*n.y);
-					if (length < FP_PRECISION) {
-						n = { 1.0f, 0.0f };
-					}
-					else {
-						n = div(n, length);
-					}
+					normalize(n);
 					CudaPhysics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
 						firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
 						mA, mB, vA2, vB2, angularVelA2, angularVelB2);
