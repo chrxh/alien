@@ -413,6 +413,9 @@ __inline__ __device__ void BlockProcessorForCluster1::killCloseCells(Map<CellDat
 	}
 
 	float2 absPos = cell->absPos;
+	killCloseCell(absPos, map, cell);
+
+/*
 	--absPos.x;
 	--absPos.y;
 	killCloseCell(absPos, map, cell);
@@ -434,6 +437,7 @@ __inline__ __device__ void BlockProcessorForCluster1::killCloseCells(Map<CellDat
 	killCloseCell(absPos, map, cell);
 	++absPos.x;
 	killCloseCell(absPos, map, cell);
+*/
 }
 
 __inline__ __device__ void BlockProcessorForCluster1::killCloseCell(float2 const & pos, Map<CellData> const & map, CellData * cell)
@@ -457,7 +461,7 @@ __inline__ __device__ void BlockProcessorForCluster1::killCloseCell(float2 const
 __inline__ __device__ void BlockProcessorForCluster2::init(SimulationDataInternal & data, int clusterIndex)
 {
 	_data = &data;
-	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+	_cluster = &data.clustersAC2.getEntireArray()[clusterIndex];
 	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 }
 
@@ -470,6 +474,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 {
 	__shared__ ClusterData* cluster;
 	__shared__ ClusterData* firstOtherCluster;
+	//TODO: array of cells of colliding firstOtherCluster
 	__shared__ int firstOtherClusterId;
 	__shared__ int clusterLocked;
 	__shared__ int firstOtherClusterLocked;
@@ -477,7 +482,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 	__shared__ float2 collisionCenterPos;
 	__shared__ bool avoidCollision;
 	if (0 == threadIdx.x) {
-		cluster = _data->cellsAC2.getEntireArray()[0].cluster;
+		cluster = _cluster;
 		firstOtherCluster = nullptr;
 		firstOtherClusterId = 0;
 		clusterLocked = 1;// atomicExch(&cluster->locked, 1);
@@ -491,8 +496,10 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 
 	//find colliding cluster
 	for (int index = startCellIndex; index <= endCellIndex; ++index) {
-		CellData* cell = &_data->cellsAC2.getEntireArray()[index];
+		CellData* cell = &cluster->cells[index];
 		CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
+
+		//TODO: look at neighbor cells
 		if (!otherCell || otherCell == cell) {
 			continue;
 		}
@@ -527,7 +534,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 
 		if (0 == clusterLocked && 0 == firstOtherClusterLocked) {
 			for (int index = startCellIndex; index <= endCellIndex; ++index) {
-				CellData* cell = &_data->cellsAC2.getEntireArray()[index];
+				CellData* cell = &cluster->cells[index];
 				CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
 				if (!otherCell || otherCell == cell) {
 					continue;
@@ -570,7 +577,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 				__syncthreads();
 
 				for (int index = startCellIndex; index <= endCellIndex; ++index) {
-					CellData* cell = &_data->cellsAC2.getEntireArray()[index];
+					CellData* cell = &cluster->cells[index];
 					CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
 					if (!otherCell || otherCell == cell) {
 						continue;
