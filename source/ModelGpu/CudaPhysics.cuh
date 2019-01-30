@@ -116,7 +116,7 @@ __device__ __inline__ void CudaPhysics::calcCollision(float2 const & vA1, float2
 	float2 const & rBPp, float angularVelA1, float angularVelB1, float2 const & n, float angularMassA, 
 	float angularMassB, float massA, float massB, float2 & vA2, float2 & vB2, float & angularVelA2, float & angularVelB2)
 {
-	float2 vAB = sub(sub(vA1, mul(rAPp, angularVelA1)), sub(vB1, mul(rBPp, angularVelB1)));
+	float2 vAB = sub(sub(vA1, mul(rAPp, angularVelA1 * DEG_TO_RAD)), sub(vB1, mul(rBPp, angularVelB1 * DEG_TO_RAD)));
 
 	float vAB_dot_n = dot(vAB, n);
 	if (vAB_dot_n > 0.0) {
