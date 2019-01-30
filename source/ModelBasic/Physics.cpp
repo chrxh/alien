@@ -13,9 +13,9 @@ void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D
     angularVelA1 *= degToRad;
     angularVelB1 *= degToRad;
 
-    if( (qAbs(angularMassA) <= Const::AlienPrecision) )
+    if( (qAbs(angularMassA) <= FLOATINGPOINT_HIGH_PRECISION) )
         angularVelA1 = 0.0;
-    if( (qAbs(angularMassB) <= Const::AlienPrecision) )
+    if( (qAbs(angularMassB) <= FLOATINGPOINT_HIGH_PRECISION) )
         angularVelB1 = 0.0;
 
     QVector2D vAB = vA1-rAPp*angularVelA1-(vB1-rBPp*angularVelB1);
@@ -26,7 +26,7 @@ void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D
         angularVelB2 = angularVelB1;
     }
     else {
-        if( (qAbs(angularMassA) > Const::AlienPrecision) && (qAbs(angularMassB) > Const::AlienPrecision) ) {
+        if( (qAbs(angularMassA) > FLOATINGPOINT_HIGH_PRECISION) && (qAbs(angularMassB) > FLOATINGPOINT_HIGH_PRECISION) ) {
             double j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
                     +QVector2D::dotProduct(rAPp,n)*QVector2D::dotProduct(rAPp,n)/angularMassA
                     +QVector2D::dotProduct(rBPp,n)*QVector2D::dotProduct(rBPp,n)/angularMassB);
@@ -35,7 +35,7 @@ void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D
             vB2 = vB1 - j/massB*n;
             angularVelB2 = angularVelB1+QVector2D::dotProduct(rBPp,n)*j/angularMassB;
         }
-        if( (qAbs(angularMassA) <= Const::AlienPrecision) && (qAbs(angularMassB) > Const::AlienPrecision) ) {
+        if( (qAbs(angularMassA) <= FLOATINGPOINT_HIGH_PRECISION) && (qAbs(angularMassB) > FLOATINGPOINT_HIGH_PRECISION) ) {
             double j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
                     +QVector2D::dotProduct(rBPp,n)*QVector2D::dotProduct(rBPp,n)/angularMassB);
             vA2 = vA1 + j/massA*n;
@@ -43,7 +43,7 @@ void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D
             vB2 = vB1 - j/massB*n;
             angularVelB2 = angularVelB1+QVector2D::dotProduct(rBPp,n)*j/angularMassB;
         }
-        if( (qAbs(angularMassA) > Const::AlienPrecision) && (qAbs(angularMassB) <= Const::AlienPrecision) ) {
+        if( (qAbs(angularMassA) > FLOATINGPOINT_HIGH_PRECISION) && (qAbs(angularMassB) <= FLOATINGPOINT_HIGH_PRECISION) ) {
             double j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB)
                     +QVector2D::dotProduct(rAPp,n)*QVector2D::dotProduct(rAPp,n)/angularMassA);
             vA2 = vA1 + j/massA*n;
@@ -51,7 +51,7 @@ void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D
             vB2 = vB1 - j/massB*n;
             angularVelB2 = angularVelB1;
         }
-        if( (qAbs(angularMassA) <= Const::AlienPrecision) && (qAbs(angularMassB) <= Const::AlienPrecision) ) {
+        if( (qAbs(angularMassA) <= FLOATINGPOINT_HIGH_PRECISION) && (qAbs(angularMassB) <= FLOATINGPOINT_HIGH_PRECISION) ) {
             double j=-2.0*QVector2D::dotProduct(vAB,n)/(n.lengthSquared()*(1.0/massA+1.0/massB));
             vA2 = vA1 + j/massA*n;
             angularVelA2 = angularVelA1;
@@ -138,7 +138,7 @@ double Physics::angularMomentum (QVector2D r, QVector2D v)
 
 double Physics::angularVelocity (double angularMomentum, double angularMass)
 {
-    if( qAbs(angularMass) < Const::AlienPrecision )
+    if( qAbs(angularMass) < FLOATINGPOINT_HIGH_PRECISION )
         return 0;
     else
         return angularMomentum/angularMass*radToDeg;
