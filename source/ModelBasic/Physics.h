@@ -43,7 +43,7 @@ public:
     static QVector2D rotateQuarterCounterClockwise (QVector2D v);
     static double angleOfVector (QVector2D v);   //0 DEG corresponds to (0,-1)
     static QVector2D unitVectorOfAngle (double angle);
-    static bool compareEqualAngle (double angle1, double angle2, double precision = Const::AlienPrecision);
+    static bool compareEqualAngle (double angle1, double angle2, double precision = FLOATINGPOINT_HIGH_PRECISION);
     static double subtractAngle (double angleMinuend, double angleSubtrahend);
     static double clockwiseAngleFromFirstToSecondVector (QVector2D v1, QVector2D v2);
 };

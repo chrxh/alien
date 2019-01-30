@@ -41,6 +41,8 @@ protected:
 	double calcKineticEnergy(ClusterDescription const& cluster) const;
 
 protected:
+	double const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
+
 	SimulationControllerGpu* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	SpaceProperties* _spaceProp = nullptr;
@@ -139,13 +141,60 @@ double SimulationGpuTest::calcKineticEnergy(ClusterDescription const& cluster) c
 	auto vel = *cluster.vel;
 
 	vector<QVector2D> relPositions;
-	std::transform(cluster.cells->begin(), cluster.cells->end(), relPositions.begin(),
+	std::transform(cluster.cells->begin(), cluster.cells->end(), std::inserter(relPositions, relPositions.begin()),
 		[&cluster](CellDescription const& cell) { return *cell.pos - *cluster.pos; });
 
 	auto angularMass = Physics::angularMass(relPositions);
 	auto angularVel = *cluster.angularVel;
 	return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
 }
+
+/**
+* Situation: horizontal collision of two cells where both move such that no pixel overlapping occurs
+* Expected result: direction of movement of both cells changed
+*/
+TEST_F(SimulationGpuTest, DISABLED_testCollisionOfSingleCells_horizontal_noPixelOverlapping)
+{
+	DataDescription origData;
+	auto cellEnergy = _parameters->cellFunctionConstructorOffspringCellEnergy;
+
+	auto cellId1 = _numberGen->getId();
+	auto cell1 = CellDescription().setId(cellId1).setPos({ 100, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
+	auto cluster1 = ClusterDescription().setId(_numberGen->getId()).setVel({ 0.1f, 0 }).setAngle(0).setAngularVel(0)
+		.addCell(cell1);
+	cluster1.setPos(cluster1.getClusterPosFromCells());
+	origData.addCluster(cluster1);
+
+	auto cellId2 = _numberGen->getId();
+	auto cell2 = CellDescription().setId(cellId2).setPos({ 110, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
+	auto cluster2 = ClusterDescription().setId(_numberGen->getId()).setVel({ -0.1f, 0 }).setAngle(0).setAngularVel(0)
+		.addCell(cell2);
+	cluster2.setPos(cluster2.getClusterPosFromCells());
+	origData.addCluster(cluster2);
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(150, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_EQ(2, newData.clusters->size());
+	auto cellById = IntegrationTestHelper::getCellByCellId(newData);
+	auto newCell1 = cellById.at(cellId1);
+	auto newCell2 = cellById.at(cellId2);
+	auto clusterById = IntegrationTestHelper::getClusterByCellId(newData);
+	auto newCluster1 = clusterById.at(cellId1);
+	auto newCluster2 = clusterById.at(cellId2);
+
+	EXPECT_GE(99, newCell1.pos->x());
+	EXPECT_TRUE(isCompatible(100.0f, newCell1.pos->y()));
+	EXPECT_TRUE(isCompatible(QVector2D(-0.1f, 0), *newCluster1.vel));
+
+	EXPECT_LE(111, newCell2.pos->x());
+	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->y()));
+	EXPECT_TRUE(isCompatible(QVector2D(0.1f, 0), *newCluster2.vel));
+}
+
 
 /**
 * Situation: horizontal collision of two cells
@@ -164,7 +213,7 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_horizontal)
 	origData.addCluster(cluster1);
 
 	auto cellId2 = _numberGen->getId();
-	auto cell2 = CellDescription().setId(cellId2).setPos({ 110, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
+	auto cell2 = CellDescription().setId(cellId2).setPos({ 110.2f, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
 	auto cluster2 = ClusterDescription().setId(_numberGen->getId()).setVel({ -0.1f, 0 }).setAngle(0).setAngularVel(0)
 		.addCell(cell2);
 	cluster2.setPos(cluster2.getClusterPosFromCells());
@@ -210,7 +259,7 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 	origData.addCluster(cluster1);
 
 	auto cellId2 = _numberGen->getId();
-	auto cell2 = CellDescription().setId(cellId2).setPos({ 100, 110 }).setMaxConnections(0).setEnergy(cellEnergy);
+	auto cell2 = CellDescription().setId(cellId2).setPos({ 100, 110.2f }).setMaxConnections(0).setEnergy(cellEnergy);
 	auto cluster2 = ClusterDescription().setId(_numberGen->getId()).setVel({ 0, -0.1f }).setAngle(0).setAngularVel(0)
 		.addCell(cell2);
 	cluster2.setPos(cluster2.getClusterPosFromCells());
@@ -272,7 +321,7 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoClusters)
 	{
 		auto cluster = clusterById.at(clusterId2);
 		EXPECT_EQ(100, cluster.pos->x());
-		EXPECT_LE(101, cluster.pos->y());
+		EXPECT_LE(100, cluster.pos->y());
 		EXPECT_TRUE(isCompatible(QVector2D(0, 0), *cluster.vel));
 	}
 
@@ -300,7 +349,6 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
 	ASSERT_EQ(2, newData.clusters->size());
 
-	auto const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
 		auto cluster = clusterById.at(clusterId1);
@@ -324,7 +372,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 *	- sidewise collision of two orthogonal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result:
-*	- first clusters move upwards and rotate counterclockwise
+*	- first cluster moves upward and rotate counterclockwise
 *	- second cluster does not move on x axis and does not rotate
 */
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
@@ -342,7 +390,6 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
 	ASSERT_EQ(2, newData.clusters->size());
 
-	auto const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
 		auto cluster = clusterById.at(clusterId1);
@@ -356,6 +403,81 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->x()));
 		EXPECT_GE(NearlyZero, cluster.vel->y());
 		EXPECT_TRUE(abs(*cluster.angularVel) < 0.01);
+	}
+
+	checkKineticEnergy(origData, newData);
+}
+
+/**
+* Situation:
+*	- sidewise collision of two traversal cell clusters
+*	- first cluster is arranged horizontal and has no velocity
+*	- second cluster is below the first one, sloped at 45 degree and moves upward
+* Expected result:
+*	- first cluster moves upward and rotate clockwise
+*	- second cluster moves upward and rotate counterclockwise
+*/
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalClusters)
+{
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.5f }, 45));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(40, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_TRUE(abs(cluster.vel->x()) < NearlyZero);
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_LE(NearlyZero, *cluster.angularVel);
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_TRUE(abs(cluster.vel->x()) < NearlyZero);
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+
+	checkKineticEnergy(origData, newData);
+}
+
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalClusters_waitUntilSecondCollision)
+{
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.5f }, 45));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(100, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_TRUE(abs(cluster.vel->x()) < NearlyZero);
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_LE(NearlyZero, *cluster.angularVel);
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_TRUE(abs(cluster.vel->x()) < NearlyZero);
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
 
 	checkKineticEnergy(origData, newData);

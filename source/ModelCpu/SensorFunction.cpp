@@ -117,7 +117,7 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
 
                         //scan masses
                         qreal mass = scanCell->getCluster()->getMass();
-                        if( mass >= (minMassReal-Const::AlienPrecision) && mass <= (maxMassReal+Const::AlienPrecision) )
+                        if( mass >= (minMassReal-FLOATINGPOINT_HIGH_PRECISION) && mass <= (maxMassReal+FLOATINGPOINT_HIGH_PRECISION) )
                             hitListCell << scanCell;
                     }
                 }
