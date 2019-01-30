@@ -16,7 +16,12 @@ public:
 protected:
 
 	//boost::none means random
-	ClusterDescription createHorizontalCluster(int numCells, 
+	ClusterDescription createLineCluster(int numCells,
+		optional<QVector2D> const& centerPos = boost::none,
+		optional<QVector2D> const& centerVel = boost::none,
+		optional<double> const& angle = boost::none,
+		optional<double> const& angularVel = boost::none) const;
+	ClusterDescription createHorizontalCluster(int numCells,
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none,
 		optional<double> const& angularVel = boost::none) const;	

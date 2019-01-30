@@ -1,4 +1,5 @@
 #include <QEventLoop>
+#include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
@@ -57,6 +58,42 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
 			TokenDescription().setData(tokenMemory).setEnergy(89)
 	})
 	).setId(clusterId).setPos({ 1, 2 }).setVel({ -1, 1 }).setAngle(23).setAngularVel(1.2).setMetadata(clusterMetadata);
+}
+
+ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, optional<QVector2D> const & centerPos, 
+	optional<QVector2D> const & centerVel, optional<double> const & optAngle, optional<double> const & angularVel) const
+{
+	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
+	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+	double angle = optAngle ? *optAngle : _numberGen->getRandomReal(0, 359);
+
+	ClusterDescription cluster;
+	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(angularVel.get_value_or(0));
+
+	QMatrix4x4 transform;
+	transform.setToIdentity();
+	transform.rotate(angle, 0.0, 0.0, 1.0);
+
+	for (int j = 0; j < numCells; ++j) {
+		QVector2D relPosUnrotated(-static_cast<float>(numCells - 1) / 2.0 + j, 0);
+		QVector2D relPos = transform.map(QVector3D(relPosUnrotated)).toVector2D();
+		cluster.addCell(
+			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			.setPos(pos + relPos)
+			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
+		);
+	}
+	for (int j = 0; j < numCells; ++j) {
+		list<uint64_t> connectingCells;
+		if (j > 0) {
+			connectingCells.emplace_back(cluster.cells->at(j - 1).id);
+		}
+		if (j < numCells - 1) {
+			connectingCells.emplace_back(cluster.cells->at(j + 1).id);
+		}
+		cluster.cells->at(j).setConnectingCells(connectingCells);
+	}
+	return cluster;
 }
 
 ClusterDescription IntegrationTestFramework::createHorizontalCluster(int numCells, optional<QVector2D> const& centerPos,
