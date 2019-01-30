@@ -468,16 +468,16 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalClusters_waitUntilS
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
 		auto cluster = clusterById.at(clusterId1);
-		EXPECT_TRUE(abs(cluster.vel->x()) < NearlyZero);
+		EXPECT_LE(NearlyZero, cluster.vel->x());
 		EXPECT_GE(-NearlyZero, cluster.vel->y());
-		EXPECT_LE(NearlyZero, *cluster.angularVel);
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
 
 	{
 		auto cluster = clusterById.at(clusterId2);
-		EXPECT_TRUE(abs(cluster.vel->x()) < NearlyZero);
+		EXPECT_GE(-NearlyZero, cluster.vel->x());
 		EXPECT_GE(-NearlyZero, cluster.vel->y());
-		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+		EXPECT_LE(NearlyZero, *cluster.angularVel);
 	}
 
 	checkKineticEnergy(origData, newData);

@@ -58,6 +58,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	totalVideoMemory += 2 * size.x * size.y * sizeof(CellData*);
 	totalVideoMemory += sizeof(int) * RANDOM_NUMBER_BLOCK_SIZE;
 	std::cout << "[CUDA] acquire " << totalVideoMemory/1024/1024 << "mb of video memory" << std::endl;
+	cudaDeviceSynchronize();
 
 	_data = new SimulationDataInternal();
 	_data->size = size;
