@@ -120,6 +120,7 @@ public:
 		: _size(0)
 	{
 		cudaMallocManaged(&_numEntries, sizeof(int));
+		cudaDeviceSynchronize();
 		checkCudaErrors(cudaGetLastError());
 
 		*_numEntries = 0;
@@ -130,6 +131,7 @@ public:
 	{
 		cudaMallocManaged(&_data, sizeof(T) * size);
 		cudaMallocManaged(&_numEntries, sizeof(int));
+		cudaDeviceSynchronize();
 		checkCudaErrors(cudaGetLastError());
 
 		*_numEntries = 0;

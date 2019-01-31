@@ -585,7 +585,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 					if (firstOtherCluster != otherCell->cluster) {
 						continue;
 					}
-					float2 normal = CudaPhysics::calcNormalToCell(cell, outwardVector);
+					float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
 					atomicAdd(&n.x, normal.x);
 					atomicAdd(&n.y, normal.y);
 				}

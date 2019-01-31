@@ -16,6 +16,9 @@ public:
 protected:
 
 	//boost::none means random
+	ClusterDescription createRectangleCluster(IntVector2D const& size,
+		optional<QVector2D> const& centerPos = boost::none,
+		optional<QVector2D> const& centerVel = boost::none) const;
 	ClusterDescription createLineCluster(int numCells,
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none,
