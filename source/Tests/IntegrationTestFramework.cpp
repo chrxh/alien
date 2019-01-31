@@ -60,15 +60,66 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
 	).setId(clusterId).setPos({ 1, 2 }).setVel({ -1, 1 }).setAngle(23).setAngularVel(1.2).setMetadata(clusterMetadata);
 }
 
-ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, optional<QVector2D> const & centerPos, 
-	optional<QVector2D> const & centerVel, optional<double> const & optAngle, optional<double> const & angularVel) const
+ClusterDescription IntegrationTestFramework::createRectangleCluster(IntVector2D const & size, optional<QVector2D> const & centerPos, 
+	optional<QVector2D> const & centerVel) const
+{
+	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
+	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+
+	ClusterDescription cluster;
+	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
+
+	for (int x = 0; x < size.x; ++x) {
+		for (int y = 0; y < size.y; ++y) {
+			QVector2D relPos(-static_cast<float>(size.x - 1) / 2.0 + x, -static_cast<float>(size.y - 1) / 2.0 + y);
+			int maxConnections = 4;
+			if (x == 0 || x == size.x - 1) {
+				--maxConnections;
+			}
+			if (y == 0 || y == size.y - 1) {
+				--maxConnections;
+			}
+			cluster.addCell(
+				CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+				.setPos(pos + relPos)
+				.setMaxConnections(maxConnections).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
+			);
+		}
+	}
+
+	for (int x = 0; x < size.x; ++x) {
+		for (int y = 0; y < size.y; ++y) {
+			list<uint64_t> connectingCells;
+			if (x > 0) {
+				connectingCells.emplace_back(cluster.cells->at((x - 1) + y * size.x).id);
+			}
+			if (x < size.x - 1) {
+				connectingCells.emplace_back(cluster.cells->at((x + 1) + y * size.x).id);
+			}
+			if (y > 0) {
+				connectingCells.emplace_back(cluster.cells->at(x + (y - 1) * size.x).id);
+			}
+			if (y < size.y - 1) {
+				connectingCells.emplace_back(cluster.cells->at(x + (y + 1) * size.x).id);
+			}
+
+			cluster.cells->at(x + y * size.x).setConnectingCells(connectingCells);
+		}
+	}
+
+	return cluster;
+}
+
+ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, optional<QVector2D> const & centerPos,
+	optional<QVector2D> const & centerVel, optional<double> const & optAngle, optional<double> const & optAngularVel) const
 {
 	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
 	double angle = optAngle ? *optAngle : _numberGen->getRandomReal(0, 359);
+	double angularVel = optAngularVel.get_value_or(_numberGen->getRandomReal(-1, 1));
 
 	ClusterDescription cluster;
-	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(angularVel.get_value_or(0));
+	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(angularVel);
 
 	QMatrix4x4 transform;
 	transform.setToIdentity();
