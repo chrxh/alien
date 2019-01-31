@@ -294,7 +294,7 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: first cluster moves upward while second cluster stand stills
 */
-TEST_F(SimulationGpuTest, testCenterCollisionOfTwoClusters)
+TEST_F(SimulationGpuTest, testCenterCollisionOfTwoParallelLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -334,7 +334,7 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoClusters)
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: both clusters move upwards and rotate counterclockwise
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -369,13 +369,50 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelClusters)
 
 /**
 * Situation:
+*	- sidewise collision of two rectangular cell clusters
+*	- first cluster has no velocity while second cluster moves upward
+* Expected result: both clusters move upwards and rotate counterclockwise
+*/
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters)
+{
+	DataDescription origData;
+	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{ 105, 120 }, QVector2D{ 0, -0.5f }));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(23, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+
+	checkKineticEnergy(origData, newData);
+}
+
+/**
+* Situation:
 *	- sidewise collision of two orthogonal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result:
 *	- first cluster moves upward and rotate counterclockwise
 *	- second cluster does not move on x axis and does not rotate
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -417,7 +454,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalClusters)
 *	- first cluster moves upward and rotate clockwise
 *	- second cluster moves upward and rotate counterclockwise
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalClusters)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -450,7 +487,17 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalClusters)
 	checkKineticEnergy(origData, newData);
 }
 
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalClusters_waitUntilSecondCollision)
+/**
+* Situation:
+*	- sidewise collision of two traversal cell clusters
+*	- first cluster is arranged horizontal and has no velocity
+*	- second cluster is below the first one, sloped at 45 degree and moves upward
+*	- simulate until second collision occur
+* Expected result:
+*	- velocity of first cluster: x: positive, y: negative, angular vel: negative 
+*	- velocity of second cluster: x: negative, y: negative, angular vel: positive
+*/
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters_waitUntilSecondCollision)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
