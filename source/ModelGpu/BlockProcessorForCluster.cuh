@@ -413,9 +413,10 @@ __inline__ __device__ void BlockProcessorForCluster1::killCloseCells(Map<CellDat
 	}
 
 	float2 absPos = cell->absPos;
-	killCloseCell(absPos, map, cell);
-
 /*
+	killCloseCell(absPos, map, cell);
+*/
+
 	--absPos.x;
 	--absPos.y;
 	killCloseCell(absPos, map, cell);
@@ -437,7 +438,6 @@ __inline__ __device__ void BlockProcessorForCluster1::killCloseCells(Map<CellDat
 	killCloseCell(absPos, map, cell);
 	++absPos.x;
 	killCloseCell(absPos, map, cell);
-*/
 }
 
 __inline__ __device__ void BlockProcessorForCluster1::killCloseCell(float2 const & pos, Map<CellData> const & map, CellData * cell)
@@ -474,10 +474,11 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 {
 	__shared__ ClusterData* cluster;
 	__shared__ ClusterData* firstOtherCluster;
-	//TODO: array of cells of colliding firstOtherCluster
 	__shared__ int firstOtherClusterId;
-	__shared__ int clusterLocked;
-	__shared__ int firstOtherClusterLocked;
+	__shared__ int clusterLocked1;
+	__shared__ int clusterLocked2;
+	__shared__ int* clusterLockAddr1;
+	__shared__ int* clusterLockAddr2;
 	__shared__ int numberOfCollidingCells;
 	__shared__ float2 collisionCenterPos;
 	__shared__ bool avoidCollision;
@@ -485,8 +486,8 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 		cluster = _cluster;
 		firstOtherCluster = nullptr;
 		firstOtherClusterId = 0;
-		clusterLocked = 1;// atomicExch(&cluster->locked, 1);
-		firstOtherClusterLocked = 1;
+		clusterLocked1 = 1;// atomicExch(&cluster->locked, 1);
+		clusterLocked2 = 1;
 		collisionCenterPos.x = 0;
 		collisionCenterPos.y = 0;
 		numberOfCollidingCells = 0;
@@ -497,61 +498,74 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 	//find colliding cluster
 	for (int index = startCellIndex; index <= endCellIndex; ++index) {
 		CellData* cell = &cluster->cells[index];
-		CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
+		for (float dx = -1.0f; dx < 2.0f; ++dx) {
+			for (float dy = -1.0f; dy < 2.0f; ++dy) {
+				CellData* otherCell = _cellMap.getFromNewMap(add(cell->absPos, {dx, dy}));
 
-		//TODO: look at neighbor cells
-		if (!otherCell || otherCell == cell) {
-			continue;
-		}
-		if (cluster == otherCell->cluster) {
-			continue;
-		}
-		if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
-			continue;
-		}
-		int origFirstOtherClusterId = atomicCAS(&firstOtherClusterId, 0, otherCell->cluster->id);
-		if (0 != origFirstOtherClusterId) {
-			continue;
-		}
+				if (!otherCell || otherCell == cell) {
+					continue;
+				}
+				if (cluster == otherCell->cluster) {
+					continue;
+				}
+				if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
+					continue;
+				}
+				int origFirstOtherClusterId = atomicCAS(&firstOtherClusterId, 0, otherCell->cluster->id);
+				if (0 != origFirstOtherClusterId) {
+					continue;
+				}
 
-		firstOtherCluster = otherCell->cluster;
+				firstOtherCluster = otherCell->cluster;
+			}
+		}
 	}
 	__syncthreads();
 
 	if (firstOtherCluster) {
 
-		//try locking both clusters (TODO: using one atomic operation)
-		clusterLocked = atomicExch(&cluster->locked, 1);
-		firstOtherClusterLocked = atomicExch(&firstOtherCluster->locked, 1);
-		if (0 != clusterLocked || 0 != firstOtherClusterLocked) {
-			if (0 == clusterLocked) {
-				cluster->locked = 0;
+		if (0 == threadIdx.x) {
+			clusterLockAddr1 = &cluster->locked;
+			clusterLockAddr2 = &firstOtherCluster->locked;
+			if (firstOtherCluster->id < cluster->id) {
+				clusterLockAddr1 = &firstOtherCluster->locked;
+				clusterLockAddr2 = &cluster->locked;
 			}
-			if (0 == firstOtherClusterLocked) {
-				firstOtherCluster->locked = 0;
+			clusterLocked1 = atomicExch(clusterLockAddr1, 1);
+			if (0 == clusterLocked1) {
+				clusterLocked2 = atomicExch(clusterLockAddr2, 1);
 			}
 		}
+		__syncthreads();
 
-		if (0 == clusterLocked && 0 == firstOtherClusterLocked) {
+		if (0 == clusterLocked1 && 0 == clusterLocked2) {
 			for (int index = startCellIndex; index <= endCellIndex; ++index) {
 				CellData* cell = &cluster->cells[index];
-				CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
-				if (!otherCell || otherCell == cell) {
-					continue;
+				for (float dx = -1.0f; dx < 2.0f; ++dx) {
+					for (float dy = -1.0f; dy < 2.0f; ++dy) {
+						CellData* otherCell = _cellMap.getFromNewMap(add(cell->absPos, { dx, dy }));
+						if (!otherCell || otherCell == cell) {
+							continue;
+						}
+						if (firstOtherCluster != otherCell->cluster) {
+							continue;
+						}
+						if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
+							avoidCollision = true;
+							break;
+						}
+
+						atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
+						atomicAdd(&collisionCenterPos.y, otherCell->absPos.y);
+						atomicAdd(&numberOfCollidingCells, 1);
+					}
+					if (avoidCollision) {
+						break;
+					}
 				}
-				if (firstOtherCluster != otherCell->cluster) {
-					continue;
-				}
-				if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
-					avoidCollision = true;
+				if (avoidCollision) {
 					break;
 				}
-
-				atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
-				atomicAdd(&collisionCenterPos.y, otherCell->absPos.y);
-				atomicAdd(&numberOfCollidingCells, 1);
-				cell->protectionCounter = PROTECTION_TIMESTEPS;
-				otherCell->protectionCounter = PROTECTION_TIMESTEPS;
 			}
 			__syncthreads();
 
@@ -578,16 +592,22 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 
 				for (int index = startCellIndex; index <= endCellIndex; ++index) {
 					CellData* cell = &cluster->cells[index];
-					CellData* otherCell = _cellMap.getFromNewMap(cell->absPos);
-					if (!otherCell || otherCell == cell) {
-						continue;
+					for (float dx = -1.0f; dx < 2.0f; ++dx) {
+						for (float dy = -1.0f; dy < 2.0f; ++dy) {
+							CellData* otherCell = _cellMap.getFromNewMap(add(cell->absPos, { dx, dy }));
+							if (!otherCell || otherCell == cell) {
+								continue;
+							}
+							if (firstOtherCluster != otherCell->cluster) {
+								continue;
+							}
+							float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
+							atomicAdd(&n.x, normal.x);
+							atomicAdd(&n.y, normal.y);
+							cell->protectionCounter = PROTECTION_TIMESTEPS;
+							otherCell->protectionCounter = PROTECTION_TIMESTEPS;
+						}
 					}
-					if (firstOtherCluster != otherCell->cluster) {
-						continue;
-					}
-					float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
-					atomicAdd(&n.x, normal.x);
-					atomicAdd(&n.y, normal.y);
 				}
 				__syncthreads();
 
@@ -612,11 +632,11 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 		__syncthreads();
 
 		if (0 == threadIdx.x) {
-			if (0 == clusterLocked) {
-				cluster->locked = 0;
+			if (0 == clusterLocked1) {
+				*clusterLockAddr1 = 0;
 			}
-			if (0 == firstOtherClusterLocked) {
-				firstOtherCluster->locked = 0;
+			if (0 == clusterLocked2) {
+				*clusterLockAddr2 = 0;
 			}
 		}
 	}
