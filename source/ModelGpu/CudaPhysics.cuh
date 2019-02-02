@@ -120,6 +120,10 @@ __device__ __inline__ void CudaPhysics::calcCollision(float2 const & vA1, float2
 
 	float vAB_dot_n = dot(vAB, n);
 	if (vAB_dot_n > 0.0) {
+		vA2 = vA1;
+		angularVelA2 = angularVelA1;
+		vB2 = vB1;
+		angularVelB2 = angularVelB1;
 		return;
 	}
 
