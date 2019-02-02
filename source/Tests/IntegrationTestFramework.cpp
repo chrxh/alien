@@ -148,13 +148,14 @@ ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, opt
 }
 
 ClusterDescription IntegrationTestFramework::createHorizontalCluster(int numCells, optional<QVector2D> const& centerPos,
-	optional<QVector2D> const& centerVel, optional<double> const& angularVel) const
+	optional<QVector2D> const& centerVel, optional<double> const& optAngularVel) const
 {
 	QVector2D pos = centerPos ? * centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+	double angularVel = optAngularVel.get_value_or(_numberGen->getRandomReal(-1, 1));
 
 	ClusterDescription cluster;
-	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(angularVel.get_value_or(0));
+	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(angularVel);
 	for (int j = 0; j < numCells; ++j) {
 		cluster.addCell(
 			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)

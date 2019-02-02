@@ -297,8 +297,8 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 TEST_F(SimulationGpuTest, testCenterCollisionOfTwoParallelLineClusters)
 {
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 110 }, QVector2D{ 0, -0.1f }));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 110 }, QVector2D{ 0, -0.1f }, 0));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
@@ -313,7 +313,7 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoParallelLineClusters)
 	{
 		auto cluster = clusterById.at(clusterId1);
 		EXPECT_EQ(100, cluster.pos->x());
-		EXPECT_GE(99, cluster.pos->y());
+		EXPECT_GE(100, cluster.pos->y());
 		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->x()));
 		EXPECT_TRUE(isCompatible(-0.1f, cluster.vel->y()));
 	}
@@ -337,8 +337,8 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoParallelLineClusters)
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelLineClusters)
 {
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 199, 110 }, QVector2D{ 0, -0.1f }));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 199, 110 }, QVector2D{ 0, -0.1f }, 0));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
@@ -415,7 +415,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters)
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalLineClusters)
 {
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
 	origData.addCluster(createVerticalCluster(100, QVector2D{ 148, 160 }, QVector2D{ 0, -0.1f }));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
@@ -457,8 +457,8 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalLineClusters)
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters)
 {
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
-	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.5f }, 45));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
+	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.5f }, 45, 0));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
@@ -500,8 +500,8 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters)
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters_waitUntilSecondCollision)
 {
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
-	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.5f }, 45));
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
+	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.5f }, 45, 0));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
