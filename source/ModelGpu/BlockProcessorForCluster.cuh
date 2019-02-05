@@ -181,7 +181,8 @@ __inline__ __device__ void BlockProcessorForCluster1::processingDataCopyWithDeco
 			if (cell.tag == entries[index].tag) {
 				ClusterData* newCluster = newClusters[index];
 				float2 deltaPos = { cell.absPos.x - newCluster->pos.x, cell.absPos.y - newCluster->pos.y };
-				newCluster->angularMass += deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
+				auto angularMass = deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
+				atomicAdd(&newCluster->angularMass, angularMass);
 
 				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
 				float2 relVel = { tangentialVel.x - newCluster->vel.x, tangentialVel.y - newCluster->vel.y };
@@ -486,7 +487,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 		cluster = _cluster;
 		firstOtherCluster = nullptr;
 		firstOtherClusterId = 0;
-		clusterLocked1 = 1;// atomicExch(&cluster->locked, 1);
+		clusterLocked1 = 1;
 		clusterLocked2 = 1;
 		collisionCenterPos.x = 0;
 		collisionCenterPos.y = 0;
@@ -622,6 +623,29 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 					CudaPhysics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
 						firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
 						mA, mB, vA2, vB2, angularVelA2, angularVelB2);
+					//---
+                    auto linearKin1 = 0.5f * float(cluster->numCells) * (cluster->vel.x * cluster->vel.x + cluster->vel.y * cluster->vel.y);
+                    auto linearKin2 = 0.5f * float(firstOtherCluster->numCells)
+                        * (firstOtherCluster->vel.x * firstOtherCluster->vel.x + firstOtherCluster->vel.y * firstOtherCluster->vel.y);
+					auto rotKin1 = 0.5f * cluster->angularMass * cluster->angularVel * cluster->angularVel * DEG_TO_RAD * DEG_TO_RAD;
+					auto rotKin2 = 0.5f * firstOtherCluster->angularMass * firstOtherCluster->angularVel * firstOtherCluster->angularVel * DEG_TO_RAD * DEG_TO_RAD;
+					auto energyBefore = linearKin1 + rotKin1 + linearKin2 + rotKin2;
+
+					auto linearKin3 = 0.5f * float(cluster->numCells) * (vA2.x * vA2.x + vA2.y * vA2.y);
+                    auto linearKin4 = 0.5f * float(firstOtherCluster->numCells) * (vB2.x * vB2.x + vB2.y * vB2.y);
+                    auto rotKin3 = 0.5f * cluster->angularMass * angularVelA2 * angularVelA2 * DEG_TO_RAD * DEG_TO_RAD;
+					auto rotKin4 = 0.5f * firstOtherCluster->angularMass * angularVelB2 * angularVelB2 * DEG_TO_RAD * DEG_TO_RAD;
+					auto energyAfter = linearKin3 + rotKin3 + linearKin4 + rotKin4;
+
+					if (abs(energyBefore - energyAfter) > 0.1) {
+						int dummy = 0;
+						CudaPhysics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
+							firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
+							mA, mB, vA2, vB2, angularVelA2, angularVelB2);
+						++dummy;
+					}
+
+                    //---
 					cluster->vel = vA2;
 					cluster->angularVel = angularVelA2;
 					firstOtherCluster->vel = vB2;
