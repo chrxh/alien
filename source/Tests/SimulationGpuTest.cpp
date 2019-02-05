@@ -406,6 +406,36 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters)
 
 /**
 * Situation:
+*	- sidewise collision of two rectangular cell clusters
+*	- both clusters have velocity and angular velocity
+* Expected result: energy is conserved
+*/
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters_withAngularVelocities)
+{
+	DataDescription origData;
+	auto cluster1 = createRectangleCluster({ 20, 20 }, QVector2D{ 457.46f, 356.37f }, QVector2D{ -0.011f, -0.077f });
+	cluster1.angle = 1.409;
+	cluster1.angularVel = -0.271;
+	auto cluster2 = createRectangleCluster({ 20, 20 }, QVector2D{ 476.24f, 341.08f }, QVector2D{ -0.088f, 0.061f });
+	cluster2.angle = 307.34;
+	cluster2.angularVel = 0.394;
+	origData.addCluster(cluster1);
+	origData.addCluster(cluster2);
+	uint64_t clusterId1 = cluster1.id;
+	uint64_t clusterId2 = cluster2.id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(1, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	checkKineticEnergy(origData, newData);
+}
+
+/**
+* Situation:
 *	- sidewise collision of two orthogonal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result:
