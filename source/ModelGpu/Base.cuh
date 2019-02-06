@@ -124,6 +124,7 @@ public:
 		checkCudaErrors(cudaGetLastError());
 
 		*_numEntries = 0;
+		cudaDeviceSynchronize();
 	}
 
 	ArrayController(int size)
@@ -135,6 +136,7 @@ public:
 		checkCudaErrors(cudaGetLastError());
 
 		*_numEntries = 0;
+		cudaDeviceSynchronize();
 	}
 
 	void free()
