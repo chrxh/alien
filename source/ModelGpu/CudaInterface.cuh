@@ -14,6 +14,7 @@ struct ParticleData
 
 	//auxiliary data
 	int locked;	//0 = unlocked, 1 = locked
+	bool alive;
 };
 
 struct ClusterData;

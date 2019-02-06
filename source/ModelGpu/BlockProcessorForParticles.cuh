@@ -40,7 +40,7 @@ __inline__ __device__ void BlockProcessorForParticles::processingMovement(int st
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
 		ParticleData *origParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
-		if (0.0f == origParticle->energy) {
+		if (!origParticle->alive) {
 			continue;
 		}
 		if (auto cell = _cellMap.getFromNewMap(origParticle->pos)) {
@@ -61,20 +61,29 @@ __inline__ __device__ void BlockProcessorForParticles::processingCollision(int s
 		ParticleData* particle = &_data->particlesAC2.getEntireArray()[particleIndex];
 		ParticleData* otherParticle = _particleMap.getFromNewMap(particle->pos);
 		if (otherParticle && otherParticle != particle) {
-			int particleLocked = static_cast<bool>(atomicExch((int*)(&particle->locked), 1));
-			int otherParticleLocked = static_cast<bool>(atomicExch((int*)(&otherParticle->locked), 1));
-			if (0 == particleLocked && 0 == otherParticleLocked) {
-				float factor1 = particle->energy / (particle->energy + otherParticle->energy);
-				float factor2 = 1.0f - factor1;
-				particle->vel = add(mul(particle->vel, factor1), mul(otherParticle->vel, factor2));
-				particle->energy += otherParticle->energy;
-				otherParticle->energy = 0.0f;
+			int* particleLockAddr1 = &particle->locked;
+			int* particleLockAddr2 = &otherParticle->locked;
+			if (otherParticle->id < particle->id) {
+				particleLockAddr1 = &otherParticle->locked;
+				particleLockAddr2 = &particle->locked;
 			}
-			if (0 == particleLocked) {
-				particle->locked = 0;
+			int particleLocked1 = static_cast<bool>(atomicExch(particleLockAddr1, 1));
+			int particleLocked2 = static_cast<bool>(atomicExch(particleLockAddr2, 1));
+			if (0 == particleLocked1 && 0 == particleLocked2) {
+				if (particle->alive && otherParticle->alive) {
+					float factor1 = particle->energy / (particle->energy + otherParticle->energy);
+					float factor2 = 1.0f - factor1;
+					particle->vel = add(mul(particle->vel, factor1), mul(otherParticle->vel, factor2));
+					atomicAdd(&particle->energy, otherParticle->energy);
+					atomicAdd(&otherParticle->energy, -otherParticle->energy);
+					otherParticle->alive = false;
+				}
 			}
-			if (0 == otherParticleLocked) {
-				otherParticle->locked = 0;
+			if (0 == particleLocked1) {
+				*particleLockAddr1 = 0;
+			}
+			if (0 == particleLocked2) {
+				*particleLockAddr2 = 0;
 			}
 		}
 	}
