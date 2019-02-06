@@ -171,9 +171,6 @@ __global__ void clearMaps(SimulationDataInternal data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
-	if (indexResource >= numEntities) {
-		return;
-	}
 	int startIndex;
 	int endIndex;
 	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
@@ -184,12 +181,8 @@ __global__ void clearMaps(SimulationDataInternal data)
 
 	indexResource = threadIdx.x + blockIdx.x * blockDim.x;
 	numEntities = data.particlesAC1.getNumEntries();
-	if (indexResource >= numEntities) {
-		return;
-	}
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
 	for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
 		clearParticle(data, particleIndex);
 	}
-
 }

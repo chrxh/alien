@@ -404,6 +404,7 @@ __inline__ __device__ ParticleData* BlockProcessorForCluster1::createNewParticle
 	ParticleData* particle = _data->particlesAC2.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
 	particle->locked = 0;
+	particle->alive = true;
 	return particle;
 }
 
