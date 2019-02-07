@@ -244,6 +244,11 @@ __host__ __device__ __inline__ float2 sub(float2 const &p, float2 const &q)
 	return{ p.x - q.x, p.y - q.y };
 }
 
+__host__ __device__ __inline__ float length(float2 const & v)
+{
+	return sqrt(v.x * v.x + v.y * v.y);
+}
+
 __host__ __device__ __inline__ int2 toInt2(float2 const &p)
 {
 	return{ static_cast<int>(p.x), static_cast<int>(p.y) };

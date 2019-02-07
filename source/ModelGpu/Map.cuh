@@ -25,6 +25,7 @@ public:
 
 	__inline__ __device__ void mapDisplacementCorrection(float2 &disp) const
 	{
+		//TODO
 	}
 
 	__inline__ __device__ float mapDistanceSquared(float2 const &p, float2 const &q) const

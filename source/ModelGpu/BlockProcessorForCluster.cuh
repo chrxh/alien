@@ -513,6 +513,12 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 				if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
 					continue;
 				}
+				if (!cell->alive || !otherCell->alive) {
+					continue;
+				}
+				if (_cellMap.mapDistanceSquared(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
+					continue;
+				}
 				int origFirstOtherClusterId = atomicCAS(&firstOtherClusterId, 0, otherCell->cluster->id);
 				if (0 != origFirstOtherClusterId) {
 					continue;
@@ -552,6 +558,12 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 						if (firstOtherCluster != otherCell->cluster) {
 							continue;
 						}
+						if (!cell->alive || !otherCell->alive) {
+							continue;
+						}
+						if (_cellMap.mapDistanceSquared(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
+							continue;
+						}
 						if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
 							avoidCollision = true;
 							break;
@@ -579,9 +591,9 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 				if (0 == threadIdx.x) {
 					collisionCenterPos = div(collisionCenterPos, numberOfCollidingCells);
 					rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
-					// 				metric->correctDisplacement(rAPp);
+					_cellMap.mapDisplacementCorrection(rAPp);
 					rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
-					// 				metric->correctDisplacement(rBPp);
+					_cellMap.mapDisplacementCorrection(rBPp);
 					outwardVector = sub(
 						CudaPhysics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
 						CudaPhysics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
@@ -601,6 +613,12 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 								continue;
 							}
 							if (firstOtherCluster != otherCell->cluster) {
+								continue;
+							}
+							if (!cell->alive || !otherCell->alive) {
+								continue;
+							}
+							if (_cellMap.mapDistanceSquared(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 								continue;
 							}
 							float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
