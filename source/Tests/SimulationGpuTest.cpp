@@ -47,7 +47,6 @@ protected:
 	SimulationContext* _context = nullptr;
 	SpaceProperties* _spaceProp = nullptr;
 	SimulationAccessGpu* _access = nullptr;
-	IntVector2D _gridSize{ 6, 6 };
 };
 
 SimulationGpuTest::SimulationGpuTest()
@@ -286,6 +285,43 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 	EXPECT_LE(111, newCell2.pos->y());
 	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->x()));
 	EXPECT_TRUE(isCompatible(QVector2D(0, 0.1f), *newCluster2.vel));
+}
+
+/**
+* Situation: 
+* Expected result: 
+*/
+TEST_F(SimulationGpuTest, testCollisionOfSingleCells_atUniverseBoundary)
+{
+	DataDescription origData;
+	auto size = _spaceProp->getSize();
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x - 5.0f, 100 }, QVector2D{ 0.1f, 0 }, 0));
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x + 5.0f, 100 }, QVector2D{ -0.1f,0 }, 0));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(20, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_TRUE(isCompatible(-0.1f, cluster.vel->x()));
+		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
+		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_TRUE(isCompatible(0.1f, cluster.vel->x()));
+		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
+		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+	}
 }
 
 /**
