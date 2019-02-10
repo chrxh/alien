@@ -66,7 +66,7 @@ __device__ void clusterCollision(SimulationDataInternal &data, int clusterIndex)
 __global__ void clusterCollision(SimulationDataInternal data)
 {
 	int indexResource = blockIdx.x;
-	int numEntities = data.clustersAC2.getNumEntries();
+	int numEntities = data.clustersAC1.getNumEntries();
 	if (indexResource >= numEntities) {
 		return;
 	}
