@@ -16,7 +16,7 @@ public:
 	__inline__ __device__ int getNumOrigCells() const;
 
 	//synchronizing threads
-	__inline__ __device__ void processingMovementAndCollision(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDataCopy(int startCellIndex, int endCellIndex);
@@ -40,7 +40,6 @@ private:
 
 	ClusterData _modifiedCluster;
 	ClusterData *_origCluster;
-	CollisionData _collisionData;
 };
 
 //experimental
@@ -70,7 +69,6 @@ __inline__ __device__ void BlockProcessorForCluster1::init(SimulationDataInterna
 	_data = &data;
 	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	_modifiedCluster = *_origCluster;
-	_collisionData.init();
 	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 }
 
@@ -246,31 +244,16 @@ __inline__ __device__ void BlockProcessorForCluster1::processingDataCopyWithoutD
 	__syncthreads();
 }
 
-__inline__ __device__ void BlockProcessorForCluster1::processingMovementAndCollision(int startCellIndex, int endCellIndex)
+__inline__ __device__ void BlockProcessorForCluster1::processingMovement(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
-/*
-		CudaPhysics::getCollisionDataForCell(_cellMap, origCell, _collisionData);
-*/
 		killCloseCells(_cellMap, origCell);
 	}
 
 	__syncthreads();
 
 	if (0 == threadIdx.x) {
-/*
-		for (int i = 0; i < _collisionData.numEntries; ++i) {
-			CollisionEntry* entry = &_collisionData.entries[i];
-			float numCollisions = static_cast<float>(entry->numCollisions);
-			entry->collisionPos.x /= numCollisions;
-			entry->collisionPos.y /= numCollisions;
-			entry->normalVec.x /= numCollisions;
-			entry->normalVec.y /= numCollisions;
-			CudaPhysics::calcCollision(&_modifiedCluster, entry, _cellMap);
-		}
-*/
-
 		_modifiedCluster.angle += _modifiedCluster.angularVel;
 		CudaPhysics::angleCorrection(_modifiedCluster.angle);
 		_modifiedCluster.pos = add(_modifiedCluster.pos, _modifiedCluster.vel);

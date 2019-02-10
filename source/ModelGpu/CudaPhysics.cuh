@@ -9,16 +9,11 @@
 #include "CudaSimulationParameters.cuh"
 #include "Map.cuh"
 #include "SimulationDataInternal.cuh"
-#include "CollisionData.cuh"
 
 
 class CudaPhysics
 {
 public:
-	__device__ __inline__ static void calcCollision(ClusterData *clusterA, CollisionEntry *collisionEntry, BasicMap const& map);
-	__device__ __inline__ static void getCollisionDataForCell(Map<CellData> const &map, CellData *cell
-		, CollisionData &collisionData);
-
 	__inline__ __device__ static void rotationMatrix(float angle, float(&rotMatrix)[2][2]);
 	__inline__ __device__ static void angleCorrection(float &angle);
 	__inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
@@ -32,8 +27,6 @@ public:
 
 private:
 	__device__ __inline__ static float2 calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map);
-	__device__ __inline__ static void updateCollisionData(float2 pos, CellData *cell, Map<CellData> const& cellMap
-		, CollisionData &collisionData);
 	__inline__ __device__ static void angleCorrection(int &angle);
 };
 
@@ -171,101 +164,6 @@ __device__ __inline__ void CudaPhysics::calcCollision(float2 const & vA1, float2
 
 }
 
-__device__ __inline__ void CudaPhysics::calcCollision(ClusterData *clusterA, CollisionEntry *collisionEntry, BasicMap const& map)
-{
-	float2 posA = clusterA->pos;
-	float2 velA = clusterA->vel;
-	float angVelA = clusterA->angularVel * DEG_TO_RAD;
-	float angMassA = clusterA->angularMass;
-
-	ClusterData *clusterB = collisionEntry->cluster;
-	float2 posB = clusterB->pos;
-	float2 velB = clusterB->vel;
-	float angVelB = clusterB->angularVel * DEG_TO_RAD;
-	float angMassB = clusterB->angularMass;
-
-	float2 rAPp = sub(collisionEntry->collisionPos, posA);
-	map.mapDisplacementCorrection(rAPp);
-	rotateQuarterCounterClockwise(rAPp);
-	float2 rBPp = sub(collisionEntry->collisionPos, posB);
-	map.mapDisplacementCorrection(rBPp);
-	rotateQuarterCounterClockwise(rBPp);
-	float2 vAB = sub(sub(velA, mul(rAPp, angVelA)), sub(velB, mul(rBPp, angVelB)));
-
-	float2 n = collisionEntry->normalVec;
-
-	if (angMassA < FP_PRECISION) {
-		angVelA = 0.0;
-	}
-	if (angMassB < FP_PRECISION) {
-		angVelB = 0.0;
-	}
-
-	float vAB_dot_n = dot(vAB, n);
-	if (vAB_dot_n > 0.0) {
-		return;
-	}
-
-	float massA = static_cast<float>(clusterA->numCells);
-	float massB = static_cast<float>(clusterB->numCells);
-	float rAPp_dot_n = dot(rAPp, n);
-	float rBPp_dot_n = dot(rBPp, n);
-
-	if (angMassA > FP_PRECISION && angMassB > FP_PRECISION) {
-		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
-			+ rAPp_dot_n * rAPp_dot_n / angMassA + rBPp_dot_n * rBPp_dot_n / angMassB);
-
-
-		atomicAdd(&clusterA->angularVel, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
-		atomicAdd(&clusterA->vel.x, j / massA * n.x);
-		atomicAdd(&clusterA->vel.y, j / massA * n.y);
-
-		/*
-		atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
-		atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
-		atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		*/
-	}
-
-	if (angMassA <= FP_PRECISION && angMassB > FP_PRECISION) {
-		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
-			+ rBPp_dot_n * rBPp_dot_n / angMassB);
-
-		atomicAdd(&clusterA->vel.x, j / massA * n.x);
-		atomicAdd(&clusterA->vel.y, j / massA * n.y);
-		/*
-		atomicAdd(&collisionData.angularVelDelta, (rBPp_dot_n * j / angMassB) * RAD_TO_DEG);
-		atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
-		atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		*/
-	}
-
-	if (angMassA > FP_PRECISION && angMassB <= FP_PRECISION) {
-		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
-			+ rAPp_dot_n * rAPp_dot_n / angMassA);
-
-		atomicAdd(&clusterA->angularVel, -(rAPp_dot_n * j / angMassA) * RAD_TO_DEG);
-		atomicAdd(&clusterA->vel.x, j / massA * n.x);
-		atomicAdd(&clusterA->vel.y, j / massA * n.y);
-		/*
-		atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
-		atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		*/
-	}
-
-	if (angMassA <= FP_PRECISION && angMassB <= FP_PRECISION) {
-		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB));
-
-		atomicAdd(&clusterA->vel.x, j / massA * n.x);
-		atomicAdd(&clusterA->vel.y, j / massA * n.y);
-		/*
-		atomicAdd(&collisionData.velDelta.x, -j / massB * n.x);
-		atomicAdd(&collisionData.velDelta.y, -j / massB * n.y);
-		*/
-	}
-
-}
-
 __device__ __inline__ float2 CudaPhysics::calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map)
 {
 	ClusterData* clusterA = cellA->cluster;
@@ -285,80 +183,6 @@ __device__ __inline__ float2 CudaPhysics::calcOutwardVector(CellData* cellA, Cel
 	map.mapDisplacementCorrection(rBPp);
 	rotateQuarterCounterClockwise(rBPp);
 	return sub(sub(velB, mul(rBPp, angVelB)), sub(velA, mul(rAPp, angVelA)));
-}
-
-__device__ __inline__ void CudaPhysics::updateCollisionData(float2 pos, CellData *cell
-	, Map<CellData> const& cellMap, CollisionData &collisionData)
-{
-	CellData* mapCell = cellMap.getFromOrigMap(pos);
-	if (!mapCell) {
-		return;
-	}
-	ClusterData* mapCluster = mapCell->cluster;
-	if (mapCluster == cell->cluster) {
-		return;
-	}
-	if (mapCell->protectionCounter > 0) {
-		return;
-	}
-	auto distanceSquared = cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos);
-	if (distanceSquared > cudaSimulationParameters.cellMaxDistance * cudaSimulationParameters.cellMaxDistance) {
-		return;
-	}
-
-	CollisionEntry* entry = collisionData.getOrCreateEntry(mapCluster);
-
-	atomicAdd(&entry->numCollisions, 2);
-	atomicAdd(&entry->collisionPos.x, mapCell->absPos.x);
-	atomicAdd(&entry->collisionPos.y, mapCell->absPos.y);
-	atomicAdd(&entry->collisionPos.x, cell->absPos.x);
-	atomicAdd(&entry->collisionPos.y, cell->absPos.y);
-
-	float2 outward = calcOutwardVector(cell, mapCell, cellMap);
-	float2 n = calcNormalToCell(mapCell, outward);
-	atomicAdd(&entry->normalVec.x, n.x);
-	atomicAdd(&entry->normalVec.y, n.y);
-
-	outward = calcOutwardVector(mapCell, cell, cellMap);
-	n = minus(calcNormalToCell(cell, outward));
-	atomicAdd(&entry->normalVec.x, n.x);
-	atomicAdd(&entry->normalVec.y, n.y);
-
-	cell->protectionCounter = PROTECTION_TIMESTEPS;
-}
-
-__device__ __inline__ void CudaPhysics::getCollisionDataForCell(Map<CellData> const &map, CellData *cell, CollisionData &collisionData)
-{
-	if (cell->protectionCounter > 0) {
-		return;
-	}
-
-	auto absPos = cell->absPos;
-	if (!map.isEntityPresentAtOrigMap(absPos, cell)) {
-		return;
-	}
-
-	--absPos.x;
-	--absPos.y;
-	updateCollisionData(absPos, cell, map, collisionData);
-	++absPos.x;
-	updateCollisionData(absPos, cell, map, collisionData);
-	++absPos.x;
-	updateCollisionData(absPos, cell, map, collisionData);
-
-	++absPos.y;
-	absPos.x -= 2;
-	updateCollisionData(absPos, cell, map, collisionData);
-	absPos.x += 2;
-	updateCollisionData(absPos, cell, map, collisionData);
-
-	++absPos.y;
-	absPos.x -= 2;
-	updateCollisionData(absPos, cell, map, collisionData);
-	++absPos.x;
-	updateCollisionData(absPos, cell, map, collisionData);
-	++absPos.x;
-	updateCollisionData(absPos, cell, map, collisionData);
 }
 
 __inline__ __device__ void CudaPhysics::rotationMatrix(float angle, float(&rotMatrix)[2][2])

@@ -63,9 +63,6 @@
     <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForCluster.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CollisionData.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\SimulationDataInternal.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
