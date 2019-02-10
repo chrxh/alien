@@ -65,6 +65,7 @@ public:
 		cudaMallocManaged(&_array, sizeof(int)*size);
 		cudaMallocManaged(&_currentId, sizeof(uint64_t));
 		checkCudaErrors(cudaGetLastError());
+		cudaDeviceSynchronize();
 
 		*_currentIndex = 0;
 
@@ -72,6 +73,7 @@ public:
 			_array[i] = rand();
 		}
 		*_currentId = 0;
+		cudaDeviceSynchronize();
 	}
 
 	__device__ __inline__ float random(float maxVal)
