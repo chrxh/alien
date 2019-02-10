@@ -25,9 +25,8 @@ public:
 
 	__inline__ __device__ void mapDisplacementCorrection(float2 &disp) const
 	{
-		int2 halfSize{ _size.x / 2, _size.y / 2 };
-		disp.x = fmodf(disp.x, halfSize.x);
-		disp.y = fmodf(disp.y, halfSize.y);
+		disp.x = fmodf(disp.x, _size.x / 2);
+		disp.y = fmodf(disp.y, _size.y / 2);
 	}
 
 	__inline__ __device__ float mapDistanceSquared(float2 const &p, float2 const &q) const
