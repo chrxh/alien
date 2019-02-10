@@ -17,7 +17,7 @@ public:
 
 	__inline__ __host__ __device__ void mapPosCorrection(float2 &pos) const
 	{
-		int2 intPart{ (int)pos.x, (int)pos.y };
+		int2 intPart{ floorInt(pos.x), floorInt(pos.y) };
 		float2 fracPart = { pos.x - intPart.x, pos.y - intPart.y };
 		mapPosCorrection(intPart);
 		pos = { static_cast<float>(intPart.x) + fracPart.x, static_cast<float>(intPart.y) + fracPart.y };
@@ -25,7 +25,9 @@ public:
 
 	__inline__ __device__ void mapDisplacementCorrection(float2 &disp) const
 	{
-		//TODO
+		int2 halfSize{ _size.x / 2, _size.y / 2 };
+		disp.x = fmodf(disp.x, halfSize.x);
+		disp.y = fmodf(disp.y, halfSize.y);
 	}
 
 	__inline__ __device__ float mapDistanceSquared(float2 const &p, float2 const &q) const
@@ -53,7 +55,7 @@ public:
 
 	__inline__ __host__ __device__ bool isEntityPresentAtOrigMap(float2 pos, T* entity) const
 	{
-		int2 posInt = { static_cast<int>(pos.x/* + 0.5f*/), static_cast<int>(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * BasicMap::_size.x;
 		return _map1[mapEntry] == entity;	
@@ -62,7 +64,7 @@ public:
 
 	__inline__ __host__ __device__ T* getFromOrigMap(float2 pos) const
 	{
-		int2 posInt = { static_cast<int>(pos.x/* + 0.5f*/), static_cast<int>(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		return _map1[mapEntry];
@@ -70,7 +72,7 @@ public:
 
 	__inline__ __host__ __device__ T* getFromNewMap(float2 pos) const
 	{
-		int2 posInt = { static_cast<int>(pos.x/* + 0.5f*/), static_cast<int>(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		return _map2[mapEntry];
@@ -78,7 +80,7 @@ public:
 
 	__inline__ __host__ __device__ void setToOrigMap(float2 pos, T* entity)
 	{
-		int2 posInt = { static_cast<int>(pos.x/* + 0.5f*/), static_cast<int>(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		_map1[mapEntry] = entity;
@@ -86,7 +88,7 @@ public:
 
 	__inline__ __host__ __device__ void setToNewMap(float2 pos, T* entity)
 	{
-		int2 posInt = { static_cast<int>(pos.x/* + 0.5f*/), static_cast<int>(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
 		_map2[mapEntry] = entity;

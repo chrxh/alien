@@ -254,6 +254,16 @@ __host__ __device__ __inline__ int2 toInt2(float2 const &p)
 	return{ static_cast<int>(p.x), static_cast<int>(p.y) };
 }
 
+__host__ __device__ __inline__ int floorInt(float v)
+{
+	int result = static_cast<int>(v);
+	if (result > v) {
+		--result;
+	}
+	return result;
+}
+
+
 float random(float max)
 {
 	return ((float)rand() / RAND_MAX) * max;
