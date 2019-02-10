@@ -26,31 +26,11 @@ __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 	int endCellIndex;
 	calcPartition(blockProcessor.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	blockProcessor.processingMovementAndCollision(startCellIndex, endCellIndex);
+	blockProcessor.processingMovement(startCellIndex, endCellIndex);
 	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
 	blockProcessor.processingDecomposition(startCellIndex, endCellIndex);
 	blockProcessor.processingDataCopy(startCellIndex, endCellIndex);
 }
-
-/*
-__global__ void mapCheckDEBUG(SimulationDataInternal data)
-{
-	//DEBUG
-	__syncthreads();
-	if (0 == blockIdx.x && 0 == threadIdx.x) {
-		for (int x = 0; x < data.size.x; ++x) {
-			for (int y = 0; y < data.size.y; ++y) {
-				if (data.cellMap1[x + y *data.size.x] != nullptr) {
-					int dummy = 0;
-					dummy++;
-				}
-			}
-		}
-	}
-	__syncthreads();
-	//DEBUG END
-}
-*/
 
 __global__ void clusterMovement(SimulationDataInternal data)
 {
