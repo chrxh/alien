@@ -42,7 +42,6 @@ private:
 	ClusterData *_origCluster;
 };
 
-//experimental
 class BlockProcessorForCluster2
 {
 public:
@@ -50,7 +49,7 @@ public:
 	__inline__ __device__ int getNumCells() const;
 
 	//synchronizing threads
-	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);	//uses new maps
+	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);	//operates on orig cell map
 
 private:
 
@@ -446,7 +445,7 @@ __inline__ __device__ void BlockProcessorForCluster1::killCloseCell(float2 const
 __inline__ __device__ void BlockProcessorForCluster2::init(SimulationDataInternal & data, int clusterIndex)
 {
 	_data = &data;
-	_cluster = &data.clustersAC2.getEntireArray()[clusterIndex];
+	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
 }
 
@@ -485,7 +484,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 		CellData* cell = &cluster->cells[index];
 		for (float dx = -1.0f; dx < 2.0f; ++dx) {
 			for (float dy = -1.0f; dy < 2.0f; ++dy) {
-				CellData* otherCell = _cellMap.getFromNewMap(add(cell->absPos, {dx, dy}));
+				CellData* otherCell = _cellMap.getFromOrigMap(add(cell->absPos, {dx, dy}));
 
 				if (!otherCell || otherCell == cell) {
 					continue;
@@ -534,7 +533,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 				CellData* cell = &cluster->cells[index];
 				for (float dx = -1.0f; dx < 2.0f; ++dx) {
 					for (float dy = -1.0f; dy < 2.0f; ++dy) {
-						CellData* otherCell = _cellMap.getFromNewMap(add(cell->absPos, { dx, dy }));
+						CellData* otherCell = _cellMap.getFromOrigMap(add(cell->absPos, { dx, dy }));
 						if (!otherCell || otherCell == cell) {
 							continue;
 						}
@@ -591,7 +590,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 					CellData* cell = &cluster->cells[index];
 					for (float dx = -1.0f; dx < 2.0f; ++dx) {
 						for (float dy = -1.0f; dy < 2.0f; ++dy) {
-							CellData* otherCell = _cellMap.getFromNewMap(add(cell->absPos, { dx, dy }));
+							CellData* otherCell = _cellMap.getFromOrigMap(add(cell->absPos, { dx, dy }));
 							if (!otherCell || otherCell == cell) {
 								continue;
 							}

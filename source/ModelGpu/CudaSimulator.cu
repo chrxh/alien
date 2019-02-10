@@ -134,11 +134,11 @@ void CudaSimulator::calcNextTimestep()
 {
 	prepareTargetData();
 
-	clusterMovement<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
+	clusterCollision << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	clusterCollision<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >>> (*_data);
+	clusterMovement<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
