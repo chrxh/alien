@@ -15,7 +15,7 @@ public:
 	__inline__ __device__ void init(SimulationDataInternal& data);
 	
 	__inline__ __device__ void processingMovement(int startParticleIndex, int endParticleIndex);
-	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);	//uses on new maps
+	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);	//uses orig particle map
 
 private:
 
@@ -58,8 +58,8 @@ __inline__ __device__ void BlockProcessorForParticles::processingMovement(int st
 __inline__ __device__ void BlockProcessorForParticles::processingCollision(int startParticleIndex, int endParticleIndex)
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
-		ParticleData* particle = &_data->particlesAC2.getEntireArray()[particleIndex];
-		ParticleData* otherParticle = _particleMap.getFromNewMap(particle->pos);
+		ParticleData* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
+		ParticleData* otherParticle = _particleMap.getFromOrigMap(particle->pos);
 		if (otherParticle && otherParticle != particle) {
 			int* particleLockAddr1 = &particle->locked;
 			int* particleLockAddr2 = &otherParticle->locked;
