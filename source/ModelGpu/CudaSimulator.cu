@@ -61,6 +61,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	cudaDeviceSynchronize();
 
 	_data = new SimulationDataInternal();
+	std::cout << "[CUDA debug] 1" << std::endl;
 	_data->size = size;
 
 	std::cout << "[CUDA debug] step 1 CudaSimulator::CudaSimulator" << std::endl;
@@ -134,7 +135,7 @@ void CudaSimulator::calcNextTimestep()
 {
 	prepareTargetData();
 
-	clusterCollision << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_data);
+	clusterCollision<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
@@ -142,11 +143,11 @@ void CudaSimulator::calcNextTimestep()
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	particleMovement<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
+	particleCollision<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	particleCollision<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
+	particleMovement<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
