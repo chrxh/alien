@@ -92,7 +92,7 @@ __global__ void particleCollision(SimulationDataInternal data)
 	__syncthreads();
 
 	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	int numEntities = data.particlesAC2.getNumEntries();
+	int numEntities = data.particlesAC1.getNumEntries();
 
 	int startIndex;
 	int endIndex;
