@@ -45,55 +45,77 @@ class Map
 	: public BasicMap
 {
 public:
-	__inline__ __host__ __device__ void init(int2 const& size, T ** map1, T ** map2)
+	__inline__ __host__ __device__ void init(int2 const& size, T ** map)
 	{
 		BasicMap::init(size);
-		_map1 = map1;
-		_map2 = map2;
+		_map = map;
 	}
 
-	__inline__ __host__ __device__ bool isEntityPresentAtOrigMap(float2 pos, T* entity) const
+	__inline__ __host__ __device__ bool isEntityPresent(float2 const& pos, T* entity) const
 	{
-		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * BasicMap::_size.x;
-		return _map1[mapEntry] == entity;	
-
+		return _map[mapEntry] == entity;
 	}
 
-	__inline__ __host__ __device__ T* getFromOrigMap(float2 pos) const
+	__inline__ __host__ __device__ T* get(float2 const& pos) const
 	{
-		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
-		return _map1[mapEntry];
+		return _map[mapEntry];
 	}
 
-	__inline__ __host__ __device__ T* getFromNewMap(float2 pos) const
+	__inline__ __host__ __device__ void set(float2 const& pos, T* entity)
 	{
-		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
+		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
-		return _map2[mapEntry];
-	}
-
-	__inline__ __host__ __device__ void setToOrigMap(float2 pos, T* entity)
-	{
-		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
-		mapPosCorrection(posInt);
-		auto mapEntry = posInt.x + posInt.y * _size.x;
-		_map1[mapEntry] = entity;
-	}
-
-	__inline__ __host__ __device__ void setToNewMap(float2 pos, T* entity)
-	{
-		int2 posInt = { floorInt(pos.x/* + 0.5f*/), floorInt(pos.y/* + 0.5f*/) };
-		mapPosCorrection(posInt);
-		auto mapEntry = posInt.x + posInt.y * _size.x;
-		_map2[mapEntry] = entity;
+		_map[mapEntry] = entity;
 	}
 
 private:
-	T ** _map1;
-	T ** _map2;
+	T ** _map;
+};
+
+template<typename T>
+class BiMap
+{
+public:
+	__inline__ __host__ __device__ void init(int2 const& size, T ** map1, T ** map2)
+	{
+		_map1.init(size, map1);
+		_map2.init(size, map2);
+	}
+
+	__inline__ __host__ __device__ bool isEntityPresentAtOrigMap(float2 const& pos, T* entity) const
+	{
+		return _map1.isEntityPresent(pos, entity);
+
+	}
+
+	__inline__ __host__ __device__ T* getFromOrigMap(float2 const& pos) const
+	{
+		return _map1.get(pos);
+	}
+
+	__inline__ __host__ __device__ T* getFromNewMap(float2 const& pos) const
+	{
+		return _map2.get(pos);
+	}
+
+	__inline__ __host__ __device__ void setToOrigMap(float2 const& pos, T* entity)
+	{
+		_map1.setToNewMap(pos, entity);
+	}
+
+	__inline__ __host__ __device__ void setToNewMap(float2 const& pos, T* entity)
+	{
+		_map2.setToNewMap(pos, entity);
+	}
+
+private:
+	Map<T> _map1;
+	Map<T> _map2;
 };

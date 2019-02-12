@@ -217,11 +217,11 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 		_data->particleMap1[i] = nullptr;
 	}
 	Map<CellData> map;
-	map.init(_data->size, _data->cellMap1, _data->cellMap2);
+	map.init(_data->size, _data->cellMap1);
 	for (int index = 0; index < _data->cellsAC1.getNumEntries(); ++index) {
 		CellData* cell = _data->cellsAC1.at(index);
 		auto& absPos = cell->absPos;
-		map.setToOrigMap(absPos, cell);
+		map.set(absPos, cell);
 	}
 	cudaDeviceSynchronize();
 
