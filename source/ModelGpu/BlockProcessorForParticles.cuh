@@ -20,8 +20,9 @@ public:
 private:
 
 	SimulationDataInternal* _data;
-	Map<CellData> _cellMap;
-	Map<ParticleData> _particleMap;
+	Map<CellData> _newCellMap;
+	Map<ParticleData> _origParticleMap;
+	Map<ParticleData> _newParticleMap;
 };
 
 
@@ -32,8 +33,9 @@ private:
 __inline__ __device__ void BlockProcessorForParticles::init(SimulationDataInternal & data)
 {
 	_data = &data;
-	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
-	_particleMap.init(data.size, data.particleMap1, data.particleMap2);
+	_newCellMap.init(data.size, data.cellMap2);
+	_origParticleMap.init(data.size, data.particleMap1);
+	_newParticleMap.init(data.size, data.particleMap2);
 }
 
 __inline__ __device__ void BlockProcessorForParticles::processingMovement(int startParticleIndex, int endParticleIndex)
@@ -43,15 +45,15 @@ __inline__ __device__ void BlockProcessorForParticles::processingMovement(int st
 		if (!origParticle->alive) {
 			continue;
 		}
-		if (auto cell = _cellMap.getFromNewMap(origParticle->pos)) {
+		if (auto cell = _newCellMap.get(origParticle->pos)) {
 			atomicAdd(&cell->energy, origParticle->energy);
 			continue;
 		}
 		ParticleData* newParticle = _data->particlesAC2.getNewElement();
 		*newParticle = *origParticle;
 		newParticle->pos = add(origParticle->pos, origParticle->vel);
-		_particleMap.mapPosCorrection(newParticle->pos);
-		_particleMap.setToNewMap(newParticle->pos, newParticle);
+		_newParticleMap.mapPosCorrection(newParticle->pos);
+		_newParticleMap.set(newParticle->pos, newParticle);
 	}
 }
 
@@ -59,7 +61,7 @@ __inline__ __device__ void BlockProcessorForParticles::processingCollision(int s
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
 		ParticleData* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
-		ParticleData* otherParticle = _particleMap.getFromOrigMap(particle->pos);
+		ParticleData* otherParticle = _origParticleMap.get(particle->pos);
 		if (otherParticle && otherParticle != particle) {
 			int* particleLockAddr1 = &particle->locked;
 			int* particleLockAddr2 = &otherParticle->locked;

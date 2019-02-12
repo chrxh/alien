@@ -32,11 +32,12 @@ private:
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
 	__inline__ __device__ void cellRadiation(CellData *cell);
 	__inline__ __device__ ParticleData* createNewParticle();
-	__inline__ __device__ void killCloseCells(Map<CellData> const &map, CellData *cell);
-	__inline__ __device__ void killCloseCell(float2 const& pos, Map<CellData> const &map, CellData *cell);
+	__inline__ __device__ void killCloseCells(CellData *cell);
+	__inline__ __device__ void killCloseCell(float2 const& pos, CellData *cell);
 
 	SimulationDataInternal* _data;
-	Map<CellData> _cellMap;
+	Map<CellData> _origCellMap;
+	Map<CellData> _newCellMap;
 
 	ClusterData _modifiedCluster;
 	ClusterData *_origCluster;
@@ -68,7 +69,8 @@ __inline__ __device__ void BlockProcessorForCluster1::init(SimulationDataInterna
 	_data = &data;
 	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	_modifiedCluster = *_origCluster;
-	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
+	_origCellMap.init(data.size, data.cellMap1);
+	_newCellMap.init(data.size, data.cellMap2);
 }
 
 __inline__ __device__ int BlockProcessorForCluster1::getNumOrigCells() const
@@ -247,7 +249,7 @@ __inline__ __device__ void BlockProcessorForCluster1::processingMovement(int sta
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
-		killCloseCells(_cellMap, origCell);
+		killCloseCells(origCell);
 	}
 
 	__syncthreads();
@@ -256,7 +258,7 @@ __inline__ __device__ void BlockProcessorForCluster1::processingMovement(int sta
 		_modifiedCluster.angle += _modifiedCluster.angularVel;
 		CudaPhysics::angleCorrection(_modifiedCluster.angle);
 		_modifiedCluster.pos = add(_modifiedCluster.pos, _modifiedCluster.vel);
-		_cellMap.mapPosCorrection(_modifiedCluster.pos);
+		_newCellMap.mapPosCorrection(_modifiedCluster.pos);
 	}
 	__syncthreads();
 }
@@ -338,7 +340,7 @@ __inline__ __device__  void BlockProcessorForCluster1::copyAndUpdateCell(CellDat
 		--cellCopy.protectionCounter;
 	}
 	*newCell = cellCopy;
-	_cellMap.setToNewMap(absPos, newCell);
+	_newCellMap.set(absPos, newCell);
 
 	origCell->nextTimestep = newCell;
 }
@@ -357,7 +359,7 @@ __inline__ __device__ void BlockProcessorForCluster1::cellRadiation(CellData *ce
 		auto particle = createNewParticle();
 		auto &pos = cell->absPos;
 		particle->pos = { static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f, static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f };
-		_cellMap.mapPosCorrection(particle->pos);
+		_newCellMap.mapPosCorrection(particle->pos);
 		particle->vel = { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation
 			, (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
 		float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
@@ -390,49 +392,46 @@ __inline__ __device__ ParticleData* BlockProcessorForCluster1::createNewParticle
 	return particle;
 }
 
-__inline__ __device__ void BlockProcessorForCluster1::killCloseCells(Map<CellData> const & map, CellData * cell)
+__inline__ __device__ void BlockProcessorForCluster1::killCloseCells(CellData * cell)
 {
 	if (cell->protectionCounter > 0) {
 		return;
 	}
 
 	float2 absPos = cell->absPos;
-/*
-	killCloseCell(absPos, map, cell);
-*/
 
 	--absPos.x;
 	--absPos.y;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 	++absPos.x;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 	++absPos.x;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 
 	++absPos.y;
 	absPos.x -= 2;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 	absPos.x += 2;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 
 	++absPos.y;
 	absPos.x -= 2;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 	++absPos.x;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 	++absPos.x;
-	killCloseCell(absPos, map, cell);
+	killCloseCell(absPos, cell);
 }
 
-__inline__ __device__ void BlockProcessorForCluster1::killCloseCell(float2 const & pos, Map<CellData> const & map, CellData * cell)
+__inline__ __device__ void BlockProcessorForCluster1::killCloseCell(float2 const & pos, CellData * cell)
 {
-	CellData* mapCell = map.getFromOrigMap(pos);
+	CellData* mapCell = _origCellMap.get(pos);
 	if (!mapCell || mapCell == cell) {
 		return;
 	}
 
 	ClusterData* mapCluster = mapCell->cluster;
-	auto distanceSquared = map.mapDistanceSquared(cell->absPos, mapCell->absPos);
+	auto distanceSquared = _origCellMap.mapDistanceSquared(cell->absPos, mapCell->absPos);
 	if (distanceSquared < cudaSimulationParameters.cellMinDistance * cudaSimulationParameters.cellMinDistance) {
 		ClusterData* cluster = cell->cluster;
 		if (mapCluster->numCells >= cluster->numCells) {
@@ -446,7 +445,7 @@ __inline__ __device__ void BlockProcessorForCluster2::init(SimulationDataInterna
 {
 	_data = &data;
 	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
-	_cellMap.init(data.size, data.cellMap1, data.cellMap2);
+	_cellMap.init(data.size, data.cellMap1);
 }
 
 __inline__ __device__ int BlockProcessorForCluster2::getNumCells() const
@@ -484,7 +483,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 		CellData* cell = &cluster->cells[index];
 		for (float dx = -1.0f; dx < 2.0f; ++dx) {
 			for (float dy = -1.0f; dy < 2.0f; ++dy) {
-				CellData* otherCell = _cellMap.getFromOrigMap(add(cell->absPos, {dx, dy}));
+				CellData* otherCell = _cellMap.get(add(cell->absPos, {dx, dy}));
 
 				if (!otherCell || otherCell == cell) {
 					continue;
@@ -533,7 +532,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 				CellData* cell = &cluster->cells[index];
 				for (float dx = -1.0f; dx < 2.0f; ++dx) {
 					for (float dy = -1.0f; dy < 2.0f; ++dy) {
-						CellData* otherCell = _cellMap.getFromOrigMap(add(cell->absPos, { dx, dy }));
+						CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
 						if (!otherCell || otherCell == cell) {
 							continue;
 						}
@@ -590,7 +589,7 @@ __inline__ __device__ void BlockProcessorForCluster2::processingCollision(int st
 					CellData* cell = &cluster->cells[index];
 					for (float dx = -1.0f; dx < 2.0f; ++dx) {
 						for (float dy = -1.0f; dy < 2.0f; ++dy) {
-							CellData* otherCell = _cellMap.getFromOrigMap(add(cell->absPos, { dx, dy }));
+							CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
 							if (!otherCell || otherCell == cell) {
 								continue;
 							}

@@ -129,22 +129,22 @@ __device__ void clearCellCluster(SimulationDataInternal const &data, int cluster
 		return;
 	}
 	Map<CellData> map;
-	map.init(size, data.cellMap1, data.cellMap2);
+	map.init(size, data.cellMap1);
 
 	calcPartition(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		float2 absPos = oldCluster.cells[cellIndex].absPos;
-		map.setToOrigMap(absPos, nullptr);
+		map.set(absPos, nullptr);
 	}
 }
 
 __device__ void clearParticle(SimulationDataInternal const &data, int particleIndex)
 {
 	Map<ParticleData> map;
-	map.init(data.size, data.particleMap1, data.particleMap2);
+	map.init(data.size, data.particleMap1);
 
 	auto const &particle = data.particlesAC1.getEntireArray()[particleIndex];
-	map.setToOrigMap(particle.pos, nullptr);
+	map.set(particle.pos, nullptr);
 }
 
 __global__ void clearMaps(SimulationDataInternal data)
