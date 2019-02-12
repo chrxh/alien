@@ -7,16 +7,16 @@
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "BlockProcessorForCluster.cuh"
-#include "BlockProcessorForParticles.cuh"
+#include "ClusterMover.cuh"
+#include "ParticleMover.cuh"
 
 /************************************************************************/
 /* Clusters																*/
 /************************************************************************/
 
-__device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
+__device__ void clusterReassembling(SimulationDataInternal &data, int clusterIndex)
 {
-	__shared__ BlockProcessorForCluster1 blockProcessor;
+	__shared__ ClusterReassembler blockProcessor;
 	if (0 == threadIdx.x) {
 		blockProcessor.init(data, clusterIndex);
 	}
@@ -30,6 +30,38 @@ __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
 	blockProcessor.processingDecomposition(startCellIndex, endCellIndex);
 	blockProcessor.processingDataCopy(startCellIndex, endCellIndex);
+}
+
+__global__ void clusterReassembling(SimulationDataInternal data)
+{
+	int indexResource = blockIdx.x;
+	int numEntities = data.clustersAC1.getNumEntries();
+	if (indexResource >= numEntities) {
+		return;
+	}
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
+	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+		clusterReassembling(data, clusterIndex);
+	}
+}
+
+__device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
+{
+	__shared__ ClusterMover blockProcessor;
+	if (0 == threadIdx.x) {
+		blockProcessor.init(data, clusterIndex);
+	}
+	__syncthreads();
+
+	int startCellIndex;
+	int endCellIndex;
+	calcPartition(blockProcessor.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+
+	blockProcessor.processingCollision(startCellIndex, endCellIndex);
+	blockProcessor.killCloseCell(startCellIndex, endCellIndex);
 }
 
 __global__ void clusterMovement(SimulationDataInternal data)
@@ -48,44 +80,13 @@ __global__ void clusterMovement(SimulationDataInternal data)
 	}
 }
 
-__device__ void clusterCollision(SimulationDataInternal &data, int clusterIndex)
-{
-	__shared__ BlockProcessorForCluster2 blockProcessor;
-	if (0 == threadIdx.x) {
-		blockProcessor.init(data, clusterIndex);
-	}
-	__syncthreads();
-
-	int startCellIndex;
-	int endCellIndex;
-	calcPartition(blockProcessor.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-	blockProcessor.processingCollision(startCellIndex, endCellIndex);
-}
-
-__global__ void clusterCollision(SimulationDataInternal data)
-{
-	int indexResource = blockIdx.x;
-	int numEntities = data.clustersAC1.getNumEntries();
-	if (indexResource >= numEntities) {
-		return;
-	}
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
-	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterCollision(data, clusterIndex);
-	}
-}
-
 /************************************************************************/
 /* Particles															*/
 /************************************************************************/
 
-__global__ void particleCollision(SimulationDataInternal data)
+__global__ void particleMovement(SimulationDataInternal data)
 {
-	__shared__ BlockProcessorForParticles blockProcessor;
+	__shared__ ParticleMover blockProcessor;
 	if (0 == threadIdx.x) {
 		blockProcessor.init(data);
 	}
@@ -100,9 +101,9 @@ __global__ void particleCollision(SimulationDataInternal data)
 	blockProcessor.processingCollision(startIndex, endIndex);
 }
 
-__global__ void particleMovement(SimulationDataInternal data)
+__global__ void particleReassembling(SimulationDataInternal data)
 {
-	__shared__ BlockProcessorForParticles blockProcessor;
+	__shared__ ParticleReassembler blockProcessor;
 	if (0 == threadIdx.x) {
 		blockProcessor.init(data);
 	}
