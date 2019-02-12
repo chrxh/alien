@@ -9,13 +9,12 @@
 #include "CudaPhysics.cuh"
 #include "Map.cuh"
 
-class BlockProcessorForParticles
+class ParticleReassembler
 {
 public:
 	__inline__ __device__ void init(SimulationDataInternal& data);
 	
 	__inline__ __device__ void processingMovement(int startParticleIndex, int endParticleIndex);
-	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);	//uses orig particle map
 
 private:
 
@@ -25,12 +24,25 @@ private:
 	Map<ParticleData> _newParticleMap;
 };
 
+class ParticleMover
+{
+public:
+	__inline__ __device__ void init(SimulationDataInternal& data);
+
+	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);
+
+private:
+
+	SimulationDataInternal* _data;
+	Map<ParticleData> _origParticleMap;
+};
+
 
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void BlockProcessorForParticles::init(SimulationDataInternal & data)
+__inline__ __device__ void ParticleReassembler::init(SimulationDataInternal & data)
 {
 	_data = &data;
 	_newCellMap.init(data.size, data.cellMap2);
@@ -38,7 +50,7 @@ __inline__ __device__ void BlockProcessorForParticles::init(SimulationDataIntern
 	_newParticleMap.init(data.size, data.particleMap2);
 }
 
-__inline__ __device__ void BlockProcessorForParticles::processingMovement(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleReassembler::processingMovement(int startParticleIndex, int endParticleIndex)
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
 		ParticleData *origParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
@@ -57,7 +69,13 @@ __inline__ __device__ void BlockProcessorForParticles::processingMovement(int st
 	}
 }
 
-__inline__ __device__ void BlockProcessorForParticles::processingCollision(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleMover::init(SimulationDataInternal & data)
+{
+	_data = &data;
+	_origParticleMap.init(data.size, data.particleMap1);
+}
+
+__inline__ __device__ void ParticleMover::processingCollision(int startParticleIndex, int endParticleIndex)
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
 		ParticleData* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
