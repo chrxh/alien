@@ -60,9 +60,6 @@
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForCluster.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\SimulationDataInternal.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
@@ -84,7 +81,10 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\BlockProcessorForParticles.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\ParticleMover.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ClusterMover.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
