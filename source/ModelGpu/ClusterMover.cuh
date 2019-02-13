@@ -16,7 +16,6 @@ public:
 	__inline__ __device__ int getNumOrigCells() const;
 
 	//synchronizing threads
-	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDataCopy(int startCellIndex, int endCellIndex);
@@ -49,11 +48,12 @@ public:
 
 	//synchronizing threads
 	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void killCloseCell(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void destroyCloseCell(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
 
 private:
-	__inline__ __device__ void killCloseCells(CellData *cell);
-	__inline__ __device__ void killCloseCell(float2 const& pos, CellData *cell);
+	__inline__ __device__ void destroyCloseCell(CellData *cell);
+	__inline__ __device__ void destroyCloseCell(float2 const& pos, CellData *cell);
 
 	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
@@ -242,17 +242,6 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecompos
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData* newCell = &newCells[cellIndex];
 		correctCellConnections(newCell);
-	}
-	__syncthreads();
-}
-
-__inline__ __device__ void ClusterReassembler::processingMovement(int startCellIndex, int endCellIndex)
-{
-	if (0 == threadIdx.x) {
-		_modifiedCluster.angle += _modifiedCluster.angularVel;
-		CudaPhysics::angleCorrection(_modifiedCluster.angle);
-		_modifiedCluster.pos = add(_modifiedCluster.pos, _modifiedCluster.vel);
-		_newCellMap.mapPosCorrection(_modifiedCluster.pos);
 	}
 	__syncthreads();
 }
@@ -591,52 +580,36 @@ __inline__ __device__ void ClusterMover::processingCollision(int startCellIndex,
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterMover::killCloseCell(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterMover::destroyCloseCell(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_cluster->cells[cellIndex];
-		killCloseCells(origCell);
+		destroyCloseCell(origCell);
 	}
 
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterMover::killCloseCells(CellData * cell)
+__inline__ __device__ void ClusterMover::processingMovement(int startCellIndex, int endCellIndex)
+{
+	if (0 == threadIdx.x) {
+		_cluster->angle += _cluster->angularVel;
+		CudaPhysics::angleCorrection(_cluster->angle);
+		_cluster->pos = add(_cluster->pos, _cluster->vel);
+		_cellMap.mapPosCorrection(_cluster->pos);
+	}
+	__syncthreads();
+}
+
+__inline__ __device__ void ClusterMover::destroyCloseCell(CellData * cell)
 {
 	if (cell->protectionCounter > 0) {
 		return;
 	}
-
-	float2 absPos = cell->absPos;
-
-/*
-	--absPos.x;
-	--absPos.y;
-*/
-	killCloseCell(absPos, cell);
-/*
-	++absPos.x;
-	killCloseCell(absPos, cell);
-	++absPos.x;
-	killCloseCell(absPos, cell);
-
-	++absPos.y;
-	absPos.x -= 2;
-	killCloseCell(absPos, cell);
-	absPos.x += 2;
-	killCloseCell(absPos, cell);
-
-	++absPos.y;
-	absPos.x -= 2;
-	killCloseCell(absPos, cell);
-	++absPos.x;
-	killCloseCell(absPos, cell);
-	++absPos.x;
-	killCloseCell(absPos, cell);
-*/
+	destroyCloseCell(cell->absPos, cell);
 }
 
-__inline__ __device__ void ClusterMover::killCloseCell(float2 const & pos, CellData * cell)
+__inline__ __device__ void ClusterMover::destroyCloseCell(float2 const & pos, CellData * cell)
 {
 	CellData* mapCell = _cellMap.get(pos);
 	if (!mapCell || mapCell == cell) {

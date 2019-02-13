@@ -26,7 +26,6 @@ __device__ void clusterReassembling(SimulationDataInternal &data, int clusterInd
 	int endCellIndex;
 	calcPartition(blockProcessor.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	blockProcessor.processingMovement(startCellIndex, endCellIndex);
 	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
 	blockProcessor.processingDecomposition(startCellIndex, endCellIndex);
 	blockProcessor.processingDataCopy(startCellIndex, endCellIndex);
@@ -61,7 +60,8 @@ __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 	calcPartition(blockProcessor.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 	blockProcessor.processingCollision(startCellIndex, endCellIndex);
-	blockProcessor.killCloseCell(startCellIndex, endCellIndex);
+	blockProcessor.destroyCloseCell(startCellIndex, endCellIndex);
+	blockProcessor.processingMovement(startCellIndex, endCellIndex);
 }
 
 __global__ void clusterMovement(SimulationDataInternal data)
