@@ -305,6 +305,7 @@ __inline__ __device__  void ClusterReassembler::copyAndUpdateCell(CellData *orig
 {
 	CellData cellCopy = *origCell;
 
+	//move to ClusterMover
 	float2 absPos;
 	absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterPos.x;
 	absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterPos.y;
@@ -367,8 +368,8 @@ __inline__ __device__ void ClusterMover::processingCollision(int startCellIndex,
 	//find colliding cluster
 	for (int index = startCellIndex; index <= endCellIndex; ++index) {
 		CellData* cell = &cluster->cells[index];
-		for (float dx = -1.0f; dx < 2.0f; ++dx) {
-			for (float dy = -1.0f; dy < 2.0f; ++dy) {
+		for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
+			for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
 				CellData* otherCell = _cellMap.get(add(cell->absPos, {dx, dy}));
 
 				if (!otherCell || otherCell == cell) {
@@ -383,7 +384,7 @@ __inline__ __device__ void ClusterMover::processingCollision(int startCellIndex,
 				if (!cell->alive || !otherCell->alive) {
 					continue;
 				}
-				if (_cellMap.mapDistanceSquared(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
+				if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 					continue;
 				}
 				int origFirstOtherClusterId = atomicCAS(&firstOtherClusterId, 0, otherCell->cluster->id);
@@ -416,8 +417,8 @@ __inline__ __device__ void ClusterMover::processingCollision(int startCellIndex,
 		if (0 == clusterLocked1 && 0 == clusterLocked2) {
 			for (int index = startCellIndex; index <= endCellIndex; ++index) {
 				CellData* cell = &cluster->cells[index];
-				for (float dx = -1.0f; dx < 2.0f; ++dx) {
-					for (float dy = -1.0f; dy < 2.0f; ++dy) {
+				for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
+					for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
 						CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
 						if (!otherCell || otherCell == cell) {
 							continue;
@@ -428,7 +429,7 @@ __inline__ __device__ void ClusterMover::processingCollision(int startCellIndex,
 						if (!cell->alive || !otherCell->alive) {
 							continue;
 						}
-						if (_cellMap.mapDistanceSquared(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
+						if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 							continue;
 						}
 						if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
@@ -474,8 +475,8 @@ __inline__ __device__ void ClusterMover::processingCollision(int startCellIndex,
 
 				for (int index = startCellIndex; index <= endCellIndex; ++index) {
 					CellData* cell = &cluster->cells[index];
-					for (float dx = -1.0f; dx < 2.0f; ++dx) {
-						for (float dy = -1.0f; dy < 2.0f; ++dy) {
+					for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
+						for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
 							CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
 							if (!otherCell || otherCell == cell) {
 								continue;
@@ -486,7 +487,7 @@ __inline__ __device__ void ClusterMover::processingCollision(int startCellIndex,
 							if (!cell->alive || !otherCell->alive) {
 								continue;
 							}
-							if (_cellMap.mapDistanceSquared(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
+							if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 								continue;
 							}
 							float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
@@ -578,8 +579,8 @@ __inline__ __device__ void ClusterMover::destroyCloseCell(float2 const & pos, Ce
 	}
 
 	ClusterData* mapCluster = mapCell->cluster;
-	auto distanceSquared = _cellMap.mapDistanceSquared(cell->absPos, mapCell->absPos);
-	if (distanceSquared < cudaSimulationParameters.cellMinDistance * cudaSimulationParameters.cellMinDistance) {
+	auto distanceSquared = _cellMap.mapDistance(cell->absPos, mapCell->absPos);
+	if (distanceSquared < cudaSimulationParameters.cellMinDistance) {
 		ClusterData* cluster = cell->cluster;
 		if (mapCluster->numCells >= cluster->numCells) {
 			cell->alive = false;

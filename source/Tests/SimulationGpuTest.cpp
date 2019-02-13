@@ -288,49 +288,12 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 }
 
 /**
-* Situation: 
-* Expected result: 
-*/
-TEST_F(SimulationGpuTest, testCollisionOfSingleCells_atUniverseBoundary)
-{
-	DataDescription origData;
-	auto size = _spaceProp->getSize();
-	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x - 5.0f, 100 }, QVector2D{ 0.1f, 0 }, 0));
-	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x + 5.0f, 100 }, QVector2D{ -0.1f,0 }, 0));
-	uint64_t clusterId1 = origData.clusters->at(0).id;
-	uint64_t clusterId2 = origData.clusters->at(1).id;
-
-	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(20, _controller);
-
-	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
-	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
-
-	ASSERT_EQ(2, newData.clusters->size());
-
-	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
-	{
-		auto cluster = clusterById.at(clusterId1);
-		EXPECT_TRUE(isCompatible(-0.1f, cluster.vel->x()));
-		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
-		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
-	}
-
-	{
-		auto cluster = clusterById.at(clusterId2);
-		EXPECT_TRUE(isCompatible(0.1f, cluster.vel->x()));
-		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
-		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
-	}
-}
-
-/**
 * Situation:
 *	- center collision of two horizontal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: first cluster moves upward while second cluster stand stills
 */
-TEST_F(SimulationGpuTest, testCenterCollisionOfTwoParallelLineClusters)
+TEST_F(SimulationGpuTest, testCenterCollisionOfParallelLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
@@ -365,12 +328,88 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfTwoParallelLineClusters)
 }
 
 /**
+* Situation: horizontal collision of two line clusters at boundary
+* Expected result: direction of movement of both cells changed accordingly
+*/
+TEST_F(SimulationGpuTest, testHorizontalCenterCollisionOfParallelLineClusters_atUniverseBoundary)
+{
+	DataDescription origData;
+	auto size = _spaceProp->getSize();
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x - 5.0f, 100 }, QVector2D{ 0.1f, 0 }, 0));
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x + 5.0f, 100 }, QVector2D{ -0.1f,0 }, 0));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(20, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_TRUE(isCompatible(-0.1f, cluster.vel->x()));
+		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
+		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_TRUE(isCompatible(0.1f, cluster.vel->x()));
+		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
+		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+	}
+}
+
+
+/**
+* Situation: vertical collision of two line clusters at boundary
+* Expected result: direction of movement of both cells changed accordingly
+*/
+TEST_F(SimulationGpuTest, testVerticalCenterCollisionOfParallelLineClusters_atUniverseBoundary)
+{
+	auto size = _spaceProp->getSize();
+
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, size.y + 0.5f }, QVector2D{ 0, -0.1f }, 0.0));
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, size.y - 0.5f }, QVector2D{ 0, 0.1f }, 0.0));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(1, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_TRUE(isCompatible(QVector2D(0.0f, 0.1f), *cluster.vel));
+		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_TRUE(isCompatible(QVector2D(0.0f, -0.1f), *cluster.vel));
+		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+	}
+
+	checkKineticEnergy(origData, newData);
+}
+
+
+/**
 * Situation:
 *	- sidewise collision of two horizontal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: both clusters move upwards and rotate counterclockwise
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelLineClusters)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfParallelLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
@@ -409,7 +448,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoParallelLineClusters)
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: both clusters move upwards and rotate counterclockwise
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfRectangleClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -446,7 +485,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters)
 *	- both clusters have velocity and angular velocity
 * Expected result: energy is conserved
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters_withAngularVelocities)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfRectangleClusters_withAngularVelocities)
 {
 	DataDescription origData;
 	auto cluster1 = createRectangleCluster({ 20, 20 }, QVector2D{ 457.46f, 356.37f }, QVector2D{ -0.011f, -0.077f });
@@ -478,7 +517,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoRectangleClusters_withAngula
 *	- first cluster moves upward and rotate counterclockwise
 *	- second cluster does not move on x axis and does not rotate
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalLineClusters)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfOrthogonalLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
@@ -520,7 +559,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoOrthogonalLineClusters)
 *	- first cluster moves upward and rotate clockwise
 *	- second cluster moves upward and rotate counterclockwise
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTraversalLineClusters)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
@@ -563,7 +602,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters)
 *	- velocity of first cluster: x: positive, y: negative, angular vel: negative 
 *	- velocity of second cluster: x: negative, y: negative, angular vel: positive
 */
-TEST_F(SimulationGpuTest, testSidewiseCollisionOfTwoTraversalLineClusters_waitUntilSecondCollision)
+TEST_F(SimulationGpuTest, testSidewiseCollisionOfTraversalLineClusters_waitUntilSecondCollision)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
