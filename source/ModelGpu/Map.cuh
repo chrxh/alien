@@ -25,15 +25,15 @@ public:
 
 	__inline__ __device__ void mapDisplacementCorrection(float2 &disp) const
 	{
-		disp.x = fmodf(disp.x, _size.x / 2);
-		disp.y = fmodf(disp.y, _size.y / 2);
+		disp.x = remainderf(disp.x, _size.x / 2);
+		disp.y = remainderf(disp.y, _size.y / 2);
 	}
 
-	__inline__ __device__ float mapDistanceSquared(float2 const &p, float2 const &q) const
+	__inline__ __device__ float mapDistance(float2 const &p, float2 const &q) const
 	{
 		float2 d = { p.x - q.x, p.y - q.y };
 		mapDisplacementCorrection(d);
-		return d.x*d.x + d.y*d.y;
+		return sqrt(d.x*d.x + d.y*d.y);
 	}
 
 protected:
