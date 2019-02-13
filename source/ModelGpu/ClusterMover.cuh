@@ -16,7 +16,6 @@ public:
 	__inline__ __device__ int getNumOrigCells() const;
 
 	//synchronizing threads
-	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDataCopy(int startCellIndex, int endCellIndex);
 
@@ -29,8 +28,6 @@ private:
 	__inline__ __device__ void copyAndUpdateCell(CellData *origCell, CellData* newCell
 		, ClusterData* newCluster, float2 const& clusterPos, float (&rotMatrix)[2][2]);
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
-	__inline__ __device__ void cellRadiation(CellData *cell);
-	__inline__ __device__ ParticleData* createNewParticle();
 
 	SimulationDataInternal* _data;
 	Map<CellData> _origCellMap;
@@ -50,10 +47,13 @@ public:
 	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void destroyCloseCell(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 
 private:
 	__inline__ __device__ void destroyCloseCell(CellData *cell);
 	__inline__ __device__ void destroyCloseCell(float2 const& pos, CellData *cell);
+	__inline__ __device__ void cellRadiation(CellData *cell);
+	__inline__ __device__ ParticleData* createNewParticle();
 
 	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
@@ -300,15 +300,6 @@ __inline__ __device__ void ClusterReassembler::processingDecomposition(int start
 	}
 }
 
-__inline__ __device__ void ClusterReassembler::processingRadiation(int startCellIndex, int endCellIndex)
-{
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData *origCell = &_origCluster->cells[cellIndex];
-		cellRadiation(origCell);
-	}
-	__syncthreads();
-}
-
 __inline__ __device__  void ClusterReassembler::copyAndUpdateCell(CellData *origCell, CellData* newCell
 	, ClusterData* newCluster, float2 const& clusterPos, float (&rotMatrix)[2][2])
 {
@@ -334,45 +325,6 @@ __inline__ __device__ void ClusterReassembler::correctCellConnections(CellData* 
 	for (int i = 0; i < numConnections; ++i) {
 		cell->connections[i] = cell->connections[i]->nextTimestep;
 	}
-}
-
-__inline__ __device__ void ClusterReassembler::cellRadiation(CellData *cell)
-{
-	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
-		auto particle = createNewParticle();
-		auto &pos = cell->absPos;
-		particle->pos = { static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f, static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f };
-		_newCellMap.mapPosCorrection(particle->pos);
-		particle->vel = { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation
-			, (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
-		float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
-		radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
-		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
-		if (radiationEnergy > cell->energy - 1) {
-			radiationEnergy = cell->energy - 1;
-		}
-		particle->energy = radiationEnergy;
-		cell->energy -= radiationEnergy;
-	}
-	if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
-		cell->alive = false;
-		cell->cluster->decompositionRequired = true;
-	}
-	if (1 == cell->cluster->numCells && !cell->alive) {
-		auto particle = createNewParticle();
-		particle->pos = cell->absPos;
-		particle->vel = cell->cluster->vel;
-		particle->energy = cell->energy;
-	}
-}
-
-__inline__ __device__ ParticleData* ClusterReassembler::createNewParticle()
-{
-	ParticleData* particle = _data->particlesAC2.getNewElement();
-	particle->id = _data->numberGen.createNewId_kernel();
-	particle->locked = 0;
-	particle->alive = true;
-	return particle;
 }
 
 __inline__ __device__ void ClusterMover::init(SimulationDataInternal & data, int clusterIndex)
@@ -601,6 +553,15 @@ __inline__ __device__ void ClusterMover::processingMovement(int startCellIndex, 
 	__syncthreads();
 }
 
+__inline__ __device__ void ClusterMover::processingRadiation(int startCellIndex, int endCellIndex)
+{
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData *origCell = &_cluster->cells[cellIndex];
+		cellRadiation(origCell);
+	}
+	__syncthreads();
+}
+
 __inline__ __device__ void ClusterMover::destroyCloseCell(CellData * cell)
 {
 	if (cell->protectionCounter > 0) {
@@ -629,4 +590,44 @@ __inline__ __device__ void ClusterMover::destroyCloseCell(float2 const & pos, Ce
 			mapCluster->decompositionRequired = true;
 		}
 	}
+}
+
+__inline__ __device__ void ClusterMover::cellRadiation(CellData *cell)
+{
+	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
+		auto particle = createNewParticle();
+		auto &pos = cell->absPos;
+        particle->pos = {static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f,
+                         static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f};
+        _cellMap.mapPosCorrection(particle->pos);
+        particle->vel = { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation
+			, (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
+		float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
+		radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
+		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
+		if (radiationEnergy > cell->energy - 1) {
+			radiationEnergy = cell->energy - 1;
+		}
+		particle->energy = radiationEnergy;
+		cell->energy -= radiationEnergy;
+	}
+	if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
+		cell->alive = false;
+		cell->cluster->decompositionRequired = true;
+	}
+	if (1 == cell->cluster->numCells && !cell->alive) {
+		auto particle = createNewParticle();
+		particle->pos = cell->absPos;
+		particle->vel = cell->cluster->vel;
+		particle->energy = cell->energy;
+	}
+}
+
+__inline__ __device__ ParticleData* ClusterMover::createNewParticle()
+{
+	ParticleData* particle = _data->particlesAC1.getNewElement();
+	particle->id = _data->numberGen.createNewId_kernel();
+	particle->locked = 0;
+	particle->alive = true;
+	return particle;
 }
