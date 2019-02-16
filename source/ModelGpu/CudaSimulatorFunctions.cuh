@@ -16,18 +16,19 @@
 
 __device__ void clusterReassembling(SimulationDataInternal &data, int clusterIndex)
 {
-	__shared__ ClusterReassembler blockProcessor;
+	__shared__ ClusterReassembler reassembler;
 	if (0 == threadIdx.x) {
-		blockProcessor.init(data, clusterIndex);
+		reassembler.init(data, clusterIndex);
 	}
 	__syncthreads();
 
 	int startCellIndex;
 	int endCellIndex;
-	calcPartition(blockProcessor.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+	calcPartition(reassembler.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	blockProcessor.processingDecomposition(startCellIndex, endCellIndex);
-	blockProcessor.processingDataCopy(startCellIndex, endCellIndex);
+
+	reassembler.processingDecomposition(startCellIndex, endCellIndex);
+	reassembler.processingDataCopy(startCellIndex, endCellIndex);
 }
 
 __global__ void clusterReassembling(SimulationDataInternal data)
@@ -48,20 +49,20 @@ __global__ void clusterReassembling(SimulationDataInternal data)
 
 __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 {
-	__shared__ ClusterMover blockProcessor;
+	__shared__ ClusterMover mover;
 	if (0 == threadIdx.x) {
-		blockProcessor.init(data, clusterIndex);
+		mover.init(data, clusterIndex);
 	}
 	__syncthreads();
 
 	int startCellIndex;
 	int endCellIndex;
-	calcPartition(blockProcessor.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+	calcPartition(mover.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	blockProcessor.processingCollision(startCellIndex, endCellIndex);
-	blockProcessor.destroyCloseCell(startCellIndex, endCellIndex);
-	blockProcessor.processingMovement(startCellIndex, endCellIndex);
-	blockProcessor.processingRadiation(startCellIndex, endCellIndex);
+	mover.processingMovement(startCellIndex, endCellIndex);
+	mover.processingCollision(startCellIndex, endCellIndex);
+	mover.destroyCloseCell(startCellIndex, endCellIndex);
+	mover.processingRadiation(startCellIndex, endCellIndex);
 }
 
 __global__ void clusterMovement(SimulationDataInternal data)
