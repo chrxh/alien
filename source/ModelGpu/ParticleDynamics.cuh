@@ -24,7 +24,7 @@ private:
 	Map<ParticleData> _newParticleMap;
 };
 
-class ParticleMover
+class ParticleDynamics
 {
 public:
 	__inline__ __device__ void init(SimulationDataInternal& data);
@@ -71,13 +71,13 @@ __inline__ __device__ void ParticleReassembler::processingMovement(int startPart
 	}
 }
 
-__inline__ __device__ void ParticleMover::init(SimulationDataInternal & data)
+__inline__ __device__ void ParticleDynamics::init(SimulationDataInternal & data)
 {
 	_data = &data;
 	_origParticleMap.init(data.size, data.particleMap1);
 }
 
-__inline__ __device__ void ParticleMover::processingCollision(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleDynamics::processingCollision(int startParticleIndex, int endParticleIndex)
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
 		ParticleData* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
