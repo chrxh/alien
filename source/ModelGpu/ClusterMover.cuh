@@ -25,8 +25,8 @@ private:
 	__inline__ __device__ void processingDataCopyWithoutDecomposition(int startCellIndex, int endCellIndex);
 
 	//not synchronizing threads
-	__inline__ __device__ void copyAndUpdateCell(CellData *origCell, CellData* newCell
-		, ClusterData* newCluster, float2 const& clusterPos, float (&rotMatrix)[2][2]);
+	__inline__ __device__ void copyAndUpdateCell(CellData *origCell, CellData* newCell, 
+		ClusterData* newCluster, float2 const& clusterPos);
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
 
 	SimulationDataInternal* _data;
@@ -198,7 +198,7 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 
 				int newCellIndex = atomicAdd(&newCluster->numCells, 1);
 				CellData& newCell = newCluster->cells[newCellIndex];
-				copyAndUpdateCell(&cell, &newCell, newCluster, newCluster->pos, entries[index].rotMatrix);
+				copyAndUpdateCell(&cell, &newCell, newCluster, newCluster->pos);
 			}
 		}
 	}
@@ -216,12 +216,10 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecompos
 {
 	__shared__ ClusterData* newCluster;
 	__shared__ CellData* newCells;
-	__shared__ float rotMatrix[2][2];
 
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
 		newCells = _data->cellsAC2.getNewSubarray(_modifiedCluster.numCells);
-		CudaPhysics::rotationMatrix(_modifiedCluster.angle, rotMatrix);
 		_modifiedCluster.numCells = 0;
 		_modifiedCluster.cells = newCells;
 	}
@@ -232,7 +230,7 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecompos
 
 		int newCellIndex = atomicAdd(&_modifiedCluster.numCells, 1);
 		CellData *newCell = &newCells[newCellIndex];
-		copyAndUpdateCell(origCell, newCell, newCluster, _modifiedCluster.pos, rotMatrix);
+		copyAndUpdateCell(origCell, newCell, newCluster, _modifiedCluster.pos);
 	}
 
 	__syncthreads();
@@ -301,22 +299,10 @@ __inline__ __device__ void ClusterReassembler::processingDecomposition(int start
 }
 
 __inline__ __device__  void ClusterReassembler::copyAndUpdateCell(CellData *origCell, CellData* newCell
-	, ClusterData* newCluster, float2 const& clusterPos, float (&rotMatrix)[2][2])
+	, ClusterData* newCluster, float2 const& clusterPos)
 {
-	CellData cellCopy = *origCell;
-
-	//move to ClusterMover
-	float2 absPos;
-	absPos.x = cellCopy.relPos.x*rotMatrix[0][0] + cellCopy.relPos.y*rotMatrix[0][1] + clusterPos.x;
-	absPos.y = cellCopy.relPos.x*rotMatrix[1][0] + cellCopy.relPos.y*rotMatrix[1][1] + clusterPos.y;
-	cellCopy.absPos = absPos;
-	cellCopy.cluster = newCluster;
-	if (cellCopy.protectionCounter > 0) {
-		--cellCopy.protectionCounter;
-	}
-	*newCell = cellCopy;
-	_newCellMap.set(absPos, newCell);
-
+	*newCell = *origCell;
+	newCell->cluster = newCluster;
 	origCell->nextTimestep = newCell;
 }
 
@@ -545,11 +531,30 @@ __inline__ __device__ void ClusterMover::destroyCloseCell(int startCellIndex, in
 
 __inline__ __device__ void ClusterMover::processingMovement(int startCellIndex, int endCellIndex)
 {
+	__shared__ float rotMatrix[2][2];
 	if (0 == threadIdx.x) {
 		_cluster->angle += _cluster->angularVel;
 		CudaPhysics::angleCorrection(_cluster->angle);
 		_cluster->pos = add(_cluster->pos, _cluster->vel);
 		_cellMap.mapPosCorrection(_cluster->pos);
+		CudaPhysics::rotationMatrix(_cluster->angle, rotMatrix);
+	}
+	__syncthreads();
+
+
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		CellData *cell = &_cluster->cells[cellIndex];
+
+
+		float2 absPos;
+		absPos.x = cell->relPos.x*rotMatrix[0][0] + cell->relPos.y*rotMatrix[0][1] + _cluster->pos.x;
+		absPos.y = cell->relPos.x*rotMatrix[1][0] + cell->relPos.y*rotMatrix[1][1] + _cluster->pos.y;
+		cell->absPos = absPos;
+
+		if (cell->protectionCounter > 0) {
+			--cell->protectionCounter;
+		}
+		_cellMap.set(absPos, cell);
 	}
 	__syncthreads();
 }
@@ -557,8 +562,8 @@ __inline__ __device__ void ClusterMover::processingMovement(int startCellIndex, 
 __inline__ __device__ void ClusterMover::processingRadiation(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData *origCell = &_cluster->cells[cellIndex];
-		cellRadiation(origCell);
+		CellData *cell = &_cluster->cells[cellIndex];
+		cellRadiation(cell);
 	}
 	__syncthreads();
 }
