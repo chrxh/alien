@@ -7,8 +7,8 @@
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "ClusterMover.cuh"
-#include "ParticleMover.cuh"
+#include "ClusterDynamics.cuh"
+#include "ParticleDynamics.cuh"
 
 /************************************************************************/
 /* Clusters																*/
@@ -47,9 +47,9 @@ __global__ void clusterReassembling(SimulationDataInternal data)
 	}
 }
 
-__device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
+__device__ void clusterDynamicsStep1(SimulationDataInternal &data, int clusterIndex)
 {
-	__shared__ ClusterMover mover;
+	__shared__ ClusterDynamics mover;
 	if (0 == threadIdx.x) {
 		mover.init(data, clusterIndex);
 	}
@@ -60,12 +60,9 @@ __device__ void clusterMovement(SimulationDataInternal &data, int clusterIndex)
 	calcPartition(mover.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 	mover.processingMovement(startCellIndex, endCellIndex);
-	mover.processingCollision(startCellIndex, endCellIndex);
-	mover.destroyCloseCell(startCellIndex, endCellIndex);
-	mover.processingRadiation(startCellIndex, endCellIndex);
 }
 
-__global__ void clusterMovement(SimulationDataInternal data)
+__global__ void clusterDynamicsStep1(SimulationDataInternal data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
@@ -77,7 +74,40 @@ __global__ void clusterMovement(SimulationDataInternal data)
 	int endIndex;
 	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterMovement(data, clusterIndex);
+		clusterDynamicsStep1(data, clusterIndex);
+	}
+}
+
+__device__ void clusterDynamicsStep2(SimulationDataInternal &data, int clusterIndex)
+{
+	__shared__ ClusterDynamics mover;
+	if (0 == threadIdx.x) {
+		mover.init(data, clusterIndex);
+	}
+	__syncthreads();
+
+	int startCellIndex;
+	int endCellIndex;
+	calcPartition(mover.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+
+	mover.processingCollision(startCellIndex, endCellIndex);
+	mover.destroyCloseCell(startCellIndex, endCellIndex);
+	mover.processingRadiation(startCellIndex, endCellIndex);
+}
+
+__global__ void clusterDynamicsStep2(SimulationDataInternal data)
+{
+	int indexResource = blockIdx.x;
+	int numEntities = data.clustersAC1.getNumEntries();
+	if (indexResource >= numEntities) {
+		return;
+	}
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
+	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+		clusterDynamicsStep2(data, clusterIndex);
 	}
 }
 
@@ -85,9 +115,9 @@ __global__ void clusterMovement(SimulationDataInternal data)
 /* Particles															*/
 /************************************************************************/
 
-__global__ void particleMovement(SimulationDataInternal data)
+__global__ void particleDynamics(SimulationDataInternal data)
 {
-	__shared__ ParticleMover blockProcessor;
+	__shared__ ParticleDynamics blockProcessor;
 	if (0 == threadIdx.x) {
 		blockProcessor.init(data);
 	}
