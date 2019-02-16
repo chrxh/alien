@@ -81,10 +81,10 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ParticleMover.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\ClusterDynamics.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClusterMover.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
