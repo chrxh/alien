@@ -53,8 +53,7 @@ private:
 	__inline__ __device__ void correctCellConnections(CellData *origCell);
 
 	SimulationDataInternal* _data;
-	Map<CellData> _origCellMap;
-	Map<CellData> _newCellMap;
+	Map<CellData> _cellMap;
 
 	ClusterData _modifiedCluster;
 	ClusterData *_origCluster;
@@ -68,8 +67,7 @@ __inline__ __device__ void ClusterReassembler::init(SimulationDataInternal& data
 	_data = &data;
 	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	_modifiedCluster = *_origCluster;
-	_origCellMap.init(data.size, data.cellMap1);
-	_newCellMap.init(data.size, data.cellMap2);
+	_cellMap.init(data.size, data.cellMap);
 }
 
 __inline__ __device__ int ClusterReassembler::getNumOrigCells() const
@@ -315,7 +313,7 @@ __inline__ __device__ void ClusterDynamics::init(SimulationDataInternal & data, 
 {
 	_data = &data;
 	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
-	_cellMap.init(data.size, data.cellMap1);
+	_cellMap.init(data.size, data.cellMap);
 }
 
 __inline__ __device__ int ClusterDynamics::getNumCells() const

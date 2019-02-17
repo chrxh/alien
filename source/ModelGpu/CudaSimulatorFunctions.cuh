@@ -161,7 +161,7 @@ __device__ void clearCellCluster(SimulationDataInternal const &data, int cluster
 		return;
 	}
 	Map<CellData> map;
-	map.init(size, data.cellMap1);
+	map.init(size, data.cellMap);
 
 	calcPartition(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {

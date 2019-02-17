@@ -19,7 +19,7 @@ public:
 private:
 
 	SimulationDataInternal* _data;
-	Map<CellData> _origCellMap;
+	Map<CellData> _cellMap;
 	Map<ParticleData> _origParticleMap;
 	Map<ParticleData> _newParticleMap;
 };
@@ -45,7 +45,7 @@ private:
 __inline__ __device__ void ParticleReassembler::init(SimulationDataInternal & data)
 {
 	_data = &data;
-	_origCellMap.init(data.size, data.cellMap1);
+	_cellMap.init(data.size, data.cellMap);
 	_origParticleMap.init(data.size, data.particleMap1);
 	_newParticleMap.init(data.size, data.particleMap2);
 }
@@ -57,7 +57,7 @@ __inline__ __device__ void ParticleReassembler::processingMovement(int startPart
 		if (!origParticle->alive) {
 			continue;
 		}
-		if (auto cell = _origCellMap.get(origParticle->pos)) {
+		if (auto cell = _cellMap.get(origParticle->pos)) {
 			if (auto nextCell = cell->nextTimestep) {
 				atomicAdd(&nextCell->energy, origParticle->energy);
 				continue;
