@@ -8,8 +8,7 @@ struct SimulationDataInternal
 {
 	int2 size;
 
-	CellData **cellMap1;
-	CellData **cellMap2;
+	CellData **cellMap;
 
 	ParticleData **particleMap1;
 	ParticleData **particleMap2;
