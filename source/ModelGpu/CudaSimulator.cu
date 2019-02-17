@@ -55,7 +55,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	totalVideoMemory += 2 * sizeof(CellData) * MAX_CELLS;
 	totalVideoMemory += 2 * sizeof(ParticleData) * MAX_PARTICLES;
 	totalVideoMemory += 2 * size.x * size.y * sizeof(ParticleData*);
-	totalVideoMemory += 2 * size.x * size.y * sizeof(CellData*);
+	totalVideoMemory += size.x * size.y * sizeof(CellData*);
 	totalVideoMemory += sizeof(int) * RANDOM_NUMBER_BLOCK_SIZE;
 	std::cout << "[CUDA] acquire " << totalVideoMemory/1024/1024 << "mb of video memory" << std::endl;
 	cudaDeviceSynchronize();
@@ -75,8 +75,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 
 	std::cout << "[CUDA debug] step 2 CudaSimulator::CudaSimulator" << std::endl;
 
-	cudaMallocManaged(&_data->cellMap1, size.x * size.y * sizeof(CellData*));
-	cudaMallocManaged(&_data->cellMap2, size.x * size.y * sizeof(CellData*));
+	cudaMallocManaged(&_data->cellMap, size.x * size.y * sizeof(CellData*));
 	cudaMallocManaged(&_data->particleMap1, size.x * size.y * sizeof(ParticleData*));
 	cudaMallocManaged(&_data->particleMap2, size.x * size.y * sizeof(ParticleData*));
 	checkCudaErrors(cudaGetLastError());
@@ -91,8 +90,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	std::cout << "[CUDA debug] step 4 CudaSimulator::CudaSimulator" << std::endl;
 
 	for (int i = 0; i < size.x * size.y; ++i) {
-		_data->cellMap1[i] = nullptr;
-		_data->cellMap2[i] = nullptr;
+		_data->cellMap[i] = nullptr;
 		_data->particleMap1[i] = nullptr;
 		_data->particleMap2[i] = nullptr;
 	}
@@ -116,8 +114,7 @@ CudaSimulator::~CudaSimulator()
 	_data->particlesAC1.free();
 	_data->particlesAC2.free();
 
-	cudaFree(_data->cellMap1);
-	cudaFree(_data->cellMap2);
+	cudaFree(_data->cellMap);
 	cudaFree(_data->particleMap1);
 	cudaFree(_data->particleMap2);
 	_data->numberGen.free();
@@ -217,11 +214,11 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 	}
 
 	for (int i = 0; i < _data->size.x * _data->size.y; ++i) {
-		_data->cellMap1[i] = nullptr;
+		_data->cellMap[i] = nullptr;
 		_data->particleMap1[i] = nullptr;
 	}
 	Map<CellData> map;
-	map.init(_data->size, _data->cellMap1);
+	map.init(_data->size, _data->cellMap);
 	for (int index = 0; index < _data->cellsAC1.getNumEntries(); ++index) {
 		CellData* cell = _data->cellsAC1.at(index);
 		auto& absPos = cell->absPos;
@@ -244,7 +241,6 @@ void CudaSimulator::swapData()
 	swap(_data->clustersAC1, _data->clustersAC2);
 	swap(_data->cellsAC1, _data->cellsAC2);
 	swap(_data->particlesAC1, _data->particlesAC2);
-	swap(_data->cellMap1, _data->cellMap2);
 	swap(_data->particleMap1, _data->particleMap2);
 }
 
