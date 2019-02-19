@@ -111,7 +111,9 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
 				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
 
-				auto tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+				auto r = sub(cell.absPos, _origCluster->pos);
+				_cellMap.mapDisplacementCorrection(r);
+				auto tangentialVel = CudaPhysics::tangentialVelocity(r, _origCluster->vel, _origCluster->angularVel);
 				atomicAdd(&entries[index].cluster.vel.x, tangentialVel.x);
 				atomicAdd(&entries[index].cluster.vel.y, tangentialVel.y);
 				auto angularMass = cell.relPos.x * cell.relPos.x + cell.relPos.y * cell.relPos.y;
@@ -127,7 +129,9 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 				atomicAdd(&entries[index].cluster.pos.x, cell.absPos.x);
 				atomicAdd(&entries[index].cluster.pos.y, cell.absPos.y);
 
-				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+				auto r = sub(cell.absPos, _origCluster->pos);
+				_cellMap.mapDisplacementCorrection(r);
+				auto tangentialVel = CudaPhysics::tangentialVelocity(r, _origCluster->vel, _origCluster->angularVel);
 				atomicAdd(&entries[index].cluster.vel.x, tangentialVel.x);
 				atomicAdd(&entries[index].cluster.vel.y, tangentialVel.y);
 				auto angularMass = cell.relPos.x * cell.relPos.x + cell.relPos.y * cell.relPos.y;
@@ -143,7 +147,9 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.x, cell.absPos.x);
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.y, cell.absPos.y);
 
-			float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
+			auto r = sub(cell.absPos, _origCluster->pos);
+			_cellMap.mapDisplacementCorrection(r);
+			auto tangentialVel = CudaPhysics::tangentialVelocity(r, _origCluster->vel, _origCluster->angularVel);
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.x, tangentialVel.x);
 			atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.y, tangentialVel.y);
 			auto angularMass = cell.relPos.x * cell.relPos.x + cell.relPos.y * cell.relPos.y;
@@ -176,13 +182,16 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 		for (int index = 0; index < numDecompositions; ++index) {
 			if (cell.tag == entries[index].tag) {
 				ClusterData* newCluster = newClusters[index];
-				float2 deltaPos = { cell.absPos.x - newCluster->pos.x, cell.absPos.y - newCluster->pos.y };
+				float2 deltaPos = sub(cell.absPos, newCluster->pos);
+				_cellMap.mapDisplacementCorrection(deltaPos);
 				auto angularMass = deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
 				atomicAdd(&newCluster->angularMass, angularMass);
 
-				float2 tangentialVel = CudaPhysics::tangentialVelocity(cell.relPos, _origCluster->vel, _origCluster->angularVel);
-				float2 relVel = { tangentialVel.x - newCluster->vel.x, tangentialVel.y - newCluster->vel.y };
-				float angularMomentum = CudaPhysics::angularMomentum(cell.relPos, relVel);
+				auto r = sub(cell.absPos, _origCluster->pos);
+				_cellMap.mapDisplacementCorrection(r);
+				auto tangentialVel = CudaPhysics::tangentialVelocity(r, _origCluster->vel, _origCluster->angularVel);
+				float2 relVel = sub(tangentialVel, newCluster->vel);
+				float angularMomentum = CudaPhysics::angularMomentum(r, relVel);
 				float angularVel = CudaPhysics::angularVelocity(angularMomentum, entries[index].angularMassOfOrigCenter);
 				atomicAdd(&newCluster->angularVel, angularVel);
 
@@ -333,6 +342,8 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	__shared__ int numberOfCollidingCells;
 	__shared__ float2 collisionCenterPos;
 	__shared__ bool avoidCollision;
+	enum CollisionType { None, ElasticCollision, Fusion };
+	__shared__ CollisionType collisionType;
 	if (0 == threadIdx.x) {
 		cluster = _cluster;
 		firstOtherCluster = nullptr;
@@ -343,6 +354,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 		collisionCenterPos.y = 0;
 		numberOfCollidingCells = 0;
 		avoidCollision = false;
+		collisionType = CollisionType::None;
 	}
 	__syncthreads();
 
@@ -533,6 +545,8 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 		_cluster->pos = add(_cluster->pos, _cluster->vel);
 		_cellMap.mapPosCorrection(_cluster->pos);
 		CudaPhysics::rotationMatrix(_cluster->angle, rotMatrix);
+
+//		CudaPhysics::tangentialVelocity(_cl);
 	}
 	__syncthreads();
 

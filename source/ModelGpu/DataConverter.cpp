@@ -259,6 +259,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cudaCell.absPos = { cellDesc.pos->x(), cellDesc.pos->y() };
 	QVector2D relPos = cellDesc.getPosRelativeTo(cluster);
 	cudaCell.relPos = { relPos.x(), relPos.y() };
+	cudaCell.vel = { 0.0f, 0.0f };	//calc
 	cudaCell.energy = *cellDesc.energy;
 	if (cellDesc.connectingCells) {
 		cudaCell.numConnections = cellDesc.connectingCells->size();

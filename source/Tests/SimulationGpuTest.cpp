@@ -759,32 +759,37 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 {
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(31, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 1.0));
+	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 1.0));
+	origData.addCluster(createHorizontalCluster(5, QVector2D{ 200, 100 }, QVector2D{ 0, 0 }, 1.0));	//second cluster for comparison
 
 	auto lowEnergy = _parameters->cellMinEnergy / 2.0;
-	origData.clusters->at(0).cells->at(15).energy = lowEnergy;
+	origData.clusters->at(0).cells->at(2).energy = lowEnergy;
 
 	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(2, _controller);
+	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_EQ(2, newData.clusters->size());
-
+	auto newClusterById = IntegrationTestHelper::getClusterByCellId(newData);
+	ClusterDescription refCluster = newClusterById.at(origData.clusters->at(1).cells->at(0).id);
 	{
+		ClusterDescription firstFragment = newClusterById.at(origData.clusters->at(0).cells->at(0).id);
+
 		set<uint64_t> firstFragmentCellIds;
-		ClusterDescription firstFragment = newData.clusters->at(0);
-		std::transform(firstFragment.cells->begin(), firstFragment.cells->end(), std::inserter(firstFragmentCellIds, firstFragmentCellIds.begin()),
-			[](CellDescription const& cell) { return cell.id; });
-		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->front(), firstFragmentCellIds);
+		for (int i = 0; i < 2; ++i) {
+			firstFragmentCellIds.insert(origData.clusters->at(1).cells->at(i).id);
+		}
+		Physics::Velocities velocities = calcVelocitiesOfClusterPart(refCluster, firstFragmentCellIds);
 		EXPECT_TRUE(isCompatible(velocities.linear, *firstFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *firstFragment.angularVel));
 	}
 	{
+		ClusterDescription secondFragment = newClusterById.at(origData.clusters->at(0).cells->at(4).id);
+
 		set<uint64_t> secondFragmentCellIds;
-		ClusterDescription secondFragment = newData.clusters->at(1);
-		std::transform(secondFragment.cells->begin(), secondFragment.cells->end(), std::inserter(secondFragmentCellIds, secondFragmentCellIds.begin()),
-			[](CellDescription const& cell) { return cell.id; });
-		Physics::Velocities velocities = calcVelocitiesOfClusterPart(origData.clusters->front(), secondFragmentCellIds);
+		for (int i = 3; i < 5; ++i) {
+			secondFragmentCellIds.insert(origData.clusters->at(1).cells->at(i).id);
+		}
+		Physics::Velocities velocities = calcVelocitiesOfClusterPart(refCluster, secondFragmentCellIds);
 		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}
