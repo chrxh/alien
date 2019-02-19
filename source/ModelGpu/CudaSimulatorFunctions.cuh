@@ -90,9 +90,9 @@ __device__ void clusterDynamicsStep2(SimulationDataInternal &data, int clusterIn
 	int endCellIndex;
 	calcPartition(mover.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	mover.processingCollision(startCellIndex, endCellIndex);
 	mover.destroyCloseCell(startCellIndex, endCellIndex);
 	mover.processingRadiation(startCellIndex, endCellIndex);
+	mover.processingCollision(startCellIndex, endCellIndex);
 }
 
 __global__ void clusterDynamicsStep2(SimulationDataInternal data)
