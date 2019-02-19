@@ -14,14 +14,13 @@ class ParticleReassembler
 public:
 	__inline__ __device__ void init(SimulationDataInternal& data);
 	
-	__inline__ __device__ void processingMovement(int startParticleIndex, int endParticleIndex);
+	__inline__ __device__ void processingDataCopy(int startParticleIndex, int endParticleIndex);
 
 private:
 
 	SimulationDataInternal* _data;
 	Map<CellData> _cellMap;
 	Map<ParticleData> _origParticleMap;
-	Map<ParticleData> _newParticleMap;
 };
 
 class ParticleDynamics
@@ -29,6 +28,7 @@ class ParticleDynamics
 public:
 	__inline__ __device__ void init(SimulationDataInternal& data);
 
+	__inline__ __device__ void processingMovement(int startParticleIndex, int endParticleIndex);
 	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);
 
 private:
@@ -47,10 +47,9 @@ __inline__ __device__ void ParticleReassembler::init(SimulationDataInternal & da
 	_data = &data;
 	_cellMap.init(data.size, data.cellMap);
 	_origParticleMap.init(data.size, data.particleMap1);
-	_newParticleMap.init(data.size, data.particleMap2);
 }
 
-__inline__ __device__ void ParticleReassembler::processingMovement(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleReassembler::processingDataCopy(int startParticleIndex, int endParticleIndex)
 {
 	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
 		ParticleData *origParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
@@ -65,9 +64,6 @@ __inline__ __device__ void ParticleReassembler::processingMovement(int startPart
 		}
 		ParticleData* newParticle = _data->particlesAC2.getNewElement();
 		*newParticle = *origParticle;
-		newParticle->pos = add(origParticle->pos, origParticle->vel);
-		_newParticleMap.mapPosCorrection(newParticle->pos);
-		_newParticleMap.set(newParticle->pos, newParticle);
 	}
 }
 
@@ -75,6 +71,16 @@ __inline__ __device__ void ParticleDynamics::init(SimulationDataInternal & data)
 {
 	_data = &data;
 	_origParticleMap.init(data.size, data.particleMap1);
+}
+
+__inline__ __device__ void ParticleDynamics::processingMovement(int startParticleIndex, int endParticleIndex)
+{
+	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
+		ParticleData* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
+		particle->pos = add(particle->pos, particle->vel);
+		_origParticleMap.mapPosCorrection(particle->pos);
+		_origParticleMap.set(particle->pos, particle);
+	}
 }
 
 __inline__ __device__ void ParticleDynamics::processingCollision(int startParticleIndex, int endParticleIndex)
