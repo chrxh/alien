@@ -9,20 +9,6 @@
 #include "CudaPhysics.cuh"
 #include "Map.cuh"
 
-class ParticleReassembler
-{
-public:
-	__inline__ __device__ void init(SimulationDataInternal& data);
-	
-	__inline__ __device__ void processingDataCopy(int startParticleIndex, int endParticleIndex);
-
-private:
-
-	SimulationDataInternal* _data;
-	Map<CellData> _cellMap;
-	Map<ParticleData> _origParticleMap;
-};
-
 class ParticleDynamics
 {
 public:
@@ -37,6 +23,19 @@ private:
 	Map<ParticleData> _origParticleMap;
 };
 
+class ParticleReassembler
+{
+public:
+	__inline__ __device__ void init(SimulationDataInternal& data);
+
+	__inline__ __device__ void processingDataCopy(int startParticleIndex, int endParticleIndex);
+
+private:
+
+	SimulationDataInternal* _data;
+	Map<CellData> _cellMap;
+	Map<ParticleData> _origParticleMap;
+};
 
 
 /************************************************************************/
