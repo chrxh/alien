@@ -24,6 +24,7 @@ struct CellData
 	ClusterData* cluster;
 	float2 relPos;
 	float2 absPos;
+	float2 vel;
 	float energy;
 	int numConnections;
 	CellData* connections[MAX_CELL_BONDS];

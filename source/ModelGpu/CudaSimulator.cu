@@ -221,6 +221,7 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 		_data->cellMap[i] = nullptr;
 		_data->particleMap1[i] = nullptr;
 	}
+/*
 	Map<CellData> map;
 	map.init(_data->size, _data->cellMap);
 	for (int index = 0; index < _data->cellsAC1.getNumEntries(); ++index) {
@@ -228,6 +229,7 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 		auto& absPos = cell->absPos;
 		map.set(absPos, cell);
 	}
+*/
 	cudaDeviceSynchronize();
 
 	std::cout << "[CUDA debug] end CudaSimulator::setDataForAccess" << std::endl;
