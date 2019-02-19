@@ -121,23 +121,36 @@ public:
 	ArrayController()
 		: _size(0)
 	{
+		std::cout << "[CUDA debug] ArrayController: 1a" << std::endl;
 		cudaMallocManaged(&_numEntries, sizeof(int));
+		std::cout << "[CUDA debug] ArrayController: 2a" << std::endl;
 		cudaDeviceSynchronize();
+		std::cout << "[CUDA debug] ArrayController: 3a" << std::endl;
 		checkCudaErrors(cudaGetLastError());
+		std::cout << "[CUDA debug] ArrayController: 4a" << std::endl;
 
+		cudaDeviceSynchronize();
 		*_numEntries = 0;
+		std::cout << "[CUDA debug] ArrayController: 5a" << std::endl;
 		cudaDeviceSynchronize();
 	}
 
 	ArrayController(int size)
 		: _size(size)
 	{
+		std::cout << "[CUDA debug] ArrayController: 1b" << std::endl;
 		cudaMallocManaged(&_data, sizeof(T) * size);
+		std::cout << "[CUDA debug] ArrayController: 2b" << std::endl;
 		cudaMallocManaged(&_numEntries, sizeof(int));
+		std::cout << "[CUDA debug] ArrayController: 3b" << std::endl;
 		cudaDeviceSynchronize();
+		std::cout << "[CUDA debug] ArrayController: 4b" << std::endl;
 		checkCudaErrors(cudaGetLastError());
+		std::cout << "[CUDA debug] ArrayController: 5b" << std::endl;
 
+		cudaDeviceSynchronize();
 		*_numEntries = 0;
+		std::cout << "[CUDA debug] ArrayController: 6b" << std::endl;
 		cudaDeviceSynchronize();
 	}
 

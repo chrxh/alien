@@ -115,7 +115,24 @@ __global__ void clusterDynamicsStep2(SimulationDataInternal data)
 /* Particles															*/
 /************************************************************************/
 
-__global__ void particleDynamics(SimulationDataInternal data)
+__global__ void particleDynamicsStep1(SimulationDataInternal data)
+{
+	__shared__ ParticleDynamics blockProcessor;
+	if (0 == threadIdx.x) {
+		blockProcessor.init(data);
+	}
+	__syncthreads();
+
+	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
+	int numEntities = data.particlesAC1.getNumEntries();
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
+	blockProcessor.processingMovement(startIndex, endIndex);
+}
+
+__global__ void particleDynamicsStep2(SimulationDataInternal data)
 {
 	__shared__ ParticleDynamics blockProcessor;
 	if (0 == threadIdx.x) {
@@ -146,7 +163,7 @@ __global__ void particleReassembling(SimulationDataInternal data)
 	int startIndex;
 	int endIndex;
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
-	blockProcessor.processingMovement(startIndex, endIndex);
+	blockProcessor.processingDataCopy(startIndex, endIndex);
 }
 
 __device__ void clearCellCluster(SimulationDataInternal const &data, int clusterIndex)
