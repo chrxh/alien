@@ -144,7 +144,11 @@ void CudaSimulator::calcNextTimestep()
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	particleDynamics<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
+	particleDynamicsStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_data);
+	cudaDeviceSynchronize();
+	checkCudaErrors(cudaGetLastError());
+
+	particleDynamicsStep2<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
