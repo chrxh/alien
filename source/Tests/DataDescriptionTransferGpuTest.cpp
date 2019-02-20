@@ -56,7 +56,7 @@ DataDescriptionTransferGpuTest::~DataDescriptionTransferGpuTest()
 	delete _controller;
 }
 
-TEST_F(DataDescriptionTransferGpuTest, testCreateClusterWithCompleteCell)
+TEST_F(DataDescriptionTransferGpuTest, DISABLED_testCreateClusterWithCompleteCell)
 {
 	DataDescription dataBefore;
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
@@ -72,7 +72,7 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateClusterWithCompleteCell)
 * Situation: change particle properties
 * Expected result: particle in simulation changed
 */
-TEST_F(DataDescriptionTransferGpuTest, testChangeParticle)
+TEST_F(DataDescriptionTransferGpuTest, DISABLED_testChangeParticle)
 {
 	DataDescription dataBefore;
 	auto particleEnergy1 = _parameters->cellMinEnergy / 2.0;
