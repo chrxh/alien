@@ -379,23 +379,102 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	}
 	__syncthreads();
 
-	if (firstOtherCluster) {
+	if (!firstOtherCluster) {
+		__syncthreads();
+		return;
+	}
 
+	if (0 == threadIdx.x) {
+		clusterLockAddr1 = &cluster->locked;
+		clusterLockAddr2 = &firstOtherCluster->locked;
+		if (firstOtherCluster->id < cluster->id) {
+			clusterLockAddr1 = &firstOtherCluster->locked;
+			clusterLockAddr2 = &cluster->locked;
+		}
+		clusterLocked1 = atomicExch(clusterLockAddr1, 1);
+		if (0 == clusterLocked1) {
+			clusterLocked2 = atomicExch(clusterLockAddr2, 1);
+		}
+
+	}
+	__syncthreads();
+
+	if (0 != clusterLocked1 || 0 != clusterLocked2) {
 		if (0 == threadIdx.x) {
-			clusterLockAddr1 = &cluster->locked;
-			clusterLockAddr2 = &firstOtherCluster->locked;
-			if (firstOtherCluster->id < cluster->id) {
-				clusterLockAddr1 = &firstOtherCluster->locked;
-				clusterLockAddr2 = &cluster->locked;
-			}
-			clusterLocked1 = atomicExch(clusterLockAddr1, 1);
 			if (0 == clusterLocked1) {
-				clusterLocked2 = atomicExch(clusterLockAddr2, 1);
+				*clusterLockAddr1 = 0;
+			}
+			if (0 == clusterLocked2) {
+				*clusterLockAddr2 = 0;
 			}
 		}
 		__syncthreads();
+		return;
+	}
 
-		if (0 == clusterLocked1 && 0 == clusterLocked2) {
+	__syncthreads();
+
+	for (int index = startCellIndex; index <= endCellIndex; ++index) {
+		CellData* cell = &cluster->cells[index];
+		for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
+			for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
+				CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+				if (!otherCell || otherCell == cell) {
+					continue;
+				}
+				if (firstOtherCluster != otherCell->cluster) {
+					continue;
+				}
+				if (!cell->alive || !otherCell->alive) {
+					continue;
+				}
+				if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
+					continue;
+				}
+				if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
+					avoidCollision = true;
+					break;
+				}
+				if (length(sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity && areConnectable(cell, otherCell)) {
+					collisionType = CollisionType::Fusion;
+				}
+				atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
+				atomicAdd(&collisionCenterPos.y, otherCell->absPos.y);
+				atomicAdd(&numberOfCollidingCells, 1);
+			}
+			if (avoidCollision) {
+				break;
+			}
+		}
+		if (avoidCollision) {
+			break;
+		}
+	}
+	__syncthreads();
+
+	//checking numberOfCollidingCells because it might happen that the colliding cells are not alive anymore... 
+	if (!avoidCollision) {
+		if (CollisionType::ElasticCollision == collisionType && 0 != numberOfCollidingCells) {
+			__shared__ float2 rAPp;
+			__shared__ float2 rBPp;
+			__shared__ float2 outwardVector;
+			__shared__ float2 n;
+			if (0 == threadIdx.x) {
+				collisionCenterPos = div(collisionCenterPos, numberOfCollidingCells);
+				rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
+				_cellMap.mapDisplacementCorrection(rAPp);
+				rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
+				_cellMap.mapDisplacementCorrection(rBPp);
+				outwardVector = sub(
+					CudaPhysics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
+					CudaPhysics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
+				CudaPhysics::rotateQuarterCounterClockwise(rAPp);
+				CudaPhysics::rotateQuarterCounterClockwise(rBPp);
+				n.x = 0.0f;
+				n.y = 0.0f;
+			}
+			__syncthreads();
+
 			for (int index = startCellIndex; index <= endCellIndex; ++index) {
 				CellData* cell = &cluster->cells[index];
 				for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
@@ -413,106 +492,43 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 						if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 							continue;
 						}
-						if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
-							avoidCollision = true;
-							break;
-						}
-						if (length(sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity && areConnectable(cell, otherCell)) {
-							collisionType = CollisionType::Fusion;
-						}
-						atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
-						atomicAdd(&collisionCenterPos.y, otherCell->absPos.y);
-						atomicAdd(&numberOfCollidingCells, 1);
+						float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
+						atomicAdd(&n.x, normal.x);
+						atomicAdd(&n.y, normal.y);
+						cell->protectionCounter = PROTECTION_TIMESTEPS;
+						otherCell->protectionCounter = PROTECTION_TIMESTEPS;
 					}
-					if (avoidCollision) {
-						break;
-					}
-				}
-				if (avoidCollision) {
-					break;
 				}
 			}
 			__syncthreads();
 
-			//checking numberOfCollidingCells because it might happen that the colliding cells are not alive anymore... 
-			if (!avoidCollision) {
-				if (CollisionType::ElasticCollision == collisionType && 0 != numberOfCollidingCells) {
-					__shared__ float2 rAPp;
-					__shared__ float2 rBPp;
-					__shared__ float2 outwardVector;
-					__shared__ float2 n;
-					if (0 == threadIdx.x) {
-						collisionCenterPos = div(collisionCenterPos, numberOfCollidingCells);
-						rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
-						_cellMap.mapDisplacementCorrection(rAPp);
-						rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
-						_cellMap.mapDisplacementCorrection(rBPp);
-						outwardVector = sub(
-							CudaPhysics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
-							CudaPhysics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
-						CudaPhysics::rotateQuarterCounterClockwise(rAPp);
-						CudaPhysics::rotateQuarterCounterClockwise(rBPp);
-						n.x = 0.0f;
-						n.y = 0.0f;
-					}
-					__syncthreads();
+			if (0 == threadIdx.x) {
+				float mA = cluster->numCells;
+				float mB = firstOtherCluster->numCells;
+				float2 vA2{ 0.0f, 0.0f };
+				float2 vB2{ 0.0f, 0.0f };
+				float angularVelA2{ 0.0f };
+				float angularVelB2{ 0.0f };
+				normalize(n);
+				CudaPhysics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
+					firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
+					mA, mB, vA2, vB2, angularVelA2, angularVelB2);
 
-					for (int index = startCellIndex; index <= endCellIndex; ++index) {
-						CellData* cell = &cluster->cells[index];
-						for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
-							for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-								CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
-								if (!otherCell || otherCell == cell) {
-									continue;
-								}
-								if (firstOtherCluster != otherCell->cluster) {
-									continue;
-								}
-								if (!cell->alive || !otherCell->alive) {
-									continue;
-								}
-								if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
-									continue;
-								}
-								float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
-								atomicAdd(&n.x, normal.x);
-								atomicAdd(&n.y, normal.y);
-								cell->protectionCounter = PROTECTION_TIMESTEPS;
-								otherCell->protectionCounter = PROTECTION_TIMESTEPS;
-							}
-						}
-					}
-					__syncthreads();
-
-					if (0 == threadIdx.x) {
-						float mA = cluster->numCells;
-						float mB = firstOtherCluster->numCells;
-						float2 vA2{ 0.0f, 0.0f };
-						float2 vB2{ 0.0f, 0.0f };
-						float angularVelA2{ 0.0f };
-						float angularVelB2{ 0.0f };
-						normalize(n);
-						CudaPhysics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
-							firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
-							mA, mB, vA2, vB2, angularVelA2, angularVelB2);
-
-						cluster->vel = vA2;
-						cluster->angularVel = angularVelA2;
-						firstOtherCluster->vel = vB2;
-						firstOtherCluster->angularVel = angularVelB2;
-					}
-				}
+				cluster->vel = vA2;
+				cluster->angularVel = angularVelA2;
+				firstOtherCluster->vel = vB2;
+				firstOtherCluster->angularVel = angularVelB2;
 			}
 		}
-		__syncthreads();
+	}
+	__syncthreads();
 
-		if (0 == threadIdx.x) {
-			if (0 == clusterLocked1) {
-				*clusterLockAddr1 = 0;
-			}
-			if (0 == clusterLocked2) {
-				*clusterLockAddr2 = 0;
-			}
+	if (0 == threadIdx.x) {
+		if (0 == clusterLocked1) {
+			*clusterLockAddr1 = 0;
+		}
+		if (0 == clusterLocked2) {
+			*clusterLockAddr2 = 0;
 		}
 	}
 	__syncthreads();
