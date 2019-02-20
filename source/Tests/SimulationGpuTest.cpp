@@ -606,12 +606,48 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTraversalLineClusters_waitUntil
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
-	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.5f }, 45, 0));
+	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.25f }, 45, 0));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
 	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(100, _controller);
+	IntegrationTestHelper::runSimulation(200, _controller);
+
+	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
+	ASSERT_EQ(2, newData.clusters->size());
+
+	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+	{
+		auto cluster = clusterById.at(clusterId1);
+		EXPECT_LE(NearlyZero, cluster.vel->x());
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_GE(-NearlyZero, *cluster.angularVel);
+	}
+
+	{
+		auto cluster = clusterById.at(clusterId2);
+		EXPECT_GE(-NearlyZero, cluster.vel->x());
+		EXPECT_GE(-NearlyZero, cluster.vel->y());
+		EXPECT_LE(NearlyZero, *cluster.angularVel);
+	}
+
+	checkKineticEnergy(origData, newData);
+}
+
+/**
+* Situation: same as testSidewiseCollisionOfTraversalLineClusters_waitUntilSecondCollision but with high velocities
+*/
+TEST_F(SimulationGpuTest, DISABLED_testSidewiseCollisionOfTraversalLineClusters_waitUntilSecondCollision_faster)
+{
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(100, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0));
+	origData.addCluster(createLineCluster(100, QVector2D{ 100, 145 }, QVector2D{ 0, -0.25f }, 45, 0));
+	uint64_t clusterId1 = origData.clusters->at(0).id;
+	uint64_t clusterId2 = origData.clusters->at(1).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(200, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
