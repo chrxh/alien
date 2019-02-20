@@ -270,6 +270,7 @@ void CudaSimulator::setCudaSimulationParameters()
 	parametersToCopy.cellMaxDistance = 1.3f;
 	parametersToCopy.cellMinDistance = 0.3f;
 	parametersToCopy.cellMinEnergy = 50.0f;
+	parametersToCopy.cellFusionVelocity = 0.4f;
 	parametersToCopy.radiationProbability = 0.2f;
 	parametersToCopy.radiationExponent = 1.0f;
 	parametersToCopy.radiationFactor = 0.0002f;
