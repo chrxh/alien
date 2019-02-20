@@ -45,7 +45,7 @@ __inline__ __device__ void ParticleReassembler::init(SimulationDataInternal & da
 {
 	_data = &data;
 	_cellMap.init(data.size, data.cellMap);
-	_origParticleMap.init(data.size, data.particleMap1);
+	_origParticleMap.init(data.size, data.particleMap);
 }
 
 __inline__ __device__ void ParticleReassembler::processingDataCopy(int startParticleIndex, int endParticleIndex)
@@ -69,7 +69,7 @@ __inline__ __device__ void ParticleReassembler::processingDataCopy(int startPart
 __inline__ __device__ void ParticleDynamics::init(SimulationDataInternal & data)
 {
 	_data = &data;
-	_origParticleMap.init(data.size, data.particleMap1);
+	_origParticleMap.init(data.size, data.particleMap);
 }
 
 __inline__ __device__ void ParticleDynamics::processingMovement(int startParticleIndex, int endParticleIndex)

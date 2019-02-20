@@ -54,7 +54,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	totalVideoMemory += 2 * sizeof(ClusterData) * MAX_CELLCLUSTERS;
 	totalVideoMemory += 2 * sizeof(CellData) * MAX_CELLS;
 	totalVideoMemory += 2 * sizeof(ParticleData) * MAX_PARTICLES;
-	totalVideoMemory += 2 * size.x * size.y * sizeof(ParticleData*);
+	totalVideoMemory += size.x * size.y * sizeof(ParticleData*);
 	totalVideoMemory += size.x * size.y * sizeof(CellData*);
 	totalVideoMemory += sizeof(int) * RANDOM_NUMBER_BLOCK_SIZE;
 	std::cout << "[CUDA] acquire " << totalVideoMemory/1024/1024 << "mb of video memory" << std::endl;
@@ -76,8 +76,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	std::cout << "[CUDA debug] step 2 CudaSimulator::CudaSimulator" << std::endl;
 
 	cudaMallocManaged(&_data->cellMap, size.x * size.y * sizeof(CellData*));
-	cudaMallocManaged(&_data->particleMap1, size.x * size.y * sizeof(ParticleData*));
-	cudaMallocManaged(&_data->particleMap2, size.x * size.y * sizeof(ParticleData*));
+	cudaMallocManaged(&_data->particleMap, size.x * size.y * sizeof(ParticleData*));
 	checkCudaErrors(cudaGetLastError());
 
 	std::cout << "[CUDA debug] step 3 CudaSimulator::CudaSimulator" << std::endl;
@@ -91,8 +90,7 @@ CudaSimulator::CudaSimulator(int2 const &size)
 
 	for (int i = 0; i < size.x * size.y; ++i) {
 		_data->cellMap[i] = nullptr;
-		_data->particleMap1[i] = nullptr;
-		_data->particleMap2[i] = nullptr;
+		_data->particleMap[i] = nullptr;
 	}
 	std::cout << "[CUDA debug] step 5 CudaSimulator::CudaSimulator" << std::endl;
 
@@ -115,8 +113,7 @@ CudaSimulator::~CudaSimulator()
 	_data->particlesAC2.free();
 
 	cudaFree(_data->cellMap);
-	cudaFree(_data->particleMap1);
-	cudaFree(_data->particleMap2);
+	cudaFree(_data->particleMap);
 	_data->numberGen.free();
 
 	delete[] _access->clusters;
@@ -219,7 +216,7 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 
 	for (int i = 0; i < _data->size.x * _data->size.y; ++i) {
 		_data->cellMap[i] = nullptr;
-		_data->particleMap1[i] = nullptr;
+		_data->particleMap[i] = nullptr;
 	}
 /*
 	Map<CellData> map;
@@ -247,7 +244,6 @@ void CudaSimulator::swapData()
 	swap(_data->clustersAC1, _data->clustersAC2);
 	swap(_data->cellsAC1, _data->cellsAC2);
 	swap(_data->particlesAC1, _data->particlesAC2);
-	swap(_data->particleMap1, _data->particleMap2);
 }
 
 void CudaSimulator::correctPointersAfterCellCopy(CellData* cell, int64_t addressShiftCell, int64_t addressShiftCluster)
