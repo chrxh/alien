@@ -78,6 +78,8 @@ __inline__ __device__ int ClusterReassembler::getNumOrigCells() const
 
 __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex)
 {
+	__syncthreads();
+
 	__shared__ int numDecompositions;
 	struct Entry {
 		int tag;
@@ -201,12 +203,12 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 		CellData& cell = _origCluster->cells[cellIndex];
 		correctCellConnections(cell.nextTimestep);
 	}
-	__syncthreads();
-
 }
 
 __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecomposition(int startCellIndex, int endCellIndex)
 {
+	__syncthreads();
+
 	__shared__ ClusterData* newCluster;
 	__shared__ CellData* newCells;
 
@@ -234,13 +236,11 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecompos
 		CellData* newCell = &newCells[cellIndex];
 		correctCellConnections(newCell);
 	}
-	__syncthreads();
 }
 
 __inline__ __device__ void ClusterReassembler::processingDataCopy(int startCellIndex, int endCellIndex)
 {
 	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive) {
-		__syncthreads();
 		return;
 	}
 	if (_origCluster->decompositionRequired) {
@@ -253,6 +253,8 @@ __inline__ __device__ void ClusterReassembler::processingDataCopy(int startCellI
 
 __inline__ __device__ void ClusterReassembler::processingDecomposition(int startCellIndex, int endCellIndex)
 {
+	__syncthreads();
+
 	if (_origCluster->decompositionRequired) {
 		__shared__ bool changes;
 
@@ -287,7 +289,6 @@ __inline__ __device__ void ClusterReassembler::processingDecomposition(int start
 				}
 			}
 		} while (changes);
-		__syncthreads();
 	}
 }
 
@@ -320,6 +321,8 @@ __inline__ __device__ int ClusterDynamics::getNumCells() const
 
 __inline__ __device__ void ClusterDynamics::processingCollision(int startCellIndex, int endCellIndex)
 {
+	__syncthreads();
+
 	__shared__ ClusterData* cluster;
 	__shared__ ClusterData* firstOtherCluster;
 	__shared__ int firstOtherClusterId;
@@ -377,10 +380,8 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 			}
 		}
 	}
-	__syncthreads();
 
 	if (!firstOtherCluster) {
-		__syncthreads();
 		return;
 	}
 
@@ -408,11 +409,9 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 				*clusterLockAddr2 = 0;
 			}
 		}
-		__syncthreads();
 		return;
 	}
 
-	__syncthreads();
 
 	for (int index = startCellIndex; index <= endCellIndex; ++index) {
 		CellData* cell = &cluster->cells[index];
@@ -531,21 +530,22 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 			*clusterLockAddr2 = 0;
 		}
 	}
-	__syncthreads();
 }
 
 __inline__ __device__ void ClusterDynamics::destroyCloseCell(int startCellIndex, int endCellIndex)
 {
+	__syncthreads();
+
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_cluster->cells[cellIndex];
 		destroyCloseCell(origCell);
 	}
-
-	__syncthreads();
 }
 
 __inline__ __device__ void ClusterDynamics::processingMovement(int startCellIndex, int endCellIndex)
 {
+	__syncthreads();
+
 	__shared__ float rotMatrix[2][2];
 	if (0 == threadIdx.x) {
 		_cluster->angle += _cluster->angularVel;
@@ -555,7 +555,6 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 		CudaPhysics::rotationMatrix(_cluster->angle, rotMatrix);
 	}
 	__syncthreads();
-
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *cell = &_cluster->cells[cellIndex];
@@ -574,16 +573,16 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 		}
 		_cellMap.set(absPos, cell);
 	}
-	__syncthreads();
 }
 
 __inline__ __device__ void ClusterDynamics::processingRadiation(int startCellIndex, int endCellIndex)
 {
+	__syncthreads();
+
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *cell = &_cluster->cells[cellIndex];
 		cellRadiation(cell);
 	}
-	__syncthreads();
 }
 
 __inline__ __device__ void ClusterDynamics::destroyCloseCell(CellData * cell)
