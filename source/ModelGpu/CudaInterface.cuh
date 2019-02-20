@@ -26,6 +26,7 @@ struct CellData
 	float2 absPos;
 	float2 vel;
 	float energy;
+	int maxConnections;
 	int numConnections;
 	CellData* connections[MAX_CELL_BONDS];
 	CellData* nextTimestep;
