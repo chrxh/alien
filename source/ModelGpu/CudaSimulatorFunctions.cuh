@@ -190,7 +190,7 @@ __device__ void clearCellCluster(SimulationDataInternal const &data, int cluster
 __device__ void clearParticle(SimulationDataInternal const &data, int particleIndex)
 {
 	Map<ParticleData> map;
-	map.init(data.size, data.particleMap1);
+	map.init(data.size, data.particleMap);
 
 	auto const &particle = data.particlesAC1.getEntireArray()[particleIndex];
 	map.set(particle.pos, nullptr);
