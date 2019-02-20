@@ -756,7 +756,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 * Situation: cluster with line structure where middle cell has low energy
 * Expected result: cluster decomposes into 2 parts
 */
-TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
+TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withDifferentAngleAndRotation)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 1.0));
@@ -764,6 +764,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withRotation)
 
 	auto lowEnergy = _parameters->cellMinEnergy / 2.0;
 	origData.clusters->at(0).cells->at(2).energy = lowEnergy;
+	origData.clusters->at(0).angle = 90;
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
