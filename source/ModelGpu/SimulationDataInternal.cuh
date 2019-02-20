@@ -10,8 +10,7 @@ struct SimulationDataInternal
 
 	CellData **cellMap;
 
-	ParticleData **particleMap1;
-	ParticleData **particleMap2;
+	ParticleData **particleMap;
 
 	ArrayController<ClusterData> clustersAC1;
 	ArrayController<ClusterData> clustersAC2;
