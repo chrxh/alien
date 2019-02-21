@@ -286,8 +286,8 @@ __inline__ __device__ void ClusterReassembler::processingDecomposition(int start
 					cell.numConnections = 0;
 				}
 			}
+			__syncthreads();
 		} while (changes);
-		__syncthreads();
 	}
 }
 
