@@ -26,7 +26,6 @@ __device__ void clusterReassembling(SimulationDataInternal &data, int clusterInd
 	int endCellIndex;
 	calcPartition(reassembler.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-
 	reassembler.processingDecomposition(startCellIndex, endCellIndex);
 	reassembler.processingDataCopy(startCellIndex, endCellIndex);
 }
