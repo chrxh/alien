@@ -323,10 +323,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	__shared__ ClusterData* cluster;
 	__shared__ ClusterData* firstOtherCluster;
 	__shared__ int firstOtherClusterId;
-	__shared__ int clusterLocked1;
-	__shared__ int clusterLocked2;
-	__shared__ int* clusterLockAddr1;
-	__shared__ int* clusterLockAddr2;
+	__shared__ DoubleLock lock;
 	__shared__ int numberOfCollidingCells;
 	__shared__ float2 collisionCenterPos;
 	__shared__ bool avoidCollision;
@@ -336,8 +333,6 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 		cluster = _cluster;
 		firstOtherCluster = nullptr;
 		firstOtherClusterId = 0;
-		clusterLocked1 = 1;
-		clusterLocked2 = 1;
 		collisionCenterPos.x = 0;
 		collisionCenterPos.y = 0;
 		numberOfCollidingCells = 0;
@@ -385,34 +380,14 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	}
 
 	if (0 == threadIdx.x) {
-		clusterLockAddr1 = &cluster->locked;
-		clusterLockAddr2 = &firstOtherCluster->locked;
-		if (firstOtherCluster->id < cluster->id) {
-			clusterLockAddr1 = &firstOtherCluster->locked;
-			clusterLockAddr2 = &cluster->locked;
-		}
-		clusterLocked1 = atomicExch(clusterLockAddr1, 1);
-		if (0 == clusterLocked1) {
-			clusterLocked2 = atomicExch(clusterLockAddr2, 1);
-		}
-
+		lock.init(&cluster->locked, &firstOtherCluster->locked, cluster->id, firstOtherCluster->id);
+		lock.tryLock();
 	}
 	__syncthreads();
-
-	if (0 != clusterLocked1 || 0 != clusterLocked2) {
-		if (0 == threadIdx.x) {
-			if (0 == clusterLocked1) {
-				*clusterLockAddr1 = 0;
-			}
-			if (0 == clusterLocked2) {
-				*clusterLockAddr2 = 0;
-			}
-		}
+	if (!lock.isLocked()) {
 		__syncthreads();
 		return;
 	}
-
-	__syncthreads();
 
 	for (int index = startCellIndex; index <= endCellIndex; ++index) {
 		CellData* cell = &cluster->cells[index];
@@ -524,12 +499,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	__syncthreads();
 
 	if (0 == threadIdx.x) {
-		if (0 == clusterLocked1) {
-			*clusterLockAddr1 = 0;
-		}
-		if (0 == clusterLocked2) {
-			*clusterLockAddr2 = 0;
-		}
+		lock.release();
 	}
 	__syncthreads();
 }
@@ -540,7 +510,6 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(int startCellIndex,
 		CellData *origCell = &_cluster->cells[cellIndex];
 		destroyCloseCell(origCell);
 	}
-
 	__syncthreads();
 }
 
