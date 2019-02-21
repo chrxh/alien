@@ -278,6 +278,56 @@ __host__ __device__ __inline__ int floorInt(float v)
 	return result;
 }
 
+class DoubleLock
+{
+private:
+	int* _lock1;
+	int* _lock2;
+	int _lockState1;
+	int _lockState2;
+	bool _isLocked;
+
+public:
+	__device__ __inline__ void init(int* lock1, int* lock2, uint64_t id1, uint64_t id2)
+	{
+		if (id1 <= id2) {
+			_lock1 = lock1;
+			_lock2 = lock2;
+		}
+		else {
+			_lock1 = lock2;
+			_lock2 = lock1;
+		}
+		_isLocked = false;
+	}
+
+	__device__ __inline__ void tryLock()
+	{
+		_lockState1 = atomicExch(_lock1, 1);
+		if (0 == _lockState1) {
+			_lockState2 = atomicExch(_lock2, 1);
+		}
+		if (0 != _lockState1 || 0 != _lockState2) {
+			release();
+		}
+		_isLocked = _lockState1 == 0 && _lockState2 == 0;
+	}
+
+	__device__ __inline__ bool isLocked()
+	{
+		return _isLocked;
+	}
+
+	__host__ __device__ __inline__ void release()
+	{
+		if (0 == _lockState1) {
+			*_lock1 = 0;
+		}
+		if (0 == _lockState2) {
+			*_lock2 = 0;
+		}
+	}
+};
 
 float random(float max)
 {
