@@ -831,3 +831,21 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withDifferentAngleA
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}
 }
+
+/**
+* Situation:
+*	- destruction of cells in two overlapping clusters
+*	- important: NUM_THREADS_PER_BLOCK should be 128
+* Expected result: no crash
+*/
+TEST_F(SimulationGpuTest, regressionTest_overlappingRectangleClusters_manyThreadsPerBlocks)
+{
+	float closeDistance = static_cast<float>(_parameters->cellMinDistance) / 2.0f;
+
+	DataDescription origData;
+	origData.addCluster(createRectangleCluster({ 20, 20 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createRectangleCluster({ 20, 20 }, QVector2D{ 105.0f + closeDistance, 105 }, QVector2D{ 0, 0 }));
+
+	IntegrationTestHelper::updateData(_access, origData);
+	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1, _controller));
+}
