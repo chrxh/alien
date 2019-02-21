@@ -602,8 +602,8 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 	}
 
 	ClusterData* mapCluster = mapCell->cluster;
-	auto distanceSquared = _cellMap.mapDistance(cell->absPos, mapCell->absPos);
-	if (distanceSquared < cudaSimulationParameters.cellMinDistance) {
+	auto distance = _cellMap.mapDistance(cell->absPos, mapCell->absPos);
+	if (distance < cudaSimulationParameters.cellMinDistance) {
 		ClusterData* cluster = cell->cluster;
 		if (mapCluster->numCells >= cluster->numCells) {
 			cell->alive = false;
