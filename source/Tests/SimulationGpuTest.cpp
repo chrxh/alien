@@ -766,7 +766,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	auto numClusters = newData.clusters ? newData.clusters->size() : 0;
+	auto numClusters = newData.clusters->size();
 	ASSERT_EQ(4, numClusters);
 
 	unordered_map<int, vector<ClusterDescription>> clustersBySize;
@@ -830,6 +830,26 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withDifferentAngleA
 		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}
+}
+
+/**
+* Situation: two clusters are situated very close
+* Expected result: the cells of the smaller clusters are destroyed
+*/
+TEST_F(SimulationGpuTest, testDestructionOfTooCloseCells)
+{
+	float closeDistance = static_cast<float>(_parameters->cellMinDistance) / 2.0f;
+
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100, 100.5f }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(3, QVector2D{ 100, 100.5f + closeDistance }, QVector2D{ 0, 0 }, 0.0));
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(2, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+	ASSERT_EQ(5, newData.clusters->at(0).cells->size());
 }
 
 /**
