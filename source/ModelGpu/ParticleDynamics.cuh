@@ -88,29 +88,23 @@ __inline__ __device__ void ParticleDynamics::processingCollision(int startPartic
 		ParticleData* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
 		ParticleData* otherParticle = _origParticleMap.get(particle->pos);
 		if (otherParticle && otherParticle != particle) {
-			int* particleLockAddr1 = &particle->locked;
-			int* particleLockAddr2 = &otherParticle->locked;
-			if (otherParticle->id < particle->id) {
-				particleLockAddr1 = &otherParticle->locked;
-				particleLockAddr2 = &particle->locked;
-			}
-			int particleLocked1 = static_cast<bool>(atomicExch(particleLockAddr1, 1));
-			int particleLocked2 = static_cast<bool>(atomicExch(particleLockAddr2, 1));
-			if (0 == particleLocked1 && 0 == particleLocked2) {
-				if (particle->alive && otherParticle->alive) {
-					float factor1 = particle->energy / (particle->energy + otherParticle->energy);
-					float factor2 = 1.0f - factor1;
-					particle->vel = add(mul(particle->vel, factor1), mul(otherParticle->vel, factor2));
-					atomicAdd(&particle->energy, otherParticle->energy);
-					atomicAdd(&otherParticle->energy, -otherParticle->energy);
-					otherParticle->alive = false;
+			if (particle->alive && otherParticle->alive) {
+
+				DoubleLock lock;
+				lock.init(&particle->locked, &otherParticle->locked, particle->id, otherParticle->id);
+				lock.tryLock();
+				if (!lock.isLocked()) {
+					continue;
 				}
-			}
-			if (0 == particleLocked1) {
-				*particleLockAddr1 = 0;
-			}
-			if (0 == particleLocked2) {
-				*particleLockAddr2 = 0;
+
+				float factor1 = particle->energy / (particle->energy + otherParticle->energy);
+				float factor2 = 1.0f - factor1;
+				particle->vel = add(mul(particle->vel, factor1), mul(otherParticle->vel, factor2));
+				atomicAdd(&particle->energy, otherParticle->energy);
+				atomicAdd(&otherParticle->energy, -otherParticle->energy);
+				otherParticle->alive = false;
+
+				lock.releaseLock();
 			}
 		}
 	}
