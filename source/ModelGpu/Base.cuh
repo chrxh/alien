@@ -288,9 +288,9 @@ private:
 	bool _isLocked;
 
 public:
-	__device__ __inline__ void init(int* lock1, int* lock2, uint64_t id1, uint64_t id2)
+	__device__ __inline__ void init(int* lock1, int* lock2)
 	{
-		if (id1 <= id2) {
+		if (lock1 <= lock2) {
 			_lock1 = lock1;
 			_lock2 = lock2;
 		}

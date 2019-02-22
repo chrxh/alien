@@ -91,7 +91,7 @@ __inline__ __device__ void ParticleDynamics::processingCollision(int startPartic
 			if (particle->alive && otherParticle->alive) {
 
 				DoubleLock lock;
-				lock.init(&particle->locked, &otherParticle->locked, particle->id, otherParticle->id);
+				lock.init(&particle->locked, &otherParticle->locked);
 				lock.tryLock();
 				if (!lock.isLocked()) {
 					continue;

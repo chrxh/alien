@@ -51,6 +51,7 @@ struct ClusterData
 	//auxiliary data
 	bool decompositionRequired;
 	int locked;	//0 = unlocked, 1 = locked
+	ClusterData* clusterToFuse;
 };
 
 struct SimulationDataForAccess
