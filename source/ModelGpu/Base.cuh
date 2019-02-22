@@ -308,7 +308,7 @@ public:
 			_lockState2 = atomicExch(_lock2, 1);
 		}
 		if (0 != _lockState1 || 0 != _lockState2) {
-			release();
+			releaseLock();
 		}
 		_isLocked = _lockState1 == 0 && _lockState2 == 0;
 	}
@@ -318,7 +318,7 @@ public:
 		return _isLocked;
 	}
 
-	__host__ __device__ __inline__ void release()
+	__host__ __device__ __inline__ void releaseLock()
 	{
 		if (0 == _lockState1) {
 			*_lock1 = 0;
