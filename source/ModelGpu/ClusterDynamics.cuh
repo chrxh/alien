@@ -323,7 +323,6 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	__shared__ ClusterData* cluster;
 	__shared__ ClusterData* firstOtherCluster;
 	__shared__ int firstOtherClusterId;
-	__shared__ DoubleLock lock;
 	__shared__ int numberOfCollidingCells;
 	__shared__ float2 collisionCenterPos;
 	__shared__ bool avoidCollision;
@@ -379,6 +378,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 		return;
 	}
 
+	__shared__ DoubleLock lock;
 	if (0 == threadIdx.x) {
 		lock.init(&cluster->locked, &firstOtherCluster->locked, cluster->id, firstOtherCluster->id);
 		lock.tryLock();
@@ -499,7 +499,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	__syncthreads();
 
 	if (0 == threadIdx.x) {
-		lock.release();
+		lock.releaseLock();
 	}
 	__syncthreads();
 }
