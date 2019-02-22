@@ -91,7 +91,7 @@ __device__ void clusterDynamicsStep2(SimulationDataInternal &data, int clusterIn
 
 	mover.destroyCloseCell(startCellIndex, endCellIndex);
 	mover.processingRadiation(startCellIndex, endCellIndex);
-	mover.processingCollision(startCellIndex, endCellIndex);
+	mover.processingCollision(startCellIndex, endCellIndex);	//attention: can result an temporarily inconsistent state
 }
 
 __global__ void clusterDynamicsStep2(SimulationDataInternal data)
