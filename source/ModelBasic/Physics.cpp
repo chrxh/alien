@@ -1,7 +1,8 @@
-#include "Physics.h"
-
+#include <boost/range/combine.hpp>
 #include <qmath.h>
 #include <QMatrix4x4>
+
+#include "Physics.h"
 
 //calculate collision of two moving and rotating rigid bodies
 void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp,
@@ -63,38 +64,10 @@ void Physics::collision (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D
     angularVelB2 *= radToDeg;
 }
 
-void Physics::fusion (QVector2D vA1, QVector2D vB1, QVector2D rAPp, QVector2D rBPp, double angularVelA1
-	, double angularVelB1, QVector2D n, double angularMassA, double angularMassB, double angularMassAB
-	, double massA, double massB, QVector2D& v2, double& angularVel2)
-{
-    //calculation of rAPp
-    /*QVector2D rAPp = posP-posA;
-    double temp = rAPp.x();
-    rAPp.setX(rAPp.y());
-    rAPp.setY(-temp);
-    QVector2D rBPp = posP-posB;
-    temp = rBPp.x();
-    rBPp.setX(rBPp.y());
-    rBPp.setY(-temp);*/
-
-    QVector2D vA2;
-    QVector2D vB2;
-    double angularVelA2(0.0);
-    double angularVelB2(0.0);
-
-    Physics::collision(vA1, vB1, rAPp, rBPp, angularVelA1,
-                       angularVelB1, n, angularMassA, angularMassB,
-                       massA, massB,
-                       vA2, vB2, angularVelA2, angularVelB2);
-    v2 = (vA2*massA+vB2*massB)/(massA+massB);
-    angularVel2 = (angularVelA2*angularMassA+angularVelB2*angularMassB)/angularMassAB;
-}
-
-
 //remember that the coordinate system in a computer system is mirrored at the x-axis...
-QVector2D Physics::tangentialVelocity (QVector2D r, QVector2D vel, double angularVel)
+QVector2D Physics::tangentialVelocity (QVector2D r, Velocities const& velocityOfCenter)
 {
-    return vel - angularVel*rotateQuarterCounterClockwise(r)*degToRad;
+    return velocityOfCenter.linear - velocityOfCenter.angular*rotateQuarterCounterClockwise(r)*degToRad;
 }
 
 
@@ -164,7 +137,7 @@ auto Physics::velocitiesOfCenter(Velocities const& velocities, vector<QVector2D>
 	Velocities result;
 	result.angular = 0.0;
 	for (QVector2D const& relPositionOfMass : relPositionOfMasses) {
-		result.linear += Physics::tangentialVelocity(relPositionOfMass, velocities.linear, velocities.angular);
+		result.linear += Physics::tangentialVelocity(relPositionOfMass, velocities);
 	}
 	result.linear /= relPositionOfMasses.size();
 	if (relPositionOfMasses.size() == 1) {
@@ -174,12 +147,52 @@ auto Physics::velocitiesOfCenter(Velocities const& velocities, vector<QVector2D>
 	double angularMomentum = 0.0;
 	double angularMass = Physics::angularMass(getPositionsInBarycentricCoordinates(relPositionOfMasses));
 	for (QVector2D const& relPositionOfMass : relPositionOfMasses) {
-		QVector2D tangentialVel = Physics::tangentialVelocity(relPositionOfMass, velocities.linear, velocities.angular);
+		QVector2D tangentialVel = Physics::tangentialVelocity(relPositionOfMass, velocities);
 		QVector2D relVel = tangentialVel - result.linear;
 		angularMomentum += Physics::angularMomentum(relPositionOfMass, relVel);
 	}
 
 	result.angular = Physics::angularVelocity(angularMomentum, angularMass);
+	return result;
+}
+
+auto Physics::fusion(
+    QVector2D const& pos1, Velocities const& velocities1, vector<QVector2D> const& relPositionOfMasses1,
+    QVector2D const& pos2, Velocities const& velocities2, vector<QVector2D> const& relPositionOfMasses2) -> Velocities
+{
+	Velocities result;
+	auto mass1 = relPositionOfMasses1.size();
+	auto mass2 = relPositionOfMasses2.size();
+	result.linear = (velocities1.linear * mass1 + velocities2.linear * mass2) / (mass1 + mass2);
+
+	vector<QVector2D> relPositionOfFusion;
+	vector<QVector2D> relVelOfFusion;
+	auto center = (pos1 * mass1 + pos2 * mass2) / (mass1 + mass2);
+	auto shift1 = pos1 - center;
+    std::transform(
+        relPositionOfMasses1.begin(), relPositionOfMasses1.end(), std::inserter(relPositionOfFusion, relPositionOfFusion.begin()),
+        [&shift1](QVector2D const& relPos) { return relPos + shift1; });
+	std::transform(
+		relPositionOfMasses1.begin(), relPositionOfMasses1.end(), std::inserter(relVelOfFusion, relVelOfFusion.begin()),
+		[&velocities1](QVector2D const& relPos) { return tangentialVelocity(relPos, velocities1); });
+
+	auto shift2 = pos2 - center;
+	std::transform(
+		relPositionOfMasses2.begin(), relPositionOfMasses2.end(), std::inserter(relPositionOfFusion, relPositionOfFusion.begin()),
+		[&shift1](QVector2D const& relPos) { return relPos + shift1; });
+	std::transform(
+		relPositionOfMasses2.begin(), relPositionOfMasses2.end(), std::inserter(relVelOfFusion, relVelOfFusion.begin()),
+		[&velocities2](QVector2D const& relPos) { return tangentialVelocity(relPos, velocities2); });
+
+	auto angularMassOfFusion = angularMass(relPositionOfFusion);
+
+	auto angularMomentumOfFusion = 0.0;
+	for (auto const& relPosAndVel : boost::combine(relPositionOfFusion, relVelOfFusion)) {
+		auto relPos = relPosAndVel.get<0>();
+		auto relVel = relPosAndVel.get<1>() - result.linear;
+		angularMomentumOfFusion += angularMomentum(relPos, relVel);
+	}
+	result.angular = angularVelocity(angularMomentumOfFusion, angularMassOfFusion);
 	return result;
 }
 

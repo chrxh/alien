@@ -277,9 +277,9 @@ void DescriptionHelperImpl::setClusterAttributes(ClusterDescription& cluster)
 	cluster.pos = calcCenter(*cluster.cells);
 	cluster.angle = calcAngleBasedOnOrigClusters(*cluster.cells);
 	auto velocities = calcVelocitiesBasedOnOrigClusters(*cluster.cells);
-	double v = velocities.linearVel.length();
-	cluster.vel = velocities.linearVel;
-	cluster.angularVel = velocities.angularVel;
+	double v = velocities.linear.length();
+	cluster.vel = velocities.linear;
+	cluster.angularVel = velocities.angular;
 	if (auto clusterMetadata = calcMetadataBasedOnOrigClusters(*cluster.cells)) {
 		cluster.metadata = *clusterMetadata;
 	}
@@ -309,11 +309,11 @@ namespace
 	}
 }
 
-DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const
+Physics::Velocities DescriptionHelperImpl::calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const
 {
 	CHECK(!cells.empty());
 	
-	ClusterVelocities result;
+	Physics::Velocities result{ QVector2D(), 0.0 };
 	if (cells.size() == 1) {
 		auto cell = cells.front();
 		if (_origNavi.clusterIndicesByCellIds.find(cell.id) == _origNavi.clusterIndicesByCellIds.end()
@@ -324,7 +324,7 @@ DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBa
 		int cellIndex = _origNavi.cellIndicesByCellIds.at(cell.id);
 		auto const& origCluster = _origData->clusters->at(clusterIndex);
 		auto const& origCell = origCluster.cells->at(cellIndex);
-		result.linearVel = Physics::tangentialVelocity(*origCell.pos - *origCluster.pos, *origCluster.vel, *origCluster.angularVel);
+		result.linear= Physics::tangentialVelocity(*origCell.pos - *origCluster.pos, { *origCluster.vel, *origCluster.angularVel });
 		return result;
 	}
 
@@ -338,19 +338,19 @@ DescriptionHelperImpl::ClusterVelocities DescriptionHelperImpl::calcVelocitiesBa
 		int cellIndex = _origNavi.cellIndicesByCellIds.at(cell.id);
 		auto const& origCluster = _origData->clusters->at(clusterIndex);
 		auto const& origCell = origCluster.cells->at(cellIndex);
-		cellVel.insert_or_assign(cell.id, Physics::tangentialVelocity(*origCell.pos - *origCluster.pos, *origCluster.vel, *origCluster.angularVel));
-		result.linearVel += cellVel.at(cell.id);
+		cellVel.insert_or_assign(cell.id, Physics::tangentialVelocity(*origCell.pos - *origCluster.pos, { *origCluster.vel, *origCluster.angularVel }));
+		result.linear += cellVel.at(cell.id);
 	}
-	result.linearVel /= cells.size();
+	result.linear /= cells.size();
 
 	QVector2D center = calcCenter(cells);
 	double angularMomentum = 0.0;
 	for (auto const& cell : cells) {
 		QVector2D r = *cell.pos - center;
-		QVector2D v = cellVel.at(cell.id) - result.linearVel;
+		QVector2D v = cellVel.at(cell.id) - result.linear;
 		angularMomentum += Physics::angularMomentum(r, v);
 	}
-	result.angularVel = Physics::angularVelocity(angularMomentum, calcAngularMass(cells));
+	result.angular = Physics::angularVelocity(angularMomentum, calcAngularMass(cells));
 
 	return result;
 }
