@@ -144,6 +144,20 @@ double Physics::angularVelocity (double angularMomentum, double angularMass)
         return angularMomentum/angularMass*radToDeg;
 }
 
+namespace
+{
+	vector<QVector2D> getPositionsInBarycentricCoordinates(vector<QVector2D> const& positions)
+	{
+		QVector2D center = std::accumulate(positions.begin(), positions.end(), QVector2D());
+		center /= positions.size();
+		vector<QVector2D> result;
+		std::transform(positions.begin(), positions.end(), std::inserter(result, result.begin()), [&center](QVector2D const& pos) {
+			return pos - center;
+		});
+		return result;
+	}
+}
+
 auto Physics::velocitiesOfCenter(Velocities const& velocities, vector<QVector2D> const& relPositionOfMasses) -> Velocities
 {
 	CHECK(!relPositionOfMasses.empty());
@@ -158,7 +172,7 @@ auto Physics::velocitiesOfCenter(Velocities const& velocities, vector<QVector2D>
 	}
 
 	double angularMomentum = 0.0;
-	double angularMass = Physics::angularMass(relPositionOfMasses);
+	double angularMass = Physics::angularMass(getPositionsInBarycentricCoordinates(relPositionOfMasses));
 	for (QVector2D const& relPositionOfMass : relPositionOfMasses) {
 		QVector2D tangentialVel = Physics::tangentialVelocity(relPositionOfMass, velocities.linear, velocities.angular);
 		QVector2D relVel = tangentialVel - result.linear;
