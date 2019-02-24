@@ -845,11 +845,32 @@ TEST_F(SimulationGpuTest, testDestructionOfTooCloseCells)
 	origData.addCluster(createHorizontalCluster(3, QVector2D{ 100, 100.5f + closeDistance }, QVector2D{ 0, 0 }, 0.0));
 
 	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(2, _controller);
+	IntegrationTestHelper::runSimulation(100, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(1, newData.clusters->size());
 	ASSERT_EQ(5, newData.clusters->at(0).cells->size());
+}
+
+/**
+* Situation: two horizontal clusters are approaching each others vertically
+* Expected result: fusion should take place
+*/
+TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
+{
+	float fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 105 }, QVector2D{ 0, -fusionVelocity }, 0.0));
+
+	IntegrationTestHelper::updateData(_access, origData);
+	int duration = static_cast<int>((5.0f / fusionVelocity) + 5);
+	IntegrationTestHelper::runSimulation(duration, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+	ASSERT_EQ(20, newData.clusters->at(0).cells->size());
 }
 
 /**
