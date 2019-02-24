@@ -47,7 +47,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
 
     //calc old tangential velocity
     QVector2D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector2D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVelocity(), cluster->getAngularVel()));
+	QVector2D tangVel(Physics::tangentialVelocity(cellRelPos, { cluster->getVelocity(), cluster->getAngularVel() }));
 
     //calc impulse angle
     QVector2D impulse;

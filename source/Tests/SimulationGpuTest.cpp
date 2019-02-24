@@ -35,6 +35,7 @@ protected:
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
 	void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
 	Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
+	Physics::Velocities calcVelocitiesOfFusion(ClusterDescription const& cluster1, ClusterDescription const& cluster2) const;
 	double calcEnergy(DataDescription const& data) const;
 	double calcEnergy(ClusterDescription const& cluster) const;
 	double calcKineticEnergy(DataDescription const& data) const;
@@ -93,6 +94,24 @@ Physics::Velocities SimulationGpuTest::calcVelocitiesOfClusterPart(ClusterDescri
 		}
 	}
 	return Physics::velocitiesOfCenter({ *cluster.vel, *cluster.angularVel }, relPositionOfMasses);
+}
+
+Physics::Velocities SimulationGpuTest::calcVelocitiesOfFusion(ClusterDescription const & cluster1, ClusterDescription const & cluster2) const
+{
+	vector<QVector2D> relPositionOfMasses1;
+    std::transform(
+        cluster1.cells->begin(), cluster1.cells->end(),
+		std::inserter(relPositionOfMasses1, relPositionOfMasses1.begin()),
+        [cluster1](auto const& cell) { return *cell.pos - *cluster1.pos; });
+
+	vector<QVector2D> relPositionOfMasses2;
+	std::transform(
+		cluster2.cells->begin(), cluster2.cells->end(),
+		std::inserter(relPositionOfMasses2, relPositionOfMasses2.begin()),
+		[cluster2](auto const& cell) { return *cell.pos - *cluster2.pos; });
+	return Physics::fusion(
+		*cluster1.pos, { *cluster1.vel, *cluster1.angularVel }, relPositionOfMasses1,
+		*cluster2.pos, { *cluster2.vel, *cluster2.angularVel }, relPositionOfMasses2);
 }
 
 double SimulationGpuTest::calcEnergy(DataDescription const & data) const
@@ -789,10 +808,12 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 }
 
 /**
-* Situation: cluster with line structure where middle cell has low energy
+* Situation:
+*	- cluster with line structure where middle cell has low energy
+*	- cluster rotates
 * Expected result: cluster decomposes into 2 parts
 */
-TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_withDifferentAngleAndRotation)
+TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_duringRotation)
 {
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 1.0));
@@ -849,7 +870,7 @@ TEST_F(SimulationGpuTest, testDestructionOfTooCloseCells)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(1, newData.clusters->size());
-	ASSERT_EQ(5, newData.clusters->at(0).cells->size());
+	EXPECT_EQ(5, newData.clusters->at(0).cells->size());
 }
 
 /**
@@ -862,7 +883,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0));
-	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 105 }, QVector2D{ 0, -fusionVelocity }, 0.0));
+	origData.addCluster(createHorizontalCluster(12, QVector2D{ 100, 105 }, QVector2D{ 0, -fusionVelocity }, 0.0));
 
 	IntegrationTestHelper::updateData(_access, origData);
 	int duration = static_cast<int>((5.0f / fusionVelocity) + 5);
@@ -870,7 +891,36 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(1, newData.clusters->size());
-	ASSERT_EQ(20, newData.clusters->at(0).cells->size());
+	EXPECT_EQ(20, newData.clusters->at(0).cells->size());
+}
+
+/**
+* Situation: two horizontal clusters are approaching each others during rotation
+* Expected result: fusion should take place
+*/
+TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_duringRotation)
+{
+	float fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100.1f }, QVector2D{ 0, 0 }, 1.0));
+	origData.addCluster(createHorizontalCluster(12, QVector2D{ 100, 101 }, QVector2D{ 0, -fusionVelocity }, 1.0));
+	origData.clusters->at(0).angle = 90;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(1, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+
+	auto origCluster1 = origData.clusters->at(0);
+	auto origCluster2 = origData.clusters->at(1);
+	auto expectedFusionVelocity = calcVelocitiesOfFusion(origCluster1, origCluster2);
+
+	auto fusedCluster = newData.clusters->at(0);
+	EXPECT_EQ(22, fusedCluster.cells->size());
+	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
+	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
 }
 
 /**

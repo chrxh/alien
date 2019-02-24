@@ -775,7 +775,7 @@ void Cluster::updateCellVel (bool forceCheck)
         //calc cell velocities
 		auto parameters = _context->getSimulationParameters();
 		foreach(Cell* cell, _cells) {
-            QVector2D vel = Physics::tangentialVelocity(calcCellDistWithoutTorusCorrection(cell), _vel, _angularVel);
+			QVector2D vel = Physics::tangentialVelocity(calcCellDistWithoutTorusCorrection(cell), { _vel, _angularVel });
             if( cell->getVelocity().isNull() ) {
                 cell->setVelocity(vel);
             }
