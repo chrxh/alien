@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DescriptionHelper.h"
+#include "ModelBasic/Physics.h"
 
 class DescriptionHelperImpl
 	: public DescriptionHelper
@@ -36,11 +37,7 @@ private:
 
 	void setClusterAttributes(ClusterDescription& cluster);
 	double calcAngleBasedOnOrigClusters(vector<CellDescription> const & cells) const;
-	struct ClusterVelocities {
-		QVector2D linearVel;
-		double angularVel = 0.0;
-	};
-	ClusterVelocities calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const;
+	Physics::Velocities calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const;
 	optional<ClusterMetadata> calcMetadataBasedOnOrigClusters(vector<CellDescription> const & cells) const;
 
 	SpaceProperties* _metric = nullptr;
