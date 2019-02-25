@@ -731,9 +731,11 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(CellData *cell)
         particle->pos = {static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f,
                          static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f};
         _cellMap.mapPosCorrection(particle->pos);
-        particle->vel = { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation
-			, (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
-		float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
+        particle->vel =
+            add(cell->vel,
+                {(_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                 (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation});
+        float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
 		radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
 		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
 		if (radiationEnergy > cell->energy - 1) {
