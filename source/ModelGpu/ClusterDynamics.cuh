@@ -282,7 +282,7 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 
 			auto r = sub(newCell->absPos, _origCluster->pos);
 			_cellMap.mapDisplacementCorrection(r);
-			float2 relVel = sub(newCell->vel, newCluster->vel);
+			float2 relVel = sub(newCell->vel, _origCluster->vel);
 			float angularMomentum = CudaPhysics::angularMomentum(r, relVel);
 			atomicAdd(&newCluster->angularVel, angularMomentum);
 		}
@@ -301,6 +301,12 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 			newCell->absPos = add(newCell->absPos, correction);
 			newCell->cluster = newCluster;
 			atomicAdd(&newCluster->angularMass, lengthSquared(relPos));
+
+			auto r = sub(newCell->absPos, otherCluster->pos);
+			_cellMap.mapDisplacementCorrection(r);
+			float2 relVel = sub(newCell->vel, otherCluster->vel);
+			float angularMomentum = CudaPhysics::angularMomentum(r, relVel);
+			atomicAdd(&newCluster->angularVel, angularMomentum);
 		}
 		__syncthreads();
 
@@ -544,11 +550,12 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 						if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 							continue;
 						}
-						if (!areConnectable(cell, otherCell)) {
-							continue;
-						}
-						auto index = cell->numConnections++;
-						auto otherIndex = otherCell->numConnections++;
+                        if (length(sub(cell->vel, otherCell->vel)) < cudaSimulationParameters.cellFusionVelocity
+                            || !areConnectable(cell, otherCell)) {
+                            continue;
+                        }
+                        auto index = cell->numConnections++;
+                        auto otherIndex = otherCell->numConnections++;
 						cell->connections[index] = otherCell;
 						otherCell->connections[otherIndex] = cell;
 					}
