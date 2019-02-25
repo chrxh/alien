@@ -254,10 +254,7 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 			newCluster->clusterToFuse = nullptr;
 			newCluster->cells = _data->cellsAC2.getNewSubarray(newCluster->numCells);
 
-			auto deltaUncorrected = sub(_origCluster->pos, otherCluster->pos);
-			auto delta = deltaUncorrected;
-			_cellMap.mapDisplacementCorrection(delta);
-			correction = sub(delta, deltaUncorrected);	//to be added to otherCluster
+			correction = _cellMap.correctionIncrement(_origCluster->pos, otherCluster->pos);	//to be added to otherCluster
 
             newCluster->pos = div(
 				add(mul(_origCluster->pos, _origCluster->numCells), mul(add(otherCluster->pos, correction), otherCluster->numCells)),
@@ -550,12 +547,11 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 						if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 							continue;
 						}
-                        if (length(sub(cell->vel, otherCell->vel)) < cudaSimulationParameters.cellFusionVelocity
-                            || !areConnectable(cell, otherCell)) {
-                            continue;
-                        }
-                        auto index = cell->numConnections++;
-                        auto otherIndex = otherCell->numConnections++;
+						if (length(sub(cell->vel, otherCell->vel)) < cudaSimulationParameters.cellFusionVelocity || !areConnectable(cell, otherCell)) {
+							continue;
+						}
+						auto index = cell->numConnections++;
+						auto otherIndex = otherCell->numConnections++;
 						cell->connections[index] = otherCell;
 						otherCell->connections[otherIndex] = cell;
 					}

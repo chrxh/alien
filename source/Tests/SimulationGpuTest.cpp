@@ -968,6 +968,30 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_partialContact)
 }
 
 /**
+* Situation: two horizontal clusters are approaching each others horizontally at universe boundary
+* Expected result: fusion should take place
+*/
+TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
+{
+	auto fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+	auto size = _spaceProp->getSize();
+
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x - 5.0f, 100 }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(12, QVector2D{ size.x + 6.0f, 100 }, QVector2D{ -fusionVelocity, 0 }, 0.0));
+	setMaxConnections(origData.clusters->at(0), 3);
+	setMaxConnections(origData.clusters->at(1), 3);
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(1, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
+}
+
+
+/**
 * Situation:
 *	- destruction of cells in two overlapping clusters
 *	- important: NUM_THREADS_PER_BLOCK should be 128
