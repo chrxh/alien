@@ -40,6 +40,7 @@ protected:
 	double calcEnergy(ClusterDescription const& cluster) const;
 	double calcKineticEnergy(DataDescription const& data) const;
 	double calcKineticEnergy(ClusterDescription const& cluster) const;
+	void setMaxConnections(ClusterDescription& cluster, int maxConnections) const;
 
 protected:
 	double const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
@@ -109,6 +110,7 @@ Physics::Velocities SimulationGpuTest::calcVelocitiesOfFusion(ClusterDescription
 		cluster2.cells->begin(), cluster2.cells->end(),
 		std::inserter(relPositionOfMasses2, relPositionOfMasses2.begin()),
 		[cluster2](auto const& cell) { return *cell.pos - *cluster2.pos; });
+
 	return Physics::fusion(
 		*cluster1.pos, { *cluster1.vel, *cluster1.angularVel }, relPositionOfMasses1,
 		*cluster2.pos, { *cluster2.vel, *cluster2.angularVel }, relPositionOfMasses2);
@@ -165,6 +167,13 @@ double SimulationGpuTest::calcKineticEnergy(ClusterDescription const& cluster) c
 	auto angularMass = Physics::angularMass(relPositions);
 	auto angularVel = *cluster.angularVel;
 	return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
+}
+
+void SimulationGpuTest::setMaxConnections(ClusterDescription& cluster, int maxConnections) const
+{
+	for (CellDescription& cell : *cluster.cells) {
+		cell.setMaxConnections(maxConnections);
+	}
 }
 
 /**
@@ -884,6 +893,8 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0));
 	origData.addCluster(createHorizontalCluster(12, QVector2D{ 100, 105 }, QVector2D{ 0, -fusionVelocity }, 0.0));
+	setMaxConnections(origData.clusters->at(0), 3);
+	setMaxConnections(origData.clusters->at(1), 3);
 
 	IntegrationTestHelper::updateData(_access, origData);
 	int duration = static_cast<int>((5.0f / fusionVelocity) + 5);
@@ -891,20 +902,22 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(1, newData.clusters->size());
-	EXPECT_EQ(20, newData.clusters->at(0).cells->size());
+	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
 }
 
 /**
-* Situation: two horizontal clusters are approaching each others during rotation
-* Expected result: fusion should take place
+* Situation: two line clusters are approaching each others during rotation
+* Expected result: fusion should take place with correct (angular) velocity
 */
-TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_duringRotation)
+TEST_F(SimulationGpuTest, testFusionOfLineClusters_duringRotation)
 {
 	float fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100.1f }, QVector2D{ 0, 0 }, 1.0));
 	origData.addCluster(createHorizontalCluster(12, QVector2D{ 100, 101 }, QVector2D{ 0, -fusionVelocity }, 1.0));
+	setMaxConnections(origData.clusters->at(0), 3);
+	setMaxConnections(origData.clusters->at(1), 3);
 	origData.clusters->at(0).angle = 90;
 
 	IntegrationTestHelper::updateData(_access, origData);
@@ -913,9 +926,40 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_duringRotation)
 
 	ASSERT_EQ(1, newData.clusters->size());
 
-	auto origCluster1 = origData.clusters->at(0);
-	auto origCluster2 = origData.clusters->at(1);
-	auto expectedFusionVelocity = calcVelocitiesOfFusion(origCluster1, origCluster2);
+	auto refCluster1 = createLineCluster(10, QVector2D{ 100, 100.1f }, QVector2D{ 0, 0 }, 1.0, 1.0);
+	auto refCluster2 = createLineCluster(12, QVector2D{ 100, 101 - fusionVelocity }, QVector2D{ 0, -fusionVelocity }, 1.0, 1.0);
+	auto expectedFusionVelocity = calcVelocitiesOfFusion(refCluster1, refCluster2);
+
+	auto fusedCluster = newData.clusters->at(0);
+	EXPECT_EQ(22, fusedCluster.cells->size());
+	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
+	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
+}
+
+/**
+* Situation: two horizontal clusters with a position offset are approaching 
+* Expected result: fusion should take place with correct (angular) velocity
+*/
+TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_partialContact)
+{
+	float fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100.1f }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(12, QVector2D{ 103, 101 }, QVector2D{ 0, -fusionVelocity }, 0.0));
+	setMaxConnections(origData.clusters->at(0), 3);
+	setMaxConnections(origData.clusters->at(1), 3);
+	origData.clusters->at(0).angle = 90;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(1, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+
+	auto refCluster1 = createLineCluster(10, QVector2D{ 100, 100.1f }, QVector2D{ 0, 0 }, 0.0, 0.0);
+	auto refCluster2 = createLineCluster(12, QVector2D{ 103, 101 - fusionVelocity }, QVector2D{ 0, -fusionVelocity }, 0.0, 0.0);
+	auto expectedFusionVelocity = calcVelocitiesOfFusion(refCluster1, refCluster2);
 
 	auto fusedCluster = newData.clusters->at(0);
 	EXPECT_EQ(22, fusedCluster.cells->size());
