@@ -36,6 +36,25 @@ public:
 		return sqrt(d.x*d.x + d.y*d.y);
 	}
 
+	__inline__ __device__ float2 correctionIncrement(float2 pos1, float2 pos2) const
+	{
+		float2 result;
+		if (pos2.x - pos1.x > _size.x / 2) {
+			result.x = -_size.x;
+		}
+		if (pos1.x - pos2.x > _size.x / 2) {
+			result.x = _size.x;
+		}
+		if (pos2.y - pos1.y > _size.y / 2) {
+			result.y = -_size.y;
+		}
+		if (pos1.y - pos2.y > _size.y / 2) {
+			result.y = _size.y;
+		}
+		return result;
+	}
+
+
 protected:
 	int2 _size;
 };
