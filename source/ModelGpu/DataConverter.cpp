@@ -232,7 +232,7 @@ DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) c
 				clusterDesc.addCell(
 					CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
 					.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
-					.setConnectingCells(connectingCellIds).setMaxConnections(MAX_CELL_BONDS).setFlagTokenBlocked(false)
+					.setConnectingCells(connectingCellIds).setMaxConnections(cell.maxConnections).setFlagTokenBlocked(false)
 					.setTokenBranchNumber(0).setMetadata(CellMetadata())
 				);
 			}
