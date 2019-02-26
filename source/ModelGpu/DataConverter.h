@@ -35,6 +35,7 @@ private:
 	void applyChangeDescription(CellData& cell, CellChangeDescription const& cellChanges, ClusterChangeDescription const& clusterChanges);
 
 	void updateAngularMass(ClusterData& cluster);
+	void updateCellVelocities(ClusterData& cluster);
 
 private:
 	SimulationDataForAccess& _cudaData;
