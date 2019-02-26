@@ -1,6 +1,7 @@
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/Descriptions.h"
 #include "ModelBasic/ChangeDescriptions.h"
+#include "ModelBasic/Physics.h"
 
 #include "DataConverter.h"
 
@@ -271,6 +272,10 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cudaCell.protectionCounter = 0;
 	cudaCell.alive = true;
 	cudaCell.nextTimestep = nullptr;
+/*
+	auto vel = Physics::tangentialVelocity(*cellDesc.pos - *cluster.pos, { *cluster.vel, *cluster.angularVel });
+	cudaCell.vel = { vel.x(), vel.y() };
+*/
 
 	cellByIds.insert_or_assign(cudaCell.id, &cudaCell);
 }
@@ -327,6 +332,9 @@ void DataConverter::applyChangeDescription(ClusterData & cluster, ClusterChangeD
 	if (clusterChanges.angularVel) {
 		cluster.angularVel = clusterChanges.angularVel.getValue();
 	}
+/*
+		updateCellVelocities(cluster);
+*/
 	updateAngularMass(cluster);
 }
 
@@ -354,6 +362,18 @@ void DataConverter::updateAngularMass(ClusterData& cluster)
 	for (int i = 0; i < cluster.numCells; ++i) {
 		float2 relPos = cluster.cells[i].relPos;
 		cluster.angularMass += relPos.x*relPos.x + relPos.y*relPos.y;
+	}
+}
+
+void DataConverter::updateCellVelocities(ClusterData & cluster)
+{
+	for (int i = 0; i < cluster.numCells; ++i) {
+		auto& cudaCell = cluster.cells[i];
+		QVector2D clusterPos(cluster.pos.x, cluster.pos.y);
+		QVector2D clusterVel(cluster.vel.x, cluster.vel.y);
+		QVector2D cellPos(cudaCell.absPos.x, cudaCell.absPos.y);
+		auto vel = Physics::tangentialVelocity(cellPos - clusterPos, { clusterVel, cluster.angularVel });
+		cudaCell.vel = { vel.x(), vel.y() };
 	}
 }
 
