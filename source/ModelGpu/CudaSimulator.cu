@@ -40,7 +40,6 @@ namespace
 
 CudaSimulator::CudaSimulator(int2 const &size)
 {
-	std::cout << "[CUDA debug] begin CudaSimulator::CudaSimulator" << std::endl;
 
 	CudaInitializer::init();
 	cudaDeviceSynchronize();
@@ -61,10 +60,8 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	cudaDeviceSynchronize();
 
 	_data = new SimulationDataInternal();
-	std::cout << "[CUDA debug] 1" << std::endl;
 	_data->size = size;
 
-	std::cout << "[CUDA debug] step 1 CudaSimulator::CudaSimulator" << std::endl;
 
 	_data->clustersAC1 = ArrayController<ClusterData>(MAX_CELLCLUSTERS);
 	_data->clustersAC2 = ArrayController<ClusterData>(MAX_CELLCLUSTERS);
@@ -73,31 +70,26 @@ CudaSimulator::CudaSimulator(int2 const &size)
 	_data->particlesAC1 = ArrayController<ParticleData>(MAX_PARTICLES);
 	_data->particlesAC2 = ArrayController<ParticleData>(MAX_PARTICLES);
 
-	std::cout << "[CUDA debug] step 2 CudaSimulator::CudaSimulator" << std::endl;
 
 	cudaMallocManaged(&_data->cellMap, size.x * size.y * sizeof(CellData*));
 	cudaMallocManaged(&_data->particleMap, size.x * size.y * sizeof(ParticleData*));
 	checkCudaErrors(cudaGetLastError());
 
-	std::cout << "[CUDA debug] step 3 CudaSimulator::CudaSimulator" << std::endl;
 
 	_access = new SimulationDataForAccess();
 	_access->clusters = new ClusterData[MAX_CELLCLUSTERS];
 	_access->cells = new CellData[MAX_CELLS];
 	_access->particles = new ParticleData[MAX_PARTICLES];
 
-	std::cout << "[CUDA debug] step 4 CudaSimulator::CudaSimulator" << std::endl;
 
 	for (int i = 0; i < size.x * size.y; ++i) {
 		_data->cellMap[i] = nullptr;
 		_data->particleMap[i] = nullptr;
 	}
-	std::cout << "[CUDA debug] step 5 CudaSimulator::CudaSimulator" << std::endl;
 
 	_data->numberGen.init(RANDOM_NUMBER_BLOCK_SIZE);
 	cudaDeviceSynchronize();
 
-	std::cout << "[CUDA debug] end CudaSimulator::CudaSimulator" << std::endl;
 
 }
 
@@ -162,8 +154,6 @@ void CudaSimulator::calcNextTimestep()
 
 SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 {
-	std::cout << "[CUDA debug] begin CudaSimulator::getDataForAccess" << std::endl;
-
 	cudaDeviceSynchronize();
 	_access->numClusters = _data->clustersAC1.getNumEntries();
 	cudaMemcpy(_access->clusters, _data->clustersAC1.getEntireArray(), sizeof(ClusterData) * _data->clustersAC1.getNumEntries(), cudaMemcpyDeviceToHost);
@@ -185,14 +175,11 @@ SimulationDataForAccess const& CudaSimulator::getDataForAccess()
 		correctPointersAfterCellCopy(&_access->cells[i], addrShiftCell, addrShiftCluster);
 	}
 
-	std::cout << "[CUDA debug] end CudaSimulator::getDataForAccess" << std::endl;
 	return *_access;
 }
 
 void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 {
-	std::cout << "[CUDA debug] begin CudaSimulator::setDataForAccess" << std::endl;
-
 	cudaDeviceSynchronize();
 	*_access = newAccess;
 	_data->clustersAC1.setNumEntries(_access->numClusters);
@@ -228,8 +215,6 @@ void CudaSimulator::setDataForAccess(SimulationDataForAccess const& newAccess)
 	}
 */
 	cudaDeviceSynchronize();
-
-	std::cout << "[CUDA debug] end CudaSimulator::setDataForAccess" << std::endl;
 }
 
 void CudaSimulator::prepareTargetData()
@@ -262,8 +247,6 @@ void CudaSimulator::correctPointersAfterClusterCopy(ClusterData* cluster, int64_
 
 void CudaSimulator::setCudaSimulationParameters()
 {
-	std::cout << "[CUDA debug] begin CudaSimulator::setCudaSimulationParameters" << std::endl;
-
 	cudaDeviceSynchronize();
 	CudaSimulationParameters parametersToCopy;
 
@@ -271,6 +254,8 @@ void CudaSimulator::setCudaSimulationParameters()
 	parametersToCopy.cellMinDistance = 0.3f;
 	parametersToCopy.cellMinEnergy = 50.0f;
 	parametersToCopy.cellFusionVelocity = 0.4f;
+	parametersToCopy.cellMaxForce = 0.8f;
+	parametersToCopy.cellMaxForceDecayProb = 0.2f;
 	parametersToCopy.radiationProbability = 0.2f;
 	parametersToCopy.radiationExponent = 1.0f;
 	parametersToCopy.radiationFactor = 0.0002f;
@@ -279,6 +264,4 @@ void CudaSimulator::setCudaSimulationParameters()
 	cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters) , 0, cudaMemcpyHostToDevice);
 	checkCudaErrors(cudaGetLastError());
 	cudaDeviceSynchronize();
-
-	std::cout << "[CUDA debug] end CudaSimulator::setCudaSimulationParameters" << std::endl;
 }

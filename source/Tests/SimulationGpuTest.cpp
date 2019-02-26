@@ -995,6 +995,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
 * Situation:
 *	- destruction of cells in two overlapping clusters
 *	- important: NUM_THREADS_PER_BLOCK should be 128
+* Original error: problem due to missing __synchtreads call
 * Expected result: no crash
 */
 TEST_F(SimulationGpuTest, regressionTest_overlappingRectangleClusters_manyThreadsPerBlocks)
@@ -1007,4 +1008,23 @@ TEST_F(SimulationGpuTest, regressionTest_overlappingRectangleClusters_manyThread
 
 	IntegrationTestHelper::updateData(_access, origData);
 	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1, _controller));
+}
+
+/**
+* Situation: many overlapping clusters
+* Original error: crash in combination with fusion
+* Expected result: no crash
+*/
+TEST_F(SimulationGpuTest, regressionTest_manyOverlappingRectangleClusters)
+{
+	auto size = _spaceProp->getSize();
+	float closeDistance = static_cast<float>(_parameters->cellMinDistance) / 2.0f;
+
+	DataDescription origData;
+	for (int i = 0; i < 20; ++i) {
+		origData.addCluster(createRectangleCluster({ 20, 20 }, QVector2D{ 100.0f + 5.0f*i, 100}, QVector2D{ -2.0f + 3.2f*i, -2.0f + 3.2f*i }));
+	}
+
+	IntegrationTestHelper::updateData(_access, origData);
+	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(300, _controller));
 }
