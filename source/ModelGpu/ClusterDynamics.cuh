@@ -256,13 +256,12 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 
 			correction = _cellMap.correctionIncrement(_origCluster->pos, otherCluster->pos);	//to be added to otherCluster
 
-            newCluster->pos = div(
-				add(mul(_origCluster->pos, _origCluster->numCells), mul(add(otherCluster->pos, correction), otherCluster->numCells)),
-                    _origCluster->numCells + otherCluster->numCells);
-			newCluster->vel = div(
-				add(mul(_origCluster->vel, _origCluster->numCells), mul(otherCluster->vel, otherCluster->numCells)),
-					_origCluster->numCells + otherCluster->numCells);
-			newCluster->angularVel = 0.0f;
+            newCluster->pos =
+                div(add(mul(_origCluster->pos, _origCluster->numCells), mul(add(otherCluster->pos, correction), otherCluster->numCells)),
+                    newCluster->numCells);
+            newCluster->vel = div(
+                add(mul(_origCluster->vel, _origCluster->numCells), mul(otherCluster->vel, otherCluster->numCells)), newCluster->numCells);
+            newCluster->angularVel = 0.0f;
 			newCluster->angularMass = 0.0f;
 		}
         __syncthreads();
@@ -327,7 +326,7 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 
 __inline__ __device__ void ClusterReassembler::processingDataCopy(int startCellIndex, int endCellIndex)
 {
-	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive) {
+	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive && !_origCluster->clusterToFuse) {
 		__syncthreads();
 		return;
 	}
@@ -670,7 +669,18 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 
 		auto r = sub(cell->absPos, _cluster->pos);
 		_cellMap.mapDisplacementCorrection(r);
-		cell->vel = CudaPhysics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
+		auto newVel = CudaPhysics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
+
+/*
+		auto a = sub(newVel, cell->vel);
+		if (length(a) > cudaSimulationParameters.cellMaxForce) {
+			if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+				cell->alive = false;
+				_cluster->decompositionRequired = true;
+			}
+		}
+*/
+		cell->vel = newVel;
 
 		if (cell->protectionCounter > 0) {
 			--cell->protectionCounter;
