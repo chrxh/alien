@@ -201,32 +201,36 @@ namespace
 	}
 }
 
-void DataRepository::addDataAtFixedPosition(DataDescription data, optional<double> rotationAngle)
+void DataRepository::addDataAtFixedPosition(vector<DataAndAngle> dataAndAngles)
 {
-	if (rotationAngle) {
-		int numClusters = data.clusters.is_initialized() ? data.clusters->size() : 0;
-		int numParticle = data.particles.is_initialized() ? data.particles->size() : 0;
-		auto clusterResolver = [&data](int index) -> ClusterDescription& {
-			return data.clusters->at(index);
-		};
-		auto particleResolver = [&data](int index) -> ParticleDescription& {
-			return data.particles->at(index);
-		};
-		rotate(*rotationAngle, numClusters, numParticle, clusterResolver, particleResolver);
-	}
-
-	if (data.clusters) {
-		for (auto& cluster : *data.clusters) {
-			cluster.id = 0;
-			_descHelper->makeValid(cluster);
-			_data.addCluster(cluster);
+	for (auto & dataAndAngle : dataAndAngles) {
+		auto & data = dataAndAngle.data;
+		auto & rotationAngel = dataAndAngle.angle;
+		if (rotationAngel) {
+			int numClusters = data.clusters.is_initialized() ? data.clusters->size() : 0;
+			int numParticle = data.particles.is_initialized() ? data.particles->size() : 0;
+			auto clusterResolver = [&data](int index) -> ClusterDescription& {
+				return data.clusters->at(index);
+			};
+			auto particleResolver = [&data](int index) -> ParticleDescription& {
+				return data.particles->at(index);
+			};
+			rotate(*dataAndAngle.angle, numClusters, numParticle, clusterResolver, particleResolver);
 		}
-	}
-	if (data.particles) {
-		for (auto& particle : *data.particles) {
-			particle.id = 0;
-			_descHelper->makeValid(particle);
-			_data.addParticle(particle);
+
+		if (data.clusters) {
+			for (auto& cluster : *data.clusters) {
+				cluster.id = 0;
+				_descHelper->makeValid(cluster);
+				_data.addCluster(cluster);
+			}
+		}
+		if (data.particles) {
+			for (auto& particle : *data.particles) {
+				particle.id = 0;
+				_descHelper->makeValid(particle);
+				_data.addParticle(particle);
+			}
 		}
 	}
 	_navi.update(_data);
@@ -246,7 +250,7 @@ void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerP
 		remainingEnergy -= particleEnergy;
 	}
 
-	addDataAtFixedPosition(data);
+	addDataAtFixedPosition({ { data, optional<double>() } });
 }
 
 namespace
