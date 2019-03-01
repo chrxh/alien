@@ -509,6 +509,7 @@ void ActionController::onRandomMultiplier()
 	if (dialog.exec()) {
 		DataDescription data = _repository->getExtendedSelection();
 		IntVector2D universeSize = _mainController->getSimulationConfig()->universeSize;
+		vector<DataRepository::DataAndAngle> addedData;
 		for (int i = 0; i < dialog.getNumberOfCopies(); ++i) {
 			DataDescription dataCopied = data;
 			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
@@ -529,8 +530,9 @@ void ActionController::onRandomMultiplier()
 				angularVelocity = _numberGenerator->getRandomReal(dialog.getAngVelMin(), dialog.getAngVelMax());
 			}
 			modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
-			_repository->addDataAtFixedPosition(dataCopied, angle);
+			addedData.emplace_back(DataRepository::DataAndAngle{ dataCopied, angle });
 		}
+		_repository->addDataAtFixedPosition(addedData);
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
@@ -548,6 +550,7 @@ void ActionController::onGridMultiplier()
 	if (dialog.exec()) {
 		QVector2D initialDelta(dialog.getInitialPosX(), dialog.getInitialPosY());
 		initialDelta -= center;
+		vector<DataRepository::DataAndAngle> addedData;
 		for (int i = 0; i < dialog.getHorizontalNumber(); ++i) {
 			for (int j = 0; j < dialog.getVerticalNumber(); ++j) {
 				if (i == 0 && j == 0 && initialDelta.lengthSquared() < FLOATINGPOINT_MEDIUM_PRECISION) {
@@ -575,9 +578,10 @@ void ActionController::onGridMultiplier()
 				posDelta += initialDelta;
 
 				modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
-				_repository->addDataAtFixedPosition(dataCopied, angle);
+				addedData.emplace_back(DataRepository::DataAndAngle{ dataCopied, angle });
 			}
 		}
+		_repository->addDataAtFixedPosition(addedData);
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,

@@ -28,7 +28,11 @@ public:
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
 	virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta);
-	virtual void addDataAtFixedPosition(DataDescription data, optional<double> rotationAngle = boost::none);
+	struct DataAndAngle {
+		DataDescription data;
+		optional<double> angle;
+	};
+	virtual void addDataAtFixedPosition(vector<DataAndAngle> dataAndAngles);
 	virtual void addRandomParticles(double totalEnergy, double maxEnergyPerParticle);
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
