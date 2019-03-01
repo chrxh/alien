@@ -129,15 +129,9 @@ void CudaSimulator::calcNextTimestep()
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	clusterReassembling<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
+	clusterBuilding<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
-
-/*
-	clusterReassembling2<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
-	cudaDeviceSynchronize();
-	checkCudaErrors(cudaGetLastError());
-*/
 
 	particleDynamicsStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_data);
 	cudaDeviceSynchronize();
@@ -147,7 +141,7 @@ void CudaSimulator::calcNextTimestep()
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	particleReassembling<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
+	particleBuilding<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_data);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
@@ -271,35 +265,3 @@ void CudaSimulator::setCudaSimulationParameters()
 	checkCudaErrors(cudaGetLastError());
 	cudaDeviceSynchronize();
 }
-
-/*
-void CudaSimulator::debug()
-{
-	for (int i = 0; i < _data->cellsAC1.getNumEntries(); ++i) {
-		CellData* cell = &_data->cellsAC1.getEntireArray()[i];
-		for (int j = 0; j < cell->numConnections; ++j) {
-			if (cell->connections[j] == 0) {
-				std::cout << "[CUDA debug] cellConnections1" << std::endl;
-			}
-		}
-	}
-
-	for (int i = 0; i < _data->cellsAC2.getNumEntries(); ++i) {
-		CellData* cell = &_data->cellsAC2.getEntireArray()[i];
-		for (int j = 0; j < cell->numConnections; ++j) {
-			if (cell->connections[j] == 0) {
-				std::cout << "[CUDA debug] cellConnections2" << std::endl;
-			}
-		}
-	}
-
-	for (int i = 0; i < _data->clustersAC1.getNumEntries(); ++i) {
-		ClusterData* cluster = &_data->clustersAC1.getEntireArray()[i];
-		if (cluster->clusterToFuse) {
-			if (cluster->clusterToFuse->clusterToFuse != cluster) {
-				std::cout << "[CUDA debug] clusterToFuse" << std::endl;
-			}
-		}
-	}
-}
-*/
