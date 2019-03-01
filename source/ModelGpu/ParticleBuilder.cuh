@@ -43,8 +43,10 @@ __inline__ __device__ void ParticleBuilder::processingDataCopy(int startParticle
 		}
 		if (auto cell = _cellMap.get(origParticle->pos)) {
 			if (auto nextCell = cell->nextTimestep) {
-				atomicAdd(&nextCell->energy, origParticle->energy);
-				continue;
+				if (nextCell->alive) {
+					atomicAdd(&nextCell->energy, origParticle->energy);
+					continue;
+				}
 			}
 		}
 		ParticleData* newParticle = _data->particlesAC2.getNewElement();
