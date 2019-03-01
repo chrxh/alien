@@ -46,6 +46,39 @@ __global__ void clusterReassembling(SimulationDataInternal data)
 	}
 }
 
+/*
+__device__ void clusterReassembling2(SimulationDataInternal &data, int clusterIndex)
+{
+	__shared__ ClusterReassembler reassembler;
+	if (0 == threadIdx.x) {
+		reassembler.init(data, clusterIndex);
+	}
+	__syncthreads();
+
+	int startCellIndex;
+	int endCellIndex;
+	calcPartition(reassembler.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+
+	reassembler.processingDataCopy(startCellIndex, endCellIndex);
+}
+
+__global__ void clusterReassembling2(SimulationDataInternal data)
+{
+	int indexResource = blockIdx.x;
+	int numEntities = data.clustersAC1.getNumEntries();
+	if (indexResource >= numEntities) {
+		return;
+	}
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
+	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+		clusterReassembling2(data, clusterIndex);
+	}
+}
+*/
+
 __device__ void clusterDynamicsStep1(SimulationDataInternal &data, int clusterIndex)
 {
 	__shared__ ClusterDynamics mover;
