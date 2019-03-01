@@ -87,6 +87,12 @@
     <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ClusterBuilder.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ParticleBuilder.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
