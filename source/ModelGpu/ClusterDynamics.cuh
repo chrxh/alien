@@ -25,7 +25,7 @@ private:
 	__inline__ __device__ void destroyCloseCell(CellData *cell);
 	__inline__ __device__ void destroyCloseCell(float2 const& pos, CellData *cell);
 	__inline__ __device__ void cellRadiation(CellData *cell);
-	__inline__ __device__ ParticleData* createNewParticle();
+	__inline__ __device__ ParticleData* createNewParticle(float energy, float2 const& pos, float2 const& vel);
 	__inline__ __device__ bool areConnectable(CellData *cell1, CellData *cell2);
 
 	SimulationDataInternal* _data;
@@ -368,6 +368,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 		if (mapCluster->numCells >= cluster->numCells) {
 			cell->alive = false;
 			cluster->decompositionRequired = true;
+			createNewParticle(cell->energy, cell->absPos, cell->vel);
 		}
 		else {
 			auto lockState = atomicExch(&mapCluster->locked, 1);
@@ -375,6 +376,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 				mapCell->alive = false;
 				mapCluster->decompositionRequired = true;
 				mapCluster->locked = 0;
+				createNewParticle(mapCell->energy, mapCell->absPos, mapCell->vel);
 			}
 		}
 	}
@@ -383,42 +385,38 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 __inline__ __device__ void ClusterDynamics::cellRadiation(CellData *cell)
 {
 	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
-		auto particle = createNewParticle();
 		auto &pos = cell->absPos;
-        particle->pos = {static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f,
-                         static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f};
-        _cellMap.mapPosCorrection(particle->pos);
-        particle->vel =
+        float2 particlePos = {static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f,
+                              static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f};
+        _cellMap.mapPosCorrection(particlePos);
+        float2 particleVel =
             add(cell->vel,
                 {(_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                  (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation});
         float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
-		radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
+        radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
 		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
 		if (radiationEnergy > cell->energy - 1) {
 			radiationEnergy = cell->energy - 1;
 		}
-		particle->energy = radiationEnergy;
 		cell->energy -= radiationEnergy;
+		createNewParticle(radiationEnergy, particlePos, particleVel);
 	}
 	if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
 		cell->alive = false;
 		cell->cluster->decompositionRequired = true;
 	}
-	if (1 == cell->cluster->numCells && !cell->alive) {		//TODO: not here!
-		auto particle = createNewParticle();
-		particle->pos = cell->absPos;
-		particle->vel = cell->cluster->vel;
-		particle->energy = cell->energy;
-	}
 }
 
-__inline__ __device__ ParticleData* ClusterDynamics::createNewParticle()
+__inline__ __device__ ParticleData* ClusterDynamics::createNewParticle(float energy, float2 const& pos, float2 const& vel)
 {
 	ParticleData* particle = _data->particlesAC1.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
 	particle->locked = 0;
 	particle->alive = true;
+	particle->energy = energy;
+	particle->pos = pos;
+	particle->vel = vel;
 	return particle;
 }
 
