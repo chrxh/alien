@@ -203,7 +203,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ClusterBuilder.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterDynamics.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ParticleBuilder.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulator.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh" />
