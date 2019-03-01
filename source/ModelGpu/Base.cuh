@@ -78,14 +78,14 @@ public:
 
 	__device__ __inline__ float random(float maxVal)
 	{
-		int index = atomicInc(_currentIndex, _size);
+		int index = atomicInc(_currentIndex, _size - 1);
 		int number = _array[index];
 		return maxVal* static_cast<float>(number) / RAND_MAX;
 	}
 
 	__device__ __inline__ float random()
 	{
-		int index = atomicInc(_currentIndex, _size);
+		int index = atomicInc(_currentIndex, _size - 1);
 		int number = _array[index];
 		return static_cast<float>(number) / RAND_MAX;
 	}
@@ -279,7 +279,6 @@ private:
 	int* _lock2;
 	int _lockState1;
 	int _lockState2;
-	bool _isLocked;
 
 public:
 	__device__ __inline__ void init(int* lock1, int* lock2)
@@ -292,33 +291,31 @@ public:
 			_lock1 = lock2;
 			_lock2 = lock1;
 		}
-		_isLocked = false;
 	}
 
 	__device__ __inline__ void tryLock()
 	{
 		_lockState1 = atomicExch(_lock1, 1);
-		if (0 == _lockState1) {
-			_lockState2 = atomicExch(_lock2, 1);
-		}
+		_lockState2 = atomicExch(_lock2, 1);
 		if (0 != _lockState1 || 0 != _lockState2) {
 			releaseLock();
 		}
-		_isLocked = _lockState1 == 0 && _lockState2 == 0;
 	}
 
 	__device__ __inline__ bool isLocked()
 	{
-		return _isLocked;
+		return _lockState1 == 0 && _lockState2 == 0;
 	}
 
-	__host__ __device__ __inline__ void releaseLock()
+	__device__ __inline__ void releaseLock()
 	{
 		if (0 == _lockState1) {
-			*_lock1 = 0;
+			atomicExch(_lock1, 0);
+// 			*_lock1 = 0;
 		}
 		if (0 == _lockState2) {
-			*_lock2 = 0;
+			atomicExch(_lock2, 0);
+// 			*_lock2 = 0;
 		}
 	}
 };

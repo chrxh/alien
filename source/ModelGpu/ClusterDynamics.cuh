@@ -98,6 +98,7 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 			entries[i].cluster.numCells = 0;
 			entries[i].cluster.decompositionRequired = false;
 			entries[i].cluster.clusterToFuse = nullptr;
+			entries[i].cluster.locked = 0;
 		}
 	}
 	__syncthreads();
@@ -198,12 +199,48 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithDecompositi
 	}
 	__syncthreads();
 
+	//---
+/*
+	for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
+		ClusterData* newCluster = newClusters[index];
+		for (int cellIndex = 0; cellIndex < newCluster->numCells; ++cellIndex) {
+			auto cell = &newCluster->cells[cellIndex];
+			for (int i = 0; i < cell->numConnections; ++i) {
+				if (cell->connections[i] == 0) {
+					int dummy = 0;
+					dummy++;
+				}
+			}
+		}
+	}
+	__syncthreads();
+*/
+	//---
+
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData& cell = _origCluster->cells[cellIndex];
 		correctCellConnections(cell.nextTimestep);
 	}
+	//---
+/*
 	__syncthreads();
 
+	for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
+		ClusterData* newCluster = newClusters[index];
+		for (int cellIndex = 0; cellIndex < newCluster->numCells; ++cellIndex) {
+			auto cell = &newCluster->cells[cellIndex];
+			for (int i = 0; i < cell->numConnections; ++i) {
+				if (cell->connections[i] == 0) {
+					int dummy = 0;
+					dummy++;
+				}
+			}
+		}
+	}
+*/
+	//---
+
+	__syncthreads();
 }
 
 __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecompositionAndFusion(int startCellIndex, int endCellIndex)
@@ -214,16 +251,13 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecompos
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
 		newCells = _data->cellsAC2.getNewSubarray(_modifiedCluster.numCells);
-		_modifiedCluster.numCells = 0;
 		_modifiedCluster.cells = newCells;
 	}
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData *origCell = &_origCluster->cells[cellIndex];
-
-		int newCellIndex = atomicAdd(&_modifiedCluster.numCells, 1);
-		CellData *newCell = &newCells[newCellIndex];
+		CellData *newCell = &newCells[cellIndex];
 		setSuccessorCell(origCell, newCell, newCluster);
 	}
 
@@ -231,9 +265,37 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithoutDecompos
 	if (threadIdx.x == 0) {
 		*newCluster = _modifiedCluster;
 	}
+	//---
+/*
+	__syncthreads();
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		auto cell = &newCells[cellIndex];
+		for (int i = 0; i < cell->numConnections; ++i) {
+			if (cell->connections[i] == 0) {
+				int dummy = 0;
+				dummy++;
+			}
+		}
+	}
+*/
+	//---
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		correctCellConnections(&newCells[cellIndex]);
 	}
+	//---
+/*
+	__syncthreads();
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		auto cell = &newCells[cellIndex];
+		for (int i = 0; i < cell->numConnections; ++i) {
+			if (cell->connections[i] == 0) {
+				int dummy = 0;
+				dummy++;
+			}
+		}
+	}
+*/
+	//---
 	__syncthreads();
 }
 
@@ -269,7 +331,6 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			CellData* newCell = &newCluster->cells[cellIndex];
 			CellData* origCell = &_origCluster->cells[cellIndex];
-			*newCell = *origCell;
 			setSuccessorCell(origCell, newCell, newCluster);
 			auto relPos = sub(newCell->absPos, newCluster->pos);
 			newCell->relPos = relPos;
@@ -282,6 +343,7 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 			float angularMomentum = CudaPhysics::angularMomentum(r, relVel);
 			atomicAdd(&newCluster->angularVel, angularMomentum);
 		}
+		__syncthreads();
 
 		int startOtherCellIndex;
 		int endOtherCellIndex;
@@ -290,7 +352,6 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 		for (int otherCellIndex = startOtherCellIndex; otherCellIndex <= endOtherCellIndex; ++otherCellIndex) {
 			CellData* newCell = &newCluster->cells[_origCluster->numCells + otherCellIndex];
 			CellData* origCell = &otherCluster->cells[otherCellIndex];
-			*newCell = *origCell;
 			setSuccessorCell(origCell, newCell, newCluster);
 			auto relPos = sub(add(newCell->absPos, correction), newCluster->pos);
 			newCell->relPos = relPos;
@@ -306,6 +367,21 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 		}
 		__syncthreads();
 
+		//---
+/*
+		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+			auto cell = &newCluster->cells[cellIndex];
+			for (int i = 0; i < cell->numConnections; ++i) {
+				if (cell->connections[i] == 0) {
+					int dummy = 0;
+					dummy++;
+				}
+			}
+		}
+		__syncthreads();
+*/
+		//---
+
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			correctCellConnections(&newCluster->cells[cellIndex]);
 		}
@@ -313,6 +389,20 @@ __inline__ __device__ void ClusterReassembler::processingDataCopyWithFusion(int 
 			correctCellConnections(&newCluster->cells[_origCluster->numCells + otherCellIndex]);
 		}
 
+		//---
+/*
+		__syncthreads();
+		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+			auto cell = &newCluster->cells[cellIndex];
+			for (int i = 0; i < cell->numConnections; ++i) {
+				if (cell->connections[i] == 0) {
+					int dummy = 0;
+					dummy++;
+				}
+			}
+		}
+*/
+		//---
 		if (0 == threadIdx.x) {
 			newCluster->angularVel = CudaPhysics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 		}
@@ -378,6 +468,19 @@ __inline__ __device__ void ClusterReassembler::processingDecomposition(int start
 			}
 			__syncthreads();
 		} while (changes);
+		//---
+/*
+		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+			CellData* cell = &_origCluster->cells[cellIndex];
+			for (int i = 0; i < cell->numConnections; ++i) {
+				if (cell->connections[i] == 0) {
+					int dummy = 0;
+					dummy++;
+				}
+			}
+		}
+*/
+		//---
 	}
 }
 
@@ -527,7 +630,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	}
 
 	if (CollisionState::Fusion == state) {
-        if (!cluster->clusterToFuse && !firstOtherCluster->clusterToFuse
+        if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse
 			/*&& !cluster->decompositionRequired && !firstOtherCluster->decompositionRequired*/) {
             for (auto index = startCellIndex; index <= endCellIndex; ++index) {
                 CellData* cell = &cluster->cells[index];
@@ -549,13 +652,19 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 						if (length(sub(cell->vel, otherCell->vel)) < cudaSimulationParameters.cellFusionVelocity || !areConnectable(cell, otherCell)) {
 							continue;
 						}
-						auto index = cell->numConnections++;
-						auto otherIndex = otherCell->numConnections++;
-						cell->connections[index] = otherCell;
-						otherCell->connections[otherIndex] = cell;
+						auto otherIndex = atomicAdd(&otherCell->numConnections, 1);
+						if (otherIndex < otherCell->maxConnections) {
+							auto index = cell->numConnections++;
+							cell->connections[index] = otherCell;
+							otherCell->connections[otherIndex] = cell;
+						}
+						else {
+							atomicAdd(&otherCell->numConnections, -1);
+						}
 					}
 				}
             }
+			__syncthreads();
 			if (0 == threadIdx.x) {
 				cluster->clusterToFuse = firstOtherCluster;
 				firstOtherCluster->clusterToFuse = cluster;
@@ -758,7 +867,7 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(CellData *cell)
 		cell->alive = false;
 		cell->cluster->decompositionRequired = true;
 	}
-	if (1 == cell->cluster->numCells && !cell->alive) {
+	if (1 == cell->cluster->numCells && !cell->alive) {		//TODO: not here!
 		auto particle = createNewParticle();
 		particle->pos = cell->absPos;
 		particle->vel = cell->cluster->vel;
