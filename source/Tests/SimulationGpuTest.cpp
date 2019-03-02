@@ -1010,6 +1010,29 @@ TEST_F(SimulationGpuTest, testFastMovingCluster)
 }
 
 /**
+* Situation: cluster rotating very very fast 
+* Expected result: cells are destroyed because of high forces
+*/
+TEST_F(SimulationGpuTest, testFastRotatingCluster)
+{
+	auto size = _spaceProp->getSize();
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(51, QVector2D{ size.x / 2.0f, size.y / 2.0f }, QVector2D(), 20.0));
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(100, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	int numCells = 0;
+	if (newData.clusters) {
+		for (auto const& cluster : *newData.clusters) {
+			numCells += cluster.cells->size();
+		}
+	}
+	EXPECT_GE(50, numCells);
+}
+
+/**
 * Situation:
 *	- destruction of cells in two overlapping clusters
 *	- important: NUM_THREADS_PER_BLOCK should be 128
