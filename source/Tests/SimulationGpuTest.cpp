@@ -990,6 +990,24 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
 	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
 }
 
+/**
+* Situation: one fast moving but not rotating cluster
+* Expected result: no cells are destroyed
+*/
+TEST_F(SimulationGpuTest, testFastMovingCluster)
+{
+	auto size = _spaceProp->getSize();
+	float cellMaxForce = static_cast<float>(_parameters->callMaxForce);
+	DataDescription origData;
+	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{size.x / 2.0f, size.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(1, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+	EXPECT_EQ(100, newData.clusters->at(0).cells->size());
+}
 
 /**
 * Situation:
