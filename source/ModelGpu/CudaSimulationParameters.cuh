@@ -12,6 +12,7 @@ struct CudaSimulationParameters
 	float radiationExponent;
 	float radiationFactor;
 	float radiationVelocityPerturbation;
+	float radiationVelocityMultiplier;
 };
 
 __constant__ __device__ CudaSimulationParameters cudaSimulationParameters;
