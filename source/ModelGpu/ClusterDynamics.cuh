@@ -318,15 +318,15 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 		_cellMap.mapDisplacementCorrection(r);
 		auto newVel = CudaPhysics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
 
-/*
 		auto a = sub(newVel, cell->vel);
 		if (length(a) > cudaSimulationParameters.cellMaxForce) {
 			if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
 				cell->alive = false;
 				_cluster->decompositionRequired = true;
+				createNewParticle(cell->energy, cell->absPos, cell->vel);
 			}
 		}
-*/
+
 		cell->vel = newVel;
 
 		if (cell->protectionCounter > 0) {
@@ -390,7 +390,7 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(CellData *cell)
                               static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f};
         _cellMap.mapPosCorrection(particlePos);
         float2 particleVel =
-            add(cell->vel,
+            add(mul(cell->vel, cudaSimulationParameters.radiationVelocityMultiplier),
                 {(_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                  (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation});
         float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;

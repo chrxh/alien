@@ -272,10 +272,8 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cudaCell.protectionCounter = 0;
 	cudaCell.alive = true;
 	cudaCell.nextTimestep = nullptr;
-/*
 	auto vel = Physics::tangentialVelocity(*cellDesc.pos - *cluster.pos, { *cluster.vel, *cluster.angularVel });
 	cudaCell.vel = { vel.x(), vel.y() };
-*/
 
 	cellByIds.insert_or_assign(cudaCell.id, &cudaCell);
 }
@@ -332,9 +330,7 @@ void DataConverter::applyChangeDescription(ClusterData & cluster, ClusterChangeD
 	if (clusterChanges.angularVel) {
 		cluster.angularVel = clusterChanges.angularVel.getValue();
 	}
-/*
-		updateCellVelocities(cluster);
-*/
+	updateCellVelocities(cluster);
 	updateAngularMass(cluster);
 }
 
