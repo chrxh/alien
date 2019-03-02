@@ -79,6 +79,9 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 	__syncthreads();
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData& cell = _origCluster->cells[cellIndex];
+		if (!cell.alive) {
+			continue;
+		}
 		bool foundMatch = false;
 		for (int index = 0; index < MAX_DECOMPOSITIONS; ++index) {
 			int origTag = atomicCAS(&entries[index].tag, -1, cell.tag);
@@ -176,6 +179,9 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		CellData& cell = _origCluster->cells[cellIndex];
+		if (!cell.alive) {
+			continue;
+		}
 		correctCellConnections(cell.nextTimestep);
 	}
 	__syncthreads();

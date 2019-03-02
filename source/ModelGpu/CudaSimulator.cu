@@ -259,6 +259,7 @@ void CudaSimulator::setCudaSimulationParameters()
 	parametersToCopy.radiationProbability = 0.2f;
 	parametersToCopy.radiationExponent = 1.0f;
 	parametersToCopy.radiationFactor = 0.0002f;
+	parametersToCopy.radiationVelocityMultiplier = 1.0f;
 	parametersToCopy.radiationVelocityPerturbation = 0.5f;
 
 	cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters) , 0, cudaMemcpyHostToDevice);
