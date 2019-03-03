@@ -1,5 +1,7 @@
 #include <functional>
 #include <QImage>
+#include <QElapsedTimer>
+#include <QThread>
 
 #include "ModelBasic/SpaceProperties.h"
 #include "CudaInterface.cuh"
@@ -57,6 +59,12 @@ void CudaWorker::updateDataFinished()
 	_updateData = false;
 }
 
+optional<int> CudaWorker::getTps()
+{
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	return _tps;
+}
+
 bool CudaWorker::stopAfterNextTimestep()
 {
 	std::lock_guard<std::mutex> lock(_mutexForFlags);
@@ -102,17 +110,25 @@ void CudaWorker::updateData()
 	}
 }
 
-void CudaWorker::setFlagStopAfterNextTimestep(bool value)
+void CudaWorker::stopAfterNextTimestep(bool value)
 {
 	std::lock_guard<std::mutex> lock(_mutexForFlags);
 	_stopAfterNextTimestep = value;
 }
 
+void CudaWorker::restrictTimestepsPerSecond(optional<int> tps)
+{
+	std::lock_guard<std::mutex> lock(_mutexForFlags);
+	_tps = tps;
+}
+
 
 void CudaWorker::runSimulation()
 {
+	QElapsedTimer timer;
 	setSimulationRunning(true);
 	do {
+		timer.start();
 		if (isDataUpdated()) {
 			if (_mutexForData.try_lock()) {
 				_simDataManager->setDataForAccess(_cudaData);
@@ -131,6 +147,12 @@ void CudaWorker::runSimulation()
 				requireDataFinished();
 				_mutexForData.unlock();
 				Q_EMIT dataObtained();
+			}
+		}
+		if (auto const& tps = getTps()) {
+			int remainingTime = 1000/(*tps) - timer.elapsed();
+			if (remainingTime > 0) {
+				QThread::msleep(remainingTime);
 			}
 		}
 	} while (!stopAfterNextTimestep());

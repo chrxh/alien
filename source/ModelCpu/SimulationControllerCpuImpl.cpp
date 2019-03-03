@@ -55,7 +55,7 @@ uint SimulationControllerCpuImpl::getTimestep() const
 	return _timestep;
 }
 
-void SimulationControllerCpuImpl::setRestrictTimestepsPreSecond(optional<int> tps)
+void SimulationControllerCpuImpl::setRestrictTimestepsPerSecond(optional<int> tps)
 {
 	_restrictTps = tps;
 	if (tps) {
