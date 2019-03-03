@@ -150,9 +150,9 @@ void CudaWorker::runSimulation()
 			}
 		}
 		if (auto const& tps = getTps()) {
-			int remainingTime = 1000/(*tps) - timer.elapsed();
+			int remainingTime = 1000000/(*tps) - timer.nsecsElapsed()/1000;
 			if (remainingTime > 0) {
-				QThread::msleep(remainingTime);
+				QThread::usleep(remainingTime);
 			}
 		}
 	} while (!stopAfterNextTimestep());
