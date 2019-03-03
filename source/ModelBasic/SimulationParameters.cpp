@@ -14,7 +14,7 @@ SimulationParameters * SimulationParameters::clone(QObject * parent) const
 	parameters->cellMinDistance = cellMinDistance;
 	parameters->cellMaxDistance = cellMaxDistance;
 	parameters->cellMass_Reciprocal = cellMass_Reciprocal;
-	parameters->callMaxForce = callMaxForce;
+	parameters->cellMaxForce = cellMaxForce;
 	parameters->cellMaxForceDecayProb = cellMaxForceDecayProb;
 	parameters->cellMaxBonds = cellMaxBonds;
 	parameters->cellMaxToken = cellMaxToken;

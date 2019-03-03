@@ -66,7 +66,7 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 	setItem("min distance", 0, _simulationParameters->cellMinDistance);
 	setItem("max distance", 0, _simulationParameters->cellMaxDistance);
 	setItem("mass", 0, 1.0/_simulationParameters->cellMass_Reciprocal);
-	setItem("max force", 0, _simulationParameters->callMaxForce);
+	setItem("max force", 0, _simulationParameters->cellMaxForce);
     setItem("max force decay probability", 0, _simulationParameters->cellMaxForceDecayProb);
     setItem("max bonds", 0, _simulationParameters->cellMaxBonds);
     setItem("max token", 0, _simulationParameters->cellMaxToken);
@@ -102,7 +102,7 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
 	_simulationParameters->cellMinDistance = getItemReal("min distance", 0);
 	_simulationParameters->cellMaxDistance = getItemReal("max distance", 0);
     _simulationParameters->cellMass_Reciprocal = 1.0/ getItemReal("mass", 0);
-    _simulationParameters->callMaxForce = getItemReal("max force", 0);
+    _simulationParameters->cellMaxForce = getItemReal("max force", 0);
     _simulationParameters->cellMaxForceDecayProb = getItemReal("max force decay probability", 0);
     _simulationParameters->cellMaxBonds = getItemInt("max bonds", 0);
     _simulationParameters->cellMaxToken = getItemInt("max token", 0);

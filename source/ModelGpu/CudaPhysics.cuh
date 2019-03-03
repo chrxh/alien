@@ -24,6 +24,7 @@ public:
 	__device__ __inline__ static void calcCollision(float2 const& vA1, float2 const& vB1, float2 const& rAPp, float2 const& rBPp,
 		float angularVelA1, float angularVelB1, float2 const& n, float angularMassA, float angularMassB, float massA, float massB,
 		float2& vA2, float2& vB2, float& angularVelA2, float& angularVelB2);
+	__device__ __inline__ static float linearKineticEnergy(float mass, float2 const& vel);
 
 private:
 	__device__ __inline__ static float2 calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map);
@@ -162,6 +163,11 @@ __device__ __inline__ void CudaPhysics::calcCollision(float2 const & vA1, float2
 		angularVelB2 = angularVelB1;
 	}
 
+}
+
+__device__ __inline__ float CudaPhysics::linearKineticEnergy(float mass, float2 const & vel)
+{
+	return 0.5f * mass * lengthSquared(vel);
 }
 
 __device__ __inline__ float2 CudaPhysics::calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map)

@@ -997,7 +997,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
 TEST_F(SimulationGpuTest, testFastMovingCluster)
 {
 	auto size = _spaceProp->getSize();
-	float cellMaxForce = static_cast<float>(_parameters->callMaxForce);
+	float cellMaxForce = static_cast<float>(_parameters->cellMaxForce);
 	DataDescription origData;
 	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{size.x / 2.0f, size.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
 
@@ -1030,6 +1030,25 @@ TEST_F(SimulationGpuTest, testFastRotatingCluster)
 		}
 	}
 	EXPECT_GE(50, numCells);
+}
+
+/**
+* Situation: particle with high energy
+* Expected result: particle transforms to cell
+*/
+TEST_F(SimulationGpuTest, testTransformationParticleToCell)
+{
+	auto size = _spaceProp->getSize();
+	DataDescription origData;
+	float cellMinEnergy = static_cast<float>(_parameters->cellMinEnergy);
+	origData.addParticle(ParticleDescription().setId(_numberGen->getId()).setPos({ 0, 0 }).setVel({ 0, 0 }).setEnergy(cellMinEnergy + 1));
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(100, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+	EXPECT_EQ(1, newData.clusters->at(0).cells->size());
 }
 
 /**
