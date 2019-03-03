@@ -101,6 +101,16 @@ void SimulationAccessGpuImpl::updateDataToGpuModel()
 	_dataToUpdate.clear();
 }
 
+void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
+{
+	QRgb const& origColor = image->pixel(pos.x, pos.y);
+
+	int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
+	int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
+	int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
+	image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
+}
+
 void SimulationAccessGpuImpl::createImageFromGpuModel()
 {
 	auto spaceProp = _context->getSpaceProperties();
@@ -127,7 +137,21 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		spaceProp->correctPosition(intPos);
 		if (_requiredRect.isContained(intPos)) {
-			_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcCellColor(0, 0, cell.energy));
+			uint32_t color = EntityRenderer::calcCellColor(0, 0, cell.energy);
+			_requiredImage->setPixel(intPos.x, intPos.y, color);
+			--intPos.x;
+			spaceProp->correctPosition(intPos);
+			colorPixel(_requiredImage, intPos, color, 0x60);
+			intPos.x += 2;
+			spaceProp->correctPosition(intPos);
+			colorPixel(_requiredImage, intPos, color, 0x60);
+			--intPos.x;
+			--intPos.y;
+			spaceProp->correctPosition(intPos);
+			colorPixel(_requiredImage, intPos, color, 0x60);
+			intPos.y += 2;
+			spaceProp->correctPosition(intPos);
+			colorPixel(_requiredImage, intPos, color, 0x60);
 		}
 	}
 
