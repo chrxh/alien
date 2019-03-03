@@ -18,7 +18,7 @@ public:
 	qreal cellMinDistance = 0.0;
 	qreal cellMaxDistance = 0.0;
 	qreal cellMass_Reciprocal = 0.0; //related to 1/mass
-	qreal callMaxForce = 0.0;
+	qreal cellMaxForce = 0.0;
 	qreal cellMaxForceDecayProb = 0.0;
 	int cellMaxBonds = 0;
 	int cellMaxToken = 0;

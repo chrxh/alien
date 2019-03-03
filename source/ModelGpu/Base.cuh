@@ -76,6 +76,13 @@ public:
 		cudaDeviceSynchronize();
 	}
 
+	__device__ __inline__ float random(int maxVal)
+	{
+		int index = atomicInc(_currentIndex, _size - 1);
+		int number = _array[index];
+		return number % (maxVal + 1);
+	}
+
 	__device__ __inline__ float random(float maxVal)
 	{
 		int index = atomicInc(_currentIndex, _size - 1);
