@@ -784,7 +784,7 @@ void Cluster::updateCellVel (bool forceCheck)
 
                 //destroy cell if acceleration exceeds a certain threshold
                 if( forceCheck ) {
-                    if (a.length() > parameters->callMaxForce) {
+                    if (a.length() > parameters->cellMaxForce) {
                         if (_context->getNumberGenerator()->getRandomReal() < parameters->cellMaxForceDecayProb)
                             cell->setToBeKilled(true);
                     }

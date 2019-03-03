@@ -256,6 +256,8 @@ void CudaSimulator::setCudaSimulationParameters()
 	parametersToCopy.cellFusionVelocity = 0.4f;
 	parametersToCopy.cellMaxForce = 0.8f;
 	parametersToCopy.cellMaxForceDecayProb = 0.2f;
+	parametersToCopy.cellTransformationProb = 0.2f;
+	parametersToCopy.cellMass = 1.0;
 	parametersToCopy.radiationProbability = 0.2f;
 	parametersToCopy.radiationExponent = 1.0f;
 	parametersToCopy.radiationFactor = 0.0002f;

@@ -131,6 +131,7 @@ __global__ void particleDynamicsStep1(SimulationDataInternal data)
 	int endIndex;
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
 	blockProcessor.processingMovement(startIndex, endIndex);
+	blockProcessor.processingTransformation(startIndex, endIndex);
 }
 
 __global__ void particleDynamicsStep2(SimulationDataInternal data)

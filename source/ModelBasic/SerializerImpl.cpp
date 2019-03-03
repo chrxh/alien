@@ -139,7 +139,7 @@ namespace boost {
 			ar & data.cellMinDistance;
 			ar & data.cellMaxDistance;
 			ar & data.cellMass_Reciprocal;
-			ar & data.callMaxForce;
+			ar & data.cellMaxForce;
 			ar & data.cellMaxForceDecayProb;
 			ar & data.cellMaxBonds;
 			ar & data.cellMaxToken;
