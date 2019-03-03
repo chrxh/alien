@@ -15,9 +15,10 @@ public:
 
 	void init(SpaceProperties *metric);
 
-	virtual CudaWorker* getCudaWorker() const;
+	CudaWorker* getCudaWorker() const;
 
 	void calculate(RunningMode mode);
+	void restrictTimestepsPerSecond(optional<int> tps);
 
 	Q_SIGNAL void timestepCalculated();
 

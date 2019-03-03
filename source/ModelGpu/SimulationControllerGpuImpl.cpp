@@ -73,8 +73,9 @@ uint SimulationControllerGpuImpl::getTimestep() const
 	return _timestep;
 }
 
-void SimulationControllerGpuImpl::setRestrictTimestepsPreSecond(optional<int> tps)
+void SimulationControllerGpuImpl::setRestrictTimestepsPerSecond(optional<int> tps)
 {
+	_context->getGpuThreadController()->restrictTimestepsPerSecond(tps);
 }
 
 void SimulationControllerGpuImpl::oneSecondTimerTimeout()
