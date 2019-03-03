@@ -8,6 +8,8 @@ struct CudaSimulationParameters
 	float cellFusionVelocity;
 	float cellMaxForce;
 	float cellMaxForceDecayProb;
+	float cellMass;
+	float cellTransformationProb;
 	float radiationProbability;
 	float radiationExponent;
 	float radiationFactor;

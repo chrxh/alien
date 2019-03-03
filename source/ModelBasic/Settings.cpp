@@ -155,7 +155,7 @@ SimulationParameters* ModelSettings::getDefaultSimulationParameters()
 	parameters->cellMinDistance = 0.3;
 	parameters->cellMaxDistance = 1.3;
 	parameters->cellMass_Reciprocal = 1;
-	parameters->callMaxForce = 0.8;
+	parameters->cellMaxForce = 0.8;
 	parameters->cellMaxForceDecayProb = 0.2;
 	parameters->cellMaxBonds = 6;
 	parameters->cellMaxToken = 9;
