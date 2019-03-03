@@ -25,7 +25,8 @@ public:
 	void updateData();
 
 	bool isSimulationRunning();
-	void setFlagStopAfterNextTimestep(bool value);
+	void stopAfterNextTimestep(bool value);
+	void restrictTimestepsPerSecond(optional<int> tps);
 
 	Q_SLOT void runSimulation();		
 	Q_SIGNAL void timestepCalculated();
@@ -35,6 +36,7 @@ private:
 	void requireDataFinished();
 	bool isDataUpdated();
 	void updateDataFinished();
+	optional<int> getTps();
 
 	bool stopAfterNextTimestep();
 	void setSimulationRunning(bool running);
@@ -42,6 +44,7 @@ private:
 private:
 	SpaceProperties* _spaceProp;
 	bool _stopAfterNextTimestep = true;
+	optional<int> _tps;
 	bool _simRunning = false;
 	bool _requireData = false;
 	bool _updateData = false;

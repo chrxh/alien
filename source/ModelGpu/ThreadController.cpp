@@ -14,7 +14,7 @@ ThreadController::ThreadController(QObject* parent /*= nullptr*/)
 
 ThreadController::~ThreadController()
 {
-	_worker->setFlagStopAfterNextTimestep(RunningMode::CalcSingleTimestep);
+	_worker->stopAfterNextTimestep(RunningMode::CalcSingleTimestep);
 	_thread.quit();
 	if (!_thread.wait(2000)) {
 		_thread.terminate();
@@ -36,20 +36,25 @@ CudaWorker * ThreadController::getCudaWorker() const
 void ThreadController::calculate(RunningMode mode)
 {
 	if (mode == RunningMode::CalcSingleTimestep) {
-		_worker->setFlagStopAfterNextTimestep(true);
+		_worker->stopAfterNextTimestep(true);
 		if (!_worker->isSimulationRunning()) {
 			Q_EMIT runSimulationWithGpu();
 		}
 	}
 	if (mode == RunningMode::OpenEndedSimulation) {
-		_worker->setFlagStopAfterNextTimestep(false);
+		_worker->stopAfterNextTimestep(false);
 		if (!_worker->isSimulationRunning()) {
 			Q_EMIT runSimulationWithGpu();
 		}
 	}
 	if (mode == RunningMode::DoNothing) {
-		_worker->setFlagStopAfterNextTimestep(true);
+		_worker->stopAfterNextTimestep(true);
 	}
+}
+
+void ThreadController::restrictTimestepsPerSecond(optional<int> tps)
+{
+	_worker->restrictTimestepsPerSecond(tps);
 }
 
 void ThreadController::timestepCalculatedWithGpu()
