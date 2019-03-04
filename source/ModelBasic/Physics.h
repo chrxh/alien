@@ -37,7 +37,7 @@ public:
 
     static double kineticEnergy (double mass, QVector2D vel, double angularMass, double angularVel);
 	static double linearKineticEnergy(double mass, QVector2D vel);
-	static double rotationalKineticEnergy(double angularMass, double angularVel);
+	static double rotationalKineticEnergy (double angularMass, double angularVel);
 
 	//angles are returned in [0,360]
     static QVector2D rotateClockwise (QVector2D v, double angle);
