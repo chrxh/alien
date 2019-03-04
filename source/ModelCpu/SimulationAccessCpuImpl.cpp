@@ -376,17 +376,31 @@ namespace
 
 void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 {
-	auto metric = unit->getContext()->getSpaceProperties();
+	auto spaceProp = unit->getContext()->getSpaceProperties();
 	auto const &clusters = unit->getContext()->getClustersRef();
 	list<IntVector2D> tokenPos;
 	for (auto const &cluster : clusters) {
 		for (auto const &cell : cluster->getCellsRef()) {
-			auto pos = metric->correctPositionAndConvertToIntVector(cell->calcPosition(true));
+			auto pos = spaceProp->correctPositionAndConvertToIntVector(cell->calcPosition(true));
 			if (_requiredRect.isContained(pos)) {
 				if (cell->getNumToken() > 0) {
 					tokenPos.push_back(pos);
 				} else {
-					_requiredImage->setPixel(pos.x, pos.y, EntityRenderer::calcCellColor(cell->getNumToken(), cell->getMetadata().color, cell->getEnergy()));
+					auto color = EntityRenderer::calcCellColor(cell->getNumToken(), cell->getMetadata().color, cell->getEnergy());
+					_requiredImage->setPixel(pos.x, pos.y, color);
+					--pos.x;
+					spaceProp->correctPosition(pos);
+					colorPixel(_requiredImage, pos, color, 0x60);
+					pos.x += 2;
+					spaceProp->correctPosition(pos);
+					colorPixel(_requiredImage, pos, color, 0x60);
+					--pos.x;
+					--pos.y;
+					spaceProp->correctPosition(pos);
+					colorPixel(_requiredImage, pos, color, 0x60);
+					pos.y += 2;
+					spaceProp->correctPosition(pos);
+					colorPixel(_requiredImage, pos, color, 0x60);
 				}
 			}
 		}
@@ -395,28 +409,28 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x, pos.y - i };
-						metric->correctPosition(posMod);
+						spaceProp->correctPosition(posMod);
 						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i*255/4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x + i, pos.y };
-						metric->correctPosition(posMod);
+						spaceProp->correctPosition(posMod);
 						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x, pos.y + i };
-						metric->correctPosition(posMod);
+						spaceProp->correctPosition(posMod);
 						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x - i, pos.y };
-						metric->correctPosition(posMod);
+						spaceProp->correctPosition(posMod);
 						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
 					}
 				}
