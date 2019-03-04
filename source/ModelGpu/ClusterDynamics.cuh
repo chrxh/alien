@@ -386,8 +386,8 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(CellData *cell)
 {
 	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
 		auto &pos = cell->absPos;
-        float2 particlePos = {static_cast<int>(pos.x) + 0.5f + _data->numberGen.random(2.0f) - 1.0f,
-                              static_cast<int>(pos.y) + 0.5f + _data->numberGen.random(2.0f) - 1.0f};
+        float2 particlePos = {static_cast<int>(pos.x) + _data->numberGen.random(3) - 1.5f,
+                              static_cast<int>(pos.y) + _data->numberGen.random(3) - 1.5f};
         _cellMap.mapPosCorrection(particlePos);
         float2 particleVel =
             add(mul(cell->vel, cudaSimulationParameters.radiationVelocityMultiplier),
