@@ -29,7 +29,7 @@ void CudaWorker::requireData(IntRect const& rect)
 
 	if (!_simRunning) {
 		_mutexForData.lock();
-		_cudaData = _cudaSimulation->getAccessData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y });
+		_cudaData = _cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y });
 		_mutexForData.unlock();
 		_requireData = false;
 		Q_EMIT dataObtained();
@@ -106,7 +106,7 @@ void CudaWorker::updateData()
 	_updateData = true;
 
 	if (!_simRunning) {
-		_cudaSimulation->updateToSimulation();
+		_cudaSimulation->updateSimulationData();
 		_updateData = false;
 	}
 }
@@ -132,7 +132,7 @@ void CudaWorker::runSimulation()
 		timer.start();
 		if (isDataUpdated()) {
 			if (_mutexForData.try_lock()) {
-				_cudaSimulation->updateToSimulation();
+				_cudaSimulation->updateSimulationData();
 				updateDataFinished();
 				_mutexForData.unlock();
 			}
@@ -144,7 +144,7 @@ void CudaWorker::runSimulation()
 
 		if (isDataRequired()) {
 			if (_mutexForData.try_lock()) {
-				_cudaData = _cudaSimulation->getAccessData({ _requiredRect.p1.x, _requiredRect.p1.y }, { _requiredRect.p2.x, _requiredRect.p2.y });
+				_cudaData = _cudaSimulation->getSimulationData({ _requiredRect.p1.x, _requiredRect.p1.y }, { _requiredRect.p2.x, _requiredRect.p2.y });
 				requireDataFinished();
 				_mutexForData.unlock();
 				Q_EMIT dataObtained();
