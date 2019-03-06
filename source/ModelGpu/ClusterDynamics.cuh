@@ -6,38 +6,37 @@
 #include "CudaInterface.cuh"
 #include "CudaConstants.cuh"
 #include "Base.cuh"
-#include "CudaPhysics.cuh"
+#include "Physics.cuh"
 #include "Map.cuh"
 
 class ClusterDynamics
 {
 public:
-	__inline__ __device__ void init(SimulationDataInternal& data, int clusterIndex);
+	__inline__ __device__ void init(SimulationData& data, int clusterIndex);
 	__inline__ __device__ int getNumCells() const;
 
-	//synchronizing threads
 	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void destroyCloseCell(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
 
 private:
-	__inline__ __device__ void destroyCloseCell(CellData *cell);
-	__inline__ __device__ void destroyCloseCell(float2 const& pos, CellData *cell);
-	__inline__ __device__ void cellRadiation(CellData *cell);
-	__inline__ __device__ ParticleData* createNewParticle(float energy, float2 const& pos, float2 const& vel);
-	__inline__ __device__ bool areConnectable(CellData *cell1, CellData *cell2);
+	__inline__ __device__ void destroyCloseCell(Cell *cell);
+	__inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
+	__inline__ __device__ void cellRadiation(Cell *cell);
+	__inline__ __device__ Particle* createNewParticle(float energy, float2 const& pos, float2 const& vel);
+	__inline__ __device__ bool areConnectable(Cell *cell1, Cell *cell2);
 
-	SimulationDataInternal* _data;
-	Map<CellData> _cellMap;
+	SimulationData* _data;
+	Map<Cell> _cellMap;
 
-	ClusterData *_cluster;
+	Cluster *_cluster;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ClusterDynamics::init(SimulationDataInternal & data, int clusterIndex)
+__inline__ __device__ void ClusterDynamics::init(SimulationData & data, int clusterIndex)
 {
 	_data = &data;
 	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
@@ -51,8 +50,8 @@ __inline__ __device__ int ClusterDynamics::getNumCells() const
 
 __inline__ __device__ void ClusterDynamics::processingCollision(int startCellIndex, int endCellIndex)
 {
-	__shared__ ClusterData* cluster;
-	__shared__ ClusterData* firstOtherCluster;
+	__shared__ Cluster* cluster;
+	__shared__ Cluster* firstOtherCluster;
 	__shared__ int firstOtherClusterId;
 	__shared__ int numberOfCollidingCells;
 	__shared__ float2 collisionCenterPos;
@@ -73,10 +72,10 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 
 	//find colliding cluster
 	for (auto index = startCellIndex; index <= endCellIndex; ++index) {
-		CellData* cell = &cluster->cells[index];
+		Cell* cell = &cluster->cells[index];
 		for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 			for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-				CellData* otherCell = _cellMap.get(add(cell->absPos, {dx, dy}));
+				Cell* otherCell = _cellMap.get(add(cell->absPos, {dx, dy}));
 
 				if (!otherCell || otherCell == cell) {
 					continue;
@@ -121,10 +120,10 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	}
 
 	for (auto index = startCellIndex; index <= endCellIndex; ++index) {
-		CellData* cell = &cluster->cells[index];
+		Cell* cell = &cluster->cells[index];
 		for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 			for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-				CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+				Cell* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
 				if (!otherCell || otherCell == cell) {
 					continue;
 				}
@@ -171,10 +170,10 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
         if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse
 			/*&& !cluster->decompositionRequired && !firstOtherCluster->decompositionRequired*/) {
             for (auto index = startCellIndex; index <= endCellIndex; ++index) {
-                CellData* cell = &cluster->cells[index];
+                Cell* cell = &cluster->cells[index];
 				for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 					for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-						CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+						Cell* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
 						if (!otherCell || otherCell == cell) {
 							continue;
 						}
@@ -222,20 +221,20 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 			rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
 			_cellMap.mapDisplacementCorrection(rBPp);
 			outwardVector = sub(
-				CudaPhysics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
-				CudaPhysics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
-			CudaPhysics::rotateQuarterCounterClockwise(rAPp);
-			CudaPhysics::rotateQuarterCounterClockwise(rBPp);
+				Physics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
+				Physics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
+			Physics::rotateQuarterCounterClockwise(rAPp);
+			Physics::rotateQuarterCounterClockwise(rBPp);
 			n.x = 0.0f;
 			n.y = 0.0f;
 		}
 		__syncthreads();
 
 		for (auto index = startCellIndex; index <= endCellIndex; ++index) {
-			CellData* cell = &cluster->cells[index];
+			Cell* cell = &cluster->cells[index];
 			for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 				for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-					CellData* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+					Cell* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
 					if (!otherCell || otherCell == cell) {
 						continue;
 					}
@@ -248,7 +247,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 					if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
 						continue;
 					}
-					float2 normal = CudaPhysics::calcNormalToCell(otherCell, outwardVector);
+					float2 normal = Physics::calcNormalToCell(otherCell, outwardVector);
 					atomicAdd(&n.x, normal.x);
 					atomicAdd(&n.y, normal.y);
 					cell->protectionCounter = PROTECTION_TIMESTEPS;
@@ -266,7 +265,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 			float angularVelA2{ 0.0f };
 			float angularVelB2{ 0.0f };
 			normalize(n);
-			CudaPhysics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
+			Physics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
 				firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
 				mA, mB, vA2, vB2, angularVelA2, angularVelB2);
 
@@ -287,7 +286,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 __inline__ __device__ void ClusterDynamics::destroyCloseCell(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData *origCell = &_cluster->cells[cellIndex];
+		Cell *origCell = &_cluster->cells[cellIndex];
 		destroyCloseCell(origCell);
 	}
 	__syncthreads();
@@ -298,16 +297,16 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 	__shared__ float rotMatrix[2][2];
 	if (0 == threadIdx.x) {
 		_cluster->angle += _cluster->angularVel;
-		CudaPhysics::angleCorrection(_cluster->angle);
+		Physics::angleCorrection(_cluster->angle);
 		_cluster->pos = add(_cluster->pos, _cluster->vel);
 		_cellMap.mapPosCorrection(_cluster->pos);
-		CudaPhysics::rotationMatrix(_cluster->angle, rotMatrix);
+		Physics::rotationMatrix(_cluster->angle, rotMatrix);
 	}
 	__syncthreads();
 
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData *cell = &_cluster->cells[cellIndex];
+		Cell *cell = &_cluster->cells[cellIndex];
 
 		float2 absPos;
 		absPos.x = cell->relPos.x*rotMatrix[0][0] + cell->relPos.y*rotMatrix[0][1] + _cluster->pos.x;
@@ -316,7 +315,7 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 
 		auto r = sub(cell->absPos, _cluster->pos);
 		_cellMap.mapDisplacementCorrection(r);
-		auto newVel = CudaPhysics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
+		auto newVel = Physics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
 
 		auto a = sub(newVel, cell->vel);
 		if (length(a) > cudaSimulationParameters.cellMaxForce) {
@@ -340,13 +339,13 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 __inline__ __device__ void ClusterDynamics::processingRadiation(int startCellIndex, int endCellIndex)
 {
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData *cell = &_cluster->cells[cellIndex];
+		Cell *cell = &_cluster->cells[cellIndex];
 		cellRadiation(cell);
 	}
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::destroyCloseCell(CellData * cell)
+__inline__ __device__ void ClusterDynamics::destroyCloseCell(Cell * cell)
 {
 	if (cell->protectionCounter > 0) {
 		return;
@@ -354,17 +353,17 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(CellData * cell)
 	destroyCloseCell(cell->absPos, cell);
 }
 
-__inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos, CellData * cell)
+__inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos, Cell * cell)
 {
-	CellData* mapCell = _cellMap.get(pos);
+	Cell* mapCell = _cellMap.get(pos);
 	if (!mapCell || mapCell == cell) {
 		return;
 	}
 
-	ClusterData* mapCluster = mapCell->cluster;
+	Cluster* mapCluster = mapCell->cluster;
 	auto distance = _cellMap.mapDistance(cell->absPos, mapCell->absPos);
 	if (distance < cudaSimulationParameters.cellMinDistance) {
-		ClusterData* cluster = cell->cluster;
+		Cluster* cluster = cell->cluster;
 		if (mapCluster->numCells >= cluster->numCells) {
 			cell->alive = false;
 			cluster->decompositionRequired = true;
@@ -382,7 +381,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 	}
 }
 
-__inline__ __device__ void ClusterDynamics::cellRadiation(CellData *cell)
+__inline__ __device__ void ClusterDynamics::cellRadiation(Cell *cell)
 {
 	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
 		auto &pos = cell->absPos;
@@ -408,9 +407,9 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(CellData *cell)
 	}
 }
 
-__inline__ __device__ ParticleData* ClusterDynamics::createNewParticle(float energy, float2 const& pos, float2 const& vel)
+__inline__ __device__ Particle* ClusterDynamics::createNewParticle(float energy, float2 const& pos, float2 const& vel)
 {
-	ParticleData* particle = _data->particlesAC1.getNewElement();
+	Particle* particle = _data->particlesAC1.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
 	particle->locked = 0;
 	particle->alive = true;
@@ -420,7 +419,7 @@ __inline__ __device__ ParticleData* ClusterDynamics::createNewParticle(float ene
 	return particle;
 }
 
-__inline__ __device__ bool ClusterDynamics::areConnectable(CellData * cell1, CellData * cell2)
+__inline__ __device__ bool ClusterDynamics::areConnectable(Cell * cell1, Cell * cell2)
 {
 	return cell1->numConnections < cell1->maxConnections && cell2->numConnections < cell2->maxConnections;
 }

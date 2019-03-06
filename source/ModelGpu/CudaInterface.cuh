@@ -2,65 +2,45 @@
 
 #include <cuda_runtime.h>
 
-#include "CudaSimulator.cuh"
 #include "CudaConstants.cuh"
+#include "CudaSimulation.cuh"
 
-struct ParticleData
+struct ParticleAccessTO
 {
 	uint64_t id;
 	float energy;
 	float2 pos;
 	float2 vel;
-
-	//auxiliary data
-	int locked;	//0 = unlocked, 1 = locked
-	bool alive;
 };
 
-struct ClusterData;
-struct CellData
+struct CellAccessTO
 {
 	uint64_t id;
-	ClusterData* cluster;
-	float2 relPos;
-	float2 absPos;
-	float2 vel;
+	float2 pos;
 	float energy;
 	int maxConnections;
 	int numConnections;
-	CellData* connections[MAX_CELL_BONDS];
-	CellData* nextTimestep;
-
-	//auxiliary data
-	int protectionCounter;
-	bool alive;
-	int tag;
+	int connectionIndices[MAX_CELL_BONDS];
 };
 
-struct ClusterData
+struct ClusterAccessTO
 {
 	uint64_t id;
 	float2 pos;
 	float2 vel;
 	float angle;
 	float angularVel;
-	float angularMass;
 	int numCells;
-	CellData* cells;
-
-	//auxiliary data
-	bool decompositionRequired;
-	int locked;	//0 = unlocked, 1 = locked
-	ClusterData* clusterToFuse;
+	int cellStartIndex;
 };
 
-struct SimulationDataForAccess
+struct SimulationAccessTO
 {
-	int numClusters;
-	ClusterData* clusters;
-	int numCells;
-	CellData* cells;
-	int numParticles;
-	ParticleData* particles;
+	int* numClusters;
+	ClusterAccessTO* clusters;
+	int* numCells;
+	CellAccessTO* cells;
+	int* numParticles;
+	ParticleAccessTO* particles;
 };
 
