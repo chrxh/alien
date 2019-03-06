@@ -199,7 +199,7 @@ void CudaSimulation::calcNextTimestep()
 	swapData();
 }
 
-SimulationAccessTO* CudaSimulation::getAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
+SimulationAccessTO* CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
 	_rectUpperLeft = rectUpperLeft;
 	_rectLowerRight = rectLowerRight;
@@ -262,7 +262,7 @@ SimulationAccessTO* CudaSimulation::getAccessData(int2 const& rectUpperLeft, int
 */
 }
 
-void CudaSimulation::updateToSimulation()
+void CudaSimulation::updateSimulationData()
 {
 	prepareTargetData();
 

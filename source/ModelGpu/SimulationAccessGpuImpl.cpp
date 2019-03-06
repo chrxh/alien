@@ -94,8 +94,8 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_requiredRect = rect;
 	_resolveDesc = resolveDesc;
 
-	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
-	cudaBridge->requireData(_requiredRect);
+	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
+	cudaWorker->requireData(_requiredRect);
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
@@ -104,8 +104,8 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredRect = rect;
 	_requiredImage = target;
 
-	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
-	cudaBridge->requireData(_requiredRect);
+	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
+	cudaWorker->requireData(_requiredRect);
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -135,16 +135,16 @@ void SimulationAccessGpuImpl::dataObtainedFromGpu()
 
 void SimulationAccessGpuImpl::updateDataToGpuModel()
 {
-	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
+	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
 
-	cudaBridge->lockData();
-	SimulationAccessTO* cudaData = cudaBridge->retrieveData();
+	cudaWorker->lockData();
+	SimulationAccessTO* simulationTO = cudaWorker->retrieveData();
 
-	DataConverter converter(cudaData, _numberGen);
+	DataConverter converter(simulationTO, _numberGen);
 	converter.updateData(_dataToUpdate);
 
-	cudaBridge->updateData();
-	cudaBridge->unlockData();
+	cudaWorker->updateData();
+	cudaWorker->unlockData();
 	_dataToUpdate.clear();
 }
 
@@ -160,44 +160,44 @@ void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int al
 
 void SimulationAccessGpuImpl::createImageFromGpuModel()
 {
-	auto spaceProp = _context->getSpaceProperties();
+	auto space = _context->getSpaceProperties();
 	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
 
 	_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
 
 	cudaWorker->lockData();
-	SimulationAccessTO* cudaData = cudaWorker->retrieveData();
+	SimulationAccessTO* simulationTO = cudaWorker->retrieveData();
 
-	for (int i = 0; i < *cudaData->numParticles; ++i) {
-		ParticleAccessTO& particle = cudaData->particles[i];
+	for (int i = 0; i < *simulationTO->numParticles; ++i) {
+		ParticleAccessTO& particle = simulationTO->particles[i];
 		float2& pos = particle.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-		spaceProp->correctPosition(intPos);
+		space->correctPosition(intPos);
 		if (_requiredRect.isContained(intPos)) {
 			_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
 		}
 	}
 
-	for (int i = 0; i < *cudaData->numCells; ++i) {
-		CellAccessTO& cell = cudaData->cells[i];
+	for (int i = 0; i < *simulationTO->numCells; ++i) {
+		CellAccessTO& cell = simulationTO->cells[i];
 		float2 const& pos = cell.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-		spaceProp->correctPosition(intPos);
+		space->correctPosition(intPos);
 		if (_requiredRect.isContained(intPos)) {
 			uint32_t color = EntityRenderer::calcCellColor(0, 0, cell.energy);
 			_requiredImage->setPixel(intPos.x, intPos.y, color);
 			--intPos.x;
-			spaceProp->correctPosition(intPos);
+			space->correctPosition(intPos);
 			colorPixel(_requiredImage, intPos, color, 0x60);
 			intPos.x += 2;
-			spaceProp->correctPosition(intPos);
+			space->correctPosition(intPos);
 			colorPixel(_requiredImage, intPos, color, 0x60);
 			--intPos.x;
 			--intPos.y;
-			spaceProp->correctPosition(intPos);
+			space->correctPosition(intPos);
 			colorPixel(_requiredImage, intPos, color, 0x60);
 			intPos.y += 2;
-			spaceProp->correctPosition(intPos);
+			space->correctPosition(intPos);
 			colorPixel(_requiredImage, intPos, color, 0x60);
 		}
 	}
@@ -211,8 +211,8 @@ void SimulationAccessGpuImpl::createDataFromGpuModel()
 	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
 
 	cudaBridge->lockData();
-	SimulationAccessTO* cudaData = cudaBridge->retrieveData();
-	DataConverter converter(cudaData, _numberGen);
+	SimulationAccessTO* simulationTO = cudaBridge->retrieveData();
+	DataConverter converter(simulationTO, _numberGen);
 	_dataCollected = converter.getDataDescription(_requiredRect);
 
 	cudaBridge->unlockData();

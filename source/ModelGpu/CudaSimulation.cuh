@@ -12,8 +12,8 @@ public:
 	~CudaSimulation();
 
 	void calcNextTimestep();
-	SimulationAccessTO* getAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
-	void updateToSimulation();
+	SimulationAccessTO* getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+	void updateSimulationData();
 
 private:
 	void prepareTargetData();
