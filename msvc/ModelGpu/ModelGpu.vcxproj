@@ -202,14 +202,15 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\source\ModelGpu\AccessFunctions.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\ClusterBuilder.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ClusterReorganizer.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterDynamics.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\ParticleBuilder.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ParticleReorganizer.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\CudaSimulator.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\SimulationParameters.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h" />
     <ClInclude Include="..\..\source\ModelGpu\Definitions.h" />
@@ -220,8 +221,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuBuilderFacadeImpl.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h" />
-    <ClInclude Include="..\..\source\ModelGpu\CudaPhysics.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\CudaSimulatorFunctions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\Physics.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\SimulationFunctions.cuh" />
     <CustomBuild Include="..\..\source\ModelGpu\SimulationMonitorGpuImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SimulationMonitorGpuImpl.h...</Message>
@@ -295,7 +296,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DMODELGPU_LIB -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_WIDGETS_LIB -D_WINDLL -D_MBCS "-I$(SolutionDir)\..\..\external\boost_1_64_0" "-I$(ProjectDir)\..\..\source" "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2015" "-I\$(INHERIT)\." "-I$(CudaToolkitIncludeDir)\." "-I.\..\..\source\ModelGpu"</Command>
     </CustomBuild>
-    <ClInclude Include="..\..\source\ModelGpu\SimulationDataInternal.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\SimulationData.cuh" />
     <CustomBuild Include="..\..\source\ModelGpu\CudaWorker.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing CudaWorker.h...</Message>
@@ -446,7 +447,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\source\ModelGpu\CudaSimulator.cu" />
+    <CudaCompile Include="..\..\source\ModelGpu\CudaSimulation.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

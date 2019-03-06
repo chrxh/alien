@@ -394,7 +394,7 @@
       <item row="2" column="0">
        <widget class="QRadioButton" name="gpuDeviceRadioButton">
         <property name="text">
-         <string>GPU/CUDA (experimental)</string>
+         <string>CUDA (experimental)</string>
         </property>
        </widget>
       </item>

@@ -6,40 +6,37 @@
 #include "CudaInterface.cuh"
 #include "CudaConstants.cuh"
 #include "Base.cuh"
-#include "CudaPhysics.cuh"
+#include "Physics.cuh"
 #include "Map.cuh"
 
-class ClusterBuilder
+class ClusterReorganizer
 {
 public:
-	__inline__ __device__ void init(SimulationDataInternal& data, int clusterIndex);
+	__inline__ __device__ void init(SimulationData& data, int clusterIndex);
 	__inline__ __device__ int getNumOrigCells() const;
 
-	//synchronizing threads
 	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDataCopy(int startCellIndex, int endCellIndex);
 
 private:
-	//synchronizing threads
 	__inline__ __device__ void processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDataCopyWithoutDecompositionAndFusion(int startCellIndex, int endCellIndex);
 	__inline__ __device__ void processingDataCopyWithFusion(int startCellIndex, int endCellIndex);
 
-	//not synchronizing threads
-	__inline__ __device__ void setSuccessorCell(CellData *origCell, CellData* newCell, ClusterData* newCluster);
-	__inline__ __device__ void correctCellConnections(CellData *origCell);
+	__inline__ __device__ void setSuccessorCell(Cell *origCell, Cell* newCell, Cluster* newCluster);
+	__inline__ __device__ void correctCellConnections(Cell *origCell);
 
-	SimulationDataInternal* _data;
-	Map<CellData> _cellMap;
+	SimulationData* _data;
+	Map<Cell> _cellMap;
 
-	ClusterData _modifiedCluster;
-	ClusterData *_origCluster;
+	Cluster _modifiedCluster;
+	Cluster *_origCluster;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ClusterBuilder::init(SimulationDataInternal& data, int clusterIndex)
+__inline__ __device__ void ClusterReorganizer::init(SimulationData& data, int clusterIndex)
 {
 	_data = &data;
 	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
@@ -47,18 +44,18 @@ __inline__ __device__ void ClusterBuilder::init(SimulationDataInternal& data, in
 	_cellMap.init(data.size, data.cellMap);
 }
 
-__inline__ __device__ int ClusterBuilder::getNumOrigCells() const
+__inline__ __device__ int ClusterReorganizer::getNumOrigCells() const
 {
 	return _origCluster->numCells;
 }
 
-__inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex)
 {
 	__shared__ int numDecompositions;
 	struct Entry {
 		int tag;
 		float rotMatrix[2][2];
-		ClusterData cluster;
+		Cluster cluster;
 	};
 	__shared__ Entry entries[MAX_DECOMPOSITIONS];
 	if (0 == threadIdx.x) {
@@ -78,7 +75,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 	}
 	__syncthreads();
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData& cell = _origCluster->cells[cellIndex];
+		Cell& cell = _origCluster->cells[cellIndex];
 		if (!cell.alive) {
 			continue;
 		}
@@ -94,7 +91,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 				atomicAdd(&entries[index].cluster.vel.y, cell.vel.y);
 
 				entries[index].cluster.id = _data->numberGen.createNewId_kernel();
-				CudaPhysics::rotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
+				Physics::rotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
 				foundMatch = true;
 				break;
 			}
@@ -124,7 +121,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 
 	int startDecompositionIndex;
 	int endDecompositionIndex;
-	__shared__ ClusterData* newClusters[MAX_DECOMPOSITIONS];
+	__shared__ Cluster* newClusters[MAX_DECOMPOSITIONS];
 	calcPartition(numDecompositions, threadIdx.x, blockDim.x, startDecompositionIndex, endDecompositionIndex);
 	for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
 		entries[index].cluster.pos.x /= entries[index].cluster.numCells;
@@ -140,10 +137,10 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData& cell = _origCluster->cells[cellIndex];
+		Cell& cell = _origCluster->cells[cellIndex];
 		for (int index = 0; index < numDecompositions; ++index) {
 			if (cell.tag == entries[index].tag) {
-				ClusterData* newCluster = newClusters[index];
+				Cluster* newCluster = newClusters[index];
 				float2 deltaPos = sub(cell.absPos, newCluster->pos);
 				_cellMap.mapDisplacementCorrection(deltaPos);
 				auto angularMass = deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
@@ -152,7 +149,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 				auto r = sub(cell.absPos, _origCluster->pos);
 				_cellMap.mapDisplacementCorrection(r);
 				float2 relVel = sub(cell.vel, newCluster->vel);
-				float angularMomentum = CudaPhysics::angularMomentum(r, relVel);
+				float angularMomentum = Physics::angularMomentum(r, relVel);
 				atomicAdd(&newCluster->angularVel, angularMomentum);
 
 				float(&invRotMatrix)[2][2] = entries[index].rotMatrix;
@@ -162,7 +159,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 				swap(invRotMatrix[0][1], invRotMatrix[1][0]);
 
 				int newCellIndex = atomicAdd(&newCluster->numCells, 1);
-				CellData& newCell = newCluster->cells[newCellIndex];
+				Cell& newCell = newCluster->cells[newCellIndex];
 				setSuccessorCell(&cell, &newCell, newCluster);
 			}
 		}
@@ -170,15 +167,15 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 	__syncthreads();
 
 	for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
-		ClusterData* newCluster = newClusters[index];
+		Cluster* newCluster = newClusters[index];
 
 		//newCluster->angularVel contains angular momentum until here
-		newCluster->angularVel = CudaPhysics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
+		newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 	}
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData& cell = _origCluster->cells[cellIndex];
+		Cell& cell = _origCluster->cells[cellIndex];
 		if (!cell.alive) {
 			continue;
 		}
@@ -187,10 +184,10 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithDecomposition(i
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterBuilder::processingDataCopyWithoutDecompositionAndFusion(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::processingDataCopyWithoutDecompositionAndFusion(int startCellIndex, int endCellIndex)
 {
-	__shared__ ClusterData* newCluster;
-	__shared__ CellData* newCells;
+	__shared__ Cluster* newCluster;
+	__shared__ Cell* newCells;
 
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
@@ -200,8 +197,8 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithoutDecompositio
 	__syncthreads();
 
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		CellData *origCell = &_origCluster->cells[cellIndex];
-		CellData *newCell = &newCells[cellIndex];
+		Cell *origCell = &_origCluster->cells[cellIndex];
+		Cell *newCell = &newCells[cellIndex];
 		setSuccessorCell(origCell, newCell, newCluster);
 	}
 
@@ -215,11 +212,11 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithoutDecompositio
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterBuilder::processingDataCopyWithFusion(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::processingDataCopyWithFusion(int startCellIndex, int endCellIndex)
 {
 	if (_origCluster < _origCluster->clusterToFuse) {
-		__shared__ ClusterData* newCluster;
-		__shared__ ClusterData* otherCluster;
+		__shared__ Cluster* newCluster;
+		__shared__ Cluster* otherCluster;
 		__shared__ float2 correction;
 		if (0 == threadIdx.x) {
 			otherCluster = _origCluster->clusterToFuse;
@@ -245,8 +242,8 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithFusion(int star
 		__syncthreads();
 
 		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			CellData* newCell = &newCluster->cells[cellIndex];
-			CellData* origCell = &_origCluster->cells[cellIndex];
+			Cell* newCell = &newCluster->cells[cellIndex];
+			Cell* origCell = &_origCluster->cells[cellIndex];
 			setSuccessorCell(origCell, newCell, newCluster);
 			auto relPos = sub(newCell->absPos, newCluster->pos);
 			newCell->relPos = relPos;
@@ -256,7 +253,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithFusion(int star
 			auto r = sub(newCell->absPos, _origCluster->pos);
 			_cellMap.mapDisplacementCorrection(r);
 			float2 relVel = sub(newCell->vel, _origCluster->vel);
-			float angularMomentum = CudaPhysics::angularMomentum(r, relVel);
+			float angularMomentum = Physics::angularMomentum(r, relVel);
 			atomicAdd(&newCluster->angularVel, angularMomentum);
 		}
 		__syncthreads();
@@ -266,8 +263,8 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithFusion(int star
 		calcPartition(otherCluster->numCells, threadIdx.x, blockDim.x, startOtherCellIndex, endOtherCellIndex);
 
 		for (int otherCellIndex = startOtherCellIndex; otherCellIndex <= endOtherCellIndex; ++otherCellIndex) {
-			CellData* newCell = &newCluster->cells[_origCluster->numCells + otherCellIndex];
-			CellData* origCell = &otherCluster->cells[otherCellIndex];
+			Cell* newCell = &newCluster->cells[_origCluster->numCells + otherCellIndex];
+			Cell* origCell = &otherCluster->cells[otherCellIndex];
 			setSuccessorCell(origCell, newCell, newCluster);
 			auto relPos = sub(add(newCell->absPos, correction), newCluster->pos);
 			newCell->relPos = relPos;
@@ -278,7 +275,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithFusion(int star
 			auto r = sub(newCell->absPos, otherCluster->pos);
 			_cellMap.mapDisplacementCorrection(r);
 			float2 relVel = sub(newCell->vel, otherCluster->vel);
-			float angularMomentum = CudaPhysics::angularMomentum(r, relVel);
+			float angularMomentum = Physics::angularMomentum(r, relVel);
 			atomicAdd(&newCluster->angularVel, angularMomentum);
 		}
 		__syncthreads();
@@ -291,7 +288,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithFusion(int star
 		}
 
 		if (0 == threadIdx.x) {
-			newCluster->angularVel = CudaPhysics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
+			newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 		}
 
 	}
@@ -301,7 +298,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopyWithFusion(int star
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterBuilder::processingDataCopy(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::processingDataCopy(int startCellIndex, int endCellIndex)
 {
 	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive && !_origCluster->clusterToFuse) {
 		__syncthreads();
@@ -318,7 +315,7 @@ __inline__ __device__ void ClusterBuilder::processingDataCopy(int startCellIndex
 	}
 }
 
-__inline__ __device__ void ClusterBuilder::processingDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::processingDecomposition(int startCellIndex, int endCellIndex)
 {
 	if (_origCluster->decompositionRequired && !_origCluster->clusterToFuse) {
 		__shared__ bool changes;
@@ -330,10 +327,10 @@ __inline__ __device__ void ClusterBuilder::processingDecomposition(int startCell
 			changes = false;
 			__syncthreads();
 			for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-				CellData& cell = _origCluster->cells[cellIndex];
+				Cell& cell = _origCluster->cells[cellIndex];
 				if (cell.alive) {
 					for (int i = 0; i < cell.numConnections; ++i) {
-						CellData& otherCell = *cell.connections[i];
+						Cell& otherCell = *cell.connections[i];
 						if (otherCell.alive) {
 							if (otherCell.tag < cell.tag) {
 								cell.tag = otherCell.tag;
@@ -358,14 +355,14 @@ __inline__ __device__ void ClusterBuilder::processingDecomposition(int startCell
 	}
 }
 
-__inline__ __device__  void ClusterBuilder::setSuccessorCell(CellData *origCell, CellData* newCell, ClusterData* newCluster)
+__inline__ __device__  void ClusterReorganizer::setSuccessorCell(Cell *origCell, Cell* newCell, Cluster* newCluster)
 {
 	*newCell = *origCell;
 	newCell->cluster = newCluster;
 	origCell->nextTimestep = newCell;
 }
 
-__inline__ __device__ void ClusterBuilder::correctCellConnections(CellData* cell)
+__inline__ __device__ void ClusterReorganizer::correctCellConnections(Cell* cell)
 {
 	int numConnections = cell->numConnections;
 	for (int i = 0; i < numConnections; ++i) {

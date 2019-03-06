@@ -19,7 +19,7 @@ public:
 private:
 	Q_SLOT void dataObtainedFromGpu();
 
-	void calcMonitorData(SimulationDataForAccess const& access);
+	void calcMonitorData(SimulationAccessTO* access);
 
 private:
 	list<QMetaObject::Connection> _connections;

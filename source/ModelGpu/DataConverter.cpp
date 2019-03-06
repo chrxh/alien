@@ -5,8 +5,8 @@
 
 #include "DataConverter.h"
 
-DataConverter::DataConverter(SimulationDataForAccess& cudaData, NumberGenerator* numberGen)
-	: _cudaData(cudaData), _numberGen(numberGen)
+DataConverter::DataConverter(SimulationAccessTO* simulationTO, NumberGenerator* numberGen)
+	: _simulationTO(simulationTO), _numberGen(numberGen)
 {}
 
 void DataConverter::updateData(DataChangeDescription const & data)
@@ -47,44 +47,37 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 		return;
 	}
 
-	ClusterData& cudaCluster = _cudaData.clusters[_cudaData.numClusters++];
-	cudaCluster.id = clusterDesc.id == 0 ? _numberGen->getId() : clusterDesc.id;
+	ClusterAccessTO& clusterTO = _simulationTO->clusters[(*_simulationTO->numClusters)++];
+	clusterTO.id = clusterDesc.id == 0 ? _numberGen->getId() : clusterDesc.id;
 	QVector2D clusterPos = clusterDesc.pos ? clusterPos = *clusterDesc.pos : clusterPos = clusterDesc.getClusterPosFromCells();
-	cudaCluster.pos = { clusterPos.x(), clusterPos.y() };
-	cudaCluster.vel = { clusterDesc.vel->x(), clusterDesc.vel->y() };
-	cudaCluster.angle = *clusterDesc.angle;
-	cudaCluster.angularVel = *clusterDesc.angularVel;
-	cudaCluster.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
-	cudaCluster.decompositionRequired = false;
-	cudaCluster.locked = 0;
-	cudaCluster.clusterToFuse = nullptr;
-	unordered_map<uint64_t, CellData*> cellByIds;
+	clusterTO.pos = { clusterPos.x(), clusterPos.y() };
+	clusterTO.vel = { clusterDesc.vel->x(), clusterDesc.vel->y() };
+	clusterTO.angle = *clusterDesc.angle;
+	clusterTO.angularVel = *clusterDesc.angularVel;
+	clusterTO.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
+	unordered_map<uint64_t, int> cellIndexByIds;
 	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
-		addCell(cellDesc, clusterDesc, cudaCluster, cellByIds);
+		addCell(cellDesc, clusterDesc, clusterTO, cellIndexByIds);
 		if (firstIndex) {
-			cudaCluster.cells = cellByIds.begin()->second;
+			clusterTO.cellStartIndex = cellIndexByIds.begin()->second;
 			firstIndex = false;
 		}
 	}
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
 		if (cellDesc.id != 0) {
-			resolveConnections(cellDesc, cellByIds, *cellByIds.at(cellDesc.id));
+			setConnections(cellDesc, _simulationTO->cells[cellIndexByIds.at(cellDesc.id)], cellIndexByIds);
 		}
 	}
-
-	updateAngularMass(cudaCluster);
 }
 
 void DataConverter::addParticle(ParticleDescription const & particleDesc)
 {
-	ParticleData& cudaParticle = _cudaData.particles[_cudaData.numParticles++];
+	ParticleAccessTO& cudaParticle = _simulationTO->particles[(*_simulationTO->numParticles)++];
 	cudaParticle.id = cudaParticle.id == 0 ? _numberGen->getId() : particleDesc.id;
 	cudaParticle.pos = { particleDesc.pos->x(), particleDesc.pos->y() };
 	cudaParticle.vel = { particleDesc.vel->x(), particleDesc.vel->y() };
 	cudaParticle.energy = *particleDesc.energy;
-	cudaParticle.locked = 0;
-	cudaParticle.alive = true;
 }
 
 void DataConverter::markDelCluster(uint64_t clusterId)
@@ -120,102 +113,90 @@ void DataConverter::processDeletionsAndModifications()
 	}
 
 	//delete and modify clusters
-	std::unordered_set<uint64_t> cellIdsToDelete;
-	std::unordered_map<ClusterData*, ClusterData*> newByOldClusterData;
+	std::unordered_set<int> cellIndicesToDelete;
 	int clusterIndexCopyOffset = 0;
-	for (int clusterIndex = 0; clusterIndex < _cudaData.numClusters; ++clusterIndex) {
-		ClusterData& cluster = _cudaData.clusters[clusterIndex];
+	for (int clusterIndex = 0; clusterIndex < *_simulationTO->numClusters; ++clusterIndex) {
+		ClusterAccessTO& cluster = _simulationTO->clusters[clusterIndex];
 		uint64_t clusterId = cluster.id;
 		if (_clusterIdsToDelete.find(clusterId) != _clusterIdsToDelete.end()) {
 			++clusterIndexCopyOffset;
 			for (int cellIndex = 0; cellIndex < cluster.numCells; ++cellIndex) {
-				cellIdsToDelete.insert(cluster.cells[cellIndex].id);
+				cellIndicesToDelete.insert(cluster.cellStartIndex + cellIndex);
 			}
 		}
 		else if (clusterIndexCopyOffset > 0) {
-			newByOldClusterData.insert_or_assign(&cluster, &_cudaData.clusters[clusterIndex - clusterIndexCopyOffset]);
-			_cudaData.clusters[clusterIndex - clusterIndexCopyOffset] = cluster;
+			_simulationTO->clusters[clusterIndex - clusterIndexCopyOffset] = cluster;
 		}
 
 		if (_clusterToModifyById.find(clusterId) != _clusterToModifyById.end()) {
 			applyChangeDescription(cluster, _clusterToModifyById.at(clusterId));
 		}
 	}
-	_cudaData.numClusters -= clusterIndexCopyOffset;
+	_simulationTO->numClusters -= clusterIndexCopyOffset;
 
 	//delete and modify cells
 	int cellIndexCopyOffset = 0;
-	std::unordered_map<CellData*, CellData*> newByOldCellData;
-	for (int index = 0; index < _cudaData.numCells; ++index) {
-		CellData& cell = _cudaData.cells[index];
+	std::unordered_map<int, int> newByOldCellIndex;
+	for (int index = 0; index < *_simulationTO->numCells; ++index) {
+		CellAccessTO& cell = _simulationTO->cells[index];
 		uint64_t cellId = cell.id;
-		if (cellIdsToDelete.find(cellId) != cellIdsToDelete.end()) {
+		if (cellIndicesToDelete.find(index) != cellIndicesToDelete.end()) {
 			++cellIndexCopyOffset;
 		}
 		else if (cellIndexCopyOffset > 0) {
-			newByOldCellData.insert_or_assign(&cell, &_cudaData.cells[index - cellIndexCopyOffset]);
-			_cudaData.cells[index - cellIndexCopyOffset] = cell;
+			newByOldCellIndex.insert_or_assign(index, index - cellIndexCopyOffset);
+			_simulationTO->cells[index - cellIndexCopyOffset] = cell;
 		}
 
 		if (_cellToModifyById.find(cellId) != _cellToModifyById.end()) {
-			uint64_t clusterId = cell.cluster->id;
-			applyChangeDescription(cell, _cellToModifyById.at(cellId), _clusterToModifyById.at(clusterId));
+			applyChangeDescription(cell, _cellToModifyById.at(cellId));
 		}
 	}
-	_cudaData.numCells -= cellIndexCopyOffset;
+	_simulationTO->numCells -= cellIndexCopyOffset;
 
 	//delete and modify particles
 	int particleIndexCopyOffset = 0;
-	for (int index = 0; index < _cudaData.numParticles; ++index) {
-		ParticleData& particle = _cudaData.particles[index];
+	for (int index = 0; index < *_simulationTO->numParticles; ++index) {
+		ParticleAccessTO& particle = _simulationTO->particles[index];
 		uint64_t particleId = particle.id;
 		if (_particleIdsToDelete.find(particleId) != _particleIdsToDelete.end()) {
 			++particleIndexCopyOffset;
 		}
 		else if (particleIndexCopyOffset > 0) {
-			_cudaData.particles[index - particleIndexCopyOffset] = particle;
+			_simulationTO->particles[index - particleIndexCopyOffset] = particle;
 		}
 
 		if (_particleToModifyById.find(particleId) != _particleToModifyById.end()) {
 			applyChangeDescription(particle, _particleToModifyById.at(particleId));
 		}
 	}
-	_cudaData.numParticles -= particleIndexCopyOffset;
+	_simulationTO->numParticles -= particleIndexCopyOffset;
 
 	//adjust cell and cluster pointers
-	for (int clusterIndex = 0; clusterIndex < _cudaData.numClusters; ++clusterIndex) {
-		ClusterData& cluster = _cudaData.clusters[clusterIndex];
-		auto it = newByOldCellData.find(cluster.cells);
-		if (it != newByOldCellData.end()) {
-			cluster.cells = it->second;
+	for (int clusterIndex = 0; clusterIndex < *_simulationTO->numClusters; ++clusterIndex) {
+		ClusterAccessTO& cluster = _simulationTO->clusters[clusterIndex];
+		auto it = newByOldCellIndex.find(cluster.cellStartIndex);
+		if (it != newByOldCellIndex.end()) {
+			cluster.cellStartIndex = it->second;
 		}
 	}
-	for (int cellIndex = 0; cellIndex < _cudaData.numCells; ++cellIndex) {
-		CellData& cell = _cudaData.cells[cellIndex];
-		auto it = newByOldClusterData.find(cell.cluster);
-		if (it != newByOldClusterData.end()) {
-			cell.cluster = it->second;
-		}
+	for (int cellIndex = 0; cellIndex < *_simulationTO->numCells; ++cellIndex) {
+		CellAccessTO& cell = _simulationTO->cells[cellIndex];
 		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
-			auto it = newByOldCellData.find(cell.connections[connectionIndex]);
-			if (it != newByOldCellData.end()) {
-				cell.connections[connectionIndex] = it->second;
+			auto it = newByOldCellIndex.find(cell.connectionIndices[connectionIndex]);
+			if (it != newByOldCellIndex.end()) {
+				cell.connectionIndices[connectionIndex] = it->second;
 			}
 		}
 	}
-}
-
-SimulationDataForAccess DataConverter::getGpuData() const
-{
-	return _cudaData;
 }
 
 DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) const
 {
 	DataDescription result;
 	list<uint64_t> connectingCellIds;
-	for (int i = 0; i < _cudaData.numClusters; ++i) {
-		ClusterData const& cluster = _cudaData.clusters[i];
+	for (int i = 0; i < *_simulationTO->numClusters; ++i) {
+		ClusterAccessTO const& cluster = _simulationTO->clusters[i];
 		if (requiredRect.isContained({ int(cluster.pos.x), int(cluster.pos.y) })) {
 			auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
 				.setVel({ cluster.vel.x, cluster.vel.y })
@@ -223,12 +204,12 @@ DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) c
 				.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
 
 			for (int j = 0; j < cluster.numCells; ++j) {
-				CellData const& cell = cluster.cells[j];
-				auto pos = cell.absPos;
+				CellAccessTO const& cell = _simulationTO->cells[cluster.cellStartIndex + j];
+				auto pos = cell.pos;
 				auto id = cell.id;
 				connectingCellIds.clear();
 				for (int i = 0; i < cell.numConnections; ++i) {
-					connectingCellIds.emplace_back(cell.connections[i]->id);
+					connectingCellIds.emplace_back(_simulationTO->cells[cell.connectionIndices[i]].id);
 				}
 				clusterDesc.addCell(
 					CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
@@ -241,8 +222,8 @@ DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) c
 		}
 	}
 
-	for (int i = 0; i < _cudaData.numParticles; ++i) {
-		ParticleData const& particle = _cudaData.particles[i];
+	for (int i = 0; i < *_simulationTO->numParticles; ++i) {
+		ParticleAccessTO const& particle = _simulationTO->particles[i];
 		if (requiredRect.isContained({ int(particle.pos.x), int(particle.pos.y) })) {
 			result.addParticle(ParticleDescription().setId(particle.id).setPos({ particle.pos.x, particle.pos.y })
 				.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
@@ -252,15 +233,13 @@ DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) c
 	return result;
 }
 
-void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription const& cluster, ClusterData& cudaCluster
-	, unordered_map<uint64_t, CellData*>& cellByIds)
+void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription const& cluster, ClusterAccessTO& cudaCluster
+	, unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
-	CellData& cudaCell = _cudaData.cells[_cudaData.numCells++];
+	int index = (*_simulationTO->numCells)++;
+	CellAccessTO& cudaCell = _simulationTO->cells[index];
 	cudaCell.id = cellDesc.id == 0 ? _numberGen->getId() : cellDesc.id;
-	cudaCell.cluster = &cudaCluster;
-	cudaCell.absPos = { cellDesc.pos->x(), cellDesc.pos->y() };
-	QVector2D relPos = cellDesc.getPosRelativeTo(cluster);
-	cudaCell.relPos = { relPos.x(), relPos.y() };
+	cudaCell.pos= { cellDesc.pos->x(), cellDesc.pos->y() };
 	cudaCell.energy = *cellDesc.energy;
 	cudaCell.maxConnections = *cellDesc.maxConnections;
 	if (cellDesc.connectingCells) {
@@ -269,22 +248,17 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	else {
 		cudaCell.numConnections = 0;
 	}
-	cudaCell.protectionCounter = 0;
-	cudaCell.alive = true;
-	cudaCell.nextTimestep = nullptr;
-	auto vel = Physics::tangentialVelocity(*cellDesc.pos - *cluster.pos, { *cluster.vel, *cluster.angularVel });
-	cudaCell.vel = { vel.x(), vel.y() };
 
-	cellByIds.insert_or_assign(cudaCell.id, &cudaCell);
+	cellIndexTOByIds.insert_or_assign(cudaCell.id, index);
 }
 
-void DataConverter::resolveConnections(CellDescription const & cellToAdd, unordered_map<uint64_t, CellData*> const & cellByIds
-	, CellData& cudaCell)
+void DataConverter::setConnections(
+    CellDescription const& cellToAdd, CellAccessTO& cellTO, unordered_map<uint64_t, int> const& cellIndexByIds)
 {
 	int index = 0;
 	if (cellToAdd.connectingCells) {
 		for (uint64_t connectingCellId : *cellToAdd.connectingCells) {
-			cudaCell.connections[index] = cellByIds.at(connectingCellId);
+			cellTO.connectionIndices[index] = cellIndexByIds.at(connectingCellId);
 			++index;
 		}
 	}
@@ -299,7 +273,7 @@ namespace
 	}
 }
 
-void DataConverter::applyChangeDescription(ParticleData & particle, ParticleChangeDescription const & particleChanges)
+void DataConverter::applyChangeDescription(ParticleAccessTO & particle, ParticleChangeDescription const & particleChanges)
 {
 	if (particleChanges.pos) {
 		QVector2D newPos = particleChanges.pos.getValue();
@@ -314,7 +288,7 @@ void DataConverter::applyChangeDescription(ParticleData & particle, ParticleChan
 	}
 }
 
-void DataConverter::applyChangeDescription(ClusterData & cluster, ClusterChangeDescription const & clusterChanges)
+void DataConverter::applyChangeDescription(ClusterAccessTO & cluster, ClusterChangeDescription const & clusterChanges)
 {
 	if (clusterChanges.pos) {
 		QVector2D newPos = clusterChanges.pos.getValue();
@@ -330,46 +304,16 @@ void DataConverter::applyChangeDescription(ClusterData & cluster, ClusterChangeD
 	if (clusterChanges.angularVel) {
 		cluster.angularVel = clusterChanges.angularVel.getValue();
 	}
-	updateCellVelocities(cluster);
-	updateAngularMass(cluster);
 }
 
-void DataConverter::applyChangeDescription(CellData & cell, CellChangeDescription const & cellChanges
-	, ClusterChangeDescription const& clusterChanges)
+void DataConverter::applyChangeDescription(CellAccessTO & cell, CellChangeDescription const & cellChanges)
 {
 	if (cellChanges.pos) {
 		QVector2D newAbsPos = cellChanges.pos.getValue();
-		convert(newAbsPos, cell.absPos);
-
-		CellDescription newCell(cellChanges);
-		ClusterDescription newCluster(clusterChanges);
-		QVector2D newRelPos = newCell.getPosRelativeTo(newCluster);
-		convert(newRelPos, cell.relPos);
+		convert(newAbsPos, cell.pos);
 	}
 	if (cellChanges.energy) {
 		cell.energy = cellChanges.energy.getValue();
-	}
-
-}
-
-void DataConverter::updateAngularMass(ClusterData& cluster)
-{
-	cluster.angularMass = 0.0;
-	for (int i = 0; i < cluster.numCells; ++i) {
-		float2 relPos = cluster.cells[i].relPos;
-		cluster.angularMass += relPos.x*relPos.x + relPos.y*relPos.y;
-	}
-}
-
-void DataConverter::updateCellVelocities(ClusterData & cluster)
-{
-	for (int i = 0; i < cluster.numCells; ++i) {
-		auto& cudaCell = cluster.cells[i];
-		QVector2D clusterPos(cluster.pos.x, cluster.pos.y);
-		QVector2D clusterVel(cluster.vel.x, cluster.vel.y);
-		QVector2D cellPos(cudaCell.absPos.x, cudaCell.absPos.y);
-		auto vel = Physics::tangentialVelocity(cellPos - clusterPos, { clusterVel, cluster.angularVel });
-		cudaCell.vel = { vel.x(), vel.y() };
 	}
 }
 
