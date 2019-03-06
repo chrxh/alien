@@ -47,7 +47,6 @@ std::ostream& operator << (std::ostream& os, const IntVector2D& vec)
 	return os;
 }
 
-
 IntRect::IntRect(std::initializer_list<IntVector2D> l)
 {
 	auto it = l.begin();

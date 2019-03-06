@@ -7,11 +7,10 @@
 class DataConverter
 {
 public:
-	DataConverter(SimulationDataForAccess& cudaData, NumberGenerator* numberGen);
+	DataConverter(SimulationAccessTO* cudaData, NumberGenerator* numberGen);
 
 	void updateData(DataChangeDescription const& data);
 
-	SimulationDataForAccess getGpuData() const;
 	DataDescription getDataDescription(IntRect const& requiredRect) const;
 
 private:
@@ -25,20 +24,16 @@ private:
 	void markModifyParticle(ParticleChangeDescription const& particleDesc);
 
 	void processDeletionsAndModifications();
-	void addCell(CellDescription const& cellToAdd, ClusterDescription const& cluster, ClusterData& cudaCluster
-		, unordered_map<uint64_t, CellData*>& cellByIds);
-	void resolveConnections(CellDescription const& cellToAdd, unordered_map<uint64_t, CellData*> const& cellByIds
-		, CellData& cudaCell);
+	void addCell(CellDescription const& cellToAdd, ClusterDescription const& cluster, ClusterAccessTO& cudaCluster,
+		unordered_map<uint64_t, int>& cellIndexTOByIds);
+	void setConnections(CellDescription const& cellToAdd, CellAccessTO& cellTO, unordered_map<uint64_t, int> const& cellIndexByIds);
 
-	void applyChangeDescription(ParticleData& particle, ParticleChangeDescription const& particleChanges);
-	void applyChangeDescription(ClusterData& cluster, ClusterChangeDescription const& clusterChanges);
-	void applyChangeDescription(CellData& cell, CellChangeDescription const& cellChanges, ClusterChangeDescription const& clusterChanges);
-
-	void updateAngularMass(ClusterData& cluster);
-	void updateCellVelocities(ClusterData& cluster);
+	void applyChangeDescription(ParticleAccessTO& particle, ParticleChangeDescription const& particleChanges);
+	void applyChangeDescription(ClusterAccessTO& cluster, ClusterChangeDescription const& clusterChanges);
+	void applyChangeDescription(CellAccessTO& cell, CellChangeDescription const& cellChanges);
 
 private:
-	SimulationDataForAccess& _cudaData;
+	SimulationAccessTO* _simulationTO;
 	NumberGenerator* _numberGen;
 
 	std::unordered_set<uint64_t> _clusterIdsToDelete;

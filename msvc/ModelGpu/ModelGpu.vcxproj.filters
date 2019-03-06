@@ -60,21 +60,6 @@
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\SimulationDataInternal.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaSimulatorFunctions.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaSimulator.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaPhysics.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
@@ -87,10 +72,28 @@
     <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClusterBuilder.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\SimulationData.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ParticleBuilder.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\AccessFunctions.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Physics.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\SimulationParameters.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\SimulationFunctions.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ClusterReorganizer.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ParticleReorganizer.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
@@ -201,7 +204,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\..\source\ModelGpu\CudaSimulator.cu">
+    <CudaCompile Include="..\..\source\ModelGpu\CudaSimulation.cu">
       <Filter>Source Files\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>

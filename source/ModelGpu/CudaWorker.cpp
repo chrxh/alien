@@ -10,25 +10,26 @@
 
 CudaWorker::~CudaWorker()
 {
-	delete _simDataManager;
+	delete _cudaSimulation;
 }
 
 void CudaWorker::init(SpaceProperties* spaceProp)
 {
 	_spaceProp = spaceProp;
 	auto size = spaceProp->getSize();
-	delete _simDataManager;
-	_simDataManager = new CudaSimulator({ size.x, size.y });
+	delete _cudaSimulation;
+	_cudaSimulation = new CudaSimulation({ size.x, size.y });
 }
 
-void CudaWorker::requireData()
+void CudaWorker::requireData(IntRect const& rect)
 {
 	std::lock_guard<std::mutex> lock(_mutexForFlags);
 	_requireData = true;
+	_requiredRect = rect;
 
 	if (!_simRunning) {
 		_mutexForData.lock();
-		_cudaData = _simDataManager->getDataForAccess();
+		_cudaData = _cudaSimulation->getAccessData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y });
 		_mutexForData.unlock();
 		_requireData = false;
 		Q_EMIT dataObtained();
@@ -94,7 +95,7 @@ void CudaWorker::unlockData()
 	_mutexForData.unlock();
 }
 
-SimulationDataForAccess& CudaWorker::retrieveData()
+SimulationAccessTO* CudaWorker::retrieveData()
 {
 	return _cudaData;
 }
@@ -105,7 +106,7 @@ void CudaWorker::updateData()
 	_updateData = true;
 
 	if (!_simRunning) {
-		_simDataManager->setDataForAccess(_cudaData);
+		_cudaSimulation->updateToSimulation();
 		_updateData = false;
 	}
 }
@@ -131,19 +132,19 @@ void CudaWorker::runSimulation()
 		timer.start();
 		if (isDataUpdated()) {
 			if (_mutexForData.try_lock()) {
-				_simDataManager->setDataForAccess(_cudaData);
+				_cudaSimulation->updateToSimulation();
 				updateDataFinished();
 				_mutexForData.unlock();
 			}
 		}
 
-		_simDataManager->calcNextTimestep();
+		_cudaSimulation->calcNextTimestep();
 
 		Q_EMIT timestepCalculated();
 
 		if (isDataRequired()) {
 			if (_mutexForData.try_lock()) {
-				_cudaData = _simDataManager->getDataForAccess();
+				_cudaData = _cudaSimulation->getAccessData({ _requiredRect.p1.x, _requiredRect.p1.y }, { _requiredRect.p2.x, _requiredRect.p2.y });
 				requireDataFinished();
 				_mutexForData.unlock();
 				Q_EMIT dataObtained();

@@ -279,6 +279,15 @@ __host__ __device__ __inline__ int floorInt(float v)
 	return result;
 }
 
+__host__ __device__ __inline__ bool isContained(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
+{
+	return pos.x >= rectUpperLeft.x
+		&& pos.x <= rectLowerRight.x
+		&& pos.y >= rectUpperLeft.y
+		&& pos.y <= rectLowerRight.y;
+}
+
+
 class DoubleLock
 {
 private:
