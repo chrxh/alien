@@ -19,7 +19,8 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 	_numberGen = _context->getNumberGenerator();
 	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
-
+	auto size = _context->getSpaceProperties()->getSize();
+	_requiredRect = { {0,0}, size };
 	for (auto const& connection : _connections) {
 		QObject::disconnect(connection);
 	}
@@ -30,6 +31,46 @@ void SimulationAccessGpuImpl::clear()
 {
 }
 
+/*
+namespace
+{
+	void enlargeRect(IntVector2D const& p, optional<IntRect>& rect)
+	{
+		if (rect) {
+			if (p.x < rect->p1.x) {
+				rect->p1.x = p.x;
+			}
+			if (p.y < rect->p1.y) {
+				rect->p1.y = p.y;
+			}
+			if (p.x > rect->p2.x) {
+				rect->p2.x = p.x;
+			}
+			if (p.y > rect->p2.y) {
+				rect->p2.y = p.y;
+			}
+		}
+		else {
+			rect = IntRect{ p, p };
+		}
+	}
+	
+	IntRect getRect(DataChangeDescription const & desc)
+	{
+		optional<IntRect> result;
+		for (auto const& cluster : desc.clusters) {
+			IntVector2D pos(*cluster->pos);
+			enlargeRect(pos, result);
+		}
+		for (auto const& particle : desc.particles) {
+			IntVector2D pos(*particle->pos);
+			enlargeRect(pos, result);
+		}
+		return result.get_value_or(IntRect());
+	}
+}
+*/
+
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
 {
 	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
@@ -37,8 +78,14 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
 
 	metricCorrection(_dataToUpdate);
 
-	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
-	cudaBridge->requireData();
+	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
+
+	if (cudaWorker->isSimulationRunning()) {
+		cudaWorker->requireData({ {0, 0}, _context->getSpaceProperties()->getSize() });
+	}
+	else {
+		cudaWorker->requireData(_requiredRect);
+	}
 }
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
@@ -48,7 +95,7 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	_resolveDesc = resolveDesc;
 
 	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
-	cudaBridge->requireData();
+	cudaBridge->requireData(_requiredRect);
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
@@ -58,7 +105,7 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 	_requiredImage = target;
 
 	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
-	cudaBridge->requireData();
+	cudaBridge->requireData(_requiredRect);
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -91,7 +138,7 @@ void SimulationAccessGpuImpl::updateDataToGpuModel()
 	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
 
 	cudaBridge->lockData();
-	SimulationDataForAccess& cudaData = cudaBridge->retrieveData();
+	SimulationAccessTO* cudaData = cudaBridge->retrieveData();
 
 	DataConverter converter(cudaData, _numberGen);
 	converter.updateData(_dataToUpdate);
@@ -114,15 +161,15 @@ void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int al
 void SimulationAccessGpuImpl::createImageFromGpuModel()
 {
 	auto spaceProp = _context->getSpaceProperties();
-	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
+	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
 
 	_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
 
-	cudaBridge->lockData();
-	SimulationDataForAccess cudaData = cudaBridge->retrieveData();
+	cudaWorker->lockData();
+	SimulationAccessTO* cudaData = cudaWorker->retrieveData();
 
-	for (int i = 0; i < cudaData.numParticles; ++i) {
-		ParticleData& particle = cudaData.particles[i];
+	for (int i = 0; i < *cudaData->numParticles; ++i) {
+		ParticleAccessTO& particle = cudaData->particles[i];
 		float2& pos = particle.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		spaceProp->correctPosition(intPos);
@@ -131,9 +178,9 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		}
 	}
 
-	for (int i = 0; i < cudaData.numCells; ++i) {
-		CellData& cell = cudaData.cells[i];
-		float2& pos = cell.absPos;
+	for (int i = 0; i < *cudaData->numCells; ++i) {
+		CellAccessTO& cell = cudaData->cells[i];
+		float2 const& pos = cell.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		spaceProp->correctPosition(intPos);
 		if (_requiredRect.isContained(intPos)) {
@@ -155,7 +202,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		}
 	}
 
-	cudaBridge->unlockData();
+	cudaWorker->unlockData();
 }
 
 void SimulationAccessGpuImpl::createDataFromGpuModel()
@@ -164,7 +211,7 @@ void SimulationAccessGpuImpl::createDataFromGpuModel()
 	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
 
 	cudaBridge->lockData();
-	SimulationDataForAccess cudaData = cudaBridge->retrieveData();
+	SimulationAccessTO* cudaData = cudaBridge->retrieveData();
 	DataConverter converter(cudaData, _numberGen);
 	_dataCollected = converter.getDataDescription(_requiredRect);
 

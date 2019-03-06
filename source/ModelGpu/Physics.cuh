@@ -6,28 +6,29 @@
 #include "CudaInterface.cuh"
 #include "Base.cuh"
 #include "CudaConstants.cuh"
-#include "CudaSimulationParameters.cuh"
+#include "SimulationParameters.cuh"
 #include "Map.cuh"
-#include "SimulationDataInternal.cuh"
+#include "SimulationData.cuh"
 
 
-class CudaPhysics
+class Physics
 {
 public:
 	__inline__ __device__ static void rotationMatrix(float angle, float(&rotMatrix)[2][2]);
+	__inline__ __device__ static void inverseRotationMatrix(float angle, float(&rotMatrix)[2][2]);
 	__inline__ __device__ static void angleCorrection(float &angle);
 	__inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
 	__inline__ __device__ static float angularMomentum(float2 const& positionFromCenter, float2 const& velocityOfCenter);
 	__inline__ __device__ static float angularVelocity(float angularMomentum, float angularMass);
-	__device__ __inline__ static void rotateQuarterCounterClockwise(float2 &v);
-	__device__ __inline__ static float2 calcNormalToCell(CellData *cell, float2 outward);
-	__device__ __inline__ static void calcCollision(float2 const& vA1, float2 const& vB1, float2 const& rAPp, float2 const& rBPp,
+	__inline__ __device__ static void rotateQuarterCounterClockwise(float2 &v);
+	__inline__ __device__ static float2 calcNormalToCell(Cell *cell, float2 outward);
+	__inline__ __device__ static void calcCollision(float2 const& vA1, float2 const& vB1, float2 const& rAPp, float2 const& rBPp,
 		float angularVelA1, float angularVelB1, float2 const& n, float angularMassA, float angularMassB, float massA, float massB,
 		float2& vA2, float2& vB2, float& angularVelA2, float& angularVelB2);
-	__device__ __inline__ static float linearKineticEnergy(float mass, float2 const& vel);
+	__inline__ __device__ static float linearKineticEnergy(float mass, float2 const& vel);
 
 private:
-	__device__ __inline__ static float2 calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map);
+	__device__ __inline__ static float2 calcOutwardVector(Cell* cellA, Cell* cellB, BasicMap const& map);
 	__inline__ __device__ static void angleCorrection(int &angle);
 };
 
@@ -41,22 +42,22 @@ private:
 #define DEG_TO_RAD PI/180.0
 #define RAD_TO_DEG 180.0/PI
 
-__device__ __inline__ void CudaPhysics::rotateQuarterCounterClockwise(float2 &v)
+__device__ __inline__ void Physics::rotateQuarterCounterClockwise(float2 &v)
 {
 	float temp = v.x;
 	v.x = v.y;
 	v.y = -temp;
 }
 
-__device__ __inline__ float2 CudaPhysics::calcNormalToCell(CellData *cell, float2 outward)
+__device__ __inline__ float2 Physics::calcNormalToCell(Cell *cell, float2 outward)
 {
 	normalize(outward);
 	if (cell->numConnections < 2) {
 		return outward;
 	}
 
-	CellData* minCell = nullptr;
-	CellData* maxCell = nullptr;
+	Cell* minCell = nullptr;
+	Cell* maxCell = nullptr;
 	float2 minVector;
 	float2 maxVector;
 	float min_h = 0.0;	//h = angular distance from outward vector
@@ -106,7 +107,7 @@ __device__ __inline__ float2 CudaPhysics::calcNormalToCell(CellData *cell, float
 	return result;
 }
 
-__device__ __inline__ void CudaPhysics::calcCollision(float2 const & vA1, float2 const & vB1, float2 const & rAPp, 
+__device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 const & vB1, float2 const & rAPp, 
 	float2 const & rBPp, float angularVelA1, float angularVelB1, float2 const & n, float angularMassA, 
 	float angularMassB, float massA, float massB, float2 & vA2, float2 & vB2, float & angularVelA2, float & angularVelB2)
 {
@@ -165,19 +166,19 @@ __device__ __inline__ void CudaPhysics::calcCollision(float2 const & vA1, float2
 
 }
 
-__device__ __inline__ float CudaPhysics::linearKineticEnergy(float mass, float2 const & vel)
+__device__ __inline__ float Physics::linearKineticEnergy(float mass, float2 const & vel)
 {
 	return 0.5f * mass * lengthSquared(vel);
 }
 
-__device__ __inline__ float2 CudaPhysics::calcOutwardVector(CellData* cellA, CellData* cellB, BasicMap const& map)
+__device__ __inline__ float2 Physics::calcOutwardVector(Cell* cellA, Cell* cellB, BasicMap const& map)
 {
-	ClusterData* clusterA = cellA->cluster;
+	Cluster* clusterA = cellA->cluster;
 	float2 posA = clusterA->pos;
 	float2 velA = clusterA->vel;
 	float angVelA = clusterA->angularVel * DEG_TO_RAD;
 
-	ClusterData* clusterB = cellB->cluster;
+	Cluster* clusterB = cellB->cluster;
 	float2 posB = clusterB->pos;
 	float2 velB = clusterB->vel;
 	float angVelB = clusterB->angularVel * DEG_TO_RAD;
@@ -191,7 +192,7 @@ __device__ __inline__ float2 CudaPhysics::calcOutwardVector(CellData* cellA, Cel
 	return sub(sub(velB, mul(rBPp, angVelB)), sub(velA, mul(rAPp, angVelA)));
 }
 
-__inline__ __device__ void CudaPhysics::rotationMatrix(float angle, float(&rotMatrix)[2][2])
+__inline__ __device__ void Physics::rotationMatrix(float angle, float(&rotMatrix)[2][2])
 {
 	float sinAngle = __sinf(angle*DEG_TO_RAD);
 	float cosAngle = __cosf(angle*DEG_TO_RAD);
@@ -201,12 +202,22 @@ __inline__ __device__ void CudaPhysics::rotationMatrix(float angle, float(&rotMa
 	rotMatrix[1][1] = cosAngle;
 }
 
-__inline__ __device__ void CudaPhysics::angleCorrection(int &angle)
+__inline__ __device__ void Physics::inverseRotationMatrix(float angle, float(&rotMatrix)[2][2])
+{
+	float sinAngle = __sinf(angle*DEG_TO_RAD);
+	float cosAngle = __cosf(angle*DEG_TO_RAD);
+	rotMatrix[0][0] = cosAngle;
+	rotMatrix[0][1] = sinAngle;
+	rotMatrix[1][0] = -sinAngle;
+	rotMatrix[1][1] = cosAngle;
+}
+
+__inline__ __device__ void Physics::angleCorrection(int &angle)
 {
 	angle = ((angle % 360) + 360) % 360;
 }
 
-__inline__ __device__ void CudaPhysics::angleCorrection(float &angle)
+__inline__ __device__ void Physics::angleCorrection(float &angle)
 {
 	int intPart = (int)angle;
 	float fracPart = angle - intPart;
@@ -214,17 +225,17 @@ __inline__ __device__ void CudaPhysics::angleCorrection(float &angle)
 	angle = (float)intPart + fracPart;
 }
 
-__inline__ __device__ float2 CudaPhysics::tangentialVelocity(float2 const& r, float2 const& vel, float angularVel)
+__inline__ __device__ float2 Physics::tangentialVelocity(float2 const& r, float2 const& vel, float angularVel)
 {
 	return { vel.x - angularVel*r.y * static_cast<float>(DEG_TO_RAD), vel.y + angularVel*r.x * static_cast<float>(DEG_TO_RAD) };
 }
 
-__inline__ __device__ float CudaPhysics::angularMomentum(float2 const & positionFromCenter, float2 const & velocityOfCenter)
+__inline__ __device__ float Physics::angularMomentum(float2 const & positionFromCenter, float2 const & velocityOfCenter)
 {
 	return positionFromCenter.x*velocityOfCenter.y - positionFromCenter.y*velocityOfCenter.x;
 }
 
-__inline__ __device__ float CudaPhysics::angularVelocity(float angularMomentum, float angularMass)
+__inline__ __device__ float Physics::angularVelocity(float angularMomentum, float angularMass)
 {
 	if (std::abs(angularMass) < FP_PRECISION)
 		return 0;

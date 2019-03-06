@@ -8,31 +8,31 @@
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ClusterDynamics.cuh"
-#include "ClusterBuilder.cuh"
+#include "ClusterReorganizer.cuh"
 #include "ParticleDynamics.cuh"
-#include "ParticleBuilder.cuh"
+#include "ParticleReorganizer.cuh"
 
 /************************************************************************/
 /* Clusters																*/
 /************************************************************************/
 
-__device__ void clusterBuilding(SimulationDataInternal &data, int clusterIndex)
+__device__ void clusterReorganizing(SimulationData &data, int clusterIndex)
 {
-	__shared__ ClusterBuilder reassembler;
+	__shared__ ClusterReorganizer builder;
 	if (0 == threadIdx.x) {
-		reassembler.init(data, clusterIndex);
+		builder.init(data, clusterIndex);
 	}
 	__syncthreads();
 
 	int startCellIndex;
 	int endCellIndex;
-	calcPartition(reassembler.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+	calcPartition(builder.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	reassembler.processingDecomposition(startCellIndex, endCellIndex);
-	reassembler.processingDataCopy(startCellIndex, endCellIndex);
+	builder.processingDecomposition(startCellIndex, endCellIndex);
+	builder.processingDataCopy(startCellIndex, endCellIndex);
 }
 
-__global__ void clusterBuilding(SimulationDataInternal data)
+__global__ void clusterReorganizing(SimulationData data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
@@ -44,26 +44,26 @@ __global__ void clusterBuilding(SimulationDataInternal data)
 	int endIndex;
 	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterBuilding(data, clusterIndex);
+		clusterReorganizing(data, clusterIndex);
 	}
 }
 
-__device__ void clusterDynamicsStep1(SimulationDataInternal &data, int clusterIndex)
+__device__ void clusterDynamicsStep1(SimulationData &data, int clusterIndex)
 {
-	__shared__ ClusterDynamics mover;
+	__shared__ ClusterDynamics cluster;
 	if (0 == threadIdx.x) {
-		mover.init(data, clusterIndex);
+		cluster.init(data, clusterIndex);
 	}
 	__syncthreads();
 
 	int startCellIndex;
 	int endCellIndex;
-	calcPartition(mover.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+	calcPartition(cluster.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	mover.processingMovement(startCellIndex, endCellIndex);
+	cluster.processingMovement(startCellIndex, endCellIndex);
 }
 
-__global__ void clusterDynamicsStep1(SimulationDataInternal data)
+__global__ void clusterDynamicsStep1(SimulationData data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
@@ -79,24 +79,24 @@ __global__ void clusterDynamicsStep1(SimulationDataInternal data)
 	}
 }
 
-__device__ void clusterDynamicsStep2(SimulationDataInternal &data, int clusterIndex)
+__device__ void clusterDynamicsStep2(SimulationData &data, int clusterIndex)
 {
-	__shared__ ClusterDynamics mover;
+	__shared__ ClusterDynamics cluster;
 	if (0 == threadIdx.x) {
-		mover.init(data, clusterIndex);
+		cluster.init(data, clusterIndex);
 	}
 	__syncthreads();
 
 	int startCellIndex;
 	int endCellIndex;
-	calcPartition(mover.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+	calcPartition(cluster.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
-	mover.destroyCloseCell(startCellIndex, endCellIndex);
-	mover.processingRadiation(startCellIndex, endCellIndex);
-	mover.processingCollision(startCellIndex, endCellIndex);	//attention: can result an temporarily inconsistent state
+	cluster.destroyCloseCell(startCellIndex, endCellIndex);
+	cluster.processingRadiation(startCellIndex, endCellIndex);
+	cluster.processingCollision(startCellIndex, endCellIndex);	//attention: can result an temporarily inconsistent state
 }
 
-__global__ void clusterDynamicsStep2(SimulationDataInternal data)
+__global__ void clusterDynamicsStep2(SimulationData data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
@@ -116,7 +116,7 @@ __global__ void clusterDynamicsStep2(SimulationDataInternal data)
 /* Particles															*/
 /************************************************************************/
 
-__global__ void particleDynamicsStep1(SimulationDataInternal data)
+__global__ void particleDynamicsStep1(SimulationData data)
 {
 	__shared__ ParticleDynamics blockProcessor;
 	if (0 == threadIdx.x) {
@@ -134,7 +134,7 @@ __global__ void particleDynamicsStep1(SimulationDataInternal data)
 	blockProcessor.processingTransformation(startIndex, endIndex);
 }
 
-__global__ void particleDynamicsStep2(SimulationDataInternal data)
+__global__ void particleDynamicsStep2(SimulationData data)
 {
 	__shared__ ParticleDynamics blockProcessor;
 	if (0 == threadIdx.x) {
@@ -151,9 +151,9 @@ __global__ void particleDynamicsStep2(SimulationDataInternal data)
 	blockProcessor.processingCollision(startIndex, endIndex);
 }
 
-__global__ void particleBuilding(SimulationDataInternal data)
+__global__ void particleReorganizing(SimulationData data)
 {
-	__shared__ ParticleBuilder blockProcessor;
+	__shared__ ParticleReorganizer blockProcessor;
 	if (0 == threadIdx.x) {
 		blockProcessor.init(data);
 	}
@@ -168,7 +168,7 @@ __global__ void particleBuilding(SimulationDataInternal data)
 	blockProcessor.processingDataCopy(startIndex, endIndex);
 }
 
-__device__ void clearCellCluster(SimulationDataInternal const &data, int clusterIndex)
+__device__ void clearCellCluster(SimulationData const &data, int clusterIndex)
 {
 	auto const &oldCluster = data.clustersAC1.getEntireArray()[clusterIndex];
 
@@ -179,7 +179,7 @@ __device__ void clearCellCluster(SimulationDataInternal const &data, int cluster
 	if (threadIdx.x >= oldNumCells) {
 		return;
 	}
-	Map<CellData> map;
+	Map<Cell> map;
 	map.init(size, data.cellMap);
 
 	calcPartition(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
@@ -189,16 +189,16 @@ __device__ void clearCellCluster(SimulationDataInternal const &data, int cluster
 	}
 }
 
-__device__ void clearParticle(SimulationDataInternal const &data, int particleIndex)
+__device__ void clearParticle(SimulationData const &data, int particleIndex)
 {
-	Map<ParticleData> map;
+	Map<Particle> map;
 	map.init(data.size, data.particleMap);
 
 	auto const &particle = data.particlesAC1.getEntireArray()[particleIndex];
 	map.set(particle.pos, nullptr);
 }
 
-__global__ void clearMaps(SimulationDataInternal data)
+__global__ void clearMaps(SimulationData data)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();

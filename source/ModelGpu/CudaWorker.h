@@ -17,11 +17,11 @@ public:
 
 	void init(SpaceProperties* metric);
 
-	void requireData();
+	void requireData(IntRect const& rect);
 	Q_SIGNAL void dataObtained();	//only for queued connection (due to mutex)
 	void lockData();
 	void unlockData();
-	SimulationDataForAccess& retrieveData();
+	SimulationAccessTO* retrieveData();
 	void updateData();
 
 	bool isSimulationRunning();
@@ -48,9 +48,10 @@ private:
 	bool _simRunning = false;
 	bool _requireData = false;
 	bool _updateData = false;
+	IntRect _requiredRect;
 
 	std::mutex _mutexForFlags;
 	std::mutex _mutexForData;
-	SimulationDataForAccess _cudaData;
-	CudaSimulator* _simDataManager = nullptr;
+	SimulationAccessTO* _cudaData;
+	CudaSimulation* _cudaSimulation = nullptr;
 };
