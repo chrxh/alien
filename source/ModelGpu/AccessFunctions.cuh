@@ -147,16 +147,16 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
 		for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			Cell& cell = cluster.cells[cellIndex];
 			newCells[cellIndex] = cell;
-			cell.cluster = newCluster;
+			newCells[cellIndex].cluster = newCluster;
 			cell.nextTimestep = &newCells[cellIndex];
 		}
 		__syncthreads();
 
 		for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			Cell& cell = cluster.cells[cellIndex];
-			int numConnections = cell.numConnections;
+			Cell& newCell = newCells[cellIndex];
+			int numConnections = newCell.numConnections;
 			for (int i = 0; i < numConnections; ++i) {
-				cell.connections[i] = cell.connections[i]->nextTimestep;
+				newCell.connections[i] = newCell.connections[i]->nextTimestep;
 			}
 		}
 	}
@@ -218,7 +218,6 @@ public:
 		for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			Cell& cell = cluster->cells[cellIndex];
 			CellAccessTO const& cellTO =  _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
-			atomicAdd(&angularMass, lengthSquared(cell.relPos));
 			cell.id = cellTO.id;
 			cell.cluster = cluster;
 			cell.absPos = cellTO.pos;
@@ -226,6 +225,7 @@ public:
 			float2 deltaPos = sub(cell.absPos, cluster->pos);
 			cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
 			cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
+			atomicAdd(&angularMass, lengthSquared(cell.relPos));
 		
 			auto r = sub(cell.absPos, cluster->pos);
 			_map.mapDisplacementCorrection(r);
