@@ -192,10 +192,14 @@ public:
 		__shared__ Cluster* cluster;
 		__shared__ float angularMass;
 		__shared__ float invRotMatrix[2][2];
+		__shared__ float2 posCorrection;
+
 		if (0 == threadIdx.x) {
 			cluster = _data->clustersAC2.getNewElement();
 			cluster->id = clusterTO.id;
 			cluster->pos = clusterTO.pos;
+			_map.mapPosCorrection(cluster->pos);
+			posCorrection = sub(cluster->pos, clusterTO.pos);
 			cluster->vel = clusterTO.vel;
 			cluster->angle = clusterTO.angle;
 			cluster->angularVel = clusterTO.angularVel;
@@ -220,9 +224,9 @@ public:
 			CellAccessTO const& cellTO =  _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
 			cell.id = cellTO.id;
 			cell.cluster = cluster;
-			cell.absPos = cellTO.pos;
+			cell.absPos = add(cellTO.pos, posCorrection);
 
-			float2 deltaPos = sub(cell.absPos, cluster->pos);
+			float2 deltaPos = sub(cell.absPos, clusterTO.pos);
 			cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
 			cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
 			atomicAdd(&angularMass, lengthSquared(cell.relPos));
@@ -255,6 +259,7 @@ public:
 		Particle* particle = _data->particlesAC2.getNewElement();
 		particle->id = particleTO.id;
 		particle->pos = particleTO.pos;
+		_map.mapPosCorrection(particle->pos);
 		particle->vel = particleTO.vel;
 		particle->energy = particleTO.energy;
 		particle->locked = 0;
@@ -301,6 +306,7 @@ __device__ void convertData(SimulationData data, SimulationAccessTO const& simul
 		converter.createClusterFromTO(simulationTO.clusters[clusterIndex]);
 	}
 
+	indexResource = threadIdx.x + blockIdx.x * blockDim.x;
 	numEntities = *simulationTO.numParticles;
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
 	for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
