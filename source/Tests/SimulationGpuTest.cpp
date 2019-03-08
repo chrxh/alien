@@ -706,7 +706,7 @@ TEST_F(SimulationGpuTest, DISABLED_testSidewiseCollisionOfTraversalLineClusters_
 TEST_F(SimulationGpuTest, testFusionOfSingleParticles)
 {
 	DataDescription origData;
-	auto particleEnergy = _parameters->cellMinEnergy / 2.0;
+	auto particleEnergy = _parameters->cellMinEnergy / 3.0;
 
 	auto particleId1 = _numberGen->getId();
 	auto particle1 = ParticleDescription().setId(particleId1).setEnergy(particleEnergy).setPos({ 100, 100 }).setVel({ 0.5, 0.0 });
@@ -726,18 +726,24 @@ TEST_F(SimulationGpuTest, testFusionOfSingleParticles)
 	ASSERT_EQ(1, newData.particles->size());
 	auto newParticle = newData.particles->front();
 	EXPECT_TRUE(isCompatible(QVector2D(0, 0), *newParticle.vel));
+
+	checkEnergy(origData, newData);
+
 }
 
 /**
-* Situation: fusion of two particles
-* Expected result: one particle remains with average velocity
+* Situation: fusion of many particles
+* Expected result: energy balance is fulfilled
 */
 TEST_F(SimulationGpuTest, testFusionOfManyParticles)
 {
+	auto particleEnergy = _parameters->cellMinEnergy / 120.0;
+
 	DataDescription origData;
-	for (int i = 0; i < 100000; ++i) {
-		origData.addParticle(createParticle());
-	}
+	for (int i = 0; i < 100; ++i) {
+        origData.addParticle(
+            ParticleDescription().setId(_numberGen->getId()).setEnergy(particleEnergy).setPos({100, 100}).setVel({0.5, 0.0}));
+    }
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(300, _controller);
@@ -883,26 +889,48 @@ TEST_F(SimulationGpuTest, testDestructionOfTooCloseCells)
 }
 
 /**
-* Situation: two horizontal clusters are approaching each others vertically
+* Situation: two horizontal clusters are approaching each others vertically above critical speed
 * Expected result: fusion should take place
 */
 TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 {
-	float fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+	float velocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0));
-	origData.addCluster(createHorizontalCluster(12, QVector2D{ 100, 105 }, QVector2D{ 0, -fusionVelocity }, 0.0));
+	origData.addCluster(createHorizontalCluster(12, QVector2D{ 100, 105 }, QVector2D{ 0, -velocity }, 0.0));
 	setMaxConnections(origData.clusters->at(0), 3);
 	setMaxConnections(origData.clusters->at(1), 3);
 
 	IntegrationTestHelper::updateData(_access, origData);
-	int duration = static_cast<int>((5.0f / fusionVelocity) + 5);
+	int duration = static_cast<int>((5.0f / velocity) + 5);
 	IntegrationTestHelper::runSimulation(duration, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
+}
+
+/**
+* Situation: two horizontal clusters are approaching each others vertically below critical speed
+* Expected result: fusion should take place
+*/
+TEST_F(SimulationGpuTest, testNoFusionOfHorizontalClusters)
+{
+	float velocity = static_cast<float>(_parameters->cellFusionVelocity) - 0.1f;
+
+	DataDescription origData;
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(12, QVector2D{ 100, 105 }, QVector2D{ 0, -velocity }, 0.0));
+	setMaxConnections(origData.clusters->at(0), 3);
+	setMaxConnections(origData.clusters->at(1), 3);
+
+	IntegrationTestHelper::updateData(_access, origData);
+	int duration = static_cast<int>((5.0f / velocity) + 5);
+	IntegrationTestHelper::runSimulation(duration, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(2, newData.clusters->size());
 }
 
 /**
@@ -1029,7 +1057,7 @@ TEST_F(SimulationGpuTest, testFastRotatingCluster)
 			numCells += cluster.cells->size();
 		}
 	}
-	EXPECT_GE(50, numCells);
+	EXPECT_LE(2, newData.clusters->size());
 }
 
 /**
