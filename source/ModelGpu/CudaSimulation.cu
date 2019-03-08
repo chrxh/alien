@@ -360,7 +360,7 @@ void CudaSimulation::setCudaSimulationParameters()
 	parametersToCopy.cellMaxDistance = 1.3f;
 	parametersToCopy.cellMinDistance = 0.3f;
 	parametersToCopy.cellMinEnergy = 50.0f;
-	parametersToCopy.cellFusionVelocity = 0.8f;
+	parametersToCopy.cellFusionVelocity = 0.4f;
 	parametersToCopy.cellMaxForce = 0.8f;
 	parametersToCopy.cellMaxForceDecayProb = 0.2f;
 	parametersToCopy.cellTransformationProb = 0.2f;
