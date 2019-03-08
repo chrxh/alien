@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
@@ -26,22 +27,6 @@ static __inline__ __device__ double atomicAdd(double *address, double val) {
 #endif
 
 
-template<class T>
-struct SharedMemory
-{
-	__device__ inline operator T *()
-	{
-		extern __shared__ int __smem[];
-		return (T *)__smem;
-	}
-
-	__device__ inline operator const T *() const
-	{
-		extern __shared__ int __smem[];
-		return (T *)__smem;
-	}
-};
-
 class CudaNumberGenerator
 {
 private:
@@ -56,24 +41,20 @@ public:
 	void init(int size)
 	{
 		_size = size;
-		int device;
-		cudaDeviceProp prop;
-		cudaGetDevice(&device);
-		cudaGetDeviceProperties(&prop, device);
 
-		cudaMallocManaged(&_currentIndex, sizeof(unsigned int));
-		cudaMallocManaged(&_array, sizeof(int)*size);
-		cudaMallocManaged(&_currentId, sizeof(uint64_t));
-		checkCudaErrors(cudaGetLastError());
-		cudaDeviceSynchronize();
+		checkCudaErrors(cudaMalloc(&_currentIndex, sizeof(unsigned int)));
+		checkCudaErrors(cudaMalloc(&_array, sizeof(int)*size));
+		checkCudaErrors(cudaMalloc(&_currentId, sizeof(uint64_t)));
 
-		*_currentIndex = 0;
+		checkCudaErrors(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
+		uint64_t hostCurrentId = 0;
+		checkCudaErrors(cudaMemcpy(_currentId, &hostCurrentId, sizeof(uint64_t), cudaMemcpyHostToDevice));
 
+		std::vector<int> randomNumbers(size);
 		for (int i = 0; i < size; ++i) {
-			_array[i] = rand();
+			randomNumbers[i] = rand();
 		}
-		*_currentId = 0;
-		cudaDeviceSynchronize();
+		checkCudaErrors(cudaMemcpy(_array, randomNumbers.data(), sizeof(int)*size, cudaMemcpyHostToDevice));
 	}
 
 	__device__ __inline__ float random(int maxVal)
@@ -128,44 +109,27 @@ public:
 	ArrayController()
 		: _size(0)
 	{
-		cudaMallocManaged(&_numEntries, sizeof(int));
-		cudaDeviceSynchronize();
-		checkCudaErrors(cudaGetLastError());
-
-		cudaDeviceSynchronize();
-		*_numEntries = 0;
-		cudaDeviceSynchronize();
+		checkCudaErrors(cudaMalloc(&_numEntries, sizeof(int)));
+		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
 	}
 
 	ArrayController(int size)
 		: _size(size)
 	{
-		cudaMallocManaged(&_data, sizeof(T) * size);
-		cudaMallocManaged(&_numEntries, sizeof(int));
-		cudaDeviceSynchronize();
-		checkCudaErrors(cudaGetLastError());
-
-		cudaDeviceSynchronize();
-		*_numEntries = 0;
-		cudaDeviceSynchronize();
+		checkCudaErrors(cudaMalloc(&_data, sizeof(T) * size));
+		checkCudaErrors(cudaMalloc(&_numEntries, sizeof(int)));
+		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
 	}
 
 	void free()
 	{
-		cudaFree(_data);
-		cudaFree(_numEntries);
+		checkCudaErrors(cudaFree(_data));
+		checkCudaErrors(cudaFree(_numEntries));
 	}
 
-	__host__ __device__ __inline__ void reset()
+	void reset()
 	{
-		*_numEntries = 0;
-	}
-
-	T* getArray(int size)
-	{
-		int oldIndex = *_numEntries;
-		*_numEntries += size;
-		return &_data[oldIndex];
+		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
 	}
 
 	__device__ __inline__ T* getNewSubarray(int size)
@@ -180,22 +144,22 @@ public:
 		return &_data[oldIndex];
 	}
 
-	__host__ __device__ __inline__ T* at(int index)
+	__device__ __inline__ T* at(int index)
 	{
 		return &_data[index];
 	}
 
-	__host__ __device__ __inline__ int getNumEntries() const
+	__device__ __inline__ int getNumEntries() const
 	{
 		return *_numEntries;
 	}
 
-	__host__ __device__ __inline__ T* getEntireArray() const
+	__device__ __inline__ T* getEntireArray() const
 	{
 		return _data;
 	}
 
-	__host__ __device__ __inline__ void setNumEntries(int value) const
+	__device__ __inline__ void setNumEntries(int value) const
 	{
 		*_numEntries = value;
 	}
@@ -327,11 +291,9 @@ public:
 	{
 		if (0 == _lockState1) {
 			atomicExch(_lock1, 0);
-// 			*_lock1 = 0;
 		}
 		if (0 == _lockState2) {
 			atomicExch(_lock2, 0);
-// 			*_lock2 = 0;
 		}
 	}
 };
