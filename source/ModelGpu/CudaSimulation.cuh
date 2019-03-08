@@ -18,14 +18,10 @@ public:
 private:
 	void prepareTargetData();
 	void swapData();
-/*
-	void correctPointersAfterCellCopy(CellAccessTO* cell, int64_t addressShiftCell, int64_t addressShiftCluster);
-	void correctPointersAfterClusterCopy(ClusterAccessTO* cluster, int64_t addressShiftCell);
-*/
 	void setCudaSimulationParameters();
 
 	cudaStream_t _cudaStream;
-	SimulationData* _data = nullptr;
+	SimulationData* _internalData;
 	int2 _rectUpperLeft = { 0,0 };
 	int2 _rectLowerRight = { 0,0 };
 	SimulationAccessTO* _accessTO;
