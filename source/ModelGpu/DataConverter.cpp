@@ -197,29 +197,27 @@ DataDescription DataConverter::getDataDescription(IntRect const& requiredRect) c
 	list<uint64_t> connectingCellIds;
 	for (int i = 0; i < *_simulationTO->numClusters; ++i) {
 		ClusterAccessTO const& cluster = _simulationTO->clusters[i];
-		if (requiredRect.isContained({ int(cluster.pos.x), int(cluster.pos.y) })) {
-			auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
-				.setVel({ cluster.vel.x, cluster.vel.y })
-				.setAngle(cluster.angle)
-				.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
+		auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
+			.setVel({ cluster.vel.x, cluster.vel.y })
+			.setAngle(cluster.angle)
+			.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
 
-			for (int j = 0; j < cluster.numCells; ++j) {
-				CellAccessTO const& cell = _simulationTO->cells[cluster.cellStartIndex + j];
-				auto pos = cell.pos;
-				auto id = cell.id;
-				connectingCellIds.clear();
-				for (int i = 0; i < cell.numConnections; ++i) {
-					connectingCellIds.emplace_back(_simulationTO->cells[cell.connectionIndices[i]].id);
-				}
-				clusterDesc.addCell(
-					CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
-					.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
-					.setConnectingCells(connectingCellIds).setMaxConnections(cell.maxConnections).setFlagTokenBlocked(false)
-					.setTokenBranchNumber(0).setMetadata(CellMetadata())
-				);
+		for (int j = 0; j < cluster.numCells; ++j) {
+			CellAccessTO const& cell = _simulationTO->cells[cluster.cellStartIndex + j];
+			auto pos = cell.pos;
+			auto id = cell.id;
+			connectingCellIds.clear();
+			for (int i = 0; i < cell.numConnections; ++i) {
+				connectingCellIds.emplace_back(_simulationTO->cells[cell.connectionIndices[i]].id);
 			}
-			result.addCluster(clusterDesc);
+			clusterDesc.addCell(
+				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
+				.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
+				.setConnectingCells(connectingCellIds).setMaxConnections(cell.maxConnections).setFlagTokenBlocked(false)
+				.setTokenBranchNumber(0).setMetadata(CellMetadata())
+			);
 		}
+		result.addCluster(clusterDesc);
 	}
 
 	for (int i = 0; i < *_simulationTO->numParticles; ++i) {
