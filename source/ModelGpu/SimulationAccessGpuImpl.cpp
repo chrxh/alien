@@ -173,9 +173,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		float2& pos = particle.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		space->correctPosition(intPos);
-		if (_requiredRect.isContained(intPos)) {
-			_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
-		}
+		_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
 	}
 
 	for (int i = 0; i < *simulationTO->numCells; ++i) {
@@ -183,23 +181,21 @@ void SimulationAccessGpuImpl::createImageFromGpuModel()
 		float2 const& pos = cell.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		space->correctPosition(intPos);
-		if (_requiredRect.isContained(intPos)) {
-			uint32_t color = EntityRenderer::calcCellColor(0, 0, cell.energy);
-			_requiredImage->setPixel(intPos.x, intPos.y, color);
-			--intPos.x;
-			space->correctPosition(intPos);
-			colorPixel(_requiredImage, intPos, color, 0x60);
-			intPos.x += 2;
-			space->correctPosition(intPos);
-			colorPixel(_requiredImage, intPos, color, 0x60);
-			--intPos.x;
-			--intPos.y;
-			space->correctPosition(intPos);
-			colorPixel(_requiredImage, intPos, color, 0x60);
-			intPos.y += 2;
-			space->correctPosition(intPos);
-			colorPixel(_requiredImage, intPos, color, 0x60);
-		}
+		uint32_t color = EntityRenderer::calcCellColor(0, 0, cell.energy);
+		_requiredImage->setPixel(intPos.x, intPos.y, color);
+		--intPos.x;
+		space->correctPosition(intPos);
+		colorPixel(_requiredImage, intPos, color, 0x60);
+		intPos.x += 2;
+		space->correctPosition(intPos);
+		colorPixel(_requiredImage, intPos, color, 0x60);
+		--intPos.x;
+		--intPos.y;
+		space->correctPosition(intPos);
+		colorPixel(_requiredImage, intPos, color, 0x60);
+		intPos.y += 2;
+		space->correctPosition(intPos);
+		colorPixel(_requiredImage, intPos, color, 0x60);
 	}
 
 	cudaWorker->unlockData();
