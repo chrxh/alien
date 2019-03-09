@@ -60,7 +60,7 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
 	).setId(clusterId).setPos({ 1, 2 }).setVel({ -1, 1 }).setAngle(23).setAngularVel(1.2).setMetadata(clusterMetadata);
 }
 
-ClusterDescription IntegrationTestFramework::createRectangleCluster(IntVector2D const & size, optional<QVector2D> const & centerPos, 
+ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2D const & size, optional<QVector2D> const & centerPos, 
 	optional<QVector2D> const & centerVel) const
 {
 	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
