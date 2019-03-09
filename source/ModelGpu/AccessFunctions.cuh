@@ -21,14 +21,17 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 
 	__shared__ bool containedInRect;
 	__shared__ CellAccessTO* cellTOs;
+	__shared__ BasicMap map;
 	if (0 == threadIdx.x) {
 		containedInRect = false;
+		map.init(data.size);
 	}
 	__syncthreads();
 
 	for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		Cell const& cell = cluster.cells[cellIndex];
-		if (isContained(rectUpperLeft, rectLowerRight, cell.absPos)) {
+		auto pos = cluster.cells[cellIndex].absPos;
+		map.mapPosCorrection(pos);
+		if (isContained(rectUpperLeft, rectLowerRight, pos)) {
 			containedInRect = true;
 		}
 	}
