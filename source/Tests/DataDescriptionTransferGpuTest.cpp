@@ -126,3 +126,38 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateDataOutsideBoundaries)
 	EXPECT_TRUE(isCompatible(*origParticle.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newParticle.pos));
 
 }
+
+/**
+* Situation:
+* 	- one cluster with 10x10 cell and one particle
+*	- particle and some cells are moved via update
+* Fixed error: crash after moving cells in a cluster in item view
+* Expected result: no crash
+*/
+TEST_F(DataDescriptionTransferGpuTest, regressionTest_changeData)
+{
+	auto descHelper = _basicFacade->buildDescriptionHelper();
+	descHelper->init(_context);
+
+	auto size = _spaceProp->getSize();
+	DataDescription dataBefore;
+	dataBefore.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ size.x / 2.0f, size.y / 2.0f }, QVector2D{}));
+	dataBefore.addParticle(createParticle(QVector2D{ 0, 0 }));
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+
+	auto dataModified = dataBefore;
+	unordered_set<uint64_t> idsOfChangedCells;
+	for(int i = 0; i < 10; ++i) {
+		auto& cluster = dataModified.clusters->at(0);
+		auto& cell = cluster.cells->at(i);
+		cell.pos->setX(cell.pos->x() + 50.0f);
+		idsOfChangedCells.insert(cell.id);
+	}
+	auto& particle = dataModified.particles->at(0);
+	particle.pos->setX(particle.pos->x() + 50.0f);
+
+
+	descHelper->reconnect(dataModified, dataBefore, idsOfChangedCells);
+	EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataModified)));
+}
