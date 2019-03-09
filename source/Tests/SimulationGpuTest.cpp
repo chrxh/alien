@@ -479,8 +479,8 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfParallelLineClusters)
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfRectangleClusters)
 {
 	DataDescription origData;
-	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
-	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{ 105, 120 }, QVector2D{ 0, -0.5f }));
+	origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 105, 120 }, QVector2D{ 0, -0.5f }));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
@@ -516,10 +516,10 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfRectangleClusters)
 TEST_F(SimulationGpuTest, testSidewiseCollisionOfRectangleClusters_withAngularVelocities)
 {
 	DataDescription origData;
-	auto cluster1 = createRectangleCluster({ 20, 20 }, QVector2D{ 457.46f, 356.37f }, QVector2D{ -0.011f, -0.077f });
+	auto cluster1 = createRectangularCluster({ 20, 20 }, QVector2D{ 457.46f, 356.37f }, QVector2D{ -0.011f, -0.077f });
 	cluster1.angle = 1.409;
 	cluster1.angularVel = -0.271;
-	auto cluster2 = createRectangleCluster({ 20, 20 }, QVector2D{ 476.24f, 341.08f }, QVector2D{ -0.088f, 0.061f });
+	auto cluster2 = createRectangularCluster({ 20, 20 }, QVector2D{ 476.24f, 341.08f }, QVector2D{ -0.088f, 0.061f });
 	cluster2.angle = 307.34;
 	cluster2.angularVel = 0.394;
 	origData.addCluster(cluster1);
@@ -1027,7 +1027,7 @@ TEST_F(SimulationGpuTest, testFastMovingCluster)
 	auto size = _spaceProp->getSize();
 	float cellMaxForce = static_cast<float>(_parameters->cellMaxForce);
 	DataDescription origData;
-	origData.addCluster(createRectangleCluster({ 10, 10 }, QVector2D{size.x / 2.0f, size.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
+	origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{size.x / 2.0f, size.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
@@ -1091,8 +1091,8 @@ TEST_F(SimulationGpuTest, regressionTest_overlappingRectangleClusters_manyThread
 	float closeDistance = static_cast<float>(_parameters->cellMinDistance) / 2.0f;
 
 	DataDescription origData;
-	origData.addCluster(createRectangleCluster({ 20, 20 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
-	origData.addCluster(createRectangleCluster({ 20, 20 }, QVector2D{ 105.0f + closeDistance, 105 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createRectangularCluster({ 20, 20 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
+	origData.addCluster(createRectangularCluster({ 20, 20 }, QVector2D{ 105.0f + closeDistance, 105 }, QVector2D{ 0, 0 }));
 
 	IntegrationTestHelper::updateData(_access, origData);
 	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1, _controller));
@@ -1112,7 +1112,7 @@ TEST_F(SimulationGpuTest, regressionTest_manyOverlappingRectangleClusters)
 
 	DataDescription origData;
 	for (int i = 0; i < 40; ++i) {
-		origData.addCluster(createRectangleCluster({ 20, 20 }, QVector2D{ 100.0f + 5.0f*i, 100}, QVector2D{ -2.0f + 3.2f*i, -2.0f + 3.2f*i }));
+		origData.addCluster(createRectangularCluster({ 20, 20 }, QVector2D{ 100.0f + 5.0f*i, 100}, QVector2D{ -2.0f + 3.2f*i, -2.0f + 3.2f*i }));
 	}
 
 	IntegrationTestHelper::updateData(_access, origData);
