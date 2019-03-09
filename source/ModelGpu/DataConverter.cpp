@@ -132,7 +132,7 @@ void DataConverter::processDeletionsAndModifications()
 			applyChangeDescription(cluster, _clusterToModifyById.at(clusterId));
 		}
 	}
-	_simulationTO->numClusters -= clusterIndexCopyOffset;
+	*_simulationTO->numClusters -= clusterIndexCopyOffset;
 
 	//delete and modify cells
 	int cellIndexCopyOffset = 0;
@@ -152,7 +152,7 @@ void DataConverter::processDeletionsAndModifications()
 			applyChangeDescription(cell, _cellToModifyById.at(cellId));
 		}
 	}
-	_simulationTO->numCells -= cellIndexCopyOffset;
+	*_simulationTO->numCells -= cellIndexCopyOffset;
 
 	//delete and modify particles
 	int particleIndexCopyOffset = 0;
@@ -170,7 +170,7 @@ void DataConverter::processDeletionsAndModifications()
 			applyChangeDescription(particle, _particleToModifyById.at(particleId));
 		}
 	}
-	_simulationTO->numParticles -= particleIndexCopyOffset;
+	*_simulationTO->numParticles -= particleIndexCopyOffset;
 
 	//adjust cell and cluster pointers
 	for (int clusterIndex = 0; clusterIndex < *_simulationTO->numClusters; ++clusterIndex) {
