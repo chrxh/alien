@@ -57,21 +57,32 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 
 	CudaJob job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastRect, _dataTOCache.getDataTO(), updateDescCorrected);
 	cudaWorker->addJob(job);
+	_updateInProgress = true;
 }
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
 	_lastRect = rect;
-	auto cudaWorker = _context->getCudaController()->getCudaWorker();
+	auto worker = _context->getCudaController()->getCudaWorker();
 	CudaJob job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache.getDataTO());
-	cudaWorker->addJob(job);
+	if (!_updateInProgress) {
+		worker->addJob(job);
+	}
+	else {
+		_waitingJobs.push_back(job);
+	}
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 {
-	auto cudaWorker = _context->getCudaController()->getCudaWorker();
+	auto worker = _context->getCudaController()->getCudaWorker();
 	CudaJob job = boost::make_shared<_GetDataForImageJob>(getObjectId(), rect, _dataTOCache.getDataTO(), target);
-	cudaWorker->addJob(job);
+	if (!_updateInProgress) {
+		worker->addJob(job);
+	}
+	else {
+		_waitingJobs.push_back(job);
+	}
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -107,6 +118,11 @@ void SimulationAccessGpuImpl::jobsFinished()
 
 		if (auto const& setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
 			_dataTOCache.releaseDataTO(setDataJob->getDataTO());
+			_updateInProgress = false;
+			for (auto const& job : _waitingJobs) {
+				worker->addJob(job);
+			}
+			_waitingJobs.clear();
 		}
 	}
 }
@@ -121,18 +137,6 @@ void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, DataC
 	cudaWorker->addJob(job);
 }
 
-namespace
-{
-	void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
-	{
-		QRgb const& origColor = image->pixel(pos.x, pos.y);
-
-		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
-		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
-		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
-		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
-	}
-}
 void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO, QImage* targetImage)
 {
 	auto space = _context->getSpaceProperties();
@@ -157,17 +161,17 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 		targetImage->setPixel(intPos.x, intPos.y, color);
 		--intPos.x;
 		space->correctPosition(intPos);
-		colorPixel(targetImage, intPos, color, 0x60);
+		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
 		intPos.x += 2;
 		space->correctPosition(intPos);
-		colorPixel(targetImage, intPos, color, 0x60);
+		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
 		--intPos.x;
 		--intPos.y;
 		space->correctPosition(intPos);
-		colorPixel(targetImage, intPos, color, 0x60);
+		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
 		intPos.y += 2;
 		space->correctPosition(intPos);
-		colorPixel(targetImage, intPos, color, 0x60);
+		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
 	}
 }
 
