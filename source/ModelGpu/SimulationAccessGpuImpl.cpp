@@ -15,7 +15,7 @@
 namespace
 {
 	const string SimulationAccessGpuId = "SimulationAccessGpuId";
-	const int NumDataTOs = 4;
+	const int NumDataTOs = 6;
 }
 
 SimulationAccessGpuImpl::SimulationAccessGpuImpl(QObject* parent /*= nullptr*/)
@@ -254,6 +254,8 @@ void SimulationAccessGpuImpl::DataTOCache::releaseDataTO(DataAccessTO const & da
 	auto usedDataTO = std::find_if(_usedDataTOs.begin(), _usedDataTOs.end(), [&dataTO](DataAccessTO const& usedDataTO) {
 		return usedDataTO.numClusters == dataTO.numClusters;
 	});
-	_freeDataTOs.push_back(*usedDataTO);
-	_usedDataTOs.erase(usedDataTO);
+	if (usedDataTO != _usedDataTOs.end()) {
+		_freeDataTOs.push_back(*usedDataTO);
+		_usedDataTOs.erase(usedDataTO);
+	}
 }

@@ -56,11 +56,22 @@ vector<CudaJob> CudaWorker::getFinishedJobs(string const & originId)
 void CudaWorker::run()
 {
 	do {
+		QElapsedTimer timer;
+		timer.start();
+
 		processJobs();
+
 		if (isSimulationRunning()) {
 			_cudaSimulation->calcNextTimestep();
+			if (_tpsRestriction) {
+				int remainingTime = 1000000 / (*_tpsRestriction) - timer.nsecsElapsed() / 1000;
+				if (remainingTime > 0) {
+					QThread::usleep(remainingTime);
+				}
+			}
 			Q_EMIT timestepCalculated();
 		}
+
 		std::unique_lock<std::mutex> uniqueLock(_mutex);
 		if (!_jobs.empty() && !_terminate) {
 			_condition.wait(uniqueLock, [this]() {
@@ -103,6 +114,10 @@ void CudaWorker::processJobs()
 		if (auto calcSingleTimestepJob = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
 			_cudaSimulation->calcNextTimestep();
 			Q_EMIT timestepCalculated();
+		}
+
+		if (auto tpsRestrictionJob = boost::dynamic_pointer_cast<_TpsRestrictionJob>(job)) {
+			_tpsRestriction = tpsRestrictionJob->getTpsRestriction();
 		}
 
 		if (job->isNotifyFinish()) {
