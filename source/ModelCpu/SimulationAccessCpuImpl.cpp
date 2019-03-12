@@ -361,19 +361,6 @@ namespace
 	}
 }
 
-namespace
-{
-	void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
-	{
-		QRgb const& origColor = image->pixel(pos.x, pos.y);
-
-		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
-		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
-		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
-		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
-	}
-}
-
 void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 {
 	auto spaceProp = unit->getContext()->getSpaceProperties();
@@ -390,17 +377,17 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 					_requiredImage->setPixel(pos.x, pos.y, color);
 					--pos.x;
 					spaceProp->correctPosition(pos);
-					colorPixel(_requiredImage, pos, color, 0x60);
+					EntityRenderer::colorPixel(_requiredImage, pos, color, 0x60);
 					pos.x += 2;
 					spaceProp->correctPosition(pos);
-					colorPixel(_requiredImage, pos, color, 0x60);
+					EntityRenderer::colorPixel(_requiredImage, pos, color, 0x60);
 					--pos.x;
 					--pos.y;
 					spaceProp->correctPosition(pos);
-					colorPixel(_requiredImage, pos, color, 0x60);
+					EntityRenderer::colorPixel(_requiredImage, pos, color, 0x60);
 					pos.y += 2;
 					spaceProp->correctPosition(pos);
-					colorPixel(_requiredImage, pos, color, 0x60);
+					EntityRenderer::colorPixel(_requiredImage, pos, color, 0x60);
 				}
 			}
 		}
@@ -410,28 +397,28 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x, pos.y - i };
 						spaceProp->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i*255/4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i*255/4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x + i, pos.y };
 						spaceProp->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x, pos.y + i };
 						spaceProp->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x - i, pos.y };
 						spaceProp->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
 					}
 				}
 			}
