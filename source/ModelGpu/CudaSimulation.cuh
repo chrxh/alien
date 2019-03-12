@@ -3,7 +3,7 @@
 struct SimulationData;
 struct CellAccessTO;
 struct ClusterAccessTO;
-struct SimulationAccessTO;
+struct DataAccessTO;
 
 class CudaSimulation
 {
@@ -12,8 +12,9 @@ public:
 	~CudaSimulation();
 
 	void calcNextTimestep();
-	SimulationAccessTO* getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
-	void updateSimulationData();
+
+	void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+	void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
 private:
 	void prepareTargetData();
@@ -22,8 +23,5 @@ private:
 
 	cudaStream_t _cudaStream;
 	SimulationData* _internalData;
-	int2 _rectUpperLeft = { 0,0 };
-	int2 _rectLowerRight = { 0,0 };
-	SimulationAccessTO* _accessTO;
-	SimulationAccessTO* _cudaAccessTO;
+	DataAccessTO* _cudaAccessTO;
 };

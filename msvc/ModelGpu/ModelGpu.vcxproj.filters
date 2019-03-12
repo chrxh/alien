@@ -96,6 +96,12 @@
     <ClInclude Include="..\..\source\ModelGpu\ParticleReorganizer.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\EntityBuilder.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaJob.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
@@ -123,15 +129,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SimulationControllerGpuImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\ModelGpu\ThreadController.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ThreadController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ThreadController.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_SimulationControllerGpu.cpp">
@@ -176,15 +173,21 @@
     <ClCompile Include="Release\moc_CudaWorker.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\CudaController.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_CudaController.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_CudaController.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\ModelGpu\SimulationContextGpuImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelGpu\SimulationControllerGpuImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelGpu\ThreadController.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelGpu\SimulationControllerGpu.h">
@@ -200,6 +203,9 @@
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelGpu\CudaWorker.h">
+      <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelGpu\CudaController.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -7,7 +7,7 @@
 #include "ModelBasic/SpaceProperties.h"
 
 #include "CudaWorker.h"
-#include "ThreadController.h"
+#include "CudaController.h"
 #include "SimulationContextGpuImpl.h"
 
 SimulationContextGpuImpl::SimulationContextGpuImpl(QObject* parent /*= nullptr*/)
@@ -26,7 +26,7 @@ void SimulationContextGpuImpl::init(SpaceProperties *metric, SymbolTable *symbol
 	SET_CHILD(_parameters, parameters);
 	SET_CHILD(_numberGen, numberGen);
 
-	auto threadController = new ThreadController;
+	auto threadController = new CudaController;
 	SET_CHILD(_threadController, threadController);
 	_threadController->init(metric);
 }
@@ -60,7 +60,7 @@ void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters * pa
 {
 }
 
-ThreadController * SimulationContextGpuImpl::getGpuThreadController() const
+CudaController * SimulationContextGpuImpl::getCudaController() const
 {
 	return _threadController;
 }

@@ -396,6 +396,8 @@ TEST_F(SimulationGpuTest, testHorizontalCenterCollisionOfParallelLineClusters_at
 /**
 * Situation: vertical collision of two line clusters at boundary
 * Expected result: direction of movement of both cells changed accordingly
+*
+* Hint if failed: collision calculated twice?
 */
 TEST_F(SimulationGpuTest, testVerticalCenterCollisionOfParallelLineClusters_atUniverseBoundary)
 {
