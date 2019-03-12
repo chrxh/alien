@@ -152,3 +152,21 @@ public:
 
 	virtual ~_CalcSingleTimestepJob() = default;
 };
+
+class _TpsRestrictionJob
+	: public _CudaJob
+{
+public:
+	_TpsRestrictionJob(string const& originId, optional<int> tpsRestriction, bool notifyFinish = false)
+		: _CudaJob(originId, notifyFinish), _tpsRestriction(tpsRestriction) { }
+
+	virtual ~_TpsRestrictionJob() = default;
+
+	optional<int> getTpsRestriction() const
+	{
+		return _tpsRestriction;
+	}
+
+private:
+	optional<int> _tpsRestriction;
+};
