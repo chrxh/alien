@@ -24,12 +24,12 @@ public:
 
 	virtual void setSimulationParameters(SimulationParameters* parameters) override;
 
-	virtual ThreadController* getGpuThreadController() const;
+	virtual CudaController* getCudaController() const;
 
 private:
 	SpaceProperties *_metric = nullptr;
 	SymbolTable *_symbolTable = nullptr;
 	SimulationParameters *_parameters = nullptr;
-	ThreadController *_threadController = nullptr;
+	CudaController *_threadController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 };

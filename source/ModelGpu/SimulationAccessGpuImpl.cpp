@@ -1,14 +1,27 @@
+#include <sstream>
 #include <QImage>
 
 #include "ModelBasic/SpaceProperties.h"
 #include "ModelBasic/EntityRenderer.h"
 
 #include "CudaWorker.h"
-#include "ThreadController.h"
+#include "CudaController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
 #include "SimulationControllerGpu.h"
+#include "CudaJob.h"
 #include "DataConverter.h"
+
+namespace
+{
+	const string SimulationAccessGpuId = "SimulationAccessGpuId";
+	const int NumDataTOs = 4;
+}
+
+SimulationAccessGpuImpl::SimulationAccessGpuImpl(QObject* parent /*= nullptr*/)
+	: SimulationAccessGpu(parent)
+{
+}
 
 SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 {
@@ -18,94 +31,47 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 	_numberGen = _context->getNumberGenerator();
-	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
+	auto worker = _context->getCudaController()->getCudaWorker();
 	auto size = _context->getSpaceProperties()->getSize();
-	_requiredRect = { {0,0}, size };
+	_lastRect = { { 0,0 }, size };
 	for (auto const& connection : _connections) {
 		QObject::disconnect(connection);
 	}
-	_connections.push_back(connect(cudaBridge, &CudaWorker::dataObtained, this, &SimulationAccessGpuImpl::dataObtainedFromGpu, Qt::QueuedConnection));
+	_connections.push_back(connect(worker, &CudaWorker::jobsFinished, this, &SimulationAccessGpuImpl::jobsFinished, Qt::QueuedConnection));
 }
 
 void SimulationAccessGpuImpl::clear()
 {
 }
 
-/*
-namespace
+void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc)
 {
-	void enlargeRect(IntVector2D const& p, optional<IntRect>& rect)
-	{
-		if (rect) {
-			if (p.x < rect->p1.x) {
-				rect->p1.x = p.x;
-			}
-			if (p.y < rect->p1.y) {
-				rect->p1.y = p.y;
-			}
-			if (p.x > rect->p2.x) {
-				rect->p2.x = p.x;
-			}
-			if (p.y > rect->p2.y) {
-				rect->p2.y = p.y;
-			}
-		}
-		else {
-			rect = IntRect{ p, p };
-		}
-	}
-	
-	IntRect getRect(DataChangeDescription const & desc)
-	{
-		optional<IntRect> result;
-		for (auto const& cluster : desc.clusters) {
-			IntVector2D pos(*cluster->pos);
-			enlargeRect(pos, result);
-		}
-		for (auto const& particle : desc.particles) {
-			IntVector2D pos(*particle->pos);
-			enlargeRect(pos, result);
-		}
-		return result.get_value_or(IntRect());
-	}
-}
-*/
+	auto cudaWorker = _context->getCudaController()->getCudaWorker();
 
-void SimulationAccessGpuImpl::updateData(DataChangeDescription const & desc)
-{
-	_dataToUpdate.clusters.insert(_dataToUpdate.clusters.end(), desc.clusters.begin(), desc.clusters.end());
-	_dataToUpdate.particles.insert(_dataToUpdate.particles.end(), desc.particles.begin(), desc.particles.end());
+	//heuristic for determining rect
+	auto size = _context->getSpaceProperties()->getSize();
+	IntRect rect = cudaWorker->isSimulationRunning() ? IntRect{ { 0, 0 }, size } : _lastRect;
 
-	metricCorrection(_dataToUpdate);
+	auto updateDescCorrected = updateDesc;
+	metricCorrection(updateDescCorrected);
 
-	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
-
-	if (cudaWorker->isSimulationRunning()) {
-		cudaWorker->requireData({ {0, 0}, _context->getSpaceProperties()->getSize() });
-	}
-	else {
-		cudaWorker->requireData(_requiredRect);
-	}
+	CudaJob job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastRect, _dataTOCache.getDataTO(), updateDescCorrected);
+	cudaWorker->addJob(job);
 }
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
-	_dataDescRequired = true;
-	_requiredRect = rect;
-	_resolveDesc = resolveDesc;
-
-	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
-	cudaWorker->requireData(_requiredRect);
+	_lastRect = rect;
+	auto cudaWorker = _context->getCudaController()->getCudaWorker();
+	CudaJob job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache.getDataTO());
+	cudaWorker->addJob(job);
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 {
-	_imageRequired = true;
-	_requiredRect = rect;
-	_requiredImage = target;
-
-	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
-	cudaWorker->requireData(_requiredRect);
+	auto cudaWorker = _context->getCudaController()->getCudaWorker();
+	CudaJob job = boost::make_shared<_GetDataForImageJob>(getObjectId(), rect, _dataTOCache.getDataTO(), target);
+	cudaWorker->addJob(job);
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -113,105 +79,102 @@ DataDescription const & SimulationAccessGpuImpl::retrieveData()
 	return _dataCollected;
 }
 
-void SimulationAccessGpuImpl::dataObtainedFromGpu()
+void SimulationAccessGpuImpl::jobsFinished()
 {
-	if (!_dataToUpdate.empty()) {
-		updateDataToGpuModel();
-		Q_EMIT dataUpdated();
-	}
+	auto worker = _context->getCudaController()->getCudaWorker();
+	auto finishedJobs = worker->getFinishedJobs(getObjectId());
+	for (auto const& job : finishedJobs) {
 
-	if (_imageRequired) {
-		_imageRequired = false;
-		createImageFromGpuModel();
-		Q_EMIT imageReady();
-	}
+		if (auto const& getDataForUpdateJob = boost::dynamic_pointer_cast<_GetDataForUpdateJob>(job)) {
+			auto dataToUpdateTO = getDataForUpdateJob->getDataTO();
+			updateDataToGpu(dataToUpdateTO, getDataForUpdateJob->getUpdateDescription());
+			Q_EMIT dataUpdated();
+		}
 
-	if (_dataDescRequired) {
-		_dataDescRequired = false;
-		createDataFromGpuModel();
-		Q_EMIT dataReadyToRetrieve();
+		if (auto const& getDataForImageJob = boost::dynamic_pointer_cast<_GetDataForImageJob>(job)) {
+			auto dataTO = getDataForImageJob->getDataTO();
+			createImageFromGpuModel(dataTO, getDataForImageJob->getTargetImage());
+			_dataTOCache.releaseDataTO(dataTO);
+			Q_EMIT imageReady();
+		}
+
+		if (auto const& getDataForEditJob = boost::dynamic_pointer_cast<_GetDataForEditJob>(job)) {
+			auto dataTO = getDataForEditJob->getDataTO();
+			createDataFromGpuModel(dataTO);
+			_dataTOCache.releaseDataTO(dataTO);
+			Q_EMIT dataReadyToRetrieve();
+		}
+
+		if (auto const& setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
+			_dataTOCache.releaseDataTO(setDataJob->getDataTO());
+		}
 	}
 }
 
-void SimulationAccessGpuImpl::updateDataToGpuModel()
+void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, DataChangeDescription const& updateDesc)
 {
-	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
+	DataConverter converter(dataToUpdateTO, _numberGen);
+	converter.updateData(updateDesc);
 
-	cudaWorker->lockData();
-	SimulationAccessTO* simulationTO = cudaWorker->retrieveData();
-
-	DataConverter converter(simulationTO, _numberGen);
-	converter.updateData(_dataToUpdate);
-
-	cudaWorker->updateData();
-	cudaWorker->unlockData();
-	_dataToUpdate.clear();
+	auto cudaWorker = _context->getCudaController()->getCudaWorker();
+	CudaJob job = boost::make_shared<_SetDataJob>(getObjectId(), true, _lastRect, dataToUpdateTO);
+	cudaWorker->addJob(job);
 }
 
-void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
+namespace
 {
-	QRgb const& origColor = image->pixel(pos.x, pos.y);
+	void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
+	{
+		QRgb const& origColor = image->pixel(pos.x, pos.y);
 
-	int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
-	int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
-	int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
-	image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
+		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
+		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
+		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
+		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
+	}
 }
-
-void SimulationAccessGpuImpl::createImageFromGpuModel()
+void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO, QImage* targetImage)
 {
 	auto space = _context->getSpaceProperties();
-	auto cudaWorker = _context->getGpuThreadController()->getCudaWorker();
+	auto cudaWorker = _context->getCudaController()->getCudaWorker();
 
-	_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
+	targetImage->fill(QColor(0x00, 0x00, 0x1b));
 
-	cudaWorker->lockData();
-	SimulationAccessTO* simulationTO = cudaWorker->retrieveData();
-
-	for (int i = 0; i < *simulationTO->numParticles; ++i) {
-		ParticleAccessTO& particle = simulationTO->particles[i];
+	for (int i = 0; i < *dataTO.numParticles; ++i) {
+		ParticleAccessTO& particle = dataTO.particles[i];
 		float2& pos = particle.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		space->correctPosition(intPos);
-		_requiredImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
+		targetImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
 	}
 
-	for (int i = 0; i < *simulationTO->numCells; ++i) {
-		CellAccessTO& cell = simulationTO->cells[i];
+	for (int i = 0; i < *dataTO.numCells; ++i) {
+		CellAccessTO& cell = dataTO.cells[i];
 		float2 const& pos = cell.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
 		space->correctPosition(intPos);
 		uint32_t color = EntityRenderer::calcCellColor(0, 0, cell.energy);
-		_requiredImage->setPixel(intPos.x, intPos.y, color);
+		targetImage->setPixel(intPos.x, intPos.y, color);
 		--intPos.x;
 		space->correctPosition(intPos);
-		colorPixel(_requiredImage, intPos, color, 0x60);
+		colorPixel(targetImage, intPos, color, 0x60);
 		intPos.x += 2;
 		space->correctPosition(intPos);
-		colorPixel(_requiredImage, intPos, color, 0x60);
+		colorPixel(targetImage, intPos, color, 0x60);
 		--intPos.x;
 		--intPos.y;
 		space->correctPosition(intPos);
-		colorPixel(_requiredImage, intPos, color, 0x60);
+		colorPixel(targetImage, intPos, color, 0x60);
 		intPos.y += 2;
 		space->correctPosition(intPos);
-		colorPixel(_requiredImage, intPos, color, 0x60);
+		colorPixel(targetImage, intPos, color, 0x60);
 	}
-
-	cudaWorker->unlockData();
 }
 
-void SimulationAccessGpuImpl::createDataFromGpuModel()
+void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO)
 {
-	_dataCollected.clear();
-	auto cudaBridge = _context->getGpuThreadController()->getCudaWorker();
-
-	cudaBridge->lockData();
-	SimulationAccessTO* simulationTO = cudaBridge->retrieveData();
-	DataConverter converter(simulationTO, _numberGen);
-	_dataCollected = converter.getDataDescription(_requiredRect);
-
-	cudaBridge->unlockData();
+	DataConverter converter(dataTO, _numberGen);
+	_dataCollected = converter.getDataDescription();
 }
 
 void SimulationAccessGpuImpl::metricCorrection(DataChangeDescription & data) const
@@ -237,4 +200,60 @@ void SimulationAccessGpuImpl::metricCorrection(DataChangeDescription & data) con
 			particle->pos.setValue(pos);
 		}
 	}
+}
+
+string SimulationAccessGpuImpl::getObjectId() const
+{
+	auto id = reinterpret_cast<long long>(this);
+	std::stringstream stream;
+	stream << SimulationAccessGpuId << id;
+	return stream.str();
+}
+
+SimulationAccessGpuImpl::DataTOCache::DataTOCache()
+{
+	for (int i = 0; i < NumDataTOs; ++i) {
+		DataAccessTO dataTO;
+		dataTO.numClusters = new int;
+		dataTO.numCells = new int;
+		dataTO.numParticles = new int;
+		dataTO.clusters = new ClusterAccessTO[MAX_CELLCLUSTERS];
+		dataTO.cells = new CellAccessTO[MAX_CELLS];
+		dataTO.particles = new ParticleAccessTO[MAX_PARTICLES];
+		_freeDataTOs.push_back(dataTO);
+	}
+}
+
+SimulationAccessGpuImpl::DataTOCache::~DataTOCache()
+{
+	for (DataAccessTO const& dataTO : _freeDataTOs) {
+		delete dataTO.numClusters;
+		delete dataTO.numCells;
+		delete dataTO.numParticles;
+		delete[] dataTO.clusters;
+		delete[] dataTO.cells;
+		delete[] dataTO.particles;
+	}
+}
+
+DataAccessTO SimulationAccessGpuImpl::DataTOCache::getDataTO()
+{
+	DataAccessTO result;
+	if (!_freeDataTOs.empty()) {
+		result = *_freeDataTOs.begin();
+		_freeDataTOs.erase(_freeDataTOs.begin());
+		_usedDataTOs.push_back(result);
+		return result;
+	}
+	result = *_usedDataTOs.begin();
+	return result;
+}
+
+void SimulationAccessGpuImpl::DataTOCache::releaseDataTO(DataAccessTO const & dataTO)
+{
+	auto usedDataTO = std::find_if(_usedDataTOs.begin(), _usedDataTOs.end(), [&dataTO](DataAccessTO const& usedDataTO) {
+		return usedDataTO.numClusters == dataTO.numClusters;
+	});
+	_freeDataTOs.push_back(*usedDataTO);
+	_usedDataTOs.erase(usedDataTO);
 }

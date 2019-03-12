@@ -9,25 +9,41 @@ class SimulationAccessGpuImpl
 	: public SimulationAccessGpu
 {
 public:
-	SimulationAccessGpuImpl(QObject* parent = nullptr) : SimulationAccessGpu(parent) {}
+	SimulationAccessGpuImpl(QObject* parent = nullptr);
 	virtual ~SimulationAccessGpuImpl();
 
 	virtual void init(SimulationControllerGpu* controller) override;
 
 	virtual void clear() override;
-	virtual void updateData(DataChangeDescription const &desc) override;
+	virtual void updateData(DataChangeDescription const &dataToUpdate) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	virtual void requireImage(IntRect rect, QImage* target) override;
 	virtual DataDescription const& retrieveData() override;
 
 private:
-	Q_SLOT void dataObtainedFromGpu();
-	void updateDataToGpuModel();
+	Q_SLOT void jobsFinished();
 
-	void createImageFromGpuModel();
-	void createDataFromGpuModel();
+	void updateDataToGpu(DataAccessTO dataToUpdateTO, DataChangeDescription const& updateDesc);
+	void createImageFromGpuModel(DataAccessTO const& dataTO, QImage* targetImage);
+	void createDataFromGpuModel(DataAccessTO dataTO);
 
 	void metricCorrection(DataChangeDescription& data) const;
+
+	string getObjectId() const;
+
+	class DataTOCache
+	{
+	public:
+		DataTOCache();
+		~DataTOCache();
+
+		DataAccessTO getDataTO();
+		void releaseDataTO(DataAccessTO const& dataTO);
+
+	private:
+		vector<DataAccessTO> _freeDataTOs;
+		vector<DataAccessTO> _usedDataTOs;
+	};
 
 private:
 	list<QMetaObject::Connection> _connections;
@@ -35,14 +51,8 @@ private:
 	SimulationContextGpuImpl* _context = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 
-	DataChangeDescription _dataToUpdate;
-
-	bool _dataDescRequired = false;
-	ResolveDescription _resolveDesc;	//not used yet
+	DataTOCache _dataTOCache;
 	DataDescription _dataCollected;
-
-	bool _imageRequired = false;
-	IntRect _requiredRect;
-	QImage* _requiredImage = nullptr;
+	IntRect _lastRect;
 };
 
