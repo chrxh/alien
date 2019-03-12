@@ -63,24 +63,11 @@ private:
 	CudaSimulation* _cudaSimulation = nullptr;
 
 	std::mutex _mutex;
-//	std::mutex _conditionMutex;
 	std::condition_variable _condition;
 	vector<CudaJob> _jobs;
 	vector<CudaJob> _finishedJobs;
 
 	bool _simulationRunning = false;
 	bool _terminate = false;
-
-	/*
-	bool _stopAfterNextTimestep = true;
-	optional<int> _tps;
-	bool _simRunning = false;
-	bool _requireData = false;
-	bool _updateData = false;
-	IntRect _requiredRect;
-
-	std::mutex _mutexForFlags;
-	std::mutex _mutexForData;
-	SimulationAccessTO* _cudaData;
-*/
+	optional<int> _tpsRestriction;
 };
