@@ -7,11 +7,11 @@
 class DataConverter
 {
 public:
-	DataConverter(SimulationAccessTO* cudaData, NumberGenerator* numberGen);
+	DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen);
 
 	void updateData(DataChangeDescription const& data);
 
-	DataDescription getDataDescription(IntRect const& requiredRect) const;
+	DataDescription getDataDescription() const;
 
 private:
 	void addCluster(ClusterDescription const& clusterDesc);
@@ -33,7 +33,7 @@ private:
 	void applyChangeDescription(CellAccessTO& cell, CellChangeDescription const& cellChanges);
 
 private:
-	SimulationAccessTO* _simulationTO;
+	DataAccessTO& _dataTO;
 	NumberGenerator* _numberGen;
 
 	std::unordered_set<uint64_t> _clusterIdsToDelete;

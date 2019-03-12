@@ -106,8 +106,8 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateDataOutsideBoundaries)
 	dataBefore.addParticle(createParticle(QVector2D{ 2.5f * universeSize.x + 2.0f, 2.5f * universeSize.y + 2.0f }));
 
 	IntegrationTestHelper::updateData(_access, dataBefore);
-
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } });
+
 	EXPECT_EQ(1, dataAfter.clusters->size());
 	auto origCluster = dataBefore.clusters->at(0);
 	auto newCluster = dataAfter.clusters->at(0);
@@ -124,7 +124,6 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateDataOutsideBoundaries)
 	auto origParticle = dataBefore.particles->at(0);
 	auto newParticle = dataAfter.particles->at(0);
 	EXPECT_TRUE(isCompatible(*origParticle.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newParticle.pos));
-
 }
 
 /**
@@ -156,7 +155,6 @@ TEST_F(DataDescriptionTransferGpuTest, regressionTest_changeData)
 	}
 	auto& particle = dataModified.particles->at(0);
 	particle.pos->setX(particle.pos->x() + 50.0f);
-
 
 	descHelper->reconnect(dataModified, dataBefore, idsOfChangedCells);
 	EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataModified)));

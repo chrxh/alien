@@ -13,7 +13,7 @@ public:
 	{
 		bool contentReady = false;
 		QEventLoop pause;
-		access->connect(access, &SimulationAccess::dataReadyToRetrieve, [&]() {
+		auto connection = access->connect(access, &SimulationAccess::dataReadyToRetrieve, [&]() {
 			contentReady = true;
 			pause.quit();
 		});
@@ -23,6 +23,7 @@ public:
 		if (!contentReady) {
 			pause.exec();
 		}
+		QObject::disconnect(connection);
 		return access->retrieveData();
 	}
 
@@ -30,7 +31,7 @@ public:
 	{
 		QEventLoop pause;
 		bool finished = false;
-		access->connect(access, &SimulationAccess::dataUpdated, [&]() {
+		auto connection = access->connect(access, &SimulationAccess::dataUpdated, [&]() {
 			finished = true;
 			pause.quit();
 		});
@@ -38,6 +39,7 @@ public:
 		if (!finished) {
 			pause.exec();
 		}
+		QObject::disconnect(connection);
 	}
 
 	static void runSimulation(int timesteps, SimulationController* controller)
@@ -45,7 +47,7 @@ public:
 		QEventLoop pause;
 		for (int t = 0; t < timesteps; ++t) {
 			bool finished = false;
-			controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
+			auto connection = controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
 				finished = true;
 				pause.quit();
 			});
@@ -53,6 +55,8 @@ public:
 			if (!finished) {
 				pause.exec();
 			}
+			QObject::disconnect(connection);
+
 		}
 	}
 

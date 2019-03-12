@@ -67,18 +67,7 @@ CudaSimulation::CudaSimulation(int2 const &size)
 	checkCudaErrors(cudaMemcpy(_internalData->particleMap, hostParticleMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
 	_internalData->numberGen.init(RANDOM_NUMBER_BLOCK_SIZE);
 
-	_accessTO = new SimulationAccessTO();
-	_accessTO->numClusters = new int();
-	_accessTO->numCells = new int();
-	_accessTO->numParticles = new int();
-	_accessTO->clusters = new ClusterAccessTO[MAX_CELLCLUSTERS];
-	_accessTO->cells = new CellAccessTO[MAX_CELLS];
-	_accessTO->particles = new ParticleAccessTO[MAX_PARTICLES];
-	*_accessTO->numClusters = 0;
-	*_accessTO->numCells = 0;
-	*_accessTO->numParticles = 0;
-
-	_cudaAccessTO = new SimulationAccessTO();
+	_cudaAccessTO = new DataAccessTO();
 	checkCudaErrors(cudaMalloc(&_cudaAccessTO->numClusters, sizeof(int)));
 	checkCudaErrors(cudaMalloc(&_cudaAccessTO->numCells, sizeof(int)));
 	checkCudaErrors(cudaMalloc(&_cudaAccessTO->numParticles, sizeof(int)));
@@ -107,14 +96,6 @@ CudaSimulation::~CudaSimulation()
 	checkCudaErrors(cudaFree(_cudaAccessTO->cells));
 	checkCudaErrors(cudaFree(_cudaAccessTO->particles));
 
-	delete _accessTO->numClusters;
-	delete _accessTO->numCells;
-	delete _accessTO->numParticles;
-	delete[] _accessTO->clusters;
-	delete[] _accessTO->cells;
-	delete[] _accessTO->particles;
-
-	delete _accessTO;
 	delete _cudaAccessTO;
 	delete _internalData;
 
@@ -156,45 +137,57 @@ void CudaSimulation::calcNextTimestep()
 	swapData();
 }
 
-SimulationAccessTO* CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
+void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-	_rectUpperLeft = rectUpperLeft;
-	_rectLowerRight = rectLowerRight;
-
 	checkCudaErrors(cudaMemset(_cudaAccessTO->numClusters, 0, sizeof(int)));
 	checkCudaErrors(cudaMemset(_cudaAccessTO->numCells, 0, sizeof(int)));
 	checkCudaErrors(cudaMemset(_cudaAccessTO->numParticles, 0, sizeof(int)));
 
-	getSimulationAccessData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (_rectUpperLeft, _rectLowerRight, *_internalData, *_cudaAccessTO);
+	getSimulationAccessData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>>(rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	checkCudaErrors(cudaMemcpy(_accessTO->numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(_accessTO->numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(_accessTO->numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(_accessTO->clusters, _cudaAccessTO->clusters, sizeof(ClusterAccessTO) * (*_accessTO->numClusters), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(_accessTO->cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*_accessTO->numCells), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(_accessTO->particles, _cudaAccessTO->particles, sizeof(ParticleAccessTO) * (*_accessTO->numParticles), cudaMemcpyDeviceToHost));
+/*
+	DataAccessTO dataTO;
+	dataTO.numClusters = new int;
+	dataTO.numCells = new int;
+	dataTO.numParticles = new int;
+	checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
 
-	return _accessTO;
+	dataTO.clusters = new ClusterAccessTO[*dataTO.numClusters];
+	dataTO.cells = new CellAccessTO[*dataTO.numCells];
+	dataTO.particles = new ParticleAccessTO[*dataTO.numParticles];
+	checkCudaErrors(cudaMemcpy(dataTO.clusters, _cudaAccessTO->clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.particles, _cudaAccessTO->particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyDeviceToHost));
+	return dataTO;
+*/
+	checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.clusters, _cudaAccessTO->clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(dataTO.particles, _cudaAccessTO->particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyDeviceToHost));
 }
 
-void CudaSimulation::updateSimulationData()
+void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
  	prepareTargetData();
 
-	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numClusters, _accessTO->numClusters, sizeof(int), cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numCells, _accessTO->numCells, sizeof(int), cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numParticles, _accessTO->numParticles, sizeof(int), cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaMemcpy(_cudaAccessTO->clusters, _accessTO->clusters, sizeof(ClusterAccessTO) * (*_accessTO->numClusters), cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaMemcpy(_cudaAccessTO->cells, _accessTO->cells, sizeof(CellAccessTO) * (*_accessTO->numCells), cudaMemcpyHostToDevice));
-	checkCudaErrors(cudaMemcpy(_cudaAccessTO->particles, _accessTO->particles, sizeof(ParticleAccessTO) * (*_accessTO->numParticles), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numClusters, dataTO.numClusters, sizeof(int), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(_cudaAccessTO->clusters, dataTO.clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(_cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(_cudaAccessTO->particles, dataTO.particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyHostToDevice));
 
-	filterData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (_rectUpperLeft, _rectLowerRight, *_internalData);
+	filterData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (rectUpperLeft, rectLowerRight, *_internalData);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	setSimulationAccessData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (_rectUpperLeft, _rectLowerRight, *_internalData, *_cudaAccessTO);
+	setSimulationAccessData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 

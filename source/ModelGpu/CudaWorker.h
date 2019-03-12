@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mutex>
-#include <QObject>
+#include <QThread>
 
 #include "ModelBasic/ChangeDescriptions.h"
 #include "CudaInterface.cuh"
@@ -12,11 +12,23 @@ class CudaWorker
 {
 	Q_OBJECT
 public:
+
 	CudaWorker(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CudaWorker();
 
-	void init(SpaceProperties* metric);
+	void init(SpaceProperties* space);
+	void terminateWorker();
+	bool isSimulationRunning();
 
+	void addJob(CudaJob const& job);
+	vector<CudaJob> getFinishedJobs(string const& originId);
+	Q_SIGNAL void jobsFinished();
+
+	Q_SIGNAL void timestepCalculated();
+
+	Q_SLOT void run();
+
+/*
 	void requireData(IntRect const& rect);
 	Q_SIGNAL void dataObtained();	//only for queued connection (due to mutex)
 	void lockData();
@@ -40,9 +52,26 @@ private:
 
 	bool stopAfterNextTimestep();
 	void setSimulationRunning(bool running);
+*/
 
 private:
-	SpaceProperties* _spaceProp;
+	void processJobs();
+	bool isTerminate();
+
+private:
+	SpaceProperties* _space = nullptr;
+	CudaSimulation* _cudaSimulation = nullptr;
+
+	std::mutex _mutex;
+//	std::mutex _conditionMutex;
+	std::condition_variable _condition;
+	vector<CudaJob> _jobs;
+	vector<CudaJob> _finishedJobs;
+
+	bool _simulationRunning = false;
+	bool _terminate = false;
+
+	/*
 	bool _stopAfterNextTimestep = true;
 	optional<int> _tps;
 	bool _simRunning = false;
@@ -53,5 +82,5 @@ private:
 	std::mutex _mutexForFlags;
 	std::mutex _mutexForData;
 	SimulationAccessTO* _cudaData;
-	CudaSimulation* _cudaSimulation = nullptr;
+*/
 };
