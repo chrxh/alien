@@ -75,4 +75,15 @@ public:
 		b = b*e / 150;
 		return (r << 16) | (g << 8) | b;
 	}
+
+	static void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
+	{
+		QRgb const& origColor = image->pixel(pos.x, pos.y);
+
+		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
+		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
+		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
+		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
+	}
+
 };
