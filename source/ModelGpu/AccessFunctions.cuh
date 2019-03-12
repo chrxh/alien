@@ -7,11 +7,12 @@
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
+#include "EntityBuilder.cuh"
 
 #include "SimulationData.cuh"
 
 __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
-	SimulationData const& data, SimulationAccessTO& simulationTO, int clusterIndex)
+	SimulationData const& data, DataAccessTO& simulationTO, int clusterIndex)
 {
 	Cluster const& cluster = data.clustersAC1.getEntireArray()[clusterIndex];
 
@@ -72,7 +73,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 }
 
 __device__ void getParticleAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
-	SimulationData const& data, SimulationAccessTO& access, int particleIndex)
+	SimulationData const& data, DataAccessTO& access, int particleIndex)
 {
 	Particle const& particle = data.particlesAC1.getEntireArray()[particleIndex];
 	if (particle.pos.x >= rectUpperLeft.x
@@ -91,7 +92,7 @@ __device__ void getParticleAccessData(int2 const& rectUpperLeft, int2 const& rec
 }
 
 __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
-	SimulationData data, SimulationAccessTO access)
+	SimulationData data, DataAccessTO access)
 {
 	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
@@ -175,101 +176,6 @@ __device__ void filterParticleData(int2 const& rectUpperLeft, int2 const& rectLo
 	}
 }
 
-class EntityConverter
-{
-private:
-	BasicMap _map;
-	SimulationData* _data;
-	SimulationAccessTO const* _simulationTO;
-
-public:
-	__device__ void init(SimulationData* data, SimulationAccessTO const* simulationTO)
-	{
-		_data = data;
-		_simulationTO = simulationTO;
-		_map.init(data->size);
-	}
-
-	__device__ void createClusterFromTO(ClusterAccessTO const& clusterTO)
-	{
-		__shared__ Cluster* cluster;
-		__shared__ float angularMass;
-		__shared__ float invRotMatrix[2][2];
-		__shared__ float2 posCorrection;
-
-		if (0 == threadIdx.x) {
-			cluster = _data->clustersAC2.getNewElement();
-			cluster->id = clusterTO.id;
-			cluster->pos = clusterTO.pos;
-			_map.mapPosCorrection(cluster->pos);
-			posCorrection = sub(cluster->pos, clusterTO.pos);
-			cluster->vel = clusterTO.vel;
-			cluster->angle = clusterTO.angle;
-			cluster->angularVel = clusterTO.angularVel;
-			cluster->numCells = clusterTO.numCells;
-			cluster->cells = _data->cellsAC2.getNewSubarray(cluster->numCells);
-
-			cluster->decompositionRequired = false;
-			cluster->locked = 0;
-			cluster->clusterToFuse = nullptr;
-
-			angularMass = 0.0f;
-			Physics::inverseRotationMatrix(cluster->angle, invRotMatrix);
-		}
-		__syncthreads();
-
-		int startCellIndex;
-		int endCellIndex;
-		calcPartition(cluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-		for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-			Cell& cell = cluster->cells[cellIndex];
-			CellAccessTO const& cellTO =  _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
-			cell.id = cellTO.id;
-			cell.cluster = cluster;
-			cell.absPos = add(cellTO.pos, posCorrection);
-
-			float2 deltaPos = sub(cell.absPos, clusterTO.pos);
-			cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
-			cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
-			atomicAdd(&angularMass, lengthSquared(cell.relPos));
-		
-			auto r = sub(cell.absPos, cluster->pos);
-			_map.mapDisplacementCorrection(r);
-			cell.vel = Physics::tangentialVelocity(r, cluster->vel, cluster->angularVel);
-			
-			cell.energy = cellTO.energy;
-			cell.maxConnections = cellTO.maxConnections;
-			cell.numConnections = cellTO.numConnections;
-			for (int i = 0; i < cell.numConnections; ++i) {
-				int index = cellTO.connectionIndices[i] - clusterTO.cellStartIndex;
-				cell.connections[i] = cluster->cells + index;
-			}
-
-			cell.nextTimestep = nullptr;
-			cell.protectionCounter = 0;
-			cell.alive = true;
-		}
-		__syncthreads();
-
-		if (0 == threadIdx.x) {
-			cluster->angularMass = angularMass;
-		}
-	}
-
-	__device__ void createParticleFromTO(ParticleAccessTO const& particleTO)
-	{
-		Particle* particle = _data->particlesAC2.getNewElement();
-		particle->id = particleTO.id;
-		particle->pos = particleTO.pos;
-		_map.mapPosCorrection(particle->pos);
-		particle->vel = particleTO.vel;
-		particle->energy = particleTO.energy;
-		particle->locked = 0;
-		particle->alive = true;
-	}
-};
-
 __global__ void filterData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
 	int indexResource = blockIdx.x;
@@ -291,9 +197,9 @@ __global__ void filterData(int2 rectUpperLeft, int2 rectLowerRight, SimulationDa
 }
 
 
-__device__ void convertData(SimulationData data, SimulationAccessTO const& simulationTO)
+__device__ void convertData(SimulationData data, DataAccessTO const& simulationTO)
 {
-	__shared__ EntityConverter converter;
+	__shared__ EntityBuilder converter;
 	if (0 == threadIdx.x) {
 		converter.init(&data, &simulationTO);
 	}
@@ -318,7 +224,7 @@ __device__ void convertData(SimulationData data, SimulationAccessTO const& simul
 }
 
 __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
-	SimulationData data, SimulationAccessTO access)
+	SimulationData data, DataAccessTO access)
 {
 	convertData(data, access);
 }

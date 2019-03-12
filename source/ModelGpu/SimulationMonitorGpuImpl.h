@@ -2,14 +2,15 @@
 
 #include "SimulationMonitorGpu.h"
 #include "DefinitionsImpl.h"
+#include "CudaInterface.cuh"
 
 class SimulationMonitorGpuImpl
 	: public SimulationMonitorGpu
 {
 	Q_OBJECT
 public:
-	SimulationMonitorGpuImpl(QObject* parent = nullptr) : SimulationMonitorGpu(parent) {}
-	virtual ~SimulationMonitorGpuImpl() = default;
+	SimulationMonitorGpuImpl(QObject* parent = nullptr);
+	virtual ~SimulationMonitorGpuImpl();
 
 	virtual void init(SimulationControllerGpu* controller) override;
 
@@ -17,14 +18,16 @@ public:
 	virtual MonitorData const& retrieveData() override;
 
 private:
-	Q_SLOT void dataObtainedFromGpu();
+	Q_SLOT void jobsFinished();
 
-	void calcMonitorData(SimulationAccessTO* access);
+	void calcMonitorData(DataAccessTO const& dataTO);
+	string getObjectId() const;
 
 private:
 	list<QMetaObject::Connection> _connections;
 
 	SimulationContextGpuImpl* _context = nullptr;
-	MonitorData _data;
+	MonitorData _monitorData;
+	DataAccessTO _dataTO;
 };
 

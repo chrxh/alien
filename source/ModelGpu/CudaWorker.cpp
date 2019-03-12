@@ -4,8 +4,9 @@
 #include <QThread>
 
 #include "ModelBasic/SpaceProperties.h"
-#include "CudaInterface.cuh"
 
+#include "CudaInterface.cuh"
+#include "CudaJob.h"
 #include "CudaWorker.h"
 
 CudaWorker::~CudaWorker()
@@ -13,149 +14,119 @@ CudaWorker::~CudaWorker()
 	delete _cudaSimulation;
 }
 
-void CudaWorker::init(SpaceProperties* spaceProp)
+void CudaWorker::init(SpaceProperties* space)
 {
-	_spaceProp = spaceProp;
-	auto size = spaceProp->getSize();
+	_space = space;
+	auto size = space->getSize();
 	delete _cudaSimulation;
 	_cudaSimulation = new CudaSimulation({ size.x, size.y });
 }
 
-void CudaWorker::requireData(IntRect const& rect)
+void CudaWorker::terminateWorker()
 {
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	_requireData = true;
-	_requiredRect = rect;
+	std::lock_guard<std::mutex> lock(_mutex);
+	_terminate = true;
+	_condition.notify_all();
+}
 
-	if (!_simRunning) {
-		_mutexForData.lock();
-		_cudaData = _cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y });
-		_mutexForData.unlock();
-		_requireData = false;
-		Q_EMIT dataObtained();
+void CudaWorker::addJob(CudaJob const & job)
+{
+	std::lock_guard<std::mutex> lock(_mutex);
+	_jobs.push_back(job);
+	_condition.notify_all();
+}
+
+vector<CudaJob> CudaWorker::getFinishedJobs(string const & originId)
+{
+	std::lock_guard<std::mutex> lock(_mutex);
+	vector<CudaJob> result;
+	vector<CudaJob> remainingJobs;
+	for (auto const& job : _finishedJobs) {
+		if (job->getOriginId() == originId) {
+			result.push_back(job);
+		}
+		else {
+			remainingJobs.push_back(job);
+		}
+	}
+	_finishedJobs = remainingJobs;
+	return result;
+}
+
+void CudaWorker::run()
+{
+	do {
+		processJobs();
+		if (isSimulationRunning()) {
+			_cudaSimulation->calcNextTimestep();
+			Q_EMIT timestepCalculated();
+		}
+		std::unique_lock<std::mutex> uniqueLock(_mutex);
+		if (!_jobs.empty() && !_terminate) {
+			_condition.wait(uniqueLock, [this]() {
+				return !_jobs.empty() || _terminate;
+			});
+		}
+	} while (!isTerminate());
+}
+
+void CudaWorker::processJobs()
+{
+	std::lock_guard<std::mutex> lock(_mutex);
+	if (_jobs.empty()) {
+		return;
+	}
+	bool notify = false;
+
+	for (auto const& job : _jobs) {
+
+		if (auto getDataJob = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
+			auto rect = getDataJob->getRect();
+			auto dataTO = getDataJob->getDataTO();
+			_cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+		}
+
+		if (auto setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
+			auto rect = setDataJob->getRect();
+			auto dataTO = setDataJob->getDataTO();
+			_cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+		}
+
+		if (auto runSimJob = boost::dynamic_pointer_cast<_RunSimulationJob>(job)) {
+			_simulationRunning = true;
+		}
+
+		if (auto stopSimulationJob = boost::dynamic_pointer_cast<_StopSimulationJob>(job)) {
+			_simulationRunning = false;
+		}
+
+		if (auto calcSingleTimestepJob = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
+			_cudaSimulation->calcNextTimestep();
+			Q_EMIT timestepCalculated();
+		}
+
+		if (job->isNotifyFinish()) {
+			notify = true;
+		}
+	}
+	if (notify) {
+		_finishedJobs.insert(_finishedJobs.end(), _jobs.begin(), _jobs.end());
+		_jobs.clear();
+		Q_EMIT jobsFinished();
+	}
+	else {
+		_jobs.clear();
 	}
 }
 
-bool CudaWorker::isDataRequired()
+bool CudaWorker::isTerminate()
 {
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	return _requireData;
-}
-
-void CudaWorker::requireDataFinished()
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	_requireData = false;
-}
-
-bool CudaWorker::isDataUpdated()
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	return _updateData;
-}
-
-void CudaWorker::updateDataFinished()
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	_updateData = false;
-}
-
-optional<int> CudaWorker::getTps()
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	return _tps;
-}
-
-bool CudaWorker::stopAfterNextTimestep()
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	return _stopAfterNextTimestep;
-}
-
-void CudaWorker::setSimulationRunning(bool running)
-{
-	_mutexForFlags.lock();
-	_simRunning = running;
-	_mutexForFlags.unlock();
+	std::lock_guard<std::mutex> lock(_mutex);
+	return _terminate;
 }
 
 bool CudaWorker::isSimulationRunning()
 {
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	return _simRunning;
-}
-
-void CudaWorker::lockData()
-{
-	_mutexForData.lock();
-}
-
-void CudaWorker::unlockData()
-{
-	_mutexForData.unlock();
-}
-
-SimulationAccessTO* CudaWorker::retrieveData()
-{
-	return _cudaData;
-}
-
-void CudaWorker::updateData()
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	_updateData = true;
-
-	if (!_simRunning) {
-		_cudaSimulation->updateSimulationData();
-		_updateData = false;
-	}
-}
-
-void CudaWorker::stopAfterNextTimestep(bool value)
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	_stopAfterNextTimestep = value;
-}
-
-void CudaWorker::restrictTimestepsPerSecond(optional<int> tps)
-{
-	std::lock_guard<std::mutex> lock(_mutexForFlags);
-	_tps = tps;
-}
-
-
-void CudaWorker::runSimulation()
-{
-	QElapsedTimer timer;
-	setSimulationRunning(true);
-	do {
-		timer.start();
-		if (isDataUpdated()) {
-			if (_mutexForData.try_lock()) {
-				_cudaSimulation->updateSimulationData();
-				updateDataFinished();
-				_mutexForData.unlock();
-			}
-		}
-
-		_cudaSimulation->calcNextTimestep();
-
-		Q_EMIT timestepCalculated();
-
-		if (isDataRequired()) {
-			if (_mutexForData.try_lock()) {
-				_cudaData = _cudaSimulation->getSimulationData({ _requiredRect.p1.x, _requiredRect.p1.y }, { _requiredRect.p2.x, _requiredRect.p2.y });
-				requireDataFinished();
-				_mutexForData.unlock();
-				Q_EMIT dataObtained();
-			}
-		}
-		if (auto const& tps = getTps()) {
-			int remainingTime = 1000000/(*tps) - timer.nsecsElapsed()/1000;
-			if (remainingTime > 0) {
-				QThread::usleep(remainingTime);
-			}
-		}
-	} while (!stopAfterNextTimestep());
-	setSimulationRunning(false);
+	std::lock_guard<std::mutex> lock(_mutex);
+	return _simulationRunning;
 }

@@ -34,7 +34,7 @@ struct ClusterAccessTO
 	int cellStartIndex;
 };
 
-struct SimulationAccessTO
+struct DataAccessTO
 {
 	int* numClusters;
 	ClusterAccessTO* clusters;

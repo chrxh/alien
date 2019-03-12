@@ -5,13 +5,13 @@
 #include "ModelBasic/Definitions.h"
 #include "DefinitionsImpl.h"
 
-class ThreadController
+class CudaController
 	: public QObject
 {
 	Q_OBJECT
 public:
-	ThreadController(QObject* parent = nullptr);
-	virtual ~ThreadController();
+	CudaController(QObject* parent = nullptr);
+	virtual ~CudaController();
 
 	void init(SpaceProperties *metric);
 
@@ -23,7 +23,7 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 private:
-	Q_SIGNAL void runSimulationWithGpu();
+	Q_SIGNAL void runWorker();
 	Q_SLOT void timestepCalculatedWithGpu();
 
 	SpaceProperties *_metric = nullptr;
