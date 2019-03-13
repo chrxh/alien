@@ -23,9 +23,9 @@ public:
 private:
 	Q_SLOT void jobsFinished();
 
-	void updateDataToGpu(DataAccessTO dataToUpdateTO, DataChangeDescription const& updateDesc);
-	void createImageFromGpuModel(DataAccessTO const& dataTO, QImage* targetImage);
-	void createDataFromGpuModel(DataAccessTO dataTO);
+	void updateDataToGpu(DataAccessTO dataToUpdateTO, IntRect const& rect, DataChangeDescription const& updateDesc);
+	void createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImage* targetImage);
+	void createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect);
 
 	void metricCorrection(DataChangeDescription& data) const;
 
@@ -51,9 +51,10 @@ private:
 	SimulationContextGpuImpl* _context = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 
-	DataTOCache _dataTOCache;
 	DataDescription _dataCollected;
-	IntRect _lastRect;
+	DataTOCache _dataTOCache;
+	IntRect _lastDataRect;
+	IntRect _lastImageRect;
 
 	bool _updateInProgress = false;
 	vector<CudaJob> _waitingJobs;

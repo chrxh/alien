@@ -56,11 +56,13 @@ public:
 	virtual unordered_set<uint64_t> getSelectedCellIds() const;
 	virtual unordered_set<uint64_t> getSelectedParticleIds() const;
 	virtual DataDescription getExtendedSelection() const;
+	virtual bool isCellPresent(uint64_t cellId);
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
 	virtual void requireImageFromSimulation(IntRect const& rect, QImage* target);
 
 	Q_SIGNAL void imageReady();
+
 
 private:
 	Q_SLOT void dataFromSimulationAvailable();
@@ -68,7 +70,6 @@ private:
 
 	void updateAfterCellReconnections();
 	void updateInternals(DataDescription const &data);
-	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);
 
 	list<QMetaObject::Connection> _connections;
