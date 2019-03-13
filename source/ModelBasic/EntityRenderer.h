@@ -86,4 +86,14 @@ public:
 		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
 	}
 
+	static void fillRect(QImage* image, IntRect const& rect)
+	{
+		for (int x = rect.p1.x; x < rect.p2.x; ++x) {
+			for (int y = rect.p1.y; y < rect.p2.y; ++y) {
+				int* scanLine = (int*)(image->scanLine(y));
+				scanLine[x] = 0x1b;
+			}
+		}
+
+	}
 };
