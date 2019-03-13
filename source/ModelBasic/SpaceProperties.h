@@ -23,6 +23,7 @@ public:
 	virtual QVector2D correctionIncrement(QVector2D pos1, QVector2D pos2) const;
 	
 	virtual void truncatePosition(IntVector2D& pos) const;
+	virtual void truncateRect(IntRect& rect) const;
 	virtual QVector2D displacement(QVector2D fromPoint, QVector2D toPoint) const;
 	virtual qreal distance(QVector2D fromPoint, QVector2D toPoint) const;
 	virtual IntVector2D shiftPosition(IntVector2D const& pos, IntVector2D const && shift) const;

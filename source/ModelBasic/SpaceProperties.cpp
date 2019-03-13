@@ -65,6 +65,12 @@ IntVector2D SpaceProperties::shiftPosition(IntVector2D const & pos, IntVector2D 
 	return temp;
 }
 
+void SpaceProperties::truncateRect(IntRect & rect) const
+{
+	truncatePosition(rect.p1);
+	truncatePosition(rect.p2);
+}
+
 void SpaceProperties::correctDisplacement(QVector2D & displacement) const
 {
 	IntVector2D intDisplacement{ qFloor(displacement.x()), qFloor(displacement.y()) };

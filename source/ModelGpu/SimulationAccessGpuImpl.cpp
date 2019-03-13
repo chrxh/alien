@@ -15,7 +15,7 @@
 namespace
 {
 	const string SimulationAccessGpuId = "SimulationAccessGpuId";
-	const int NumDataTOs = 6;
+	const int NumDataTOs = 1;
 }
 
 SimulationAccessGpuImpl::SimulationAccessGpuImpl(QObject* parent /*= nullptr*/)
@@ -33,7 +33,7 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 	_numberGen = _context->getNumberGenerator();
 	auto worker = _context->getCudaController()->getCudaWorker();
 	auto size = _context->getSpaceProperties()->getSize();
-	_lastRect = { { 0,0 }, size };
+	_lastDataRect = { { 0,0 }, size };
 	for (auto const& connection : _connections) {
 		QObject::disconnect(connection);
 	}
@@ -50,19 +50,18 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 
 	//heuristic for determining rect
 	auto size = _context->getSpaceProperties()->getSize();
-	IntRect rect = cudaWorker->isSimulationRunning() ? IntRect{ { 0, 0 }, size } : _lastRect;
+	IntRect rect = cudaWorker->isSimulationRunning() ? IntRect{ { 0, 0 }, size } : _lastDataRect;
 
 	auto updateDescCorrected = updateDesc;
 	metricCorrection(updateDescCorrected);
 
-	CudaJob job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastRect, _dataTOCache.getDataTO(), updateDescCorrected);
+	CudaJob job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastDataRect, _dataTOCache.getDataTO(), updateDescCorrected);
 	cudaWorker->addJob(job);
 	_updateInProgress = true;
 }
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
-	_lastRect = rect;
 	auto worker = _context->getCudaController()->getCudaWorker();
 	CudaJob job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache.getDataTO());
 	if (!_updateInProgress) {
@@ -98,20 +97,20 @@ void SimulationAccessGpuImpl::jobsFinished()
 
 		if (auto const& getDataForUpdateJob = boost::dynamic_pointer_cast<_GetDataForUpdateJob>(job)) {
 			auto dataToUpdateTO = getDataForUpdateJob->getDataTO();
-			updateDataToGpu(dataToUpdateTO, getDataForUpdateJob->getUpdateDescription());
+			updateDataToGpu(dataToUpdateTO, getDataForUpdateJob->getRect(), getDataForUpdateJob->getUpdateDescription());
 			Q_EMIT dataUpdated();
 		}
 
 		if (auto const& getDataForImageJob = boost::dynamic_pointer_cast<_GetDataForImageJob>(job)) {
 			auto dataTO = getDataForImageJob->getDataTO();
-			createImageFromGpuModel(dataTO, getDataForImageJob->getTargetImage());
+			createImageFromGpuModel(dataTO, getDataForImageJob->getRect(), getDataForImageJob->getTargetImage());
 			_dataTOCache.releaseDataTO(dataTO);
 			Q_EMIT imageReady();
 		}
 
 		if (auto const& getDataForEditJob = boost::dynamic_pointer_cast<_GetDataForEditJob>(job)) {
 			auto dataTO = getDataForEditJob->getDataTO();
-			createDataFromGpuModel(dataTO);
+			createDataFromGpuModel(dataTO, getDataForEditJob->getRect());
 			_dataTOCache.releaseDataTO(dataTO);
 			Q_EMIT dataReadyToRetrieve();
 		}
@@ -127,22 +126,25 @@ void SimulationAccessGpuImpl::jobsFinished()
 	}
 }
 
-void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, DataChangeDescription const& updateDesc)
+void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, IntRect const& rect, DataChangeDescription const& updateDesc)
 {
 	DataConverter converter(dataToUpdateTO, _numberGen);
 	converter.updateData(updateDesc);
 
 	auto cudaWorker = _context->getCudaController()->getCudaWorker();
-	CudaJob job = boost::make_shared<_SetDataJob>(getObjectId(), true, _lastRect, dataToUpdateTO);
+	CudaJob job = boost::make_shared<_SetDataJob>(getObjectId(), true, rect, dataToUpdateTO);
 	cudaWorker->addJob(job);
 }
 
-void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO, QImage* targetImage)
+void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImage* targetImage)
 {
 	auto space = _context->getSpaceProperties();
-	auto cudaWorker = _context->getCudaController()->getCudaWorker();
+	auto worker = _context->getCudaController()->getCudaWorker();
 
-	targetImage->fill(QColor(0x00, 0x00, 0x1b));
+	auto lastRect = _lastImageRect;
+	_lastImageRect = rect;
+	space->truncateRect(lastRect);
+	EntityRenderer::fillRect(targetImage, lastRect);
 
 	for (int i = 0; i < *dataTO.numParticles; ++i) {
 		ParticleAccessTO& particle = dataTO.particles[i];
@@ -175,8 +177,10 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 	}
 }
 
-void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO)
+void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect)
 {
+	_lastDataRect = rect;
+
 	DataConverter converter(dataTO, _numberGen);
 	_dataCollected = converter.getDataDescription();
 }
