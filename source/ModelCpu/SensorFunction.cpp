@@ -44,7 +44,7 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
     if( cmd == Enums::SensorIn::SEARCH_VICINITY ) {
         QVector2D cellPos = cell->calcPosition(_context);
 //        auto time1 = high_resolution_clock::now();
-        Cluster* otherCluster = cellMap->getNearbyClusterFast(cellPos, parameters->cellFunctionSensorRange
+        Cluster* otherCluster = cellMap->getNearbyClusterFast(cellPos, parameters.cellFunctionSensorRange
             , minMassReal, maxMassReal, cluster);
 //        nanoseconds diff1 = high_resolution_clock::now()- time1;
 //        cout << "Dauer: " << diff1.count() << endl;
@@ -61,7 +61,7 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
             //calc distance by scanning along beam
             QVector2D beamPos = cell->calcPosition(true);
             QVector2D scanPos;
-            for(int d = 1; d < parameters->cellFunctionSensorRange; d += 2) {
+            for(int d = 1; d < parameters.cellFunctionSensorRange; d += 2) {
                 beamPos += 2.0*dir;
                 for(int rx = -1; rx < 2; ++rx)
                     for(int ry = -1; ry < 2; ++ry) {
@@ -104,7 +104,7 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
     QList< Cell* > hitListCell;
     QVector2D beamPos = cell->calcPosition(true);
     QVector2D scanPos;
-    for(int d = 1; d < parameters->cellFunctionSensorRange; d += 2) {
+    for(int d = 1; d < parameters.cellFunctionSensorRange; d += 2) {
         beamPos += 2.0*dir;
         for(int rx = -1; rx < 2; ++rx)
             for(int ry = -1; ry < 2; ++ry) {

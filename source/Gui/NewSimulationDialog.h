@@ -18,7 +18,7 @@ class NewSimulationDialog : public QDialog
 	Q_OBJECT
 
 public:
-	NewSimulationDialog(SimulationParameters const* parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = nullptr);
+	NewSimulationDialog(SimulationParameters const& parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = nullptr);
 	virtual ~NewSimulationDialog();
 
 	SimulationConfig getConfig() const;
@@ -30,7 +30,7 @@ private:
 	IntVector2D getGridSize() const;
 	uint getMaxThreads() const;
 	SymbolTable* getSymbolTable() const;
-	SimulationParameters* getSimulationParameters() const;
+	SimulationParameters const& getSimulationParameters() const;
 	IntVector2D getUnitSize() const;
 
 private:
@@ -43,7 +43,7 @@ private:
 	Ui::NewSimulationDialog *ui;
 	Serializer* _serializer = nullptr;
 
-	SimulationParameters* _parameters = nullptr;
+	SimulationParameters _parameters;
 	SymbolTable* _symbolTable = nullptr;
 
 	IntVector2D _universeSizeForModelCpu;

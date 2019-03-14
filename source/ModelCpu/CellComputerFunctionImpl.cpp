@@ -16,10 +16,10 @@ CellComputerFunctionImpl::CellComputerFunctionImpl(QByteArray const& code, QByte
 	: CellComputerFunction(context)
 {
 	int numInstructions = code.size() / 3;
-	int copySize = 3 * std::min(numInstructions, context->getSimulationParameters()->cellFunctionComputerMaxInstructions);
+	int copySize = 3 * std::min(numInstructions, context->getSimulationParameters().cellFunctionComputerMaxInstructions);
 	_code = code.left(copySize);
 
-	int memorySize = context->getSimulationParameters()->cellFunctionComputerCellMemorySize;
+	int memorySize = context->getSimulationParameters().cellFunctionComputerCellMemorySize;
 	_memory = memory.left(memorySize);
 	if (memorySize > _memory.size()) {
 		_memory.append(memorySize - _memory.size(), 0);
@@ -75,7 +75,7 @@ CellFeatureChain::ProcessingResult CellComputerFunctionImpl::processImpl (Token*
     ProcessingResult processingResult {false, 0};
 
 	auto parameters = _context->getSimulationParameters();
-	vector<bool> condTable(parameters->cellFunctionComputerMaxInstructions);
+	vector<bool> condTable(parameters.cellFunctionComputerMaxInstructions);
     int condPointer(0);
 	CHECK((_code.size() % 3) == 0);
 	for (int instructionPointer = 0; instructionPointer < _code.size(); ) {
@@ -88,25 +88,25 @@ CellFeatureChain::ProcessingResult CellComputerFunctionImpl::processImpl (Token*
         quint8 opPointer1 = 0;
 		MemoryType memType = MemoryType::TOKEN;
         if (instruction.opType1 == Enums::ComputerOptype::MEM)
-            opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters->tokenMemorySize);
+            opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.tokenMemorySize);
         if (instruction.opType1 == Enums::ComputerOptype::MEMMEM) {
-            instruction.operand1 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand1, parameters->tokenMemorySize)];
-            opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters->tokenMemorySize);
+            instruction.operand1 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand1, parameters.tokenMemorySize)];
+            opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.tokenMemorySize);
         }
 		if (instruction.opType1 == Enums::ComputerOptype::CMEM) {
-			opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters->cellFunctionComputerCellMemorySize);
+			opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.cellFunctionComputerCellMemorySize);
 			memType = MemoryType::CELL;
 		}
 
         //operand 2: loading value
         if (instruction.opType2 == Enums::ComputerOptype::MEM)
-            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters->tokenMemorySize)];
+            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters.tokenMemorySize)];
         if (instruction.opType2 == Enums::ComputerOptype::MEMMEM) {
-            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters->tokenMemorySize)];
-            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters->tokenMemorySize)];
+            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters.tokenMemorySize)];
+            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters.tokenMemorySize)];
         }
         if (instruction.opType2 == Enums::ComputerOptype::CMEM)
-            instruction.operand2 = _memory[CompilerHelper::convertToAddress(instruction.operand2, parameters->cellFunctionComputerCellMemorySize)];
+            instruction.operand2 = _memory[CompilerHelper::convertToAddress(instruction.operand2, parameters.cellFunctionComputerCellMemorySize)];
 
         //execute instruction
         bool execute = true;

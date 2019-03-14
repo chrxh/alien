@@ -26,7 +26,7 @@ void CellConnectionItem::update(CellDescription const & cell1, CellDescription c
 
 	auto branchNumber1 = cell1.tokenBranchNumber.get_value_or(0);
 	auto branchNumber2 = cell2.tokenBranchNumber.get_value_or(0);
-	auto maxBranchNumber = _config->getSimulationParameters()->cellMaxTokenBranchNumber;
+	auto maxBranchNumber = _config->getSimulationParameters().cellMaxTokenBranchNumber;
 	if (branchNumber1 == (branchNumber2 + 1) % maxBranchNumber) {
 		_connectionState = ConnectionState::B_TO_A_CONNECTION;
 	}

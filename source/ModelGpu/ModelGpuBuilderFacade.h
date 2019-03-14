@@ -11,7 +11,7 @@ public:
 	struct Config {
 		IntVector2D universeSize;
 		SymbolTable* symbolTable;
-		SimulationParameters* parameters;
+		SimulationParameters parameters;
 	};
 	virtual SimulationControllerGpu* buildSimulationController(Config const& config
 		, ModelGpuData const& specificData

@@ -25,8 +25,10 @@ SimulationContextCpuImpl::~SimulationContextCpuImpl()
 }
 
 void SimulationContextCpuImpl::init(SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
-	, SymbolTable * symbolTable, SimulationParameters* parameters, CellComputerCompiler* compiler)
+	, SymbolTable * symbolTable, SimulationParameters const& parameters, CellComputerCompiler* compiler)
 {
+	_simulationParameters = parameters;
+
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
 	numberGen->init();
@@ -35,7 +37,6 @@ void SimulationContextCpuImpl::init(SpaceProperties* spaceProp, UnitGrid* grid, 
 	SET_CHILD(_grid, grid);
 	SET_CHILD(_threads, threads);
 	SET_CHILD(_symbolTable, symbolTable);
-	SET_CHILD(_simulationParameters, parameters);
 	SET_CHILD(_compiler, compiler);
 	SET_CHILD(_numberGen, numberGen);
 
@@ -65,7 +66,7 @@ SymbolTable* SimulationContextCpuImpl::getSymbolTable() const
 	return _symbolTable;
 }
 
-SimulationParameters* SimulationContextCpuImpl::getSimulationParameters() const
+SimulationParameters const& SimulationContextCpuImpl::getSimulationParameters() const
 {
 	return _simulationParameters;
 }
@@ -81,7 +82,7 @@ map<string, int> SimulationContextCpuImpl::getSpecificData() const
 	return data.getData();
 }
 
-void SimulationContextCpuImpl::setSimulationParameters(SimulationParameters * parameters)
+void SimulationContextCpuImpl::setSimulationParameters(SimulationParameters const& parameters)
 {
 	_attributeSetter->setSimulationParameters(parameters);
 	_simulationParameters = parameters;

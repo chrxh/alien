@@ -10,7 +10,7 @@ public:
 	struct Config {
 		IntVector2D universeSize;
 		SymbolTable* symbolTable;
-		SimulationParameters* parameters;
+		SimulationParameters parameters;
 	};
 	virtual SimulationControllerCpu* buildSimulationController(Config const& config
 		, ModelCpuData const& specificData

@@ -271,7 +271,7 @@ CellComputerCompilerImpl::CellComputerCompilerImpl(QObject * parent) : CellCompu
 	
 }
 
-void CellComputerCompilerImpl::init(SymbolTable const* symbols, SimulationParameters const* parameters)
+void CellComputerCompilerImpl::init(SymbolTable const* symbols, SimulationParameters const& parameters)
 {
 	_symbols = symbols;
 	_parameters = parameters;
@@ -366,19 +366,19 @@ std::string CellComputerCompilerImpl::decompileSourceCode(QByteArray const & dat
 
 		//write operands
 		if (instruction.opType1 == Enums::ComputerOptype::MEM)
-			textOp1 = "[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand1, _parameters->tokenMemorySize), 0, 16) + "]";
+			textOp1 = "[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand1, _parameters.tokenMemorySize), 0, 16) + "]";
 		if (instruction.opType1 == Enums::ComputerOptype::MEMMEM)
-			textOp1 = "[[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand1, _parameters->tokenMemorySize), 0, 16) + "]]";
+			textOp1 = "[[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand1, _parameters.tokenMemorySize), 0, 16) + "]]";
 		if (instruction.opType1 == Enums::ComputerOptype::CMEM)
-			textOp1 = "(" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand1, _parameters->cellFunctionComputerCellMemorySize), 0, 16) + ")";
+			textOp1 = "(" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand1, _parameters.cellFunctionComputerCellMemorySize), 0, 16) + ")";
 		if (instruction.opType2 == Enums::ComputerOptype::MEM)
-			textOp2 = "[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters->tokenMemorySize), 0, 16) + "]";
+			textOp2 = "[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters.tokenMemorySize), 0, 16) + "]";
 		if (instruction.opType2 == Enums::ComputerOptype::MEMMEM)
-			textOp2 = "[[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters->tokenMemorySize), 0, 16) + "]]";
+			textOp2 = "[[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters.tokenMemorySize), 0, 16) + "]]";
 		if (instruction.opType2 == Enums::ComputerOptype::CMEM)
-			textOp2 = "(" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters->cellFunctionComputerCellMemorySize), 0, 16) + ")";
+			textOp2 = "(" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters.cellFunctionComputerCellMemorySize), 0, 16) + ")";
 		if (instruction.opType2 == Enums::ComputerOptype::CONST)
-			textOp2 = QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters->tokenMemorySize), 0, 16);
+			textOp2 = QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters.tokenMemorySize), 0, 16);
 
 		//write separation/comparator
 		if (instruction.operation <= Enums::ComputerOperation::AND) {

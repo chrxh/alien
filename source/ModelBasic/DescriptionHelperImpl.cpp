@@ -199,7 +199,7 @@ void DescriptionHelperImpl::removeConnections(CellDescription &cellDesc)
 
 void DescriptionHelperImpl::establishNewConnectionsWithNeighborCells(CellDescription & cellDesc)
 {
-	int r = static_cast<int>(std::ceil(_parameters->cellMaxDistance));
+	int r = static_cast<int>(std::ceil(_parameters.cellMaxDistance));
 	IntVector2D pos = *cellDesc.pos;
 	for(int dx = -r; dx <= r; ++dx) {
 		for (int dy = -r; dy <= r; ++dy) {
@@ -217,7 +217,7 @@ void DescriptionHelperImpl::establishNewConnection(CellDescription &cell1, CellD
 	if (cell1.id == cell2.id) {
 		return;
 	}
-	if (getDistance(cell1, cell2) > _parameters->cellMaxDistance) {
+	if (getDistance(cell1, cell2) > _parameters.cellMaxDistance) {
 		return;
 	}
 	if (cell1.connectingCells.get_value_or({}).size() >= cell1.maxConnections.get_value_or(0)

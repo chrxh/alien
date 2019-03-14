@@ -41,7 +41,7 @@ private:
 	optional<ClusterMetadata> calcMetadataBasedOnOrigClusters(vector<CellDescription> const & cells) const;
 
 	SpaceProperties* _metric = nullptr;
-	SimulationParameters const* _parameters = nullptr;
+	SimulationParameters _parameters;
 	NumberGenerator* _numberGen = nullptr;
 
 	DataDescription* _data = nullptr;

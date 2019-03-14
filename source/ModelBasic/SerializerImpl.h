@@ -26,8 +26,8 @@ public:
 	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const override;
 	virtual SymbolTable* deserializeSymbolTable(string const& data) override;
 
-	virtual string serializeSimulationParameters(SimulationParameters const* parameters) const override;
-	virtual SimulationParameters* deserializeSimulationParameters(string const& data) override;
+	virtual string serializeSimulationParameters(SimulationParameters const& parameters) const override;
+	virtual SimulationParameters deserializeSimulationParameters(string const& data) override;
 
 private:
 	Q_SLOT void dataReadyToRetrieve();
@@ -39,7 +39,7 @@ private:
 	SimulationAccess* _access = nullptr;
 
 	struct ConfigToSerialize {
-		SimulationParameters const* parameters;
+		SimulationParameters parameters;
 		SymbolTable const* symbolTable;
 		IntVector2D universeSize;
 		int typeId;

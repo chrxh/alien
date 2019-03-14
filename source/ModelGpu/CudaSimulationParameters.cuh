@@ -1,6 +1,6 @@
 #pragma once
 
-struct SimulationParameters
+struct CudaSimulationParameters
 {
 	float cellMaxDistance;
 	float cellMinDistance;
@@ -17,4 +17,4 @@ struct SimulationParameters
 	float radiationVelocityMultiplier;
 };
 
-__constant__ __device__ SimulationParameters cudaSimulationParameters;
+__constant__ __device__ CudaSimulationParameters cudaSimulationParameters;

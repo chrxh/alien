@@ -6,7 +6,7 @@
 #include "CudaInterface.cuh"
 #include "Base.cuh"
 #include "CudaConstants.cuh"
-#include "SimulationParameters.cuh"
+#include "CudaSimulationParameters.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"
 

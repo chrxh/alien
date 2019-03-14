@@ -55,7 +55,7 @@ SerializationTest::SerializationTest()
 	_access = _cpuFacade->buildSimulationAccess();
 
 	auto controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
-		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationControllerCpu*
+		SimulationParameters const& parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationControllerCpu*
 	{
 		auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 		ModelCpuData data(typeSpecificData);
