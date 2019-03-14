@@ -143,7 +143,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 
 	auto truncatedRect = rect;
 	space->truncateRect(truncatedRect);
-	EntityRenderer::fillRect(targetImage, truncatedRect);
+//	EntityRenderer::fillRect(targetImage, truncatedRect);
 	targetImage->fill(QColor(0, 0, 0x1b));
 
 	for (int i = 0; i < *dataTO.numParticles; ++i) {
