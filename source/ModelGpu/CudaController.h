@@ -13,12 +13,13 @@ public:
 	CudaController(QObject* parent = nullptr);
 	virtual ~CudaController();
 
-	void init(SpaceProperties *metric);
+	void init(SpaceProperties *space, SimulationParameters const& parameters);
 
 	CudaWorker* getCudaWorker() const;
 
 	void calculate(RunningMode mode);
 	void restrictTimestepsPerSecond(optional<int> tps);
+	void setSimulationParameters(SimulationParameters const& parameters);
 
 	Q_SIGNAL void timestepCalculated();
 

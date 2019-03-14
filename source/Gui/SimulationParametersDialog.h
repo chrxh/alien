@@ -19,7 +19,7 @@ public:
     SimulationParametersDialog(SimulationConfig const& config, Serializer* serializer, QWidget *parent = nullptr);
     virtual ~SimulationParametersDialog();
 
-	SimulationParameters* getSimulationParameters ();
+	SimulationParameters const& getSimulationParameters () const;
 
 private:
 	Q_SLOT void okClicked();
@@ -36,11 +36,11 @@ private:
 	int getItemInt(QString key, int matchPos);
 	qreal getItemReal(QString key, int matchPos);
 
-	bool saveSimulationParameters(string filename, SimulationParameters* symbolTable);
+	bool saveSimulationParameters(string filename);
 
 	Ui::SimulationParametersDialog *ui;
 	Serializer* _serializer = nullptr;
-    SimulationParameters* _simulationParameters = nullptr;
+    SimulationParameters _simulationParameters;
 
 	SimulationConfig _config;
 };

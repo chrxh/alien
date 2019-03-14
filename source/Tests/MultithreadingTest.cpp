@@ -34,7 +34,7 @@ protected:
 
 	SimulationControllerCpu* _controller = nullptr;
 	SimulationContextCpuImpl* _context = nullptr;
-	SimulationParameters* _parameters = nullptr;
+	SimulationParameters _parameters;
 	UnitThreadControllerImpl* _threadController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 	IntVector2D _gridSize{ 6, 6 };
@@ -80,11 +80,11 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 	auto access = facade->buildSimulationAccess();
 	access->init(_controller);
 
-	_parameters->radiationProb = 0.0;
+	_parameters.radiationProb = 0.0;
 
 	DataChangeDescription desc;
 	desc.addNewCluster(ClusterChangeDescription().setPos({ 100, 50 }).setVel({ 1.0, 0.5 })
-		.addNewCell(CellChangeDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)));
+		.addNewCell(CellChangeDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)));
 	access->updateData(desc);
 
 	IntegrationTestHelper::runSimulation(300, _controller);
@@ -111,7 +111,7 @@ TEST_F(MultithreadingTest, testManyCellsMovement)
 	for (int i = 0; i < 10000; ++i) {
 		desc.addNewCluster(ClusterChangeDescription().setPos(QVector2D( _numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y) ))
 			.setVel(QVector2D(_numberGen->getRandomReal() - 0.5, _numberGen->getRandomReal() - 0.5 ))
-			.addNewCell(CellChangeDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setMaxConnections(4)));
+			.addNewCell(CellChangeDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy).setMaxConnections(4)));
 	}
 	access->updateData(desc);
 

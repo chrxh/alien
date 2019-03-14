@@ -164,7 +164,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
     QByteArray data = scanCellFunction->getInternalData();
 	tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA] = data.size();
 	tokenMem.replace(Enums::Scanner::OUT_CELL_FUNCTION_DATA + 1, data.size(), data);
-	tokenMem.left(_context->getSimulationParameters()->tokenMemorySize);
+	tokenMem.left(_context->getSimulationParameters().tokenMemorySize);
 
     //scan cluster
     quint32 mass = qFloor(cell->getCluster()->getMass());

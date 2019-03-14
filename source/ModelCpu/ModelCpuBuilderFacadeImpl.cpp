@@ -117,7 +117,7 @@ Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simul
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();
-	auto parameters = context->getSimulationParameters()->clone();
+	auto parameters = context->getSimulationParameters();
 	uint16_t threadId = gridPos.x + gridPos.y * grid->getSize().x + 1;
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, threadId);
 	compartment->init(grid->calcCompartmentRect(gridPos));

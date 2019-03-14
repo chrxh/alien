@@ -282,8 +282,8 @@ void ActionController::onLoadSimulationParameters()
 {
 	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
 	if (!filename.isEmpty()) {
-		SimulationParameters* parameters;
-		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
+		SimulationParameters parameters;
+		if (SerializationHelper::loadFromFile<SimulationParameters>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
 			auto config = _mainController->getSimulationConfig();
 			config->parameters = parameters;
 			string errorMsg;
@@ -875,7 +875,7 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 		uint64_t selectedCellId = *_repository->getSelectedCellIds().begin();
 		if (auto tokens = _repository->getCellDescRef(selectedCellId).tokens) {
 			tokenOfSelectedCell = tokens->size();
-			freeTokenOfSelectedCell = _mainModel->getSimulationParameters()->cellMaxToken - tokenOfSelectedCell;
+			freeTokenOfSelectedCell = _mainModel->getSimulationParameters().cellMaxToken - tokenOfSelectedCell;
 		}
 	}
 

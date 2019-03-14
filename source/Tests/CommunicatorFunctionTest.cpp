@@ -49,13 +49,13 @@ CommunicatorFunctionTest::CommunicatorFunctionTest()
 
 TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
 {
-	const float distCommRange = _parameters->cellFunctionCommunicatorRange / 2.0;
+	const float distCommRange = _parameters.cellFunctionCommunicatorRange / 2.0;
 	const uint8_t channel = 1;
 	const uint8_t differentChannel = 2;
 	const uint8_t message = 100;
 	const uint8_t angle = PhysicalQuantityConverter::convertAngleToData(180.0);
 
-	QByteArray tokenData(_parameters->tokenMemorySize, 0);
+	QByteArray tokenData(_parameters.tokenMemorySize, 0);
 	tokenData[Enums::Communicator::IN] = Enums::CommunicatorIn::SEND_MESSAGE;
 	tokenData[Enums::Communicator::IN_CHANNEL] = channel;
 	tokenData[Enums::Communicator::IN_MESSAGE] = message;
@@ -75,16 +75,16 @@ TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
 		.setId(clusterId1)
 		.addCells({
 			CellDescription()
-			.setId(cellId1).setPos({ 500, 500 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
+			.setId(cellId1).setPos({ 500, 500 }).setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
 			.setConnectingCells({ cellId2 }).setMaxConnections(1).setTokenBranchNumber(0)
 			.setCellFeature(
 				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
 			)
 			.setTokens({
-				TokenDescription().setEnergy(_parameters->cellFunctionConstructorOffspringTokenEnergy).setData(tokenData)
+				TokenDescription().setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy).setData(tokenData)
 			}),
 			CellDescription()
-			.setId(cellId2).setPos({ 500, 501 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
+			.setId(cellId2).setPos({ 500, 501 }).setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy).setFlagTokenBlocked(false)
 			.setConnectingCells({ cellId1 }).setMaxConnections(1).setTokenBranchNumber(1)
 			.setCellFeature(
 				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)
@@ -94,7 +94,7 @@ TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
 		.setId(clusterId2)
 		.addCells({
 			CellDescription()
-			.setId(cellId3).setPos({ 500 + distCommRange / 2, 501 + distCommRange / 2 }).setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			.setId(cellId3).setPos({ 500 + distCommRange / 2, 501 + distCommRange / 2 }).setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
 			.setFlagTokenBlocked(false).setMaxConnections(0).setTokenBranchNumber(0)
 			.setCellFeature(
 				CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR).setVolatileData(cellData)

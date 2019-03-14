@@ -183,7 +183,7 @@ void SimulationGpuTest::setMaxConnections(ClusterDescription& cluster, int maxCo
 TEST_F(SimulationGpuTest, DISABLED_testCollisionOfSingleCells_horizontal_noPixelOverlapping)
 {
 	DataDescription origData;
-	auto cellEnergy = _parameters->cellFunctionConstructorOffspringCellEnergy;
+	auto cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
 
 	auto cellId1 = _numberGen->getId();
 	auto cell1 = CellDescription().setId(cellId1).setPos({ 100, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
@@ -230,7 +230,7 @@ TEST_F(SimulationGpuTest, DISABLED_testCollisionOfSingleCells_horizontal_noPixel
 TEST_F(SimulationGpuTest, testCollisionOfSingleCells_horizontal)
 {
 	DataDescription origData;
-	auto cellEnergy = _parameters->cellFunctionConstructorOffspringCellEnergy;
+	auto cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
 
 	auto cellId1 = _numberGen->getId();
 	auto cell1 = CellDescription().setId(cellId1).setPos({ 100, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
@@ -276,7 +276,7 @@ TEST_F(SimulationGpuTest, testCollisionOfSingleCells_horizontal)
 TEST_F(SimulationGpuTest, testCollisionOfSingleCells_vertical)
 {
 	DataDescription origData;
-	auto cellEnergy = _parameters->cellFunctionConstructorOffspringCellEnergy;
+	auto cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
 
 	auto cellId1 = _numberGen->getId();
 	auto cell1 = CellDescription().setId(cellId1).setPos({ 100, 100 }).setMaxConnections(0).setEnergy(cellEnergy);
@@ -708,7 +708,7 @@ TEST_F(SimulationGpuTest, DISABLED_testSidewiseCollisionOfTraversalLineClusters_
 TEST_F(SimulationGpuTest, testFusionOfSingleParticles)
 {
 	DataDescription origData;
-	auto particleEnergy = _parameters->cellMinEnergy / 3.0;
+	auto particleEnergy = _parameters.cellMinEnergy / 3.0;
 
 	auto particleId1 = _numberGen->getId();
 	auto particle1 = ParticleDescription().setId(particleId1).setEnergy(particleEnergy).setPos({ 100, 100 }).setVel({ 0.5, 0.0 });
@@ -739,7 +739,7 @@ TEST_F(SimulationGpuTest, testFusionOfSingleParticles)
 */
 TEST_F(SimulationGpuTest, testFusionOfManyParticles)
 {
-	auto particleEnergy = _parameters->cellMinEnergy / 120.0;
+	auto particleEnergy = _parameters.cellMinEnergy / 120.0;
 
 	DataDescription origData;
 	for (int i = 0; i < 100; ++i) {
@@ -766,16 +766,16 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 		for (int i = 0; i < 30; ++i) {
 			auto cell = CellDescription().setId(_numberGen->getId()).setPos({ 100, 100 + float(i) }).setMaxConnections(4);
 			if (15 == i) {
-				cell.setEnergy(_parameters->cellMinEnergy / 2);
+				cell.setEnergy(_parameters.cellMinEnergy / 2);
 			}
 			else {
-				cell.setEnergy(_parameters->cellMinEnergy * 2);
+				cell.setEnergy(_parameters.cellMinEnergy * 2);
 			}
 			cluster.addCell(cell);
 		}
-		auto leftCell = CellDescription().setId(_numberGen->getId()).setPos({ 99, 115 }).setMaxConnections(4).setEnergy(_parameters->cellMinEnergy * 2);
+		auto leftCell = CellDescription().setId(_numberGen->getId()).setPos({ 99, 115 }).setMaxConnections(4).setEnergy(_parameters.cellMinEnergy * 2);
 		cluster.addCell(leftCell);
-		auto rightCell = CellDescription().setId(_numberGen->getId()).setPos({ 101, 115 }).setMaxConnections(4).setEnergy(_parameters->cellMinEnergy * 2);
+		auto rightCell = CellDescription().setId(_numberGen->getId()).setPos({ 101, 115 }).setMaxConnections(4).setEnergy(_parameters.cellMinEnergy * 2);
 		cluster.addCell(rightCell);
 
 		for (int i = 0; i < 30; ++i) {
@@ -836,7 +836,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_duringRotation)
 	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 1.0));
 	origData.addCluster(createHorizontalCluster(5, QVector2D{ 200, 100 }, QVector2D{ 0, 0 }, 1.0));	//second cluster for comparison
 
-	auto lowEnergy = _parameters->cellMinEnergy / 2.0;
+	auto lowEnergy = _parameters.cellMinEnergy / 2.0;
 	origData.clusters->at(0).cells->at(2).energy = lowEnergy;
 	origData.clusters->at(0).angle = 90;
 
@@ -876,7 +876,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_duringRotation)
 */
 TEST_F(SimulationGpuTest, testDestructionOfTooCloseCells)
 {
-	float closeDistance = static_cast<float>(_parameters->cellMinDistance) / 2.0f;
+	float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100, 100.5f }, QVector2D{ 0, 0 }, 0.0));
@@ -896,7 +896,7 @@ TEST_F(SimulationGpuTest, testDestructionOfTooCloseCells)
 */
 TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 {
-	float velocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+	float velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0));
@@ -919,7 +919,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 */
 TEST_F(SimulationGpuTest, testNoFusionOfHorizontalClusters)
 {
-	float velocity = static_cast<float>(_parameters->cellFusionVelocity) - 0.1f;
+	float velocity = static_cast<float>(_parameters.cellFusionVelocity) - 0.1f;
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0));
@@ -941,7 +941,7 @@ TEST_F(SimulationGpuTest, testNoFusionOfHorizontalClusters)
 */
 TEST_F(SimulationGpuTest, testFusionOfLineClusters_duringRotation)
 {
-	float fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+	float fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100.1f }, QVector2D{ 0, 0 }, 1.0));
@@ -972,7 +972,7 @@ TEST_F(SimulationGpuTest, testFusionOfLineClusters_duringRotation)
 */
 TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_partialContact)
 {
-	float fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+	float fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
 
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, 100.1f }, QVector2D{ 0, 0 }, 0.0));
@@ -1003,7 +1003,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_partialContact)
 */
 TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
 {
-	auto fusionVelocity = static_cast<float>(_parameters->cellFusionVelocity) + 0.1f;
+	auto fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
 	auto size = _spaceProp->getSize();
 
 	DataDescription origData;
@@ -1027,7 +1027,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
 TEST_F(SimulationGpuTest, testFastMovingCluster)
 {
 	auto size = _spaceProp->getSize();
-	float cellMaxForce = static_cast<float>(_parameters->cellMaxForce);
+	float cellMaxForce = static_cast<float>(_parameters.cellMaxForce);
 	DataDescription origData;
 	origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{size.x / 2.0f, size.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
 
@@ -1070,7 +1070,7 @@ TEST_F(SimulationGpuTest, testTransformationParticleToCell)
 {
 	auto size = _spaceProp->getSize();
 	DataDescription origData;
-	float cellMinEnergy = static_cast<float>(_parameters->cellMinEnergy);
+	float cellMinEnergy = static_cast<float>(_parameters.cellMinEnergy);
 	origData.addParticle(ParticleDescription().setId(_numberGen->getId()).setPos({ 0, 0 }).setVel({ 0, 0 }).setEnergy(cellMinEnergy + 1));
 
 	IntegrationTestHelper::updateData(_access, origData);
@@ -1090,7 +1090,7 @@ TEST_F(SimulationGpuTest, testTransformationParticleToCell)
 */
 TEST_F(SimulationGpuTest, regressionTest_overlappingRectangleClusters_manyThreadsPerBlocks)
 {
-	float closeDistance = static_cast<float>(_parameters->cellMinDistance) / 2.0f;
+	float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
 
 	DataDescription origData;
 	origData.addCluster(createRectangularCluster({ 20, 20 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
@@ -1110,7 +1110,7 @@ TEST_F(SimulationGpuTest, regressionTest_overlappingRectangleClusters_manyThread
 TEST_F(SimulationGpuTest, regressionTest_manyOverlappingRectangleClusters)
 {
 	auto size = _spaceProp->getSize();
-	float closeDistance = static_cast<float>(_parameters->cellMinDistance) / 2.0f;
+	float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
 
 	DataDescription origData;
 	for (int i = 0; i < 40; ++i) {

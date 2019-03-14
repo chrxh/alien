@@ -75,13 +75,13 @@ TEST_F(DataDescriptionTransferGpuTest, DISABLED_testCreateClusterWithCompleteCel
 TEST_F(DataDescriptionTransferGpuTest, DISABLED_testChangeParticle)
 {
 	DataDescription dataBefore;
-	auto particleEnergy1 = _parameters->cellMinEnergy / 2.0;
+	auto particleEnergy1 = _parameters.cellMinEnergy / 2.0;
 	auto particleId = _numberGen->getId();
 	auto particleBefore = ParticleDescription().setId(particleId).setEnergy(particleEnergy1).setPos({ 100, 100 }).setVel({ 0.5f, 0.0f });
 	dataBefore.addParticle(particleBefore);
 	
 	DataDescription dataChanged;
-	auto particleEnergy2 = _parameters->cellMinEnergy / 3.0;
+	auto particleEnergy2 = _parameters.cellMinEnergy / 3.0;
 	auto particleChange = ParticleDescription().setId(particleId).setEnergy(particleEnergy2).setPos({ 150, 150 }).setVel({ 0.0f, -0.3f });
 	dataChanged.addParticle(particleChange);
 

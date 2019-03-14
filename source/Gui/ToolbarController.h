@@ -24,6 +24,6 @@ private:
 	ToolbarContext* _context = nullptr;
 	ToolbarView* _view = nullptr;
 	DataRepository* _repository = nullptr;
-	SimulationParameters const* _parameters = nullptr;
+	SimulationParameters _parameters;
 	ActionHolder* _actions = nullptr;
 };

@@ -81,8 +81,8 @@ bool Particle::processingMovement(Cluster*& cluster)
 	//enough energy for cell transformation?
 	qreal p(_context->getNumberGenerator()->getRandomReal());
 	qreal eKin = Physics::kineticEnergy(1, _vel, 0, 0);
-	qreal eNew = _energy - (eKin / parameters->cellMass_Reciprocal);
-	if ((eNew >= parameters->cellMinEnergy) && (p < parameters->cellTransformationProb)) {
+	qreal eNew = _energy - (eKin / parameters.cellMass_Reciprocal);
+	if ((eNew >= parameters.cellMinEnergy) && (p < parameters.cellTransformationProb)) {
 
 		//look for neighbor cell
 		for (int dx = -2; dx < 3; ++dx) {
@@ -141,8 +141,8 @@ void Particle::collisionWithCell(Cell* cell)
 CellDescription Particle::getRandomCellDesciption(double energy) const
 {
 	auto parameters = _context->getSimulationParameters();
-	int randomMaxConnections = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxBonds + 1);
-	int randomTokenAccessNumber = _context->getNumberGenerator()->getRandomInt(parameters->cellMaxTokenBranchNumber);
+	int randomMaxConnections = _context->getNumberGenerator()->getRandomInt(parameters.cellMaxBonds + 1);
+	int randomTokenAccessNumber = _context->getNumberGenerator()->getRandomInt(parameters.cellMaxTokenBranchNumber);
 	QByteArray randomData(255, 0);
 	for (int i = 0; i < 255; ++i) {
 		randomData[i] = _context->getNumberGenerator()->getRandomInt(256);

@@ -21,6 +21,6 @@ class MODELBASIC_EXPORT ModelSettings
 {
 public:
     static SymbolTable* getDefaultSymbolTable();
-	static SimulationParameters* getDefaultSimulationParameters();
+	static SimulationParameters getDefaultSimulationParameters();
 };
 

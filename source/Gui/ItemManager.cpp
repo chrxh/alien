@@ -12,7 +12,7 @@
 #include "CoordinateSystem.h"
 #include "MarkerItem.h"
 
-void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters const* parameters)
+void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters const& parameters)
 {
 	auto config = new ItemConfig();
 
