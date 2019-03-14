@@ -55,7 +55,7 @@ void MainController::init()
 	_view = new MainView();
 
 	_controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
-		SimulationParameters* parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
+		SimulationParameters const& parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
 	{
 		if (ModelComputationType(typeId) == ModelComputationType::Cpu) {
 			auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
@@ -193,7 +193,7 @@ void MainController::onRestoreSnapshot()
 	_versionController->restoreSnapshot();
 }
 
-void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters* parameters)
+void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)
 {
 	_model->setSimulationParameters(parameters);
 	_model->setSymbolTable(symbolTable);
@@ -343,7 +343,7 @@ void MainController::connectSimController() const
 
 void MainController::addRandomEnergy(double amount)
 {
-	double maxEnergyPerCell = _simController->getContext()->getSimulationParameters()->cellMinEnergy;
+	double maxEnergyPerCell = _simController->getContext()->getSimulationParameters().cellMinEnergy;
 	_repository->addRandomParticles(amount, maxEnergyPerCell);
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,

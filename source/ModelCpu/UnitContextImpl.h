@@ -12,19 +12,19 @@ public:
 	virtual ~UnitContextImpl();
 
 	void init(NumberGenerator* numberGen, SpaceProperties* spaceProp, CellMap* cellMap, ParticleMap* energyMap
-		, MapCompartment* mapCompartment, SimulationParameters* parameters) override;
+		, MapCompartment* mapCompartment, SimulationParameters const& parameters) override;
 
 	virtual NumberGenerator* getNumberGenerator() const override;
 	virtual SpaceProperties* getSpaceProperties () const override;
 	virtual CellMap* getCellMap () const override;
 	virtual ParticleMap* getParticleMap () const override;
 	virtual MapCompartment* getMapCompartment() const override;
-	virtual SimulationParameters* getSimulationParameters() const override;
+	virtual SimulationParameters const& getSimulationParameters() const override;
 
 	virtual uint64_t getTimestamp() const override;
 	virtual void incTimestamp() override;
 
-	virtual void setSimulationParameters(SimulationParameters* parameters) override;
+	virtual void setSimulationParameters(SimulationParameters const& parameters) override;
 	virtual QList<Cluster*>& getClustersRef() override;
 	virtual QList<Particle*>& getParticlesRef () override;
 
@@ -39,7 +39,7 @@ private:
     ParticleMap* _energyParticleMap = nullptr;
 	MapCompartment* _mapCompartment = nullptr;
 	SymbolTable* _symbolTable = nullptr;
-	SimulationParameters* _simulationParameters = nullptr;
+	SimulationParameters _simulationParameters;
 
 	uint64_t _timestamp = 0;
 };

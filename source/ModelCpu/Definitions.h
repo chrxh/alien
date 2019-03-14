@@ -21,7 +21,6 @@ class UnitThreadController;
 class UnitContext;
 class SimulationContextCpuImpl;
 class SimulationContext;
-class SimulationParameters;
 class SimulationController;
 class SymbolTable;
 class UnitObserver;

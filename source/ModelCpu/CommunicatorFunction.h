@@ -37,7 +37,7 @@ protected:
 
 private:
 
-	SimulationParameters* _parameters = nullptr;
+	SimulationParameters _parameters;
 
     bool _newMessageReceived = false;
     MessageData _receivedMessage;

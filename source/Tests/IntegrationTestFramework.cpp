@@ -36,8 +36,8 @@ IntegrationTestFramework::~IntegrationTestFramework()
 ClusterDescription IntegrationTestFramework::createSingleCellClusterWithCompleteData(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
 {
 	QByteArray code("123123123");
-	QByteArray cellMemory(_parameters->cellFunctionComputerCellMemorySize, 0);
-	QByteArray tokenMemory(_parameters->tokenMemorySize, 0);
+	QByteArray cellMemory(_parameters.cellFunctionComputerCellMemorySize, 0);
+	QByteArray tokenMemory(_parameters.tokenMemorySize, 0);
 	cellMemory[1] = 'a';
 	cellMemory[2] = 'b';
 	tokenMemory[0] = 't';
@@ -80,7 +80,7 @@ ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2
 				--maxConnections;
 			}
 			cluster.addCell(
-				CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+				CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
 				.setPos(pos + relPos)
 				.setMaxConnections(maxConnections).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
 			);
@@ -129,7 +129,7 @@ ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, opt
 		QVector2D relPosUnrotated(-static_cast<float>(numCells - 1) / 2.0 + j, 0);
 		QVector2D relPos = transform.map(QVector3D(relPosUnrotated)).toVector2D();
 		cluster.addCell(
-			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
 			.setPos(pos + relPos)
 			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
 		);
@@ -158,7 +158,7 @@ ClusterDescription IntegrationTestFramework::createHorizontalCluster(int numCell
 	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(angularVel);
 	for (int j = 0; j < numCells; ++j) {
 		cluster.addCell(
-			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
 			.setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
 			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
 		);
@@ -185,7 +185,7 @@ ClusterDescription IntegrationTestFramework::createVerticalCluster(int numCells,
 	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
 	for (int j = 0; j < numCells; ++j) {
 		cluster.addCell(
-			CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy)
+			CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
 			.setPos(pos + QVector2D(0, -static_cast<float>(numCells - 1) / 2.0 + j))
 			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
 		);
@@ -207,7 +207,7 @@ ParticleDescription IntegrationTestFramework::createParticle(optional<QVector2D>
 {
 	auto pos = optPos ? *optPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
-	return ParticleDescription().setEnergy(_parameters->cellMinEnergy / 2).setPos(pos).setVel(vel).setId(_numberGen->getId());
+	return ParticleDescription().setEnergy(_parameters.cellMinEnergy / 2).setPos(pos).setVel(vel).setId(_numberGen->getId());
 }
 
 

@@ -30,9 +30,9 @@ CudaController::~CudaController()
 	delete _worker;
 }
 
-void CudaController::init(SpaceProperties *metric)
+void CudaController::init(SpaceProperties *space, SimulationParameters const& parameters)
 {
-	_worker->init(metric);
+	_worker->init(space, parameters);
 }
 
 CudaWorker * CudaController::getCudaWorker() const
@@ -59,6 +59,12 @@ void CudaController::calculate(RunningMode mode)
 void CudaController::restrictTimestepsPerSecond(optional<int> tps)
 {
 	CudaJob job = boost::make_shared<_TpsRestrictionJob>(ThreadControllerId, tps);
+	_worker->addJob(job);
+}
+
+void CudaController::setSimulationParameters(SimulationParameters const & parameters)
+{
+	CudaJob job = boost::make_shared<_SetSimulationParametersJob>(ThreadControllerId, parameters);
 	_worker->addJob(job);
 }
 

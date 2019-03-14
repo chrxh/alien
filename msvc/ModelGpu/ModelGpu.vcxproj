@@ -212,7 +212,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\SimulationParameters.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h" />
     <ClInclude Include="..\..\source\ModelGpu\Definitions.h" />

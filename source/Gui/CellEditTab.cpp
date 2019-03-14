@@ -38,7 +38,7 @@ void CellEditTab::updateModelAndNotifyController ()
 		cell.maxConnections = qRound(generateNumberFromFormattedString(currentText));
 	if ((row == 6) && !(*cell.tokenBlocked)) {
 		auto parameters = _model->getSimulationParameters();
-		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText)) % parameters->cellMaxTokenBranchNumber;
+		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText)) % parameters.cellMaxTokenBranchNumber;
 	}
 	_controller->notificationFromCellTab();
 }
@@ -297,7 +297,7 @@ void CellEditTab::mousePressEvent(QMouseEvent* e)
 		if (row == 7) {
 			cell.cellFeature->type = Enums::CellFunction::COMPUTER;
 			auto parameters = _model->getSimulationParameters();
-			int memorySize = parameters->cellFunctionComputerCellMemorySize;
+			int memorySize = parameters.cellFunctionComputerCellMemorySize;
 			cell.cellFeature->setVolatileData(QByteArray(memorySize, 0));
 		}
         if( row == 8 )

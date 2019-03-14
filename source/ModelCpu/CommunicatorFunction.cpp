@@ -102,7 +102,7 @@ QList< Cell* > CommunicatorFunction::findNearbyCommunicator(Cell* cell) const
             return cellFunction && (cellFunction->getType() == Enums::CellFunction::COMMUNICATOR);
         };
     QVector2D cellPos = cell->calcPosition();
-    qreal range = _parameters->cellFunctionCommunicatorRange;
+    qreal range = _parameters.cellFunctionCommunicatorRange;
     return _context->getCellMap()->getNearbySpecificCells(cellPos, range, cellSelectCommunicatorFunction);
 }
 

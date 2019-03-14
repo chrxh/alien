@@ -5,10 +5,11 @@
 #include <iostream>
 #include <functional>
 
+#include "ModelBasic/SimulationParameters.h"
 #include "Base.cuh"
 #include "CudaSimulation.cuh"
 #include "CudaConstants.cuh"
-#include "SimulationParameters.cuh"
+#include "CudaSimulationParameters.cuh"
 #include "CudaInterface.cuh"
 #include "SimulationFunctions.cuh"
 #include "AccessFunctions.cuh"
@@ -40,12 +41,12 @@ namespace
 	};
 }
 
-CudaSimulation::CudaSimulation(int2 const &size)
+CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& parameters)
 {
 
 	CudaInitializer::init();
 
-	setCudaSimulationParameters();
+	setSimulationParameters(parameters);
 
 	cudaStreamCreate(&_cudaStream);
 	std::cout << "[CUDA] stream created" << std::endl;
@@ -194,6 +195,26 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
 	swapData();
 }
 
+void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
+{
+	CudaSimulationParameters parametersToCopy;
+	parametersToCopy.cellMaxDistance = parameters.cellMaxDistance;
+	parametersToCopy.cellMinDistance = parameters.cellMinDistance;
+	parametersToCopy.cellMinEnergy = parameters.cellMinEnergy;
+	parametersToCopy.cellFusionVelocity = parameters.cellFusionVelocity;
+	parametersToCopy.cellMaxForce = parameters.cellMaxForce;
+	parametersToCopy.cellMaxForceDecayProb = parameters.cellMaxForceDecayProb;
+	parametersToCopy.cellTransformationProb = parameters.cellTransformationProb;
+	parametersToCopy.cellMass = 1.0f / parameters.cellMass_Reciprocal;
+	parametersToCopy.radiationProbability = parameters.radiationProb;
+	parametersToCopy.radiationExponent = parameters.radiationExponent;
+	parametersToCopy.radiationFactor = parameters.radiationFactor;
+	parametersToCopy.radiationVelocityMultiplier = parameters.radiationVelocityMultiplier;
+	parametersToCopy.radiationVelocityPerturbation = parameters.radiationVelocityPerturbation;
+
+	checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters), 0, cudaMemcpyHostToDevice));
+}
+
 void CudaSimulation::prepareTargetData()
 {
 	_internalData->clustersAC2.reset();
@@ -208,9 +229,10 @@ void CudaSimulation::swapData()
 	swap(_internalData->particlesAC1, _internalData->particlesAC2);
 }
 
+/*
 void CudaSimulation::setCudaSimulationParameters()
 {
-	SimulationParameters parametersToCopy;
+	CudaSimulationParameters parametersToCopy;
 	parametersToCopy.cellMaxDistance = 1.3f;
 	parametersToCopy.cellMinDistance = 0.3f;
 	parametersToCopy.cellMinEnergy = 50.0f;
@@ -225,5 +247,6 @@ void CudaSimulation::setCudaSimulationParameters()
 	parametersToCopy.radiationVelocityMultiplier = 1.0f;
 	parametersToCopy.radiationVelocityPerturbation = 0.5f;
 
-	checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(SimulationParameters) , 0, cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters) , 0, cudaMemcpyHostToDevice));
 }
+*/

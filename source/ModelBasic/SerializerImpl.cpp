@@ -253,13 +253,13 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 	boost::archive::binary_iarchive ia(stream);
 
 	DataDescription data;
-	SimulationParameters* parameters = new SimulationParameters(this);
+	SimulationParameters parameters;
 	SymbolTable* symbolTable = new SymbolTable(this);
 	IntVector2D universeSize;
 	uint timestep;
 	int typeId;
 	map<string, int> specificData;
-	ia >> data >> universeSize >> typeId >> specificData >> *parameters >> *symbolTable >> timestep;
+	ia >> data >> universeSize >> typeId >> specificData >> parameters >> *symbolTable >> timestep;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
@@ -310,22 +310,22 @@ SymbolTable * SerializerImpl::deserializeSymbolTable(string const & data)
 	return symbolTable;
 }
 
-string SerializerImpl::serializeSimulationParameters(SimulationParameters const* parameters) const
+string SerializerImpl::serializeSimulationParameters(SimulationParameters const& parameters) const
 {
 	ostringstream stream;
 	boost::archive::binary_oarchive archive(stream);
 
-	archive << *parameters;
+	archive << parameters;
 	return stream.str();
 }
 
-SimulationParameters * SerializerImpl::deserializeSimulationParameters(string const & data)
+SimulationParameters SerializerImpl::deserializeSimulationParameters(string const & data)
 {
 	istringstream stream(data);
 	boost::archive::binary_iarchive ia(stream);
 
-	SimulationParameters* parameters = new SimulationParameters(this);
-	ia >> *parameters;
+	SimulationParameters parameters;
+	ia >> parameters;
 	return parameters;
 }
 
@@ -336,7 +336,7 @@ void SerializerImpl::dataReadyToRetrieve()
 
 	auto content = _access->retrieveData();
 	archive << content
-		<< _configToSerialize.universeSize << _configToSerialize.typeId << _configToSerialize.typeSpecificData << *_configToSerialize.parameters
+		<< _configToSerialize.universeSize << _configToSerialize.typeId << _configToSerialize.typeSpecificData << _configToSerialize.parameters
 		<< *_configToSerialize.symbolTable << _configToSerialize.timestep;
 	_serializedSimulation = stream.str();
 

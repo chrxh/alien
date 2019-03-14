@@ -54,7 +54,6 @@ private:
 	DataDescription _dataCollected;
 	DataTOCache _dataTOCache;
 	IntRect _lastDataRect;
-	IntRect _lastImageRect;
 
 	bool _updateInProgress = false;
 	vector<CudaJob> _waitingJobs;

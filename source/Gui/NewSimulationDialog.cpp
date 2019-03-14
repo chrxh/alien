@@ -9,14 +9,13 @@
 #include "NewSimulationDialog.h"
 #include "ui_newsimulationdialog.h"
 
-NewSimulationDialog::NewSimulationDialog(SimulationParameters const* parameters, SymbolTable const* symbols, Serializer* serializer, QWidget *parent)
+NewSimulationDialog::NewSimulationDialog(SimulationParameters const& parameters, SymbolTable const* symbols, Serializer* serializer, QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::NewSimulationDialog)
-	, _parameters(parameters->clone())
+	, _parameters(parameters)
 	, _symbolTable(symbols->clone())
 	, _serializer(serializer)
 {
-	_parameters->setParent(parent);
 	_symbolTable->setParent(parent);
 	ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
@@ -130,7 +129,7 @@ SymbolTable* NewSimulationDialog::getSymbolTable() const
 	return _symbolTable;
 }
 
-SimulationParameters* NewSimulationDialog::getSimulationParameters() const
+SimulationParameters const& NewSimulationDialog::getSimulationParameters() const
 {
 	return _parameters;
 }

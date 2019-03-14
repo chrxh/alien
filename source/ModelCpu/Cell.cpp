@@ -16,8 +16,8 @@
 Cell::Cell (uint64_t id, qreal energy, UnitContext* context, int maxConnections, int tokenBranchNumber)
 	: _id(id)
 	, _context(context)
-	, _tokenStack(context->getSimulationParameters()->cellMaxToken)
-	, _newTokenStack(context->getSimulationParameters()->cellMaxToken)
+	, _tokenStack(context->getSimulationParameters().cellMaxToken)
+	, _newTokenStack(context->getSimulationParameters().cellMaxToken)
 {
 	_energy = energy;
     _tokenBranchNumber = tokenBranchNumber;
@@ -406,7 +406,7 @@ int Cell::getBranchNumber () const
 
 void Cell::setBranchNumber (int i)
 {
-    _tokenBranchNumber = i % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
+    _tokenBranchNumber = i % _context->getSimulationParameters().cellMaxTokenBranchNumber;
 }
 
 bool Cell::isTokenBlocked () const
@@ -490,7 +490,7 @@ Token* Cell::takeTokenFromStack ()
 
 void Cell::mutationByChance()
 {
-	if (_context->getNumberGenerator()->getRandomReal() < _context->getSimulationParameters()->cellMutationProb) {
+	if (_context->getNumberGenerator()->getRandomReal() < _context->getSimulationParameters().cellMutationProb) {
 		_features->mutate();
 	}
 }

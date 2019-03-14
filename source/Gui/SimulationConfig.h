@@ -16,7 +16,7 @@ public:
 
 	IntVector2D universeSize;
 	SymbolTable* symbolTable;
-	SimulationParameters* parameters;
+	SimulationParameters parameters;
 };
 
 

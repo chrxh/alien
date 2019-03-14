@@ -81,9 +81,6 @@
     <ClInclude Include="..\..\source\ModelGpu\Physics.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\SimulationParameters.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
@@ -101,6 +98,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaJob.h">
       <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh">
+      <Filter>Source Files\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,7 @@ DescriptionHelper * ModelBasicBuilderFacadeImpl::buildDescriptionHelper() const
 	return new DescriptionHelperImpl();
 }
 
-CellComputerCompiler * ModelBasicBuilderFacadeImpl::buildCellComputerCompiler(SymbolTable* symbolTable, SimulationParameters* parameters) const
+CellComputerCompiler * ModelBasicBuilderFacadeImpl::buildCellComputerCompiler(SymbolTable* symbolTable, SimulationParameters const& parameters) const
 {
 	auto result = new CellComputerCompilerImpl();
 	result->init(symbolTable, parameters);
@@ -27,7 +27,7 @@ SymbolTable * ModelBasicBuilderFacadeImpl::buildDefaultSymbolTable() const
 	return ModelSettings::getDefaultSymbolTable();
 }
 
-SimulationParameters* ModelBasicBuilderFacadeImpl::buildDefaultSimulationParameters() const
+SimulationParameters ModelBasicBuilderFacadeImpl::buildDefaultSimulationParameters() const
 {
 	return ModelSettings::getDefaultSimulationParameters();
 }

@@ -6,7 +6,7 @@
 #include "TokenImpl.h"
 
 TokenImpl::TokenImpl(UnitContext * context)
-	: _context(context), _memory(context->getSimulationParameters()->tokenMemorySize, 0)
+	: _context(context), _memory(context->getSimulationParameters().tokenMemorySize, 0)
 {
 }
 
@@ -14,7 +14,7 @@ TokenImpl::TokenImpl(UnitContext* context, qreal energy, QByteArray const& memor
 	: _context(context), _energy(energy)
 {
 
-	int memorySize = context->getSimulationParameters()->tokenMemorySize;
+	int memorySize = context->getSimulationParameters().tokenMemorySize;
 	_memory = memory.left(memorySize);
 	if (memorySize > _memory.size()) {
 		_memory.append(memorySize - _memory.size(), 0);
@@ -29,7 +29,7 @@ void TokenImpl::setContext(UnitContext * context)
 TokenImpl* TokenImpl::duplicate() const
 {
 	TokenImpl* newToken(new TokenImpl(_context));
-	for (int i = 0; i < _context->getSimulationParameters()->tokenMemorySize; ++i)
+	for (int i = 0; i < _context->getSimulationParameters().tokenMemorySize; ++i)
 		newToken->_memory[i] = _memory[i];
 	newToken->_energy = _energy;
 
@@ -43,7 +43,7 @@ TokenDescription TokenImpl::getDescription() const
 
 int TokenImpl::getTokenAccessNumber() const
 {
-	return _memory[0] % _context->getSimulationParameters()->cellMaxTokenBranchNumber;
+	return _memory[0] % _context->getSimulationParameters().cellMaxTokenBranchNumber;
 }
 
 void TokenImpl::setTokenAccessNumber(int i)

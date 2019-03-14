@@ -6,7 +6,7 @@
 #include "NewHexagonDialog.h"
 
 
-NewHexagonDialog::NewHexagonDialog(SimulationParameters const* simulationParameters, QWidget *parent)
+NewHexagonDialog::NewHexagonDialog(SimulationParameters const& simulationParameters, QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewHexagonDialog)
 {
     ui->setupUi(this);

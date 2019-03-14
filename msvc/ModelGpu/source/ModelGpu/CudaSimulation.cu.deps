@@ -391,13 +391,14 @@ D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\iostream
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\functional
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\xfunctional
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\tuple
+F:\Alle wichtigen Dateien\Artificial Life\alien\msvc\ModelGpu\\..\..\source\ModelBasic/SimulationParameters.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Base.cuh
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\vector
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_launch_parameters.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaConstants.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaSimulation.cuh
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\SimulationParameters.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaSimulationParameters.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CudaInterface.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\SimulationFunctions.cuh
