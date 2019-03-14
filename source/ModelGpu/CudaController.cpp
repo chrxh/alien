@@ -8,6 +8,8 @@ namespace
 	const string ThreadControllerId = "ThreadControllerId";
 }
 
+#include <iostream>
+
 CudaController::CudaController(QObject* parent /*= nullptr*/)
 	: QObject(parent)
 {
@@ -16,6 +18,7 @@ CudaController::CudaController(QObject* parent /*= nullptr*/)
 	connect(_worker, &CudaWorker::timestepCalculated, this, &CudaController::timestepCalculatedWithGpu);
 	connect(this, &CudaController::runWorker, _worker, &CudaWorker::run);
 	_thread.start();
+	_thread.setPriority(QThread::TimeCriticalPriority);
 	Q_EMIT runWorker();
 }
 
