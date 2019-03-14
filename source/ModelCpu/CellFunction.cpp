@@ -12,7 +12,7 @@
 
 QByteArray CellFunction::getInternalData() const
 {
-	int memorySize = _context->getSimulationParameters()->cellFunctionComputerCellMemorySize;
+	int memorySize = _context->getSimulationParameters().cellFunctionComputerCellMemorySize;
 	return QByteArray(memorySize, 0);
 }
 

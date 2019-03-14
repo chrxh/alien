@@ -170,3 +170,21 @@ public:
 private:
 	optional<int> _tpsRestriction;
 };
+
+class _SetSimulationParametersJob
+	: public _CudaJob
+{
+public:
+	_SetSimulationParametersJob(string const& originId, SimulationParameters const& parameters, bool notifyFinish = false)
+		: _CudaJob(originId, notifyFinish), _parameters(parameters) { }
+
+	virtual ~_SetSimulationParametersJob() = default;
+
+	SimulationParameters const& getSimulationParameters() const
+	{
+		return _parameters;
+	}
+
+private:
+	SimulationParameters _parameters;
+};

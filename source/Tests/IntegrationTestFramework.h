@@ -38,7 +38,7 @@ protected:
     ModelBasicBuilderFacade* _basicFacade = nullptr;
 	ModelCpuBuilderFacade* _cpuFacade = nullptr;
 	ModelGpuBuilderFacade* _gpuFacade = nullptr;
-	SimulationParameters* _parameters = nullptr;
+	SimulationParameters _parameters;
 	NumberGenerator* _numberGen = nullptr;
 	SymbolTable* _symbols = nullptr;
 	IntVector2D _universeSize{ 12 * 33 * 3, 12 * 17 * 3 };

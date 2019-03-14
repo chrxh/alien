@@ -26,7 +26,7 @@ protected:
 	bool clusterConsistsOfFollowingCells(ClusterDescription const &cluster, set<uint64_t> const &cellIds);
 
 	SimulationController* _controller = nullptr;
-	SimulationParameters* _parameters = nullptr;
+	SimulationParameters _parameters;
 	NumberGenerator* _numberGen = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
 

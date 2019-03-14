@@ -13,23 +13,23 @@ public:
 	SimulationContextGpuImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextGpuImpl() = default;
 
-	void init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters);
+	void init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters const& parameters);
 
 	virtual SpaceProperties* getSpaceProperties() const override;
 	virtual SymbolTable* getSymbolTable() const override;
-	virtual SimulationParameters* getSimulationParameters() const override;
+	virtual SimulationParameters const& getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
 
 	virtual map<string, int> getSpecificData() const override;
 
-	virtual void setSimulationParameters(SimulationParameters* parameters) override;
+	virtual void setSimulationParameters(SimulationParameters const& parameters) override;
 
 	virtual CudaController* getCudaController() const;
 
 private:
 	SpaceProperties *_metric = nullptr;
 	SymbolTable *_symbolTable = nullptr;
-	SimulationParameters *_parameters = nullptr;
-	CudaController *_threadController = nullptr;
+	SimulationParameters _parameters;
+	CudaController *_cudaController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 };

@@ -16,7 +16,7 @@ public:
 	CudaWorker(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CudaWorker();
 
-	void init(SpaceProperties* space);
+	void init(SpaceProperties* space, SimulationParameters const& parameters);
 	void terminateWorker();
 	bool isSimulationRunning();
 
@@ -27,32 +27,6 @@ public:
 	Q_SIGNAL void timestepCalculated();
 
 	Q_SLOT void run();
-
-/*
-	void requireData(IntRect const& rect);
-	Q_SIGNAL void dataObtained();	//only for queued connection (due to mutex)
-	void lockData();
-	void unlockData();
-	SimulationAccessTO* retrieveData();
-	void updateData();
-
-	bool isSimulationRunning();
-	void stopAfterNextTimestep(bool value);
-	void restrictTimestepsPerSecond(optional<int> tps);
-
-	Q_SLOT void runSimulation();		
-	Q_SIGNAL void timestepCalculated();
-
-private:
-	bool isDataRequired();
-	void requireDataFinished();
-	bool isDataUpdated();
-	void updateDataFinished();
-	optional<int> getTps();
-
-	bool stopAfterNextTimestep();
-	void setSimulationRunning(bool running);
-*/
 
 private:
 	void processJobs();

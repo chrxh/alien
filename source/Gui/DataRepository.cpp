@@ -84,9 +84,9 @@ optional<uint> DataRepository::getSelectedTokenIndex() const
 void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
-	int memorySize = _parameters->cellFunctionComputerCellMemorySize;
+	int memorySize = _parameters.cellFunctionComputerCellMemorySize;
 	auto desc = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
-		CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setMaxConnections(_parameters->cellCreationMaxConnection)
+		CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy).setMaxConnections(_parameters.cellCreationMaxConnection)
 		.setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
 		.setFlagTokenBlocked(false).setTokenBranchNumber(0).setCellFeature(
 			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setVolatileData(QByteArray(memorySize, 0))
@@ -102,7 +102,7 @@ void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 void DataRepository::addAndSelectParticle(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
-	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters->cellMinEnergy / 2.0);
+	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters.cellMinEnergy / 2.0);
 	_descHelper->makeValid(desc);
 	_data.addParticle(desc);
 	_selectedCellIds = { };
@@ -351,7 +351,7 @@ void DataRepository::deleteExtendedSelection()
 
 void DataRepository::addToken()
 {
-	addToken(TokenDescription().setEnergy(_parameters->cellFunctionConstructorOffspringTokenEnergy).setData(QByteArray(_parameters->tokenMemorySize, 0)));
+	addToken(TokenDescription().setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0)));
 }
 
 void DataRepository::addToken(TokenDescription const & token)
@@ -360,7 +360,7 @@ void DataRepository::addToken(TokenDescription const & token)
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
 
 	int numToken = cell.tokens ? cell.tokens->size() : 0;
-	if (numToken < _parameters->cellMaxToken) {
+	if (numToken < _parameters.cellMaxToken) {
 		uint pos = _selectedTokenIndex ? *_selectedTokenIndex : numToken;
 		cell.addToken(pos, token);
 	}

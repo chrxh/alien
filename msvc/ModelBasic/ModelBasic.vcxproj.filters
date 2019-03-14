@@ -147,18 +147,6 @@
     <ClCompile Include="Release\moc_SimulationMonitor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelBasic\SimulationParameters.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tests\moc_SimulationParameters.cpp">
-      <Filter>Generated Files\Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationParameters.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationParameters.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelBasic\SpaceProperties.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

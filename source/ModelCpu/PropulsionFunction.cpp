@@ -98,10 +98,10 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     //calc new kinetic energy
 	auto parameters = _context->getSimulationParameters();
     qreal eKinNew(Physics::kineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
-    qreal energyDiff((eKinNew-eKinOld)/ parameters->cellMass_Reciprocal);
+    qreal energyDiff((eKinNew-eKinOld)/ parameters.cellMass_Reciprocal);
 
     //has token enough energy?
-    if( token->getEnergy() >= (energyDiff + qAbs(energyDiff) + parameters->tokenMinEnergy + FLOATINGPOINT_HIGH_PRECISION) ) {
+    if( token->getEnergy() >= (energyDiff + qAbs(energyDiff) + parameters.tokenMinEnergy + FLOATINGPOINT_HIGH_PRECISION) ) {
 
         //create energy particle with difference energy
 		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();

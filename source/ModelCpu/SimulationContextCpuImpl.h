@@ -16,15 +16,15 @@ public:
 	virtual SpaceProperties* getSpaceProperties() const;
 	virtual UnitGrid* getUnitGrid() const;
 	virtual SymbolTable* getSymbolTable() const override;
-	virtual SimulationParameters * getSimulationParameters() const override;
+	virtual SimulationParameters const& getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
 
-	virtual void setSimulationParameters(SimulationParameters* parameters) override;
+	virtual void setSimulationParameters(SimulationParameters const& parameters) override;
 
 	virtual map<string, int> getSpecificData() const override;
 
 	virtual void init(SpaceProperties* spaceProp, UnitGrid* grid, UnitThreadController* threads
-		, SymbolTable * symbolTable, SimulationParameters * parameters, CellComputerCompiler* compiler);
+		, SymbolTable * symbolTable, SimulationParameters const& parameters, CellComputerCompiler* compiler);
 
 	virtual UnitThreadController* getUnitThreadController() const;
 	
@@ -35,7 +35,7 @@ private:
 	SimulationAttributeSetter* _attributeSetter = nullptr;
 
 	SymbolTable* _symbolTable = nullptr;
-	SimulationParameters * _simulationParameters = nullptr;
+	SimulationParameters _simulationParameters;
 	CellComputerCompiler* _compiler = nullptr;
 	NumberGenerator* _numberGen = nullptr;
 };

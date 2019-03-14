@@ -15,20 +15,20 @@ SimulationContextGpuImpl::SimulationContextGpuImpl(QObject* parent /*= nullptr*/
 {
 }
 
-void SimulationContextGpuImpl::init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters *parameters)
+void SimulationContextGpuImpl::init(SpaceProperties *space, SymbolTable *symbolTable, SimulationParameters const& parameters)
 {
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();
 	numberGen->init(1323781, 1);
 
-	SET_CHILD(_metric, metric);
+	SET_CHILD(_metric, space);
 	SET_CHILD(_symbolTable, symbolTable);
-	SET_CHILD(_parameters, parameters);
+	_parameters = parameters;
 	SET_CHILD(_numberGen, numberGen);
 
-	auto threadController = new CudaController;
-	SET_CHILD(_threadController, threadController);
-	_threadController->init(metric);
+	auto cudaController = new CudaController;
+	SET_CHILD(_cudaController, cudaController);
+	_cudaController->init(space, parameters);
 }
 
 SpaceProperties * SimulationContextGpuImpl::getSpaceProperties() const
@@ -41,7 +41,7 @@ SymbolTable * SimulationContextGpuImpl::getSymbolTable() const
 	return _symbolTable;
 }
 
-SimulationParameters * SimulationContextGpuImpl::getSimulationParameters() const
+SimulationParameters const& SimulationContextGpuImpl::getSimulationParameters() const
 {
 	return _parameters;
 }
@@ -56,12 +56,14 @@ map<string, int> SimulationContextGpuImpl::getSpecificData() const
 	return map<string, int>();
 }
 
-void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters * parameters)
+void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters const& parameters)
 {
+	_parameters = parameters;
+	_cudaController->setSimulationParameters(parameters);
 }
 
 CudaController * SimulationContextGpuImpl::getCudaController() const
 {
-	return _threadController;
+	return _cudaController;
 }
 

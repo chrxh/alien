@@ -14,12 +14,12 @@ CudaWorker::~CudaWorker()
 	delete _cudaSimulation;
 }
 
-void CudaWorker::init(SpaceProperties* space)
+void CudaWorker::init(SpaceProperties* space, SimulationParameters const& parameters)
 {
 	_space = space;
 	auto size = space->getSize();
 	delete _cudaSimulation;
-	_cudaSimulation = new CudaSimulation({ size.x, size.y });
+	_cudaSimulation = new CudaSimulation({ size.x, size.y }, parameters);
 }
 
 void CudaWorker::terminateWorker()
@@ -118,6 +118,10 @@ void CudaWorker::processJobs()
 
 		if (auto tpsRestrictionJob = boost::dynamic_pointer_cast<_TpsRestrictionJob>(job)) {
 			_tpsRestriction = tpsRestrictionJob->getTpsRestriction();
+		}
+
+		if (auto setSimulationParametersJob = boost::dynamic_pointer_cast<_SetSimulationParametersJob>(job)) {
+			_cudaSimulation->setSimulationParameters(setSimulationParametersJob->getSimulationParameters());
 		}
 
 		if (job->isNotifyFinish()) {
