@@ -28,7 +28,7 @@ protected:
 private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void requestData();
-	Q_SLOT void retrieveAndDisplayData();
+	Q_SLOT void displayData();
 	Q_SLOT void scrolled();
 
 	list<QMetaObject::Connection> _connections;
@@ -37,7 +37,7 @@ private:
 	DataRepository* _repository = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
-    QGraphicsPixmapItem* _pixmap = nullptr;
+	FastImageItem* _fastImageItem = nullptr;
     QImage* _image = nullptr;
 	Notifier* _notifier = nullptr;
 };

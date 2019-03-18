@@ -15,12 +15,12 @@
 #include "CoordinateSystem.h"
 #include "DataRepository.h"
 #include "Manipulator.h"
+#include "FastImageItem.h"
 #include "PixelUniverseView.h"
 
 PixelUniverseView::PixelUniverseView(QObject* parent)
 {
 	setBackgroundBrush(QBrush(Const::BackgroundColor));
-    _pixmap = addPixmap(QPixmap());
 	_manipulator = new Manipulator(this);
     update();
 }
@@ -40,10 +40,16 @@ void PixelUniverseView::init(Notifier* notifier, SimulationController* controlle
 
 	_manipulator->init(controller->getContext(), access);
 
+	delete _fastImageItem;
 	delete _image;
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
 	_image = new QImage(size.x, size.y, QImage::Format_RGB32);
+	_fastImageItem = new FastImageItem(_image);
+	addItem(_fastImageItem);
+
 	QGraphicsScene::setSceneRect(0, 0, _image->width(), _image->height());
+
+	update();
 }
 
 void PixelUniverseView::activate()
@@ -51,7 +57,7 @@ void PixelUniverseView::activate()
 	deactivate();
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData));
 	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &PixelUniverseView::receivedNotifications));
-	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::retrieveAndDisplayData, Qt::QueuedConnection));
+	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::displayData, Qt::QueuedConnection));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &PixelUniverseView::scrolled));
 
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
@@ -102,9 +108,9 @@ void PixelUniverseView::requestData()
 	_repository->requireImageFromSimulation(rect, _image);
 }
 
-void PixelUniverseView::retrieveAndDisplayData()
+void PixelUniverseView::displayData()
 {
-	_pixmap->setPixmap(QPixmap::fromImage(*_image));
+	update();
 }
 
 void PixelUniverseView::scrolled()

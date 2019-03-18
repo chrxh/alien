@@ -38,6 +38,11 @@
     <Filter Include="Source Files\StartScreen">
       <UniqueIdentifier>{8e45d07f-5a3b-4c3f-a104-52836c1dfeca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">
@@ -538,6 +543,9 @@
     <ClCompile Include="Release\moc_ComputationSettingsDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Gui\FastImageItem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -775,6 +783,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\ComputationSettingsDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\Gui\FastImageItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
