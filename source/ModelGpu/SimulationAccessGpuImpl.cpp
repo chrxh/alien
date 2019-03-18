@@ -146,6 +146,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 //	EntityRenderer::fillRect(targetImage, truncatedRect);
 	targetImage->fill(QColor(0, 0, 0x1b));
 
+
 	for (int i = 0; i < *dataTO.numParticles; ++i) {
 		ParticleAccessTO& particle = dataTO.particles[i];
 		float2& pos = particle.pos;
@@ -175,6 +176,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 		space->correctPosition(intPos);
 		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
 	}
+
 }
 
 void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect)
