@@ -45,10 +45,10 @@ void InfoController::updateInfoLabel()
 {
 	QString deviceString;
 	if (Device::CPU == _device) {
-		deviceString = "Device: <font color=#FF5050><b>CPU</b></font>";
+		deviceString = "Device: <font color=#FF5050><b>C P U </b></font>";
 	}
 	if (Device::GPU == _device) {
-		deviceString = "Device: <font color=#80FF80><b>CUDA</b></font>";
+		deviceString = "Device: <font color=#80FF80><b>C U D A </b></font>";
 	}
 	auto separator = QString("&nbsp;&nbsp;<font color=#7070FF>&#10072;</font>&nbsp;&nbsp;");
 	auto infoString = deviceString + separator + QString("Timestep: %1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
