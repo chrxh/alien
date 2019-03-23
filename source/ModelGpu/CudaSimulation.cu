@@ -148,23 +148,6 @@ void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& re
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-/*
-	DataAccessTO dataTO;
-	dataTO.numClusters = new int;
-	dataTO.numCells = new int;
-	dataTO.numParticles = new int;
-	checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-
-	dataTO.clusters = new ClusterAccessTO[*dataTO.numClusters];
-	dataTO.cells = new CellAccessTO[*dataTO.numCells];
-	dataTO.particles = new ParticleAccessTO[*dataTO.numParticles];
-	checkCudaErrors(cudaMemcpy(dataTO.clusters, _cudaAccessTO->clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy(dataTO.particles, _cudaAccessTO->particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyDeviceToHost));
-	return dataTO;
-*/
 	checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
 	checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
 	checkCudaErrors(cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
@@ -175,7 +158,8 @@ void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& re
 
 void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
- 	prepareTargetData();
+
+	prepareTargetData();
 
 	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numClusters, dataTO.numClusters, sizeof(int), cudaMemcpyHostToDevice));
 	checkCudaErrors(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
@@ -228,25 +212,3 @@ void CudaSimulation::swapData()
 	swap(_internalData->cellsAC1, _internalData->cellsAC2);
 	swap(_internalData->particlesAC1, _internalData->particlesAC2);
 }
-
-/*
-void CudaSimulation::setCudaSimulationParameters()
-{
-	CudaSimulationParameters parametersToCopy;
-	parametersToCopy.cellMaxDistance = 1.3f;
-	parametersToCopy.cellMinDistance = 0.3f;
-	parametersToCopy.cellMinEnergy = 50.0f;
-	parametersToCopy.cellFusionVelocity = 0.4f;
-	parametersToCopy.cellMaxForce = 0.8f;
-	parametersToCopy.cellMaxForceDecayProb = 0.2f;
-	parametersToCopy.cellTransformationProb = 0.2f;
-	parametersToCopy.cellMass = 1.0;
-	parametersToCopy.radiationProbability = 0.2f;
-	parametersToCopy.radiationExponent = 1.0f;
-	parametersToCopy.radiationFactor = 0.0002f;
-	parametersToCopy.radiationVelocityMultiplier = 1.0f;
-	parametersToCopy.radiationVelocityPerturbation = 0.5f;
-
-	checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters) , 0, cudaMemcpyHostToDevice));
-}
-*/

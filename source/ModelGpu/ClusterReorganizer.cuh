@@ -54,7 +54,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 	__shared__ int numDecompositions;
 	struct Entry {
 		int tag;
-		float rotMatrix[2][2];
+		float invRotMatrix[2][2];
 		Cluster cluster;
 	};
 	__shared__ Entry entries[MAX_DECOMPOSITIONS];
@@ -91,7 +91,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 				atomicAdd(&entries[index].cluster.vel.y, cell.vel.y);
 
 				entries[index].cluster.id = _data->numberGen.createNewId_kernel();
-				Physics::rotationMatrix(entries[index].cluster.angle, entries[index].rotMatrix);
+				Physics::inverseRotationMatrix(entries[index].cluster.angle, entries[index].invRotMatrix);
 				foundMatch = true;
 				break;
 			}
@@ -152,11 +152,9 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 				float angularMomentum = Physics::angularMomentum(r, relVel);
 				atomicAdd(&newCluster->angularVel, angularMomentum);
 
-				float(&invRotMatrix)[2][2] = entries[index].rotMatrix;
-				swap(invRotMatrix[0][1], invRotMatrix[1][0]);
+				float(&invRotMatrix)[2][2] = entries[index].invRotMatrix;
 				cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
 				cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
-				swap(invRotMatrix[0][1], invRotMatrix[1][0]);
 
 				int newCellIndex = atomicAdd(&newCluster->numCells, 1);
 				Cell& newCell = newCluster->cells[newCellIndex];
@@ -266,14 +264,16 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithFusion(int 
 			Cell* newCell = &newCluster->cells[_origCluster->numCells + otherCellIndex];
 			Cell* origCell = &otherCluster->cells[otherCellIndex];
 			setSuccessorCell(origCell, newCell, newCluster);
-			auto relPos = sub(add(newCell->absPos, correction), newCluster->pos);
-			newCell->relPos = relPos;
-			newCell->absPos = add(newCell->absPos, correction);
-			newCell->cluster = newCluster;
-			atomicAdd(&newCluster->angularMass, lengthSquared(relPos));
 
 			auto r = sub(newCell->absPos, otherCluster->pos);
 			_cellMap.mapDisplacementCorrection(r);
+
+			newCell->absPos = add(newCell->absPos, correction);
+			auto relPos = sub(newCell->absPos, newCluster->pos);
+			newCell->relPos = relPos;
+			newCell->cluster = newCluster;
+			atomicAdd(&newCluster->angularMass, lengthSquared(relPos));
+
 			float2 relVel = sub(newCell->vel, otherCluster->vel);
 			float angularMomentum = Physics::angularMomentum(r, relVel);
 			atomicAdd(&newCluster->angularVel, angularMomentum);
