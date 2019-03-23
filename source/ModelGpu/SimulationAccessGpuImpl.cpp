@@ -15,7 +15,7 @@
 namespace
 {
 	const string SimulationAccessGpuId = "SimulationAccessGpuId";
-	const int NumDataTOs = 1;
+	const int NumDataTOs = 5;
 }
 
 SimulationAccessGpuImpl::SimulationAccessGpuImpl(QObject* parent /*= nullptr*/)
