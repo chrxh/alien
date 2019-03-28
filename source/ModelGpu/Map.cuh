@@ -38,7 +38,7 @@ public:
 
 	__inline__ __device__ float2 correctionIncrement(float2 pos1, float2 pos2) const
 	{
-		float2 result;
+		float2 result{ 0.0f, 0.0f };
 		if (pos2.x - pos1.x > _size.x / 2) {
 			result.x = -_size.x;
 		}

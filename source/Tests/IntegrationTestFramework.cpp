@@ -69,8 +69,8 @@ ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2
 	ClusterDescription cluster;
 	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
 
-	for (int x = 0; x < size.x; ++x) {
-		for (int y = 0; y < size.y; ++y) {
+	for (int y = 0; y < size.y; ++y) {
+		for (int x = 0; x < size.x; ++x) {
 			QVector2D relPos(-static_cast<float>(size.x - 1) / 2.0 + x, -static_cast<float>(size.y - 1) / 2.0 + y);
 			int maxConnections = 4;
 			if (x == 0 || x == size.x - 1) {
