@@ -29,7 +29,6 @@ private:
 	SimulationData* _data;
 	Map<Cell> _cellMap;
 
-	Cluster _modifiedCluster;
 	Cluster *_origCluster;
 };
 
@@ -40,7 +39,6 @@ __inline__ __device__ void ClusterReorganizer::init(SimulationData& data, int cl
 {
 	_data = &data;
 	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
-	_modifiedCluster = *_origCluster;
 	_cellMap.init(data.size, data.cellMap);
 }
 
@@ -64,7 +62,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 			entries[i].tag = -1;
 			entries[i].cluster.pos = { 0.0f, 0.0f };
 			entries[i].cluster.vel = { 0.0f, 0.0f };
-			entries[i].cluster.angle = _modifiedCluster.angle;
+			entries[i].cluster.angle = _origCluster->angle;
 			entries[i].cluster.angularVel = 0.0f;
 			entries[i].cluster.angularMass = 0.0f;
 			entries[i].cluster.numCells = 0;
@@ -124,11 +122,12 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 	__shared__ Cluster* newClusters[MAX_DECOMPOSITIONS];
 	calcPartition(numDecompositions, threadIdx.x, blockDim.x, startDecompositionIndex, endDecompositionIndex);
 	for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
-		entries[index].cluster.pos.x /= entries[index].cluster.numCells;
-		entries[index].cluster.pos.y /= entries[index].cluster.numCells;
-		entries[index].cluster.vel.x /= entries[index].cluster.numCells;
-		entries[index].cluster.vel.y /= entries[index].cluster.numCells;
-		entries[index].cluster.cells = _data->cellsAC2.getNewSubarray(entries[index].cluster.numCells);
+		auto numCells = entries[index].cluster.numCells;
+		entries[index].cluster.pos.x /= numCells;
+		entries[index].cluster.pos.y /= numCells;
+		entries[index].cluster.vel.x /= numCells;
+		entries[index].cluster.vel.y /= numCells;
+		entries[index].cluster.cells = _data->cellsAC2.getNewSubarray(numCells);
 		entries[index].cluster.numCells = 0;
 
 		newClusters[index] = _data->clustersAC2.getNewElement();
@@ -189,8 +188,9 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithoutDecompos
 
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
-		newCells = _data->cellsAC2.getNewSubarray(_modifiedCluster.numCells);
-		_modifiedCluster.cells = newCells;
+		*newCluster = *_origCluster;
+		newCells = _data->cellsAC2.getNewSubarray(_origCluster->numCells);
+		newCluster->cells = newCells;
 	}
 	__syncthreads();
 
@@ -201,9 +201,6 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithoutDecompos
 	}
 
 	__syncthreads();
-	if (threadIdx.x == 0) {
-		*newCluster = _modifiedCluster;
-	}
 	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 		correctCellConnections(&newCells[cellIndex]);
 	}
@@ -304,6 +301,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopy(int startCellI
 		__syncthreads();
 		return;
 	}
+
 	if (_origCluster->decompositionRequired && !_origCluster->clusterToFuse) {
 		processingDataCopyWithDecomposition(startCellIndex, endCellIndex);
 	}

@@ -33,6 +33,7 @@ public:
 
 protected:
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
+	void checkDistancesToConnectingCells(DataDescription const& data) const;
 	void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
 	Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
 	Physics::Velocities calcVelocitiesOfFusion(ClusterDescription const& cluster1, ClusterDescription const& cluster2) const;
@@ -75,6 +76,26 @@ void SimulationGpuTest::checkEnergy(DataDescription const& origData, DataDescrip
 	auto energyAfter = calcEnergy(newData);
 
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
+}
+
+void SimulationGpuTest::checkDistancesToConnectingCells(DataDescription const & data) const
+{
+	if (!data.clusters) {
+		return;
+	}
+	auto cellMaxDistance = _parameters.cellMaxDistance + FLOATINGPOINT_MEDIUM_PRECISION;
+	auto cellByCellId = IntegrationTestHelper::getCellByCellId(data);
+	for (ClusterDescription const& cluster : *data.clusters) {
+		for (CellDescription const& cell: *cluster.cells) {
+			if (!cell.connectingCells) {
+				continue;
+			}
+			for (auto const& connectingCellId : *cell.connectingCells) {
+				CellDescription const& connectingCell = cellByCellId.at(connectingCellId);
+				ASSERT_GE(cellMaxDistance, (*connectingCell.pos - *cell.pos).length());
+			}
+		}
+	}
 }
 
 void SimulationGpuTest::checkKineticEnergy(DataDescription const & origData, DataDescription const & newData) const
@@ -353,6 +374,7 @@ TEST_F(SimulationGpuTest, testCenterCollisionOfParallelLineClusters)
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -390,6 +412,7 @@ TEST_F(SimulationGpuTest, testHorizontalCenterCollisionOfParallelLineClusters_at
 		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
 		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
 	}
+	checkDistancesToConnectingCells(newData);
 }
 
 
@@ -430,6 +453,7 @@ TEST_F(SimulationGpuTest, testVerticalCenterCollisionOfParallelLineClusters_atUn
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 
@@ -470,6 +494,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfParallelLineClusters)
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -507,6 +532,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfRectangleClusters)
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -537,6 +563,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfRectangleClusters_withAngularVe
 	ASSERT_EQ(2, newData.clusters->size());
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -578,6 +605,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfOrthogonalLineClusters)
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -620,6 +648,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTraversalLineClusters)
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -663,6 +692,7 @@ TEST_F(SimulationGpuTest, testSidewiseCollisionOfTraversalLineClusters_waitUntil
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -699,6 +729,7 @@ TEST_F(SimulationGpuTest, DISABLED_testSidewiseCollisionOfTraversalLineClusters_
 	}
 
 	checkKineticEnergy(origData, newData);
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -822,6 +853,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy)
 			EXPECT_TRUE(isCompatible(cell.pos, origCell.pos));
 		}
 	}
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -868,6 +900,7 @@ TEST_F(SimulationGpuTest, testDecomposeClusterAfterLowEnergy_duringRotation)
 		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -888,6 +921,7 @@ TEST_F(SimulationGpuTest, testDestructionOfTooCloseCells)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(5, newData.clusters->at(0).cells->size());
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -911,6 +945,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -933,6 +968,7 @@ TEST_F(SimulationGpuTest, testNoFusionOfHorizontalClusters)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(2, newData.clusters->size());
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -964,6 +1000,7 @@ TEST_F(SimulationGpuTest, testFusionOfLineClusters_duringRotation)
 	EXPECT_EQ(22, fusedCluster.cells->size());
 	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
 	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -995,6 +1032,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_partialContact)
 	EXPECT_EQ(22, fusedCluster.cells->size());
 	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
 	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -1018,6 +1056,7 @@ TEST_F(SimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -1037,6 +1076,7 @@ TEST_F(SimulationGpuTest, testFastMovingCluster)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(100, newData.clusters->at(0).cells->size());
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -1060,6 +1100,7 @@ TEST_F(SimulationGpuTest, testFastRotatingCluster)
 		}
 	}
 	EXPECT_LE(2, newData.clusters->size());
+	checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -1084,7 +1125,7 @@ TEST_F(SimulationGpuTest, testTransformationParticleToCell)
 /**
 * Situation:
 *	- destruction of cells in two overlapping clusters
-*	- important: NUM_THREADS_PER_BLOCK should be 128
+*	- important: NUM_THREADS_PER_BLOCK should be at least 128
 * Fixed error: problem due to missing __synchtreads call
 * Expected result: no crash
 */
@@ -1119,4 +1160,50 @@ TEST_F(SimulationGpuTest, regressionTest_manyOverlappingRectangleClusters)
 
 	IntegrationTestHelper::updateData(_access, origData);
 	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(300, _controller));
+}
+
+/**
+* Situation:
+*	- many moving rectangular clusters
+*	- important: NUM_THREADS_PER_BLOCK should be at least 128 and run in release build
+* Fixed error: distance to connecting cells are too large (calculation of invRotMatrix in processingDataCopyWithDecomposition)
+* Expected result: distance to connecting cells are admissible
+*/
+TEST_F(SimulationGpuTest, regressionTest_manyRectangleClusters_manyThreadsPerBlocks)
+{
+	auto size = _spaceProp->getSize();
+
+	DataDescription origData;
+	for (int i = 0; i < 20; ++i) {
+		origData.addCluster(createRectangularCluster({ 7, 40 }));
+	}
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(300, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x, _universeSize.y } });
+	checkDistancesToConnectingCells(newData);
+}
+
+/**
+* Situation: many moving rectangular clusters concentrated at boundary
+* Fixed error: distance to connecting cells are too large in release build
+*			   due to missing initialization in BasicMap::correctionIncrement
+* Expected result: distance to connecting cells are admissible
+*/
+TEST_F(SimulationGpuTest, regressionTest_manyRectangleClusters_concentratedAtUniverseBoundary)
+{
+	auto size = _spaceProp->getSize();
+
+	DataDescription origData;
+	for (int i = 0; i < 100; ++i) {
+        origData.addCluster(createRectangularCluster({7, 40},
+            QVector2D{
+			static_cast<float>(_numberGen->getRandomReal(-20, -20 + 40)),
+			static_cast<float>(_numberGen->getRandomReal(-20, -20 + 40)) }));
+    }
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(50, _controller);
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+	checkDistancesToConnectingCells(newData);
 }
