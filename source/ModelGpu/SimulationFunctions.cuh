@@ -16,38 +16,6 @@
 /* Clusters																*/
 /************************************************************************/
 
-__device__ void clusterReorganizing(SimulationData &data, int clusterIndex)
-{
-	__shared__ ClusterReorganizer builder;
-	if (0 == threadIdx.x) {
-		builder.init(data, clusterIndex);
-	}
-	__syncthreads();
-
-	int startCellIndex;
-	int endCellIndex;
-	calcPartition(builder.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-	builder.processingDecomposition(startCellIndex, endCellIndex);
-	builder.processingDataCopy(startCellIndex, endCellIndex);
-}
-
-__global__ void clusterReorganizing(SimulationData data)
-{
-	int indexResource = blockIdx.x;
-	int numEntities = data.clustersAC1.getNumEntries();
-	if (indexResource >= numEntities) {
-		return;
-	}
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
-	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterReorganizing(data, clusterIndex);
-	}
-}
-
 __device__ void clusterDynamicsStep1(SimulationData &data, int clusterIndex)
 {
 	__shared__ ClusterDynamics cluster;
@@ -61,22 +29,6 @@ __device__ void clusterDynamicsStep1(SimulationData &data, int clusterIndex)
 	calcPartition(cluster.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 	cluster.processingMovement(startCellIndex, endCellIndex);
-}
-
-__global__ void clusterDynamicsStep1(SimulationData data)
-{
-	int indexResource = blockIdx.x;
-	int numEntities = data.clustersAC1.getNumEntries();
-	if (indexResource >= numEntities) {
-		return;
-	}
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
-	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterDynamicsStep1(data, clusterIndex);
-	}
 }
 
 __device__ void clusterDynamicsStep2(SimulationData &data, int clusterIndex)
@@ -93,24 +45,62 @@ __device__ void clusterDynamicsStep2(SimulationData &data, int clusterIndex)
 
 	cluster.destroyCloseCell(startCellIndex, endCellIndex);
 	cluster.processingRadiation(startCellIndex, endCellIndex);
-	cluster.processingCollision(startCellIndex, endCellIndex);	//attention: can result an temporarily inconsistent state
+	cluster.processingCollision(startCellIndex, endCellIndex);	//attention: can result a temporarily inconsistent state
+																//will be resolved in reorganizer
+}
+
+__device__ void clusterReorganizing(SimulationData &data, int clusterIndex)
+{
+	__shared__ ClusterReorganizer builder;
+	if (0 == threadIdx.x) {
+		builder.init(data, clusterIndex);
+	}
+	__syncthreads();
+
+	int startCellIndex;
+	int endCellIndex;
+	calcPartition(builder.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+
+	builder.processingDecomposition(startCellIndex, endCellIndex);
+	builder.processingDataCopy(startCellIndex, endCellIndex);
+}
+
+__global__ void clusterDynamicsStep1(SimulationData data)
+{
+	int numEntities = data.clustersAC1.getNumEntries();
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
+	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+		clusterDynamicsStep1(data, clusterIndex);
+	}
 }
 
 __global__ void clusterDynamicsStep2(SimulationData data)
 {
-	int indexResource = blockIdx.x;
 	int numEntities = data.clustersAC1.getNumEntries();
-	if (indexResource >= numEntities) {
-		return;
-	}
 
 	int startIndex;
 	int endIndex;
-	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
+	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
 		clusterDynamicsStep2(data, clusterIndex);
 	}
 }
+
+__global__ void clusterReorganizing(SimulationData data)
+{
+	int numEntities = data.clustersAC1.getNumEntries();
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
+	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+		clusterReorganizing(data, clusterIndex);
+	}
+}
+
 
 /************************************************************************/
 /* Particles															*/
@@ -130,6 +120,7 @@ __global__ void particleDynamicsStep1(SimulationData data)
 	int startIndex;
 	int endIndex;
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
+
 	blockProcessor.processingMovement(startIndex, endIndex);
 	blockProcessor.processingTransformation(startIndex, endIndex);
 }
@@ -148,6 +139,7 @@ __global__ void particleDynamicsStep2(SimulationData data)
 	int startIndex;
 	int endIndex;
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
+
 	blockProcessor.processingCollision(startIndex, endIndex);
 }
 
@@ -165,6 +157,7 @@ __global__ void particleReorganizing(SimulationData data)
 	int startIndex;
 	int endIndex;
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
+
 	blockProcessor.processingDataCopy(startIndex, endIndex);
 }
 
