@@ -392,6 +392,8 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(Cell *cell)
             add(mul(cell->vel, cudaSimulationParameters.radiationVelocityMultiplier),
                 {(_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                  (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation});
+
+		particlePos = sub(particlePos, particleVel);	//because particle will still be moved in current time step
         float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
         radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
 		radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
