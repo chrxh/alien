@@ -23,9 +23,14 @@ public:
 private:
     Q_SLOT void changesFromMetadataDescriptionEditor ();
 
+	void setConnections();
+	void unsetConnections();
+
 private:
     Ui::MetadataEditTab *ui;
 
 	DataEditModel* _model = nullptr;
 	DataEditController* _controller = nullptr;
+
+	list<QMetaObject::Connection> _connections;
 };
