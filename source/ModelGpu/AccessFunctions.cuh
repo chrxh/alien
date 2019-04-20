@@ -21,7 +21,6 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 	calcPartition(cluster.numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
 	__shared__ bool containedInRect;
-	__shared__ CellAccessTO* cellTOs;
 	__shared__ BasicMap map;
 	if (0 == threadIdx.x) {
 		containedInRect = false;
@@ -40,11 +39,16 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 
 	if (containedInRect) {
 		__shared__ int cellTOIndex;
+		__shared__ int tokenTOIndex;
+		__shared__ CellAccessTO* cellTOs;
+		__shared__ TokenAccessTO* tokenTOs;
 		if (0 == threadIdx.x) {
 			int clusterAccessIndex = atomicAdd(simulationTO.numClusters, 1);
 			cellTOIndex = atomicAdd(simulationTO.numCells, cluster.numCells);
-
 			cellTOs = &simulationTO.cells[cellTOIndex];
+
+			tokenTOIndex = atomicAdd(simulationTO.numTokens, cluster.numTokens);
+			tokenTOs = &simulationTO.tokens[tokenTOIndex];
 
 			ClusterAccessTO& clusterTO = simulationTO.clusters[clusterAccessIndex];
 			clusterTO.id = cluster.id;
@@ -53,21 +57,37 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 			clusterTO.angle = cluster.angle;
 			clusterTO.angularVel = cluster.angularVel;
 			clusterTO.numCells = cluster.numCells;
+			clusterTO.numTokens = cluster.numTokens;
 			clusterTO.cellStartIndex = cellTOIndex;
 		}
 		__syncthreads();
 
 		for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
 			Cell const& cell = cluster.cells[cellIndex];
-			cellTOs[cellIndex].id = cell.id;
-			cellTOs[cellIndex].pos = cell.absPos;
-			cellTOs[cellIndex].energy = cell.energy;
-			cellTOs[cellIndex].maxConnections = cell.maxConnections;
-			cellTOs[cellIndex].numConnections = cell.numConnections;
+			CellAccessTO& cellTO = cellTOs[cellIndex];
+			cellTO.id = cell.id;
+			cellTO.pos = cell.absPos;
+			cellTO.energy = cell.energy;
+			cellTO.maxConnections = cell.maxConnections;
+			cellTO.numConnections = cell.numConnections;
 			for (int i = 0; i < cell.numConnections; ++i) {
 				int connectingCellIndex = cell.connections[i] - cluster.cells + cellTOIndex;
-				cellTOs[cellIndex].connectionIndices[i] = connectingCellIndex;
+				cellTO.connectionIndices[i] = connectingCellIndex;
 			}
+		}
+
+		int startTokenIndex;
+		int endTokenIndex;
+		calcPartition(cluster.numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+		for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+			Token const& token = cluster.tokens[tokenIndex];
+			TokenAccessTO& tokenTO = tokenTOs[tokenIndex];
+			tokenTO.energy = token.energy;
+			for (int i = 0; i < MAX_TOKEN_MEM_SIZE; ++i) {
+				tokenTO.memory[i] = token.memory[i];
+			}
+			int tokenCellIndex = token.cell - cluster.cells + cellTOIndex;
+			tokenTO.cellIndex = tokenCellIndex;
 		}
 	}
 }

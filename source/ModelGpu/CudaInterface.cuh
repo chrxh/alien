@@ -5,6 +5,13 @@
 #include "CudaConstants.cuh"
 #include "CudaSimulation.cuh"
 
+struct TokenAccessTO
+{
+	float energy;
+	char memory[MAX_TOKEN_MEM_SIZE];
+	int cellIndex;
+};
+
 struct ParticleAccessTO
 {
 	uint64_t id;
@@ -32,6 +39,8 @@ struct ClusterAccessTO
 	float angularVel;
 	int numCells;
 	int cellStartIndex;
+	int numTokens;
+	int tokenStartIndex;
 };
 
 struct DataAccessTO
@@ -42,5 +51,19 @@ struct DataAccessTO
 	CellAccessTO* cells;
 	int* numParticles;
 	ParticleAccessTO* particles;
+	int* numTokens;
+	TokenAccessTO* tokens;
+
+	bool operator==(DataAccessTO const& other) const
+	{
+		return numClusters == other.numClusters
+			&& clusters == other.clusters
+			&& numCells == other.numCells
+			&& cells == other.cells
+			&& numParticles == other.numParticles
+			&& particles == other.particles
+			&& numTokens == other.numTokens
+			&& tokens == other.tokens;
+	}
 };
 

@@ -43,6 +43,8 @@ public:
 			cluster->angularVel = clusterTO.angularVel;
 			cluster->numCells = clusterTO.numCells;
 			cluster->cells = _data->cellsAC2.getNewSubarray(cluster->numCells);
+			cluster->numTokens = clusterTO.numTokens;
+			cluster->tokens = _data->tokensAC2.getNewSubarray(cluster->numTokens);
 
 			cluster->decompositionRequired = false;
 			cluster->locked = 0;
@@ -85,6 +87,23 @@ public:
 			cell.protectionCounter = 0;
 			cell.alive = true;
 		}
+
+		int startTokenIndex;
+		int endTokenIndex;
+		calcPartition(cluster->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+
+		for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+			Token& token = cluster->tokens[tokenIndex];
+			TokenAccessTO const& tokenTO = _simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];
+
+			token.energy = tokenTO.energy;
+			for (int i = 0; i < MAX_TOKEN_MEM_SIZE; ++i) {
+				token.memory[i] = tokenTO.memory[i];
+			}
+			int index = tokenTO.cellIndex - clusterTO.cellStartIndex;
+			token.cell = cluster->cells + index;
+		}
+
 		__syncthreads();
 
 		if (0 == threadIdx.x) {
