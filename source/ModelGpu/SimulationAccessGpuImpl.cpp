@@ -128,7 +128,7 @@ void SimulationAccessGpuImpl::jobsFinished()
 
 void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, IntRect const& rect, DataChangeDescription const& updateDesc)
 {
-	DataConverter converter(dataToUpdateTO, _numberGen);
+	DataConverter converter(dataToUpdateTO, _numberGen, _context->getSimulationParameters());
 	converter.updateData(updateDesc);
 
 	auto cudaWorker = _context->getCudaController()->getCudaWorker();
@@ -183,7 +183,7 @@ void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO, IntRec
 {
 	_lastDataRect = rect;
 
-	DataConverter converter(dataTO, _numberGen);
+	DataConverter converter(dataTO, _numberGen, _context->getSimulationParameters());
 	_dataCollected = converter.getDataDescription();
 }
 
@@ -227,9 +227,11 @@ SimulationAccessGpuImpl::DataTOCache::DataTOCache()
 		dataTO.numClusters = new int;
 		dataTO.numCells = new int;
 		dataTO.numParticles = new int;
+		dataTO.numTokens = new int;
 		dataTO.clusters = new ClusterAccessTO[MAX_CELLCLUSTERS];
 		dataTO.cells = new CellAccessTO[MAX_CELLS];
 		dataTO.particles = new ParticleAccessTO[MAX_PARTICLES];
+		dataTO.tokens = new TokenAccessTO[MAX_TOKENS];
 		_freeDataTOs.push_back(dataTO);
 	}
 }
@@ -240,9 +242,11 @@ SimulationAccessGpuImpl::DataTOCache::~DataTOCache()
 		delete dataTO.numClusters;
 		delete dataTO.numCells;
 		delete dataTO.numParticles;
+		delete dataTO.numTokens;
 		delete[] dataTO.clusters;
 		delete[] dataTO.cells;
 		delete[] dataTO.particles;
+		delete[] dataTO.tokens;
 	}
 }
 
@@ -262,7 +266,7 @@ DataAccessTO SimulationAccessGpuImpl::DataTOCache::getDataTO()
 void SimulationAccessGpuImpl::DataTOCache::releaseDataTO(DataAccessTO const & dataTO)
 {
 	auto usedDataTO = std::find_if(_usedDataTOs.begin(), _usedDataTOs.end(), [&dataTO](DataAccessTO const& usedDataTO) {
-		return usedDataTO.numClusters == dataTO.numClusters;
+		return usedDataTO == dataTO;
 	});
 	if (usedDataTO != _usedDataTOs.end()) {
 		_freeDataTOs.push_back(*usedDataTO);

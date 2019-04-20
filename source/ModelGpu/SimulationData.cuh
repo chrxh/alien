@@ -4,6 +4,15 @@
 #include "CudaInterface.cuh"
 #include "Map.cuh"
 
+struct Cell;
+struct Token
+{
+	float energy;
+	char memory[MAX_TOKEN_MEM_SIZE];
+	Cell* cell;
+};
+
+
 struct Particle
 {
 	uint64_t id;
@@ -46,6 +55,8 @@ struct Cluster
 	float angularMass;
 	int numCells;
 	Cell* cells;
+	int numTokens;
+	Token* tokens;
 
 	//auxiliary data
 	bool decompositionRequired;
@@ -66,6 +77,8 @@ struct SimulationData
 	ArrayController<Cell> cellsAC2;
 	ArrayController<Particle> particlesAC1;
 	ArrayController<Particle> particlesAC2;
+	ArrayController<Token> tokensAC1;
+	ArrayController<Token> tokensAC2;
 
 	CudaNumberGenerator numberGen;
 };

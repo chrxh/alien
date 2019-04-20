@@ -5,108 +5,12 @@
 
 #include "DataConverter.h"
 
-DataConverter::DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen)
-	: _dataTO(dataTO), _numberGen(numberGen)
+DataConverter::DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen, SimulationParameters const& parameters)
+	: _dataTO(dataTO), _numberGen(numberGen), _parameters(parameters)
 {}
-
-namespace
-{
-	int getAddedClusters(DataChangeDescription const & data)
-	{
-		auto result = 0;
-		for (auto const& cluster : data.clusters) {
-			if (cluster.isAdded()) {
-				++result;
-			}
-		}
-		return result;
-	}
-
-	int getDeletedClusters(DataChangeDescription const & data)
-	{
-		auto result = 0;
-		for (auto const& cluster : data.clusters) {
-			if (cluster.isDeleted()) {
-				++result;
-			}
-		}
-		return result;
-	}
-
-	int getAddedCells(DataChangeDescription const & data)
-	{
-		auto result = 0;
-		for (auto const& cluster : data.clusters) {
-			if (cluster.isAdded()) {
-				result += cluster->cells.size();
-			}
-		}
-		return result;
-	}
-
-	int getDeletedCells(DataChangeDescription const & data)
-	{
-		auto result = 0;
-		for (auto const& cluster : data.clusters) {
-			if (cluster.isDeleted()) {
-				result += cluster->cells.size();
-			}
-		}
-		return result;
-	}
-
-	int getAddedParticles(DataChangeDescription const & data)
-	{
-		auto result = 0;
-		for (auto const& particle : data.particles) {
-			if (particle.isAdded()) {
-				++result;
-			}
-		}
-		return result;
-	}
-
-	int getDeletedParticles(DataChangeDescription const & data)
-	{
-		auto result = 0;
-		for (auto const& particle : data.particles) {
-			if (particle.isDeleted()) {
-				++result;
-			}
-		}
-		return result;
-	}
-}
 
 void DataConverter::updateData(DataChangeDescription const & data)
 {
-
-	//adjust arrays
-/*
-	if (getAddedClusters(data) > 0) {
-		ClusterAccessTO* clusters = new ClusterAccessTO[*_dataTO.numClusters + getAddedClusters(data) - getDeletedClusters(data)];
-		CellAccessTO* cells = new CellAccessTO[*_dataTO.numCells + getAddedCells(data) - getDeletedCells(data)];
-		for (int i = 0; i < *_dataTO.numClusters; ++i) {
-			clusters[i] = _dataTO.clusters[i];
-		}
-		for (int i = 0; i < *_dataTO.numCells; ++i) {
-			cells[i] = _dataTO.cells[i];
-		}
-		delete[] _dataTO.clusters;
-		_dataTO.clusters = clusters;
-		delete[] _dataTO.cells;
-		_dataTO.cells = cells;
-	}
-	if (getAddedParticles(data) > 0) {
-		ParticleAccessTO* particles = new ParticleAccessTO[*_dataTO.numParticles+ getAddedParticles(data) - getDeletedParticles(data)];
-		for (int i = 0; i < *_dataTO.numParticles; ++i) {
-			particles[i] = _dataTO.particles[i];
-		}
-		delete[] _dataTO.particles;
-		_dataTO.particles = particles;
-	}
-*/
-
 	for (auto const& cluster : data.clusters) {
 		if (cluster.isDeleted()) {
 			markDelCluster(cluster.getValue().id);
@@ -151,6 +55,7 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 	clusterTO.angle = *clusterDesc.angle;
 	clusterTO.angularVel = *clusterDesc.angularVel;
 	clusterTO.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
+	clusterTO.numTokens = 0;	//will be incremented in addCell
 	unordered_map<uint64_t, int> cellIndexByIds;
 	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
@@ -291,6 +196,8 @@ DataDescription DataConverter::getDataDescription() const
 {
 	DataDescription result;
 	list<uint64_t> connectingCellIds;
+	unordered_map<int, int> cellIndexByCellTOIndex;
+	unordered_map<int, int> clusterIndexByCellTOIndex;
 	for (int i = 0; i < *_dataTO.numClusters; ++i) {
 		ClusterAccessTO const& cluster = _dataTO.clusters[i];
 		auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
@@ -306,6 +213,8 @@ DataDescription DataConverter::getDataDescription() const
 			for (int i = 0; i < cell.numConnections; ++i) {
 				connectingCellIds.emplace_back(_dataTO.cells[cell.connectionIndices[i]].id);
 			}
+			cellIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, j);
+			clusterIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, i);
 			clusterDesc.addCell(
 				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
 				.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
@@ -322,26 +231,52 @@ DataDescription DataConverter::getDataDescription() const
 			.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
 	}
 
+	for (int i = 0; i < *_dataTO.numTokens; ++i) {
+		TokenAccessTO const& token = _dataTO.tokens[i];
+		ClusterDescription& cluster = result.clusters->at(clusterIndexByCellTOIndex.at(token.cellIndex));
+		CellDescription& cell = cluster.cells->at(cellIndexByCellTOIndex.at(token.cellIndex));
+		QByteArray data(_parameters.tokenMemorySize, 0);
+		for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
+			data[i] = token.memory[i];
+		}
+		cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
+	}
+
 	return result;
 }
 
-void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription const& cluster, ClusterAccessTO& cudaCluster
+void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription const& cluster, ClusterAccessTO& clusterTO
 	, unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
 	int index = (*_dataTO.numCells)++;
-	CellAccessTO& cudaCell = _dataTO.cells[index];
-	cudaCell.id = cellDesc.id == 0 ? _numberGen->getId() : cellDesc.id;
-	cudaCell.pos= { cellDesc.pos->x(), cellDesc.pos->y() };
-	cudaCell.energy = *cellDesc.energy;
-	cudaCell.maxConnections = *cellDesc.maxConnections;
+	CellAccessTO& cellTO = _dataTO.cells[index];
+	cellTO.id = cellDesc.id == 0 ? _numberGen->getId() : cellDesc.id;
+	cellTO.pos= { cellDesc.pos->x(), cellDesc.pos->y() };
+	cellTO.energy = *cellDesc.energy;
+	cellTO.maxConnections = *cellDesc.maxConnections;
 	if (cellDesc.connectingCells) {
-		cudaCell.numConnections = cellDesc.connectingCells->size();
+		cellTO.numConnections = cellDesc.connectingCells->size();
 	}
 	else {
-		cudaCell.numConnections = 0;
+		cellTO.numConnections = 0;
 	}
 
-	cellIndexTOByIds.insert_or_assign(cudaCell.id, index);
+	if (cellDesc.tokens) {
+		clusterTO.numTokens += cellDesc.tokens->size();
+		clusterTO.tokenStartIndex = *_dataTO.numTokens;
+		for (int i = 0; i < cellDesc.tokens->size(); ++i) {
+			TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
+			int index = (*_dataTO.numTokens)++;
+			TokenAccessTO& tokenTO = _dataTO.tokens[index];
+			tokenTO.energy = *tokenDesc.energy;
+			tokenTO.cellIndex = index;
+			for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
+				tokenTO.memory[i] = tokenDesc.data->at(i);
+			}
+		}
+	}
+
+	cellIndexTOByIds.insert_or_assign(cellTO.id, index);
 }
 
 void DataConverter::setConnections(
