@@ -7,7 +7,7 @@
 class DataConverter
 {
 public:
-	DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen);
+	DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen, SimulationParameters const& parameters);
 
 	void updateData(DataChangeDescription const& data);
 
@@ -35,6 +35,7 @@ private:
 private:
 	DataAccessTO& _dataTO;
 	NumberGenerator* _numberGen;
+	SimulationParameters _parameters;
 
 	std::unordered_set<uint64_t> _clusterIdsToDelete;
 	std::unordered_map<uint64_t, ClusterChangeDescription> _clusterToModifyById;

@@ -22,9 +22,11 @@ SimulationMonitorGpuImpl::SimulationMonitorGpuImpl(QObject* parent /*= nullptr*/
 	_dataTO.numClusters = new int;
 	_dataTO.numCells = new int;
 	_dataTO.numParticles = new int;
+	_dataTO.numTokens = new int;
 	_dataTO.clusters = new ClusterAccessTO[MAX_CELLCLUSTERS];
 	_dataTO.cells = new CellAccessTO[MAX_CELLS];
 	_dataTO.particles = new ParticleAccessTO[MAX_PARTICLES];
+	_dataTO.tokens = new TokenAccessTO[MAX_TOKENS];
 }
 
 SimulationMonitorGpuImpl::~SimulationMonitorGpuImpl()
@@ -32,9 +34,11 @@ SimulationMonitorGpuImpl::~SimulationMonitorGpuImpl()
 	delete _dataTO.numClusters;
 	delete _dataTO.numCells;
 	delete _dataTO.numParticles;
+	delete _dataTO.numTokens;
 	delete[] _dataTO.clusters;
 	delete[] _dataTO.cells;
 	delete[] _dataTO.particles;
+	delete[] _dataTO.tokens;
 }
 
 void SimulationMonitorGpuImpl::init(SimulationControllerGpu * controller)
@@ -79,6 +83,7 @@ void SimulationMonitorGpuImpl::calcMonitorData(DataAccessTO const& dataTO)
 	_monitorData.numCells = *dataTO.numCells;
 	_monitorData.numClusters = *dataTO.numClusters;
 	_monitorData.numParticles = *dataTO.numParticles;
+	_monitorData.numTokens = *dataTO.numTokens;
 
 	_monitorData.totalInternalEnergy = 0.0;
 	_monitorData.totalLinearKineticEnergy = 0.0;
