@@ -100,6 +100,7 @@ __inline__ __device__ void ParticleDynamics::createRandomCell(float energy, floa
 	cluster->angularMass = 0.0f;
 	cluster->numCells = 1;
 	cluster->cells = cell;
+	cluster->numTokens = 0;
 
 	cluster->clusterToFuse = nullptr;
 	cluster->locked = 0;

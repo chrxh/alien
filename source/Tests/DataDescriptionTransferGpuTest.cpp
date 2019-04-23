@@ -62,17 +62,97 @@ TEST_F(DataDescriptionTransferGpuTest, DISABLED_testCreateClusterWithCompleteCel
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
 	IntegrationTestHelper::updateData(_access, dataBefore);
 
-	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
-	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
 /**
-* Situation: change particle properties
-* Expected result: particle in simulation changed
+* Situation: add token to cell
+* Expected result: token in simulation added
 */
-TEST_F(DataDescriptionTransferGpuTest, DISABLED_testChangeParticle)
+TEST_F(DataDescriptionTransferGpuTest, testAddToken)
+{
+	DataDescription dataBefore;
+	auto cellId = _numberGen->getId();
+	auto clusterId = _numberGen->getId();
+	auto cluster = createSingleCellCluster(clusterId, cellId);
+	dataBefore.addCluster(cluster);
+
+	DataDescription dataChanged;
+	cluster.cells->at(0).addToken(TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0)));
+	dataChanged.addCluster(cluster);
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+}
+
+/**
+* Situation: change cell with token
+* Expected result: changes are correctly transferred to simulation
+*/
+TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_changeClusterId)
+{
+	auto cluster = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
+	cluster.cells->at(0).addToken(TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0)));
+
+	DataDescription dataBefore;
+	dataBefore.addCluster(cluster);
+
+	DataDescription dataChanged;
+	auto otherCluster = cluster;
+	otherCluster.id = _numberGen->getId();
+	dataChanged.addCluster(otherCluster);
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+}
+
+/**
+* Situation: - one cell has a token
+*			 - add further token
+* Expected result: changes are correctly transferred to simulation
+*/
+TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
+{
+	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+
+	auto cluster1 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
+	auto& cell1 = cluster1.cells->at(0);
+	cell1.addToken(token);
+
+	auto cluster2 = cluster1;
+	cluster2.id = _numberGen->getId();
+	auto& cell2 = cluster2.cells->at(0);
+	cell2.addToken(token);
+
+	DataDescription dataBefore;
+	dataBefore.addCluster(cluster1);
+
+	DataDescription dataChanged;
+	dataChanged.addCluster(cluster2);
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+}
+
+/**
+* Situation: change particle properties
+* Expected result: changes are correctly transferred to simulation
+*/
+TEST_F(DataDescriptionTransferGpuTest, testChangeParticle)
 {
 	DataDescription dataBefore;
 	auto particleEnergy1 = _parameters.cellMinEnergy / 2.0;
@@ -88,8 +168,7 @@ TEST_F(DataDescriptionTransferGpuTest, DISABLED_testChangeParticle)
 	IntegrationTestHelper::updateData(_access, dataBefore);
 	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
 
-	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
-	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x, _universeSize.y } });
 
 	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
 }
@@ -106,7 +185,7 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateDataOutsideBoundaries)
 	dataBefore.addParticle(createParticle(QVector2D{ 2.5f * universeSize.x + 2.0f, 2.5f * universeSize.y + 2.0f }));
 
 	IntegrationTestHelper::updateData(_access, dataBefore);
-	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } });
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x, _universeSize.y } });
 
 	EXPECT_EQ(1, dataAfter.clusters->size());
 	auto origCluster = dataBefore.clusters->at(0);

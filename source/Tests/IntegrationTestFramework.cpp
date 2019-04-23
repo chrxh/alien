@@ -53,7 +53,7 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
 	return ClusterDescription().addCell(
 		CellDescription().setCellFeature(
 			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setConstData(code).setVolatileData(cellMemory)
-		).setId(cellId).setPos({ 1, 2 }).setEnergy(56).setFlagTokenBlocked(true).setMaxConnections(3).setMetadata(cellMetadata)
+		).setId(cellId).setPos({ 1, 2 }).setEnergy(_parameters.cellMinEnergy*2).setFlagTokenBlocked(true).setMaxConnections(3).setMetadata(cellMetadata)
 		.setTokenBranchNumber(2).setTokens({
 			TokenDescription().setData(tokenMemory).setEnergy(89)
 	})
@@ -201,6 +201,17 @@ ClusterDescription IntegrationTestFramework::createVerticalCluster(int numCells,
 		cluster.cells->at(j).setConnectingCells(connectingCells);
 	}
 	return cluster;
+}
+
+ClusterDescription IntegrationTestFramework::createSingleCellCluster(uint64_t clusterId, uint64_t cellId) const
+{
+    return ClusterDescription()
+        .addCell(CellDescription().setId(cellId).setPos({1, 2}).setEnergy(_parameters.cellMinEnergy * 2).setMaxConnections(3))
+        .setId(clusterId)
+        .setPos({1, 2})
+        .setVel({0, 0})
+        .setAngle(23)
+        .setAngularVel(1.2);
 }
 
 ParticleDescription IntegrationTestFramework::createParticle(optional<QVector2D> const& optPos) const
