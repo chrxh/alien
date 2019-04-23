@@ -23,14 +23,15 @@ private:
 	void markModifyCluster(ClusterChangeDescription const& clusterDesc);
 	void markModifyParticle(ParticleChangeDescription const& particleDesc);
 
-	void processDeletionsAndModifications();
+	void processDeletions();
+	void processModifications();
 	void addCell(CellDescription const& cellToAdd, ClusterDescription const& cluster, ClusterAccessTO& cudaCluster,
 		unordered_map<uint64_t, int>& cellIndexTOByIds);
 	void setConnections(CellDescription const& cellToAdd, CellAccessTO& cellTO, unordered_map<uint64_t, int> const& cellIndexByIds);
 
-	void applyChangeDescription(ParticleAccessTO& particle, ParticleChangeDescription const& particleChanges);
-	void applyChangeDescription(ClusterAccessTO& cluster, ClusterChangeDescription const& clusterChanges);
-	void applyChangeDescription(CellAccessTO& cell, CellChangeDescription const& cellChanges);
+	void applyChangeDescription(ParticleChangeDescription const& particleChanges, ParticleAccessTO& particle);
+	void applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& cluster);
+	void applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell, ClusterAccessTO& cluster);
 
 private:
 	DataAccessTO& _dataTO;
