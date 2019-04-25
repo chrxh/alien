@@ -149,6 +149,46 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
 }
 
 /**
+* Situation: - one cluster with one cell and one token
+*			 - an other cluster with one cell and two tokens
+*			 - position of first cluster is changed
+* Expected result: changes are correctly transferred to simulation
+*/
+TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithSeveralTokens)
+{
+	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+
+	auto cluster1 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
+	auto& cell1 = cluster1.cells->at(0);
+	cell1.addToken(token);
+
+	auto cluster2 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
+	auto& cell2 = cluster2.cells->at(0);
+	cell2.addToken(token);
+	cell2.addToken(token);
+
+	auto cluster3 = cluster1;
+	cluster3.id = _numberGen->getId();
+	*cluster3.pos = *cluster3.pos + QVector2D{ 1.0, 0.0 };
+	*cluster3.cells->at(0).pos = *cluster3.cells->at(0).pos + QVector2D{ 1.0, 0.0 };
+
+	DataDescription dataBefore;
+	dataBefore.addCluster(cluster1);
+	dataBefore.addCluster(cluster2);
+
+	DataDescription dataChanged;
+	dataChanged.addCluster(cluster3);
+	dataChanged.addCluster(cluster2);
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+}
+
+/**
 * Situation: change particle properties
 * Expected result: changes are correctly transferred to simulation
 */
