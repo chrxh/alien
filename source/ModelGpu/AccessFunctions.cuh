@@ -59,6 +59,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 			clusterTO.numCells = cluster.numCells;
 			clusterTO.numTokens = cluster.numTokens;
 			clusterTO.cellStartIndex = cellTOIndex;
+			clusterTO.tokenStartIndex = tokenTOIndex;
 		}
 		__syncthreads();
 
