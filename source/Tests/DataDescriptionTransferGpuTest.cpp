@@ -188,6 +188,34 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithSeveralTokens)
 	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
 }
 
+TEST_F(DataDescriptionTransferGpuTest, testRemoveCellWithToken)
+{
+	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+
+	auto cluster1 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
+	auto& cell1 = cluster1.cells->at(0);
+	cell1.addToken(token);
+
+	auto cluster2 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
+	auto& cell2 = cluster2.cells->at(0);
+	cell2.addToken(token);
+	cell2.addToken(token);
+
+	DataDescription dataBefore;
+	dataBefore.addCluster(cluster1);
+	dataBefore.addCluster(cluster2);
+
+	DataDescription dataChanged;
+	dataChanged.addCluster(cluster2);
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+}
+
 /**
 * Situation: change particle properties
 * Expected result: changes are correctly transferred to simulation
