@@ -188,6 +188,12 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithSeveralTokens)
 	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
 }
 
+/**
+* Situation: - cluster with one cell and one token
+*			 - an other cluster with one cell and two tokens
+*			 - first cluster is removed
+* Expected result: changes are correctly transferred to simulation
+*/
 TEST_F(DataDescriptionTransferGpuTest, testRemoveCellWithToken)
 {
 	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
