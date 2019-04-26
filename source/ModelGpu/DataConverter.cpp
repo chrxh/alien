@@ -167,10 +167,10 @@ void DataConverter::processDeletions()
 			++tokenIndexCopyOffset;
 		}
 		else if (tokenIndexCopyOffset > 0) {
-			if (newByOldCellIndex.find(token.cellIndex) != newByOldCellIndex.end()) {
-				token.cellIndex = newByOldCellIndex.at(token.cellIndex);
-			}
 			_dataTO.tokens[tokenIndex - tokenIndexCopyOffset] = token;
+		}
+		if (newByOldCellIndex.find(token.cellIndex) != newByOldCellIndex.end()) {
+			token.cellIndex = newByOldCellIndex.at(token.cellIndex);
 		}
 	}
 	*_dataTO.numTokens -= tokenIndexCopyOffset;
