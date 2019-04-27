@@ -43,6 +43,59 @@ void DataConverter::updateData(DataChangeDescription const & data)
 	}
 }
 
+DataDescription DataConverter::getDataDescription() const
+{
+	DataDescription result;
+	list<uint64_t> connectingCellIds;
+	unordered_map<int, int> cellIndexByCellTOIndex;
+	unordered_map<int, int> clusterIndexByCellTOIndex;
+	for (int i = 0; i < *_dataTO.numClusters; ++i) {
+		ClusterAccessTO const& cluster = _dataTO.clusters[i];
+		auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
+			.setVel({ cluster.vel.x, cluster.vel.y })
+			.setAngle(cluster.angle)
+			.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
+
+		for (int j = 0; j < cluster.numCells; ++j) {
+			CellAccessTO const& cell = _dataTO.cells[cluster.cellStartIndex + j];
+			auto pos = cell.pos;
+			auto id = cell.id;
+			connectingCellIds.clear();
+			for (int i = 0; i < cell.numConnections; ++i) {
+				connectingCellIds.emplace_back(_dataTO.cells[cell.connectionIndices[i]].id);
+			}
+			cellIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, j);
+			clusterIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, i);
+			clusterDesc.addCell(
+				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
+				.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
+				.setConnectingCells(connectingCellIds).setMaxConnections(cell.maxConnections).setFlagTokenBlocked(false)
+				.setTokenBranchNumber(0).setMetadata(CellMetadata()).setTokens(vector<TokenDescription>{})
+			);
+		}
+		result.addCluster(clusterDesc);
+	}
+
+	for (int i = 0; i < *_dataTO.numParticles; ++i) {
+		ParticleAccessTO const& particle = _dataTO.particles[i];
+		result.addParticle(ParticleDescription().setId(particle.id).setPos({ particle.pos.x, particle.pos.y })
+			.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
+	}
+
+	for (int i = 0; i < *_dataTO.numTokens; ++i) {
+		TokenAccessTO const& token = _dataTO.tokens[i];
+		ClusterDescription& cluster = result.clusters->at(clusterIndexByCellTOIndex.at(token.cellIndex));
+		CellDescription& cell = cluster.cells->at(cellIndexByCellTOIndex.at(token.cellIndex));
+		QByteArray data(_parameters.tokenMemorySize, 0);
+		for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
+			data[i] = token.memory[i];
+		}
+		cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
+	}
+
+	return result;
+}
+
 void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 {
 	if (!clusterDesc.cells) {
@@ -244,59 +297,6 @@ void DataConverter::processModifications()
 			applyChangeDescription(_particleToModifyById.at(particleId), particle);
 		}
 	}
-}
-
-DataDescription DataConverter::getDataDescription() const
-{
-	DataDescription result;
-	list<uint64_t> connectingCellIds;
-	unordered_map<int, int> cellIndexByCellTOIndex;
-	unordered_map<int, int> clusterIndexByCellTOIndex;
-	for (int i = 0; i < *_dataTO.numClusters; ++i) {
-		ClusterAccessTO const& cluster = _dataTO.clusters[i];
-		auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
-			.setVel({ cluster.vel.x, cluster.vel.y })
-			.setAngle(cluster.angle)
-			.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
-
-		for (int j = 0; j < cluster.numCells; ++j) {
-			CellAccessTO const& cell = _dataTO.cells[cluster.cellStartIndex + j];
-			auto pos = cell.pos;
-			auto id = cell.id;
-			connectingCellIds.clear();
-			for (int i = 0; i < cell.numConnections; ++i) {
-				connectingCellIds.emplace_back(_dataTO.cells[cell.connectionIndices[i]].id);
-			}
-			cellIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, j);
-			clusterIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, i);
-			clusterDesc.addCell(
-				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
-				.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
-				.setConnectingCells(connectingCellIds).setMaxConnections(cell.maxConnections).setFlagTokenBlocked(false)
-				.setTokenBranchNumber(0).setMetadata(CellMetadata())
-			);
-		}
-		result.addCluster(clusterDesc);
-	}
-
-	for (int i = 0; i < *_dataTO.numParticles; ++i) {
-		ParticleAccessTO const& particle = _dataTO.particles[i];
-		result.addParticle(ParticleDescription().setId(particle.id).setPos({ particle.pos.x, particle.pos.y })
-			.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
-	}
-
-	for (int i = 0; i < *_dataTO.numTokens; ++i) {
-		TokenAccessTO const& token = _dataTO.tokens[i];
-		ClusterDescription& cluster = result.clusters->at(clusterIndexByCellTOIndex.at(token.cellIndex));
-		CellDescription& cell = cluster.cells->at(cellIndexByCellTOIndex.at(token.cellIndex));
-		QByteArray data(_parameters.tokenMemorySize, 0);
-		for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
-			data[i] = token.memory[i];
-		}
-		cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
-	}
-
-	return result;
 }
 
 namespace
