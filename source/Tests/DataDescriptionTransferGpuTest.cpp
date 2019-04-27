@@ -148,6 +148,32 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
 	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
 }
 
+TEST_F(DataDescriptionTransferGpuTest, testChangeClusterWithToken_addSecondToken)
+{
+	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+
+	auto cluster1 = createHorizontalCluster(2);
+	auto& cell1 = cluster1.cells->at(0);
+	cell1.addToken(token);
+
+	auto cluster2 = cluster1;
+	auto& cell2 = cluster2.cells->at(1);
+	cell2.addToken(token);
+
+	DataDescription dataBefore;
+	dataBefore.addCluster(cluster1);
+
+	DataDescription dataChanged;
+	dataChanged.addCluster(cluster2);
+
+	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+}
+
 /**
 * Situation: - one cluster with one cell and one token
 *			 - an other cluster with one cell and two tokens

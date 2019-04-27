@@ -64,7 +64,7 @@ template<typename T>
 bool isCompatible(vector<T> a, vector<T> b)
 {
 	if (a.size() != b.size()) {
-		false;
+		return false;
 	}
 	for (int i = 0; i < a.size(); ++i) {
 		if (!isCompatible(a.at(i), b.at(i))) {

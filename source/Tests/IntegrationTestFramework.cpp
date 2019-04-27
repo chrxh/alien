@@ -239,7 +239,7 @@ template<>
 bool isCompatible<TokenDescription>(TokenDescription token1, TokenDescription token2)
 {
 	return isCompatible(token1.energy, token2.energy)
-		&& isCompatible(token1.data->mid(1), token2.data->mid(1));	//do not compare first byte (overriden branch number)
+		&& isCompatible(token1.data->mid(1), token2.data->mid(1));	//do not compare first byte (overiden branch number)
 }
 
 namespace
