@@ -261,6 +261,21 @@ void DataConverter::processDeletions()
 	}
 }
 
+namespace
+{
+	void copyTokenMemory(QByteArray const& source, char* target, int tokenMemorySize)
+	{
+		for (int i = 0; i < tokenMemorySize; ++i) {
+			if (i < source.size()) {
+				target[i] = source.at(i);
+			}
+			else {
+				target[i] = 0;
+			}
+		}
+	}
+}
+
 void DataConverter::processModifications()
 {
 	//modify clusters
@@ -273,19 +288,52 @@ void DataConverter::processModifications()
 	}
 
 	//modify cells
-	unordered_map<int, int> clusterIndexByCellIndex;
-	for (int clusterIndex = 0; clusterIndex < *_dataTO.numClusters; ++clusterIndex) {
-		ClusterAccessTO const& cluster = _dataTO.clusters[clusterIndex];
-		for (int cellIndex = cluster.cellStartIndex; cellIndex < cluster.cellStartIndex + cluster.numCells; ++cellIndex) {
-			clusterIndexByCellIndex.insert_or_assign(cellIndex, clusterIndex);
-		}
-	}
 	for (int cellIndex = 0; cellIndex < *_dataTO.numCells; ++cellIndex) {
 		CellAccessTO& cell = _dataTO.cells[cellIndex];
 		uint64_t cellId = cell.id;
 		if (_cellToModifyById.find(cellId) != _cellToModifyById.end()) {
-			ClusterAccessTO& cluster = _dataTO.clusters[clusterIndexByCellIndex.at(cellIndex)];
-			applyChangeDescription(_cellToModifyById.at(cellId), cell, cluster);
+			applyChangeDescription(_cellToModifyById.at(cellId), cell);
+		}
+	}
+
+	//modify tokens
+	std::unordered_map<uint64_t, vector<TokenAccessTO>> tokenTOsByCellId;
+	for (int index = 0; index < *_dataTO.numTokens; ++index) {
+		auto const& tokenTO = _dataTO.tokens[index];
+		auto const& cellTO = _dataTO.cells[tokenTO.cellIndex];
+		tokenTOsByCellId[cellTO.id].emplace_back(tokenTO);
+	}
+	*_dataTO.numTokens = 0;
+	for (int clusterIndex = 0; clusterIndex < *_dataTO.numClusters; ++clusterIndex) {
+		auto& clusterTO = _dataTO.clusters[clusterIndex];
+		clusterTO.tokenStartIndex = *_dataTO.numTokens;
+		clusterTO.numTokens = 0;
+		for (int cellIndex = clusterTO.cellStartIndex; cellIndex < clusterTO.cellStartIndex + clusterTO.numCells; ++cellIndex) {
+			auto const& cellTO = _dataTO.cells[cellIndex];
+			if (_cellToModifyById.find(cellTO.id) != _cellToModifyById.end()) {
+				auto const& cell = _cellToModifyById.at(cellTO.id);
+				if (auto const& tokens = cell.tokens) {
+					clusterTO.numTokens += tokens->size();
+					for (int sourceTokenIndex = 0; sourceTokenIndex < tokens->size(); ++sourceTokenIndex) {
+						int targetTokenIndex = (*_dataTO.numTokens)++;
+						auto& targetToken = _dataTO.tokens[targetTokenIndex];
+						auto const& sourceToken = tokens->at(sourceTokenIndex);
+						targetToken.cellIndex = cellIndex;
+						targetToken.energy = *sourceToken.energy;
+						copyTokenMemory(*sourceToken.data, targetToken.memory, _parameters.tokenMemorySize);
+					}
+				}
+			}
+			else if (tokenTOsByCellId.find(cellTO.id) != tokenTOsByCellId.end()){
+				auto const& tokens = tokenTOsByCellId.at(cellTO.id);
+				clusterTO.numTokens += tokens.size();
+				for (int sourceTokenIndex = 0; sourceTokenIndex < tokens.size(); ++sourceTokenIndex) {
+					int targetTokenIndex = (*_dataTO.numTokens)++;
+					auto& targetToken = _dataTO.tokens[targetTokenIndex];
+					auto const& sourceToken = tokens[sourceTokenIndex];
+					targetToken = sourceToken;
+				}
+			}
 		}
 	}
 
@@ -295,21 +343,6 @@ void DataConverter::processModifications()
 		uint64_t particleId = particle.id;
 		if (_particleToModifyById.find(particleId) != _particleToModifyById.end()) {
 			applyChangeDescription(_particleToModifyById.at(particleId), particle);
-		}
-	}
-}
-
-namespace
-{
-	void copyTokenMemory(QByteArray const& source, char* target, int tokenMemorySize)
-	{
-		for (int i = 0; i < tokenMemorySize; ++i) {
-			if (i < source.size()) {
-				target[i] = source.at(i);
-			}
-			else {
-				target[i] = 0;
-			}
 		}
 	}
 }
@@ -400,7 +433,7 @@ void DataConverter::applyChangeDescription(ClusterChangeDescription const& clust
 	}
 }
 
-void DataConverter::applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell, ClusterAccessTO& cluster)
+void DataConverter::applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell)
 {
 	if (cellChanges.pos) {
 		QVector2D newAbsPos = cellChanges.pos.getValue();
@@ -408,19 +441,6 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
 	}
 	if (cellChanges.energy) {
 		cell.energy = cellChanges.energy.getValue();
-	}
-	if (cellChanges.tokens) {
-		cluster.numTokens = cellChanges.tokens->size();
-		cluster.tokenStartIndex = *_dataTO.numTokens;
-		for (int i = 0; i < cellChanges.tokens->size(); ++i) {
-			TokenDescription const& tokenDesc = cellChanges.tokens->at(i);
-			int tokenIndex = (*_dataTO.numTokens)++;
-			TokenAccessTO& tokenTO = _dataTO.tokens[tokenIndex];
-			int cellIndex = &cell - _dataTO.cells;
-			tokenTO.cellIndex = cellIndex;
-			tokenTO.energy = *tokenDesc.energy;
-			copyTokenMemory(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
-		}
 	}
 }
 

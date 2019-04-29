@@ -1112,7 +1112,7 @@ TEST_F(SimulationGpuTest, testTransformationParticleToCell)
 	auto size = _spaceProp->getSize();
 	DataDescription origData;
 	float cellMinEnergy = static_cast<float>(_parameters.cellMinEnergy);
-	origData.addParticle(ParticleDescription().setId(_numberGen->getId()).setPos({ 0, 0 }).setVel({ 0, 0 }).setEnergy(cellMinEnergy + 1));
+	origData.addParticle(ParticleDescription().setId(_numberGen->getId()).setPos({ 0, 0 }).setVel({ 0, 0 }).setEnergy(cellMinEnergy * 2));
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(100, _controller);
