@@ -31,7 +31,7 @@ private:
 
 	void applyChangeDescription(ParticleChangeDescription const& particleChanges, ParticleAccessTO& particle);
 	void applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& cluster);
-	void applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell, ClusterAccessTO& cluster);
+	void applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell);
 
 private:
 	DataAccessTO& _dataTO;

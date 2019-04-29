@@ -148,6 +148,12 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
 	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
 }
 
+/**
+* Situation: - one cluster has two cells
+*			 - one of its cells has a token, the other not
+*			 - add further token to other cell
+* Expected result: changes are correctly transferred to simulation
+*/
 TEST_F(DataDescriptionTransferGpuTest, testChangeClusterWithToken_addSecondToken)
 {
 	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
