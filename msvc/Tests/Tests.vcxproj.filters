@@ -74,9 +74,6 @@
     <ClCompile Include="..\..\source\Tests\DataDescriptionTransferGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\SimulationGpuTest.cpp">
-      <Filter>Source Files\IntegrationTests\GPU</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Tests\ClusterSizeTest.cpp">
       <Filter>Source Files\IntegrationTests\CPU</Filter>
     </ClCompile>
@@ -100,6 +97,21 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Tests\Benchmark.cpp">
       <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\TokenDynamicsGpuTest.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ParticleDynamicsGpuTest.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ClusterDynamicsGpuTest.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\SimulationGpuTest.h">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\SimulationGpuTest.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

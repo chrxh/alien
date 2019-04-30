@@ -33,6 +33,7 @@ protected:
 		optional<QVector2D> const& centerVel = boost::none) const;	
 	ClusterDescription createSingleCellCluster(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0) const;
+	TokenDescription createSimpleToken() const;
 
 	ParticleDescription createParticle(optional<QVector2D> const& pos = boost::none) const;
 

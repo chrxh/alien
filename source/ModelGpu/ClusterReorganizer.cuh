@@ -175,7 +175,10 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithDecomposition()
 		//newCluster->angularVel contains angular momentum until here
 		newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 	}
-	__syncthreads();
+	for (int index = 0; index <= numDecompositions; ++index) {
+		Cluster* newCluster = newClusters[index];
+		copyToken(newCluster);
+	}
 
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell& cell = _origCluster->cells[cellIndex];
@@ -298,6 +301,8 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 			newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 		}
 
+		copyToken(newCluster);
+		copyToken(newCluster->clusterToFuse);
 	}
 	else {
 		//do not copy anything
