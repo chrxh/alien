@@ -80,7 +80,8 @@ TEST_F(DataDescriptionTransferGpuTest, testAddToken)
 	dataBefore.addCluster(cluster);
 
 	DataDescription dataChanged;
-	cluster.cells->at(0).addToken(TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0)));
+	auto token = createSimpleToken();
+	cluster.cells->at(0).addToken(token);
 	dataChanged.addCluster(cluster);
 
 	IntegrationTestHelper::updateData(_access, dataBefore);
@@ -98,7 +99,8 @@ TEST_F(DataDescriptionTransferGpuTest, testAddToken)
 TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_changeClusterId)
 {
 	auto cluster = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
-	cluster.cells->at(0).addToken(TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0)));
+	auto token = createSimpleToken();
+	cluster.cells->at(0).addToken(token);
 
 	DataDescription dataBefore;
 	dataBefore.addCluster(cluster);
@@ -123,7 +125,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_changeClusterId)
 */
 TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
 {
-	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+	auto token = createSimpleToken();
 
 	auto cluster1 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
 	auto& cell1 = cluster1.cells->at(0);
@@ -156,7 +158,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
 */
 TEST_F(DataDescriptionTransferGpuTest, testChangeClusterWithToken_addSecondToken)
 {
-	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+	auto token = createSimpleToken();
 
 	auto cluster1 = createHorizontalCluster(2);
 	auto& cell1 = cluster1.cells->at(0);
@@ -188,7 +190,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeClusterWithToken_addSecondToken
 */
 TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithSeveralTokens)
 {
-	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+	auto token = createSimpleToken();
 
 	auto cluster1 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
 	auto& cell1 = cluster1.cells->at(0);
@@ -228,7 +230,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithSeveralTokens)
 */
 TEST_F(DataDescriptionTransferGpuTest, testRemoveCellWithToken)
 {
-	auto token = TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0));
+	auto token = createSimpleToken();
 
 	auto cluster1 = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
 	auto& cell1 = cluster1.cells->at(0);

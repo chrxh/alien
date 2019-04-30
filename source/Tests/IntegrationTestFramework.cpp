@@ -60,6 +60,12 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
 	).setId(clusterId).setPos({ 1, 2 }).setVel({ -1, 1 }).setAngle(23).setAngularVel(1.2).setMetadata(clusterMetadata);
 }
 
+TokenDescription IntegrationTestFramework::createSimpleToken() const
+{
+	auto tokenEnergy = _parameters.tokenMinEnergy * 2.0;
+	return TokenDescription().setEnergy(tokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0));
+}
+
 ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2D const & size, optional<QVector2D> const & centerPos, 
 	optional<QVector2D> const & centerVel) const
 {
