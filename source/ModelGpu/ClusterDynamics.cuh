@@ -13,12 +13,11 @@ class ClusterDynamics
 {
 public:
 	__inline__ __device__ void init(SimulationData& data, int clusterIndex);
-	__inline__ __device__ int getNumCells() const;
 
-	__inline__ __device__ void processingMovement(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingCollision(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void destroyCloseCell(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingRadiation(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingMovement();
+	__inline__ __device__ void processingCollision();
+	__inline__ __device__ void destroyCloseCell();
+	__inline__ __device__ void processingRadiation();
 
 private:
 	__inline__ __device__ void destroyCloseCell(Cell *cell);
@@ -31,6 +30,8 @@ private:
 	Map<Cell> _cellMap;
 
 	Cluster *_cluster;
+	int _startCellIndex;
+	int _endCellIndex;
 };
 
 /************************************************************************/
@@ -41,14 +42,12 @@ __inline__ __device__ void ClusterDynamics::init(SimulationData & data, int clus
 	_data = &data;
 	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	_cellMap.init(data.size, data.cellMap);
+
+	calcPartition(_cluster->numCells, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
+	__syncthreads();
 }
 
-__inline__ __device__ int ClusterDynamics::getNumCells() const
-{
-	return _cluster->numCells;
-}
-
-__inline__ __device__ void ClusterDynamics::processingCollision(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterDynamics::processingCollision()
 {
 	__shared__ Cluster* cluster;
 	__shared__ Cluster* firstOtherCluster;
@@ -71,7 +70,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	__syncthreads();
 
 	//find colliding cluster
-	for (auto index = startCellIndex; index <= endCellIndex; ++index) {
+	for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
 		Cell* cell = &cluster->cells[index];
 		for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 			for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -119,7 +118,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 		return;
 	}
 
-	for (auto index = startCellIndex; index <= endCellIndex; ++index) {
+	for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
 		Cell* cell = &cluster->cells[index];
 		for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 			for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -169,7 +168,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	if (CollisionState::Fusion == state) {
         if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse
 			/*&& !cluster->decompositionRequired && !firstOtherCluster->decompositionRequired*/) {
-            for (auto index = startCellIndex; index <= endCellIndex; ++index) {
+            for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
                 Cell* cell = &cluster->cells[index];
 				for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 					for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -230,7 +229,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 		}
 		__syncthreads();
 
-		for (auto index = startCellIndex; index <= endCellIndex; ++index) {
+		for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
 			Cell* cell = &cluster->cells[index];
 			for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
 				for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -283,16 +282,16 @@ __inline__ __device__ void ClusterDynamics::processingCollision(int startCellInd
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::destroyCloseCell(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterDynamics::destroyCloseCell()
 {
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell *origCell = &_cluster->cells[cellIndex];
 		destroyCloseCell(origCell);
 	}
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::processingMovement(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterDynamics::processingMovement()
 {
 	__shared__ float rotMatrix[2][2];
 	if (0 == threadIdx.x) {
@@ -305,7 +304,7 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 	__syncthreads();
 
 
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell *cell = &_cluster->cells[cellIndex];
 
 		float2 absPos;
@@ -336,9 +335,9 @@ __inline__ __device__ void ClusterDynamics::processingMovement(int startCellInde
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::processingRadiation(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterDynamics::processingRadiation()
 {
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell *cell = &_cluster->cells[cellIndex];
 		cellRadiation(cell);
 	}
