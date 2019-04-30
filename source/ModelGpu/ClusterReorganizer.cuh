@@ -21,7 +21,7 @@ private:
 	__inline__ __device__ void copyClusterWithDecomposition();
 	__inline__ __device__ void copyClusterWithoutDecompositionAndFusion();
 	__inline__ __device__ void copyClusterWithFusion();
-	__inline__ __device__ void copyToken(Cluster* targetCluster);
+	__inline__ __device__ void spreadAndCopyToken(Cluster* targetCluster);
 
 	__inline__ __device__ void setSuccessorCell(Cell *origCell, Cell* newCell, Cluster* newCluster);
 	__inline__ __device__ void correctCellConnections(Cell *origCell);
@@ -177,7 +177,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithDecomposition()
 	}
 	for (int index = 0; index <= numDecompositions; ++index) {
 		Cluster* newCluster = newClusters[index];
-		copyToken(newCluster);
+		spreadAndCopyToken(newCluster);
 	}
 
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
@@ -216,7 +216,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithoutDecompositionAn
 	}
 	__syncthreads();
 
-	copyToken(newCluster);
+	spreadAndCopyToken(newCluster);
 }
 
 __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
@@ -301,8 +301,8 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 			newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 		}
 
-		copyToken(newCluster);
-		copyToken(newCluster->clusterToFuse);
+		spreadAndCopyToken(newCluster);
+		spreadAndCopyToken(newCluster->clusterToFuse);
 	}
 	else {
 		//do not copy anything
@@ -310,7 +310,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterReorganizer::copyToken(Cluster* targetCluster)
+__inline__ __device__ void ClusterReorganizer::spreadAndCopyToken(Cluster* targetCluster)
 {
 	if (0 == _origCluster->numTokens) {
 		__syncthreads();
@@ -332,19 +332,25 @@ __inline__ __device__ void ClusterReorganizer::copyToken(Cluster* targetCluster)
 
 		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
 			Cell const& connectingCell = *cell.connections[connectionIndex];
-			if (connectingCell.alive) {
-				Cell& targetCell = *connectingCell.nextTimestep;
-				if (targetCell.cluster == targetCluster) {
-					int numToken = atomicAdd(&targetCell.tag, 1);
-					if (numToken < cudaSimulationParameters.cellMaxToken) {
-						Token& newToken = *_data->tokensAC2.getNewElement();
-						int origNumTokens = atomicAdd(&targetCluster->numTokens, 1);
-						if (0 == origNumTokens) {
-							targetCluster->tokens = &newToken;
-						}
-						newToken = token;
-						newToken.cell = &targetCell;
+			if (!connectingCell.alive) {
+				continue;
+			}
+            if (((cell.branchNumber + 1) % cudaSimulationParameters.cellMaxTokenBranchNumber)
+				!= connectingCell.branchNumber) {
+                continue;
+            }
+
+            Cell& targetCell = *connectingCell.nextTimestep;
+			if (targetCell.cluster == targetCluster) {
+				int numToken = atomicAdd(&targetCell.tag, 1);
+				if (numToken < cudaSimulationParameters.cellMaxToken) {
+					Token& newToken = *_data->tokensAC2.getNewElement();
+					int origNumTokens = atomicAdd(&targetCluster->numTokens, 1);
+					if (0 == origNumTokens) {
+						targetCluster->tokens = &newToken;
 					}
+					newToken = token;
+					newToken.cell = &targetCell;
 				}
 			}
 		}

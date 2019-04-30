@@ -27,6 +27,7 @@ struct CellAccessTO
 	float energy;
 	int maxConnections;
 	int numConnections;
+	int branchNumber;
 	int connectionIndices[MAX_CELL_BONDS];
 };
 
