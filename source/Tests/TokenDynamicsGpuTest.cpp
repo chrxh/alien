@@ -27,7 +27,7 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovement_fittingBranchNumbers)
 	firstCell.addToken(createSimpleToken());
 	origData.addCluster(cluster);
 	
-	uint64_t lastCellId = cluster.cells->at(0).id;
+	uint64_t lastCellId = cluster.cells->at(9).id;
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(9, _controller);
@@ -89,3 +89,6 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovement_unfittingBranchNumbers)
 		}
 	}
 }
+
+//TODO: Tests mit Token und Decomposition/Fusion
+
