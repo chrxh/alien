@@ -18,20 +18,18 @@
 
 __device__ void clusterDynamicsStep1(SimulationData &data, int clusterIndex)
 {
-	ClusterDynamics cluster;
-	cluster.init(data, clusterIndex);
-
-	cluster.processingMovement();
+	ClusterDynamics dynamics;
+	dynamics.init(data, clusterIndex);
+	dynamics.processingMovement();
 }
 
 __device__ void clusterDynamicsStep2(SimulationData &data, int clusterIndex)
 {
-	ClusterDynamics cluster;
-	cluster.init(data, clusterIndex);
-
-	cluster.destroyCloseCell();
-	cluster.processingRadiation();
-	cluster.processingCollision();	//attention: can result a temporarily inconsistent state
+	ClusterDynamics dynamics;
+	dynamics.init(data, clusterIndex);
+	dynamics.destroyCloseCell();
+	dynamics.processingRadiation();
+	dynamics.processingCollision();	//attention: can result a temporarily inconsistent state
 									//will be resolved in reorganizer
 }
 
@@ -39,10 +37,8 @@ __device__ void clusterReorganizing(SimulationData &data, int clusterIndex)
 {
 	ClusterReorganizer reorganizer;
 	reorganizer.init(data, clusterIndex);
-	
 	reorganizer.processingDecomposition();
 	reorganizer.processingClusterCopy();
-	reorganizer.processingTokenCopy();
 }
 
 __global__ void clusterDynamicsStep1(SimulationData data)
@@ -88,24 +84,24 @@ __global__ void clusterReorganizing(SimulationData data)
 
 __global__ void particleDynamicsStep1(SimulationData data)
 {
-	ParticleDynamics particle;
-	particle.init(data);
-	particle.processingMovement();
-	particle.processingTransformation();
+	ParticleDynamics dynamics;
+	dynamics.init(data);
+	dynamics.processingMovement();
+	dynamics.processingTransformation();
 }
 
 __global__ void particleDynamicsStep2(SimulationData data)
 {
-	ParticleDynamics blockProcessor;
-	blockProcessor.init(data);
-	blockProcessor.processingCollision();
+	ParticleDynamics dynamics;
+	dynamics.init(data);
+	dynamics.processingCollision();
 }
 
 __global__ void particleReorganizing(SimulationData data)
 {
-	ParticleReorganizer blockProcessor;
-	blockProcessor.init(data);
-	blockProcessor.processingDataCopy();
+	ParticleReorganizer reorganizer;
+	reorganizer.init(data);
+	reorganizer.processingDataCopy();
 }
 
 __device__ void clearCellCluster(SimulationData const &data, int clusterIndex)
