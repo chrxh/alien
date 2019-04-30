@@ -70,7 +70,7 @@ DataDescription DataConverter::getDataDescription() const
 				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
 				.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
 				.setConnectingCells(connectingCellIds).setMaxConnections(cell.maxConnections).setFlagTokenBlocked(false)
-				.setTokenBranchNumber(0).setMetadata(CellMetadata()).setTokens(vector<TokenDescription>{})
+				.setTokenBranchNumber(0).setMetadata(CellMetadata()).setTokens(vector<TokenDescription>{}).setTokenBranchNumber(cell.branchNumber)
 			);
 		}
 		result.addCluster(clusterDesc);
@@ -356,6 +356,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cellTO.pos= { cellDesc.pos->x(), cellDesc.pos->y() };
 	cellTO.energy = *cellDesc.energy;
 	cellTO.maxConnections = *cellDesc.maxConnections;
+	cellTO.branchNumber = *cellDesc.tokenBranchNumber;
 	if (cellDesc.connectingCells) {
 		cellTO.numConnections = cellDesc.connectingCells->size();
 	}
@@ -441,6 +442,9 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
 	}
 	if (cellChanges.energy) {
 		cell.energy = cellChanges.energy.getValue();
+	}
+	if (cellChanges.tokenBranchNumber) {
+		cell.branchNumber = cellChanges.tokenBranchNumber.getValue();
 	}
 }
 
