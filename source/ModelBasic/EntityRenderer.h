@@ -16,7 +16,12 @@ public:
 		return (e << 16) | 0x30;
 	}
 
-	static uint32_t calcCellColor(int numToken, uint8_t colorCode, double energy)
+	static uint32_t calcTokenColor()
+	{
+		return 0xFFFFFF;
+	}
+
+	static uint32_t calcCellColor(uint8_t colorCode, double energy)
 	{
 		uint8_t r = 0;
 		uint8_t g = 0;

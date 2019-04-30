@@ -373,7 +373,7 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 				if (cell->getNumToken() > 0) {
 					tokenPos.push_back(pos);
 				} else {
-					auto color = EntityRenderer::calcCellColor(cell->getNumToken(), cell->getMetadata().color, cell->getEnergy());
+					auto color = EntityRenderer::calcCellColor(cell->getMetadata().color, cell->getEnergy());
 					_requiredImage->setPixel(pos.x, pos.y, color);
 					--pos.x;
 					spaceProp->correctPosition(pos);
@@ -392,33 +392,34 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 			}
 		}
 		if (!tokenPos.empty()) {
+			auto const color = EntityRenderer::calcTokenColor();
 			for (IntVector2D const& pos : tokenPos) {
 				{
-					for (int i = 1; i < 4; ++i) {
+					for (int i = 0 ; i < 4; ++i) {
 						IntVector2D posMod{ pos.x, pos.y - i };
 						spaceProp->correctPosition(posMod);
-						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i*255/4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, color, 255 - i*255/4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x + i, pos.y };
 						spaceProp->correctPosition(posMod);
-						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, color, 255 - i * 255 / 4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x, pos.y + i };
 						spaceProp->correctPosition(posMod);
-						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, color, 255 - i * 255 / 4);
 					}
 				}
 				{
 					for (int i = 1; i < 4; ++i) {
 						IntVector2D posMod{ pos.x - i, pos.y };
 						spaceProp->correctPosition(posMod);
-						EntityRenderer::colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
+						EntityRenderer::colorPixel(_requiredImage, posMod, color, 255 - i * 255 / 4);
 					}
 				}
 			}
