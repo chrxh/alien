@@ -121,6 +121,7 @@ __inline__ __device__ void ParticleDynamics::createRandomCell(float energy, floa
 	cell->energy = energy;
 	cell->maxConnections = _data->numberGen.random(MAX_CELL_BONDS);
 	cell->cluster = cluster;
+	cell->branchNumber = _data->numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
 	cell->numConnections = 0;
 	cell->nextTimestep = nullptr;
 	cell->alive = true;

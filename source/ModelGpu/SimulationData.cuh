@@ -34,6 +34,7 @@ struct Cell
 	float2 absPos;
 	float2 vel;
 	float energy;
+	int branchNumber;
 	int maxConnections;
 	int numConnections;
 	Cell* connections[MAX_CELL_BONDS];
