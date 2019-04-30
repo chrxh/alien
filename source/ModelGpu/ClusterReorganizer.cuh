@@ -16,12 +16,12 @@ public:
 
 	__inline__ __device__ void processingDecomposition();
 	__inline__ __device__ void processingClusterCopy();
-	__inline__ __device__ void processingTokenCopy();
 
 private:
 	__inline__ __device__ void copyClusterWithDecomposition();
 	__inline__ __device__ void copyClusterWithoutDecompositionAndFusion();
 	__inline__ __device__ void copyClusterWithFusion();
+	__inline__ __device__ void copyToken(Cluster* targetCluster);
 
 	__inline__ __device__ void setSuccessorCell(Cell *origCell, Cell* newCell, Cluster* newCluster);
 	__inline__ __device__ void correctCellConnections(Cell *origCell);
@@ -30,8 +30,11 @@ private:
 	Map<Cell> _cellMap;
 
 	Cluster *_origCluster;
+
 	int _startCellIndex;
 	int _endCellIndex;
+	int _startTokenIndex;
+	int _endTokenIndex;
 };
 
 /************************************************************************/
@@ -44,6 +47,8 @@ __inline__ __device__ void ClusterReorganizer::init(SimulationData& data, int cl
 	_cellMap.init(data.size, data.cellMap);
 
 	calcPartition(_origCluster->numCells, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
+	calcPartition(_origCluster->numTokens, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
+
 	__syncthreads();
 }
 
@@ -66,6 +71,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithDecomposition()
 			entries[i].cluster.angularVel = 0.0f;
 			entries[i].cluster.angularMass = 0.0f;
 			entries[i].cluster.numCells = 0;
+			entries[i].cluster.numTokens = 0;
 			entries[i].cluster.decompositionRequired = false;
 			entries[i].cluster.clusterToFuse = nullptr;
 			entries[i].cluster.locked = 0;
@@ -191,6 +197,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithoutDecompositionAn
 		*newCluster = *_origCluster;
 		newCells = _data->cellsAC2.getNewSubarray(_origCluster->numCells);
 		newCluster->cells = newCells;
+		newCluster->numTokens = 0;
 	}
 	__syncthreads();
 
@@ -205,6 +212,8 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithoutDecompositionAn
 		correctCellConnections(&newCells[cellIndex]);
 	}
 	__syncthreads();
+
+	copyToken(newCluster);
 }
 
 __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
@@ -219,6 +228,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 			newCluster->id = _origCluster->id;
 			newCluster->angle = 0.0f;
 			newCluster->numCells = _origCluster->numCells + otherCluster->numCells;
+			newCluster->numTokens = 0;
 			newCluster->decompositionRequired = _origCluster->decompositionRequired || otherCluster->decompositionRequired;
 			newCluster->locked = 0;
 			newCluster->clusterToFuse = nullptr;
@@ -295,6 +305,48 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 	__syncthreads();
 }
 
+__inline__ __device__ void ClusterReorganizer::copyToken(Cluster* targetCluster)
+{
+	if (0 == _origCluster->numTokens) {
+		__syncthreads();
+		return;
+	}
+
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+		Cell const& cell = _origCluster->cells[cellIndex];
+		if (cell.alive) {
+			Cell& newCell = *cell.nextTimestep;
+			newCell.tag = 0;
+		}
+	}
+	__syncthreads();
+
+	for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
+		Token const& token = _origCluster->tokens[tokenIndex];
+		Cell const& cell = *token.cell;
+
+		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
+			Cell const& connectingCell = *cell.connections[connectionIndex];
+			if (connectingCell.alive) {
+				Cell& targetCell = *connectingCell.nextTimestep;
+				if (targetCell.cluster == targetCluster) {
+					int numToken = atomicAdd(&targetCell.tag, 1);
+					if (numToken < cudaSimulationParameters.cellMaxToken) {
+						Token& newToken = *_data->tokensAC2.getNewElement();
+						int origNumTokens = atomicAdd(&targetCluster->numTokens, 1);
+						if (0 == origNumTokens) {
+							targetCluster->tokens = &newToken;
+						}
+						newToken = token;
+						newToken.cell = &targetCell;
+					}
+				}
+			}
+		}
+	}
+	__syncthreads();
+}
+
 __inline__ __device__ void ClusterReorganizer::processingClusterCopy()
 {
 	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive && !_origCluster->clusterToFuse) {
@@ -311,10 +363,6 @@ __inline__ __device__ void ClusterReorganizer::processingClusterCopy()
 	else {
 		copyClusterWithoutDecompositionAndFusion();
 	}
-}
-
-__inline__ __device__ void ClusterReorganizer::processingTokenCopy()
-{
 }
 
 __inline__ __device__ void ClusterReorganizer::processingDecomposition()
