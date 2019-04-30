@@ -10,6 +10,7 @@ struct CudaSimulationParameters
 	float cellMaxForceDecayProb;
 	float cellMass;
 	float cellTransformationProb;
+	int cellMaxToken;
 	float radiationProbability;
 	float radiationExponent;
 	float radiationFactor;

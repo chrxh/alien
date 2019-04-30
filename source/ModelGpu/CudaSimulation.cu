@@ -201,6 +201,7 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
 	parametersToCopy.cellMaxForceDecayProb = parameters.cellMaxForceDecayProb;
 	parametersToCopy.cellTransformationProb = parameters.cellTransformationProb;
 	parametersToCopy.cellMass = 1.0f / parameters.cellMass_Reciprocal;
+	parametersToCopy.cellMaxToken = parameters.cellMaxToken;
 	parametersToCopy.radiationProbability = parameters.radiationProb;
 	parametersToCopy.radiationExponent = parameters.radiationExponent;
 	parametersToCopy.radiationFactor = parameters.radiationFactor;
