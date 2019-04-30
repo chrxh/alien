@@ -13,15 +13,15 @@ class ClusterReorganizer
 {
 public:
 	__inline__ __device__ void init(SimulationData& data, int clusterIndex);
-	__inline__ __device__ int getNumOrigCells() const;
 
-	__inline__ __device__ void processingDecomposition(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingDataCopy(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void processingDecomposition();
+	__inline__ __device__ void processingClusterCopy();
+	__inline__ __device__ void processingTokenCopy();
 
 private:
-	__inline__ __device__ void processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingDataCopyWithoutDecompositionAndFusion(int startCellIndex, int endCellIndex);
-	__inline__ __device__ void processingDataCopyWithFusion(int startCellIndex, int endCellIndex);
+	__inline__ __device__ void copyClusterWithDecomposition();
+	__inline__ __device__ void copyClusterWithoutDecompositionAndFusion();
+	__inline__ __device__ void copyClusterWithFusion();
 
 	__inline__ __device__ void setSuccessorCell(Cell *origCell, Cell* newCell, Cluster* newCluster);
 	__inline__ __device__ void correctCellConnections(Cell *origCell);
@@ -30,6 +30,8 @@ private:
 	Map<Cell> _cellMap;
 
 	Cluster *_origCluster;
+	int _startCellIndex;
+	int _endCellIndex;
 };
 
 /************************************************************************/
@@ -40,14 +42,12 @@ __inline__ __device__ void ClusterReorganizer::init(SimulationData& data, int cl
 	_data = &data;
 	_origCluster = &data.clustersAC1.getEntireArray()[clusterIndex];
 	_cellMap.init(data.size, data.cellMap);
+
+	calcPartition(_origCluster->numCells, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
+	__syncthreads();
 }
 
-__inline__ __device__ int ClusterReorganizer::getNumOrigCells() const
-{
-	return _origCluster->numCells;
-}
-
-__inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::copyClusterWithDecomposition()
 {
 	__shared__ int numDecompositions;
 	struct Entry {
@@ -72,7 +72,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 		}
 	}
 	__syncthreads();
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell& cell = _origCluster->cells[cellIndex];
 		if (!cell.alive) {
 			continue;
@@ -135,7 +135,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 	}
 	__syncthreads();
 
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell& cell = _origCluster->cells[cellIndex];
 		for (int index = 0; index < numDecompositions; ++index) {
 			if (cell.tag == entries[index].tag) {
@@ -171,7 +171,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 	}
 	__syncthreads();
 
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell& cell = _origCluster->cells[cellIndex];
 		if (!cell.alive) {
 			continue;
@@ -181,7 +181,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithDecompositi
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterReorganizer::processingDataCopyWithoutDecompositionAndFusion(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::copyClusterWithoutDecompositionAndFusion()
 {
 	__shared__ Cluster* newCluster;
 	__shared__ Cell* newCells;
@@ -194,20 +194,20 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithoutDecompos
 	}
 	__syncthreads();
 
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell *origCell = &_origCluster->cells[cellIndex];
 		Cell *newCell = &newCells[cellIndex];
 		setSuccessorCell(origCell, newCell, newCluster);
 	}
 
 	__syncthreads();
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		correctCellConnections(&newCells[cellIndex]);
 	}
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterReorganizer::processingDataCopyWithFusion(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 {
 	if (_origCluster < _origCluster->clusterToFuse) {
 		__shared__ Cluster* newCluster;
@@ -236,7 +236,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithFusion(int 
 		}
 		__syncthreads();
 
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 			Cell* newCell = &newCluster->cells[cellIndex];
 			Cell* origCell = &_origCluster->cells[cellIndex];
 			setSuccessorCell(origCell, newCell, newCluster);
@@ -277,7 +277,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithFusion(int 
 		}
 		__syncthreads();
 
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 			correctCellConnections(&newCluster->cells[cellIndex]);
 		}
 		for (int otherCellIndex = startOtherCellIndex; otherCellIndex <= endOtherCellIndex; ++otherCellIndex) {
@@ -295,7 +295,7 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopyWithFusion(int 
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterReorganizer::processingDataCopy(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::processingClusterCopy()
 {
 	if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive && !_origCluster->clusterToFuse) {
 		__syncthreads();
@@ -303,28 +303,32 @@ __inline__ __device__ void ClusterReorganizer::processingDataCopy(int startCellI
 	}
 
 	if (_origCluster->decompositionRequired && !_origCluster->clusterToFuse) {
-		processingDataCopyWithDecomposition(startCellIndex, endCellIndex);
+		copyClusterWithDecomposition();
 	}
 	else if (_origCluster->clusterToFuse) {
-		processingDataCopyWithFusion(startCellIndex, endCellIndex);
+		copyClusterWithFusion();
 	}
 	else {
-		processingDataCopyWithoutDecompositionAndFusion(startCellIndex, endCellIndex);
+		copyClusterWithoutDecompositionAndFusion();
 	}
 }
 
-__inline__ __device__ void ClusterReorganizer::processingDecomposition(int startCellIndex, int endCellIndex)
+__inline__ __device__ void ClusterReorganizer::processingTokenCopy()
+{
+}
+
+__inline__ __device__ void ClusterReorganizer::processingDecomposition()
 {
 	if (_origCluster->decompositionRequired && !_origCluster->clusterToFuse) {
 		__shared__ bool changes;
 
-		for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 			_origCluster->cells[cellIndex].tag = cellIndex;
 		}
 		do {
 			changes = false;
 			__syncthreads();
-			for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+			for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 				Cell& cell = _origCluster->cells[cellIndex];
 				if (cell.alive) {
 					for (int i = 0; i < cell.numConnections; ++i) {

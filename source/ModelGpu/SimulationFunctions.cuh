@@ -18,51 +18,31 @@
 
 __device__ void clusterDynamicsStep1(SimulationData &data, int clusterIndex)
 {
-	__shared__ ClusterDynamics cluster;
-	if (0 == threadIdx.x) {
-		cluster.init(data, clusterIndex);
-	}
-	__syncthreads();
+	ClusterDynamics cluster;
+	cluster.init(data, clusterIndex);
 
-	int startCellIndex;
-	int endCellIndex;
-	calcPartition(cluster.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-	cluster.processingMovement(startCellIndex, endCellIndex);
+	cluster.processingMovement();
 }
 
 __device__ void clusterDynamicsStep2(SimulationData &data, int clusterIndex)
 {
-	__shared__ ClusterDynamics cluster;
-	if (0 == threadIdx.x) {
-		cluster.init(data, clusterIndex);
-	}
-	__syncthreads();
+	ClusterDynamics cluster;
+	cluster.init(data, clusterIndex);
 
-	int startCellIndex;
-	int endCellIndex;
-	calcPartition(cluster.getNumCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-	cluster.destroyCloseCell(startCellIndex, endCellIndex);
-	cluster.processingRadiation(startCellIndex, endCellIndex);
-	cluster.processingCollision(startCellIndex, endCellIndex);	//attention: can result a temporarily inconsistent state
-																//will be resolved in reorganizer
+	cluster.destroyCloseCell();
+	cluster.processingRadiation();
+	cluster.processingCollision();	//attention: can result a temporarily inconsistent state
+									//will be resolved in reorganizer
 }
 
 __device__ void clusterReorganizing(SimulationData &data, int clusterIndex)
 {
-	__shared__ ClusterReorganizer builder;
-	if (0 == threadIdx.x) {
-		builder.init(data, clusterIndex);
-	}
-	__syncthreads();
-
-	int startCellIndex;
-	int endCellIndex;
-	calcPartition(builder.getNumOrigCells(), threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-	builder.processingDecomposition(startCellIndex, endCellIndex);
-	builder.processingDataCopy(startCellIndex, endCellIndex);
+	ClusterReorganizer reorganizer;
+	reorganizer.init(data, clusterIndex);
+	
+	reorganizer.processingDecomposition();
+	reorganizer.processingClusterCopy();
+	reorganizer.processingTokenCopy();
 }
 
 __global__ void clusterDynamicsStep1(SimulationData data)
@@ -108,57 +88,24 @@ __global__ void clusterReorganizing(SimulationData data)
 
 __global__ void particleDynamicsStep1(SimulationData data)
 {
-	__shared__ ParticleDynamics blockProcessor;
-	if (0 == threadIdx.x) {
-		blockProcessor.init(data);
-	}
-	__syncthreads();
-
-	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	int numEntities = data.particlesAC1.getNumEntries();
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
-
-	blockProcessor.processingMovement(startIndex, endIndex);
-	blockProcessor.processingTransformation(startIndex, endIndex);
+	ParticleDynamics particle;
+	particle.init(data);
+	particle.processingMovement();
+	particle.processingTransformation();
 }
 
 __global__ void particleDynamicsStep2(SimulationData data)
 {
-	__shared__ ParticleDynamics blockProcessor;
-	if (0 == threadIdx.x) {
-		blockProcessor.init(data);
-	}
-	__syncthreads();
-
-	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	int numEntities = data.particlesAC1.getNumEntries();
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
-
-	blockProcessor.processingCollision(startIndex, endIndex);
+	ParticleDynamics blockProcessor;
+	blockProcessor.init(data);
+	blockProcessor.processingCollision();
 }
 
 __global__ void particleReorganizing(SimulationData data)
 {
-	__shared__ ParticleReorganizer blockProcessor;
-	if (0 == threadIdx.x) {
-		blockProcessor.init(data);
-	}
-	__syncthreads();
-
-	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	int numEntities = data.particlesAC1.getNumEntries();
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
-
-	blockProcessor.processingDataCopy(startIndex, endIndex);
+	ParticleReorganizer blockProcessor;
+	blockProcessor.init(data);
+	blockProcessor.processingDataCopy();
 }
 
 __device__ void clearCellCluster(SimulationData const &data, int clusterIndex)

@@ -14,13 +14,16 @@ class ParticleReorganizer
 public:
 	__inline__ __device__ void init(SimulationData& data);
 
-	__inline__ __device__ void processingDataCopy(int startParticleIndex, int endParticleIndex);
+	__inline__ __device__ void processingDataCopy();
 
 private:
 
 	SimulationData* _data;
 	Map<Cell> _cellMap;
 	Map<Particle> _origParticleMap;
+
+	int _startParticleIndex;
+	int _endParticleIndex;
 };
 
 
@@ -32,11 +35,17 @@ __inline__ __device__ void ParticleReorganizer::init(SimulationData & data)
 	_data = &data;
 	_cellMap.init(data.size, data.cellMap);
 	_origParticleMap.init(data.size, data.particleMap);
+
+	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
+	int numEntities = data.particlesAC1.getNumEntries();
+	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, _startParticleIndex, _endParticleIndex);
+
+	__syncthreads();
 }
 
-__inline__ __device__ void ParticleReorganizer::processingDataCopy(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleReorganizer::processingDataCopy()
 {
-	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
+	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle *origParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
 		if (!origParticle->alive) {
 			continue;
