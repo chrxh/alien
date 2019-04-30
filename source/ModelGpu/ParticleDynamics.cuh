@@ -14,15 +14,17 @@ class ParticleDynamics
 public:
 	__inline__ __device__ void init(SimulationData& data);
 
-	__inline__ __device__ void processingMovement(int startParticleIndex, int endParticleIndex);
-	__inline__ __device__ void processingCollision(int startParticleIndex, int endParticleIndex);
-	__inline__ __device__ void processingTransformation(int startParticleIndex, int endParticleIndex);
+	__inline__ __device__ void processingMovement();
+	__inline__ __device__ void processingCollision();
+	__inline__ __device__ void processingTransformation();
 
 private:
 	__inline__ __device__ void createRandomCell(float energy, float2 const& pos, float2 const& vel);
 
 	SimulationData* _data;
 	Map<Particle> _origParticleMap;
+	int _startParticleIndex;
+	int _endParticleIndex;
 };
 
 
@@ -33,11 +35,17 @@ __inline__ __device__ void ParticleDynamics::init(SimulationData & data)
 {
 	_data = &data;
 	_origParticleMap.init(data.size, data.particleMap);
+
+	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
+	int numEntities = data.particlesAC1.getNumEntries();
+	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, _startParticleIndex, _endParticleIndex);
+
+	__syncthreads();
 }
 
-__inline__ __device__ void ParticleDynamics::processingMovement(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleDynamics::processingMovement()
 {
-	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
+	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
 		particle->pos = add(particle->pos, particle->vel);
 		_origParticleMap.mapPosCorrection(particle->pos);
@@ -45,9 +53,9 @@ __inline__ __device__ void ParticleDynamics::processingMovement(int startParticl
 	}
 }
 
-__inline__ __device__ void ParticleDynamics::processingCollision(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleDynamics::processingCollision()
 {
-	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
+	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
 		Particle* otherParticle = _origParticleMap.get(particle->pos);
 		if (otherParticle && otherParticle != particle) {
@@ -73,9 +81,9 @@ __inline__ __device__ void ParticleDynamics::processingCollision(int startPartic
 	}
 }
 
-__inline__ __device__ void ParticleDynamics::processingTransformation(int startParticleIndex, int endParticleIndex)
+__inline__ __device__ void ParticleDynamics::processingTransformation()
 {
-	for (int particleIndex = startParticleIndex; particleIndex <= endParticleIndex; ++particleIndex) {
+	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
 		auto innerEnergy = particle->energy - Physics::linearKineticEnergy(cudaSimulationParameters.cellMass, particle->vel);
 		if (innerEnergy >= cudaSimulationParameters.cellMinEnergy) {
