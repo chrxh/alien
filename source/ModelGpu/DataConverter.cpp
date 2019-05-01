@@ -216,14 +216,14 @@ void DataConverter::processDeletions()
 	tokenIndexCopyOffset = 0;
 	for (int tokenIndex = 0; tokenIndex < *_dataTO.numTokens; ++tokenIndex) {
 		TokenAccessTO& token = _dataTO.tokens[tokenIndex];
+		if (newByOldCellIndex.find(token.cellIndex) != newByOldCellIndex.end()) {
+			token.cellIndex = newByOldCellIndex.at(token.cellIndex);
+		}
 		if (tokenIndicesToDelete.find(tokenIndex) != tokenIndicesToDelete.end()) {
 			++tokenIndexCopyOffset;
 		}
 		else if (tokenIndexCopyOffset > 0) {
 			_dataTO.tokens[tokenIndex - tokenIndexCopyOffset] = token;
-		}
-		if (newByOldCellIndex.find(token.cellIndex) != newByOldCellIndex.end()) {
-			token.cellIndex = newByOldCellIndex.at(token.cellIndex);
 		}
 	}
 	*_dataTO.numTokens -= tokenIndexCopyOffset;
@@ -356,7 +356,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cellTO.pos= { cellDesc.pos->x(), cellDesc.pos->y() };
 	cellTO.energy = *cellDesc.energy;
 	cellTO.maxConnections = *cellDesc.maxConnections;
-	cellTO.branchNumber = *cellDesc.tokenBranchNumber;
+	cellTO.branchNumber = cellDesc.tokenBranchNumber.get_value_or(0);
 	if (cellDesc.connectingCells) {
 		cellTO.numConnections = cellDesc.connectingCells->size();
 	}
