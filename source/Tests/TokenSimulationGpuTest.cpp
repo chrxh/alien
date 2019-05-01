@@ -1,10 +1,10 @@
 #include "SimulationGpuTest.h"
 
-class TokenDynamicsGpuTest
+class TokenSimulationGpuTest
 	: public SimulationGpuTest
 {
 public:
-	virtual ~TokenDynamicsGpuTest() = default;
+	virtual ~TokenSimulationGpuTest() = default;
 };
 
 /**
@@ -13,7 +13,7 @@ public:
 *			 - simulating 9 time steps
 * Expected result: token should be on the last cell
 */
-TEST_F(TokenDynamicsGpuTest, testTokenMovementWithFittingBranchNumbers)
+TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -55,7 +55,7 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovementWithFittingBranchNumbers)
 *			 - simulating one time step
 * Expected result: no token should be on the cells
 */
-TEST_F(TokenDynamicsGpuTest, testTokenMovementWithUnfittingBranchNumbers)
+TEST_F(TokenSimulationGpuTest, testTokenMovementWithUnfittingBranchNumbers)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -92,7 +92,7 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovementWithUnfittingBranchNumbers)
 *			 - simulating one time step
 * Expected result: there should be two tokens: on the first and last cell
 */
-TEST_F(TokenDynamicsGpuTest, testTokenForking)
+TEST_F(TokenSimulationGpuTest, testTokenForking)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -137,7 +137,7 @@ TEST_F(TokenDynamicsGpuTest, testTokenForking)
 *			 - simulating 1 time step
 * Expected result: cluster decomposes into two cluster, each still has a token
 */
-TEST_F(TokenDynamicsGpuTest, testTokenMovementDuringDecomposition)
+TEST_F(TokenSimulationGpuTest, testTokenMovementDuringDecomposition)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -201,7 +201,7 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovementDuringDecomposition)
 *			 - second cell has two tokens
 *			 - fourth cell has one token
 */
-TEST_F(TokenDynamicsGpuTest, testTokenMovementDuringFusion)
+TEST_F(TokenSimulationGpuTest, testTokenMovementDuringFusion)
 {
 	DataDescription origData;
 	auto velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -210,14 +210,14 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovementDuringFusion)
 	firstCluster.cells->at(0).tokenBranchNumber = 0;
 	firstCluster.cells->at(1).tokenBranchNumber = 1;
 	firstCluster.cells->at(0).addToken(createSimpleToken());
-	setMaxConnections(firstCluster, 3);
+	setMaxConnections(firstCluster, 2);
 	origData.addCluster(firstCluster);
 
 	auto secondCluster = createHorizontalCluster(2, QVector2D{ 102, 100 }, QVector2D{ 0, -velocity }, 0.0);
 	secondCluster.cells->at(0).tokenBranchNumber = 0;
 	secondCluster.cells->at(1).tokenBranchNumber = 1;
 	secondCluster.cells->at(0).addToken(createSimpleToken());
-	setMaxConnections(secondCluster, 3);
+	setMaxConnections(secondCluster, 2);
 	origData.addCluster(secondCluster);
 
 	auto secondCellId = firstCluster.cells->at(1).id;
@@ -251,7 +251,7 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovementDuringFusion)
 *			 - simulating one time step
 * Expected result: second cell should have cellMaxToken tokens
 */
-TEST_F(TokenDynamicsGpuTest, testTokenMovementWithTooManyTokens)
+TEST_F(TokenSimulationGpuTest, testTokenMovementWithTooManyTokens)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
