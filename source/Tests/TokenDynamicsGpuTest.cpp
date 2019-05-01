@@ -244,3 +244,50 @@ TEST_F(TokenDynamicsGpuTest, testTokenMovementDuringFusion)
 	}
 }
 
+/**
+* Situation: - one horizontal cluster with 3 cells and branch numbers (0, 1, 0)
+*			 - first cell has cellMaxToken tokens
+*			 - third cell has 1 token
+*			 - simulating one time step
+* Expected result: second cell should have cellMaxToken tokens
+*/
+TEST_F(TokenDynamicsGpuTest, testTokenMovementWithTooManyTokens)
+{
+	DataDescription origData;
+	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+	auto cluster = createHorizontalCluster(3, QVector2D{}, QVector2D{}, 0);
+	auto& firstCell = cluster.cells->at(0);
+	auto& secondCell = cluster.cells->at(1);
+	auto& thirdCell = cluster.cells->at(2);
+	firstCell.tokenBranchNumber = 0;
+	secondCell.tokenBranchNumber = 1;
+	thirdCell.tokenBranchNumber = 0;
+	for (int i = 0; i < _parameters.cellMaxToken; ++i) {
+		firstCell.addToken(createSimpleToken());
+	}
+	thirdCell.addToken(createSimpleToken());
+	origData.addCluster(cluster);
+
+	uint64_t secondCellId = secondCell.id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(1, _controller);
+
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+	auto newCluster = newData.clusters->at(0);
+
+	EXPECT_EQ(3, newCluster.cells->size());
+
+	for (auto const& newCell : *newCluster.cells) {
+		if (newCell.id == secondCellId) {
+			EXPECT_EQ(_parameters.cellMaxToken, newCell.tokens->size());
+		}
+		else if (newCell.tokens) {
+			EXPECT_TRUE(newCell.tokens->empty());
+		}
+	}
+}
+
