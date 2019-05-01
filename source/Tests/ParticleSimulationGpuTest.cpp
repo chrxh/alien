@@ -1,17 +1,17 @@
 #include "SimulationGpuTest.h"
 
-class ParticleDynamicsGpuTest
+class ParticleSimulationGpuTest
 	: public SimulationGpuTest
 {
 public:
-	virtual ~ParticleDynamicsGpuTest() = default;
+	virtual ~ParticleSimulationGpuTest() = default;
 };
 
 /**
 * Situation: fusion of two particles
 * Expected result: one particle remains with average velocity
 */
-TEST_F(ParticleDynamicsGpuTest, testFusionOfSingleParticles)
+TEST_F(ParticleSimulationGpuTest, testFusionOfSingleParticles)
 {
 	DataDescription origData;
 	auto particleEnergy = _parameters.cellMinEnergy / 3.0;
@@ -42,7 +42,7 @@ TEST_F(ParticleDynamicsGpuTest, testFusionOfSingleParticles)
 * Situation: fusion of many particles
 * Expected result: energy balance is fulfilled
 */
-TEST_F(ParticleDynamicsGpuTest, testFusionOfManyParticles)
+TEST_F(ParticleSimulationGpuTest, testFusionOfManyParticles)
 {
 	auto particleEnergy = _parameters.cellMinEnergy / 120.0;
 
@@ -63,7 +63,7 @@ TEST_F(ParticleDynamicsGpuTest, testFusionOfManyParticles)
 * Situation: particle with high energy
 * Expected result: particle transforms to cell
 */
-TEST_F(ParticleDynamicsGpuTest, testTransformationParticleToCell)
+TEST_F(ParticleSimulationGpuTest, testTransformationParticleToCell)
 {
 	auto size = _spaceProp->getSize();
 	DataDescription origData;
