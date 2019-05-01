@@ -21,7 +21,7 @@ private:
 	__inline__ __device__ void copyClusterWithDecomposition();
 	__inline__ __device__ void copyClusterWithoutDecompositionAndFusion();
 	__inline__ __device__ void copyClusterWithFusion();
-	__inline__ __device__ void spreadAndCopyToken(Cluster* targetCluster);
+	__inline__ __device__ void spreadAndCopyToken(Cluster* sourceCluster, Cluster* targetCluster);
 
 	__inline__ __device__ void setSuccessorCell(Cell *origCell, Cell* newCell, Cluster* newCluster);
 	__inline__ __device__ void correctCellConnections(Cell *origCell);
@@ -177,7 +177,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithDecomposition()
 	}
 	for (int index = 0; index <= numDecompositions; ++index) {
 		Cluster* newCluster = newClusters[index];
-		spreadAndCopyToken(newCluster);
+		spreadAndCopyToken(_origCluster, newCluster);
 	}
 
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
@@ -216,7 +216,7 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithoutDecompositionAn
 	}
 	__syncthreads();
 
-	spreadAndCopyToken(newCluster);
+	spreadAndCopyToken(_origCluster, newCluster);
 }
 
 __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
@@ -301,8 +301,8 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 			newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 		}
 
-		spreadAndCopyToken(newCluster);
-		spreadAndCopyToken(newCluster->clusterToFuse);
+		spreadAndCopyToken(_origCluster, newCluster);
+		spreadAndCopyToken(_origCluster->clusterToFuse, newCluster);
 	}
 	else {
 		//do not copy anything
@@ -310,15 +310,19 @@ __inline__ __device__ void ClusterReorganizer::copyClusterWithFusion()
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterReorganizer::spreadAndCopyToken(Cluster* targetCluster)
+__inline__ __device__ void ClusterReorganizer::spreadAndCopyToken(Cluster* sourceCluster, Cluster* targetCluster)
 {
-	if (0 == _origCluster->numTokens) {
+	if (0 == sourceCluster->numTokens) {
 		__syncthreads();
 		return;
 	}
 
-	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
-		Cell const& cell = _origCluster->cells[cellIndex];
+	int startCellIndex;
+	int endCellIndex;
+	calcPartition(_origCluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+
+	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+		Cell const& cell = sourceCluster->cells[cellIndex];
 		if (cell.alive) {
 			Cell& newCell = *cell.nextTimestep;
 			newCell.tag = 0;
@@ -327,7 +331,7 @@ __inline__ __device__ void ClusterReorganizer::spreadAndCopyToken(Cluster* targe
 	__syncthreads();
 
 	for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
-		Token const& token = _origCluster->tokens[tokenIndex];
+		Token const& token = sourceCluster->tokens[tokenIndex];
 		Cell const& cell = *token.cell;
 
 		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
