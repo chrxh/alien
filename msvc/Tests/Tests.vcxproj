@@ -265,7 +265,7 @@
     <ClCompile Include="..\..\source\Tests\CellClusterTest.cpp" />
     <ClCompile Include="..\..\source\Tests\CellConnectorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ChangeDescriptionsTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\ClusterDynamicsGpuTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\ClusterSimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ClusterSizeTest.cpp" />
     <ClCompile Include="..\..\source\Tests\CommunicatorFunctionTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ComparisonTest.cpp" />
@@ -275,14 +275,14 @@
     <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\Tests\MultithreadingTest.cpp" />
     <ClCompile Include="..\..\source\Tests\NumberGeneratorTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\ParticleDynamicsGpuTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\ParticleSimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\SimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\PhysicsTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\SerializationTest.cpp" />
     <ClCompile Include="..\..\source\Tests\TestSuite.cpp" />
-    <ClCompile Include="..\..\source\Tests\TokenDynamicsGpuTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\TokenSimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitGridTest.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp" />
   </ItemGroup>
