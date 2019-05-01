@@ -140,6 +140,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 {
 	auto space = _context->getSpaceProperties();
 	auto worker = _context->getCudaController()->getCudaWorker();
+	EntityRenderer renderer(targetImage, space);
 
 	auto truncatedRect = rect;
 	space->truncateRect(truncatedRect);
@@ -151,67 +152,21 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 		ParticleAccessTO& particle = dataTO.particles[i];
 		float2& pos = particle.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-		space->correctPosition(intPos);
-		targetImage->setPixel(intPos.x, intPos.y, EntityRenderer::calcParticleColor(particle.energy));
+		renderer.renderParticle(intPos, particle.energy);
 	}
 
 	for (int i = 0; i < *dataTO.numCells; ++i) {
 		CellAccessTO& cell = dataTO.cells[i];
 		float2 const& pos = cell.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-		space->correctPosition(intPos);
-		uint32_t color = EntityRenderer::calcCellColor(0, cell.energy);
-		targetImage->setPixel(intPos.x, intPos.y, color);
-		--intPos.x;
-		space->correctPosition(intPos);
-		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
-		intPos.x += 2;
-		space->correctPosition(intPos);
-		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
-		--intPos.x;
-		--intPos.y;
-		space->correctPosition(intPos);
-		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
-		intPos.y += 2;
-		space->correctPosition(intPos);
-		EntityRenderer::colorPixel(targetImage, intPos, color, 0x60);
+		renderer.renderCell(intPos, 0, cell.energy);
 	}
 
-	auto const tokenColor = EntityRenderer::calcTokenColor();
 	for (int i = 0; i < *dataTO.numTokens; ++i) {
 		TokenAccessTO const& token = dataTO.tokens[i];
 		CellAccessTO const& cell = dataTO.cells[token.cellIndex];
 		IntVector2D pos = { static_cast<int>(cell.pos.x), static_cast<int>(cell.pos.y) };
-		space->correctPosition(pos);
-		{
-			for (int i = 0; i < 4; ++i) {
-				IntVector2D posMod{ pos.x, pos.y - i };
-				space->correctPosition(posMod);
-				EntityRenderer::colorPixel(targetImage, posMod, tokenColor, 255 - i * 255 / 4);
-			}
-		}
-		{
-			for (int i = 1; i < 4; ++i) {
-				IntVector2D posMod{ pos.x + i, pos.y };
-				space->correctPosition(posMod);
-				EntityRenderer::colorPixel(targetImage, posMod, tokenColor, 255 - i * 255 / 4);
-			}
-		}
-		{
-			for (int i = 1; i < 4; ++i) {
-				IntVector2D posMod{ pos.x, pos.y + i };
-				space->correctPosition(posMod);
-				EntityRenderer::colorPixel(targetImage, posMod, tokenColor, 255 - i * 255 / 4);
-			}
-		}
-		{
-			for (int i = 1; i < 4; ++i) {
-				IntVector2D posMod{ pos.x - i, pos.y };
-				space->correctPosition(posMod);
-				EntityRenderer::colorPixel(targetImage, posMod, tokenColor, 255 - i * 255 / 4);
-			}
-		}
-
+		renderer.renderToken(pos);
 	}
 }
 
