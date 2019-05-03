@@ -28,6 +28,7 @@ struct CellAccessTO
 	int maxConnections;
 	int numConnections;
 	int branchNumber;
+	bool tokenBlocked;
 	int connectionIndices[MAX_CELL_BONDS];
 };
 

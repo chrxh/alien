@@ -77,6 +77,7 @@ public:
 
 			cell.energy = cellTO.energy;
 			cell.branchNumber = cellTO.branchNumber;
+			cell.tokenBlocked = cellTO.tokenBlocked;
 			cell.maxConnections = cellTO.maxConnections;
 			cell.numConnections = cellTO.numConnections;
 			for (int i = 0; i < cell.numConnections; ++i) {

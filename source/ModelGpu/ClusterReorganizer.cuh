@@ -351,7 +351,7 @@ __inline__ __device__ void ClusterReorganizer::spreadAndCopyToken(Cluster* sourc
             Cell& targetCell = *connectingCell.nextTimestep;
 			if (targetCell.cluster == targetCluster) {
 				int numToken = atomicAdd(&targetCell.tag, 1);
-				if (numToken < cudaSimulationParameters.cellMaxToken) {
+				if (numToken < cudaSimulationParameters.cellMaxToken && !connectingCell.tokenBlocked) {
 					Token* newToken = copyToken(&token, &targetCell);
 					int origNumTokens = atomicAdd(&targetCluster->numTokens, 1);
 					if (0 == origNumTokens) {
