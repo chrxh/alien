@@ -21,7 +21,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers)
 	auto cluster = createHorizontalCluster(10, QVector2D{}, QVector2D{}, 0);
 	for (int i = 0; i < 10; ++i) {
 		auto& cell = cluster.cells->at(i);
-		cell.tokenBranchNumber = i % cellMaxTokenBranchNumber;
+		cell.tokenBranchNumber = 1 + i % cellMaxTokenBranchNumber;
 	}
 	auto& firstCell = cluster.cells->at(0);
 	firstCell.addToken(createSimpleToken());
