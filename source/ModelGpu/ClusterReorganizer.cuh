@@ -25,6 +25,8 @@ private:
 
 	__inline__ __device__ void setSuccessorCell(Cell *origCell, Cell* newCell, Cluster* newCluster);
 	__inline__ __device__ void correctCellConnections(Cell *origCell);
+	__inline__ __device__ Token* copyToken(Token const* sourceToken, Cell *targetCell);
+
 
 	SimulationData* _data;
 	Map<Cell> _cellMap;
@@ -334,13 +336,15 @@ __inline__ __device__ void ClusterReorganizer::spreadAndCopyToken(Cluster* sourc
 		Token const& token = sourceCluster->tokens[tokenIndex];
 		Cell const& cell = *token.cell;
 
+		int tokenBranchNumber = token.memory[0];
+
 		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
 			Cell const& connectingCell = *cell.connections[connectionIndex];
 			if (!connectingCell.alive) {
 				continue;
 			}
-            if (((cell.branchNumber + 1) % cudaSimulationParameters.cellMaxTokenBranchNumber)
-				!= connectingCell.branchNumber) {
+            if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
+				% cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
                 continue;
             }
 
@@ -348,13 +352,11 @@ __inline__ __device__ void ClusterReorganizer::spreadAndCopyToken(Cluster* sourc
 			if (targetCell.cluster == targetCluster) {
 				int numToken = atomicAdd(&targetCell.tag, 1);
 				if (numToken < cudaSimulationParameters.cellMaxToken) {
-					Token& newToken = *_data->tokensAC2.getNewElement();
+					Token* newToken = copyToken(&token, &targetCell);
 					int origNumTokens = atomicAdd(&targetCluster->numTokens, 1);
 					if (0 == origNumTokens) {
-						targetCluster->tokens = &newToken;
+						targetCluster->tokens = newToken;
 					}
-					newToken = token;
-					newToken.cell = &targetCell;
 				}
 			}
 		}
@@ -433,5 +435,14 @@ __inline__ __device__ void ClusterReorganizer::correctCellConnections(Cell* cell
 	for (int i = 0; i < numConnections; ++i) {
 		cell->connections[i] = cell->connections[i]->nextTimestep;
 	}
+}
+
+__inline__ __device__ Token* ClusterReorganizer::copyToken(Token const* sourceToken, Cell * targetCell)
+{
+	auto result = _data->tokensAC2.getNewElement();
+	*result = *sourceToken;
+	result->memory[0] = targetCell->branchNumber;
+	result->cell = targetCell;
+	return result;
 }
 
