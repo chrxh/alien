@@ -374,7 +374,8 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 			tokenTO.energy = *tokenDesc.energy;
 			tokenTO.cellIndex = cellIndex;
 			copyTokenMemory(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
-		}
+            tokenTO.memory[0] = cellTO.branchNumber % _parameters.cellMaxTokenBranchNumber;
+        }
 	}
 
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
