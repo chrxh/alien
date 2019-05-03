@@ -57,20 +57,21 @@ DataDescription DataConverter::getDataDescription() const
 			.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
 
 		for (int j = 0; j < cluster.numCells; ++j) {
-			CellAccessTO const& cell = _dataTO.cells[cluster.cellStartIndex + j];
-			auto pos = cell.pos;
-			auto id = cell.id;
+			CellAccessTO const& cellTO = _dataTO.cells[cluster.cellStartIndex + j];
+			auto pos = cellTO.pos;
+			auto id = cellTO.id;
 			connectingCellIds.clear();
-			for (int i = 0; i < cell.numConnections; ++i) {
-				connectingCellIds.emplace_back(_dataTO.cells[cell.connectionIndices[i]].id);
+			for (int i = 0; i < cellTO.numConnections; ++i) {
+				connectingCellIds.emplace_back(_dataTO.cells[cellTO.connectionIndices[i]].id);
 			}
 			cellIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, j);
 			clusterIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, i);
 			clusterDesc.addCell(
 				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
-				.setEnergy(cell.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
-				.setConnectingCells(connectingCellIds).setMaxConnections(cell.maxConnections).setFlagTokenBlocked(false)
-				.setTokenBranchNumber(0).setMetadata(CellMetadata()).setTokens(vector<TokenDescription>{}).setTokenBranchNumber(cell.branchNumber)
+				.setEnergy(cellTO.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
+				.setConnectingCells(connectingCellIds).setMaxConnections(cellTO.maxConnections).setFlagTokenBlocked(false)
+				.setTokenBranchNumber(0).setMetadata(CellMetadata()).setTokens(vector<TokenDescription>{}).setTokenBranchNumber(cellTO.branchNumber)
+				.setFlagTokenBlocked(cellTO.tokenBlocked)
 			);
 		}
 		result.addCluster(clusterDesc);
@@ -357,6 +358,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cellTO.energy = *cellDesc.energy;
 	cellTO.maxConnections = *cellDesc.maxConnections;
 	cellTO.branchNumber = cellDesc.tokenBranchNumber.get_value_or(0);
+	cellTO.tokenBlocked = cellDesc.tokenBlocked.get_value_or(false);
 	if (cellDesc.connectingCells) {
 		cellTO.numConnections = cellDesc.connectingCells->size();
 	}
