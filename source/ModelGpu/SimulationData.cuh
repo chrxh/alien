@@ -35,6 +35,7 @@ struct Cell
 	float2 vel;
 	float energy;
 	int branchNumber;
+	bool tokenBlocked;
 	int maxConnections;
 	int numConnections;
 	Cell* connections[MAX_CELL_BONDS];
