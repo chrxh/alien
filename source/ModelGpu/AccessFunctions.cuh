@@ -72,6 +72,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 			cellTO.maxConnections = cell.maxConnections;
 			cellTO.numConnections = cell.numConnections;
 			cellTO.branchNumber = cell.branchNumber;
+			cellTO.tokenBlocked = cell.tokenBlocked;
 			for (int i = 0; i < cell.numConnections; ++i) {
 				int connectingCellIndex = cell.connections[i] - cluster.cells + cellTOIndex;
 				cellTO.connectionIndices[i] = connectingCellIndex;
