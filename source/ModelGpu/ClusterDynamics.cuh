@@ -23,7 +23,7 @@ private:
 	__inline__ __device__ void destroyCloseCell(Cell *cell);
 	__inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
 	__inline__ __device__ void cellRadiation(Cell *cell);
-	__inline__ __device__ Particle* createNewParticle(float energy, float2 const& pos, float2 const& vel);
+	__inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel);
 	__inline__ __device__ bool areConnectable(Cell *cell1, Cell *cell2);
 
 	SimulationData* _data;
@@ -321,7 +321,7 @@ __inline__ __device__ void ClusterDynamics::processingMovement()
 			if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
 				cell->alive = false;
 				_cluster->decompositionRequired = true;
-				createNewParticle(cell->energy, cell->absPos, cell->vel);
+				createParticle(cell->energy, cell->absPos, cell->vel);
 			}
 		}
 
@@ -366,7 +366,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 		if (mapCluster->numCells >= cluster->numCells) {
 			cell->alive = false;
 			cluster->decompositionRequired = true;
-			createNewParticle(cell->energy, cell->absPos, cell->vel);
+			createParticle(cell->energy, cell->absPos, cell->vel);
 		}
 		else {
 			auto lockState = atomicExch(&mapCluster->locked, 1);
@@ -374,7 +374,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 				mapCell->alive = false;
 				mapCluster->decompositionRequired = true;
 				mapCluster->locked = 0;
-				createNewParticle(mapCell->energy, mapCell->absPos, mapCell->vel);
+				createParticle(mapCell->energy, mapCell->absPos, mapCell->vel);
 			}
 		}
 	}
@@ -400,7 +400,7 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(Cell *cell)
 			radiationEnergy = cell->energy - 1;
 		}
 		cell->energy -= radiationEnergy;
-		createNewParticle(radiationEnergy, particlePos, particleVel);
+		createParticle(radiationEnergy, particlePos, particleVel);
 	}
 	if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
 		cell->alive = false;
@@ -408,7 +408,7 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(Cell *cell)
 	}
 }
 
-__inline__ __device__ Particle* ClusterDynamics::createNewParticle(float energy, float2 const& pos, float2 const& vel)
+__inline__ __device__ Particle* ClusterDynamics::createParticle(float energy, float2 const& pos, float2 const& vel)
 {
 	Particle* particle = _data->particlesAC1.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
