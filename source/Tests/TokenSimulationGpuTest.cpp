@@ -78,13 +78,55 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithUnfittingBranchNumbers)
 	auto newCluster = newData.clusters->at(0);
 
 	EXPECT_EQ(10, newCluster.cells->size());
-
 	for (auto const& newCell : *newCluster.cells) {
 		if (newCell.tokens) {
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
 }
+
+/**
+* Situation: - one horizontal cluster with 10 cells and ascending branch numbers
+*			 - first cell has a token
+*            - last cell has flag tokenBlocked
+*			 - simulating 9 time steps
+* Expected result: no token should be on the cells
+*/
+TEST_F(TokenSimulationGpuTest, testTokenMovementBlocked)
+{
+	DataDescription origData;
+	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+	auto cluster = createHorizontalCluster(10, QVector2D{}, QVector2D{}, 0);
+	for (int i = 0; i < 10; ++i) {
+		auto& cell = cluster.cells->at(i);
+		cell.tokenBranchNumber = 1 + i % cellMaxTokenBranchNumber;
+	}
+	auto& firstCell = cluster.cells->at(0);
+	firstCell.addToken(createSimpleToken());
+
+	auto& lastCell = cluster.cells->at(9);
+	lastCell.tokenBlocked = true;
+	origData.addCluster(cluster);
+
+	uint64_t lastCellId = cluster.cells->at(9).id;
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(9, _controller);
+
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(1, newData.clusters->size());
+	auto newCluster = newData.clusters->at(0);
+
+	EXPECT_EQ(10, newCluster.cells->size());
+	for (auto const& newCell : *newCluster.cells) {
+		if (newCell.tokens) {
+			EXPECT_TRUE(newCell.tokens->empty());
+		}
+	}
+}
+
 
 /**
 * Situation: - one horizontal cluster with 3 cells and branch numbers (1, 0, 1)
