@@ -9,7 +9,7 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 
-class ParticleDynamics
+class ParticleProcessorOnOrigData
 {
 public:
 	__inline__ __device__ void init(SimulationData& data);
@@ -31,7 +31,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ParticleDynamics::init(SimulationData & data)
+__inline__ __device__ void ParticleProcessorOnOrigData::init(SimulationData & data)
 {
 	_data = &data;
 	_origParticleMap.init(data.size, data.particleMap);
@@ -43,7 +43,7 @@ __inline__ __device__ void ParticleDynamics::init(SimulationData & data)
 	__syncthreads();
 }
 
-__inline__ __device__ void ParticleDynamics::processingMovement()
+__inline__ __device__ void ParticleProcessorOnOrigData::processingMovement()
 {
 	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
@@ -53,7 +53,7 @@ __inline__ __device__ void ParticleDynamics::processingMovement()
 	}
 }
 
-__inline__ __device__ void ParticleDynamics::processingCollision()
+__inline__ __device__ void ParticleProcessorOnOrigData::processingCollision()
 {
 	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
@@ -81,7 +81,7 @@ __inline__ __device__ void ParticleDynamics::processingCollision()
 	}
 }
 
-__inline__ __device__ void ParticleDynamics::processingTransformation()
+__inline__ __device__ void ParticleProcessorOnOrigData::processingTransformation()
 {
 	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
@@ -95,7 +95,7 @@ __inline__ __device__ void ParticleDynamics::processingTransformation()
 	}
 }
 
-__inline__ __device__ void ParticleDynamics::createRandomCell(float energy, float2 const & pos, float2 const & vel)
+__inline__ __device__ void ParticleProcessorOnOrigData::createRandomCell(float energy, float2 const & pos, float2 const & vel)
 {
 	Cluster* cluster = _data->clustersAC2.getNewElement();
 	Cell* cell = _data->cellsAC2.getNewElement();

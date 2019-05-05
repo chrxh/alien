@@ -66,12 +66,6 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClusterDynamics.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\SimulationData.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
@@ -87,12 +81,6 @@
     <ClInclude Include="..\..\source\ModelGpu\SimulationFunctions.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClusterReorganizer.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ParticleReorganizer.cuh">
-      <Filter>Source Files\CUDA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\EntityBuilder.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
@@ -100,6 +88,24 @@
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnOrigData.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnCopyData.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnOrigData.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnCopyData.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnOrigData.cuh">
+      <Filter>Source Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnCopyData.cuh">
       <Filter>Source Files\CUDA</Filter>
     </ClInclude>
   </ItemGroup>
