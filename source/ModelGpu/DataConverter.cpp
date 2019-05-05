@@ -112,6 +112,7 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 	clusterTO.angularVel = *clusterDesc.angularVel;
 	clusterTO.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
 	clusterTO.numTokens = 0;	//will be incremented in addCell
+	clusterTO.tokenStartIndex = *_dataTO.numTokens;
 	unordered_map<uint64_t, int> cellIndexByIds;
 	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
@@ -368,7 +369,6 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 
 	if (cellDesc.tokens) {
 		clusterTO.numTokens += cellDesc.tokens->size();
-		clusterTO.tokenStartIndex = *_dataTO.numTokens;
 		for (int i = 0; i < cellDesc.tokens->size(); ++i) {
 			TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
 			int tokenIndex = (*_dataTO.numTokens)++;

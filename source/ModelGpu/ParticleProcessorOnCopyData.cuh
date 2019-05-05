@@ -9,7 +9,7 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 
-class ParticleReorganizer
+class ParticleProcessorOnCopyData
 {
 public:
 	__inline__ __device__ void init(SimulationData& data);
@@ -30,7 +30,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ParticleReorganizer::init(SimulationData & data)
+__inline__ __device__ void ParticleProcessorOnCopyData::init(SimulationData & data)
 {
 	_data = &data;
 	_cellMap.init(data.size, data.cellMap);
@@ -43,7 +43,7 @@ __inline__ __device__ void ParticleReorganizer::init(SimulationData & data)
 	__syncthreads();
 }
 
-__inline__ __device__ void ParticleReorganizer::processingDataCopy()
+__inline__ __device__ void ParticleProcessorOnCopyData::processingDataCopy()
 {
 	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
 		Particle *origParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
