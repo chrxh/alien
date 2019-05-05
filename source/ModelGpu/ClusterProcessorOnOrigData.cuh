@@ -4,12 +4,11 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaInterface.cuh"
-#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Physics.cuh"
 #include "Map.cuh"
 
-class ClusterDynamics
+class ClusterProcessorOnOrigData
 {
 public:
 	__inline__ __device__ void init(SimulationData& data, int clusterIndex);
@@ -37,7 +36,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ClusterDynamics::init(SimulationData & data, int clusterIndex)
+__inline__ __device__ void ClusterProcessorOnOrigData::init(SimulationData & data, int clusterIndex)
 {
 	_data = &data;
 	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
@@ -47,7 +46,7 @@ __inline__ __device__ void ClusterDynamics::init(SimulationData & data, int clus
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::processingCollision()
+__inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
 {
 	__shared__ Cluster* cluster;
 	__shared__ Cluster* firstOtherCluster;
@@ -282,7 +281,7 @@ __inline__ __device__ void ClusterDynamics::processingCollision()
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::destroyCloseCell()
+__inline__ __device__ void ClusterProcessorOnOrigData::destroyCloseCell()
 {
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell *origCell = &_cluster->cells[cellIndex];
@@ -291,7 +290,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell()
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::processingMovement()
+__inline__ __device__ void ClusterProcessorOnOrigData::processingMovement()
 {
 	__shared__ float rotMatrix[2][2];
 	if (0 == threadIdx.x) {
@@ -335,7 +334,7 @@ __inline__ __device__ void ClusterDynamics::processingMovement()
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::processingRadiation()
+__inline__ __device__ void ClusterProcessorOnOrigData::processingRadiation()
 {
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell *cell = &_cluster->cells[cellIndex];
@@ -344,7 +343,7 @@ __inline__ __device__ void ClusterDynamics::processingRadiation()
 	__syncthreads();
 }
 
-__inline__ __device__ void ClusterDynamics::destroyCloseCell(Cell * cell)
+__inline__ __device__ void ClusterProcessorOnOrigData::destroyCloseCell(Cell * cell)
 {
 	if (cell->protectionCounter > 0) {
 		return;
@@ -352,7 +351,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(Cell * cell)
 	destroyCloseCell(cell->absPos, cell);
 }
 
-__inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos, Cell * cell)
+__inline__ __device__ void ClusterProcessorOnOrigData::destroyCloseCell(float2 const & pos, Cell * cell)
 {
 	Cell* mapCell = _cellMap.get(pos);
 	if (!mapCell || mapCell == cell) {
@@ -380,7 +379,7 @@ __inline__ __device__ void ClusterDynamics::destroyCloseCell(float2 const & pos,
 	}
 }
 
-__inline__ __device__ void ClusterDynamics::cellRadiation(Cell *cell)
+__inline__ __device__ void ClusterProcessorOnOrigData::cellRadiation(Cell *cell)
 {
 	if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
 		auto &pos = cell->absPos;
@@ -408,7 +407,7 @@ __inline__ __device__ void ClusterDynamics::cellRadiation(Cell *cell)
 	}
 }
 
-__inline__ __device__ Particle* ClusterDynamics::createParticle(float energy, float2 const& pos, float2 const& vel)
+__inline__ __device__ Particle* ClusterProcessorOnOrigData::createParticle(float energy, float2 const& pos, float2 const& vel)
 {
 	Particle* particle = _data->particlesAC1.getNewElement();
 	particle->id = _data->numberGen.createNewId_kernel();
@@ -420,7 +419,7 @@ __inline__ __device__ Particle* ClusterDynamics::createParticle(float energy, fl
 	return particle;
 }
 
-__inline__ __device__ bool ClusterDynamics::areConnectable(Cell * cell1, Cell * cell2)
+__inline__ __device__ bool ClusterProcessorOnOrigData::areConnectable(Cell * cell1, Cell * cell2)
 {
 	return cell1->numConnections < cell1->maxConnections && cell2->numConnections < cell2->maxConnections;
 }

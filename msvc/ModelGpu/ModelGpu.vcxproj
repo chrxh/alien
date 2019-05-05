@@ -204,12 +204,12 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelGpu\AccessFunctions.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\ClusterReorganizer.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\ClusterDynamics.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnCopyData.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaJob.h" />
     <ClInclude Include="..\..\source\ModelGpu\EntityBuilder.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\ParticleReorganizer.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\ParticleDynamics.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnCopyData.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh" />
@@ -225,6 +225,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h" />
     <ClInclude Include="..\..\source\ModelGpu\Physics.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\SimulationFunctions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnOrigData.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnCopyData.cuh" />
     <CustomBuild Include="..\..\source\ModelGpu\SimulationMonitorGpuImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SimulationMonitorGpuImpl.h...</Message>
