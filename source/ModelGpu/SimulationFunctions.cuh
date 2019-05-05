@@ -7,25 +7,27 @@
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "ClusterDynamics.cuh"
-#include "ClusterReorganizer.cuh"
-#include "ParticleDynamics.cuh"
-#include "ParticleReorganizer.cuh"
+#include "ClusterProcessorOnOrigData.cuh"
+#include "ClusterProcessorOnCopyData.cuh"
+#include "ParticleProcessorOnOrigData.cuh"
+#include "ParticleProcessorOnCopyData.cuh"
+#include "TokenProcessorOnOrigData.cuh"
+#include "TokenProcessorOnCopyData.cuh"
 
 /************************************************************************/
 /* Clusters																*/
 /************************************************************************/
 
-__device__ void clusterDynamicsStep1(SimulationData &data, int clusterIndex)
+__device__ void clusterProcessingOnOrigDataStep1(SimulationData &data, int clusterIndex)
 {
-	ClusterDynamics dynamics;
+	ClusterProcessorOnOrigData dynamics;
 	dynamics.init(data, clusterIndex);
 	dynamics.processingMovement();
 }
 
-__device__ void clusterDynamicsStep2(SimulationData &data, int clusterIndex)
+__device__ void clusterProcessingOnOrigDataStep2(SimulationData &data, int clusterIndex)
 {
-	ClusterDynamics dynamics;
+	ClusterProcessorOnOrigData dynamics;
 	dynamics.init(data, clusterIndex);
 	dynamics.destroyCloseCell();
 	dynamics.processingRadiation();
@@ -33,15 +35,15 @@ __device__ void clusterDynamicsStep2(SimulationData &data, int clusterIndex)
 									//will be resolved in reorganizer
 }
 
-__device__ void clusterReorganizing(SimulationData &data, int clusterIndex)
+__device__ void clusterProcessingOnCopyData(SimulationData &data, int clusterIndex)
 {
-	ClusterReorganizer reorganizer;
+	ClusterProcessorOnCopyData reorganizer;
 	reorganizer.init(data, clusterIndex);
 	reorganizer.processingDecomposition();
 	reorganizer.processingClusterCopy();
 }
 
-__global__ void clusterDynamicsStep1(SimulationData data)
+__global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
 {
 	int numEntities = data.clustersAC1.getNumEntries();
 
@@ -49,11 +51,11 @@ __global__ void clusterDynamicsStep1(SimulationData data)
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterDynamicsStep1(data, clusterIndex);
+		clusterProcessingOnOrigDataStep1(data, clusterIndex);
 	}
 }
 
-__global__ void clusterDynamicsStep2(SimulationData data)
+__global__ void clusterProcessingOnOrigDataStep2(SimulationData data)
 {
 	int numEntities = data.clustersAC1.getNumEntries();
 
@@ -61,11 +63,11 @@ __global__ void clusterDynamicsStep2(SimulationData data)
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterDynamicsStep2(data, clusterIndex);
+		clusterProcessingOnOrigDataStep2(data, clusterIndex);
 	}
 }
 
-__global__ void clusterReorganizing(SimulationData data)
+__global__ void clusterProcessingOnCopyData(SimulationData data)
 {
 	int numEntities = data.clustersAC1.getNumEntries();
 
@@ -73,7 +75,39 @@ __global__ void clusterReorganizing(SimulationData data)
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterReorganizing(data, clusterIndex);
+		clusterProcessingOnCopyData(data, clusterIndex);
+	}
+}
+
+
+/************************************************************************/
+/* Tokens																*/
+/************************************************************************/
+
+__global__ void tokenProcessingOnOrigData(SimulationData data)
+{
+	TokenProcessorOnOrigData dynamics;
+	dynamics.init(data);
+	dynamics.processingEnergyGuidance();
+}
+
+__device__ void tokenProcessingOnCopyData(SimulationData data, int clusterIndex)
+{
+	TokenProcessorOnCopyData reorganizer;
+
+	reorganizer.init(data, clusterIndex);
+	reorganizer.processingTokenSpreading();
+}
+
+__global__ void tokenProcessingOnCopyData(SimulationData data)
+{
+	int numEntities = data.clustersAC1.getNumEntries();
+
+	int startIndex;
+	int endIndex;
+	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
+	for (int index = startIndex; index <= endIndex; ++index) {
+		tokenProcessingOnCopyData(data, index);
 	}
 }
 
@@ -82,24 +116,24 @@ __global__ void clusterReorganizing(SimulationData data)
 /* Particles															*/
 /************************************************************************/
 
-__global__ void particleDynamicsStep1(SimulationData data)
+__global__ void particleProcessingOnOrigDataStep1(SimulationData data)
 {
-	ParticleDynamics dynamics;
+	ParticleProcessorOnOrigData dynamics;
 	dynamics.init(data);
 	dynamics.processingMovement();
 	dynamics.processingTransformation();
 }
 
-__global__ void particleDynamicsStep2(SimulationData data)
+__global__ void particleProcessingOnOrigDataStep2(SimulationData data)
 {
-	ParticleDynamics dynamics;
+	ParticleProcessorOnOrigData dynamics;
 	dynamics.init(data);
 	dynamics.processingCollision();
 }
 
 __global__ void particleReorganizing(SimulationData data)
 {
-	ParticleReorganizer reorganizer;
+	ParticleProcessorOnCopyData reorganizer;
 	reorganizer.init(data);
 	reorganizer.processingDataCopy();
 }

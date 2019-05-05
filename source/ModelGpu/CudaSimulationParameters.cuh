@@ -12,6 +12,7 @@ struct CudaSimulationParameters
 	float cellTransformationProb;
 	int cellMaxToken;
 	int cellMaxTokenBranchNumber;
+	float tokenMinEnergy;
 	float radiationProbability;
 	float radiationExponent;
 	float radiationFactor;

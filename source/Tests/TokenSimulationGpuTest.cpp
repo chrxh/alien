@@ -13,7 +13,7 @@ public:
 *			 - simulating 9 time steps
 * Expected result: token should be on the last cell
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers)
+TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneCluster)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -48,6 +48,55 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers)
 		}
 	}
 }
+
+/**
+* Situation: - 50 horizontal cluster with 100 cells each and ascending branch numbers
+*			 - first cell on each cluster has a token
+*			 - simulating 99 time steps
+* Expected result: token should be on the last cell of each cluster
+*/
+TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLargeClusters)
+{
+	DataDescription origData;
+	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+	for (int clusterIndex = 0; clusterIndex < 50; ++clusterIndex) {
+		auto cluster = createHorizontalCluster(100, QVector2D{0, static_cast<float>(clusterIndex) }, QVector2D{}, 0);
+		for (int i = 0; i < 100; ++i) {
+			auto& cell = cluster.cells->at(i);
+			cell.tokenBranchNumber = i % cellMaxTokenBranchNumber;
+		}
+		auto& firstCell = cluster.cells->at(0);
+		firstCell.addToken(createSimpleToken());
+		origData.addCluster(cluster);
+	}
+
+	unordered_set<uint64_t> lastCellIds;
+	for (int clusterIndex = 0; clusterIndex < 50; ++clusterIndex) {
+		lastCellIds.insert(origData.clusters->at(clusterIndex).cells->at(99).id);
+	}
+
+	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::runSimulation(99, _controller);
+
+	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+	ASSERT_EQ(50, newData.clusters->size());
+
+	for (auto const& newCluster : *newData.clusters) {
+		EXPECT_EQ(100, newCluster.cells->size());
+
+		for (auto const& newCell : *newCluster.cells) {
+			if (lastCellIds.find(newCell.id) != lastCellIds.end()) {
+				EXPECT_EQ(1, newCell.tokens->size());
+			}
+			else if (newCell.tokens) {
+				EXPECT_TRUE(newCell.tokens->empty());
+			}
+		}
+	}
+}
+
 
 /**
 * Situation: - one horizontal cluster with 10 cells and equal branch numbers
@@ -275,7 +324,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementDuringFusion)
 	EXPECT_EQ(4, newCluster.cells->size());
 	for (auto const& newCell : *newCluster.cells) {
 		if (newCell.id == secondCellId) {
-			EXPECT_EQ(2, newCell.tokens->size());
+			EXPECT_EQ(1, newCell.tokens->size());
 		}
 		else if (newCell.id == fourthCellId) {
 			EXPECT_EQ(1, newCell.tokens->size());
@@ -332,4 +381,3 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithTooManyTokens)
 		}
 	}
 }
-

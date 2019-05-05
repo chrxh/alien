@@ -406,20 +406,26 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Map.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ClusterDynamics.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ClusterProcessorOnOrigData.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Physics.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\vector_types.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\SimulationData.cuh
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ClusterReorganizer.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ClusterProcessorOnCopyData.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ParticleDynamics.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ParticleProcessorOnOrigData.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ParticleReorganizer.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ParticleProcessorOnCopyData.cuh
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\TokenProcessorOnOrigData.cuh
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\TokenProcessorOnCopyData.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\AccessFunctions.cuh

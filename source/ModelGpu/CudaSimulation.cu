@@ -114,23 +114,31 @@ void CudaSimulation::calcNextTimestep()
 {
 	prepareTargetData();
 
-	clusterDynamicsStep1<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+	tokenProcessingOnOrigData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	clusterDynamicsStep2<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+	tokenProcessingOnCopyData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	clusterReorganizing<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+	clusterProcessingOnOrigDataStep1<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	particleDynamicsStep1<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+	clusterProcessingOnOrigDataStep2<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	particleDynamicsStep2<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+	clusterProcessingOnCopyData<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+	cudaDeviceSynchronize();
+	checkCudaErrors(cudaGetLastError());
+
+	particleProcessingOnOrigDataStep1<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+	cudaDeviceSynchronize();
+	checkCudaErrors(cudaGetLastError());
+
+	particleProcessingOnOrigDataStep2<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
@@ -203,6 +211,7 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
 	parametersToCopy.cellMass = 1.0f / parameters.cellMass_Reciprocal;
 	parametersToCopy.cellMaxToken = parameters.cellMaxToken;
 	parametersToCopy.cellMaxTokenBranchNumber = parameters.cellMaxTokenBranchNumber;
+	parametersToCopy.tokenMinEnergy = parameters.tokenMinEnergy;
 	parametersToCopy.radiationProbability = parameters.radiationProb;
 	parametersToCopy.radiationExponent = parameters.radiationExponent;
 	parametersToCopy.radiationFactor = parameters.radiationFactor;
