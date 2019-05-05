@@ -51,14 +51,15 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneClus
 
 /**
 * Situation: - 50 horizontal cluster with 100 cells each and ascending branch numbers
-*			 - first cell on each cluster has a token
+*			 - first cell on each cluster has cellMaxToken-many tokens
 *			 - simulating 99 time steps
-* Expected result: token should be on the last cell of each cluster
+* Expected result: cellMaxToken-many tokens should be on the last cell of each cluster
 */
 TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLargeClusters)
 {
 	DataDescription origData;
-	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+	auto cellMaxToken = _parameters.cellMaxToken;
 
 	for (int clusterIndex = 0; clusterIndex < 50; ++clusterIndex) {
 		auto cluster = createHorizontalCluster(100, QVector2D{0, static_cast<float>(clusterIndex) }, QVector2D{}, 0);
@@ -67,7 +68,9 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLar
 			cell.tokenBranchNumber = i % cellMaxTokenBranchNumber;
 		}
 		auto& firstCell = cluster.cells->at(0);
-		firstCell.addToken(createSimpleToken());
+		for (int i = 0; i < cellMaxToken; ++i) {
+			firstCell.addToken(createSimpleToken());
+		}
 		origData.addCluster(cluster);
 	}
 
@@ -88,7 +91,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLar
 
 		for (auto const& newCell : *newCluster.cells) {
 			if (lastCellIds.find(newCell.id) != lastCellIds.end()) {
-				EXPECT_EQ(1, newCell.tokens->size());
+				EXPECT_EQ(cellMaxToken, newCell.tokens->size());
 			}
 			else if (newCell.tokens) {
 				EXPECT_TRUE(newCell.tokens->empty());
