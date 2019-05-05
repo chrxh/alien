@@ -101,14 +101,37 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingTokenSpreading()
 	__syncthreads();
 
 	for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
-		Token const& token = _cluster->tokens[tokenIndex];
-		Cell const& cell = *token.cell;
+		Token& token = _cluster->tokens[tokenIndex];
+		Cell& cell = *token.cell;
 		if (token.energy < cudaSimulationParameters.tokenMinEnergy) {
 			continue;
 		}
 
 		int tokenBranchNumber = token.memory[0];
 
+		int numFreePlaces = 0;
+		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
+			Cell const& connectingCell = *cell.connections[connectionIndex];
+			if (!connectingCell.alive) {
+				continue;
+			}
+			if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
+				% cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
+				continue;
+			}
+			if (connectingCell.tokenBlocked) {
+				continue;
+			}
+			++numFreePlaces;
+		}
+
+		if (0 == numFreePlaces) {
+			atomicAdd(&cell.energy, token.energy);
+			continue;
+		}
+
+		float availableTokenEnergyForCell = token.energy / numFreePlaces;
+		float remainingTokenEnergy = token.energy;
 		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
 			Cell& connectingCell = *cell.connections[connectionIndex];
 			if (!connectingCell.alive) {
@@ -129,6 +152,18 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingTokenSpreading()
 			int tokenIndex = atomicAdd(&newNumTokens, 1);
 			Token& newToken = newTokens[tokenIndex];
 			copyToken(&token, &newToken, &connectingCell);
+
+			if (connectingCell.energy > cudaSimulationParameters.cellMinEnergy + token.energy - availableTokenEnergyForCell) {
+				atomicAdd(&connectingCell.energy, -(token.energy - availableTokenEnergyForCell));
+				newToken.energy = token.energy;
+			}
+			else {
+				newToken.energy = availableTokenEnergyForCell;
+			}
+			remainingTokenEnergy -= availableTokenEnergyForCell;
+		}
+		if (remainingTokenEnergy > 0) {
+			atomicAdd(&cell.energy, remainingTokenEnergy);
 		}
 	}
 	__syncthreads();

@@ -23,8 +23,6 @@ private:
 	__inline__ __device__ void copyClusterWithFusion();
 	__inline__ __device__ void copyTokens(Cluster* sourceCluster, Cluster* targetCluster);
 
-	__inline__ __device__ void spreadAndCopyToken(Cluster* sourceCluster, Cluster* targetCluster);
-
 	__inline__ __device__ void setSuccessorCell(Cell* origCell, Cell* newCell, Cluster* newCluster);
 	__inline__ __device__ void correctCellConnections(Cell* origCell);
 	__inline__ __device__ void correctTokens(Token* token);
@@ -362,113 +360,6 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourc
 		}
 	}
 	__syncthreads();
-}
-
-__inline__ __device__ void ClusterProcessorOnCopyData::spreadAndCopyToken(Cluster* sourceCluster, Cluster* targetCluster)
-{
-/*
-	if (0 == sourceCluster->numTokens) {
-		__syncthreads();
-		return;
-	}
-
-	int startCellIndex;
-	int endCellIndex;
-	calcPartition(_origCluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-		Cell const& cell = sourceCluster->cells[cellIndex];
-		if (cell.alive) {
-			Cell& newCell = *cell.nextTimestep;
-			newCell.tag = 0;
-		}
-	}
-	__syncthreads();
-
-	for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
-		Token& token = sourceCluster->tokens[tokenIndex];
-		Cell& cell = *token.cell;
-		Cell& newCell = *cell.nextTimestep;
-		if (token.energy < cudaSimulationParameters.tokenMinEnergy) {
-			newCell.energy += token.energy;
-			continue;
-		}
-
-		int tokenBranchNumber = token.memory[0];
-
-		int numFreePlaces = 0;
-		int numFreeTotalPlaces = 0;
-		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
-			Cell const& connectingCell = *cell.connections[connectionIndex];
-			if (!connectingCell.alive) {
-				continue;
-			}
-			if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
-				% cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
-				continue;
-			}
-			if (connectingCell.tokenBlocked) {
-				continue;
-			}
-			++numFreeTotalPlaces;
-
-			Cell& targetCell = *connectingCell.nextTimestep;
-			if (targetCell.cluster != targetCluster) {
-				continue;
-			}
-			++numFreePlaces;
-		}
-
-		if (0 == numFreePlaces) {
-			newCell.energy += token.energy;
-			continue;
-		}
-
-		float availableTokenEnergyForCell = token.energy / numFreeTotalPlaces;
-		float remainingTokenEnergy = token.energy / numFreeTotalPlaces * numFreePlaces;
-		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
-			Cell const& connectingCell = *cell.connections[connectionIndex];
-			if (!connectingCell.alive) {
-				continue;
-			}
-            if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
-				% cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
-                continue;
-            }
-			if (connectingCell.tokenBlocked) {
-				continue;
-			}
-            Cell& targetCell = *connectingCell.nextTimestep;
-			if (targetCell.cluster != targetCluster) {
-				continue;
-			}
-
-			int numToken = atomicAdd(&targetCell.tag, 1);
-			if (numToken < cudaSimulationParameters.cellMaxToken) {
-				Token* newToken = copyToken(&token, &targetCell);
-				int origNumTokens = atomicAdd(&targetCluster->numTokens, 1);
-				if (0 == origNumTokens) {
-					targetCluster->tokens = newToken;
-				}
-
-				if (targetCell.energy > cudaSimulationParameters.cellMinEnergy
-					+ token.energy - availableTokenEnergyForCell)
-				{
-					atomicSub(&targetCell, token.energy - availableTokenEnergyForCell);
-					newToken->energy = token.energy;
-				}
-				else {
-					newToken->energy = availableTokenEnergyForCell;
-				}
-				remainingTokenEnergy -= availableTokenEnergyForCell;
-			}
-		}
-		if (remainingTokenEnergy > 0) {
-			atomicAdd(&newCell, remainingTokenEnergy);
-		}
-	}
-	__syncthreads();
-*/
 }
 
 __inline__ __device__ void ClusterProcessorOnCopyData::processingClusterCopy()
