@@ -255,7 +255,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementBlocked)
 TEST_F(TokenSimulationGpuTest, testTokenForking)
 {
 	DataDescription origData;
-	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
 	auto cluster = createHorizontalCluster(3, QVector2D{}, QVector2D{}, 0);
 	auto& firstCell = cluster.cells->at(0);
@@ -288,6 +288,61 @@ TEST_F(TokenSimulationGpuTest, testTokenForking)
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
+
+    checkEnergy(origData, newData);
+}
+
+/**
+* Situation: - one horizontal cluster with 3 cells and branch numbers (1, 0, 1)
+*			 - second cell has a token
+*            - cells have low internal energy 
+*			 - simulating one time step
+* Expected result: there should be two tokens:
+*                  on the first and last cell with half of the energy as of the initial token
+*/
+TEST_F(TokenSimulationGpuTest, testTokenForking_lowCellEnergies)
+{
+    DataDescription origData;
+    auto token = createSimpleToken();
+    auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+    auto lowCellEnergy = _parameters.cellMinEnergy + *token.energy / 2 - 1.0;
+
+    auto cluster = createHorizontalCluster(3, QVector2D{}, QVector2D{}, 0);
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    auto& thirdCell = cluster.cells->at(2);
+    firstCell.tokenBranchNumber = 1;
+    secondCell.tokenBranchNumber = 0;
+    thirdCell.tokenBranchNumber = 1;
+    firstCell.energy = lowCellEnergy;
+    secondCell.energy = lowCellEnergy;
+    thirdCell.energy = lowCellEnergy;
+    secondCell.addToken(token);
+    origData.addCluster(cluster);
+
+    uint64_t firstCellId = firstCell.id;
+    uint64_t thirdCellId = thirdCell.id;
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto newCluster = newData.clusters->at(0);
+
+    EXPECT_EQ(3, newCluster.cells->size());
+
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.id == firstCellId || newCell.id == thirdCellId) {
+            EXPECT_EQ(1, newCell.tokens->size());
+            auto newToken = newCell.tokens->at(0);
+            EXPECT_EQ(*token.energy / 2, *newToken.energy);
+        }
+        else if (newCell.tokens) {
+            EXPECT_TRUE(newCell.tokens->empty());
+        }
+    }
 
     checkEnergy(origData, newData);
 }
