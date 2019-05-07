@@ -153,13 +153,16 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingTokenSpreading()
 			Token& newToken = newTokens[tokenIndex];
 			copyToken(&token, &newToken, &connectingCell);
 
-			if (connectingCell.energy > cudaSimulationParameters.cellMinEnergy + token.energy - availableTokenEnergyForCell) {
-				atomicAdd(&connectingCell.energy, -(token.energy - availableTokenEnergyForCell));
-				newToken.energy = token.energy;
-			}
-			else {
-				newToken.energy = availableTokenEnergyForCell;
-			}
+            if (token.energy - availableTokenEnergyForCell > 0) {
+                auto origConnectingCellEnergy = atomicAdd(&connectingCell.energy, -(token.energy - availableTokenEnergyForCell));
+                if (origConnectingCellEnergy > cudaSimulationParameters.cellMinEnergy + token.energy - availableTokenEnergyForCell) {
+                    newToken.energy = token.energy;
+                }
+                else {
+                    atomicAdd(&connectingCell.energy, token.energy - availableTokenEnergyForCell);
+                    newToken.energy = availableTokenEnergyForCell;
+                }
+            }
 			remainingTokenEnergy -= availableTokenEnergyForCell;
 		}
 		if (remainingTokenEnergy > 0) {

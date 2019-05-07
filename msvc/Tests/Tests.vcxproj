@@ -290,6 +290,7 @@
     <ClInclude Include="..\..\source\Tests\IntegrationTestFramework.h" />
     <ClInclude Include="..\..\source\Tests\IntegrationTestHelper.h" />
     <ClInclude Include="..\..\source\Tests\Predicates.h" />
+    <ClInclude Include="..\..\source\Tests\SimulationGpuTest.h" />
     <ClInclude Include="..\..\source\Tests\TestSettings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

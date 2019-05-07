@@ -124,5 +124,8 @@
     <ClInclude Include="..\..\source\Tests\Predicates.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Tests\SimulationGpuTest.h">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

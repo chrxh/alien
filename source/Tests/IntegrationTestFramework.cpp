@@ -229,16 +229,19 @@ ParticleDescription IntegrationTestFramework::createParticle(optional<QVector2D>
 
 
 template<>
-bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2)
+bool isCompatible<double>(double a, double b)
 {
-	return std::abs(vec1.x() - vec2.x()) < FLOATINGPOINT_MEDIUM_PRECISION
-		&& std::abs(vec1.y() - vec2.y()) < FLOATINGPOINT_MEDIUM_PRECISION;
+    if (a == b) {
+        return true;
+    }
+	return std::abs(a - b) / std::abs(a) < 0.0001;  //use relative error
 }
 
 template<>
-bool isCompatible<double>(double a, double b)
+bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2)
 {
-	return std::abs(a - b) < FLOATINGPOINT_MEDIUM_PRECISION;
+    return isCompatible(vec1.x(), vec2.x())
+        && isCompatible(vec1.y(), vec2.y());
 }
 
 template<>

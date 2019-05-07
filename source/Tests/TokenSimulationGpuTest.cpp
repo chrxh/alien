@@ -24,7 +24,8 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneClus
 		cell.tokenBranchNumber = 1 + i % cellMaxTokenBranchNumber;
 	}
 	auto& firstCell = cluster.cells->at(0);
-	firstCell.addToken(createSimpleToken());
+	auto token = createSimpleToken();
+	firstCell.addToken(token);
 	origData.addCluster(cluster);
 	
 	uint64_t lastCellId = cluster.cells->at(9).id;
@@ -35,18 +36,22 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneClus
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(1, newData.clusters->size());
-	auto newCluster = newData.clusters->at(0);
+	auto const& newCluster = newData.clusters->at(0);
 
 	EXPECT_EQ(10, newCluster.cells->size());
 
 	for (auto const& newCell : *newCluster.cells) {
 		if (newCell.id == lastCellId) {
-			EXPECT_EQ(1, newCell.tokens->size());
+			ASSERT_EQ(1, newCell.tokens->size());
+			auto const& newToken = newCell.tokens->at(0);
+            EXPECT_EQ(*token.energy, *newToken.energy);
 		}
 		else if (newCell.tokens) {
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
 
 /**
@@ -61,6 +66,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLar
 	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 	auto cellMaxToken = _parameters.cellMaxToken;
 
+    auto token = createSimpleToken();
 	for (int clusterIndex = 0; clusterIndex < 50; ++clusterIndex) {
 		auto cluster = createHorizontalCluster(100, QVector2D{0, static_cast<float>(clusterIndex) }, QVector2D{}, 0);
 		for (int i = 0; i < 100; ++i) {
@@ -69,7 +75,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLar
 		}
 		auto& firstCell = cluster.cells->at(0);
 		for (int i = 0; i < cellMaxToken; ++i) {
-			firstCell.addToken(createSimpleToken());
+			firstCell.addToken(token);
 		}
 		origData.addCluster(cluster);
 	}
@@ -92,12 +98,17 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLar
 		for (auto const& newCell : *newCluster.cells) {
 			if (lastCellIds.find(newCell.id) != lastCellIds.end()) {
 				EXPECT_EQ(cellMaxToken, newCell.tokens->size());
+                for (auto const& newToken : *newCell.tokens) {
+                    EXPECT_EQ(*token.energy, *newToken.energy);
+                }
 			}
 			else if (newCell.tokens) {
 				EXPECT_TRUE(newCell.tokens->empty());
 			}
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
 
 /**
@@ -119,8 +130,9 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithEncounter)
 	firstCell.tokenBranchNumber = 0;
 	secondCell.tokenBranchNumber = 1;
 	thirdCell.tokenBranchNumber = 0;
-	firstCell.addToken(createSimpleToken());
-	thirdCell.addToken(createSimpleToken());
+    auto token = createSimpleToken();
+    firstCell.addToken(token);
+	thirdCell.addToken(token);
 	origData.addCluster(cluster);
 
 	uint64_t secondCellId = secondCell.id;
@@ -137,12 +149,17 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithEncounter)
 
 	for (auto const& newCell : *newCluster.cells) {
 		if (newCell.id == secondCellId) {
-			EXPECT_EQ(2, newCell.tokens->size());
+			ASSERT_EQ(2, newCell.tokens->size());
+            for (auto const& newToken : *newCell.tokens) {
+                EXPECT_EQ(*token.energy, *newToken.energy);
+            }
 		}
 		else if (newCell.tokens) {
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
 
 
@@ -180,6 +197,8 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithUnfittingBranchNumbers)
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
 
 /**
@@ -222,6 +241,8 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementBlocked)
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
 
 
@@ -267,6 +288,8 @@ TEST_F(TokenSimulationGpuTest, testTokenForking)
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
 
 /**
@@ -428,4 +451,6 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithTooManyTokens)
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
