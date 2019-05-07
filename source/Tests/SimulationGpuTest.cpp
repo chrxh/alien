@@ -109,9 +109,14 @@ double SimulationGpuTest::calcEnergy(ClusterDescription const & cluster) const
 {
 	auto result = calcKineticEnergy(cluster);
 	if (cluster.cells) {
-		for (CellDescription const& cell : *cluster.cells) {
-			result += *cell.energy;
-		}
+        for (CellDescription const& cell : *cluster.cells) {
+            result += *cell.energy;
+            if (cell.tokens) {
+                for (TokenDescription const& token : *cell.tokens) {
+                    result += *token.energy;
+                }
+            }
+        }
 	}
 	return result;
 }
