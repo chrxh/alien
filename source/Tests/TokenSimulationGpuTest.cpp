@@ -5,7 +5,16 @@ class TokenSimulationGpuTest
 {
 public:
 	virtual ~TokenSimulationGpuTest() = default;
+
+protected:
+    virtual void SetUp();
 };
+
+void TokenSimulationGpuTest::SetUp()
+{
+    _parameters.radiationFactor = 0;    //exclude radiation
+    _context->setSimulationParameters(_parameters);
+}
 
 /**
 * Situation: - one horizontal cluster with 10 cells and ascending branch numbers
@@ -522,9 +531,6 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementAveragingCellEnergies)
 {
     DataDescription origData;
     auto const& cellMinEnergy = _parameters.cellMinEnergy;
-
-    _parameters.radiationFactor = 0;    //exclude radiation
-    _context->setSimulationParameters(_parameters);
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
