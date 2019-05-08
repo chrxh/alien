@@ -12,7 +12,7 @@ protected:
 
 void TokenSimulationGpuTest::SetUp()
 {
-    _parameters.radiationFactor = 0;    //exclude radiation
+    _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
 }
 
@@ -480,7 +480,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementDuringFusion)
 TEST_F(TokenSimulationGpuTest, testTokenMovementWithTooManyTokens)
 {
 	DataDescription origData;
-	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
 	auto cluster = createHorizontalCluster(3, QVector2D{}, QVector2D{}, 0);
 	auto& firstCell = cluster.cells->at(0);
@@ -556,5 +556,47 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementAveragingCellEnergies)
     for (auto const& newCell : *newCluster.cells) {
         EXPECT_EQ(cellMinEnergy * 3, *newCell.energy);
     }
+    checkEnergy(origData, newData);
+}
+
+/**
+* Situation: - one rectangular cluster with 100x100 cells and random branch numbers
+*			 - each cell has random number of tokens
+*			 - simulating 100 time steps
+* Expected result: 100x100 cluster should still be there, energy balance fulfilled
+*/
+TEST_F(TokenSimulationGpuTest, testMassiveTokenMovements)
+{
+    auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+    auto cellMaxToken = _parameters.cellMaxToken;
+
+    DataDescription origData;
+    auto cluster = createRectangularCluster({ 100, 100 }, QVector2D{}, QVector2D{});
+    auto token = createSimpleToken();
+    for (auto& cell : *cluster.cells) {
+        cell.tokenBranchNumber = _numberGen->getRandomInt(cellMaxTokenBranchNumber);
+        int numToken = _numberGen->getRandomInt(cellMaxToken);
+        for (int i = 0; i < numToken; ++i) {
+            cell.addToken(token);
+        }
+    }
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(100, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto const& newCluster = newData.clusters->at(0);
+
+    int numTokens = 0;
+    for (auto& cell : *cluster.cells) {
+        if (cell.tokens) {
+            numTokens += cell.tokens->size();
+        }
+    }
+
+    EXPECT_EQ(100*100, newCluster.cells->size());
     checkEnergy(origData, newData);
 }
