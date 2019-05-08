@@ -569,12 +569,14 @@ TEST_F(TokenSimulationGpuTest, testMassiveTokenMovements)
 {
     auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
     auto cellMaxToken = _parameters.cellMaxToken;
+    auto cellMinEnergy = _parameters.cellMinEnergy;
 
     DataDescription origData;
     auto cluster = createRectangularCluster({ 100, 100 }, QVector2D{}, QVector2D{});
     auto token = createSimpleToken();
     for (auto& cell : *cluster.cells) {
         cell.tokenBranchNumber = _numberGen->getRandomInt(cellMaxTokenBranchNumber);
+        cell.energy = cellMinEnergy * _numberGen->getRandomReal(1.0, 3.0);
         int numToken = _numberGen->getRandomInt(cellMaxToken);
         for (int i = 0; i < numToken; ++i) {
             cell.addToken(token);
@@ -589,13 +591,6 @@ TEST_F(TokenSimulationGpuTest, testMassiveTokenMovements)
 
     ASSERT_EQ(1, newData.clusters->size());
     auto const& newCluster = newData.clusters->at(0);
-
-    int numTokens = 0;
-    for (auto& cell : *cluster.cells) {
-        if (cell.tokens) {
-            numTokens += cell.tokens->size();
-        }
-    }
 
     EXPECT_EQ(100*100, newCluster.cells->size());
     checkEnergy(origData, newData);
