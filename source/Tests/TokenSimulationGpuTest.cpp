@@ -509,3 +509,46 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithTooManyTokens)
 
     checkEnergy(origData, newData);
 }
+
+/**
+* Situation: - one horizontal cluster with 2 cells and ascending branch numbers
+*			 - first cell has a token
+*            - first cell has less energy than second cell
+*			 - simulating one time step
+*            - no radiation
+* Expected result: both cell should have same energy, energy balance fulfilled
+*/
+TEST_F(TokenSimulationGpuTest, testTokenMovementAveragingCellEnergies)
+{
+    DataDescription origData;
+    auto const& cellMinEnergy = _parameters.cellMinEnergy;
+
+    _parameters.radiationFactor = 0;    //exclude radiation
+    _context->setSimulationParameters(_parameters);
+
+    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    firstCell.tokenBranchNumber = 0;
+    firstCell.energy = cellMinEnergy * 2;
+    secondCell.tokenBranchNumber = 1;
+    secondCell.energy = cellMinEnergy * 4;
+    auto token = createSimpleToken();
+    firstCell.addToken(token);
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto const& newCluster = newData.clusters->at(0);
+
+    EXPECT_EQ(2, newCluster.cells->size());
+
+    for (auto const& newCell : *newCluster.cells) {
+        EXPECT_EQ(cellMinEnergy * 3, *newCell.energy);
+    }
+    checkEnergy(origData, newData);
+}
