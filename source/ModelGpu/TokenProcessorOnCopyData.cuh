@@ -55,35 +55,54 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingTokenSpreading()
 	}
 	__syncthreads();
 
-	for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
-		Token const& token = _cluster->tokens[tokenIndex];
-		Cell const& cell = *token.cell;
-		if (token.energy < cudaSimulationParameters.tokenMinEnergy) {
-			continue;
-		}
+    Cell* candidateCellsForEnergyAveraging[MAX_CELL_BONDS + 1];
+    Cell* cellsForEnergyAveraging[MAX_CELL_BONDS + 1];
+    for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
+        Token const& token = _cluster->tokens[tokenIndex];
+        Cell& cell = *token.cell;
+        if (token.energy < cudaSimulationParameters.tokenMinEnergy) {
+            continue;
+        }
 
-		int tokenBranchNumber = token.memory[0];
+        int tokenBranchNumber = token.memory[0];
+        int numCandidateCellsForEnergyAveraging = 1;
+        candidateCellsForEnergyAveraging[0] = &cell;
+        for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
+            Cell& connectingCell = *cell.connections[connectionIndex];
+            if (!connectingCell.alive) {
+                continue;
+            }
+            if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
+                % cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
+                continue;
+            }
+            if (connectingCell.tokenBlocked) {
+                continue;
+            }
+            int numToken = atomicAdd(&connectingCell.tag, 1);
+            if (numToken >= cudaSimulationParameters.cellMaxToken) {
+                continue;
+            }
+            candidateCellsForEnergyAveraging[numCandidateCellsForEnergyAveraging++] = &connectingCell;
+            atomicAdd(&anticipatedTokens, 1);
+        }
 
-		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
-			Cell& connectingCell = *cell.connections[connectionIndex];
-			if (!connectingCell.alive) {
-				continue;
-			}
-			if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
-				% cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
-				continue;
-			}
-			if (connectingCell.tokenBlocked) {
-				continue;
-			}
-			int numToken = atomicAdd(&connectingCell.tag, 1);
-			if (numToken >= cudaSimulationParameters.cellMaxToken) {
-				continue;
-			}
-
-			atomicAdd(&anticipatedTokens, 1);
-		}
-	}
+        float averageEnergy = 0;
+        int numCellsForEnergyAveraging = 0;
+        for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+            Cell* cell = candidateCellsForEnergyAveraging[index];
+            float origCellEnergy = atomicExch(&cell->energy, -1.0f);    //-1 is temporary value marking the cell for the moment
+            if (origCellEnergy != -1.0f) {
+                averageEnergy += origCellEnergy;
+                cellsForEnergyAveraging[numCellsForEnergyAveraging++] = cell;
+            }
+        }
+        averageEnergy /= numCellsForEnergyAveraging;
+        for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
+            Cell* cell = cellsForEnergyAveraging[index];
+            atomicExch(&cell->energy, averageEnergy);
+        }
+    }
 	__syncthreads();
 
 	__shared__ Token* newTokens;
