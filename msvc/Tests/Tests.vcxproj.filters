@@ -107,7 +107,10 @@
     <ClCompile Include="..\..\source\Tests\ParticleSimulationGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\TokenSimulationGpuTest.cpp">
+    <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\TokenSpreadingSimulationGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
   </ItemGroup>
