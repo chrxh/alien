@@ -24,7 +24,7 @@ void TokenEnergyGuidanceSimulationGpuTest::SetUp()
 *			 - both cell have same high energy
 * Expected result: energy should be transferred from cell to token
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testTokenEnergyGuidance_balanceCell_highCellEnergy)
+TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_highCellEnergy)
 {
     auto const valueCell = 100.0f;
 
@@ -75,7 +75,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testTokenEnergyGuidance_balanceCell
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testTokenEnergyGuidance_balanceCell_lowCellEnergy)
+TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_lowCellEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
@@ -123,7 +123,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testTokenEnergyGuidance_balanceCell
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testTokenEnergyGuidance_balanceToken_highTokenEnergy)
+TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_highTokenEnergy)
 {
     auto const valueToken = 30.0f;
 
@@ -167,7 +167,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testTokenEnergyGuidance_balanceToke
 *            - token has low energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testTokenEnergyGuidance_balanceToken_lowTokenEnergy)
+TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_lowTokenEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
