@@ -598,7 +598,13 @@ TEST_F(TokenSimulationGpuTest, testMassiveTokenMovements)
     checkEnergy(origData, newData);
 }
 
-TEST_F(TokenSimulationGpuTest, testTokenEnergyGuidance_balanceCell)
+/**
+* Situation: - one cluster with 2 cells with fitting branch number
+*			 - first cell has one token with balance energy command
+*			 - both cell have same high energy
+* Expected result: energy should be transferred from cell to token
+*/
+TEST_F(TokenSimulationGpuTest, testTokenEnergyGuidance_balanceCell_highCellEnergy)
 {
     auto const valueCell = 100.0f;
 
@@ -611,6 +617,7 @@ TEST_F(TokenSimulationGpuTest, testTokenEnergyGuidance_balanceCell)
     firstCell.tokenBranchNumber = 0;
     secondCell.tokenBranchNumber = 1;
     *firstCell.energy = _parameters.cellMinEnergy + valueCell + 1 + tokenTransferEnergyAmount;
+    *secondCell.energy = _parameters.cellMinEnergy + valueCell + 1 + tokenTransferEnergyAmount; /**firstCell.energy*/;
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
     tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_CELL;
@@ -628,19 +635,15 @@ TEST_F(TokenSimulationGpuTest, testTokenEnergyGuidance_balanceCell)
     ASSERT_EQ(1, newData.clusters->size());
     auto newCluster = newData.clusters->at(0);
 
-    EXPECT_EQ(3, newCluster.cells->size());
+    EXPECT_EQ(2, newCluster.cells->size());
 
-    for (auto const& newCell : *newCluster.cells) {
-        if (newCell.id == secondCellId) {
-            ASSERT_EQ(2, newCell.tokens->size());
-            for (auto const& newToken : *newCell.tokens) {
-                EXPECT_EQ(*token.energy, *newToken.energy);
-            }
-        }
-        else if (newCell.tokens) {
-            EXPECT_TRUE(newCell.tokens->empty());
-        }
-    }
+    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto newCell = cellByCellId.at(secondCellId);
+    ASSERT_EQ(1, newCell.tokens->size());
+
+    auto const& newToken = newCell.tokens->at(0);
+    EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
+    EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
 
     checkEnergy(origData, newData);
 }
