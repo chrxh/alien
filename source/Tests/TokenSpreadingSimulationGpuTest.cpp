@@ -24,7 +24,7 @@ void TokenSpreadingSimulationGpuTest::SetUp()
 *			 - simulating 9 time steps
 * Expected result: token should be on the last cell
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneCluster)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementWithFittingBranchNumbers_oneCluster)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -71,7 +71,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithFittingBranchNumber
 *			 - simulating 99 time steps
 * Expected result: cellMaxToken-many tokens should be on the last cell of each cluster
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLargeClusters)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementWithFittingBranchNumbers_manyLargeClusters)
 {
 	DataDescription origData;
 	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -129,7 +129,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithFittingBranchNumber
 *			 - simulating one time step
 * Expected result: second cell should have 2 tokens
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithEncounter)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementWithEncounter)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -180,7 +180,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithEncounter)
 *			 - simulating one time step
 * Expected result: no token should be on the cells
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithUnfittingBranchNumbers)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementWithUnfittingBranchNumbers)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -219,7 +219,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithUnfittingBranchNumb
 *			 - simulating 9 time steps
 * Expected result: no token should be on the cells
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementBlocked)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementBlocked)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -263,7 +263,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementBlocked)
 *			 - simulating one time step
 * Expected result: there should be two tokens: on the first and last cell
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenForking)
+TEST_F(TokenSpreadingSimulationGpuTest, testForking)
 {
 	DataDescription origData;
 	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -311,7 +311,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenForking)
 * Expected result: there should be two tokens:
 *                  on the first and last cell with half of the energy as of the initial token
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenForking_lowCellEnergies)
+TEST_F(TokenSpreadingSimulationGpuTest, testForking_lowCellEnergies)
 {
     DataDescription origData;
     auto token = createSimpleToken();
@@ -365,7 +365,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenForking_lowCellEnergies)
 *			 - simulating 1 time step
 * Expected result: cluster decomposes into two cluster, each still has a token
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementDuringDecomposition)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementDuringDecomposition)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -429,7 +429,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementDuringDecomposition)
 *			 - second cell has two tokens
 *			 - fourth cell has one token
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementDuringFusion)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementDuringFusion)
 {
 	DataDescription origData;
 	auto velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -479,7 +479,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementDuringFusion)
 *			 - simulating one time step
 * Expected result: second cell should have cellMaxToken tokens
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithTooManyTokens)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementWithTooManyTokens)
 {
 	DataDescription origData;
 	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -529,7 +529,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithTooManyTokens)
 *            - no radiation
 * Expected result: both cell should have same energy, energy balance fulfilled
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementAveragingCellEnergies)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementAveragingCellEnergies)
 {
     DataDescription origData;
     auto const& cellMinEnergy = _parameters.cellMinEnergy;
@@ -567,7 +567,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementAveragingCellEnergies)
 *			 - simulating 100 time steps
 * Expected result: 100x100 cluster should still be there, energy balance fulfilled
 */
-TEST_F(TokenSpreadingSimulationGpuTest, testMassiveTokenMovements)
+TEST_F(TokenSpreadingSimulationGpuTest, testMassiveMovements)
 {
     auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
     auto cellMaxToken = _parameters.cellMaxToken;
