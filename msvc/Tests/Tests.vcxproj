@@ -282,7 +282,8 @@
     <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\SerializationTest.cpp" />
     <ClCompile Include="..\..\source\Tests\TestSuite.cpp" />
-    <ClCompile Include="..\..\source\Tests\TokenSimulationGpuTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationTests.cpp" />
+    <ClCompile Include="..\..\source\Tests\TokenSpreadingSimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitGridTest.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp" />
   </ItemGroup>

@@ -1,10 +1,10 @@
 #include "SimulationGpuTest.h"
 
-class TokenSimulationGpuTest
+class TokenSpreadingSimulationGpuTest
 	: public SimulationGpuTest
 {
 public:
-	virtual ~TokenSimulationGpuTest() = default;
+	virtual ~TokenSpreadingSimulationGpuTest() = default;
 
 protected:
     virtual void SetUp();
@@ -12,7 +12,7 @@ protected:
     const float tokenTransferEnergyAmount = 10.0;
 };
 
-void TokenSimulationGpuTest::SetUp()
+void TokenSpreadingSimulationGpuTest::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
@@ -24,7 +24,7 @@ void TokenSimulationGpuTest::SetUp()
 *			 - simulating 9 time steps
 * Expected result: token should be on the last cell
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneCluster)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneCluster)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -71,7 +71,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_oneClus
 *			 - simulating 99 time steps
 * Expected result: cellMaxToken-many tokens should be on the last cell of each cluster
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLargeClusters)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLargeClusters)
 {
 	DataDescription origData;
 	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -129,7 +129,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithFittingBranchNumbers_manyLar
 *			 - simulating one time step
 * Expected result: second cell should have 2 tokens
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementWithEncounter)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithEncounter)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -180,7 +180,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithEncounter)
 *			 - simulating one time step
 * Expected result: no token should be on the cells
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementWithUnfittingBranchNumbers)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithUnfittingBranchNumbers)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -219,7 +219,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithUnfittingBranchNumbers)
 *			 - simulating 9 time steps
 * Expected result: no token should be on the cells
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementBlocked)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementBlocked)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -263,7 +263,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementBlocked)
 *			 - simulating one time step
 * Expected result: there should be two tokens: on the first and last cell
 */
-TEST_F(TokenSimulationGpuTest, testTokenForking)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenForking)
 {
 	DataDescription origData;
 	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -311,7 +311,7 @@ TEST_F(TokenSimulationGpuTest, testTokenForking)
 * Expected result: there should be two tokens:
 *                  on the first and last cell with half of the energy as of the initial token
 */
-TEST_F(TokenSimulationGpuTest, testTokenForking_lowCellEnergies)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenForking_lowCellEnergies)
 {
     DataDescription origData;
     auto token = createSimpleToken();
@@ -365,7 +365,7 @@ TEST_F(TokenSimulationGpuTest, testTokenForking_lowCellEnergies)
 *			 - simulating 1 time step
 * Expected result: cluster decomposes into two cluster, each still has a token
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementDuringDecomposition)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementDuringDecomposition)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -429,7 +429,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementDuringDecomposition)
 *			 - second cell has two tokens
 *			 - fourth cell has one token
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementDuringFusion)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementDuringFusion)
 {
 	DataDescription origData;
 	auto velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -479,7 +479,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementDuringFusion)
 *			 - simulating one time step
 * Expected result: second cell should have cellMaxToken tokens
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementWithTooManyTokens)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementWithTooManyTokens)
 {
 	DataDescription origData;
 	auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -529,7 +529,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementWithTooManyTokens)
 *            - no radiation
 * Expected result: both cell should have same energy, energy balance fulfilled
 */
-TEST_F(TokenSimulationGpuTest, testTokenMovementAveragingCellEnergies)
+TEST_F(TokenSpreadingSimulationGpuTest, testTokenMovementAveragingCellEnergies)
 {
     DataDescription origData;
     auto const& cellMinEnergy = _parameters.cellMinEnergy;
@@ -567,7 +567,7 @@ TEST_F(TokenSimulationGpuTest, testTokenMovementAveragingCellEnergies)
 *			 - simulating 100 time steps
 * Expected result: 100x100 cluster should still be there, energy balance fulfilled
 */
-TEST_F(TokenSimulationGpuTest, testMassiveTokenMovements)
+TEST_F(TokenSpreadingSimulationGpuTest, testMassiveTokenMovements)
 {
     auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
     auto cellMaxToken = _parameters.cellMaxToken;
@@ -598,106 +598,3 @@ TEST_F(TokenSimulationGpuTest, testMassiveTokenMovements)
     checkEnergy(origData, newData);
 }
 
-/**
-* Situation: - one cluster with 2 cells with fitting branch number
-*			 - first cell has one token with balance energy command
-*			 - both cell have same high energy
-* Expected result: energy should be transferred from cell to token
-*/
-TEST_F(TokenSimulationGpuTest, testTokenEnergyGuidance_balanceCell_highCellEnergy)
-{
-    auto const valueCell = 100.0f;
-
-    DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
-
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
-    auto& firstCell = cluster.cells->at(0);
-    auto& secondCell = cluster.cells->at(1);
-    firstCell.tokenBranchNumber = 0;
-    secondCell.tokenBranchNumber = 1;
-    *firstCell.energy = _parameters.cellMinEnergy + valueCell + 1 + tokenTransferEnergyAmount;
-    secondCell.energy = firstCell.energy;
-    auto token = createSimpleToken();
-    auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_CELL;
-    tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
-    firstCell.addToken(token);
-    origData.addCluster(cluster);
-
-    uint64_t secondCellId = secondCell.id;
-
-    IntegrationTestHelper::updateData(_access, origData);
-    IntegrationTestHelper::runSimulation(1, _controller);
-
-    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-
-    ASSERT_EQ(1, newData.clusters->size());
-    auto newCluster = newData.clusters->at(0);
-
-    EXPECT_EQ(2, newCluster.cells->size());
-
-    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
-    auto newCell = cellByCellId.at(secondCellId);
-    ASSERT_EQ(1, newCell.tokens->size());
-
-    auto const& newToken = newCell.tokens->at(0);
-    EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
-    EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
-
-    checkEnergy(origData, newData);
-}
-
-/**
-* Situation: - one cluster with 2 cells with fitting branch number
-*			 - first cell has one token with balance energy command
-*			 - both cell have same low energy
-*            - token has high energy
-* Expected result: energy should be transferred from token to cell
-*/
-TEST_F(TokenSimulationGpuTest, testTokenEnergyGuidance_balanceCell_highTokenEnergy)
-{
-    auto const valueCell = 100.0f;
-    auto const valueToken = 30.0f;
-
-    DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
-
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
-    auto& firstCell = cluster.cells->at(0);
-    auto& secondCell = cluster.cells->at(1);
-    firstCell.tokenBranchNumber = 0;
-    secondCell.tokenBranchNumber = 1;
-    *firstCell.energy = _parameters.cellMinEnergy + valueCell - 1 + tokenTransferEnergyAmount;
-    secondCell.energy = firstCell.energy;
-    auto token = createSimpleToken();
-    token.energy = _parameters.tokenMinEnergy + valueToken + 1 + tokenTransferEnergyAmount;
-    auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_CELL;
-    tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
-    tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
-    firstCell.addToken(token);
-    origData.addCluster(cluster);
-
-    uint64_t secondCellId = secondCell.id;
-
-    IntegrationTestHelper::updateData(_access, origData);
-    IntegrationTestHelper::runSimulation(1, _controller);
-
-    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-
-    ASSERT_EQ(1, newData.clusters->size());
-    auto newCluster = newData.clusters->at(0);
-
-    EXPECT_EQ(2, newCluster.cells->size());
-
-    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
-    auto newCell = cellByCellId.at(secondCellId);
-    ASSERT_EQ(1, newCell.tokens->size());
-
-    auto const& newToken = newCell.tokens->at(0);
-    EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
-    EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
-
-    checkEnergy(origData, newData);
-}
