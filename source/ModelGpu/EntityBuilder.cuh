@@ -88,6 +88,7 @@ public:
 			cell.nextTimestep = nullptr;
 			cell.protectionCounter = 0;
 			cell.alive = true;
+            cell.locked = 0;
 		}
 
 		int startTokenIndex;

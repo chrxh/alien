@@ -84,11 +84,11 @@ __global__ void clusterProcessingOnCopyData(SimulationData data)
 /* Tokens																*/
 /************************************************************************/
 
-__global__ void tokenProcessingOnOrigData(SimulationData data)
+__device__ void tokenProcessingOnOrigData(SimulationData data, int clusterIndex)
 {
 	TokenProcessorOnOrigData dynamics;
-	dynamics.init(data);
-	dynamics.processingEnergyGuidance();
+	dynamics.init(data, clusterIndex);
+	dynamics.processingEnergyAveraging();
 }
 
 __device__ void tokenProcessingOnCopyData(SimulationData data, int clusterIndex)
@@ -96,7 +96,19 @@ __device__ void tokenProcessingOnCopyData(SimulationData data, int clusterIndex)
 	TokenProcessorOnCopyData reorganizer;
 
 	reorganizer.init(data, clusterIndex);
-	reorganizer.processingTokenSpreading();
+	reorganizer.processingSpreadingAndFeatures();
+}
+
+__global__ void tokenProcessingOnOrigData(SimulationData data)
+{
+    int numEntities = data.clustersAC1.getNumEntries();
+
+    int startIndex;
+    int endIndex;
+    calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
+    for (int index = startIndex; index <= endIndex; ++index) {
+        tokenProcessingOnOrigData(data, index);
+    }
 }
 
 __global__ void tokenProcessingOnCopyData(SimulationData data)
