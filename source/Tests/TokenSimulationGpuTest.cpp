@@ -8,6 +8,8 @@ public:
 
 protected:
     virtual void SetUp();
+
+    const float tokenTransferEnergyAmount = 10.0;
 };
 
 void TokenSimulationGpuTest::SetUp()
@@ -593,5 +595,52 @@ TEST_F(TokenSimulationGpuTest, testMassiveTokenMovements)
     auto const& newCluster = newData.clusters->at(0);
 
     EXPECT_EQ(100*100, newCluster.cells->size());
+    checkEnergy(origData, newData);
+}
+
+TEST_F(TokenSimulationGpuTest, testTokenEnergyGuidance_balanceCell)
+{
+    auto const valueCell = 100.0f;
+
+    DataDescription origData;
+    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    *firstCell.energy = _parameters.cellMinEnergy + valueCell + 1 + tokenTransferEnergyAmount;
+    auto token = createSimpleToken();
+    auto& tokenData = *token.data;
+    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_CELL;
+    tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
+    firstCell.addToken(token);
+    origData.addCluster(cluster);
+
+    uint64_t secondCellId = secondCell.id;
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto newCluster = newData.clusters->at(0);
+
+    EXPECT_EQ(3, newCluster.cells->size());
+
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.id == secondCellId) {
+            ASSERT_EQ(2, newCell.tokens->size());
+            for (auto const& newToken : *newCell.tokens) {
+                EXPECT_EQ(*token.energy, *newToken.energy);
+            }
+        }
+        else if (newCell.tokens) {
+            EXPECT_TRUE(newCell.tokens->empty());
+        }
+    }
+
     checkEnergy(origData, newData);
 }
