@@ -127,4 +127,5 @@ __inline__ __device__ void ParticleProcessorOnOrigData::createRandomCell(float e
 	cell->nextTimestep = nullptr;
 	cell->alive = true;
 	cell->protectionCounter = 0;
+    cell->locked = 0;
 }

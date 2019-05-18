@@ -39,10 +39,11 @@ struct Cell
 	int maxConnections;
 	int numConnections;
 	Cell* connections[MAX_CELL_BONDS];
-	Cell* nextTimestep;
 
 	//auxiliary data
-	int protectionCounter;
+	Cell* nextTimestep;
+    int locked;	//0 = unlocked, 1 = locked
+    int protectionCounter;
 	bool alive;
 	int tag;
 };

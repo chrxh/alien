@@ -245,5 +245,8 @@
     <ClInclude Include="..\..\source\ModelBasic\EntityRenderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\Enums.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
