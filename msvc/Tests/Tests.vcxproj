@@ -261,7 +261,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\Tests\Benchmark.cpp" />
+    <ClCompile Include="..\..\source\Tests\BenchmarkCpu.cpp" />
+    <ClCompile Include="..\..\source\Tests\BenchmarkGpu.cpp" />
     <ClCompile Include="..\..\source\Tests\CellClusterTest.cpp" />
     <ClCompile Include="..\..\source\Tests\CellConnectorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ChangeDescriptionsTest.cpp" />
@@ -282,7 +283,7 @@
     <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\SerializationTest.cpp" />
     <ClCompile Include="..\..\source\Tests\TestSuite.cpp" />
-    <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationTests.cpp" />
+    <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\TokenSpreadingSimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitGridTest.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp" />

@@ -26,7 +26,7 @@ class SimulationGpuTest
 	: public IntegrationTestFramework
 {
 public:
-	SimulationGpuTest();
+    SimulationGpuTest(IntVector2D const& universeSize = { 600, 300 });
 	virtual ~SimulationGpuTest();
 
 protected:

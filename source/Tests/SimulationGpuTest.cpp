@@ -3,8 +3,8 @@
 
 #include "SimulationGpuTest.h"
 
-SimulationGpuTest::SimulationGpuTest()
-	: IntegrationTestFramework({ 600, 300 })
+SimulationGpuTest::SimulationGpuTest(IntVector2D const& universeSize)
+	: IntegrationTestFramework(universeSize)
 {
 	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelGpuData(), 0);
 	_context = _controller->getContext();

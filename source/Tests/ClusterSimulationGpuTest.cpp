@@ -799,11 +799,10 @@ TEST_F(ClusterSimulationGpuTest, testFusionOfHorizontalClusters_partialContact)
 TEST_F(ClusterSimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBoundary)
 {
 	auto fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
-	auto size = _spaceProp->getSize();
 
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(10, QVector2D{ size.x - 5.0f, 100 }, QVector2D{ 0, 0 }, 0.0));
-	origData.addCluster(createHorizontalCluster(12, QVector2D{ size.x + 6.0f, 100 }, QVector2D{ -fusionVelocity, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(10, QVector2D{ _universeSize.x - 5.0f, 100 }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(12, QVector2D{ _universeSize.x + 6.0f, 100 }, QVector2D{ -fusionVelocity, 0 }, 0.0));
 	setMaxConnections(origData.clusters->at(0), 3);
 	setMaxConnections(origData.clusters->at(1), 3);
 
@@ -822,10 +821,9 @@ TEST_F(ClusterSimulationGpuTest, testFusionOfHorizontalClusters_atUniverseBounda
 */
 TEST_F(ClusterSimulationGpuTest, testFastMovingCluster)
 {
-	auto size = _spaceProp->getSize();
 	float cellMaxForce = static_cast<float>(_parameters.cellMaxForce);
 	DataDescription origData;
-	origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ size.x / 2.0f, size.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
+	origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ _universeSize.x / 2.0f, _universeSize.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
@@ -842,9 +840,8 @@ TEST_F(ClusterSimulationGpuTest, testFastMovingCluster)
 */
 TEST_F(ClusterSimulationGpuTest, testFastRotatingCluster)
 {
-	auto size = _spaceProp->getSize();
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(51, QVector2D{ size.x / 2.0f, size.y / 2.0f }, QVector2D(), 20.0));
+	origData.addCluster(createHorizontalCluster(51, QVector2D{ _universeSize.x / 2.0f, _universeSize.y / 2.0f }, QVector2D(), 20.0));
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(100, _controller);
@@ -888,7 +885,6 @@ TEST_F(ClusterSimulationGpuTest, regressionTest_overlappingRectangleClusters_man
 */
 TEST_F(ClusterSimulationGpuTest, regressionTest_manyOverlappingRectangleClusters)
 {
-	auto size = _spaceProp->getSize();
 	float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
 
 	DataDescription origData;
@@ -909,8 +905,6 @@ TEST_F(ClusterSimulationGpuTest, regressionTest_manyOverlappingRectangleClusters
 */
 TEST_F(ClusterSimulationGpuTest, regressionTest_manyRectangleClusters_manyThreadsPerBlocks)
 {
-	auto size = _spaceProp->getSize();
-
 	DataDescription origData;
 	for (int i = 0; i < 20; ++i) {
 		origData.addCluster(createRectangularCluster({ 7, 40 }));
@@ -930,8 +924,6 @@ TEST_F(ClusterSimulationGpuTest, regressionTest_manyRectangleClusters_manyThread
 */
 TEST_F(ClusterSimulationGpuTest, regressionTest_manyRectangleClusters_concentratedAtUniverseBoundary)
 {
-	auto size = _spaceProp->getSize();
-
 	DataDescription origData;
 	for (int i = 0; i < 100; ++i) {
 		origData.addCluster(createRectangularCluster({ 7, 40 },
