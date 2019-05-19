@@ -84,6 +84,12 @@ public:
                 int index = cellTO.connectionIndices[i] - clusterTO.cellStartIndex;
                 cell.connections[i] = cluster->cells + index;
             }
+            for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+                cell.staticData[i] = cellTO.staticData[i];
+            }
+            for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+                cell.mutableData[i] = cellTO.mutableData[i];
+            }
 
             cell.nextTimestep = nullptr;
             cell.protectionCounter = 0;

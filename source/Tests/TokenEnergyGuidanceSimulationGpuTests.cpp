@@ -29,7 +29,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_highCellEnergy)
     auto const valueCell = 100.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -81,7 +80,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_lowCellEnergy)
     auto const valueToken = 30.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -128,7 +126,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_highTokenEnergy)
     auto const valueToken = 30.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -173,7 +170,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_lowTokenEnergy)
     auto const valueToken = 30.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -221,7 +217,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCellAndToken_highTokenEn
     auto const valueToken = 30.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -269,7 +264,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCellAndToken_lowTokenEne
     auto const valueToken = 30.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -315,7 +309,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testHarvestCell)
     auto const valueCell = 100.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -360,7 +353,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testHarvestToken)
     auto const valueToken = 30.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -404,7 +396,6 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testParallelization)
     auto const valueToken = 30.0f;
 
     DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);

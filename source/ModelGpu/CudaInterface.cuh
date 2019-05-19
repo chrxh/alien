@@ -30,6 +30,9 @@ struct CellAccessTO
 	int branchNumber;
 	bool tokenBlocked;
 	int connectionIndices[MAX_CELL_BONDS];
+    int cellFunctionType;
+    char staticData[MAX_CELL_STATIC_BYTES];
+    char mutableData[MAX_CELL_MUTABLE_BYTES];
 };
 
 struct ClusterAccessTO
