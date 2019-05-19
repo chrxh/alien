@@ -22,6 +22,7 @@ private:
 
     __inline__ __device__ void processionCellFeatures(Cell const* sourceCell, Token* token);
     __inline__ __device__ void processionEnergyGuidance(Cell const* sourceCell, Token* token);
+    __inline__ __device__ void processionComputerFunction(Cell const* sourceCell, Token* token);
 
 
 private:
@@ -275,4 +276,8 @@ __inline__ __device__ void TokenProcessorOnCopyData::processionEnergyGuidance(Ce
             token->energy -= amount;
         }
     }
+}
+
+__inline__ __device__ void TokenProcessorOnCopyData::processionComputerFunction(Cell const * sourceCell, Token * token)
+{
 }

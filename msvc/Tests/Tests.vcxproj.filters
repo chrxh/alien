@@ -95,9 +95,6 @@
     <ClCompile Include="..\..\source\Tests\SerializationTest.cpp">
       <Filter>Source Files\IntegrationTests\CPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\Benchmark.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Tests\SimulationGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
@@ -107,10 +104,16 @@
     <ClCompile Include="..\..\source\Tests\ParticleSimulationGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationTests.cpp">
+    <ClCompile Include="..\..\source\Tests\TokenSpreadingSimulationGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\TokenSpreadingSimulationGpuTest.cpp">
+    <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\BenchmarkCpu.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\BenchmarkGpu.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
   </ItemGroup>
