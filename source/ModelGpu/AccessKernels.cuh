@@ -164,7 +164,7 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
 		__shared__ Cluster* newCluster;
 		if (0 == threadIdx.x) {
 			newCluster = data.clustersAC2.getNewElement();
-			newCells = data.cellsAC1.getNewSubarray(cluster.numCells);
+			newCells = data.cellsAC.getNewSubarray(cluster.numCells);
 			*newCluster = cluster;
 			newCluster->cells = newCells;
 		}
