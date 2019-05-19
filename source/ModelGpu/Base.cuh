@@ -132,6 +132,13 @@ public:
 		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
 	}
 
+    int retrieveNumEntries() const
+    {
+        int result;
+        checkCudaErrors(cudaMemcpy(&result, _numEntries, sizeof(int), cudaMemcpyDeviceToHost));
+        return result;
+    }
+
 	__device__ __inline__ T* getNewSubarray(int size)
 	{
 		int oldIndex = atomicAdd(_numEntries, size);

@@ -11,8 +11,10 @@
 #include "CudaConstants.cuh"
 #include "CudaSimulationParameters.cuh"
 #include "CudaInterface.cuh"
-#include "SimulationFunctions.cuh"
-#include "AccessFunctions.cuh"
+
+#include "SimulationKernels.cuh"
+#include "AccessKernels.cuh"
+#include "GarbageCollectorKernels.cuh"
 
 #include "SimulationData.cuh"
 #include "Map.cuh"
@@ -56,7 +58,7 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
 	_internalData->clustersAC1 = ArrayController<Cluster>(MAX_CELLCLUSTERS);
 	_internalData->clustersAC2 = ArrayController<Cluster>(MAX_CELLCLUSTERS);
 	_internalData->cellsAC1 = ArrayController<Cell>(MAX_CELLS);
-	_internalData->cellsAC2 = ArrayController<Cell>(MAX_CELLS);
+	_internalData->cellsTempAC = ArrayController<Cell>(MAX_CELLS);
 	_internalData->particlesAC1 = ArrayController<Particle>(MAX_PARTICLES);
 	_internalData->particlesAC2 = ArrayController<Particle>(MAX_PARTICLES);
 	_internalData->tokensAC1 = ArrayController<Token>(MAX_TOKENS);
@@ -86,7 +88,7 @@ CudaSimulation::~CudaSimulation()
 	_internalData->clustersAC1.free();
 	_internalData->clustersAC2.free();
 	_internalData->cellsAC1.free();
-	_internalData->cellsAC2.free();
+	_internalData->cellsTempAC.free();
 	_internalData->particlesAC1.free();
 	_internalData->particlesAC2.free();
 	_internalData->tokensAC1.free();
@@ -150,7 +152,24 @@ void CudaSimulation::calcNextTimestep()
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	swapData();
+    swap(_internalData->clustersAC1, _internalData->clustersAC2);
+    swap(_internalData->particlesAC1, _internalData->particlesAC2);
+    swap(_internalData->tokensAC1, _internalData->tokensAC2);
+
+    cleanUnusedMemory();
+}
+
+void CudaSimulation::cleanUnusedMemory()
+{
+    if (_internalData->cellsAC1.retrieveNumEntries() > MAX_CELLS * 2 / 3) {
+        _internalData->cellsTempAC.reset();
+
+        garbageCollector<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
+        cudaDeviceSynchronize();
+        checkCudaErrors(cudaGetLastError());
+
+        swap(_internalData->cellsAC1, _internalData->cellsTempAC);
+    }
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
@@ -195,7 +214,11 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
 	cudaDeviceSynchronize();
 	checkCudaErrors(cudaGetLastError());
 
-	swapData();
+    swap(_internalData->clustersAC1, _internalData->clustersAC2);
+    swap(_internalData->particlesAC1, _internalData->particlesAC2);
+    swap(_internalData->tokensAC1, _internalData->tokensAC2);
+
+    cleanUnusedMemory();
 }
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
@@ -224,15 +247,6 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
 void CudaSimulation::prepareTargetData()
 {
 	_internalData->clustersAC2.reset();
-	_internalData->cellsAC2.reset();
 	_internalData->particlesAC2.reset();
 	_internalData->tokensAC2.reset();
-}
-
-void CudaSimulation::swapData()
-{
-	swap(_internalData->clustersAC1, _internalData->clustersAC2);
-	swap(_internalData->cellsAC1, _internalData->cellsAC2);
-	swap(_internalData->particlesAC1, _internalData->particlesAC2);
-	swap(_internalData->tokensAC1, _internalData->tokensAC2);
 }
