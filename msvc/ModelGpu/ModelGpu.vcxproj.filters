@@ -111,9 +111,6 @@
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh">
       <Filter>Source Files\Impl\kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\GarbageCollectorKernels.cuh">
-      <Filter>Source Files\Impl\kernel</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
