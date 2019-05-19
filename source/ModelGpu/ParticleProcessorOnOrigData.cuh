@@ -98,7 +98,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingTransformation
 __inline__ __device__ void ParticleProcessorOnOrigData::createRandomCell(float energy, float2 const & pos, float2 const & vel)
 {
 	Cluster* cluster = _data->clustersAC2.getNewElement();
-	Cell* cell = _data->cellsAC1.getNewElement();
+	Cell* cell = _data->cellsAC.getNewElement();
 
 	cluster->id = _data->numberGen.createNewId_kernel();
 	cluster->pos = pos;

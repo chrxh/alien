@@ -25,7 +25,6 @@ private:
 
 	__inline__ __device__ void setSuccessorCell(Cell* origCell, Cell* newCell, Cluster* newCluster);
 	__inline__ __device__ void correctCellConnections(Cell* origCell);
-	__inline__ __device__ void correctTokens(Token* token);
 
 	SimulationData* _data;
 	Map<Cell> _cellMap;
@@ -131,7 +130,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
 		entries[index].cluster.pos.y /= numCells;
 		entries[index].cluster.vel.x /= numCells;
 		entries[index].cluster.vel.y /= numCells;
-		entries[index].cluster.cells = _data->cellsAC1.getNewSubarray(numCells);
+		entries[index].cluster.cells = _data->cellsAC.getNewSubarray(numCells);
 		entries[index].cluster.numCells = 0;
 
 		newClusters[index] = _data->clustersAC2.getNewElement();
@@ -221,7 +220,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion()
 			newCluster->decompositionRequired = _origCluster->decompositionRequired || otherCluster->decompositionRequired;
 			newCluster->locked = 0;
 			newCluster->clusterToFuse = nullptr;
-			newCluster->cells = _data->cellsAC1.getNewSubarray(newCluster->numCells);
+			newCluster->cells = _data->cellsAC.getNewSubarray(newCluster->numCells);
 
 			correction = _cellMap.correctionIncrement(_origCluster->pos, otherCluster->pos);	//to be added to otherCluster
 
@@ -416,11 +415,6 @@ __inline__ __device__ void ClusterProcessorOnCopyData::correctCellConnections(Ce
 	for (int i = 0; i < numConnections; ++i) {
 		cell->connections[i] = cell->connections[i]->nextTimestep;
 	}
-}
-
-__inline__ __device__ void ClusterProcessorOnCopyData::correctTokens(Token* token)
-{
-	token->cell = token->cell->nextTimestep;
 }
 
 

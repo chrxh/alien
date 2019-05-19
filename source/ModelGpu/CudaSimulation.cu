@@ -57,7 +57,7 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
 	_internalData->size = size;
 	_internalData->clustersAC1 = ArrayController<Cluster>(MAX_CELLCLUSTERS);
 	_internalData->clustersAC2 = ArrayController<Cluster>(MAX_CELLCLUSTERS);
-	_internalData->cellsAC1 = ArrayController<Cell>(MAX_CELLS);
+	_internalData->cellsAC = ArrayController<Cell>(MAX_CELLS);
 	_internalData->cellsTempAC = ArrayController<Cell>(MAX_CELLS);
 	_internalData->particlesAC1 = ArrayController<Particle>(MAX_PARTICLES);
 	_internalData->particlesAC2 = ArrayController<Particle>(MAX_PARTICLES);
@@ -87,7 +87,7 @@ CudaSimulation::~CudaSimulation()
 {
 	_internalData->clustersAC1.free();
 	_internalData->clustersAC2.free();
-	_internalData->cellsAC1.free();
+	_internalData->cellsAC.free();
 	_internalData->cellsTempAC.free();
 	_internalData->particlesAC1.free();
 	_internalData->particlesAC2.free();
@@ -161,14 +161,14 @@ void CudaSimulation::calcNextTimestep()
 
 void CudaSimulation::cleanUnusedMemory()
 {
-    if (_internalData->cellsAC1.retrieveNumEntries() > MAX_CELLS * 2 / 3) {
+    if (_internalData->cellsAC.retrieveNumEntries() > MAX_CELLS * 2 / 3) {
         _internalData->cellsTempAC.reset();
 
         garbageCollector<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream>>> (*_internalData);
         cudaDeviceSynchronize();
         checkCudaErrors(cudaGetLastError());
 
-        swap(_internalData->cellsAC1, _internalData->cellsTempAC);
+        swap(_internalData->cellsAC, _internalData->cellsTempAC);
     }
 }
 
