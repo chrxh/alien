@@ -77,7 +77,7 @@ struct SimulationData
 	ArrayController<Cluster> clustersAC1;
 	ArrayController<Cluster> clustersAC2;
 	ArrayController<Cell> cellsAC1;
-	ArrayController<Cell> cellsAC2;
+	ArrayController<Cell> cellsTempAC;
 	ArrayController<Particle> particlesAC1;
 	ArrayController<Particle> particlesAC2;
 	ArrayController<Token> tokensAC1;

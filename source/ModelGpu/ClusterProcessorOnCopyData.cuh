@@ -131,7 +131,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
 		entries[index].cluster.pos.y /= numCells;
 		entries[index].cluster.vel.x /= numCells;
 		entries[index].cluster.vel.y /= numCells;
-		entries[index].cluster.cells = _data->cellsAC2.getNewSubarray(numCells);
+		entries[index].cluster.cells = _data->cellsAC1.getNewSubarray(numCells);
 		entries[index].cluster.numCells = 0;
 
 		newClusters[index] = _data->clustersAC2.getNewElement();
@@ -191,33 +191,16 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
 __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithoutDecompositionAndFusion()
 {
 	__shared__ Cluster* newCluster;
-	__shared__ Cell* newCells;
 
 	if (threadIdx.x == 0) {
 		newCluster = _data->clustersAC2.getNewElement();
 		*newCluster = *_origCluster;
-		newCells = _data->cellsAC2.getNewSubarray(_origCluster->numCells);
-		newCluster->cells = newCells;
 	}
 	__syncthreads();
 
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
-		Cell *origCell = &_origCluster->cells[cellIndex];
-		Cell *newCell = &newCells[cellIndex];
-		setSuccessorCell(origCell, newCell, newCluster);
-	}
-
-	__syncthreads();
-	
-	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
-		correctCellConnections(&newCells[cellIndex]);
-	}
-
-	int startTokenIndex;
-	int endTokenIndex;
-	calcPartition(_origCluster->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-	for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
-		correctTokens(&_origCluster->tokens[tokenIndex]);
+		Cell *cell = &newCluster->cells[cellIndex];
+        cell->cluster = newCluster;
 	}
 	__syncthreads();
 }
@@ -238,7 +221,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion()
 			newCluster->decompositionRequired = _origCluster->decompositionRequired || otherCluster->decompositionRequired;
 			newCluster->locked = 0;
 			newCluster->clusterToFuse = nullptr;
-			newCluster->cells = _data->cellsAC2.getNewSubarray(newCluster->numCells);
+			newCluster->cells = _data->cellsAC1.getNewSubarray(newCluster->numCells);
 
 			correction = _cellMap.correctionIncrement(_origCluster->pos, otherCluster->pos);	//to be added to otherCluster
 
