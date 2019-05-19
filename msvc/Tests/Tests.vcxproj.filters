@@ -110,11 +110,14 @@
     <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\BenchmarkCpu.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\BenchmarkGpu.cpp">
+    <ClCompile Include="..\..\source\Tests\CellComputerSimulationGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\GpuBenchmark.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CpuBenchmark.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

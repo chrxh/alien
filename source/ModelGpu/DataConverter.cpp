@@ -66,12 +66,16 @@ DataDescription DataConverter::getDataDescription() const
 			}
 			cellIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, j);
 			clusterIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, i);
-			clusterDesc.addCell(
+
+            auto feature = CellFeatureDescription().setType(static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType))
+                .setConstData(QByteArray(cellTO.staticData, MAX_CELL_STATIC_BYTES)).setVolatileData(QByteArray(cellTO.mutableData, MAX_CELL_MUTABLE_BYTES));
+
+            clusterDesc.addCell(
 				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
 				.setEnergy(cellTO.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
 				.setConnectingCells(connectingCellIds).setMaxConnections(cellTO.maxConnections).setFlagTokenBlocked(false)
 				.setTokenBranchNumber(0).setMetadata(CellMetadata()).setTokens(vector<TokenDescription>{}).setTokenBranchNumber(cellTO.branchNumber)
-				.setFlagTokenBlocked(cellTO.tokenBlocked)
+				.setFlagTokenBlocked(cellTO.tokenBlocked).setCellFeature(feature)
 			);
 		}
 		result.addCluster(clusterDesc);
@@ -265,17 +269,17 @@ void DataConverter::processDeletions()
 
 namespace
 {
-	void copyTokenMemory(QByteArray const& source, char* target, int tokenMemorySize)
-	{
-		for (int i = 0; i < tokenMemorySize; ++i) {
-			if (i < source.size()) {
-				target[i] = source.at(i);
-			}
-			else {
-				target[i] = 0;
-			}
-		}
-	}
+    void copyByteArrayToChar(QByteArray const& source, char* target, int size)
+    {
+        for (int i = 0; i < size; ++i) {
+            if (i < source.size()) {
+                target[i] = source.at(i);
+            }
+            else {
+                target[i] = 0;
+            }
+        }
+    }
 }
 
 void DataConverter::processModifications()
@@ -322,7 +326,7 @@ void DataConverter::processModifications()
 						auto const& sourceToken = tokens->at(sourceTokenIndex);
 						targetToken.cellIndex = cellIndex;
 						targetToken.energy = *sourceToken.energy;
-						copyTokenMemory(*sourceToken.data, targetToken.memory, _parameters.tokenMemorySize);
+						copyByteArrayToChar(*sourceToken.data, targetToken.memory, _parameters.tokenMemorySize);
 					}
 				}
 			}
@@ -360,7 +364,11 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cellTO.maxConnections = *cellDesc.maxConnections;
 	cellTO.branchNumber = cellDesc.tokenBranchNumber.get_value_or(0);
 	cellTO.tokenBlocked = cellDesc.tokenBlocked.get_value_or(false);
-	if (cellDesc.connectingCells) {
+    auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
+    cellTO.cellFunctionType = static_cast<int>(cellFunction.type);
+    copyByteArrayToChar(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
+    copyByteArrayToChar(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
+    if (cellDesc.connectingCells) {
 		cellTO.numConnections = cellDesc.connectingCells->size();
 	}
 	else {
@@ -375,7 +383,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 			TokenAccessTO& tokenTO = _dataTO.tokens[tokenIndex];
 			tokenTO.energy = *tokenDesc.energy;
 			tokenTO.cellIndex = cellIndex;
-			copyTokenMemory(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
+			copyByteArrayToChar(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
             tokenTO.memory[0] = cellTO.branchNumber % _parameters.cellMaxTokenBranchNumber;
         }
 	}
@@ -437,17 +445,23 @@ void DataConverter::applyChangeDescription(ClusterChangeDescription const& clust
 	}
 }
 
-void DataConverter::applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell)
+void DataConverter::applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cellTO)
 {
 	if (cellChanges.pos) {
 		QVector2D newAbsPos = cellChanges.pos.getValue();
-		convert(newAbsPos, cell.pos);
+		convert(newAbsPos, cellTO.pos);
 	}
 	if (cellChanges.energy) {
-		cell.energy = cellChanges.energy.getValue();
+		cellTO.energy = cellChanges.energy.getValue();
 	}
 	if (cellChanges.tokenBranchNumber) {
-		cell.branchNumber = cellChanges.tokenBranchNumber.getValue();
+		cellTO.branchNumber = cellChanges.tokenBranchNumber.getValue();
 	}
+    if (cellChanges.cellFeatures) {
+        auto cellFunction = *cellChanges.cellFeatures;
+        cellTO.cellFunctionType = static_cast<int>(cellFunction.type);
+        copyByteArrayToChar(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
+        copyByteArrayToChar(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
+    }
 }
 

@@ -2,20 +2,20 @@
 
 #include "SimulationGpuTest.h"
 
-class BenchmarkGpu
+class GpuBenchmark
     : public SimulationGpuTest
 {
 public:
-    BenchmarkGpu() : SimulationGpuTest({ 2000, 1000 })
+    GpuBenchmark() : SimulationGpuTest({ 4000, 2000 })
     {}
 
-    virtual ~BenchmarkGpu() = default;
+    virtual ~GpuBenchmark() = default;
 };
 
-TEST_F(BenchmarkGpu, testClusterAndParticleMovement)
+TEST_F(GpuBenchmark, testClusterAndParticleMovement)
 {
     DataDescription origData;
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 3000; ++i) {
         origData.addCluster(createRectangularCluster({ 7, 40 },
             QVector2D{
             static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
@@ -30,17 +30,17 @@ TEST_F(BenchmarkGpu, testClusterAndParticleMovement)
 
     QElapsedTimer timer;
     timer.start();
-    IntegrationTestHelper::runSimulation(1000, _controller);
+    IntegrationTestHelper::runSimulation(2000, _controller);
     std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms"<< std::endl;
 }
 
-TEST_F(BenchmarkGpu, testOnlyClusterMovement)
+TEST_F(GpuBenchmark, testOnlyClusterMovement)
 {
     _parameters.radiationProb = 0;
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 3000; ++i) {
         origData.addCluster(createRectangularCluster({ 7, 40 },
             QVector2D{
             static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
@@ -55,6 +55,6 @@ TEST_F(BenchmarkGpu, testOnlyClusterMovement)
 
     QElapsedTimer timer;
     timer.start();
-    IntegrationTestHelper::runSimulation(1000, _controller);
+    IntegrationTestHelper::runSimulation(2000, _controller);
     std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 }

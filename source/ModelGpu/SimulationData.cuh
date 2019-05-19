@@ -39,6 +39,9 @@ struct Cell
     int maxConnections;
     int numConnections;
     Cell* connections[MAX_CELL_BONDS];
+    int cellFunctionType;
+    char staticData[MAX_CELL_STATIC_BYTES];
+    char mutableData[MAX_CELL_MUTABLE_BYTES];
 
     //auxiliary data
     Cell* nextTimestep;
