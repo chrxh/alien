@@ -202,12 +202,13 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\ModelGpu\AccessFunctions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\AccessKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnCopyData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaJob.h" />
     <ClInclude Include="..\..\source\ModelGpu\EntityBuilder.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\GarbageCollectorKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnCopyData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh" />
@@ -224,7 +225,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h" />
     <ClInclude Include="..\..\source\ModelGpu\Physics.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\SimulationFunctions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnCopyData.cuh" />
     <CustomBuild Include="..\..\source\ModelGpu\SimulationMonitorGpuImpl.h">

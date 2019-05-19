@@ -8,7 +8,6 @@
 #include "Base.cuh"
 #include "Map.cuh"
 #include "EntityBuilder.cuh"
-
 #include "SimulationData.cuh"
 
 __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
@@ -165,7 +164,7 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
 		__shared__ Cluster* newCluster;
 		if (0 == threadIdx.x) {
 			newCluster = data.clustersAC2.getNewElement();
-			newCells = data.cellsAC2.getNewSubarray(cluster.numCells);
+			newCells = data.cellsAC1.getNewSubarray(cluster.numCells);
 			*newCluster = cluster;
 			newCluster->cells = newCells;
 		}
