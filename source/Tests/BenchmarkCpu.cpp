@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <QElapsedTimer>
 #include <QEventLoop>
 
 #include "Base/ServiceLocator.h"
@@ -25,22 +26,22 @@
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
-class Benchmark
+class BenchmarkCpu
 	: public IntegrationTestFramework
 {
 public:
-	Benchmark();
+	BenchmarkCpu();
 
 protected:
 	void createTestData(SimulationAccess* access);
 };
 
-Benchmark::Benchmark()
+BenchmarkCpu::BenchmarkCpu()
 	: IntegrationTestFramework({ 12 * 33 * 3, 12 * 17 * 3 })
 {
 }
 
-void Benchmark::createTestData(SimulationAccess * access)
+void BenchmarkCpu::createTestData(SimulationAccess * access)
 {
 	DataChangeDescription desc;
 	for (int i = 0; i < 20000 * 9; ++i) {
@@ -51,7 +52,7 @@ void Benchmark::createTestData(SimulationAccess * access)
 	access->updateData(desc);
 }
 
-TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
+TEST_F(BenchmarkCpu, benchmarkOneThreadWithOneUnit)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 1,1 }));
@@ -61,7 +62,11 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 
 
 	createTestData(access);
+
+    QElapsedTimer timer;
+    timer.start();
 	IntegrationTestHelper::runSimulation(20, controller);
+    std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
 	delete controller;
@@ -69,7 +74,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithOneUnit)
 	EXPECT_TRUE(true);
 }
 
-TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
+TEST_F(BenchmarkCpu, benchmarkOneThreadWithManyUnits)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 12, 6 }));
@@ -78,7 +83,10 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
-	IntegrationTestHelper::runSimulation(20, controller);
+    QElapsedTimer timer;
+    timer.start();
+    IntegrationTestHelper::runSimulation(20, controller);
+    std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
 	delete controller;
@@ -86,7 +94,7 @@ TEST_F(Benchmark, benchmarkOneThreadWithManyUnits)
 	EXPECT_TRUE(true);
 }
 
-TEST_F(Benchmark, benchmarkFourThread)
+TEST_F(BenchmarkCpu, benchmarkFourThread)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(4, { 12, 6 }));
@@ -95,7 +103,11 @@ TEST_F(Benchmark, benchmarkFourThread)
 	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
-	IntegrationTestHelper::runSimulation(20, controller);
+
+    QElapsedTimer timer;
+    timer.start();
+    IntegrationTestHelper::runSimulation(20, controller);
+    std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
 	delete controller;
@@ -103,7 +115,7 @@ TEST_F(Benchmark, benchmarkFourThread)
 	EXPECT_TRUE(true);
 }
 
-TEST_F(Benchmark, benchmarkEightThread)
+TEST_F(BenchmarkCpu, benchmarkEightThread)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(8, { 12, 6 }));
@@ -112,7 +124,11 @@ TEST_F(Benchmark, benchmarkEightThread)
 	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
-	IntegrationTestHelper::runSimulation(20, controller);
+
+    QElapsedTimer timer;
+    timer.start();
+    IntegrationTestHelper::runSimulation(20, controller);
+    std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
 	delete controller;
