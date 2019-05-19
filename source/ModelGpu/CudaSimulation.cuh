@@ -9,23 +9,22 @@ struct SimulationParameters;
 class CudaSimulation
 {
 public:
-	CudaSimulation(int2 const &size, SimulationParameters const& parameters);
-	~CudaSimulation();
+    CudaSimulation(int2 const &size, SimulationParameters const& parameters);
+    ~CudaSimulation();
 
-	void calcNextTimestep();
+    void calcNextTimestep();
 
+    void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+    void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
-	void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-	void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-
-	void setSimulationParameters(SimulationParameters const& parameters);
+    void setSimulationParameters(SimulationParameters const& parameters);
 
 
 private:
-	void prepareTargetData();
-    void cleanUnusedMemory();
+    void prepareTargetData();
+    void swapData();
 
-	cudaStream_t _cudaStream;
-	SimulationData* _internalData;
-	DataAccessTO* _cudaAccessTO;
+    cudaStream_t _cudaStream;
+    SimulationData* _internalData;
+    DataAccessTO* _cudaAccessTO;
 };
