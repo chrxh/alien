@@ -28,17 +28,17 @@ struct Particle
 struct Cluster;
 struct Cell
 {
-	uint64_t id;
-	Cluster* cluster;
-	float2 relPos;
-	float2 absPos;
-	float2 vel;
-	float energy;
-	int branchNumber;
-	bool tokenBlocked;
-	int maxConnections;
-	int numConnections;
-	Cell* connections[MAX_CELL_BONDS];
+    uint64_t id;
+    Cluster* cluster;
+    float2 relPos;
+    float2 absPos;
+    float2 vel;
+    float energy;
+    int branchNumber;
+    bool tokenBlocked;
+    int maxConnections;
+    int numConnections;
+    Cell* connections[MAX_CELL_BONDS];
 
 	//auxiliary data
 	Cell* nextTimestep;
@@ -76,10 +76,10 @@ struct SimulationData
 
 	ArrayController<Cluster> clustersAC1;
 	ArrayController<Cluster> clustersAC2;
-	ArrayController<Cell> cellsAC1;
-	ArrayController<Cell> cellsTempAC;
 	ArrayController<Particle> particlesAC1;
 	ArrayController<Particle> particlesAC2;
+	ArrayController<Cell> cellsAC;
+	ArrayController<Cell> cellsTempAC;
 	ArrayController<Token> tokensAC1;
 	ArrayController<Token> tokensAC2;
 
