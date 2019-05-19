@@ -14,6 +14,7 @@ public:
 
 	void calcNextTimestep();
 
+
 	void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 	void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
@@ -22,7 +23,7 @@ public:
 
 private:
 	void prepareTargetData();
-	void swapData();
+    void cleanUnusedMemory();
 
 	cudaStream_t _cudaStream;
 	SimulationData* _internalData;

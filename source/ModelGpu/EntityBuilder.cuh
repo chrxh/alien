@@ -42,7 +42,7 @@ public:
 			cluster->angle = clusterTO.angle;
 			cluster->angularVel = clusterTO.angularVel;
 			cluster->numCells = clusterTO.numCells;
-			cluster->cells = _data->cellsAC2.getNewSubarray(cluster->numCells);
+			cluster->cells = _data->cellsAC1.getNewSubarray(cluster->numCells);
 			cluster->numTokens = clusterTO.numTokens;
 			cluster->tokens = _data->tokensAC2.getNewSubarray(cluster->numTokens);
 
