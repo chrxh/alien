@@ -261,9 +261,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\Tests\BenchmarkCpu.cpp" />
-    <ClCompile Include="..\..\source\Tests\BenchmarkGpu.cpp" />
+    <ClCompile Include="..\..\source\Tests\CpuBenchmark.cpp" />
+    <ClCompile Include="..\..\source\Tests\GpuBenchmark.cpp" />
     <ClCompile Include="..\..\source\Tests\CellClusterTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\CellComputerSimulationGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\CellConnectorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ChangeDescriptionsTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ClusterSimulationGpuTest.cpp" />

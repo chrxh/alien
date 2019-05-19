@@ -273,8 +273,10 @@ template<>
 bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2)
 {
 	removeZerosAtEnd(feature1.volatileData);
+    removeZerosAtEnd(feature1.constData);
 	removeZerosAtEnd(feature2.volatileData);
-	return isCompatible(feature1.type, feature2.type)
+    removeZerosAtEnd(feature2.constData);
+    return isCompatible(feature1.type, feature2.type)
 		&& isCompatible(feature1.constData, feature2.constData)
 		&& isCompatible(feature1.volatileData, feature2.volatileData)
 		;

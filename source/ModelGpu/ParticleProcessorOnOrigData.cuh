@@ -3,6 +3,8 @@
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
+#include "ModelBasic/Enums.h"
+
 #include "CudaInterface.cuh"
 #include "CudaConstants.cuh"
 #include "Base.cuh"
@@ -128,4 +130,12 @@ __inline__ __device__ void ParticleProcessorOnOrigData::createRandomCell(float e
     cell->alive = true;
     cell->protectionCounter = 0;
     cell->locked = 0;
+    cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
+    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+        cell->staticData[i] = _data->numberGen.random(255);
+    }
+    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+        cell->mutableData[i] = _data->numberGen.random(255);
+    }
+
 }
