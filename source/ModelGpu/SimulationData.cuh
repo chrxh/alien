@@ -7,22 +7,22 @@
 struct Cell;
 struct Token
 {
-	float energy;
-	char memory[MAX_TOKEN_MEM_SIZE];
-	Cell* cell;
+    float energy;
+    char memory[MAX_TOKEN_MEM_SIZE];
+    Cell* cell;
 };
 
 
 struct Particle
 {
-	uint64_t id;
-	float energy;
-	float2 pos;
-	float2 vel;
+    uint64_t id;
+    float energy;
+    float2 pos;
+    float2 vel;
 
-	//auxiliary data
-	int locked;	//0 = unlocked, 1 = locked
-	bool alive;
+    //auxiliary data
+    int locked;	//0 = unlocked, 1 = locked
+    bool alive;
 };
 
 struct Cluster;
@@ -40,49 +40,49 @@ struct Cell
     int numConnections;
     Cell* connections[MAX_CELL_BONDS];
 
-	//auxiliary data
-	Cell* nextTimestep;
+    //auxiliary data
+    Cell* nextTimestep;
     int locked;	//0 = unlocked, 1 = locked
     int protectionCounter;
-	bool alive;
-	int tag;
+    bool alive;
+    int tag;
 };
 
 struct Cluster
 {
-	uint64_t id;
-	float2 pos;
-	float2 vel;
-	float angle;
-	float angularVel;
-	float angularMass;
-	int numCells;
-	Cell* cells;
-	int numTokens;
-	Token* tokens;
+    uint64_t id;
+    float2 pos;
+    float2 vel;
+    float angle;
+    float angularVel;
+    float angularMass;
+    int numCells;
+    Cell* cells;
+    int numTokens;
+    Token* tokens;
 
-	//auxiliary data
-	bool decompositionRequired;
-	int locked;	//0 = unlocked, 1 = locked
-	Cluster* clusterToFuse;
+    //auxiliary data
+    bool decompositionRequired;
+    int locked;	//0 = unlocked, 1 = locked
+    Cluster* clusterToFuse;
 };
 
 struct SimulationData
 {
-	int2 size;
+    int2 size;
 
-	Cell **cellMap;
-	Particle **particleMap;
+    Cell **cellMap;
+    Particle **particleMap;
 
-	ArrayController<Cluster> clustersAC1;
-	ArrayController<Cluster> clustersAC2;
-	ArrayController<Particle> particlesAC1;
-	ArrayController<Particle> particlesAC2;
-	ArrayController<Cell> cellsAC;
-	ArrayController<Cell> cellsTempAC;
-	ArrayController<Token> tokensAC1;
-	ArrayController<Token> tokensAC2;
+    ArrayController<Cluster> clustersAC1;
+    ArrayController<Cluster> clustersAC2;
+    ArrayController<Cell> cellsAC1;
+    ArrayController<Cell> cellsAC2;
+    ArrayController<Particle> particlesAC1;
+    ArrayController<Particle> particlesAC2;
+    ArrayController<Token> tokensAC1;
+    ArrayController<Token> tokensAC2;
 
-	CudaNumberGenerator numberGen;
+    CudaNumberGenerator numberGen;
 };
 
