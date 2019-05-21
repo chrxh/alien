@@ -1,7 +1,7 @@
-#include "SimulationGpuTest.h"
+#include "SimulationGpuTestFramework.h"
 
 class TokenEnergyGuidanceSimulationGpuTest
-    : public SimulationGpuTest
+    : public SimulationGpuTestFramework
 {
 public:
     virtual ~TokenEnergyGuidanceSimulationGpuTest() = default;

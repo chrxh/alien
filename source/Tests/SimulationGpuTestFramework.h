@@ -22,12 +22,12 @@
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
-class SimulationGpuTest
+class SimulationGpuTestFramework
 	: public IntegrationTestFramework
 {
 public:
-    SimulationGpuTest(IntVector2D const& universeSize = { 600, 300 });
-	virtual ~SimulationGpuTest();
+    SimulationGpuTestFramework(IntVector2D const& universeSize = { 600, 300 });
+	virtual ~SimulationGpuTestFramework();
 
 protected:
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
