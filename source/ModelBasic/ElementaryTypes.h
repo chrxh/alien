@@ -210,3 +210,10 @@ namespace Enums
     };
 }
 
+struct InstructionCoded {
+    Enums::ComputerOperation::Type operation;
+    Enums::ComputerOptype::Type opType1;
+    Enums::ComputerOptype::Type opType2;
+    uint8_t operand1;
+    uint8_t operand2;
+};

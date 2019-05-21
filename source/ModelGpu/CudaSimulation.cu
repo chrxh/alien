@@ -212,7 +212,9 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
     parametersToCopy.cellMaxToken = parameters.cellMaxToken;
     parametersToCopy.cellMaxTokenBranchNumber = parameters.cellMaxTokenBranchNumber;
     parametersToCopy.cellFunctionComputerMaxInstructions = parameters.cellFunctionComputerMaxInstructions;
+    parametersToCopy.cellFunctionComputerCellMemorySize = parameters.cellFunctionComputerCellMemorySize;
     parametersToCopy.tokenMinEnergy = parameters.tokenMinEnergy;
+    parametersToCopy.tokenMemorySize = parameters.tokenMemorySize;
     parametersToCopy.radiationProbability = parameters.radiationProb;
     parametersToCopy.radiationExponent = parameters.radiationExponent;
     parametersToCopy.radiationFactor = parameters.radiationFactor;
