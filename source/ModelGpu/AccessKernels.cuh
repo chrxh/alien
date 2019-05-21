@@ -3,11 +3,11 @@
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "EntityBuilder.cuh"
+#include "EntityFactory.cuh"
 
 #include "SimulationData.cuh"
 
@@ -74,9 +74,11 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
             cellTO.branchNumber = cell.branchNumber;
             cellTO.tokenBlocked = cell.tokenBlocked;
             cellTO.cellFunctionType = cell.cellFunctionType;
+            cellTO.numStaticBytes = cell.numStaticBytes;
             for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
                 cellTO.staticData[i] = cell.staticData[i];
             }
+            cellTO.numMutableBytes = cell.numMutableBytes;
             for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
                 cellTO.mutableData[i] = cell.mutableData[i];
             }
@@ -229,9 +231,9 @@ __global__ void filterData(int2 rectUpperLeft, int2 rectLowerRight, SimulationDa
 
 __device__ void convertData(SimulationData data, DataAccessTO const& simulationTO)
 {
-    __shared__ EntityBuilder converter;
+    __shared__ EntityFactory converter;
     if (0 == threadIdx.x) {
-        converter.init(&data, &simulationTO);
+        converter.init(&data);
     }
     __syncthreads();
 
@@ -242,14 +244,14 @@ __device__ void convertData(SimulationData data, DataAccessTO const& simulationT
     calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
 
     for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-        converter.createClusterFromTO(simulationTO.clusters[clusterIndex]);
+        converter.createClusterFromTO(simulationTO.clusters[clusterIndex], &simulationTO);
     }
 
     indexResource = threadIdx.x + blockIdx.x * blockDim.x;
     numEntities = *simulationTO.numParticles;
     calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
     for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
-        converter.createParticleFromTO(simulationTO.particles[particleIndex]);
+        converter.createParticleFromTO(simulationTO.particles[particleIndex], &simulationTO);
     }
 }
 
