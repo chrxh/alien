@@ -336,7 +336,7 @@ void DataConverter::processModifications()
 						auto const& sourceToken = tokens->at(sourceTokenIndex);
 						targetToken.cellIndex = cellIndex;
 						targetToken.energy = *sourceToken.energy;
-						convertToArray(*sourceToken.data, targetToken.memory, std::min(_parameters.tokenMemorySize, MAX_TOKEN_MEM_SIZE));
+						convertToArray(*sourceToken.data, targetToken.memory, _parameters.tokenMemorySize);
 					}
 				}
 			}
@@ -395,7 +395,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 			TokenAccessTO& tokenTO = _dataTO.tokens[tokenIndex];
 			tokenTO.energy = *tokenDesc.energy;
 			tokenTO.cellIndex = cellIndex;
-			convertToArray(*tokenDesc.data, tokenTO.memory, MAX_TOKEN_MEM_SIZE);
+			convertToArray(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
             tokenTO.memory[0] = cellTO.branchNumber % _parameters.cellMaxTokenBranchNumber;
         }
 	}
