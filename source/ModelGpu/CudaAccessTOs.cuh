@@ -31,7 +31,9 @@ struct CellAccessTO
 	bool tokenBlocked;
 	int connectionIndices[MAX_CELL_BONDS];
     int cellFunctionType;
+    unsigned char numStaticBytes;
     char staticData[MAX_CELL_STATIC_BYTES];
+    unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
 };
 

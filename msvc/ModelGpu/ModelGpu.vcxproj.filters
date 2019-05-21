@@ -63,9 +63,6 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
@@ -79,9 +76,6 @@
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\EntityBuilder.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Map.cuh">
@@ -110,6 +104,12 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh">
       <Filter>Source Files\Impl\kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaAccessTOs.cuh">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\EntityFactory.cuh">
+      <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

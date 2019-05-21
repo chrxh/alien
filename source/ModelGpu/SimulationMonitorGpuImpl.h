@@ -2,7 +2,7 @@
 
 #include "SimulationMonitorGpu.h"
 #include "DefinitionsImpl.h"
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 
 class SimulationMonitorGpuImpl
 	: public SimulationMonitorGpu
