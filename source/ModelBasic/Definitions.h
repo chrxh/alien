@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 
 #include "SimulationParameters.h"
-#include "Enums.h"
+#include "ElementaryTypes.h"
 #include "DllExport.h"
 
 class QTimer;
@@ -34,12 +34,4 @@ using SimulationControllerBuildFunc = std::function<SimulationController*(
 	map<string, int> const& typeSpecificData, uint timestepAtBeginning
 	)>;
 using SimulationAccessBuildFunc = std::function<SimulationAccess*(SimulationController*)>;
-
-struct InstructionCoded {
-	Enums::ComputerOperation::Type operation;
-	Enums::ComputerOptype::Type opType1;
-	Enums::ComputerOptype::Type opType2;
-	quint8 operand1;
-	quint8 operand2;
-};
 

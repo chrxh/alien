@@ -43,6 +43,31 @@ void DataConverter::updateData(DataChangeDescription const & data)
 	}
 }
 
+namespace
+{
+    QByteArray convertToQByteArray(char const* data, int size)
+    {
+        QByteArray result;
+        result.reserve(size);
+        for (int i = 0; i < size; ++i) {
+            result[i] = data[i];
+        }
+        return result;
+    }
+
+    void convertToArray(QByteArray const& source, char* target, int size)
+    {
+        for (int i = 0; i < size; ++i) {
+            if (i < source.size()) {
+                target[i] = source.at(i);
+            }
+            else {
+                target[i] = 0;
+            }
+        }
+    }
+}
+
 DataDescription DataConverter::getDataDescription() const
 {
 	DataDescription result;
@@ -68,7 +93,7 @@ DataDescription DataConverter::getDataDescription() const
 			clusterIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, i);
 
             auto feature = CellFeatureDescription().setType(static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType))
-                .setConstData(QByteArray(cellTO.staticData, cellTO.numStaticBytes)).setVolatileData(QByteArray(cellTO.mutableData, cellTO.numMutableBytes));
+                .setConstData(convertToQByteArray(cellTO.staticData, cellTO.numStaticBytes)).setVolatileData(convertToQByteArray(cellTO.mutableData, cellTO.numMutableBytes));
 
             clusterDesc.addCell(
 				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
@@ -267,21 +292,6 @@ void DataConverter::processDeletions()
 	}
 }
 
-namespace
-{
-    void copyByteArrayToChar(QByteArray const& source, char* target, int size)
-    {
-        for (int i = 0; i < size; ++i) {
-            if (i < source.size()) {
-                target[i] = source.at(i);
-            }
-            else {
-                target[i] = 0;
-            }
-        }
-    }
-}
-
 void DataConverter::processModifications()
 {
 	//modify clusters
@@ -326,7 +336,7 @@ void DataConverter::processModifications()
 						auto const& sourceToken = tokens->at(sourceTokenIndex);
 						targetToken.cellIndex = cellIndex;
 						targetToken.energy = *sourceToken.energy;
-						copyByteArrayToChar(*sourceToken.data, targetToken.memory, std::min(_parameters.tokenMemorySize, MAX_TOKEN_MEM_SIZE));
+						convertToArray(*sourceToken.data, targetToken.memory, std::min(_parameters.tokenMemorySize, MAX_TOKEN_MEM_SIZE));
 					}
 				}
 			}
@@ -368,8 +378,8 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
     cellTO.cellFunctionType = static_cast<int>(cellFunction.type);
     cellTO.numStaticBytes = std::min(cellFunction.constData.size(), MAX_CELL_STATIC_BYTES);
     cellTO.numMutableBytes = std::min(cellFunction.volatileData.size(), MAX_CELL_MUTABLE_BYTES);
-    copyByteArrayToChar(cellFunction.constData, cellTO.staticData, cellTO.numStaticBytes);
-    copyByteArrayToChar(cellFunction.volatileData, cellTO.mutableData, cellTO.numMutableBytes);
+    convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
+    convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
     if (cellDesc.connectingCells) {
 		cellTO.numConnections = cellDesc.connectingCells->size();
 	}
@@ -385,7 +395,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 			TokenAccessTO& tokenTO = _dataTO.tokens[tokenIndex];
 			tokenTO.energy = *tokenDesc.energy;
 			tokenTO.cellIndex = cellIndex;
-			copyByteArrayToChar(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
+			convertToArray(*tokenDesc.data, tokenTO.memory, MAX_TOKEN_MEM_SIZE);
             tokenTO.memory[0] = cellTO.branchNumber % _parameters.cellMaxTokenBranchNumber;
         }
 	}
@@ -464,8 +474,8 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
         cellTO.cellFunctionType = static_cast<int>(cellFunction.type);
         cellTO.numStaticBytes = std::min(cellFunction.constData.size(), MAX_CELL_STATIC_BYTES);
         cellTO.numMutableBytes = std::min(cellFunction.volatileData.size(), MAX_CELL_MUTABLE_BYTES);
-        copyByteArrayToChar(cellFunction.constData, cellTO.staticData, cellTO.numStaticBytes);
-        copyByteArrayToChar(cellFunction.volatileData, cellTO.mutableData, cellTO.numMutableBytes);
+        convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
+        convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
     }
 }
 

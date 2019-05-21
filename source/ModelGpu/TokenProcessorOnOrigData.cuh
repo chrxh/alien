@@ -3,7 +3,7 @@
 #include "Base.cuh"
 #include "CudaAccessTOs.cuh"
 #include "Map.cuh"
-#include "ModelBasic/Enums.h"
+#include "ModelBasic/ElementaryTypes.h"
 #include "Physics.cuh"
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"

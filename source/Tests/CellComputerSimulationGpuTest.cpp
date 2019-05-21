@@ -33,9 +33,9 @@ TEST_F(CellComputerSimulationGpuTest, testSimpleProgramm)
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
     firstCell.tokenBranchNumber = 0;
-    firstCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setConstData(compiledProgram.compilation);
     auto& secondCell = cluster.cells->at(1);
     secondCell.tokenBranchNumber = 1;
+    secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setConstData(compiledProgram.compilation);
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
     firstCell.addToken(token);

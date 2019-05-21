@@ -3,7 +3,7 @@
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
-#include "ModelBasic/Enums.h"
+#include "ModelBasic/ElementaryTypes.h"
 
 #include "CudaAccessTOs.cuh"
 #include "CudaConstants.cuh"

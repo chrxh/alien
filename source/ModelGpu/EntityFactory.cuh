@@ -95,11 +95,24 @@ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO const& cluste
         }
 
         cell.cellFunctionType = cellTO.cellFunctionType;
-        cell.numStaticBytes = cellTO.numStaticBytes;
+
+        switch (static_cast<Enums::CellFunction::Type>(cell.cellFunctionType)) {
+        case Enums::CellFunction::COMPUTER: {
+            cell.numStaticBytes = cellTO.numStaticBytes;
+            cell.numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
+        } break;
+        case Enums::CellFunction::SENSOR: {
+            cell.numStaticBytes = 0;
+            cell.numMutableBytes = 5;
+        } break;
+        default: {
+            cell.numStaticBytes = 0;
+            cell.numMutableBytes = 0;
+        }
+        }
         for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
             cell.staticData[i] = cellTO.staticData[i];
         }
-        cell.numMutableBytes = cellTO.numMutableBytes;
         for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
             cell.mutableData[i] = cellTO.mutableData[i];
         }
@@ -119,7 +132,7 @@ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO const& cluste
         TokenAccessTO const& tokenTO = _simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];
 
         token.energy = tokenTO.energy;
-        for (int i = 0; i < MAX_TOKEN_MEM_SIZE; ++i) {
+        for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
             token.memory[i] = tokenTO.memory[i];
         }
         int index = tokenTO.cellIndex - clusterTO.cellStartIndex;
@@ -179,6 +192,20 @@ __device__ void EntityFactory::createClusterWithRandomCell(float energy, float2 
     cell->protectionCounter = 0;
     cell->locked = 0;
     cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
+    switch (static_cast<Enums::CellFunction::Type>(cell->cellFunctionType)) {
+    case Enums::CellFunction::COMPUTER: {
+        cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions*3;
+        cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
+    } break;
+    case Enums::CellFunction::SENSOR: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 5;
+    } break;
+    default: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 0;
+    }
+    }
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
         cell->staticData[i] = _data->numberGen.random(255);
     }
