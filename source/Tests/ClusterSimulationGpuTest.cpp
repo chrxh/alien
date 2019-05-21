@@ -1,7 +1,7 @@
-#include "SimulationGpuTest.h"
+#include "SimulationGpuTestFramework.h"
 
 class ClusterSimulationGpuTest
-	: public SimulationGpuTest
+	: public SimulationGpuTestFramework
 {
 public:
 	virtual ~ClusterSimulationGpuTest() = default;

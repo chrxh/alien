@@ -328,6 +328,9 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourc
     for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
         auto const& token = sourceCluster->tokens[tokenIndex];
         auto const& cell = token.cell;
+        if (!cell->alive) {
+            continue;
+        }
         auto const& successorCell = *cell->nextTimestep;
         auto const& successorCluster = successorCell.cluster;
         if (successorCluster == targetCluster) {
@@ -350,6 +353,9 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourc
     for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
         auto& token = sourceCluster->tokens[tokenIndex];
         auto& cell = token.cell;
+        if (!cell->alive) {
+            continue;
+        }
         auto& successorCell = *cell->nextTimestep;
         auto& successorCluster = successorCell.cluster;
         if (successorCluster == targetCluster) {

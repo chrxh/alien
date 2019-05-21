@@ -1,7 +1,7 @@
-#include "SimulationGpuTest.h"
+#include "SimulationGpuTestFramework.h"
 
 class TokenSpreadingSimulationGpuTest
-	: public SimulationGpuTest
+	: public SimulationGpuTestFramework
 {
 public:
 	virtual ~TokenSpreadingSimulationGpuTest() = default;
@@ -598,3 +598,38 @@ TEST_F(TokenSpreadingSimulationGpuTest, testMassiveMovements)
     checkEnergy(origData, newData);
 }
 
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementonDestroyedCell)
+{
+    auto cellMinEnergy = _parameters.cellMinEnergy;
+
+    DataDescription origData;
+
+    auto cluster = createHorizontalCluster(3, QVector2D{}, QVector2D{}, 0);
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    firstCell.energy = cellMinEnergy / 2;
+    secondCell.energy = cellMinEnergy / 2;
+    auto token = createSimpleToken();
+    auto& tokenData = *token.data;
+    firstCell.addToken(token);
+    origData.addCluster(cluster);
+
+    uint64_t secondCellId = secondCell.id;
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+
+    auto const& newCluster = newData.clusters->at(0);
+    EXPECT_EQ(1, newCluster.cells->size());
+
+    auto const& newCell = newCluster.cells->at(0);
+    EXPECT_TRUE(newCell.tokens->empty());
+
+    checkEnergy(origData, newData);
+}
