@@ -207,13 +207,13 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnCopyData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaJob.h" />
-    <ClInclude Include="..\..\source\ModelGpu\EntityBuilder.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\EntityFactory.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnCopyData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\CudaInterface.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\CudaAccessTOs.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h" />
     <ClInclude Include="..\..\source\ModelGpu\Definitions.h" />
     <ClInclude Include="..\..\source\ModelGpu\DefinitionsImpl.h" />

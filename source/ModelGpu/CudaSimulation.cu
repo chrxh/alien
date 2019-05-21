@@ -10,7 +10,7 @@
 #include "CudaSimulation.cuh"
 #include "CudaConstants.cuh"
 #include "CudaSimulationParameters.cuh"
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 #include "SimulationKernels.cuh"
 #include "AccessKernels.cuh"
 
@@ -211,6 +211,7 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
     parametersToCopy.cellMass = 1.0f / parameters.cellMass_Reciprocal;
     parametersToCopy.cellMaxToken = parameters.cellMaxToken;
     parametersToCopy.cellMaxTokenBranchNumber = parameters.cellMaxTokenBranchNumber;
+    parametersToCopy.cellFunctionComputerMaxInstructions = parameters.cellFunctionComputerMaxInstructions;
     parametersToCopy.tokenMinEnergy = parameters.tokenMinEnergy;
     parametersToCopy.radiationProbability = parameters.radiationProb;
     parametersToCopy.radiationExponent = parameters.radiationExponent;

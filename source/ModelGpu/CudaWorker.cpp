@@ -5,7 +5,7 @@
 
 #include "ModelBasic/SpaceProperties.h"
 
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 #include "CudaJob.h"
 #include "CudaWorker.h"
 

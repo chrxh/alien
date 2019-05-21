@@ -3,7 +3,7 @@
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Physics.cuh"
@@ -21,8 +21,8 @@ private:
 	__inline__ __device__ void copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell);
 
     __inline__ __device__ void processionCellFeatures(Cell const* sourceCell, Token* token);
-    __inline__ __device__ void processionEnergyGuidance(Cell const* sourceCell, Token* token);
-    __inline__ __device__ void processionComputerFunction(Cell const* sourceCell, Token* token);
+    __inline__ __device__ void processionEnergyGuidance(Token* token);
+    __inline__ __device__ void processionComputerFunction(Token* token);
 
 
 private:
@@ -154,14 +154,6 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingSpreadingAndFeatu
 
 __inline__ __device__ void TokenProcessorOnCopyData::calcAnticipatedTokens(int& result)
 {
-/*
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
-        Cell& cell = _cluster->cells[cellIndex];
-        if (cell.alive) {
-            cell.tag = 0;
-        }
-    }
-*/
     if (0 == threadIdx.x) {
         result = 0;
     }
@@ -187,12 +179,6 @@ __inline__ __device__ void TokenProcessorOnCopyData::calcAnticipatedTokens(int& 
             if (connectingCell.tokenBlocked) {
                 continue;
             }
-/*
-            int numToken = atomicAdd(&connectingCell.tag, 1);
-            if (numToken >= cudaSimulationParameters.cellMaxToken) {
-                continue;
-            }
-*/
             atomicAdd(&result, 1);
         }
     }
@@ -207,21 +193,28 @@ __inline__ __device__ void TokenProcessorOnCopyData::copyToken(Token const* sour
 	targetToken->cell = targetCell;
 }
 
-__inline__ __device__ void TokenProcessorOnCopyData::processionCellFeatures(Cell const * sourceCell, Token * token)
+__inline__ __device__ void TokenProcessorOnCopyData::processionCellFeatures(Cell const* sourceCell, Token * token)
 {
     auto cell = token->cell;
     int locked;
     do {
         locked = atomicExch(&cell->locked, 1);
         if (0 == locked) {
-            processionEnergyGuidance(sourceCell, token);
+            processionEnergyGuidance(token);
+            auto type = static_cast<Enums::CellFunction::Type>(
+                cell->cellFunctionType % static_cast<int>(Enums::CellFunction::_COUNTER));
+            switch (type) {
+            case Enums::CellFunction::COMPUTER: {
+                processionComputerFunction(token);
+            } break;
+            }
             atomicExch(&cell->locked, 0);
         }
     } while (1 == locked);
 
 }
 
-__inline__ __device__ void TokenProcessorOnCopyData::processionEnergyGuidance(Cell const * sourceCell, Token * token)
+__inline__ __device__ void TokenProcessorOnCopyData::processionEnergyGuidance(Token * token)
 {
     auto cell = token->cell;
     uint8_t cmd = token->memory[Enums::EnergyGuidance::IN] % static_cast<int>(Enums::EnergyGuidanceIn::_COUNTER);
@@ -278,6 +271,124 @@ __inline__ __device__ void TokenProcessorOnCopyData::processionEnergyGuidance(Ce
     }
 }
 
-__inline__ __device__ void TokenProcessorOnCopyData::processionComputerFunction(Cell const * sourceCell, Token * token)
+__inline__ __device__ void TokenProcessorOnCopyData::processionComputerFunction(Token * token)
 {
+/*
+    auto cell = token->cell;
+    bool condTable[MAX_CELL_STATIC_BYTES/3 + 1];
+    int condPointer(0);
+    for (int instructionPointer = 0; instructionPointer < cell->numStaticBytes; ) {
+
+        //decode instruction
+        InstructionCoded instruction;
+        CompilerHelper::readInstruction(_code, instructionPointer, instruction);
+
+        //operand 1: pointer to mem
+        quint8 opPointer1 = 0;
+        MemoryType memType = MemoryType::TOKEN;
+        if (instruction.opType1 == Enums::ComputerOptype::MEM)
+            opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.tokenMemorySize);
+        if (instruction.opType1 == Enums::ComputerOptype::MEMMEM) {
+            instruction.operand1 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand1, parameters.tokenMemorySize)];
+            opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.tokenMemorySize);
+        }
+        if (instruction.opType1 == Enums::ComputerOptype::CMEM) {
+            opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.cellFunctionComputerCellMemorySize);
+            memType = MemoryType::CELL;
+        }
+
+        //operand 2: loading value
+        if (instruction.opType2 == Enums::ComputerOptype::MEM)
+            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters.tokenMemorySize)];
+        if (instruction.opType2 == Enums::ComputerOptype::MEMMEM) {
+            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters.tokenMemorySize)];
+            instruction.operand2 = token->getMemoryRef()[CompilerHelper::convertToAddress(instruction.operand2, parameters.tokenMemorySize)];
+        }
+        if (instruction.opType2 == Enums::ComputerOptype::CMEM)
+            instruction.operand2 = _memory[CompilerHelper::convertToAddress(instruction.operand2, parameters.cellFunctionComputerCellMemorySize)];
+
+        //execute instruction
+        bool execute = true;
+        for (int k = 0; k < condPointer; ++k)
+            if (!condTable[k])
+                execute = false;
+        if (execute) {
+            if (instruction.operation == Enums::ComputerOperation::MOV)
+                setMemoryByte(token->getMemoryRef(), _memory, opPointer1, instruction.operand2, memType);
+            if (instruction.operation == Enums::ComputerOperation::ADD)
+                setMemoryByte(token->getMemoryRef(), _memory, opPointer1, getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType) + instruction.operand2, memType);
+            if (instruction.operation == Enums::ComputerOperation::SUB)
+                setMemoryByte(token->getMemoryRef(), _memory, opPointer1, getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType) - instruction.operand2, memType);
+            if (instruction.operation == Enums::ComputerOperation::MUL)
+                setMemoryByte(token->getMemoryRef(), _memory, opPointer1, getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType) * instruction.operand2, memType);
+            if (instruction.operation == Enums::ComputerOperation::DIV) {
+                if (instruction.operand2 > 0)
+                    setMemoryByte(token->getMemoryRef(), _memory, opPointer1, getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType) / instruction.operand2, memType);
+                else
+                    setMemoryByte(token->getMemoryRef(), _memory, opPointer1, 0, memType);
+            }
+            if (instruction.operation == Enums::ComputerOperation::XOR)
+                setMemoryByte(token->getMemoryRef(), _memory, opPointer1, getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType) ^ instruction.operand2, memType);
+            if (instruction.operation == Enums::ComputerOperation::OR)
+                setMemoryByte(token->getMemoryRef(), _memory, opPointer1, getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType) | instruction.operand2, memType);
+            if (instruction.operation == Enums::ComputerOperation::AND)
+                setMemoryByte(token->getMemoryRef(), _memory, opPointer1, getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType) & instruction.operand2, memType);
+        }
+
+        //if instructions
+        instruction.operand1 = getMemoryByte(token->getMemoryRef(), _memory, opPointer1, memType);
+        if (instruction.operation == Enums::ComputerOperation::IFG) {
+            if (instruction.operand1 > instruction.operand2)
+                condTable[condPointer] = true;
+            else
+                condTable[condPointer] = false;
+            condPointer++;
+        }
+        if (instruction.operation == Enums::ComputerOperation::IFGE) {
+            if (instruction.operand1 >= instruction.operand2)
+                condTable[condPointer] = true;
+            else
+                condTable[condPointer] = false;
+            condPointer++;
+        }
+        if (instruction.operation == Enums::ComputerOperation::IFE) {
+            if (instruction.operand1 == instruction.operand2)
+                condTable[condPointer] = true;
+            else
+                condTable[condPointer] = false;
+            condPointer++;
+        }
+        if (instruction.operation == Enums::ComputerOperation::IFNE) {
+            if (instruction.operand1 != instruction.operand2)
+                condTable[condPointer] = true;
+            else
+                condTable[condPointer] = false;
+            condPointer++;
+        }
+        if (instruction.operation == Enums::ComputerOperation::IFLE) {
+            if (instruction.operand1 <= instruction.operand2)
+                condTable[condPointer] = true;
+            else
+                condTable[condPointer] = false;
+            condPointer++;
+        }
+        if (instruction.operation == Enums::ComputerOperation::IFL) {
+            if (instruction.operand1 < instruction.operand2)
+                condTable[condPointer] = true;
+            else
+                condTable[condPointer] = false;
+            condPointer++;
+        }
+
+        if (instruction.operation == Enums::ComputerOperation::ELSE) {
+            if (condPointer > 0)
+                condTable[condPointer - 1] = !condTable[condPointer - 1];
+        }
+
+        if (instruction.operation == Enums::ComputerOperation::ENDIF) {
+            if (condPointer > 0)
+                condPointer--;
+        }
+    }
+*/
 }

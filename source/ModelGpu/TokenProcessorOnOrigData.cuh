@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base.cuh"
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 #include "Map.cuh"
 #include "ModelBasic/Enums.h"
 #include "Physics.cuh"

@@ -3,7 +3,7 @@
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"

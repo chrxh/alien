@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 #include "ModelBasic/ChangeDescriptions.h"
 
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 #include "DefinitionsImpl.h"
 
 class _CudaJob

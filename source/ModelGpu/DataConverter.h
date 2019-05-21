@@ -2,7 +2,7 @@
 
 #include "ModelBasic/Definitions.h"
 #include "Definitions.h"
-#include "CudaInterface.cuh"
+#include "CudaAccessTOs.cuh"
 
 class DataConverter
 {
