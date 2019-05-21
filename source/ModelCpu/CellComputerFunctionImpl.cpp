@@ -45,15 +45,15 @@ void CellComputerFunctionImpl::mutateImpl()
 namespace
 {
 	enum class MemoryType {
-		TOKEN, CELL
+		Token, Cell
 	};
 
 	qint8 getMemoryByte(QByteArray const& tokenMemory, QByteArray const& cellMemory, quint8 pointer, MemoryType type)
 	{
-		if (type == MemoryType::TOKEN) {
+		if (type == MemoryType::Token) {
 			return tokenMemory[pointer];
 		}
-		if (type == MemoryType::CELL) {
+		if (type == MemoryType::Cell) {
 			return cellMemory[pointer];
 		}
 		return tokenMemory[pointer];
@@ -61,10 +61,10 @@ namespace
 
 	void setMemoryByte(QByteArray& tokenMemory, QByteArray& cellMemory, quint8 pointer, qint8 value, MemoryType type)
 	{
-		if (type == MemoryType::TOKEN) {
+		if (type == MemoryType::Token) {
 			tokenMemory[pointer] = value;
 		}
-		if (type == MemoryType::CELL) {
+		if (type == MemoryType::Cell) {
 			cellMemory[pointer] = value;
 		}
 	}
@@ -86,7 +86,7 @@ CellFeatureChain::ProcessingResult CellComputerFunctionImpl::processImpl (Token*
 
         //operand 1: pointer to mem
         quint8 opPointer1 = 0;
-		MemoryType memType = MemoryType::TOKEN;
+		MemoryType memType = MemoryType::Token;
         if (instruction.opType1 == Enums::ComputerOptype::MEM)
             opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.tokenMemorySize);
         if (instruction.opType1 == Enums::ComputerOptype::MEMMEM) {
@@ -95,7 +95,7 @@ CellFeatureChain::ProcessingResult CellComputerFunctionImpl::processImpl (Token*
         }
 		if (instruction.opType1 == Enums::ComputerOptype::CMEM) {
 			opPointer1 = CompilerHelper::convertToAddress(instruction.operand1, parameters.cellFunctionComputerCellMemorySize);
-			memType = MemoryType::CELL;
+			memType = MemoryType::Cell;
 		}
 
         //operand 2: loading value
