@@ -95,7 +95,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
             Token const& token = cluster.tokens[tokenIndex];
             TokenAccessTO& tokenTO = tokenTOs[tokenIndex];
             tokenTO.energy = token.energy;
-            for (int i = 0; i < MAX_TOKEN_MEM_SIZE; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
                 tokenTO.memory[i] = token.memory[i];
             }
             int tokenCellIndex = token.cell - cluster.cells + cellTOIndex;
