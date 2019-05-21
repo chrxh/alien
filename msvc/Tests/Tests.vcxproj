@@ -278,7 +278,7 @@
     <ClCompile Include="..\..\source\Tests\MultithreadingTest.cpp" />
     <ClCompile Include="..\..\source\Tests\NumberGeneratorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ParticleSimulationGpuTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\SimulationGpuTest.cpp" />
+    <ClCompile Include="..\..\source\Tests\SimulationGpuTestFramework.cpp" />
     <ClCompile Include="..\..\source\Tests\PhysicsTest.cpp" />
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp" />
@@ -293,7 +293,7 @@
     <ClInclude Include="..\..\source\Tests\IntegrationTestFramework.h" />
     <ClInclude Include="..\..\source\Tests\IntegrationTestHelper.h" />
     <ClInclude Include="..\..\source\Tests\Predicates.h" />
-    <ClInclude Include="..\..\source\Tests\SimulationGpuTest.h" />
+    <ClInclude Include="..\..\source\Tests\SimulationGpuTestFramework.h" />
     <ClInclude Include="..\..\source\Tests\TestSettings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

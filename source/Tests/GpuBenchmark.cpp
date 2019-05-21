@@ -1,12 +1,12 @@
 #include <QElapsedTimer>
 
-#include "SimulationGpuTest.h"
+#include "SimulationGpuTestFramework.h"
 
 class GpuBenchmark
-    : public SimulationGpuTest
+    : public SimulationGpuTestFramework
 {
 public:
-    GpuBenchmark() : SimulationGpuTest({ 4000, 2000 })
+    GpuBenchmark() : SimulationGpuTestFramework({ 4000, 2000 })
     {}
 
     virtual ~GpuBenchmark() = default;
