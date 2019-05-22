@@ -124,7 +124,7 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingSpreadingAndFeatu
 			int tokenIndex = atomicAdd(&newNumTokens, 1);
 			Token& newToken = newTokens[tokenIndex];
 			copyToken(&token, &newToken, &connectingCell);
-//            processingCellFeatures(&cell, &newToken);
+            processingCellFeatures(&cell, &newToken);
 
             if (token.energy - availableTokenEnergyForCell > 0) {
                 auto origConnectingCellEnergy = atomicAdd(&connectingCell.energy, -(token.energy - availableTokenEnergyForCell));
