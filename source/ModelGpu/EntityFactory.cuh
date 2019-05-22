@@ -3,6 +3,8 @@
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
+#include "ModelBasic/ElementaryTypes.h"
+
 #include "CudaAccessTOs.cuh"
 #include "CudaConstants.cuh"
 #include "Base.cuh"
@@ -17,10 +19,11 @@ private:
     SimulationData* _data;
 
 public:
-    __device__ void init(SimulationData* data);
-    __device__ void createClusterFromTO(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO);
-    __device__ void createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO);
-    __device__ void createClusterWithRandomCell(float energy, float2 const & pos, float2 const & vel);
+    __inline__ __device__ void init(SimulationData* data);
+    __inline__ __device__ void createClusterFromTO(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO);
+    __inline__ __device__ void createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO);
+    __inline__ __device__ void createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
+    __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel);
 
 };
 
@@ -28,13 +31,13 @@ public:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ void EntityFactory::init(SimulationData* data)
+__inline__ __device__ void EntityFactory::init(SimulationData* data)
 {
     _data = data;
     _map.init(data->size);
 }
 
-__device__ void EntityFactory::createClusterFromTO(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO)
+__inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO)
 {
     __shared__ Cluster* cluster;
     __shared__ float angularMass;
@@ -146,7 +149,7 @@ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO const& cluste
     }
 }
 
-__device__ void EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO)
+__inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO)
 {
     Particle* particle = _data->particlesAC2.getNewElement();
     particle->id = particleTO.id;
@@ -158,7 +161,7 @@ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO const& part
     particle->alive = true;
 }
 
-__device__ void EntityFactory::createClusterWithRandomCell(float energy, float2 const & pos, float2 const & vel)
+__inline__ __device__ void EntityFactory::createClusterWithRandomCell(float energy, float2 const & pos, float2 const & vel)
 {
     Cluster* cluster = _data->clustersAC2.getNewElement();
     Cell* cell = _data->cellsAC2.getNewElement();
@@ -212,4 +215,16 @@ __device__ void EntityFactory::createClusterWithRandomCell(float energy, float2 
     for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
         cell->mutableData[i] = _data->numberGen.random(255);
     }
+}
+
+__inline__ __device__ Particle * EntityFactory::createParticle(float energy, float2 const & pos, float2 const & vel)
+{
+    Particle* particle = _data->particlesAC1.getNewElement();
+    particle->id = _data->numberGen.createNewId_kernel();
+    particle->locked = 0;
+    particle->alive = true;
+    particle->energy = energy;
+    particle->pos = pos;
+    particle->vel = vel;
+    return particle;
 }
