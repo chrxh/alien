@@ -386,7 +386,9 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingRadiation()
         for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
             auto& cell = _cluster->cells[cellIndex];
             if (!cell.alive) {
-                factory.createParticle(cell.energy, cell.absPos, cell.vel);
+                auto pos = cell.absPos;
+                _cellMap.mapPosCorrection(pos);
+                factory.createParticle(cell.energy, pos, cell.vel);
             }
         }
     }
