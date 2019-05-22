@@ -370,7 +370,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourc
 
 __inline__ __device__ void ClusterProcessorOnCopyData::processingClusterCopy()
 {
-    if (_origCluster->numCells == 1 && !_origCluster->cells[0].alive && !_origCluster->clusterToFuse) {
+    if (_origCluster->numCells == 1 && !_origCluster->cells->alive && !_origCluster->clusterToFuse) {
         __syncthreads();
         return;
     }
@@ -445,5 +445,4 @@ __inline__ __device__ void ClusterProcessorOnCopyData::correctTokens(Token* toke
 {
     token->cell = token->cell->nextTimestep;
 }
-
 
