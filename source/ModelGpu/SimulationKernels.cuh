@@ -143,7 +143,7 @@ __global__ void particleProcessingOnOrigDataStep2(SimulationData data)
 	dynamics.processingCollision();
 }
 
-__global__ void particleReorganizing(SimulationData data)
+__global__ void particleProcessingOnCopyData(SimulationData data)
 {
 	ParticleProcessorOnCopyData reorganizer;
 	reorganizer.init(data);
