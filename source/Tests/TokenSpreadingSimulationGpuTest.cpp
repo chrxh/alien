@@ -598,7 +598,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testMassiveMovements)
     checkEnergy(origData, newData);
 }
 
-TEST_F(TokenSpreadingSimulationGpuTest, testMovementonDestroyedCell)
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementOnDestroyedCell)
 {
     auto cellMinEnergy = _parameters.cellMinEnergy;
 

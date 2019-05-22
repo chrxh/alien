@@ -20,11 +20,14 @@ private:
 
 public:
     __inline__ __device__ void init(SimulationData* data);
-    __inline__ __device__ void createClusterFromTO(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO);
-    __inline__ __device__ void createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO);
+    __inline__ __device__ void createClusterFromTO(
+        ClusterAccessTO const& clusterTO,
+        DataAccessTO const* _simulationTO);  //should be called from all threads of a block
+    __inline__ __device__ void createParticleFromTO(
+        ParticleAccessTO const& particleTO,
+        DataAccessTO const* _simulationTO);
     __inline__ __device__ void createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
-    __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel);
-
+    __inline__ __device__ void createParticle(float energy, float2 const& pos, float2 const& vel);
 };
 
 /************************************************************************/
@@ -217,14 +220,13 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
     }
 }
 
-__inline__ __device__ Particle * EntityFactory::createParticle(float energy, float2 const & pos, float2 const & vel)
+__inline__ __device__ void EntityFactory::createParticle(float energy, float2 const & pos, float2 const & vel)
 {
-    Particle* particle = _data->particlesAC1.getNewElement();
+    Particle* particle = _data->particlesAC2.getNewElement();
     particle->id = _data->numberGen.createNewId_kernel();
     particle->locked = 0;
     particle->alive = true;
     particle->energy = energy;
     particle->pos = pos;
     particle->vel = vel;
-    return particle;
 }
