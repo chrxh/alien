@@ -142,7 +142,7 @@ void CudaSimulation::calcNextTimestep()
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
-    particleReorganizing << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
+    particleProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
