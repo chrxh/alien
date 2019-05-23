@@ -64,13 +64,13 @@ class Map
 	: public BasicMap
 {
 public:
-	__inline__ __host__ __device__ void init(int2 const& size, T ** map)
+	__inline__ __device__ void init(int2 const& size, T ** map)
 	{
 		BasicMap::init(size);
 		_map = map;
 	}
 
-	__inline__ __host__ __device__ bool isEntityPresent(float2 const& pos, T* entity) const
+	__inline__ __device__ bool isEntityPresent(float2 const& pos, T* entity) const
 	{
 		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
@@ -78,7 +78,7 @@ public:
 		return _map[mapEntry] == entity;
 	}
 
-	__inline__ __host__ __device__ T* get(float2 const& pos) const
+	__inline__ __device__ T* get(float2 const& pos) const
 	{
 		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
@@ -86,12 +86,12 @@ public:
 		return _map[mapEntry];
 	}
 
-	__inline__ __host__ __device__ void set(float2 const& pos, T* entity)
+	__inline__ __device__ void set(float2 const& pos, T* entity)
 	{
 		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
 		auto mapEntry = posInt.x + posInt.y * _size.x;
-		_map[mapEntry] = entity;
+        _map[mapEntry] = entity;
 	}
 
 private:

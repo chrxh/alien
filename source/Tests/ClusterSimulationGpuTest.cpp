@@ -666,19 +666,23 @@ TEST_F(ClusterSimulationGpuTest, testDecomposeClusterAfterLowEnergy_duringRotati
 */
 TEST_F(ClusterSimulationGpuTest, testDestructionOfTooCloseCells)
 {
-	float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
+    _parameters.radiationProb = 0;    //exclude radiation
+    _context->setSimulationParameters(_parameters);
+
+    float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
 
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100, 100.5f }, QVector2D{ 0, 0 }, 0.0));
-	origData.addCluster(createHorizontalCluster(3, QVector2D{ 100, 100.5f + closeDistance }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100.5f, 100.5f }, QVector2D{ 0, 0 }, 0.0));
+	origData.addCluster(createHorizontalCluster(3, QVector2D{ 100.5f, 100.5f + closeDistance }, QVector2D{ 0, 0 }, 0.0));
 
 	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(100, _controller);
+	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(5, newData.clusters->at(0).cells->size());
 	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
 }
 
 /**
