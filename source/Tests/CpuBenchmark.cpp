@@ -30,25 +30,28 @@ class CpuBenchmark
 	: public IntegrationTestFramework
 {
 public:
-	CpuBenchmark();
+    CpuBenchmark() : IntegrationTestFramework({ 2004, 1002 })
+    { }
 
 protected:
 	void createTestData(SimulationAccess* access);
 };
 
-CpuBenchmark::CpuBenchmark()
-	: IntegrationTestFramework({ 12 * 33 * 3, 12 * 17 * 3 })
-{
-}
 
 void CpuBenchmark::createTestData(SimulationAccess * access)
 {
-	DataChangeDescription desc;
-	for (int i = 0; i < 20000 * 9; ++i) {
-		desc.addNewParticle(ParticleChangeDescription().setPos(QVector2D(_numberGen->getRandomInt(_universeSize.x), _numberGen->getRandomInt(_universeSize.y)))
-			.setVel(QVector2D(_numberGen->getRandomReal()*2.0 - 1.0, _numberGen->getRandomReal()*2.0 - 1.0))
-			.setEnergy(50));
-	}
+	DataDescription desc;
+
+    for (int i = 0; i < 1000; ++i) {
+        desc.addCluster(createRectangularCluster({ 7, 40 },
+            QVector2D{
+            static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
+            static_cast<float>(_numberGen->getRandomReal(0, _universeSize.y)) },
+            QVector2D{
+            static_cast<float>(_numberGen->getRandomReal(-1, 1)),
+            static_cast<float>(_numberGen->getRandomReal(-1, 1)) }
+        ));
+    }
 	access->updateData(desc);
 }
 
@@ -60,12 +63,11 @@ TEST_F(CpuBenchmark, benchmarkOneThreadWithOneUnit)
 	access->init(controller);
 	_numberGen = controller->getContext()->getNumberGenerator();
 
-
 	createTestData(access);
 
     QElapsedTimer timer;
     timer.start();
-	IntegrationTestHelper::runSimulation(20, controller);
+	IntegrationTestHelper::runSimulation(200, controller);
     std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
@@ -85,7 +87,7 @@ TEST_F(CpuBenchmark, benchmarkOneThreadWithManyUnits)
 	createTestData(access);
     QElapsedTimer timer;
     timer.start();
-    IntegrationTestHelper::runSimulation(20, controller);
+    IntegrationTestHelper::runSimulation(200, controller);
     std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
@@ -106,7 +108,7 @@ TEST_F(CpuBenchmark, benchmarkFourThread)
 
     QElapsedTimer timer;
     timer.start();
-    IntegrationTestHelper::runSimulation(20, controller);
+    IntegrationTestHelper::runSimulation(200, controller);
     std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
@@ -127,7 +129,7 @@ TEST_F(CpuBenchmark, benchmarkEightThread)
 
     QElapsedTimer timer;
     timer.start();
-    IntegrationTestHelper::runSimulation(20, controller);
+    IntegrationTestHelper::runSimulation(200, controller);
     std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 
 	delete access;
