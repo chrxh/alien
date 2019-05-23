@@ -248,5 +248,8 @@
     <ClInclude Include="..\..\source\ModelBasic\ElementaryTypes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\SerializationHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

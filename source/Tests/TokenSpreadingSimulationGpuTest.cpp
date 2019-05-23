@@ -1,3 +1,6 @@
+#include "ModelBasic/Serializer.h"
+#include "ModelBasic/SerializationHelper.h"
+
 #include "SimulationGpuTestFramework.h"
 
 class TokenSpreadingSimulationGpuTest
@@ -9,6 +12,8 @@ public:
 protected:
     virtual void SetUp();
 
+    ClusterDescription createStickyRotatingTokenCluster(QVector2D const& pos, QVector2D const& vel);
+
     const float tokenTransferEnergyAmount = 10.0;
 };
 
@@ -17,6 +22,28 @@ void TokenSpreadingSimulationGpuTest::SetUp()
     _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
 }
+
+ClusterDescription TokenSpreadingSimulationGpuTest::createStickyRotatingTokenCluster(
+    QVector2D const& pos,
+    QVector2D const& vel)
+{
+    auto token = createSimpleToken();
+    auto cluster = createRectangularCluster({2, 2}, pos, vel);
+    for (auto& cell : *cluster.cells) {
+        cell.maxConnections = 4;
+    }
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    auto& thirdCell = cluster.cells->at(3);
+    auto& fourthCell = cluster.cells->at(2);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    thirdCell.tokenBranchNumber = 2;
+    fourthCell.tokenBranchNumber = 3;
+    firstCell.addToken(token);
+    return cluster;
+}
+
 
 /**
 * Situation: - one horizontal cluster with 10 cells and ascending branch numbers
@@ -708,4 +735,31 @@ TEST_F(TokenSpreadingSimulationGpuTest, testMovementOnDestroyedCell_closeCell)
 
     }
     checkEnergy(origData, newData);
+}
+
+/**
+* Situation: - many 2x2 clusters with circular ascending branch numbers
+*  			 - first cell of each cluster has a token
+*			 - simulating 100 time steps
+* Expected result: no crash
+*/
+TEST_F(TokenSpreadingSimulationGpuTest, regressionTest_manyStickyRotatingTokenClusters)
+{
+    auto highVel = _parameters.cellFusionVelocity*2;
+
+    _parameters.cellMaxTokenBranchNumber = 4;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+    for (int i = 0; i < 25; ++i) {
+        auto cluster = createStickyRotatingTokenCluster(
+            QVector2D{static_cast<float>(_numberGen->getRandomReal(-10, 10)),
+                      static_cast<float>(_numberGen->getRandomReal(-10, 10))},
+            QVector2D{static_cast<float>(_numberGen->getRandomReal(-highVel, highVel)),
+                      static_cast<float>(_numberGen->getRandomReal(-highVel, highVel))});
+        origData.addCluster(cluster);
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(100, _controller);
 }

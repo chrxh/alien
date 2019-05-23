@@ -331,6 +331,10 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourc
         if (!cell->alive) {
             continue;
         }
+        if (0 == cell->nextTimestep) {
+            int dummy = 0;
+            ++dummy;
+        }
         auto const& successorCell = *cell->nextTimestep;
         auto const& successorCluster = successorCell.cluster;
         if (successorCluster == targetCluster) {
