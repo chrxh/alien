@@ -22,7 +22,6 @@ public:
 private:
     __inline__ __device__ void destroyCloseCell(Cell *cell);
     __inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
-    __inline__ __device__ void cellRadiation(Cell *cell);
     __inline__ __device__ bool areConnectable(Cell *cell1, Cell *cell2);
 
     SimulationData* _data;
@@ -420,18 +419,10 @@ __inline__ __device__ void ClusterProcessorOnOrigData::destroyCloseCell(float2 c
             cluster->decompositionRequired = true;
         }
         else {
-            auto lockState = atomicExch(&mapCluster->locked, 1);
-            if (0 == lockState) {
-                mapCell->alive = false;
-                mapCluster->decompositionRequired = true;
-                mapCluster->locked = 0;
-            }
+            mapCell->alive = false;
+            mapCluster->decompositionRequired = true;
         }
     }
-}
-
-__inline__ __device__ void ClusterProcessorOnOrigData::cellRadiation(Cell *cell)
-{
 }
 
 __inline__ __device__ bool ClusterProcessorOnOrigData::areConnectable(Cell * cell1, Cell * cell2)
