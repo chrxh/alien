@@ -884,9 +884,6 @@
     <ClInclude Include="ui_MainView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\SerializationHelper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\StringHelper.h">
       <Filter>Source Files</Filter>
     </ClInclude>

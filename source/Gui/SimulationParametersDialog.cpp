@@ -6,9 +6,9 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/Serializer.h"
+#include "ModelBasic/SerializationHelper.h"
 
 #include "Settings.h"
-#include "SerializationHelper.h"
 #include "SimulationParametersDialog.h"
 #include "SimulationConfig.h"
 #include "ui_simulationparametersdialog.h"

@@ -8,9 +8,9 @@
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/Serializer.h"
+#include "ModelBasic/SerializationHelper.h"
 #include "Gui/Settings.h"
 
-#include "SerializationHelper.h"
 #include "SymbolTableDialog.h"
 #include "ui_symboltabledialog.h"
 

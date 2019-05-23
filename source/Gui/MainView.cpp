@@ -1,6 +1,7 @@
 ﻿#include "ModelBasic/SimulationController.h"
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/SerializationHelper.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
@@ -10,7 +11,6 @@
 #include "Gui/StartScreenController.h"
 #include "Gui/MonitorController.h"
 
-#include "SerializationHelper.h"
 #include "InfoController.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"

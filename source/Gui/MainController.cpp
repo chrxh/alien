@@ -16,6 +16,7 @@
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/DescriptionHelper.h"
 #include "ModelBasic/SimulationMonitor.h"
+#include "ModelBasic/SerializationHelper.h"
 
 #include "ModelCpu/SimulationControllerCpu.h"
 #include "ModelCpu/SimulationAccessCpu.h"
@@ -30,7 +31,6 @@
 #include "ModelGpu/SimulationMonitorGpu.h"
 
 #include "VersionController.h"
-#include "SerializationHelper.h"
 #include "InfoController.h"
 #include "MainController.h"
 #include "MainView.h"
