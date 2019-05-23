@@ -19,7 +19,7 @@ public:
 
 private:
     __inline__ __device__ void copyClusterWithDecomposition();
-    __inline__ __device__ void copyClusterWithoutDecompositionAndFusion();
+    __inline__ __device__ void copyCluster();
     __inline__ __device__ void copyClusterWithFusion();
     __inline__ __device__ void copyTokens(Cluster* sourceCluster, Cluster* targetCluster);
 
@@ -188,7 +188,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithoutDecompositionAndFusion()
+__inline__ __device__ void ClusterProcessorOnCopyData::copyCluster()
 {
     __shared__ Cluster* newCluster;
     __shared__ Cell* newCells;
@@ -331,10 +331,6 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourc
         if (!cell->alive) {
             continue;
         }
-        if (0 == cell->nextTimestep) {
-            int dummy = 0;
-            ++dummy;
-        }
         auto const& successorCell = *cell->nextTimestep;
         auto const& successorCluster = successorCell.cluster;
         if (successorCluster == targetCluster) {
@@ -386,7 +382,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::processingClusterCopy()
         copyClusterWithFusion();
     }
     else {
-        copyClusterWithoutDecompositionAndFusion();
+        copyCluster();
     }
 }
 
