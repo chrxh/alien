@@ -14,9 +14,11 @@ public:
 	SerializerImpl(QObject *parent = nullptr);
 	virtual ~SerializerImpl() = default;
 
-	virtual void init(SimulationControllerBuildFunc const& controllerBuilder, SimulationAccessBuildFunc const& accessBuilder) override;
+    virtual void init(
+        SimulationControllerBuildFunc const& controllerBuilder,
+        SimulationAccessBuildFunc const& accessBuilder) override;   //only for (de)serialization of entire simulation necessary
 
-	virtual void serialize(SimulationController* simController, int typeId, optional<Settings> newSettings = boost::none) override;
+    virtual void serialize(SimulationController* simController, int typeId, optional<Settings> newSettings = boost::none) override;
 	virtual string const& retrieveSerializedSimulation() override;
 	virtual SimulationController* deserializeSimulation(string const& content) override;
 

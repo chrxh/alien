@@ -11,6 +11,7 @@
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/SerializationHelper.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
@@ -28,7 +29,6 @@
 #include "Gui/GridMultiplierDialog.h"
 #include "Gui/MonitorController.h"
 #include "Gui/Settings.h"
-#include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
 #include "Gui/MainController.h"
 #include "Gui/MainModel.h"
