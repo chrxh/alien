@@ -27,9 +27,15 @@ __device__ void clusterProcessingOnOrigDataStep1(SimulationData &data, int clust
 
 __device__ void clusterProcessingOnOrigDataStep2(SimulationData &data, int clusterIndex)
 {
+    ClusterProcessorOnOrigData dynamics;
+    dynamics.init(data, clusterIndex);
+    dynamics.destroyCloseCell();
+}
+
+__device__ void clusterProcessingOnOrigDataStep3(SimulationData &data, int clusterIndex)
+{
 	ClusterProcessorOnOrigData dynamics;
 	dynamics.init(data, clusterIndex);
-	dynamics.destroyCloseCell();
 	dynamics.processingRadiation();
 	dynamics.processingCollision();	//attention: can result a temporarily inconsistent state
 									//will be resolved in reorganizer
@@ -57,13 +63,25 @@ __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
 
 __global__ void clusterProcessingOnOrigDataStep2(SimulationData data)
 {
+    int numEntities = data.clustersAC1.getNumEntries();
+
+    int startIndex;
+    int endIndex;
+    calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
+    for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+        clusterProcessingOnOrigDataStep2(data, clusterIndex);
+    }
+}
+
+__global__ void clusterProcessingOnOrigDataStep3(SimulationData data)
+{
 	int numEntities = data.clustersAC1.getNumEntries();
 
 	int startIndex;
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterProcessingOnOrigDataStep2(data, clusterIndex);
+		clusterProcessingOnOrigDataStep3(data, clusterIndex);
 	}
 }
 

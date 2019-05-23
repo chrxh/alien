@@ -532,7 +532,7 @@ TEST_F(TokenSpreadingSimulationGpuTest, testMovementWithTooManyTokens)
 TEST_F(TokenSpreadingSimulationGpuTest, testMovementAveragingCellEnergies)
 {
     DataDescription origData;
-    auto const& cellMinEnergy = _parameters.cellMinEnergy;
+    auto cellMinEnergy = _parameters.cellMinEnergy;
 
     auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     auto& firstCell = cluster.cells->at(0);
@@ -598,7 +598,14 @@ TEST_F(TokenSpreadingSimulationGpuTest, testMassiveMovements)
     checkEnergy(origData, newData);
 }
 
-TEST_F(TokenSpreadingSimulationGpuTest, testMovementOnDestroyedCell)
+/**
+* Situation: - horizontal cluster with 3 cells and ascending branch numbers
+*  			 - first cell has a token
+*            - first and second cell have low energy
+*			 - simulating 1 time step
+* Expected result: low energy cells including token should be destroyed
+*/
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementOnDestroyedCell_lowEnergy)
 {
     auto cellMinEnergy = _parameters.cellMinEnergy;
 
@@ -612,11 +619,8 @@ TEST_F(TokenSpreadingSimulationGpuTest, testMovementOnDestroyedCell)
     firstCell.energy = cellMinEnergy / 2;
     secondCell.energy = cellMinEnergy / 2;
     auto token = createSimpleToken();
-    auto& tokenData = *token.data;
     firstCell.addToken(token);
     origData.addCluster(cluster);
-
-    uint64_t secondCellId = secondCell.id;
 
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -631,5 +635,77 @@ TEST_F(TokenSpreadingSimulationGpuTest, testMovementOnDestroyedCell)
     auto const& newCell = newCluster.cells->at(0);
     EXPECT_TRUE(newCell.tokens->empty());
 
+    checkEnergy(origData, newData);
+}
+
+/**
+* Situation: - horizontal cluster with 3 cells and ascending branch numbers
+*   			 - first cell has a token
+*            - further horizontal cluster with 5 cells which overlaps
+*			 - simulating 1 time step
+* Expected result: overlapping cells of the smaller cluster should be destroyed and token should be moved
+*/
+TEST_F(TokenSpreadingSimulationGpuTest, testMovementOnDestroyedCell_closeCell)
+{
+    auto lowDistance = _parameters.cellMinDistance / 2;
+    uint64_t firstCellOfFirstClusterId;
+    uint64_t firstCellOfSecondClusterId;
+    uint64_t secondCellOfSecondClusterId;
+    uint64_t thirdCellOfSecondClusterId;
+    auto token = createSimpleToken();
+
+    DataDescription origData;
+    {
+        auto cluster = createHorizontalCluster(3, QVector2D{0.1f, 0.1f}, QVector2D{}, 0);
+        auto& firstCell = cluster.cells->at(0);
+        auto& secondCell = cluster.cells->at(1);
+        firstCell.tokenBranchNumber = 0;
+        secondCell.tokenBranchNumber = 1;
+        firstCell.addToken(token);
+        origData.addCluster(cluster);
+        firstCellOfFirstClusterId = firstCell.id;
+    }
+    {
+        auto cluster = createHorizontalCluster(5, QVector2D{ 2.1f, 0.1f + static_cast<float>(lowDistance) }, QVector2D{}, 0);
+        auto& firstCell = cluster.cells->at(0);
+        auto& secondCell = cluster.cells->at(1);
+        auto& thirdCell = cluster.cells->at(2);
+        firstCell.tokenBranchNumber = 0;
+        secondCell.tokenBranchNumber = 1;
+        thirdCell.tokenBranchNumber = 2;
+        firstCell.addToken(token);
+        secondCell.addToken(token);
+        origData.addCluster(cluster);
+        firstCellOfSecondClusterId = firstCell.id;
+        secondCellOfSecondClusterId = secondCell.id;
+        thirdCellOfSecondClusterId = thirdCell.id;
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(2, newData.clusters->size());
+
+    auto newClusterById = IntegrationTestHelper::getClusterByCellId(newData);
+    {
+        auto const& newCluster = newClusterById.at(firstCellOfFirstClusterId);
+        EXPECT_EQ(1, newCluster.cells->size());
+        auto const& newCell = newCluster.cells->at(0);
+    }
+    {
+        auto const& newCluster = newClusterById.at(firstCellOfSecondClusterId);
+        EXPECT_EQ(5, newCluster.cells->size());
+        for (auto const& newCell : *newCluster.cells) {
+            if (newCell.id == secondCellOfSecondClusterId || newCell.id == thirdCellOfSecondClusterId) {
+                EXPECT_EQ(1, newCell.tokens->size());
+            }
+            else if (newCell.tokens) {
+                EXPECT_TRUE(newCell.tokens->empty());
+            }
+        }
+
+    }
     checkEnergy(origData, newData);
 }

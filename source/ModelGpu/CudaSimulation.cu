@@ -130,6 +130,10 @@ void CudaSimulation::calcNextTimestep()
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
+    clusterProcessingOnOrigDataStep3 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
+    cudaDeviceSynchronize();
+    checkCudaErrors(cudaGetLastError());
+
     clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
