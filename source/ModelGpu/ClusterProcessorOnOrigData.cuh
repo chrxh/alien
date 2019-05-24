@@ -137,7 +137,8 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
                     avoidCollision = true;
                     break;
                 }
-                if (length(sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity && areConnectable(cell, otherCell)) {
+                if (length(sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity
+                    && areConnectable(cell, otherCell)) {
                     state = CollisionState::Fusion;
                 }
                 atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
