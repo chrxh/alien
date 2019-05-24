@@ -23,6 +23,7 @@ private:
     __inline__ __device__ void copyClusterWithFusion();
     __inline__ __device__ void copyTokens(Cluster* sourceCluster, Cluster* targetCluster);
     __inline__ __device__ void copyTokens(Cluster* sourceCluster1, Cluster* sourceCluster2, Cluster* targetCluster);
+    __inline__ __device__ void getNumberOfTokensToCopy(Cluster* sourceCluster, Cluster* targetCluster, int& counter);
 
     __inline__ __device__ void setSuccessorCell(Cell* origCell, Cell* newCell, Cluster* newCluster);
     __inline__ __device__ void correctCellConnections(Cell* origCell);
@@ -316,40 +317,24 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion()
 __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourceCluster, Cluster* targetCluster)
 {
     __shared__ int numberOfTokensToCopy;
+    __shared__ int tokenCopyIndex;
     if (0 == threadIdx.x) {
         numberOfTokensToCopy = 0;
+        tokenCopyIndex = 0;
+    }
+    __syncthreads();
+
+    getNumberOfTokensToCopy(sourceCluster, targetCluster, numberOfTokensToCopy);
+
+    if (0 == threadIdx.x) {
+        targetCluster->tokens = _data->tokensAC2.getNewSubarray(numberOfTokensToCopy);
+        targetCluster->numTokens = numberOfTokensToCopy;
     }
     __syncthreads();
 
     int startTokenIndex;
     int endTokenIndex;
     calcPartition(sourceCluster->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-
-    for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
-        auto const& token = sourceCluster->tokens[tokenIndex];
-        auto const& cell = token.cell;
-        if (!cell->alive) {
-            continue;
-        }
-        auto const& successorCell = *cell->nextTimestep;
-        auto const& successorCluster = successorCell.cluster;
-        if (successorCluster == targetCluster) {
-            atomicAdd(&numberOfTokensToCopy, 1);
-        }
-    }
-    __syncthreads();
-
-    __shared__ int tokenCopyIndex;
-    if (0 == threadIdx.x) {
-        tokenCopyIndex = targetCluster->numTokens;
-        auto newTokenArray = _data->tokensAC2.getNewSubarray(numberOfTokensToCopy);
-        if (0 == targetCluster->numTokens) {
-            targetCluster->tokens = newTokenArray;
-        }
-        targetCluster->numTokens += numberOfTokensToCopy;
-    }
-    __syncthreads();
-
     for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
         auto& token = sourceCluster->tokens[tokenIndex];
         auto& cell = token.cell;
@@ -371,13 +356,19 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokens(Cluster* sourc
 __inline__ __device__ void
 ClusterProcessorOnCopyData::copyTokens(Cluster* sourceCluster1, Cluster* sourceCluster2, Cluster* targetCluster)
 {
-
+    __shared__ int numberOfTokensToCopy;
     __shared__ int tokenCopyIndex;
     if (0 == threadIdx.x) {
+        numberOfTokensToCopy = 0;
         tokenCopyIndex = 0;
-        int numberOfTokensToCopy = sourceCluster1->numTokens + sourceCluster2->numTokens;
-        auto newTokenArray = _data->tokensAC2.getNewSubarray(numberOfTokensToCopy);
-        targetCluster->tokens = newTokenArray;
+    }
+    __syncthreads();
+
+    getNumberOfTokensToCopy(sourceCluster1, targetCluster, numberOfTokensToCopy);
+    getNumberOfTokensToCopy(sourceCluster2, targetCluster, numberOfTokensToCopy);
+
+    if (0 == threadIdx.x) {
+        targetCluster->tokens = _data->tokensAC2.getNewSubarray(numberOfTokensToCopy);
         targetCluster->numTokens = numberOfTokensToCopy;
     }
     __syncthreads();
@@ -385,7 +376,6 @@ ClusterProcessorOnCopyData::copyTokens(Cluster* sourceCluster1, Cluster* sourceC
     int startTokenIndex;
     int endTokenIndex;
     calcPartition(sourceCluster1->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-
     for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
         auto& token = sourceCluster1->tokens[tokenIndex];
         auto& cell = token.cell;
@@ -404,7 +394,6 @@ ClusterProcessorOnCopyData::copyTokens(Cluster* sourceCluster1, Cluster* sourceC
     __syncthreads();
 
     calcPartition(sourceCluster2->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-
     for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
         auto& token = sourceCluster2->tokens[tokenIndex];
         auto& cell = token.cell;
@@ -422,6 +411,28 @@ ClusterProcessorOnCopyData::copyTokens(Cluster* sourceCluster1, Cluster* sourceC
     }
     __syncthreads();
 
+}
+
+__inline__ __device__ void
+ClusterProcessorOnCopyData::getNumberOfTokensToCopy(Cluster* sourceCluster, Cluster* targetCluster, int& counter)
+{
+    int startTokenIndex;
+    int endTokenIndex;
+    calcPartition(sourceCluster->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+
+    for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+        auto const& token = sourceCluster->tokens[tokenIndex];
+        auto const& cell = token.cell;
+        if (!cell->alive) {
+            continue;
+        }
+        auto const& successorCell = *cell->nextTimestep;
+        auto const& successorCluster = successorCell.cluster;
+        if (successorCluster == targetCluster) {
+            atomicAdd(&counter, 1);
+        }
+    }
+    __syncthreads();
 }
 
 __inline__ __device__ void ClusterProcessorOnCopyData::processingClusterCopy()
