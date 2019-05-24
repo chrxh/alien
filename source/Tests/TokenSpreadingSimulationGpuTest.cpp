@@ -763,3 +763,44 @@ TEST_F(TokenSpreadingSimulationGpuTest, regressionTest_manyStickyRotatingTokenCl
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
 }
+
+namespace
+{
+    void setCenterPos(ClusterDescription& cluster, QVector2D const& centerPos)
+    {
+        auto diff = centerPos - *cluster.pos;
+        cluster.pos = centerPos;
+        for (auto& cell : *cluster.cells) {
+            cell.pos = *cell.pos + diff;
+        }
+    }
+}
+
+/**
+* Situation: - many concentrated replicator clusters
+*			 - simulating 100 time steps
+* Expected result: no crash
+*/
+TEST_F(TokenSpreadingSimulationGpuTest, regressionTest_manyReplicators)
+{
+    DataDescription loadData;
+    auto serializer = _basicFacade->buildSerializer();
+    auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.aco" };
+    SerializationHelper::loadFromFile<DataDescription>(
+        filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
+
+    auto& replicator = loadData.clusters->at(0);
+
+    DataDescription origData;
+    for (int i = 0; i < 400; ++i) {
+        setCenterPos(replicator, QVector2D{ static_cast<float>(_numberGen->getRandomReal(0, 30)),
+            static_cast<float>(_numberGen->getRandomReal(0, 30)) });
+        replicator.vel = QVector2D{ static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9)),
+            static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9f)) };
+        replicator.angularVel = _numberGen->getRandomReal(-1, 1);
+        origData.addCluster(replicator);
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(100, _controller);
+}
