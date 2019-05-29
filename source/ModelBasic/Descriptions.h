@@ -31,6 +31,8 @@ struct MODELBASIC_EXPORT TokenDescription
 	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
+#include <iostream>
+
 struct MODELBASIC_EXPORT CellDescription
 {
 	uint64_t id = 0;
@@ -76,8 +78,9 @@ struct MODELBASIC_EXPORT ClusterDescription
 	optional<vector<CellDescription>> cells;
 
 	ClusterDescription() = default;
-	ClusterDescription(ClusterChangeDescription const& change);
-	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
+    
+    ClusterDescription(ClusterChangeDescription const& change);
+    ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ClusterDescription& setAngle(double value) { angle = value; return *this; }
@@ -112,7 +115,6 @@ struct MODELBASIC_EXPORT ParticleDescription
 	optional<ParticleMetadata> metadata;
 
 	ParticleDescription() = default;
-	~ParticleDescription() = default;
 	ParticleDescription(ParticleChangeDescription const& change);
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
@@ -125,6 +127,7 @@ struct MODELBASIC_EXPORT DataDescription
 	optional<vector<ClusterDescription>> clusters;
 	optional<vector<ParticleDescription>> particles;
 
+    DataDescription() = default;
 	DataDescription& addClusters(list<ClusterDescription> const& value)
 	{
 		if (clusters) {

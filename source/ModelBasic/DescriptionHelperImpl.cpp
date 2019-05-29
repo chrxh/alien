@@ -48,23 +48,35 @@ void DescriptionHelperImpl::recluster(DataDescription & data, unordered_set<uint
 	reclustering(idsOfChangedClusters);
 }
 
+void DescriptionHelperImpl::makeValid(DataDescription & data)
+{
+    if (data.clusters) {
+        for (auto& cluster : *data.clusters) {
+            makeValid(cluster);
+        }
+    }
+    if (data.particles) {
+        for (auto& particle : *data.particles) {
+            makeValid(particle);
+        }
+    }
+}
+
 void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 {
-	if (cluster.id == 0) {
-		cluster.id = _numberGen->getId();
-		if (cluster.cells) {
-			unordered_map<uint64_t, uint64_t> newByOldIds;
-			for (auto & cell : *cluster.cells) {
-				uint64_t newId = _numberGen->getId();
-				newByOldIds.insert_or_assign(cell.id, newId);
-				cell.id = newId;
-			}
+	cluster.id = _numberGen->getId();
+	if (cluster.cells) {
+		unordered_map<uint64_t, uint64_t> newByOldIds;
+		for (auto & cell : *cluster.cells) {
+			uint64_t newId = _numberGen->getId();
+			newByOldIds.insert_or_assign(cell.id, newId);
+			cell.id = newId;
+		}
 
-			for (auto & cell : *cluster.cells) {
-				if (cell.connectingCells) {
-					for (uint64_t& connectingCellId : *cell.connectingCells) {
-						connectingCellId = newByOldIds.at(connectingCellId);
-					}
+		for (auto & cell : *cluster.cells) {
+			if (cell.connectingCells) {
+				for (uint64_t& connectingCellId : *cell.connectingCells) {
+					connectingCellId = newByOldIds.at(connectingCellId);
 				}
 			}
 		}
@@ -73,9 +85,7 @@ void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 
 void DescriptionHelperImpl::makeValid(ParticleDescription & particle)
 {
-	if (particle.id == 0) {
-		particle.id = _numberGen->getId();
-	}
+	particle.id = _numberGen->getId();
 }
 
 list<uint64_t> DescriptionHelperImpl::filterPresentCellIds(unordered_set<uint64_t> const & cellIds) const
