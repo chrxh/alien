@@ -39,6 +39,7 @@ private:
 	SimulationControllerBuildFunc _controllerBuilder;
 	SimulationAccessBuildFunc _accessBuilder;
 	SimulationAccess* _access = nullptr;
+    DescriptionHelper* _descHelper = nullptr;
 
 	struct ConfigToSerialize {
 		SimulationParameters parameters;

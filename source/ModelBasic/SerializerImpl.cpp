@@ -18,6 +18,7 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/DescriptionHelper.h"
 
 #include "SerializerImpl.h"
 
@@ -207,6 +208,10 @@ void SerializerImpl::init(SimulationControllerBuildFunc const& controllerBuilder
 {
 	_controllerBuilder = controllerBuilder;
 	_accessBuilder = accessBuilder;
+
+    auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto descHelper = facade->buildDescriptionHelper();
+    SET_CHILD(_descHelper, descHelper);
 }
 
 void SerializerImpl::serialize(SimulationController * simController, int typeId, optional<Settings> newSettings /*= boost::none*/)
@@ -265,6 +270,9 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 	auto simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
 
 	simController->setParent(this);
+
+    _descHelper->init(simController->getContext());
+    _descHelper->makeValid(data);
 
 	buildAccess(simController);
 	_access->clear();

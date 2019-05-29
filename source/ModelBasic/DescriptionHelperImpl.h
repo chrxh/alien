@@ -15,7 +15,8 @@ public:
 
 	virtual void reconnect(DataDescription& data, DataDescription& orgData, unordered_set<uint64_t> const& idsOfChangedCells) override;
 	virtual void recluster(DataDescription& data, unordered_set<uint64_t> const& idsOfChangedClusters) override;
-	virtual void makeValid(ClusterDescription& cluster) override;
+    virtual void makeValid(DataDescription& data) override;
+    virtual void makeValid(ClusterDescription& cluster) override;
 	virtual void makeValid(ParticleDescription& particle) override;
 
 private:
