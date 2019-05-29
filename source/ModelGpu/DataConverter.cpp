@@ -328,7 +328,7 @@ void DataConverter::processModifications()
 			auto const& cellTO = _dataTO.cells[cellIndex];
 			if (_cellToModifyById.find(cellTO.id) != _cellToModifyById.end()) {
 				auto const& cell = _cellToModifyById.at(cellTO.id);
-				if (auto const& tokens = cell.tokens) {
+				if (boost::optional<vector<TokenDescription>> const& tokens = cell.tokens.getOptionalValue()) {
 					clusterTO.numTokens += tokens->size();
 					for (int sourceTokenIndex = 0; sourceTokenIndex < tokens->size(); ++sourceTokenIndex) {
 						int targetTokenIndex = (*_dataTO.numTokens)++;
