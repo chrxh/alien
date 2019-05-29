@@ -88,23 +88,21 @@ void SimulationMonitorGpuImpl::calcMonitorData(DataAccessTO const& dataTO)
 	_monitorData.totalInternalEnergy = 0.0;
 	_monitorData.totalLinearKineticEnergy = 0.0;
 	_monitorData.totalRotationalKineticEnergy = 0.0;
-/*
-	for (int i = 0; i < dataTO.numClusters; ++i) {
-		ClusterAccessData const& cluster = dataTO.clusters[i];
-		_data.totalLinearKineticEnergy += Physics::linearKineticEnergy(cluster.numCells, { cluster.vel.x, cluster.vel.y });
-		if (cluster.angularMass < 0) {
-			int dummy = 0;
-			++dummy;
-		}
-		_data.totalRotationalKineticEnergy += Physics::rotationalKineticEnergy(cluster.angularMass, cluster.angularVel);
+	for (int i = 0; i < *dataTO.numClusters; ++i) {
+		auto const& cluster = dataTO.clusters[i];
+        _monitorData.totalLinearKineticEnergy += Physics::linearKineticEnergy(cluster.numCells, { cluster.vel.x, cluster.vel.y });
+//        _monitorData.totalRotationalKineticEnergy += Physics::rotationalKineticEnergy(cluster.angularMass, cluster.angularVel);
 	}
-*/
 	for (int i = 0; i < *dataTO.numCells; ++i) {
-		CellAccessTO const& cell = dataTO.cells[i];
+		auto const& cell = dataTO.cells[i];
 		_monitorData.totalInternalEnergy += cell.energy;
 	}
-	for (int i = 0; i < *dataTO.numParticles; ++i) {
-		ParticleAccessTO const& particle = dataTO.particles[i];
+    for (int i = 0; i < *dataTO.numTokens; ++i) {
+        auto const& token = dataTO.tokens[i];
+        _monitorData.totalInternalEnergy += token.energy;
+    }
+    for (int i = 0; i < *dataTO.numParticles; ++i) {
+        auto const& particle = dataTO.particles[i];
 		_monitorData.totalInternalEnergy += particle.energy;
 	}
 }
