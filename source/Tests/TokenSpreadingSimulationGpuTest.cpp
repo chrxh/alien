@@ -804,3 +804,4 @@ TEST_F(TokenSpreadingSimulationGpuTest, regressionTest_manyReplicators)
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
 }
+
