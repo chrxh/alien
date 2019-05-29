@@ -346,3 +346,39 @@ TEST_F(DataDescriptionTransferGpuTest, regressionTest_changeData)
 	descHelper->reconnect(dataModified, dataBefore, idsOfChangedCells);
 	EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataModified)));
 }
+
+/**
+* Situation:
+* 	- one cluster with one cell and one token is moved
+* Fixed error: token was removed in DataConverter::processModifications
+* Expected result: token is still there
+*/
+TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken)
+{
+    DataDescription origData;
+    auto cluster = createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0);
+    auto& cell = cluster.cells->at(0);
+    auto token = createSimpleToken();
+    cell.addToken(token);
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+
+    DataDescription changedData = origData;
+    auto& changedCluster = changedData.clusters->at(0);
+    *changedCluster.pos += QVector2D{ 1.0f, 0 };
+    for (auto& changedCell : *changedCluster.cells) {
+        *changedCell.pos += QVector2D{ 1.0f, 0 };
+    }
+    IntegrationTestHelper::updateData(_access, DataChangeDescription(origData, changedData));
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+
+    auto const& newCluster = newData.clusters->at(0);
+    EXPECT_EQ(1, newCluster.cells->size());
+
+    auto const& newCell = newCluster.cells->at(0);
+    EXPECT_EQ(1, newCell.tokens->size());
+}
