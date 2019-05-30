@@ -1,10 +1,10 @@
 #include "Base/ServiceLocator.h"
 #include "ModelBasic/CellComputerCompiler.h"
 
-#include "SimulationGpuTestFramework.h"
+#include "IntegrationGpuTestFramework.h"
 
 class CellComputerSimulationGpuTest
-    : public SimulationGpuTestFramework
+    : public IntegrationGpuTestFramework
 {
 public:
     virtual ~CellComputerSimulationGpuTest() = default;

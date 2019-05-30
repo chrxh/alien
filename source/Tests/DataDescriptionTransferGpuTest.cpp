@@ -23,31 +23,19 @@
 
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
+#include "IntegrationGpuTestFramework.h"
 
 class DataDescriptionTransferGpuTest
-	: public IntegrationTestFramework
+	: public IntegrationGpuTestFramework
 {
 public:
 	DataDescriptionTransferGpuTest();
 	~DataDescriptionTransferGpuTest();
-
-protected:
-	SimulationControllerGpu* _controller = nullptr;
-	SimulationContext* _context = nullptr;
-	SpaceProperties* _spaceProp = nullptr;
-	SimulationAccessGpu* _access = nullptr;
-	IntVector2D _gridSize{ 6, 6 };
 };
 
 DataDescriptionTransferGpuTest::DataDescriptionTransferGpuTest()
-	: IntegrationTestFramework({ 600, 300 })
+	: IntegrationGpuTestFramework({ 600, 300 })
 {
-	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelGpuData(), 0);
-	_context = _controller->getContext();
-	_spaceProp = _context->getSpaceProperties();
-	_access = _gpuFacade->buildSimulationAccess();
-	_access->init(_controller);
-	_numberGen = _context->getNumberGenerator();
 }
 
 DataDescriptionTransferGpuTest::~DataDescriptionTransferGpuTest()
@@ -366,10 +354,7 @@ TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken)
 
     DataDescription changedData = origData;
     auto& changedCluster = changedData.clusters->at(0);
-    *changedCluster.pos += QVector2D{ 1.0f, 0 };
-    for (auto& changedCell : *changedCluster.cells) {
-        *changedCell.pos += QVector2D{ 1.0f, 0 };
-    }
+    setCenterPos(changedCluster, QVector2D{ 1.0f, 0 });
     IntegrationTestHelper::updateData(_access, DataChangeDescription(origData, changedData));
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -381,4 +366,44 @@ TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken)
 
     auto const& newCell = newCluster.cells->at(0);
     EXPECT_EQ(1, newCell.tokens->size());
+}
+
+/**
+* Situation:
+* 	- two cluster with one cell each and one token
+*   - move one cluster by updating only a part of the universe where that cluster is situated
+* Fixed error: 
+* Expected result: changes are correctly transferred to simulation
+*/
+TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken_partialUpdate)
+{
+    auto token = createSimpleToken();
+
+    DataDescription origData;
+    for (int i = 0; i < 2; ++i) {
+        auto cluster = createHorizontalCluster(1, QVector2D{ static_cast<float>(10 + 40 * i), 0 }, QVector2D{}, 0);
+        auto& firstCell = cluster.cells->at(0);
+        firstCell.addToken(token);
+        origData.addCluster(cluster);
+    }
+    IntegrationTestHelper::updateData(_access, origData);
+
+    auto intermediateData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ 20, _universeSize.y } });
+    auto changedData = intermediateData;
+    auto& changedCluster = changedData.clusters->at(0);
+    setCenterPos(changedCluster, QVector2D{ 5, 0 });
+    IntegrationTestHelper::updateData(_access, DataChangeDescription(intermediateData, changedData));
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    ASSERT_EQ(2, newData.clusters->size());
+
+    int numToken = 0;
+    for (auto const& cluster : *newData.clusters) {
+        for (auto const& cell : *cluster.cells) {
+            if (cell.tokens) {
+                numToken += cell.tokens->size();
+            }
+        }
+    }
+    EXPECT_EQ(2, numToken);
 }
