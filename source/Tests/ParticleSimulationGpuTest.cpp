@@ -1,7 +1,7 @@
-#include "SimulationGpuTestFramework.h"
+#include "IntegrationGpuTestFramework.h"
 
 class ParticleSimulationGpuTest
-	: public SimulationGpuTestFramework
+	: public IntegrationGpuTestFramework
 {
 public:
 	virtual ~ParticleSimulationGpuTest() = default;

@@ -1,9 +1,9 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 
-#include "SimulationGpuTestFramework.h"
+#include "IntegrationGpuTestFramework.h"
 
-SimulationGpuTestFramework::SimulationGpuTestFramework(IntVector2D const& universeSize)
+IntegrationGpuTestFramework::IntegrationGpuTestFramework(IntVector2D const& universeSize)
 	: IntegrationTestFramework(universeSize)
 {
 	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelGpuData(), 0);
@@ -11,17 +11,21 @@ SimulationGpuTestFramework::SimulationGpuTestFramework(IntVector2D const& univer
 	_spaceProp = _context->getSpaceProperties();
 	_access = _gpuFacade->buildSimulationAccess();
 	_parameters = _context->getSimulationParameters();
-	_numberGen = _context->getNumberGenerator();
+    _numberGen = _context->getNumberGenerator();
 	_access->init(_controller);
+
+    _descHelper = _basicFacade->buildDescriptionHelper();
+    _descHelper->init(_context);
 }
 
-SimulationGpuTestFramework::~SimulationGpuTestFramework()
+IntegrationGpuTestFramework::~IntegrationGpuTestFramework()
 {
 	delete _access;
 	delete _controller;
+    delete _descHelper;
 }
 
-void SimulationGpuTestFramework::checkEnergy(DataDescription const& origData, DataDescription const& newData) const
+void IntegrationGpuTestFramework::checkEnergy(DataDescription const& origData, DataDescription const& newData) const
 {
 	auto energyBefore = calcEnergy(origData);
 	auto energyAfter = calcEnergy(newData);
@@ -29,7 +33,7 @@ void SimulationGpuTestFramework::checkEnergy(DataDescription const& origData, Da
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
 }
 
-void SimulationGpuTestFramework::checkDistancesToConnectingCells(DataDescription const & data) const
+void IntegrationGpuTestFramework::checkDistancesToConnectingCells(DataDescription const & data) const
 {
 	if (!data.clusters) {
 		return;
@@ -49,7 +53,7 @@ void SimulationGpuTestFramework::checkDistancesToConnectingCells(DataDescription
 	}
 }
 
-void SimulationGpuTestFramework::checkKineticEnergy(DataDescription const & origData, DataDescription const & newData) const
+void IntegrationGpuTestFramework::checkKineticEnergy(DataDescription const & origData, DataDescription const & newData) const
 {
 	auto energyBefore = calcKineticEnergy(origData);
 	auto energyAfter = calcKineticEnergy(newData);
@@ -57,7 +61,7 @@ void SimulationGpuTestFramework::checkKineticEnergy(DataDescription const & orig
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
 }
 
-Physics::Velocities SimulationGpuTestFramework::calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const
+Physics::Velocities IntegrationGpuTestFramework::calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const
 {
 	CHECK(!cellIds.empty());
 	vector<QVector2D> relPositionOfMasses;
@@ -69,7 +73,7 @@ Physics::Velocities SimulationGpuTestFramework::calcVelocitiesOfClusterPart(Clus
 	return Physics::velocitiesOfCenter({ *cluster.vel, *cluster.angularVel }, relPositionOfMasses);
 }
 
-Physics::Velocities SimulationGpuTestFramework::calcVelocitiesOfFusion(ClusterDescription const & cluster1, ClusterDescription const & cluster2) const
+Physics::Velocities IntegrationGpuTestFramework::calcVelocitiesOfFusion(ClusterDescription const & cluster1, ClusterDescription const & cluster2) const
 {
 	vector<QVector2D> relPositionOfMasses1;
 	std::transform(
@@ -88,7 +92,7 @@ Physics::Velocities SimulationGpuTestFramework::calcVelocitiesOfFusion(ClusterDe
 		*cluster2.pos, { *cluster2.vel, *cluster2.angularVel }, relPositionOfMasses2);
 }
 
-double SimulationGpuTestFramework::calcEnergy(DataDescription const & data) const
+double IntegrationGpuTestFramework::calcEnergy(DataDescription const & data) const
 {
 	auto result = 0.0;
 	if (data.clusters) {
@@ -105,7 +109,7 @@ double SimulationGpuTestFramework::calcEnergy(DataDescription const & data) cons
 	return result;
 }
 
-double SimulationGpuTestFramework::calcEnergy(ClusterDescription const & cluster) const
+double IntegrationGpuTestFramework::calcEnergy(ClusterDescription const & cluster) const
 {
 	auto result = calcKineticEnergy(cluster);
 	if (cluster.cells) {
@@ -121,7 +125,7 @@ double SimulationGpuTestFramework::calcEnergy(ClusterDescription const & cluster
 	return result;
 }
 
-double SimulationGpuTestFramework::calcKineticEnergy(DataDescription const & data) const
+double IntegrationGpuTestFramework::calcKineticEnergy(DataDescription const & data) const
 {
 	auto result = 0.0;
 	if (data.clusters) {
@@ -132,7 +136,7 @@ double SimulationGpuTestFramework::calcKineticEnergy(DataDescription const & dat
 	return result;
 }
 
-double SimulationGpuTestFramework::calcKineticEnergy(ClusterDescription const& cluster) const
+double IntegrationGpuTestFramework::calcKineticEnergy(ClusterDescription const& cluster) const
 {
 	auto mass = cluster.cells->size();
 	auto vel = *cluster.vel;
@@ -146,10 +150,18 @@ double SimulationGpuTestFramework::calcKineticEnergy(ClusterDescription const& c
 	return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
 }
 
-void SimulationGpuTestFramework::setMaxConnections(ClusterDescription& cluster, int maxConnections) const
+void IntegrationGpuTestFramework::setMaxConnections(ClusterDescription& cluster, int maxConnections) const
 {
 	for (CellDescription& cell : *cluster.cells) {
 		cell.setMaxConnections(maxConnections);
 	}
 }
 
+void IntegrationGpuTestFramework::setCenterPos(ClusterDescription& cluster, QVector2D const& centerPos) const
+{
+    auto diff = centerPos - *cluster.pos;
+    cluster.pos = centerPos;
+    for (auto& cell : *cluster.cells) {
+        cell.pos = *cell.pos + diff;
+    }
+}
