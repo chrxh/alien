@@ -171,12 +171,15 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
 
     if (!containedInRect) {
         __shared__ Cell* newCells;
+        __shared__ Token* newTokens;
         __shared__ Cluster* newCluster;
         if (0 == threadIdx.x) {
             newCluster = data.clustersAC2.getNewElement();
             newCells = data.cellsAC2.getNewSubarray(cluster.numCells);
+            newTokens = data.tokensAC2.getNewSubarray(cluster.numTokens);
             *newCluster = cluster;
             newCluster->cells = newCells;
+            newCluster->tokens = newTokens;
         }
         __syncthreads();
 
@@ -194,6 +197,21 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
             for (int i = 0; i < numConnections; ++i) {
                 newCell.connections[i] = newCell.connections[i]->nextTimestep;
             }
+        }
+        __syncthreads();
+
+        if (newCluster->numTokens > 0) {
+            int startTokenIndex;
+            int endTokenIndex;
+            calcPartition(cluster.numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+
+            for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+                Token& token = cluster.tokens[tokenIndex];
+                newTokens[tokenIndex] = token;
+                auto& tokenCell = newTokens[tokenIndex].cell;
+                tokenCell = tokenCell->nextTimestep;
+            }
+            __syncthreads();
         }
     }
 }

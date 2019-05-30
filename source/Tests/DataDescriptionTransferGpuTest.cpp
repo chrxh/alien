@@ -365,7 +365,7 @@ TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken)
 * Situation:
 * 	- two cluster with one cell each and one token
 *   - move one cluster by updating only a part of the universe where that cluster is situated
-* Fixed error: 
+* Fixed error: tokens were not correctly filtered in AccessKernel
 * Expected result: changes are correctly transferred to simulation
 */
 TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken_partialUpdate)
