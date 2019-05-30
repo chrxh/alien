@@ -30,18 +30,11 @@ class DataDescriptionTransferGpuTest
 {
 public:
 	DataDescriptionTransferGpuTest();
-	~DataDescriptionTransferGpuTest();
 };
 
 DataDescriptionTransferGpuTest::DataDescriptionTransferGpuTest()
 	: IntegrationGpuTestFramework({ 600, 300 })
 {
-}
-
-DataDescriptionTransferGpuTest::~DataDescriptionTransferGpuTest()
-{
-	delete _access;
-	delete _controller;
 }
 
 TEST_F(DataDescriptionTransferGpuTest, DISABLED_testCreateClusterWithCompleteCell)
