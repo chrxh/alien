@@ -22,12 +22,12 @@
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
-class SimulationGpuTestFramework
+class IntegrationGpuTestFramework
 	: public IntegrationTestFramework
 {
 public:
-    SimulationGpuTestFramework(IntVector2D const& universeSize = { 600, 300 });
-	virtual ~SimulationGpuTestFramework();
+    IntegrationGpuTestFramework(IntVector2D const& universeSize = { 600, 300 });
+	virtual ~IntegrationGpuTestFramework();
 
 protected:
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
@@ -40,6 +40,7 @@ protected:
 	double calcKineticEnergy(DataDescription const& data) const;
 	double calcKineticEnergy(ClusterDescription const& cluster) const;
 	void setMaxConnections(ClusterDescription& cluster, int maxConnections) const;
+    void setCenterPos(ClusterDescription& cluster, QVector2D const& centerPos) const;
 
 protected:
 	double const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
@@ -47,5 +48,6 @@ protected:
 	SimulationControllerGpu* _controller = nullptr;
 	SimulationContext* _context = nullptr;
 	SpaceProperties* _spaceProp = nullptr;
-	SimulationAccessGpu* _access = nullptr;
+    SimulationAccessGpu* _access = nullptr;
+    DescriptionHelper* _descHelper = nullptr;
 };

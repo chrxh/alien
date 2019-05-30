@@ -1,10 +1,10 @@
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SerializationHelper.h"
 
-#include "SimulationGpuTestFramework.h"
+#include "IntegrationGpuTestFramework.h"
 
 class TokenSpreadingSimulationGpuTest
-	: public SimulationGpuTestFramework
+	: public IntegrationGpuTestFramework
 {
 public:
 	virtual ~TokenSpreadingSimulationGpuTest() = default;
@@ -764,18 +764,6 @@ TEST_F(TokenSpreadingSimulationGpuTest, regressionTest_manyStickyRotatingTokenCl
     IntegrationTestHelper::runSimulation(100, _controller);
 }
 
-namespace
-{
-    void setCenterPos(ClusterDescription& cluster, QVector2D const& centerPos)
-    {
-        auto diff = centerPos - *cluster.pos;
-        cluster.pos = centerPos;
-        for (auto& cell : *cluster.cells) {
-            cell.pos = *cell.pos + diff;
-        }
-    }
-}
-
 /**
 * Situation: - many concentrated replicator clusters
 *			 - simulating 100 time steps
@@ -798,10 +786,10 @@ TEST_F(TokenSpreadingSimulationGpuTest, regressionTest_manyReplicators)
         replicator.vel = QVector2D{ static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9)),
             static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9f)) };
         replicator.angularVel = _numberGen->getRandomReal(-1, 1);
+        _descHelper->makeValid(replicator);
         origData.addCluster(replicator);
     }
 
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
 }
-

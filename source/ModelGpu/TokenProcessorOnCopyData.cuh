@@ -45,8 +45,6 @@ __inline__ __device__ void TokenProcessorOnCopyData::init(SimulationData & data,
 
 	calcPartition(_cluster->numCells, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
 	calcPartition(_cluster->numTokens, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
-    int dummy = 0;
-    ++dummy;
 }
 
 __inline__ __device__ void TokenProcessorOnCopyData::processingSpreadingAndFeatures()
