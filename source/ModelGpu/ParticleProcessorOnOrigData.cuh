@@ -48,7 +48,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingMovement()
 {
     for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
         Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
-        particle->pos = add(particle->pos, particle->vel);
+        particle->pos = Math::add(particle->pos, particle->vel);
         _origParticleMap.mapPosCorrection(particle->pos);
         _origParticleMap.set(particle->pos, particle);
     }
@@ -71,7 +71,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingCollision()
 
                 float factor1 = particle->energy / (particle->energy + otherParticle->energy);
                 float factor2 = 1.0f - factor1;
-                particle->vel = add(mul(particle->vel, factor1), mul(otherParticle->vel, factor2));
+                particle->vel = Math::add(Math::mul(particle->vel, factor1), Math::mul(otherParticle->vel, factor2));
                 atomicAdd(&particle->energy, otherParticle->energy);
                 atomicAdd(&otherParticle->energy, -otherParticle->energy);
                 otherParticle->alive = false;

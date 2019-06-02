@@ -24,12 +24,12 @@
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
-class DataDescriptionTransferTest
+class DataDescriptionTransferTests
 	: public IntegrationTestFramework
 {
 public:
-	DataDescriptionTransferTest();
-	~DataDescriptionTransferTest();
+	DataDescriptionTransferTests();
+	~DataDescriptionTransferTests();
 
 protected:
 	SimulationControllerCpu* _controller = nullptr;
@@ -39,7 +39,7 @@ protected:
 	IntVector2D _gridSize{ 6, 6 };
 };
 
-DataDescriptionTransferTest::DataDescriptionTransferTest()
+DataDescriptionTransferTests::DataDescriptionTransferTests()
 	: IntegrationTestFramework({ 600, 300 })
 {
 	_controller = _cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, _gridSize), 0);
@@ -50,13 +50,13 @@ DataDescriptionTransferTest::DataDescriptionTransferTest()
 	_numberGen = _context->getNumberGenerator();
 }
 
-DataDescriptionTransferTest::~DataDescriptionTransferTest()
+DataDescriptionTransferTests::~DataDescriptionTransferTests()
 {
 	delete _access;
 	delete _controller;
 }
 
-TEST_F(DataDescriptionTransferTest, testCreateClusterDescriptionWithCompleteCell)
+TEST_F(DataDescriptionTransferTests, testCreateClusterDescriptionWithCompleteCell)
 {
 	DataDescription dataBefore;
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
@@ -68,7 +68,7 @@ TEST_F(DataDescriptionTransferTest, testCreateClusterDescriptionWithCompleteCell
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testModifyClusterDescriptionWithCompleteCell)
+TEST_F(DataDescriptionTransferTests, testModifyClusterDescriptionWithCompleteCell)
 {
 	const uint64_t clusterId = 1;
 	const uint64_t cellId = 2;
@@ -95,7 +95,7 @@ TEST_F(DataDescriptionTransferTest, testModifyClusterDescriptionWithCompleteCell
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testCreateRandomData)
+TEST_F(DataDescriptionTransferTests, testCreateRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
@@ -112,7 +112,7 @@ TEST_F(DataDescriptionTransferTest, testCreateRandomData)
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testCreateAndDeleteRandomData)
+TEST_F(DataDescriptionTransferTests, testCreateAndDeleteRandomData)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
@@ -147,7 +147,7 @@ TEST_F(DataDescriptionTransferTest, testCreateAndDeleteRandomData)
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
+TEST_F(DataDescriptionTransferTests, testModifyRandomParticles)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
@@ -174,7 +174,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticles)
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
+TEST_F(DataDescriptionTransferTests, testModifyRandomParticlesWithLargePositions)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 100; ++i) {
@@ -201,7 +201,7 @@ TEST_F(DataDescriptionTransferTest, testModifyRandomParticlesWithLargePositions)
 	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
 }
 
-TEST_F(DataDescriptionTransferTest, testCreateAndDeleteAndModifyWithinSimulation)
+TEST_F(DataDescriptionTransferTests, testCreateAndDeleteAndModifyWithinSimulation)
 {
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto descHelper = _basicFacade->buildDescriptionHelper();

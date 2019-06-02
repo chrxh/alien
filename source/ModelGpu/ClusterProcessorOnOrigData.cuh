@@ -72,7 +72,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
         Cell* cell = &cluster->cells[index];
         for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
             for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                Cell* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+                Cell* otherCell = _cellMap.get(Math::add(cell->absPos, { dx, dy }));
 
                 if (!otherCell || otherCell == cell) {
                     continue;
@@ -120,7 +120,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
         Cell* cell = &cluster->cells[index];
         for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
             for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                Cell* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+                Cell* otherCell = _cellMap.get(Math::add(cell->absPos, { dx, dy }));
                 if (!otherCell || otherCell == cell) {
                     continue;
                 }
@@ -137,7 +137,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
                     avoidCollision = true;
                     break;
                 }
-                if (length(sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity
+                if (Math::length(Math::sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity
                     && areConnectable(cell, otherCell)) {
                     state = CollisionState::Fusion;
                 }
@@ -171,7 +171,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
                 Cell* cell = &cluster->cells[index];
                 for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
                     for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                        Cell* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+                        Cell* otherCell = _cellMap.get(Math::add(cell->absPos, { dx, dy }));
                         if (!otherCell || otherCell == cell) {
                             continue;
                         }
@@ -184,7 +184,8 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
                         if (_cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
                             continue;
                         }
-                        if (length(sub(cell->vel, otherCell->vel)) < cudaSimulationParameters.cellFusionVelocity || !areConnectable(cell, otherCell)) {
+                        if (Math::length(Math::sub(cell->vel, otherCell->vel)) < cudaSimulationParameters.cellFusionVelocity
+                            || !areConnectable(cell, otherCell)) {
                             continue;
                         }
                         auto otherIndex = atomicAdd(&otherCell->numConnections, 1);
@@ -213,16 +214,16 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
         __shared__ float2 outwardVector;
         __shared__ float2 n;
         if (0 == threadIdx.x) {
-            collisionCenterPos = div(collisionCenterPos, numberOfCollidingCells);
+            collisionCenterPos = Math::div(collisionCenterPos, numberOfCollidingCells);
             rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
             _cellMap.mapDisplacementCorrection(rAPp);
             rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
             _cellMap.mapDisplacementCorrection(rBPp);
-            outwardVector = sub(
+            outwardVector = Math::sub(
                 Physics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
                 Physics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
-            Physics::rotateQuarterCounterClockwise(rAPp);
-            Physics::rotateQuarterCounterClockwise(rBPp);
+            Math::rotateQuarterCounterClockwise(rAPp);
+            Math::rotateQuarterCounterClockwise(rBPp);
             n.x = 0.0f;
             n.y = 0.0f;
         }
@@ -232,7 +233,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
             Cell* cell = &cluster->cells[index];
             for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
                 for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                    Cell* otherCell = _cellMap.get(add(cell->absPos, { dx, dy }));
+                    Cell* otherCell = _cellMap.get(Math::add(cell->absPos, { dx, dy }));
                     if (!otherCell || otherCell == cell) {
                         continue;
                     }
@@ -262,7 +263,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision()
             float2 vB2{ 0.0f, 0.0f };
             float angularVelA2{ 0.0f };
             float angularVelB2{ 0.0f };
-            normalize(n);
+            Math::normalize(n);
             Physics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
                 firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
                 mA, mB, vA2, vB2, angularVelA2, angularVelB2);
@@ -295,10 +296,10 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingMovement()
     __shared__ float rotMatrix[2][2];
     if (0 == threadIdx.x) {
         _cluster->angle += _cluster->angularVel;
-        Physics::angleCorrection(_cluster->angle);
-        _cluster->pos = add(_cluster->pos, _cluster->vel);
+        Math::angleCorrection(_cluster->angle);
+        _cluster->pos = Math::add(_cluster->pos, _cluster->vel);
         _cellMap.mapPosCorrection(_cluster->pos);
-        Physics::rotationMatrix(_cluster->angle, rotMatrix);
+        Math::rotationMatrix(_cluster->angle, rotMatrix);
     }
     __syncthreads();
 
@@ -311,12 +312,12 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingMovement()
         absPos.y = cell->relPos.x*rotMatrix[1][0] + cell->relPos.y*rotMatrix[1][1] + _cluster->pos.y;
         cell->absPos = absPos;
 
-        auto r = sub(cell->absPos, _cluster->pos);
+        auto r = Math::sub(cell->absPos, _cluster->pos);
         _cellMap.mapDisplacementCorrection(r);
         auto newVel = Physics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
 
-        auto a = sub(newVel, cell->vel);
-        if (length(a) > cudaSimulationParameters.cellMaxForce) {
+        auto a = Math::sub(newVel, cell->vel);
+        if (Math::length(a) > cudaSimulationParameters.cellMaxForce) {
             if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 cell->alive = false;
                 _cluster->decompositionRequired = true;
@@ -351,11 +352,11 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingRadiation()
                 static_cast<int>(pos.y) + _data->numberGen.random(3) - 1.5f };
             _cellMap.mapPosCorrection(particlePos);
             float2 particleVel =
-                add(mul(cell->vel, cudaSimulationParameters.radiationVelocityMultiplier),
+                Math::add(Math::mul(cell->vel, cudaSimulationParameters.radiationVelocityMultiplier),
                 { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                     (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation });
 
-            particlePos = sub(particlePos, particleVel);	//because particle will still be moved in current time step
+            particlePos = Math::sub(particlePos, particleVel);	//because particle will still be moved in current time step
             float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
             radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
             radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();

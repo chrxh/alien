@@ -23,18 +23,18 @@
 #include "IntegrationTestFramework.h"
 #include "IntegrationTestHelper.h"
 
-class CommunicatorFunctionTest : public IntegrationTestFramework
+class CommunicatorTests : public IntegrationTestFramework
 {
 public:
-	CommunicatorFunctionTest();
-	~CommunicatorFunctionTest();
+	CommunicatorTests();
+	~CommunicatorTests();
 
 protected:
     SimulationControllerCpu* _controller = nullptr;
 	SimulationAccessCpu* _access = nullptr;
 };
 
-CommunicatorFunctionTest::CommunicatorFunctionTest()
+CommunicatorTests::CommunicatorTests()
 	: IntegrationTestFramework({ 1000, 1000 })
 {
 	auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
@@ -47,7 +47,7 @@ CommunicatorFunctionTest::CommunicatorFunctionTest()
 	_numberGen = context->getNumberGenerator();
 }
 
-TEST_F(CommunicatorFunctionTest, testSendMessage_receiveOnSameChannel)
+TEST_F(CommunicatorTests, testSendMessage_receiveOnSameChannel)
 {
 	const float distCommRange = _parameters.cellFunctionCommunicatorRange / 2.0;
 	const uint8_t channel = 1;
@@ -241,7 +241,7 @@ TEST_F (TestCellFunctionCommunicator, testSendMessage)
 }
 */
 
-CommunicatorFunctionTest::~CommunicatorFunctionTest()
+CommunicatorTests::~CommunicatorTests()
 {
 	delete _controller;
 	delete _access;

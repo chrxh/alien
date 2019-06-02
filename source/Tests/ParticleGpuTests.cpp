@@ -1,17 +1,17 @@
 #include "IntegrationGpuTestFramework.h"
 
-class ParticleSimulationGpuTest
+class ParticleGpuTests
 	: public IntegrationGpuTestFramework
 {
 public:
-	virtual ~ParticleSimulationGpuTest() = default;
+	virtual ~ParticleGpuTests() = default;
 };
 
 /**
 * Situation: fusion of two particles
 * Expected result: one particle remains with average velocity
 */
-TEST_F(ParticleSimulationGpuTest, testFusionOfSingleParticles)
+TEST_F(ParticleGpuTests, testFusionOfSingleParticles)
 {
 	DataDescription origData;
 	auto particleEnergy = _parameters.cellMinEnergy / 3.0;
@@ -42,7 +42,7 @@ TEST_F(ParticleSimulationGpuTest, testFusionOfSingleParticles)
 * Situation: fusion of many particles
 * Expected result: energy balance is fulfilled
 */
-TEST_F(ParticleSimulationGpuTest, testFusionOfManyParticles)
+TEST_F(ParticleGpuTests, testFusionOfManyParticles)
 {
 	auto particleEnergy = _parameters.cellMinEnergy / 120.0;
 
@@ -63,7 +63,7 @@ TEST_F(ParticleSimulationGpuTest, testFusionOfManyParticles)
 * Situation: particle with high energy
 * Expected result: particle transforms to cell
 */
-TEST_F(ParticleSimulationGpuTest, testTransformationParticleToCell)
+TEST_F(ParticleGpuTests, testTransformationParticleToCell)
 {
 	auto size = _spaceProp->getSize();
 	DataDescription origData;

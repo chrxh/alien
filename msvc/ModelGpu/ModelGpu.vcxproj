@@ -210,6 +210,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\CudaJob.h" />
     <ClInclude Include="..\..\source\ModelGpu\EnergyGuidance.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\EntityFactory.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\Math.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnCopyData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh" />
@@ -225,7 +226,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuBuilderFacadeImpl.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuData.h" />
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuServices.h" />
+    <ClInclude Include="..\..\source\ModelGpu\QuantityConverter.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Physics.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\PropulsionFunction.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnCopyData.cuh" />

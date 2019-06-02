@@ -24,11 +24,11 @@
 #include "tests/Predicates.h"
 #include "IntegrationTestHelper.h"
 
-class MultithreadingTest : public ::testing::Test
+class MultithreadingTests : public ::testing::Test
 {
 public:
-	MultithreadingTest();
-	~MultithreadingTest();
+	MultithreadingTests();
+	~MultithreadingTests();
 
 protected:
 
@@ -42,7 +42,7 @@ protected:
 	IntVector2D _universeSize{ 600, 300 };
 };
 
-MultithreadingTest::MultithreadingTest()
+MultithreadingTests::MultithreadingTests()
 {
 	auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
@@ -56,12 +56,12 @@ MultithreadingTest::MultithreadingTest()
 	_numberGen = _context->getNumberGenerator();
 }
 
-MultithreadingTest::~MultithreadingTest()
+MultithreadingTests::~MultithreadingTests()
 {
 	delete _controller;
 }
 
-TEST_F(MultithreadingTest, testThreads)
+TEST_F(MultithreadingTests, testThreads)
 {
 	QEventLoop pause;
 	_controller->connect(_controller, &SimulationController::nextTimestepCalculated, &pause, &QEventLoop::quit);
@@ -74,7 +74,7 @@ TEST_F(MultithreadingTest, testThreads)
 }
 
 
-TEST_F(MultithreadingTest, testOneCellMovement)
+TEST_F(MultithreadingTests, testOneCellMovement)
 {
 	auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto access = facade->buildSimulationAccess();
@@ -101,7 +101,7 @@ TEST_F(MultithreadingTest, testOneCellMovement)
 }
 
 
-TEST_F(MultithreadingTest, testManyCellsMovement)
+TEST_F(MultithreadingTests, testManyCellsMovement)
 {
 	auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto access = facade->buildSimulationAccess();

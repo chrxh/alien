@@ -26,11 +26,11 @@
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
-class CpuBenchmark
+class CpuBenchmarks
 	: public IntegrationTestFramework
 {
 public:
-    CpuBenchmark() : IntegrationTestFramework({ 2004, 1002 })
+    CpuBenchmarks() : IntegrationTestFramework({ 2004, 1002 })
     { }
 
 protected:
@@ -38,7 +38,7 @@ protected:
 };
 
 
-void CpuBenchmark::createTestData(SimulationAccess * access)
+void CpuBenchmarks::createTestData(SimulationAccess * access)
 {
 	DataDescription desc;
 
@@ -55,7 +55,7 @@ void CpuBenchmark::createTestData(SimulationAccess * access)
 	access->updateData(desc);
 }
 
-TEST_F(CpuBenchmark, benchmarkOneThreadWithOneUnit)
+TEST_F(CpuBenchmarks, benchmarkOneThreadWithOneUnit)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 1,1 }));
@@ -76,7 +76,7 @@ TEST_F(CpuBenchmark, benchmarkOneThreadWithOneUnit)
 	EXPECT_TRUE(true);
 }
 
-TEST_F(CpuBenchmark, benchmarkOneThreadWithManyUnits)
+TEST_F(CpuBenchmarks, benchmarkOneThreadWithManyUnits)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(1, { 12, 6 }));
@@ -96,7 +96,7 @@ TEST_F(CpuBenchmark, benchmarkOneThreadWithManyUnits)
 	EXPECT_TRUE(true);
 }
 
-TEST_F(CpuBenchmark, benchmarkFourThread)
+TEST_F(CpuBenchmarks, benchmarkFourThread)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(4, { 12, 6 }));
@@ -117,7 +117,7 @@ TEST_F(CpuBenchmark, benchmarkFourThread)
 	EXPECT_TRUE(true);
 }
 
-TEST_F(CpuBenchmark, benchmarkEightThread)
+TEST_F(CpuBenchmarks, benchmarkEightThread)
 {
 	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	auto controller = cpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelCpuData(8, { 12, 6 }));

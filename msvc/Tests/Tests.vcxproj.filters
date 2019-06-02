@@ -71,53 +71,56 @@
     <ClCompile Include="..\..\source\Tests\TestSuite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferGpuTest.cpp">
-      <Filter>Source Files\IntegrationTests\GPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\ClusterSizeTest.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\CommunicatorFunctionTest.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\ComparisonTest.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferTest.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\MultithreadingTest.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\ReplicatorTest.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\SerializationTest.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\ClusterSimulationGpuTest.cpp">
-      <Filter>Source Files\IntegrationTests\GPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\ParticleSimulationGpuTest.cpp">
-      <Filter>Source Files\IntegrationTests\GPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\TokenSpreadingSimulationGpuTest.cpp">
-      <Filter>Source Files\IntegrationTests\GPU</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp">
-      <Filter>Source Files\IntegrationTests\GPU</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Tests\CellComputerSimulationGpuTest.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Tests\GpuBenchmark.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\CpuBenchmark.cpp">
-      <Filter>Source Files\IntegrationTests\CPU</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Tests\IntegrationGpuTestFramework.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\PropulsionGpuTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CellComputerGpuTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferGpuTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ClusterGpuTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ParticleGpuTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\TokenSpreadingGpuTests.cpp">
+      <Filter>Source Files\IntegrationTests\GPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ClusterSizeTests.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CommunicatorTests.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ComparisonTests.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\CpuBenchmarks.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferTests.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\MultithreadingTests.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\ReplicatorTests.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Tests\SerializationTests.cpp">
+      <Filter>Source Files\IntegrationTests\CPU</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -143,7 +143,8 @@ namespace Enums
             TOWARD_CENTER,
             ROTATION_CLOCKWISE,
             ROTATION_COUNTERCLOCKWISE,
-            DAMP_ROTATION
+            DAMP_ROTATION,
+            _COUNTER
         };
     };
 

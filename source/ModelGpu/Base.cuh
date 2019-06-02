@@ -184,58 +184,6 @@ __device__ __inline__ void calcPartition(int numEntities, int division, int numD
 	endIndex = startIndex + length - 1;
 }
 
-__device__ __inline__ void normalize(float2 &vec)
-{
-	float length = sqrt(vec.x*vec.x + vec.y*vec.y);
-	if (length > FP_PRECISION) {
-		vec = { vec.x / length, vec.y / length };
-	}
-	else
-	{
-		vec = { 1.0, 0.0 };
-	}
-}
-
-__host__ __device__ __inline__ float dot(float2 const &p, float2 const &q)
-{
-	return p.x*q.x + p.y*q.y;
-}
-
-__host__ __device__ __inline__ float2 minus(float2 const &p)
-{
-	return{ -p.x, -p.y };
-}
-
-__host__ __device__ __inline__ float2 mul(float2 const &p, float r)
-{
-	return{ p.x * r, p.y * r };
-}
-
-__host__ __device__ __inline__ float2 div(float2 const &p, float r)
-{
-	return{ p.x / r, p.y / r };
-}
-
-__host__ __device__ __inline__ float2 add(float2 const &p, float2 const &q)
-{
-	return{ p.x + q.x, p.y + q.y };
-}
-
-__host__ __device__ __inline__ float2 sub(float2 const &p, float2 const &q)
-{
-	return{ p.x - q.x, p.y - q.y };
-}
-
-__host__ __device__ __inline__ float length(float2 const & v)
-{
-	return sqrt(v.x * v.x + v.y * v.y);
-}
-
-__host__ __device__ __inline__ float lengthSquared(float2 const & v)
-{
-	return v.x * v.x + v.y * v.y;
-}
-
 __host__ __device__ __inline__ int2 toInt2(float2 const &p)
 {
 	return{ static_cast<int>(p.x), static_cast<int>(p.y) };
