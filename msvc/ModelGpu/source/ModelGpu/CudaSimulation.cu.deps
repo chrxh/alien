@@ -413,6 +413,7 @@ f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Physics.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\vector_types.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\SimulationData.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Math.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\EntityFactory.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
@@ -432,8 +433,10 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_fun
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\TokenProcessorOnCopyData.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CellComputerFunction.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\EnergyGuidance.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CellComputerFunction.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\PropulsionFunction.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\QuantityConverter.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\AccessKernels.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h

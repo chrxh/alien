@@ -25,12 +25,12 @@
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
-class SerializationTest
+class SerializationTests
 	: public IntegrationTestFramework
 {
 public:
-	SerializationTest();
-	~SerializationTest();
+	SerializationTests();
+	~SerializationTests();
 
 protected:
 	string const& serializeSimulation() const;
@@ -44,7 +44,7 @@ protected:
 	Serializer* _serializer = nullptr;
 };
 
-SerializationTest::SerializationTest()
+SerializationTests::SerializationTests()
 	: IntegrationTestFramework({ 600, 300 })
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -75,13 +75,13 @@ SerializationTest::SerializationTest()
 	_numberGen = _context->getNumberGenerator();
 }
 
-SerializationTest::~SerializationTest()
+SerializationTests::~SerializationTests()
 {
 	delete _access;
 	delete _controller;
 }
 
-string const & SerializationTest::serializeSimulation() const
+string const & SerializationTests::serializeSimulation() const
 {
 	bool serializationFinished = false;
 	QEventLoop pause;
@@ -96,12 +96,12 @@ string const & SerializationTest::serializeSimulation() const
 	return _serializer->retrieveSerializedSimulation();
 }
 
-void SerializationTest::deserializeSimulation(string const & data)
+void SerializationTests::deserializeSimulation(string const & data)
 {
 	_controller = static_cast<SimulationControllerCpu*>(_serializer->deserializeSimulation(data));
 }
 
-TEST_F(SerializationTest, testCheckIds)
+TEST_F(SerializationTests, testCheckIds)
 {
 	DataDescription dataBefore;
 	for (int i = 1; i <= 10000; ++i) {

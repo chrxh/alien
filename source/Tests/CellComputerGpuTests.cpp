@@ -3,14 +3,14 @@
 
 #include "IntegrationGpuTestFramework.h"
 
-class CellComputerSimulationGpuTest
+class CellComputerGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    CellComputerSimulationGpuTest() : IntegrationGpuTestFramework({ 10, 10 })
+    CellComputerGpuTests() : IntegrationGpuTestFramework({ 10, 10 })
     {}
 
-    virtual ~CellComputerSimulationGpuTest() = default;
+    virtual ~CellComputerGpuTests() = default;
 
 protected:
     virtual void SetUp();
@@ -19,13 +19,13 @@ protected:
 };
 
 
-void CellComputerSimulationGpuTest::SetUp()
+void CellComputerGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
 }
 
-QByteArray CellComputerSimulationGpuTest::runSimpleCellComputer(string const & program) const
+QByteArray CellComputerGpuTests::runSimpleCellComputer(string const & program) const
 {
     auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
     CellComputerCompiler* compiler = basicFacade->buildCellComputerCompiler(_context->getSymbolTable(), _context->getSimulationParameters());
@@ -55,14 +55,14 @@ QByteArray CellComputerSimulationGpuTest::runSimpleCellComputer(string const & p
     return *newToken.data;
 }
 
-TEST_F(CellComputerSimulationGpuTest, testDereferencing1)
+TEST_F(CellComputerGpuTests, testDereferencing1)
 {
     string program = "mov [1], 3";
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(3, data.at(1));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testDereferencing2)
+TEST_F(CellComputerGpuTests, testDereferencing2)
 {
     string program = 
         "mov [1], 3\n"\
@@ -72,7 +72,7 @@ TEST_F(CellComputerSimulationGpuTest, testDereferencing2)
     EXPECT_EQ(5, data.at(3));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testDereferencing3)
+TEST_F(CellComputerGpuTests, testDereferencing3)
 {
     string program = 
         "mov [1], 3\n"\
@@ -83,7 +83,7 @@ TEST_F(CellComputerSimulationGpuTest, testDereferencing3)
     EXPECT_EQ(5, data.at(3));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testDereferencing4)
+TEST_F(CellComputerGpuTests, testDereferencing4)
 {
     string program = 
         "mov [1], 3\n"\
@@ -95,7 +95,7 @@ TEST_F(CellComputerSimulationGpuTest, testDereferencing4)
     EXPECT_EQ(7, data.at(3));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testArithmetic)
+TEST_F(CellComputerGpuTests, testArithmetic)
 {
     string program = 
         "mov [1], 1\n"\
@@ -109,7 +109,7 @@ TEST_F(CellComputerSimulationGpuTest, testArithmetic)
     EXPECT_EQ(6, data.at(1));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testBitwiseOperators)
+TEST_F(CellComputerGpuTests, testBitwiseOperators)
 {
     string program = 
         "mov [1], 1\n"\
@@ -125,7 +125,7 @@ TEST_F(CellComputerSimulationGpuTest, testBitwiseOperators)
     EXPECT_EQ(2, data.at(3));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionGT1)
+TEST_F(CellComputerGpuTests, testConditionGT1)
 {
     string program = 
         "mov [1], 2\n"\
@@ -139,7 +139,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionGT1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionGT2)
+TEST_F(CellComputerGpuTests, testConditionGT2)
 {
     string program = 
         "mov [1], 3\n"\
@@ -153,7 +153,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionGT2)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionGT3)
+TEST_F(CellComputerGpuTests, testConditionGT3)
 {
     string program = 
         "mov [1], 4\n"\
@@ -167,7 +167,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionGT3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionGE1)
+TEST_F(CellComputerGpuTests, testConditionGE1)
 {
     string program = 
         "mov [1], 3\n"\
@@ -181,7 +181,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionGE1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionGE2)
+TEST_F(CellComputerGpuTests, testConditionGE2)
 {
     string program = 
         "mov [1], 4\n"\
@@ -195,7 +195,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionGE2)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionGE3)
+TEST_F(CellComputerGpuTests, testConditionGE3)
 {
     string program = 
         "mov [1], 2\n"\
@@ -209,7 +209,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionGE3)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionEQ1)
+TEST_F(CellComputerGpuTests, testConditionEQ1)
 {
     string program = 
         "mov [1], 3\n"\
@@ -223,7 +223,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionEQ1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionEQ2)
+TEST_F(CellComputerGpuTests, testConditionEQ2)
 {
     string program = 
         "mov [1], 4\n"\
@@ -237,7 +237,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionEQ2)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionEQ3)
+TEST_F(CellComputerGpuTests, testConditionEQ3)
 {
     string program = 
         "mov [1], 2\n"\
@@ -251,7 +251,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionEQ3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionNEQ1)
+TEST_F(CellComputerGpuTests, testConditionNEQ1)
 {
     string program = 
         "mov [1], 3\n"\
@@ -265,7 +265,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionNEQ1)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionNEQ2)
+TEST_F(CellComputerGpuTests, testConditionNEQ2)
 {
     string program =
         "mov [1], 4\n"\
@@ -279,7 +279,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionNEQ2)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionNEQ3)
+TEST_F(CellComputerGpuTests, testConditionNEQ3)
 {
     string program =
         "mov [1], 2\n"\
@@ -293,7 +293,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionNEQ3)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionLE1)
+TEST_F(CellComputerGpuTests, testConditionLE1)
 {
     string program =
         "mov [1], 3\n"\
@@ -307,7 +307,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionLE1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionLE2)
+TEST_F(CellComputerGpuTests, testConditionLE2)
 {
     string program =
         "mov [1], 4\n"\
@@ -321,7 +321,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionLE2)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionLE3)
+TEST_F(CellComputerGpuTests, testConditionLE3)
 {
     string program = 
         "mov [1], 2\n"\
@@ -335,7 +335,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionLE3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionLT1)
+TEST_F(CellComputerGpuTests, testConditionLT1)
 {
     string program = 
         "mov [1], 3\n"\
@@ -349,7 +349,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionLT1)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionLT2)
+TEST_F(CellComputerGpuTests, testConditionLT2)
 {
     string program = 
         "mov [1], 4\n"\
@@ -363,7 +363,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionLT2)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testConditionLT3)
+TEST_F(CellComputerGpuTests, testConditionLT3)
 {
     string program = 
         "mov [1], 2\n"\
@@ -377,7 +377,7 @@ TEST_F(CellComputerSimulationGpuTest, testConditionLT3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testInstructionAfterConditionClause)
+TEST_F(CellComputerGpuTests, testInstructionAfterConditionClause)
 {
     string program = 
         "if [1] != 3\n"\
@@ -391,7 +391,7 @@ TEST_F(CellComputerSimulationGpuTest, testInstructionAfterConditionClause)
     EXPECT_EQ(6, data.at(5));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers1)
+TEST_F(CellComputerGpuTests, testNegativeNumbers1)
 {
     string program =
         "mov [1], 1\n"\
@@ -401,7 +401,7 @@ TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers1)
     EXPECT_EQ(-1, static_cast<int>(data.at(1)));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers2)
+TEST_F(CellComputerGpuTests, testNegativeNumbers2)
 {
     string program =
         "mov [1], -1"
@@ -410,7 +410,7 @@ TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers2)
     EXPECT_EQ(-1, static_cast<int>(data.at(1)));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers3)
+TEST_F(CellComputerGpuTests, testNegativeNumbers3)
 {
     string program =
         "mov [1], 1\n"\
@@ -420,7 +420,7 @@ TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers3)
     EXPECT_EQ(2, static_cast<int>(data.at(1)));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers4)
+TEST_F(CellComputerGpuTests, testNegativeNumbers4)
 {
     string program =
         "mov [-1], 1"
@@ -429,7 +429,7 @@ TEST_F(CellComputerSimulationGpuTest, testNegativeNumbers4)
     EXPECT_EQ(1, data.at(255));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testOverflow1)
+TEST_F(CellComputerGpuTests, testOverflow1)
 {
     string program =
         "mov [1], 127\n"\
@@ -439,7 +439,7 @@ TEST_F(CellComputerSimulationGpuTest, testOverflow1)
     EXPECT_EQ(static_cast<char>(-128), data.at(1));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testOverflow2)
+TEST_F(CellComputerGpuTests, testOverflow2)
 {
     string program =
         "mov [1], 255\n"\
@@ -449,7 +449,7 @@ TEST_F(CellComputerSimulationGpuTest, testOverflow2)
     EXPECT_EQ(0, data.at(1));
 }
 
-TEST_F(CellComputerSimulationGpuTest, testOverflow3)
+TEST_F(CellComputerGpuTests, testOverflow3)
 {
     string program =
         "mov [1], 55\n"\
@@ -459,7 +459,7 @@ TEST_F(CellComputerSimulationGpuTest, testOverflow3)
     EXPECT_EQ(61, data.at(1));  //55 * 43 = 2365 = 61 (mod 256)
 }
 
-TEST_F(CellComputerSimulationGpuTest, testOverflow4)
+TEST_F(CellComputerGpuTests, testOverflow4)
 {
     string program =
         "mov [1], 55\n"\
@@ -469,7 +469,7 @@ TEST_F(CellComputerSimulationGpuTest, testOverflow4)
     EXPECT_EQ(static_cast<char>(-85), data.at(1));  //55 * 45 = 2475 = 171 (mod 256)
 }
 
-TEST_F(CellComputerSimulationGpuTest, testOverflow5)
+TEST_F(CellComputerGpuTests, testOverflow5)
 {
     string program =
         "mov [1], 55\n"\
@@ -479,7 +479,7 @@ TEST_F(CellComputerSimulationGpuTest, testOverflow5)
     EXPECT_EQ(85, data.at(1));  //55 * (-45) = -2475 = -171 (mod 256)
 }
 
-TEST_F(CellComputerSimulationGpuTest, testDivisionByZero)
+TEST_F(CellComputerGpuTests, testDivisionByZero)
 {
     string program =
         "mov [1], 55\n"\

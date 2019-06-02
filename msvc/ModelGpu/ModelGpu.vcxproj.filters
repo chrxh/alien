@@ -117,6 +117,15 @@
     <ClInclude Include="..\..\source\ModelGpu\CellComputerFunction.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\PropulsionFunction.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Math.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\QuantityConverter.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">

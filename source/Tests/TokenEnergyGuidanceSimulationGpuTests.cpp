@@ -1,10 +1,10 @@
 #include "IntegrationGpuTestFramework.h"
 
-class TokenEnergyGuidanceSimulationGpuTest
+class TokenEnergyGuidanceGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    virtual ~TokenEnergyGuidanceSimulationGpuTest() = default;
+    virtual ~TokenEnergyGuidanceGpuTests() = default;
 
 protected:
     virtual void SetUp();
@@ -12,7 +12,7 @@ protected:
     const float tokenTransferEnergyAmount = 10.0;
 };
 
-void TokenEnergyGuidanceSimulationGpuTest::SetUp()
+void TokenEnergyGuidanceGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
@@ -24,7 +24,7 @@ void TokenEnergyGuidanceSimulationGpuTest::SetUp()
 *			 - both cells have same high energy
 * Expected result: energy should be transferred from cell to token
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_highCellEnergy)
+TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
 {
     auto const valueCell = 100.0f;
 
@@ -74,7 +74,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_highCellEnergy)
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_lowCellEnergy)
+TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
@@ -121,7 +121,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCell_lowCellEnergy)
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_highTokenEnergy)
+TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
 {
     auto const valueToken = 30.0f;
 
@@ -164,7 +164,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_highTokenEnergy)
 *            - token has low energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_lowTokenEnergy)
+TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
@@ -211,7 +211,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceToken_lowTokenEnergy)
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCellAndToken_highTokenEnergy_lowCellEnergy)
+TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowCellEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
@@ -258,7 +258,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCellAndToken_highTokenEn
 *            - token has low energy
 * Expected result: energy should be transferred from cell to token
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCellAndToken_lowTokenEnergy_highCellEnergy)
+TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highCellEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
@@ -304,7 +304,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testBalanceCellAndToken_lowTokenEne
 *			 - both cells have same high energy
 * Expected result: energy should be transferred from cell to token
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testHarvestCell)
+TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
 {
     auto const valueCell = 100.0f;
 
@@ -348,7 +348,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testHarvestCell)
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testHarvestToken)
+TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
 {
     auto const valueToken = 30.0f;
 
@@ -391,7 +391,7 @@ TEST_F(TokenEnergyGuidanceSimulationGpuTest, testHarvestToken)
 *            - both tokens has high energy
 * Expected result: energy should be transferred from token to cell twice
 */
-TEST_F(TokenEnergyGuidanceSimulationGpuTest, testParallelization)
+TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
 {
     auto const valueToken = 30.0f;
 

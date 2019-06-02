@@ -8,8 +8,9 @@
 #include "Base.cuh"
 #include "Physics.cuh"
 #include "Map.cuh"
-#include "CellComputerFunction.cuh"
 #include "EnergyGuidance.cuh"
+#include "CellComputerFunction.cuh"
+#include "PropulsionFunction.cuh"
 
 class TokenProcessorOnCopyData
 {
@@ -22,7 +23,7 @@ private:
     __inline__ __device__ void calcAnticipatedTokens(int& result);
 	__inline__ __device__ void copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell);
 
-    __inline__ __device__ void processingCellFeatures(Cell const* sourceCell, Token* token);
+    __inline__ __device__ void processingCellFeatures(Cell const* sourceCell, Token* token, EntityFactory& factory);
 
 
 private:
@@ -58,9 +59,11 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingSpreadingAndFeatu
 
 	__shared__ Token* newTokens;
 	__shared__ int newNumTokens;
+    __shared__ EntityFactory factory;
 	if (0 == threadIdx.x) {
 		newTokens = _data->tokensAC2.getNewSubarray(anticipatedTokens);
 		newNumTokens = 0;
+        factory.init(_data);
 	}
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
 		Cell& cell = _cluster->cells[cellIndex];
@@ -122,7 +125,7 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingSpreadingAndFeatu
 			int tokenIndex = atomicAdd(&newNumTokens, 1);
 			Token& newToken = newTokens[tokenIndex];
 			copyToken(&token, &newToken, &connectingCell);
-            processingCellFeatures(&cell, &newToken);
+            processingCellFeatures(&cell, &newToken, factory);
 
             if (token.energy - availableTokenEnergyForCell > 0) {
                 auto origConnectingCellEnergy = atomicAdd(&connectingCell.energy, -(token.energy - availableTokenEnergyForCell));
@@ -191,19 +194,21 @@ __inline__ __device__ void TokenProcessorOnCopyData::copyToken(Token const* sour
 	targetToken->cell = targetCell;
 }
 
-__inline__ __device__ void TokenProcessorOnCopyData::processingCellFeatures(Cell const* sourceCell, Token * token)
+__inline__ __device__ void TokenProcessorOnCopyData::processingCellFeatures(Cell const* sourceCell, Token * token, EntityFactory& factory)
 {
     auto cell = token->cell;
     int locked;
-    do {
+    do {    //mutex
         locked = atomicExch(&cell->locked, 1);
         if (0 == locked) {
             EnergyGuidance::processing(token);
-            auto type = static_cast<Enums::CellFunction::Type>(
-                cell->cellFunctionType % static_cast<int>(Enums::CellFunction::_COUNTER));
+            auto type = static_cast<Enums::CellFunction::Type>(cell->cellFunctionType % Enums::CellFunction::_COUNTER);
             switch (type) {
             case Enums::CellFunction::COMPUTER: {
                 CellComputerFunction::processing(token);
+            } break;
+            case Enums::CellFunction::PROPULSION: {
+                PropulsionFunction::processing(sourceCell, token, factory);
             } break;
             }
             atomicExch(&cell->locked, 0);

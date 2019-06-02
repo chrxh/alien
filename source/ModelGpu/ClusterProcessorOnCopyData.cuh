@@ -95,7 +95,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
                 atomicAdd(&entries[index].cluster.vel.y, cell.vel.y);
 
                 entries[index].cluster.id = _data->numberGen.createNewId_kernel();
-                Physics::inverseRotationMatrix(entries[index].cluster.angle, entries[index].invRotMatrix);
+                Math::inverseRotationMatrix(entries[index].cluster.angle, entries[index].invRotMatrix);
                 foundMatch = true;
                 break;
             }
@@ -146,14 +146,14 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         for (int index = 0; index < numDecompositions; ++index) {
             if (cell.tag == entries[index].tag) {
                 Cluster* newCluster = newClusters[index];
-                float2 deltaPos = sub(cell.absPos, newCluster->pos);
+                float2 deltaPos = Math::sub(cell.absPos, newCluster->pos);
                 _cellMap.mapDisplacementCorrection(deltaPos);
                 auto angularMass = deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
                 atomicAdd(&newCluster->angularMass, angularMass);
 
-                auto r = sub(cell.absPos, _origCluster->pos);
+                auto r = Math::sub(cell.absPos, _origCluster->pos);
                 _cellMap.mapDisplacementCorrection(r);
-                float2 relVel = sub(cell.vel, newCluster->vel);
+                float2 relVel = Math::sub(cell.vel, newCluster->vel);
                 float angularMomentum = Physics::angularMomentum(r, relVel);
                 atomicAdd(&newCluster->angularVel, angularMomentum);
 
@@ -245,10 +245,10 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion()
             correction = _cellMap.correctionIncrement(_origCluster->pos, otherCluster->pos);	//to be added to otherCluster
 
             newCluster->pos =
-                div(add(mul(_origCluster->pos, _origCluster->numCells), mul(add(otherCluster->pos, correction), otherCluster->numCells)),
+                Math::div(Math::add(Math::mul(_origCluster->pos, _origCluster->numCells), Math::mul(Math::add(otherCluster->pos, correction), otherCluster->numCells)),
                     newCluster->numCells);
-            newCluster->vel = div(
-                add(mul(_origCluster->vel, _origCluster->numCells), mul(otherCluster->vel, otherCluster->numCells)), newCluster->numCells);
+            newCluster->vel = Math::div(
+                Math::add(Math::mul(_origCluster->vel, _origCluster->numCells), Math::mul(otherCluster->vel, otherCluster->numCells)), newCluster->numCells);
             newCluster->angularVel = 0.0f;
             newCluster->angularMass = 0.0f;
         }
@@ -258,14 +258,14 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion()
             Cell* newCell = &newCluster->cells[cellIndex];
             Cell* origCell = &_origCluster->cells[cellIndex];
             setSuccessorCell(origCell, newCell, newCluster);
-            auto relPos = sub(newCell->absPos, newCluster->pos);
+            auto relPos = Math::sub(newCell->absPos, newCluster->pos);
             newCell->relPos = relPos;
             newCell->cluster = newCluster;
-            atomicAdd(&newCluster->angularMass, lengthSquared(relPos));
+            atomicAdd(&newCluster->angularMass, Math::lengthSquared(relPos));
 
-            auto r = sub(newCell->absPos, _origCluster->pos);
+            auto r = Math::sub(newCell->absPos, _origCluster->pos);
             _cellMap.mapDisplacementCorrection(r);
-            float2 relVel = sub(newCell->vel, _origCluster->vel);
+            float2 relVel = Math::sub(newCell->vel, _origCluster->vel);
             float angularMomentum = Physics::angularMomentum(r, relVel);
             atomicAdd(&newCluster->angularVel, angularMomentum);
         }
@@ -280,16 +280,16 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion()
             Cell* origCell = &otherCluster->cells[otherCellIndex];
             setSuccessorCell(origCell, newCell, newCluster);
 
-            auto r = sub(newCell->absPos, otherCluster->pos);
+            auto r = Math::sub(newCell->absPos, otherCluster->pos);
             _cellMap.mapDisplacementCorrection(r);
 
-            newCell->absPos = add(newCell->absPos, correction);
-            auto relPos = sub(newCell->absPos, newCluster->pos);
+            newCell->absPos = Math::add(newCell->absPos, correction);
+            auto relPos = Math::sub(newCell->absPos, newCluster->pos);
             newCell->relPos = relPos;
             newCell->cluster = newCluster;
-            atomicAdd(&newCluster->angularMass, lengthSquared(relPos));
+            atomicAdd(&newCluster->angularMass, Math::lengthSquared(relPos));
 
-            float2 relVel = sub(newCell->vel, otherCluster->vel);
+            float2 relVel = Math::sub(newCell->vel, otherCluster->vel);
             float angularMomentum = Physics::angularMomentum(r, relVel);
             atomicAdd(&newCluster->angularVel, angularMomentum);
         }
