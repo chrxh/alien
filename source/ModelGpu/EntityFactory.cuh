@@ -52,7 +52,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
         cluster->id = clusterTO.id;
         cluster->pos = clusterTO.pos;
         _map.mapPosCorrection(cluster->pos);
-        posCorrection = sub(cluster->pos, clusterTO.pos);
+        posCorrection = Math::sub(cluster->pos, clusterTO.pos);
         cluster->vel = clusterTO.vel;
         cluster->angle = clusterTO.angle;
         cluster->angularVel = clusterTO.angularVel;
@@ -66,7 +66,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
         cluster->clusterToFuse = nullptr;
 
         angularMass = 0.0f;
-        Physics::inverseRotationMatrix(cluster->angle, invRotMatrix);
+        Math::inverseRotationMatrix(cluster->angle, invRotMatrix);
     }
     __syncthreads();
 
@@ -79,14 +79,14 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
         CellAccessTO const& cellTO = _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
         cell.id = cellTO.id;
         cell.cluster = cluster;
-        cell.absPos = add(cellTO.pos, posCorrection);
+        cell.absPos = Math::add(cellTO.pos, posCorrection);
 
-        float2 deltaPos = sub(cell.absPos, clusterTO.pos);
+        float2 deltaPos = Math::sub(cell.absPos, clusterTO.pos);
         cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
         cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
-        atomicAdd(&angularMass, lengthSquared(cell.relPos));
+        atomicAdd(&angularMass, Math::lengthSquared(cell.relPos));
 
-        auto r = sub(cell.absPos, cluster->pos);
+        auto r = Math::sub(cell.absPos, cluster->pos);
         _map.mapDisplacementCorrection(r);
         cell.vel = Physics::tangentialVelocity(r, cluster->vel, cluster->angularVel);
 
