@@ -9,25 +9,25 @@
 #include "tests/TestSettings.h"
 
 
-class ReplicatorTest : public ::testing::Test
+class ReplicatorTests : public ::testing::Test
 {
 public:
-	ReplicatorTest();
-	~ReplicatorTest();
+	ReplicatorTests();
+	~ReplicatorTests();
 
 protected:
 	SimulationController* _simulationController = nullptr;
 };
 
 
-ReplicatorTest::ReplicatorTest()
+ReplicatorTests::ReplicatorTests()
 {
 /*
 	_simulationController = new SimulationController();
 */
 }
 
-ReplicatorTest::~ReplicatorTest()
+ReplicatorTests::~ReplicatorTests()
 {
 	delete _simulationController;
 }

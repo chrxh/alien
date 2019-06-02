@@ -25,19 +25,19 @@
 #include "IntegrationTestFramework.h"
 #include "IntegrationGpuTestFramework.h"
 
-class DataDescriptionTransferGpuTest
+class DataDescriptionTransferGpuTests
 	: public IntegrationGpuTestFramework
 {
 public:
-	DataDescriptionTransferGpuTest();
+	DataDescriptionTransferGpuTests();
 };
 
-DataDescriptionTransferGpuTest::DataDescriptionTransferGpuTest()
+DataDescriptionTransferGpuTests::DataDescriptionTransferGpuTests()
 	: IntegrationGpuTestFramework({ 600, 300 })
 {
 }
 
-TEST_F(DataDescriptionTransferGpuTest, DISABLED_testCreateClusterWithCompleteCell)
+TEST_F(DataDescriptionTransferGpuTests, DISABLED_testCreateClusterWithCompleteCell)
 {
 	DataDescription dataBefore;
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
@@ -52,7 +52,7 @@ TEST_F(DataDescriptionTransferGpuTest, DISABLED_testCreateClusterWithCompleteCel
 * Situation: add token to cell
 * Expected result: token in simulation added
 */
-TEST_F(DataDescriptionTransferGpuTest, testAddToken)
+TEST_F(DataDescriptionTransferGpuTests, testAddToken)
 {
 	DataDescription dataBefore;
 	auto cellId = _numberGen->getId();
@@ -77,7 +77,7 @@ TEST_F(DataDescriptionTransferGpuTest, testAddToken)
 * Situation: change cell with token
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_changeClusterId)
+TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_changeClusterId)
 {
 	auto cluster = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
 	auto token = createSimpleToken();
@@ -104,7 +104,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_changeClusterId)
 *			 - add further token
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
+TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_addSecondToken)
 {
 	auto token = createSimpleToken();
 
@@ -137,7 +137,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithToken_addSecondToken)
 *			 - add further token to other cell
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTest, testChangeClusterWithToken_addSecondToken)
+TEST_F(DataDescriptionTransferGpuTests, testChangeClusterWithToken_addSecondToken)
 {
 	auto token = createSimpleToken();
 
@@ -169,7 +169,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeClusterWithToken_addSecondToken
 *			 - position of first cluster is changed
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithSeveralTokens)
+TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithSeveralTokens)
 {
 	auto token = createSimpleToken();
 
@@ -209,7 +209,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeCellWithSeveralTokens)
 *			 - first cluster is removed
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTest, testRemoveCellWithToken)
+TEST_F(DataDescriptionTransferGpuTests, testRemoveCellWithToken)
 {
 	auto token = createSimpleToken();
 
@@ -241,7 +241,7 @@ TEST_F(DataDescriptionTransferGpuTest, testRemoveCellWithToken)
 * Situation: change particle properties
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTest, testChangeParticle)
+TEST_F(DataDescriptionTransferGpuTests, testChangeParticle)
 {
 	DataDescription dataBefore;
 	auto particleEnergy1 = _parameters.cellMinEnergy / 2.0;
@@ -266,7 +266,7 @@ TEST_F(DataDescriptionTransferGpuTest, testChangeParticle)
 * Situation: create cluster and particle at a position outside universe
 * Expected result: cluster and particle should be positioned inside universe due to torus topology
 */
-TEST_F(DataDescriptionTransferGpuTest, testCreateDataOutsideBoundaries)
+TEST_F(DataDescriptionTransferGpuTests, testCreateDataOutsideBoundaries)
 {
 	auto universeSize = _spaceProp->getSize();
 	DataDescription dataBefore;
@@ -301,7 +301,7 @@ TEST_F(DataDescriptionTransferGpuTest, testCreateDataOutsideBoundaries)
 * Fixed error: crash after moving cells in a cluster in item view
 * Expected result: no crash
 */
-TEST_F(DataDescriptionTransferGpuTest, regressionTest_changeData)
+TEST_F(DataDescriptionTransferGpuTests, regressionTest_changeData)
 {
 	auto descHelper = _basicFacade->buildDescriptionHelper();
 	descHelper->init(_context);
@@ -334,7 +334,7 @@ TEST_F(DataDescriptionTransferGpuTest, regressionTest_changeData)
 * Fixed error: token was removed in DataConverter::processModifications
 * Expected result: token is still there
 */
-TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken)
+TEST_F(DataDescriptionTransferGpuTests, regressionTest_moveCellWithToken)
 {
     DataDescription origData;
     auto cluster = createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0);
@@ -368,7 +368,7 @@ TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken)
 * Fixed error: tokens were not correctly filtered in AccessKernel
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTest, regressionTest_moveCellWithToken_partialUpdate)
+TEST_F(DataDescriptionTransferGpuTests, regressionTest_moveCellWithToken_partialUpdate)
 {
     auto token = createSimpleToken();
 

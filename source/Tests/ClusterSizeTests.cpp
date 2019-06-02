@@ -26,12 +26,12 @@
 #include "IntegrationTestHelper.h"
 #include "IntegrationTestFramework.h"
 
-class ClusterSizeTest
+class ClusterSizeTests
 	: public IntegrationTestFramework
 {
 public:
-	ClusterSizeTest();
-	~ClusterSizeTest();
+	ClusterSizeTests();
+	~ClusterSizeTests();
 
 protected:
 	SimulationControllerCpu* _controller = nullptr;
@@ -41,7 +41,7 @@ protected:
 	IntVector2D _gridSize{ 12, 6 };
 };
 
-ClusterSizeTest::ClusterSizeTest()
+ClusterSizeTests::ClusterSizeTests()
 	: IntegrationTestFramework({ 600, 300 })
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
@@ -53,13 +53,13 @@ ClusterSizeTest::ClusterSizeTest()
 	_numberGen = _context->getNumberGenerator();
 }
 
-ClusterSizeTest::~ClusterSizeTest()
+ClusterSizeTests::~ClusterSizeTests()
 {
 	delete _access;
 	delete _controller;
 }
 
-TEST_F(ClusterSizeTest, testDistanceToNeighbors)
+TEST_F(ClusterSizeTests, testDistanceToNeighbors)
 {
 	DataDescription data;
 	for (int i = 1; i <= 10000; ++i) {
