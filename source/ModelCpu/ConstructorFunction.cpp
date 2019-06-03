@@ -9,13 +9,13 @@
 #include "ModelBasic/SpaceProperties.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/QuantityConverter.h"
 #include "ModelBasic/Settings.h"
 
 #include "EntityFactory.h"
 #include "Cell.h"
 #include "Cluster.h"
 #include "Token.h"
-#include "PhysicalQuantityConverter.h"
 #include "UnitContext.h"
 #include "CellMap.h"
 
@@ -147,7 +147,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
         return processingResult;
 
     //read shift length for construction site from token data
-    qreal len = PhysicalQuantityConverter::convertDataToShiftLen(tokenMem[Enums::Constr::IN_DIST]);
+    qreal len = QuantityConverter::convertDataToShiftLen(tokenMem[Enums::Constr::IN_DIST]);
     if( len > parameters.cellMaxDistance ) {        //length to large?
         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
         return processingResult;
@@ -208,7 +208,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
             }
 
             //read desired rotation angle from token
-            qreal angleSum = PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
+            qreal angleSum = QuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
             //calc angular masses with respect to "constructionCell"
             qreal angMassConstrSite = 0.0;
@@ -318,7 +318,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 
                 //update token data
                 tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS_ROT;
-                tokenMem[Enums::Constr::INOUT_ANGLE] = PhysicalQuantityConverter::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
+                tokenMem[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
                 cluster->drawCellsToMap();
             }
 
@@ -541,7 +541,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 }
 
                 //calc start angle
-                angleGap = angleGap + PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
+                angleGap = angleGap + QuantityConverter::convertDataToAngle(tokenMem[Enums::Constr::INOUT_ANGLE]);
 
                 //calc coordinates for new cell from angle gap and construct cell
                 QVector2D angleGapPos = Physics::unitVectorOfAngle(angleGap)*parameters.cellFunctionConstructorOffspringCellDistance;
