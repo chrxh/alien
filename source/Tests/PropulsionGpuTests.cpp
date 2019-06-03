@@ -71,46 +71,106 @@ pair<Physics::Velocities, Enums::PropOut::Type> PropulsionGpuTests::extractResul
     return result;
 }
 
-TEST_F(PropulsionGpuTests, testThrustViaAngle1)
+TEST_F(PropulsionGpuTests, testThrustControlByAngle1)
 {
     auto data = runPropulsion(Enums::PropIn::BY_ANGLE, 0, 100);
     auto result = extractResult(data);
     auto const& velocities = result.first;
     auto const& propOut = result.second;
 
-    ASSERT_GT(-0.005f, velocities.linear.x());
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
+    EXPECT_GT(-0.005f, velocities.linear.x());
     EXPECT_TRUE(abs(velocities.linear.y()) < 0.001f);
+    EXPECT_TRUE(abs(velocities.angular) < 0.01f);
 }
 
-TEST_F(PropulsionGpuTests, testThrustViaAngle2)
+TEST_F(PropulsionGpuTests, testThrustControlByAngle2)
 {
     auto data = runPropulsion(Enums::PropIn::BY_ANGLE, QuantityConverter::convertAngleToData(90), 100);
     auto result = extractResult(data);
     auto const& velocities = result.first;
     auto const& propOut = result.second;
 
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
     EXPECT_TRUE(abs(velocities.linear.x()) < 0.001f);
-    ASSERT_GT(-0.005f, velocities.linear.y());
+    EXPECT_GT(-0.005f, velocities.linear.y());
+    EXPECT_GT(-0.005f, velocities.angular);
 }
 
-TEST_F(PropulsionGpuTests, testThrustViaAngle3)
+TEST_F(PropulsionGpuTests, testThrustControlByAngle3)
 {
     auto data = runPropulsion(Enums::PropIn::BY_ANGLE, QuantityConverter::convertAngleToData(180), 100);
     auto result = extractResult(data);
     auto const& velocities = result.first;
     auto const& propOut = result.second;
 
-    ASSERT_LT(0.005f, velocities.linear.x());
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
+    EXPECT_LT(0.005f, velocities.linear.x());
     EXPECT_TRUE(abs(velocities.linear.y()) < 0.001f);
+    EXPECT_TRUE(abs(velocities.angular) < 0.01f);
 }
 
-TEST_F(PropulsionGpuTests, testThrustViaAngle4)
+TEST_F(PropulsionGpuTests, testThrustControlByAngle4)
 {
     auto data = runPropulsion(Enums::PropIn::BY_ANGLE, QuantityConverter::convertAngleToData(270), 100);
     auto result = extractResult(data);
     auto const& velocities = result.first;
     auto const& propOut = result.second;
 
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
     EXPECT_TRUE(abs(velocities.linear.x()) < 0.001f);
-    ASSERT_LT(0.005f, velocities.linear.y());
+    EXPECT_LT(0.005f, velocities.linear.y());
+    EXPECT_LT(0.005f, velocities.angular);
+}
+
+TEST_F(PropulsionGpuTests, testThrustControlFromCenter)
+{
+    auto data = runPropulsion(Enums::PropIn::FROM_CENTER, 0, 100);
+    auto result = extractResult(data);
+    auto const& velocities = result.first;
+    auto const& propOut = result.second;
+
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
+    EXPECT_LT(0.005f, velocities.linear.x());
+    EXPECT_TRUE(abs(velocities.linear.y()) < 0.001f);
+    EXPECT_TRUE(abs(velocities.angular) < 0.01f);
+}
+
+TEST_F(PropulsionGpuTests, testThrustControlTowardCenter)
+{
+    auto data = runPropulsion(Enums::PropIn::TOWARD_CENTER, 0, 100);
+    auto result = extractResult(data);
+    auto const& velocities = result.first;
+    auto const& propOut = result.second;
+
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
+    EXPECT_GT(-0.005f, velocities.linear.x());
+    EXPECT_TRUE(abs(velocities.linear.y()) < 0.001f);
+    EXPECT_TRUE(abs(velocities.angular) < 0.01f);
+}
+
+TEST_F(PropulsionGpuTests, testThrustControlRotationClockwise)
+{
+    auto data = runPropulsion(Enums::PropIn::ROTATION_CLOCKWISE, 0, 100);
+    auto result = extractResult(data);
+    auto const& velocities = result.first;
+    auto const& propOut = result.second;
+
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
+    EXPECT_TRUE(abs(velocities.linear.x()) < 0.001f);
+    EXPECT_LT(0.005f, velocities.linear.y());
+    EXPECT_LT(0.005f, velocities.angular);
+}
+
+TEST_F(PropulsionGpuTests, testThrustControlRotationCounterClockwise)
+{
+    auto data = runPropulsion(Enums::PropIn::ROTATION_COUNTERCLOCKWISE, 0, 100);
+    auto result = extractResult(data);
+    auto const& velocities = result.first;
+    auto const& propOut = result.second;
+
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
+    EXPECT_TRUE(abs(velocities.linear.x()) < 0.001f);
+    EXPECT_GT(-0.005f, velocities.linear.y());
+    EXPECT_GT(-0.005f, velocities.angular);
 }
