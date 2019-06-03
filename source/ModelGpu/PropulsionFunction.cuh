@@ -24,9 +24,6 @@ __inline__ __device__ void PropulsionFunction::processing(Cell const* sourceCell
     auto& tokenMem = token->memory;
     auto const& command = tokenMem[Enums::Prop::IN] % Enums::PropIn::_COUNTER;
 
-    float angle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
-    float power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
-
     if (Enums::PropIn::DO_NOTHING == command) {
         tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
         return;
@@ -36,6 +33,9 @@ __inline__ __device__ void PropulsionFunction::processing(Cell const* sourceCell
     do {    //mutex
         locked = atomicExch(&cluster->locked, 1);
         if (0 == locked) {
+            float angle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
+            float power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
+
             auto clusterMass = cluster->numCells * cudaSimulationParameters.cellMass;
             auto const& angularVel = cluster->angularVel;
             auto const& vel = cluster->vel;
