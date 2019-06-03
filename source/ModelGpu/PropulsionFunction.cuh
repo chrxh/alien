@@ -98,23 +98,23 @@ __inline__ __device__ void PropulsionFunction::processing(Cell const* sourceCell
                 Physics::kineticEnergy(clusterMass, Math::add(vel, velInc), angularMass, angularVel + angularVelInc);
             auto energyDiff = newKineticEnergy - origKineticEnergy;
 
-            //has token enough energy?
-            if (token->energy >= (energyDiff + abs(energyDiff) + cudaSimulationParameters.tokenMinEnergy + FP_PRECISION)) {
-
-                //create energy particle with difference energy
-                Math::normalize(impulse);
-                auto pos = Math::sub(cell->absPos, impulse);
-                auto vel = Math::sub(tangVel, Math::div(impulse, 4.0f));
-                factory.createParticle(abs(energyDiff), pos, vel);
-
-                cluster->vel = Math::add(vel, velInc);
-                cluster->angularVel += angularVelInc;
-                token->energy -= (energyDiff + abs(energyDiff));
-                tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
-            }
-            else {
+            if (energyDiff > 0.0f && token->energy < energyDiff + cudaSimulationParameters.tokenMinEnergy + FP_PRECISION) {
                 tokenMem[Enums::Prop::OUT] = Enums::PropOut::ERROR_NO_ENERGY;
+                atomicExch(&cluster->locked, 0);
+                return;
             }
+
+            cluster->vel = Math::add(vel, velInc);
+            cluster->angularVel += angularVelInc;
+
+            //create energy particle with difference energy
+            Math::normalize(impulse);
+            auto particlePos = Math::sub(cell->absPos, impulse);
+            auto particleVel = Math::sub(tangVel, Math::div(impulse, 4.0f));
+            factory.createParticle(abs(energyDiff), particlePos, particleVel);
+
+            token->energy -= (energyDiff + abs(energyDiff));
+            tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
 
             atomicExch(&cluster->locked, 0);
         }

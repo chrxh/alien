@@ -40,7 +40,6 @@ QByteArray CellComputerGpuTests::runSimpleCellComputer(string const & program) c
     secondCell.tokenBranchNumber = 1;
     secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setConstData(compiledProgram.compilation);
     auto token = createSimpleToken();
-    auto& tokenData = *token.data;
     firstCell.addToken(token);
     origData.addCluster(cluster);
 

@@ -118,9 +118,6 @@
     <ClInclude Include="..\..\source\ModelCpu\Particle.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelCpu\PhysicalQuantityConverter.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelCpu\PropulsionFunction.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
@@ -313,9 +310,6 @@
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\Particle.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\PhysicalQuantityConverter.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\PropulsionFunction.cpp">

@@ -161,7 +161,7 @@ __device__ __inline__ float Physics::linearKineticEnergy(float mass, float2 cons
 
 __inline__ __device__ float Physics::rotationalKineticEnergy(float angularMass, float angularVel)
 {
-    angularVel *= RAD_TO_DEG;
+    angularVel *= DEG_TO_RAD;
     return 0.5f * angularMass * angularVel * angularVel;
 }
 

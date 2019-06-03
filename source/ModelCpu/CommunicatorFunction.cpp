@@ -3,12 +3,12 @@
 #include "ModelBasic/Physics.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/QuantityConverter.h"
 
 #include "Cluster.h"
 #include "Token.h"
 #include "UnitContext.h"
 #include "CellMap.h"
-#include "PhysicalQuantityConverter.h"
 
 #include "Cell.h"
 #include "CommunicatorFunction.h"
@@ -75,7 +75,7 @@ void CommunicatorFunction::sendMessageToNearbyCommunicatorsAndUpdateToken (Token
     messageDataToSend.angle = token->getMemoryRef()[Enums::Communicator::IN_ANGLE];
     messageDataToSend.distance = token->getMemoryRef()[Enums::Communicator::IN_DISTANCE];
     int numMsg = sendMessageToNearbyCommunicatorsAndReturnNumber(messageDataToSend, cell, previousCell);
-    token->getMemoryRef()[Enums::Communicator::OUT_SENT_NUM_MESSAGE] = PhysicalQuantityConverter::convertIntToData(numMsg);
+    token->getMemoryRef()[Enums::Communicator::OUT_SENT_NUM_MESSAGE] = QuantityConverter::convertIntToData(numMsg);
 }
 
 int CommunicatorFunction::sendMessageToNearbyCommunicatorsAndReturnNumber (const MessageData& messageDataToSend,
@@ -117,8 +117,8 @@ bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess (const Mess
             QVector2D displacementOfObjectFromReceiver = spaceProp->displacement(receiverCell->calcPosition(), senderCell->calcPosition() + displacementOfObjectFromSender);
             qreal angleSeenFromReceiver = Physics::angleOfVector(displacementOfObjectFromReceiver);
             qreal distanceSeenFromReceiver = displacementOfObjectFromReceiver.length();
-            communicator->_receivedMessage.angle = PhysicalQuantityConverter::convertAngleToData(angleSeenFromReceiver);
-            communicator->_receivedMessage.distance = PhysicalQuantityConverter::convertURealToData(distanceSeenFromReceiver);
+            communicator->_receivedMessage.angle = QuantityConverter::convertAngleToData(angleSeenFromReceiver);
+            communicator->_receivedMessage.distance = QuantityConverter::convertURealToData(distanceSeenFromReceiver);
             communicator->_receivedMessage.message = messageDataToSend.message;
             communicator->_newMessageReceived = true;
             return true;
@@ -132,8 +132,8 @@ QVector2D CommunicatorFunction::calcDisplacementOfObjectFromSender (const Messag
 {
     QVector2D displacementFromSender = senderPreviousCell->calcPosition() - senderCell->calcPosition();
     displacementFromSender.normalize();
-    displacementFromSender = Physics::rotateClockwise(displacementFromSender, PhysicalQuantityConverter::convertDataToAngle(messageDataToSend.angle));
-    displacementFromSender = displacementFromSender * PhysicalQuantityConverter::convertDataToUReal(messageDataToSend.distance);
+    displacementFromSender = Physics::rotateClockwise(displacementFromSender, QuantityConverter::convertDataToAngle(messageDataToSend.angle));
+    displacementFromSender = displacementFromSender * QuantityConverter::convertDataToUReal(messageDataToSend.distance);
     return displacementFromSender;
 }
 
@@ -159,7 +159,7 @@ void CommunicatorFunction::calcReceivedMessageAngle (Cell* receiverCell,
 {
     QVector2D displacement = receiverPreviousCell->calcPosition() - receiverCell->calcPosition();
     qreal localAngle = Physics::angleOfVector(displacement);
-    qreal messageAngle = PhysicalQuantityConverter::convertDataToAngle(_receivedMessage.angle);
+    qreal messageAngle = QuantityConverter::convertDataToAngle(_receivedMessage.angle);
     qreal relAngle = Physics::subtractAngle(messageAngle, localAngle);
-    _receivedMessage.angle = PhysicalQuantityConverter::convertAngleToData(relAngle);
+    _receivedMessage.angle = QuantityConverter::convertAngleToData(relAngle);
 }
