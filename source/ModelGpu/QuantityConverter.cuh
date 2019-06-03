@@ -24,10 +24,10 @@ __inline__ __device__ float QuantityConverter::convertDataToAngle(unsigned char 
     //0 to 127 => 0 to 179 degree
     //128 to 255 => -179 to 0 degree
     if (b < 128) {
-        return (0.5 + static_cast<float>(b))*(180.0 / 128.0);        //add 0.5 to prevent discretization errors
+        return (0.5f + static_cast<float>(b))*(180.0f / 128.0f);
     }
     else {
-        return (-256.0 - 0.5 + static_cast<float>(b))*(180.0 / 128.0);
+        return (-256.0f - 0.5f + static_cast<float>(b))*(180.0f / 128.0f);
     }
 }
 
@@ -43,7 +43,7 @@ __inline__ __device__ unsigned char QuantityConverter::convertAngleToData(float 
 
 __inline__ __device__ float QuantityConverter::convertDataToShiftLen(unsigned char b)
 {
-    return (0.5f + static_cast<float>(b)) / 100.0f;                    //add 0.5 to prevent discretization errors
+    return (0.5f + static_cast<float>(b)) / 100.0f;
 
 }
 
@@ -52,19 +52,18 @@ __inline__ __device__ unsigned char QuantityConverter::convertShiftLenToData(flo
     if (static_cast<uint32_t>(len*100.0f) >= 256) {
         return 255;
     }
-    return static_cast<unsigned char>(len*100.0);
+    return static_cast<unsigned char>(len*100.0f);
 }
 
 __inline__ __device__ unsigned char QuantityConverter::convertURealToData(float r)
 {
-    if (r < 0.0) {
+    if (r < 0.0f) {
         return 0;
     }
-    if (r > 127.0) {
+    if (r > 127.0f) {
         return 127;
     }
     return floorInt(r);
-
 }
 
 __inline__ __device__ float QuantityConverter::convertDataToUReal(unsigned char d)
