@@ -7,11 +7,11 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/QuantityConverter.h"
 #include "ModelCpu/SimulationAccessCpu.h"
 #include "ModelCpu/Cluster.h"
 #include "ModelCpu/Cell.h"
 #include "ModelCpu/Token.h"
-#include "ModelCpu/PhysicalQuantityConverter.h"
 #include "ModelCpu/UnitContext.h"
 #include "ModelCpu/CommunicatorFunction.h"
 #include "ModelCpu/SimulationControllerCpu.h"
@@ -53,7 +53,7 @@ TEST_F(CommunicatorTests, testSendMessage_receiveOnSameChannel)
 	const uint8_t channel = 1;
 	const uint8_t differentChannel = 2;
 	const uint8_t message = 100;
-	const uint8_t angle = PhysicalQuantityConverter::convertAngleToData(180.0);
+	const uint8_t angle = QuantityConverter::convertAngleToData(180.0);
 
 	QByteArray tokenData(_parameters.tokenMemorySize, 0);
 	tokenData[Enums::Communicator::IN] = Enums::CommunicatorIn::SEND_MESSAGE;
@@ -119,8 +119,8 @@ TEST_F(CommunicatorTests, testSendMessage_receiveOnSameChannel)
 
 	EXPECT_EQ(100, cellMem1.at(CommunicatorFunction::InternalDataSemantic::MessageCode));
 	EXPECT_EQ(100, cellMem3.at(CommunicatorFunction::InternalDataSemantic::MessageCode));
-	qreal receivedAngle1 = PhysicalQuantityConverter::convertDataToAngle(cellMem1.at(CommunicatorFunction::InternalDataSemantic::OriginAngle));
-	qreal receivedAngle3 = PhysicalQuantityConverter::convertDataToAngle(cellMem3.at(CommunicatorFunction::InternalDataSemantic::OriginAngle));
+	qreal receivedAngle1 = QuantityConverter::convertDataToAngle(cellMem1.at(CommunicatorFunction::InternalDataSemantic::OriginAngle));
+	qreal receivedAngle3 = QuantityConverter::convertDataToAngle(cellMem3.at(CommunicatorFunction::InternalDataSemantic::OriginAngle));
 
 	EXPECT_TRUE(std::abs(180 - receivedAngle1) < 2.0);
 	EXPECT_TRUE(std::abs(-135  - receivedAngle3) < 2.0);
