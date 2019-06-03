@@ -4,12 +4,12 @@
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/QuantityConverter.h"
 
 #include "Cluster.h"
 #include "Particle.h"
 #include "Token.h"
 #include "EntityFactory.h"
-#include "PhysicalQuantityConverter.h"
 #include "UnitContext.h"
 
 #include "Cell.h"
@@ -34,7 +34,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
     quint8 cmd = tokenMem[Enums::Prop::IN] % 7;
-    qreal angle = PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
+    qreal angle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
     qreal power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
     if( cmd == Enums::PropIn::DO_NOTHING ) {

@@ -4,7 +4,7 @@
 
 #include "Definitions.h"
 
-class MODELCPU_EXPORT PhysicalQuantityConverter
+class MODELBASIC_EXPORT QuantityConverter
 {
 public:
 	//Notice: all angles below are in DEG

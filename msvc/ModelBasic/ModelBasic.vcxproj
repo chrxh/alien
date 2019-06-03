@@ -265,6 +265,7 @@
     <ClCompile Include="..\..\source\ModelBasic\Descriptions.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\ModelBasicBuilderFacadeImpl.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\ModelBasicServices.cpp" />
+    <ClCompile Include="..\..\source\ModelBasic\QuantityConverter.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\Physics.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\SerializerImpl.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\Settings.cpp" />
@@ -430,6 +431,7 @@
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicBuilderFacade.h" />
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicBuilderFacadeImpl.h" />
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicServices.h" />
+    <ClInclude Include="..\..\source\ModelBasic\QuantityConverter.h" />
     <ClInclude Include="..\..\source\ModelBasic\Physics.h" />
     <CustomBuild Include="..\..\source\ModelBasic\SerializerImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

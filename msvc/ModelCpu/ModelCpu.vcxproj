@@ -45,7 +45,6 @@
     <ClInclude Include="..\..\source\ModelCpu\ModelCpuServices.h" />
     <ClInclude Include="..\..\source\ModelCpu\ModelCpuData.h" />
     <ClInclude Include="..\..\source\ModelCpu\Particle.h" />
-    <ClInclude Include="..\..\source\ModelCpu\PhysicalQuantityConverter.h" />
     <ClInclude Include="..\..\source\ModelCpu\PropulsionFunction.h" />
     <ClInclude Include="..\..\source\ModelCpu\ScannerFunction.h" />
     <ClInclude Include="..\..\source\ModelCpu\SensorFunction.h" />
@@ -455,7 +454,6 @@
     <ClCompile Include="..\..\source\ModelCpu\ModelCpuData.cpp" />
     <ClCompile Include="..\..\source\ModelCpu\Particle.cpp" />
     <ClCompile Include="..\..\source\ModelCpu\ParticleMapImpl.cpp" />
-    <ClCompile Include="..\..\source\ModelCpu\PhysicalQuantityConverter.cpp" />
     <ClCompile Include="..\..\source\ModelCpu\PropulsionFunction.cpp" />
     <ClCompile Include="..\..\source\ModelCpu\ScannerFunction.cpp" />
     <ClCompile Include="..\..\source\ModelCpu\SensorFunction.cpp" />
