@@ -126,6 +126,9 @@
     <ClInclude Include="..\..\source\ModelGpu\QuantityConverter.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ScannerFunction.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">

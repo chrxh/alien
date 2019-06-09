@@ -229,6 +229,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\QuantityConverter.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Physics.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\PropulsionFunction.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ScannerFunction.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnOrigData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnCopyData.cuh" />
