@@ -235,9 +235,9 @@ TEST_F(PropulsionGpuTests, testThrustControlDampRotation2)
 TEST_F(PropulsionGpuTests, testPowerControl)
 {
     DataDescription origData;
-    auto&& cluster1 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 1, QVector2D{}, 0, 0, 1);
-    auto&& cluster2 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 10, QVector2D{}, 0, 0, 1);
-    auto&& cluster3 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 255, QVector2D{}, 0, 0, 1);
+    auto cluster1 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 1, QVector2D{}, 0, 0, 1);
+    auto cluster2 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 10, QVector2D{}, 0, 0, 1);
+    auto cluster3 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 255, QVector2D{}, 0, 0, 1);
     setCenterPos(cluster1, { 0, 0 });
     setCenterPos(cluster2, { 5, 0 });
     setCenterPos(cluster3, { 0, 5 });
@@ -283,8 +283,8 @@ TEST_F(PropulsionGpuTests, testParallelization1)
     auto const& cellMaxToken = _parameters.cellMaxToken;
 
     DataDescription origData;
-    auto&& cluster1 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 1, QVector2D{}, 0, 0, cellMaxToken);
-    auto&& cluster2 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 1, QVector2D{}, 0, 0, 1);
+    auto cluster1 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 1, QVector2D{}, 0, 0, cellMaxToken);
+    auto cluster2 = createClusterForPropulsionTest(Enums::PropIn::FROM_CENTER, 0, 1, QVector2D{}, 0, 0, 1);
     setCenterPos(cluster1, { 0, 0 });
     setCenterPos(cluster2, { 5, 0 });
     origData.addCluster(cluster1);
