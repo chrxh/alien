@@ -204,7 +204,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         __shared__ Cluster* newCluster;
         __shared__ Cluster* otherCluster;
         __shared__ float2 correction;
-        enum CopyInfo
+        enum class CopyInfo
         {
             CellPointers,
             OtherCellPointers,
@@ -223,13 +223,14 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
             newCluster->locked = 0;
             newCluster->clusterToFuse = nullptr;
             
-            if (_origCluster->maxCellPointers - _origCluster->numCellPointers >= otherCluster->numCellPointers) {
+            if (_origCluster->maxCellPointers  >= newCluster->numCellPointers) {
                 newCluster->maxCellPointers = _origCluster->maxCellPointers;
                 newCluster->cellPointers = _origCluster->cellPointers;
                 offset = _origCluster->numCellPointers;
                 copyInfo = CopyInfo::OtherCellPointers;
             }
-            else if (otherCluster->maxCellPointers - otherCluster->numCellPointers >= _origCluster->numCellPointers) {
+
+            else if (otherCluster->maxCellPointers >= newCluster->numCellPointers) {
                 newCluster->maxCellPointers = otherCluster->maxCellPointers;
                 newCluster->cellPointers = otherCluster->cellPointers;
                 offset = otherCluster->numCellPointers;
@@ -257,8 +258,8 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
 
         for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
             Cell* cell = _origCluster->cellPointers[cellIndex];
-            if (CellPointers == copyInfo || BothCellPointers == copyInfo) {
-                Cell*& newCellPointer = newCluster->cellPointers[offset + cellIndex];
+            if (CopyInfo::CellPointers == copyInfo || CopyInfo::BothCellPointers == copyInfo) {
+                auto& newCellPointer = newCluster->cellPointers[offset + cellIndex];
                 newCellPointer = cell;
             }
             auto relPos = Math::sub(cell->absPos, newCluster->pos);
@@ -274,7 +275,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         }
         __syncthreads();
        
-        if (0 == threadIdx.x && BothCellPointers == copyInfo) {
+        if (0 == threadIdx.x && CopyInfo::BothCellPointers == copyInfo) {
             offset += _origCluster->numCellPointers;
         }
         __syncthreads();
@@ -285,8 +286,8 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
 
         for (int otherCellIndex = startOtherCellIndex; otherCellIndex <= endOtherCellIndex; ++otherCellIndex) {
             Cell* cell = otherCluster->cellPointers[otherCellIndex];
-            if (OtherCellPointers == copyInfo || BothCellPointers == copyInfo) {
-                Cell*& newCellPointer = newCluster->cellPointers[offset + otherCellIndex];
+            if (CopyInfo::OtherCellPointers == copyInfo || CopyInfo::BothCellPointers == copyInfo) {
+                auto& newCellPointer = newCluster->cellPointers[offset + otherCellIndex];
                 newCellPointer = cell;
             }
             auto r = Math::sub(cell->absPos, otherCluster->pos);
