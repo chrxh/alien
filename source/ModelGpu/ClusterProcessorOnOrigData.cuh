@@ -139,7 +139,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision_block
                 }
                 if (Math::length(Math::sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity
                     && areConnectable(cell, otherCell)) {
-//                    state = CollisionState::Fusion;
+                    state = CollisionState::Fusion;
                 }
                 atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
                 atomicAdd(&collisionCenterPos.y, otherCell->absPos.y);
