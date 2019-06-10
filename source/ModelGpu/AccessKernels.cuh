@@ -14,11 +14,10 @@
 __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     SimulationData const& data, DataAccessTO& simulationTO, int clusterIndex)
 {
-    Cluster const& cluster = data.clustersAC1.getEntireArray()[clusterIndex];
+    Cluster const& cluster = data.clusters.getEntireArray()[clusterIndex];
 
-    int startCellIndex;
-    int endCellIndex;
-    calcPartition(cluster.numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+    int startCellIndex, endCellIndex;
+    calcPartition(cluster.numCellPointers, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
     __shared__ bool containedInRect;
     __shared__ BasicMap map;
@@ -29,7 +28,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
     __syncthreads();
 
     for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-        auto pos = cluster.cells[cellIndex].absPos;
+        auto pos = cluster.cellPointers[cellIndex]->absPos;
         map.mapPosCorrection(pos);
         if (isContained(rectUpperLeft, rectLowerRight, pos)) {
             containedInRect = true;
@@ -44,7 +43,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
         __shared__ TokenAccessTO* tokenTOs;
         if (0 == threadIdx.x) {
             int clusterAccessIndex = atomicAdd(simulationTO.numClusters, 1);
-            cellTOIndex = atomicAdd(simulationTO.numCells, cluster.numCells);
+            cellTOIndex = atomicAdd(simulationTO.numCells, cluster.numCellPointers);
             cellTOs = &simulationTO.cells[cellTOIndex];
 
             tokenTOIndex = atomicAdd(simulationTO.numTokens, cluster.numTokens);
@@ -56,7 +55,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
             clusterTO.vel = cluster.vel;
             clusterTO.angle = cluster.angle;
             clusterTO.angularVel = cluster.angularVel;
-            clusterTO.numCells = cluster.numCells;
+            clusterTO.numCells = cluster.numCellPointers;
             clusterTO.numTokens = cluster.numTokens;
             clusterTO.cellStartIndex = cellTOIndex;
             clusterTO.tokenStartIndex = tokenTOIndex;
@@ -64,7 +63,13 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
         __syncthreads();
 
         for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-            Cell const& cell = cluster.cells[cellIndex];
+            Cell& cell = *cluster.cellPointers[cellIndex];
+            cell.tag = cellIndex;
+        }
+        __syncthreads();
+
+        for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+            Cell const& cell = *cluster.cellPointers[cellIndex];
             CellAccessTO& cellTO = cellTOs[cellIndex];
             cellTO.id = cell.id;
             cellTO.pos = cell.absPos;
@@ -83,13 +88,12 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
                 cellTO.mutableData[i] = cell.mutableData[i];
             }
             for (int i = 0; i < cell.numConnections; ++i) {
-                int connectingCellIndex = cell.connections[i] - cluster.cells + cellTOIndex;
+                int connectingCellIndex = cell.connections[i]->tag + cellTOIndex;
                 cellTO.connectionIndices[i] = connectingCellIndex;
             }
         }
 
-        int startTokenIndex;
-        int endTokenIndex;
+        int startTokenIndex, endTokenIndex;
         calcPartition(cluster.numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
         for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
             Token const& token = cluster.tokens[tokenIndex];
@@ -98,7 +102,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
             for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
                 tokenTO.memory[i] = token.memory[i];
             }
-            int tokenCellIndex = token.cell - cluster.cells + cellTOIndex;
+            int tokenCellIndex = token.cell->tag + cellTOIndex;
             tokenTO.cellIndex = tokenCellIndex;
         }
     }
@@ -107,7 +111,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
 __device__ void getParticleAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     SimulationData const& data, DataAccessTO& access, int particleIndex)
 {
-    Particle const& particle = data.particlesAC1.getEntireArray()[particleIndex];
+    Particle const& particle = data.particles.getEntireArray()[particleIndex];
     if (particle.pos.x >= rectUpperLeft.x
         && particle.pos.x <= rectLowerRight.x
         && particle.pos.y >= rectUpperLeft.y
@@ -127,7 +131,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     int indexResource = blockIdx.x;
-    int numEntities = data.clustersAC1.getNumEntries();
+    int numEntities = data.clusters.getNumEntries();
     int startIndex;
     int endIndex;
     calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
@@ -137,7 +141,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     }
 
     indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-    numEntities = data.particlesAC1.getNumEntries();
+    numEntities = data.particles.getNumEntries();
 
     calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
     for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
@@ -149,11 +153,11 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     SimulationData& data, int clusterIndex)
 {
-    Cluster const& cluster = data.clustersAC1.getEntireArray()[clusterIndex];
+    Cluster const& cluster = data.clusters.getEntireArray()[clusterIndex];
 
     int startCellIndex;
     int endCellIndex;
-    calcPartition(cluster.numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+    calcPartition(cluster.numCellPointers, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
     __shared__ bool containedInRect;
     if (0 == threadIdx.x) {
@@ -162,7 +166,7 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
     __syncthreads();
 
     for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-        Cell const& cell = cluster.cells[cellIndex];
+        Cell const& cell = *cluster.cellPointers[cellIndex];
         if (isContained(rectUpperLeft, rectLowerRight, cell.absPos)) {
             containedInRect = true;
         }
@@ -170,19 +174,17 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
     __syncthreads();
 
     if (!containedInRect) {
-        __shared__ Cell* newCells;
         __shared__ Token* newTokens;
         __shared__ Cluster* newCluster;
         if (0 == threadIdx.x) {
-            newCluster = data.clustersAC2.getNewElement();
-            newCells = data.cellsAC2.getNewSubarray(cluster.numCells);
-            newTokens = data.tokensAC2.getNewSubarray(cluster.numTokens);
+            newCluster = data.clustersNew.getNewElement();
+            newTokens = data.tokensNew.getNewSubarray(cluster.numTokens);
             *newCluster = cluster;
-            newCluster->cells = newCells;
             newCluster->tokens = newTokens;
         }
         __syncthreads();
 
+/*
         for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
             Cell& cell = cluster.cells[cellIndex];
             newCells[cellIndex] = cell;
@@ -199,6 +201,7 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
             }
         }
         __syncthreads();
+*/
 
         if (newCluster->numTokens > 0) {
             int startTokenIndex;
@@ -208,8 +211,10 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
             for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
                 Token& token = cluster.tokens[tokenIndex];
                 newTokens[tokenIndex] = token;
+/*
                 auto& tokenCell = newTokens[tokenIndex].cell;
                 tokenCell = tokenCell->nextTimestep;
+*/
             }
             __syncthreads();
         }
@@ -219,9 +224,9 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
 __device__ void filterParticleData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     SimulationData& data, int particleIndex)
 {
-    Particle const& particle = data.particlesAC1.getEntireArray()[particleIndex];
+    Particle const& particle = data.particles.getEntireArray()[particleIndex];
     if (!isContained(rectUpperLeft, rectLowerRight, particle.pos)) {
-        Particle* newParticle = data.particlesAC2.getNewElement();
+        Particle* newParticle = data.particlesNew.getNewElement();
         *newParticle = particle;
     }
 }
@@ -229,7 +234,7 @@ __device__ void filterParticleData(int2 const& rectUpperLeft, int2 const& rectLo
 __global__ void filterData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
     int indexResource = blockIdx.x;
-    int numEntities = data.clustersAC1.getNumEntries();
+    int numEntities = data.clusters.getNumEntries();
     int startIndex;
     int endIndex;
     calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
@@ -238,7 +243,7 @@ __global__ void filterData(int2 rectUpperLeft, int2 rectLowerRight, SimulationDa
     }
 
     indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-    numEntities = data.particlesAC1.getNumEntries();
+    numEntities = data.particles.getNumEntries();
     calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
     for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
         filterParticleData(rectUpperLeft, rectLowerRight, data, particleIndex);
@@ -249,9 +254,9 @@ __global__ void filterData(int2 rectUpperLeft, int2 rectLowerRight, SimulationDa
 
 __device__ void convertData(SimulationData data, DataAccessTO const& simulationTO)
 {
-    __shared__ EntityFactory converter;
+    __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
-        converter.init(&data);
+        factory.init(&data);
     }
     __syncthreads();
 
@@ -262,14 +267,14 @@ __device__ void convertData(SimulationData data, DataAccessTO const& simulationT
     calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
 
     for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-        converter.createClusterFromTO(simulationTO.clusters[clusterIndex], &simulationTO);
+        factory.createClusterFromTO_blockCall(simulationTO.clusters[clusterIndex], &simulationTO);
     }
 
     indexResource = threadIdx.x + blockIdx.x * blockDim.x;
     numEntities = *simulationTO.numParticles;
     calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
     for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
-        converter.createParticleFromTO(simulationTO.particles[particleIndex], &simulationTO);
+        factory.createParticleFromTO(simulationTO.particles[particleIndex], &simulationTO);
     }
 }
 

@@ -105,7 +105,7 @@ __inline__ __device__ void ScannerFunction::processing(Cell const* sourceCell, T
     }
 
     //scan cluster
-    auto mass = floorf(cell->cluster->numCells);
+    auto mass = floorf(cell->cluster->numCellPointers);
     if (mass > 255) {
         mass = 255;
     }

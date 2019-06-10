@@ -46,7 +46,6 @@ struct Cell
     char mutableData[MAX_CELL_MUTABLE_BYTES];
 
     //auxiliary data
-    Cell* nextTimestep;
     int locked;	//0 = unlocked, 1 = locked
     int protectionCounter;
     bool alive;
@@ -61,8 +60,9 @@ struct Cluster
     float angle;
     float angularVel;
     float angularMass;
-    int numCells;
-    Cell* cells;
+    int maxCellPointers;
+    int numCellPointers;
+    Cell** cellPointers;
     int numTokens;
     Token* tokens;
 
@@ -79,14 +79,14 @@ struct SimulationData
     Cell **cellMap;
     Particle **particleMap;
 
-    ArrayController<Cluster> clustersAC1;
-    ArrayController<Cluster> clustersAC2;
-    ArrayController<Cell> cellsAC1;
-    ArrayController<Cell> cellsAC2;
-    ArrayController<Particle> particlesAC1;
-    ArrayController<Particle> particlesAC2;
-    ArrayController<Token> tokensAC1;
-    ArrayController<Token> tokensAC2;
+    ArrayController<Cluster> clusters;
+    ArrayController<Cluster> clustersNew;
+    ArrayController<Cell*> cellPointers;
+    ArrayController<Cell> cells;
+    ArrayController<Particle> particles;
+    ArrayController<Particle> particlesNew;
+    ArrayController<Token> tokens;
+    ArrayController<Token> tokensNew;
 
     CudaNumberGenerator numberGen;
 };

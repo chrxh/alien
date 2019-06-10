@@ -36,7 +36,7 @@ __inline__ __device__ void PropulsionFunction::processing(Cell const* sourceCell
             float angle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
             float power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
-            auto clusterMass = cluster->numCells * cudaSimulationParameters.cellMass;
+            auto clusterMass = cluster->numCellPointers * cudaSimulationParameters.cellMass;
             auto const& angularVel = cluster->angularVel;
             auto const& vel = cluster->vel;
             auto const& angularMass = cluster->angularMass;
