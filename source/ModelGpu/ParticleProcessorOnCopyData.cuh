@@ -37,7 +37,7 @@ __inline__ __device__ void ParticleProcessorOnCopyData::init(SimulationData & da
 	_origParticleMap.init(data.size, data.particleMap);
 
 	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	int numEntities = data.particlesAC1.getNumEntries();
+	int numEntities = data.particles.getNumEntries();
 	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, _startParticleIndex, _endParticleIndex);
 
 	__syncthreads();
@@ -46,19 +46,17 @@ __inline__ __device__ void ParticleProcessorOnCopyData::init(SimulationData & da
 __inline__ __device__ void ParticleProcessorOnCopyData::processingDataCopy()
 {
 	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
-		Particle *origParticle = &_data->particlesAC1.getEntireArray()[particleIndex];
+		Particle *origParticle = &_data->particles.getEntireArray()[particleIndex];
 		if (!origParticle->alive) {
 			continue;
 		}
 		if (auto cell = _cellMap.get(origParticle->pos)) {
-			if (auto nextCell = cell->nextTimestep) {
-				if (nextCell->alive) {
-					atomicAdd(&nextCell->energy, origParticle->energy);
-					continue;
-				}
+			if (cell->alive) {
+				atomicAdd(&cell->energy, origParticle->energy);
+				continue;
 			}
 		}
-		Particle* newParticle = _data->particlesAC2.getNewElement();
+		Particle* newParticle = _data->particlesNew.getNewElement();
 		*newParticle = *origParticle;
 	}
 }

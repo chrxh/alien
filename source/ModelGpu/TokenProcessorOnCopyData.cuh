@@ -42,9 +42,9 @@ private:
 __inline__ __device__ void TokenProcessorOnCopyData::init(SimulationData & data, int clusterIndex)
 {
 	_data = &data;
-	_cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+	_cluster = &data.clusters.getEntireArray()[clusterIndex];
 
-	calcPartition(_cluster->numCells, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
+	calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
 	calcPartition(_cluster->numTokens, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
 }
 
@@ -61,14 +61,14 @@ __inline__ __device__ void TokenProcessorOnCopyData::processingSpreadingAndFeatu
 	__shared__ int newNumTokens;
     __shared__ EntityFactory factory;
 	if (0 == threadIdx.x) {
-		newTokens = _data->tokensAC2.getNewSubarray(anticipatedTokens);
+		newTokens = _data->tokensNew.getNewSubarray(anticipatedTokens);
 		newNumTokens = 0;
         factory.init(_data);
 	}
 	for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
-		Cell& cell = _cluster->cells[cellIndex];
-		if (cell.alive) {
-			cell.tag = 0;
+		Cell* cell = _cluster->cellPointers[cellIndex];
+		if (cell->alive) {
+			cell->tag = 0;
 		}
 	}
 	__syncthreads();

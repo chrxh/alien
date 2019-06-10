@@ -38,7 +38,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::init(SimulationData & da
     _origParticleMap.init(data.size, data.particleMap);
 
     int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-    int numEntities = data.particlesAC1.getNumEntries();
+    int numEntities = data.particles.getNumEntries();
     calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, _startParticleIndex, _endParticleIndex);
 
     __syncthreads();
@@ -47,7 +47,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::init(SimulationData & da
 __inline__ __device__ void ParticleProcessorOnOrigData::processingMovement()
 {
     for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
-        Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
+        Particle* particle = &_data->particles.getEntireArray()[particleIndex];
         particle->pos = Math::add(particle->pos, particle->vel);
         _origParticleMap.mapPosCorrection(particle->pos);
         _origParticleMap.set(particle->pos, particle);
@@ -57,7 +57,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingMovement()
 __inline__ __device__ void ParticleProcessorOnOrigData::processingCollision()
 {
     for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
-        Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
+        Particle* particle = &_data->particles.getEntireArray()[particleIndex];
         Particle* otherParticle = _origParticleMap.get(particle->pos);
         if (otherParticle && otherParticle != particle) {
             if (particle->alive && otherParticle->alive) {
@@ -85,7 +85,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingCollision()
 __inline__ __device__ void ParticleProcessorOnOrigData::processingTransformation()
 {
     for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
-        Particle* particle = &_data->particlesAC1.getEntireArray()[particleIndex];
+        Particle* particle = &_data->particles.getEntireArray()[particleIndex];
         auto innerEnergy = particle->energy - Physics::linearKineticEnergy(cudaSimulationParameters.cellMass, particle->vel);
         if (innerEnergy >= cudaSimulationParameters.cellMinEnergy) {
             if (_data->numberGen.random() < cudaSimulationParameters.cellTransformationProb) {
