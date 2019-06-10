@@ -20,9 +20,9 @@ private:
 
 public:
     __inline__ __device__ void init(SimulationData* data);
-    __inline__ __device__ void createClusterFromTO(
+    __inline__ __device__ void createClusterFromTO_blockCall(
         ClusterAccessTO const& clusterTO,
-        DataAccessTO const* _simulationTO);  //should be called from all threads of a block
+        DataAccessTO const* _simulationTO);
     __inline__ __device__ void createParticleFromTO(
         ParticleAccessTO const& particleTO,
         DataAccessTO const* _simulationTO);
@@ -40,15 +40,16 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
     _map.init(data->size);
 }
 
-__inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO)
+__inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO)
 {
     __shared__ Cluster* cluster;
+    __shared__ Cell* cells;
     __shared__ float angularMass;
     __shared__ float invRotMatrix[2][2];
     __shared__ float2 posCorrection;
 
     if (0 == threadIdx.x) {
-        cluster = _data->clustersAC2.getNewElement();
+        cluster = _data->clustersNew.getNewElement();
         cluster->id = clusterTO.id;
         cluster->pos = clusterTO.pos;
         _map.mapPosCorrection(cluster->pos);
@@ -56,10 +57,12 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
         cluster->vel = clusterTO.vel;
         cluster->angle = clusterTO.angle;
         cluster->angularVel = clusterTO.angularVel;
-        cluster->numCells = clusterTO.numCells;
-        cluster->cells = _data->cellsAC2.getNewSubarray(cluster->numCells);
+        cluster->maxCellPointers = clusterTO.numCells * CELL_POINTER_CAPACITY_MULTIPLIER;
+        cluster->numCellPointers = clusterTO.numCells;
+        cluster->cellPointers = _data->cellPointers.getNewSubarray(cluster->maxCellPointers);
+        cells = _data->cells.getNewSubarray(cluster->numCellPointers);
         cluster->numTokens = clusterTO.numTokens;
-        cluster->tokens = _data->tokensAC2.getNewSubarray(cluster->numTokens);
+        cluster->tokens = _data->tokensNew.getNewSubarray(cluster->numTokens);
 
         cluster->decompositionRequired = false;
         cluster->locked = 0;
@@ -72,11 +75,12 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
 
     int startCellIndex;
     int endCellIndex;
-    calcPartition(cluster->numCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
+    calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
 
     for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-        Cell& cell = cluster->cells[cellIndex];
-        CellAccessTO const& cellTO = _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
+        auto& cell = cells[cellIndex];
+        cluster->cellPointers[cellIndex] = &cell;
+        auto const& cellTO = _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
         cell.id = cellTO.id;
         cell.cluster = cluster;
         cell.absPos = Math::add(cellTO.pos, posCorrection);
@@ -97,7 +101,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
         cell.numConnections = cellTO.numConnections;
         for (int i = 0; i < cell.numConnections; ++i) {
             int index = cellTO.connectionIndices[i] - clusterTO.cellStartIndex;
-            cell.connections[i] = cluster->cells + index;
+            cell.connections[i] = cells + index;
         }
 
         cell.cellFunctionType = cellTO.cellFunctionType;
@@ -123,7 +127,6 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
             cell.mutableData[i] = cellTO.mutableData[i];
         }
 
-        cell.nextTimestep = nullptr;
         cell.protectionCounter = 0;
         cell.alive = true;
         cell.locked = 0;
@@ -142,7 +145,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
             token.memory[i] = tokenTO.memory[i];
         }
         int index = tokenTO.cellIndex - clusterTO.cellStartIndex;
-        token.cell = cluster->cells + index;
+        token.cell = cells + index;
     }
 
     __syncthreads();
@@ -154,7 +157,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO(ClusterAccessTO co
 
 __inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO)
 {
-    Particle* particle = _data->particlesAC2.getNewElement();
+    Particle* particle = _data->particlesNew.getNewElement();
     particle->id = particleTO.id;
     particle->pos = particleTO.pos;
     _map.mapPosCorrection(particle->pos);
@@ -166,8 +169,9 @@ __inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO 
 
 __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float energy, float2 const & pos, float2 const & vel)
 {
-    Cluster* cluster = _data->clustersAC2.getNewElement();
-    Cell* cell = _data->cellsAC2.getNewElement();
+    auto cluster = _data->clustersNew.getNewElement();
+    auto cell = _data->cells.getNewElement();
+    auto cellPointers = _data->cellPointers.getNewSubarray(CELL_POINTER_CAPACITY_MULTIPLIER);
 
     cluster->id = _data->numberGen.createNewId_kernel();
     cluster->pos = pos;
@@ -175,8 +179,10 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
     cluster->angle = 0.0f;
     cluster->angularVel = 0.0f;
     cluster->angularMass = 0.0f;
-    cluster->numCells = 1;
-    cluster->cells = cell;
+    cluster->maxCellPointers = CELL_POINTER_CAPACITY_MULTIPLIER;
+    cluster->numCellPointers = 1;
+    cluster->cellPointers = cellPointers;
+    *cellPointers = cell;
     cluster->numTokens = 0;
 
     cluster->clusterToFuse = nullptr;
@@ -193,7 +199,6 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
     cell->branchNumber = _data->numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
     cell->numConnections = 0;
     cell->tokenBlocked = false;
-    cell->nextTimestep = nullptr;
     cell->alive = true;
     cell->protectionCounter = 0;
     cell->locked = 0;
@@ -222,7 +227,7 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
 
 __inline__ __device__ void EntityFactory::createParticle(float energy, float2 const & pos, float2 const & vel)
 {
-    Particle* particle = _data->particlesAC2.getNewElement();
+    Particle* particle = _data->particlesNew.getNewElement();
     particle->id = _data->numberGen.createNewId_kernel();
     particle->locked = 0;
     particle->alive = true;

@@ -31,9 +31,9 @@ private:
 __inline__ __device__ void TokenProcessorOnOrigData::init(SimulationData& data, int clusterIndex)
 {
     _data = &data;
-    _cluster = &data.clustersAC1.getEntireArray()[clusterIndex];
+    _cluster = &data.clusters.getEntireArray()[clusterIndex];
 
-    calcPartition(_cluster->numCells, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
+    calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
     calcPartition(_cluster->numTokens, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
 }
 
@@ -44,9 +44,9 @@ __inline__ __device__ void TokenProcessorOnOrigData::processingEnergyAveraging()
     }
 
     for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
-        Cell& cell = _cluster->cells[cellIndex];
-        if (cell.alive) {
-            cell.tag = 0;
+        Cell* cell = _cluster->cellPointers[cellIndex];
+        if (cell->alive) {
+            cell->tag = 0;
         }
     }
     __syncthreads();
