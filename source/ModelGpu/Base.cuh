@@ -204,6 +204,9 @@ public:
     {
         int index = _hash(element) % _size;
         while (_data[index]) {
+            if (_data[index] == element) {
+                return;
+            }
             index = (++index) % _size;
         }
         _data[index] = element;
