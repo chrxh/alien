@@ -60,7 +60,6 @@ struct Cluster
     float angle;
     float angularVel;
     float angularMass;
-    int maxCellPointers;
     int numCellPointers;
     Cell** cellPointers;
     int numTokens;
