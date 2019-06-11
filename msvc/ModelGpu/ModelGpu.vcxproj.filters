@@ -93,12 +93,6 @@
     <ClInclude Include="..\..\source\ModelGpu\SimulationData.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnCopyData.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\TokenProcessorOnOrigData.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\AccessKernels.cuh">
       <Filter>Source Files\Impl\kernel</Filter>
     </ClInclude>
@@ -127,6 +121,9 @@
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ScannerFunction.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\TokenProcessor.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
   </ItemGroup>
