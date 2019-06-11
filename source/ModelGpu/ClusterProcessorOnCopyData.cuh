@@ -130,7 +130,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         entries[index].cluster.pos.y /= numCells;
         entries[index].cluster.vel.x /= numCells;
         entries[index].cluster.vel.y /= numCells;
-        entries[index].cluster.cellPointers = _data->cellPointers.getNewSubarray(numCells);
+        entries[index].cluster.cellPointers = _data->cellPointers.getNewSubarray(numCells * CELL_POINTER_CAPACITY_MULTIPLIER);
         entries[index].cluster.numCellPointers = 0;
         entries[index].cluster.maxCellPointers = numCells * CELL_POINTER_CAPACITY_MULTIPLIER;
 
@@ -259,8 +259,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
             Cell* cell = _origCluster->cellPointers[cellIndex];
             if (CopyInfo::CellPointers == copyInfo || CopyInfo::BothCellPointers == copyInfo) {
-                auto& newCellPointer = newCluster->cellPointers[offset + cellIndex];
-                newCellPointer = cell;
+                newCluster->cellPointers[offset + cellIndex] = cell;
             }
             auto relPos = Math::sub(cell->absPos, newCluster->pos);
             cell->relPos = relPos;
@@ -287,8 +286,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         for (int otherCellIndex = startOtherCellIndex; otherCellIndex <= endOtherCellIndex; ++otherCellIndex) {
             Cell* cell = otherCluster->cellPointers[otherCellIndex];
             if (CopyInfo::OtherCellPointers == copyInfo || CopyInfo::BothCellPointers == copyInfo) {
-                auto& newCellPointer = newCluster->cellPointers[offset + otherCellIndex];
-                newCellPointer = cell;
+                newCluster->cellPointers[offset + otherCellIndex] = cell;
             }
             auto r = Math::sub(cell->absPos, otherCluster->pos);
             _cellMap.mapDisplacementCorrection(r);
