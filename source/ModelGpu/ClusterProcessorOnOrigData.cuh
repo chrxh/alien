@@ -375,11 +375,11 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingRadiation_block
 
     if (_cluster->decompositionRequired) {
         int startTokenIndex, endTokenIndex;
-        calcPartition(_cluster->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+        calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
         for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
-            auto& token = _cluster->tokens[tokenIndex];
-            if (!token.cell->alive) {
-                atomicAdd(&token.cell->energy, token.energy);
+            auto token = _cluster->tokenPointers[tokenIndex];
+            if (!token->cell->alive) {
+                atomicAdd(&token->cell->energy, token->energy);
             }
         }
 
