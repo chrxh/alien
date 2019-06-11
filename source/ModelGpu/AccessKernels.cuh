@@ -46,7 +46,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
             cellTOIndex = atomicAdd(simulationTO.numCells, cluster.numCellPointers);
             cellTOs = &simulationTO.cells[cellTOIndex];
 
-            tokenTOIndex = atomicAdd(simulationTO.numTokens, cluster.numTokens);
+            tokenTOIndex = atomicAdd(simulationTO.numTokens, cluster.numTokenPointers);
             tokenTOs = &simulationTO.tokens[tokenTOIndex];
 
             ClusterAccessTO& clusterTO = simulationTO.clusters[clusterAccessIndex];
@@ -56,7 +56,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
             clusterTO.angle = cluster.angle;
             clusterTO.angularVel = cluster.angularVel;
             clusterTO.numCells = cluster.numCellPointers;
-            clusterTO.numTokens = cluster.numTokens;
+            clusterTO.numTokens = cluster.numTokenPointers;
             clusterTO.cellStartIndex = cellTOIndex;
             clusterTO.tokenStartIndex = tokenTOIndex;
         }
@@ -94,9 +94,9 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
         }
 
         int startTokenIndex, endTokenIndex;
-        calcPartition(cluster.numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+        calcPartition(cluster.numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
         for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
-            Token const& token = cluster.tokens[tokenIndex];
+            Token const& token = *cluster.tokenPointers[tokenIndex];
             TokenAccessTO& tokenTO = tokenTOs[tokenIndex];
             tokenTO.energy = token.energy;
             for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
@@ -174,50 +174,12 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
     __syncthreads();
 
     if (!containedInRect) {
-        __shared__ Token* newTokens;
         __shared__ Cluster* newCluster;
         if (0 == threadIdx.x) {
             newCluster = data.clustersNew.getNewElement();
-            newTokens = data.tokensNew.getNewSubarray(cluster.numTokens);
             *newCluster = cluster;
-            newCluster->tokens = newTokens;
         }
         __syncthreads();
-
-/*
-        for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-            Cell& cell = cluster.cells[cellIndex];
-            newCells[cellIndex] = cell;
-            newCells[cellIndex].cluster = newCluster;
-            cell.nextTimestep = &newCells[cellIndex];
-        }
-        __syncthreads();
-
-        for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
-            Cell& newCell = newCells[cellIndex];
-            int numConnections = newCell.numConnections;
-            for (int i = 0; i < numConnections; ++i) {
-                newCell.connections[i] = newCell.connections[i]->nextTimestep;
-            }
-        }
-        __syncthreads();
-*/
-
-        if (newCluster->numTokens > 0) {
-            int startTokenIndex;
-            int endTokenIndex;
-            calcPartition(cluster.numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-
-            for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
-                Token& token = cluster.tokens[tokenIndex];
-                newTokens[tokenIndex] = token;
-/*
-                auto& tokenCell = newTokens[tokenIndex].cell;
-                tokenCell = tokenCell->nextTimestep;
-*/
-            }
-            __syncthreads();
-        }
     }
 }
 

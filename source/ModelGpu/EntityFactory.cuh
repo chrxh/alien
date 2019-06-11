@@ -44,6 +44,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
 {
     __shared__ Cluster* cluster;
     __shared__ Cell* cells;
+    __shared__ Token* tokens;
     __shared__ float angularMass;
     __shared__ float invRotMatrix[2][2];
     __shared__ float2 posCorrection;
@@ -60,8 +61,9 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
         cluster->numCellPointers = clusterTO.numCells;
         cluster->cellPointers = _data->cellPointers.getNewSubarray(cluster->numCellPointers);
         cells = _data->cells.getNewSubarray(cluster->numCellPointers);
-        cluster->numTokens = clusterTO.numTokens;
-        cluster->tokens = _data->tokensNew.getNewSubarray(cluster->numTokens);
+        cluster->numTokenPointers = clusterTO.numTokens;
+        cluster->tokenPointers = _data->tokenPointers.getNewSubarray(cluster->numTokenPointers);
+        tokens = _data->tokens.getNewSubarray(cluster->numTokenPointers);
 
         cluster->decompositionRequired = false;
         cluster->locked = 0;
@@ -133,11 +135,12 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
 
     int startTokenIndex;
     int endTokenIndex;
-    calcPartition(cluster->numTokens, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+    calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
 
     for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
-        Token& token = cluster->tokens[tokenIndex];
-        TokenAccessTO const& tokenTO = _simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];
+        auto& token = tokens[tokenIndex];
+        cluster->tokenPointers[tokenIndex] = &token;
+        auto const& tokenTO = _simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];
 
         token.energy = tokenTO.energy;
         for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
@@ -181,7 +184,7 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
     cluster->numCellPointers = 1;
     cluster->cellPointers = cellPointers;
     *cellPointers = cell;
-    cluster->numTokens = 0;
+    cluster->numTokenPointers = 0;
 
     cluster->clusterToFuse = nullptr;
     cluster->locked = 0;
