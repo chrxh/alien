@@ -17,21 +17,21 @@
 /* Clusters																*/
 /************************************************************************/
 
-__device__ void clusterProcessingOnOrigDataStep1(SimulationData &data, int clusterIndex)
+__device__ void clusterProcessingOnOrigDataStep1_blockCall(SimulationData &data, int clusterIndex)
 {
 	ClusterProcessorOnOrigData clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterIndex);
     clusterProcessor.processingMovement_blockCall();
 }
 
-__device__ void clusterProcessingOnOrigDataStep2(SimulationData &data, int clusterIndex)
+__device__ void clusterProcessingOnOrigDataStep2_blockCall(SimulationData &data, int clusterIndex)
 {
     ClusterProcessorOnOrigData clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterIndex);
     clusterProcessor.destroyCloseCell_blockCall();
 }
 
-__device__ void clusterProcessingOnOrigDataStep3(SimulationData &data, int clusterIndex)
+__device__ void clusterProcessingOnOrigDataStep3_blockCall(SimulationData &data, int clusterIndex)
 {
 	ClusterProcessorOnOrigData clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterIndex);
@@ -40,7 +40,7 @@ __device__ void clusterProcessingOnOrigDataStep3(SimulationData &data, int clust
 									//will be resolved in reorganizer
 }
 
-__device__ void clusterProcessingOnCopyData(SimulationData &data, int clusterIndex)
+__device__ void clusterProcessingOnCopyData_blockCall(SimulationData &data, int clusterIndex)
 {
 	ClusterProcessorOnCopyData clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterIndex);
@@ -56,7 +56,7 @@ __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterProcessingOnOrigDataStep1(data, clusterIndex);
+		clusterProcessingOnOrigDataStep1_blockCall(data, clusterIndex);
 	}
 }
 
@@ -68,7 +68,7 @@ __global__ void clusterProcessingOnOrigDataStep2(SimulationData data)
     int endIndex;
     calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
     for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-        clusterProcessingOnOrigDataStep2(data, clusterIndex);
+        clusterProcessingOnOrigDataStep2_blockCall(data, clusterIndex);
     }
 }
 
@@ -80,7 +80,7 @@ __global__ void clusterProcessingOnOrigDataStep3(SimulationData data)
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterProcessingOnOrigDataStep3(data, clusterIndex);
+		clusterProcessingOnOrigDataStep3_blockCall(data, clusterIndex);
 	}
 }
 
@@ -92,7 +92,7 @@ __global__ void clusterProcessingOnCopyData(SimulationData data)
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
-		clusterProcessingOnCopyData(data, clusterIndex);
+		clusterProcessingOnCopyData_blockCall(data, clusterIndex);
 	}
 }
 
@@ -101,22 +101,23 @@ __global__ void clusterProcessingOnCopyData(SimulationData data)
 /* Tokens																*/
 /************************************************************************/
 
-__device__ void tokenProcessingOnOrigData(SimulationData data, int clusterIndex)
+__device__ void tokenProcessingStep1_blockCall(SimulationData data, int clusterIndex)
 {
 	TokenProcessor tokenProcessor;
-    tokenProcessor.init(data, clusterIndex);
-    tokenProcessor.processingEnergyAveraging();
+    tokenProcessor.init_blockCall(data, clusterIndex);
+    tokenProcessor.processingEnergyAveraging_blockCall();
 }
 
-__device__ void tokenProcessingOnCopyData(SimulationData data, int clusterIndex)
+__device__ void tokenProcessingStep2_blockCall(SimulationData data, int clusterIndex)
 {
 	TokenProcessor tokenProcessor;
 
-    tokenProcessor.init(data, clusterIndex);
-    tokenProcessor.processingSpreadingAndFeatures_blockCall();
+    tokenProcessor.init_blockCall(data, clusterIndex);
+    tokenProcessor.processingSpreading_blockCall();
+    tokenProcessor.processingFeatures_blockCall();
 }
 
-__global__ void tokenProcessingOnOrigData(SimulationData data)
+__global__ void tokenProcessingStep1(SimulationData data)
 {
     int numEntities = data.clusters.getNumEntries();
 
@@ -124,11 +125,11 @@ __global__ void tokenProcessingOnOrigData(SimulationData data)
     int endIndex;
     calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
     for (int index = startIndex; index <= endIndex; ++index) {
-        tokenProcessingOnOrigData(data, index);
+        tokenProcessingStep1_blockCall(data, index);
     }
 }
 
-__global__ void tokenProcessingOnCopyData(SimulationData data)
+__global__ void tokenProcessingStep2(SimulationData data)
 {
 	int numEntities = data.clusters.getNumEntries();
 
@@ -136,7 +137,7 @@ __global__ void tokenProcessingOnCopyData(SimulationData data)
 	int endIndex;
 	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
 	for (int index = startIndex; index <= endIndex; ++index) {
-		tokenProcessingOnCopyData(data, index);
+		tokenProcessingStep2_blockCall(data, index);
 	}
 }
 
