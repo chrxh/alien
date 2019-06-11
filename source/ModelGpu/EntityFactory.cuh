@@ -57,9 +57,8 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
         cluster->vel = clusterTO.vel;
         cluster->angle = clusterTO.angle;
         cluster->angularVel = clusterTO.angularVel;
-        cluster->maxCellPointers = clusterTO.numCells * CELL_POINTER_CAPACITY_MULTIPLIER;
         cluster->numCellPointers = clusterTO.numCells;
-        cluster->cellPointers = _data->cellPointers.getNewSubarray(cluster->maxCellPointers);
+        cluster->cellPointers = _data->cellPointers.getNewSubarray(cluster->numCellPointers);
         cells = _data->cells.getNewSubarray(cluster->numCellPointers);
         cluster->numTokens = clusterTO.numTokens;
         cluster->tokens = _data->tokensNew.getNewSubarray(cluster->numTokens);
@@ -171,7 +170,7 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
 {
     auto cluster = _data->clustersNew.getNewElement();
     auto cell = _data->cells.getNewElement();
-    auto cellPointers = _data->cellPointers.getNewSubarray(CELL_POINTER_CAPACITY_MULTIPLIER);
+    auto cellPointers = _data->cellPointers.getNewElement();
 
     cluster->id = _data->numberGen.createNewId_kernel();
     cluster->pos = pos;
@@ -179,7 +178,6 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
     cluster->angle = 0.0f;
     cluster->angularVel = 0.0f;
     cluster->angularMass = 0.0f;
-    cluster->maxCellPointers = CELL_POINTER_CAPACITY_MULTIPLIER;
     cluster->numCellPointers = 1;
     cluster->cellPointers = cellPointers;
     *cellPointers = cell;
