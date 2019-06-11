@@ -55,12 +55,12 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
     _internalData->size = size;
     _internalData->clusters = ArrayController<Cluster>(MAX_CELLCLUSTERS);
     _internalData->clustersNew = ArrayController<Cluster>(MAX_CELLCLUSTERS);
-    _internalData->cells = ArrayController<Cell>(MAX_CELLS);
     _internalData->cellPointers = ArrayController<Cell*>(MAX_CELLS*20);
+    _internalData->cells = ArrayController<Cell>(MAX_CELLS);
     _internalData->particles = ArrayController<Particle>(MAX_PARTICLES);
     _internalData->particlesNew = ArrayController<Particle>(MAX_PARTICLES);
+    _internalData->tokenPointers = ArrayController<Token*>(MAX_TOKENS*20);
     _internalData->tokens = ArrayController<Token>(MAX_TOKENS);
-    _internalData->tokensNew = ArrayController<Token>(MAX_TOKENS);
     checkCudaErrors(cudaMalloc(&_internalData->cellMap, size.x * size.y * sizeof(Cell*)));
     checkCudaErrors(cudaMalloc(&_internalData->particleMap, size.x * size.y * sizeof(Particle*)));
 
@@ -85,12 +85,12 @@ CudaSimulation::~CudaSimulation()
 {
     _internalData->clusters.free();
     _internalData->clustersNew.free();
-    _internalData->cells.free();
     _internalData->cellPointers.free();
+    _internalData->cells.free();
     _internalData->particles.free();
     _internalData->particlesNew.free();
+    _internalData->tokenPointers.free();
     _internalData->tokens.free();
-    _internalData->tokensNew.free();
 
     checkCudaErrors(cudaFree(_internalData->cellMap));
     checkCudaErrors(cudaFree(_internalData->particleMap));
@@ -230,21 +230,12 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
 
 void CudaSimulation::prepareTargetData()
 {
-/*
-    _internalData->clustersAC2.reset();
-    _internalData->cellsAC2.reset();
-*/
     _internalData->clustersNew.reset();
     _internalData->particlesNew.reset();
-    _internalData->tokensNew.reset();
 }
 
 void CudaSimulation::swapData()
 {
-/*
-    swap(_internalData->cells, _internalData->cellsAC2);
-*/
     swap(_internalData->clusters, _internalData->clustersNew);
     swap(_internalData->particles, _internalData->particlesNew);
-    swap(_internalData->tokens, _internalData->tokensNew);
 }

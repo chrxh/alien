@@ -62,8 +62,8 @@ struct Cluster
     float angularMass;
     int numCellPointers;
     Cell** cellPointers;
-    int numTokens;
-    Token* tokens;
+    int numTokenPointers;
+    Token** tokenPointers;
 
     //auxiliary data
     bool decompositionRequired;
@@ -84,8 +84,8 @@ struct SimulationData
     ArrayController<Cell> cells;
     ArrayController<Particle> particles;
     ArrayController<Particle> particlesNew;
+    ArrayController<Token*> tokenPointers;
     ArrayController<Token> tokens;
-    ArrayController<Token> tokensNew;
 
     CudaNumberGenerator numberGen;
 };
