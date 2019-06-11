@@ -114,11 +114,11 @@ void CudaSimulation::calcNextTimestep()
 {
     prepareTargetData();
 
-    tokenProcessingOnOrigData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
+    tokenProcessingStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
-    tokenProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
+    tokenProcessingStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 

@@ -16,10 +16,11 @@
 class TokenProcessor
 {
 public:
-    __inline__ __device__ void init(SimulationData& data, int clusterIndex);
+    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterIndex);
 
-    __inline__ __device__ void processingEnergyAveraging();
-    __inline__ __device__ void processingSpreadingAndFeatures_blockCall();
+    __inline__ __device__ void processingEnergyAveraging_blockCall();
+    __inline__ __device__ void processingSpreading_blockCall();
+    __inline__ __device__ void processingFeatures_blockCall();
 
 private:
     __inline__ __device__ void calcAnticipatedTokens_blockCall(int& result);
@@ -41,7 +42,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void TokenProcessor::init(SimulationData& data, int clusterIndex)
+__inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterIndex)
 {
     _data = &data;
     _cluster = &data.clusters.getEntireArray()[clusterIndex];
@@ -50,7 +51,7 @@ __inline__ __device__ void TokenProcessor::init(SimulationData& data, int cluste
     calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
 }
 
-__inline__ __device__ void TokenProcessor::processingEnergyAveraging()
+__inline__ __device__ void TokenProcessor::processingEnergyAveraging_blockCall()
 {
     if (0 == _cluster->numTokenPointers) {
         return;
@@ -115,7 +116,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging()
     __syncthreads();
 }
 
-__inline__ __device__ void TokenProcessor::processingSpreadingAndFeatures_blockCall()
+__inline__ __device__ void TokenProcessor::processingSpreading_blockCall()
 {
     if (0 == _cluster->numTokenPointers) {
         return;
@@ -126,11 +127,9 @@ __inline__ __device__ void TokenProcessor::processingSpreadingAndFeatures_blockC
 
     __shared__ Token** newTokenPointers;
     __shared__ int newNumTokens;
-    __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
         newNumTokens = 0;
         newTokenPointers = _data->tokenPointers.getNewSubarray(anticipatedTokens);
-        factory.init(_data);
     }
     for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
         Cell* cell = _cluster->cellPointers[cellIndex];
@@ -203,8 +202,6 @@ __inline__ __device__ void TokenProcessor::processingSpreadingAndFeatures_blockC
             }
             newTokenPointers[tokenIndex] = newToken;
 
-            processingCellFeatures(cell, newToken, factory);
-
             if (tokenEnergy - availableTokenEnergyForCell > 0) {
                 auto origConnectingCellEnergy = atomicAdd(&connectingCell->energy, -(tokenEnergy - availableTokenEnergyForCell));
                 if (origConnectingCellEnergy > cudaSimulationParameters.cellMinEnergy + tokenEnergy - availableTokenEnergyForCell) {
@@ -227,6 +224,24 @@ __inline__ __device__ void TokenProcessor::processingSpreadingAndFeatures_blockC
     if (0 == threadIdx.x) {
         _cluster->tokenPointers = newTokenPointers;
         _cluster->numTokenPointers = newNumTokens;
+    }
+    __syncthreads();
+
+    calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
+    __syncthreads();
+}
+
+__inline__ __device__ void TokenProcessor::processingFeatures_blockCall()
+{
+    __shared__ EntityFactory factory;
+    if (0 == threadIdx.x) {
+        factory.init(_data);
+    }
+    __syncthreads();
+
+    for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
+        auto& token = _cluster->tokenPointers[tokenIndex];
+        processingCellFeatures(token->cell, token, factory);
     }
     __syncthreads();
 }
