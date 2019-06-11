@@ -6,7 +6,7 @@
 class PropulsionFunction
 {
 public:
-    __inline__ __device__ static void processing(Cell const* sourceCell, Token* token, EntityFactory& factory);
+    __inline__ __device__ static void processing(Token* token, EntityFactory& factory);
 
 private:
     __inline__ __device__ static float convertDataToThrustPower(unsigned char data);
@@ -17,9 +17,10 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void PropulsionFunction::processing(Cell const* sourceCell, Token * token, EntityFactory& factory)
+__inline__ __device__ void PropulsionFunction::processing(Token * token, EntityFactory& factory)
 {
     auto const& cell = token->cell;
+    auto const& sourceCell = token->sourceCell;
     auto const& cluster = cell->cluster;
     auto& tokenMem = token->memory;
     auto const& command = tokenMem[Enums::Prop::IN] % Enums::PropIn::_COUNTER;

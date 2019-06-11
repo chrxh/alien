@@ -27,7 +27,7 @@ private:
     __inline__ __device__ void copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell);
     __inline__ __device__ void moveToken(Token* sourceToken, Token*& targetToken, Cell* targetCell);
 
-    __inline__ __device__ void processingCellFeatures(Cell const* sourceCell, Token* token, EntityFactory& factory);
+    __inline__ __device__ void processingCellFeatures(Token* token, EntityFactory& factory);
 
 private:
     SimulationData* _data;
@@ -241,7 +241,7 @@ __inline__ __device__ void TokenProcessor::processingFeatures_blockCall()
 
     for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
         auto& token = _cluster->tokenPointers[tokenIndex];
-        processingCellFeatures(token->cell, token, factory);
+        processingCellFeatures(token, factory);
     }
     __syncthreads();
 }
@@ -283,6 +283,7 @@ __inline__ __device__ void TokenProcessor::copyToken(Token const* sourceToken, T
 {
     *targetToken = *sourceToken;
     targetToken->memory[0] = targetCell->branchNumber;
+    targetToken->sourceCell = sourceToken->cell;
     targetToken->cell = targetCell;
 }
 
@@ -290,10 +291,11 @@ __inline__ __device__ void TokenProcessor::moveToken(Token* sourceToken, Token*&
 {
     targetToken = sourceToken;
     targetToken->memory[0] = targetCell->branchNumber;
+    targetToken->sourceCell = sourceToken->cell;
     targetToken->cell = targetCell;
 }
 
-__inline__ __device__ void TokenProcessor::processingCellFeatures(Cell const* sourceCell, Token * token, EntityFactory& factory)
+__inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token, EntityFactory& factory)
 {
     auto cell = token->cell;
     int locked;
@@ -307,7 +309,7 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Cell const* so
                 CellComputerFunction::processing(token);
             } break;
             case Enums::CellFunction::PROPULSION: {
-                PropulsionFunction::processing(sourceCell, token, factory);
+                PropulsionFunction::processing(token, factory);
             } break;
             }
             atomicExch(&cell->locked, 0);
