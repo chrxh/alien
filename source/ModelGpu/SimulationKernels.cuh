@@ -11,8 +11,7 @@
 #include "ClusterProcessorOnCopyData.cuh"
 #include "ParticleProcessorOnOrigData.cuh"
 #include "ParticleProcessorOnCopyData.cuh"
-#include "TokenProcessorOnOrigData.cuh"
-#include "TokenProcessorOnCopyData.cuh"
+#include "TokenProcessor.cuh"
 
 /************************************************************************/
 /* Clusters																*/
@@ -20,33 +19,33 @@
 
 __device__ void clusterProcessingOnOrigDataStep1(SimulationData &data, int clusterIndex)
 {
-	ClusterProcessorOnOrigData dynamics;
-	dynamics.init_blockCall(data, clusterIndex);
-	dynamics.processingMovement_blockCall();
+	ClusterProcessorOnOrigData clusterProcessor;
+    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.processingMovement_blockCall();
 }
 
 __device__ void clusterProcessingOnOrigDataStep2(SimulationData &data, int clusterIndex)
 {
-    ClusterProcessorOnOrigData dynamics;
-    dynamics.init_blockCall(data, clusterIndex);
-    dynamics.destroyCloseCell_blockCall();
+    ClusterProcessorOnOrigData clusterProcessor;
+    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.destroyCloseCell_blockCall();
 }
 
 __device__ void clusterProcessingOnOrigDataStep3(SimulationData &data, int clusterIndex)
 {
-	ClusterProcessorOnOrigData dynamics;
-	dynamics.init_blockCall(data, clusterIndex);
-	dynamics.processingRadiation_blockCall();
-	dynamics.processingCollision_blockCall();	//attention: can result a temporarily inconsistent state
+	ClusterProcessorOnOrigData clusterProcessor;
+    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.processingRadiation_blockCall();
+    clusterProcessor.processingCollision_blockCall();	//attention: can result a temporarily inconsistent state
 									//will be resolved in reorganizer
 }
 
 __device__ void clusterProcessingOnCopyData(SimulationData &data, int clusterIndex)
 {
-	ClusterProcessorOnCopyData reorganizer;
-	reorganizer.init_blockCall(data, clusterIndex);
-	reorganizer.processingDecomposition_blockCall();
-	reorganizer.processingClusterCopy_blockCall();
+	ClusterProcessorOnCopyData clusterProcessor;
+    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.processingDecomposition_blockCall();
+    clusterProcessor.processingClusterCopy_blockCall();
 }
 
 __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
@@ -104,17 +103,17 @@ __global__ void clusterProcessingOnCopyData(SimulationData data)
 
 __device__ void tokenProcessingOnOrigData(SimulationData data, int clusterIndex)
 {
-	TokenProcessorOnOrigData dynamics;
-	dynamics.init(data, clusterIndex);
-	dynamics.processingEnergyAveraging();
+	TokenProcessor tokenProcessor;
+    tokenProcessor.init(data, clusterIndex);
+    tokenProcessor.processingEnergyAveraging();
 }
 
 __device__ void tokenProcessingOnCopyData(SimulationData data, int clusterIndex)
 {
-	TokenProcessorOnCopyData reorganizer;
+	TokenProcessor tokenProcessor;
 
-	reorganizer.init(data, clusterIndex);
-	reorganizer.processingSpreadingAndFeatures_blockCall();
+    tokenProcessor.init(data, clusterIndex);
+    tokenProcessor.processingSpreadingAndFeatures_blockCall();
 }
 
 __global__ void tokenProcessingOnOrigData(SimulationData data)
@@ -148,24 +147,24 @@ __global__ void tokenProcessingOnCopyData(SimulationData data)
 
 __global__ void particleProcessingOnOrigDataStep1(SimulationData data)
 {
-	ParticleProcessorOnOrigData dynamics;
-	dynamics.init(data);
-	dynamics.processingMovement();
-	dynamics.processingTransformation();
+	ParticleProcessorOnOrigData particleProcessor;
+    particleProcessor.init(data);
+    particleProcessor.processingMovement();
+    particleProcessor.processingTransformation();
 }
 
 __global__ void particleProcessingOnOrigDataStep2(SimulationData data)
 {
-	ParticleProcessorOnOrigData dynamics;
-	dynamics.init(data);
-	dynamics.processingCollision();
+	ParticleProcessorOnOrigData particleProcessor;
+    particleProcessor.init(data);
+    particleProcessor.processingCollision();
 }
 
 __global__ void particleProcessingOnCopyData(SimulationData data)
 {
-	ParticleProcessorOnCopyData reorganizer;
-	reorganizer.init(data);
-	reorganizer.processingDataCopy();
+	ParticleProcessorOnCopyData particleProcessor;
+    particleProcessor.init(data);
+    particleProcessor.processingDataCopy();
 }
 
 __device__ void clearCellCluster(SimulationData const &data, int clusterIndex)
