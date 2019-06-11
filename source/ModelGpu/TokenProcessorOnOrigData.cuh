@@ -34,12 +34,12 @@ __inline__ __device__ void TokenProcessorOnOrigData::init(SimulationData& data, 
     _cluster = &data.clusters.getEntireArray()[clusterIndex];
 
     calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
-    calcPartition(_cluster->numTokens, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
+    calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
 }
 
 __inline__ __device__ void TokenProcessorOnOrigData::processingEnergyAveraging()
 {
-    if (0 == _cluster->numTokens) {
+    if (0 == _cluster->numTokenPointers) {
         return;
     }
 
@@ -54,17 +54,17 @@ __inline__ __device__ void TokenProcessorOnOrigData::processingEnergyAveraging()
     Cell* candidateCellsForEnergyAveraging[MAX_CELL_BONDS + 1];
     Cell* cellsForEnergyAveraging[MAX_CELL_BONDS + 1];
     for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
-        Token const& token = _cluster->tokens[tokenIndex];
-        Cell& cell = *token.cell;
-        if (token.energy < cudaSimulationParameters.tokenMinEnergy) {
+        auto const& token = _cluster->tokenPointers[tokenIndex];
+        auto& cell = token->cell;
+        if (token->energy < cudaSimulationParameters.tokenMinEnergy) {
             continue;
         }
 
-        int tokenBranchNumber = token.memory[0];
+        int tokenBranchNumber = token->memory[0];
         int numCandidateCellsForEnergyAveraging = 1;
-        candidateCellsForEnergyAveraging[0] = &cell;
-        for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
-            Cell& connectingCell = *cell.connections[connectionIndex];
+        candidateCellsForEnergyAveraging[0] = cell;
+        for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
+            auto& connectingCell = *cell->connections[connectionIndex];
             if (!connectingCell.alive) {
                 continue;
             }
@@ -85,7 +85,7 @@ __inline__ __device__ void TokenProcessorOnOrigData::processingEnergyAveraging()
         float averageEnergy = 0;
         int numCellsForEnergyAveraging = 0;
         for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
-            Cell* cell = candidateCellsForEnergyAveraging[index];
+            auto const& cell = candidateCellsForEnergyAveraging[index];
             int locked = atomicExch(&cell->locked, 1);
             if (0 == locked) {
                 averageEnergy += cell->energy;
@@ -94,7 +94,7 @@ __inline__ __device__ void TokenProcessorOnOrigData::processingEnergyAveraging()
         }
         averageEnergy /= numCellsForEnergyAveraging;
         for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
-            Cell* cell = cellsForEnergyAveraging[index];
+            auto const& cell = cellsForEnergyAveraging[index];
             cell->energy = averageEnergy;
             atomicExch(&cell->locked, 0);
         }

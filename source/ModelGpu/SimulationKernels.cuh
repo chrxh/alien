@@ -114,7 +114,7 @@ __device__ void tokenProcessingOnCopyData(SimulationData data, int clusterIndex)
 	TokenProcessorOnCopyData reorganizer;
 
 	reorganizer.init(data, clusterIndex);
-	reorganizer.processingSpreadingAndFeatures();
+	reorganizer.processingSpreadingAndFeatures_blockCall();
 }
 
 __global__ void tokenProcessingOnOrigData(SimulationData data)
