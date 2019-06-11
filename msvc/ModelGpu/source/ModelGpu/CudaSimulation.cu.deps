@@ -427,12 +427,9 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_fun
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\ParticleProcessorOnCopyData.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\TokenProcessorOnOrigData.cuh
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\TokenProcessor.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\TokenProcessorOnCopyData.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\EnergyGuidance.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CellComputerFunction.cuh
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\PropulsionFunction.cuh
