@@ -28,8 +28,7 @@ private:
     Map<Cell> _cellMap;
 
     Cluster *_cluster;
-    int _startCellIndex;
-    int _endCellIndex;
+    BlockData _cellBlock;
 };
 
 /************************************************************************/
@@ -41,8 +40,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::init_blockCall(Simulation
     _cluster = &data.clusters.getEntireArray()[clusterIndex];
     _cellMap.init(data.size, data.cellMap);
 
-    calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
-    __syncthreads();
+    _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
 }
 
 __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision_blockCall()
@@ -68,7 +66,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision_block
     __syncthreads();
 
     //find colliding cluster
-    for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
+    for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
         Cell* cell = cluster->cellPointers[index];
         for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
             for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -116,7 +114,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision_block
         return;
     }
 
-    for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
+    for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
         Cell* cell = cluster->cellPointers[index];
         for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
             for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -167,7 +165,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision_block
     if (CollisionState::Fusion == state) {
         if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse
             /*&& !cluster->decompositionRequired && !firstOtherCluster->decompositionRequired*/) {
-            for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
+            for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
                 Cell* cell = cluster->cellPointers[index];
                 for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
                     for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -229,7 +227,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision_block
         }
         __syncthreads();
 
-        for (auto index = _startCellIndex; index <= _endCellIndex; ++index) {
+        for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
             Cell* cell = cluster->cellPointers[index];
             for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
                 for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
@@ -284,7 +282,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingCollision_block
 
 __inline__ __device__ void ClusterProcessorOnOrigData::destroyCloseCell_blockCall()
 {
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *origCell = _cluster->cellPointers[cellIndex];
         destroyCloseCell(origCell);
     }
@@ -304,7 +302,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingMovement_blockC
     __syncthreads();
 
 
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
 
         float2 absPos;
@@ -343,7 +341,7 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingRadiation_block
     }
     __syncthreads();
 
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
 
         if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
@@ -374,16 +372,15 @@ __inline__ __device__ void ClusterProcessorOnOrigData::processingRadiation_block
     __syncthreads();
 
     if (_cluster->decompositionRequired) {
-        int startTokenIndex, endTokenIndex;
-        calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-        for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+        BlockData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
+        for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto token = _cluster->tokenPointers[tokenIndex];
             if (!token->cell->alive) {
                 atomicAdd(&token->cell->energy, token->energy);
             }
         }
 
-        for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             auto cell = _cluster->cellPointers[cellIndex];
             if (!cell->alive) {
                 auto pos = cell->absPos;

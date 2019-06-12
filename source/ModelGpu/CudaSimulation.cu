@@ -56,11 +56,15 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
     _internalData->clusters = ArrayController<Cluster>(MAX_CELLCLUSTERS);
     _internalData->clustersNew = ArrayController<Cluster>(MAX_CELLCLUSTERS);
     _internalData->cellPointers = ArrayController<Cell*>(MAX_CELLS*20);
+    _internalData->cellPointersTemp = ArrayController<Cell*>(MAX_CELLS * 20);
     _internalData->cells = ArrayController<Cell>(MAX_CELLS);
+    _internalData->cellsTemp = ArrayController<Cell>(MAX_CELLS);
+    _internalData->tokenPointers = ArrayController<Token*>(MAX_TOKENS*20);
+    _internalData->tokenPointersTemp = ArrayController<Token*>(MAX_TOKENS * 20);
+    _internalData->tokens = ArrayController<Token>(MAX_TOKENS);
+    _internalData->tokensTemp = ArrayController<Token>(MAX_TOKENS);
     _internalData->particles = ArrayController<Particle>(MAX_PARTICLES);
     _internalData->particlesNew = ArrayController<Particle>(MAX_PARTICLES);
-    _internalData->tokenPointers = ArrayController<Token*>(MAX_TOKENS*20);
-    _internalData->tokens = ArrayController<Token>(MAX_TOKENS);
     checkCudaErrors(cudaMalloc(&_internalData->cellMap, size.x * size.y * sizeof(Cell*)));
     checkCudaErrors(cudaMalloc(&_internalData->particleMap, size.x * size.y * sizeof(Particle*)));
 
@@ -86,11 +90,15 @@ CudaSimulation::~CudaSimulation()
     _internalData->clusters.free();
     _internalData->clustersNew.free();
     _internalData->cellPointers.free();
+    _internalData->cellPointersTemp.free();
     _internalData->cells.free();
+    _internalData->cellsTemp.free();
+    _internalData->tokenPointers.free();
+    _internalData->tokenPointersTemp.free();
+    _internalData->tokens.free();
+    _internalData->tokensTemp.free();
     _internalData->particles.free();
     _internalData->particlesNew.free();
-    _internalData->tokenPointers.free();
-    _internalData->tokens.free();
 
     checkCudaErrors(cudaFree(_internalData->cellMap));
     checkCudaErrors(cudaFree(_internalData->particleMap));

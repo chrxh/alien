@@ -12,9 +12,9 @@
 class ParticleProcessorOnCopyData
 {
 public:
-	__inline__ __device__ void init(SimulationData& data);
+	__inline__ __device__ void init_blockCall(SimulationData& data);
 
-	__inline__ __device__ void processingDataCopy();
+	__inline__ __device__ void processingDataCopy_blockCall();
 
 private:
 
@@ -22,30 +22,26 @@ private:
 	Map<Cell> _cellMap;
 	Map<Particle> _origParticleMap;
 
-	int _startParticleIndex;
-	int _endParticleIndex;
+    BlockData _particleBlock;
 };
 
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ParticleProcessorOnCopyData::init(SimulationData & data)
+__inline__ __device__ void ParticleProcessorOnCopyData::init_blockCall(SimulationData & data)
 {
-	_data = &data;
-	_cellMap.init(data.size, data.cellMap);
-	_origParticleMap.init(data.size, data.particleMap);
+    _data = &data;
+    _cellMap.init(data.size, data.cellMap);
+    _origParticleMap.init(data.size, data.particleMap);
 
-	int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	int numEntities = data.particles.getNumEntries();
-	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, _startParticleIndex, _endParticleIndex);
-
-	__syncthreads();
+    _particleBlock = 
+        calcPartition(data.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
-__inline__ __device__ void ParticleProcessorOnCopyData::processingDataCopy()
+__inline__ __device__ void ParticleProcessorOnCopyData::processingDataCopy_blockCall()
 {
-	for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
+	for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
 		Particle *origParticle = &_data->particles.getEntireArray()[particleIndex];
 		if (!origParticle->alive) {
 			continue;

@@ -33,10 +33,8 @@ private:
     SimulationData* _data;
     Cluster* _cluster;
 
-    int _startCellIndex;
-    int _endCellIndex;
-    int _startTokenIndex;
-    int _endTokenIndex;
+    BlockData _cellBlock;
+    BlockData _tokenBlock;
 };
 
 /************************************************************************/
@@ -47,8 +45,8 @@ __inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, 
     _data = &data;
     _cluster = &data.clusters.getEntireArray()[clusterIndex];
 
-    calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
-    calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
+    _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
+    _tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
 }
 
 __inline__ __device__ void TokenProcessor::processingEnergyAveraging_blockCall()
@@ -57,7 +55,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_blockCall()
         return;
     }
 
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell* cell = _cluster->cellPointers[cellIndex];
         if (cell->alive) {
             cell->tag = 0;
@@ -67,7 +65,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_blockCall()
 
     Cell* candidateCellsForEnergyAveraging[MAX_CELL_BONDS + 1];
     Cell* cellsForEnergyAveraging[MAX_CELL_BONDS + 1];
-    for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = _tokenBlock.startIndex; tokenIndex <= _tokenBlock.endIndex; ++tokenIndex) {
         auto const& token = _cluster->tokenPointers[tokenIndex];
         auto& cell = token->cell;
         if (token->energy < cudaSimulationParameters.tokenMinEnergy) {
@@ -131,7 +129,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_blockCall()
         newNumTokens = 0;
         newTokenPointers = _data->tokenPointers.getNewSubarray(anticipatedTokens);
     }
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell* cell = _cluster->cellPointers[cellIndex];
         if (cell->alive) {
             cell->tag = 0;
@@ -139,7 +137,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_blockCall()
     }
     __syncthreads();
 
-    for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = _tokenBlock.startIndex; tokenIndex <= _tokenBlock.endIndex; ++tokenIndex) {
         auto& token = _cluster->tokenPointers[tokenIndex];
         auto cell = token->cell;
         if (token->energy < cudaSimulationParameters.tokenMinEnergy) {
@@ -227,7 +225,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_blockCall()
     }
     __syncthreads();
 
-    calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x, _startTokenIndex, _endTokenIndex);
+    _tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
     __syncthreads();
 }
 
@@ -239,7 +237,7 @@ __inline__ __device__ void TokenProcessor::processingFeatures_blockCall()
     }
     __syncthreads();
 
-    for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = _tokenBlock.startIndex; tokenIndex <= _tokenBlock.endIndex; ++tokenIndex) {
         auto& token = _cluster->tokenPointers[tokenIndex];
         processingCellFeatures(token, factory);
     }
@@ -253,7 +251,7 @@ __inline__ __device__ void TokenProcessor::calcAnticipatedTokens_blockCall(int& 
     }
     __syncthreads();
 
-    for (int tokenIndex = _startTokenIndex; tokenIndex <= _endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = _tokenBlock.startIndex; tokenIndex <= _tokenBlock.endIndex; ++tokenIndex) {
         auto const& token = _cluster->tokenPointers[tokenIndex];
         auto& cell = *token->cell;
         if (token->energy < cudaSimulationParameters.tokenMinEnergy) {
