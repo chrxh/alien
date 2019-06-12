@@ -23,7 +23,8 @@ private:
     __inline__ __device__ void copyClusterWithFusion_blockCall();
     __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster, Cluster* targetCluster);
     __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* sourceCluster2, Cluster* targetCluster);
-    __inline__ __device__ void getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, int& counter);
+    __inline__ __device__ void getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, 
+        int& counter, BlockData const& tokenBlock);
 
 
     SimulationData* _data;
@@ -31,8 +32,7 @@ private:
 
     Cluster *_origCluster;
 
-    int _startCellIndex;
-    int _endCellIndex;
+    BlockData _cellBlock;
 };
 
 /************************************************************************/
@@ -44,9 +44,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::init_blockCall(Simulation
     _origCluster = &data.clusters.getEntireArray()[clusterIndex];
     _cellMap.init(data.size, data.cellMap);
 
-    calcPartition(_origCluster->numCellPointers, threadIdx.x, blockDim.x, _startCellIndex, _endCellIndex);
-
-    __syncthreads();
+    _cellBlock = calcPartition(_origCluster->numCellPointers, threadIdx.x, blockDim.x);
 }
 
 __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposition_blockCall()
@@ -75,7 +73,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         }
     }
     __syncthreads();
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell* cell = _origCluster->cellPointers[cellIndex];
         if (!cell->alive) {
             continue;
@@ -120,11 +118,10 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
     }
     __syncthreads();
 
-    int startDecompositionIndex;
-    int endDecompositionIndex;
     __shared__ Cluster* newClusters[MAX_DECOMPOSITIONS];
-    calcPartition(numDecompositions, threadIdx.x, blockDim.x, startDecompositionIndex, endDecompositionIndex);
-    for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
+    BlockData decompositionBlock = 
+        calcPartition(numDecompositions, threadIdx.x, blockDim.x);
+    for (int index = decompositionBlock.startIndex; index <= decompositionBlock.endIndex; ++index) {
         auto numCells = entries[index].cluster.numCellPointers;
         entries[index].cluster.pos.x /= numCells;
         entries[index].cluster.pos.y /= numCells;
@@ -138,7 +135,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
     }
     __syncthreads();
 
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell* cell = _origCluster->cellPointers[cellIndex];
         for (int index = 0; index < numDecompositions; ++index) {
             if (cell->tag == entries[index].tag) {
@@ -167,7 +164,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
     }
     __syncthreads();
 
-    for (int index = startDecompositionIndex; index <= endDecompositionIndex; ++index) {
+    for (int index = decompositionBlock.startIndex; index <= decompositionBlock.endIndex; ++index) {
         Cluster* newCluster = newClusters[index];
 
         //newCluster->angularVel contains angular momentum until here
@@ -190,7 +187,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyCluster_blockCall()
     }
     __syncthreads();
 
-    for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto *cell = newCluster->cellPointers[cellIndex];
         cell->cluster = newCluster;
     }
@@ -227,7 +224,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         }
         __syncthreads();
 
-        for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             Cell* cell = _origCluster->cellPointers[cellIndex];
             newCluster->cellPointers[cellIndex] = cell;
             auto relPos = Math::sub(cell->absPos, newCluster->pos);
@@ -243,11 +240,9 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         }
         __syncthreads();
        
-        int startOtherCellIndex;
-        int endOtherCellIndex;
-        calcPartition(otherCluster->numCellPointers, threadIdx.x, blockDim.x, startOtherCellIndex, endOtherCellIndex);
+        BlockData otherCellBlock = calcPartition(otherCluster->numCellPointers, threadIdx.x, blockDim.x);
 
-        for (int otherCellIndex = startOtherCellIndex; otherCellIndex <= endOtherCellIndex; ++otherCellIndex) {
+        for (int otherCellIndex = otherCellBlock.startIndex; otherCellIndex <= otherCellBlock.endIndex; ++otherCellIndex) {
             Cell* cell = otherCluster->cellPointers[otherCellIndex];
             newCluster->cellPointers[_origCluster->numCellPointers + otherCellIndex] = cell;
             auto r = Math::sub(cell->absPos, otherCluster->pos);
@@ -287,7 +282,8 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokenPointers_blockCa
     }
     __syncthreads();
 
-    getNumberOfTokensToCopy_blockCall(sourceCluster, targetCluster, numberOfTokensToCopy);
+    BlockData tokenBlock = calcPartition(sourceCluster->numTokenPointers, threadIdx.x, blockDim.x);
+    getNumberOfTokensToCopy_blockCall(sourceCluster, targetCluster, numberOfTokensToCopy, tokenBlock);
 
     if (0 == threadIdx.x) {
         targetCluster->numTokenPointers = numberOfTokensToCopy;
@@ -295,10 +291,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokenPointers_blockCa
     }
     __syncthreads();
 
-    int startTokenIndex;
-    int endTokenIndex;
-    calcPartition(sourceCluster->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-    for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto& token = sourceCluster->tokenPointers[tokenIndex];
         auto& cell = token->cell;
         if (!cell->alive) {
@@ -323,8 +316,11 @@ ClusterProcessorOnCopyData::copyTokenPointers_blockCall(Cluster* sourceCluster1,
     }
     __syncthreads();
 
-    getNumberOfTokensToCopy_blockCall(sourceCluster1, targetCluster, numberOfTokensToCopy);
-    getNumberOfTokensToCopy_blockCall(sourceCluster2, targetCluster, numberOfTokensToCopy);
+    BlockData tokenBlock1 = calcPartition(sourceCluster1->numTokenPointers, threadIdx.x, blockDim.x);
+    BlockData tokenBlock2 = calcPartition(sourceCluster2->numTokenPointers, threadIdx.x, blockDim.x);
+
+    getNumberOfTokensToCopy_blockCall(sourceCluster1, targetCluster, numberOfTokensToCopy, tokenBlock1);
+    getNumberOfTokensToCopy_blockCall(sourceCluster2, targetCluster, numberOfTokensToCopy, tokenBlock2);
 
     if (0 == threadIdx.x) {
         targetCluster->numTokenPointers = numberOfTokensToCopy;
@@ -332,10 +328,7 @@ ClusterProcessorOnCopyData::copyTokenPointers_blockCall(Cluster* sourceCluster1,
     }
     __syncthreads();
 
-    int startTokenIndex;
-    int endTokenIndex;
-    calcPartition(sourceCluster1->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-    for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = tokenBlock1.startIndex; tokenIndex <= tokenBlock1.endIndex; ++tokenIndex) {
         auto& token = sourceCluster1->tokenPointers[tokenIndex];
         auto& cell = token->cell;
         if (!cell->alive) {
@@ -348,8 +341,7 @@ ClusterProcessorOnCopyData::copyTokenPointers_blockCall(Cluster* sourceCluster1,
     }
     __syncthreads();
 
-    calcPartition(sourceCluster2->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-    for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = tokenBlock2.startIndex; tokenIndex <= tokenBlock2.endIndex; ++tokenIndex) {
         auto& token = sourceCluster2->tokenPointers[tokenIndex];
         auto& cell = token->cell;
         if (!cell->alive) {
@@ -365,12 +357,10 @@ ClusterProcessorOnCopyData::copyTokenPointers_blockCall(Cluster* sourceCluster1,
 }
 
 __inline__ __device__ void
-ClusterProcessorOnCopyData::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, int& counter)
+ClusterProcessorOnCopyData::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, 
+    int& counter, BlockData const& tokenBlock)
 {
-    int startTokenIndex, endTokenIndex;
-    calcPartition(sourceCluster->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
-
-    for (int tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+    for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto const& token = sourceCluster->tokenPointers[tokenIndex];
         auto const& cell = token->cell;
         if (!cell->alive) {
@@ -406,13 +396,13 @@ __inline__ __device__ void ClusterProcessorOnCopyData::processingDecomposition_b
     if (_origCluster->decompositionRequired && !_origCluster->clusterToFuse) {
         __shared__ bool changes;
 
-        for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             _origCluster->cellPointers[cellIndex]->tag = cellIndex;
         }
         do {
             changes = false;
             __syncthreads();
-            for (int cellIndex = _startCellIndex; cellIndex <= _endCellIndex; ++cellIndex) {
+            for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
                 Cell* cell = _origCluster->cellPointers[cellIndex];
                 if (cell->alive) {
                     for (int i = 0; i < cell->numConnections; ++i) {

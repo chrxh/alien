@@ -6,7 +6,7 @@ class GpuBenchmark
     : public IntegrationGpuTestFramework
 {
 public:
-    GpuBenchmark() : IntegrationGpuTestFramework({ 2004, 1002 })
+    GpuBenchmark() : IntegrationGpuTestFramework({ 1008, 504 })
     {}
 
     virtual ~GpuBenchmark() = default;
@@ -15,7 +15,7 @@ public:
 TEST_F(GpuBenchmark, testClusterAndParticleMovement)
 {
     DataDescription origData;
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 250; ++i) {
         origData.addCluster(createRectangularCluster({ 7, 40 },
             QVector2D{
             static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
@@ -27,6 +27,7 @@ TEST_F(GpuBenchmark, testClusterAndParticleMovement)
     }
 
     IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(400, _controller);
 
     QElapsedTimer timer;
     timer.start();
@@ -40,7 +41,7 @@ TEST_F(GpuBenchmark, testOnlyClusterMovement)
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 250; ++i) {
         origData.addCluster(createRectangularCluster({ 7, 40 },
             QVector2D{
             static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
@@ -52,6 +53,7 @@ TEST_F(GpuBenchmark, testOnlyClusterMovement)
     }
 
     IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(400, _controller);
 
     QElapsedTimer timer;
     timer.start();

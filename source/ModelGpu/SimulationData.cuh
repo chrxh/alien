@@ -70,6 +70,16 @@ struct Cluster
     bool decompositionRequired;
     int locked;	//0 = unlocked, 1 = locked
     Cluster* clusterToFuse;
+
+    __device__ __inline__ void tagCellByIndex_blockCall(BlockData const& blockData)
+    {
+        for (auto cellIndex = blockData.startIndex; cellIndex <= blockData.endIndex; ++cellIndex) {
+            Cell& cell = *cellPointers[cellIndex];
+            cell.tag = cellIndex;
+        }
+        __syncthreads();
+    }
+
 };
 
 struct SimulationData
@@ -82,11 +92,15 @@ struct SimulationData
     ArrayController<Cluster> clusters;
     ArrayController<Cluster> clustersNew;
     ArrayController<Cell*> cellPointers;
+    ArrayController<Cell*> cellPointersTemp;
     ArrayController<Cell> cells;
+    ArrayController<Cell> cellsTemp;
+    ArrayController<Token*> tokenPointers;
+    ArrayController<Token*> tokenPointersTemp;
+    ArrayController<Token> tokens;
+    ArrayController<Token> tokensTemp;
     ArrayController<Particle> particles;
     ArrayController<Particle> particlesNew;
-    ArrayController<Token*> tokenPointers;
-    ArrayController<Token> tokens;
 
     CudaNumberGenerator numberGen;
 };
