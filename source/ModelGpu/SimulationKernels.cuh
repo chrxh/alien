@@ -50,48 +50,32 @@ __device__ void clusterProcessingOnCopyData_blockCall(SimulationData &data, int 
 
 __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
 {
-	int numEntities = data.clusters.getNumEntries();
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
-	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+	BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+	for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
 		clusterProcessingOnOrigDataStep1_blockCall(data, clusterIndex);
 	}
 }
 
 __global__ void clusterProcessingOnOrigDataStep2(SimulationData data)
 {
-    int numEntities = data.clusters.getNumEntries();
-
-    int startIndex;
-    int endIndex;
-    calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
-    for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnOrigDataStep2_blockCall(data, clusterIndex);
     }
 }
 
 __global__ void clusterProcessingOnOrigDataStep3(SimulationData data)
 {
-	int numEntities = data.clusters.getNumEntries();
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
-	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
 		clusterProcessingOnOrigDataStep3_blockCall(data, clusterIndex);
 	}
 }
 
 __global__ void clusterProcessingOnCopyData(SimulationData data)
 {
-	int numEntities = data.clusters.getNumEntries();
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
-	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
 		clusterProcessingOnCopyData_blockCall(data, clusterIndex);
 	}
 }
@@ -119,24 +103,16 @@ __device__ void tokenProcessingStep2_blockCall(SimulationData data, int clusterI
 
 __global__ void tokenProcessingStep1(SimulationData data)
 {
-    int numEntities = data.clusters.getNumEntries();
-
-    int startIndex;
-    int endIndex;
-    calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
-    for (int index = startIndex; index <= endIndex; ++index) {
+    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int index = clusterBlock.startIndex; index <= clusterBlock.endIndex; ++index) {
         tokenProcessingStep1_blockCall(data, index);
     }
 }
 
 __global__ void tokenProcessingStep2(SimulationData data)
 {
-	int numEntities = data.clusters.getNumEntries();
-
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, blockIdx.x, gridDim.x, startIndex, endIndex);
-	for (int index = startIndex; index <= endIndex; ++index) {
+    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int index = clusterBlock.startIndex; index <= clusterBlock.endIndex; ++index) {
 		tokenProcessingStep2_blockCall(data, index);
 	}
 }
@@ -149,38 +125,36 @@ __global__ void tokenProcessingStep2(SimulationData data)
 __global__ void particleProcessingOnOrigDataStep1(SimulationData data)
 {
 	ParticleProcessorOnOrigData particleProcessor;
-    particleProcessor.init(data);
-    particleProcessor.processingMovement();
-    particleProcessor.processingTransformation();
+    particleProcessor.init_blockCall(data);
+    particleProcessor.processingMovement_blockCall();
+    particleProcessor.processingTransformation_blockCall();
 }
 
 __global__ void particleProcessingOnOrigDataStep2(SimulationData data)
 {
 	ParticleProcessorOnOrigData particleProcessor;
-    particleProcessor.init(data);
-    particleProcessor.processingCollision();
+    particleProcessor.init_blockCall(data);
+    particleProcessor.processingCollision_blockCall();
 }
 
 __global__ void particleProcessingOnCopyData(SimulationData data)
 {
 	ParticleProcessorOnCopyData particleProcessor;
-    particleProcessor.init(data);
-    particleProcessor.processingDataCopy();
+    particleProcessor.init_blockCall(data);
+    particleProcessor.processingDataCopy_blockCall();
 }
 
 __device__ void clearCellCluster(SimulationData const &data, int clusterIndex)
 {
 	auto const &oldCluster = data.clusters.getEntireArray()[clusterIndex];
 
-	int startCellIndex;
-	int endCellIndex;
 	int2 size = data.size;
 	int oldNumCells = oldCluster.numCellPointers;
 	Map<Cell> map;
 	map.init(size, data.cellMap);
 
-	calcPartition(oldNumCells, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-	for (int cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+	BlockData cellBlock = calcPartition(oldNumCells, threadIdx.x, blockDim.x);
+	for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
 		float2 absPos = oldCluster.cellPointers[cellIndex]->absPos;
 		map.set(absPos, nullptr);
 	}
@@ -197,20 +171,15 @@ __device__ void clearParticle(SimulationData const &data, int particleIndex)
 
 __global__ void clearMaps(SimulationData data)
 {
-	int indexResource = blockIdx.x;
-	int numEntities = data.clusters.getNumEntries();
-	int startIndex;
-	int endIndex;
-	calcPartition(numEntities, indexResource, gridDim.x, startIndex, endIndex);
+	BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
 
-	for (int clusterIndex = startIndex; clusterIndex <= endIndex; ++clusterIndex) {
+	for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
 		clearCellCluster(data, clusterIndex);
 	}
 
-	indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-	numEntities = data.particles.getNumEntries();
-	calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, startIndex, endIndex);
-	for (int particleIndex = startIndex; particleIndex <= endIndex; ++particleIndex) {
+	BlockData particleBlock = 
+        calcPartition(data.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+	for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
 		clearParticle(data, particleIndex);
 	}
 }

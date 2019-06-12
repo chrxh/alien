@@ -15,38 +15,33 @@
 class ParticleProcessorOnOrigData
 {
 public:
-    __inline__ __device__ void init(SimulationData& data);
+    __inline__ __device__ void init_blockCall(SimulationData& data);
 
-    __inline__ __device__ void processingMovement();
-    __inline__ __device__ void processingCollision();
-    __inline__ __device__ void processingTransformation();
+    __inline__ __device__ void processingMovement_blockCall();
+    __inline__ __device__ void processingCollision_blockCall();
+    __inline__ __device__ void processingTransformation_blockCall();
 
 private:
     SimulationData* _data;
     Map<Particle> _origParticleMap;
-    int _startParticleIndex;
-    int _endParticleIndex;
+    BlockData _particleBlock;
 };
 
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ParticleProcessorOnOrigData::init(SimulationData & data)
+__inline__ __device__ void ParticleProcessorOnOrigData::init_blockCall(SimulationData & data)
 {
     _data = &data;
     _origParticleMap.init(data.size, data.particleMap);
 
-    int indexResource = threadIdx.x + blockIdx.x * blockDim.x;
-    int numEntities = data.particles.getNumEntries();
-    calcPartition(numEntities, indexResource, blockDim.x * gridDim.x, _startParticleIndex, _endParticleIndex);
-
-    __syncthreads();
+    _particleBlock = calcPartition(data.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
-__inline__ __device__ void ParticleProcessorOnOrigData::processingMovement()
+__inline__ __device__ void ParticleProcessorOnOrigData::processingMovement_blockCall()
 {
-    for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
+    for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = &_data->particles.getEntireArray()[particleIndex];
         particle->pos = Math::add(particle->pos, particle->vel);
         _origParticleMap.mapPosCorrection(particle->pos);
@@ -54,9 +49,9 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingMovement()
     }
 }
 
-__inline__ __device__ void ParticleProcessorOnOrigData::processingCollision()
+__inline__ __device__ void ParticleProcessorOnOrigData::processingCollision_blockCall()
 {
-    for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
+    for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = &_data->particles.getEntireArray()[particleIndex];
         Particle* otherParticle = _origParticleMap.get(particle->pos);
         if (otherParticle && otherParticle != particle) {
@@ -82,9 +77,9 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingCollision()
     }
 }
 
-__inline__ __device__ void ParticleProcessorOnOrigData::processingTransformation()
+__inline__ __device__ void ParticleProcessorOnOrigData::processingTransformation_blockCall()
 {
-    for (int particleIndex = _startParticleIndex; particleIndex <= _endParticleIndex; ++particleIndex) {
+    for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = &_data->particles.getEntireArray()[particleIndex];
         auto innerEnergy = particle->energy - Physics::linearKineticEnergy(cudaSimulationParameters.cellMass, particle->vel);
         if (innerEnergy >= cudaSimulationParameters.cellMinEnergy) {

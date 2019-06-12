@@ -26,6 +26,11 @@ static __inline__ __device__ double atomicAdd(double *address, double val) {
 
 #endif
 
+struct BlockData
+{
+    int startIndex;
+    int endIndex;
+};
 
 class CudaNumberGenerator
 {
@@ -229,16 +234,18 @@ private:
     Hash _hash;
 };
 
-__device__ __inline__ void calcPartition(int numEntities, int division, int numDivisions, int& startIndex, int& endIndex)
+__device__ __inline__ BlockData calcPartition(int numEntities, int division, int numDivisions)
 {
+    BlockData result;
 	int entitiesByDivisions = numEntities / numDivisions;
 	int remainder = numEntities % numDivisions;
 
 	int length = division < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
-	startIndex = division < remainder ?
+    result.startIndex = division < remainder ?
 		(entitiesByDivisions + 1) * division
 		: (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (division - remainder);
-	endIndex = startIndex + length - 1;
+    result.endIndex = result.startIndex + length - 1;
+    return result;
 }
 
 __host__ __device__ __inline__ int2 toInt2(float2 const &p)
