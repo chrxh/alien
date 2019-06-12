@@ -74,11 +74,8 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
     }
     __syncthreads();
 
-    int startCellIndex;
-    int endCellIndex;
-    calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x, startCellIndex, endCellIndex);
-
-    for (auto cellIndex = startCellIndex; cellIndex <= endCellIndex; ++cellIndex) {
+    BlockData cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+    for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
         auto& cell = cells[cellIndex];
         cluster->cellPointers[cellIndex] = &cell;
         auto const& cellTO = _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
@@ -133,11 +130,9 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
         cell.locked = 0;
     }
 
-    int startTokenIndex;
-    int endTokenIndex;
-    calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x, startTokenIndex, endTokenIndex);
+    BlockData tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
 
-    for (auto tokenIndex = startTokenIndex; tokenIndex <= endTokenIndex; ++tokenIndex) {
+    for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto& token = tokens[tokenIndex];
         cluster->tokenPointers[tokenIndex] = &token;
         auto const& tokenTO = _simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];

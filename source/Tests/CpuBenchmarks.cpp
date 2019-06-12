@@ -30,7 +30,7 @@ class CpuBenchmarks
 	: public IntegrationTestFramework
 {
 public:
-    CpuBenchmarks() : IntegrationTestFramework({ 2004, 1002 })
+    CpuBenchmarks() : IntegrationTestFramework({ 1008, 504 })
     { }
 
 protected:
@@ -42,7 +42,7 @@ void CpuBenchmarks::createTestData(SimulationAccess * access)
 {
 	DataDescription desc;
 
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 250; ++i) {
         desc.addCluster(createRectangularCluster({ 7, 40 },
             QVector2D{
             static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
@@ -64,6 +64,7 @@ TEST_F(CpuBenchmarks, benchmarkOneThreadWithOneUnit)
 	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
+    IntegrationTestHelper::runSimulation(400, controller);
 
     QElapsedTimer timer;
     timer.start();
@@ -85,6 +86,8 @@ TEST_F(CpuBenchmarks, benchmarkOneThreadWithManyUnits)
 	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
+    IntegrationTestHelper::runSimulation(400, controller);
+
     QElapsedTimer timer;
     timer.start();
     IntegrationTestHelper::runSimulation(200, controller);
@@ -105,6 +108,7 @@ TEST_F(CpuBenchmarks, benchmarkFourThread)
 	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
+    IntegrationTestHelper::runSimulation(400, controller);
 
     QElapsedTimer timer;
     timer.start();
@@ -126,6 +130,7 @@ TEST_F(CpuBenchmarks, benchmarkEightThread)
 	_numberGen = controller->getContext()->getNumberGenerator();
 
 	createTestData(access);
+    IntegrationTestHelper::runSimulation(400, controller);
 
     QElapsedTimer timer;
     timer.start();
