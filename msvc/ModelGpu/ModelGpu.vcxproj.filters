@@ -63,9 +63,6 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
@@ -99,9 +96,6 @@
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh">
       <Filter>Source Files\Impl\kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaAccessTOs.cuh">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\EntityFactory.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
@@ -124,6 +118,30 @@
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessor.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\GarbageCollectorKernels.cuh">
+      <Filter>Source Files\Impl\kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaAccessTOs.cuh">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaConstants.cuh">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Cluster.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Cell.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Particle.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Token.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Definitions.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
   </ItemGroup>
