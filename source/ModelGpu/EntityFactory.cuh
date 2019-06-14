@@ -11,6 +11,8 @@
 #include "Map.cuh"
 
 #include "SimulationData.cuh"
+#include "Token.cuh"
+#include "Particle.cuh"
 
 class EntityFactory
 {
