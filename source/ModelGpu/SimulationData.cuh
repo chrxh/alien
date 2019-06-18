@@ -10,8 +10,9 @@ struct SimulationData
     Cell **cellMap;
     Particle **particleMap;
 
+    ArrayController<Cluster*> clusterPointers;
+    ArrayController<Cluster*> clusterPointersTemp;
     ArrayController<Cluster> clusters;
-    ArrayController<Cluster> clustersNew;
     ArrayController<Cell*> cellPointers;
     ArrayController<Cell*> cellPointersTemp;
     ArrayController<Cell> cells;

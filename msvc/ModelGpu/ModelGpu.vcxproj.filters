@@ -120,9 +120,6 @@
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessor.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\GarbageCollectorKernels.cuh">
-      <Filter>Source Files\Impl\kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaAccessTOs.cuh">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
@@ -143,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Definitions.cuh">
       <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CleanupKernels.cuh">
+      <Filter>Source Files\Impl\kernel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

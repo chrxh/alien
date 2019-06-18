@@ -106,12 +106,19 @@ class ArrayController
 {
 private:
 	int _size;
-	int *_numEntries;
+	int* _numEntries;
 	T* _data;
 
 public:
 
-	ArrayController()
+/*
+    __host__ __device__ __inline__ ArrayController(ArrayController const& other)
+        : _size(other._size), _numEntries(other._numEntries), _data(other._data)
+    {
+    }
+*/
+
+    ArrayController()
 		: _size(0)
 	{
 		checkCudaErrors(cudaMalloc(&_numEntries, sizeof(int)));
@@ -156,10 +163,15 @@ public:
 		return &_data[oldIndex];
 	}
 
-	__device__ __inline__ T* at(int index)
+	__device__ __inline__ T& at(int index)
 	{
-		return &_data[index];
+		return _data[index];
 	}
+
+    __device__ __inline__ T const& at(int index) const
+    {
+        return _data[index];
+    }
 
 	__device__ __inline__ int getNumEntries() const
 	{
