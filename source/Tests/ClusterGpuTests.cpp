@@ -941,3 +941,29 @@ TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_concentratedAtUnive
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 	checkDistancesToConnectingCells(newData);
 }
+
+/**
+* Situation: many moving clusters
+* Fixed error: particles are blocked by false entries in cellMap
+* Expected result: enough particles are radiated
+*/
+TEST_F(ClusterGpuTests, regressionTest_movingClustersRadiateEnoughParticles)
+{
+    _parameters.radiationExponent = 1;
+    _parameters.radiationFactor = 0.0002f;
+    _parameters.radiationProb = 0.03f;
+    _parameters.radiationVelocityMultiplier = 1.0f;
+    _parameters.radiationVelocityPerturbation = 0.5f;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+    for (int i = 0; i < 30; ++i) {
+        origData.addCluster(createRectangularCluster({ 7, 40 }));
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(500, _controller);
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    EXPECT_LT(1500, newData.particles->size());
+}
