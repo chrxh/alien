@@ -14,9 +14,9 @@
 __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     SimulationData const& data, DataAccessTO& simulationTO, int clusterIndex)
 {
-    Cluster& cluster = data.clusters.getEntireArray()[clusterIndex];
+    auto const& cluster = data.clusterPointers.at(clusterIndex);
 
-    BlockData cellBlock = calcPartition(cluster.numCellPointers, threadIdx.x, blockDim.x);
+    BlockData cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
 
     __shared__ bool containedInRect;
     __shared__ BasicMap map;
@@ -27,7 +27,7 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
     __syncthreads();
 
     for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-        auto pos = cluster.cellPointers[cellIndex]->absPos;
+        auto pos = cluster->cellPointers[cellIndex]->absPos;
         map.mapPosCorrection(pos);
         if (isContained(rectUpperLeft, rectLowerRight, pos)) {
             containedInRect = true;
@@ -42,29 +42,29 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
         __shared__ TokenAccessTO* tokenTOs;
         if (0 == threadIdx.x) {
             int clusterAccessIndex = atomicAdd(simulationTO.numClusters, 1);
-            cellTOIndex = atomicAdd(simulationTO.numCells, cluster.numCellPointers);
+            cellTOIndex = atomicAdd(simulationTO.numCells, cluster->numCellPointers);
             cellTOs = &simulationTO.cells[cellTOIndex];
 
-            tokenTOIndex = atomicAdd(simulationTO.numTokens, cluster.numTokenPointers);
+            tokenTOIndex = atomicAdd(simulationTO.numTokens, cluster->numTokenPointers);
             tokenTOs = &simulationTO.tokens[tokenTOIndex];
 
             ClusterAccessTO& clusterTO = simulationTO.clusters[clusterAccessIndex];
-            clusterTO.id = cluster.id;
-            clusterTO.pos = cluster.pos;
-            clusterTO.vel = cluster.vel;
-            clusterTO.angle = cluster.angle;
-            clusterTO.angularVel = cluster.angularVel;
-            clusterTO.numCells = cluster.numCellPointers;
-            clusterTO.numTokens = cluster.numTokenPointers;
+            clusterTO.id = cluster->id;
+            clusterTO.pos = cluster->pos;
+            clusterTO.vel = cluster->vel;
+            clusterTO.angle = cluster->angle;
+            clusterTO.angularVel = cluster->angularVel;
+            clusterTO.numCells = cluster->numCellPointers;
+            clusterTO.numTokens = cluster->numTokenPointers;
             clusterTO.cellStartIndex = cellTOIndex;
             clusterTO.tokenStartIndex = tokenTOIndex;
         }
         __syncthreads();
 
-        cluster.tagCellByIndex_blockCall(cellBlock);
+        cluster->tagCellByIndex_blockCall(cellBlock);
 
         for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-            Cell const& cell = *cluster.cellPointers[cellIndex];
+            Cell const& cell = *cluster->cellPointers[cellIndex];
             CellAccessTO& cellTO = cellTOs[cellIndex];
             cellTO.id = cell.id;
             cellTO.pos = cell.absPos;
@@ -88,9 +88,9 @@ __device__ void getClusterAccessData(int2 const& rectUpperLeft, int2 const& rect
             }
         }
 
-        BlockData tokenBlock = calcPartition(cluster.numTokenPointers, threadIdx.x, blockDim.x);
+        BlockData tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
         for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-            Token const& token = *cluster.tokenPointers[tokenIndex];
+            Token const& token = *cluster->tokenPointers[tokenIndex];
             TokenAccessTO& tokenTO = tokenTOs[tokenIndex];
             tokenTO.energy = token.energy;
             for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
@@ -125,7 +125,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     BlockData clusterBlock = 
-        calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+        calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
 
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         getClusterAccessData(rectUpperLeft, rectLowerRight, data, access, clusterIndex);
@@ -142,10 +142,10 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     SimulationData& data, int clusterIndex)
 {
-    Cluster const& cluster = data.clusters.getEntireArray()[clusterIndex];
+    auto& cluster = data.clusterPointers.at(clusterIndex);
 
     BlockData cellBlock =
-        calcPartition(cluster.numCellPointers, threadIdx.x, blockDim.x);
+        calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
 
     __shared__ bool containedInRect;
     if (0 == threadIdx.x) {
@@ -154,21 +154,17 @@ __device__ void filterClusterData(int2 const& rectUpperLeft, int2 const& rectLow
     __syncthreads();
 
     for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-        Cell const& cell = *cluster.cellPointers[cellIndex];
+        Cell const& cell = *cluster->cellPointers[cellIndex];
         if (isContained(rectUpperLeft, rectLowerRight, cell.absPos)) {
             containedInRect = true;
         }
     }
     __syncthreads();
 
-    if (!containedInRect) {
-        __shared__ Cluster* newCluster;
-        if (0 == threadIdx.x) {
-            newCluster = data.clustersNew.getNewElement();
-            *newCluster = cluster;
-        }
-        __syncthreads();
+    if (containedInRect && 0 == threadIdx.x) {
+        cluster = nullptr;
     }
+    __syncthreads();
 }
 
 __device__ void filterParticleData(int2 const& rectUpperLeft, int2 const& rectLowerRight,
@@ -183,7 +179,7 @@ __device__ void filterParticleData(int2 const& rectUpperLeft, int2 const& rectLo
 
 __global__ void filterData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         filterClusterData(rectUpperLeft, rectLowerRight, data, clusterIndex);
     }
