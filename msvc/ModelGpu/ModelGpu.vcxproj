@@ -213,7 +213,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\Definitions.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\EnergyGuidance.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\EntityFactory.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\GarbageCollectorKernels.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\CleanupKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Math.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Particle.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnCopyData.cuh" />

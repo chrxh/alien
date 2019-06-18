@@ -18,7 +18,7 @@ public:
     __inline__ __device__ void processingClusterCopy_blockCall();
 
 private:
-    __inline__ __device__ void copyCluster_blockCall();
+    __inline__ __device__ void cleanClusterFromMap_blockCall();
     __inline__ __device__ void copyClusterWithDecomposition_blockCall();
     __inline__ __device__ void copyClusterWithFusion_blockCall();
     __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster, Cluster* targetCluster);
@@ -30,7 +30,8 @@ private:
     SimulationData* _data;
     Map<Cell> _cellMap;
 
-    Cluster *_origCluster;
+    Cluster* _origCluster;
+    Cluster** _origClusterPointer;
 
     BlockData _cellBlock;
 };
@@ -41,10 +42,20 @@ private:
 __inline__ __device__ void ClusterProcessorOnCopyData::init_blockCall(SimulationData& data, int clusterIndex)
 {
     _data = &data;
-    _origCluster = &data.clusters.getEntireArray()[clusterIndex];
+    _origClusterPointer = &data.clusterPointers.at(clusterIndex);
+    _origCluster = *_origClusterPointer;
     _cellMap.init(data.size, data.cellMap);
 
     _cellBlock = calcPartition(_origCluster->numCellPointers, threadIdx.x, blockDim.x);
+}
+
+__inline__ __device__ void ClusterProcessorOnCopyData::cleanClusterFromMap_blockCall()
+{
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        Cell* cell = _origCluster->cellPointers[cellIndex];
+        _cellMap.set(cell->absPos, nullptr);
+    }
+    __syncthreads();
 }
 
 __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposition_blockCall()
@@ -57,6 +68,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
     };
     __shared__ Entry entries[MAX_DECOMPOSITIONS];
     if (0 == threadIdx.x) {
+        *_origClusterPointer = nullptr;
         numDecompositions = 0;
         for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
             entries[i].tag = -1;
@@ -73,6 +85,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         }
     }
     __syncthreads();
+
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell* cell = _origCluster->cellPointers[cellIndex];
         if (!cell->alive) {
@@ -130,7 +143,11 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         entries[index].cluster.cellPointers = _data->cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        newClusters[index] = _data->clustersNew.getNewElement();
+        auto newClusterPointer = _data->clusterPointers.getNewElement();
+        auto newCluster = _data->clusters.getNewElement();
+        *newClusterPointer = newCluster;
+
+        newClusters[index] = newCluster;
         *newClusters[index] = entries[index].cluster;
     }
     __syncthreads();
@@ -177,23 +194,6 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessorOnCopyData::copyCluster_blockCall()
-{
-    __shared__ Cluster* newCluster;
-
-    if (threadIdx.x == 0) {
-        newCluster = _data->clustersNew.getNewElement();
-        *newCluster = *_origCluster;
-    }
-    __syncthreads();
-
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto *cell = newCluster->cellPointers[cellIndex];
-        cell->cluster = newCluster;
-    }
-    __syncthreads();
-}
-
 __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blockCall()
 {
     if (_origCluster < _origCluster->clusterToFuse) {
@@ -202,7 +202,9 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         __shared__ float2 correction;
         if (0 == threadIdx.x) {
             otherCluster = _origCluster->clusterToFuse;
-            newCluster = _data->clustersNew.getNewElement();
+            newCluster = _data->clusters.getNewElement();
+            *_origClusterPointer = newCluster;
+
             newCluster->id = _origCluster->id;
             newCluster->angle = 0.0f;
             newCluster->numTokenPointers = 0;
@@ -267,7 +269,9 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         copyTokenPointers_blockCall(_origCluster, _origCluster->clusterToFuse, newCluster);
     }
     else {
-        //do not copy anything
+        if (0 == threadIdx.x) {
+            *_origClusterPointer = nullptr;
+        }
     }
     __syncthreads();
 }
@@ -376,18 +380,21 @@ ClusterProcessorOnCopyData::getNumberOfTokensToCopy_blockCall(Cluster* sourceClu
 __inline__ __device__ void ClusterProcessorOnCopyData::processingClusterCopy_blockCall()
 {
     if (_origCluster->numCellPointers == 1 && !_origCluster->cellPointers[0]->alive && !_origCluster->clusterToFuse) {
+        if (0 == threadIdx.x) {
+            *_origClusterPointer = nullptr;
+        }
+        cleanClusterFromMap_blockCall();
         __syncthreads();
         return;
     }
 
     if (_origCluster->decompositionRequired && !_origCluster->clusterToFuse) {
+        cleanClusterFromMap_blockCall();
         copyClusterWithDecomposition_blockCall();
     }
     else if (_origCluster->clusterToFuse) {
+        cleanClusterFromMap_blockCall();
         copyClusterWithFusion_blockCall();
-    }
-    else {
-        copyCluster_blockCall();
     }
 }
 
