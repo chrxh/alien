@@ -46,12 +46,14 @@ __inline__ __device__ void ParticleProcessorOnCopyData::processingDataCopy_block
 		if (!origParticle->alive) {
 			continue;
 		}
+
 		if (auto cell = _cellMap.get(origParticle->pos)) {
 			if (cell->alive) {
 				atomicAdd(&cell->energy, origParticle->energy);
 				continue;
 			}
 		}
+
 		Particle* newParticle = _data->particlesNew.getNewElement();
 		*newParticle = *origParticle;
 	}

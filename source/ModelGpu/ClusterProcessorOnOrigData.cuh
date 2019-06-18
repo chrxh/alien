@@ -37,7 +37,7 @@ private:
 __inline__ __device__ void ClusterProcessorOnOrigData::init_blockCall(SimulationData & data, int clusterIndex)
 {
     _data = &data;
-    _cluster = &data.clusters.getEntireArray()[clusterIndex];
+    _cluster = data.clusterPointers.at(clusterIndex);
     _cellMap.init(data.size, data.cellMap);
 
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);

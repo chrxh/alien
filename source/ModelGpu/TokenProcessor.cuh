@@ -43,7 +43,7 @@ private:
 __inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterIndex)
 {
     _data = &data;
-    _cluster = &data.clusters.getEntireArray()[clusterIndex];
+    _cluster = data.clusterPointers.at(clusterIndex);
 
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
     _tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);

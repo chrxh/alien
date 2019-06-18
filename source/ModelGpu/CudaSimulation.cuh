@@ -23,6 +23,7 @@ public:
 private:
     void prepareTargetData();
     void swapData();
+    void cleanup();
 
     cudaStream_t _cudaStream;
     SimulationData* _internalData;

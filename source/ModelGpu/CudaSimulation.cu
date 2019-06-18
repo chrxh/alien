@@ -13,6 +13,7 @@
 #include "CudaAccessTOs.cuh"
 #include "SimulationKernels.cuh"
 #include "AccessKernels.cuh"
+#include "CleanupKernels.cuh"
 
 #include "SimulationData.cuh"
 #include "Map.cuh"
@@ -53,14 +54,15 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
 
     _internalData = new SimulationData();
     _internalData->size = size;
+    _internalData->clusterPointers = ArrayController<Cluster*>(MAX_CELLCLUSTERPOINTERS);
+    _internalData->clusterPointersTemp = ArrayController<Cluster*>(MAX_CELLCLUSTERPOINTERS);
     _internalData->clusters = ArrayController<Cluster>(MAX_CELLCLUSTERS);
-    _internalData->clustersNew = ArrayController<Cluster>(MAX_CELLCLUSTERS);
-    _internalData->cellPointers = ArrayController<Cell*>(MAX_CELLS*20);
-    _internalData->cellPointersTemp = ArrayController<Cell*>(MAX_CELLS * 20);
+    _internalData->cellPointers = ArrayController<Cell*>(MAX_CELLPOINTERS);
+    _internalData->cellPointersTemp = ArrayController<Cell*>(MAX_CELLPOINTERS);
     _internalData->cells = ArrayController<Cell>(MAX_CELLS);
     _internalData->cellsTemp = ArrayController<Cell>(MAX_CELLS);
-    _internalData->tokenPointers = ArrayController<Token*>(MAX_TOKENS*20);
-    _internalData->tokenPointersTemp = ArrayController<Token*>(MAX_TOKENS * 20);
+    _internalData->tokenPointers = ArrayController<Token*>(MAX_TOKENPOINTERS);
+    _internalData->tokenPointersTemp = ArrayController<Token*>(MAX_TOKENPOINTERS);
     _internalData->tokens = ArrayController<Token>(MAX_TOKENS);
     _internalData->tokensTemp = ArrayController<Token>(MAX_TOKENS);
     _internalData->particles = ArrayController<Particle>(MAX_PARTICLES);
@@ -87,8 +89,9 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
 
 CudaSimulation::~CudaSimulation()
 {
+    _internalData->clusterPointers.free();
+    _internalData->clusterPointersTemp.free();
     _internalData->clusters.free();
-    _internalData->clustersNew.free();
     _internalData->cellPointers.free();
     _internalData->cellPointersTemp.free();
     _internalData->cells.free();
@@ -142,7 +145,7 @@ void CudaSimulation::calcNextTimestep()
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
-    clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
+    clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData, _internalData->clusterPointers.retrieveNumEntries());
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
@@ -158,7 +161,9 @@ void CudaSimulation::calcNextTimestep()
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
-    clearMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
+    cleanup();
+
+    cleanupMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
@@ -207,6 +212,8 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
 
+    cleanup();
+
     swapData();
 }
 
@@ -238,12 +245,21 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
 
 void CudaSimulation::prepareTargetData()
 {
-    _internalData->clustersNew.reset();
     _internalData->particlesNew.reset();
 }
 
 void CudaSimulation::swapData()
 {
-    swap(_internalData->clusters, _internalData->clustersNew);
     swap(_internalData->particles, _internalData->particlesNew);
+}
+
+void CudaSimulation::cleanup()
+{
+    _internalData->clusterPointersTemp.reset();
+
+    cleanupClusterPointers<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >>> (*_internalData);
+    cudaDeviceSynchronize();
+    checkCudaErrors(cudaGetLastError());
+
+    swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
 }
