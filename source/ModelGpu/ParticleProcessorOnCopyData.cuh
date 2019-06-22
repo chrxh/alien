@@ -36,13 +36,13 @@ __inline__ __device__ void ParticleProcessorOnCopyData::init_blockCall(Simulatio
     _origParticleMap.init(data.size, data.particleMap);
 
     _particleBlock = 
-        calcPartition(data.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(data.entities.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
 __inline__ __device__ void ParticleProcessorOnCopyData::processingDataCopy_blockCall()
 {
 	for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
-		Particle *origParticle = &_data->particles.getEntireArray()[particleIndex];
+		Particle *origParticle = &_data->entities.particles.getEntireArray()[particleIndex];
 		if (!origParticle->alive) {
 			continue;
 		}
@@ -54,7 +54,7 @@ __inline__ __device__ void ParticleProcessorOnCopyData::processingDataCopy_block
 			}
 		}
 
-		Particle* newParticle = _data->particlesNew.getNewElement();
+		Particle* newParticle = _data->entitiesNew.particles.getNewElement();
 		*newParticle = *origParticle;
 	}
 }

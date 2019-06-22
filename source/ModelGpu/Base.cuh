@@ -107,16 +107,9 @@ class ArrayController
 private:
 	int _size;
 	int* _numEntries;
-	T* _data;
+	T** _data;
 
 public:
-
-/*
-    __host__ __device__ __inline__ ArrayController(ArrayController const& other)
-        : _size(other._size), _numEntries(other._numEntries), _data(other._data)
-    {
-    }
-*/
 
     ArrayController()
 		: _size(0)
@@ -125,19 +118,32 @@ public:
 		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
 	}
 
-	ArrayController(int size)
-		: _size(size)
+	void init(int size)
 	{
-		checkCudaErrors(cudaMalloc(&_data, sizeof(T) * size));
-		checkCudaErrors(cudaMalloc(&_numEntries, sizeof(int)));
+        _size = size;
+        T* data = nullptr;
+		checkCudaErrors(cudaMalloc(&data, sizeof(T) * size));
+        checkCudaErrors(cudaMalloc(&_data, sizeof(T*)));
+        checkCudaErrors(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
+
+        checkCudaErrors(cudaMalloc(&_numEntries, sizeof(int)));
 		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
 	}
 
 	void free()
 	{
-		checkCudaErrors(cudaFree(_data));
+        T* data = nullptr;
+        checkCudaErrors(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+        checkCudaErrors(cudaFree(data));
+        checkCudaErrors(cudaFree(_data));
 		checkCudaErrors(cudaFree(_numEntries));
 	}
+
+    __device__ __inline__ void swapArrays(ArrayController& other)
+    {
+        swap(*_numEntries, *other._numEntries);
+        swap(*_data, *other._data);
+    }
 
     __device__ __inline__ void reset()
 	{
@@ -154,23 +160,23 @@ public:
 	__device__ __inline__ T* getNewSubarray(int size)
 	{
 		int oldIndex = atomicAdd(_numEntries, size);
-		return &_data[oldIndex];
+		return &(*_data)[oldIndex];
 	}
 
 	__device__ __inline__ T* getNewElement()
 	{
 		int oldIndex = atomicAdd(_numEntries, 1);
-		return &_data[oldIndex];
+		return &(*_data)[oldIndex];
 	}
 
 	__device__ __inline__ T& at(int index)
 	{
-		return _data[index];
+		return (*_data)[index];
 	}
 
     __device__ __inline__ T const& at(int index) const
     {
-        return _data[index];
+        return (*_data)[index];
     }
 
 	__device__ __inline__ int getNumEntries() const
@@ -180,7 +186,7 @@ public:
 
 	__device__ __inline__ T* getEntireArray() const
 	{
-		return _data;
+		return *_data;
 	}
 
 	__device__ __inline__ void setNumEntries(int value) const

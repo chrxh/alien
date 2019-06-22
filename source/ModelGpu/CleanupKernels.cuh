@@ -10,11 +10,11 @@
 
 __device__ void cleanupCells(SimulationData &data, int clusterIndex)
 {
-    auto& cluster = data.clusterPointers.at(clusterIndex);
+    auto& cluster = data.entities.clusterPointers.at(clusterIndex);
 
     __shared__ Cell* newCells;
     if (0 == threadIdx.x) {
-        newCells = data.cellsTemp.getNewSubarray(cluster->numCellPointers);
+        newCells = data.entitiesNew.cells.getNewSubarray(cluster->numCellPointers);
     }
     __syncthreads();
 
@@ -46,7 +46,7 @@ __device__ void cleanupCells(SimulationData &data, int clusterIndex)
 
 __global__ void cleanupClusterPointers(SimulationData data)
 {
-    BlockData pointerBlock = calcPartition(data.clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    BlockData pointerBlock = calcPartition(data.entities.clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     __shared__ int numClusterPointers;
     if (0 == threadIdx.x) {
@@ -55,7 +55,7 @@ __global__ void cleanupClusterPointers(SimulationData data)
     __syncthreads();
 
     for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        if (data.clusterPointers.at(index) != nullptr) {
+        if (data.entities.clusterPointers.at(index) != nullptr) {
             atomicAdd(&numClusterPointers, 1);
         }
     }
@@ -63,13 +63,13 @@ __global__ void cleanupClusterPointers(SimulationData data)
 
     __shared__ Cluster** newClusterPointers;
     if (0 == threadIdx.x) {
-        newClusterPointers = data.clusterPointersTemp.getNewSubarray(numClusterPointers);
+        newClusterPointers = data.entitiesNew.clusterPointers.getNewSubarray(numClusterPointers);
         numClusterPointers = 0;
     }
     __syncthreads();
 
     for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        auto const& clusterPointer = data.clusterPointers.at(index);
+        auto const& clusterPointer = data.entities.clusterPointers.at(index);
         if (clusterPointer != nullptr) {
             int newIndex = atomicAdd(&numClusterPointers, 1);
             newClusterPointers[newIndex] = clusterPointer;
@@ -80,13 +80,13 @@ __global__ void cleanupClusterPointers(SimulationData data)
 
 __global__ void cleanupCellPointers(SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(data.entities.clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = data.clusters.getEntireArray()[clusterIndex];
+        auto& cluster = data.entities.clusters.getEntireArray()[clusterIndex];
 
         __shared__ Cell** newCellPointers;
         if (0 == threadIdx.x) {
-            newCellPointers = data.cellPointersTemp.getNewSubarray(cluster.numCellPointers);
+            newCellPointers = data.entitiesNew.cellPointers.getNewSubarray(cluster.numCellPointers);
         }
         __syncthreads();
 
@@ -108,7 +108,7 @@ __global__ void cleanupCellPointers(SimulationData data)
 
 __device__ void cleanupClusterOnMap(SimulationData const &data, int clusterIndex)
 {
-    auto const &cluster = data.clusterPointersTemp.at(clusterIndex);
+    auto const &cluster = data.entitiesNew.clusterPointers.at(clusterIndex);
 
     int2 size = data.size;
     int numCells = cluster->numCellPointers;
@@ -127,14 +127,14 @@ __device__ void cleanupParticleOnMap(SimulationData const &data, int particleInd
     Map<Particle> map;
     map.init(data.size, data.particleMap);
 
-    auto const &particle = data.particlesNew.getEntireArray()[particleIndex];
+    auto const &particle = data.entitiesNew.particles.getEntireArray()[particleIndex];
     map.set(particle.pos, nullptr);
 }
 
 __global__ void cleanupMaps(SimulationData data)
 {
 
-    BlockData clusterBlock = calcPartition(data.clusterPointersTemp.getNumEntries(), blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(data.entitiesNew.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
 
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         cleanupClusterOnMap(data, clusterIndex);
@@ -142,7 +142,7 @@ __global__ void cleanupMaps(SimulationData data)
 
 
     BlockData particleBlock =
-        calcPartition(data.particlesNew.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(data.entitiesNew.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         cleanupParticleOnMap(data, particleIndex);
     }
@@ -150,11 +150,13 @@ __global__ void cleanupMaps(SimulationData data)
 
 __global__ void cleanup(SimulationData data)
 {
-    data.clusterPointersTemp.reset();
+    data.entitiesNew.clusterPointers.reset();
 
     cleanupClusterPointers << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
 
     cleanupMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
+
+    data.entities.clusterPointers.swapArrays(data.entitiesNew.clusterPointers);
 }

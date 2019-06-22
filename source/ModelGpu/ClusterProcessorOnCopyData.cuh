@@ -42,7 +42,7 @@ private:
 __inline__ __device__ void ClusterProcessorOnCopyData::init_blockCall(SimulationData& data, int clusterIndex)
 {
     _data = &data;
-    _origClusterPointer = &data.clusterPointers.at(clusterIndex);
+    _origClusterPointer = &data.entities.clusterPointers.at(clusterIndex);
     _origCluster = *_origClusterPointer;
     _cellMap.init(data.size, data.cellMap);
 
@@ -140,11 +140,11 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         entries[index].cluster.pos.y /= numCells;
         entries[index].cluster.vel.x /= numCells;
         entries[index].cluster.vel.y /= numCells;
-        entries[index].cluster.cellPointers = _data->cellPointers.getNewSubarray(numCells);
+        entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        auto newClusterPointer = _data->clusterPointers.getNewElement();
-        auto newCluster = _data->clusters.getNewElement();
+        auto newClusterPointer = _data->entities.clusterPointers.getNewElement();
+        auto newCluster = _data->entities.clusters.getNewElement();
         *newClusterPointer = newCluster;
 
         newClusters[index] = newCluster;
@@ -202,14 +202,14 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithFusion_blo
         __shared__ float2 correction;
         if (0 == threadIdx.x) {
             otherCluster = _origCluster->clusterToFuse;
-            newCluster = _data->clusters.getNewElement();
+            newCluster = _data->entities.clusters.getNewElement();
             *_origClusterPointer = newCluster;
 
             newCluster->id = _origCluster->id;
             newCluster->angle = 0.0f;
             newCluster->numTokenPointers = 0;
             newCluster->numCellPointers = _origCluster->numCellPointers + otherCluster->numCellPointers;
-            newCluster->cellPointers = _data->cellPointers.getNewSubarray(newCluster->numCellPointers);
+            newCluster->cellPointers = _data->entities.cellPointers.getNewSubarray(newCluster->numCellPointers);
             newCluster->decompositionRequired = _origCluster->decompositionRequired || otherCluster->decompositionRequired;
             newCluster->locked = 0;
             newCluster->clusterToFuse = nullptr;
@@ -291,7 +291,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyTokenPointers_blockCa
 
     if (0 == threadIdx.x) {
         targetCluster->numTokenPointers = numberOfTokensToCopy;
-        targetCluster->tokenPointers = _data->tokenPointers.getNewSubarray(numberOfTokensToCopy);
+        targetCluster->tokenPointers = _data->entities.tokenPointers.getNewSubarray(numberOfTokensToCopy);
     }
     __syncthreads();
 
@@ -328,7 +328,7 @@ ClusterProcessorOnCopyData::copyTokenPointers_blockCall(Cluster* sourceCluster1,
 
     if (0 == threadIdx.x) {
         targetCluster->numTokenPointers = numberOfTokensToCopy;
-        targetCluster->tokenPointers = _data->tokenPointers.getNewSubarray(numberOfTokensToCopy);
+        targetCluster->tokenPointers = _data->entities.tokenPointers.getNewSubarray(numberOfTokensToCopy);
     }
     __syncthreads();
 
