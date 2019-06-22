@@ -94,9 +94,6 @@ void CudaSimulation::calcNextTimestep()
 {
     KERNEL_FUNCTION(1, 1, calcSimulationTimestep, *_internalData);
 /*
-    swap(_internalData->particles, _internalData->particlesNew);
-    swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
-
     std::cout
         << "Clusters: " << _internalData->entities.clusterPointers.retrieveNumEntries() << "; " << _internalData->entities.clusters.retrieveNumEntries() << "  "
         << "Cells: " << _internalData->entities.cellPointers.retrieveNumEntries() << "; " << _internalData->entities.cells.retrieveNumEntries()
@@ -130,10 +127,6 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
 
     KERNEL_FUNCTION(1, 1, setSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
-/*
-    swap(_internalData->particles, _internalData->particlesNew);
-    swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
-*/
 }
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
