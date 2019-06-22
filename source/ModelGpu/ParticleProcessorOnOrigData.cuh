@@ -36,13 +36,13 @@ __inline__ __device__ void ParticleProcessorOnOrigData::init_blockCall(Simulatio
     _data = &data;
     _origParticleMap.init(data.size, data.particleMap);
 
-    _particleBlock = calcPartition(data.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    _particleBlock = calcPartition(data.entities.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
 __inline__ __device__ void ParticleProcessorOnOrigData::processingMovement_blockCall()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
-        Particle* particle = &_data->particles.getEntireArray()[particleIndex];
+        Particle* particle = &_data->entities.particles.getEntireArray()[particleIndex];
         particle->pos = Math::add(particle->pos, particle->vel);
         _origParticleMap.mapPosCorrection(particle->pos);
         _origParticleMap.set(particle->pos, particle);
@@ -52,7 +52,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingMovement_block
 __inline__ __device__ void ParticleProcessorOnOrigData::processingCollision_blockCall()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
-        Particle* particle = &_data->particles.getEntireArray()[particleIndex];
+        Particle* particle = &_data->entities.particles.getEntireArray()[particleIndex];
         Particle* otherParticle = _origParticleMap.get(particle->pos);
         if (otherParticle && otherParticle != particle) {
             if (particle->alive && otherParticle->alive) {
@@ -80,7 +80,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingCollision_bloc
 __inline__ __device__ void ParticleProcessorOnOrigData::processingTransformation_blockCall()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
-        Particle* particle = &_data->particles.getEntireArray()[particleIndex];
+        Particle* particle = &_data->entities.particles.getEntireArray()[particleIndex];
         auto innerEnergy = particle->energy - Physics::linearKineticEnergy(cudaSimulationParameters.cellMass, particle->vel);
         if (innerEnergy >= cudaSimulationParameters.cellMinEnergy) {
             if (_data->numberGen.random() < cudaSimulationParameters.cellTransformationProb) {
