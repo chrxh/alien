@@ -14,6 +14,7 @@
 #include "SimulationKernels.cuh"
 #include "AccessKernels.cuh"
 #include "CleanupKernels.cuh"
+#include "Entities.cuh"
 
 #include "SimulationData.cuh"
 #include "Map.cuh"
@@ -55,28 +56,7 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
     setSimulationParameters(parameters);
 
     _internalData = new SimulationData();
-    _internalData->size = size;
-    _internalData->clusterPointers = ArrayController<Cluster*>(MAX_CELLCLUSTERPOINTERS);
-    _internalData->clusterPointersTemp = ArrayController<Cluster*>(MAX_CELLCLUSTERPOINTERS);
-    _internalData->clusters = ArrayController<Cluster>(MAX_CELLCLUSTERS);
-    _internalData->cellPointers = ArrayController<Cell*>(MAX_CELLPOINTERS);
-    _internalData->cellPointersTemp = ArrayController<Cell*>(MAX_CELLPOINTERS);
-    _internalData->cells = ArrayController<Cell>(MAX_CELLS);
-    _internalData->cellsTemp = ArrayController<Cell>(MAX_CELLS);
-    _internalData->tokenPointers = ArrayController<Token*>(MAX_TOKENPOINTERS);
-    _internalData->tokenPointersTemp = ArrayController<Token*>(MAX_TOKENPOINTERS);
-    _internalData->tokens = ArrayController<Token>(MAX_TOKENS);
-    _internalData->tokensTemp = ArrayController<Token>(MAX_TOKENS);
-    _internalData->particles = ArrayController<Particle>(MAX_PARTICLES);
-    _internalData->particlesNew = ArrayController<Particle>(MAX_PARTICLES);
-    checkCudaErrors(cudaMalloc(&_internalData->cellMap, size.x * size.y * sizeof(Cell*)));
-    checkCudaErrors(cudaMalloc(&_internalData->particleMap, size.x * size.y * sizeof(Particle*)));
-
-    std::vector<Cell*> hostCellMap(size.x * size.y, 0);
-    std::vector<Particle*> hostParticleMap(size.x * size.y, 0);
-    checkCudaErrors(cudaMemcpy(_internalData->cellMap, hostCellMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_internalData->particleMap, hostParticleMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
-    _internalData->numberGen.init(RANDOM_NUMBER_BLOCK_SIZE);
+    _internalData->init(size);
 
     _cudaAccessTO = new DataAccessTO();
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->numClusters, sizeof(int)));
@@ -91,23 +71,7 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
 
 CudaSimulation::~CudaSimulation()
 {
-    _internalData->clusterPointers.free();
-    _internalData->clusterPointersTemp.free();
-    _internalData->clusters.free();
-    _internalData->cellPointers.free();
-    _internalData->cellPointersTemp.free();
-    _internalData->cells.free();
-    _internalData->cellsTemp.free();
-    _internalData->tokenPointers.free();
-    _internalData->tokenPointersTemp.free();
-    _internalData->tokens.free();
-    _internalData->tokensTemp.free();
-    _internalData->particles.free();
-    _internalData->particlesNew.free();
-
-    checkCudaErrors(cudaFree(_internalData->cellMap));
-    checkCudaErrors(cudaFree(_internalData->particleMap));
-    _internalData->numberGen.free();
+    _internalData->free();
 
     checkCudaErrors(cudaFree(_cudaAccessTO->numClusters));
     checkCudaErrors(cudaFree(_cudaAccessTO->numCells));
@@ -125,8 +89,10 @@ CudaSimulation::~CudaSimulation()
 void CudaSimulation::calcNextTimestep()
 {
     KERNEL_FUNCTION(1, 1, calcSimulationTimestep, *_internalData);
+/*
     swap(_internalData->particles, _internalData->particlesNew);
     swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
+*/
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
@@ -155,8 +121,10 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
 
     KERNEL_FUNCTION(1, 1, setSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
+/*
     swap(_internalData->particles, _internalData->particlesNew);
     swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
+*/
 }
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
