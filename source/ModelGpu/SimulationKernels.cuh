@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cooperative_groups.h>
 #include "device_functions.h"
 #include "sm_60_atomic_functions.h"
 
@@ -12,6 +13,7 @@
 #include "ParticleProcessorOnOrigData.cuh"
 #include "ParticleProcessorOnCopyData.cuh"
 #include "TokenProcessor.cuh"
+#include "CleanupKernels.cuh"
 
 /************************************************************************/
 /* Clusters																*/
@@ -48,6 +50,14 @@ __device__ void clusterProcessingOnCopyData_blockCall(SimulationData data, int c
     clusterProcessor.processingClusterCopy_blockCall();
 }
 
+__device__ int getNumClusterPointers(SimulationData const& data)
+{
+    int numClusterPointers = data.clusterPointers.getNumEntries();
+//    cooperative_groups::this_grid().sync();
+
+    return numClusterPointers;
+}
+
 __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
 {
 /*
@@ -63,8 +73,9 @@ __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
     cudaDeviceSynchronize();
     delete clusterIndexPtr;
 */
- 
-    BlockData clusterBlock = calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
+    int numClusterPointers = getNumClusterPointers(data);
+
+    BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnOrigDataStep1_blockCall(data, clusterIndex);
     }
@@ -72,7 +83,9 @@ __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
 
 __global__ void clusterProcessingOnOrigDataStep2(SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
+    int numClusterPointers = getNumClusterPointers(data);
+
+    BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnOrigDataStep2_blockCall(data, clusterIndex);
     }
@@ -80,14 +93,18 @@ __global__ void clusterProcessingOnOrigDataStep2(SimulationData data)
 
 __global__ void clusterProcessingOnOrigDataStep3(SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
+    int numClusterPointers = getNumClusterPointers(data);
+
+    BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnOrigDataStep3_blockCall(data, clusterIndex);
     }
 }
 
-__global__ void clusterProcessingOnCopyData(SimulationData data, int numClusterPointers)
+__global__ void clusterProcessingOnCopyData(SimulationData data)
 {
+    int numClusterPointers = getNumClusterPointers(data);
+
     BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnCopyData_blockCall(data, clusterIndex);
@@ -158,3 +175,33 @@ __global__ void particleProcessingOnCopyData(SimulationData data)
     particleProcessor.processingDataCopy_blockCall();
 }
 
+/************************************************************************/
+/* Main      															*/
+/************************************************************************/
+
+__global__ void calcSimulationTimestep(SimulationData data)
+{
+    data.particlesNew.reset();
+
+    tokenProcessingStep1<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK>>>(data);
+    cudaDeviceSynchronize();
+    tokenProcessingStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    clusterProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    clusterProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    clusterProcessingOnOrigDataStep3 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    particleProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    particleProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    particleProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+
+    cleanup<<<1, 1>>>(data);
+    cudaDeviceSynchronize();
+}
