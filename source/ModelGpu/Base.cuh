@@ -139,9 +139,9 @@ public:
 		checkCudaErrors(cudaFree(_numEntries));
 	}
 
-	void reset()
+    __device__ __inline__ void reset()
 	{
-		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
+		*_numEntries = 0;
 	}
 
     int retrieveNumEntries() const

@@ -18,6 +18,11 @@
 #include "SimulationData.cuh"
 #include "Map.cuh"
 
+
+#define KERNEL_FUNCTION(numBlocks, numThreadsPerBlock, func, ...) func<<<numBlocks, numThreadsPerBlock>>>(##__VA_ARGS__); \
+    cudaDeviceSynchronize(); \
+    checkCudaErrors(cudaGetLastError());
+
 namespace
 {
     class CudaInitializer
@@ -48,9 +53,6 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
     CudaInitializer::init();
 
     setSimulationParameters(parameters);
-
-    cudaStreamCreate(&_cudaStream);
-    std::cout << "[CUDA] stream created" << std::endl;
 
     _internalData = new SimulationData();
     _internalData->size = size;
@@ -118,68 +120,18 @@ CudaSimulation::~CudaSimulation()
     delete _cudaAccessTO;
     delete _internalData;
 
-    std::cout << "[CUDA] stream closed" << std::endl;
 }
 
 void CudaSimulation::calcNextTimestep()
 {
-    prepareTargetData();
-
-    tokenProcessingStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    tokenProcessingStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    clusterProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    clusterProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    clusterProcessingOnOrigDataStep3 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData, _internalData->clusterPointers.retrieveNumEntries());
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    particleProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    particleProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    particleProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    cleanup();
-
-    cleanupMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    swapData();
+    KERNEL_FUNCTION(1, 1, calcSimulationTimestep, *_internalData);
+    swap(_internalData->particles, _internalData->particlesNew);
+    swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    checkCudaErrors(cudaMemset(_cudaAccessTO->numClusters, 0, sizeof(int)));
-    checkCudaErrors(cudaMemset(_cudaAccessTO->numCells, 0, sizeof(int)));
-    checkCudaErrors(cudaMemset(_cudaAccessTO->numParticles, 0, sizeof(int)));
-    checkCudaErrors(cudaMemset(_cudaAccessTO->numTokens, 0, sizeof(int)));
-
-    getSimulationAccessData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
+    KERNEL_FUNCTION(1, 1, getSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
 
     checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
@@ -193,8 +145,6 @@ void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& re
 
 void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    prepareTargetData();
-
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->numClusters, dataTO.numClusters, sizeof(int), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
@@ -204,17 +154,9 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->particles, dataTO.particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
 
-    filterData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (rectUpperLeft, rectLowerRight, *_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    setSimulationAccessData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >> > (rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    cleanup();
-
-    swapData();
+    KERNEL_FUNCTION(1, 1, setSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
+    swap(_internalData->particles, _internalData->particlesNew);
+    swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
 }
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
@@ -241,25 +183,4 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
     parametersToCopy.radiationVelocityPerturbation = parameters.radiationVelocityPerturbation;
 
     checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters), 0, cudaMemcpyHostToDevice));
-}
-
-void CudaSimulation::prepareTargetData()
-{
-    _internalData->particlesNew.reset();
-}
-
-void CudaSimulation::swapData()
-{
-    swap(_internalData->particles, _internalData->particlesNew);
-}
-
-void CudaSimulation::cleanup()
-{
-    _internalData->clusterPointersTemp.reset();
-
-    cleanupClusterPointers<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK, 0, _cudaStream >>> (*_internalData);
-    cudaDeviceSynchronize();
-    checkCudaErrors(cudaGetLastError());
-
-    swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
 }
