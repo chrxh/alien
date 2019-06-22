@@ -8,6 +8,8 @@
 #include "Cell.cuh"
 #include "Token.cuh"
 
+#define FILL_LEVEL_FACTOR 2/3
+
 __global__ void cleanupClusterPointers(SimulationData data)
 {
     BlockData pointerBlock = calcPartition(data.entities.clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -68,27 +70,27 @@ __global__ void cleanupClusters(SimulationData data)
 
 __global__ void cleanupCellPointers(SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.entities.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(data.entities.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = data.entities.clusters.getEntireArray()[clusterIndex];
+        auto& cluster = data.entities.clusterPointers.at(clusterIndex);
 
         __shared__ Cell** newCellPointers;
         if (0 == threadIdx.x) {
-            newCellPointers = data.entitiesNew.cellPointers.getNewSubarray(cluster.numCellPointers);
+            newCellPointers = data.entitiesNew.cellPointers.getNewSubarray(cluster->numCellPointers);
         }
         __syncthreads();
 
 
-        auto cellBlock = calcPartition(cluster.numCellPointers, threadIdx.x, blockDim.x);
+        auto cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
 
         for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-            auto& origCell = cluster.cellPointers[cellIndex];
+            auto& origCell = cluster->cellPointers[cellIndex];
             newCellPointers[cellIndex] = origCell;
         }
         __syncthreads();
 
         if (0 == threadIdx.x) {
-            cluster.cellPointers = newCellPointers;
+            cluster->cellPointers = newCellPointers;
         }
         __syncthreads();
     }
@@ -179,10 +181,19 @@ __global__ void cleanup(SimulationData data)
     cudaDeviceSynchronize();
     data.entities.clusterPointers.swapArrays(data.entitiesNew.clusterPointers);
 
-    data.entitiesNew.clusters.reset();
-    cleanupClusters<< <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
-    data.entities.clusters.swapArrays(data.entitiesNew.clusters);
+    if (data.entities.clusters.getNumEntries() > MAX_CELLCLUSTERS * FILL_LEVEL_FACTOR) {
+        data.entitiesNew.clusters.reset();
+        cleanupClusters << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+        cudaDeviceSynchronize();
+        data.entities.clusters.swapArrays(data.entitiesNew.clusters);
+    }
+
+    if (data.entities.cellPointers.getNumEntries() > MAX_CELLPOINTERS * FILL_LEVEL_FACTOR) {
+        data.entitiesNew.cellPointers.reset();
+        cleanupCellPointers << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+        cudaDeviceSynchronize();
+        data.entities.cellPointers.swapArrays(data.entitiesNew.cellPointers);
+    }
 
     cleanupMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
