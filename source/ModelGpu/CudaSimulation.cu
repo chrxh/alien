@@ -67,6 +67,8 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->cells, sizeof(CellAccessTO)*MAX_CELLS));
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->particles, sizeof(ParticleAccessTO)*MAX_PARTICLES));
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->tokens, sizeof(TokenAccessTO)*MAX_TOKENS));
+
+    std::cout << "[CUDA] memory acquired" << std::endl;
 }
 
 CudaSimulation::~CudaSimulation()
@@ -81,6 +83,8 @@ CudaSimulation::~CudaSimulation()
     checkCudaErrors(cudaFree(_cudaAccessTO->particles));
     checkCudaErrors(cudaFree(_cudaAccessTO->tokens));
 
+    std::cout << "[CUDA] freed" << std::endl;
+
     delete _cudaAccessTO;
     delete _internalData;
 
@@ -92,7 +96,6 @@ void CudaSimulation::calcNextTimestep()
 /*
     swap(_internalData->particles, _internalData->particlesNew);
     swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
-
 
     std::cout
         << "Clusters: " << _internalData->entities.clusterPointers.retrieveNumEntries() << "; " << _internalData->entities.clusters.retrieveNumEntries() << "  "
