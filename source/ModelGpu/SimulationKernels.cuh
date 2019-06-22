@@ -50,15 +50,7 @@ __device__ void clusterProcessingOnCopyData_blockCall(SimulationData data, int c
     clusterProcessor.processingClusterCopy_blockCall();
 }
 
-__device__ int getNumClusterPointers(SimulationData const& data)
-{
-    int numClusterPointers = data.entities.clusterPointers.getNumEntries();
-//    cooperative_groups::this_grid().sync();
-
-    return numClusterPointers;
-}
-
-__global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
+__global__ void clusterProcessingOnOrigDataStep1(SimulationData data, int numClusters)
 {
 /*
     int* clusterIndexPtr = new int;
@@ -73,39 +65,31 @@ __global__ void clusterProcessingOnOrigDataStep1(SimulationData data)
     cudaDeviceSynchronize();
     delete clusterIndexPtr;
 */
-    int numClusterPointers = getNumClusterPointers(data);
-
-    BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnOrigDataStep1_blockCall(data, clusterIndex);
     }
 }
 
-__global__ void clusterProcessingOnOrigDataStep2(SimulationData data)
+__global__ void clusterProcessingOnOrigDataStep2(SimulationData data, int numClusters)
 {
-    int numClusterPointers = getNumClusterPointers(data);
-
-    BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnOrigDataStep2_blockCall(data, clusterIndex);
     }
 }
 
-__global__ void clusterProcessingOnOrigDataStep3(SimulationData data)
+__global__ void clusterProcessingOnOrigDataStep3(SimulationData data, int numClusters)
 {
-    int numClusterPointers = getNumClusterPointers(data);
-
-    BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnOrigDataStep3_blockCall(data, clusterIndex);
     }
 }
 
-__global__ void clusterProcessingOnCopyData(SimulationData data)
+__global__ void clusterProcessingOnCopyData(SimulationData data, int numClusters)
 {
-    int numClusterPointers = getNumClusterPointers(data);
-
-    BlockData clusterBlock = calcPartition(numClusterPointers, blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingOnCopyData_blockCall(data, clusterIndex);
     }
@@ -187,13 +171,13 @@ __global__ void calcSimulationTimestep(SimulationData data)
     cudaDeviceSynchronize();
     tokenProcessingStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
-    clusterProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    clusterProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
     cudaDeviceSynchronize();
-    clusterProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    clusterProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
     cudaDeviceSynchronize();
-    clusterProcessingOnOrigDataStep3 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    clusterProcessingOnOrigDataStep3 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
     cudaDeviceSynchronize();
-    clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
     cudaDeviceSynchronize();
     particleProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
