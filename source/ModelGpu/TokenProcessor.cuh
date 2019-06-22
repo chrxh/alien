@@ -43,7 +43,7 @@ private:
 __inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterIndex)
 {
     _data = &data;
-    _cluster = data.clusterPointers.at(clusterIndex);
+    _cluster = data.entities.clusterPointers.at(clusterIndex);
 
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
     _tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
@@ -127,7 +127,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_blockCall()
     __shared__ int newNumTokens;
     if (0 == threadIdx.x) {
         newNumTokens = 0;
-        newTokenPointers = _data->tokenPointers.getNewSubarray(anticipatedTokens);
+        newTokenPointers = _data->entities.tokenPointers.getNewSubarray(anticipatedTokens);
     }
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell* cell = _cluster->cellPointers[cellIndex];
@@ -195,7 +195,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_blockCall()
                 tokenRecycled = true;
             }
             else {
-                newToken = _data->tokens.getNewElement();
+                newToken = _data->entities.tokens.getNewElement();
                 copyToken(token, newToken, connectingCell);
             }
             newTokenPointers[tokenIndex] = newToken;

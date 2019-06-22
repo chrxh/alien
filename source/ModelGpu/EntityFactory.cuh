@@ -9,6 +9,8 @@
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
+#include "Math.cuh"
+#include "Physics.cuh"
 
 #include "SimulationData.cuh"
 #include "Token.cuh"
@@ -52,8 +54,8 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
     __shared__ float2 posCorrection;
 
     if (0 == threadIdx.x) {
-        auto clusterPointer = _data->clusterPointers.getNewElement();
-        cluster = _data->clusters.getNewElement();
+        auto clusterPointer = _data->entities.clusterPointers.getNewElement();
+        cluster = _data->entities.clusters.getNewElement();
         *clusterPointer = cluster;
         cluster->id = clusterTO.id;
         cluster->pos = clusterTO.pos;
@@ -63,11 +65,11 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
         cluster->angle = clusterTO.angle;
         cluster->angularVel = clusterTO.angularVel;
         cluster->numCellPointers = clusterTO.numCells;
-        cluster->cellPointers = _data->cellPointers.getNewSubarray(cluster->numCellPointers);
-        cells = _data->cells.getNewSubarray(cluster->numCellPointers);
+        cluster->cellPointers = _data->entities.cellPointers.getNewSubarray(cluster->numCellPointers);
+        cells = _data->entities.cells.getNewSubarray(cluster->numCellPointers);
         cluster->numTokenPointers = clusterTO.numTokens;
-        cluster->tokenPointers = _data->tokenPointers.getNewSubarray(cluster->numTokenPointers);
-        tokens = _data->tokens.getNewSubarray(cluster->numTokenPointers);
+        cluster->tokenPointers = _data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers);
+        tokens = _data->entities.tokens.getNewSubarray(cluster->numTokenPointers);
 
         cluster->decompositionRequired = false;
         cluster->locked = 0;
@@ -158,7 +160,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
 
 __inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO)
 {
-    Particle* particle = _data->particlesNew.getNewElement();
+    Particle* particle = _data->entitiesNew.particles.getNewElement();
     particle->id = particleTO.id;
     particle->pos = particleTO.pos;
     _map.mapPosCorrection(particle->pos);
@@ -170,12 +172,12 @@ __inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO 
 
 __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float energy, float2 const & pos, float2 const & vel)
 {
-    auto clusterPointer = _data->clusterPointers.getNewElement();
-    auto cluster = _data->clusters.getNewElement();
+    auto clusterPointer = _data->entities.clusterPointers.getNewElement();
+    auto cluster = _data->entities.clusters.getNewElement();
     *clusterPointer = cluster;
 
-    auto cell = _data->cells.getNewElement();
-    auto cellPointers = _data->cellPointers.getNewElement();
+    auto cell = _data->entities.cells.getNewElement();
+    auto cellPointers = _data->entities.cellPointers.getNewElement();
 
     cluster->id = _data->numberGen.createNewId_kernel();
     cluster->pos = pos;
@@ -230,7 +232,7 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
 
 __inline__ __device__ void EntityFactory::createParticle(float energy, float2 const & pos, float2 const & vel)
 {
-    Particle* particle = _data->particlesNew.getNewElement();
+    Particle* particle = _data->entitiesNew.particles.getNewElement();
     particle->id = _data->numberGen.createNewId_kernel();
     particle->locked = 0;
     particle->alive = true;

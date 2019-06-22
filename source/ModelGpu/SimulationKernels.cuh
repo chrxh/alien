@@ -52,7 +52,7 @@ __device__ void clusterProcessingOnCopyData_blockCall(SimulationData data, int c
 
 __device__ int getNumClusterPointers(SimulationData const& data)
 {
-    int numClusterPointers = data.clusterPointers.getNumEntries();
+    int numClusterPointers = data.entities.clusterPointers.getNumEntries();
 //    cooperative_groups::this_grid().sync();
 
     return numClusterPointers;
@@ -134,7 +134,7 @@ __device__ void tokenProcessingStep2_blockCall(SimulationData data, int clusterI
 
 __global__ void tokenProcessingStep1(SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(data.entities.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int index = clusterBlock.startIndex; index <= clusterBlock.endIndex; ++index) {
         tokenProcessingStep1_blockCall(data, index);
     }
@@ -142,7 +142,7 @@ __global__ void tokenProcessingStep1(SimulationData data)
 
 __global__ void tokenProcessingStep2(SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
+    BlockData clusterBlock = calcPartition(data.entities.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int index = clusterBlock.startIndex; index <= clusterBlock.endIndex; ++index) {
 		tokenProcessingStep2_blockCall(data, index);
 	}
@@ -181,7 +181,7 @@ __global__ void particleProcessingOnCopyData(SimulationData data)
 
 __global__ void calcSimulationTimestep(SimulationData data)
 {
-    data.particlesNew.reset();
+    data.entitiesNew.particles.reset();
 
     tokenProcessingStep1<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK>>>(data);
     cudaDeviceSynchronize();
@@ -204,4 +204,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
 
     cleanup<<<1, 1>>>(data);
     cudaDeviceSynchronize();
+
+    data.entities.particles.swapArrays(data.entitiesNew.particles);
 }
+
