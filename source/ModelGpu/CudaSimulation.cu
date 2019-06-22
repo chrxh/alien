@@ -92,6 +92,12 @@ void CudaSimulation::calcNextTimestep()
 /*
     swap(_internalData->particles, _internalData->particlesNew);
     swap(_internalData->clusterPointers, _internalData->clusterPointersTemp);
+
+
+    std::cout
+        << "Clusters: " << _internalData->entities.clusterPointers.retrieveNumEntries() << "; " << _internalData->entities.clusters.retrieveNumEntries() << "  "
+        << "Cells: " << _internalData->entities.cellPointers.retrieveNumEntries() << "; " << _internalData->entities.cells.retrieveNumEntries()
+        << std::endl;
 */
 }
 
