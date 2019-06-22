@@ -10,53 +10,38 @@
 
 __device__ void cleanupCells(SimulationData &data, int clusterIndex)
 {
-    auto& cluster = data.clusters.getEntireArray()[clusterIndex];
+    auto& cluster = data.clusterPointers.at(clusterIndex);
 
     __shared__ Cell* newCells;
-    __shared__ Cell** newCellPointers;
     if (0 == threadIdx.x) {
-        newCells = data.cellsTemp.getNewSubarray(cluster.numCellPointers);
-        newCellPointers = data.cellPointersTemp.getNewSubarray(cluster.numCellPointers);
+        newCells = data.cellsTemp.getNewSubarray(cluster->numCellPointers);
     }
     __syncthreads();
 
 
-    auto cellBlock = calcPartition(cluster.numCellPointers, threadIdx.x, blockDim.x);
-    cluster.tagCellByIndex_blockCall(cellBlock);
+    auto cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+    cluster->tagCellByIndex_blockCall(cellBlock);
 
     for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-        auto& origCell = *cluster.cellPointers[cellIndex];
+        auto& origCell = cluster->cellPointers[cellIndex];
         auto& newCell = newCells[cellIndex];
-        newCell = origCell;
-        newCellPointers[cellIndex] = &origCell;
+        newCell = *origCell;
+        origCell = &newCells[cellIndex];
 
         for (int i = 0; i < newCell.numConnections; ++i) {
-            auto relCellIndex = origCell.connections[i]->tag;
+            auto relCellIndex = origCell->connections[i]->tag;
             newCell.connections[i] = newCells + relCellIndex;
         }
 
     }
 
-    BlockData tokenBlock = calcPartition(cluster.numTokenPointers, threadIdx.x, blockDim.x);
+    BlockData tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-        auto token = cluster.tokenPointers[tokenIndex];
+        auto token = cluster->tokenPointers[tokenIndex];
         int relCellIndex = token->cell->tag;
         token->cell = newCells + relCellIndex;
     }
     __syncthreads();
-
-    if (0 == threadIdx.x) {
-        cluster.cellPointers = newCellPointers;
-    }
-    __syncthreads();
-}
-
-__global__ void cleanupCellsAndCellPointers(SimulationData data)
-{
-    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        cleanupCells(data, clusterIndex);
-    }
 }
 
 __global__ void cleanupClusterPointers(SimulationData data)
@@ -93,9 +78,37 @@ __global__ void cleanupClusterPointers(SimulationData data)
     __syncthreads();
 }
 
+__global__ void cleanupCellPointers(SimulationData data)
+{
+    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        auto& cluster = data.clusters.getEntireArray()[clusterIndex];
+
+        __shared__ Cell** newCellPointers;
+        if (0 == threadIdx.x) {
+            newCellPointers = data.cellPointersTemp.getNewSubarray(cluster.numCellPointers);
+        }
+        __syncthreads();
+
+
+        auto cellBlock = calcPartition(cluster.numCellPointers, threadIdx.x, blockDim.x);
+
+        for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
+            auto& origCell = cluster.cellPointers[cellIndex];
+            newCellPointers[cellIndex] = origCell;
+        }
+        __syncthreads();
+
+        if (0 == threadIdx.x) {
+            cluster.cellPointers = newCellPointers;
+        }
+        __syncthreads();
+    }
+}
+
 __device__ void cleanupClusterOnMap(SimulationData const &data, int clusterIndex)
 {
-    auto const &cluster = data.clusterPointers.at(clusterIndex);
+    auto const &cluster = data.clusterPointersTemp.at(clusterIndex);
 
     int2 size = data.size;
     int numCells = cluster->numCellPointers;
@@ -114,21 +127,34 @@ __device__ void cleanupParticleOnMap(SimulationData const &data, int particleInd
     Map<Particle> map;
     map.init(data.size, data.particleMap);
 
-    auto const &particle = data.particles.getEntireArray()[particleIndex];
+    auto const &particle = data.particlesNew.getEntireArray()[particleIndex];
     map.set(particle.pos, nullptr);
 }
 
 __global__ void cleanupMaps(SimulationData data)
 {
-    BlockData clusterBlock = calcPartition(data.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
+
+    BlockData clusterBlock = calcPartition(data.clusterPointersTemp.getNumEntries(), blockIdx.x, gridDim.x);
 
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         cleanupClusterOnMap(data, clusterIndex);
     }
 
+
     BlockData particleBlock =
-        calcPartition(data.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(data.particlesNew.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         cleanupParticleOnMap(data, particleIndex);
     }
+}
+
+__global__ void cleanup(SimulationData data)
+{
+    data.clusterPointersTemp.reset();
+
+    cleanupClusterPointers << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+
+    cleanupMaps << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
 }
