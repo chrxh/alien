@@ -22,12 +22,6 @@ public:
 
     __device__ __inline__ T* getNewElement(int suggestedArrayIndex)
     {
-
-
-        auto result = _arrays[0].getNewElement();
-        return result;
-
-/*
         suggestedArrayIndex = max(min((suggestedArrayIndex - 16) / 48, n - 1), 0);
         auto origSuggestedArrayIndex = suggestedArrayIndex;
 
@@ -39,7 +33,6 @@ public:
             suggestedArrayIndex = (suggestedArrayIndex + n - 1) % n;
         } while (!result && suggestedArrayIndex != origSuggestedArrayIndex);
         return nullptr;
-*/
     }
 
     __device__ __inline__ ArrayController<T>& getArray(int arrayIndex)
