@@ -2,10 +2,11 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
+#include "MultiArrayController.cuh"
 
 struct Entities
 {
-    ArrayController<Cluster*> clusterPointers;
+    MultiArrayController<Cluster*, NUM_CLUSTERPOINTERARRAYS> clusterPointerArrays;
     ArrayController<Cell*> cellPointers;
     ArrayController<Token*> tokenPointers;
 
@@ -16,8 +17,13 @@ struct Entities
 
     void init()
     {
-        clusterPointers.init(MAX_CELLCLUSTERPOINTERS);
-        clusters.init(MAX_CELLCLUSTERS);
+        int sizes[NUM_CLUSTERPOINTERARRAYS];
+        for (int i = 0; i < NUM_CLUSTERPOINTERARRAYS; ++i) {
+            sizes[i] = MAX_CLUSTERPOINTERS / NUM_CLUSTERPOINTERARRAYS;
+        }
+        clusterPointerArrays.init(sizes);
+
+        clusters.init(MAX_CLUSTERS);
         cellPointers.init(MAX_CELLPOINTERS);
         cells.init(MAX_CELLS);
         tokenPointers.init(MAX_TOKENPOINTERS);
@@ -27,7 +33,7 @@ struct Entities
 
     void free()
     {
-        clusterPointers.free();
+        clusterPointerArrays.free();
         clusters.free();
         cellPointers.free();
         cells.free();

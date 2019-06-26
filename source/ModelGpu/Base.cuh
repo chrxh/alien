@@ -100,8 +100,6 @@ public:
     ArrayController()
 		: _size(0)
 	{
-		checkCudaErrors(cudaMalloc(&_numEntries, sizeof(int)));
-		checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
 	}
 
 	void init(int size)
@@ -125,7 +123,7 @@ public:
 		checkCudaErrors(cudaFree(_numEntries));
 	}
 
-    __device__ __inline__ void swapArrays(ArrayController& other)
+    __device__ __inline__ void swapArray(ArrayController& other)
     {
         swap(*_numEntries, *other._numEntries);
         swap(*_data, *other._data);
@@ -146,12 +144,20 @@ public:
 	__device__ __inline__ T* getNewSubarray(int size)
 	{
 		int oldIndex = atomicAdd(_numEntries, size);
-		return &(*_data)[oldIndex];
+        if (oldIndex + size - 1 >= _size) {
+            atomicAdd(_numEntries, -size);
+            return nullptr;
+        }
+        return &(*_data)[oldIndex];
 	}
 
 	__device__ __inline__ T* getNewElement()
 	{
 		int oldIndex = atomicAdd(_numEntries, 1);
+        if (oldIndex >= _size) {
+            atomicAdd(_numEntries, -1);
+            return nullptr;
+        }
 		return &(*_data)[oldIndex];
 	}
 

@@ -20,7 +20,7 @@
 #include "Map.cuh"
 
 
-#define KERNEL_FUNCTION(numBlocks, numThreadsPerBlock, func, ...) func<<<numBlocks, numThreadsPerBlock>>>(##__VA_ARGS__); \
+#define GPU_FUNCTION(func, ...) func<<<1, 1>>>(##__VA_ARGS__); \
     cudaDeviceSynchronize(); \
     checkCudaErrors(cudaGetLastError());
 
@@ -63,7 +63,7 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->numCells, sizeof(int)));
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->numParticles, sizeof(int)));
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->numTokens, sizeof(int)));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->clusters, sizeof(ClusterAccessTO)*MAX_CELLCLUSTERS));
+    checkCudaErrors(cudaMalloc(&_cudaAccessTO->clusters, sizeof(ClusterAccessTO)*MAX_CLUSTERS));
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->cells, sizeof(CellAccessTO)*MAX_CELLS));
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->particles, sizeof(ParticleAccessTO)*MAX_PARTICLES));
     checkCudaErrors(cudaMalloc(&_cudaAccessTO->tokens, sizeof(TokenAccessTO)*MAX_TOKENS));
@@ -92,7 +92,7 @@ CudaSimulation::~CudaSimulation()
 
 void CudaSimulation::calcNextTimestep()
 {
-    KERNEL_FUNCTION(1, 1, calcSimulationTimestep, *_internalData);
+    GPU_FUNCTION(calcSimulationTimestep, *_internalData);
 /*
     std::cout
         << "Clusters: " << _internalData->entities.clusterPointers.retrieveNumEntries() << "; " << _internalData->entities.clusters.retrieveNumEntries() << "  "
@@ -103,7 +103,7 @@ void CudaSimulation::calcNextTimestep()
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    KERNEL_FUNCTION(1, 1, getSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
+    GPU_FUNCTION(getSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
 
     checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
@@ -126,7 +126,7 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->particles, dataTO.particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
 
-    KERNEL_FUNCTION(1, 1, setSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
+    GPU_FUNCTION(setSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
 }
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
