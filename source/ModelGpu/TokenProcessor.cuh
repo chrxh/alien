@@ -16,7 +16,7 @@
 class TokenProcessor
 {
 public:
-    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterIndex);
+    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex);
 
     __inline__ __device__ void processingEnergyAveraging_blockCall();
     __inline__ __device__ void processingSpreading_blockCall();
@@ -40,10 +40,11 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterIndex)
+__inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterArrayIndex, 
+    int clusterIndex)
 {
     _data = &data;
-    _cluster = data.entities.clusterPointers.at(clusterIndex);
+    _cluster = data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
 
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
     _tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);

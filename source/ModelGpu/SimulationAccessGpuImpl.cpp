@@ -219,7 +219,7 @@ SimulationAccessGpuImpl::DataTOCache::DataTOCache()
 		dataTO.numCells = new int;
 		dataTO.numParticles = new int;
 		dataTO.numTokens = new int;
-		dataTO.clusters = new ClusterAccessTO[MAX_CELLCLUSTERS];
+		dataTO.clusters = new ClusterAccessTO[MAX_CLUSTERS];
 		dataTO.cells = new CellAccessTO[MAX_CELLS];
 		dataTO.particles = new ParticleAccessTO[MAX_PARTICLES];
 		dataTO.tokens = new TokenAccessTO[MAX_TOKENS];
