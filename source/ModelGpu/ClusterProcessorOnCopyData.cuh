@@ -12,7 +12,7 @@
 class ClusterProcessorOnCopyData
 {
 public:
-    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterIndex);
+    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex);
 
     __inline__ __device__ void processingDecomposition_blockCall();
     __inline__ __device__ void processingClusterCopy_blockCall();
@@ -39,10 +39,11 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ClusterProcessorOnCopyData::init_blockCall(SimulationData& data, int clusterIndex)
+__inline__ __device__ void ClusterProcessorOnCopyData::init_blockCall(SimulationData& data, 
+    int clusterArrayIndex, int clusterIndex)
 {
     _data = &data;
-    _origClusterPointer = &data.entities.clusterPointers.at(clusterIndex);
+    _origClusterPointer = &data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
     _origCluster = *_origClusterPointer;
     _cellMap.init(data.size, data.cellMap);
 
@@ -143,7 +144,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        auto newClusterPointer = _data->entities.clusterPointers.getNewElement();
+        auto newClusterPointer = _data->entities.clusterPointerArrays.getNewElement(numCells);
         auto newCluster = _data->entities.clusters.getNewElement();
         *newClusterPointer = newCluster;
 

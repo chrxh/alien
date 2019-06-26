@@ -19,79 +19,66 @@
 /* Clusters																*/
 /************************************************************************/
 
-__device__ void clusterProcessingOnOrigDataStep1_blockCall(SimulationData data, int clusterIndex)
+__device__ void clusterProcessingOnOrigDataStep1_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
 	ClusterProcessorOnOrigData clusterProcessor;
-    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.processingMovement_blockCall();
 }
 
-__device__  void clusterProcessingOnOrigDataStep2_blockCall(SimulationData data, int clusterIndex)
+__device__  void clusterProcessingOnOrigDataStep2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
     ClusterProcessorOnOrigData clusterProcessor;
-    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.destroyCloseCell_blockCall();
 }
 
-__device__ void clusterProcessingOnOrigDataStep3_blockCall(SimulationData data, int clusterIndex)
+__device__ void clusterProcessingOnOrigDataStep3_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
 	ClusterProcessorOnOrigData clusterProcessor;
-    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.processingRadiation_blockCall();
     clusterProcessor.processingCollision_blockCall();	//attention: can result a temporarily inconsistent state
 									//will be resolved in reorganizer
 }
 
-__device__ void clusterProcessingOnCopyData_blockCall(SimulationData data, int clusterIndex)
+__device__ void clusterProcessingOnCopyData_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
 	ClusterProcessorOnCopyData clusterProcessor;
-    clusterProcessor.init_blockCall(data, clusterIndex);
+    clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.processingDecomposition_blockCall();
     clusterProcessor.processingClusterCopy_blockCall();
 }
 
-__global__ void clusterProcessingOnOrigDataStep1(SimulationData data, int numClusters)
+__global__ void clusterProcessingOnOrigDataStep1(SimulationData data, int numClusters, int clusterArrayIndex)
 {
-/*
-    int* clusterIndexPtr = new int;
-    int& clusterIndex = *clusterIndexPtr;
-
-    BlockData clusterBlock = calcPartition(data.clusters.getNumEntries(), blockIdx.x, gridDim.x);
-    for (clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto numCells = data.clusters.at(clusterIndex)->numCellPointers;
-        clusterProcessingOnOrigDataStep1_blockCall << <1, min(64, numCells) >> > (data, clusterIndex);
-    }
-
-    cudaDeviceSynchronize();
-    delete clusterIndexPtr;
-*/
     BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        clusterProcessingOnOrigDataStep1_blockCall(data, clusterIndex);
+        clusterProcessingOnOrigDataStep1_blockCall(data, clusterArrayIndex, clusterIndex);
     }
 }
 
-__global__ void clusterProcessingOnOrigDataStep2(SimulationData data, int numClusters)
+__global__ void clusterProcessingOnOrigDataStep2(SimulationData data, int numClusters, int clusterArrayIndex)
 {
     BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        clusterProcessingOnOrigDataStep2_blockCall(data, clusterIndex);
+        clusterProcessingOnOrigDataStep2_blockCall(data, clusterArrayIndex, clusterIndex);
     }
 }
 
-__global__ void clusterProcessingOnOrigDataStep3(SimulationData data, int numClusters)
+__global__ void clusterProcessingOnOrigDataStep3(SimulationData data, int numClusters, int clusterArrayIndex)
 {
     BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        clusterProcessingOnOrigDataStep3_blockCall(data, clusterIndex);
+        clusterProcessingOnOrigDataStep3_blockCall(data, clusterArrayIndex, clusterIndex);
     }
 }
 
-__global__ void clusterProcessingOnCopyData(SimulationData data, int numClusters)
+__global__ void clusterProcessingOnCopyData(SimulationData data, int numClusters, int clusterArrayIndex)
 {
     BlockData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        clusterProcessingOnCopyData_blockCall(data, clusterIndex);
+        clusterProcessingOnCopyData_blockCall(data, clusterArrayIndex, clusterIndex);
     }
 }
 
@@ -100,36 +87,38 @@ __global__ void clusterProcessingOnCopyData(SimulationData data, int numClusters
 /* Tokens																*/
 /************************************************************************/
 
-__device__ void tokenProcessingStep1_blockCall(SimulationData data, int clusterIndex)
+__device__ void tokenProcessingStep1_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
 	TokenProcessor tokenProcessor;
-    tokenProcessor.init_blockCall(data, clusterIndex);
+    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     tokenProcessor.processingEnergyAveraging_blockCall();
 }
 
-__device__ void tokenProcessingStep2_blockCall(SimulationData data, int clusterIndex)
+__device__ void tokenProcessingStep2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
 	TokenProcessor tokenProcessor;
 
-    tokenProcessor.init_blockCall(data, clusterIndex);
+    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     tokenProcessor.processingSpreading_blockCall();
     tokenProcessor.processingFeatures_blockCall();
 }
 
-__global__ void tokenProcessingStep1(SimulationData data)
+__global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
 {
-    BlockData clusterBlock = calcPartition(data.entities.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    for (int index = clusterBlock.startIndex; index <= clusterBlock.endIndex; ++index) {
-        tokenProcessingStep1_blockCall(data, index);
+    auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    BlockData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        tokenProcessingStep1_blockCall(data, clusterArrayIndex, clusterIndex);
     }
 }
 
-__global__ void tokenProcessingStep2(SimulationData data)
+__global__ void tokenProcessingStep2(SimulationData data, int clusterArrayIndex)
 {
-    BlockData clusterBlock = calcPartition(data.entities.clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    for (int index = clusterBlock.startIndex; index <= clusterBlock.endIndex; ++index) {
-		tokenProcessingStep2_blockCall(data, index);
-	}
+    auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    BlockData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        tokenProcessingStep2_blockCall(data, clusterArrayIndex, clusterIndex);
+    }
 }
 
 
@@ -167,18 +156,12 @@ __global__ void calcSimulationTimestep(SimulationData data)
 {
     data.entitiesNew.particles.reset();
 
-    tokenProcessingStep1<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK>>>(data);
-    cudaDeviceSynchronize();
-    tokenProcessingStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
-    clusterProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
-    cudaDeviceSynchronize();
-    clusterProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
-    cudaDeviceSynchronize();
-    clusterProcessingOnOrigDataStep3 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
-    cudaDeviceSynchronize();
-    clusterProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, data.entities.clusterPointers.getNumEntries());
-    cudaDeviceSynchronize();
+    MULTI_CALL(tokenProcessingStep1, data);
+    MULTI_CALL(tokenProcessingStep2, data);
+    MULTI_CALL(clusterProcessingOnOrigDataStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(clusterProcessingOnOrigDataStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(clusterProcessingOnOrigDataStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(clusterProcessingOnCopyData, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     particleProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
     particleProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
@@ -189,6 +172,6 @@ __global__ void calcSimulationTimestep(SimulationData data)
     cleanup<<<1, 1>>>(data);
     cudaDeviceSynchronize();
 
-    data.entities.particles.swapArrays(data.entitiesNew.particles);
+    data.entities.particles.swapArray(data.entitiesNew.particles);
 }
 
