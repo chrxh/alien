@@ -147,6 +147,9 @@
     <ClInclude Include="..\..\source\ModelGpu\Entities.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\MultiArrayController.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
