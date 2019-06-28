@@ -21,8 +21,8 @@ struct SimulationData
         entities.init();
         entitiesNew.init();
 
-        checkCudaErrors(cudaMalloc(&cellMap, size.x * size.y * sizeof(Cell*)));
-        checkCudaErrors(cudaMalloc(&particleMap, size.x * size.y * sizeof(Particle*)));
+        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, cellMap);
+        CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, particleMap);
 
         std::vector<Cell*> hostCellMap(size.x * size.y, 0);
         std::vector<Particle*> hostParticleMap(size.x * size.y, 0);
@@ -35,8 +35,8 @@ struct SimulationData
     {
         entities.free();
         entitiesNew.free();
-        checkCudaErrors(cudaFree(cellMap));
-        checkCudaErrors(cudaFree(particleMap));
+        CudaMemoryManager::getInstance().freeMemory(cellMap);
+        CudaMemoryManager::getInstance().freeMemory(particleMap);
         numberGen.free();
     }
 };
