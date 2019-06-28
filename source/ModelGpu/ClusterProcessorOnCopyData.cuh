@@ -144,7 +144,7 @@ __inline__ __device__ void ClusterProcessorOnCopyData::copyClusterWithDecomposit
         entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        auto newClusterPointer = _data->entities.clusterPointerArrays.getNewElement(numCells);
+        auto newClusterPointer = _data->entities.clusterPointerArrays.getNewClusterPointer(numCells);
         auto newCluster = _data->entities.clusters.getNewElement();
         *newClusterPointer = newCluster;
 
