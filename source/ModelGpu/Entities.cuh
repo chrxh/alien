@@ -2,11 +2,11 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "MultiArrayController.cuh"
+#include "ClusterPointerMultiArrayController.cuh"
 
 struct Entities
 {
-    MultiArrayController<Cluster*, NUM_CLUSTERPOINTERARRAYS> clusterPointerArrays;
+    ClusterPointerMultiArrayController<Cluster*, NUM_CLUSTERPOINTERARRAYS> clusterPointerArrays;
     ArrayController<Cell*> cellPointers;
     ArrayController<Token*> tokenPointers;
 
