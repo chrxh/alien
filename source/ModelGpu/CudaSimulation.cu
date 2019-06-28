@@ -15,6 +15,7 @@
 #include "AccessKernels.cuh"
 #include "CleanupKernels.cuh"
 #include "Entities.cuh"
+#include "CudaMemoryManager.cuh"
 
 #include "SimulationData.cuh"
 #include "Map.cuh"
@@ -52,36 +53,38 @@ CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& par
 {
 
     CudaInitializer::init();
+    CudaMemoryManager::getInstance().reset();
 
     setSimulationParameters(parameters);
 
     _internalData = new SimulationData();
+    _cudaAccessTO = new DataAccessTO();
+
     _internalData->init(size);
 
-    _cudaAccessTO = new DataAccessTO();
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->numClusters, sizeof(int)));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->numCells, sizeof(int)));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->numParticles, sizeof(int)));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->numTokens, sizeof(int)));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->clusters, sizeof(ClusterAccessTO)*MAX_CLUSTERS));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->cells, sizeof(CellAccessTO)*MAX_CELLS));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->particles, sizeof(ParticleAccessTO)*MAX_PARTICLES));
-    checkCudaErrors(cudaMalloc(&_cudaAccessTO->tokens, sizeof(TokenAccessTO)*MAX_TOKENS));
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numClusters);
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numTokens);
+    CudaMemoryManager::getInstance().acquireMemory<ClusterAccessTO>(MAX_CLUSTERS, _cudaAccessTO->clusters);
+    CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(MAX_CELLS, _cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(MAX_PARTICLES, _cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(MAX_TOKENS, _cudaAccessTO->tokens);
 
-    std::cout << "[CUDA] memory acquired" << std::endl;
+    std::cout << "[CUDA] " << CudaMemoryManager::getInstance().getSizeOfAcquiredMemory() / (1024 * 1024) << "mb memory acquired" << std::endl;
 }
 
 CudaSimulation::~CudaSimulation()
 {
     _internalData->free();
 
-    checkCudaErrors(cudaFree(_cudaAccessTO->numClusters));
-    checkCudaErrors(cudaFree(_cudaAccessTO->numCells));
-    checkCudaErrors(cudaFree(_cudaAccessTO->numParticles));
-    checkCudaErrors(cudaFree(_cudaAccessTO->clusters));
-    checkCudaErrors(cudaFree(_cudaAccessTO->cells));
-    checkCudaErrors(cudaFree(_cudaAccessTO->particles));
-    checkCudaErrors(cudaFree(_cudaAccessTO->tokens));
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numClusters);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->clusters);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
 
     std::cout << "[CUDA] freed" << std::endl;
 
@@ -93,12 +96,12 @@ CudaSimulation::~CudaSimulation()
 void CudaSimulation::calcNextTimestep()
 {
     GPU_FUNCTION(calcSimulationTimestep, *_internalData);
-/*
+    /*
     std::cout
-        << "Clusters: " << _internalData->entities.clusterPointers.retrieveNumEntries() << "; " << _internalData->entities.clusters.retrieveNumEntries() << "  "
-        << "Cells: " << _internalData->entities.cellPointers.retrieveNumEntries() << "; " << _internalData->entities.cells.retrieveNumEntries()
-        << std::endl;
-*/
+    << "Clusters: " << _internalData->entities.clusterPointers.retrieveNumEntries() << "; " << _internalData->entities.clusters.retrieveNumEntries() << "  "
+    << "Cells: " << _internalData->entities.cellPointers.retrieveNumEntries() << "; " << _internalData->entities.cells.retrieveNumEntries()
+    << std::endl;
+    */
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
