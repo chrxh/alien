@@ -114,10 +114,10 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     BlockData particleBlock =
-        calcPartition(data.entities.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        Particle const& particle = data.entities.particles.at(particleIndex);
+        auto& particle = *data.entities.particlePointers.at(particleIndex);
         if (particle.pos.x >= rectUpperLeft.x
             && particle.pos.x <= rectLowerRight.x
             && particle.pos.y >= rectUpperLeft.y
@@ -166,10 +166,9 @@ __device__ void filterCluster(int2 const& rectUpperLeft, int2 const& rectLowerRi
 __device__ void filterParticle(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     SimulationData& data, int particleIndex)
 {
-    Particle const& particle = data.entities.particles.getEntireArray()[particleIndex];
-    if (!isContained(rectUpperLeft, rectLowerRight, particle.pos)) {
-        Particle* newParticle = data.entitiesNew.particles.getNewElement();
-        *newParticle = particle;
+    auto& particle = data.entities.particlePointers.getEntireArray()[particleIndex];
+    if (isContained(rectUpperLeft, rectLowerRight, particle->pos)) {
+        particle = nullptr;
     }
 }
 
@@ -187,7 +186,7 @@ __global__ void filterClusters(int2 rectUpperLeft, int2 rectLowerRight, Simulati
 __global__ void filterParticles(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
     BlockData particleBlock =
-        calcPartition(data.entities.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         filterParticle(rectUpperLeft, rectLowerRight, data, particleIndex);
     }
@@ -245,11 +244,6 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     data.entitiesNew.particles.reset();
     
     MULTI_CALL(filterClusters, rectUpperLeft, rectLowerRight, data);
-/*
-    for (int i = 0; i < NUM_CLUSTERPOINTERARRAYS; ++i) {
-        filterClusters << <NUM_BLOCKS, i + 1 >> > (rectUpperLeft, rectLowerRight, data, i);
-    }
-*/
     filterParticles<< <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (rectUpperLeft, rectLowerRight, data);
     cudaDeviceSynchronize();
     convertData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, access);

@@ -66,12 +66,6 @@
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnCopyData.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClusterProcessorOnOrigData.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulationParameters.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
@@ -152,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\CudaMemoryManager.cuh">
       <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ClusterProcessor.cuh">
+      <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
