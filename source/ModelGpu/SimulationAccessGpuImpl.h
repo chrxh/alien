@@ -3,6 +3,7 @@
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/ChangeDescriptions.h"
 
+#include "CudaConstants.h"
 #include "SimulationAccessGpu.h"
 
 class SimulationAccessGpuImpl
@@ -31,25 +32,27 @@ private:
 
 	string getObjectId() const;
 
-	class DataTOCache
+	class _DataTOCache
 	{
 	public:
-		DataTOCache();
-		~DataTOCache();
+		_DataTOCache(CudaConstants const& cudaConstants);
+		~_DataTOCache();
 
 		DataAccessTO getDataTO();
 		void releaseDataTO(DataAccessTO const& dataTO);
 
 	private:
-		vector<DataAccessTO> _freeDataTOs;
+        vector<DataAccessTO> _freeDataTOs;
 		vector<DataAccessTO> _usedDataTOs;
 	};
+    using DataTOCache = boost::shared_ptr<_DataTOCache>;
 
 private:
 	list<QMetaObject::Connection> _connections;
 
 	SimulationContextGpuImpl* _context = nullptr;
 	NumberGenerator* _numberGen = nullptr;
+    CudaConstants _cudaConstants;
 
 	DataDescription _dataCollected;
 	DataTOCache _dataTOCache;

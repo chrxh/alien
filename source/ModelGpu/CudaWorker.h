@@ -16,7 +16,7 @@ public:
 	CudaWorker(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CudaWorker();
 
-	void init(SpaceProperties* space, SimulationParameters const& parameters);
+    void init(SpaceProperties* space, SimulationParameters const& parameters, CudaConstants const& cudaConstants);
 	void terminateWorker();
 	bool isSimulationRunning();
 

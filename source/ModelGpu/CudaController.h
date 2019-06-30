@@ -13,9 +13,9 @@ public:
 	CudaController(QObject* parent = nullptr);
 	virtual ~CudaController();
 
-	void init(SpaceProperties *space, SimulationParameters const& parameters);
+    void init(SpaceProperties* space, SimulationParameters const& parameters, CudaConstants const& cudaConstants);
 
-	CudaWorker* getCudaWorker() const;
+    CudaWorker* getCudaWorker() const;
 
 	void calculate(RunningMode mode);
 	void restrictTimestepsPerSecond(optional<int> tps);

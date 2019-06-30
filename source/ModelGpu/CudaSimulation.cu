@@ -8,8 +8,8 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "Base.cuh"
 #include "CudaSimulation.cuh"
-#include "CudaConstants.cuh"
-#include "CudaSimulationParameters.cuh"
+#include "CudaConstants.h"
+#include "ConstantMemory.cuh"
 #include "CudaAccessTOs.cuh"
 #include "SimulationKernels.cuh"
 #include "AccessKernels.cuh"
@@ -49,27 +49,31 @@ namespace
     };
 }
 
-CudaSimulation::CudaSimulation(int2 const &size, SimulationParameters const& parameters)
+CudaSimulation::CudaSimulation(
+    int2 const& size,
+    SimulationParameters const& parameters,
+    CudaConstants const& cudaConstants)
 {
 
     CudaInitializer::init();
     CudaMemoryManager::getInstance().reset();
 
     setSimulationParameters(parameters);
+    setCudaConstants(cudaConstants);
 
     _internalData = new SimulationData();
     _cudaAccessTO = new DataAccessTO();
 
-    _internalData->init(size);
+    _internalData->init(size, cudaConstants);
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numClusters);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numTokens);
-    CudaMemoryManager::getInstance().acquireMemory<ClusterAccessTO>(MAX_CLUSTERS, _cudaAccessTO->clusters);
-    CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(MAX_CELLS, _cudaAccessTO->cells);
-    CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(MAX_PARTICLES, _cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(MAX_TOKENS, _cudaAccessTO->tokens);
+    CudaMemoryManager::getInstance().acquireMemory<ClusterAccessTO>(cudaConstants.MAX_CLUSTERS, _cudaAccessTO->clusters);
+    CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cudaConstants.MAX_CELLS, _cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cudaConstants.MAX_PARTICLES, _cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(cudaConstants.MAX_TOKENS, _cudaAccessTO->tokens);
 
     std::cout << "[CUDA] " << CudaMemoryManager::getInstance().getSizeOfAcquiredMemory() / (1024 * 1024) << "mb memory acquired" << std::endl;
 }
@@ -133,26 +137,10 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
 {
-    CudaSimulationParameters parametersToCopy;
-    parametersToCopy.cellMaxDistance = parameters.cellMaxDistance;
-    parametersToCopy.cellMinDistance = parameters.cellMinDistance;
-    parametersToCopy.cellMinEnergy = parameters.cellMinEnergy;
-    parametersToCopy.cellFusionVelocity = parameters.cellFusionVelocity;
-    parametersToCopy.cellMaxForce = parameters.cellMaxForce;
-    parametersToCopy.cellMaxForceDecayProb = parameters.cellMaxForceDecayProb;
-    parametersToCopy.cellTransformationProb = parameters.cellTransformationProb;
-    parametersToCopy.cellMass = 1.0f / parameters.cellMass_Reciprocal;
-    parametersToCopy.cellMaxToken = parameters.cellMaxToken;
-    parametersToCopy.cellMaxTokenBranchNumber = parameters.cellMaxTokenBranchNumber;
-    parametersToCopy.cellFunctionComputerMaxInstructions = parameters.cellFunctionComputerMaxInstructions;
-    parametersToCopy.cellFunctionComputerCellMemorySize = parameters.cellFunctionComputerCellMemorySize;
-    parametersToCopy.tokenMinEnergy = parameters.tokenMinEnergy;
-    parametersToCopy.tokenMemorySize = parameters.tokenMemorySize;
-    parametersToCopy.radiationProbability = parameters.radiationProb;
-    parametersToCopy.radiationExponent = parameters.radiationExponent;
-    parametersToCopy.radiationFactor = parameters.radiationFactor;
-    parametersToCopy.radiationVelocityMultiplier = parameters.radiationVelocityMultiplier;
-    parametersToCopy.radiationVelocityPerturbation = parameters.radiationVelocityPerturbation;
+    checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+}
 
-    checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parametersToCopy, sizeof(CudaSimulationParameters), 0, cudaMemcpyHostToDevice));
+void CudaSimulation::setCudaConstants(CudaConstants const & cudaConstants_)
+{
+    checkCudaErrors(cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(CudaConstants), 0, cudaMemcpyHostToDevice));
 }

@@ -5,8 +5,10 @@
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
 
-#include "CudaConstants.cuh"
+#include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
+
+#define FP_PRECISION 0.00001
 
 struct BlockData
 {

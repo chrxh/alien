@@ -4,7 +4,6 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaAccessTOs.cuh"
-#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Physics.cuh"
 #include "Map.cuh"
@@ -253,8 +252,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                     float2 normal = Physics::calcNormalToCell(otherCell, outwardVector);
                     atomicAdd(&n.x, normal.x);
                     atomicAdd(&n.y, normal.y);
-                    cell->protectionCounter = PROTECTION_TIMESTEPS;
-                    otherCell->protectionCounter = PROTECTION_TIMESTEPS;
+                    cell->protectionCounter = cudaConstants.PROTECTION_TIMESTEPS;
+                    otherCell->protectionCounter = cudaConstants.PROTECTION_TIMESTEPS;
                 }
             }
         }
@@ -350,7 +349,7 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
 
-        if (_data->numberGen.random() < cudaSimulationParameters.radiationProbability) {
+        if (_data->numberGen.random() < cudaSimulationParameters.radiationProb) {
             auto &pos = cell->absPos;
             float2 particlePos = { static_cast<int>(pos.x) + _data->numberGen.random(3) - 1.5f,
                 static_cast<int>(pos.y) + _data->numberGen.random(3) - 1.5f };
@@ -362,7 +361,7 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
 
             particlePos = Math::sub(particlePos, particleVel);	//because particle will still be moved in current time step
             float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
-            radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProbability;
+            radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
             radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
             if (radiationEnergy > cell->energy - 1) {
                 radiationEnergy = cell->energy - 1;
@@ -453,6 +452,8 @@ __inline__ __device__ void ClusterProcessor::cleanClusterFromMap_blockCall()
     }
     __syncthreads();
 }
+
+#define MAX_DECOMPOSITIONS 5
 
 __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockCall()
 {

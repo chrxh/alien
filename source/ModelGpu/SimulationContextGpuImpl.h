@@ -4,6 +4,7 @@
 
 #include "ModelBasic/SimulationContext.h"
 #include "DefinitionsImpl.h"
+#include "ModelGpuData.h"
 
 class SimulationContextGpuImpl
 	: public SimulationContext
@@ -13,9 +14,13 @@ public:
 	SimulationContextGpuImpl(QObject* parent = nullptr);
 	virtual ~SimulationContextGpuImpl() = default;
 
-	void init(SpaceProperties *metric, SymbolTable *symbolTable, SimulationParameters const& parameters);
+    void init(
+        SpaceProperties* metric,
+        SymbolTable* symbolTable,
+        SimulationParameters const& parameters,
+        ModelGpuData const& specificData);
 
-	virtual SpaceProperties* getSpaceProperties() const override;
+    virtual SpaceProperties* getSpaceProperties() const override;
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters const& getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
@@ -32,4 +37,5 @@ private:
 	SimulationParameters _parameters;
 	CudaController *_cudaController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
+    ModelGpuData _specificData;
 };

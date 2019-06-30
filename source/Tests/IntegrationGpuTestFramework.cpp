@@ -6,7 +6,24 @@
 IntegrationGpuTestFramework::IntegrationGpuTestFramework(IntVector2D const& universeSize)
 	: IntegrationTestFramework(universeSize)
 {
-	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, ModelGpuData(), 0);
+    ModelGpuData data;
+    data.setNumThreadsPerBlock(64);
+    data.setNumBlocks(64);
+
+    data.setNumClusterPointerArrays(1);
+    data.setMaxClusters(500000);
+    data.setMaxCells(2000000);
+    data.setMaxParticles(2000000);
+    data.setMaxTokens(500000);
+    data.setMaxCellPointers(2000000 * 10);
+    data.setMaxClusterPointers(500000 * 10);
+    data.setMaxParticlePointers(2000000 * 10);
+    data.setMaxTokenPointers(500000 * 10);
+
+    data.setRandomNumberBlockSize(31231257);
+    data.setProtectionTimesteps(14);
+
+	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, data, 0);
 	_context = _controller->getContext();
 	_spaceProp = _context->getSpaceProperties();
 	_access = _gpuFacade->buildSimulationAccess();

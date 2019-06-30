@@ -238,7 +238,23 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 	else if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
 		auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 		ModelGpuBuilderFacade::Config simulationControllerConfig{ configGpu->universeSize, configGpu->symbolTable, configGpu->parameters };
-		ModelGpuData data;
+        ModelGpuData data;
+        data.setNumThreadsPerBlock(64);
+        data.setNumBlocks(64);
+
+        data.setNumClusterPointerArrays(1);
+        data.setMaxClusters(500000);
+        data.setMaxCells(2000000);
+        data.setMaxParticles(2000000);
+        data.setMaxTokens(500000);
+        data.setMaxCellPointers(2000000 * 10);
+        data.setMaxClusterPointers(500000 * 10);
+        data.setMaxParticlePointers(2000000 * 10);
+        data.setMaxTokenPointers(500000 * 10);
+
+        data.setRandomNumberBlockSize(31231257);
+        data.setProtectionTimesteps(14);
+
 		_simController = facade->buildSimulationController(simulationControllerConfig, data);
 	}
 	else {
