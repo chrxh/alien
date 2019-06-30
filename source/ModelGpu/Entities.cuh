@@ -6,7 +6,7 @@
 
 struct Entities
 {
-    ClusterPointerMultiArrayController<Cluster*, NUM_CLUSTERPOINTERARRAYS> clusterPointerArrays;
+    ClusterPointerMultiArrayController<Cluster*> clusterPointerArrays;
     ArrayController<Cell*> cellPointers;
     ArrayController<Token*> tokenPointers;
     ArrayController<Particle*> particlePointers;
@@ -16,21 +16,22 @@ struct Entities
     ArrayController<Token> tokens;
     ArrayController<Particle> particles;
 
-    void init()
+    void init(CudaConstants const& cudaConstants)
     {
-        int sizes[NUM_CLUSTERPOINTERARRAYS];
-        for (int i = 0; i < NUM_CLUSTERPOINTERARRAYS; ++i) {
-            sizes[i] = MAX_CLUSTERPOINTERS / NUM_CLUSTERPOINTERARRAYS;
+        int* sizes = new int[cudaConstants.NUM_CLUSTERPOINTERARRAYS];
+        for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) {
+            sizes[i] = cudaConstants.MAX_CLUSTERPOINTERS / cudaConstants.NUM_CLUSTERPOINTERARRAYS;
         }
-        clusterPointerArrays.init(sizes);
+        clusterPointerArrays.init(cudaConstants.NUM_CLUSTERPOINTERARRAYS, sizes);
+        delete[] sizes;
 
-        clusters.init(MAX_CLUSTERS);
-        cellPointers.init(MAX_CELLPOINTERS);
-        cells.init(MAX_CELLS);
-        tokenPointers.init(MAX_TOKENPOINTERS);
-        tokens.init(MAX_TOKENS);
-        particles.init(MAX_PARTICLES);
-        particlePointers.init(MAX_PARTICLEPOINTERS);
+        clusters.init(cudaConstants.MAX_CLUSTERS);
+        cellPointers.init(cudaConstants.MAX_CELLPOINTERS);
+        cells.init(cudaConstants.MAX_CELLS);
+        tokenPointers.init(cudaConstants.MAX_TOKENPOINTERS);
+        tokens.init(cudaConstants.MAX_TOKENS);
+        particles.init(cudaConstants.MAX_PARTICLES);
+        particlePointers.init(cudaConstants.MAX_PARTICLEPOINTERS);
     }
 
     void free()

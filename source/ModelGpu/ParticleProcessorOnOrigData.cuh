@@ -6,7 +6,6 @@
 #include "ModelBasic/ElementaryTypes.h"
 
 #include "CudaAccessTOs.cuh"
-#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Physics.cuh"
 #include "Map.cuh"
@@ -81,7 +80,7 @@ __inline__ __device__ void ParticleProcessorOnOrigData::processingTransformation
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
-        auto innerEnergy = particle->energy - Physics::linearKineticEnergy(cudaSimulationParameters.cellMass, particle->vel);
+        auto innerEnergy = particle->energy - Physics::linearKineticEnergy(1.0f/cudaSimulationParameters.cellMass_Reciprocal, particle->vel);
         if (innerEnergy >= cudaSimulationParameters.cellMinEnergy) {
             if (_data->numberGen.random() < cudaSimulationParameters.cellTransformationProb) {
                 EntityFactory factory;
