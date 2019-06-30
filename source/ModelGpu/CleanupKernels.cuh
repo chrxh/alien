@@ -48,6 +48,27 @@ __global__ void cleanupParticlePointers(SimulationData data)
     __syncthreads();
 }
 
+__global__ void cleanupParticles(SimulationData data)
+{
+    auto& particlePointers = data.entities.particlePointers;
+    BlockData pointerBlock = calcPartition(particlePointers.getNumEntries(),
+        threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    int numParticlesToCopy = pointerBlock.numElements();
+    if (numParticlesToCopy > 0) {
+        auto newParticles = data.entitiesNew.particles.getNewSubarray(numParticlesToCopy);
+
+        int newParticleIndex = 0;
+        for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
+            auto& particlePointer = particlePointers.at(index);
+            auto& newParticle = newParticles[newParticleIndex];
+            newParticle = *particlePointer;
+            particlePointer = &newParticle;
+
+            ++newParticleIndex;
+        }
+    }
+}
 
 __global__ void cleanupClusterPointers(SimulationData data, int clusterArrayIndex)
 {
@@ -241,6 +262,13 @@ __global__ void cleanup(SimulationData data)
     cleanupParticlePointers << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
     data.entities.particlePointers.swapArray(data.entitiesNew.particlePointers);
+
+    if (data.entities.particles.getNumEntries() > MAX_PARTICLES * FillLevelFactor) {
+        data.entitiesNew.particles.reset();
+        cleanupParticles << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+        cudaDeviceSynchronize();
+        data.entities.particles.swapArray(data.entitiesNew.particles);
+    }
 
     if (data.entities.clusters.getNumEntries() > MAX_CLUSTERS * FillLevelFactor) {
         data.entitiesNew.clusters.reset();
