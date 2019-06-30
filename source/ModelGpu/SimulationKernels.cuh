@@ -154,8 +154,6 @@ __global__ void particleProcessingOnCopyData(SimulationData data)
 
 __global__ void calcSimulationTimestep(SimulationData data)
 {
-    data.entitiesNew.particles.reset();
-
     MULTI_CALL(tokenProcessingStep1, data);
     MULTI_CALL(tokenProcessingStep2, data);
     MULTI_CALL(clusterProcessingOnOrigDataStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
@@ -171,7 +169,5 @@ __global__ void calcSimulationTimestep(SimulationData data)
 
     cleanup<<<1, 1>>>(data);
     cudaDeviceSynchronize();
-
-    data.entities.particles.swapArray(data.entitiesNew.particles);
 }
 

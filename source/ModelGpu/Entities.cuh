@@ -9,6 +9,7 @@ struct Entities
     ClusterPointerMultiArrayController<Cluster*, NUM_CLUSTERPOINTERARRAYS> clusterPointerArrays;
     ArrayController<Cell*> cellPointers;
     ArrayController<Token*> tokenPointers;
+    ArrayController<Particle*> particlePointers;
 
     ArrayController<Cluster> clusters;
     ArrayController<Cell> cells;
@@ -29,6 +30,7 @@ struct Entities
         tokenPointers.init(MAX_TOKENPOINTERS);
         tokens.init(MAX_TOKENS);
         particles.init(MAX_PARTICLES);
+        particlePointers.init(MAX_PARTICLEPOINTERS);
     }
 
     void free()
@@ -40,6 +42,7 @@ struct Entities
         tokenPointers.free();
         tokens.free();
         particles.free();
+        particlePointers.free();
     }
 };
 
