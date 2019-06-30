@@ -8,8 +8,7 @@
 #include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "ClusterProcessorOnOrigData.cuh"
-#include "ClusterProcessorOnCopyData.cuh"
+#include "ClusterProcessor.cuh"
 #include "ParticleProcessorOnOrigData.cuh"
 #include "ParticleProcessorOnCopyData.cuh"
 #include "TokenProcessor.cuh"
@@ -21,21 +20,21 @@
 
 __device__ void clusterProcessingOnOrigDataStep1_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
-	ClusterProcessorOnOrigData clusterProcessor;
+	ClusterProcessor clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.processingMovement_blockCall();
 }
 
 __device__  void clusterProcessingOnOrigDataStep2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
-    ClusterProcessorOnOrigData clusterProcessor;
+    ClusterProcessor clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.destroyCloseCell_blockCall();
 }
 
 __device__ void clusterProcessingOnOrigDataStep3_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
-	ClusterProcessorOnOrigData clusterProcessor;
+    ClusterProcessor clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.processingRadiation_blockCall();
     clusterProcessor.processingCollision_blockCall();	//attention: can result a temporarily inconsistent state
@@ -44,7 +43,7 @@ __device__ void clusterProcessingOnOrigDataStep3_blockCall(SimulationData data, 
 
 __device__ void clusterProcessingOnCopyData_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
-	ClusterProcessorOnCopyData clusterProcessor;
+	ClusterProcessor clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.processingDecomposition_blockCall();
     clusterProcessor.processingClusterCopy_blockCall();
