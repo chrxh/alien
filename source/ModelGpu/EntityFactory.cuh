@@ -160,7 +160,9 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
 
 __inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO)
 {
-    Particle* particle = _data->entitiesNew.particles.getNewElement();
+    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
+    Particle* particle = _data->entities.particles.getNewElement();
+    *particlePointer = particle;
     particle->id = particleTO.id;
     particle->pos = particleTO.pos;
     _map.mapPosCorrection(particle->pos);
@@ -232,7 +234,9 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
 
 __inline__ __device__ void EntityFactory::createParticle(float energy, float2 const & pos, float2 const & vel)
 {
-    Particle* particle = _data->entitiesNew.particles.getNewElement();
+    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
+    Particle* particle = _data->entities.particles.getNewElement();
+    *particlePointer = particle;
     particle->id = _data->numberGen.createNewId_kernel();
     particle->locked = 0;
     particle->alive = true;
