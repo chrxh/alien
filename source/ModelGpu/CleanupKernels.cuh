@@ -12,6 +12,43 @@ namespace {
     __device__ const float FillLevelFactor = 2.0f / 3.0f;
 }
 
+__global__ void cleanupParticlePointers(SimulationData data)
+{
+    auto& particlePointers = data.entities.particlePointers;
+    BlockData pointerBlock = calcPartition(
+        particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    __shared__ int numParticlePointers;
+    if (0 == threadIdx.x) {
+        numParticlePointers = 0;
+    }
+    __syncthreads();
+
+    for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
+        if (particlePointers.at(index) != nullptr) {
+            atomicAdd(&numParticlePointers, 1);
+        }
+    }
+    __syncthreads();
+
+    __shared__ Particle** newParticlePointers;
+    if (0 == threadIdx.x) {
+        newParticlePointers = data.entitiesNew.particlePointers.getNewSubarray(numParticlePointers);
+        numParticlePointers = 0;
+    }
+    __syncthreads();
+
+    for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
+        auto const& particlePointer = particlePointers.at(index);
+        if (particlePointer != nullptr) {
+            int newIndex = atomicAdd(&numParticlePointers, 1);
+            newParticlePointers[newIndex] = particlePointer;
+        }
+    }
+    __syncthreads();
+}
+
+
 __global__ void cleanupClusterPointers(SimulationData data, int clusterArrayIndex)
 {
     auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
@@ -199,6 +236,11 @@ __global__ void cleanup(SimulationData data)
     }
     cudaDeviceSynchronize();
     data.entities.clusterPointerArrays.swapArrays(data.entitiesNew.clusterPointerArrays);
+
+    data.entitiesNew.particlePointers.reset();
+    cleanupParticlePointers << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    data.entities.particlePointers.swapArray(data.entitiesNew.particlePointers);
 
     if (data.entities.clusters.getNumEntries() > MAX_CLUSTERS * FillLevelFactor) {
         data.entitiesNew.clusters.reset();
