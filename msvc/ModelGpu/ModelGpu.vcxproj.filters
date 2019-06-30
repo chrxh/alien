@@ -69,12 +69,6 @@
     <ClInclude Include="..\..\source\ModelGpu\Map.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnCopyData.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ParticleProcessorOnOrigData.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Physics.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
@@ -148,6 +142,9 @@
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ConstantMemory.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ParticleProcessor.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
   </ItemGroup>
