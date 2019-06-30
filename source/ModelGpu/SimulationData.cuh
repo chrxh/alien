@@ -15,11 +15,11 @@ struct SimulationData
     Entities entitiesNew;
     CudaNumberGenerator numberGen;
 
-    void init(int2 size_)
+    void init(int2 size_, CudaConstants const& cudaConstants)
     {
         size = size_;
-        entities.init();
-        entitiesNew.init();
+        entities.init(cudaConstants);
+        entitiesNew.init(cudaConstants);
 
         CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, cellMap);
         CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, particleMap);
@@ -28,7 +28,7 @@ struct SimulationData
         std::vector<Particle*> hostParticleMap(size.x * size.y, 0);
         checkCudaErrors(cudaMemcpy(cellMap, hostCellMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
         checkCudaErrors(cudaMemcpy(particleMap, hostParticleMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
-        numberGen.init(RANDOM_NUMBER_BLOCK_SIZE);
+        numberGen.init(cudaConstants.RANDOM_NUMBER_BLOCK_SIZE);
     }
 
     void free()

@@ -15,7 +15,7 @@ SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(C
 
 	SpaceProperties* spaceProp = new SpaceProperties();
 	spaceProp->init(config.universeSize);
-	context->init(spaceProp, config.symbolTable, config.parameters);
+	context->init(spaceProp, config.symbolTable, config.parameters, specificData);
 
 	auto controller = new SimulationControllerGpuImpl();
 	controller->init(context, timestepAtBeginning);

@@ -4,7 +4,6 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaAccessTOs.cuh"
-#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Physics.cuh"
 #include "Map.cuh"

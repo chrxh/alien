@@ -2,13 +2,12 @@
 #include "CudaJob.h"
 
 #include "CudaController.h"
+#include "ModelGpuData.h"
 
 namespace
 {
 	const string ThreadControllerId = "ThreadControllerId";
 }
-
-#include <iostream>
 
 CudaController::CudaController(QObject* parent /*= nullptr*/)
 	: QObject(parent)
@@ -33,9 +32,12 @@ CudaController::~CudaController()
 	delete _worker;
 }
 
-void CudaController::init(SpaceProperties *space, SimulationParameters const& parameters)
+void CudaController::init(
+    SpaceProperties* space,
+    SimulationParameters const& parameters,
+    CudaConstants const& cudaConstants)
 {
-	_worker->init(space, parameters);
+	_worker->init(space, parameters, cudaConstants);
 }
 
 CudaWorker * CudaController::getCudaWorker() const

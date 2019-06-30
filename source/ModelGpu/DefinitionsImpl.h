@@ -5,6 +5,8 @@ class SimulationContextGpuImpl;
 class CudaWorker;
 class GpuObserver;
 class CudaController;
+struct CudaConstants;
+class ModelGpuData;
 
 class _CudaJob;
 using CudaJob = boost::shared_ptr<_CudaJob>;
