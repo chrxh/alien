@@ -2,8 +2,12 @@
 
 #include <cuda_runtime.h>
 
-#include "CudaConstants.cuh"
 #include "CudaSimulation.cuh"
+
+#define MAX_TOKEN_MEM_SIZE 256
+#define MAX_CELL_BONDS 6
+#define MAX_CELL_STATIC_BYTES 48
+#define MAX_CELL_MUTABLE_BYTES 16
 
 struct TokenAccessTO
 {
@@ -52,14 +56,14 @@ struct ClusterAccessTO
 
 struct DataAccessTO
 {
-	int* numClusters;
-	ClusterAccessTO* clusters;
-	int* numCells;
-	CellAccessTO* cells;
-	int* numParticles;
-	ParticleAccessTO* particles;
-	int* numTokens;
-	TokenAccessTO* tokens;
+	int* numClusters = nullptr;
+	ClusterAccessTO* clusters = nullptr;
+	int* numCells = nullptr;
+	CellAccessTO* cells = nullptr;
+	int* numParticles = nullptr;
+	ParticleAccessTO* particles = nullptr;
+	int* numTokens = nullptr;
+	TokenAccessTO* tokens = nullptr;
 
 	bool operator==(DataAccessTO const& other) const
 	{

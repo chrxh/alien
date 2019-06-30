@@ -5,11 +5,12 @@ struct CellAccessTO;
 struct ClusterAccessTO;
 struct DataAccessTO;
 struct SimulationParameters;
+struct CudaConstants;
 
 class CudaSimulation
 {
 public:
-    CudaSimulation(int2 const &size, SimulationParameters const& parameters);
+    CudaSimulation(int2 const &size, SimulationParameters const& parameters, CudaConstants const& cudaConstants);
     ~CudaSimulation();
 
     void calcNextTimestep();
@@ -18,6 +19,7 @@ public:
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
     void setSimulationParameters(SimulationParameters const& parameters);
+    void setCudaConstants(CudaConstants const& cudaConstants);
 
 private:
     SimulationData* _internalData;

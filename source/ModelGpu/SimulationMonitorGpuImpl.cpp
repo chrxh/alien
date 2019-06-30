@@ -8,7 +8,7 @@
 #include "CudaController.h"
 #include "CudaWorker.h"
 #include "CudaJob.h"
-
+#include "CudaConstants.h"
 #include "SimulationMonitorGpuImpl.h"
 
 namespace
@@ -19,34 +19,38 @@ namespace
 SimulationMonitorGpuImpl::SimulationMonitorGpuImpl(QObject* parent /*= nullptr*/)
 	: SimulationMonitorGpu(parent)
 {
-	_dataTO.numClusters = new int;
-	_dataTO.numCells = new int;
-	_dataTO.numParticles = new int;
-	_dataTO.numTokens = new int;
-	_dataTO.clusters = new ClusterAccessTO[MAX_CLUSTERS];
-	_dataTO.cells = new CellAccessTO[MAX_CELLS];
-	_dataTO.particles = new ParticleAccessTO[MAX_PARTICLES];
-	_dataTO.tokens = new TokenAccessTO[MAX_TOKENS];
 }
 
 SimulationMonitorGpuImpl::~SimulationMonitorGpuImpl()
 {
-	delete _dataTO.numClusters;
-	delete _dataTO.numCells;
-	delete _dataTO.numParticles;
-	delete _dataTO.numTokens;
-	delete[] _dataTO.clusters;
-	delete[] _dataTO.cells;
-	delete[] _dataTO.particles;
-	delete[] _dataTO.tokens;
 }
 
 void SimulationMonitorGpuImpl::init(SimulationControllerGpu * controller)
 {
-	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
-	auto cudaBridge = _context->getCudaController()->getCudaWorker();
+    _context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 
-	for (auto const& connection : _connections) {
+    delete _dataTO.numClusters;
+    delete _dataTO.numCells;
+    delete _dataTO.numParticles;
+    delete _dataTO.numTokens;
+    delete[] _dataTO.clusters;
+    delete[] _dataTO.cells;
+    delete[] _dataTO.particles;
+    delete[] _dataTO.tokens;
+
+    auto cudaConstants = ModelGpuData(_context->getSpecificData()).getCudaConstants();
+    _dataTO.numClusters = new int;
+    _dataTO.numCells = new int;
+    _dataTO.numParticles = new int;
+    _dataTO.numTokens = new int;
+    _dataTO.clusters = new ClusterAccessTO[cudaConstants.MAX_CLUSTERS];
+    _dataTO.cells = new CellAccessTO[cudaConstants.MAX_CELLS];
+    _dataTO.particles = new ParticleAccessTO[cudaConstants.MAX_PARTICLES];
+    _dataTO.tokens = new TokenAccessTO[cudaConstants.MAX_TOKENS];
+    
+    auto cudaBridge = _context->getCudaController()->getCudaWorker();
+
+    for (auto const& connection : _connections) {
 		QObject::disconnect(connection);
 	}
 	_connections.push_back(connect(cudaBridge, &CudaWorker::jobsFinished, this, &SimulationMonitorGpuImpl::jobsFinished, Qt::QueuedConnection));

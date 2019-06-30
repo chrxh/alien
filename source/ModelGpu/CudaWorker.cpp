@@ -8,18 +8,19 @@
 #include "CudaAccessTOs.cuh"
 #include "CudaJob.h"
 #include "CudaWorker.h"
+#include "ModelGpuData.h"
 
 CudaWorker::~CudaWorker()
 {
 	delete _cudaSimulation;
 }
 
-void CudaWorker::init(SpaceProperties* space, SimulationParameters const& parameters)
+void CudaWorker::init(SpaceProperties* space, SimulationParameters const& parameters, CudaConstants const& cudaConstants)
 {
 	_space = space;
 	auto size = space->getSize();
 	delete _cudaSimulation;
-	_cudaSimulation = new CudaSimulation({ size.x, size.y }, parameters);
+	_cudaSimulation = new CudaSimulation({ size.x, size.y }, parameters, cudaConstants);
 }
 
 void CudaWorker::terminateWorker()

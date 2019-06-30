@@ -267,6 +267,23 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 	ia >> data >> universeSize >> typeId >> specificData >> parameters >> *symbolTable >> timestep;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    //TODO: only temporary
+    specificData.insert_or_assign("numThreadsPerBlock", 64);
+    specificData.insert_or_assign("numBlocks", 64);
+
+    specificData.insert_or_assign("numClusterPointerArrays", 1);
+    specificData.insert_or_assign("maxClusters", 500000);
+    specificData.insert_or_assign("maxCells", 2000000);
+    specificData.insert_or_assign("maxParticles", 2000000);
+    specificData.insert_or_assign("maxTokens", 500000);
+    specificData.insert_or_assign("maxCellPointers", 2000000 * 10);
+    specificData.insert_or_assign("maxClusterPointers", 500000 * 10);
+    specificData.insert_or_assign("maxParticlePointers", 2000000 * 10);
+    specificData.insert_or_assign("maxTokenPointers", 500000 * 10);
+
+    specificData.insert_or_assign("randomNumberBlockSize", 31231257);
+    specificData.insert_or_assign("protectionTimesteps", 14);
+    //---
 	auto simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
 
 	simController->setParent(this);

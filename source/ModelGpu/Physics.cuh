@@ -5,8 +5,6 @@
 
 #include "CudaAccessTOs.cuh"
 #include "Base.cuh"
-#include "CudaConstants.cuh"
-#include "CudaSimulationParameters.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"
 #include "Math.cuh"

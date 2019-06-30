@@ -252,46 +252,46 @@ __global__ void cleanupParticlesOnMap(SimulationData data)
 __global__ void cleanup(SimulationData data)
 {
     data.entitiesNew.clusterPointerArrays.reset();
-    for (int i = 0; i < NUM_CLUSTERPOINTERARRAYS; ++i) {
-        cleanupClusterPointers<<<NUM_BLOCKS, NUM_THREADS_PER_BLOCK>>>(data, i);
+    for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) {
+        cleanupClusterPointers<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK>>>(data, i);
     }
     cudaDeviceSynchronize();
     data.entities.clusterPointerArrays.swapArrays(data.entitiesNew.clusterPointerArrays);
 
     data.entitiesNew.particlePointers.reset();
-    cleanupParticlePointers << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cleanupParticlePointers << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
     data.entities.particlePointers.swapArray(data.entitiesNew.particlePointers);
 
-    if (data.entities.particles.getNumEntries() > MAX_PARTICLES * FillLevelFactor) {
+    if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
         data.entitiesNew.particles.reset();
-        cleanupParticles << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+        cleanupParticles << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
         cudaDeviceSynchronize();
         data.entities.particles.swapArray(data.entitiesNew.particles);
     }
 
-    if (data.entities.clusters.getNumEntries() > MAX_CLUSTERS * FillLevelFactor) {
+    if (data.entities.clusters.getNumEntries() > cudaConstants.MAX_CLUSTERS * FillLevelFactor) {
         data.entitiesNew.clusters.reset();
-        for (int i = 0; i < NUM_CLUSTERPOINTERARRAYS; ++i) {
-            cleanupClusters << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> >(data, i);
+        for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) {
+            cleanupClusters << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> >(data, i);
         }
         cudaDeviceSynchronize();
         data.entities.clusters.swapArray(data.entitiesNew.clusters);
     }
 
-    if (data.entities.cellPointers.getNumEntries() > MAX_CELLPOINTERS * FillLevelFactor) {
+    if (data.entities.cellPointers.getNumEntries() > cudaConstants.MAX_CELLPOINTERS * FillLevelFactor) {
         data.entitiesNew.cellPointers.reset();
         MULTI_CALL(cleanupCellPointers, data);
         data.entities.cellPointers.swapArray(data.entitiesNew.cellPointers);
     }
 
-    if (data.entities.cells.getNumEntries() > MAX_CELLS * FillLevelFactor) {
+    if (data.entities.cells.getNumEntries() > cudaConstants.MAX_CELLS * FillLevelFactor) {
         data.entitiesNew.cells.reset();
         MULTI_CALL(cleanupCells, data);
         data.entities.cells.swapArray(data.entitiesNew.cells);
     }
 
     MULTI_CALL(cleanupClustersOnMap, data);
-    cleanupParticlesOnMap<< <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    cleanupParticlesOnMap<< <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
 }

@@ -29,6 +29,9 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 
 void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
+    auto modelGpuData = ModelGpuData(controller->getContext()->getSpecificData());
+    _cudaConstants = modelGpuData.getCudaConstants();
+    _dataTOCache = boost::make_shared<_DataTOCache>(_cudaConstants);
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 	_numberGen = _context->getNumberGenerator();
 	auto worker = _context->getCudaController()->getCudaWorker();
@@ -55,7 +58,7 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 	auto updateDescCorrected = updateDesc;
 	metricCorrection(updateDescCorrected);
 
-	CudaJob job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastDataRect, _dataTOCache.getDataTO(), updateDescCorrected);
+	CudaJob job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(), updateDescCorrected);
 	cudaWorker->addJob(job);
 	_updateInProgress = true;
 }
@@ -63,7 +66,7 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
 	auto worker = _context->getCudaController()->getCudaWorker();
-	CudaJob job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache.getDataTO());
+	CudaJob job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache->getDataTO());
 	if (!_updateInProgress) {
 		worker->addJob(job);
 	}
@@ -75,7 +78,7 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
 {
 	auto worker = _context->getCudaController()->getCudaWorker();
-	CudaJob job = boost::make_shared<_GetDataForImageJob>(getObjectId(), rect, _dataTOCache.getDataTO(), target);
+	CudaJob job = boost::make_shared<_GetDataForImageJob>(getObjectId(), rect, _dataTOCache->getDataTO(), target);
 	if (!_updateInProgress) {
 		worker->addJob(job);
 	}
@@ -104,19 +107,19 @@ void SimulationAccessGpuImpl::jobsFinished()
 		if (auto const& getDataForImageJob = boost::dynamic_pointer_cast<_GetDataForImageJob>(job)) {
 			auto dataTO = getDataForImageJob->getDataTO();
 			createImageFromGpuModel(dataTO, getDataForImageJob->getRect(), getDataForImageJob->getTargetImage());
-			_dataTOCache.releaseDataTO(dataTO);
+			_dataTOCache->releaseDataTO(dataTO);
 			Q_EMIT imageReady();
 		}
 
 		if (auto const& getDataForEditJob = boost::dynamic_pointer_cast<_GetDataForEditJob>(job)) {
 			auto dataTO = getDataForEditJob->getDataTO();
 			createDataFromGpuModel(dataTO, getDataForEditJob->getRect());
-			_dataTOCache.releaseDataTO(dataTO);
+			_dataTOCache->releaseDataTO(dataTO);
 			Q_EMIT dataReadyToRetrieve();
 		}
 
 		if (auto const& setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
-			_dataTOCache.releaseDataTO(setDataJob->getDataTO());
+			_dataTOCache->releaseDataTO(setDataJob->getDataTO());
 			_updateInProgress = false;
 			for (auto const& job : _waitingJobs) {
 				worker->addJob(job);
@@ -211,7 +214,7 @@ string SimulationAccessGpuImpl::getObjectId() const
 	return stream.str();
 }
 
-SimulationAccessGpuImpl::DataTOCache::DataTOCache()
+SimulationAccessGpuImpl::_DataTOCache::_DataTOCache(CudaConstants const& cudaConstants)
 {
 	for (int i = 0; i < NumDataTOs; ++i) {
 		DataAccessTO dataTO;
@@ -219,15 +222,15 @@ SimulationAccessGpuImpl::DataTOCache::DataTOCache()
 		dataTO.numCells = new int;
 		dataTO.numParticles = new int;
 		dataTO.numTokens = new int;
-		dataTO.clusters = new ClusterAccessTO[MAX_CLUSTERS];
-		dataTO.cells = new CellAccessTO[MAX_CELLS];
-		dataTO.particles = new ParticleAccessTO[MAX_PARTICLES];
-		dataTO.tokens = new TokenAccessTO[MAX_TOKENS];
+		dataTO.clusters = new ClusterAccessTO[cudaConstants.MAX_CLUSTERS];
+		dataTO.cells = new CellAccessTO[cudaConstants.MAX_CELLS];
+		dataTO.particles = new ParticleAccessTO[cudaConstants.MAX_PARTICLES];
+		dataTO.tokens = new TokenAccessTO[cudaConstants.MAX_TOKENS];
 		_freeDataTOs.push_back(dataTO);
 	}
 }
 
-SimulationAccessGpuImpl::DataTOCache::~DataTOCache()
+SimulationAccessGpuImpl::_DataTOCache::~_DataTOCache()
 {
 	for (DataAccessTO const& dataTO : _freeDataTOs) {
 		delete dataTO.numClusters;
@@ -241,7 +244,7 @@ SimulationAccessGpuImpl::DataTOCache::~DataTOCache()
 	}
 }
 
-DataAccessTO SimulationAccessGpuImpl::DataTOCache::getDataTO()
+DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getDataTO()
 {
 	DataAccessTO result;
 	if (!_freeDataTOs.empty()) {
@@ -254,7 +257,7 @@ DataAccessTO SimulationAccessGpuImpl::DataTOCache::getDataTO()
 	return result;
 }
 
-void SimulationAccessGpuImpl::DataTOCache::releaseDataTO(DataAccessTO const & dataTO)
+void SimulationAccessGpuImpl::_DataTOCache::releaseDataTO(DataAccessTO const & dataTO)
 {
 	auto usedDataTO = std::find_if(_usedDataTOs.begin(), _usedDataTOs.end(), [&dataTO](DataAccessTO const& usedDataTO) {
 		return usedDataTO == dataTO;

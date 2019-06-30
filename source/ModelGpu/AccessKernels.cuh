@@ -4,7 +4,6 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaAccessTOs.cuh"
-#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "EntityFactory.cuh"
@@ -228,13 +227,8 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     *access.numTokens = 0;
 
     MULTI_CALL(getClusterAccessData, rectUpperLeft, rectLowerRight, data, access);
-/*
-    for (int i = 0; i < NUM_CLUSTERPOINTERARRAYS; ++i) {
-        getClusterAccessData << <NUM_BLOCKS, i + 1 >> > (rectUpperLeft, rectLowerRight, data, access, i);
-    }
-*/
     cudaDeviceSynchronize();
-    getParticleAccessData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> >(rectUpperLeft, rectLowerRight, data, access);
+    getParticleAccessData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> >(rectUpperLeft, rectLowerRight, data, access);
     cudaDeviceSynchronize();
 }
 
@@ -244,9 +238,9 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     data.entitiesNew.particles.reset();
     
     MULTI_CALL(filterClusters, rectUpperLeft, rectLowerRight, data);
-    filterParticles<< <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (rectUpperLeft, rectLowerRight, data);
+    filterParticles<< <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (rectUpperLeft, rectLowerRight, data);
     cudaDeviceSynchronize();
-    convertData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data, access);
+    convertData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data, access);
     cudaDeviceSynchronize();
 
     cleanup<<<1, 1>>>(data);

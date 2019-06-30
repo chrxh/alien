@@ -6,7 +6,6 @@
 #include "ModelBasic/ElementaryTypes.h"
 
 #include "CudaAccessTOs.cuh"
-#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "Math.cuh"

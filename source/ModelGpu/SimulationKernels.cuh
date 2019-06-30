@@ -5,7 +5,6 @@
 #include "sm_60_atomic_functions.h"
 
 #include "CudaAccessTOs.cuh"
-#include "CudaConstants.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ClusterProcessor.cuh"
@@ -159,11 +158,11 @@ __global__ void calcSimulationTimestep(SimulationData data)
     MULTI_CALL(clusterProcessingOnOrigDataStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingOnOrigDataStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingOnCopyData, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    particleProcessingOnOrigDataStep1 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    particleProcessingOnOrigDataStep1 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
-    particleProcessingOnOrigDataStep2 << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    particleProcessingOnOrigDataStep2 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
-    particleProcessingOnCopyData << <NUM_BLOCKS, NUM_THREADS_PER_BLOCK >> > (data);
+    particleProcessingOnCopyData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
 
     cleanup<<<1, 1>>>(data);
