@@ -48,6 +48,9 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+
+#define PROTECTION_TIMESTEPS 14
+
 __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
 {
     __shared__ Cluster* cluster;
@@ -252,8 +255,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                     float2 normal = Physics::calcNormalToCell(otherCell, outwardVector);
                     atomicAdd(&n.x, normal.x);
                     atomicAdd(&n.y, normal.y);
-                    cell->protectionCounter = cudaConstants.PROTECTION_TIMESTEPS;
-                    otherCell->protectionCounter = cudaConstants.PROTECTION_TIMESTEPS;
+                    cell->protectionCounter = PROTECTION_TIMESTEPS;
+                    otherCell->protectionCounter = PROTECTION_TIMESTEPS;
                 }
             }
         }

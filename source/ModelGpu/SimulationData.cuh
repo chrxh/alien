@@ -28,7 +28,7 @@ struct SimulationData
         std::vector<Particle*> hostParticleMap(size.x * size.y, 0);
         checkCudaErrors(cudaMemcpy(cellMap, hostCellMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
         checkCudaErrors(cudaMemcpy(particleMap, hostParticleMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
-        numberGen.init(cudaConstants.RANDOM_NUMBER_BLOCK_SIZE);
+        numberGen.init(31231257);
     }
 
     void free()

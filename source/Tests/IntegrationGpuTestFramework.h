@@ -26,7 +26,7 @@ class IntegrationGpuTestFramework
 	: public IntegrationTestFramework
 {
 public:
-    IntegrationGpuTestFramework(IntVector2D const& universeSize = { 600, 300 });
+    IntegrationGpuTestFramework(IntVector2D const& universeSize = { 600, 300 }, optional<ModelGpuData> const& modelData = boost::none);
 	virtual ~IntegrationGpuTestFramework();
 
 protected:

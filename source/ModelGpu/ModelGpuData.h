@@ -24,9 +24,6 @@ public:
     void setMaxParticlePointers(int value);
     void setMaxTokenPointers(int value);
 
-    void setRandomNumberBlockSize(int value);
-    void setProtectionTimesteps(int value);
-
 	map<string, int> getData() const;
 
 private:
