@@ -261,6 +261,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\source\Tests\CleanupGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\CpuBenchmarks.cpp" />
     <ClCompile Include="..\..\source\Tests\GpuBenchmark.cpp" />
     <ClCompile Include="..\..\source\Tests\CellClusterTest.cpp" />

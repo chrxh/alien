@@ -100,11 +100,12 @@ CudaSimulation::~CudaSimulation()
 void CudaSimulation::calcNextTimestep()
 {
     GPU_FUNCTION(calcSimulationTimestep, *_internalData);
-/*
+
     std::cout
-    << "Particles: " << _internalData->entities.particlePointers.retrieveNumEntries() << "; " << _internalData->entities.particles.retrieveNumEntries()
+        << "Particles: " << _internalData->entities.particles.retrieveNumEntries() << "; "
+        << "Cells: " << _internalData->entities.cells.retrieveNumEntries() << "; Clusters: " << _internalData->entities.clusters.retrieveNumEntries()
     << std::endl;
-*/
+
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
