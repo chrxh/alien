@@ -141,11 +141,11 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaConstants.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ConstantMemory.cuh">
-      <Filter>Source Files\Impl\device</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessor.cuh">
       <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ConstantMemory.cuh">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

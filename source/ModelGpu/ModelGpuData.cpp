@@ -16,9 +16,6 @@ namespace
     string const maxClusterPointers_key = "maxClusterPointers";
     string const maxParticlePointers_key = "maxParticlePointers";
     string const maxTokenPointers_key = "maxTokenPointers";
-
-    string const randomNumberBlockSize_key = "randomNumberBlockSize";
-    string const protectionTimesteps_key = "protectionTimesteps";
 }
 
 
@@ -45,8 +42,6 @@ CudaConstants ModelGpuData::getCudaConstants() const
     result.MAX_CLUSTERPOINTERS = _data.at(maxClusterPointers_key);
     result.MAX_PARTICLEPOINTERS = _data.at(maxParticlePointers_key);
     result.MAX_TOKENPOINTERS = _data.at(maxTokenPointers_key);
-    result.RANDOM_NUMBER_BLOCK_SIZE = _data.at(randomNumberBlockSize_key);
-    result.PROTECTION_TIMESTEPS = _data.at(protectionTimesteps_key);
     return result;
 }
 
@@ -73,16 +68,6 @@ void ModelGpuData::setMaxClusters(int value)
 void ModelGpuData::setMaxCells(int value)
 {
     _data.insert_or_assign(maxCells_key, value);
-}
-
-void ModelGpuData::setRandomNumberBlockSize(int value)
-{
-    _data.insert_or_assign(randomNumberBlockSize_key, value);
-}
-
-void ModelGpuData::setProtectionTimesteps(int value)
-{
-    _data.insert_or_assign(protectionTimesteps_key, value);
 }
 
 void ModelGpuData::setMaxParticles(int value)
