@@ -252,9 +252,6 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
         data.setMaxParticlePointers(2000000 * 10);
         data.setMaxTokenPointers(500000 * 10);
 
-        data.setRandomNumberBlockSize(31231257);
-        data.setProtectionTimesteps(14);
-
 		_simController = facade->buildSimulationController(simulationControllerConfig, data);
 	}
 	else {
