@@ -260,25 +260,19 @@ __device__ void cleanupClusterOnMap(SimulationData &data, int clusterArrayIndex,
     auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
     auto const& cluster = clusters.at(clusterIndex);
 
-    int2 size = data.size;
     int numCells = cluster->numCellPointers;
-    Map<Cell> map;
-    map.init(size, data.cellMap);
 
     BlockData cellBlock = calcPartition(numCells, threadIdx.x, blockDim.x);
     for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
         float2 absPos = cluster->cellPointers[cellIndex]->absPos;
-        map.set(absPos, nullptr);
+        data.cellMap.set(absPos, nullptr);
     }
 }
 
-__device__ void cleanupParticleOnMap(SimulationData const &data, int particleIndex)
+__device__ void cleanupParticleOnMap(SimulationData &data, int particleIndex)
 {
-    Map<Particle> map;
-    map.init(data.size, data.particleMap);
-
     auto const &particle = data.entitiesNew.particles.getEntireArray()[particleIndex];
-    map.set(particle.pos, nullptr);
+    data.particleMap.set(particle.pos, nullptr);
 }
 
 __global__ void cleanupClustersOnMap(SimulationData data, int clusterArrayIndex)

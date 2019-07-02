@@ -109,7 +109,7 @@ public:
     {
     }
 
-    void init(int size)
+    __host__ __inline__ void init(int size)
     {
         _size = size;
         T* data = nullptr;
@@ -121,7 +121,7 @@ public:
         checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
     }
 
-    void free()
+    __host__ __inline__ void free()
     {
         T* data = nullptr;
         checkCudaErrors(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));

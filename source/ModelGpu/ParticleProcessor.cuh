@@ -21,8 +21,6 @@ public:
 private:
 
 	SimulationData* _data;
-	Map<Cell> _cellMap;
-	Map<Particle> _particleMap;
 
     BlockData _particleBlock;
 };
@@ -34,8 +32,6 @@ private:
 __inline__ __device__ void ParticleProcessor::init_blockCall(SimulationData & data)
 {
     _data = &data;
-    _cellMap.init(data.size, data.cellMap);
-    _particleMap.init(data.size, data.particleMap);
 
     _particleBlock = calcPartition(
         data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -46,8 +42,8 @@ __inline__ __device__ void ParticleProcessor::processingMovement_blockCall()
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
         particle->pos = Math::add(particle->pos, particle->vel);
-        _particleMap.mapPosCorrection(particle->pos);
-        _particleMap.set(particle->pos, particle);
+        _data->particleMap.mapPosCorrection(particle->pos);
+        _data->particleMap.set(particle->pos, particle);
     }
 }
 
@@ -55,7 +51,7 @@ __inline__ __device__ void ParticleProcessor::processingCollision_blockCall()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
-        Particle* otherParticle = _particleMap.get(particle->pos);
+        Particle* otherParticle = _data->particleMap.get(particle->pos);
         if (otherParticle && otherParticle != particle) {
             if (particle->alive && otherParticle->alive) {
 
@@ -104,7 +100,7 @@ __inline__ __device__ void ParticleProcessor::processingDataCopy_blockCall()
 			continue;
 		}
 
-		if (auto cell = _cellMap.get(particle->pos)) {
+        if (auto cell = _data->cellMap.get(particle->pos)) {
 			if (cell->alive) {
 				atomicAdd(&cell->energy, particle->energy);
                 particle = nullptr;
