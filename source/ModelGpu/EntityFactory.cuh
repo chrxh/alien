@@ -79,7 +79,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
     }
     __syncthreads();
 
-    BlockData cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+    PartitionData cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
     for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
         auto& cell = cells[cellIndex];
         cluster->cellPointers[cellIndex] = &cell;
@@ -135,7 +135,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
         cell.locked = 0;
     }
 
-    BlockData tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
+    PartitionData tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
 
     for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto& token = tokens[tokenIndex];

@@ -10,7 +10,7 @@
 
 #define FP_PRECISION 0.00001
 
-struct BlockData
+struct PartitionData
 {
     int startIndex;
     int endIndex;
@@ -252,9 +252,9 @@ private:
     Hash _hash;
 };
 
-__device__ __inline__ BlockData calcPartition(int numEntities, int division, int numDivisions)
+__device__ __inline__ PartitionData calcPartition(int numEntities, int division, int numDivisions)
 {
-    BlockData result;
+    PartitionData result;
     int entitiesByDivisions = numEntities / numDivisions;
     int remainder = numEntities % numDivisions;
 
