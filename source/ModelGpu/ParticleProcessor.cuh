@@ -22,7 +22,7 @@ private:
 
 	SimulationData* _data;
 
-    BlockData _particleBlock;
+    PartitionData _particleBlock;
 };
 
 

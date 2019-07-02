@@ -33,8 +33,8 @@ private:
     SimulationData* _data;
     Cluster* _cluster;
 
-    BlockData _cellBlock;
-    BlockData _tokenBlock;
+    PartitionData _cellBlock;
+    PartitionData _tokenBlock;
 };
 
 /************************************************************************/
