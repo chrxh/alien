@@ -145,13 +145,7 @@ TEST_F(CleanupGpuTests, testCleanupTokenPointers)
     origData.addCluster(cluster);
     IntegrationTestHelper::updateData(_access, origData);
 
-    try {
-        (IntegrationTestHelper::runSimulation(1100, _controller));
-    }
-    catch (std::exception const&) {
-        int dummy = 0;
-        ++dummy;
-    }
+    EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1100, _controller));
 }
 
 TEST_F(CleanupGpuTests, testCleanupTokens)
