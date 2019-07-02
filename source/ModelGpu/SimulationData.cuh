@@ -8,8 +8,8 @@ struct SimulationData
 {
     int2 size;
 
-    Cell** cellMap;
-    Particle** particleMap;
+    Map<Cell> cellMap;
+    Map<Particle> particleMap;
 
     Entities entities;
     Entities entitiesNew;
@@ -21,13 +21,9 @@ struct SimulationData
         entities.init(cudaConstants);
         entitiesNew.init(cudaConstants);
 
-        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, cellMap);
-        CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, particleMap);
+        cellMap.init(size);
+        particleMap.init(size);
 
-        std::vector<Cell*> hostCellMap(size.x * size.y, 0);
-        std::vector<Particle*> hostParticleMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(cellMap, hostCellMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
-        checkCudaErrors(cudaMemcpy(particleMap, hostParticleMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
         numberGen.init(31231257);
     }
 
@@ -35,8 +31,8 @@ struct SimulationData
     {
         entities.free();
         entitiesNew.free();
-        CudaMemoryManager::getInstance().freeMemory(cellMap);
-        CudaMemoryManager::getInstance().freeMemory(particleMap);
+        cellMap.free();
+        particleMap.free();
         numberGen.free();
     }
 };
