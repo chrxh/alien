@@ -64,11 +64,11 @@ class Map
     : public BasicMap
 {
 public:
-    __host__ __inline__ void init(int2 const& size)
+    __host__ __inline__ void init(int2 const& size, int maxEntries)
     {
         BasicMap::init(size);
         CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
-        _mapEntries.init(2000000);
+        _mapEntries.init(maxEntries);
 
         std::vector<T*> hostMap(size.x * size.y, 0);
         checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*)*size.x*size.y, cudaMemcpyHostToDevice));
