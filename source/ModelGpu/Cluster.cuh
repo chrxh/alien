@@ -21,7 +21,7 @@ struct Cluster
     int locked;	//0 = unlocked, 1 = locked
     Cluster* clusterToFuse;
 
-    __device__ __inline__ void tagCellByIndex_blockCall(BlockData const& blockData)
+    __device__ __inline__ void tagCellByIndex_blockCall(PartitionData const& blockData)
     {
         for (auto cellIndex = blockData.startIndex; cellIndex <= blockData.endIndex; ++cellIndex) {
             Cell& cell = *cellPointers[cellIndex];

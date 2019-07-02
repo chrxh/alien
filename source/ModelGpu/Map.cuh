@@ -61,21 +61,28 @@ protected:
 
 template<typename T>
 class Map
-	: public BasicMap
+    : public BasicMap
 {
 public:
-	__inline__ __host__ void init(int2 const& size)
-	{
-		BasicMap::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.x, _map);
+    __host__ __inline__ void init(int2 const& size)
+    {
+        BasicMap::init(size);
+        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
+        _mapEntries.init(2000000);
 
         std::vector<T*> hostMap(size.x * size.y, 0);
         checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*)*size.x*size.y, cudaMemcpyHostToDevice));
-	}
+    }
+
+    __device__ __inline__ void reset()
+    {
+        _mapEntries.reset();
+    }
 
     __host__ __inline__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_map);
+        _mapEntries.free();
     }
 
 	__device__ __inline__ bool isEntityPresent(float2 const& pos, T* entity) const
@@ -102,7 +109,39 @@ public:
         _map[mapEntry] = entity;
 	}
 
+    __device__ __inline__ void set_blockCall(int numEntities, T** entities)
+    {
+        __shared__ int* entrySubarray;
+        if (0 == threadIdx.x) {
+            entrySubarray = _mapEntries.getNewSubarray(numEntities);
+        }
+        __syncthreads();
+
+        auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& entity = entities[index];
+            int2 posInt = { floorInt(entity->absPos.x), floorInt(entity->absPos.y) };
+            mapPosCorrection(posInt);
+            auto mapEntry = posInt.x + posInt.y * _size.x;
+            _map[mapEntry] = entity;
+
+            entrySubarray[index] = mapEntry;
+        }
+        __syncthreads();
+    }
+
+    __device__ __inline__ void cleanup_gridCall()
+    {
+        auto partition =
+            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto mapEntry = _mapEntries.at(index);
+            _map[mapEntry] = nullptr;
+        }
+    }
+
 private:
 	T ** _map;
+    ArrayController<int> _mapEntries;
 };
 
