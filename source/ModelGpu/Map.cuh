@@ -111,6 +111,10 @@ public:
 
     __device__ __inline__ void set_blockCall(int numEntities, T** entities)
     {
+        if (0 == numEntities) {
+            return;
+        }
+
         __shared__ int* entrySubarray;
         if (0 == threadIdx.x) {
             entrySubarray = _mapEntries.getNewSubarray(numEntities);

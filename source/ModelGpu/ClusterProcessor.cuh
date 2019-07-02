@@ -15,6 +15,7 @@ public:
     __inline__ __device__ void init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex);
 
     __inline__ __device__ void processingMovement_blockCall();
+    __inline__ __device__ void updateMap_blockCall();
     __inline__ __device__ void processingCollision_blockCall();
     __inline__ __device__ void destroyCloseCell_blockCall();
     __inline__ __device__ void processingRadiation_blockCall();
@@ -27,7 +28,6 @@ private:
     __inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
     __inline__ __device__ bool areConnectable(Cell *cell1, Cell *cell2);
 
-    __inline__ __device__ void cleanClusterFromMap_blockCall();
     __inline__ __device__ void copyClusterWithDecomposition_blockCall();
     __inline__ __device__ void copyClusterWithFusion_blockCall();
     __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster, Cluster* targetCluster);
@@ -342,6 +342,11 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
 
 }
 
+__inline__ __device__ void ClusterProcessor::updateMap_blockCall()
+{
+    _data->cellMap.set_blockCall(_cluster->numCellPointers, _cluster->cellPointers);
+}
+
 __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
 {
     __shared__ EntityFactory factory;
@@ -445,15 +450,6 @@ __inline__ __device__ void ClusterProcessor::init_blockCall(SimulationData& data
     _cluster = *_clusterPointer;
 
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
-}
-
-__inline__ __device__ void ClusterProcessor::cleanClusterFromMap_blockCall()
-{
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        Cell* cell = _cluster->cellPointers[cellIndex];
-        _data->cellMap.set(cell->absPos, nullptr);
-    }
-    __syncthreads();
 }
 
 #define MAX_DECOMPOSITIONS 5
@@ -783,17 +779,14 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
         if (0 == threadIdx.x) {
             *_clusterPointer = nullptr;
         }
-        cleanClusterFromMap_blockCall();
         __syncthreads();
         return;
     }
 
     if (_cluster->decompositionRequired && !_cluster->clusterToFuse) {
-        cleanClusterFromMap_blockCall();
         copyClusterWithDecomposition_blockCall();
     }
     else if (_cluster->clusterToFuse) {
-        cleanClusterFromMap_blockCall();
         copyClusterWithFusion_blockCall();
     }
 }

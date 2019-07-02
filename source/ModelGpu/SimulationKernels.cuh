@@ -21,12 +21,7 @@ __device__ void clusterProcessingStep1_blockCall(SimulationData data, int cluste
 	ClusterProcessor clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
     clusterProcessor.processingMovement_blockCall();
-}
-
-__device__ void updateCellMap_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
-{
-    auto const& cluster = data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
-    data.cellMap.set_blockCall(cluster->numCellPointers, cluster->cellPointers);
+    clusterProcessor.updateMap_blockCall();
 }
 
 __device__  void clusterProcessingStep2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
@@ -58,14 +53,6 @@ __global__ void clusterProcessingStep1(SimulationData data, int numClusters, int
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         clusterProcessingStep1_blockCall(data, clusterArrayIndex, clusterIndex);
-    }
-}
-
-__global__ void updateCellMap(SimulationData data, int numClusters, int clusterArrayIndex)
-{
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        updateCellMap_blockCall(data, clusterArrayIndex, clusterIndex);
     }
 }
 
@@ -142,6 +129,7 @@ __global__ void particleProcessingStep1(SimulationData data)
 	ParticleProcessor particleProcessor;
     particleProcessor.init_blockCall(data);
     particleProcessor.processingMovement_blockCall();
+    particleProcessor.updateMap_blockCall();
     particleProcessor.processingTransformation_blockCall();
 }
 
@@ -166,11 +154,11 @@ __global__ void particleProcessingStep3(SimulationData data)
 __global__ void calcSimulationTimestep(SimulationData data)
 {
     data.cellMap.reset();
+    data.particleMap.reset();
 
     MULTI_CALL(tokenProcessingStep1, data);
     MULTI_CALL(tokenProcessingStep2, data);
     MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    MULTI_CALL(updateCellMap, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());

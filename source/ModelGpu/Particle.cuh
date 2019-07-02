@@ -6,7 +6,7 @@ struct Particle
 {
     uint64_t id;
     float energy;
-    float2 pos;
+    float2 absPos;
     float2 vel;
 
     //auxiliary data

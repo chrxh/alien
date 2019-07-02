@@ -255,24 +255,14 @@ __global__ void cleanupTokens(SimulationData data, int clusterArrayIndex)
     }
 }
 
-__device__ void cleanupParticleOnMap(SimulationData &data, int particleIndex)
-{
-    auto const &particle = data.entitiesNew.particles.getEntireArray()[particleIndex];
-    data.particleMap.set(particle.pos, nullptr);
-}
-
-__global__ void cleanupClusters(SimulationData data)
+__global__ void cleanupCellMap(SimulationData data)
 {
     data.cellMap.cleanup_gridCall();
 }
 
-__global__ void cleanupParticlesOnMap(SimulationData data)
+__global__ void cleanupParticleMap(SimulationData data)
 {
-    PartitionData particleBlock =
-        calcPartition(data.entitiesNew.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        cleanupParticleOnMap(data, particleIndex);
-    }
+    data.particleMap.cleanup_gridCall();
 }
 
 /************************************************************************/
@@ -333,7 +323,7 @@ __global__ void cleanup(SimulationData data)
         data.entities.tokens.swapArray(data.entitiesNew.tokens);
     }
 
-    cleanupClusters<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cleanupParticlesOnMap<< <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
+    cleanupCellMap<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
+    cleanupParticleMap<< <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
 }
