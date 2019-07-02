@@ -64,13 +64,21 @@ class Map
 	: public BasicMap
 {
 public:
-	__inline__ __device__ void init(int2 const& size, T ** map)
+	__inline__ __host__ void init(int2 const& size)
 	{
 		BasicMap::init(size);
-		_map = map;
+        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.x, _map);
+
+        std::vector<T*> hostMap(size.x * size.y, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*)*size.x*size.y, cudaMemcpyHostToDevice));
 	}
 
-	__inline__ __device__ bool isEntityPresent(float2 const& pos, T* entity) const
+    __host__ __inline__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_map);
+    }
+
+	__device__ __inline__ bool isEntityPresent(float2 const& pos, T* entity) const
 	{
 		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
@@ -78,7 +86,7 @@ public:
 		return _map[mapEntry] == entity;
 	}
 
-	__inline__ __device__ T* get(float2 const& pos) const
+	__device__ __inline__ T* get(float2 const& pos) const
 	{
 		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
@@ -86,7 +94,7 @@ public:
 		return _map[mapEntry];
 	}
 
-	__inline__ __device__ void set(float2 const& pos, T* entity)
+	__device__ __inline__ void set(float2 const& pos, T* entity)
 	{
 		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
 		mapPosCorrection(posInt);
@@ -98,43 +106,3 @@ private:
 	T ** _map;
 };
 
-template<typename T>
-class BiMap
-{
-public:
-	__inline__ __host__ __device__ void init(int2 const& size, T ** map1, T ** map2)
-	{
-		_map1.init(size, map1);
-		_map2.init(size, map2);
-	}
-
-	__inline__ __host__ __device__ bool isEntityPresentAtOrigMap(float2 const& pos, T* entity) const
-	{
-		return _map1.isEntityPresent(pos, entity);
-
-	}
-
-	__inline__ __host__ __device__ T* getFromOrigMap(float2 const& pos) const
-	{
-		return _map1.get(pos);
-	}
-
-	__inline__ __host__ __device__ T* getFromNewMap(float2 const& pos) const
-	{
-		return _map2.get(pos);
-	}
-
-	__inline__ __host__ __device__ void setToOrigMap(float2 const& pos, T* entity)
-	{
-		_map1.setToNewMap(pos, entity);
-	}
-
-	__inline__ __host__ __device__ void setToNewMap(float2 const& pos, T* entity)
-	{
-		_map2.setToNewMap(pos, entity);
-	}
-
-private:
-	Map<T> _map1;
-	Map<T> _map2;
-};
