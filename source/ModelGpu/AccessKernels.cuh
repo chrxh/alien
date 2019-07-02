@@ -117,16 +117,16 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto& particle = *data.entities.particlePointers.at(particleIndex);
-        if (particle.pos.x >= rectUpperLeft.x
-            && particle.pos.x <= rectLowerRight.x
-            && particle.pos.y >= rectUpperLeft.y
-            && particle.pos.y <= rectLowerRight.y)
+        if (particle.absPos.x >= rectUpperLeft.x
+            && particle.absPos.x <= rectLowerRight.x
+            && particle.absPos.y >= rectUpperLeft.y
+            && particle.absPos.y <= rectLowerRight.y)
         {
             int particleAccessIndex = atomicAdd(access.numParticles, 1);
             ParticleAccessTO& particleAccess = access.particles[particleAccessIndex];
 
             particleAccess.id = particle.id;
-            particleAccess.pos = particle.pos;
+            particleAccess.pos = particle.absPos;
             particleAccess.vel = particle.vel;
             particleAccess.energy = particle.energy;
         }
@@ -166,7 +166,7 @@ __device__ void filterParticle(int2 const& rectUpperLeft, int2 const& rectLowerR
     SimulationData& data, int particleIndex)
 {
     auto& particle = data.entities.particlePointers.getEntireArray()[particleIndex];
-    if (isContained(rectUpperLeft, rectLowerRight, particle->pos)) {
+    if (isContained(rectUpperLeft, rectLowerRight, particle->absPos)) {
         particle = nullptr;
     }
 }
@@ -243,6 +243,8 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     convertData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data, access);
     cudaDeviceSynchronize();
 
+    data.cellMap.reset();
+    data.particleMap.reset();
     cleanup<<<1, 1>>>(data);
     cudaDeviceSynchronize();
 
