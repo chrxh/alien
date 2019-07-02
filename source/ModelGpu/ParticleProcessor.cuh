@@ -14,6 +14,7 @@ public:
 	__inline__ __device__ void init_blockCall(SimulationData& data);
 
     __inline__ __device__ void processingMovement_blockCall();
+    __inline__ __device__ void updateMap_blockCall();
     __inline__ __device__ void processingCollision_blockCall();
     __inline__ __device__ void processingTransformation_blockCall();
 	__inline__ __device__ void processingDataCopy_blockCall();
@@ -41,17 +42,22 @@ __inline__ __device__ void ParticleProcessor::processingMovement_blockCall()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
-        particle->pos = Math::add(particle->pos, particle->vel);
-        _data->particleMap.mapPosCorrection(particle->pos);
-        _data->particleMap.set(particle->pos, particle);
+        particle->absPos = Math::add(particle->absPos, particle->vel);
+        _data->particleMap.mapPosCorrection(particle->absPos);
     }
+}
+
+__inline__ __device__ void ParticleProcessor::updateMap_blockCall()
+{
+    Particle** particles = &_data->entities.particlePointers.at(_particleBlock.startIndex);
+    _data->particleMap.set_blockCall(_particleBlock.numElements(), particles);
 }
 
 __inline__ __device__ void ParticleProcessor::processingCollision_blockCall()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
-        Particle* otherParticle = _data->particleMap.get(particle->pos);
+        Particle* otherParticle = _data->particleMap.get(particle->absPos);
         if (otherParticle && otherParticle != particle) {
             if (particle->alive && otherParticle->alive) {
 
@@ -84,7 +90,7 @@ __inline__ __device__ void ParticleProcessor::processingTransformation_blockCall
             if (_data->numberGen.random() < cudaSimulationParameters.cellTransformationProb) {
                 EntityFactory factory;
                 factory.init(_data);
-                factory.createClusterWithRandomCell(innerEnergy, particle->pos, particle->vel);
+                factory.createClusterWithRandomCell(innerEnergy, particle->absPos, particle->vel);
                 particle->alive = false;
             }
         }
@@ -100,7 +106,7 @@ __inline__ __device__ void ParticleProcessor::processingDataCopy_blockCall()
 			continue;
 		}
 
-        if (auto cell = _data->cellMap.get(particle->pos)) {
+        if (auto cell = _data->cellMap.get(particle->absPos)) {
 			if (cell->alive) {
 				atomicAdd(&cell->energy, particle->energy);
                 particle = nullptr;
