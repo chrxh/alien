@@ -103,9 +103,12 @@ void CudaSimulation::calcNextTimestep()
 
     std::cout
         << "Particles: " << _internalData->entities.particles.retrieveNumEntries() << "; "
-        << "Cells: " << _internalData->entities.cells.retrieveNumEntries() << "; Clusters: " << _internalData->entities.clusters.retrieveNumEntries()
-    << std::endl;
-
+        << "Cells: " << _internalData->entities.cells.retrieveNumEntries() << "; "
+        << "Clusters: " << _internalData->entities.clusters.retrieveNumEntries() << "; "
+        << "CellPointers: " << _internalData->entities.cellPointers.retrieveNumEntries() << "; "
+        << "Tokens: " << _internalData->entities.tokens.retrieveNumEntries() << "; "
+        << "TokenPointers: " << _internalData->entities.tokenPointers.retrieveNumEntries() << "; "
+        << std::endl;
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
