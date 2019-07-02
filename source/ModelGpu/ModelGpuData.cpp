@@ -92,12 +92,12 @@ void ModelGpuData::setMaxClusterPointers(int value)
 
 void ModelGpuData::setMaxParticlePointers(int value)
 {
-    _data.insert_or_assign(maxTokenPointers_key, value);
+    _data.insert_or_assign(maxParticlePointers_key, value);
 }
 
 void ModelGpuData::setMaxTokenPointers(int value)
 {
-    _data.insert_or_assign(maxParticlePointers_key, value);
+    _data.insert_or_assign(maxTokenPointers_key, value);
 }
 
 map<string, int> ModelGpuData::getData() const
