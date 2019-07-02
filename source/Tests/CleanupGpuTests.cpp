@@ -36,11 +36,11 @@ ModelGpuData CleanupGpuTests::getModelDataForCleanup()
         result.setMaxClusters(1000);
         result.setMaxCells(1000);
         result.setMaxParticles(10000);
-        result.setMaxTokens(1000);
+        result.setMaxTokens(100);
         result.setMaxCellPointers(10000);
         result.setMaxClusterPointers(10000);
-        result.setMaxParticlePointers(100000);
-        result.setMaxTokenPointers(10000);
+        result.setMaxParticlePointers(10000);
+        result.setMaxTokenPointers(1000);
         return result;
     }
 }
@@ -69,6 +69,11 @@ TEST_F(CleanupGpuTests, testCleanupParticles)
 */
 TEST_F(CleanupGpuTests, testCleanupCells)
 {
+    _parameters.radiationExponent = 1;
+    _parameters.radiationFactor = 0.0002f;
+    _parameters.radiationProb = 0.003f;
+    _context->setSimulationParameters(_parameters);
+
     DataDescription origData;
     for (int i = 0; i < 9; ++i) {
         origData.addCluster(createRectangularCluster({ 10, 10 }));
@@ -93,3 +98,84 @@ TEST_F(CleanupGpuTests, testCleanupClusters)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(2000, _controller));
 }
 
+/**
+* Situation: few large fast moving clusters; radiate much energy with low number of particles
+* Expected result: no crash during the number of cell pointers of all times is growing
+*/
+TEST_F(CleanupGpuTests, testCleanupCellPointers)
+{
+    _parameters.radiationExponent = 1;
+    _parameters.radiationFactor = 0.02f;
+    _parameters.radiationProb = 0.003f;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+    for (int i = 0; i < 5; ++i) {
+        QVector2D vel(_numberGen->getRandomReal(-3, 3), _numberGen->getRandomReal(-4, 4));
+        origData.addCluster(createRectangularCluster({ 10, 10 }, boost::none, vel));
+    }
+    IntegrationTestHelper::updateData(_access, origData);
+
+    EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(2000, _controller));
+}
+
+/**
+* Situation: cluster where a token is moving in a cycle
+* Expected result: no crash during the number of token pointers of all times is growing
+*/
+TEST_F(CleanupGpuTests, testCleanupTokenPointers)
+{
+    _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.cellMaxTokenBranchNumber = 4;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+
+    auto token = createSimpleToken();
+    auto cluster = createRectangularCluster({ 2, 2 }, QVector2D{}, QVector2D{});
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    auto& thirdCell = cluster.cells->at(3);
+    auto& fourthCell = cluster.cells->at(2);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    thirdCell.tokenBranchNumber = 2;
+    fourthCell.tokenBranchNumber = 3;
+    firstCell.addToken(token);
+    origData.addCluster(cluster);
+    IntegrationTestHelper::updateData(_access, origData);
+
+    try {
+        (IntegrationTestHelper::runSimulation(1100, _controller));
+    }
+    catch (std::exception const&) {
+        int dummy = 0;
+        ++dummy;
+    }
+}
+
+TEST_F(CleanupGpuTests, testCleanupTokens)
+{
+    _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.cellMaxTokenBranchNumber = 4;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+
+    auto token = createSimpleToken();
+    auto cluster = createRectangularCluster({ 2, 3 }, QVector2D{}, QVector2D{});
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    auto& thirdCell = cluster.cells->at(3);
+    auto& fourthCell = cluster.cells->at(2);
+    auto& fifthCell = cluster.cells->at(4);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    thirdCell.tokenBranchNumber = 2;
+    fourthCell.tokenBranchNumber = 3;
+    fifthCell.tokenBranchNumber = 0;
+    firstCell.addToken(token);
+    origData.addCluster(cluster);
+    IntegrationTestHelper::updateData(_access, origData);
+    EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(440, _controller));
+}
