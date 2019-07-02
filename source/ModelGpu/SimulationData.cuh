@@ -12,17 +12,17 @@ struct SimulationData
     Map<Particle> particleMap;
 
     Entities entities;
-    Entities entitiesNew;
+    Entities entitiesForCleanup;
     CudaNumberGenerator numberGen;
 
     void init(int2 size_, CudaConstants const& cudaConstants)
     {
         size = size_;
         entities.init(cudaConstants);
-        entitiesNew.init(cudaConstants);
+        entitiesForCleanup.init(cudaConstants);
 
-        cellMap.init(size);
-        particleMap.init(size);
+        cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
+        particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
 
         numberGen.init(31231257);
     }
@@ -30,7 +30,7 @@ struct SimulationData
     void free()
     {
         entities.free();
-        entitiesNew.free();
+        entitiesForCleanup.free();
         cellMap.free();
         particleMap.free();
         numberGen.free();
