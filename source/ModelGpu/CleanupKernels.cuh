@@ -195,6 +195,61 @@ __global__ void cleanupCells(SimulationData data, int clusterArrayIndex)
             auto token = cluster->tokenPointers[tokenIndex];
             int relCellIndex = token->cell->tag;
             token->cell = newCells + relCellIndex;
+
+            relCellIndex = token->sourceCell->tag;
+            token->sourceCell = newCells + relCellIndex;
+        }
+        __syncthreads();
+    }
+}
+
+__global__ void cleanupTokenPointers(SimulationData data, int clusterArrayIndex)
+{
+    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    BlockData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        auto& cluster = clusters.at(clusterIndex);
+
+        __shared__ Token** newTokenPointers;
+        if (0 == threadIdx.x) {
+            newTokenPointers = data.entitiesNew.tokenPointers.getNewSubarray(cluster->numTokenPointers);
+        }
+        __syncthreads();
+
+        auto tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
+        for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
+            auto& origToken = cluster->tokenPointers[tokenIndex];
+            newTokenPointers[tokenIndex] = origToken;
+        }
+        __syncthreads();
+
+        if (0 == threadIdx.x) {
+            cluster->tokenPointers = newTokenPointers;
+        }
+        __syncthreads();
+    }
+}
+
+__global__ void cleanupTokens(SimulationData data, int clusterArrayIndex)
+{
+    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    BlockData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        auto& cluster = clusters.at(clusterIndex);
+
+        __shared__ Token* newTokens;
+        if (0 == threadIdx.x) {
+            newTokens = data.entitiesNew.tokens.getNewSubarray(cluster->numTokenPointers);
+        }
+        __syncthreads();
+
+        auto tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
+
+        for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
+            auto& origTokenPointer = cluster->tokenPointers[tokenIndex];
+            auto& newToken = newTokens[tokenIndex];
+            newToken = *origTokenPointer;
+            origTokenPointer = &newTokens[tokenIndex];
         }
         __syncthreads();
     }
@@ -289,6 +344,18 @@ __global__ void cleanup(SimulationData data)
         data.entitiesNew.cells.reset();
         MULTI_CALL(cleanupCells, data);
         data.entities.cells.swapArray(data.entitiesNew.cells);
+    }
+
+    if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
+        data.entitiesNew.tokenPointers.reset();
+        MULTI_CALL(cleanupTokenPointers, data);
+        data.entities.tokenPointers.swapArray(data.entitiesNew.tokenPointers);
+    }
+
+    if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
+        data.entitiesNew.tokens.reset();
+        MULTI_CALL(cleanupTokens, data);
+        data.entities.tokens.swapArray(data.entitiesNew.tokens);
     }
 
     MULTI_CALL(cleanupClustersOnMap, data);
