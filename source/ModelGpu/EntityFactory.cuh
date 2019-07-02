@@ -163,8 +163,8 @@ __inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO 
     Particle* particle = _data->entities.particles.getNewElement();
     *particlePointer = particle;
     particle->id = particleTO.id;
-    particle->pos = particleTO.pos;
-    _map.mapPosCorrection(particle->pos);
+    particle->absPos = particleTO.pos;
+    _map.mapPosCorrection(particle->absPos);
     particle->vel = particleTO.vel;
     particle->energy = particleTO.energy;
     particle->locked = 0;
@@ -240,6 +240,6 @@ __inline__ __device__ void EntityFactory::createParticle(float energy, float2 co
     particle->locked = 0;
     particle->alive = true;
     particle->energy = energy;
-    particle->pos = pos;
+    particle->absPos = pos;
     particle->vel = vel;
 }
