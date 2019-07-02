@@ -33,7 +33,7 @@ private:
     __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster, Cluster* targetCluster);
     __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* sourceCluster2, Cluster* targetCluster);
     __inline__ __device__ void getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, 
-        int& counter, BlockData const& tokenBlock);
+        int& counter, PartitionData const& tokenBlock);
 
 
     SimulationData* _data;
@@ -41,7 +41,7 @@ private:
     Cluster* _cluster;
     Cluster** _clusterPointer;
 
-    BlockData _cellBlock;
+    PartitionData _cellBlock;
 };
 
 /************************************************************************/
@@ -337,7 +337,6 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
         if (cell->protectionCounter > 0) {
             --cell->protectionCounter;
         }
-        _data->cellMap.set(absPos, cell);
     }
     __syncthreads();
 
@@ -382,7 +381,7 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
     __syncthreads();
 
     if (_cluster->decompositionRequired) {
-        BlockData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
+        PartitionData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto token = _cluster->tokenPointers[tokenIndex];
             if (!token->cell->alive) {
@@ -533,7 +532,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
     __syncthreads();
 
     __shared__ Cluster* newClusters[MAX_DECOMPOSITIONS];
-    BlockData decompositionBlock = 
+    PartitionData decompositionBlock = 
         calcPartition(numDecompositions, threadIdx.x, blockDim.x);
     for (int index = decompositionBlock.startIndex; index <= decompositionBlock.endIndex; ++index) {
         auto numCells = entries[index].cluster.numCellPointers;
@@ -643,7 +642,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         }
         __syncthreads();
        
-        BlockData otherCellBlock = calcPartition(otherCluster->numCellPointers, threadIdx.x, blockDim.x);
+        PartitionData otherCellBlock = calcPartition(otherCluster->numCellPointers, threadIdx.x, blockDim.x);
 
         for (int otherCellIndex = otherCellBlock.startIndex; otherCellIndex <= otherCellBlock.endIndex; ++otherCellIndex) {
             Cell* cell = otherCluster->cellPointers[otherCellIndex];
@@ -687,7 +686,7 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(Cluster
     }
     __syncthreads();
 
-    BlockData tokenBlock = calcPartition(sourceCluster->numTokenPointers, threadIdx.x, blockDim.x);
+    PartitionData tokenBlock = calcPartition(sourceCluster->numTokenPointers, threadIdx.x, blockDim.x);
     getNumberOfTokensToCopy_blockCall(sourceCluster, targetCluster, numberOfTokensToCopy, tokenBlock);
 
     if (0 == threadIdx.x) {
@@ -721,8 +720,8 @@ ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* 
     }
     __syncthreads();
 
-    BlockData tokenBlock1 = calcPartition(sourceCluster1->numTokenPointers, threadIdx.x, blockDim.x);
-    BlockData tokenBlock2 = calcPartition(sourceCluster2->numTokenPointers, threadIdx.x, blockDim.x);
+    PartitionData tokenBlock1 = calcPartition(sourceCluster1->numTokenPointers, threadIdx.x, blockDim.x);
+    PartitionData tokenBlock2 = calcPartition(sourceCluster2->numTokenPointers, threadIdx.x, blockDim.x);
 
     getNumberOfTokensToCopy_blockCall(sourceCluster1, targetCluster, numberOfTokensToCopy, tokenBlock1);
     getNumberOfTokensToCopy_blockCall(sourceCluster2, targetCluster, numberOfTokensToCopy, tokenBlock2);
@@ -763,7 +762,7 @@ ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* 
 
 __inline__ __device__ void
 ClusterProcessor::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, 
-    int& counter, BlockData const& tokenBlock)
+    int& counter, PartitionData const& tokenBlock)
 {
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto const& token = sourceCluster->tokenPointers[tokenIndex];
