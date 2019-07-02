@@ -148,6 +148,10 @@ TEST_F(CleanupGpuTests, testCleanupTokenPointers)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1100, _controller));
 }
 
+/**
+* Situation: cluster where a token is moving in a cycle and branches
+* Expected result: no crash during the number of tokens of all times is growing
+*/
 TEST_F(CleanupGpuTests, testCleanupTokens)
 {
     _parameters.radiationProb = 0;    //exclude radiation
