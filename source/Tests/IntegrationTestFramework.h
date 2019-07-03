@@ -35,7 +35,9 @@ protected:
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	TokenDescription createSimpleToken() const;
 
-	ParticleDescription createParticle(optional<QVector2D> const& pos = boost::none) const;
+    ParticleDescription createParticle(
+        optional<QVector2D> const& pos = boost::none,
+        optional<QVector2D> const& vel = boost::none) const;
 
     ModelBasicBuilderFacade* _basicFacade = nullptr;
 	ModelCpuBuilderFacade* _cpuFacade = nullptr;

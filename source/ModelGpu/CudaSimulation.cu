@@ -100,8 +100,10 @@ CudaSimulation::~CudaSimulation()
 void CudaSimulation::calcNextTimestep()
 {
     GPU_FUNCTION(calcSimulationTimestep, *_internalData);
+}
 
-/*
+void CudaSimulation::DEBUG_printNumEntries()
+{
     std::cout
         << "Particles: " << _internalData->entities.particles.retrieveNumEntries() << "; "
         << "Cells: " << _internalData->entities.cells.retrieveNumEntries() << "; "
@@ -110,7 +112,6 @@ void CudaSimulation::calcNextTimestep()
         << "Tokens: " << _internalData->entities.tokens.retrieveNumEntries() << "; "
         << "TokenPointers: " << _internalData->entities.tokenPointers.retrieveNumEntries() << "; "
         << std::endl;
-*/
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
