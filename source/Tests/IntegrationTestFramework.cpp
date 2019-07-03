@@ -220,10 +220,12 @@ ClusterDescription IntegrationTestFramework::createSingleCellCluster(uint64_t cl
         .setAngularVel(1.2);
 }
 
-ParticleDescription IntegrationTestFramework::createParticle(optional<QVector2D> const& optPos) const
+ParticleDescription IntegrationTestFramework::createParticle(
+    optional<QVector2D> const& optPos,
+    optional<QVector2D> const& optVel) const
 {
 	auto pos = optPos ? *optPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	QVector2D vel(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
+	auto vel = optVel ? *optVel : QVector2D(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
 	return ParticleDescription().setEnergy(_parameters.cellMinEnergy / 2).setPos(pos).setVel(vel).setId(_numberGen->getId());
 }
 
