@@ -182,30 +182,29 @@ TEST_F(CleanupGpuTests, testCleanupTokens)
 }
 
 /**
-* Situation: many moving clusters
-* Expected result: if cellMap is cleared properly enough particles are present
+* Situation: one moving clusters and a particles which crosses old position of cluster
+* Expected result: particle is not absorbed
 */
 TEST_F(CleanupGpuTests, testCleanupCellMap)
 {
-    _parameters.radiationExponent = 1;
-    _parameters.radiationFactor = 0.0002f;
-    _parameters.radiationProb = 0.03f;
-    _parameters.radiationVelocityMultiplier = 1.0f;
-    _parameters.radiationVelocityPerturbation = 0.5f;
+    _parameters.radiationProb = 0;
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
-    for (int i = 0; i < 9; ++i) {
-        origData.addCluster(createRectangularCluster({ 10, 10 }));
-    }
-
+    origData.addCluster(createRectangularCluster({ 2,2 }, QVector2D{ 0, 10 }, QVector2D{ 0.5f, 0 }));
+    origData.addParticle(createParticle(QVector2D{ 5, 0 }, QVector2D{ 0, 0.5f }));
     IntegrationTestHelper::updateData(_access, origData);
-    IntegrationTestHelper::runSimulation(500, _controller);
+
+    IntegrationTestHelper::runSimulation(30, _controller);
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    EXPECT_LT(500, newData.particles->size());
+    ASSERT_EQ(1, newData.particles->size());
 }
 
+/**
+* Situation: two moving particles where one particle crosses old position of the other one
+* Expected result: particles do not fuse
+*/
 TEST_F(CleanupGpuTests, testCleanupParticleMap)
 {
     DataDescription origData;
