@@ -19,7 +19,10 @@ public:
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
     void setSimulationParameters(SimulationParameters const& parameters);
+
+private:
     void setCudaConstants(CudaConstants const& cudaConstants);
+    void DEBUG_printNumEntries();
 
 private:
     SimulationData* _internalData;

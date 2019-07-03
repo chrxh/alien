@@ -89,6 +89,9 @@ TEST_F(CleanupGpuTests, testCleanupCells)
 */
 TEST_F(CleanupGpuTests, testCleanupClusters)
 {
+    _parameters.radiationProb = 0;
+    _context->setSimulationParameters(_parameters);
+
     DataDescription origData;
     for (int i = 0; i < 900; ++i) {
         origData.addCluster(createRectangularCluster({ 1, 1 }));
@@ -176,4 +179,42 @@ TEST_F(CleanupGpuTests, testCleanupTokens)
     origData.addCluster(cluster);
     IntegrationTestHelper::updateData(_access, origData);
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(440, _controller));
+}
+
+/**
+* Situation: many moving clusters
+* Expected result: if cellMap is cleared properly enough particles are present
+*/
+TEST_F(CleanupGpuTests, testCleanupCellMap)
+{
+    _parameters.radiationExponent = 1;
+    _parameters.radiationFactor = 0.0002f;
+    _parameters.radiationProb = 0.03f;
+    _parameters.radiationVelocityMultiplier = 1.0f;
+    _parameters.radiationVelocityPerturbation = 0.5f;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+    for (int i = 0; i < 9; ++i) {
+        origData.addCluster(createRectangularCluster({ 10, 10 }));
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(500, _controller);
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    EXPECT_LT(500, newData.particles->size());
+}
+
+TEST_F(CleanupGpuTests, testCleanupParticleMap)
+{
+    DataDescription origData;
+    origData.addParticle(createParticle(QVector2D{ 0, 10 }, QVector2D{ 0.5f, 0 }));
+    origData.addParticle(createParticle(QVector2D{ 5, 0 }, QVector2D{ 0, 0.5f }));
+    IntegrationTestHelper::updateData(_access, origData);
+
+    IntegrationTestHelper::runSimulation(30, _controller);
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(2, newData.particles->size());
 }
