@@ -15,7 +15,7 @@ public:
 
 protected:
 
-	//boost::none means random
+	//important: boost::none means random
 	ClusterDescription createRectangularCluster(IntVector2D const& size,
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none) const;
