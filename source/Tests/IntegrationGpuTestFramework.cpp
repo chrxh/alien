@@ -13,17 +13,17 @@ IntegrationGpuTestFramework::IntegrationGpuTestFramework(
         data = *modelData;
     }
     else {
-        data.setNumThreadsPerBlock(64);
-        data.setNumBlocks(64);
+        data.setNumThreadsPerBlock(1);
+        data.setNumBlocks(1);
         data.setNumClusterPointerArrays(1);
-        data.setMaxClusters(500000);
-        data.setMaxCells(2000000);
-        data.setMaxParticles(2000000);
-        data.setMaxTokens(500000);
-        data.setMaxCellPointers(2000000 * 10);
-        data.setMaxClusterPointers(500000 * 10);
-        data.setMaxParticlePointers(2000000 * 10);
-        data.setMaxTokenPointers(500000 * 10);
+        data.setMaxClusters(100000);
+        data.setMaxCells(500000);
+        data.setMaxParticles(500000);
+        data.setMaxTokens(50000);
+        data.setMaxCellPointers(500000 * 10);
+        data.setMaxClusterPointers(100000 * 10);
+        data.setMaxParticlePointers(500000 * 10);
+        data.setMaxTokenPointers(50000 * 10);
     }
 
 	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, data, 0);
