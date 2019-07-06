@@ -13,8 +13,8 @@ IntegrationGpuTestFramework::IntegrationGpuTestFramework(
         data = *modelData;
     }
     else {
-        data.setNumThreadsPerBlock(1);
-        data.setNumBlocks(1);
+        data.setNumThreadsPerBlock(64);
+        data.setNumBlocks(64);
         data.setNumClusterPointerArrays(1);
         data.setMaxClusters(100000);
         data.setMaxCells(500000);
