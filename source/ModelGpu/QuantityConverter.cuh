@@ -35,7 +35,10 @@ __inline__ __device__ unsigned char QuantityConverter::convertAngleToData(float 
 {
     //0 to 180 degree => 0 to 128
     //-180 to 0 degree => 128 to 256 (= 0)
-    a = remainderf(remainderf(a, 360.0f) + 360.0f, 360.0f) - 180.0f;    //get angle between -180 and 180
+    a = remainderf(remainderf(a, 360.0f) + 360.0f, 360.0f);    //get angle between 0 and 360
+    if (a > 180.0f) {
+        a -= 360.0f;
+    }
     int result = static_cast<int>(a * 128.0f / 180.0f);
     return static_cast<unsigned char>(result);
 
