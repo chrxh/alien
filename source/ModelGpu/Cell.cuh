@@ -29,3 +29,11 @@ struct Cell
     int tag;
 };
 
+template<>
+struct HashFunctor<Cell*>
+{
+    __device__ __inline__ int operator()(Cell* const& cell)
+    {
+        return abs(static_cast<int>(cell->id));
+    }
+};

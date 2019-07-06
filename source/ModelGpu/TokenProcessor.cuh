@@ -12,6 +12,7 @@
 #include "EnergyGuidance.cuh"
 #include "CellComputerFunction.cuh"
 #include "PropulsionFunction.cuh"
+#include "ScannerFunction.cuh"
 
 class TokenProcessor
 {
@@ -309,6 +310,9 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
             } break;
             case Enums::CellFunction::PROPULSION: {
                 PropulsionFunction::processing(token, factory);
+            } break;
+            case Enums::CellFunction::SCANNER: {
+                ScannerFunction::processing(token);
             } break;
             }
             atomicExch(&cell->locked, 0);
