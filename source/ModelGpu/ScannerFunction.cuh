@@ -86,11 +86,8 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
     }
 
     //scan cell
-    auto e = floorf(lookupResult.cell->energy);
-    if (e > 255) {
-        e = 255;
-    }
-    tokenMem[Enums::Scanner::OUT_ENERGY] = e;
+    int cellEnergy = min(static_cast<int>(floorf(lookupResult.cell->energy)), 255);
+    tokenMem[Enums::Scanner::OUT_ENERGY] = cellEnergy;
     tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = lookupResult.cell->maxConnections;
     tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = lookupResult.cell->branchNumber;
 /*
@@ -136,11 +133,11 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell const* ce
         auto nextCellFound = false;
         Cell* nextCell = nullptr;
         auto nextCellAngle = 0.0f;
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto nextCandidateCell = cell->connections[i];
+        for (int i = 0; i < result.cell->numConnections; ++i) {
+            auto nextCandidateCell = result.cell->connections[i];
             if (!visitedCell.contains(nextCandidateCell) && !nextCandidateCell->tokenBlocked) {
 
-                //calc angle from "nextCandCell"
+                //calc angle from nextCandidateCell
                 auto angle = Math::angleOfVector(Math::sub(nextCandidateCell->relPos, cell->relPos));
 
                 //another cell already found? => compare angles
