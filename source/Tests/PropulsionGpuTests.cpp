@@ -1,5 +1,4 @@
 #include "Base/ServiceLocator.h"
-#include "ModelBasic/CellComputerCompiler.h"
 #include "ModelBasic/QuantityConverter.h"
 
 #include "IntegrationGpuTestFramework.h"

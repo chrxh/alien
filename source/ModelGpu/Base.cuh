@@ -206,18 +206,23 @@ struct HashFunctor<T*>
 {
     __device__ __inline__ int operator()(T* const& element)
     {
-        return reinterpret_cast<std::uintptr_t>(element) * 17;
+        return abs(static_cast<int>(reinterpret_cast<std::uintptr_t>(element)) * 17);
     }
 };
-
 
 template<typename T, typename Hash = HashFunctor<T>>
 class HashSet
 {
 public:
     __device__ __inline__ HashSet(int size, T* data)
-        : _size(size), _data(data)
+        : _data(data)
     {
+        reset(size);
+    }
+
+    __device__ __inline__ void reset(int size)
+    {
+        _size = size;
         for (int i = 0; i < size; ++i) {
             _data[i] = nullptr;
         }
