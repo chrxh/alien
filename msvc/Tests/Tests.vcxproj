@@ -284,6 +284,7 @@
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\Tests\PropulsionGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\ReplicatorTests.cpp" />
+    <ClCompile Include="..\..\source\Tests\ScannerGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\SerializationTests.cpp" />
     <ClCompile Include="..\..\source\Tests\TestSuite.cpp" />
     <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp" />
