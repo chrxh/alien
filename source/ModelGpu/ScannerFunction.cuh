@@ -30,7 +30,7 @@ private:
 __inline__ __device__ void ScannerFunction::processing(Token * token)
 {
     auto& tokenMem = token->memory;
-    int n = tokenMem[Enums::Scanner::INOUT_CELL_NUMBER];
+    unsigned int n = static_cast<unsigned char>(tokenMem[Enums::Scanner::INOUT_CELL_NUMBER]);
     auto cell = token->cell;
 
     auto lookupResult = spiralLookupAlgorithm(n, cell, token->sourceCell);
@@ -119,8 +119,8 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell const* ce
 {
     SpiralLookupResult result;
 
-    Cell const* visitedCellData[256];
-    HashSet<Cell const*> visitedCell(min(depth*2, 256), visitedCellData);
+    Cell const* visitedCellData[256*2];
+    HashSet<Cell const*> visitedCell(depth*2, visitedCellData);
 
     result.cell = cell;
     result.prevCell = sourceCell;
@@ -173,6 +173,7 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell const* ce
         //no next cell found? => finish
         else {
             result.finish = true;
+            printf("currentDepth: %d\n", currentDepth);
             return result;
         }
     }
