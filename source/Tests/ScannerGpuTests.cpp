@@ -7,7 +7,7 @@ class ScannerGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    ScannerGpuTests() : IntegrationGpuTestFramework({ 10, 10 })
+    ScannerGpuTests() : IntegrationGpuTestFramework()
     {}
 
     virtual ~ScannerGpuTests() = default;
@@ -95,7 +95,7 @@ TEST_F(ScannerGpuTests, testScanOriginCell)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 1
-* Expected result: correct cell (at (row=2, col=3)-position of the cluster) should be scanned
+* Expected result: correct cell (at (1, 2)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanSecondCell)
 {
@@ -134,7 +134,7 @@ TEST_F(ScannerGpuTests, testScanSecondCell)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 2
-* Expected result: correct cell (at (2, 4)-position of the cluster) should be scanned
+* Expected result: correct cell (at (1, 3)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanThirdCell)
 {
@@ -179,7 +179,7 @@ TEST_F(ScannerGpuTests, testScanThirdCell)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 9
-* Expected result: correct cell (at (1, 2)-position of the cluster) should be scanned
+* Expected result: correct cell (at (0, 1)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanDistantCell)
 {
@@ -227,7 +227,7 @@ TEST_F(ScannerGpuTests, testScanDistantCell)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 24
-* Expected result: correct cell (at (1, 1)-position of the cluster) should be scanned
+* Expected result: correct cell (at (0, 0)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanFinished)
 {
@@ -275,7 +275,7 @@ TEST_F(ScannerGpuTests, testScanFinished)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 25
-* Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
+* Expected result: correct cell (at (2, 2)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanRestart1)
 {
@@ -292,7 +292,6 @@ TEST_F(ScannerGpuTests, testScanRestart1)
     middleCell.tokenBranchNumber = 1;
     middleCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::SCANNER);
     middleCell.energy = _parameters.cellMinEnergy + 10.5f;
-
 
     origData.addCluster(cluster);
 
@@ -314,7 +313,7 @@ TEST_F(ScannerGpuTests, testScanRestart1)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 180
-* Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
+* Expected result: correct cell (at (2, 2)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanRestart2)
 {
@@ -346,4 +345,90 @@ TEST_F(ScannerGpuTests, testScanRestart2)
     EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUT));
     EXPECT_EQ(1, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
+}
+
+/**
+* Situation: - 5x5 cluster with scanner function at middle cell
+*            - token coming from left
+*            - scanning cell number is 255
+* Expected result: correct cell (at (2, 2)-position of the cluster) should be scanned
+*/
+TEST_F(ScannerGpuTests, testScanMaxCellNumber)
+{
+    DataDescription origData;
+    auto cluster = createRectangularCluster({ 5, 5 }, QVector2D{}, QVector2D{});
+
+    auto& tokenSourceCell = cluster.cells->at(11);
+    tokenSourceCell.tokenBranchNumber = 0;
+    auto token = createSimpleToken();
+    (*token.data)[Enums::Scanner::INOUT_CELL_NUMBER] = 255;
+    tokenSourceCell.addToken(token);
+
+    auto& middleCell = cluster.cells->at(12);
+    middleCell.tokenBranchNumber = 1;
+    middleCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::SCANNER);
+    middleCell.energy = _parameters.cellMinEnergy + 10.5f;
+
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const& newMiddleCell = cellByCellId.at(middleCell.id);
+    auto const& newToken = newMiddleCell.tokens->at(0);
+
+    checkScannedCellWithToken(newMiddleCell, newMiddleCell, newMiddleCell, newToken);
+    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(1, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
+    EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
+}
+
+/**
+* Situation: - 260 cluster with scanner function at first cell
+*            - token coming from second cell
+*            - scanning cell number is 255
+* Expected result: correct cell (at 256-position of the cluster) should be scanned
+*/
+TEST_F(ScannerGpuTests, testScanMaxCellNumber_largeCluster)
+{
+    DataDescription origData;
+    auto cluster = createRectangularCluster({ 260, 1 }, QVector2D{ }, QVector2D{});
+
+    auto& tokenSourceCell = cluster.cells->at(1);
+    tokenSourceCell.tokenBranchNumber = 0;
+    auto token = createSimpleToken();
+    (*token.data)[Enums::Scanner::INOUT_CELL_NUMBER] = 255;
+    tokenSourceCell.addToken(token);
+
+    auto& firstCell = cluster.cells->at(0);
+    firstCell.tokenBranchNumber = 1;
+    firstCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::SCANNER);
+
+    auto& scanCell = cluster.cells->at(255);
+    scanCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+    scanCell.tokenBranchNumber = 2;
+    scanCell.energy = _parameters.cellMinEnergy + 10.5f;
+
+    auto& prevScanCell = cluster.cells->at(254);
+    auto& prevPrevScanCell = cluster.cells->at(253);
+
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const& newFirstCell = cellByCellId.at(firstCell.id);
+    auto const& newScanCell = cellByCellId.at(scanCell.id);
+    auto const& newPrevScanCell = cellByCellId.at(prevScanCell.id);
+    auto const& newPrevPrevScanCell = cellByCellId.at(prevPrevScanCell.id);
+    auto const& newToken = newFirstCell.tokens->at(0);
+
+    checkScannedCellWithToken(newScanCell, newPrevScanCell, newPrevPrevScanCell, newToken);
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(0, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
+    EXPECT_EQ(255, static_cast<unsigned char>(newToken.data->at(Enums::Scanner::OUT_MASS)));
 }
