@@ -247,6 +247,9 @@ public:
             if (_data[index] == element) {
                 return true;
             }
+            else if(nullptr == _data[index]) {
+                return false;
+            }
         }
         return false;
     }
