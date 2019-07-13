@@ -173,7 +173,6 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell const* ce
         //no next cell found? => finish
         else {
             result.finish = true;
-            printf("currentDepth: %d\n", currentDepth);
             return result;
         }
     }
