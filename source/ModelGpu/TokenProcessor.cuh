@@ -123,8 +123,6 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
 
         int anticipatedTokens = calcAnticipatedTokens(cluster);
 
-        Token** newTokenPointers = _data->entities.tokenPointers.getNewSubarray(anticipatedTokens);
-        int newNumTokens = 0;
         for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
             Cell* cell = cluster->cellPointers[cellIndex];
             if (cell->alive) {
@@ -132,6 +130,8 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
             }
         }
 
+        int newNumTokens = 0;
+        Token** newTokenPointers = _data->entities.tokenPointers.getNewSubarray(anticipatedTokens);
         for (int tokenIndex = 0; tokenIndex < cluster->numTokenPointers; ++tokenIndex) {
             auto& token = cluster->tokenPointers[tokenIndex];
             auto cell = token->cell;
