@@ -44,7 +44,7 @@ void ScannerGpuTests::checkScannedCellWithToken(
     EXPECT_EQ(cell.cellFeature->type, token.data->at(Enums::Scanner::OUT_CELL_FUNCTION));
     EXPECT_EQ(static_cast<int>(*cell.energy), token.data->at(Enums::Scanner::OUT_ENERGY));
     EXPECT_EQ(
-        QuantityConverter::convertShiftLenToData((*cell.pos - *prevCell.pos).length()),
+        QuantityConverter::convertDistanceToData((*cell.pos - *prevCell.pos).length()),
         token.data->at(Enums::Scanner::OUT_DISTANCE));
 
     if (prevCell.pos != prevPrevCell.pos) {

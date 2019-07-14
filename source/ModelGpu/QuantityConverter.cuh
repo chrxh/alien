@@ -8,8 +8,8 @@ public:
     //Notice: all angles below are in DEG
     __inline__ __device__ static float convertDataToAngle(unsigned char b);
     __inline__ __device__ static unsigned char convertAngleToData(float a);
-    __inline__ __device__ static float convertDataToShiftLen(unsigned char b);
-    __inline__ __device__ static unsigned char convertShiftLenToData(float len);
+    __inline__ __device__ static float convertDataToDistance(unsigned char b);
+    __inline__ __device__ static unsigned char convertDistanceToData(float len);
     __inline__ __device__ static unsigned char convertURealToData(float r);
     __inline__ __device__ static float convertDataToUReal(unsigned char d);
     __inline__ __device__ static unsigned char convertIntToData(int i);
@@ -44,13 +44,13 @@ __inline__ __device__ unsigned char QuantityConverter::convertAngleToData(float 
 
 }
 
-__inline__ __device__ float QuantityConverter::convertDataToShiftLen(unsigned char b)
+__inline__ __device__ float QuantityConverter::convertDataToDistance(unsigned char b)
 {
     return (0.5f + static_cast<float>(b)) / 100.0f;
 
 }
 
-__inline__ __device__ unsigned char QuantityConverter::convertShiftLenToData(float len)
+__inline__ __device__ unsigned char QuantityConverter::convertDistanceToData(float len)
 {
     if (static_cast<uint32_t>(len*100.0f) >= 256) {
         return 255;
