@@ -147,6 +147,9 @@
     <ClInclude Include="..\..\source\ModelGpu\ConstantMemory.cuh">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ConstructorFunction.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">

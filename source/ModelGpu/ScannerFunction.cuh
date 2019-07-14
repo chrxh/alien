@@ -68,7 +68,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
 
         //calc dist from cell n to cell n-1
         auto len = Math::length(Math::sub(lookupResult.cell->relPos, lookupResult.prevCell->relPos));
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
     //further cell
@@ -82,7 +82,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
 
         //calc dist from cell n to cell n-1
         auto len = Math::length(Math::sub(lookupResult.cell->relPos, lookupResult.prevCell->relPos));
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
     //scan cell
