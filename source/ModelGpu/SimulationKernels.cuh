@@ -87,36 +87,52 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters, int
 
 __device__ void tokenProcessingStep1_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
+/*
 	TokenProcessor tokenProcessor;
-    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
-    tokenProcessor.processingEnergyAveraging_blockCall();
+    tokenProcessor.init(data, clusterArrayIndex, clusterIndex);
+    tokenProcessor.processingEnergyAveraging();
+*/
 }
 
 __device__ void tokenProcessingStep2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
 {
+/*
 	TokenProcessor tokenProcessor;
 
-    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
-    tokenProcessor.processingSpreading_blockCall();
-    tokenProcessor.processingFeatures_blockCall();
+    tokenProcessor.init(data, clusterArrayIndex, clusterIndex);
+    tokenProcessor.processingSpreading();
+    tokenProcessor.processingFeatures();
+*/
 }
 
 __global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
 {
+    TokenProcessor tokenProcessor;
+    tokenProcessor.init_gridCall(data, clusterArrayIndex);
+    tokenProcessor.processingEnergyAveraging_gridCall();
+
+/*
     auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         tokenProcessingStep1_blockCall(data, clusterArrayIndex, clusterIndex);
     }
+*/
 }
 
 __global__ void tokenProcessingStep2(SimulationData data, int clusterArrayIndex)
 {
+    TokenProcessor tokenProcessor;
+    tokenProcessor.init_gridCall(data, clusterArrayIndex);
+    tokenProcessor.processingSpreading_gridCall();
+    tokenProcessor.processingFeatures_gridCall();
+/*
     auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         tokenProcessingStep2_blockCall(data, clusterArrayIndex, clusterIndex);
     }
+*/
 }
 
 
@@ -127,24 +143,24 @@ __global__ void tokenProcessingStep2(SimulationData data, int clusterArrayIndex)
 __global__ void particleProcessingStep1(SimulationData data)
 {
 	ParticleProcessor particleProcessor;
-    particleProcessor.init_blockCall(data);
-    particleProcessor.processingMovement_blockCall();
-    particleProcessor.updateMap_blockCall();
-    particleProcessor.processingTransformation_blockCall();
+    particleProcessor.init_gridCall(data);
+    particleProcessor.processingMovement_gridCall();
+    particleProcessor.updateMap_gridCall();
+    particleProcessor.processingTransformation_gridCall();
 }
 
 __global__ void particleProcessingStep2(SimulationData data)
 {
     ParticleProcessor particleProcessor;
-    particleProcessor.init_blockCall(data);
-    particleProcessor.processingCollision_blockCall();
+    particleProcessor.init_gridCall(data);
+    particleProcessor.processingCollision_gridCall();
 }
 
 __global__ void particleProcessingStep3(SimulationData data)
 {
 	ParticleProcessor particleProcessor;
-    particleProcessor.init_blockCall(data);
-    particleProcessor.processingDataCopy_blockCall();
+    particleProcessor.init_gridCall(data);
+    particleProcessor.processingDataCopy_gridCall();
 }
 
 /************************************************************************/

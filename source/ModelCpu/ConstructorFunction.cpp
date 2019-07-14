@@ -147,7 +147,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
         return processingResult;
 
     //read shift length for construction site from token data
-    qreal len = QuantityConverter::convertDataToShiftLen(tokenMem[Enums::Constr::IN_DIST]);
+    qreal len = QuantityConverter::convertDataToDistance(tokenMem[Enums::Constr::IN_DIST]);
     if( len > parameters.cellMaxDistance ) {        //length to large?
         tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
         return processingResult;

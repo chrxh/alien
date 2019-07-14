@@ -105,7 +105,8 @@ namespace Enums
             DO_NOTHING,
             SAFE,
             UNSAFE,
-            BRUTEFORCE
+            BRUTEFORCE,
+            _COUNTER
         };
     };
     struct ConstrInOption {
@@ -116,7 +117,8 @@ namespace Enums
             FINISH_NO_SEP,
             FINISH_WITH_SEP,
             FINISH_WITH_SEP_RED,
-            FINISH_WITH_TOKEN_SEP_RED
+            FINISH_WITH_TOKEN_SEP_RED,
+            _COUNTER
         };
     };
 
