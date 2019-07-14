@@ -132,7 +132,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPosition() - scanCellPre1->getRelPosition()).length();
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
     //further cell
@@ -147,7 +147,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPosition() - scanCellPre1->getRelPosition()).length();
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
     //scan cell

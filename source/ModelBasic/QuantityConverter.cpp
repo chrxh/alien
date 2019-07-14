@@ -24,12 +24,12 @@ quint8 QuantityConverter::convertAngleToData(qreal a)
 	return static_cast<quint8>(intA);
 }
 
-qreal QuantityConverter::convertDataToShiftLen(quint8 b)
+qreal QuantityConverter::convertDataToDistance(quint8 b)
 {
 	return (0.5 + (qreal)b) / 100.0;                    //add 0.5 to prevent discretization errors
 }
 
-quint8 QuantityConverter::convertShiftLenToData(qreal len)
+quint8 QuantityConverter::convertDistanceToData(qreal len)
 {
 	if (static_cast<quint32>(len*100.0) >= 256)
 		return 255;
