@@ -85,54 +85,13 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters, int
 /* Tokens																*/
 /************************************************************************/
 
-__device__ void tokenProcessingStep1_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
-{
-/*
-	TokenProcessor tokenProcessor;
-    tokenProcessor.init(data, clusterArrayIndex, clusterIndex);
-    tokenProcessor.processingEnergyAveraging();
-*/
-}
-
-__device__ void tokenProcessingStep2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
-{
-/*
-	TokenProcessor tokenProcessor;
-
-    tokenProcessor.init(data, clusterArrayIndex, clusterIndex);
-    tokenProcessor.processingSpreading();
-    tokenProcessor.processingFeatures();
-*/
-}
-
-__global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
+__global__ void tokenProcessing(SimulationData data, int clusterArrayIndex)
 {
     TokenProcessor tokenProcessor;
     tokenProcessor.init_gridCall(data, clusterArrayIndex);
     tokenProcessor.processingEnergyAveraging_gridCall();
-
-/*
-    auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
-    PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        tokenProcessingStep1_blockCall(data, clusterArrayIndex, clusterIndex);
-    }
-*/
-}
-
-__global__ void tokenProcessingStep2(SimulationData data, int clusterArrayIndex)
-{
-    TokenProcessor tokenProcessor;
-    tokenProcessor.init_gridCall(data, clusterArrayIndex);
     tokenProcessor.processingSpreading_gridCall();
     tokenProcessor.processingFeatures_gridCall();
-/*
-    auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
-    PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        tokenProcessingStep2_blockCall(data, clusterArrayIndex, clusterIndex);
-    }
-*/
 }
 
 
@@ -172,8 +131,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.cellMap.reset();
     data.particleMap.reset();
 
-    MULTI_CALL(tokenProcessingStep1, data);
-    MULTI_CALL(tokenProcessingStep2, data);
+    MULTI_CALL(tokenProcessing, data);
     MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
