@@ -42,7 +42,7 @@ __inline__ __device__ void ParticleProcessor::processingMovement_gridCall()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
-        particle->absPos = Math::add(particle->absPos, particle->vel);
+        particle->absPos = particle->absPos + particle->vel;
         _data->particleMap.mapPosCorrection(particle->absPos);
     }
 }
@@ -70,7 +70,7 @@ __inline__ __device__ void ParticleProcessor::processingCollision_gridCall()
 
                 float factor1 = particle->energy / (particle->energy + otherParticle->energy);
                 float factor2 = 1.0f - factor1;
-                particle->vel = Math::add(Math::mul(particle->vel, factor1), Math::mul(otherParticle->vel, factor2));
+                particle->vel = particle->vel * factor1 + otherParticle->vel * factor2;
                 atomicAdd(&particle->energy, otherParticle->energy);
                 atomicAdd(&otherParticle->energy, -otherParticle->energy);
                 otherParticle->alive = false;

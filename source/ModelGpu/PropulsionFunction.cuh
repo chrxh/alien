@@ -44,38 +44,38 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
 
             auto origKineticEnergy =
                 Physics::kineticEnergy(clusterMass, vel, angularMass, angularVel);
-            auto cellRelPos = Math::sub(cell->absPos, cluster->pos);
+            auto cellRelPos = cell->absPos - cluster->pos;
             auto tangVel = Physics::tangentialVelocity(cellRelPos, vel, angularVel);
 
             //calc angle of acting thrust
             float2 impulse;
             if (Enums::PropIn::BY_ANGLE == command) {
                 auto thrustAngle =
-                    (Math::angleOfVector(Math::sub(sourceCell->relPos, cell->relPos)) + cluster->angle + angle);
-                impulse = Math::mul(Math::unitVectorOfAngle(thrustAngle), power);
+                    (Math::angleOfVector(sourceCell->relPos - cell->relPos) + cluster->angle + angle);
+                impulse = Math::unitVectorOfAngle(thrustAngle) * power;
             }
             if (Enums::PropIn::FROM_CENTER == command) {
-                impulse = Math::mul(Math::normalized(cellRelPos), power);
+                impulse = Math::normalized(cellRelPos) * power;
             }
             if (Enums::PropIn::TOWARD_CENTER == command) {
-                impulse = Math::mul(Math::normalized(Math::minus(cellRelPos)), power);
+                impulse = Math::normalized(Math::minus(cellRelPos)) * power;
             }
 
             auto rAPp = cellRelPos;
             Math::rotateQuarterCounterClockwise(rAPp);
             Math::normalize(rAPp);
             if (Enums::PropIn::ROTATION_CLOCKWISE == command) {
-                impulse = Math::mul(rAPp, -power);
+                impulse = rAPp * (-power);
             }
             if (Enums::PropIn::ROTATION_COUNTERCLOCKWISE == command) {
-                impulse = Math::mul(rAPp, power);
+                impulse = rAPp * power;
             }
             if (Enums::PropIn::DAMP_ROTATION == command) {
                 if (angularVel > 0.0f) {
-                    impulse = Math::mul(rAPp, power);
+                    impulse = rAPp * power;
                 }
                 if (angularVel < 0.0f) {
-                    impulse = Math::mul(rAPp, -power);
+                    impulse = rAPp * (-power);
                 }
             }
 
@@ -96,7 +96,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
             }
 
             auto newKineticEnergy =
-                Physics::kineticEnergy(clusterMass, Math::add(vel, velInc), angularMass, angularVel + angularVelInc);
+                Physics::kineticEnergy(clusterMass, vel + velInc, angularMass, angularVel + angularVelInc);
             auto energyDiff = newKineticEnergy - origKineticEnergy;
 
             if (energyDiff > 0.0f && token->energy < energyDiff + cudaSimulationParameters.tokenMinEnergy + FP_PRECISION) {
@@ -105,13 +105,13 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
                 return;
             }
 
-            cluster->vel = Math::add(vel, velInc);
+            cluster->vel = vel + velInc;
             cluster->angularVel += angularVelInc;
 
             //create energy particle with difference energy
             Math::normalize(impulse);
-            auto particlePos = Math::sub(cell->absPos, impulse);
-            auto particleVel = Math::sub(tangVel, Math::div(impulse, 4.0f));
+            auto particlePos = cell->absPos - impulse;
+            auto particleVel = tangVel - impulse / 4.0f;
             factory.createParticle(abs(energyDiff), particlePos, particleVel);
 
             token->energy -= (energyDiff + abs(energyDiff));
