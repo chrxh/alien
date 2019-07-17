@@ -77,7 +77,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         Cell* cell = cluster->cellPointers[index];
         for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
             for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                Cell* otherCell = _data->cellMap.get(Math::add(cell->absPos, { dx, dy }));
+                Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
 
                 if (!otherCell || otherCell == cell) {
                     continue;
@@ -125,7 +125,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         Cell* cell = cluster->cellPointers[index];
         for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
             for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                Cell* otherCell = _data->cellMap.get(Math::add(cell->absPos, { dx, dy }));
+                Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
                 if (!otherCell || otherCell == cell) {
                     continue;
                 }
@@ -143,7 +143,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                     avoidCollision = true;
                     break;
                 }
-                if (Math::length(Math::sub(cell->vel, otherCell->vel)) >= cudaSimulationParameters.cellFusionVelocity
+                if (Math::length(cell->vel - otherCell->vel) >= cudaSimulationParameters.cellFusionVelocity
                     && areConnectable(cell, otherCell)) {
                     state = CollisionState::Fusion;
                 }
@@ -177,7 +177,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                 Cell* cell = cluster->cellPointers[index];
                 for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
                     for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                        Cell* otherCell = _data->cellMap.get(Math::add(cell->absPos, { dx, dy }));
+                        Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
                         if (!otherCell || otherCell == cell) {
                             continue;
                         }
@@ -191,7 +191,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                             >= cudaSimulationParameters.cellMaxDistance) {
                             continue;
                         }
-                        if (Math::length(Math::sub(cell->vel, otherCell->vel)) < cudaSimulationParameters.cellFusionVelocity
+                        if (Math::length(cell->vel - otherCell->vel) < cudaSimulationParameters.cellFusionVelocity
                             || !areConnectable(cell, otherCell)) {
                             continue;
                         }
@@ -221,14 +221,14 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         __shared__ float2 outwardVector;
         __shared__ float2 n;
         if (0 == threadIdx.x) {
-            collisionCenterPos = Math::div(collisionCenterPos, numberOfCollidingCells);
+            collisionCenterPos = collisionCenterPos / numberOfCollidingCells;
             rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
             _data->cellMap.mapDisplacementCorrection(rAPp);
             rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
             _data->cellMap.mapDisplacementCorrection(rBPp);
-            outwardVector = Math::sub(
-                Physics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel),
-                Physics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel));
+            outwardVector =
+                Physics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel)
+                - Physics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel);
             Math::rotateQuarterCounterClockwise(rAPp);
             Math::rotateQuarterCounterClockwise(rBPp);
             n.x = 0.0f;
@@ -240,7 +240,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
             Cell* cell = cluster->cellPointers[index];
             for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
                 for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
-                    Cell* otherCell = _data->cellMap.get(Math::add(cell->absPos, { dx, dy }));
+                    Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
                     if (!otherCell || otherCell == cell) {
                         continue;
                     }
@@ -305,7 +305,7 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
     if (0 == threadIdx.x) {
         _cluster->angle += _cluster->angularVel;
         Math::angleCorrection(_cluster->angle);
-        _cluster->pos = Math::add(_cluster->pos, _cluster->vel);
+        _cluster->pos = _cluster->pos + _cluster->vel;
         _data->cellMap.mapPosCorrection(_cluster->pos);
         Math::rotationMatrix(_cluster->angle, rotMatrix);
     }
@@ -315,16 +315,14 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
 
-        float2 absPos;
-        absPos.x = cell->relPos.x*rotMatrix[0][0] + cell->relPos.y*rotMatrix[0][1] + _cluster->pos.x;
-        absPos.y = cell->relPos.x*rotMatrix[1][0] + cell->relPos.y*rotMatrix[1][1] + _cluster->pos.y;
+        float2 absPos = Math::applyMatrix(cell->relPos, rotMatrix) + _cluster->pos;
         cell->absPos = absPos;
 
-        auto r = Math::sub(cell->absPos, _cluster->pos);
+        auto r = cell->absPos - _cluster->pos;
         _data->cellMap.mapDisplacementCorrection(r);
         auto newVel = Physics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
 
-        auto a = Math::sub(newVel, cell->vel);
+        auto a = newVel - cell->vel;
         if (Math::length(a) > cudaSimulationParameters.cellMaxForce) {
             if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 cell->alive = false;
@@ -363,12 +361,11 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
             float2 particlePos = { static_cast<int>(pos.x) + _data->numberGen.random(3) - 1.5f,
                 static_cast<int>(pos.y) + _data->numberGen.random(3) - 1.5f };
             _data->cellMap.mapPosCorrection(particlePos);
-            float2 particleVel =
-                Math::add(Math::mul(cell->vel, cudaSimulationParameters.radiationVelocityMultiplier),
-                { (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                    (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation });
+            float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+                + float2{(_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                         (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
 
-            particlePos = Math::sub(particlePos, particleVel);	//because particle will still be moved in current time step
+            particlePos = particlePos - particleVel;	//because particle will still be moved in current time step
             float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
             radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
             radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
@@ -553,21 +550,19 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         for (int index = 0; index < numDecompositions; ++index) {
             if (cell->tag == entries[index].tag) {
                 Cluster* newCluster = newClusters[index];
-                float2 deltaPos = Math::sub(cell->absPos, newCluster->pos);
+                float2 deltaPos = cell->absPos - newCluster->pos;
                 _data->cellMap.mapDisplacementCorrection(deltaPos);
                 auto angularMass = deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
                 atomicAdd(&newCluster->angularMass, angularMass);
 
-                auto r = Math::sub(cell->absPos, _cluster->pos);
+                auto r = cell->absPos - _cluster->pos;
                 _data->cellMap.mapDisplacementCorrection(r);
-                float2 relVel = Math::sub(cell->vel, newCluster->vel);
+                float2 relVel = cell->vel - newCluster->vel;
                 float angularMomentum = Physics::angularMomentum(r, relVel);
                 atomicAdd(&newCluster->angularVel, angularMomentum);
 
                 float(&invRotMatrix)[2][2] = entries[index].invRotMatrix;
-                cell->relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
-                cell->relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
-
+                cell->relPos = Math::applyMatrix(deltaPos, invRotMatrix);
                 int newCellIndex = atomicAdd(&newCluster->numCellPointers, 1);
                 Cell*& newCellPointer = newCluster->cellPointers[newCellIndex];
                 newCellPointer = cell;
@@ -612,11 +607,12 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
 
             correction = _data->cellMap.correctionIncrement(_cluster->pos, otherCluster->pos);	//to be added to otherCluster
 
-            newCluster->pos =
-                Math::div(Math::add(Math::mul(_cluster->pos, _cluster->numCellPointers), Math::mul(Math::add(otherCluster->pos, correction), otherCluster->numCellPointers)),
-                    newCluster->numCellPointers);
-            newCluster->vel = Math::div(
-                Math::add(Math::mul(_cluster->vel, _cluster->numCellPointers), Math::mul(otherCluster->vel, otherCluster->numCellPointers)), newCluster->numCellPointers);
+            newCluster->pos = (_cluster->pos * _cluster->numCellPointers
+                               + ((otherCluster->pos + correction) * otherCluster->numCellPointers))
+                / newCluster->numCellPointers;
+            newCluster->vel =
+                (_cluster->vel * _cluster->numCellPointers + otherCluster->vel * otherCluster->numCellPointers)
+                / newCluster->numCellPointers;
             newCluster->angularVel = 0.0f;
             newCluster->angularMass = 0.0f;
         }
@@ -625,14 +621,14 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             Cell* cell = _cluster->cellPointers[cellIndex];
             newCluster->cellPointers[cellIndex] = cell;
-            auto relPos = Math::sub(cell->absPos, newCluster->pos);
+            auto relPos = cell->absPos - newCluster->pos;
             cell->relPos = relPos;
             cell->cluster = newCluster;
             atomicAdd(&newCluster->angularMass, Math::lengthSquared(relPos));
 
-            auto r = Math::sub(cell->absPos, _cluster->pos);
+            auto r = cell->absPos - _cluster->pos;
             _data->cellMap.mapDisplacementCorrection(r);
-            float2 relVel = Math::sub(cell->vel, _cluster->vel);
+            float2 relVel = cell->vel - _cluster->vel;
             float angularMomentum = Physics::angularMomentum(r, relVel);
             atomicAdd(&newCluster->angularVel, angularMomentum);
         }
@@ -643,16 +639,16 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         for (int otherCellIndex = otherCellBlock.startIndex; otherCellIndex <= otherCellBlock.endIndex; ++otherCellIndex) {
             Cell* cell = otherCluster->cellPointers[otherCellIndex];
             newCluster->cellPointers[_cluster->numCellPointers + otherCellIndex] = cell;
-            auto r = Math::sub(cell->absPos, otherCluster->pos);
+            auto r = cell->absPos - otherCluster->pos;
             _data->cellMap.mapDisplacementCorrection(r);
 
-            cell->absPos = Math::add(cell->absPos, correction);
-            auto relPos = Math::sub(cell->absPos, newCluster->pos);
+            cell->absPos = cell->absPos + correction;
+            auto relPos = cell->absPos - newCluster->pos;
             cell->relPos = relPos;
             cell->cluster = newCluster;
             atomicAdd(&newCluster->angularMass, Math::lengthSquared(relPos));
 
-            float2 relVel = Math::sub(cell->vel, otherCluster->vel);
+            float2 relVel = cell->vel - otherCluster->vel;
             float angularMomentum = Physics::angularMomentum(r, relVel);
             atomicAdd(&newCluster->angularVel, angularMomentum);
         }

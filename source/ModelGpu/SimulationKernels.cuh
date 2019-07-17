@@ -131,8 +131,8 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.cellMap.reset();
     data.particleMap.reset();
 
-    MULTI_CALL(tokenProcessing, data);
     MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(tokenProcessing, data);
     MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());

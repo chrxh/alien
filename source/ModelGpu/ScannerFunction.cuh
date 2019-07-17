@@ -67,7 +67,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
         tokenMem[Enums::Scanner::OUT_ANGLE] = 0;
 
         //calc dist from cell n to cell n-1
-        auto len = Math::length(Math::sub(lookupResult.cell->relPos, lookupResult.prevCell->relPos));
+        auto len = Math::length(lookupResult.cell->relPos - lookupResult.prevCell->relPos);
         tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
@@ -75,13 +75,13 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
     if (n > 1) {
 
         //calc angle from cell n to cell n-1
-        auto a1 = Math::angleOfVector(Math::sub(lookupResult.prevPrevCell->relPos, lookupResult.prevCell->relPos));
-        auto a2 = Math::angleOfVector(Math::sub(lookupResult.prevCell->relPos, lookupResult.cell->relPos));
+        auto a1 = Math::angleOfVector(lookupResult.prevPrevCell->relPos - lookupResult.prevCell->relPos);
+        auto a2 = Math::angleOfVector(lookupResult.prevCell->relPos - lookupResult.cell->relPos);
         auto angle = a1 - a2;
         tokenMem[Enums::Scanner::OUT_ANGLE] = QuantityConverter::convertAngleToData(angle);
 
         //calc dist from cell n to cell n-1
-        auto len = Math::length(Math::sub(lookupResult.cell->relPos, lookupResult.prevCell->relPos));
+        auto len = Math::length(lookupResult.cell->relPos - lookupResult.prevCell->relPos);
         tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
@@ -128,7 +128,7 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell const* ce
     for (int currentDepth = 0; currentDepth < depth; ++currentDepth) {
         visitedCell.insert(result.cell);
 
-        auto originAngle = Math::angleOfVector(Math::sub(result.prevCell->relPos, result.cell->relPos));
+        auto originAngle = Math::angleOfVector(result.prevCell->relPos - result.cell->relPos);
 
         auto nextCellFound = false;
         Cell* nextCell = nullptr;
@@ -138,7 +138,7 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell const* ce
             if (!visitedCell.contains(nextCandidateCell) && !nextCandidateCell->tokenBlocked) {
 
                 //calc angle from nextCandidateCell
-                auto angle = Math::angleOfVector(Math::sub(nextCandidateCell->relPos, cell->relPos));
+                auto angle = Math::angleOfVector(nextCandidateCell->relPos - cell->relPos);
 
                 //another cell already found? => compare angles
                 if (nextCellFound) {
