@@ -59,7 +59,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
         cluster->id = clusterTO.id;
         cluster->pos = clusterTO.pos;
         _map.mapPosCorrection(cluster->pos);
-        posCorrection = Math::sub(cluster->pos, clusterTO.pos);
+        posCorrection = cluster->pos - clusterTO.pos;
         cluster->vel = clusterTO.vel;
         cluster->angle = clusterTO.angle;
         cluster->angularVel = clusterTO.angularVel;
@@ -86,14 +86,14 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
         auto const& cellTO = _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
         cell.id = cellTO.id;
         cell.cluster = cluster;
-        cell.absPos = Math::add(cellTO.pos, posCorrection);
+        cell.absPos = cellTO.pos + posCorrection;
 
-        float2 deltaPos = Math::sub(cell.absPos, clusterTO.pos);
+        float2 deltaPos = cell.absPos - clusterTO.pos;
         cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
         cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
         atomicAdd(&angularMass, Math::lengthSquared(cell.relPos));
 
-        auto r = Math::sub(cell.absPos, cluster->pos);
+        auto r = cell.absPos - cluster->pos;
         _map.mapDisplacementCorrection(r);
         cell.vel = Physics::tangentialVelocity(r, cluster->vel, cluster->angularVel);
 
