@@ -1,19 +1,16 @@
 #pragma once
 
-#include "device_functions.h"
-#include "sm_60_atomic_functions.h"
-
-#include "ModelBasic/ElementaryTypes.h"
-
-#include "CudaAccessTOs.cuh"
 #include "Base.cuh"
+#include "CudaAccessTOs.cuh"
 #include "Map.cuh"
 #include "Math.cuh"
+#include "ModelBasic/ElementaryTypes.h"
+#include "Particle.cuh"
 #include "Physics.cuh"
-
 #include "SimulationData.cuh"
 #include "Token.cuh"
-#include "Particle.cuh"
+#include "device_functions.h"
+#include "sm_60_atomic_functions.h"
 
 class EntityFactory
 {
@@ -23,14 +20,16 @@ private:
 
 public:
     __inline__ __device__ void init(SimulationData* data);
+    __inline__ __device__ Cell* createCell(Cluster* cluster);
+    __inline__ __device__ Token* createToken(Cell* cell);
+    __inline__ __device__ Particle* createParticleFromTO(
+        ParticleAccessTO const& particleTO);  //TODO: not adding to simulation!
+    __inline__ __device__ Particle*
+    createParticle(float energy, float2 const& pos, float2 const& vel);  //TODO: not adding to simulation!
     __inline__ __device__ void createClusterFromTO_blockCall(
         ClusterAccessTO const& clusterTO,
         DataAccessTO const* _simulationTO);
-    __inline__ __device__ void createParticleFromTO(
-        ParticleAccessTO const& particleTO,
-        DataAccessTO const* _simulationTO);
     __inline__ __device__ void createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
-    __inline__ __device__ void createParticle(float energy, float2 const& pos, float2 const& vel);
 };
 
 /************************************************************************/
@@ -43,7 +42,9 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
     _map.init(data->size);
 }
 
-__inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterAccessTO const& clusterTO, DataAccessTO const* _simulationTO)
+__inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
+    ClusterAccessTO const& clusterTO,
+    DataAccessTO const* simulationTO)
 {
     __shared__ Cluster* cluster;
     __shared__ Cell* cells;
@@ -83,14 +84,14 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
     for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
         auto& cell = cells[cellIndex];
         cluster->cellPointers[cellIndex] = &cell;
-        auto const& cellTO = _simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
+        auto const& cellTO = simulationTO->cells[clusterTO.cellStartIndex + cellIndex];
         cell.id = cellTO.id;
         cell.cluster = cluster;
         cell.absPos = cellTO.pos + posCorrection;
 
         float2 deltaPos = cell.absPos - clusterTO.pos;
-        cell.relPos.x = deltaPos.x*invRotMatrix[0][0] + deltaPos.y*invRotMatrix[0][1];
-        cell.relPos.y = deltaPos.x*invRotMatrix[1][0] + deltaPos.y*invRotMatrix[1][1];
+        cell.relPos.x = deltaPos.x * invRotMatrix[0][0] + deltaPos.y * invRotMatrix[0][1];
+        cell.relPos.y = deltaPos.x * invRotMatrix[1][0] + deltaPos.y * invRotMatrix[1][1];
         atomicAdd(&angularMass, Math::lengthSquared(cell.relPos));
 
         auto r = cell.absPos - cluster->pos;
@@ -140,7 +141,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
     for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto& token = tokens[tokenIndex];
         cluster->tokenPointers[tokenIndex] = &token;
-        auto const& tokenTO = _simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];
+        auto const& tokenTO = simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];
 
         token.energy = tokenTO.energy;
         for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
@@ -157,7 +158,26 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(ClusterA
     }
 }
 
-__inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, DataAccessTO const* _simulationTO)
+__inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
+{
+    auto result = _data->entities.cells.getNewSubarray(1);
+    result->cluster = cluster;
+    result->id = _data->numberGen.createNewId_kernel();
+    result->locked = 0;
+    result->protectionCounter = 0;
+    result->alive = true;
+    return result;
+}
+
+__inline__ __device__ Token* EntityFactory::createToken(Cell* cell)
+{
+    auto result =  _data->entities.tokens.getNewSubarray(1);
+    result->cell = cell;
+    result->memory[0] = cell->branchNumber;
+    return result;
+}
+
+__inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO)
 {
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
     Particle* particle = _data->entities.particles.getNewElement();
@@ -169,9 +189,11 @@ __inline__ __device__ void EntityFactory::createParticleFromTO(ParticleAccessTO 
     particle->energy = particleTO.energy;
     particle->locked = 0;
     particle->alive = true;
+    return particle;
 }
 
-__inline__ __device__ void EntityFactory::createClusterWithRandomCell(float energy, float2 const & pos, float2 const & vel)
+__inline__ __device__ void
+EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
     auto clusterPointer = _data->entities.clusterPointerArrays.getNewClusterPointer(1);
     auto cluster = _data->entities.clusters.getNewElement();
@@ -197,7 +219,7 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
 
     cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = pos;
-    cell->relPos = { 0.0f, 0.0f };
+    cell->relPos = {0.0f, 0.0f};
     cell->vel = vel;
     cell->energy = energy;
     cell->maxConnections = _data->numberGen.random(MAX_CELL_BONDS);
@@ -211,7 +233,7 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
     cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
     switch (static_cast<Enums::CellFunction::Type>(cell->cellFunctionType)) {
     case Enums::CellFunction::COMPUTER: {
-        cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions*3;
+        cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
         cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
     } break;
     case Enums::CellFunction::SENSOR: {
@@ -231,7 +253,7 @@ __inline__ __device__ void EntityFactory::createClusterWithRandomCell(float ener
     }
 }
 
-__inline__ __device__ void EntityFactory::createParticle(float energy, float2 const & pos, float2 const & vel)
+__inline__ __device__ Particle* EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel)
 {
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
     Particle* particle = _data->entities.particles.getNewElement();
@@ -242,4 +264,5 @@ __inline__ __device__ void EntityFactory::createParticle(float energy, float2 co
     particle->energy = energy;
     particle->absPos = pos;
     particle->vel = vel;
+    return particle;
 }
