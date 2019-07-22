@@ -295,7 +295,7 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
         ScannerFunction::processing(token);
     } break;
     case Enums::CellFunction::CONSTRUCTOR: {
-        ConstructorFunction::processing(token, _data);
+        ConstructorFunction::processing(token, factory, _data);
     } break;
     }
 }
