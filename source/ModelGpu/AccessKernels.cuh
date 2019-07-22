@@ -210,7 +210,7 @@ __global__ void convertData(SimulationData data, DataAccessTO simulationTO)
     PartitionData particleBlock =
         calcPartition(*simulationTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        factory.createParticleFromTO(simulationTO.particles[particleIndex], &simulationTO);
+        factory.createParticleFromTO(simulationTO.particles[particleIndex]);
     }
 }
 
