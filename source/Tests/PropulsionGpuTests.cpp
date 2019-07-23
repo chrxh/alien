@@ -1,5 +1,7 @@
 #include "Base/ServiceLocator.h"
 #include "ModelBasic/QuantityConverter.h"
+#include "ModelBasic/Serializer.h"
+#include "ModelBasic/SerializationHelper.h"
 
 #include "IntegrationGpuTestFramework.h"
 
@@ -229,6 +231,17 @@ TEST_F(PropulsionGpuTests, testThrustControlDampRotation2)
 
     EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
     EXPECT_LT(-10 + SmallAngularVelocity, velocities.angular);
+}
+
+TEST_F(PropulsionGpuTests, testThrustControlDampRotation3)
+{
+    auto const data = runStandardPropulsionTest(Enums::PropIn::DAMP_ROTATION, 0, 100, QVector2D{}, 180, 0);
+    auto result = extractResult(data);
+    auto const& velocities = result.first;
+    auto const& propOut = result.second;
+
+    EXPECT_EQ(Enums::PropOut::SUCCESS_DAMPING_FINISHED, propOut);
+    ASSERT_PRED2(predEqualMediumPrecision, 0, velocities.angular);
 }
 
 TEST_F(PropulsionGpuTests, testPowerControl)
