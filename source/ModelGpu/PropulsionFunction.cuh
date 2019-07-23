@@ -74,8 +74,11 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
                 if (angularVel > 0.0f) {
                     impulse = rAPp * power;
                 }
-                if (angularVel < 0.0f) {
+                else if (angularVel < 0.0f) {
                     impulse = rAPp * (-power);
+                }
+                else {
+                    impulse = {0, 0};
                 }
             }
 
@@ -86,8 +89,8 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
 
             //only for damping: prove if its too much => do nothing
             if (Enums::PropIn::DAMP_ROTATION == command) {
-                if ((angularVel > 0.0 && angularVel + angularVelInc < 0.0) ||
-                    (angularVel < 0.0 && angularVel + angularVelInc > 0.0)) {
+                if ((angularVel >= 0.0 && angularVel + angularVelInc <= 0.0) ||
+                    (angularVel <= 0.0 && angularVel + angularVelInc >= 0.0)) {
 
                     tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS_DAMPING_FINISHED;
                     atomicExch(&cluster->locked, 0);

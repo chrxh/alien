@@ -122,8 +122,7 @@ __device__ __inline__ void Math::normalize(float2 &vec)
     if (length > FP_PRECISION) {
         vec = { vec.x / length, vec.y / length };
     }
-    else
-    {
+    else {
         vec = { 1.0, 0.0 };
     }
 }
