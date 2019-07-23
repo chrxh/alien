@@ -33,13 +33,19 @@ private:
         float constructor[2][2];
         float constructionSite[2][2];
     };
+    struct EnergyForNewEntities
+    {
+        bool energyAvailable;
+        float cell;
+        float token;
+    };
 
     __inline__ __device__ static bool checkDistance(float distance);
     __inline__ __device__ static Cell* getConstructionSite(Cell* cell);
 
     __inline__ __device__ static void
     continueConstruction(Token* token, Cell* constructionCell, EntityFactory& factory, SimulationData* data);
-    __inline__ __device__ static void startNewConstruction();
+    __inline__ __device__ static void startNewConstruction(Token* token, EntityFactory& factory, SimulationData* data);
 
     __inline__ __device__ static void continueConstructionWithRotationOnly(
         Token* token,
@@ -64,17 +70,22 @@ private:
     __inline__ __device__ static AngularMasses calcAngularMasses(Cluster* cluster, Cell* constructionCell);
     __inline__ __device__ static RotationMatrices calcRotationMatrices(Angles const& angles);
 
+    __inline__ __device__ static float calcFreeAngle(Cell* cell);
     __inline__ __device__ static Angles calcAnglesToRotate(
         AngularMasses const& angularMasses,
         float desiredAngleBetweenConstructurAndConstructionSite);
     __inline__ __device__ static bool restrictAngles(Angles& angles, Angles const& minAngles);
 
-    __inline__ __device__ static float calcAngularMassAfterRotationAndTranslation(
+    __inline__ __device__ static float calcAngularMassAfterTransformationAndAddingCell(
         Cluster* cluster,
         float2 const& relPosOfNewCell,
         float2 const& centerOfRotation,
         Angles const& angles,
         float2 const& displacementOfConstructionSite);
+    __inline__ __device__ static float calcAngularMassAfterAddingCell(Cluster* cluster, float2 const& relPosOfNewCell);
+    __inline__ __device__ static EnergyForNewEntities adaptEnergies(Token* token, float energyLoss);
+
+
     __inline__ __device__ static void transformClusterComponents(
         Cluster* cluster,
         float2 const& centerOfRotation,
@@ -107,11 +118,14 @@ private:
         Token* token,
         Cell* cellOfNewToken,
         Cell* sourceCellOfNewToken,
+        float energyOfNewToken,
         EntityFactory& factory,
         bool duplicate);
 
     __inline__ __device__ static void addCellToCluster(Cell* newCell, Cluster* cluster, Cell** newCellPointers);
     __inline__ __device__ static void addTokenToCluster(Token* token, Cluster* cluster, Token** newTokenPointers);
+
+    __inline__ __device__ static void separateConstructionWhenFinished(Token* token, Cell* newCell);
 
     __inline__ __device__ static void
     connectNewCell(Cell* newCell, Cell* cellOfConstructionSite, Token* token, Cluster* cluster, SimulationData* data);
@@ -145,7 +159,7 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
     if (constructionSite) {
         continueConstruction(token, constructionSite, factory, data);
     } else {
-        startNewConstruction();
+        startNewConstruction(token, factory, data);
     }
 }
 
@@ -206,7 +220,68 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     }
 }
 
-__inline__ __device__ void ConstructorFunction::startNewConstruction() {}
+__inline__ __device__ void ConstructorFunction::startNewConstruction(Token* token, EntityFactory& factory, SimulationData* data)
+{
+    auto const& cell = token->cell;
+    auto const& cluster = cell->cluster;
+
+    if (cell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
+        token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+    }
+
+    auto const freeAngle = calcFreeAngle(cell);
+    auto const newCellAngle =
+        QuantityConverter::convertDataToAngle(token->memory[Enums::Constr::INOUT_ANGLE]) + freeAngle;
+
+    auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
+    bool const separation = Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+
+    auto const relPosOfNewCellDelta =
+        Math::unitVectorOfAngle(newCellAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
+    auto const relPosOfNewCell =
+        separation ? cell->relPos + relPosOfNewCellDelta * 2 : cell->relPos + relPosOfNewCellDelta;
+
+    auto const kineticEnergyBeforeRotation =
+        Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel);
+    auto const angularMassAfterRotation = calcAngularMassAfterAddingCell(cluster, relPosOfNewCell);
+    auto const angularVelAfterRotation =
+        Physics::angularVelocity(cluster->angularMass, angularMassAfterRotation, cluster->angularVel);
+    auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
+        cluster->numCellPointers, cluster->vel, angularMassAfterRotation, angularVelAfterRotation);
+    auto const kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeRotation;
+
+    auto const energyForNewEntities = adaptEnergies(token, kineticEnergyDiff);
+    if (!energyForNewEntities.energyAvailable) {
+        token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        return;
+    }
+
+    auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
+    auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers + 1);
+    addCellToCluster(newCell, cluster, newCellPointers);
+    establishConnection(newCell, cell);
+    adaptRelPositions(cluster);
+    completeCellAbsPosAndVel(cluster);
+    cluster->angularVel = angularVelAfterRotation;
+    cluster->angularMass = angularMassAfterRotation;
+
+    separateConstructionWhenFinished(token, newCell);
+
+    bool const createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+    bool const createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
+    if (createEmptyToken || createDuplicateToken) {
+        auto const newToken =
+            constructNewToken(token, newCell, cell, energyForNewEntities.token, factory, createDuplicateToken);
+        auto const newTokenPointers = data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers + 1);
+        addTokenToCluster(newToken, cluster, newTokenPointers);
+    }
+
+    token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+    token->memory[Enums::Constr::INOUT_ANGLE] = 0;
+}
 
 __inline__ __device__ void ConstructorFunction::continueConstructionWithRotationOnly(
     Token* token,
@@ -220,7 +295,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel);
 
     auto const angularMassAfterRotation =
-        calcAngularMassAfterRotationAndTranslation(cluster, {0, 0}, constructionCell->relPos, anglesToRotate, {0, 0});
+        calcAngularMassAfterTransformationAndAddingCell(cluster, {0, 0}, constructionCell->relPos, anglesToRotate, {0, 0});
     auto const angularVelAfterRotation =
         Physics::angularVelocity(cluster->angularMass, angularMassAfterRotation, cluster->angularVel);
     auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
@@ -295,7 +370,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const kineticEnergyBeforeRotation =
         Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel);
 
-    auto const angularMassAfterRotation = calcAngularMassAfterRotationAndTranslation(
+    auto const angularMassAfterRotation = calcAngularMassAfterTransformationAndAddingCell(
         cluster,
         relPosOfNewCell,
         constructionCell->relPos,
@@ -308,30 +383,14 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     auto const kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeRotation;
 
-    auto energyForNewToken = 0.0f;
-    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
-        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
-        energyForNewToken = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
-    }
-
-    if (token->energy <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + energyForNewToken
-            + kineticEnergyDiff + cudaSimulationParameters.tokenMinEnergy) {
+    auto const energyForNewEntities = adaptEnergies(token, kineticEnergyDiff);
+    if (!energyForNewEntities.energyAvailable) {
         token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
         return;
     }
 
-    token->energy -=
-        cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + energyForNewToken + kineticEnergyDiff;
-    auto energyOfNewCell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
-    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
-        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
-        auto const averageEnergy = (cell->energy + energyOfNewCell) / 2;
-        cell->energy = averageEnergy;
-        energyOfNewCell = averageEnergy;
-    }
-
     transformClusterComponents(cluster, constructionCell->relPos, anglesToRotate, displacementForConstructionSite);
-    auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyOfNewCell, factory);
+    auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
     addCellToCluster(newCell, cluster, newCellPointers);
     connectNewCell(newCell, constructionCell, token, cluster, data);
     adaptRelPositions(cluster);
@@ -340,29 +399,56 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     cluster->angularMass = angularMassAfterRotation;
 
     constructionCell->tokenBlocked = false;  //disable token blocking on construction side
-    if (Enums::ConstrInOption::FINISH_WITH_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
-        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
-        cluster->decompositionRequired = true;
-        removeConnection(newCell, cell);
-    }
-    if (Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
-        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
-        --newCell->maxConnections;
-        --cell->maxConnections;
-    }
+    separateConstructionWhenFinished(token, newCell);
 
-    bool createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+    bool const createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
-    bool createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
+    bool const createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
 
     if (createEmptyToken || createDuplicateToken) {
-        auto newToken = constructNewToken(token, newCell, cell, factory, createDuplicateToken);
-        auto newTokenPointers = data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers + 1);
+        auto const newToken =
+            constructNewToken(token, newCell, cell, energyForNewEntities.token, factory, createDuplicateToken);
+        auto const newTokenPointers = data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers + 1);
         addTokenToCluster(newToken, cluster, newTokenPointers);
     }
 
     token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
     token->memory[Enums::Constr::INOUT_ANGLE] = 0;
+}
+
+__inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, float energyLoss) -> EnergyForNewEntities
+{
+    EnergyForNewEntities result;
+    result.energyAvailable = true;
+    result.token = 0.0f;
+    result.cell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
+
+    auto const& cell = token->cell;
+    auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
+
+    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+        || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+        result.token = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
+    }
+
+    if (token->energy <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token
+        + energyLoss + cudaSimulationParameters.tokenMinEnergy) {
+        result.energyAvailable = false;
+        return result;
+    }
+
+    token->energy -=
+        cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss;
+    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+        || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+        auto const averageEnergy = (cell->energy + result.cell) / 2;
+        cell->energy = averageEnergy;
+        result.cell = averageEnergy;
+    }
+
+    return result;
 }
 
 __inline__ __device__ void
@@ -444,6 +530,44 @@ __inline__ __device__ auto ConstructorFunction::calcRotationMatrices(Angles cons
     return result;
 }
 
+__inline__ __device__ float ConstructorFunction::calcFreeAngle(Cell* cell)
+{
+    auto const numConnections = cell->numConnections;
+    float angles[MAX_CELL_BONDS];
+    for (int i = 0; i < numConnections; ++i) {
+        auto const displacement = cell->connections[i]->relPos - cell->relPos;
+        auto const angleToAdd = Math::angleOfVector(displacement);
+        auto indexToAdd = 0;
+        for (; indexToAdd < numConnections - 1; ++indexToAdd) {
+            if (angles[indexToAdd] > angleToAdd) {
+                break;
+            }
+        }
+        for (int j = indexToAdd; j < numConnections - 1; ++j) {
+            angles[j + 1] = angles[j];
+        }
+        angles[indexToAdd] = angleToAdd;
+    }
+
+    auto largestAnglesDiff = 0.0f;
+    auto result = 0.0f;
+    for (int i = 0; i < numConnections; ++i) {
+        auto angleDiff = angles[(i + 1) % numConnections] - angles[i];
+        if (angleDiff <= 0.0f) {
+            angleDiff += 360.0f;
+        }
+        if (angleDiff > 360.0f) {
+            angleDiff -= 360.0f;
+        }
+        if (angleDiff > largestAnglesDiff) {
+            largestAnglesDiff = angleDiff;
+            result = angles[i] + angleDiff / 2;
+        }
+    }
+
+    return result;
+}
+
 __inline__ __device__ auto ConstructorFunction::calcAnglesToRotate(
     AngularMasses const& angularMasses,
     float desiredAngleBetweenConstructurAndConstructionSite) -> Angles
@@ -482,7 +606,7 @@ __inline__ __device__ bool ConstructorFunction::restrictAngles(Angles& angles, A
     return result;
 }
 
-__inline__ __device__ float ConstructorFunction::calcAngularMassAfterRotationAndTranslation(
+__inline__ __device__ float ConstructorFunction::calcAngularMassAfterTransformationAndAddingCell(
     Cluster* cluster,
     float2 const& relPosOfNewCell,
     float2 const& centerOfRotation,
@@ -496,9 +620,6 @@ __inline__ __device__ float ConstructorFunction::calcAngularMassAfterRotationAnd
         auto const& cell = cluster->cellPointers[cellIndex];
         auto cellRelPosTransformed =
             getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
-        if (ClusterComponent::ConstructionSite == cell->tag) {
-            cellRelPosTransformed = cellRelPosTransformed + displacementOfConstructionSite;
-        }
         center = center + cellRelPosTransformed;
     }
     center = center / cluster->numCellPointers;
@@ -506,11 +627,28 @@ __inline__ __device__ float ConstructorFunction::calcAngularMassAfterRotationAnd
     auto result = Math::lengthSquared(relPosOfNewCell - center);
     for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto cellRelPosTransformed = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
-        if (ClusterComponent::ConstructionSite == cell->tag) {
-            cellRelPosTransformed = cellRelPosTransformed + displacementOfConstructionSite;
-        }
+        auto cellRelPosTransformed =
+            getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
         result += Math::lengthSquared(cellRelPosTransformed - center);
+    }
+    return result;
+}
+
+__inline__ __device__ float ConstructorFunction::calcAngularMassAfterAddingCell(
+    Cluster* cluster,
+    float2 const& relPosOfNewCell)
+{
+    auto center = relPosOfNewCell;
+    for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        center = center + cell->relPos;
+    }
+    center = center / cluster->numCellPointers;
+
+    auto result = Math::lengthSquared(relPosOfNewCell - center);
+    for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        result += Math::lengthSquared(cell->relPos - center);
     }
     return result;
 }
@@ -680,13 +818,13 @@ __inline__ __device__ Token* ConstructorFunction::constructNewToken(
     Token* token,
     Cell* cellOfNewToken,
     Cell* sourceCellOfNewToken,
+    float energyOfNewToken,
     EntityFactory& factory,
     bool duplicate)
 {
     auto result = factory.createToken(cellOfNewToken);
     result->sourceCell = sourceCellOfNewToken;
-    result->energy = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
-    token->energy -= cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
+    result->energy = energyOfNewToken;
     if (duplicate) {
         for (int i = 0; i < MAX_TOKEN_MEM_SIZE; ++i) {
             result->memory[i] = token->memory[i];
@@ -720,6 +858,32 @@ ConstructorFunction::addTokenToCluster(Token* token, Cluster* cluster, Token** n
     newTokenPointers[cluster->numCellPointers] = token;
     cluster->tokenPointers = newTokenPointers;
     ++cluster->numTokenPointers;
+}
+
+__inline__ __device__ void ConstructorFunction::separateConstructionWhenFinished(Token* token, Cell* newCell)
+{
+    auto const& cell = token->cell;
+    auto const& cluster = cell->cluster;
+    auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
+
+    if (Enums::ConstrInOption::FINISH_NO_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+        newCell->tokenBlocked = false;
+    }
+
+    if (Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+        cluster->decompositionRequired = true;
+        removeConnection(newCell, cell);
+    }
+    if (Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+        --newCell->maxConnections;
+        --cell->maxConnections;
+    }
 }
 
 __inline__ __device__ void ConstructorFunction::connectNewCell(
