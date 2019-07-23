@@ -98,9 +98,65 @@ TokenDescription ConstructorGpuTests::createTokenForSimpleConstruction(
     return token;
 }
 
-TEST_F(ConstructorGpuTests, testConstructSimpleCell)
+TEST_F(ConstructorGpuTests, testConstructSimpleCell_standardParameters)
 {
     auto const token =
-        createTokenForSimpleConstruction(Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, 0.0f, 1.0f);
+        createTokenForSimpleConstruction(Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, 0.0f, 0.0f);
     runSimpleTest(token);
+}
+
+TEST_F(ConstructorGpuTests, testConstructSimpleCell_ignoreDistance1)
+{
+    auto const offspringDistance = _parameters.cellFunctionConstructorOffspringCellDistance;
+
+    auto const token = createTokenForSimpleConstruction(
+        Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, 0.0f, offspringDistance / 2);
+    auto const result = runSimpleTest(token);
+
+    ASSERT_PRED3(
+        predEqual, 0,
+        (*result.constructorCell.pos + QVector2D{offspringDistance, 0} - *result.constructedCell.pos).length(),
+        0.05);
+}
+
+TEST_F(ConstructorGpuTests, testConstructSimpleCell_ignoreDistance2)
+{
+    auto const offspringDistance = _parameters.cellFunctionConstructorOffspringCellDistance;
+
+    auto const token = createTokenForSimpleConstruction(
+        Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, 0.0f, offspringDistance * 2);
+    auto const result = runSimpleTest(token);
+
+    ASSERT_PRED3(
+        predEqual, 0,
+        (*result.constructorCell.pos + QVector2D{offspringDistance, 0} - *result.constructedCell.pos).length(),
+        0.05);
+}
+
+TEST_F(ConstructorGpuTests, testConstructSimpleCell_rightHandSide)
+{
+    auto const offspringDistance = _parameters.cellFunctionConstructorOffspringCellDistance;
+
+    auto const token = createTokenForSimpleConstruction(
+        Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, 90.0f, 0.0f);
+    auto const result = runSimpleTest(token);
+
+    ASSERT_PRED3(
+        predEqual, 0, 
+        (*result.constructorCell.pos + QVector2D{0, offspringDistance} - *result.constructedCell.pos).length(),
+        0.05);
+}
+
+TEST_F(ConstructorGpuTests, testConstructSimpleCell_leftHandSide)
+{
+    auto const offspringDistance = _parameters.cellFunctionConstructorOffspringCellDistance;
+
+    auto const token = createTokenForSimpleConstruction(
+        Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, -90.0f, 0.0f);
+    auto const result = runSimpleTest(token);
+
+    ASSERT_PRED3(
+        predEqual, 0,
+        (*result.constructorCell.pos + QVector2D{ 0, -offspringDistance } -*result.constructedCell.pos).length(),
+        0.05);
 }
