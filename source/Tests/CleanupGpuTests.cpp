@@ -1,7 +1,6 @@
 #include "IntegrationGpuTestFramework.h"
 
-class CleanupGpuTests
-    : public IntegrationGpuTestFramework
+class CleanupGpuTests : public IntegrationGpuTestFramework
 {
 public:
     CleanupGpuTests()
@@ -57,7 +56,7 @@ TEST_F(CleanupGpuTests, testCleanupParticles)
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
-    origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{}, QVector2D{ 0, 0 }));
+    origData.addCluster(createRectangularCluster({10, 10}, QVector2D{}, QVector2D{0, 0}));
     IntegrationTestHelper::updateData(_access, origData);
 
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1000, _controller));
@@ -76,7 +75,7 @@ TEST_F(CleanupGpuTests, testCleanupCells)
 
     DataDescription origData;
     for (int i = 0; i < 9; ++i) {
-        origData.addCluster(createRectangularCluster({ 10, 10 }));
+        origData.addCluster(createRectangularCluster({10, 10}));
     }
     IntegrationTestHelper::updateData(_access, origData);
 
@@ -94,7 +93,7 @@ TEST_F(CleanupGpuTests, testCleanupClusters)
 
     DataDescription origData;
     for (int i = 0; i < 900; ++i) {
-        origData.addCluster(createRectangularCluster({ 1, 1 }));
+        origData.addCluster(createRectangularCluster({1, 1}));
     }
     IntegrationTestHelper::updateData(_access, origData);
 
@@ -115,7 +114,7 @@ TEST_F(CleanupGpuTests, testCleanupCellPointers)
     DataDescription origData;
     for (int i = 0; i < 5; ++i) {
         QVector2D vel(_numberGen->getRandomReal(-3, 3), _numberGen->getRandomReal(-4, 4));
-        origData.addCluster(createRectangularCluster({ 10, 10 }, boost::none, vel));
+        origData.addCluster(createRectangularCluster({10, 10}, boost::none, vel));
     }
     IntegrationTestHelper::updateData(_access, origData);
 
@@ -128,14 +127,14 @@ TEST_F(CleanupGpuTests, testCleanupCellPointers)
 */
 TEST_F(CleanupGpuTests, testCleanupTokenPointers)
 {
-    _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.radiationProb = 0;  //exclude radiation
     _parameters.cellMaxTokenBranchNumber = 4;
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
 
     auto token = createSimpleToken();
-    auto cluster = createRectangularCluster({ 2, 2 }, QVector2D{}, QVector2D{});
+    auto cluster = createRectangularCluster({2, 2}, QVector2D{}, QVector2D{});
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     auto& thirdCell = cluster.cells->at(3);
@@ -157,14 +156,14 @@ TEST_F(CleanupGpuTests, testCleanupTokenPointers)
 */
 TEST_F(CleanupGpuTests, testCleanupTokens)
 {
-    _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.radiationProb = 0;  //exclude radiation
     _parameters.cellMaxTokenBranchNumber = 4;
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
 
     auto token = createSimpleToken();
-    auto cluster = createRectangularCluster({ 2, 3 }, QVector2D{}, QVector2D{});
+    auto cluster = createRectangularCluster({2, 3}, QVector2D{}, QVector2D{});
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     auto& thirdCell = cluster.cells->at(3);
@@ -191,12 +190,12 @@ TEST_F(CleanupGpuTests, testCleanupCellMap)
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
-    origData.addCluster(createRectangularCluster({ 2,2 }, QVector2D{ 0, 10 }, QVector2D{ 0.5f, 0 }));
-    origData.addParticle(createParticle(QVector2D{ 5, 0 }, QVector2D{ 0, 0.5f }));
+    origData.addCluster(createRectangularCluster({2, 2}, QVector2D{0, 10}, QVector2D{0.5f, 0}));
+    origData.addParticle(createParticle(QVector2D{5, 0}, QVector2D{0, 0.5f}));
     IntegrationTestHelper::updateData(_access, origData);
 
     IntegrationTestHelper::runSimulation(30, _controller);
-    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
     ASSERT_EQ(1, newData.particles->size());
 }
@@ -208,12 +207,13 @@ TEST_F(CleanupGpuTests, testCleanupCellMap)
 TEST_F(CleanupGpuTests, testCleanupParticleMap)
 {
     DataDescription origData;
-    origData.addParticle(createParticle(QVector2D{ 0, 10 }, QVector2D{ 0.5f, 0 }));
-    origData.addParticle(createParticle(QVector2D{ 5, 0 }, QVector2D{ 0, 0.5f }));
+    origData.addParticle(createParticle(QVector2D{0, 10}, QVector2D{0.5f, 0}));
+    origData.addParticle(createParticle(QVector2D{5, 0}, QVector2D{0, 0.5f}));
     IntegrationTestHelper::updateData(_access, origData);
 
     IntegrationTestHelper::runSimulation(30, _controller);
-    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    auto const newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
     ASSERT_EQ(2, newData.particles->size());
 }
+
