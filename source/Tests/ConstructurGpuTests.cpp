@@ -15,6 +15,14 @@ public:
 protected:
     virtual void SetUp();
 
+    struct SimpleTestResult
+    {
+        TokenDescription token;
+        CellDescription constructorCell;
+        CellDescription constructedCell;
+    };
+    SimpleTestResult runSimpleTest(TokenDescription const& token) const;
+
     TokenDescription createTokenForSimpleConstruction(
         Enums::ConstrIn::Type constructionIn,
         Enums::ConstrInOption::Type option,
@@ -31,6 +39,47 @@ void ConstructorGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
+}
+
+auto ConstructorGpuTests::runSimpleTest(TokenDescription const & token) const -> SimpleTestResult
+{
+    SimpleTestResult result;
+
+    DataDescription origData;
+    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+
+    auto& firstCell = cluster.cells->at(0);
+    firstCell.tokenBranchNumber = 0;
+    firstCell.addToken(token);
+
+    auto& secondCell = cluster.cells->at(1);
+    secondCell.tokenBranchNumber = 1;
+    secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+
+    //perform test
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    //check results
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const& newSecondCell = newCellByCellId.at(secondCell.id);
+    auto const& newToken = newSecondCell.tokens->at(0);
+    auto const& newCluster = newData.clusters->at(0);
+    EXPECT_EQ(3, newCluster.cells->size());
+    EXPECT_TRUE(isCompatible(cluster.pos, newCluster.pos));
+
+    result.token = newToken;
+    result.constructorCell = newSecondCell;
+
+    newCellByCellId.erase(firstCell.id);
+    newCellByCellId.erase(secondCell.id);
+    result.constructedCell = newCellByCellId.begin()->second;
+
+    return result;
 }
 
 TokenDescription ConstructorGpuTests::createTokenForSimpleConstruction(
@@ -51,31 +100,7 @@ TokenDescription ConstructorGpuTests::createTokenForSimpleConstruction(
 
 TEST_F(ConstructorGpuTests, testConstructSimpleCell)
 {
-    //create test data
-    DataDescription origData;
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
-
-    auto& firstCell = cluster.cells->at(0);
-    firstCell.tokenBranchNumber = 0;
-    auto token = createTokenForSimpleConstruction(Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, 0.0f, 1.0f);
-    firstCell.addToken(token);
-   
-    auto& secondCell = cluster.cells->at(1);
-    secondCell.tokenBranchNumber = 1;
-    secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
-
-    origData.addCluster(cluster);
-
-    IntegrationTestHelper::updateData(_access, origData);
-
-    //perform test
-    IntegrationTestHelper::runSimulation(1, _controller);
-
-    //check results
-    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
-    auto const& newSecondCell = cellByCellId.at(secondCell.id);
-    auto const& newToken = newSecondCell.tokens->at(0);
-    auto const& newCluster = newData.clusters->at(0);
-    ASSERT_EQ(3, newCluster.cells->size());
+    auto const token =
+        createTokenForSimpleConstruction(Enums::ConstrIn::SAFE, Enums::ConstrInOption::STANDARD, 0.0f, 1.0f);
+    runSimpleTest(token);
 }
