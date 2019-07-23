@@ -400,3 +400,31 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTest_moveCellWithToken_partial
     }
     EXPECT_EQ(2, numToken);
 }
+
+/**
+* Situation: partial update and running simulation several times
+* Fixed error: particles with same id emerged (due to particles array swap in setSimulationAccessData)
+*/
+TEST_F(DataDescriptionTransferGpuTests, regressionTest_repeatingPartialUpdateAndRun)
+{
+    DataDescription origData;
+    origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 100, 100 }, QVector2D{}));
+    IntegrationTestHelper::updateData(_access, origData);
+
+    for (int i = 0; i < 10; ++i) {
+        auto const data = IntegrationTestHelper::getContent(_access, { { 70, 70 },{ 130, 130 } });
+        auto newData = data;
+        *newData.clusters->at(0).angularVel = _numberGen->getRandomReal(-0.01, 0.01);
+        IntegrationTestHelper::updateData(_access, DataChangeDescription(data, newData));
+        IntegrationTestHelper::runSimulation(100, _controller);
+    }
+
+    auto const newData = IntegrationTestHelper::getContent(_access, { { 70, 70 },{ 130, 130 } });
+    std::unordered_set<uint64_t> ids;
+    if (newData.particles) {
+        for (auto const& particle : *newData.particles) {
+            EXPECT_TRUE(ids.find(particle.id) == ids.end());
+            ids.insert(particle.id);
+        }
+    }
+}
