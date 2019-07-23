@@ -5,7 +5,16 @@ class ClusterGpuTests
 {
 public:
 	virtual ~ClusterGpuTests() = default;
+
+protected:
+    virtual void SetUp();
 };
+
+void ClusterGpuTests::SetUp()
+{
+    _parameters.radiationProb = 0;    //exclude radiation
+    _context->setSimulationParameters(_parameters);
+}
 
 /**
 * Situation: horizontal collision of two cells where both move such that no pixel overlapping occurs
@@ -78,7 +87,7 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_horizontal)
 	origData.addCluster(cluster2);
 
 	IntegrationTestHelper::updateData(_access, origData);
-	IntegrationTestHelper::runSimulation(150, _controller);
+    IntegrationTestHelper::runSimulation(150, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);

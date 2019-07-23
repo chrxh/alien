@@ -149,7 +149,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
 
 		vA2 = vA1 + n * j / massA;
 		angularVelA2 = angularVelA1;
-		vB2 = vB1 - n, j / massB;
+		vB2 = vB1 - n * j / massB;
 		angularVelB2 = angularVelB1;
 	}
 
