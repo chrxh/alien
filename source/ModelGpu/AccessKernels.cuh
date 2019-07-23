@@ -235,8 +235,6 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
-    data.entitiesForCleanup.particles.reset();
-    
     MULTI_CALL(filterClusters, rectUpperLeft, rectLowerRight, data);
     filterParticles<< <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (rectUpperLeft, rectLowerRight, data);
     cudaDeviceSynchronize();
@@ -247,6 +245,4 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     data.particleMap.reset();
     cleanup<<<1, 1>>>(data);
     cudaDeviceSynchronize();
-
-    data.entities.particles.swapArray(data.entitiesForCleanup.particles);
 }
