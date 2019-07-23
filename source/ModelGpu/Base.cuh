@@ -72,11 +72,6 @@ public:
         return static_cast<float>(number) / RAND_MAX;
     }
 
-    __host__ __inline__ uint64_t createNewId()
-    {
-        return (*_currentId)++;
-    }
-
     __device__ __inline__ uint64_t createNewId_kernel()
     {
         return atomicAdd(_currentId, 1);

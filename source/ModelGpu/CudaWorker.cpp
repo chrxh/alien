@@ -99,7 +99,7 @@ void CudaWorker::processJobs()
 		}
 
 		if (auto setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
-			auto rect = setDataJob->getRect();
+            auto rect = setDataJob->getRect();
 			auto dataTO = setDataJob->getDataTO();
 			_cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 		}

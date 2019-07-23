@@ -182,7 +182,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
     Particle* particle = _data->entities.particles.getNewElement();
     *particlePointer = particle;
-    particle->id = particleTO.id;
+    particle->id = 0 == particleTO.id ? _data->numberGen.createNewId_kernel() : particleTO.id;
     particle->absPos = particleTO.pos;
     _map.mapPosCorrection(particle->absPos);
     particle->vel = particleTO.vel;
