@@ -148,15 +148,14 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
 
     //TODO: short energy check for optimization
 
-    auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
-    if (!checkDistance(distance)) {
-        token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
-    }
-
     auto const& cell = token->cell;
     auto const constructionSite = getConstructionSite(cell);
 
     if (constructionSite) {
+        auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
+        if (!checkDistance(distance)) {
+            token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
+        }
         continueConstruction(token, constructionSite, factory, data);
     } else {
         startNewConstruction(token, factory, data);
@@ -538,7 +537,7 @@ __inline__ __device__ float ConstructorFunction::calcFreeAngle(Cell* cell)
         auto const displacement = cell->connections[i]->relPos - cell->relPos;
         auto const angleToAdd = Math::angleOfVector(displacement);
         auto indexToAdd = 0;
-        for (; indexToAdd < numConnections - 1; ++indexToAdd) {
+        for (; indexToAdd < i; ++indexToAdd) {
             if (angles[indexToAdd] > angleToAdd) {
                 break;
             }
