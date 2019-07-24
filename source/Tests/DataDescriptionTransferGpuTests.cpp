@@ -423,7 +423,7 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTest_repeatingPartialUpdateAnd
     std::unordered_set<uint64_t> ids;
     if (newData.particles) {
         for (auto const& particle : *newData.particles) {
-            EXPECT_TRUE(ids.find(particle.id) == ids.end());
+            ASSERT_TRUE(ids.find(particle.id) == ids.end());
             ids.insert(particle.id);
         }
     }
