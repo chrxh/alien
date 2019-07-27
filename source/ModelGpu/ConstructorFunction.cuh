@@ -226,6 +226,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
 
     if (cell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
         token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        return;
     }
 
     auto const freeAngle = calcFreeAngle(cell);
