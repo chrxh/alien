@@ -41,7 +41,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _currentId);
 
         checkCudaErrors(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
-        uint64_t hostCurrentId = 0;
+        uint64_t hostCurrentId = 1;
         checkCudaErrors(cudaMemcpy(_currentId, &hostCurrentId, sizeof(uint64_t), cudaMemcpyHostToDevice));
 
         std::vector<int> randomNumbers(size);
