@@ -164,7 +164,7 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
 
 __inline__ __device__ bool ConstructorFunction::checkDistance(float distance)
 {
-    return distance > cudaSimulationParameters.cellMaxDistance;
+    return distance > cudaSimulationParameters.cellMaxDistance || distance < cudaSimulationParameters.cellMinDistance;
 }
 
 __inline__ __device__ Cell* ConstructorFunction::getConstructionSite(Cell* cell)
