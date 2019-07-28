@@ -99,3 +99,11 @@ IntVector2D IntRect::center() const
 	if(!(expression)) {\
 		throw std::exception("check failed");\
 	}
+
+#define MEMBER_DECLARATION(className, type, name, initialValue)\
+    type _ ## name = initialValue; \
+    className& name(type const& name)\
+    { \
+        _ ## name = name; \
+        return *this; \
+    }
