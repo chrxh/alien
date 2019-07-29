@@ -1,3 +1,5 @@
+#include <boost/range/adaptors.hpp>
+
 #include "Base/ServiceLocator.h"
 #include "ModelBasic/QuantityConverter.h"
 
@@ -26,7 +28,7 @@ protected:
         MEMBER_DECLARATION(ConstructionOnLineClusterTestParameters, bool, obstacle, false);
         MEMBER_DECLARATION(ConstructionOnLineClusterTestParameters, TokenDescription, token, TokenDescription());
     };
-    TestResult runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters const& parameters) const;
+    TestResult runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters const& parameters);
     TestResult runConstructionOnWedgeClusterTest(TokenDescription const& token, float wedgeAngle, float clusterAngle) const;
     TestResult runConstructionOnTriangleClusterTest(TokenDescription const & token) const;
 
@@ -72,7 +74,7 @@ void ConstructorGpuTests::SetUp()
 }
 
 auto ConstructorGpuTests::runConstructionOnLineClusterTest(
-    ConstructionOnLineClusterTestParameters const& parameters) const -> TestResult
+    ConstructionOnLineClusterTestParameters const& parameters) -> TestResult
 {
     DataDescription origData;
     auto cluster = createHorizontalCluster(2, QVector2D{10, 10}, QVector2D{}, 0);
@@ -87,6 +89,11 @@ auto ConstructorGpuTests::runConstructionOnLineClusterTest(
 
     origData.addCluster(cluster);
 
+    if (parameters._obstacle) {
+        auto obstacle = createHorizontalCluster(2, QVector2D{ 11.5f + _parameters.cellMinDistance / 2, 10 }, QVector2D{}, 0);
+        origData.addCluster(obstacle);
+    }
+
     IntegrationTestHelper::updateData(_access, origData);
 
     //perform test
@@ -95,19 +102,26 @@ auto ConstructorGpuTests::runConstructionOnLineClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto newClusterByCellId = IntegrationTestHelper::getClusterByCellId(newData);
     auto const& newSecondCell = newCellByCellId.at(secondCell.id);
     auto const& newToken = newSecondCell.tokens->at(0);
-    auto const& newCluster = newData.clusters->at(0);
+    auto newCluster = newClusterByCellId.at(firstCell.id);
     EXPECT_TRUE(isCompatible(cluster.pos, newCluster.pos));
 
     TestResult result;
     result.token = newToken;
     result.constructorCell = newSecondCell;
 
-    newCellByCellId.erase(firstCell.id);
-    newCellByCellId.erase(secondCell.id);
-    if (!newCellByCellId.empty()) {
-        result.constructedCell = newCellByCellId.begin()->second;
+    std::list<CellDescription> remainingCells;
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.id != firstCell.id && newCell.id != secondCell.id) {
+            remainingCells.push_back(newCell);
+        }
+    }
+    EXPECT_GE(1, remainingCells.size());
+
+    if (!remainingCells.empty()) {
+        result.constructedCell = *remainingCells.begin();
     }
 
     checkEnergy(origData, newData);
@@ -414,9 +428,8 @@ TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_errorNoEnergy)
 
 TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_errorObstacle)
 {
-    auto const lowTokenEnergy = _parameters.tokenMinEnergy + _parameters.cellFunctionConstructorOffspringCellEnergy / 2;
     auto const token = createTokenForConstruction(
-        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).energy(lowTokenEnergy));
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
     auto const result =
         runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacle(true));
 

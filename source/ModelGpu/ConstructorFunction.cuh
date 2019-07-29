@@ -107,6 +107,19 @@ private:
         Angles const& anglesToRotate,
         float2 const& displacementOfConstructionSite,
         Map<Cell> const& map);
+    __inline__ __device__ static bool isObstaclePresent(
+        bool ignoreOwnCluster,
+        Cluster* cluster,
+        float2 const& relPosOfNewCell,
+        Map<Cell> const& map);
+    __inline__ __device__ static bool isObstaclePresent(
+        bool ignoreOwnCluster,
+        Cluster* cluster,
+        Cell* cell,
+        float2 const& origAbsPos,
+        float2 const& absPos,
+        Map<Cell> const& map);
+
 
     __inline__ __device__ static Cell* constructNewCell(
         Token* token,
@@ -242,6 +255,15 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
         Math::unitVectorOfAngle(newCellAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
     auto const relPosOfNewCell =
         separation ? cell->relPos + relPosOfNewCellDelta * 2 : cell->relPos + relPosOfNewCellDelta;
+
+    auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
+    if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
+        auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
+        if (isObstaclePresent(ignoreOwnCluster, cluster, relPosOfNewCell, data->cellMap)) {
+            token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
+            return;
+        }
+    }
 
     auto const kineticEnergyBeforeRotation =
         Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel);
@@ -722,8 +744,6 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent(
     Map<Cell> const& map)
 {
     RotationMatrices const matrices = calcRotationMatrices(anglesToRotate);
-    Math::Matrix clusterMatrix;
-    Math::rotationMatrix(cluster->angle, clusterMatrix);
     float2 newCenter{0, 0};
 
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
@@ -734,7 +754,10 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent(
         }
         newCenter = newCenter + relPos;
     }
+    newCenter = newCenter / cluster->numCellPointers;
 
+    Math::Matrix clusterMatrix;
+    Math::rotationMatrix(cluster->angle, clusterMatrix);
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
@@ -743,42 +766,103 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent(
         }
         relPos = relPos - newCenter;
         auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
-        for (int dx = -1; dx <= 1; ++dx) {
-            for (int dy = -1; dy <= 1; ++dy) {
-                float2 const lookupPos = {absPos.x + dx, absPos.y + dy};
-                if (auto const otherCell = map.get(lookupPos)) {
-                    if (map.mapDistance(otherCell->absPos, absPos) >= cudaSimulationParameters.cellMinDistance) {
+        if (isObstaclePresent(ignoreOwnCluster, cluster, cell, cell->absPos, absPos, map)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+__inline__ __device__ bool ConstructorFunction::isObstaclePresent(
+    bool ignoreOwnCluster,
+    Cluster* cluster,
+    float2 const& relPosOfNewCell,
+    Map<Cell> const& map)
+{
+    auto newCenter = relPosOfNewCell;
+    for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        newCenter = newCenter + cell->relPos;
+    }
+    newCenter = newCenter / (cluster->numCellPointers + 1);
+
+    Math::Matrix clusterMatrix;
+    Math::rotationMatrix(cluster->angle, clusterMatrix);
+    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        auto const relPos = cell->relPos - newCenter;
+        auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
+        if (isObstaclePresent(ignoreOwnCluster, cluster, cell, cell->absPos, absPos, map)) {
+            return true;
+        }
+    }
+
+    //check obstacle for cell to be constructed
+    auto const origAbsPosForNewCell = cluster->pos + Math::applyMatrix(relPosOfNewCell, clusterMatrix);
+    auto const absPosForNewCell = cluster->pos + Math::applyMatrix(relPosOfNewCell - newCenter, clusterMatrix);
+    if (isObstaclePresent(ignoreOwnCluster, cluster, nullptr, origAbsPosForNewCell, absPosForNewCell, map)) {
+        return true;
+    }
+
+    return false;
+}
+
+__inline__ __device__ bool ConstructorFunction::isObstaclePresent(
+    bool ignoreOwnCluster,
+    Cluster* cluster,
+    Cell* cell,
+    float2 const& origAbsPos,
+    float2 const& absPos,
+    Map<Cell> const& map)
+{
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
+            float2 const lookupPos = { absPos.x + dx, absPos.y + dy };
+            if (auto const otherCell = map.get(lookupPos)) {
+                if (map.mapDistance(otherCell->absPos, absPos) >= cudaSimulationParameters.cellMinDistance) {
+                    continue;
+                }
+                if (cluster != otherCell->cluster) {
+                    return true;
+                }
+
+                //check also connected cells
+                for (int i = 0; i < otherCell->numConnections; ++i) {
+                    auto const connectedOtherCell = otherCell->connections[i];
+                    if (map.mapDistance(connectedOtherCell->absPos, absPos)
+                        >= cudaSimulationParameters.cellMinDistance) {
                         continue;
                     }
-                    if (ignoreOwnCluster) {
-                        if (cluster != otherCell->cluster) {
-                            return true;
-                        }
-                    } else {
-                        if (cell != otherCell) {
-                            return true;
-                        }
+                    if (cluster != connectedOtherCell->cluster) {
+                        return true;
+                    }
+                }
+            }
+/*
+            if (!ignoreOwnCluster) {
+                float2 const lookupPos = { origAbsPos.x + dx, origAbsPos.y + dy };
+                if (auto const otherCell = map.get(lookupPos)) {
+                    if (map.mapDistance(otherCell->absPos, origAbsPos) >= cudaSimulationParameters.cellMinDistance) {
+                        continue;
+                    }
+                    if (cell != otherCell) {
+                        return true;
                     }
 
                     //check also connected cells
                     for (int i = 0; i < otherCell->numConnections; ++i) {
                         auto const connectedOtherCell = otherCell->connections[i];
-                        if (map.mapDistance(connectedOtherCell->absPos, absPos)
+                        if (map.mapDistance(connectedOtherCell->absPos, origAbsPos)
                             >= cudaSimulationParameters.cellMinDistance) {
                             continue;
                         }
-                        if (ignoreOwnCluster) {
-                            if (cluster != connectedOtherCell->cluster) {
-                                return true;
-                            }
-                        } else {
-                            if (cell != connectedOtherCell) {
-                                return true;
-                            }
+                        if (cell != connectedOtherCell) {
+                            return true;
                         }
                     }
                 }
             }
+*/
         }
     }
     return false;
