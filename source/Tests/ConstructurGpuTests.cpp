@@ -426,14 +426,64 @@ TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_errorNoEnergy)
     checkResult(result, { Enums::ConstrOut::ERROR_NO_ENERGY, boost::none });
 }
 
-TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_errorObstacle)
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterObstacle_safeMode)
 {
-    auto const token = createTokenForConstruction(
-        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
     auto const result =
         runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacle(true));
 
     checkResult(result, { Enums::ConstrOut::ERROR_OBSTACLE, boost::none });
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterObstacle_unsafeMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
+    auto const result =
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacle(true));
+
+    checkResult(result, { Enums::ConstrOut::ERROR_OBSTACLE, boost::none });
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterObstacle_brutforceMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
+    auto const result =
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacle(true));
+
+    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
+    checkResult(result, { Enums::ConstrOut::SUCCESS, expectedCellPos });
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_sameClusterObstacle_safeMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
+    auto const result = runConstructionOnWedgeClusterTest(token, 180, 0);
+
+    checkResult(result, {Enums::ConstrOut::ERROR_OBSTACLE, boost::none});
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_sameClusterObstacle_unsafeMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(90));
+    auto const result = runConstructionOnWedgeClusterTest(token, 180, 0);
+
+    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
+    checkResult(result, { Enums::ConstrOut::SUCCESS, expectedCellPos });
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_sameClusterObstacle_brutforceMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(90));
+    auto const result = runConstructionOnWedgeClusterTest(token, 180, 0);
+
+    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
+    checkResult(result, { Enums::ConstrOut::SUCCESS, expectedCellPos });
 }
 
 TEST_F(ConstructorGpuTests, testConstructCellOnWedgeCluster_rightHandSide)
