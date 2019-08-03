@@ -8,5 +8,5 @@ struct Entities;
 
 #define FP_PRECISION 0.00001
 
-#define THROW_NOT_IMPLEMENTED() fprintf(stderr,"not implemented"); \
+#define THROW_NOT_IMPLEMENTED() printf("not implemented"); \
     exit(-1);

@@ -21,7 +21,6 @@ public:
     __inline__ __device__ static void normalize(float2 &vec);
     __inline__ __device__ static float2 normalized(float2 vec);
     __inline__ __device__ static float dot(float2 const &p, float2 const &q);
-    __inline__ __device__ static float2 minus(float2 const &p);
     __inline__ __device__ static float length(float2 const & v);
     __inline__ __device__ static float lengthSquared(float2 const & v);
 
@@ -49,6 +48,20 @@ __inline__ __device__ float2 operator/(float2 const& p, float m)
 {
     return{ p.x / m, p.y / m };
 }
+
+__inline__ __device__ bool operator==(int2 const& p, int2 const& q)
+{
+    return p.x == q.x && p.y == q.y;
+}
+
+template<>
+struct HashFunctor<int2>
+{
+    __device__ __inline__ int operator()(int2 const& value)
+    {
+        return abs(value.x) * 2371 + abs(value.y);
+    }
+};
 
 /************************************************************************/
 /* Implementation                                                       */
@@ -136,11 +149,6 @@ __device__ __inline__ float2 Math::normalized(float2 vec)
 __device__ __inline__ float Math::dot(float2 const &p, float2 const &q)
 {
     return p.x*q.x + p.y*q.y;
-}
-
-__device__ __inline__ float2 Math::minus(float2 const &p)
-{
-    return{ -p.x, -p.y };
 }
 
 __device__ __inline__ float Math::length(float2 const & v)

@@ -88,7 +88,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                 if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
                     continue;
                 }
-                if (!cell->alive || !otherCell->alive) {
+                if (0 == cell->alive || 0 == otherCell->alive) {
                     continue;
                 }
                 if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
@@ -132,7 +132,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                 if (firstOtherCluster != otherCell->cluster) {
                     continue;
                 }
-                if (!cell->alive || !otherCell->alive) {
+                if (0 == cell->alive || 0 == otherCell->alive) {
                     continue;
                 }
                 if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos)
@@ -184,7 +184,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                         if (firstOtherCluster != otherCell->cluster) {
                             continue;
                         }
-                        if (!cell->alive || !otherCell->alive) {
+                        if (0 == cell->alive || 0 == otherCell->alive) {
                             continue;
                         }
                         if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos)
@@ -247,7 +247,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                     if (firstOtherCluster != otherCell->cluster) {
                         continue;
                     }
-                    if (!cell->alive || !otherCell->alive) {
+                    if (0 == cell->alive || 0 == otherCell->alive) {
                         continue;
                     }
                     if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos)
@@ -325,8 +325,8 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
         auto a = newVel - cell->vel;
         if (Math::length(a) > cudaSimulationParameters.cellMaxForce) {
             if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                cell->alive = false;
-                _cluster->decompositionRequired = true;
+                atomicExch(&cell->alive, 0);
+                atomicExch(&_cluster->decompositionRequired, 1);
             }
         }
 
@@ -376,24 +376,24 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
             factory.createParticle(radiationEnergy, particlePos, particleVel);
         }
         if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
-            cell->alive = false;
-            cell->cluster->decompositionRequired = true;
+            atomicExch(&cell->alive, 0);
+            atomicExch(&cell->cluster->decompositionRequired, 1);
         }
     }
     __syncthreads();
 
-    if (_cluster->decompositionRequired) {
+    if (1 == _cluster->decompositionRequired) {
         PartitionData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto token = _cluster->tokenPointers[tokenIndex];
-            if (!token->cell->alive) {
+            if (0 == token->cell->alive) {
                 atomicAdd(&token->cell->energy, token->energy);
             }
         }
 
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             auto cell = _cluster->cellPointers[cellIndex];
-            if (!cell->alive) {
+            if (0 == cell->alive) {
                 auto pos = cell->absPos;
                 _data->cellMap.mapPosCorrection(pos);
                 factory.createParticle(cell->energy, pos, cell->vel);
@@ -424,12 +424,12 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell(float2 const & pos
     if (distance < cudaSimulationParameters.cellMinDistance) {
         Cluster* cluster = cell->cluster;
         if (mapCluster->numCellPointers >= cluster->numCellPointers) {
-            cell->alive = false;
-            cluster->decompositionRequired = true;
+            atomicExch(&cell->alive, 0);
+            atomicExch(&cluster->decompositionRequired, 1);
         }
         else {
-            cellFromMap->alive = false;
-            mapCluster->decompositionRequired = true;
+            atomicExch(&cellFromMap->alive, 0);
+            atomicExch(&mapCluster->decompositionRequired, 1);
         }
     }
 }
@@ -472,7 +472,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
             entries[i].cluster.angularMass = 0.0f;
             entries[i].cluster.numCellPointers = 0;
             entries[i].cluster.numTokenPointers = 0;
-            entries[i].cluster.decompositionRequired = false;
+            entries[i].cluster.decompositionRequired = 0;
             entries[i].cluster.clusterToFuse = nullptr;
             entries[i].cluster.locked = 0;
         }
@@ -481,7 +481,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell* cell = _cluster->cellPointers[cellIndex];
-        if (!cell->alive) {
+        if (0 == cell->alive) {
             continue;
         }
         bool foundMatch = false;
@@ -519,7 +519,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.x, cell->vel.x);
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.y, cell->vel.y);
 
-            entries[MAX_DECOMPOSITIONS - 1].cluster.decompositionRequired = true;
+            entries[MAX_DECOMPOSITIONS - 1].cluster.decompositionRequired = 1;
         }
     }
     __syncthreads();
@@ -601,7 +601,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
             newCluster->numTokenPointers = 0;
             newCluster->numCellPointers = _cluster->numCellPointers + otherCluster->numCellPointers;
             newCluster->cellPointers = _data->entities.cellPointers.getNewSubarray(newCluster->numCellPointers);
-            newCluster->decompositionRequired = _cluster->decompositionRequired || otherCluster->decompositionRequired;
+            newCluster->decompositionRequired = _cluster->decompositionRequired | otherCluster->decompositionRequired;
             newCluster->locked = 0;
             newCluster->clusterToFuse = nullptr;
 
@@ -690,7 +690,7 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(Cluster
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto& token = sourceCluster->tokenPointers[tokenIndex];
         auto& cell = token->cell;
-        if (!cell->alive) {
+        if (0 == cell->alive) {
             continue;
         }
         if (cell->cluster == targetCluster) {
@@ -727,7 +727,7 @@ ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* 
     for (int tokenIndex = tokenBlock1.startIndex; tokenIndex <= tokenBlock1.endIndex; ++tokenIndex) {
         auto& token = sourceCluster1->tokenPointers[tokenIndex];
         auto& cell = token->cell;
-        if (!cell->alive) {
+        if (0 == cell->alive) {
             continue;
         }
         if (cell->cluster == targetCluster) {
@@ -740,7 +740,7 @@ ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* 
     for (int tokenIndex = tokenBlock2.startIndex; tokenIndex <= tokenBlock2.endIndex; ++tokenIndex) {
         auto& token = sourceCluster2->tokenPointers[tokenIndex];
         auto& cell = token->cell;
-        if (!cell->alive) {
+        if (0 == cell->alive) {
             continue;
         }
         if (cell->cluster == targetCluster) {
@@ -759,7 +759,7 @@ ClusterProcessor::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Clus
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto const& token = sourceCluster->tokenPointers[tokenIndex];
         auto const& cell = token->cell;
-        if (!cell->alive) {
+        if (0 == cell->alive) {
             continue;
         }
         if (cell->cluster == targetCluster) {
@@ -771,7 +771,7 @@ ClusterProcessor::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Clus
 
 __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
 {
-    if (_cluster->numCellPointers == 1 && !_cluster->cellPointers[0]->alive && !_cluster->clusterToFuse) {
+    if (_cluster->numCellPointers == 1 && 0 == _cluster->cellPointers[0]->alive && !_cluster->clusterToFuse) {
         if (0 == threadIdx.x) {
             *_clusterPointer = nullptr;
         }
@@ -779,7 +779,7 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
         return;
     }
 
-    if (_cluster->decompositionRequired && !_cluster->clusterToFuse) {
+    if (1 == _cluster->decompositionRequired && !_cluster->clusterToFuse) {
         copyClusterWithDecomposition_blockCall();
     }
     else if (_cluster->clusterToFuse) {
@@ -789,7 +789,7 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
 {
-    if (_cluster->decompositionRequired && !_cluster->clusterToFuse) {
+    if (1 == _cluster->decompositionRequired && !_cluster->clusterToFuse) {
         __shared__ bool changes;
 
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
@@ -800,10 +800,10 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
             __syncthreads();
             for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
                 Cell* cell = _cluster->cellPointers[cellIndex];
-                if (cell->alive) {
+                if (1 == cell->alive) {
                     for (int i = 0; i < cell->numConnections; ++i) {
                         Cell& otherCell = *cell->connections[i];
-                        if (otherCell.alive) {
+                        if (1 == otherCell.alive) {
                             if (otherCell.tag < cell->tag) {
                                 cell->tag = otherCell.tag;
                                 changes = true;
