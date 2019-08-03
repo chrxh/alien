@@ -25,7 +25,7 @@ struct Cell
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
     int protectionCounter;
-    bool alive;
+    int alive;  //0 = dead, 1 == alive
     int tag;
 };
 
@@ -43,7 +43,7 @@ struct ValueToKeyFunctor<int2, Cell*>
 {
     __device__ __inline__ int2 operator()(Cell* const& cell)
     {
-        return{ static_cast<int>(cell->absPos.x), static_cast<int>(cell->absPos.y) };
+        return toInt2(cell->absPos);
     }
 };
 

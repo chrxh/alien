@@ -71,7 +71,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         cluster->tokenPointers = _data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers);
         tokens = _data->entities.tokens.getNewSubarray(cluster->numTokenPointers);
 
-        cluster->decompositionRequired = false;
+        cluster->decompositionRequired = 0;
         cluster->locked = 0;
         cluster->clusterToFuse = nullptr;
 
@@ -165,7 +165,7 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
     result->id = _data->numberGen.createNewId_kernel();
     result->locked = 0;
     result->protectionCounter = 0;
-    result->alive = true;
+    result->alive = 1;
     return result;
 }
 
@@ -188,7 +188,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     particle->vel = particleTO.vel;
     particle->energy = particleTO.energy;
     particle->locked = 0;
-    particle->alive = true;
+    particle->alive = 1;
     return particle;
 }
 
@@ -215,7 +215,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
 
     cluster->clusterToFuse = nullptr;
     cluster->locked = 0;
-    cluster->decompositionRequired = false;
+    cluster->decompositionRequired = 0;
 
     cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = pos;
@@ -227,7 +227,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->branchNumber = _data->numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
     cell->numConnections = 0;
     cell->tokenBlocked = false;
-    cell->alive = true;
+    cell->alive = 1;
     cell->protectionCounter = 0;
     cell->locked = 0;
     cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
@@ -260,7 +260,7 @@ __inline__ __device__ Particle* EntityFactory::createParticle(float energy, floa
     *particlePointer = particle;
     particle->id = _data->numberGen.createNewId_kernel();
     particle->locked = 0;
-    particle->alive = true;
+    particle->alive = 1;
     particle->energy = energy;
     particle->absPos = pos;
     particle->vel = vel;

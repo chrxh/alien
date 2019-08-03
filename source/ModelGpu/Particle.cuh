@@ -11,5 +11,5 @@ struct Particle
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
-    bool alive;
+    int alive;  //0 = dead, 1 == alive
 };
