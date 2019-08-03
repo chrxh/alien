@@ -132,7 +132,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         }
 
         cell.protectionCounter = 0;
-        cell.alive = true;
+        cell.alive = 1;
         cell.locked = 0;
     }
 
