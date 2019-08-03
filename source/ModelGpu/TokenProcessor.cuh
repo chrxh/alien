@@ -60,7 +60,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
 
         for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
             Cell* cell = cluster->cellPointers[cellIndex];
-            if (cell->alive) {
+            if (1 == cell->alive) {
                 cell->tag = 0;
             }
         }
@@ -79,7 +79,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
             candidateCellsForEnergyAveraging[0] = cell;
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
                 auto& connectingCell = *cell->connections[connectionIndex];
-                if (!connectingCell.alive) {
+                if (0 == connectingCell.alive) {
                     continue;
                 }
                 if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
@@ -125,7 +125,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
 
         for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
             Cell* cell = cluster->cellPointers[cellIndex];
-            if (cell->alive) {
+            if (1 == cell->alive) {
                 cell->tag = 0;
             }
         }
@@ -144,7 +144,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
             int numFreePlaces = 0;
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
                 auto const& connectingCell = cell->connections[connectionIndex];
-                if (!connectingCell->alive) {
+                if (0 == connectingCell->alive) {
                     continue;
                 }
                 if (((tokenBranchNumber + 1 - connectingCell->branchNumber)
@@ -168,7 +168,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
             auto tokenEnergy = token->energy;
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
                 auto const& connectingCell = cell->connections[connectionIndex];
-                if (!connectingCell->alive) {
+                if (0 == connectingCell->alive) {
                     continue;
                 }
                 if (((tokenBranchNumber + 1 - connectingCell->branchNumber)
@@ -247,7 +247,7 @@ __inline__ __device__ int TokenProcessor::calcAnticipatedTokens(Cluster* cluster
         int tokenBranchNumber = token->memory[0];
         for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
             auto connectingCell = cell.connections[connectionIndex];
-            if (!connectingCell->alive) {
+            if (0 == connectingCell->alive) {
                 continue;
             }
             if (((tokenBranchNumber + 1 - connectingCell->branchNumber)

@@ -17,7 +17,7 @@ struct Cluster
     Token** tokenPointers;
 
     //auxiliary data
-    bool decompositionRequired;
+    int decompositionRequired;  //0 = false, 1 = true
     int locked;	//0 = unlocked, 1 = locked
     Cluster* clusterToFuse;
 

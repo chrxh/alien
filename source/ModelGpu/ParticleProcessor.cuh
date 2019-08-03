@@ -59,7 +59,7 @@ __inline__ __device__ void ParticleProcessor::processingCollision_gridCall()
         Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
         Particle* otherParticle = _data->particleMap.get(particle->absPos);
         if (otherParticle && otherParticle != particle) {
-            if (particle->alive && otherParticle->alive) {
+            if (1 == particle->alive && 1 == otherParticle->alive) {
 
                 DoubleLock lock;
                 lock.init(&particle->locked, &otherParticle->locked);
@@ -73,7 +73,7 @@ __inline__ __device__ void ParticleProcessor::processingCollision_gridCall()
                 particle->vel = particle->vel * factor1 + otherParticle->vel * factor2;
                 atomicAdd(&particle->energy, otherParticle->energy);
                 atomicAdd(&otherParticle->energy, -otherParticle->energy);
-                otherParticle->alive = false;
+                atomicExch(&otherParticle->alive, 0);
 
                 lock.releaseLock();
             }
@@ -91,7 +91,7 @@ __inline__ __device__ void ParticleProcessor::processingTransformation_gridCall(
                 EntityFactory factory;
                 factory.init(_data);
                 factory.createClusterWithRandomCell(innerEnergy, particle->absPos, particle->vel);
-                particle->alive = false;
+                atomicExch(&particle->alive, 0);
             }
         }
     }
@@ -101,13 +101,13 @@ __inline__ __device__ void ParticleProcessor::processingDataCopy_gridCall()
 {
 	for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
 		auto& particle = _data->entities.particlePointers.at(particleIndex);
-		if (!particle->alive) {
+		if (0 == particle->alive) {
             particle = nullptr;
 			continue;
 		}
 
         if (auto cell = _data->cellMap.get(particle->absPos)) {
-			if (cell->alive) {
+			if (1 == cell->alive) {
 				atomicAdd(&cell->energy, particle->energy);
                 particle = nullptr;
                 continue;
