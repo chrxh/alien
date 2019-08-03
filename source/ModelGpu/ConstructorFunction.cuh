@@ -204,7 +204,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
 {
     auto const& cell = token->cell;
     auto const& cluster = constructionCell->cluster;
-    auto const cellArray1 = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers + 1);
+    auto const cellArray1 = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
     auto const cellArray2 = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers);
     tagConstructionSite(cell, constructionCell, cellArray1, cellArray2);
 
@@ -266,10 +266,10 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
         separation ? cell->relPos + relPosOfNewCellDelta * 2 : cell->relPos + relPosOfNewCellDelta;
 
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
-    auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers + 1);
+    auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
-        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers + 1, newCellPointers);
+        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
         if (isObstaclePresent(ignoreOwnCluster, cluster, relPosOfNewCell, data->cellMap, tempCellMap)) {
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
             return;
@@ -345,7 +345,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
-        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers + 1, newCellPointers);
+        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
         if (isObstaclePresent(
                 ignoreOwnCluster,
                 cluster,
@@ -395,7 +395,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
-        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers + 1, newCellPointers);
+        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
         if (isObstaclePresent(
                 ignoreOwnCluster,
                 cluster,
