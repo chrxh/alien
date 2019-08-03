@@ -239,8 +239,8 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 		auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 		ModelGpuBuilderFacade::Config simulationControllerConfig{ configGpu->universeSize, configGpu->symbolTable, configGpu->parameters };
         ModelGpuData data;
-        data.setNumThreadsPerBlock(64);
-        data.setNumBlocks(64);
+        data.setNumThreadsPerBlock(16);
+        data.setNumBlocks(64*8);
 
         data.setNumClusterPointerArrays(1);
         data.setMaxClusters(500000);
