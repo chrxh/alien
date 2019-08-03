@@ -26,7 +26,8 @@ protected:
     };
     struct ConstructionOnLineClusterTestParameters
     {
-        MEMBER_DECLARATION(ConstructionOnLineClusterTestParameters, bool, obstacle, false);
+        MEMBER_DECLARATION(ConstructionOnLineClusterTestParameters, bool, obstacleRight, false);
+        MEMBER_DECLARATION(ConstructionOnLineClusterTestParameters, bool, obstacleLeft, false);
         MEMBER_DECLARATION(ConstructionOnLineClusterTestParameters, TokenDescription, token, TokenDescription());
     };
     TestResult runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters const& parameters);
@@ -92,9 +93,15 @@ auto ConstructorGpuTests::runConstructionOnLineClusterTest(ConstructionOnLineClu
 
     origData.addCluster(cluster);
 
-    if (parameters._obstacle) {
+    if (parameters._obstacleRight) {
         auto obstacle =
             createHorizontalCluster(4, QVector2D{13.0f + _parameters.cellMinDistance / 2, 10.5}, QVector2D{}, 0);
+        origData.addCluster(obstacle);
+    }
+
+    if (parameters._obstacleLeft) {
+        auto obstacle =
+            createHorizontalCluster(4, QVector2D{ 8.0f + _parameters.cellMinDistance / 2, 10.5 }, QVector2D{}, 0);
         origData.addCluster(obstacle);
     }
 
@@ -110,7 +117,13 @@ auto ConstructorGpuTests::runConstructionOnLineClusterTest(ConstructionOnLineClu
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
     auto newClusterByCellId = IntegrationTestHelper::getClusterByCellId(newData);
-    auto newCluster = newClusterByCellId.at(firstCell.id);
+    ClusterDescription newCluster;
+    if (newClusterByCellId.find(firstCell.id) != newClusterByCellId.end()) {
+        newCluster = newClusterByCellId.at(firstCell.id);
+    }
+    else {
+        newCluster = newClusterByCellId.at(secondCell.id);
+    }
 
     TestResult result;
     result.movementOfCenter = *newCluster.pos - *cluster.pos;
@@ -443,34 +456,67 @@ TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_errorNoEnergy)
     checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_NO_ENERGY));
 }
 
-TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterRightObstacle_safeMode)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
     auto const result =
-        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacle(true));
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacleRight(true));
 
     checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterRightObstacle_unsafeMode)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
     auto const result =
-        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacle(true));
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacleRight(true));
 
     checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterObstacle_brutforceMode)
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterRightObstacle_brutforceMode)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
     auto const result =
-        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacle(true));
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacleRight(true));
 
     auto const expectedCellPos = QVector2D{_offspringDistance, 0};
+    checkResult(
+        result,
+        Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedRelCellPos(expectedCellPos).destruction(true));
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterLeftObstacle_safeMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto const result =
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacleLeft(true));
+
+    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterLeftObstacle_unsafeMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
+    auto const result =
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacleLeft(true));
+
+    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+}
+
+TEST_F(ConstructorGpuTests, testConstructCellOnLineCluster_otherClusterLeftObstacle_brutforceMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
+    auto const result =
+        runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token).obstacleLeft(true));
+
+    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
     checkResult(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedRelCellPos(expectedCellPos).destruction(true));
