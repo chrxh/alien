@@ -935,12 +935,12 @@ __inline__ __device__ Token* ConstructorFunction::constructNewToken(
     result->sourceCell = sourceCellOfNewToken;
     result->energy = energyOfNewToken;
     if (duplicate) {
-        for (int i = 0; i < MAX_TOKEN_MEM_SIZE; ++i) {
+        for (int i = 1; i < MAX_TOKEN_MEM_SIZE; ++i) {  //do not copy branchnumber (at address 0)
             result->memory[i] = token->memory[i];
         }
     }
     else {
-        for (int i = 0; i < MAX_TOKEN_MEM_SIZE; ++i) {
+        for (int i = 1; i < MAX_TOKEN_MEM_SIZE; ++i) {  //do not copy branchnumber (at address 0)
             result->memory[i] = 0;
         }
     }
