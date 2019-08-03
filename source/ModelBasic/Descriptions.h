@@ -31,8 +31,6 @@ struct MODELBASIC_EXPORT TokenDescription
 	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
-#include <iostream>
-
 struct MODELBASIC_EXPORT CellDescription
 {
 	uint64_t id = 0;
