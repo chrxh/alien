@@ -226,7 +226,8 @@ __inline__ __device__ void TokenProcessor::processingFeatures_gridCall()
     for (int clusterIndex = _clusterBlock.startIndex; clusterIndex <= _clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
 
-        for (int tokenIndex = 0; tokenIndex < cluster->numTokenPointers; ++tokenIndex) {
+        auto const numTokenPointers = cluster->numTokenPointers;
+        for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
             auto& token = cluster->tokenPointers[tokenIndex];
             processingCellFeatures(token, factory);
         }
