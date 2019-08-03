@@ -293,8 +293,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
 __inline__ __device__ void ClusterProcessor::destroyCloseCell_blockCall()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        Cell *origCell = _cluster->cellPointers[cellIndex];
-        destroyCloseCell(origCell);
+        Cell *cell = _cluster->cellPointers[cellIndex];
+        destroyCloseCell(cell);
     }
     __syncthreads();
 }
