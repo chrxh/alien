@@ -48,6 +48,7 @@ protected:
             Enums::ConstrInOption::Type,
             constructionOption,
             Enums::ConstrInOption::STANDARD);
+        MEMBER_DECLARATION(TokenForConstructionParameters, int, cellBranchNumber, 0);
         MEMBER_DECLARATION(TokenForConstructionParameters, float, angle, 0.0f);
         MEMBER_DECLARATION(TokenForConstructionParameters, float, distance, 0.0f);
     };
@@ -327,6 +328,7 @@ TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstru
     (*token.data)[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(tokenParameters._angle);
     (*token.data)[Enums::Constr::IN_DIST] = QuantityConverter::convertDistanceToData(tokenParameters._distance);
     (*token.data)[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = 2;
+    (*token.data)[Enums::Constr::IN_CELL_BRANCH_NO] = tokenParameters._cellBranchNumber;
     token.energy = tokenParameters._energy.get_value_or(
         2 * _parameters.tokenMinEnergy + 2 * _parameters.cellFunctionConstructorOffspringCellEnergy);
     return token;
@@ -602,18 +604,46 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnTiangleCluster)
     checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_alsoConstructEmptyToken)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_withEmptyToken)
 {
+    auto const cellBranchNumber = 1;
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
                                                       .constructionInput(Enums::ConstrIn::SAFE)
-                                                      .constructionOption(Enums::ConstrInOption::CREATE_EMPTY_TOKEN));
+                                                      .constructionOption(Enums::ConstrInOption::CREATE_EMPTY_TOKEN)
+                                                      .cellBranchNumber(cellBranchNumber));
     auto const result = runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
-    auto const expectedToken = TokenDescription().setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0));
+    QByteArray expectedTokenMemory(_parameters.tokenMemorySize, 0);
+    expectedTokenMemory[0] = cellBranchNumber;
+    auto const expectedToken = TokenDescription()
+                                   .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
+                                   .setData(expectedTokenMemory);
     checkResult(
         result,
         Expectations()
-            .tokenOutput(Enums::ConstrOut::SUCCESS)
-            .constructedCellRelPos(expectedCellPos)
-            .constructedToken(expectedToken));
+        .tokenOutput(Enums::ConstrOut::SUCCESS)
+        .constructedCellRelPos(expectedCellPos)
+        .constructedToken(expectedToken));
+}
+
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_withDuplicatedToken)
+{
+    auto const cellBranchNumber = 1;
+    auto const token = createTokenForConstruction(TokenForConstructionParameters()
+                                                      .constructionInput(Enums::ConstrIn::SAFE)
+                                                      .constructionOption(Enums::ConstrInOption::CREATE_DUP_TOKEN)
+                                                      .cellBranchNumber(cellBranchNumber));
+    auto const result = runConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
+    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
+    auto expectedTokenMemory = *token.data;
+    expectedTokenMemory[0] = cellBranchNumber;
+    auto const expectedToken = TokenDescription()
+                                   .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
+                                   .setData(expectedTokenMemory);
+    checkResult(
+        result,
+        Expectations()
+        .tokenOutput(Enums::ConstrOut::SUCCESS)
+        .constructedCellRelPos(expectedCellPos)
+        .constructedToken(expectedToken));
 }
