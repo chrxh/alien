@@ -9,7 +9,7 @@
 #include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
 #include "HashSet.cuh"
-#include "HashMap.cuh"
+#include "IntPointerMap.cuh"
 
 struct PartitionData
 {

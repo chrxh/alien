@@ -13,10 +13,10 @@ template <
     typename Value,
     typename Hash = HashFunctor<Key>,
     typename ValueToKey = ValueToKeyFunctor<Key, Value>>
-    class HashMap
+    class IntPointerMap
 {
 public:
-    __device__ __inline__ HashMap(int size, Value* data)
+    __device__ __inline__ IntPointerMap(int size, Value* data)
         : _data(data)
     {
         reset(size);
@@ -63,14 +63,13 @@ public:
         int index = _hash(key) % _size;
         for (int i = 0; i < _size; ++i, index = (++index) % _size) {
             if (nullptr == _data[index]) {
-                return false;
+                return _data[index];
             }
             else if (_valueToKey(_data[index]) == key) {
                 return _data[index];
             }
-
         }
-        THROW_NOT_IMPLEMENTED();
+        return _data[0];    //return something => undefined
     }
 
 private:

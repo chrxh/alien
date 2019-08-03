@@ -58,7 +58,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
                 impulse = Math::normalized(cellRelPos) * power;
             }
             if (Enums::PropIn::TOWARD_CENTER == command) {
-                impulse = Math::normalized(Math::minus(cellRelPos)) * power;
+                impulse = Math::normalized(cellRelPos) * (-power);
             }
 
             auto rAPp = cellRelPos;
