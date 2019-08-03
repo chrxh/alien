@@ -964,7 +964,7 @@ ConstructorFunction::addTokenToCluster(Token* token, Cluster* cluster, Token** n
     for (int i = 0; i < cluster->numTokenPointers; ++i) {
         newTokenPointers[i] = cluster->tokenPointers[i];
     }
-    newTokenPointers[cluster->numCellPointers] = token;
+    newTokenPointers[cluster->numTokenPointers] = token;
     cluster->tokenPointers = newTokenPointers;
     ++cluster->numTokenPointers;
 }
