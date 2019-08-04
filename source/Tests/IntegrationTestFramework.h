@@ -79,6 +79,7 @@ bool isCompatible(vector<T> a, vector<T> b)
 
 template<> bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2);
 template<> bool isCompatible<double>(double a, double b);
+template<> bool isCompatible<float>(float a, float b);
 template<> bool isCompatible<TokenDescription>(TokenDescription token1, TokenDescription token2);
 template<> bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2);
 template<> bool isCompatible<CellDescription>(CellDescription cell1, CellDescription cell2);
