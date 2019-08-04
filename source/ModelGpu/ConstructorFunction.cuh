@@ -911,14 +911,14 @@ __inline__ __device__ Cell* ConstructorFunction::constructNewCell(
         token->memory[Enums::Constr::IN_CELL_BRANCH_NO] % cudaSimulationParameters.cellMaxTokenBranchNumber;
     result->tokenBlocked = true;
     result->cellFunctionType = token->memory[Enums::Constr::IN_CELL_FUNCTION];
-    result->numStaticBytes = token->memory[Enums::Scanner::OUT_CELL_FUNCTION_DATA];
+    result->numStaticBytes = token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA];
     for (int i = 0; i < result->numStaticBytes; ++i) {
-        result->staticData[i] = token->memory[Enums::Scanner::OUT_CELL_FUNCTION_DATA + i + 1];
+        result->staticData[i] = token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1];
     }
     int offset = result->numStaticBytes + 1;
-    result->numMutableBytes = token->memory[Enums::Scanner::OUT_CELL_FUNCTION_DATA + offset];
+    result->numMutableBytes = token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset];
     for (int i = 0; i < result->numMutableBytes; ++i) {
-        result->mutableData[i] = token->memory[Enums::Scanner::OUT_CELL_FUNCTION_DATA + offset + i + 1];
+        result->mutableData[i] = token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1];
     }
     return result;
 }
