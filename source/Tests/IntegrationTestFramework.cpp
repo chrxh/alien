@@ -236,7 +236,22 @@ bool isCompatible<double>(double a, double b)
     if (a == b) {
         return true;
     }
+    if (std::abs(a) < 0.0001) {
+        return std::abs(a - b) < 0.0001;
+    }
 	return std::abs(a - b) / std::abs(a) < 0.0001;  //use relative error
+}
+
+template<>
+bool isCompatible<float>(float a, float b)
+{
+    if (a == b) {
+        return true;
+    }
+    if (std::abs(a) < 0.0001f) {
+        return std::abs(a - b) < 0.0001f;
+    }
+    return std::abs(a - b) / std::abs(a) < 0.0001f;  //use relative error
 }
 
 template<>
