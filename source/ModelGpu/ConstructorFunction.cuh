@@ -291,6 +291,10 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
         return;
     }
 
+    if (cell->maxConnections == cell->numConnections) {
+        ++cell->maxConnections;
+    }
+
     auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
     addCellToCluster(newCell, cluster, newCellPointers);
     establishConnection(newCell, cell);
@@ -1008,6 +1012,8 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
     establishConnection(newCell, cellOfConstructionSite);
     establishConnection(newCell, cellOfConstructor);
 
+    auto const isAutomaticMaxConnection = 0 == token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
+
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         if (newCell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
@@ -1024,7 +1030,7 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
         }
 
         //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
-        if (0 == token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS]) {
+        if (isAutomaticMaxConnection) {
             if (newCell->numConnections == newCell->maxConnections) {
                 ++newCell->maxConnections;
             }
