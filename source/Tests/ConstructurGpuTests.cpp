@@ -17,6 +17,9 @@ public:
 protected:
     virtual void SetUp();
 
+    enum class Separated { No, Yes };
+    float getOffspringDistance(Separated value = Separated::No) const;
+
     struct TokenForConstructionParameters
     {
         MEMBER_DECLARATION(TokenForConstructionParameters, optional<float>, energy, boost::none);
@@ -61,7 +64,7 @@ protected:
     };
     TestResult runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters const& parameters) const;
     TestResult
-    runstartConstructionOnWedgeClusterTest(TokenDescription const& token, float wedgeAngle, float clusterAngle) const;
+    runStartConstructionOnWedgeClusterTest(TokenDescription const& token, float wedgeAngle, float clusterAngle) const;
     TestResult runStartConstructionOnTriangleClusterTest(TokenDescription const& token) const;
 
     struct ContinueConstructionOnLineClusterTestParameters
@@ -78,10 +81,30 @@ protected:
         MEMBER_DECLARATION(Expectations, optional<TokenDescription>, constructedToken, boost::none);
         MEMBER_DECLARATION(Expectations, bool, destruction, false);
     };
-    void checkResult(TestResult const& testResult, Expectations const& expectations) const;
 
-    enum class Separated {No, Yes};
-    float getOffspringDistance(Separated value = Separated::No) const;
+    class _ResultChecker
+    {
+    public:
+        _ResultChecker(SimulationParameters const& parameters) : _parameters(parameters) {}
+
+        void check(TestResult const& testResult, Expectations const& expectations) const;
+
+    private:
+        void checkIfDestruction(TestResult const& testResult, Expectations const& expectations) const;
+        void checkIfNoDestruction(TestResult const& testResult, Expectations const& expectations) const;
+        void checkIfNoDestructionAndSuccess(TestResult const& testResult, Expectations const& expectations) const;
+
+        void checkTokenWithCellAttributes(TokenDescription const& token, CellDescription const& cell) const;
+        bool isFinished(TokenDescription const& token) const;
+        bool isReduced(TokenDescription const& token) const;
+        bool isSeparated(TokenDescription const& token) const;
+
+    private:
+        SimulationParameters _parameters;
+    };
+    using ResultChecker = boost::shared_ptr<_ResultChecker>;
+
+    ResultChecker _resultChecker;
 };
 
 
@@ -94,6 +117,8 @@ void ConstructorGpuTests::SetUp()
     _parameters.radiationProb = 0;  //exclude radiation
     _parameters.cellFunctionConstructorOffspringCellDistance = 1;
     _context->setSimulationParameters(_parameters);
+
+    _resultChecker = boost::make_shared<_ResultChecker>(_parameters);
 }
 
 auto ConstructorGpuTests::runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters const& parameters) const
@@ -192,7 +217,7 @@ auto ConstructorGpuTests::runStartConstructionOnLineClusterTest(ConstructionOnLi
     return result;
 }
 
-auto ConstructorGpuTests::runstartConstructionOnWedgeClusterTest(
+auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
     TokenDescription const& token,
     float wedgeAngle,
     float clusterAngle) const -> TestResult
@@ -451,109 +476,158 @@ TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstru
     return token;
 }
 
-void ConstructorGpuTests::checkResult(
+void ConstructorGpuTests::_ResultChecker::check(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
+    if (expectations._destruction) {
+        checkIfDestruction(testResult, expectations);
+    }
+    else {
+        checkIfNoDestruction(testResult, expectations);
+    }
+}
+
+void ConstructorGpuTests::_ResultChecker::checkIfDestruction(TestResult const & testResult, Expectations const & expectations) const
+{
     auto const& token = testResult.token;
+
+    EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
+
+    if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
+        EXPECT_FALSE(testResult.constructedCell);
+        return;
+    }
+}
+
+void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(TestResult const & testResult, Expectations const & expectations) const
+{
+    auto const& token = testResult.token;
+
+    EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
+    EXPECT_TRUE(isCompatible(testResult.movementOfCenter, QVector2D{}));
+
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
         EXPECT_FALSE(testResult.constructedCell);
         return;
     }
 
-    EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
-
-    if (!expectations._destruction) {
-        EXPECT_TRUE(isCompatible(testResult.movementOfCenter, QVector2D{}));
-
-        if (Enums::ConstrOut::SUCCESS == expectations._tokenOutput) {
-            EXPECT_TRUE(testResult.constructedCell);
-            EXPECT_TRUE(isCompatible(
-                _parameters.cellFunctionConstructorOffspringCellEnergy,
-                static_cast<float>(*testResult.constructedCell->energy)));
-
-            auto const option = token.data->at(Enums::Constr::IN_OPTION);
-            auto const expectedMaxConnections = token.data->at(Enums::Constr::IN_CELL_MAX_CONNECTIONS);
-            auto const expectedBranchNumber = token.data->at(Enums::Constr::IN_CELL_BRANCH_NO);
-            auto const expectedCellFunctionType = token.data->at(Enums::Constr::IN_CELL_FUNCTION);
-
-            auto const expectedStaticDataLength = token.data->at(Enums::Constr::IN_CELL_FUNCTION_DATA);
-            auto const expectedStaticData =
-                token.data->mid(Enums::Constr::IN_CELL_FUNCTION_DATA + 1, expectedStaticDataLength);
-            auto const mutableDataIndex = Enums::Constr::IN_CELL_FUNCTION_DATA + 1 + expectedStaticDataLength;
-            auto const expectedMutableDataLength = token.data->at(mutableDataIndex);
-            auto const expectedMutableData = token.data->mid(mutableDataIndex + 1, expectedMutableDataLength);
-
-            EXPECT_EQ(expectedBranchNumber, *testResult.constructedCell->tokenBranchNumber);
-            EXPECT_EQ(expectedCellFunctionType, testResult.constructedCell->cellFeature->type);
-            EXPECT_EQ(expectedStaticData, testResult.constructedCell->cellFeature->constData);
-            EXPECT_EQ(expectedMutableData, testResult.constructedCell->cellFeature->volatileData);
-
-            auto const isSeparated = Enums::ConstrInOption::FINISH_WITH_SEP == option
-                || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
-                || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
-
-            {
-                auto const& connectingCells = *testResult.constructedCell->connectingCells;
-                EXPECT_EQ(
-                    !isSeparated,
-                    std::find(connectingCells.begin(), connectingCells.end(), testResult.constructorCell.id)
-                        != connectingCells.end());
-            }
-            {
-                auto const& connectingCells = *testResult.constructorCell.connectingCells;
-                EXPECT_EQ(
-                    !isSeparated,
-                    std::find(connectingCells.begin(), connectingCells.end(), testResult.constructedCell->id)
-                        != connectingCells.end());
-            }
-            EXPECT_PRED3(
-                predEqual,
-                0,
-                (*testResult.constructorCell.pos + *expectations._constructedCellRelPos
-                 - *testResult.constructedCell->pos)
-                    .length(),
-                0.05);
-
-            auto const isFinished = Enums::ConstrInOption::FINISH_NO_SEP == option
-                || Enums::ConstrInOption::FINISH_WITH_SEP == option
-                || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
-                || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
-            EXPECT_EQ(!isFinished, testResult.constructedCell->tokenBlocked);
-
-            auto const isReduced = Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
-                || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
-            auto const decreaseMaxConnectionIfReduced = isReduced ? -1 : 0;
-            auto const isAutomaticMaxConnection = 0 == expectedMaxConnections;
-            if (isAutomaticMaxConnection) {
-                EXPECT_EQ(
-                    std::max(static_cast<int>(testResult.constructedCell->connectingCells->size()), 2)
-                        + decreaseMaxConnectionIfReduced,
-                    *testResult.constructedCell->maxConnections);
-            } else {
-                EXPECT_EQ(expectedMaxConnections, *testResult.constructedCell->maxConnections);
-            }
-
-            auto const increaseMaxConnectionIfNewConstructionSite = 0 == testResult.origConstructionSite.size() ? 1 : 0;
-            if (*testResult.origConstructorCell.maxConnections
-                == testResult.origConstructorCell.connectingCells->size()) {
-                EXPECT_EQ(
-                    *testResult.origConstructorCell.maxConnections + increaseMaxConnectionIfNewConstructionSite
-                        + decreaseMaxConnectionIfReduced,
-                    *testResult.constructorCell.maxConnections);
-            }
-
-            if (expectations._constructedToken) {
-                auto const& actualTokens = testResult.constructedCell->tokens;
-                EXPECT_EQ(1, actualTokens->size());
-                EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
-            }
-
-            return;
-        } else {
-            EXPECT_FALSE(testResult.constructedCell);
-        }
+    if (Enums::ConstrOut::SUCCESS == expectations._tokenOutput) {
+        checkIfNoDestructionAndSuccess(testResult, expectations);
     }
+    else {
+        EXPECT_FALSE(testResult.constructedCell);
+    }
+}
+
+void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(TestResult const & testResult, Expectations const & expectations) const
+{
+    auto const& token = testResult.token;
+
+    EXPECT_TRUE(testResult.constructedCell);
+    EXPECT_TRUE(isCompatible(
+        _parameters.cellFunctionConstructorOffspringCellEnergy,
+        static_cast<float>(*testResult.constructedCell->energy)));
+
+    checkTokenWithCellAttributes(token, *testResult.constructedCell);
+
+    {
+        auto const& connectingCells = *testResult.constructedCell->connectingCells;
+        EXPECT_EQ(
+            !isSeparated(token),
+            std::find(connectingCells.begin(), connectingCells.end(), testResult.constructorCell.id)
+            != connectingCells.end());
+    }
+    {
+        auto const& connectingCells = *testResult.constructorCell.connectingCells;
+        EXPECT_EQ(
+            !isSeparated(token),
+            std::find(connectingCells.begin(), connectingCells.end(), testResult.constructedCell->id)
+            != connectingCells.end());
+    }
+    EXPECT_PRED3(
+        predEqual,
+        0,
+        (*testResult.constructorCell.pos + *expectations._constructedCellRelPos
+            - *testResult.constructedCell->pos)
+        .length(),
+        0.05);
+
+    EXPECT_EQ(!isFinished(token), testResult.constructedCell->tokenBlocked);
+
+    auto const increaseMaxConnectionIfNewConstructionSite = 0 == testResult.origConstructionSite.size() ? 1 : 0;
+    if (*testResult.origConstructorCell.maxConnections
+        == testResult.origConstructorCell.connectingCells->size()) {
+        auto const decreaseMaxConnectionIfReduced = isReduced(token) ? -1 : 0;
+        EXPECT_EQ(
+            *testResult.origConstructorCell.maxConnections + increaseMaxConnectionIfNewConstructionSite
+            + decreaseMaxConnectionIfReduced,
+            *testResult.constructorCell.maxConnections);
+    }
+
+    if (expectations._constructedToken) {
+        auto const& actualTokens = testResult.constructedCell->tokens;
+        EXPECT_EQ(1, actualTokens->size());
+        EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
+    }
+}
+
+void ConstructorGpuTests::_ResultChecker::checkTokenWithCellAttributes(
+    TokenDescription const& token,
+    CellDescription const& cell) const
+{
+    auto const expectedMaxConnections = token.data->at(Enums::Constr::IN_CELL_MAX_CONNECTIONS);
+    auto const expectedBranchNumber = token.data->at(Enums::Constr::IN_CELL_BRANCH_NO);
+    auto const expectedCellFunctionType = token.data->at(Enums::Constr::IN_CELL_FUNCTION);
+
+    auto const expectedStaticDataLength = token.data->at(Enums::Constr::IN_CELL_FUNCTION_DATA);
+    auto const expectedStaticData =
+        token.data->mid(Enums::Constr::IN_CELL_FUNCTION_DATA + 1, expectedStaticDataLength);
+    auto const mutableDataIndex = Enums::Constr::IN_CELL_FUNCTION_DATA + 1 + expectedStaticDataLength;
+    auto const expectedMutableDataLength = token.data->at(mutableDataIndex);
+    auto const expectedMutableData = token.data->mid(mutableDataIndex + 1, expectedMutableDataLength);
+
+    EXPECT_EQ(expectedBranchNumber, *cell.tokenBranchNumber);
+    EXPECT_EQ(expectedCellFunctionType, cell.cellFeature->type);
+    EXPECT_EQ(expectedStaticData, cell.cellFeature->constData);
+    EXPECT_EQ(expectedMutableData, cell.cellFeature->volatileData);
+
+    auto const decreaseMaxConnectionIfReduced = isReduced(token) ? -1 : 0;
+    auto const isAutomaticMaxConnection = 0 == expectedMaxConnections;
+    if (isAutomaticMaxConnection) {
+        EXPECT_EQ(
+            std::max(static_cast<int>(cell.connectingCells->size()), 2)
+            + decreaseMaxConnectionIfReduced,
+            *cell.maxConnections);
+    }
+    else {
+        EXPECT_EQ(expectedMaxConnections, *cell.maxConnections);
+    }
+
+}
+
+bool ConstructorGpuTests::_ResultChecker::isFinished(TokenDescription const & token) const
+{
+    auto const option = token.data->at(Enums::Constr::IN_OPTION);
+    return Enums::ConstrInOption::FINISH_NO_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+}
+
+bool ConstructorGpuTests::_ResultChecker::isReduced(TokenDescription const & token) const
+{
+    auto const option = token.data->at(Enums::Constr::IN_OPTION);
+    return Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+}
+
+bool ConstructorGpuTests::_ResultChecker::isSeparated(TokenDescription const & token) const
+{
+    auto const option = token.data->at(Enums::Constr::IN_OPTION);
+    return Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
 }
 
 float ConstructorGpuTests::getOffspringDistance(Separated value) const
@@ -567,7 +641,7 @@ TEST_F(ConstructorGpuTests, testDoNothing)
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::DO_NOTHING));
     auto result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_standardParameters)
@@ -576,7 +650,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_standardParamete
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
     auto result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_nonStandardParameters1)
@@ -588,7 +662,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_nonStandardParam
                                                       .cellFunctionType(Enums::CellFunction::SCANNER));
     auto result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_nonStandardParameters2)
@@ -616,7 +690,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_nonStandardParam
                                        .mutableData(QByteArray(_parameters.cellFunctionComputerCellMemorySize, 1)));
     auto result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_ignoreDistanceOnFirstConstructedCell1)
@@ -626,7 +700,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_ignoreDistanceOn
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
 
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_ignoreDistanceOnFirstConstructedCell2)
@@ -636,7 +710,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_ignoreDistanceOn
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
 
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_rightHandSide)
@@ -646,7 +720,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_rightHandSide)
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
 
     auto const expectedCellPos = QVector2D{0, getOffspringDistance()};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_leftHandSide)
@@ -656,7 +730,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_leftHandSide)
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
 
     auto const expectedCellPos = QVector2D{0, -getOffspringDistance()};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_errorMaxConnectionsReached)
@@ -668,7 +742,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_errorMaxConnecti
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_errorNoEnergy)
@@ -678,7 +752,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_errorNoEnergy)
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).energy(lowTokenEnergy));
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_NO_ENERGY));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_NO_ENERGY));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterRightObstacle_safeMode)
@@ -688,7 +762,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterRigh
     auto const result = runStartConstructionOnLineClusterTest(
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(getOffspringDistance()));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterRightObstacle_unsafeMode)
@@ -698,7 +772,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterRigh
     auto const result = runStartConstructionOnLineClusterTest(
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(getOffspringDistance()));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterRightObstacle_brutforceMode)
@@ -709,7 +783,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterRigh
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(getOffspringDistance()));
 
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos).destruction(true));
 }
@@ -721,7 +795,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterLeft
     auto const result = runStartConstructionOnLineClusterTest(
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(-getOffspringDistance()));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterLeftObstacle_unsafeMode)
@@ -731,7 +805,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterLeft
     auto const result = runStartConstructionOnLineClusterTest(
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(-getOffspringDistance()));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterLeftObstacle_brutforceMode)
@@ -742,7 +816,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_otherClusterLeft
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(-getOffspringDistance()));
 
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos).destruction(true));
 }
@@ -751,19 +825,19 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_sameClusterObsta
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
-    auto const result = runstartConstructionOnWedgeClusterTest(token, 180, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(token, 180, 0);
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_sameClusterObstacle_unsafeMode)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(90));
-    auto const result = runstartConstructionOnWedgeClusterTest(token, 180, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(token, 180, 0);
 
     auto const expectedCellPos = QVector2D{0, getOffspringDistance()};
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos).destruction(true));
 }
@@ -772,10 +846,10 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_sameClusterObsta
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(90));
-    auto const result = runstartConstructionOnWedgeClusterTest(token, 180, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(token, 180, 0);
 
     auto const expectedCellPos = QVector2D{0, getOffspringDistance()};
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos).destruction(true));
 }
@@ -784,30 +858,30 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_rightHandSide)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result = runstartConstructionOnWedgeClusterTest(token, 90, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(token, 90, 0);
 
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_leftHandSide)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result = runstartConstructionOnWedgeClusterTest(token, 270, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(token, 270, 0);
 
     auto const expectedCellPos = QVector2D{-getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_diagonal)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result = runstartConstructionOnWedgeClusterTest(token, 90, 45);
+    auto const result = runStartConstructionOnWedgeClusterTest(token, 90, 45);
 
     auto const expectedCellPos = QVector2D{getOffspringDistance() / sqrtf(2), getOffspringDistance() / sqrtf(2)};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnTiangleCluster)
@@ -817,7 +891,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnTiangleCluster)
     auto const result = runStartConstructionOnTriangleClusterTest(token);
 
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_withEmptyToken)
@@ -834,7 +908,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_withEmptyToken)
     auto const expectedToken = TokenDescription()
                                    .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
                                    .setData(expectedTokenMemory);
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations()
             .tokenOutput(Enums::ConstrOut::SUCCESS)
@@ -856,7 +930,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_withDuplicatedTo
     auto const expectedToken = TokenDescription()
                                    .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
                                    .setData(expectedTokenMemory);
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations()
             .tokenOutput(Enums::ConstrOut::SUCCESS)
@@ -871,7 +945,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithoutSep
                                                       .constructionOption(Enums::ConstrInOption::FINISH_NO_SEP));
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{getOffspringDistance(), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSeparation)
@@ -881,7 +955,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSepara
                                                       .constructionOption(Enums::ConstrInOption::FINISH_WITH_SEP));
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{getOffspringDistance(Separated::Yes), 0};
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSeparation_otherClusterRightObstacle_safeMode)
@@ -892,7 +966,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSepara
     auto const result = runStartConstructionOnLineClusterTest(
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(getOffspringDistance(Separated::Yes)));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSeparation_otherClusterRightObstacle_unsafeMode)
@@ -903,7 +977,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSepara
     auto const result = runStartConstructionOnLineClusterTest(
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(getOffspringDistance(Separated::Yes)));
 
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSeparation_otherClusterRightObstacle_bruteforceMode)
@@ -915,7 +989,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSepara
         ConstructionOnLineClusterTestParameters().token(token).horizontalObstacleAt(getOffspringDistance(Separated::Yes)));
 
     auto const expectedCellPos = QVector2D{ getOffspringDistance(Separated::Yes), 0 };
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos).destruction(true));
 }
@@ -927,7 +1001,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithSepara
         .constructionOption(Enums::ConstrInOption::FINISH_WITH_SEP_RED));
     auto const result = runStartConstructionOnLineClusterTest(ConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{ getOffspringDistance(Separated::Yes), 0 };
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithTokenAndSeparationAndReduction)
@@ -946,7 +1020,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnLineCluster_finishWithTokenA
     auto const expectedToken = TokenDescription()
         .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
         .setData(expectedTokenMemory);
-    checkResult(
+    _resultChecker->check(
         result,
         Expectations()
             .tokenOutput(Enums::ConstrOut::SUCCESS)
@@ -961,6 +1035,6 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnLineCluster_standardParamet
     auto result =
         runContinueConstructionOnLineClusterTest(ContinueConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{ getOffspringDistance(), 0 };
-    checkResult(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
 }
 
