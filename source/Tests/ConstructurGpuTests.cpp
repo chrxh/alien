@@ -94,7 +94,12 @@ protected:
         void checkIfNoDestruction(TestResult const& testResult, Expectations const& expectations) const;
         void checkIfNoDestructionAndSuccess(TestResult const& testResult, Expectations const& expectations) const;
 
-        void checkTokenWithCellAttributes(TokenDescription const& token, CellDescription const& cell) const;
+        void checkCellPosition(TestResult const& testResult, Expectations const& expectations) const;
+        void checkCellAttributes(TokenDescription const& token, CellDescription const& cell) const;
+        void checkCellConnections(TestResult const& testResult) const;
+        void checkConstructedToken(TestResult const& testResult,
+            Expectations const& expectations) const;
+
         bool isFinished(TokenDescription const& token) const;
         bool isReduced(TokenDescription const& token) const;
         bool isSeparated(TokenDescription const& token) const;
@@ -520,62 +525,39 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(TestResult const 
     }
 }
 
-void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(TestResult const & testResult, Expectations const & expectations) const
+void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
+    TestResult const& testResult,
+    Expectations const& expectations) const
 {
-    auto const& token = testResult.token;
-
     EXPECT_TRUE(testResult.constructedCell);
-    EXPECT_TRUE(isCompatible(
-        _parameters.cellFunctionConstructorOffspringCellEnergy,
-        static_cast<float>(*testResult.constructedCell->energy)));
 
-    checkTokenWithCellAttributes(token, *testResult.constructedCell);
+    auto const& token = testResult.token;
+    checkCellPosition(testResult, expectations);
+    checkCellAttributes(token, *testResult.constructedCell);
+    checkCellConnections(testResult);
+    checkConstructedToken(testResult, expectations);
+}
 
-    {
-        auto const& connectingCells = *testResult.constructedCell->connectingCells;
-        EXPECT_EQ(
-            !isSeparated(token),
-            std::find(connectingCells.begin(), connectingCells.end(), testResult.constructorCell.id)
-            != connectingCells.end());
-    }
-    {
-        auto const& connectingCells = *testResult.constructorCell.connectingCells;
-        EXPECT_EQ(
-            !isSeparated(token),
-            std::find(connectingCells.begin(), connectingCells.end(), testResult.constructedCell->id)
-            != connectingCells.end());
-    }
+void ConstructorGpuTests::_ResultChecker::checkCellPosition(
+    TestResult const& testResult,
+    Expectations const& expectations) const
+{
     EXPECT_PRED3(
         predEqual,
         0,
-        (*testResult.constructorCell.pos + *expectations._constructedCellRelPos
-            - *testResult.constructedCell->pos)
-        .length(),
+        (*testResult.constructorCell.pos + *expectations._constructedCellRelPos - *testResult.constructedCell->pos)
+            .length(),
         0.05);
-
-    EXPECT_EQ(!isFinished(token), testResult.constructedCell->tokenBlocked);
-
-    auto const increaseMaxConnectionIfNewConstructionSite = 0 == testResult.origConstructionSite.size() ? 1 : 0;
-    if (*testResult.origConstructorCell.maxConnections
-        == testResult.origConstructorCell.connectingCells->size()) {
-        auto const decreaseMaxConnectionIfReduced = isReduced(token) ? -1 : 0;
-        EXPECT_EQ(
-            *testResult.origConstructorCell.maxConnections + increaseMaxConnectionIfNewConstructionSite
-            + decreaseMaxConnectionIfReduced,
-            *testResult.constructorCell.maxConnections);
-    }
-
-    if (expectations._constructedToken) {
-        auto const& actualTokens = testResult.constructedCell->tokens;
-        EXPECT_EQ(1, actualTokens->size());
-        EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
-    }
 }
 
-void ConstructorGpuTests::_ResultChecker::checkTokenWithCellAttributes(
+void ConstructorGpuTests::_ResultChecker::checkCellAttributes(
     TokenDescription const& token,
     CellDescription const& cell) const
 {
+    EXPECT_TRUE(isCompatible(
+        _parameters.cellFunctionConstructorOffspringCellEnergy,
+        static_cast<float>(*cell.energy)));
+
     auto const expectedMaxConnections = token.data->at(Enums::Constr::IN_CELL_MAX_CONNECTIONS);
     auto const expectedBranchNumber = token.data->at(Enums::Constr::IN_CELL_BRANCH_NO);
     auto const expectedCellFunctionType = token.data->at(Enums::Constr::IN_CELL_FUNCTION);
@@ -604,6 +586,47 @@ void ConstructorGpuTests::_ResultChecker::checkTokenWithCellAttributes(
         EXPECT_EQ(expectedMaxConnections, *cell.maxConnections);
     }
 
+    EXPECT_EQ(!isFinished(token), cell.tokenBlocked);
+}
+
+void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const& testResult) const
+{
+    auto const& token = testResult.token;
+    {
+        auto const& connectingCells = *testResult.constructedCell->connectingCells;
+        EXPECT_EQ(
+            !isSeparated(token),
+            std::find(connectingCells.begin(), connectingCells.end(), testResult.constructorCell.id)
+            != connectingCells.end());
+    }
+    {
+        auto const& connectingCells = *testResult.constructorCell.connectingCells;
+        EXPECT_EQ(
+            !isSeparated(token),
+            std::find(connectingCells.begin(), connectingCells.end(), testResult.constructedCell->id)
+            != connectingCells.end());
+    }
+
+    auto const increaseMaxConnectionIfNewConstructionSite = 0 == testResult.origConstructionSite.size() ? 1 : 0;
+    if (*testResult.origConstructorCell.maxConnections
+        == testResult.origConstructorCell.connectingCells->size()) {
+        auto const decreaseMaxConnectionIfReduced = isReduced(token) ? -1 : 0;
+        EXPECT_EQ(
+            *testResult.origConstructorCell.maxConnections + increaseMaxConnectionIfNewConstructionSite
+            + decreaseMaxConnectionIfReduced,
+            *testResult.constructorCell.maxConnections);
+    }
+}
+
+void ConstructorGpuTests::_ResultChecker::checkConstructedToken(
+    TestResult const& testResult,
+    Expectations const& expectations) const
+{
+    if (expectations._constructedToken) {
+        auto const& actualTokens = testResult.constructedCell->tokens;
+        EXPECT_EQ(1, actualTokens->size());
+        EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
+    }
 }
 
 bool ConstructorGpuTests::_ResultChecker::isFinished(TokenDescription const & token) const
@@ -1032,6 +1055,17 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnLineCluster_standardParamet
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).distance(1.0f));
+    auto result =
+        runContinueConstructionOnLineClusterTest(ContinueConstructionOnLineClusterTestParameters().token(token));
+    auto const expectedCellPos = QVector2D{ getOffspringDistance(), 0 };
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnLineCluster_minDistance)
+{
+    auto const minDistance = _parameters.cellMinDistance;
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).distance(minDistance * 1.1f));
     auto result =
         runContinueConstructionOnLineClusterTest(ContinueConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{ getOffspringDistance(), 0 };
