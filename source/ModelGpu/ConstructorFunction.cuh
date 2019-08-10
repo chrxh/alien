@@ -172,6 +172,7 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
         auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
         if (!checkDistance(distance)) {
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
+            return;
         }
         continueConstruction(token, constructionSite, factory, data);
     } else {
@@ -181,7 +182,7 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
 
 __inline__ __device__ bool ConstructorFunction::checkDistance(float distance)
 {
-    return distance > cudaSimulationParameters.cellMaxDistance || distance < cudaSimulationParameters.cellMinDistance;
+    return cudaSimulationParameters.cellMinDistance < distance && distance < cudaSimulationParameters.cellMaxDistance;
 }
 
 __inline__ __device__ Cell* ConstructorFunction::getConstructionSite(Cell* cell)
