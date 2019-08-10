@@ -1,4 +1,5 @@
 #include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm/copy.hpp>
 
 #include "Base/ServiceLocator.h"
 #include "IntegrationGpuTestFramework.h"
@@ -53,9 +54,11 @@ protected:
         int increaseNumberOfCells;
         TokenDescription token;
         CellDescription origConstructorCell;
-        vector<CellDescription> origConstructionSite;
         CellDescription constructorCell;
-        optional<CellDescription> constructedCell;
+        vector<CellDescription> origConstructionSite;
+        vector<CellDescription> constructionSite;
+
+        optional<CellDescription> getConstructedCell() const;
     };
     struct ConstructionOnLineClusterTestParameters
     {
@@ -103,6 +106,7 @@ protected:
         bool isFinished(TokenDescription const& token) const;
         bool isReduced(TokenDescription const& token) const;
         bool isSeparated(TokenDescription const& token) const;
+        bool isConnectedTo(CellDescription const& cell, uint64_t id) const;
 
     private:
         SimulationParameters _parameters;
@@ -216,7 +220,7 @@ auto ConstructorGpuTests::runStartConstructionOnLineClusterTest(ConstructionOnLi
     EXPECT_GE(1, remainingCells.size());
 
     if (!remainingCells.empty()) {
-        result.constructedCell = *remainingCells.begin();
+        result.constructionSite.emplace_back(*remainingCells.begin());
     }
 
     return result;
@@ -298,7 +302,7 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
     newCellByCellId.erase(cellId2);
     newCellByCellId.erase(cellId3);
     if (!newCellByCellId.empty()) {
-        result.constructedCell = newCellByCellId.begin()->second;
+        result.constructionSite.emplace_back(newCellByCellId.begin()->second);
     }
 
     return result;
@@ -390,7 +394,7 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescrip
     newCellByCellId.erase(cellId3);
     newCellByCellId.erase(cellId4);
     if (!newCellByCellId.empty()) {
-        result.constructedCell = newCellByCellId.begin()->second;
+        result.constructionSite.emplace_back(newCellByCellId.begin()->second);
     }
 
     return result;
@@ -451,9 +455,10 @@ auto ConstructorGpuTests::runContinueConstructionOnLineClusterTest(
 
     newCellByCellId.erase(cell1.id);
     newCellByCellId.erase(cell2.id);
-    newCellByCellId.erase(cell3.id);
     if (!newCellByCellId.empty()) {
-        result.constructedCell = newCellByCellId.begin()->second;
+        for (auto const& constructionSiteCell : newCellByCellId | boost::adaptors::map_values) {
+            result.constructionSite.emplace_back(constructionSiteCell);
+        }
     }
 
     return result;
@@ -481,6 +486,27 @@ TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstru
     return token;
 }
 
+optional<CellDescription> ConstructorGpuTests::TestResult::getConstructedCell() const
+{
+    map<uint64_t, CellDescription> cellsBefore;
+    for (auto const& cell : origConstructionSite) {
+        cellsBefore.insert_or_assign(cell.id, cell);
+    }
+    map<uint64_t, CellDescription> cellsRemaining;
+    for (auto const& cell : constructionSite) {
+        if (cellsBefore.find(cell.id) == cellsBefore.end()) {
+            cellsRemaining.insert_or_assign(cell.id, cell);
+        }
+    }
+
+    CHECK(cellsRemaining.size() <= 1);
+    if (!cellsRemaining.empty()) {
+        return cellsRemaining.begin()->second;
+    }
+
+    return boost::none;
+}
+
 void ConstructorGpuTests::_ResultChecker::check(
     TestResult const& testResult,
     Expectations const& expectations) const
@@ -500,7 +526,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfDestruction(TestResult const & 
     EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
-        EXPECT_FALSE(testResult.constructedCell);
+        EXPECT_FALSE(testResult.getConstructedCell());
         return;
     }
 }
@@ -513,7 +539,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(TestResult const 
     EXPECT_TRUE(isCompatible(testResult.movementOfCenter, QVector2D{}));
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
-        EXPECT_FALSE(testResult.constructedCell);
+        EXPECT_FALSE(testResult.getConstructedCell());
         return;
     }
 
@@ -521,7 +547,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(TestResult const 
         checkIfNoDestructionAndSuccess(testResult, expectations);
     }
     else {
-        EXPECT_FALSE(testResult.constructedCell);
+        EXPECT_FALSE(testResult.getConstructedCell());
     }
 }
 
@@ -529,11 +555,11 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
-    EXPECT_TRUE(testResult.constructedCell);
+    EXPECT_TRUE(testResult.getConstructedCell());
 
     auto const& token = testResult.token;
     checkCellPosition(testResult, expectations);
-    checkCellAttributes(token, *testResult.constructedCell);
+    checkCellAttributes(token, *testResult.getConstructedCell());
     checkCellConnections(testResult);
     checkConstructedToken(testResult, expectations);
 }
@@ -545,9 +571,32 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
     EXPECT_PRED3(
         predEqual,
         0,
-        (*testResult.constructorCell.pos + *expectations._constructedCellRelPos - *testResult.constructedCell->pos)
+        (*testResult.constructorCell.pos + *expectations._constructedCellRelPos - *testResult.getConstructedCell()->pos)
             .length(),
         0.05);
+
+    if (!testResult.origConstructionSite.empty()) {
+        optional<CellDescription> firstCellOfOrigConstructionSite;
+        for (auto const& origConstructionSiteCell : testResult.origConstructionSite) {
+            if (isConnectedTo(origConstructionSiteCell, testResult.constructorCell.id)) {
+                firstCellOfOrigConstructionSite = origConstructionSiteCell;
+                break;
+            }
+        }
+        CHECK(firstCellOfOrigConstructionSite);
+
+        optional<CellDescription> firstCellOfConstructionSite;
+        for (auto const& constructionSiteCell : testResult.constructionSite) {
+            if (firstCellOfOrigConstructionSite->id == constructionSiteCell.id) {
+                firstCellOfConstructionSite = constructionSiteCell;
+            }
+        }
+        CHECK(firstCellOfConstructionSite);
+
+        auto const displacement = *firstCellOfConstructionSite->pos - *testResult.getConstructedCell()->pos;
+        auto const expectedDistance = QuantityConverter::convertDataToDistance(testResult.token.data->at(Enums::Constr::IN_DIST));
+        EXPECT_PRED3(predEqual, expectedDistance, displacement.length(), 0.05);
+    }
 }
 
 void ConstructorGpuTests::_ResultChecker::checkCellAttributes(
@@ -593,7 +642,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const&
 {
     auto const& token = testResult.token;
     {
-        auto const& connectingCells = *testResult.constructedCell->connectingCells;
+        auto const connectingCells = *testResult.getConstructedCell()->connectingCells;
         EXPECT_EQ(
             !isSeparated(token),
             std::find(connectingCells.begin(), connectingCells.end(), testResult.constructorCell.id)
@@ -603,7 +652,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const&
         auto const& connectingCells = *testResult.constructorCell.connectingCells;
         EXPECT_EQ(
             !isSeparated(token),
-            std::find(connectingCells.begin(), connectingCells.end(), testResult.constructedCell->id)
+            std::find(connectingCells.begin(), connectingCells.end(), testResult.getConstructedCell()->id)
             != connectingCells.end());
     }
 
@@ -623,7 +672,7 @@ void ConstructorGpuTests::_ResultChecker::checkConstructedToken(
     Expectations const& expectations) const
 {
     if (expectations._constructedToken) {
-        auto const& actualTokens = testResult.constructedCell->tokens;
+        auto const actualTokens = testResult.getConstructedCell()->tokens;
         EXPECT_EQ(1, actualTokens->size());
         EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
     }
@@ -651,6 +700,12 @@ bool ConstructorGpuTests::_ResultChecker::isSeparated(TokenDescription const & t
     return Enums::ConstrInOption::FINISH_WITH_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+}
+
+bool ConstructorGpuTests::_ResultChecker::isConnectedTo(CellDescription const& cell, uint64_t id)
+    const
+{
+    return std::find(cell.connectingCells->begin(), cell.connectingCells->end(), id) != cell.connectingCells->end();
 }
 
 float ConstructorGpuTests::getOffspringDistance(Separated value) const
@@ -1070,5 +1125,37 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnLineCluster_minDistance)
         runContinueConstructionOnLineClusterTest(ContinueConstructionOnLineClusterTestParameters().token(token));
     auto const expectedCellPos = QVector2D{ getOffspringDistance(), 0 };
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnLineCluster_maxDistance)
+{
+    auto const maxDistance = _parameters.cellMaxDistance;
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).distance(maxDistance * 0.9f));
+    auto result =
+        runContinueConstructionOnLineClusterTest(ContinueConstructionOnLineClusterTestParameters().token(token));
+    auto const expectedCellPos = QVector2D{ getOffspringDistance(), 0 };
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedCellRelPos(expectedCellPos));
+}
+
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnLineCluster_errorTooLowDistance)
+{
+    auto const minDistance = _parameters.cellMinDistance;
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).distance(minDistance * 0.9f));
+    auto result =
+        runContinueConstructionOnLineClusterTest(ContinueConstructionOnLineClusterTestParameters().token(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_DIST));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnLineCluster_errorTooLargeDistance)
+{
+    auto const maxDistance = _parameters.cellMaxDistance;
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).distance(maxDistance * 1.1f));
+    auto result =
+        runContinueConstructionOnLineClusterTest(ContinueConstructionOnLineClusterTestParameters().token(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_DIST));
 }
 
