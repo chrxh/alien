@@ -67,7 +67,7 @@ private:
     __inline__ __device__ static void
     tagConstructionSite(Cell* baseCell, Cell* constructionCell, Cell** cellArray1, Cell** cellArray2);
 
-    __inline__ __device__ static Angles calcMinimalAngles(Cluster* cluster, Cell* constructionCell);
+    __inline__ __device__ static Angles calcMaxAngles(Cluster* cluster, Cell* constructionCell);
     __inline__ __device__ static AngularMasses calcAngularMasses(Cluster* cluster, Cell* constructionCell);
     __inline__ __device__ static RotationMatrices calcRotationMatrices(Angles const& angles);
 
@@ -214,13 +214,13 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         return;
     }
 
-    auto const minAngles = calcMinimalAngles(cluster, constructionCell);
+    auto const maxAngles = calcMaxAngles(cluster, constructionCell);
     auto const angularMasses = calcAngularMasses(cluster, constructionCell);
     auto const desiredAngleBetweenConstructurAndConstructionSite =
         QuantityConverter::convertDataToAngle(token->memory[Enums::Constr::INOUT_ANGLE]);
 
     auto anglesToRotate = calcAnglesToRotate(angularMasses, desiredAngleBetweenConstructurAndConstructionSite);
-    auto const angleRestricted = restrictAngles(anglesToRotate, minAngles);
+    auto const angleRestricted = restrictAngles(anglesToRotate, maxAngles);
 
     if (angleRestricted) {
         continueConstructionWithRotationOnly(
@@ -533,7 +533,7 @@ ConstructorFunction::tagConstructionSite(Cell* baseCell, Cell* constructionCell,
     } while (numElements > 0);
 }
 
-__inline__ __device__ auto ConstructorFunction::calcMinimalAngles(Cluster* cluster, Cell* constructionCell) -> Angles
+__inline__ __device__ auto ConstructorFunction::calcMaxAngles(Cluster* cluster, Cell* constructionCell) -> Angles
 {
     Angles result{360.0f, 360.0f};
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
@@ -754,8 +754,9 @@ __inline__ __device__ float2 ConstructorFunction::getTransformedCellRelPos(
         return Math::applyMatrix(cell->relPos - centerOfRotation, matrices.constructor) + centerOfRotation;
     }
     if (ClusterComponent::ConstructionSite == cell->tag) {
-        return Math::applyMatrix(cell->relPos - centerOfRotation, matrices.constructionSite) + centerOfRotation
-            + displacementForConstructionSite;
+        return Math::applyMatrix(
+                   cell->relPos + displacementForConstructionSite - centerOfRotation, matrices.constructionSite)
+            + centerOfRotation;
     }
     return cell->relPos;
 }
