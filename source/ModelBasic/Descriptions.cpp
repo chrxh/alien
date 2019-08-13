@@ -68,6 +68,11 @@ QVector2D CellDescription::getPosRelativeTo(ClusterDescription const & cluster) 
 	return transform.map(QVector3D(*pos)).toVector2D();
 }
 
+bool CellDescription::isConnectedTo(uint64_t id) const
+{
+    return std::find(connectingCells->begin(), connectingCells->end(), id) != connectingCells->end();
+}
+
 ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
 {
 	id = change.id;
@@ -97,6 +102,17 @@ QVector2D ClusterDescription::getClusterPosFromCells() const
 		result /= cells->size();
 	}
 	return result;
+}
+
+optional<CellDescription> const & ClusterDescription::getCell(uint64_t id) const
+{
+    optional<CellDescription> result;
+    for (auto const& cell : *cells) {
+        if (cell.id == id) {
+            return cell;
+        }
+    }
+    return boost::none;
 }
 
 ParticleDescription::ParticleDescription(ParticleChangeDescription const & change)
