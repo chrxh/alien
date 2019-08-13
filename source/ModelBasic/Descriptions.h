@@ -62,6 +62,7 @@ struct MODELBASIC_EXPORT CellDescription
 	CellDescription& addToken(uint index, TokenDescription const& value);
 	CellDescription& delToken(uint index);
 	QVector2D getPosRelativeTo(ClusterDescription const& cluster) const;
+    bool isConnectedTo(uint64_t id) const;
 };
 
 struct MODELBASIC_EXPORT ClusterDescription
@@ -101,6 +102,7 @@ struct MODELBASIC_EXPORT ClusterDescription
 	}
 
 	QVector2D getClusterPosFromCells() const;
+    optional<CellDescription> const& getCell(uint64_t id) const;
 };
 
 struct MODELBASIC_EXPORT ParticleDescription
