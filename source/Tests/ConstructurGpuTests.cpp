@@ -930,7 +930,7 @@ QVector2D ConstructorGpuTests::constructorPositionForHorizontalClusterAfterCreat
 
     auto offspringCellPos = constructor + QVector2D{getOffspringDistance(withSeparation), 0};
     for (auto& pos : constructionSite) {
-        pos += QVector2D{getOffspringDistance(withSeparation) + distanceBetweenOffspringToConstructionSite, 0};
+        pos += QVector2D{distanceBetweenOffspringToConstructionSite, 0};
     }
 
     auto center = std::accumulate(constructionSite.begin(), constructionSite.end(), constructor + offspringCellPos);
