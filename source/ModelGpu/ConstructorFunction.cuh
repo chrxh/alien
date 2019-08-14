@@ -101,21 +101,29 @@ private:
         RotationMatrices const& matrices,
         float2 const& displacementForConstructionSite);
 
-    __inline__ __device__ static bool isObstaclePresent(
+    __inline__ __device__ static bool isObstaclePresent_onlyRotation(
         bool ignoreOwnCluster,
         Cluster* cluster,
+        float2 const& centerOfRotation,
+        Angles const& anglesToRotate,
+        Map<Cell> const& map,
+        IntPointerMap<int2, Cell*>& tempMap);
+    __inline__ __device__ static bool isObstaclePresent_rotationAndCreation(
+        bool ignoreOwnCluster,
+        Cluster* cluster,
+        float2 const& relPosOfNewCell,
         float2 const& centerOfRotation,
         Angles const& anglesToRotate,
         float2 const& displacementOfConstructionSite,
         Map<Cell> const& map,
         IntPointerMap<int2, Cell*>& tempMap);
-    __inline__ __device__ static bool isObstaclePresent(
+    __inline__ __device__ static bool isObstaclePresent_firstCreation(
         bool ignoreOwnCluster,
         Cluster* cluster,
         float2 const& relPosOfNewCell,
         Map<Cell> const& map,
         IntPointerMap<int2, Cell*>& tempMap);
-    __inline__ __device__ static bool isObstaclePresent(
+    __inline__ __device__ static bool isObstaclePresent_helper(
         bool ignoreOwnCluster,
         Cluster* cluster,
         Cell* cell,
@@ -271,7 +279,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
         IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
-        if (isObstaclePresent(ignoreOwnCluster, cluster, relPosOfNewCell, data->cellMap, tempCellMap)) {
+        if (isObstaclePresent_firstCreation(ignoreOwnCluster, cluster, relPosOfNewCell, data->cellMap, tempCellMap)) {
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
             return;
         }
@@ -351,12 +359,11 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
         IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
-        if (isObstaclePresent(
+        if (isObstaclePresent_onlyRotation(
                 ignoreOwnCluster,
                 cluster,
                 constructionCell->relPos,
                 anglesToRotate,
-                {0, 0},
                 data->cellMap,
                 tempCellMap)) {
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
@@ -401,9 +408,10 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
         IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
-        if (isObstaclePresent(
+        if (isObstaclePresent_rotationAndCreation(
                 ignoreOwnCluster,
                 cluster,
+                relPosOfNewCell,
                 constructionCell->relPos,
                 anglesToRotate,
                 displacementForConstructionSite,
@@ -761,12 +769,11 @@ __inline__ __device__ float2 ConstructorFunction::getTransformedCellRelPos(
     return cell->relPos;
 }
 
-__inline__ __device__ bool ConstructorFunction::isObstaclePresent(
+__inline__ __device__ bool ConstructorFunction::isObstaclePresent_onlyRotation(
     bool ignoreOwnCluster,
     Cluster* cluster,
     float2 const& centerOfRotation,
     Angles const& anglesToRotate,
-    float2 const& displacementOfConstructionSite,
     Map<Cell> const& map,
     IntPointerMap<int2, Cell*>& tempMap)
 {
@@ -775,10 +782,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent(
 
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
-        if (ClusterComponent::ConstructionSite == cell->tag) {
-            relPos = relPos + displacementOfConstructionSite;
-        }
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, { 0,0 });
         newCenter = newCenter + relPos;
     }
     newCenter = newCenter / cluster->numCellPointers;
@@ -787,20 +791,51 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent(
     Math::rotationMatrix(cluster->angle, clusterMatrix);
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
-        if (ClusterComponent::ConstructionSite == cell->tag) {
-            relPos = relPos + displacementOfConstructionSite;
-        }
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, { 0,0 });
         relPos = relPos - newCenter;
         auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
-        if (isObstaclePresent(ignoreOwnCluster, cluster, cell, cell->absPos, absPos, map, tempMap)) {
+        if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, cell->absPos, absPos, map, tempMap)) {
             return true;
         }
     }
     return false;
 }
 
-__inline__ __device__ bool ConstructorFunction::isObstaclePresent(
+__inline__ __device__ bool ConstructorFunction::isObstaclePresent_rotationAndCreation(
+    bool ignoreOwnCluster,
+    Cluster* cluster,
+    float2 const& relPosOfNewCell,
+    float2 const& centerOfRotation,
+    Angles const& anglesToRotate,
+    float2 const& displacementOfConstructionSite,
+    Map<Cell> const& map,
+    IntPointerMap<int2, Cell*>& tempMap)
+{
+    RotationMatrices const matrices = calcRotationMatrices(anglesToRotate);
+    float2 newCenter = relPosOfNewCell;
+
+    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+        newCenter = newCenter + relPos;
+    }
+    newCenter = newCenter / (cluster->numCellPointers + 1);
+
+    Math::Matrix clusterMatrix;
+    Math::rotationMatrix(cluster->angle, clusterMatrix);
+    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+        relPos = relPos - newCenter;
+        auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
+        if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, cell->absPos, absPos, map, tempMap)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+__inline__ __device__ bool ConstructorFunction::isObstaclePresent_firstCreation(
     bool ignoreOwnCluster,
     Cluster* cluster,
     float2 const& relPosOfNewCell,
@@ -820,7 +855,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent(
         auto const& cell = cluster->cellPointers[cellIndex];
         auto const relPos = cell->relPos - newCenter;
         auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
-        if (isObstaclePresent(ignoreOwnCluster, cluster, cell, cell->absPos, absPos, map, tempMap)) {
+        if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, cell->absPos, absPos, map, tempMap)) {
             return true;
         }
     }
@@ -828,14 +863,14 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent(
     //check obstacle for cell to be constructed
     auto const origAbsPosForNewCell = cluster->pos + Math::applyMatrix(relPosOfNewCell, clusterMatrix);
     auto const absPosForNewCell = cluster->pos + Math::applyMatrix(relPosOfNewCell - newCenter, clusterMatrix);
-    if (isObstaclePresent(ignoreOwnCluster, cluster, nullptr, origAbsPosForNewCell, absPosForNewCell, map, tempMap)) {
+    if (isObstaclePresent_helper(ignoreOwnCluster, cluster, nullptr, origAbsPosForNewCell, absPosForNewCell, map, tempMap)) {
         return true;
     }
 
     return false;
 }
 
-__inline__ __device__ bool ConstructorFunction::isObstaclePresent(
+__inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
     bool ignoreOwnCluster,
     Cluster* cluster,
     Cell* cell,
