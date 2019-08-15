@@ -650,6 +650,7 @@ auto ConstructorGpuTests::runContinueConstructionOnSelfTouchingClusterTest(
     for (int i = 1; i <= 3 + cellLength; ++i) {
         newCellByCellId.erase(cellIds[i]);
     }
+    result.origConstructionSite.emplace_back(origCells[0]);
     for (auto const& cell : newCellByCellId | boost::adaptors::map_values) {
         result.constructionSite.emplace_back(cell);
     }

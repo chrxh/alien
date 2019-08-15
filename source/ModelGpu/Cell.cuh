@@ -27,6 +27,7 @@ struct Cell
     int protectionCounter;
     int alive;  //0 = dead, 1 == alive
     int tag;
+    float2 tempFloat2;
 };
 
 template<>
@@ -43,7 +44,7 @@ struct ValueToKeyFunctor<int2, Cell*>
 {
     __device__ __inline__ int2 operator()(Cell* const& cell)
     {
-        return toInt2(cell->absPos);
+        return toInt2(cell->tempFloat2);
     }
 };
 
