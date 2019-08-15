@@ -874,31 +874,27 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
     bool ignoreOwnCluster,
     Cluster* cluster,
     Cell* cell,
-    float2 const& origAbsPos,
+    float2 const& origAbsPos,   //kann weg?
     float2 const& absPos,
     Map<Cell> const& map,
     IntPointerMap<int2, Cell*>& tempCellMap)
 {
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dy = -1; dy <= 1; ++dy) {
+    for (int dx = 0; dx < 1; ++dx) {
+        for (int dy = 0; dy < 1; ++dy) {
             float2 const lookupPos = { absPos.x + dx, absPos.y + dy };
-            int2 posInt = { floorInt(lookupPos.x), floorInt(lookupPos.y) };
             if (auto const otherCell = map.get(lookupPos)) {
                 if (cluster != otherCell->cluster) {
                     if (map.mapDistance(otherCell->absPos, absPos) < cudaSimulationParameters.cellMinDistance) {
                         return true;
                     }
-                }
 
-                //check also connected cells
-                for (int i = 0; i < otherCell->numConnections; ++i) {
-                    auto const connectedOtherCell = otherCell->connections[i];
-                    if (map.mapDistance(connectedOtherCell->absPos, absPos)
-                        >= cudaSimulationParameters.cellMinDistance) {
-                        continue;
-                    }
-                    if (cluster != connectedOtherCell->cluster) {
-                        return true;
+                    //check also connected cells
+                    for (int i = 0; i < otherCell->numConnections; ++i) {
+                        auto const connectedOtherCell = otherCell->connections[i];
+                        if (map.mapDistance(connectedOtherCell->absPos, absPos)
+                            < cudaSimulationParameters.cellMinDistance) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -908,19 +904,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
                     auto const otherCell = tempCellMap.at(lookupPosInt);
 
                     if (cell != otherCell) {
-                        if (map.mapDistance(otherCell->absPos, origAbsPos) < cudaSimulationParameters.cellMinDistance) {
-                            return true;
-                        }
-                    }
-
-                    //check also connected cells
-                    for (int i = 0; i < otherCell->numConnections; ++i) {
-                        auto const connectedOtherCell = otherCell->connections[i];
-                        if (map.mapDistance(connectedOtherCell->absPos, origAbsPos)
-                            >= cudaSimulationParameters.cellMinDistance) {
-                            continue;
-                        }
-                        if (cell != connectedOtherCell) {
+                        if (map.mapDistance(otherCell->tempFloat2, absPos) < cudaSimulationParameters.cellMinDistance) {
                             return true;
                         }
                     }
@@ -929,6 +913,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
         }
     }
     if (!ignoreOwnCluster && cell) {
+        cell->tempFloat2 = absPos;
         tempCellMap.insert(cell);
     }
     return false;
