@@ -153,10 +153,10 @@
     <ClInclude Include="..\..\source\ModelGpu\HashSet.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\IntPointerMap.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\Array.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\Array.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\HashMap.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
   </ItemGroup>
