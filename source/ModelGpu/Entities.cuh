@@ -7,14 +7,14 @@
 struct Entities
 {
     ClusterPointerMultiArrayController<Cluster*> clusterPointerArrays;
-    ArrayController<Cell*> cellPointers;
-    ArrayController<Token*> tokenPointers;
-    ArrayController<Particle*> particlePointers;
+    Array<Cell*> cellPointers;
+    Array<Token*> tokenPointers;
+    Array<Particle*> particlePointers;
 
-    ArrayController<Cluster> clusters;
-    ArrayController<Cell> cells;
-    ArrayController<Token> tokens;
-    ArrayController<Particle> particles;
+    Array<Cluster> clusters;
+    Array<Cell> cells;
+    Array<Token> tokens;
+    Array<Particle> particles;
 
     void init(CudaConstants const& cudaConstants)
     {

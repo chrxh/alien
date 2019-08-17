@@ -36,7 +36,7 @@ public:
         return nullptr;
     }
 
-    __device__ __inline__ ArrayController<T>& getArray(int arrayIndex)
+    __device__ __inline__ Array<T>& getArray(int arrayIndex)
     {
         return _arrays/*[arrayIndex]*/;
     }
@@ -57,7 +57,7 @@ public:
 
 private:
     int _numArrays = 0;
-    ArrayController<T> _arrays; //using 1 array currently
+    Array<T> _arrays; //using 1 array currently
 };
 
 #define MULTI_CALL(func, ...) for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) { \

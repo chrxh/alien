@@ -203,6 +203,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelGpu\AccessKernels.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\Array.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cell.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cluster.cuh" />
