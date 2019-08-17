@@ -146,6 +146,6 @@ public:
 
 private:
 	T ** _map;
-    ArrayController<int> _mapEntries;
+    Array<int> _mapEntries;
 };
 
