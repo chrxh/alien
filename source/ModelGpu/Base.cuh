@@ -6,6 +6,7 @@
 #include <helper_cuda.h>
 
 #include "Definitions.cuh"
+#include "Array.cuh"
 #include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
 #include "HashSet.cuh"
@@ -87,107 +88,6 @@ public:
         cudaFree(_currentId);
         cudaFree(_currentIndex);
         cudaFree(_array);
-    }
-};
-
-template<class T>
-class ArrayController
-{
-private:
-    int _size;
-    int* _numEntries;
-    T** _data;
-
-public:
-
-    ArrayController()
-        : _size(0)
-    {
-    }
-
-    __host__ __inline__ void init(int size)
-    {
-        _size = size;
-        T* data = nullptr;
-        CudaMemoryManager::getInstance().acquireMemory<T>(size, data);
-        CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
-        CudaMemoryManager::getInstance().acquireMemory<int>(1, _numEntries);
-
-        checkCudaErrors(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
-        checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
-    }
-
-    __host__ __inline__ void free()
-    {
-        T* data = nullptr;
-        checkCudaErrors(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
-
-        CudaMemoryManager::getInstance().freeMemory(data);
-        CudaMemoryManager::getInstance().freeMemory(_data);
-        CudaMemoryManager::getInstance().freeMemory(_numEntries);
-    }
-
-    __device__ __inline__ void swapArray(ArrayController& other)
-    {
-        swap(*_numEntries, *other._numEntries);
-        swap(*_data, *other._data);
-    }
-
-    __device__ __inline__ void reset()
-    {
-        *_numEntries = 0;
-    }
-
-    int retrieveNumEntries() const
-    {
-        int result;
-        checkCudaErrors(cudaMemcpy(&result, _numEntries, sizeof(int), cudaMemcpyDeviceToHost));
-        return result;
-    }
-
-    __device__ __inline__ T* getNewSubarray(int size)
-    {
-        int oldIndex = atomicAdd(_numEntries, size);
-        if (oldIndex + size - 1 >= _size) {
-            atomicAdd(_numEntries, -size);
-            return nullptr;
-        }
-        return &(*_data)[oldIndex];
-    }
-
-    __device__ __inline__ T* getNewElement()
-    {
-        int oldIndex = atomicAdd(_numEntries, 1);
-        if (oldIndex >= _size) {
-            atomicAdd(_numEntries, -1);
-            return nullptr;
-        }
-        return &(*_data)[oldIndex];
-    }
-
-    __device__ __inline__ T& at(int index)
-    {
-        return (*_data)[index];
-    }
-
-    __device__ __inline__ T const& at(int index) const
-    {
-        return (*_data)[index];
-    }
-
-    __device__ __inline__ int getNumEntries() const
-    {
-        return *_numEntries;
-    }
-
-    __device__ __inline__ T* getEntireArray() const
-    {
-        return *_data;
-    }
-
-    __device__ __inline__ void setNumEntries(int value) const
-    {
-        *_numEntries = value;
     }
 };
 
