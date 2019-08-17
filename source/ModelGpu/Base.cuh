@@ -10,7 +10,6 @@
 #include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
 #include "HashSet.cuh"
-#include "IntPointerMap.cuh"
 
 struct PartitionData
 {
