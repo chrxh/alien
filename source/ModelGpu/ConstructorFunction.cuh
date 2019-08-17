@@ -52,7 +52,6 @@ private:
         Cell* constructionCell,
         Angles const& anglesToRotate,
         float desiredAngle,
-        Cell** newCellPointers,
         SimulationData* data);
 
     __inline__ __device__ static void continueConstructionWithRotationAndCreation(
@@ -60,7 +59,6 @@ private:
         Cell* constructionCell,
         Angles const& anglesToRotate,
         float desiredAngle,
-        Cell** newCellPointers,
         EntityFactory& factory,
         SimulationData* data);
 
@@ -212,8 +210,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
 {
     auto const& cell = token->cell;
     auto const& cluster = constructionCell->cluster;
-    auto const cellArray1 = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
-    auto const cellArray2 = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers);
+    auto const cellArray1 = data->arrays.getArray<Cell*>(cluster->numCellPointers + 1);
+    auto const cellArray2 = data->arrays.getArray<Cell*>(cluster->numCellPointers);
     tagConstructionSite(cell, constructionCell, cellArray1, cellArray2);
 
     if (ClusterComponent::ConstructionSite == cell->tag) {
@@ -235,7 +233,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             constructionCell,
             anglesToRotate,
             desiredAngleBetweenConstructurAndConstructionSite,
-            cellArray1,
             data);
     } else {
         continueConstructionWithRotationAndCreation(
@@ -243,7 +240,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             constructionCell,
             anglesToRotate,
             desiredAngleBetweenConstructurAndConstructionSite,
-            cellArray1,
             factory,
             data);
     }
@@ -332,7 +328,6 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     Cell* constructionCell,
     Angles const& anglesToRotate,
     float desiredAngle,
-    Cell** newCellPointers,
     SimulationData* data)
 {
     auto const& cluster = constructionCell->cluster;
@@ -356,7 +351,8 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
-        auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
+        auto const ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
+        auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
         IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
         if (isObstaclePresent_onlyRotation(
                 ignoreOwnCluster,
@@ -386,7 +382,6 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     Cell* constructionCell,
     Angles const& anglesToRotate,
     float desiredAngle,
-    Cell** newCellPointers,
     EntityFactory& factory,
     SimulationData* data)
 {
@@ -405,7 +400,8 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const& cluster = constructionCell->cluster;
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
-        auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
+        auto const ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
+        auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
         IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
         if (isObstaclePresent_rotationAndCreation(
                 ignoreOwnCluster,
@@ -445,6 +441,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     transformClusterComponents(cluster, constructionCell->relPos, anglesToRotate, displacementForConstructionSite);
     auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
+    auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers + 1);
     addCellToCluster(newCell, cluster, newCellPointers);
     connectNewCell(newCell, constructionCell, token, cluster, data);
     adaptRelPositions(cluster);
@@ -876,8 +873,8 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
     Map<Cell> const& map,
     IntPointerMap<int2, Cell*>& tempCellMap)
 {
-    for (int dx = 0; dx < 1; ++dx) {
-        for (int dy = 0; dy < 1; ++dy) {
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
             float2 const lookupPos = { absPos.x + dx, absPos.y + dy };
             if (auto const otherCell = map.get(lookupPos)) {
                 if (cluster != otherCell->cluster) {
