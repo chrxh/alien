@@ -27,7 +27,6 @@ struct Cell
     int protectionCounter;
     int alive;  //0 = dead, 1 == alive
     int tag;
-    float2 tempFloat2;
 };
 
 template<>
@@ -36,15 +35,6 @@ struct HashFunctor<Cell*>
     __device__ __inline__ int operator()(Cell* const& cell)
     {
         return abs(static_cast<int>(cell->id));
-    }
-};
-
-template<>
-struct ValueToKeyFunctor<int2, Cell*>
-{
-    __device__ __inline__ int2 operator()(Cell* const& cell)
-    {
-        return toInt2(cell->tempFloat2);
     }
 };
 

@@ -1,8 +1,10 @@
 #pragma once
-#include "Math.cuh"
 #include "ModelBasic/ElementaryTypes.h"
+
+#include "Math.cuh"
 #include "QuantityConverter.cuh"
 #include "SimulationData.cuh"
+#include "HashMap.cuh"
 
 class ConstructorFunction
 {
@@ -99,13 +101,17 @@ private:
         RotationMatrices const& matrices,
         float2 const& displacementForConstructionSite);
 
+    struct CellAndNewAbsPos {
+        Cell* cell;
+        float2 newAbsPos;
+    };
     __inline__ __device__ static bool isObstaclePresent_onlyRotation(
         bool ignoreOwnCluster,
         Cluster* cluster,
         float2 const& centerOfRotation,
         Angles const& anglesToRotate,
         Map<Cell> const& map,
-        IntPointerMap<int2, Cell*>& tempMap);
+        HashMap<int2, CellAndNewAbsPos>& tempMap);
     __inline__ __device__ static bool isObstaclePresent_rotationAndCreation(
         bool ignoreOwnCluster,
         Cluster* cluster,
@@ -114,20 +120,20 @@ private:
         Angles const& anglesToRotate,
         float2 const& displacementOfConstructionSite,
         Map<Cell> const& map,
-        IntPointerMap<int2, Cell*>& tempMap);
+        HashMap<int2, CellAndNewAbsPos>& tempMap);
     __inline__ __device__ static bool isObstaclePresent_firstCreation(
         bool ignoreOwnCluster,
         Cluster* cluster,
         float2 const& relPosOfNewCell,
         Map<Cell> const& map,
-        IntPointerMap<int2, Cell*>& tempMap);
+        HashMap<int2, CellAndNewAbsPos>& tempMap);
     __inline__ __device__ static bool isObstaclePresent_helper(
         bool ignoreOwnCluster,
         Cluster* cluster,
         Cell* cell,
         float2 const& absPos,
         Map<Cell> const& map,
-        IntPointerMap<int2, Cell*>& tempMap);
+        HashMap<int2, CellAndNewAbsPos>& tempMap);
 
 
     __inline__ __device__ static Cell* constructNewCell(
@@ -273,7 +279,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
     auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
-        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
+        HashMap<int2, CellAndNewAbsPos> tempCellMap(cluster->numCellPointers * 2, data->arrays);
         if (isObstaclePresent_firstCreation(ignoreOwnCluster, cluster, relPosOfNewCell, data->cellMap, tempCellMap)) {
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
             return;
@@ -352,8 +358,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto const ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
-        auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
-        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
+        HashMap<int2, CellAndNewAbsPos> tempCellMap(cluster->numCellPointers * 2, data->arrays);
         if (isObstaclePresent_onlyRotation(
                 ignoreOwnCluster,
                 cluster,
@@ -401,8 +406,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto const ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
-        auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
-        IntPointerMap<int2, Cell*> tempCellMap(cluster->numCellPointers * 2, newCellPointers);
+        HashMap<int2, CellAndNewAbsPos> tempCellMap(cluster->numCellPointers * 2, data->arrays);
         if (isObstaclePresent_rotationAndCreation(
                 ignoreOwnCluster,
                 cluster,
@@ -771,7 +775,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_onlyRotation(
     float2 const& centerOfRotation,
     Angles const& anglesToRotate,
     Map<Cell> const& map,
-    IntPointerMap<int2, Cell*>& tempMap)
+    HashMap<int2, CellAndNewAbsPos>& tempMap)
 {
     RotationMatrices const matrices = calcRotationMatrices(anglesToRotate);
     float2 newCenter{0, 0};
@@ -805,7 +809,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_rotationAndCre
     Angles const& anglesToRotate,
     float2 const& displacementOfConstructionSite,
     Map<Cell> const& map,
-    IntPointerMap<int2, Cell*>& tempMap)
+    HashMap<int2, CellAndNewAbsPos>& tempMap)
 {
     RotationMatrices const matrices = calcRotationMatrices(anglesToRotate);
     float2 newCenter = relPosOfNewCell;
@@ -836,7 +840,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_firstCreation(
     Cluster* cluster,
     float2 const& relPosOfNewCell,
     Map<Cell> const& map,
-    IntPointerMap<int2, Cell*>& tempMap)
+    HashMap<int2, CellAndNewAbsPos>& tempMap)
 {
     auto newCenter = relPosOfNewCell;
     for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
@@ -871,7 +875,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
     Cell* cell,
     float2 const& absPos,
     Map<Cell> const& map,
-    IntPointerMap<int2, Cell*>& tempCellMap)
+    HashMap<int2, CellAndNewAbsPos>& tempMap)
 {
     for (int dx = -1; dx <= 1; ++dx) {
         for (int dy = -1; dy <= 1; ++dy) {
@@ -894,11 +898,11 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
             }
             if (!ignoreOwnCluster) {
                 auto const lookupPosInt = toInt2(lookupPos);
-                if (tempCellMap.contains(lookupPosInt)) {
-                    auto const otherCell = tempCellMap.at(lookupPosInt);
+                if (tempMap.contains(lookupPosInt)) {
+                    auto const otherCellAndNewPos = tempMap[lookupPosInt];
 
-                    if (cell != otherCell) {
-                        if (map.mapDistance(otherCell->tempFloat2, absPos) < cudaSimulationParameters.cellMinDistance) {
+                    if (cell != otherCellAndNewPos.cell) {
+                        if (map.mapDistance(otherCellAndNewPos.newAbsPos, absPos) < cudaSimulationParameters.cellMinDistance) {
                             return true;
                         }
                     }
@@ -907,8 +911,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
         }
     }
     if (!ignoreOwnCluster && cell) {
-        cell->tempFloat2 = absPos;
-        tempCellMap.insert(cell);
+        tempMap.insertOrAssign(toInt2(absPos), CellAndNewAbsPos{cell, absPos});
     }
     return false;
 }
