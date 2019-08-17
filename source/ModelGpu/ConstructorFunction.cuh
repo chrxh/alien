@@ -46,7 +46,7 @@ private:
     __inline__ __device__ static Cell* getConstructionSite(Cell* cell);
 
     __inline__ __device__ static void
-    continueConstruction(Token* token, Cell* constructionCell, EntityFactory& factory, SimulationData* data);
+    continueConstruction(Token* token, Cell* firstCellOfConstructionSite, EntityFactory& factory, SimulationData* data);
     __inline__ __device__ static void startNewConstruction(Token* token, EntityFactory& factory, SimulationData* data);
 
     __inline__ __device__ static void continueConstructionWithRotationOnly(
@@ -177,15 +177,15 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
     //TODO: short energy check for optimization
 
     auto const& cell = token->cell;
-    auto const constructionSite = getConstructionSite(cell);
+    auto const firstCellOfConstructionSite = getConstructionSite(cell);
 
-    if (constructionSite) {
+    if (firstCellOfConstructionSite) {
         auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
         if (!checkDistance(distance)) {
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
             return;
         }
-        continueConstruction(token, constructionSite, factory, data);
+        continueConstruction(token, firstCellOfConstructionSite, factory, data);
     } else {
         startNewConstruction(token, factory, data);
     }
@@ -210,23 +210,23 @@ __inline__ __device__ Cell* ConstructorFunction::getConstructionSite(Cell* cell)
 
 __inline__ __device__ void ConstructorFunction::continueConstruction(
     Token* token,
-    Cell* constructionCell,
+    Cell* firstCellOfConstructionSite,
     EntityFactory& factory,
     SimulationData* data)
 {
     auto const& cell = token->cell;
-    auto const& cluster = constructionCell->cluster;
+    auto const& cluster = firstCellOfConstructionSite->cluster;
     auto const cellArray1 = data->arrays.getArray<Cell*>(cluster->numCellPointers + 1);
     auto const cellArray2 = data->arrays.getArray<Cell*>(cluster->numCellPointers);
-    tagConstructionSite(cell, constructionCell, cellArray1, cellArray2);
+    tagConstructionSite(cell, firstCellOfConstructionSite, cellArray1, cellArray2);
 
     if (ClusterComponent::ConstructionSite == cell->tag) {
         token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
         return;
     }
 
-    auto const maxAngles = calcMaxAngles(cluster, constructionCell);
-    auto const angularMasses = calcAngularMasses(cluster, constructionCell);
+    auto const maxAngles = calcMaxAngles(cluster, firstCellOfConstructionSite);
+    auto const angularMasses = calcAngularMasses(cluster, firstCellOfConstructionSite);
     auto const desiredAngleBetweenConstructurAndConstructionSite =
         QuantityConverter::convertDataToAngle(token->memory[Enums::Constr::INOUT_ANGLE]);
 
@@ -236,14 +236,14 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     if (angleRestricted) {
         continueConstructionWithRotationOnly(
             token,
-            constructionCell,
+            firstCellOfConstructionSite,
             anglesToRotate,
             desiredAngleBetweenConstructurAndConstructionSite,
             data);
     } else {
         continueConstructionWithRotationAndCreation(
             token,
-            constructionCell,
+            firstCellOfConstructionSite,
             anglesToRotate,
             desiredAngleBetweenConstructurAndConstructionSite,
             factory,
@@ -628,7 +628,7 @@ __inline__ __device__ auto ConstructorFunction::calcAnglesToRotate(
     float desiredAngleBetweenConstructurAndConstructionSite) -> Angles
 {
     Angles result;
-    auto sumAngularMasses = angularMasses.constructor + angularMasses.constructionSite;
+    auto const sumAngularMasses = angularMasses.constructor + angularMasses.constructionSite;
     result.constructionSite =
         angularMasses.constructor * desiredAngleBetweenConstructurAndConstructionSite / sumAngularMasses;
     result.constructor =
