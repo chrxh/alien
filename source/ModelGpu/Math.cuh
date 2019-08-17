@@ -54,15 +54,6 @@ __inline__ __device__ bool operator==(int2 const& p, int2 const& q)
     return p.x == q.x && p.y == q.y;
 }
 
-template<>
-struct HashFunctor<int2>
-{
-    __device__ __inline__ int operator()(int2 const& value)
-    {
-        return abs(value.x) * 2371 + abs(value.y);
-    }
-};
-
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/

@@ -123,13 +123,13 @@ public:
     }
 
     template<typename T>
-    __device__ __inline__ T* getArray (int size)
+    __device__ __inline__ T* getArray (int numElements)
     {
-        int newBytesToOccupy = size * sizeof(T);
+        int newBytesToOccupy = numElements * sizeof(T);
         newBytesToOccupy = newBytesToOccupy + 8 - (newBytesToOccupy % 8);
         int oldIndex = atomicAdd(_bytesOccupied, newBytesToOccupy);
-        if (oldIndex + size - 1 >= _size) {
-            atomicAdd(_bytesOccupied, -size);
+        if (oldIndex + newBytesToOccupy - 1 >= _size) {
+            atomicAdd(_bytesOccupied, -newBytesToOccupy);
             printf("Not enough memory!");
             return nullptr;
         }

@@ -9,9 +9,18 @@ struct HashFunctor
 template<typename T>
 struct HashFunctor<T*>
 {
-    __device__ __inline__ int operator()(T* const& element)
+    __device__ __inline__ int operator()(T* const& element)  const
     {
         return abs(static_cast<int>(reinterpret_cast<std::uintptr_t>(element)) * 17);
+    }
+};
+
+template<>
+struct HashFunctor<int2>
+{
+    __device__ __inline__ int operator()(int2 const& value) const
+    {
+        return abs(value.x) * 2371 + abs(value.y);
     }
 };
 
