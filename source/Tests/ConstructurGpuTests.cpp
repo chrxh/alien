@@ -62,13 +62,16 @@ protected:
     {
         QVector2D movementOfCenter;
         int increaseNumberOfCells;
+        
         TokenDescription origToken;
-        TokenDescription token;
         CellDescription origSourceCell;
-        optional<CellDescription> sourceCell;  //possibly be destroyed
         CellDescription origConstructorCell;
-        CellDescription constructorCell;
+        vector<CellDescription> origConstructor;
         vector<CellDescription> origConstructionSite;
+
+        TokenDescription token;
+        optional<CellDescription> sourceCell;  //possibly be destroyed
+        CellDescription constructorCell;
         vector<CellDescription> constructionSite;
 
         optional<CellDescription> getConstructedCell() const;
@@ -247,6 +250,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     }
     result.origConstructorCell = secondCell;
     result.constructorCell = newSecondCell;
+    result.origConstructor = *cluster.cells;
 
     std::list<CellDescription> remainingCells;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
@@ -341,6 +345,7 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
     }
     result.origConstructorCell = cell2;
     result.constructorCell = newCell2;
+    result.origConstructor = *cluster.cells;
 
     newCellByCellId.erase(cellId1);
     newCellByCellId.erase(cellId2);
@@ -437,6 +442,7 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescrip
     }
     result.origConstructorCell = cell4;
     result.constructorCell = newCell4;
+    result.origConstructor = *cluster.cells;
 
     newCellByCellId.erase(cellId1);
     newCellByCellId.erase(cellId2);
@@ -537,6 +543,8 @@ auto ConstructorGpuTests::runContinueConstructionOnHorizontalClusterTest(
     result.origConstructorCell = cell2;
     result.origConstructionSite.emplace_back(cell3);
     result.constructorCell = newCell2;
+    result.origConstructor.emplace_back(cell1);
+    result.origConstructor.emplace_back(cell2);
 
     std::vector<CellDescription> remainingCells;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
@@ -646,8 +654,8 @@ auto ConstructorGpuTests::runContinueConstructionOnSelfTouchingClusterTest(
     }
     result.origConstructorCell = origCells[1];
     result.constructorCell = newConstructor;
-
     for (int i = 1; i <= 3 + cellLength; ++i) {
+        result.origConstructor.emplace_back(origCells[i]);
         newCellByCellId.erase(cellIds[i]);
     }
     result.origConstructionSite.emplace_back(origCells[0]);
@@ -771,9 +779,8 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
 {
     EXPECT_TRUE(testResult.getConstructedCell());
 
-    auto const& token = testResult.token;
     checkCellPosition(testResult, expectations);
-    checkCellAttributes(token, *testResult.getConstructedCell());
+    checkCellAttributes(testResult.token, *testResult.getConstructedCell());
     checkCellConnections(testResult);
     checkConstructedToken(testResult, expectations);
 }
@@ -820,11 +827,57 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
         }
 
         auto const expectedAngle =
-            QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE)) + 180.0f;
+            QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE));
         auto const actualAngle = Physics::clockwiseAngleFromFirstToSecondVector(
             *testResult.constructorCell.pos - *testResult.getConstructedCell()->pos,
             *secondCellOfConstructionSite->pos - *testResult.getConstructedCell()->pos);
-        EXPECT_PRED3(predEqual, expectedAngle, actualAngle, 0.05);
+        EXPECT_PRED3(predEqual, expectedAngle + 180.0f, actualAngle, 0.05);
+
+        if (testResult.sourceCell) {
+            auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
+            vector<QVector2D> relPositionOfMasses;
+            std::transform(
+                testResult.origConstructor.begin(),
+                testResult.origConstructor.end(),
+                std::inserter(relPositionOfMasses, relPositionOfMasses.begin()),
+                [&firstCellOfOrigConstructionSite](auto const& cell) {
+                    return *cell.pos - *firstCellOfOrigConstructionSite.pos;
+                });
+            auto const angularMassConstructor = Physics::angularMass(relPositionOfMasses);
+
+            relPositionOfMasses.clear();
+            std::transform(
+                testResult.origConstructionSite.begin(),
+                testResult.origConstructionSite.end(),
+                std::inserter(relPositionOfMasses, relPositionOfMasses.begin()),
+                [&firstCellOfOrigConstructionSite](auto const& cell) {
+                    return *cell.pos - *firstCellOfOrigConstructionSite.pos;
+                });
+            auto const angularMassConstructionSite = Physics::angularMass(relPositionOfMasses);
+
+            auto const sumAngularMasses = angularMassConstructor + angularMassConstructionSite;
+            auto const expectedDeltaAngleConstructionSite = angularMassConstructor * expectedAngle / sumAngularMasses;
+            auto const expectedDeltaAngleConstructor = -angularMassConstructionSite * expectedAngle / sumAngularMasses;
+
+            auto const origAngleConstructor =
+                Physics::angleOfVector(*testResult.origSourceCell.pos - *testResult.origConstructorCell.pos);
+            auto const angleConstructor =
+                Physics::angleOfVector(*testResult.sourceCell->pos - *testResult.constructorCell.pos);
+            EXPECT_TRUE(isCompatible(expectedDeltaAngleConstructor, angleConstructor - origAngleConstructor));
+
+            if (testResult.origConstructionSite.size() >= 2) {
+                auto const& origConstructionSiteCell1 = testResult.origConstructionSite.at(0);
+                auto const& origConstructionSiteCell2 = testResult.origConstructionSite.at(1);
+                auto const constructionSiteCell1 = testResult.getCellOfConstructionSite(origConstructionSiteCell1.id);
+                auto const constructionSiteCell2 = testResult.getCellOfConstructionSite(origConstructionSiteCell2.id);
+                auto const origAngleConstructionSite =
+                    Physics::angleOfVector(*origConstructionSiteCell1.pos - *origConstructionSiteCell2.pos);
+                auto const angleConstructionSite =
+                    Physics::angleOfVector(*constructionSiteCell1->pos - *constructionSiteCell2->pos);
+                EXPECT_TRUE(isCompatible(
+                    expectedDeltaAngleConstructionSite, angleConstructionSite - origAngleConstructionSite));
+            }
+        }
     }
 }
 
@@ -1585,5 +1638,3 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_sameClu
 
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).destruction(true));
 }
-
-//TODO: rotation of cluster parts after creation check
