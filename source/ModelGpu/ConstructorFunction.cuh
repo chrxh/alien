@@ -116,7 +116,6 @@ private:
         bool ignoreOwnCluster,
         Cluster* cluster,
         float2 const& relPosOfNewCell,
-        float2 const& centerOfRotation,
         Angles const& anglesToRotate,
         float2 const& displacementOfConstructionSite,
         Map<Cell> const& map,
@@ -384,7 +383,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
 __inline__ __device__ void ConstructorFunction::continueConstructionWithRotationAndCreation(
     Token* token,
-    Cell* constructionCell,
+    Cell* firstCellOfConstructionSite,
     Angles const& anglesToRotate,
     float desiredAngle,
     EntityFactory& factory,
@@ -393,16 +392,16 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const& cell = token->cell;
     auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
 
-    auto displacementForConstructionSite = Math::normalized(constructionCell->relPos - cell->relPos) * distance;
+    auto displacementForConstructionSite = Math::normalized(firstCellOfConstructionSite->relPos - cell->relPos) * distance;
     auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
-    auto relPosOfNewCell = constructionCell->relPos;
+    auto relPosOfNewCell = firstCellOfConstructionSite->relPos;
     if (Enums::ConstrInOption::FINISH_WITH_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
         relPosOfNewCell = relPosOfNewCell + displacementForConstructionSite;
         displacementForConstructionSite = displacementForConstructionSite * 2;
     }
 
-    auto const& cluster = constructionCell->cluster;
+    auto const& cluster = firstCellOfConstructionSite->cluster;
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto const ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
@@ -411,7 +410,6 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
                 ignoreOwnCluster,
                 cluster,
                 relPosOfNewCell,
-                constructionCell->relPos,
                 anglesToRotate,
                 displacementForConstructionSite,
                 data->cellMap,
@@ -427,7 +425,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const angularMassAfterRotation = calcAngularMassAfterTransformationAndAddingCell(
         cluster,
         relPosOfNewCell,
-        constructionCell->relPos,
+        relPosOfNewCell,
         anglesToRotate,
         displacementForConstructionSite);
     auto const angularVelAfterRotation =
@@ -443,17 +441,17 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         return;
     }
 
-    transformClusterComponents(cluster, constructionCell->relPos, anglesToRotate, displacementForConstructionSite);
+    transformClusterComponents(cluster, relPosOfNewCell, anglesToRotate, displacementForConstructionSite);
     auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
     auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers + 1);
     addCellToCluster(newCell, cluster, newCellPointers);
-    connectNewCell(newCell, constructionCell, token, cluster, data);
+    connectNewCell(newCell, firstCellOfConstructionSite, token, cluster, data);
     adaptRelPositions(cluster);
     completeCellAbsPosAndVel(cluster);
     cluster->angularVel = angularVelAfterRotation;
     cluster->angularMass = angularMassAfterRotation;
 
-    constructionCell->tokenBlocked = false;  //disable token blocking on construction side
+    firstCellOfConstructionSite->tokenBlocked = false;  //disable token blocking on construction side
     separateConstructionWhenFinished(token, newCell);
 
     bool const createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
@@ -805,7 +803,6 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_rotationAndCre
     bool ignoreOwnCluster,
     Cluster* cluster,
     float2 const& relPosOfNewCell,
-    float2 const& centerOfRotation,
     Angles const& anglesToRotate,
     float2 const& displacementOfConstructionSite,
     Map<Cell> const& map,
@@ -816,7 +813,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_rotationAndCre
 
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+        auto relPos = getTransformedCellRelPos(cell, relPosOfNewCell, matrices, displacementOfConstructionSite);
         newCenter = newCenter + relPos;
     }
     newCenter = newCenter / (cluster->numCellPointers + 1);
@@ -825,7 +822,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_rotationAndCre
     Math::rotationMatrix(cluster->angle, clusterMatrix);
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+        auto relPos = getTransformedCellRelPos(cell, relPosOfNewCell, matrices, displacementOfConstructionSite);
         relPos = relPos - newCenter;
         auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
         if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, absPos, map, tempMap)) {

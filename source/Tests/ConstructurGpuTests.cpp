@@ -514,23 +514,25 @@ auto ConstructorGpuTests::runContinueConstructionOnHorizontalClusterTest(
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
     checkEnergy(origData, newData);
 
-    auto newClusterByCellId = IntegrationTestHelper::getClusterByCellId(newData);
-    unordered_map<uint64_t, ClusterDescription> newClusters;
-    for (auto const& cell : *cluster.cells) {
-        auto const cellIdAndNewCluster = newClusterByCellId.find(cell.id);
-        if (cellIdAndNewCluster != newClusterByCellId.end()) {
-            auto const& newCluster = cellIdAndNewCluster->second;
-            newClusters.emplace(newCluster.id, newCluster);
+    auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+
+    std::unordered_map<uint64_t, CellDescription> newCellsWithoutObstacleByCellId;
+    for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
+        if (obstacleCellIds.find(newCell.id) == obstacleCellIds.end()) {
+            newCellsWithoutObstacleByCellId.insert_or_assign(newCell.id, newCell);
         }
     }
-    EXPECT_EQ(1, newClusters.size());
-    auto const newCluster = newClusters.begin()->second;
+
+    QVector2D newCenter;
+    for (auto const& newCell : newCellsWithoutObstacleByCellId | boost::adaptors::map_values) {
+        newCenter += *newCell.pos;
+    }
+    newCenter /= newCellsWithoutObstacleByCellId.size();
 
     TestResult result;
-    result.movementOfCenter = *newCluster.pos - *cluster.pos;
-    result.increaseNumberOfCells = newCluster.cells->size() - cluster.cells->size();
+    result.movementOfCenter = newCenter - *cluster.pos;
+    result.increaseNumberOfCells = newCellsWithoutObstacleByCellId.size() - cluster.cells->size();
 
-    auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
     auto const& newCell2 = newCellByCellId.at(cell2.id);
     auto const& newToken = newCell2.tokens->at(0);
 
@@ -803,16 +805,25 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
         auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
         auto const secondCellOfConstructionSite =
             testResult.getCellOfConstructionSite(firstCellOfOrigConstructionSite.id);
+        auto const expectedDistance =
+            QuantityConverter::convertDataToDistance(testResult.origToken.data->at(Enums::Constr::IN_DIST));
         {
             auto const displacement = *secondCellOfConstructionSite->pos - *testResult.getConstructedCell()->pos;
-            auto const expectedDistance =
-                QuantityConverter::convertDataToDistance(testResult.token.data->at(Enums::Constr::IN_DIST));
             EXPECT_PRED3(predEqual, expectedDistance, displacement.length(), 0.05);
         }
 
         {
             auto const displacement = *testResult.getConstructedCell()->pos - *testResult.constructorCell.pos;
-            EXPECT_TRUE(isCompatible(_parameters.cellFunctionConstructorOffspringCellDistance, displacement.length()));
+            if (isSeparated(testResult.origToken)) {
+                EXPECT_PRED3(
+                    predEqual, _parameters.cellFunctionConstructorOffspringCellDistance + expectedDistance, displacement.length(), 0.05);
+            } else {
+                EXPECT_PRED3(
+                    predEqual, _parameters.cellFunctionConstructorOffspringCellDistance, displacement.length(), 0.05);
+            }
+
+            auto const origDisplacement = *firstCellOfOrigConstructionSite.pos - *testResult.origConstructorCell.pos;
+            EXPECT_TRUE(isCompatible(origDisplacement.normalized(), displacement.normalized()));
         }
 
         //check angles
@@ -831,7 +842,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
         auto const actualAngle = Physics::clockwiseAngleFromFirstToSecondVector(
             *testResult.constructorCell.pos - *testResult.getConstructedCell()->pos,
             *secondCellOfConstructionSite->pos - *testResult.getConstructedCell()->pos);
-        EXPECT_PRED3(predEqual, expectedAngle + 180.0f, actualAngle, 0.05);
+        EXPECT_PRED3(predEqual, expectedAngle + 180.0f, actualAngle, 1);
 
         if (testResult.sourceCell) {
             auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
@@ -1666,6 +1677,36 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_withDupli
         result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedToken(expectedToken));
 }
 
-//TODO:
-//Token auf ConstructionSite vorhanden
-//only Rotation
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWithoutSeparation)
+{
+    auto const token = createTokenForConstruction(TokenForConstructionParameters()
+                                                      .constructionInput(Enums::ConstrIn::SAFE)
+                                                      .constructionOption(Enums::ConstrInOption::FINISH_NO_SEP));
+    auto const result = runContinueConstructionOnHorizontalClusterTest(
+        ContinueConstructionOnHorizontalClusterTestParameters().token(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWithSeparation_standardPosition)
+{
+    auto const minDistance = _parameters.cellMinDistance;
+    auto const token = createTokenForConstruction(TokenForConstructionParameters()
+                                                      .constructionInput(Enums::ConstrIn::SAFE)
+                                                      .constructionOption(Enums::ConstrInOption::FINISH_WITH_SEP));
+    auto const result = runContinueConstructionOnHorizontalClusterTest(
+        ContinueConstructionOnHorizontalClusterTestParameters().token(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWithSeparation_nonStandardPosition)
+{
+    auto const minDistance = _parameters.cellMinDistance;
+    auto const token = createTokenForConstruction(TokenForConstructionParameters()
+                                                      .constructionInput(Enums::ConstrIn::SAFE)
+                                                      .constructionOption(Enums::ConstrInOption::FINISH_WITH_SEP)
+                                                      .distance(minDistance * 1.1)
+                                                      .angle(30.0f));
+    auto const result = runContinueConstructionOnHorizontalClusterTest(
+        ContinueConstructionOnHorizontalClusterTestParameters().token(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+}
