@@ -1770,7 +1770,7 @@ TEST_F(
                                                       .distance(cellDistance));
     auto const result = runContinueConstructionOnHorizontalClusterTest(
         ContinueConstructionOnHorizontalClusterTestParameters().token(token).horizontalObstacleAt(
-            1 + cellDistance + _offspringDistance));
+            cellDistance*2 + _offspringDistance));
 
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
@@ -1786,7 +1786,7 @@ TEST_F(
                                                       .distance(cellDistance));
     auto const result = runContinueConstructionOnHorizontalClusterTest(
         ContinueConstructionOnHorizontalClusterTestParameters().token(token).horizontalObstacleAt(
-            1 + cellDistance + _offspringDistance));
+            cellDistance * 2 + _offspringDistance));
 
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
@@ -1802,7 +1802,7 @@ TEST_F(
                                                       .distance(cellDistance));
     auto const result = runContinueConstructionOnHorizontalClusterTest(
         ContinueConstructionOnHorizontalClusterTestParameters().token(token).horizontalObstacleAt(
-            1 + cellDistance + _offspringDistance));
+            cellDistance * 2 + _offspringDistance));
 
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).destruction(true));
 }
