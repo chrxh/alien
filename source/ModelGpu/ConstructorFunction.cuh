@@ -269,10 +269,12 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
         || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
 
+    auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
     auto const relPosOfNewCellDelta =
         Math::unitVectorOfAngle(newCellAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
-    auto const relPosOfNewCell =
-        separation ? cell->relPos + relPosOfNewCellDelta * 2 : cell->relPos + relPosOfNewCellDelta;
+    auto const relPosOfNewCell = separation
+        ? cell->relPos + relPosOfNewCellDelta + Math::unitVectorOfAngle(newCellAngle) * distance
+        : cell->relPos + relPosOfNewCellDelta;
 
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers * 2);
