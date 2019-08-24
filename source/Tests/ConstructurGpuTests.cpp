@@ -135,6 +135,7 @@ protected:
         FurtherCellConstructionOnLineClusterTestParameters& anglesOfConstructionSite(vector<float> const& value)
         {
             _anglesOfConstructionSite = value;
+            return *this;
         }
 
         vector<float> _anglesOfConstructionSite{ 180.0f, 180.0f };
@@ -992,15 +993,12 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
             if (isSeparated(testResult.origToken)) {
                 EXPECT_PRED3(
                     predEqual, _parameters.cellFunctionConstructorOffspringCellDistance + expectedDistance, displacement.length(), 0.05);
-            } else {
+            }
+            else {
                 EXPECT_PRED3(
                     predEqual, _parameters.cellFunctionConstructorOffspringCellDistance, displacement.length(), 0.05);
             }
-
-            auto const origDisplacement = *firstCellOfOrigConstructionSite.pos - *testResult.origConstructorCell.pos;
-            EXPECT_PRED3(predEqual, 0, (origDisplacement.normalized() - displacement.normalized()).length(), 0.01);
         }
-
         //check angles
         if (testResult.sourceCell) {
             auto const origAngle = Physics::clockwiseAngleFromFirstToSecondVector(
@@ -2046,5 +2044,16 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnHorizontalCluster_standardPa
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+}
+
+TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_nonStandardParameters)
+{
+    auto const cellDistance = _parameters.cellMinDistance * 1.1f;
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(10).distance(cellDistance));
+    auto result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
+            {170, 190}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
