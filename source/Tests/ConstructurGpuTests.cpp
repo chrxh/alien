@@ -178,6 +178,7 @@ protected:
     static bool isFinished(TokenDescription const& token);
     static bool isReduced(TokenDescription const& token);
     static bool isSeparated(TokenDescription const& token);
+    static bool isAutomaticMaxConnections(TokenDescription const& token);
 
 protected:
     ResultChecker _resultChecker;
@@ -1110,6 +1111,50 @@ void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const&
     EXPECT_EQ(!isSeparated(token), constructedCell.isConnectedTo(testResult.constructorCell.id));
     EXPECT_EQ(!isSeparated(token), testResult.constructorCell.isConnectedTo(constructedCell.id));
 
+    for (auto const& cell : testResult.constructionSite) {
+        EXPECT_TRUE(0 <= *cell.maxConnections);
+        EXPECT_TRUE(*cell.maxConnections <= _parameters.cellMaxBonds);
+    }
+
+    for (auto const& origCell : testResult.origConstructionSite) {
+        auto const cell = *testResult.getCellOfConstructionSite(origCell.id);
+        for (auto const& connectingCellId : *origCell.connectingCells) {
+            if (connectingCellId == testResult.origConstructorCell.id) {
+                continue;
+            }
+            auto const connectingCell = *testResult.getCellOfConstructionSite(connectingCellId);
+            EXPECT_TRUE(cell.isConnectedTo(connectingCell.id));
+            EXPECT_TRUE(connectingCell.isConnectedTo(cell.id));
+        }
+    }
+
+    auto const automaticMaxConnections = isAutomaticMaxConnections(token);
+    for (auto const& cell : testResult.constructionSite) {
+        if (cell.id == constructedCell.id) {
+            continue;
+        }
+        if ((*constructedCell.pos - *cell.pos).length() < _parameters.cellMaxDistance) {
+            if (automaticMaxConnections) {
+                if (*constructedCell.maxConnections < _parameters.cellMaxBonds
+                    && *cell.maxConnections < _parameters.cellMaxBonds) {
+                    EXPECT_TRUE(cell.isConnectedTo(constructedCell.id));
+                    EXPECT_TRUE(constructedCell.isConnectedTo(cell.id));
+                }
+            }
+            else {
+                if (constructedCell.connectingCells->size() < *constructedCell.maxConnections
+                    && cell.connectingCells->size() < *cell.maxConnections) {
+                    EXPECT_TRUE(cell.isConnectedTo(constructedCell.id));
+                    EXPECT_TRUE(constructedCell.isConnectedTo(cell.id));
+                }
+            }
+        }
+        else {
+            EXPECT_FALSE(cell.isConnectedTo(constructedCell.id));
+            EXPECT_FALSE(constructedCell.isConnectedTo(cell.id));
+        }
+    }
+
     auto const increaseMaxConnectionIfNewConstructionSite = 0 == testResult.origConstructionSite.size() ? 1 : 0;
     if (*testResult.origConstructorCell.maxConnections == testResult.origConstructorCell.connectingCells->size()) {
         auto const decreaseMaxConnectionIfReduced = isReduced(token) ? -1 : 0;
@@ -1156,6 +1201,12 @@ bool ConstructorGpuTests::isSeparated(TokenDescription const& token)
     auto const option = token.data->at(Enums::Constr::IN_OPTION);
     return Enums::ConstrInOption::FINISH_WITH_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+}
+
+bool ConstructorGpuTests::isAutomaticMaxConnections(TokenDescription const & token)
+{
+    auto const maxConnections = token.data->at(Enums::Constr::IN_CELL_MAX_CONNECTIONS);
+    return 0 == maxConnections;
 }
 
 QVector2D ConstructorGpuTests::constructorPositionForHorizontalClusterAfterCreation(
@@ -2055,5 +2106,15 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_nonStandardParam
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
             {170, 190}));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+}
+
+TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_multipleConnections)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
+            {180, 20}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
