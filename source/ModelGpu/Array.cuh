@@ -61,7 +61,7 @@ public:
         int oldIndex = atomicAdd(_numEntries, size);
         if (oldIndex + size - 1 >= _size) {
             atomicAdd(_numEntries, -size);
-            printf("Not enough memory!");
+            printf("Not enough memory!\n");
             return nullptr;
         }
         return &(*_data)[oldIndex];
@@ -72,7 +72,7 @@ public:
         int oldIndex = atomicAdd(_numEntries, 1);
         if (oldIndex >= _size) {
             atomicAdd(_numEntries, -1);
-            printf("Not enough memory!");
+            printf("Not enough memory!\n");
             return nullptr;
         }
         return &(*_data)[oldIndex];
@@ -130,7 +130,7 @@ public:
         int oldIndex = atomicAdd(_bytesOccupied, newBytesToOccupy);
         if (oldIndex + newBytesToOccupy - 1 >= _size) {
             atomicAdd(_bytesOccupied, -newBytesToOccupy);
-            printf("Not enough memory!");
+            printf("Not enough memory!\n");
             return nullptr;
         }
         return reinterpret_cast<T*>(&(*_data)[oldIndex]);
