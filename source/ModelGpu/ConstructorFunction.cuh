@@ -1030,13 +1030,14 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
     establishConnection(newCell, cellOfConstructionSite);
     establishConnection(newCell, cellOfConstructor);
 
+    if (newCell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
+        return;
+    }
+
     auto const isAutomaticMaxConnection = 0 == token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
 
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        if (newCell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
-            break;
-        }
         if (ClusterComponent::ConstructionSite != cell->tag) {
             continue;
         }
@@ -1044,6 +1045,10 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
             continue;
         }
         if (cell == cellOfConstructionSite) {
+            continue;
+        }
+        if (data->cellMap.mapDistance(cell->absPos, newCell->absPos)
+            >= cudaSimulationParameters.cellMaxDistance) {
             continue;
         }
 
