@@ -66,16 +66,21 @@ protected:
         CellDescription origSourceCell;
         CellDescription origConstructorCell;
         vector<CellDescription> origConstructor;
-        vector<CellDescription> origConstructionSite;
+        vector<CellDescription>
+            origConstructionSite;  //ordered by assumed construction process where the front is the newest cell
 
         TokenDescription token;
         optional<CellDescription> sourceCell;  //possibly be destroyed
         CellDescription constructorCell;
         vector<CellDescription> constructionSite;
 
-        optional<CellDescription> getConstructedCell() const;
         optional<CellDescription> getFirstCellOfOrigConstructionSite() const;
+        optional<CellDescription> getSecondCellOfOrigConstructionSite() const;
+
+        optional<CellDescription> getFirstCellOfConstructionSite() const;
         optional<CellDescription> getSecondCellOfConstructionSite() const;
+        optional<CellDescription> getThirdCellOfConstructionSite() const;
+        
         optional<CellDescription> getCellOfConstructionSite(uint64_t id) const;
     };
     struct StartConstructionOnHorizontalClusterTestParameters
@@ -860,7 +865,7 @@ TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstru
     return token;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getConstructedCell() const
+optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfConstructionSite() const
 {
     map<uint64_t, CellDescription> cellsBefore;
     for (auto const& cell : origConstructionSite) {
@@ -883,10 +888,16 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getConstructedCell() 
 
 optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfOrigConstructionSite() const
 {
-    for (auto const& origConstructionSiteCell : origConstructionSite) {
-        if (*origConstructionSiteCell.tokenBlocked && origConstructionSiteCell.isConnectedTo(constructorCell.id)) {
-            return origConstructionSiteCell;
-        }
+    if (!origConstructionSite.empty()) {
+        return origConstructionSite.front();
+    }
+    return boost::none;
+}
+
+optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfOrigConstructionSite() const
+{
+    if (origConstructionSite.size() > 1) {
+        return origConstructionSite.at(1);
     }
     return boost::none;
 }
@@ -894,6 +905,14 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfOrigCon
 optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfConstructionSite() const
 {
     if (auto const firstCell = getFirstCellOfOrigConstructionSite()) {
+        return getCellOfConstructionSite(firstCell->id);
+    }
+    return boost::none;
+}
+
+optional<CellDescription> ConstructorGpuTests::TestResult::getThirdCellOfConstructionSite() const
+{
+    if (auto const firstCell = getSecondCellOfOrigConstructionSite()) {
         return getCellOfConstructionSite(firstCell->id);
     }
     return boost::none;
@@ -927,7 +946,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfDestruction(
     EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
-        EXPECT_FALSE(testResult.getConstructedCell());
+        EXPECT_FALSE(testResult.getFirstCellOfConstructionSite());
         return;
     }
 }
@@ -942,14 +961,14 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(
     EXPECT_TRUE(isCompatible(testResult.movementOfCenter, QVector2D{}));
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
-        EXPECT_FALSE(testResult.getConstructedCell());
+        EXPECT_FALSE(testResult.getFirstCellOfConstructionSite());
         return;
     }
 
     if (Enums::ConstrOut::SUCCESS == expectations._tokenOutput) {
         checkIfNoDestructionAndSuccess(testResult, expectations);
     } else {
-        EXPECT_FALSE(testResult.getConstructedCell());
+        EXPECT_FALSE(testResult.getFirstCellOfConstructionSite());
     }
 }
 
@@ -957,7 +976,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
-    EXPECT_TRUE(testResult.getConstructedCell());
+    EXPECT_TRUE(testResult.getFirstCellOfConstructionSite());
 
     checkCellPosition(testResult, expectations);
     checkCellAttributes(testResult);
@@ -974,7 +993,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
             predEqual,
             0,
             (*testResult.constructorCell.pos + *expectations._relPosOfFirstCellOfConstructionSite
-             - *testResult.getConstructedCell()->pos)
+             - *testResult.getFirstCellOfConstructionSite()->pos)
                 .length(),
             0.05);
     } else {
@@ -984,13 +1003,15 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
         auto const secondCellOfConstructionSite = *testResult.getSecondCellOfConstructionSite();
         auto const expectedDistance =
             QuantityConverter::convertDataToDistance(testResult.origToken.data->at(Enums::Constr::IN_DIST));
+        auto const expectedAngle =
+            QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE));
         {
-            auto const displacement = *secondCellOfConstructionSite.pos - *testResult.getConstructedCell()->pos;
+            auto const displacement = *secondCellOfConstructionSite.pos - *testResult.getFirstCellOfConstructionSite()->pos;
             EXPECT_PRED3(predEqual, expectedDistance, displacement.length(), 0.05);
         }
 
         {
-            auto const displacement = *testResult.getConstructedCell()->pos - *testResult.constructorCell.pos;
+            auto const displacement = *testResult.getFirstCellOfConstructionSite()->pos - *testResult.constructorCell.pos;
             if (isSeparated(testResult.origToken)) {
                 EXPECT_PRED3(
                     predEqual, _parameters.cellFunctionConstructorOffspringCellDistance + expectedDistance, displacement.length(), 0.05);
@@ -1006,20 +1027,19 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
                 *firstCellOfOrigConstructionSite.pos - *testResult.origConstructorCell.pos,
                 *testResult.origSourceCell.pos - *testResult.origConstructorCell.pos);
             auto const angle = Physics::clockwiseAngleFromFirstToSecondVector(
-                *testResult.getConstructedCell()->pos - *testResult.constructorCell.pos,
+                *testResult.getFirstCellOfConstructionSite()->pos - *testResult.constructorCell.pos,
                 *testResult.sourceCell->pos - *testResult.constructorCell.pos);
             EXPECT_TRUE(isCompatible(origAngle, angle));
         }
 
-        auto const expectedAngle =
-            QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE));
-        auto const actualAngle = Physics::clockwiseAngleFromFirstToSecondVector(
-            *testResult.constructorCell.pos - *testResult.getConstructedCell()->pos,
-            *secondCellOfConstructionSite.pos - *testResult.getConstructedCell()->pos);
-        EXPECT_PRED3(predEqual, expectedAngle + 180.0f, actualAngle, 1);
+        if (auto const thirdCellOfConstructionSite = testResult.getThirdCellOfConstructionSite()) {
+            auto const actualAngle = Physics::clockwiseAngleFromFirstToSecondVector(
+                *testResult.getFirstCellOfConstructionSite()->pos - *secondCellOfConstructionSite.pos,
+                *thirdCellOfConstructionSite->pos - *secondCellOfConstructionSite.pos);
+            EXPECT_PRED3(predEqual, expectedAngle + 180.0f, actualAngle, 1);
+        }
 
         if (testResult.sourceCell) {
-            auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
             vector<QVector2D> relPositionOfMasses;
             std::transform(
                 testResult.origConstructor.begin(),
@@ -1068,7 +1088,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
 
 void ConstructorGpuTests::_ResultChecker::checkCellAttributes(TestResult const& testResult) const
 {
-    auto const constructedCell = *testResult.getConstructedCell();
+    auto const constructedCell = *testResult.getFirstCellOfConstructionSite();
     auto const& token = testResult.token;
     EXPECT_TRUE(isCompatible(
         _parameters.cellFunctionConstructorOffspringCellEnergy, static_cast<float>(*constructedCell.energy)));
@@ -1107,7 +1127,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellAttributes(TestResult const& 
 void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const& testResult) const
 {
     auto const& token = testResult.token;
-    auto const constructedCell = *testResult.getConstructedCell();
+    auto const constructedCell = *testResult.getFirstCellOfConstructionSite();
     EXPECT_EQ(!isSeparated(token), constructedCell.isConnectedTo(testResult.constructorCell.id));
     EXPECT_EQ(!isSeparated(token), testResult.constructorCell.isConnectedTo(constructedCell.id));
 
@@ -1170,14 +1190,14 @@ void ConstructorGpuTests::_ResultChecker::checkConstructedToken(
     Expectations const& expectations) const
 {
     if (expectations._constructedToken) {
-        auto const actualTokens = testResult.getConstructedCell()->tokens;
+        auto const actualTokens = testResult.getFirstCellOfConstructionSite()->tokens;
         EXPECT_EQ(1, actualTokens->size());
         EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
 
-        EXPECT_EQ(1, testResult.getConstructedCell()->tokens->size());
+        EXPECT_EQ(1, testResult.getFirstCellOfConstructionSite()->tokens->size());
     }
     else {
-        EXPECT_TRUE(testResult.getConstructedCell()->tokens->empty());
+        EXPECT_TRUE(testResult.getFirstCellOfConstructionSite()->tokens->empty());
     }
 }
 

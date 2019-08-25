@@ -230,9 +230,9 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         QuantityConverter::convertDataToAngle(token->memory[Enums::Constr::INOUT_ANGLE]);
 
     auto anglesToRotate = calcAnglesToRotate(angularMasses, desiredAngleBetweenConstructurAndConstructionSite);
-    auto const angleRestricted = restrictAngles(anglesToRotate, maxAngles);
+    auto const isAngleRestricted = restrictAngles(anglesToRotate, maxAngles);
 
-    if (angleRestricted) {
+    if (isAngleRestricted) {
         continueConstructionWithRotationOnly(
             token,
             firstCellOfConstructionSite,
@@ -332,17 +332,17 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
 
 __inline__ __device__ void ConstructorFunction::continueConstructionWithRotationOnly(
     Token* token,
-    Cell* constructionCell,
+    Cell* firstCellOfConstructionSite,
     Angles const& anglesToRotate,
     float desiredAngle,
     SimulationData* data)
 {
-    auto const& cluster = constructionCell->cluster;
+    auto const& cluster = firstCellOfConstructionSite->cluster;
     auto const kineticEnergyBeforeRotation =
         Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel);
 
     auto const angularMassAfterRotation =
-        calcAngularMassAfterTransformationAndAddingCell(cluster, {0, 0}, constructionCell->relPos, anglesToRotate, {0, 0});
+        calcAngularMassAfterTransformationAndAddingCell(cluster, {0, 0}, firstCellOfConstructionSite->relPos, anglesToRotate, {0, 0});
     auto const angularVelAfterRotation =
         Physics::angularVelocity(cluster->angularMass, angularMassAfterRotation, cluster->angularVel);
     auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
@@ -363,7 +363,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         if (isObstaclePresent_onlyRotation(
                 ignoreOwnCluster,
                 cluster,
-                constructionCell->relPos,
+                firstCellOfConstructionSite->relPos,
                 anglesToRotate,
                 data->cellMap,
                 tempCellMap)) {
@@ -372,7 +372,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         }
     }
 
-    transformClusterComponents(cluster, constructionCell->relPos, anglesToRotate, {0, 0});
+    transformClusterComponents(cluster, firstCellOfConstructionSite->relPos, anglesToRotate, {0, 0});
     adaptRelPositions(cluster);
     completeCellAbsPosAndVel(cluster);
     cluster->angularVel = angularVelAfterRotation;
@@ -766,8 +766,8 @@ __inline__ __device__ float2 ConstructorFunction::getTransformedCellRelPos(
     }
     if (ClusterComponent::ConstructionSite == cell->tag) {
         return Math::applyMatrix(
-                   cell->relPos + displacementForConstructionSite - centerOfRotation, matrices.constructionSite)
-            + centerOfRotation;
+                   cell->relPos  - centerOfRotation, matrices.constructionSite)
+            + centerOfRotation + displacementForConstructionSite;
     }
     return cell->relPos;
 }
