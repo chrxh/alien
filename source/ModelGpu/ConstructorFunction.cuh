@@ -714,10 +714,13 @@ __inline__ __device__ void ConstructorFunction::transformClusterComponents(
     Angles const& angles,
     float2 const& displacementForConstructionSite)
 {
+    float rotMatrix[2][2];
+    Math::rotationMatrix(cluster->angle, rotMatrix);
     RotationMatrices matrices = calcRotationMatrices(angles);
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         cell->relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementForConstructionSite);
+        cell->absPos = Math::applyMatrix(cell->relPos, rotMatrix) + cluster->pos;
     }
 }
 
@@ -925,6 +928,9 @@ __inline__ __device__ Cell* ConstructorFunction::constructNewCell(
     auto result = factory.createCell(cluster);
     result->energy = energyOfNewCell;
     result->relPos = relPosOfNewCell;
+    float rotMatrix[2][2];
+    Math::rotationMatrix(cluster->angle, rotMatrix);
+    result->absPos = Math::applyMatrix(result->relPos, rotMatrix) + cluster->pos;
     result->maxConnections = token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
     result->maxConnections =
         max(min(result->maxConnections, cudaSimulationParameters.cellMaxBonds), 2);  //between 2 and cellMaxBonds
