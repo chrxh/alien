@@ -294,7 +294,7 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell_blockCall()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
-        destroyCloseCell(cell);
+         destroyCloseCell(cell);
     }
     __syncthreads();
 }
