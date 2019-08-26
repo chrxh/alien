@@ -297,11 +297,14 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
             remainingCells.push_back(newCell);
         }
     }
-    EXPECT_GE(1, remainingCells.size());
-
-    if (!remainingCells.empty()) {
-        result.constructionSite.emplace_back(*remainingCells.begin());
+    for (auto const& remainingCell : remainingCells) {
+        if (remainingCell.pos->x() >= result.constructorCell.pos->x()
+                - 0.1) {  //rough estimation of the position of constructed cell (right hand side of constructor)
+            result.constructionSite.emplace_back(remainingCell);
+        }
     }
+
+    EXPECT_GE(1, result.constructionSite.size());
 
     return result;
 }
