@@ -1000,18 +1000,19 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
 
         //check distances
         auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
+        auto const firstCellOfConstructionSite = testResult.getFirstCellOfConstructionSite();
         auto const secondCellOfConstructionSite = *testResult.getSecondCellOfConstructionSite();
         auto const expectedDistance =
             QuantityConverter::convertDataToDistance(testResult.origToken.data->at(Enums::Constr::IN_DIST));
         auto const expectedAngle =
             QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE));
         {
-            auto const displacement = *secondCellOfConstructionSite.pos - *testResult.getFirstCellOfConstructionSite()->pos;
+            auto const displacement = *secondCellOfConstructionSite.pos - *firstCellOfConstructionSite->pos;
             EXPECT_PRED3(predEqual, expectedDistance, displacement.length(), 0.05);
         }
 
         {
-            auto const displacement = *testResult.getFirstCellOfConstructionSite()->pos - *testResult.constructorCell.pos;
+            auto const displacement = *firstCellOfConstructionSite->pos - *testResult.constructorCell.pos;
             if (isSeparated(testResult.origToken)) {
                 EXPECT_PRED3(
                     predEqual, _parameters.cellFunctionConstructorOffspringCellDistance + expectedDistance, displacement.length(), 0.05);
@@ -1027,14 +1028,14 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
                 *firstCellOfOrigConstructionSite.pos - *testResult.origConstructorCell.pos,
                 *testResult.origSourceCell.pos - *testResult.origConstructorCell.pos);
             auto const angle = Physics::clockwiseAngleFromFirstToSecondVector(
-                *testResult.getFirstCellOfConstructionSite()->pos - *testResult.constructorCell.pos,
+                *firstCellOfConstructionSite->pos - *testResult.constructorCell.pos,
                 *testResult.sourceCell->pos - *testResult.constructorCell.pos);
             EXPECT_TRUE(isCompatible(origAngle, angle));
         }
 
         if (auto const thirdCellOfConstructionSite = testResult.getThirdCellOfConstructionSite()) {
             auto const actualAngle = Physics::clockwiseAngleFromFirstToSecondVector(
-                *testResult.getFirstCellOfConstructionSite()->pos - *secondCellOfConstructionSite.pos,
+                *firstCellOfConstructionSite->pos - *secondCellOfConstructionSite.pos,
                 *thirdCellOfConstructionSite->pos - *secondCellOfConstructionSite.pos);
             EXPECT_PRED3(predEqual, expectedAngle + 180.0f, actualAngle, 1);
         }
