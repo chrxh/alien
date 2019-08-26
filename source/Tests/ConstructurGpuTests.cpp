@@ -2130,12 +2130,12 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_nonStandardParam
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
 
-TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_multipleConnections)
+TEST_F(ConstructorGpuTests, testConstructFourthCellOnLineCluster_multipleConnections)
 {
     auto const token =
-        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(20));
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
-            {180, 20}));
+            {180, 180, 20}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }

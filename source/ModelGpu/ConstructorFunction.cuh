@@ -81,7 +81,7 @@ private:
         Cluster* cluster,
         float2 const& relPosOfNewCell,
         float2 const& centerOfRotation,
-        Angles const& angles,
+        RotationMatrices const& rotationMatrices,
         float2 const& displacementOfConstructionSite);
     __inline__ __device__ static float calcAngularMassAfterAddingCell(Cluster* cluster, float2 const& relPosOfNewCell);
     __inline__ __device__ static EnergyForNewEntities adaptEnergies(Token* token, float energyLoss);
@@ -90,7 +90,7 @@ private:
     __inline__ __device__ static void transformClusterComponents(
         Cluster* cluster,
         float2 const& centerOfRotation,
-        Angles const& angles,
+        RotationMatrices const& rotationMatrices,
         float2 const& displacementForConstructionSite);
     __inline__ __device__ static void ConstructorFunction::adaptRelPositions(Cluster* cluster);
     __inline__ __device__ static void completeCellAbsPosAndVel(Cluster* cluster);
@@ -109,7 +109,7 @@ private:
         bool ignoreOwnCluster,
         Cluster* cluster,
         float2 const& centerOfRotation,
-        Angles const& anglesToRotate,
+        RotationMatrices const& rotationMatrices,
         Map<Cell> const& map,
         HashMap<int2, CellAndNewAbsPos>& tempMap);
     __inline__ __device__ static bool isObstaclePresent_rotationAndCreation(
@@ -117,7 +117,7 @@ private:
         Cluster* cluster,
         float2 const& relPosOfNewCell,
         float2 const& centerOfRotation,
-        Angles const& anglesToRotate,
+        RotationMatrices const& rotationMatrices,
         float2 const& displacementOfConstructionSite,
         Map<Cell> const& map,
         HashMap<int2, CellAndNewAbsPos>& tempMap);
@@ -234,6 +234,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     auto const isAngleRestricted = restrictAngles(anglesToRotate, maxAngles);
 
     if (isAngleRestricted) {
+//         anglesToRotate.constructor = QuantityConverter::convertDataToAngle(QuantityConverter::convertAngleToData(anglesToRotate.constructor));
+//         anglesToRotate.constructionSite = QuantityConverter::convertDataToAngle(QuantityConverter::convertAngleToData(anglesToRotate.constructionSite));
         continueConstructionWithRotationOnly(
             token,
             firstCellOfConstructionSite,
@@ -341,9 +343,10 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const& cluster = firstCellOfConstructionSite->cluster;
     auto const kineticEnergyBeforeRotation =
         Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel);
+    auto const rotationMatrices = calcRotationMatrices(anglesToRotate);
 
     auto const angularMassAfterRotation =
-        calcAngularMassAfterTransformationAndAddingCell(cluster, {0, 0}, firstCellOfConstructionSite->relPos, anglesToRotate, {0, 0});
+        calcAngularMassAfterTransformationAndAddingCell(cluster, {0, 0}, firstCellOfConstructionSite->relPos, rotationMatrices, {0, 0});
     auto const angularVelAfterRotation =
         Physics::angularVelocity(cluster->angularMass, angularMassAfterRotation, cluster->angularVel);
     auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
@@ -365,7 +368,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
                 ignoreOwnCluster,
                 cluster,
                 firstCellOfConstructionSite->relPos,
-                anglesToRotate,
+                rotationMatrices,
                 data->cellMap,
                 tempCellMap)) {
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
@@ -373,7 +376,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         }
     }
 
-    transformClusterComponents(cluster, firstCellOfConstructionSite->relPos, anglesToRotate, {0, 0});
+    transformClusterComponents(cluster, firstCellOfConstructionSite->relPos, rotationMatrices, {0, 0});
     adaptRelPositions(cluster);
     completeCellAbsPosAndVel(cluster);
     cluster->angularVel = angularVelAfterRotation;
@@ -397,9 +400,9 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     auto relPosOfNewCell = firstCellOfConstructionSite->relPos;
     auto const centerOfRotation = firstCellOfConstructionSite->relPos;
-    auto const matrices = calcRotationMatrices(anglesToRotate);
+    auto const rotationMatrices = calcRotationMatrices(anglesToRotate);
 
-    auto const cellRelPos_transformed = getTransformedCellRelPos(cell, centerOfRotation, matrices, { 0,0 });
+    auto const cellRelPos_transformed = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0,0 });
 
     auto displacementForConstructionSite = Math::normalized(firstCellOfConstructionSite->relPos - cellRelPos_transformed) * distance;
     auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
@@ -420,7 +423,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
                 cluster,
                 relPosOfNewCell,
                 centerOfRotation,
-                anglesToRotate,
+                rotationMatrices,
                 displacementForConstructionSite,
                 data->cellMap,
                 tempCellMap)) {
@@ -436,7 +439,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         cluster,
         relPosOfNewCell,
         centerOfRotation,
-        anglesToRotate,
+        rotationMatrices,
         displacementForConstructionSite);
     auto const angularVelAfterRotation =
         Physics::angularVelocity(cluster->angularMass, angularMassAfterRotation, cluster->angularVel);
@@ -451,7 +454,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         return;
     }
 
-    transformClusterComponents(cluster, centerOfRotation, anglesToRotate, displacementForConstructionSite);
+    transformClusterComponents(cluster, centerOfRotation, rotationMatrices, displacementForConstructionSite);
     auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
     auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers + 1);
     addCellToCluster(newCell, cluster, newCellPointers);
@@ -673,16 +676,15 @@ __inline__ __device__ float ConstructorFunction::calcAngularMassAfterTransformat
     Cluster* cluster,
     float2 const& relPosOfNewCell,
     float2 const& centerOfRotation,
-    Angles const& angles,
+    RotationMatrices const& rotationMatrices,
     float2 const& displacementOfConstructionSite)
 {
-    auto const matrices = calcRotationMatrices(angles);
 
     auto center = relPosOfNewCell;
     for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         auto cellRelPosTransformed =
-            getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+            getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         center = center + cellRelPosTransformed;
     }
     center = center / cluster->numCellPointers;
@@ -691,7 +693,7 @@ __inline__ __device__ float ConstructorFunction::calcAngularMassAfterTransformat
     for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         auto cellRelPosTransformed =
-            getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+            getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         result += Math::lengthSquared(cellRelPosTransformed - center);
     }
     return result;
@@ -719,15 +721,14 @@ __inline__ __device__ float ConstructorFunction::calcAngularMassAfterAddingCell(
 __inline__ __device__ void ConstructorFunction::transformClusterComponents(
     Cluster* cluster,
     float2 const& centerOfRotation,
-    Angles const& angles,
+    RotationMatrices const& rotationMatrices,
     float2 const& displacementForConstructionSite)
 {
     float rotMatrix[2][2];
     Math::rotationMatrix(cluster->angle, rotMatrix);
-    RotationMatrices matrices = calcRotationMatrices(angles);
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        cell->relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementForConstructionSite);
+        cell->relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementForConstructionSite);
         cell->absPos = Math::applyMatrix(cell->relPos, rotMatrix) + cluster->pos;
     }
 }
@@ -783,16 +784,15 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_onlyRotation(
     bool ignoreOwnCluster,
     Cluster* cluster,
     float2 const& centerOfRotation,
-    Angles const& anglesToRotate,
+    RotationMatrices const& rotationMatrices,
     Map<Cell> const& map,
     HashMap<int2, CellAndNewAbsPos>& tempMap)
 {
-    RotationMatrices const matrices = calcRotationMatrices(anglesToRotate);
     float2 newCenter{0, 0};
 
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, { 0,0 });
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0,0 });
         newCenter = newCenter + relPos;
     }
     newCenter = newCenter / cluster->numCellPointers;
@@ -801,7 +801,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_onlyRotation(
     Math::rotationMatrix(cluster->angle, clusterMatrix);
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, { 0,0 });
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0,0 });
         relPos = relPos - newCenter;
         auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
         if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, absPos, map, tempMap)) {
@@ -816,17 +816,16 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_rotationAndCre
     Cluster* cluster,
     float2 const& relPosOfNewCell,
     float2 const& centerOfRotation,
-    Angles const& anglesToRotate,
+    RotationMatrices const& rotationMatrices,
     float2 const& displacementOfConstructionSite,
     Map<Cell> const& map,
     HashMap<int2, CellAndNewAbsPos>& tempMap)
 {
-    RotationMatrices const matrices = calcRotationMatrices(anglesToRotate);
     float2 newCenter = relPosOfNewCell;
 
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         newCenter = newCenter + relPos;
     }
     newCenter = newCenter / (cluster->numCellPointers + 1);
@@ -835,7 +834,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_rotationAndCre
     Math::rotationMatrix(cluster->angle, clusterMatrix);
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, matrices, displacementOfConstructionSite);
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         relPos = relPos - newCenter;
         auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
         if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, absPos, map, tempMap)) {
