@@ -395,10 +395,14 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const& cell = token->cell;
     auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
 
-    auto displacementForConstructionSite = Math::normalized(firstCellOfConstructionSite->relPos - cell->relPos) * distance;
-    auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
     auto relPosOfNewCell = firstCellOfConstructionSite->relPos;
-    auto centerOfRotation = firstCellOfConstructionSite->relPos;
+    auto const centerOfRotation = firstCellOfConstructionSite->relPos;
+    auto const matrices = calcRotationMatrices(anglesToRotate);
+
+    auto const cellRelPos_transformed = getTransformedCellRelPos(cell, centerOfRotation, matrices, { 0,0 });
+
+    auto displacementForConstructionSite = Math::normalized(firstCellOfConstructionSite->relPos - cellRelPos_transformed) * distance;
+    auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
     if (Enums::ConstrInOption::FINISH_WITH_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
 
