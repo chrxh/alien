@@ -1001,6 +1001,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
         //check distances
         auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
         auto const firstCellOfConstructionSite = testResult.getFirstCellOfConstructionSite();
+        auto const secondCellOfOrigConstructionSite = testResult.getSecondCellOfOrigConstructionSite();
         auto const secondCellOfConstructionSite = *testResult.getSecondCellOfConstructionSite();
         auto const expectedDistance =
             QuantityConverter::convertDataToDistance(testResult.origToken.data->at(Enums::Constr::IN_DIST));
@@ -1034,10 +1035,14 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
         }
 
         if (auto const thirdCellOfConstructionSite = testResult.getThirdCellOfConstructionSite()) {
-            auto const actualAngle = Physics::clockwiseAngleFromFirstToSecondVector(
+            auto const origAngle = Physics::clockwiseAngleFromFirstToSecondVector(
+                *testResult.origConstructorCell.pos - *firstCellOfOrigConstructionSite.pos,
+                *secondCellOfOrigConstructionSite->pos - *firstCellOfOrigConstructionSite.pos);
+            auto const angle = Physics::clockwiseAngleFromFirstToSecondVector(
                 *firstCellOfConstructionSite->pos - *secondCellOfConstructionSite.pos,
                 *thirdCellOfConstructionSite->pos - *secondCellOfConstructionSite.pos);
-            EXPECT_PRED3(predEqual, expectedAngle + 180.0f, actualAngle, 1);
+            auto const actualDiffAngle = angle - origAngle;
+            EXPECT_PRED3(predEqual, expectedAngle, actualDiffAngle, 1);
         }
 
         if (testResult.sourceCell) {
@@ -2130,12 +2135,12 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_nonStandardParam
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFourthCellOnLineCluster_multipleConnections)
+TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_multipleConnections)
 {
     auto const token =
-        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(20));
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(0));
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
-            {180, 180, 20}));
+            {180, 20}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
