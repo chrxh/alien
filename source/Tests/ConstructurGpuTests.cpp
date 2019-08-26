@@ -2126,7 +2126,7 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_nonStandardParam
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(10).distance(cellDistance));
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
-            {170, 190}));
+            {90, 180}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
 
