@@ -1102,7 +1102,6 @@ void ConstructorGpuTests::_ResultChecker::checkCellAttributes(TestResult const& 
     EXPECT_TRUE(isCompatible(
         _parameters.cellFunctionConstructorOffspringCellEnergy, static_cast<float>(*constructedCell.energy)));
 
-    auto const expectedMaxConnections = token.data->at(Enums::Constr::IN_CELL_MAX_CONNECTIONS);
     auto const expectedBranchNumber = token.data->at(Enums::Constr::IN_CELL_BRANCH_NO);
     auto const expectedCellFunctionType = token.data->at(Enums::Constr::IN_CELL_FUNCTION);
 
@@ -1116,16 +1115,6 @@ void ConstructorGpuTests::_ResultChecker::checkCellAttributes(TestResult const& 
     EXPECT_EQ(expectedCellFunctionType, constructedCell.cellFeature->type);
     EXPECT_EQ(expectedStaticData, constructedCell.cellFeature->constData);
     EXPECT_EQ(expectedMutableData, constructedCell.cellFeature->volatileData);
-
-    auto const decreaseMaxConnectionIfReduced = isReduced(token) ? -1 : 0;
-    auto const isAutomaticMaxConnection = 0 == expectedMaxConnections;
-    if (isAutomaticMaxConnection) {
-        EXPECT_EQ(
-            std::max(static_cast<int>(constructedCell.connectingCells->size()), 2) + decreaseMaxConnectionIfReduced,
-            *constructedCell.maxConnections);
-    } else {
-        EXPECT_EQ(expectedMaxConnections, *constructedCell.maxConnections);
-    }
 
     EXPECT_EQ(!isFinished(token), *constructedCell.tokenBlocked);
     if (auto const secondCell = testResult.getSecondCellOfConstructionSite()) {
@@ -1157,13 +1146,21 @@ void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const&
         }
     }
 
-    auto const automaticMaxConnections = isAutomaticMaxConnections(token);
+    auto const expectedMaxConnections = token.data->at(Enums::Constr::IN_CELL_MAX_CONNECTIONS);
+    auto const isAutomaticMaxConnection = isAutomaticMaxConnections(token);
+    if (isAutomaticMaxConnection) {
+        auto const separatedAndNotReduced = isSeparated(token) && !isReduced(token) ? 1 : 0;
+        EXPECT_EQ(constructedCell.connectingCells->size() + separatedAndNotReduced, *constructedCell.maxConnections);
+    }
+    else {
+        EXPECT_EQ(expectedMaxConnections, *constructedCell.maxConnections);
+    }
     for (auto const& cell : testResult.constructionSite) {
         if (cell.id == constructedCell.id) {
             continue;
         }
         if ((*constructedCell.pos - *cell.pos).length() < _parameters.cellMaxDistance) {
-            if (automaticMaxConnections) {
+            if (isAutomaticMaxConnection) {
                 if (*constructedCell.maxConnections < _parameters.cellMaxBonds
                     && *cell.maxConnections < _parameters.cellMaxBonds) {
                     EXPECT_TRUE(cell.isConnectedTo(constructedCell.id));
