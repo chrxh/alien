@@ -137,13 +137,17 @@ protected:
             tokenOnSourceCell,
             TokenDescription());
 
-        FurtherCellConstructionOnLineClusterTestParameters& anglesOfConstructionSite(vector<float> const& value)
+        struct CellProperties
         {
-            _anglesOfConstructionSite = value;
+            float angle;
+            int maxConnection;  //0 = automatic
+        };
+        FurtherCellConstructionOnLineClusterTestParameters& anglesOfConstructionSite(vector<CellProperties> const& value)
+        {
+            _propertiesOfConstructionSite = value;
             return *this;
         }
-
-        vector<float> _anglesOfConstructionSite{ 180.0f, 180.0f };
+        vector<CellProperties> _propertiesOfConstructionSite{{180.0f, 0}, {180.0f, 0}};
     };
     TestResult runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters const& parameters) const;
@@ -747,7 +751,7 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     ClusterDescription cluster;
     cluster.setId(_numberGen->getId()).setVel(QVector2D{}).setAngle(0).setAngularVel(0);
 
-    auto const numCellsOfConstructionSite = parameters._anglesOfConstructionSite.size();
+    auto const numCellsOfConstructionSite = parameters._propertiesOfConstructionSite.size();
     CHECK(1 <= numCellsOfConstructionSite);
 
     vector<uint64_t> cellIds;
@@ -783,18 +787,23 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
             connectingCells.emplace_back(cellIds[3 + i]);
         }
         auto const tokenBlocked = 0 == i;
+        auto cellProperties = parameters._propertiesOfConstructionSite[i];
         auto const newPosition =
-            lastPosition + Physics::unitVectorOfAngle(lastAngle + parameters._anglesOfConstructionSite[i] - 180.0f);
+            lastPosition + Physics::unitVectorOfAngle(lastAngle + cellProperties.angle - 180.0f);
+        auto maxConnection = i < numCellsOfConstructionSite - 1 ? 2 : 1;
+        if (0 < cellProperties.maxConnection) {
+            maxConnection = cellProperties.maxConnection;
+        }
         cluster.addCell(CellDescription()
                             .setId(cellIds[2 + i])
                             .setConnectingCells(connectingCells)
                             .setFlagTokenBlocked(tokenBlocked)
                             .setEnergy(cellEnergy)
                             .setPos(newPosition)
-                            .setMaxConnections(2)
+                            .setMaxConnections(maxConnection)
                             .setTokenBranchNumber(1)
                             .setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR)));
-        lastAngle = lastAngle + parameters._anglesOfConstructionSite[i] - 180.0f;
+        lastAngle = lastAngle + cellProperties.angle - 180.0f;
         lastPosition = newPosition;
     }
     auto const& origCells = *cluster.cells;
@@ -1088,8 +1097,12 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
                     Physics::angleOfVector(*origConstructionSiteCell1.pos - *origConstructionSiteCell2.pos);
                 auto const angleConstructionSite =
                     Physics::angleOfVector(*constructionSiteCell1->pos - *constructionSiteCell2->pos);
-                EXPECT_TRUE(isCompatible(
-                    expectedDeltaAngleConstructionSite, angleConstructionSite - origAngleConstructionSite));
+
+                EXPECT_PRED3(
+                    predEqual,
+                    expectedDeltaAngleConstructionSite,
+                    angleConstructionSite - origAngleConstructionSite,
+                    0.001);
             }
         }
     }
@@ -2131,16 +2144,16 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_nonStandardParam
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(10).distance(cellDistance));
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
-            {90, 180}));
+            {{90, 0}, {180, 0}}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
 
-TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_multipleConnections)
+TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_noMultipleConnections_limitMaxConnections)
 {
-    auto const token =
-        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(0));
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(0).maxConnections(2));
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
-            {180, 20}));
+            {{90, 0}, {180, 0}}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
