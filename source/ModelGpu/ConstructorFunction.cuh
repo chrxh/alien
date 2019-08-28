@@ -401,7 +401,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const& cell = token->cell;
 
     auto const adaptMaxConnections = isAdaptMaxConnections(token);
-    if (!isConnectable(cell, adaptMaxConnections) || !isConnectable(firstCellOfConstructionSite, adaptMaxConnections)) {
+    if(1 == token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS]) {
         token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
         return;
     }
