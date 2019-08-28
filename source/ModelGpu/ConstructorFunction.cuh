@@ -158,7 +158,10 @@ private:
     __inline__ __device__ static void
     connectNewCell(Cell* newCell, Cell* cellOfConstructionSite, Token* token, Cluster* cluster, SimulationData* data);
     __inline__ __device__ static void removeConnection(Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void establishConnection(Cell* cell1, Cell* cell2);
+    enum class AdaptMaxConnections { No, Yes };
+    __inline__ __device__ static AdaptMaxConnections isAdaptMaxConnections(Token* token);
+    __inline__ __device__ static bool isConnectable(Cell* cell, AdaptMaxConnections adaptMaxConnections);
+    __inline__ __device__ static void establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConnections adaptMaxConnections);
 };
 
 /************************************************************************/
@@ -260,7 +263,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
     auto const& cell = token->cell;
     auto const& cluster = cell->cluster;
 
-    if (cell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
+    auto const adaptMaxConnections = isAdaptMaxConnections(token);
+
+    if (!isConnectable(cell, adaptMaxConnections)) {
         token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
         return;
     }
@@ -307,13 +312,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
         return;
     }
 
-    if (cell->maxConnections == cell->numConnections) {
-        ++cell->maxConnections;
-    }
-
     auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
     addCellToCluster(newCell, cluster, newCellPointers);
-    establishConnection(newCell, cell);
+    establishConnection(newCell, cell, adaptMaxConnections);
     adaptRelPositions(cluster);
     completeCellAbsPosAndVel(cluster);
     cluster->angularVel = angularVelAfterRotation;
@@ -398,6 +399,13 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     SimulationData* data)
 {
     auto const& cell = token->cell;
+
+    auto const adaptMaxConnections = isAdaptMaxConnections(token);
+    if (!isConnectable(cell, adaptMaxConnections) || !isConnectable(firstCellOfConstructionSite, adaptMaxConnections)) {
+        token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        return;
+    }
+
     auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
 
     auto relPosOfNewCell = firstCellOfConstructionSite->relPos;
@@ -941,8 +949,6 @@ __inline__ __device__ Cell* ConstructorFunction::constructNewCell(
     Math::rotationMatrix(cluster->angle, rotMatrix);
     result->absPos = Math::applyMatrix(result->relPos, rotMatrix) + cluster->pos;
     result->maxConnections = token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
-    result->maxConnections =
-        max(min(result->maxConnections, cudaSimulationParameters.cellMaxBonds), 2);  //between 2 and cellMaxBonds
     result->numConnections = 0;
     result->branchNumber =
         token->memory[Enums::Constr::IN_CELL_BRANCH_NO] % cudaSimulationParameters.cellMaxTokenBranchNumber;
@@ -1041,15 +1047,15 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
 {
     Cell* cellOfConstructor = token->cell;
 
+    auto const adaptMaxConnections = isAdaptMaxConnections(token);
+
     removeConnection(cellOfConstructionSite, cellOfConstructor);
-    establishConnection(newCell, cellOfConstructionSite);
-    establishConnection(newCell, cellOfConstructor);
+    establishConnection(newCell, cellOfConstructionSite, adaptMaxConnections);
+    establishConnection(newCell, cellOfConstructor, adaptMaxConnections);
 
     if (newCell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
         return;
     }
-
-    auto const isAutomaticMaxConnection = 0 == token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
 
     for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
@@ -1066,19 +1072,10 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
             >= cudaSimulationParameters.cellMaxDistance) {
             continue;
         }
-
-        //CONSTR_IN_CELL_MAX_CONNECTIONS = 0 => set "maxConnections" automatically
-        if (isAutomaticMaxConnection) {
-            if (newCell->numConnections == newCell->maxConnections) {
-                ++newCell->maxConnections;
-            }
-            if (cell->numConnections == cell->maxConnections) {
-                ++cell->maxConnections;
-            }
-            establishConnection(newCell, cell);
-        } else if (newCell->numConnections < newCell->maxConnections && cell->numConnections < cell->maxConnections) {
-            establishConnection(newCell, cell);
+        if (!isConnectable(cell, adaptMaxConnections) || !isConnectable(newCell, adaptMaxConnections)) {
+            continue;
         }
+        establishConnection(newCell, cell, adaptMaxConnections);
     }
 }
 
@@ -1103,8 +1100,34 @@ __inline__ __device__ void ConstructorFunction::removeConnection(Cell* cell1, Ce
     remove(cell2, cell1);
 }
 
-__inline__ __device__ void ConstructorFunction::establishConnection(Cell* cell1, Cell* cell2)
+__inline__ __device__ auto ConstructorFunction::isAdaptMaxConnections(Token * token) -> AdaptMaxConnections
+{
+    return 0 == token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS] ? AdaptMaxConnections::Yes
+                                                                      : AdaptMaxConnections::No;
+}
+
+__inline__ __device__ bool ConstructorFunction::isConnectable(Cell * cell, AdaptMaxConnections adaptMaxConnections)
+{
+    if (AdaptMaxConnections::Yes == adaptMaxConnections) {
+        if (cell->numConnections == cudaSimulationParameters.cellMaxBonds) {
+            return false;
+        }
+    }
+    if (AdaptMaxConnections::No == adaptMaxConnections) {
+        if (cell->numConnections == cell->maxConnections) {
+            return false;
+        }
+    }
+    return true;
+}
+
+__inline__ __device__ void ConstructorFunction::establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConnections adaptMaxConnections)
 {
     cell1->connections[cell1->numConnections++] = cell2;
     cell2->connections[cell2->numConnections++] = cell1;
+
+    if (adaptMaxConnections == AdaptMaxConnections::Yes) {
+        cell1->maxConnections = cell1->numConnections;
+        cell2->maxConnections = cell2->numConnections;
+    }
 }
