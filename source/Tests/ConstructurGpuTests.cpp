@@ -95,6 +95,7 @@ protected:
             TokenDescription,
             token,
             TokenDescription());
+        MEMBER_DECLARATION(StartConstructionOnHorizontalClusterTestParameters, int, maxConnectionsOfConstructor, 2);
     };
     TestResult runStartConstructionOnHorizontalClusterTest(
         StartConstructionOnHorizontalClusterTestParameters const& parameters) const;
@@ -221,6 +222,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
 
     auto& secondCell = cluster.cells->at(1);
     secondCell.tokenBranchNumber = 1;
+    secondCell.maxConnections = parameters._maxConnectionsOfConstructor;
     secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
 
     origData.addCluster(cluster);
@@ -1394,15 +1396,38 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_leftHandSi
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_errorMaxConnectionsReached)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_setAutomaticMaxConnectionsOnConstructor)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto const result = runStartConstructionOnHorizontalClusterTest(
+        StartConstructionOnHorizontalClusterTestParameters().token(token).maxConnectionsOfConstructor(1));
+
+    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
+    _resultChecker->check(
+        result,
+        Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
+}
+
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_errorMaxConnections1)
 {
     _parameters.cellMaxBonds = 1;
     _context->setSimulationParameters(_parameters);
 
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result =
-        runStartConstructionOnHorizontalClusterTest(StartConstructionOnHorizontalClusterTestParameters().token(token));
+    auto const result = runStartConstructionOnHorizontalClusterTest(
+        StartConstructionOnHorizontalClusterTestParameters().token(token).maxConnectionsOfConstructor(1));
+
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
+}
+
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_errorMaxConnections2)
+{
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).maxConnections(1));
+    auto const result = runStartConstructionOnHorizontalClusterTest(
+        StartConstructionOnHorizontalClusterTestParameters().token(token).maxConnectionsOfConstructor(1));
 
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
 }
@@ -1849,6 +1874,16 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_errorNoEn
         SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
 
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_NO_ENERGY));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_errorMaxConnections)
+{
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).maxConnections(1));
+    auto const result = runSecondConstructionOnLineClusterTest(
+        SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
+
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
 }
 
 TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterRightObstacle_safeMode)
