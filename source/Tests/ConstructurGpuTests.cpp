@@ -630,7 +630,8 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
     std::vector<CellDescription> remainingCells;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
         if (newCell.id != cell1.id && newCell.id != cell2.id
-            && obstacleCellIds.find(newCell.id) == obstacleCellIds.end()) {
+            && obstacleCellIds.find(newCell.id) == obstacleCellIds.end()
+            && newCell.pos->x() >= result.constructorCell.pos->x() - 0.1) {
             remainingCells.push_back(newCell);
         }
     }
