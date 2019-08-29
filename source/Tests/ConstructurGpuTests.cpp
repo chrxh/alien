@@ -77,9 +77,9 @@ protected:
         optional<CellDescription> getFirstCellOfOrigConstructionSite() const;
         optional<CellDescription> getSecondCellOfOrigConstructionSite() const;
 
-        optional<CellDescription> getFirstCellOfConstructionSite() const;
-        optional<CellDescription> getSecondCellOfConstructionSite() const;
-        optional<CellDescription> getThirdCellOfConstructionSite() const;
+        optional<CellDescription> getFirstCellOfConstructionSiteAfterCreation() const;
+        optional<CellDescription> getSecondCellOfConstructionSiteAfterCreation() const;
+        optional<CellDescription> getThirdCellOfConstructionSiteAfterCreation() const;
         
         optional<CellDescription> getCellOfConstructionSite(uint64_t id) const;
     };
@@ -174,12 +174,21 @@ protected:
         void checkIfDestruction(TestResult const& testResult, Expectations const& expectations) const;
         void checkIfNoDestruction(TestResult const& testResult, Expectations const& expectations) const;
         void checkIfNoDestructionAndSuccess(TestResult const& testResult, Expectations const& expectations) const;
+        void checkIfNoDestructionAndSuccessRotationOnly(TestResult const& testResult, Expectations const& expectations) const;
 
-        void checkCellPosition(TestResult const& testResult, Expectations const& expectations) const;
-        void checkCellAttributes(TestResult const& testResult) const;
-        void checkCellConnections(TestResult const& testResult) const;
-        void checkConstructedToken(TestResult const& testResult, Expectations const& expectations) const;
+        void checkCellPositionAfterCreation(TestResult const& testResult, Expectations const& expectations) const;
+        void checkCellAttributesAfterCreation(TestResult const& testResult) const;
+        void checkCellConnectionsAfterCreation(TestResult const& testResult) const;
+        void checkConstructedTokenAfterCreation(TestResult const& testResult, Expectations const& expectations) const;
 
+        void checkCellPositionAfterRotation(TestResult const& testResult, Expectations const& expectations) const;
+
+        void checkConstructionSiteDistances(TestResult const& testResult) const;
+        struct AngularMasses {
+            float constructionSite;
+            float constructor;
+        };
+        AngularMasses calcAngularMasses(TestResult const& testResult) const;
     private:
         SimulationParameters _parameters;
     };
@@ -880,7 +889,7 @@ TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstru
     return token;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfConstructionSite() const
+optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfConstructionSiteAfterCreation() const
 {
     map<uint64_t, CellDescription> cellsBefore;
     for (auto const& cell : origConstructionSite) {
@@ -917,7 +926,7 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfOrigCo
     return boost::none;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfConstructionSite() const
+optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfConstructionSiteAfterCreation() const
 {
     if (auto const firstCell = getFirstCellOfOrigConstructionSite()) {
         return getCellOfConstructionSite(firstCell->id);
@@ -925,7 +934,7 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfConstr
     return boost::none;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getThirdCellOfConstructionSite() const
+optional<CellDescription> ConstructorGpuTests::TestResult::getThirdCellOfConstructionSiteAfterCreation() const
 {
     if (auto const firstCell = getSecondCellOfOrigConstructionSite()) {
         return getCellOfConstructionSite(firstCell->id);
@@ -961,7 +970,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfDestruction(
     EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
-        EXPECT_FALSE(testResult.getFirstCellOfConstructionSite());
+        EXPECT_FALSE(testResult.getFirstCellOfConstructionSiteAfterCreation());
         return;
     }
 }
@@ -976,14 +985,17 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(
     EXPECT_TRUE(isCompatible(testResult.movementOfCenter, QVector2D{}));
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
-        EXPECT_FALSE(testResult.getFirstCellOfConstructionSite());
+        EXPECT_FALSE(testResult.getFirstCellOfConstructionSiteAfterCreation());
         return;
     }
 
     if (Enums::ConstrOut::SUCCESS == expectations._tokenOutput) {
         checkIfNoDestructionAndSuccess(testResult, expectations);
+    }
+    else if (Enums::ConstrOut::SUCCESS_ROT== expectations._tokenOutput) {
+        checkIfNoDestructionAndSuccessRotationOnly(testResult, expectations);
     } else {
-        EXPECT_FALSE(testResult.getFirstCellOfConstructionSite());
+        EXPECT_FALSE(testResult.getFirstCellOfConstructionSiteAfterCreation());
     }
 }
 
@@ -991,15 +1003,20 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
-    EXPECT_TRUE(testResult.getFirstCellOfConstructionSite());
+    EXPECT_TRUE(testResult.getFirstCellOfConstructionSiteAfterCreation());
 
-    checkCellPosition(testResult, expectations);
-    checkCellAttributes(testResult);
-    checkCellConnections(testResult);
-    checkConstructedToken(testResult, expectations);
+    checkCellPositionAfterCreation(testResult, expectations);
+    checkCellAttributesAfterCreation(testResult);
+    checkCellConnectionsAfterCreation(testResult);
+    checkConstructedTokenAfterCreation(testResult, expectations);
 }
 
-void ConstructorGpuTests::_ResultChecker::checkCellPosition(
+void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccessRotationOnly(TestResult const & testResult, Expectations const & expectations) const
+{
+    checkCellPositionAfterRotation(testResult, expectations);
+}
+
+void ConstructorGpuTests::_ResultChecker::checkCellPositionAfterCreation(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
@@ -1008,16 +1025,20 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
             predEqual,
             0,
             (*testResult.constructorCell.pos + *expectations._relPosOfFirstCellOfConstructionSite
-             - *testResult.getFirstCellOfConstructionSite()->pos)
+             - *testResult.getFirstCellOfConstructionSiteAfterCreation()->pos)
                 .length(),
             0.05);
     } else {
 
         //check distances
+        checkConstructionSiteDistances(testResult);
+
+        auto const origSourceCell = testResult.origSourceCell;
+        auto const sourceCell = testResult.sourceCell;
+        auto const firstCellOfConstructionSite = testResult.getFirstCellOfConstructionSiteAfterCreation();
         auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
-        auto const firstCellOfConstructionSite = testResult.getFirstCellOfConstructionSite();
         auto const secondCellOfOrigConstructionSite = testResult.getSecondCellOfOrigConstructionSite();
-        auto const secondCellOfConstructionSite = *testResult.getSecondCellOfConstructionSite();
+        auto const secondCellOfConstructionSite = *testResult.getSecondCellOfConstructionSiteAfterCreation();
         auto const expectedDistance =
             QuantityConverter::convertDataToDistance(testResult.origToken.data->at(Enums::Constr::IN_DIST));
         auto const expectedAngle =
@@ -1026,7 +1047,6 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
             auto const displacement = *secondCellOfConstructionSite.pos - *firstCellOfConstructionSite->pos;
             EXPECT_PRED3(predEqual, expectedDistance, displacement.length(), 0.05);
         }
-
         {
             auto const displacement = *firstCellOfConstructionSite->pos - *testResult.constructorCell.pos;
             if (isSeparated(testResult.origToken)) {
@@ -1038,6 +1058,12 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
                     predEqual, _parameters.cellFunctionConstructorOffspringCellDistance, displacement.length(), 0.05);
             }
         }
+        if(sourceCell) {
+            auto const displacementBefore = *origSourceCell.pos - *testResult.origConstructorCell.pos;
+            auto const displacementAfter = *sourceCell->pos - *testResult.constructorCell.pos;
+            EXPECT_PRED3(predEqual, displacementBefore.length(), displacementAfter.length(), 0.01);
+        }
+
         //check angles
         if (testResult.sourceCell) {
             auto const origAngle = Physics::clockwiseAngleFromFirstToSecondVector(
@@ -1049,7 +1075,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
             EXPECT_TRUE(isCompatible(origAngle, angle));
         }
 
-        if (auto const thirdCellOfConstructionSite = testResult.getThirdCellOfConstructionSite()) {
+        if (auto const thirdCellOfConstructionSite = testResult.getThirdCellOfConstructionSiteAfterCreation()) {
             auto const origAngle = Physics::clockwiseAngleFromFirstToSecondVector(
                 *testResult.origConstructorCell.pos - *firstCellOfOrigConstructionSite.pos,
                 *secondCellOfOrigConstructionSite->pos - *firstCellOfOrigConstructionSite.pos);
@@ -1060,35 +1086,16 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
             EXPECT_PRED3(predEqual, expectedAngle, actualDiffAngle, 1);
         }
 
-        if (testResult.sourceCell) {
-            vector<QVector2D> relPositionOfMasses;
-            std::transform(
-                testResult.origConstructor.begin(),
-                testResult.origConstructor.end(),
-                std::inserter(relPositionOfMasses, relPositionOfMasses.begin()),
-                [&firstCellOfOrigConstructionSite](auto const& cell) {
-                    return *cell.pos - *firstCellOfOrigConstructionSite.pos;
-                });
-            auto const angularMassConstructor = Physics::angularMass(relPositionOfMasses);
-
-            relPositionOfMasses.clear();
-            std::transform(
-                testResult.origConstructionSite.begin(),
-                testResult.origConstructionSite.end(),
-                std::inserter(relPositionOfMasses, relPositionOfMasses.begin()),
-                [&firstCellOfOrigConstructionSite](auto const& cell) {
-                    return *cell.pos - *firstCellOfOrigConstructionSite.pos;
-                });
-            auto const angularMassConstructionSite = Physics::angularMass(relPositionOfMasses);
-
-            auto const sumAngularMasses = angularMassConstructor + angularMassConstructionSite;
-            auto const expectedDeltaAngleConstructionSite = angularMassConstructor * expectedAngle / sumAngularMasses;
-            auto const expectedDeltaAngleConstructor = -angularMassConstructionSite * expectedAngle / sumAngularMasses;
+        if (sourceCell) {
+            auto const angularMasses = calcAngularMasses(testResult);
+            auto const sumAngularMasses = angularMasses.constructor + angularMasses.constructionSite;
+            auto const expectedDeltaAngleConstructionSite = angularMasses.constructor * expectedAngle / sumAngularMasses;
+            auto const expectedDeltaAngleConstructor = -angularMasses.constructionSite * expectedAngle / sumAngularMasses;
 
             auto const origAngleConstructor =
-                Physics::angleOfVector(*testResult.origSourceCell.pos - *testResult.origConstructorCell.pos);
+                Physics::angleOfVector(*origSourceCell.pos - *testResult.origConstructorCell.pos);
             auto const angleConstructor =
-                Physics::angleOfVector(*testResult.sourceCell->pos - *testResult.constructorCell.pos);
+                Physics::angleOfVector(*sourceCell->pos - *testResult.constructorCell.pos);
             EXPECT_PRED3(predEqual, expectedDeltaAngleConstructor, angleConstructor - origAngleConstructor, 0.001);
 
             if (testResult.origConstructionSite.size() >= 2) {
@@ -1111,9 +1118,9 @@ void ConstructorGpuTests::_ResultChecker::checkCellPosition(
     }
 }
 
-void ConstructorGpuTests::_ResultChecker::checkCellAttributes(TestResult const& testResult) const
+void ConstructorGpuTests::_ResultChecker::checkCellAttributesAfterCreation(TestResult const& testResult) const
 {
-    auto const constructedCell = *testResult.getFirstCellOfConstructionSite();
+    auto const constructedCell = *testResult.getFirstCellOfConstructionSiteAfterCreation();
     auto const& token = testResult.token;
     EXPECT_TRUE(isCompatible(
         _parameters.cellFunctionConstructorOffspringCellEnergy, static_cast<float>(*constructedCell.energy)));
@@ -1133,15 +1140,15 @@ void ConstructorGpuTests::_ResultChecker::checkCellAttributes(TestResult const& 
     EXPECT_EQ(expectedMutableData, constructedCell.cellFeature->volatileData);
 
     EXPECT_EQ(!isFinished(token), *constructedCell.tokenBlocked);
-    if (auto const secondCell = testResult.getSecondCellOfConstructionSite()) {
+    if (auto const secondCell = testResult.getSecondCellOfConstructionSiteAfterCreation()) {
         EXPECT_FALSE(*secondCell->tokenBlocked);
     }
 }
 
-void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const& testResult) const
+void ConstructorGpuTests::_ResultChecker::checkCellConnectionsAfterCreation(TestResult const& testResult) const
 {
     auto const& token = testResult.token;
-    auto const constructedCell = *testResult.getFirstCellOfConstructionSite();
+    auto const constructedCell = *testResult.getFirstCellOfConstructionSiteAfterCreation();
     EXPECT_EQ(!isSeparated(token), constructedCell.isConnectedTo(testResult.constructorCell.id));
     EXPECT_EQ(!isSeparated(token), testResult.constructorCell.isConnectedTo(constructedCell.id));
 
@@ -1207,20 +1214,103 @@ void ConstructorGpuTests::_ResultChecker::checkCellConnections(TestResult const&
     }
 }
 
-void ConstructorGpuTests::_ResultChecker::checkConstructedToken(
+void ConstructorGpuTests::_ResultChecker::checkConstructedTokenAfterCreation(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
     if (expectations._constructedToken) {
-        auto const actualTokens = testResult.getFirstCellOfConstructionSite()->tokens;
+        auto const actualTokens = testResult.getFirstCellOfConstructionSiteAfterCreation()->tokens;
         EXPECT_EQ(1, actualTokens->size());
         EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
 
-        EXPECT_EQ(1, testResult.getFirstCellOfConstructionSite()->tokens->size());
+        EXPECT_EQ(1, testResult.getFirstCellOfConstructionSiteAfterCreation()->tokens->size());
     }
     else {
-        EXPECT_TRUE(testResult.getFirstCellOfConstructionSite()->tokens->empty());
+        EXPECT_TRUE(testResult.getFirstCellOfConstructionSiteAfterCreation()->tokens->empty());
     }
+}
+
+void ConstructorGpuTests::_ResultChecker::checkCellPositionAfterRotation(TestResult const & testResult, Expectations const & expectations) const
+{
+    //check distances
+    checkConstructionSiteDistances(testResult);
+    auto const origSourceCell = testResult.origSourceCell;
+    auto const sourceCell = testResult.sourceCell;
+    auto const origConstructor = testResult.origConstructorCell;
+    auto const constructor = testResult.constructorCell;
+    auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
+    auto const firstCellOfConstructionSite = *testResult.getCellOfConstructionSite(firstCellOfOrigConstructionSite.id);
+    auto const secondCellOfOrigConstructionSite = *testResult.getSecondCellOfOrigConstructionSite();
+    auto const secondCellOfConstructionSite = *testResult.getCellOfConstructionSite(secondCellOfOrigConstructionSite.id);
+    {
+        auto const displacementBefore = *origConstructor.pos - *firstCellOfOrigConstructionSite.pos;
+        auto const displacementAfter = *constructor.pos - *firstCellOfConstructionSite.pos;
+        EXPECT_PRED3(predEqual, displacementBefore.length(), displacementAfter.length(), 0.01);
+    }
+    {
+        auto const displacementBefore = *origSourceCell.pos - *testResult.origConstructorCell.pos;
+        auto const displacementAfter = *sourceCell->pos - *testResult.constructorCell.pos;
+        EXPECT_PRED3(predEqual, displacementBefore.length(), displacementAfter.length(), 0.01);
+    }
+
+    auto const expectedAngleDelta =
+        QuantityConverter::convertDataToAngle(testResult.token.data->at(Enums::Constr::INOUT_ANGLE))
+        - QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE));
+
+    auto const angularMasses = calcAngularMasses(testResult);
+    auto const sumAngularMasses = angularMasses.constructor + angularMasses.constructionSite;
+    auto const expectedDeltaAngleConstructionSite = angularMasses.constructor * expectedAngleDelta / sumAngularMasses;
+    auto const expectedDeltaAngleConstructor = -angularMasses.constructionSite * expectedAngleDelta / sumAngularMasses;
+
+    auto const origAngleConstructor =
+        Physics::angleOfVector(*origSourceCell.pos - *testResult.origConstructorCell.pos);
+    auto const angleConstructor =
+        Physics::angleOfVector(*sourceCell->pos - *testResult.constructorCell.pos);
+    EXPECT_PRED3(predEqual, expectedDeltaAngleConstructor, angleConstructor - origAngleConstructor, 0.001);
+
+}
+
+void ConstructorGpuTests::_ResultChecker::checkConstructionSiteDistances(TestResult const & testResult) const
+{
+    optional<CellDescription> prevOrigCell;
+    for (auto const& origCell : testResult.origConstructionSite) {
+        if (prevOrigCell) {
+            auto const& prevCell = *testResult.getCellOfConstructionSite(prevOrigCell->id);
+            auto const& cell = *testResult.getCellOfConstructionSite(origCell.id);
+
+            EXPECT_PRED3(
+                predEqual, (*cell.pos - *prevCell.pos).length(), (*origCell.pos - *prevOrigCell->pos).length(), 0.01);
+        }
+        prevOrigCell = origCell;
+    }
+}
+
+auto ConstructorGpuTests::_ResultChecker::calcAngularMasses(TestResult const & testResult) const -> AngularMasses
+{
+    AngularMasses result;
+
+    auto const firstCellOfOrigConstructionSite = *testResult.getFirstCellOfOrigConstructionSite();
+    vector<QVector2D> relPositionOfMasses;
+    std::transform(
+        testResult.origConstructor.begin(),
+        testResult.origConstructor.end(),
+        std::inserter(relPositionOfMasses, relPositionOfMasses.begin()),
+        [&firstCellOfOrigConstructionSite](auto const& cell) {
+        return *cell.pos - *firstCellOfOrigConstructionSite.pos;
+    });
+    result.constructor = Physics::angularMass(relPositionOfMasses);
+
+    relPositionOfMasses.clear();
+    std::transform(
+        testResult.origConstructionSite.begin(),
+        testResult.origConstructionSite.end(),
+        std::inserter(relPositionOfMasses, relPositionOfMasses.begin()),
+        [&firstCellOfOrigConstructionSite](auto const& cell) {
+        return *cell.pos - *firstCellOfOrigConstructionSite.pos;
+    });
+    result.constructionSite = Physics::angularMass(relPositionOfMasses);
+
+    return result;
 }
 
 bool ConstructorGpuTests::isFinished(TokenDescription const& token)
@@ -2192,4 +2282,13 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_noMultipleConnec
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
             {{90, 0}, {180, 0}}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+}
+
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
+    auto result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT));
 }
