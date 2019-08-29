@@ -60,7 +60,6 @@ protected:
     struct TestResult
     {
         QVector2D movementOfCenter;
-        int increaseNumberOfCells;
         
         TokenDescription origToken;
         CellDescription origSourceCell;
@@ -137,6 +136,11 @@ protected:
             TokenDescription,
             tokenOnSourceCell,
             TokenDescription());
+        MEMBER_DECLARATION(
+            FurtherCellConstructionOnLineClusterTestParameters,
+            optional<float>,
+            verticalObstacleAt,
+            boost::none);
 
         struct CellProperties
         {
@@ -182,6 +186,7 @@ protected:
         void checkConstructedTokenAfterCreation(TestResult const& testResult, Expectations const& expectations) const;
 
         void checkCellPositionAfterRotation(TestResult const& testResult, Expectations const& expectations) const;
+        void checkCellConnectionsAfterRotation(TestResult const& testResult, Expectations const& expectations) const;
 
         void checkConstructionSiteDistances(TestResult const& testResult) const;
         struct AngularMasses {
@@ -290,7 +295,6 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
 
     TestResult result;
     result.movementOfCenter = newCenter - *cluster.pos;
-    result.increaseNumberOfCells = newCellsWithoutObstacleByCellId.size() - cluster.cells->size();
 
     auto const& newSecondCell = newCellByCellId.at(secondCell.id);
     auto const& newToken = newSecondCell.tokens->at(0);
@@ -386,7 +390,6 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
 
     TestResult result;
     result.movementOfCenter = *newCluster.pos - *cluster.pos;
-    result.increaseNumberOfCells = newCluster.cells->size() - cluster.cells->size();
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -483,7 +486,6 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescrip
 
     TestResult result;
     result.movementOfCenter = *newCluster.pos - *cluster.pos;
-    result.increaseNumberOfCells = newCluster.cells->size() - cluster.cells->size();
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -619,7 +621,6 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
 
     TestResult result;
     result.movementOfCenter = newCenter - *cluster.pos;
-    result.increaseNumberOfCells = newCellsWithoutObstacleByCellId.size() - cluster.cells->size();
 
     auto const& newCell2 = newCellByCellId.at(cell2.id);
     auto const& newToken = newCell2.tokens->at(0);
@@ -730,7 +731,6 @@ auto ConstructorGpuTests::runSecondCellConstructionOnSelfTouchingClusterTest(
 
     TestResult result;
     result.movementOfCenter = *newCluster.pos - *cluster.pos;
-    result.increaseNumberOfCells = newCluster.cells->size() - cluster.cells->size();
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -825,6 +825,16 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     DataDescription origData;
     origData.addCluster(cluster);
 
+    std::unordered_set<uint64_t> obstacleCellIds;
+    if (parameters._verticalObstacleAt) {
+        auto const obstacle = createRectangularCluster(
+            {10, 2}, *cluster.pos + QVector2D{0, -0.5f + *parameters._verticalObstacleAt}, QVector2D{});
+        for (auto const& cell : *obstacle.cells) {
+            obstacleCellIds.insert(cell.id);
+        }
+        origData.addCluster(obstacle);
+    }
+
     IntegrationTestHelper::updateData(_access, origData);
 
     //perform test
@@ -834,13 +844,23 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
     checkEnergy(origData, newData);
 
-    auto const& newCluster = newData.clusters->at(0);
+    auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+
+    std::unordered_map<uint64_t, CellDescription> newCellsWithoutObstacleByCellId;
+    for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
+        if (obstacleCellIds.find(newCell.id) == obstacleCellIds.end()) {
+            newCellsWithoutObstacleByCellId.insert_or_assign(newCell.id, newCell);
+        }
+    }
+
+    QVector2D newCenter;
+    for (auto const& newCell : newCellsWithoutObstacleByCellId | boost::adaptors::map_values) {
+        newCenter += *newCell.pos;
+    }
+    newCenter /= newCellsWithoutObstacleByCellId.size();
 
     TestResult result;
-    result.movementOfCenter = *newCluster.pos - *cluster.pos;
-    result.increaseNumberOfCells = newCluster.cells->size() - cluster.cells->size();
-
-    auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    result.movementOfCenter = newCenter - *cluster.pos;
 
     auto const& newConstructor = newCellByCellId.at(cellIds[1]);
     auto const& newToken = newConstructor.tokens->at(0);
@@ -856,6 +876,9 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     for (int i = 0; i < 2; ++i) {
         result.origConstructor.emplace_back(origCells[i]);
         newCellByCellId.erase(cellIds[i]);
+    }
+    for (auto obstacleCellId : obstacleCellIds) {
+        newCellByCellId.erase(obstacleCellId);
     }
     for (int i = 0; i < numCellsOfConstructionSite; ++i) {
         result.origConstructionSite.emplace_back(origCells[2 + i]);
@@ -1004,6 +1027,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
     Expectations const& expectations) const
 {
     EXPECT_TRUE(testResult.getFirstCellOfConstructionSiteAfterCreation());
+    EXPECT_EQ(1, testResult.constructionSite.size() - testResult.origConstructionSite.size());
 
     checkCellPositionAfterCreation(testResult, expectations);
     checkCellAttributesAfterCreation(testResult);
@@ -1014,6 +1038,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
 void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccessRotationOnly(TestResult const & testResult, Expectations const & expectations) const
 {
     checkCellPositionAfterRotation(testResult, expectations);
+    checkCellConnectionsAfterRotation(testResult, expectations);
 }
 
 void ConstructorGpuTests::_ResultChecker::checkCellPositionAfterCreation(
@@ -1254,20 +1279,29 @@ void ConstructorGpuTests::_ResultChecker::checkCellPositionAfterRotation(TestRes
     }
 
     auto const expectedAngleDelta =
-        QuantityConverter::convertDataToAngle(testResult.token.data->at(Enums::Constr::INOUT_ANGLE))
-        - QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE));
+        QuantityConverter::convertDataToAngle(testResult.origToken.data->at(Enums::Constr::INOUT_ANGLE))
+        - QuantityConverter::convertDataToAngle(testResult.token.data->at(Enums::Constr::INOUT_ANGLE));
 
-    auto const angularMasses = calcAngularMasses(testResult);
-    auto const sumAngularMasses = angularMasses.constructor + angularMasses.constructionSite;
-    auto const expectedDeltaAngleConstructionSite = angularMasses.constructor * expectedAngleDelta / sumAngularMasses;
-    auto const expectedDeltaAngleConstructor = -angularMasses.constructionSite * expectedAngleDelta / sumAngularMasses;
+    auto const origAngle = Physics::clockwiseAngleFromFirstToSecondVector(
+        *secondCellOfOrigConstructionSite.pos - *firstCellOfOrigConstructionSite.pos,
+        *origConstructor.pos - *firstCellOfOrigConstructionSite.pos);
+    auto const angle = Physics::clockwiseAngleFromFirstToSecondVector(
+        *secondCellOfConstructionSite.pos - *firstCellOfConstructionSite.pos,
+        *constructor.pos - *firstCellOfConstructionSite.pos);
+    EXPECT_PRED3(predEqual, expectedAngleDelta, origAngle - angle, 0.001);
 
-    auto const origAngleConstructor =
-        Physics::angleOfVector(*origSourceCell.pos - *testResult.origConstructorCell.pos);
-    auto const angleConstructor =
-        Physics::angleOfVector(*sourceCell->pos - *testResult.constructorCell.pos);
-    EXPECT_PRED3(predEqual, expectedDeltaAngleConstructor, angleConstructor - origAngleConstructor, 0.001);
+}
 
+void ConstructorGpuTests::_ResultChecker::checkCellConnectionsAfterRotation(
+    TestResult const& testResult,
+    Expectations const& expectations) const
+{
+    for (auto const& origCell : testResult.origConstructionSite) {
+        auto const cell = *testResult.getCellOfConstructionSite(origCell.id);
+        EXPECT_EQ(origCell.connectingCells, cell.connectingCells);
+    }
+    EXPECT_EQ(testResult.origSourceCell.connectingCells, testResult.sourceCell->connectingCells);
+    EXPECT_EQ(testResult.origConstructorCell.connectingCells, testResult.constructorCell.connectingCells);
 }
 
 void ConstructorGpuTests::_ResultChecker::checkConstructionSiteDistances(TestResult const & testResult) const
@@ -1275,8 +1309,8 @@ void ConstructorGpuTests::_ResultChecker::checkConstructionSiteDistances(TestRes
     optional<CellDescription> prevOrigCell;
     for (auto const& origCell : testResult.origConstructionSite) {
         if (prevOrigCell) {
-            auto const& prevCell = *testResult.getCellOfConstructionSite(prevOrigCell->id);
-            auto const& cell = *testResult.getCellOfConstructionSite(origCell.id);
+            auto const prevCell = *testResult.getCellOfConstructionSite(prevOrigCell->id);
+            auto const cell = *testResult.getCellOfConstructionSite(origCell.id);
 
             EXPECT_PRED3(
                 predEqual, (*cell.pos - *prevCell.pos).length(), (*origCell.pos - *prevOrigCell->pos).length(), 0.01);
@@ -2291,4 +2325,31 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster)
     auto result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT));
+}
+
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_obstacle_safeMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
+    auto result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).verticalObstacleAt(-0.5));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+}
+
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_obstacle_unsafeMode)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(90));
+    auto result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).verticalObstacleAt(-0.5));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+}
+
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_obstacle_bruteforceMode)
+{
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(90));
+    auto result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).verticalObstacleAt(-0.5));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT).destruction(true));
 }
