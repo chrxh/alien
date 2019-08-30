@@ -237,6 +237,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     auto const isAngleRestricted = restrictAngles(anglesToRotate, maxAngles);
 
     if (isAngleRestricted) {
+
         //angle discretization correction
         anglesToRotate.constructor = QuantityConverter::convertDataToAngle(QuantityConverter::convertAngleToData(anglesToRotate.constructor));
         anglesToRotate.constructionSite = QuantityConverter::convertDataToAngle(QuantityConverter::convertAngleToData(anglesToRotate.constructionSite));
