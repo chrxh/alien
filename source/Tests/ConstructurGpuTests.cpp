@@ -157,6 +157,8 @@ protected:
     TestResult runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters const& parameters) const;
 
+    TestResult runConstructionSiteConnectedToConstructorTwiceTest(TokenDescription const& token) const;
+
     struct Expectations
     {
         MEMBER_DECLARATION(Expectations, Enums::ConstrOut::Type, tokenOutput, Enums::ConstrOut::SUCCESS);
@@ -890,6 +892,42 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     return result;
 }
 
+auto ConstructorGpuTests::runConstructionSiteConnectedToConstructorTwiceTest(TokenDescription const& token) const
+    -> TestResult
+{
+    auto cluster = createRectangularCluster({ 2,2 }, QVector2D{ 10, 10 }, QVector2D());
+    auto& firstCellOfConstructionSite = cluster.cells->at(1);
+    auto& sourceCell = cluster.cells->at(2);
+    auto& constructorCell = cluster.cells->at(3);
+
+    sourceCell.addToken(token);
+    sourceCell.setTokenBranchNumber(0);
+    constructorCell.setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR));
+    constructorCell.setTokenBranchNumber(1);
+    firstCellOfConstructionSite.setFlagTokenBlocked(true);
+
+    DataDescription origData;
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+
+    //perform test
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    //check results
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    checkEnergy(origData, newData);
+
+    auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const newConstructorCell = newCellByCellId.at(constructorCell.id);
+
+    TestResult result;
+    result.token = newConstructorCell.tokens->at(0);
+    result.movementOfCenter = *newData.clusters->at(0).pos - *cluster.pos;
+
+    return result;
+}
+
 TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstructionParameters tokenParameters) const
 {
     auto token = createSimpleToken();
@@ -1568,7 +1606,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_errorNoEne
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_NO_ENERGY));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterRightObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterRightObstacle_safe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
@@ -1578,7 +1616,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClust
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterRightObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterRightObstacle_unsafe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
@@ -1588,7 +1626,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClust
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterRightObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterRightObstacle_bruteforce)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
@@ -1604,7 +1642,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClust
             .destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterLeftObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterLeftObstacle_safe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
@@ -1615,7 +1653,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClust
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterLeftObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterLeftObstacle_unsafe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
@@ -1626,7 +1664,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClust
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterLeftObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClusterLeftObstacle_bruteforce)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
@@ -1643,7 +1681,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClust
             .destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_safe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
@@ -1652,7 +1690,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownCluster
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_unsafe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(90));
@@ -1667,7 +1705,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownCluster
             .destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_bruteforce)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(90));
@@ -1806,7 +1844,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_finishWith
 
 TEST_F(
     ConstructorGpuTests,
-    testConstructFirstCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_safeMode)
+    testConstructFirstCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_safe)
 {
     auto const cellDistance = _parameters.cellMinDistance * 1.1f;
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
@@ -1822,7 +1860,7 @@ TEST_F(
 
 TEST_F(
     ConstructorGpuTests,
-    testConstructFirstCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_unsafeMode)
+    testConstructFirstCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_unsafe)
 {
     auto const cellDistance = _parameters.cellMinDistance * 1.1f;
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
@@ -1838,7 +1876,7 @@ TEST_F(
 
 TEST_F(
     ConstructorGpuTests,
-    testConstructFirstCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_bruteforceMode)
+    testConstructFirstCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_bruteforce)
 {
     auto const cellDistance = _parameters.cellMinDistance * 1.1f;
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
@@ -2011,7 +2049,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_errorMaxC
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterRightObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterRightObstacle_safe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
@@ -2022,7 +2060,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClus
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterRightObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterRightObstacle_unsafe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
@@ -2033,7 +2071,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClus
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterRightObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterRightObstacle_bruteforce)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
@@ -2045,7 +2083,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClus
 }
 
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterLeftObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterLeftObstacle_safe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
@@ -2055,7 +2093,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClus
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterLeftObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterLeftObstacle_unsafe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
@@ -2065,7 +2103,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClus
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterLeftObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClusterLeftObstacle_bruteforce)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
@@ -2075,7 +2113,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_otherClus
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClusterObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClusterObstacle_safe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
@@ -2084,7 +2122,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClus
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClusterObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClusterObstacle_unsafe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE));
@@ -2093,7 +2131,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClus
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClusterObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnSelfTouchingCluster_ownClusterObstacle_bruteforce)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE));
@@ -2242,7 +2280,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWit
 
 TEST_F(
     ConstructorGpuTests,
-    testConstructSecondCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_safeMode)
+    testConstructSecondCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_safe)
 {
     auto const cellDistance = _parameters.cellMinDistance * 1.1f;
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
@@ -2258,7 +2296,7 @@ TEST_F(
 
 TEST_F(
     ConstructorGpuTests,
-    testConstructSecondCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_unsafeMode)
+    testConstructSecondCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_unsafe)
 {
     auto const cellDistance = _parameters.cellMinDistance * 1.1f;
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
@@ -2274,7 +2312,7 @@ TEST_F(
 
 TEST_F(
     ConstructorGpuTests,
-    testConstructSecondCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_bruteforceMode)
+    testConstructSecondCellOnHorizontalCluster_finishWithSeparation_otherClusterRightObstacle_bruteforce)
 {
     auto const cellDistance = _parameters.cellMinDistance * 1.1f;
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
@@ -2327,7 +2365,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster)
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT));
 }
 
-TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObstacle_safe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
@@ -2336,7 +2374,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObst
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObstacle_unsafe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(90));
@@ -2345,7 +2383,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObst
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObstacle_bruteforce)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(90));
@@ -2354,7 +2392,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_otherClusterObst
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT).destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstacle_safeMode)
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstacle_safe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(-90));
@@ -2364,7 +2402,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstac
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstacle_unsafeMode)
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstacle_unsafe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(-90));
@@ -2374,12 +2412,21 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstac
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT).destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstacle_bruteforceMode)
+TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstacle_bruteforce)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(-90));
-    auto result = runFurtherCellConstructionOnLineClusterTest(
+    auto const result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
     { { 60, 0 },{ 90, 0 },{ 180, 0 },{ 180, 0 } }));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT).destruction(true));
 }
+
+TEST_F(ConstructorGpuTests, testConstructionSiteConnectedToConstructorTwice_errorConnection)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto const result = runConstructionSiteConnectedToConstructorTwiceTest(token);
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
+}
+
