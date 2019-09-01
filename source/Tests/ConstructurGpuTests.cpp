@@ -2156,7 +2156,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_ownCluste
     auto const result = runSecondConstructionOnLineClusterTest(
         SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
 
-    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));   //no rotation takes place
 }
 
 TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_withEmptyToken)
