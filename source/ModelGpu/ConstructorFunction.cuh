@@ -591,10 +591,10 @@ __inline__ __device__ auto ConstructorFunction::calcMaxAngles(Cluster* cluster, 
         if (cudaSimulationParameters.cellMaxDistance < 2 * r) {
             auto a = abs(2.0 * asinf(cudaSimulationParameters.cellMaxDistance / (2.0 * r)) * RAD_TO_DEG);
             if (ClusterComponent::Constructor == cell->tag) {
-                result.constructionSite = min(result.constructionSite, a);
+                result.constructor= min(result.constructor, a);
             }
             if (ClusterComponent::ConstructionSite == cell->tag) {
-                result.constructor = min(result.constructor, a);
+                result.constructionSite = min(result.constructionSite, a);
             }
         }
     }
@@ -678,25 +678,25 @@ __inline__ __device__ auto ConstructorFunction::calcAnglesToRotate(
     return result;
 }
 
-__inline__ __device__ bool ConstructorFunction::restrictAngles(Angles& angles, Angles const& minAngles)
+__inline__ __device__ bool ConstructorFunction::restrictAngles(Angles& angles, Angles const& maxAngles)
 {
     auto result = false;
-    if (abs(angles.constructionSite) > minAngles.constructionSite) {
+    if (abs(angles.constructionSite) > maxAngles.constructionSite) {
         result = true;
         if (angles.constructionSite >= 0.0) {
-            angles.constructionSite = abs(minAngles.constructionSite);
+            angles.constructionSite = abs(maxAngles.constructionSite);
         }
         if (angles.constructionSite < 0.0) {
-            angles.constructionSite = -abs(minAngles.constructionSite);
+            angles.constructionSite = -abs(maxAngles.constructionSite);
         }
     }
-    if (abs(angles.constructor) > minAngles.constructor) {
+    if (abs(angles.constructor) > maxAngles.constructor) {
         result = true;
         if (angles.constructor >= 0.0) {
-            angles.constructor = abs(minAngles.constructor);
+            angles.constructor = abs(maxAngles.constructor);
         }
         if (angles.constructor < 0.0) {
-            angles.constructor = -abs(minAngles.constructor);
+            angles.constructor = -abs(maxAngles.constructor);
         }
     }
     return result;
