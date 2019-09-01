@@ -42,6 +42,7 @@ private:
         float token;
     };
 
+    __inline__ __device__ static bool checkMaxRadius(Cluster* cluster, Map<Cell> const& map);
     __inline__ __device__ static bool checkDistance(float distance);
     __inline__ __device__ static Cell* getConstructionSite(Cell* cell);
 
@@ -177,9 +178,15 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
         return;
     }
 
+    auto const& cell = token->cell;
+
+    if (!checkMaxRadius(cell->cluster, data->cellMap)) {
+        token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
+        return;
+    }
+
     //TODO: short energy check for optimization
 
-    auto const& cell = token->cell;
     auto const firstCellOfConstructionSite = getConstructionSite(cell);
 
     if (firstCellOfConstructionSite) {
@@ -192,6 +199,18 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
     } else {
         startNewConstruction(token, factory, data);
     }
+}
+
+__inline__ __device__ bool ConstructorFunction::checkMaxRadius(Cluster* cluster, Map<Cell> const& map)
+{
+    auto const maxRadius = map.getMaxRadius();
+    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        if (Math::length(cell->relPos) >= maxRadius - FP_PRECISION) {
+            return false;
+        }
+    }
+    return true;
 }
 
 __inline__ __device__ bool ConstructorFunction::checkDistance(float distance)

@@ -147,7 +147,7 @@ protected:
             float angle;
             int maxConnection;  //0 = automatic
         };
-        FurtherCellConstructionOnLineClusterTestParameters& anglesOfConstructionSite(vector<CellProperties> const& value)
+        FurtherCellConstructionOnLineClusterTestParameters& propertiesOfConstructionSite(vector<CellProperties> const& value)
         {
             _propertiesOfConstructionSite = value;
             return *this;
@@ -2341,7 +2341,7 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_nonStandardParam
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(10).distance(cellDistance));
     auto result = runFurtherCellConstructionOnLineClusterTest(
-        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
             {{90, 0}, {180, 0}}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
@@ -2351,7 +2351,7 @@ TEST_F(ConstructorGpuTests, testConstructThirdCellOnLineCluster_noMultipleConnec
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(0).maxConnections(2));
     auto result = runFurtherCellConstructionOnLineClusterTest(
-        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
             {{90, 0}, {180, 0}}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
@@ -2397,7 +2397,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstac
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(-90));
     auto result = runFurtherCellConstructionOnLineClusterTest(
-        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
             {{60, 0}, {90, 0}, {180, 0}, {180, 0}}));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
@@ -2407,7 +2407,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstac
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(-90));
     auto result = runFurtherCellConstructionOnLineClusterTest(
-        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
     { { 60, 0 },{ 90, 0 },{ 180, 0 },{ 180, 0 } }));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT).destruction(true));
 }
@@ -2417,7 +2417,7 @@ TEST_F(ConstructorGpuTests, testRotationOnlyOnHorizontalCluster_ownClusterObstac
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(-90));
     auto const result = runFurtherCellConstructionOnLineClusterTest(
-        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).anglesOfConstructionSite(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
     { { 60, 0 },{ 90, 0 },{ 180, 0 },{ 180, 0 } }));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT).destruction(true));
 }
@@ -2430,3 +2430,42 @@ TEST_F(ConstructorGpuTests, testConstructionSiteConnectedToConstructorTwice_erro
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
 }
 
+TEST_F(ConstructorGpuTests, testLargeCluster_limitSize)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+
+    int minSize = std::min(_universeSize.x, _universeSize.y);
+    CHECK(0 == minSize % 4);
+    int maxRadius = minSize / 2 - 1;
+
+    vector<FurtherCellConstructionOnLineClusterTestParameters::CellProperties> constructionSiteProperties;
+    for (int i = 0; i < maxRadius - 1; ++i) {
+        constructionSiteProperties.emplace_back(
+            FurtherCellConstructionOnLineClusterTestParameters::CellProperties{180.0f, 0});
+    }
+    auto const result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
+            constructionSiteProperties));
+    EXPECT_NE(Enums::ConstrOut::ERROR_MAX_RADIUS, result.token.data->at(Enums::Constr::OUT));
+}
+
+TEST_F(ConstructorGpuTests, testLargeCluster_errorMaxRadius)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+
+    int minSize = std::min(_universeSize.x, _universeSize.y);
+    CHECK(0 == minSize % 4);
+    int maxRadius = minSize / 2;
+
+    vector<FurtherCellConstructionOnLineClusterTestParameters::CellProperties> constructionSiteProperties;
+    for (int i = 0; i < maxRadius - 1; ++i) {
+        constructionSiteProperties.emplace_back(
+            FurtherCellConstructionOnLineClusterTestParameters::CellProperties{ 180.0f, 0 });
+    }
+    auto const result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
+            constructionSiteProperties));
+    EXPECT_EQ(Enums::ConstrOut::ERROR_MAX_RADIUS, result.token.data->at(Enums::Constr::OUT));
+}
