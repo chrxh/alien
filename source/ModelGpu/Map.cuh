@@ -54,6 +54,10 @@ public:
 		return result;
 	}
 
+    __inline__ __device__ int getMaxRadius() const
+    {
+        return min(_size.x, _size.y) / 4;
+    }
 
 protected:
 	int2 _size;
