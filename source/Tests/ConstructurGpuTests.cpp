@@ -98,8 +98,19 @@ protected:
     };
     TestResult runStartConstructionOnHorizontalClusterTest(
         StartConstructionOnHorizontalClusterTestParameters const& parameters) const;
+    struct StartConstructionOnWedgeClusterTestParameters
+    {
+        MEMBER_DECLARATION(StartConstructionOnWedgeClusterTestParameters, TokenDescription, token, TokenDescription());
+        MEMBER_DECLARATION(StartConstructionOnWedgeClusterTestParameters, float, wedgeAngle, 90.0f);
+        MEMBER_DECLARATION(StartConstructionOnWedgeClusterTestParameters, float, clusterAngle, 0.0f);
+        MEMBER_DECLARATION(
+            StartConstructionOnWedgeClusterTestParameters,
+            optional<QVector2D>,
+            referencePosition,
+            boost::none);
+    };
     TestResult
-    runStartConstructionOnWedgeClusterTest(TokenDescription const& token, float wedgeAngle, float clusterAngle) const;
+    runStartConstructionOnWedgeClusterTest(StartConstructionOnWedgeClusterTestParameters const& parameters) const;
     TestResult runStartConstructionOnTriangleClusterTest(TokenDescription const& token) const;
 
     struct SecondCellConstructionOnLineClusterTestParameters
@@ -172,8 +183,8 @@ protected:
     class _ResultChecker
     {
     public:
-        _ResultChecker(SimulationParameters const& parameters)
-            : _parameters(parameters)
+        _ResultChecker(SimulationParameters const& parameters, SpaceProperties* spaceProp)
+            : _parameters(parameters), _spaceProp(spaceProp)
         {}
 
         void check(TestResult const& testResult, Expectations const& expectations) const;
@@ -201,6 +212,7 @@ protected:
         AngularMasses calcAngularMasses(TestResult const& testResult) const;
     private:
         SimulationParameters _parameters;
+        SpaceProperties* _spaceProp;
     };
     using ResultChecker = boost::shared_ptr<_ResultChecker>;
 
@@ -225,7 +237,7 @@ void ConstructorGpuTests::SetUp()
     _parameters.cellFunctionConstructorOffspringCellDistance = 1;
     _context->setSimulationParameters(_parameters);
 
-    _resultChecker = boost::make_shared<_ResultChecker>(_parameters);
+    _resultChecker = boost::make_shared<_ResultChecker>(_parameters, _spaceProp);
     _offspringDistance = _parameters.cellFunctionConstructorOffspringCellDistance;
 }
 
@@ -334,18 +346,16 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
 }
 
 auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
-    TokenDescription const& token,
-    float wedgeAngle,
-    float clusterAngle) const -> TestResult
+    StartConstructionOnWedgeClusterTestParameters const& parameters) const -> TestResult
 {
     ClusterDescription cluster;
     cluster.setId(_numberGen->getId()).setVel(QVector2D{}).setAngle(0).setAngularVel(0);
 
-    auto const refPos = QVector2D{10.5f, 10.5f};
+    auto const refPos = parameters._referencePosition.get_value_or(QVector2D{10.5f, 10.5f});
     auto const cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
-    auto const relPos1 = Physics::unitVectorOfAngle(clusterAngle + 270 + wedgeAngle / 2);
+    auto const relPos1 = Physics::unitVectorOfAngle(parameters._clusterAngle + 270 + parameters._wedgeAngle / 2);
     auto const relPos2 = QVector2D{0, 0};
-    auto const relPos3 = Physics::unitVectorOfAngle(clusterAngle + 270 - wedgeAngle / 2);
+    auto const relPos3 = Physics::unitVectorOfAngle(parameters._clusterAngle + 270 - parameters._wedgeAngle / 2);
     auto const cellId1 = _numberGen->getId();
     auto const cellId2 = _numberGen->getId();
     auto const cellId3 = _numberGen->getId();
@@ -357,7 +367,7 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
                           .setTokenBranchNumber(0)
                           .setId(cellId1)
                           .setCellFeature(CellFeatureDescription())
-                          .addToken(token),
+                          .addToken(parameters._token),
                       CellDescription()
                           .setEnergy(cellEnergy)
                           .setPos(refPos + relPos2)
@@ -401,7 +411,7 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
     auto const& newCell2 = newCellByCellId.at(cellId2);
     auto const& newToken = newCell2.tokens->at(0);
 
-    result.origToken = token;
+    result.origToken = parameters._token;
     result.token = newToken;
     result.origSourceCell = cell1;
     if (newCellByCellId.find(cellId1) != newCellByCellId.end()) {
@@ -1050,7 +1060,9 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(
     auto const& token = testResult.token;
 
     EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
-    EXPECT_TRUE(isCompatible(testResult.movementOfCenter, QVector2D{}));
+    auto movementOfCenter = testResult.movementOfCenter;
+    _spaceProp->correctPosition(movementOfCenter);
+    EXPECT_TRUE(isCompatible(movementOfCenter, QVector2D{}));
     checkTokenMovement(testResult);
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
@@ -1719,20 +1731,22 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_otherClust
             .destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_safe)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_ownClusterObstacle_safe)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
-    auto const result = runStartConstructionOnWedgeClusterTest(token, 180, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters().token(token).wedgeAngle(180));
 
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_OBSTACLE));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_unsafe)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_ownClusterObstacle_unsafe)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::UNSAFE).angle(90));
-    auto const result = runStartConstructionOnWedgeClusterTest(token, 180, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters().token(token).wedgeAngle(180));
 
     auto const expectedCellPos = QVector2D{0, _offspringDistance};
     _resultChecker->check(
@@ -1743,11 +1757,12 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownCluster
             .destruction(true));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_ownClusterObstacle_bruteforce)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_ownClusterObstacle_bruteforce)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::BRUTEFORCE).angle(90));
-    auto const result = runStartConstructionOnWedgeClusterTest(token, 180, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters().token(token).wedgeAngle(180));
 
     auto const expectedCellPos = QVector2D{0, _offspringDistance};
     _resultChecker->check(
@@ -1771,7 +1786,8 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_rightHandSide)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result = runStartConstructionOnWedgeClusterTest(token, 90, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters().token(token).wedgeAngle(90));
 
     auto const expectedCellPos = QVector2D{_offspringDistance, 0};
     _resultChecker->check(
@@ -1783,7 +1799,8 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_leftHandSide)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result = runStartConstructionOnWedgeClusterTest(token, 270, 0);
+    auto const result = runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters().token(token).wedgeAngle(270));
 
     auto const expectedCellPos = QVector2D{-_offspringDistance, 0};
     _resultChecker->check(
@@ -1795,9 +1812,24 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_diagonal)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result = runStartConstructionOnWedgeClusterTest(token, 90, 45);
+    auto const result = runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters().token(token).wedgeAngle(90).clusterAngle(45));
 
     auto const expectedCellPos = QVector2D{_offspringDistance / sqrtf(2), _offspringDistance / sqrtf(2)};
+    _resultChecker->check(
+        result,
+        Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
+}
+
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_overUniverseSize)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto const result = runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters().token(token).wedgeAngle(90).clusterAngle(45).referencePosition(
+            QVector2D{0, 0}));
+
+    auto const expectedCellPos = QVector2D{ _offspringDistance / sqrtf(2), _offspringDistance / sqrtf(2) };
     _resultChecker->check(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
