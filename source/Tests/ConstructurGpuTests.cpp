@@ -98,6 +98,7 @@ protected:
     };
     TestResult runStartConstructionOnHorizontalClusterTest(
         StartConstructionOnHorizontalClusterTestParameters const& parameters) const;
+
     struct StartConstructionOnWedgeClusterTestParameters
     {
         MEMBER_DECLARATION(StartConstructionOnWedgeClusterTestParameters, TokenDescription, token, TokenDescription());
@@ -109,9 +110,18 @@ protected:
             referencePosition,
             boost::none);
     };
-    TestResult
-    runStartConstructionOnWedgeClusterTest(StartConstructionOnWedgeClusterTestParameters const& parameters) const;
-    TestResult runStartConstructionOnTriangleClusterTest(TokenDescription const& token) const;
+    TestResult runStartConstructionOnWedgeClusterTest(
+        StartConstructionOnWedgeClusterTestParameters const& parameters) const;
+
+    struct StartConstructionOnTriangleClusterTestParameters
+    {
+        MEMBER_DECLARATION(StartConstructionOnTriangleClusterTestParameters, TokenDescription, token, TokenDescription());
+        MEMBER_DECLARATION(StartConstructionOnTriangleClusterTestParameters, int, tokensOnSource1, 1);
+        MEMBER_DECLARATION(StartConstructionOnTriangleClusterTestParameters, int, tokensOnSource2, 0);
+        MEMBER_DECLARATION(StartConstructionOnTriangleClusterTestParameters, int, tokensOnSource3, 0);
+    };
+    TestResult runStartConstructionOnTriangleClusterTest(
+        StartConstructionOnTriangleClusterTestParameters const& parameters) const;
 
     struct SecondCellConstructionOnLineClusterTestParameters
     {
@@ -136,10 +146,9 @@ protected:
             angleOfConstructionSite,
             180.0f);
     };
-    TestResult runSecondConstructionOnLineClusterTest(
-        SecondCellConstructionOnLineClusterTestParameters const& parameters) const;
-    TestResult
-        runSecondCellConstructionOnSelfTouchingClusterTest(TokenDescription const& token, int cellLength) const;
+    TestResult runSecondConstructionOnLineClusterTest(SecondCellConstructionOnLineClusterTestParameters const& parameters) const;
+    
+    TestResult runSecondCellConstructionOnSelfTouchingClusterTest(TokenDescription const& token, int cellLength) const;
 
     struct FurtherCellConstructionOnLineClusterTestParameters {
         MEMBER_DECLARATION(
@@ -167,8 +176,7 @@ protected:
         }
         vector<CellProperties> _propertiesOfConstructionSite{{180.0f, 0}, {180.0f, 0}};
     };
-    TestResult runFurtherCellConstructionOnLineClusterTest(
-        FurtherCellConstructionOnLineClusterTestParameters const& parameters) const;
+    TestResult runFurtherCellConstructionOnLineClusterTest(FurtherCellConstructionOnLineClusterTestParameters const& parameters) const;
 
     TestResult runConstructionSiteConnectedToConstructorTwiceTest(TokenDescription const& token) const;
 
@@ -431,7 +439,8 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
     return result;
 }
 
-auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescription const& token) const -> TestResult
+auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(
+    StartConstructionOnTriangleClusterTestParameters const& parameters) const -> TestResult
 {
     ClusterDescription cluster;
     cluster.setId(_numberGen->getId()).setVel(QVector2D{}).setAngle(0).setAngularVel(0);
@@ -453,8 +462,7 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescrip
                           .setConnectingCells({cellId4})
                           .setTokenBranchNumber(0)
                           .setId(cellId1)
-                          .setCellFeature(CellFeatureDescription())
-                          .addToken(token),
+                          .setCellFeature(CellFeatureDescription()),
                       CellDescription()
                           .setEnergy(cellEnergy)
                           .setPos(refPos + relPos2)
@@ -479,8 +487,20 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescrip
                           .setTokenBranchNumber(1)
                           .setId(cellId4)
                           .setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR))});
-    auto const& cell1 = cluster.cells->at(0);
-    auto const& cell4 = cluster.cells->at(3);
+
+    auto& cell1 = cluster.cells->at(0);
+    auto& cell2 = cluster.cells->at(1);
+    auto& cell3 = cluster.cells->at(2);
+    auto& cell4 = cluster.cells->at(3);
+    for (int i = 0; i < parameters._tokensOnSource1; ++i) {
+        cell1.addToken(parameters._token);
+    }
+    for (int i = 0; i < parameters._tokensOnSource2; ++i) {
+        cell2.addToken(parameters._token);
+    }
+    for (int i = 0; i < parameters._tokensOnSource3; ++i) {
+        cell3.addToken(parameters._token);
+    }
 
     cluster.setPos(cluster.getClusterPosFromCells());
 
@@ -507,12 +527,10 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescrip
     auto const& newCell4 = newCellByCellId.at(cellId4);
     auto const& newToken = newCell4.tokens->at(0);
 
-    result.origToken = token;
+    result.origToken = parameters._token;
     result.token = newToken;
     result.origSourceCell = cell1;
-    if (newCellByCellId.find(cellId1) != newCellByCellId.end()) {
-        result.sourceCell = newCellByCellId.at(cellId1);
-    }
+    result.sourceCell = newCellByCellId.at(cellId1);
     result.origConstructorCell = cell4;
     result.constructorCell = newCell4;
     result.origConstructor = *cluster.cells;
@@ -521,8 +539,8 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(TokenDescrip
     newCellByCellId.erase(cellId2);
     newCellByCellId.erase(cellId3);
     newCellByCellId.erase(cellId4);
-    if (!newCellByCellId.empty()) {
-        result.constructionSite.emplace_back(newCellByCellId.begin()->second);
+    for(auto const& cell : newCellByCellId | boost::adaptors::map_values) {
+        result.constructionSite.emplace_back(cell);
     }
 
     return result;
@@ -1821,7 +1839,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_diagonal)
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_overUniverseSize)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnWedgeCluster_beyondUniverseBoundaries)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
@@ -1839,7 +1857,8 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnTiangleCluster)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
-    auto const result = runStartConstructionOnTriangleClusterTest(token);
+    auto const result =
+        runStartConstructionOnTriangleClusterTest(StartConstructionOnTriangleClusterTestParameters().token(token));
 
     auto const expectedCellPos = QVector2D{_offspringDistance, 0};
     _resultChecker->check(
@@ -2569,3 +2588,19 @@ TEST_F(ConstructorGpuTests, testLargeCluster_errorMaxRadius)
     EXPECT_EQ(Enums::ConstrOut::ERROR_MAX_RADIUS, result.token.data->at(Enums::Constr::OUT));
 }
 
+TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentSources)
+{
+    auto const maxToken = _parameters.cellMaxToken;
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto const result = runStartConstructionOnTriangleClusterTest(StartConstructionOnTriangleClusterTestParameters()
+                                                                      .token(token)
+                                                                      .tokensOnSource1(maxToken / 2)
+                                                                      .tokensOnSource2(maxToken / 2)
+                                                                      .tokensOnSource3(maxToken / 2));
+
+    for (auto const& token : *result.constructorCell.tokens) {
+        EXPECT_EQ(Enums::ConstrOut::SUCCESS, token.data->at(Enums::Constr::OUT));
+    }
+    EXPECT_EQ(maxToken, result.constructionSite.size() - result.origConstructionSite.size());
+}
