@@ -180,6 +180,18 @@ protected:
 
     TestResult runConstructionSiteConnectedToConstructorTwiceTest(TokenDescription const& token) const;
 
+    struct MassiveParallelClustersTestParameters
+    {
+        MEMBER_DECLARATION(MassiveParallelClustersTestParameters, int, clusterLen, 100);
+        MEMBER_DECLARATION(MassiveParallelClustersTestParameters, int, numClusters, 10);
+        MEMBER_DECLARATION(MassiveParallelClustersTestParameters, int, distanceBetweenClusters, 6);
+    };
+    struct MassiveParallelClustersTestResult {
+        vector<int> numCellsPerCluster;
+    };
+    MassiveParallelClustersTestResult runMassiveParallelClustersTest(
+        MassiveParallelClustersTestParameters const& parameters) const;
+
     struct Expectations
     {
         MEMBER_DECLARATION(Expectations, Enums::ConstrOut::Type, tokenOutput, Enums::ConstrOut::SUCCESS);
@@ -963,6 +975,85 @@ auto ConstructorGpuTests::runConstructionSiteConnectedToConstructorTwiceTest(Tok
     return result;
 }
 
+auto ConstructorGpuTests::runMassiveParallelClustersTest(MassiveParallelClustersTestParameters const& parameters) const
+    -> MassiveParallelClustersTestResult
+{
+    auto const maxToken = _parameters.cellMaxToken;
+    auto const cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+
+    auto const refPos = QVector2D{ 10, 10 };
+
+    DataDescription origData;
+    for (int clusterIndex = 0; clusterIndex < parameters._numClusters; ++clusterIndex) {
+        ClusterDescription cluster;
+        cluster.setId(_numberGen->getId()).setVel(QVector2D{}).setAngle(0).setAngularVel(0);
+
+        std::vector<uint64_t> cellIds;
+        for (int i = 0; i < parameters._clusterLen * 3; ++i) {
+            cellIds.emplace_back(_numberGen->getId());
+        }
+        for (int i = 0; i < parameters._clusterLen; ++i) {
+            std::list<uint64_t> connectingCells1{ cellIds[i * 3 + 1] };
+            std::list<uint64_t> connectingCells2{ cellIds[i * 3], cellIds[i * 3] + 2 };
+            std::list<uint64_t> connectingCells3{ cellIds[i * 3] + 1 };
+            if (i > 0) {
+                connectingCells1.emplace_back(cellIds[i * 3 - 3]);
+            }
+            if (i < parameters._clusterLen - 1) {
+                connectingCells1.emplace_back(cellIds[i * 3 + 3]);
+            }
+            auto shiftX = static_cast<float>(clusterIndex * parameters._distanceBetweenClusters);
+            cluster.addCells({CellDescription()
+                                  .setId(cellIds[i * 3])
+                                  .setConnectingCells(connectingCells1)
+                                  .setMaxConnections(connectingCells1.size())
+                                  .setEnergy(cellEnergy)
+                                  .setPos(refPos + QVector2D{shiftX, static_cast<float>(i)})
+                                  .setTokenBranchNumber(0)
+                                  .setFlagTokenBlocked(false)
+                                  .addToken(token)
+                                  .addToken(token),
+                              CellDescription()
+                                  .setId(cellIds[i * 3 + 1])
+                                  .setConnectingCells(connectingCells2)
+                                  .setMaxConnections(connectingCells2.size())
+                                  .setEnergy(cellEnergy)
+                                  .setPos(refPos + QVector2D{1 + shiftX, static_cast<float>(i)})
+                                  .setTokenBranchNumber(1)
+                                  .setFlagTokenBlocked(false)
+                                  .setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR)),
+                              CellDescription()
+                                  .setId(cellIds[i * 3 + 2])
+                                  .setConnectingCells(connectingCells3)
+                                  .setMaxConnections(connectingCells3.size())
+                                  .setEnergy(cellEnergy)
+                                  .setPos(refPos + QVector2D{2 + shiftX, static_cast<float>(i)})
+                                  .setTokenBranchNumber(0)
+                                  .setFlagTokenBlocked(true)});
+        }
+        cluster.setPos(cluster.getClusterPosFromCells());
+
+        origData.addCluster(cluster);
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+
+    //perform test
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    //check results
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    checkEnergy(origData, newData);
+
+    MassiveParallelClustersTestResult result;
+    for (auto const& newCluster : *newData.clusters) {
+        result.numCellsPerCluster.push_back(newCluster.cells->size());
+    }
+    return result;
+}
+
 TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstructionParameters tokenParameters) const
 {
     auto token = createSimpleToken();
@@ -1079,8 +1170,11 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(
 
     EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
     auto movementOfCenter = testResult.movementOfCenter;
-    _spaceProp->correctPosition(movementOfCenter);
-    EXPECT_TRUE(isCompatible(movementOfCenter, QVector2D{}));
+    if (!isCompatible(movementOfCenter, QVector2D{})) {
+        _spaceProp->correctPosition(movementOfCenter);
+        EXPECT_TRUE(isCompatible(movementOfCenter, QVector2D{}));
+    }
+    
     checkTokenMovement(testResult);
 
     if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
@@ -2603,4 +2697,20 @@ TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentSources)
         EXPECT_EQ(Enums::ConstrOut::SUCCESS, token.data->at(Enums::Constr::OUT));
     }
     EXPECT_EQ(maxToken, result.constructionSite.size() - result.origConstructionSite.size());
+}
+
+TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentConstructors_manyIsolatedClusters)
+{
+    auto testResult = runMassiveParallelClustersTest(
+        MassiveParallelClustersTestParameters().clusterLen(100).numClusters(10).distanceBetweenClusters(6));
+    EXPECT_EQ(10, testResult.numCellsPerCluster.size());
+    for (auto const& clusterSize : testResult.numCellsPerCluster) {
+        EXPECT_EQ(100 * 5, clusterSize);
+    }
+}
+
+TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentConstructors_touchingClusters)
+{
+    EXPECT_NO_THROW(runMassiveParallelClustersTest(
+        MassiveParallelClustersTestParameters().clusterLen(100).numClusters(10).distanceBetweenClusters(3)));
 }
