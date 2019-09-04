@@ -2714,3 +2714,49 @@ TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentConstructors_to
     EXPECT_NO_THROW(runMassiveParallelClustersTest(
         MassiveParallelClustersTestParameters().clusterLen(100).numClusters(10).distanceBetweenClusters(3)));
 }
+
+TEST_F(ConstructorGpuTests, testMultipleConnectedConstructionSites_errorConnection)
+{
+    DataDescription origData;
+    auto cluster = createRectangularCluster({3, 2}, QVector2D{10.5, 10.5}, QVector2D{});
+
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+
+    for(int i = 0; i <= 3; i += 3) {
+        {
+            auto& cell = cluster.cells->at(i);
+            cell.tokenBranchNumber = 0;
+            cell.addToken(token);
+        }
+        {
+            auto& cell = cluster.cells->at(i + 1);
+            cell.tokenBranchNumber = 1;
+            cell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+        }
+        {
+            auto& cell = cluster.cells->at(i + 2);
+            cell.tokenBlocked = true;
+        }
+    }
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+
+    //perform test
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    //check results
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    checkEnergy(origData, newData);
+
+    EXPECT_EQ(1, newData.clusters->size());
+
+    auto const& newCluster = newData.clusters->front();
+    EXPECT_EQ(6, newCluster.cells->size());
+
+    for (int i = 0; i <= 3; i += 3) {
+        auto const& token = newCluster.cells->at(i + 1).tokens->at(0);
+        EXPECT_EQ(Enums::ConstrOut::ERROR_CONNECTION, token.data->at(Enums::Constr::OUT));
+    }
+}
