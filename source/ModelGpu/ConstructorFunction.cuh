@@ -9,7 +9,7 @@
 class ConstructorFunction
 {
 public:
-    __inline__ __device__ static void processing(Token* token, EntityFactory& factory, SimulationData* data);
+    __inline__ __device__ static void processing(Token* token, SimulationData* data);
 
 private:
     struct ClusterComponent
@@ -47,8 +47,8 @@ private:
     __inline__ __device__ static Cell* getConstructionSite(Cell* cell);
 
     __inline__ __device__ static void
-    continueConstruction(Token* token, Cell* firstCellOfConstructionSite, EntityFactory& factory, SimulationData* data);
-    __inline__ __device__ static void startNewConstruction(Token* token, EntityFactory& factory, SimulationData* data);
+    continueConstruction(Token* token, Cell* firstCellOfConstructionSite, SimulationData* data);
+    __inline__ __device__ static void startNewConstruction(Token* token, SimulationData* data);
 
     __inline__ __device__ static void continueConstructionWithRotationOnly(
         Token* token,
@@ -62,7 +62,6 @@ private:
         Cell* constructionCell,
         Angles const& anglesToRotate,
         float desiredAngle,
-        EntityFactory& factory,
         SimulationData* data);
 
     __inline__ __device__ static void
@@ -136,7 +135,6 @@ private:
         Map<Cell> const& map,
         HashMap<int2, CellAndNewAbsPos>& tempMap);
 
-
     __inline__ __device__ static Cell* constructNewCell(
         Token* token,
         Cluster* cluster,
@@ -169,7 +167,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void ConstructorFunction::processing(Token* token, EntityFactory& factory, SimulationData* data)
+__inline__ __device__ void ConstructorFunction::processing(Token* token, SimulationData* data)
 {
     auto const command = token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
 
@@ -195,9 +193,9 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, EntityF
             token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
             return;
         }
-        continueConstruction(token, firstCellOfConstructionSite, factory, data);
+        continueConstruction(token, firstCellOfConstructionSite, data);
     } else {
-        startNewConstruction(token, factory, data);
+        startNewConstruction(token, data);
     }
 }
 
@@ -233,7 +231,6 @@ __inline__ __device__ Cell* ConstructorFunction::getConstructionSite(Cell* cell)
 __inline__ __device__ void ConstructorFunction::continueConstruction(
     Token* token,
     Cell* firstCellOfConstructionSite,
-    EntityFactory& factory,
     SimulationData* data)
 {
     auto const& cell = token->cell;
@@ -273,12 +270,11 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             firstCellOfConstructionSite,
             anglesToRotate,
             desiredAngleBetweenConstructurAndConstructionSite,
-            factory,
             data);
     }
 }
 
-__inline__ __device__ void ConstructorFunction::startNewConstruction(Token* token, EntityFactory& factory, SimulationData* data)
+__inline__ __device__ void ConstructorFunction::startNewConstruction(Token* token, SimulationData* data)
 {
     auto const& cell = token->cell;
     auto const& cluster = cell->cluster;
@@ -331,6 +327,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Token* toke
         token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
         return;
     }
+
+    EntityFactory factory;
+    factory.init(data);
 
     auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
     addCellToCluster(newCell, cluster, newCellPointers);
@@ -415,7 +414,6 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     Cell* firstCellOfConstructionSite,
     Angles const& anglesToRotate,
     float desiredAngle,
-    EntityFactory& factory,
     SimulationData* data)
 {
     auto const& cell = token->cell;
@@ -485,6 +483,9 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     }
 
     transformClusterComponents(cluster, centerOfRotation, rotationMatrices, displacementForConstructionSite);
+
+    EntityFactory factory;
+    factory.init(data);
     auto const newCell = constructNewCell(token, cluster, relPosOfNewCell, energyForNewEntities.cell, factory);
     auto const newCellPointers = data->entities.cellPointers.getNewSubarray(cluster->numCellPointers + 1);
     addCellToCluster(newCell, cluster, newCellPointers);

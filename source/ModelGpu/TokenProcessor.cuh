@@ -280,6 +280,13 @@ __inline__ __device__ void TokenProcessor::moveToken(Token* sourceToken, Token*&
     targetToken->cell = targetCell;
 }
 
+__global__ void constructorLauncher(Token* token, SimulationData data)
+{
+    if (0 == threadIdx.x) {
+        ConstructorFunction::processing(token, &data);
+    }
+}
+
 __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token, EntityFactory& factory)
 {
     auto cell = token->cell;
@@ -296,7 +303,8 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
         ScannerFunction::processing(token);
     } break;
     case Enums::CellFunction::CONSTRUCTOR: {
-        ConstructorFunction::processing(token, factory, _data);
+        constructorLauncher <<<1, cell->cluster->numCellPointers>>>(token, *_data);
+        cudaDeviceSynchronize();
     } break;
     }
 }
