@@ -1013,7 +1013,7 @@ auto ConstructorGpuTests::runMassiveParallelClustersTest(MassiveParallelClusters
                                   .setPos(refPos + QVector2D{shiftX, static_cast<float>(i)})
                                   .setTokenBranchNumber(0)
                                   .setFlagTokenBlocked(false)
-                                  .addToken(token)
+//                                  .addToken(token)
                                   .addToken(token),
                               CellDescription()
                                   .setId(cellIds[i * 3 + 1])
@@ -2705,7 +2705,7 @@ TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentConstructors_ma
         MassiveParallelClustersTestParameters().clusterLen(100).numClusters(10).distanceBetweenClusters(6));
     EXPECT_EQ(10, testResult.numCellsPerCluster.size());
     for (auto const& clusterSize : testResult.numCellsPerCluster) {
-        EXPECT_EQ(100 * 5, clusterSize);
+        EXPECT_EQ(100 * 4, clusterSize);
     }
 }
 
