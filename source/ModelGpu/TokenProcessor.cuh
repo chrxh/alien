@@ -282,9 +282,10 @@ __inline__ __device__ void TokenProcessor::moveToken(Token* sourceToken, Token*&
 
 __global__ void constructorLauncher(Token* token, SimulationData data)
 {
-    if (0 == threadIdx.x) {
-        ConstructorFunction::processing(token, &data);
-    }
+    ConstructorFunction constructor;
+
+    constructor.init_blockCall(token, &data);
+    constructor.processing();
 }
 
 __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token, EntityFactory& factory)
