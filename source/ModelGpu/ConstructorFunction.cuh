@@ -274,27 +274,37 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
     calcAngularMasses(_cluster, firstCellOfConstructionSite, angularMasses);
     __syncthreads();
 
+    __shared__ float desiredAngleBetweenConstructurAndConstructionSite;
+    __shared__ Angles anglesToRotate;
+    __shared__ bool isAngleRestricted;
     if (0 == threadIdx.x) {
-        auto const desiredAngleBetweenConstructurAndConstructionSite =
+        desiredAngleBetweenConstructurAndConstructionSite =
             QuantityConverter::convertDataToAngle(_token->memory[Enums::Constr::INOUT_ANGLE]);
+        anglesToRotate = calcAnglesToRotate(angularMasses, desiredAngleBetweenConstructurAndConstructionSite);
+        isAngleRestricted = restrictAngles(anglesToRotate, maxAngles);
+    }
+    __syncthreads();
 
-        auto anglesToRotate = calcAnglesToRotate(angularMasses, desiredAngleBetweenConstructurAndConstructionSite);
-        auto const isAngleRestricted = restrictAngles(anglesToRotate, maxAngles);
+    if (isAngleRestricted) {
 
-        if (isAngleRestricted) {
-
-            //angle discretization correction
+        //angle discretization correction
+        if (0 == threadIdx.x) {
             anglesToRotate.constructor =
                 QuantityConverter::convertDataToAngle(QuantityConverter::convertAngleToData(anglesToRotate.constructor));
             anglesToRotate.constructionSite = QuantityConverter::convertDataToAngle(
                 QuantityConverter::convertAngleToData(anglesToRotate.constructionSite));
+        }
+        __syncthreads();
 
+        if (0 == threadIdx.x) {
             continueConstructionWithRotationOnly(
                 firstCellOfConstructionSite,
                 anglesToRotate,
                 desiredAngleBetweenConstructurAndConstructionSite);
         }
-        else {
+    }
+    else {
+        if (0 == threadIdx.x) {
             continueConstructionWithRotationAndCreation(
                 firstCellOfConstructionSite,
                 anglesToRotate,
