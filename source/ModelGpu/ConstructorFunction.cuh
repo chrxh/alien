@@ -60,7 +60,7 @@ private:
     __inline__ __device__ void tagConstructionSite(Cell* baseCell, Cell* firstCellOfConstructionSite);
 
     __inline__ __device__ void calcMaxAngles(Cell* constructionCell, Angles& result);
-    __inline__ __device__ AngularMasses calcAngularMasses(Cluster* cluster, Cell* constructionCell);
+    __inline__ __device__ void calcAngularMasses(Cluster* cluster, Cell* constructionCell, AngularMasses& result);
     __inline__ __device__ RotationMatrices calcRotationMatrices(Angles const& angles);
 
     __inline__ __device__ float calcFreeAngle(Cell* cell);
@@ -269,8 +269,12 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
     __shared__ Angles maxAngles;
     calcMaxAngles(firstCellOfConstructionSite, maxAngles);
     __syncthreads();
+
+    __shared__ AngularMasses angularMasses;
+    calcAngularMasses(_cluster, firstCellOfConstructionSite, angularMasses);
+    __syncthreads();
+
     if (0 == threadIdx.x) {
-        auto const angularMasses = calcAngularMasses(_cluster, firstCellOfConstructionSite);
         auto const desiredAngleBetweenConstructurAndConstructionSite =
             QuantityConverter::convertDataToAngle(_token->memory[Enums::Constr::INOUT_ANGLE]);
 
@@ -622,21 +626,23 @@ __inline__ __device__ void ConstructorFunction::calcMaxAngles(Cell* construction
     }
 }
 
-__inline__ __device__ auto ConstructorFunction::calcAngularMasses(Cluster* cluster, Cell* constructionCell)
-    -> AngularMasses
+__inline__ __device__ void ConstructorFunction::calcAngularMasses(Cluster* cluster, Cell* firstCellOfConstructionSite, AngularMasses& result)
 {
-    AngularMasses result{0, 0};
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+    if (0 == threadIdx.x) {
+        result = { 0, 0 };
+    }
+    __syncthreads();
+
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
+        auto const angularMassElement = Math::lengthSquared(cell->relPos - firstCellOfConstructionSite->relPos);
         if (ClusterComponent::Constructor == cell->tag) {
-            result.constructor = result.constructor + Math::lengthSquared(cell->relPos - constructionCell->relPos);
+            atomicAdd_block(&result.constructor, angularMassElement);
         }
         if (ClusterComponent::ConstructionSite == cell->tag) {
-            result.constructionSite =
-                result.constructionSite + Math::lengthSquared(cell->relPos - constructionCell->relPos);
+            atomicAdd_block(&result.constructionSite, angularMassElement);
         }
     }
-    return result;
 }
 
 __inline__ __device__ auto ConstructorFunction::calcRotationMatrices(Angles const& angles) -> RotationMatrices
