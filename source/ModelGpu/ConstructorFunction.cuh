@@ -556,9 +556,18 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     constructNewCell(relPosOfNewCell, energyForNewEntities.cell, newCell);
     __syncthreads();
 
+    __shared__ Cell** newCellPointers;
     if (0 == threadIdx.x) {
-        auto const newCellPointers = _data->entities.cellPointers.getNewSubarray(_cluster->numCellPointers + 1);
-        addCellToCluster(newCell, _cluster, newCellPointers);
+        newCellPointers = _data->entities.cellPointers.getNewSubarray(_cluster->numCellPointers + 1);
+    }
+    __syncthreads();
+
+    addCellToCluster(newCell, _cluster, newCellPointers);
+    __syncthreads();
+
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
         connectNewCell(newCell, firstCellOfConstructionSite, _token, _cluster, _data);
         adaptRelPositions(_cluster);
         completeCellAbsPosAndVel(_cluster);
@@ -1135,12 +1144,14 @@ __inline__ __device__ Token* ConstructorFunction::constructNewToken(
 __inline__ __device__ void
 ConstructorFunction::addCellToCluster(Cell* newCell, Cluster* cluster, Cell** newCellPointers)
 {
-    for (int i = 0; i < cluster->numCellPointers; ++i) {
-        newCellPointers[i] = cluster->cellPointers[i];
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        newCellPointers[cellIndex] = cluster->cellPointers[cellIndex];
     }
-    newCellPointers[cluster->numCellPointers] = newCell;
-    cluster->cellPointers = newCellPointers;
-    ++cluster->numCellPointers;
+    if (0 == threadIdx.x) {
+        newCellPointers[cluster->numCellPointers] = newCell;
+        cluster->cellPointers = newCellPointers;
+        ++cluster->numCellPointers;
+    }
 }
 
 __inline__ __device__ void
@@ -1185,19 +1196,23 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
     Cluster* cluster,
     SimulationData* data)
 {
-    Cell* cellOfConstructor = token->cell;
+    __shared__ AdaptMaxConnections adaptMaxConnections;
+    if (0 == threadIdx.x) {
+        Cell* cellOfConstructor = token->cell;
 
-    auto const adaptMaxConnections = isAdaptMaxConnections(token);
+        adaptMaxConnections = isAdaptMaxConnections(token);
 
-    removeConnection(cellOfConstructionSite, cellOfConstructor);
-    establishConnection(newCell, cellOfConstructionSite, adaptMaxConnections);
-    establishConnection(newCell, cellOfConstructor, adaptMaxConnections);
+        removeConnection(cellOfConstructionSite, cellOfConstructor);
+        establishConnection(newCell, cellOfConstructionSite, adaptMaxConnections);
+        establishConnection(newCell, cellOfConstructor, adaptMaxConnections);
+    }
+//    __syncthreads();
 
     if (newCell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
         return;
     }
 
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         if (ClusterComponent::ConstructionSite != cell->tag) {
             continue;
