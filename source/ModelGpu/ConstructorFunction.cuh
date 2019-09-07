@@ -82,7 +82,7 @@ private:
         float2 const& centerOfRotation,
         RotationMatrices const& rotationMatrices,
         float2 const& displacementForConstructionSite);
-    __inline__ __device__ void ConstructorFunction::adaptRelPositions(Cluster* cluster);
+    __inline__ __device__ void adaptRelPositions();
     __inline__ __device__ void completeCellAbsPosAndVel(Cluster* cluster);
 
     __inline__ __device__ float2 getTransformedCellRelPos(
@@ -132,13 +132,12 @@ private:
         float energyOfNewToken,
         bool duplicate);
 
-    __inline__ __device__ void addCellToCluster(Cell* newCell, Cluster* cluster, Cell** newCellPointers);
+    __inline__ __device__ void addCellToCluster(Cell* newCell, Cell** newCellPointers);
     __inline__ __device__ void addTokenToCluster(Token* token, Cluster* cluster, Token** newTokenPointers);
 
     __inline__ __device__ void separateConstructionWhenFinished(Token* token, Cell* newCell);
 
-    __inline__ __device__ void
-    connectNewCell(Cell* newCell, Cell* cellOfConstructionSite, Token* token, Cluster* cluster, SimulationData* data);
+    __inline__ __device__ void connectNewCell(Cell* newCell, Cell* cellOfConstructionSite);
     __inline__ __device__ void removeConnection(Cell* cell1, Cell* cell2);
     enum class AdaptMaxConnections
     {
@@ -359,9 +358,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
 
         __shared__ Cell* newCell;
         constructNewCell(relPosOfNewCell, energyForNewEntities.cell, newCell);
-        addCellToCluster(newCell, cluster, newCellPointers);
+        addCellToCluster(newCell, newCellPointers);
         establishConnection(newCell, cell, adaptMaxConnections);
-        adaptRelPositions(cluster);
+        adaptRelPositions();
         completeCellAbsPosAndVel(cluster);
         cluster->angularVel = angularVelAfterRotation;
         cluster->angularMass = angularMassAfterRotation;
@@ -442,7 +441,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     if (0 == threadIdx.x) {
         transformClusterComponents(firstCellOfConstructionSite->relPos, rotationMatrices, { 0, 0 });
-        adaptRelPositions(_cluster);
+        adaptRelPositions();
         completeCellAbsPosAndVel(_cluster);
         _cluster->angularVel = angularVelAfterRotation;
         _cluster->angularMass = angularMassAfterRotation;
@@ -481,7 +480,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         rotationMatrices = calcRotationMatrices(anglesToRotate);
 
         auto const cellRelPos_transformed = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0, 0 });
-
+ 
         displacementForConstructionSite =
             Math::normalized(firstCellOfConstructionSite->relPos - cellRelPos_transformed) * distance;
         option = static_cast<Enums::ConstrInOption::Type>(
@@ -562,14 +561,18 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     }
     __syncthreads();
 
-    addCellToCluster(newCell, _cluster, newCellPointers);
+    addCellToCluster(newCell, newCellPointers);
+    __syncthreads();
+    
+    _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
+
+    connectNewCell(newCell, firstCellOfConstructionSite);
     __syncthreads();
 
-    connectNewCell(newCell, firstCellOfConstructionSite, _token, _cluster, _data);
+    adaptRelPositions();
     __syncthreads();
 
-    if (0 == threadIdx.x) {
-        adaptRelPositions(_cluster);
+   if (0 == threadIdx.x) {
         completeCellAbsPosAndVel(_cluster);
         _cluster->angularVel = angularVelAfterRotation;
         _cluster->angularMass = angularMassAfterRotation;
@@ -855,17 +858,28 @@ __inline__ __device__ void ConstructorFunction::transformClusterComponents(
     }
 }
 
-__inline__ __device__ void ConstructorFunction::adaptRelPositions(Cluster* cluster)
+__inline__ __device__ void ConstructorFunction::adaptRelPositions()
 {
-    float2 newCenter{0, 0};
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
-        newCenter = newCenter + cell->relPos;
+    __shared__ float2 newCenter;
+    if (0 == threadIdx.x) {
+        newCenter = {0, 0};
     }
-    newCenter = newCenter / cluster->numCellPointers;
+    __syncthreads();
 
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = _cluster->cellPointers[cellIndex];
+        atomicAdd_block(&newCenter.x, cell->relPos.x);
+        atomicAdd_block(&newCenter.y, cell->relPos.y);
+    }
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
+        newCenter = newCenter / _cluster->numCellPointers;
+    }
+    __syncthreads();
+
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = _cluster->cellPointers[cellIndex];
         cell->relPos = cell->relPos - newCenter;
     }
 }
@@ -1142,15 +1156,15 @@ __inline__ __device__ Token* ConstructorFunction::constructNewToken(
 }
 
 __inline__ __device__ void
-ConstructorFunction::addCellToCluster(Cell* newCell, Cluster* cluster, Cell** newCellPointers)
+ConstructorFunction::addCellToCluster(Cell* newCell, Cell** newCellPointers)
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        newCellPointers[cellIndex] = cluster->cellPointers[cellIndex];
+        newCellPointers[cellIndex] = _cluster->cellPointers[cellIndex];
     }
     if (0 == threadIdx.x) {
-        newCellPointers[cluster->numCellPointers] = newCell;
-        cluster->cellPointers = newCellPointers;
-        ++cluster->numCellPointers;
+        newCellPointers[_cluster->numCellPointers] = newCell;
+        _cluster->cellPointers = newCellPointers;
+        ++_cluster->numCellPointers;
     }
 }
 
@@ -1191,16 +1205,13 @@ __inline__ __device__ void ConstructorFunction::separateConstructionWhenFinished
 
 __inline__ __device__ void ConstructorFunction::connectNewCell(
     Cell* newCell,
-    Cell* cellOfConstructionSite,
-    Token* token,
-    Cluster* cluster,
-    SimulationData* data)
+    Cell* cellOfConstructionSite)
 {
     __shared__ AdaptMaxConnections adaptMaxConnections;
     if (0 == threadIdx.x) {
-        Cell* cellOfConstructor = token->cell;
+        Cell* cellOfConstructor = _token->cell;
 
-        adaptMaxConnections = isAdaptMaxConnections(token);
+        adaptMaxConnections = isAdaptMaxConnections(_token);
 
         removeConnection(cellOfConstructionSite, cellOfConstructor);
         establishConnection(newCell, cellOfConstructionSite, adaptMaxConnections);
@@ -1213,7 +1224,7 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
     }
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+        auto const& cell = _cluster->cellPointers[cellIndex];
         if (ClusterComponent::ConstructionSite != cell->tag) {
             continue;
         }
