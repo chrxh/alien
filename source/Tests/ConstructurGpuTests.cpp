@@ -355,7 +355,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     }
     for (auto const& remainingCell : remainingCells) {
         if (remainingCell.pos->x() >= result.constructorCell.pos->x()
-                - 0.1) {  //rough estimation of the position of constructed cell (right hand side of constructor)
+                - 0.5) {  //rough estimation of the position of constructed cell (right hand side of constructor)
             result.constructionSite.emplace_back(remainingCell);
         }
     }
@@ -686,12 +686,11 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
         if (newCell.id != cell1.id && newCell.id != cell2.id
             && obstacleCellIds.find(newCell.id) == obstacleCellIds.end()
-            && newCell.pos->x() >= result.constructorCell.pos->x() - 0.1) {
+            && newCell.pos->x() >= result.constructorCell.pos->x() - 0.5) {
             remainingCells.push_back(newCell);
         }
     }
     EXPECT_GE(2, remainingCells.size());
-
     result.constructionSite = std::move(remainingCells);
 
     return result;
