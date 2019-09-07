@@ -96,13 +96,11 @@ private:
         Cell* cell;
         float2 newAbsPos;
     };
-    __inline__ __device__ bool isObstaclePresent_onlyRotation(
+    __inline__ __device__ void isObstaclePresent_onlyRotation(
         bool ignoreOwnCluster,
-        Cluster* cluster,
         float2 const& centerOfRotation,
         RotationMatrices const& rotationMatrices,
-        Map<Cell> const& map,
-        HashMap<int2, CellAndNewAbsPos>& tempMap);
+        bool& result);
     __inline__ __device__ void isObstaclePresent_rotationAndCreation(
         bool ignoreOwnCluster,
         float2 const& relPosOfNewCell,
@@ -443,16 +441,22 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     float desiredAngle)
 {
     __shared__ RotationMatrices rotationMatrices;
+    __shared__ float kineticEnergyBeforeRotation;
+    if (0 == threadIdx.x) {
+        kineticEnergyBeforeRotation =
+            Physics::kineticEnergy(_cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel);
+        rotationMatrices = calcRotationMatrices(anglesToRotate);
+    }
+    __syncthreads();
+
     __shared__ float angularMassAfterRotation;
+    calcAngularMassAfterTransformationAndAddingCell(
+        {0, 0}, firstCellOfConstructionSite->relPos, rotationMatrices, {0, 0}, angularMassAfterRotation);
+    __syncthreads();
+
     __shared__ float angularVelAfterRotation;
     __shared__ float kineticEnergyDiff;
     if (0 == threadIdx.x) {
-        auto const kineticEnergyBeforeRotation =
-            Physics::kineticEnergy(_cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel);
-        rotationMatrices = calcRotationMatrices(anglesToRotate);
-
-        calcAngularMassAfterTransformationAndAddingCell(
-            {0, 0}, firstCellOfConstructionSite->relPos, rotationMatrices, {0, 0}, angularMassAfterRotation);
         angularVelAfterRotation =
             Physics::angularVelocity(_cluster->angularMass, angularMassAfterRotation, _cluster->angularVel);
         auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
@@ -461,6 +465,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeRotation;
     }
     __syncthreads();
+
     if (_token->energy <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy
             + cudaSimulationParameters.tokenMinEnergy + kineticEnergyDiff) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
@@ -472,21 +477,11 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto const ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
         
-        __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
-        tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+        __shared__ bool result;
+        isObstaclePresent_onlyRotation(
+            ignoreOwnCluster, firstCellOfConstructionSite->relPos, rotationMatrices, result);
         __syncthreads();
 
-        __shared__ bool result;
-        if (0 == threadIdx.x) {
-            result = isObstaclePresent_onlyRotation(
-                ignoreOwnCluster,
-                _cluster,
-                firstCellOfConstructionSite->relPos,
-                rotationMatrices,
-                _data->cellMap,
-                tempCellMap);
-        }
-        __syncthreads();
         if (result) {
             _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
             __syncthreads();
@@ -494,10 +489,16 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         }
     }
 
+    transformClusterComponents(firstCellOfConstructionSite->relPos, rotationMatrices, { 0, 0 });
+    __syncthreads();
+
+    adaptRelPositions();
+    __syncthreads();
+
+    completeCellAbsPosAndVel();
+    __syncthreads();
+
     if (0 == threadIdx.x) {
-        transformClusterComponents(firstCellOfConstructionSite->relPos, rotationMatrices, { 0, 0 });
-        adaptRelPositions();
-        completeCellAbsPosAndVel();
         _cluster->angularVel = angularVelAfterRotation;
         _cluster->angularMass = angularMassAfterRotation;
 
@@ -991,35 +992,49 @@ __inline__ __device__ float2 ConstructorFunction::getTransformedCellRelPos(
     return cell->relPos;
 }
 
-__inline__ __device__ bool ConstructorFunction::isObstaclePresent_onlyRotation(
+__inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     bool ignoreOwnCluster,
-    Cluster* cluster,
     float2 const& centerOfRotation,
     RotationMatrices const& rotationMatrices,
-    Map<Cell> const& map,
-    HashMap<int2, CellAndNewAbsPos>& tempMap)
+    bool& result)
 {
-    float2 newCenter{0, 0};
 
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
-        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
-        newCenter = newCenter + relPos;
+    __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
+    tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    __syncthreads();
+
+    __shared__ float2 newCenter;
+    if (0 == threadIdx.x) {
+        newCenter = { 0, 0 };
+        result = false;
     }
-    newCenter = newCenter / cluster->numCellPointers;
+    __syncthreads();
+
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
+        atomicAdd_block(&newCenter.x, relPos.x);
+        atomicAdd_block(&newCenter.y, relPos.y);
+    }
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
+        newCenter = newCenter / _cluster->numCellPointers;
+    }
+    __syncthreads();
 
     Math::Matrix clusterMatrix;
-    Math::rotationMatrix(cluster->angle, clusterMatrix);
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+    Math::rotationMatrix(_cluster->angle, clusterMatrix);
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = _cluster->cellPointers[cellIndex];
         auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
         relPos = relPos - newCenter;
-        auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
-        if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, absPos, map, tempMap)) {
-            return true;
+        auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
+        if (isObstaclePresent_helper(ignoreOwnCluster, _cluster, cell, absPos, _data->cellMap, tempCellMap)) {
+            result = true;
+            break;
         }
     }
-    return false;
 }
 
 __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCreation(
