@@ -146,7 +146,7 @@ private:
         Yes
     };
     __inline__ __device__ AdaptMaxConnections isAdaptMaxConnections(Token* token);
-    __inline__ __device__ bool isConnectable(Cell* cell, AdaptMaxConnections adaptMaxConnections);
+    __inline__ __device__ bool isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections);
     __inline__ __device__ void establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConnections adaptMaxConnections);
 
 private:
@@ -309,7 +309,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
 
         auto const adaptMaxConnections = isAdaptMaxConnections(_token);
 
-        if (!isConnectable(cell, adaptMaxConnections)) {
+        if (!isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)) {
             _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
             return;
         }
@@ -1223,10 +1223,20 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
         if (_data->cellMap.mapDistance(cell->absPos, newCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
             continue;
         }
-        if (!isConnectable(cell, adaptMaxConnections) || !isConnectable(newCell, adaptMaxConnections)) {
+        int origNumConnectionsOfNewCell = atomicAdd_block(&newCell->numConnections, 1);
+        if (!isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)
+            || !isConnectable(origNumConnectionsOfNewCell, newCell->maxConnections, adaptMaxConnections)) {
+            atomicAdd_block(&newCell->numConnections, -1);
             continue;
         }
-        establishConnection(newCell, cell, adaptMaxConnections);
+
+        newCell->connections[origNumConnectionsOfNewCell] = cell;
+        cell->connections[cell->numConnections++] = newCell;
+
+        if (adaptMaxConnections == AdaptMaxConnections::Yes) {
+            newCell->maxConnections = newCell->numConnections;
+            cell->maxConnections = cell->numConnections;
+        }
     }
 }
 
@@ -1257,15 +1267,16 @@ __inline__ __device__ auto ConstructorFunction::isAdaptMaxConnections(Token* tok
                                                                       : AdaptMaxConnections::No;
 }
 
-__inline__ __device__ bool ConstructorFunction::isConnectable(Cell* cell, AdaptMaxConnections adaptMaxConnections)
+__inline__ __device__ bool
+ConstructorFunction::isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections)
 {
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
-        if (cell->numConnections == cudaSimulationParameters.cellMaxBonds) {
+        if (numConnections == cudaSimulationParameters.cellMaxBonds) {
             return false;
         }
     }
     if (AdaptMaxConnections::No == adaptMaxConnections) {
-        if (cell->numConnections == cell->maxConnections) {
+        if (numConnections == maxConnections) {
             return false;
         }
     }
