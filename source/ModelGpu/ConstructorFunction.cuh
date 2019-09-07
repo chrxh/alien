@@ -571,7 +571,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     addCellToCluster(newCell, newCellPointers);
     __syncthreads();
-    
+
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
 
     connectNewCell(newCell, firstCellOfConstructionSite);
@@ -1187,6 +1187,8 @@ ConstructorFunction::addCellToCluster(Cell* newCell, Cell** newCellPointers)
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         newCellPointers[cellIndex] = _cluster->cellPointers[cellIndex];
     }
+    __syncthreads();
+
     if (0 == threadIdx.x) {
         newCellPointers[_cluster->numCellPointers] = newCell;
         _cluster->cellPointers = newCellPointers;
