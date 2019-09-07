@@ -7,27 +7,39 @@ template <typename Key, typename Value, typename Hash = HashFunctor<Key>>
 class HashMap
 {
 public:
-    __device__ __inline__ HashMap(int size, ArrayController& arrays)
-        : _size(size)
+    __device__ __inline__ void init_blockCall(int size, ArrayController& arrays)
     {
-        _entries = arrays.getArray<Entry>(size);
-        for (int i = 0; i < size; ++i) {
-            _entries[i].free = true;
+        __shared__ Entry* entries;
+        if (0 == threadIdx.x) {
+            entries = arrays.getArray<Entry>(size);
+        }
+        __syncthreads();
+
+        _size = size;
+        _entries = entries;
+
+        auto const threadBlock = calcPartition(size, threadIdx.x, blockDim.x);
+        for (int i = threadBlock.startIndex; i <= threadBlock.endIndex; ++i) {
+            _entries[i].free = 0;
         }
     }
 
     __device__ __inline__ void insertOrAssign(Key const& key, Value const& value)
     {
         int index = _hash(key) % _size;
-        while (!_entries[index].free) {
-            if (_entries[index].key == key) {
-                _entries[index].value = value;
-                return;
+        int wasFree;
+        do {
+            wasFree = atomicExch_block(&_entries[index].free, 1);
+            if (1 == wasFree) {
+                if (_entries[index].key == key) {
+                    _entries[index].value = value;
+                    return;
+                }
+                index = (++index) % _size;
             }
-            index = (++index) % _size;
-        }
+        } while (1 == wasFree);
+
         auto& newEntry = _entries[index];
-        newEntry.free = false;
         newEntry.key = key;
         newEntry.value = value;
     }
@@ -37,7 +49,7 @@ public:
         int index = _hash(key) % _size;
         for (int i = 0; i < _size; ++i, index = (++index) % _size) {
             auto& entry = _entries[index];
-            if (entry.free) {
+            if (0 == entry.free) {
                 return false;
             }
             if (entry.key == key) {
@@ -47,15 +59,13 @@ public:
         return false;
     }
 
-    __device__ __inline__ Value& operator[](Key const& key)
+    __device__ __inline__ Value at(Key const& key)
     {
         int index = _hash(key) % _size;
         do {
             auto& entry = _entries[index];
-            if (entry.free) {
-                entry.free = false;
-                entry.key = key;
-                return entry.value;
+            if (0 == entry.free) {
+                return Value();
             }
             if (entry.key == key) {
                 return entry.value;
@@ -70,7 +80,7 @@ private:
 
     struct Entry
     {
-        bool free;
+        int free;   //0 = free, 1 = used
         Value value;
         Key key;
     };
