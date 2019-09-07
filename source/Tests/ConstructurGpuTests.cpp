@@ -278,7 +278,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
 
     origData.addCluster(cluster);
 
-    std::unordered_set<uint64_t> obstacleCellIds;
+    set<std::pair<float, float>> obstaclePositions;
     if (parameters._horizontalObstacleAt) {
 
         //following calculation only works for 0-angle
@@ -301,7 +301,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
         auto obstacle = createHorizontalCluster(4, obstacleCenterPos, QVector2D{}, 0);
         origData.addCluster(obstacle);
         for (auto const& cell : *obstacle.cells) {
-            obstacleCellIds.insert(cell.id);
+            obstaclePositions.emplace(cell.pos->x(), cell.pos->y());
         }
     }
 
@@ -319,7 +319,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
 
     std::unordered_map<uint64_t, CellDescription> newCellsWithoutObstacleByCellId;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
-        if (obstacleCellIds.find(newCell.id) == obstacleCellIds.end()) {
+        if (obstaclePositions.find({ newCell.pos->x(), newCell.pos->y() }) == obstaclePositions.end()) {
             newCellsWithoutObstacleByCellId.insert_or_assign(newCell.id, newCell);
         }
     }
@@ -349,13 +349,13 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     std::list<CellDescription> remainingCells;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
         if (newCell.id != firstCell.id && newCell.id != secondCell.id
-            && obstacleCellIds.find(newCell.id) == obstacleCellIds.end()) {
+            && obstaclePositions.find({ newCell.pos->x(), newCell.pos->y() }) == obstaclePositions.end()) {
             remainingCells.push_back(newCell);
         }
     }
     for (auto const& remainingCell : remainingCells) {
         if (remainingCell.pos->x() >= result.constructorCell.pos->x()
-                - 0.5) {  //rough estimation of the position of constructed cell (right hand side of constructor)
+                - 0.1) {  //rough estimation of the position of constructed cell (right hand side of constructor)
             result.constructionSite.emplace_back(remainingCell);
         }
     }
@@ -609,7 +609,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
     DataDescription origData;
     origData.addCluster(cluster);
 
-    std::unordered_set<uint64_t> obstacleCellIds;
+    set<std::pair<float, float>> obstaclePositions;
     if (parameters._horizontalObstacleAt) {
 
         //following calculation only works for 0-angle
@@ -636,7 +636,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
         auto obstacle = createHorizontalCluster(4, obstacleCenterPos, QVector2D{}, 0);
         origData.addCluster(obstacle);
         for (auto const& cell : *obstacle.cells) {
-            obstacleCellIds.insert(cell.id);
+            obstaclePositions.emplace(cell.pos->x(), cell.pos->y());
         }
     }
 
@@ -653,7 +653,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
 
     std::unordered_map<uint64_t, CellDescription> newCellsWithoutObstacleByCellId;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
-        if (obstacleCellIds.find(newCell.id) == obstacleCellIds.end()) {
+        if (obstaclePositions.find({ newCell.pos->x(), newCell.pos->y() }) == obstaclePositions.end()) {
             newCellsWithoutObstacleByCellId.insert_or_assign(newCell.id, newCell);
         }
     }
@@ -685,12 +685,26 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
     std::vector<CellDescription> remainingCells;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
         if (newCell.id != cell1.id && newCell.id != cell2.id
-            && obstacleCellIds.find(newCell.id) == obstacleCellIds.end()
-            && newCell.pos->x() >= result.constructorCell.pos->x() - 0.5) {
+            && obstaclePositions.find({ newCell.pos->x(), newCell.pos->y() }) == obstaclePositions.end()
+            && newCell.pos->x() >= result.constructorCell.pos->x() - 0.1) {
             remainingCells.push_back(newCell);
         }
     }
     EXPECT_GE(2, remainingCells.size());
+    if (remainingCells.size() > 2) {
+        for (auto const& cell : remainingCells) {
+            std::cout << "pos: " << cell.pos->x() << ", " << cell.pos->y() << std::endl;
+        }
+
+        for (auto const& cluster : *newData.clusters) {
+            std::cout << "new cluster:" << std::endl;
+            for (auto const& cell: *cluster.cells) {
+                std::cout << "id: " << cell.id << ", pos: " << cell.pos->x() << " ,"
+                    << cell.pos->y() << ", energy: " << *cell.energy << std::endl;
+            }
+        }
+    }
+
     result.constructionSite = std::move(remainingCells);
 
     return result;
