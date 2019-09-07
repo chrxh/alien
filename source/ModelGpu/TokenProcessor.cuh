@@ -19,10 +19,12 @@ class TokenProcessor
 {
 public:
     __inline__ __device__ void init_gridCall(SimulationData& data, int clusterArrayIndex);
+    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex);
 
     __inline__ __device__ void processingEnergyAveraging_gridCall();
     __inline__ __device__ void processingSpreading_gridCall();
     __inline__ __device__ void processingFeatures_gridCall();
+    __inline__ __device__ void processingFeatures_blockCall();
 
 private:
     __inline__ __device__ int calcAnticipatedTokens(Cluster* cluster);
@@ -34,8 +36,9 @@ private:
 private:
     SimulationData* _data;
     int _clusterArrayIndex;
-
+    Cluster* _cluster;
     PartitionData _clusterBlock;
+    PartitionData _cellBlock;
 };
 
 /************************************************************************/
@@ -46,7 +49,18 @@ __inline__ __device__ void TokenProcessor::init_gridCall(SimulationData& data, i
     _data = &data;
     _clusterArrayIndex = clusterArrayIndex;
     auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
-    _clusterBlock = calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    _clusterBlock =
+        calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+}
+
+__inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex)
+{
+    _data = &data;
+    _clusterArrayIndex = clusterArrayIndex;
+
+    auto const clusterPointer = &data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
+    _cluster = *clusterPointer;
+    _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
 }
 
 __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
@@ -234,6 +248,28 @@ __inline__ __device__ void TokenProcessor::processingFeatures_gridCall()
     }
 }
 
+__inline__ __device__ void TokenProcessor::processingFeatures_blockCall()
+{
+    auto const numTokenPointers = _cluster->numTokenPointers;
+    for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
+        auto& token = _cluster->tokenPointers[tokenIndex];
+
+        auto cell = token->cell;
+        EnergyGuidance::processing(token);
+        auto type = static_cast<Enums::CellFunction::Type>(cell->cellFunctionType % Enums::CellFunction::_COUNTER);
+        switch (type) {
+        case Enums::CellFunction::CONSTRUCTOR: {
+            ConstructorFunction constructor;
+            constructor.init_blockCall(token, _data);
+            __syncthreads();
+
+            constructor.processing();
+            __syncthreads();
+        } break;
+        }
+    }
+}
+
 __inline__ __device__ int TokenProcessor::calcAnticipatedTokens(Cluster* cluster)
 {
     int result = 0;
@@ -283,7 +319,6 @@ __inline__ __device__ void TokenProcessor::moveToken(Token* sourceToken, Token*&
 __global__ void constructorLauncher(Token* token, SimulationData data)
 {
     ConstructorFunction constructor;
-
     constructor.init_blockCall(token, &data);
     constructor.processing();
 }
@@ -302,10 +337,6 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
     } break;
     case Enums::CellFunction::SCANNER: {
         ScannerFunction::processing(token);
-    } break;
-    case Enums::CellFunction::CONSTRUCTOR: {
-        constructorLauncher <<<1, min(cell->cluster->numCellPointers, cudaConstants.NUM_BLOCKS * cudaConstants.NUM_THREADS_PER_BLOCK)>>>(token, *_data);
-        cudaDeviceSynchronize();
     } break;
     }
 }
