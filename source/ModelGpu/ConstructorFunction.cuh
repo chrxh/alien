@@ -565,10 +565,10 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     addCellToCluster(newCell, _cluster, newCellPointers);
     __syncthreads();
 
+    connectNewCell(newCell, firstCellOfConstructionSite, _token, _cluster, _data);
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        connectNewCell(newCell, firstCellOfConstructionSite, _token, _cluster, _data);
         adaptRelPositions(_cluster);
         completeCellAbsPosAndVel(_cluster);
         _cluster->angularVel = angularVelAfterRotation;
@@ -1206,7 +1206,7 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
         establishConnection(newCell, cellOfConstructionSite, adaptMaxConnections);
         establishConnection(newCell, cellOfConstructor, adaptMaxConnections);
     }
-//    __syncthreads();
+    __syncthreads();
 
     if (newCell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
         return;
@@ -1215,9 +1215,6 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         if (ClusterComponent::ConstructionSite != cell->tag) {
-            continue;
-        }
-        if (cell->numConnections >= cudaSimulationParameters.cellMaxBonds) {
             continue;
         }
         if (cell == cellOfConstructionSite) {
