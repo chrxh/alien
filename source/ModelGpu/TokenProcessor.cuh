@@ -304,7 +304,7 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
         ScannerFunction::processing(token);
     } break;
     case Enums::CellFunction::CONSTRUCTOR: {
-        constructorLauncher <<<1, cell->cluster->numCellPointers>>>(token, *_data);
+        constructorLauncher <<<1, cell->cluster->numCellPointers/*cudaConstants.NUM_THREADS_PER_BLOCK*/>>>(token, *_data);
         cudaDeviceSynchronize();
     } break;
     }

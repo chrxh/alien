@@ -83,7 +83,7 @@ private:
         RotationMatrices const& rotationMatrices,
         float2 const& displacementForConstructionSite);
     __inline__ __device__ void adaptRelPositions();
-    __inline__ __device__ void completeCellAbsPosAndVel(Cluster* cluster);
+    __inline__ __device__ void completeCellAbsPosAndVel();
 
     __inline__ __device__ float2 getTransformedCellRelPos(
         Cell* cell,
@@ -126,16 +126,17 @@ private:
 
     __inline__ __device__ void
     constructNewCell(float2 const& relPosOfNewCell, float const energyOfNewCell, Cell*& result);
-    __inline__ __device__ Token* constructNewToken(
+    __inline__ __device__ void constructNewToken(
         Cell* cellOfNewToken,
         Cell* sourceCellOfNewToken,
         float energyOfNewToken,
-        bool duplicate);
+        bool duplicate,
+        Token*& result);
 
     __inline__ __device__ void addCellToCluster(Cell* newCell, Cell** newCellPointers);
-    __inline__ __device__ void addTokenToCluster(Token* token, Cluster* cluster, Token** newTokenPointers);
+    __inline__ __device__ void addTokenToCluster(Token* token, Token** newTokenPointers);
 
-    __inline__ __device__ void separateConstructionWhenFinished(Token* token, Cell* newCell);
+    __inline__ __device__ void separateConstructionWhenFinished(Cell* newCell);
 
     __inline__ __device__ void connectNewCell(Cell* newCell, Cell* cellOfConstructionSite);
     __inline__ __device__ void removeConnection(Cell* cell1, Cell* cell2);
@@ -361,20 +362,27 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
         addCellToCluster(newCell, newCellPointers);
         establishConnection(newCell, cell, adaptMaxConnections);
         adaptRelPositions();
-        completeCellAbsPosAndVel(cluster);
+        completeCellAbsPosAndVel();
         cluster->angularVel = angularVelAfterRotation;
         cluster->angularMass = angularMassAfterRotation;
 
-        separateConstructionWhenFinished(_token, newCell);
+        separateConstructionWhenFinished(newCell);
 
         bool const createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
         bool const createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
         if (createEmptyToken || createDuplicateToken) {
-            auto const newToken =
-                constructNewToken(newCell, cell, energyForNewEntities.token, createDuplicateToken);
-            auto const newTokenPointers = _data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers + 1);
-            addTokenToCluster(newToken, cluster, newTokenPointers);
+            __shared__ Token* newToken;
+            constructNewToken(newCell, cell, energyForNewEntities.token, createDuplicateToken, newToken);
+            __syncthreads();
+            
+            __shared__ Token** newTokenPointers;
+            if (0 == threadIdx.x) {
+                newTokenPointers = _data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers + 1);
+            }
+            __syncthreads();
+
+            addTokenToCluster(newToken, newTokenPointers);
         }
 
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
@@ -442,7 +450,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     if (0 == threadIdx.x) {
         transformClusterComponents(firstCellOfConstructionSite->relPos, rotationMatrices, { 0, 0 });
         adaptRelPositions();
-        completeCellAbsPosAndVel(_cluster);
+        completeCellAbsPosAndVel();
         _cluster->angularVel = angularVelAfterRotation;
         _cluster->angularMass = angularMassAfterRotation;
 
@@ -572,25 +580,39 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     adaptRelPositions();
     __syncthreads();
 
-   if (0 == threadIdx.x) {
-        completeCellAbsPosAndVel(_cluster);
+    completeCellAbsPosAndVel();
+    __syncthreads();
+
+    __shared__ bool createEmptyToken;
+    __shared__ bool createDuplicateToken;
+    if (0 == threadIdx.x) {
         _cluster->angularVel = angularVelAfterRotation;
         _cluster->angularMass = angularMassAfterRotation;
 
         firstCellOfConstructionSite->tokenBlocked = false;  //disable token blocking on construction side
-        separateConstructionWhenFinished(_token, newCell);
+        separateConstructionWhenFinished(newCell);
 
-        bool const createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+        createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
-        bool const createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
+        createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
+    }
+    __syncthreads();
 
-        if (createEmptyToken || createDuplicateToken) {
-            auto const newToken =
-                constructNewToken(newCell, cell, energyForNewEntities.token, createDuplicateToken);
-            auto const newTokenPointers = _data->entities.tokenPointers.getNewSubarray(_cluster->numTokenPointers + 1);
-            addTokenToCluster(newToken, _cluster, newTokenPointers);
+    if (createEmptyToken || createDuplicateToken) {
+        __shared__ Token* newToken;
+        constructNewToken(newCell, cell, energyForNewEntities.token, createDuplicateToken, newToken);
+        __syncthreads();
+
+        __shared__ Token** newTokenPointers;
+        if (0 == threadIdx.x) {
+            newTokenPointers = _data->entities.tokenPointers.getNewSubarray(_cluster->numTokenPointers + 1);
         }
+        __syncthreads();
 
+        addTokenToCluster(newToken, newTokenPointers);
+    }
+
+    if (0 == threadIdx.x) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
         _token->memory[Enums::Constr::INOUT_ANGLE] = 0;
     }
@@ -884,19 +906,16 @@ __inline__ __device__ void ConstructorFunction::adaptRelPositions()
     }
 }
 
-__inline__ __device__ void ConstructorFunction::completeCellAbsPosAndVel(Cluster* cluster)
+__inline__ __device__ void ConstructorFunction::completeCellAbsPosAndVel()
 {
     Math::Matrix rotationMatrix;
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-        auto& cell = cluster->cellPointers[cellIndex];
-        Math::rotationMatrix(cluster->angle, rotationMatrix);
-        cell->absPos = Math::applyMatrix(cell->relPos, rotationMatrix) + cluster->pos;
-    }
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto& cell = _cluster->cellPointers[cellIndex];
+        Math::rotationMatrix(_cluster->angle, rotationMatrix);
+        cell->absPos = Math::applyMatrix(cell->relPos, rotationMatrix) + _cluster->pos;
 
-    for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-        auto& cell = cluster->cellPointers[cellIndex];
-        auto r = cell->absPos - cluster->pos;
-        cell->vel = Physics::tangentialVelocity(r, cluster->vel, cluster->angularVel);
+        auto r = cell->absPos - _cluster->pos;
+        cell->vel = Physics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
     }
 }
 
@@ -1131,28 +1150,35 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
     }
 }
 
-__inline__ __device__ Token* ConstructorFunction::constructNewToken(
+__inline__ __device__ void ConstructorFunction::constructNewToken(
     Cell* cellOfNewToken,
     Cell* sourceCellOfNewToken,
     float energyOfNewToken,
-    bool duplicate)
+    bool duplicate,
+    Token*& result)
 {
-    EntityFactory factory;
-    factory.init(_data);
+    if (0 == threadIdx.x) {
+        EntityFactory factory;
+        factory.init(_data);
 
-    auto result = factory.createToken(cellOfNewToken);
-    result->sourceCell = sourceCellOfNewToken;
-    result->energy = energyOfNewToken;
+        result = factory.createToken(cellOfNewToken);
+        result->sourceCell = sourceCellOfNewToken;
+        result->energy = energyOfNewToken;
+    }
+    __syncthreads();
+
+    auto const threadBlock = calcPartition(MAX_TOKEN_MEM_SIZE, threadIdx.x, blockDim.x);
     if (duplicate) {
-        for (int i = 1; i < MAX_TOKEN_MEM_SIZE; ++i) {  //do not copy branchnumber (at address 0)
+        for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex;
+             ++i) {  //do not copy branchnumber (at address 0)
             result->memory[i] = _token->memory[i];
         }
     } else {
-        for (int i = 1; i < MAX_TOKEN_MEM_SIZE; ++i) {  //do not copy branchnumber (at address 0)
+        for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex;
+             ++i) {  //do not copy branchnumber (at address 0)
             result->memory[i] = 0;
         }
     }
-    return result;
 }
 
 __inline__ __device__ void
@@ -1169,21 +1195,25 @@ ConstructorFunction::addCellToCluster(Cell* newCell, Cell** newCellPointers)
 }
 
 __inline__ __device__ void
-ConstructorFunction::addTokenToCluster(Token* token, Cluster* cluster, Token** newTokenPointers)
+ConstructorFunction::addTokenToCluster(Token* token, Token** newTokenPointers)
 {
-    for (int i = 0; i < cluster->numTokenPointers; ++i) {
-        newTokenPointers[i] = cluster->tokenPointers[i];
+    auto const tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
+    for (int i = tokenBlock.startIndex; i <= tokenBlock.endIndex; ++i) {
+        newTokenPointers[i] = _cluster->tokenPointers[i];
     }
-    newTokenPointers[cluster->numTokenPointers] = token;
-    cluster->tokenPointers = newTokenPointers;
-    ++cluster->numTokenPointers;
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
+        newTokenPointers[_cluster->numTokenPointers] = token;
+        _cluster->tokenPointers = newTokenPointers;
+        ++_cluster->numTokenPointers;
+    }
 }
 
-__inline__ __device__ void ConstructorFunction::separateConstructionWhenFinished(Token* token, Cell* newCell)
+__inline__ __device__ void ConstructorFunction::separateConstructionWhenFinished(Cell* newCell)
 {
-    auto const& cell = token->cell;
-    auto const& cluster = cell->cluster;
-    auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
+    auto const& cell = _token->cell;
+    auto const option = _token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
 
     if (Enums::ConstrInOption::FINISH_NO_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
@@ -1193,7 +1223,7 @@ __inline__ __device__ void ConstructorFunction::separateConstructionWhenFinished
 
     if (Enums::ConstrInOption::FINISH_WITH_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
-        atomicExch(&cluster->decompositionRequired, 1);
+        atomicExch(&_cluster->decompositionRequired, 1);
         removeConnection(newCell, cell);
     }
     if (Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
