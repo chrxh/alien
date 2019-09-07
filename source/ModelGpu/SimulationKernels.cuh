@@ -94,6 +94,20 @@ __global__ void tokenProcessing(SimulationData data, int clusterArrayIndex)
     tokenProcessor.processingFeatures_gridCall();
 }
 
+__device__ void tokenProcessing2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
+{
+    TokenProcessor tokenProcessor;
+    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+    tokenProcessor.processingFeatures_blockCall();
+}
+
+__global__ void tokenProcessing2(SimulationData data, int numClusters, int clusterArrayIndex)
+{
+    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        tokenProcessing2_blockCall(data, clusterArrayIndex, clusterIndex);
+    }
+}
 
 /************************************************************************/
 /* Particles															*/
@@ -134,6 +148,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
 
     MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(tokenProcessing, data);
+    MULTI_CALL(tokenProcessing2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());

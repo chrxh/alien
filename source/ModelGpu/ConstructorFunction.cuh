@@ -110,16 +110,12 @@ private:
         bool& result);
     __inline__ __device__ void isObstaclePresent_firstCreation(
         bool ignoreOwnCluster,
-        Cluster* cluster,
         float2 const& relPosOfNewCell,
-        Map<Cell> const& map,
         bool& result);
     __inline__ __device__ bool isObstaclePresent_helper(
         bool ignoreOwnCluster,
-        Cluster* cluster,
         Cell* cell,
         float2 const& absPos,
-        Map<Cell> const& map,
         HashMap<int2, CellAndNewAbsPos>& tempMap);
 
     __inline__ __device__ void
@@ -337,7 +333,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
         __shared__ bool isObstaclePresent;
-        isObstaclePresent_firstCreation(ignoreOwnCluster, _cluster, relPosOfNewCell, _data->cellMap, isObstaclePresent);
+        isObstaclePresent_firstCreation(ignoreOwnCluster, relPosOfNewCell, isObstaclePresent);
         __syncthreads();
 
         if (isObstaclePresent) {
@@ -1030,7 +1026,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
         auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
         relPos = relPos - newCenter;
         auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
-        if (isObstaclePresent_helper(ignoreOwnCluster, _cluster, cell, absPos, _data->cellMap, tempCellMap)) {
+        if (isObstaclePresent_helper(ignoreOwnCluster, cell, absPos, tempCellMap)) {
             result = true;
             break;
         }
@@ -1090,7 +1086,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
             getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         relPos = relPos - newCenter;
         auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
-        if (isObstaclePresent_helper(ignoreOwnCluster, _cluster, cell, absPos, _data->cellMap, tempCellMap)) {
+        if (isObstaclePresent_helper(ignoreOwnCluster, cell, absPos, tempCellMap)) { 
             result = true;
             break;
         }
@@ -1099,9 +1095,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
 
 __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     bool ignoreOwnCluster,
-    Cluster* cluster,
     float2 const& relPosOfNewCell,
-    Map<Cell> const& map,
     bool& result)
 {
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
@@ -1116,34 +1110,34 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     __syncthreads();
 
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+        auto const& cell = _cluster->cellPointers[cellIndex];
         atomicAdd_block(&newCenter.x, cell->relPos.x);
         atomicAdd_block(&newCenter.y, cell->relPos.y);
     }
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        newCenter = newCenter / (cluster->numCellPointers + 1);
+        newCenter = newCenter / (_cluster->numCellPointers + 1);
     }
     __syncthreads();
 
     Math::Matrix clusterMatrix;
-    Math::rotationMatrix(cluster->angle, clusterMatrix);
+    Math::rotationMatrix(_cluster->angle, clusterMatrix);
     if (!ignoreOwnCluster) {
         for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            auto const& cell = cluster->cellPointers[cellIndex];
+            auto const& cell = _cluster->cellPointers[cellIndex];
             auto const relPos = cell->relPos - newCenter;
-            auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
+            auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
             tempCellMap.insertOrAssign(toInt2(absPos), CellAndNewAbsPos{ cell, absPos });
         }
     }
     __syncthreads();
 
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+        auto const& cell = _cluster->cellPointers[cellIndex];
         auto const relPos = cell->relPos - newCenter;
-        auto const absPos = cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
-        if (isObstaclePresent_helper(ignoreOwnCluster, cluster, cell, absPos, map, tempCellMap)) {
+        auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
+        if (isObstaclePresent_helper(ignoreOwnCluster, cell, absPos, tempCellMap)) {
             result = true;
             break;
         }
@@ -1152,8 +1146,8 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
 
     //check obstacle for cell to be constructed
     if (0 == threadIdx.x) {
-        auto const absPosForNewCell = cluster->pos + Math::applyMatrix(relPosOfNewCell - newCenter, clusterMatrix);
-        if (isObstaclePresent_helper(ignoreOwnCluster, cluster, nullptr, absPosForNewCell, map, tempCellMap)) {
+        auto const absPosForNewCell = _cluster->pos + Math::applyMatrix(relPosOfNewCell - newCenter, clusterMatrix);
+        if (isObstaclePresent_helper(ignoreOwnCluster, nullptr, absPosForNewCell, tempCellMap)) {
             result = true;
         }
     }
@@ -1161,17 +1155,16 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
 
 __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
     bool ignoreOwnCluster,
-    Cluster* cluster,
     Cell* cell,
     float2 const& absPos,
-    Map<Cell> const& map,
     HashMap<int2, CellAndNewAbsPos>& tempMap)
 {
+    auto const map = _data->cellMap;
     for (int dx = -1; dx <= 1; ++dx) {
         for (int dy = -1; dy <= 1; ++dy) {
             float2 const lookupPos = {absPos.x + dx, absPos.y + dy};
             if (auto const otherCell = map.get(lookupPos)) {
-                if (cluster != otherCell->cluster) {
+                if (_cluster != otherCell->cluster) {
                     if (map.mapDistance(otherCell->absPos, absPos) < cudaSimulationParameters.cellMinDistance) {
                         return true;
                     }
