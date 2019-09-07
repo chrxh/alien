@@ -74,7 +74,7 @@ private:
         RotationMatrices const& rotationMatrices,
         float2 const& displacementOfConstructionSite,
         float& result);
-    __inline__ __device__ float calcAngularMassAfterAddingCell(Cluster* cluster, float2 const& relPosOfNewCell);
+    __inline__ __device__ void calcAngularMassAfterAddingCell(Cluster* cluster, float2 const& relPosOfNewCell, float& result);
     __inline__ __device__ EnergyForNewEntities adaptEnergies(Token* token, float energyLoss);
 
 
@@ -350,11 +350,18 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
 
     __shared__ float angularMassAfterRotation;
     __shared__ float angularVelAfterRotation;
+    __shared__ float kineticEnergyBeforeRotation;
     __shared__ EnergyForNewEntities energyForNewEntities;
     if (0 == threadIdx.x) {
-        auto const kineticEnergyBeforeRotation =
+        kineticEnergyBeforeRotation =
             Physics::kineticEnergy(_cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel);
-        angularMassAfterRotation = calcAngularMassAfterAddingCell(_cluster, relPosOfNewCell);
+    }
+    __syncthreads();
+
+    calcAngularMassAfterAddingCell(_cluster, relPosOfNewCell, angularMassAfterRotation);
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
         angularVelAfterRotation =
             Physics::angularVelocity(_cluster->angularMass, angularMassAfterRotation, _cluster->angularVel);
         auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
@@ -886,23 +893,32 @@ __inline__ __device__ void ConstructorFunction::calcAngularMassAfterTransformati
     __syncthreads();
 }
 
-__inline__ __device__ float ConstructorFunction::calcAngularMassAfterAddingCell(
-    Cluster* cluster,
-    float2 const& relPosOfNewCell)
+__inline__ __device__ void
+ConstructorFunction::calcAngularMassAfterAddingCell(Cluster* cluster, float2 const& relPosOfNewCell, float& result)
 {
-    auto center = relPosOfNewCell;
-    for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
-        center = center + cell->relPos;
+    __shared__ float2 center;
+    if (0 == threadIdx.x) {
+        center = relPosOfNewCell;
     }
-    center = center / cluster->numCellPointers;
+    __syncthreads();
 
-    auto result = Math::lengthSquared(relPosOfNewCell - center);
-    for (auto cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+        atomicAdd_block(&center.x, cell->relPos.x);
+        atomicAdd_block(&center.y, cell->relPos.y);
+    }
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
+        center = center / cluster->numCellPointers;
+        result = Math::lengthSquared(relPosOfNewCell - center);
+    }
+    __syncthreads();
+
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = cluster->cellPointers[cellIndex];
         result += Math::lengthSquared(cell->relPos - center);
     }
-    return result;
 }
 
 __inline__ __device__ void ConstructorFunction::transformClusterComponents(
