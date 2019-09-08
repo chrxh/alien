@@ -994,7 +994,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     RotationMatrices const& rotationMatrices,
     bool& result)
 {
-
+    result = false;
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
     tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     __syncthreads();
@@ -1041,6 +1041,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     float2 const& displacementOfConstructionSite,
     bool& result)
 {
+    result = false;
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
     tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     __syncthreads();
@@ -1098,6 +1099,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     float2 const& relPosOfNewCell,
     bool& result)
 {
+    result = false;
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
     tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     __syncthreads();
@@ -1347,20 +1349,18 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
         if (_data->cellMap.mapDistance(cell->absPos, newCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
             continue;
         }
-        int origNumConnectionsOfNewCell = atomicAdd_block(&newCell->numConnections, 1);
-        if (!isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)
-            || !isConnectable(origNumConnectionsOfNewCell, newCell->maxConnections, adaptMaxConnections)) {
-            atomicAdd_block(&newCell->numConnections, -1);
-            continue;
-        }
 
-        newCell->connections[origNumConnectionsOfNewCell] = cell;
-        cell->connections[cell->numConnections++] = newCell;
-
-        if (adaptMaxConnections == AdaptMaxConnections::Yes) {
-            newCell->maxConnections = newCell->numConnections;
-            cell->maxConnections = cell->numConnections;
-        }
+        int isLocked;
+        do {
+            isLocked = atomicExch_block(&newCell->locked, 1);
+            if (0 == isLocked) {
+                if (isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)
+                    && isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
+                    establishConnection(cell, newCell, adaptMaxConnections);
+                }
+            }
+        } while (1 == isLocked);
+        atomicExch(&newCell->locked, 0);
     }
 }
 
@@ -1395,12 +1395,12 @@ __inline__ __device__ bool
 ConstructorFunction::isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections)
 {
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
-        if (numConnections == cudaSimulationParameters.cellMaxBonds) {
+        if (numConnections >= cudaSimulationParameters.cellMaxBonds) {
             return false;
         }
     }
     if (AdaptMaxConnections::No == adaptMaxConnections) {
-        if (numConnections == maxConnections) {
+        if (numConnections >= maxConnections) {
             return false;
         }
     }
