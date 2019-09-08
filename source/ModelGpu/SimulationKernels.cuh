@@ -85,6 +85,13 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters, int
 /* Tokens																*/
 /************************************************************************/
 
+__device__ void tokenProcessing2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
+{
+    TokenProcessor tokenProcessor;
+    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+    tokenProcessor.processingFeatures_blockCall();
+}
+
 __global__ void tokenProcessing(SimulationData data, int clusterArrayIndex)
 {
     TokenProcessor tokenProcessor;
@@ -92,13 +99,6 @@ __global__ void tokenProcessing(SimulationData data, int clusterArrayIndex)
     tokenProcessor.processingEnergyAveraging_gridCall();
     tokenProcessor.processingSpreading_gridCall();
     tokenProcessor.processingFeatures_gridCall();
-}
-
-__device__ void tokenProcessing2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
-{
-    TokenProcessor tokenProcessor;
-    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
-    tokenProcessor.processingFeatures_blockCall();
 }
 
 __global__ void tokenProcessing2(SimulationData data, int numClusters, int clusterArrayIndex)
