@@ -20,7 +20,9 @@ struct HashFunctor<int2>
 {
     __device__ __inline__ int operator()(int2 const& value) const
     {
-        return abs(value.x) * 2371 + abs(value.y);
+        auto const v1 = abs(value.x);
+        int result = abs(value.y) + 0x9e3779b9 + (v1 << 6) + (v1 >> 2);
+        return abs(result);
     }
 };
 

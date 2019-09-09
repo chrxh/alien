@@ -44,7 +44,7 @@ private:
 
     __inline__ __device__ void checkMaxRadius(bool& result);
     __inline__ __device__ bool checkDistance(float distance);
-    __inline__ __device__ Cell* getConstructionSite();
+    __inline__ __device__ Cell* getFirstCellOfConstructionSite();
 
     __inline__ __device__ void continueConstruction(Cell* firstCellOfConstructionSite);
     __inline__ __device__ void startNewConstruction();
@@ -177,7 +177,7 @@ __inline__ __device__ void ConstructorFunction::processing()
 
     __shared__ Cell* firstCellOfConstructionSite;
     if (0 == threadIdx.x) {
-        firstCellOfConstructionSite = getConstructionSite();
+        firstCellOfConstructionSite = getFirstCellOfConstructionSite();
     }
     __syncthreads();
 
@@ -226,7 +226,7 @@ __inline__ __device__ bool ConstructorFunction::checkDistance(float distance)
     return cudaSimulationParameters.cellMinDistance < distance && distance < cudaSimulationParameters.cellMaxDistance;
 }
 
-__inline__ __device__ Cell* ConstructorFunction::getConstructionSite()
+__inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite()
 {
     Cell* result = nullptr;
     auto const& cell = _token->cell;
@@ -705,7 +705,48 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
     if (0 == threadIdx.x) {
         firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
     }
+    __syncthreads();
 
+    //step 1: fast algorithm but possibly incomplete
+    auto prevCell = firstCellOfConstructionSite;
+    auto currentCell = firstCellOfConstructionSite;
+    int numFail = 0;
+    if (currentCell->numConnections > 0) {
+        do {
+            for (int i = 0; i < currentCell->numConnections; ++i) {
+                auto const& connectingCell = currentCell->connections[i];
+                if (connectingCell != baseCell) {
+                    auto const origTag = atomicExch_block(&connectingCell->tag, ClusterComponent::ConstructionSite);
+                    if (ClusterComponent::Constructor == origTag) {
+                        prevCell = currentCell;
+                        currentCell = connectingCell;
+                        numFail = 0;
+                        break;
+                    }
+                }
+            }
+            if (5 == ++numFail) {
+                break;
+            }
+            int connectingCellIndex = threadIdx.x % currentCell->numConnections;
+            if (currentCell->connections[connectingCellIndex] == baseCell) {
+                connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
+            }
+            if (currentCell->connections[connectingCellIndex] == prevCell) {
+                connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
+            }
+            if (currentCell->connections[connectingCellIndex] != baseCell) {
+                prevCell = currentCell;
+                currentCell = currentCell->connections[connectingCellIndex];
+            }
+            else {
+                break;
+            }
+
+        } while (true);
+    }
+
+    //step 1: slow algorithm but complete
     __shared__ bool changes;
     do {
         changes = false;

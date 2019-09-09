@@ -268,8 +268,8 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
     //TODO: only temporary
-    specificData.insert_or_assign("numThreadsPerBlock", 64);
-    specificData.insert_or_assign("numBlocks", 64);
+    specificData.insert_or_assign("numThreadsPerBlock", 16);
+    specificData.insert_or_assign("numBlocks", 64*8);
 
     specificData.insert_or_assign("numClusterPointerArrays", 1);
     specificData.insert_or_assign("maxClusters", 500000);
