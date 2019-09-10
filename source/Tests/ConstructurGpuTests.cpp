@@ -696,19 +696,6 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
         }
     }
     EXPECT_GE(2, remainingCells.size());
-    if (remainingCells.size() > 2) {
-        for (auto const& cell : remainingCells) {
-            std::cout << "pos: " << cell.pos->x() << ", " << cell.pos->y() << std::endl;
-        }
-
-        for (auto const& cluster : *newData.clusters) {
-            std::cout << "new cluster:" << std::endl;
-            for (auto const& cell: *cluster.cells) {
-                std::cout << "id: " << cell.id << ", pos: " << cell.pos->x() << " ,"
-                    << cell.pos->y() << ", energy: " << *cell.energy << std::endl;
-            }
-        }
-    }
 
     result.constructionSite = std::move(remainingCells);
 
@@ -906,14 +893,14 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     DataDescription origData;
     origData.addCluster(cluster);
 
-    std::unordered_set<uint64_t> obstacleCellIds;
+    set<std::pair<float, float>> obstaclePositions;
     if (parameters._verticalObstacleAt) {
         auto const obstacle = createRectangularCluster(
             {10, 2}, *cluster.pos + QVector2D{0, -0.5f + *parameters._verticalObstacleAt}, QVector2D{});
-        for (auto const& cell : *obstacle.cells) {
-            obstacleCellIds.insert(cell.id);
-        }
         origData.addCluster(obstacle);
+        for (auto const& cell : *obstacle.cells) {
+            obstaclePositions.emplace(cell.pos->x(), cell.pos->y());
+        }
     }
 
     IntegrationTestHelper::updateData(_access, origData);
@@ -929,7 +916,7 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
 
     std::unordered_map<uint64_t, CellDescription> newCellsWithoutObstacleByCellId;
     for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
-        if (obstacleCellIds.find(newCell.id) == obstacleCellIds.end()) {
+        if (obstaclePositions.find({ newCell.pos->x(), newCell.pos->y() }) == obstaclePositions.end()) {
             newCellsWithoutObstacleByCellId.insert_or_assign(newCell.id, newCell);
         }
     }
@@ -958,14 +945,13 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
         result.origConstructor.emplace_back(origCells[i]);
         newCellByCellId.erase(cellIds[i]);
     }
-    for (auto obstacleCellId : obstacleCellIds) {
-        newCellByCellId.erase(obstacleCellId);
-    }
     for (int i = 0; i < numCellsOfConstructionSite; ++i) {
         result.origConstructionSite.emplace_back(origCells[offset + 2 + i]);
     }
-    for (auto const& cell : newCellByCellId | boost::adaptors::map_values) {
-        result.constructionSite.emplace_back(cell);
+    for (auto const& newCell : newCellByCellId | boost::adaptors::map_values) {
+        if (obstaclePositions.find({ newCell.pos->x(), newCell.pos->y() }) == obstaclePositions.end()) {
+            result.constructionSite.emplace_back(newCell);
+        }
     }
 
     return result;
