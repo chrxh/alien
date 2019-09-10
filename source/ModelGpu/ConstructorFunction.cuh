@@ -247,7 +247,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
 
     if (ClusterComponent::ConstructionSite == cell->tag) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
-        __syncthreads();
         return;
     }
 
@@ -271,6 +270,11 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
     __syncthreads();
 
     if (isAngleRestricted) {
+
+        if (abs(anglesToRotate.constructor) < 1.0f && abs(anglesToRotate.constructionSite) < 1.0f) {
+            _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
+            return;
+        }
 
         //angle discretization correction
         if (0 == threadIdx.x) {
@@ -711,7 +715,9 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
     auto prevCell = firstCellOfConstructionSite;
     auto currentCell = firstCellOfConstructionSite;
     int numFail = 0;
+/*
     if (currentCell->numConnections > 0) {
+*/
         do {
             for (int i = 0; i < currentCell->numConnections; ++i) {
                 auto const& connectingCell = currentCell->connections[i];
@@ -744,7 +750,9 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
             }
 
         } while (true);
+/*
     }
+*/
 
     //step 1: slow algorithm but complete
     __shared__ bool changes;
@@ -1035,7 +1043,6 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     RotationMatrices const& rotationMatrices,
     bool& result)
 {
-    result = false;
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
     tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     __syncthreads();
@@ -1055,13 +1062,25 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     }
     __syncthreads();
 
+    __shared__ Math::Matrix clusterMatrix;
     if (0 == threadIdx.x) {
         newCenter = newCenter / _cluster->numCellPointers;
+        Math::rotationMatrix(_cluster->angle, clusterMatrix);
     }
     __syncthreads();
 
-    Math::Matrix clusterMatrix;
-    Math::rotationMatrix(_cluster->angle, clusterMatrix);
+    if (!ignoreOwnCluster) {
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+            auto const& cell = _cluster->cellPointers[cellIndex];
+            auto relPos =
+                getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0,0 });
+            relPos = relPos - newCenter;
+            auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
+            tempCellMap.insertOrAssign(toInt2(absPos), CellAndNewAbsPos{ cell, absPos });
+        }
+    }
+    __syncthreads();
+
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = _cluster->cellPointers[cellIndex];
         auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
@@ -1082,7 +1101,6 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     float2 const& displacementOfConstructionSite,
     bool& result)
 {
-    result = false;
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
     tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     __syncthreads();
@@ -1140,7 +1158,6 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     float2 const& relPosOfNewCell,
     bool& result)
 {
-    result = false;
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
     tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     __syncthreads();
@@ -1159,13 +1176,13 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     }
     __syncthreads();
 
+    __shared__ Math::Matrix clusterMatrix;
     if (0 == threadIdx.x) {
         newCenter = newCenter / (_cluster->numCellPointers + 1);
+        Math::rotationMatrix(_cluster->angle, clusterMatrix);
     }
     __syncthreads();
 
-    Math::Matrix clusterMatrix;
-    Math::rotationMatrix(_cluster->angle, clusterMatrix);
     if (!ignoreOwnCluster) {
         for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             auto const& cell = _cluster->cellPointers[cellIndex];
