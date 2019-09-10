@@ -161,6 +161,11 @@ protected:
             optional<float>,
             verticalObstacleAt,
             boost::none);
+        MEMBER_DECLARATION(
+            FurtherCellConstructionOnLineClusterTestParameters,
+            int,
+            additionalCellsOnConstructor,
+            0);
 
         struct CellProperties
         {
@@ -825,36 +830,50 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     CHECK(1 <= numCellsOfConstructionSite);
 
     vector<uint64_t> cellIds;
-    for (int i = 0; i < numCellsOfConstructionSite + 2; ++i) {
+    for (int i = 0; i < numCellsOfConstructionSite + 2 + parameters._additionalCellsOnConstructor; ++i) {
         cellIds.emplace_back(_numberGen->getId());
     }
 
     auto const refPos = QVector2D{ 10.5f, 10.5f };
     auto const cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
+    for (int i = 0; i < parameters._additionalCellsOnConstructor; ++i) {
+        list<uint64_t> connectingCells{ cellIds[i + 1] };
+        if (i > 0) {
+            connectingCells.push_back(cellIds[i - 1]);
+        }
+        cluster.addCell(CellDescription().setId(cellIds[i])
+            .setConnectingCells(connectingCells)
+            .setEnergy(cellEnergy)
+            .setPos(refPos + QVector2D{ static_cast<float>(i), 0 })
+            .setMaxConnections(2)
+            .setTokenBranchNumber(0)
+            .setCellFeature(CellFeatureDescription()));
+    }
+    int offset = parameters._additionalCellsOnConstructor;
     cluster.addCells({CellDescription()
-                          .setId(cellIds[0])
-                          .setConnectingCells({cellIds[1]})
+                          .setId(cellIds[offset])
+                          .setConnectingCells({cellIds[offset+ 1]})
                           .setEnergy(cellEnergy)
-                          .setPos(refPos)
+                          .setPos(refPos + QVector2D{ static_cast<float>(offset), 0 })
                           .setMaxConnections(1)
                           .setTokenBranchNumber(0)
                           .setCellFeature(CellFeatureDescription())
                           .addToken(parameters._tokenOnSourceCell),
                       CellDescription()
-                          .setId(cellIds[1])
-                          .setConnectingCells({cellIds[0], cellIds[2]})
+                          .setId(cellIds[offset + 1])
+                          .setConnectingCells({cellIds[offset], cellIds[offset + 2]})
                           .setEnergy(cellEnergy)
-                          .setPos(refPos + QVector2D{1, 0})
+                          .setPos(refPos + QVector2D{ static_cast<float>(offset) + 1, 0})
                           .setMaxConnections(2)
                           .setTokenBranchNumber(1)
                           .setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR))});
 
     auto lastAngle = 90.0f;     //abolute value with respect to {0, -1}
-    auto lastPosition = refPos + QVector2D{ 1, 0 };
+    auto lastPosition = refPos + QVector2D{ static_cast<float>(offset) + 1, 0 };
     for (int i = 0; i < numCellsOfConstructionSite; ++i) {
-        list<uint64_t> connectingCells{ cellIds[1 + i] };
+        list<uint64_t> connectingCells{ cellIds[offset + 1 + i] };
         if (i < numCellsOfConstructionSite - 1) {
-            connectingCells.emplace_back(cellIds[3 + i]);
+            connectingCells.emplace_back(cellIds[offset + 3 + i]);
         }
         auto const tokenBlocked = 0 == i;
         auto cellProperties = parameters._propertiesOfConstructionSite[i];
@@ -866,7 +885,7 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
         }
         auto const tokenBranchNumber = cellProperties.tokenBranchNumber ? *cellProperties.tokenBranchNumber : 1;
         auto cell = CellDescription()
-                        .setId(cellIds[2 + i])
+                        .setId(cellIds[offset + 2 + i])
                         .setConnectingCells(connectingCells)
                         .setFlagTokenBlocked(tokenBlocked)
                         .setEnergy(cellEnergy)
@@ -924,18 +943,18 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     TestResult result;
     result.movementOfCenter = newCenter - *cluster.pos;
 
-    auto const& newConstructor = newCellByCellId.at(cellIds[1]);
+    auto const& newConstructor = newCellByCellId.at(cellIds[offset + 1]);
     auto const& newToken = newConstructor.tokens->at(0);
 
     result.origToken = parameters._tokenOnSourceCell;
     result.token = newToken;
-    result.origSourceCell = origCells[0];
-    if (newCellByCellId.find(cellIds[0]) != newCellByCellId.end()) {
-        result.sourceCell = newCellByCellId.at(cellIds[0]);
+    result.origSourceCell = origCells[offset];
+    if (newCellByCellId.find(cellIds[offset]) != newCellByCellId.end()) {
+        result.sourceCell = newCellByCellId.at(cellIds[offset]);
     }
-    result.origConstructorCell = origCells[1];
+    result.origConstructorCell = origCells[offset + 1];
     result.constructorCell = newConstructor;
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < offset + 2; ++i) {
         result.origConstructor.emplace_back(origCells[i]);
         newCellByCellId.erase(cellIds[i]);
     }
@@ -943,7 +962,7 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
         newCellByCellId.erase(obstacleCellId);
     }
     for (int i = 0; i < numCellsOfConstructionSite; ++i) {
-        result.origConstructionSite.emplace_back(origCells[2 + i]);
+        result.origConstructionSite.emplace_back(origCells[offset + 2 + i]);
     }
     for (auto const& cell : newCellByCellId | boost::adaptors::map_values) {
         result.constructionSite.emplace_back(cell);
@@ -2772,4 +2791,47 @@ TEST_F(ConstructorGpuTests, testMultipleConnectedConstructionSites_errorConnecti
         auto const& token = newCluster.cells->at(i + 1).tokens->at(0);
         EXPECT_EQ(Enums::ConstrOut::ERROR_CONNECTION, token.data->at(Enums::Constr::OUT));
     }
+}
+
+TEST_F(ConstructorGpuTests, testLargeConstructionSite)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
+
+    vector<FurtherCellConstructionOnLineClusterTestParameters::CellProperties> constructionSiteProperties;
+    for (int i = 0; i < 140; ++i) {
+        constructionSiteProperties.emplace_back(
+            FurtherCellConstructionOnLineClusterTestParameters::CellProperties{ 180.0f, 0 });
+    }
+    auto const result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
+            constructionSiteProperties));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT));
+}
+
+TEST_F(ConstructorGpuTests, testLargeConstructor)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
+
+    vector<FurtherCellConstructionOnLineClusterTestParameters::CellProperties> constructionSiteProperties;
+    auto const result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).additionalCellsOnConstructor(140));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS_ROT));
+}
+
+TEST_F(ConstructorGpuTests, testLargeConstructionSiteAndConstructor)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).angle(90));
+
+    vector<FurtherCellConstructionOnLineClusterTestParameters::CellProperties> constructionSiteProperties;
+    for (int i = 0; i < 140; ++i) {
+        constructionSiteProperties.emplace_back(
+            FurtherCellConstructionOnLineClusterTestParameters::CellProperties{ 180.0f, 0 });
+    }
+    auto const result = runFurtherCellConstructionOnLineClusterTest(
+        FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
+            constructionSiteProperties).additionalCellsOnConstructor(140));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_DIST));
 }
