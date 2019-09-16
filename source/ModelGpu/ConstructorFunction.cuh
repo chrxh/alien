@@ -9,7 +9,7 @@ class ConstructorFunction
 {
 public:
     __inline__ __device__ void init_blockCall(Token* token, SimulationData* data);
-    __inline__ __device__ void processing();
+    __inline__ __device__ void processing_blockCall();
 
 private:
     struct ClusterComponent
@@ -154,7 +154,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void ConstructorFunction::processing()
+__inline__ __device__ void ConstructorFunction::processing_blockCall()
 {
     auto const command = _token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::DO_NOTHING == command) {

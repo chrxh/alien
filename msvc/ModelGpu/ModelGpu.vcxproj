@@ -243,6 +243,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Token.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessor.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\WeaponFunction.cuh" />
     <CustomBuild Include="..\..\source\ModelGpu\SimulationMonitorGpuImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SimulationMonitorGpuImpl.h...</Message>

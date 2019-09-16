@@ -159,6 +159,9 @@
     <ClInclude Include="..\..\source\ModelGpu\HashMap.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\WeaponFunction.cuh">
+      <Filter>Source Files\Impl\device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
