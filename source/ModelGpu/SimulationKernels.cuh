@@ -85,27 +85,22 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters, int
 /* Tokens																*/
 /************************************************************************/
 
-__device__ void tokenProcessing2_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
-{
-    TokenProcessor tokenProcessor;
-    tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
-    tokenProcessor.processingFeatures_blockCall();
-}
-
-__global__ void tokenProcessing(SimulationData data, int clusterArrayIndex)
+__global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
 {
     TokenProcessor tokenProcessor;
     tokenProcessor.init_gridCall(data, clusterArrayIndex);
     tokenProcessor.processingEnergyAveraging_gridCall();
     tokenProcessor.processingSpreading_gridCall();
-    tokenProcessor.processingFeatures_gridCall();
+    tokenProcessor.processingLightWeigthedFeatures_gridCall();
 }
 
-__global__ void tokenProcessing2(SimulationData data, int numClusters, int clusterArrayIndex)
+__global__ void tokenProcessingStep2(SimulationData data, int numClusters, int clusterArrayIndex)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        tokenProcessing2_blockCall(data, clusterArrayIndex, clusterIndex);
+        TokenProcessor tokenProcessor;
+        tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        tokenProcessor.processingHeavyWeightedFeatures_blockCall();
     }
 }
 
@@ -147,8 +142,8 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.arrays.reset();
 
     MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    MULTI_CALL(tokenProcessing, data);
-    MULTI_CALL(tokenProcessing2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(tokenProcessingStep1, data);
+    MULTI_CALL(tokenProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
