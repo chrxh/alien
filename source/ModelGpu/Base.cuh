@@ -148,13 +148,15 @@ public:
         }
     }
 
-    __device__ __inline__ void tryLock()
+    __device__ __inline__ bool tryLock()
     {
         _lockState1 = atomicExch(_lock1, 1);
         _lockState2 = atomicExch(_lock2, 1);
         if (0 != _lockState1 || 0 != _lockState2) {
             releaseLock();
+            return false;
         }
+        return true;
     }
 
     __device__ __inline__ bool isLocked()
