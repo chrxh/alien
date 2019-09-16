@@ -14,6 +14,7 @@
 #include "PropulsionFunction.cuh"
 #include "ScannerFunction.cuh"
 #include "ConstructorFunction.cuh"
+#include "WeaponFunction.cuh"
 
 class TokenProcessor
 {
@@ -23,8 +24,8 @@ public:
 
     __inline__ __device__ void processingEnergyAveraging_gridCall();
     __inline__ __device__ void processingSpreading_gridCall();
-    __inline__ __device__ void processingFeatures_gridCall();
-    __inline__ __device__ void processingFeatures_blockCall();
+    __inline__ __device__ void processingLightWeigthedFeatures_gridCall();
+    __inline__ __device__ void processingHeavyWeightedFeatures_blockCall();
 
 private:
     __inline__ __device__ int calcAnticipatedTokens(Cluster* cluster);
@@ -231,7 +232,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
     }
 }
 
-__inline__ __device__ void TokenProcessor::processingFeatures_gridCall()
+__inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridCall()
 {
     EntityFactory factory;
     factory.init(_data);
@@ -248,7 +249,7 @@ __inline__ __device__ void TokenProcessor::processingFeatures_gridCall()
     }
 }
 
-__inline__ __device__ void TokenProcessor::processingFeatures_blockCall()
+__inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_blockCall()
 {
     auto const numTokenPointers = _cluster->numTokenPointers;
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
@@ -263,7 +264,7 @@ __inline__ __device__ void TokenProcessor::processingFeatures_blockCall()
             constructor.init_blockCall(token, _data);
             __syncthreads();
 
-            constructor.processing();
+            constructor.processing_blockCall();
             __syncthreads();
         } break;
         }
@@ -320,7 +321,7 @@ __global__ void constructorLauncher(Token* token, SimulationData data)
 {
     ConstructorFunction constructor;
     constructor.init_blockCall(token, &data);
-    constructor.processing();
+    constructor.processing_blockCall();
 }
 
 __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token, EntityFactory& factory)
@@ -337,6 +338,9 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
     } break;
     case Enums::CellFunction::SCANNER: {
         ScannerFunction::processing(token);
+    } break;
+    case Enums::CellFunction::WEAPON: {
+        WeaponFunction::processing(token, _data);
     } break;
     }
 }
