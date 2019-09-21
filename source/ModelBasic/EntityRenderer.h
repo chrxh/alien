@@ -45,7 +45,12 @@ public:
 	void renderToken(IntVector2D const& pos)
 	{
 		auto const color = EntityRenderer::calcTokenColor();
-		{
+        {
+            IntVector2D posMod{ pos.x, pos.y };
+            _space->correctPosition(posMod);
+            EntityRenderer::colorPixel(posMod, color, 100);
+        }
+        {
 			for (int i = 1; i < 4; ++i) {
 				IntVector2D posMod{ pos.x, pos.y - i };
 				_space->correctPosition(posMod);
