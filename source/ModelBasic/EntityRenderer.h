@@ -49,28 +49,28 @@ public:
 			for (int i = 1; i < 4; ++i) {
 				IntVector2D posMod{ pos.x, pos.y - i };
 				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, 255 - i * 255 / 4);
+				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
 			}
 		}
 		{
 			for (int i = 1; i < 4; ++i) {
 				IntVector2D posMod{ pos.x + i, pos.y };
 				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, 255 - i * 255 / 4);
+				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
 			}
 		}
 		{
 			for (int i = 1; i < 4; ++i) {
 				IntVector2D posMod{ pos.x, pos.y + i };
 				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, 255 - i * 255 / 4);
+				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
 			}
 		}
 		{
 			for (int i = 1; i < 4; ++i) {
 				IntVector2D posMod{ pos.x - i, pos.y };
 				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, 255 - i * 255 / 4);
+				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
 			}
 		}
 	}

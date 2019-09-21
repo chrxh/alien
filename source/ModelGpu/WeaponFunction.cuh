@@ -34,21 +34,17 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
             }
             DoubleLock doubleLock;
             doubleLock.init(&cell->locked, &otherCell->locked);
-            bool success;
-            do {
-                success = doubleLock.tryLock();
-                if (success) {
-                    auto const energyToTransfer =
-                        otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
-                    if (otherCell->energy > energyToTransfer) {
-                        otherCell->energy -= energyToTransfer;
-                        token->energy += energyToTransfer / 2.0f;
-                        cell->energy += energyToTransfer / 2.0f;
-                        token->memory[Enums::Weapon::OUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
-                        doubleLock.releaseLock();
-                    }
+            if (doubleLock.tryLock()) {
+                auto const energyToTransfer =
+                    otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
+                if (otherCell->energy > energyToTransfer) {
+                    otherCell->energy -= energyToTransfer;
+                    token->energy += energyToTransfer / 2.0f;
+                    cell->energy += energyToTransfer / 2.0f;
+                    token->memory[Enums::Weapon::OUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
+                    doubleLock.releaseLock();
                 }
-            } while (!success);
+            }
         }
     }
 }
