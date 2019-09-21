@@ -396,7 +396,6 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 			tokenTO.energy = *tokenDesc.energy;
 			tokenTO.cellIndex = cellIndex;
 			convertToArray(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
-            tokenTO.memory[0] = cellTO.branchNumber % _parameters.cellMaxTokenBranchNumber;
         }
 	}
 
