@@ -1260,6 +1260,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
 __inline__ __device__ void
 ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const energyOfNewCell, Cell*& result)
 {
+    __shared__ int offset;
     if (0 == threadIdx.x) {
         EntityFactory factory;
         factory.init(_data);
@@ -1275,7 +1276,11 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
             _token->memory[Enums::Constr::IN_CELL_BRANCH_NO] % cudaSimulationParameters.cellMaxTokenBranchNumber;
         result->tokenBlocked = true;
         result->cellFunctionType = _token->memory[Enums::Constr::IN_CELL_FUNCTION];
-        result->numStaticBytes = _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA];
+        result->numStaticBytes =
+            static_cast<int>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA]) % (MAX_CELL_STATIC_BYTES + 1);
+        offset = result->numStaticBytes + 1;
+        result->numMutableBytes = static_cast<int>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset])
+            % (MAX_CELL_MUTABLE_BYTES + 1);
     }
     __syncthreads();
 
@@ -1283,8 +1288,6 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
     for (int i = staticDataBlock.startIndex; i <= staticDataBlock.endIndex; ++i) {
         result->staticData[i] = _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1];
     }
-    int offset = result->numStaticBytes + 1;
-    result->numMutableBytes = _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset];
     auto const mutableDataBlock = calcPartition(result->numMutableBytes, threadIdx.x, blockDim.x);
     for (int i = mutableDataBlock.startIndex; i <= mutableDataBlock.endIndex; ++i) {
         result->mutableData[i] = _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1];
