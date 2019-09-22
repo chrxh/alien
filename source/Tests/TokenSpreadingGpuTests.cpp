@@ -63,6 +63,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
 	}
 	auto& firstCell = cluster.cells->at(0);
 	auto token = createSimpleToken();
+    (*token.data)[0] = 1;
 	firstCell.addToken(token);
 	origData.addCluster(cluster);
 	
