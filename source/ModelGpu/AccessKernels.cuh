@@ -25,7 +25,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
         PartitionData cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
 
         __shared__ bool containedInRect;
-        __shared__ BasicMap map;
+        __shared__ MapInfo map;
         if (0 == threadIdx.x) {
             containedInRect = false;
             map.init(data.size);
@@ -241,8 +241,6 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     convertData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data, access);
     cudaDeviceSynchronize();
 
-    data.cellMap.reset();
-    data.particleMap.reset();
     cleanup<<<1, 1>>>(data);
     cudaDeviceSynchronize();
 }
