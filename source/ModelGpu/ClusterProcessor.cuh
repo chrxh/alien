@@ -785,6 +785,20 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
     else if (_cluster->clusterToFuse) {
         copyClusterWithFusion_blockCall();
     }
+
+    //--- mutation hack ---
+/*
+    __syncthreads();
+    if (0 == threadIdx.x) {
+        if (_data->numberGen.random() < 0.0001f) {
+            auto cellIndex = static_cast<int>(_data->numberGen.random(_cluster->numCellPointers - 1));
+            Cell* cell = _cluster->cellPointers[cellIndex];
+            auto const index = static_cast<int>(_data->numberGen.random(MAX_CELL_STATIC_BYTES - 1));
+            cell->staticData[index] = _data->numberGen.random(255);
+        }
+    }
+    __syncthreads();
+*/
 }
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()

@@ -30,7 +30,7 @@ public:
         float angularMass, float2& velInc, float& angularVelInc);
 
 private:
-	__device__ __inline__ static float2 calcOutwardVector(Cell* cellA, Cell* cellB, BasicMap const& map);
+	__device__ __inline__ static float2 calcOutwardVector(Cell* cellA, Cell* cellB, MapInfo const& map);
 };
 
 
@@ -179,7 +179,7 @@ __inline__ __device__ float Physics::kineticEnergy(float mass, float2 const& vel
     return linearKineticEnergy(mass, vel) + rotationalKineticEnergy(angularMass, angularVel);
 }
 
-__device__ __inline__ float2 Physics::calcOutwardVector(Cell* cellA, Cell* cellB, BasicMap const& map)
+__device__ __inline__ float2 Physics::calcOutwardVector(Cell* cellA, Cell* cellB, MapInfo const& map)
 {
 	Cluster* clusterA = cellA->cluster;
 	float2 posA = clusterA->pos;
