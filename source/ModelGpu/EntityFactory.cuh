@@ -15,7 +15,7 @@
 class EntityFactory
 {
 private:
-    BasicMap _map;
+    MapInfo _map;
     SimulationData* _data;
 
 public:
