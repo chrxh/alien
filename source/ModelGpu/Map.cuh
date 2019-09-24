@@ -2,7 +2,7 @@
 
 #include "device_functions.h"
 
-class BasicMap
+class MapInfo
 {
 public:
 	__inline__ __host__ __device__ void init(int2 const& size)
@@ -65,12 +65,12 @@ protected:
 
 template<typename T>
 class Map
-    : public BasicMap
+    : public MapInfo
 {
 public:
     __host__ __inline__ void init(int2 const& size, int maxEntries)
     {
-        BasicMap::init(size);
+        MapInfo::init(size);
         CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
         _mapEntries.init(maxEntries);
 
@@ -88,14 +88,6 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_map);
         _mapEntries.free();
     }
-
-	__device__ __inline__ bool isEntityPresent(float2 const& pos, T* entity) const
-	{
-		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-		mapPosCorrection(posInt);
-		auto mapEntry = posInt.x + posInt.y * BasicMap::_size.x;
-		return _map[mapEntry] == entity;
-	}
 
 	__device__ __inline__ T* get(float2 const& pos) const
 	{
