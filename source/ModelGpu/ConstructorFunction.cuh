@@ -1270,16 +1270,17 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
         float rotMatrix[2][2];
         Math::rotationMatrix(_cluster->angle, rotMatrix);
         result->absPos = Math::applyMatrix(result->relPos, rotMatrix) + _cluster->pos;
-        result->maxConnections = _token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
+        result->maxConnections = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS])
+            % (cudaSimulationParameters.cellMaxBonds + 1);
         result->numConnections = 0;
         result->branchNumber =
             _token->memory[Enums::Constr::IN_CELL_BRANCH_NO] % cudaSimulationParameters.cellMaxTokenBranchNumber;
         result->tokenBlocked = true;
         result->cellFunctionType = _token->memory[Enums::Constr::IN_CELL_FUNCTION];
-        result->numStaticBytes =
-            static_cast<int>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA]) % (MAX_CELL_STATIC_BYTES + 1);
+        result->numStaticBytes = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA])
+            % (MAX_CELL_STATIC_BYTES + 1);
         offset = result->numStaticBytes + 1;
-        result->numMutableBytes = static_cast<int>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset])
+        result->numMutableBytes = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset])
             % (MAX_CELL_MUTABLE_BYTES + 1);
     }
     __syncthreads();
