@@ -27,7 +27,7 @@ struct SimulationData
         cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
         arrays.init(100000000);  //TODO: make configurable
-        numberGen.init(31231257);
+        numberGen.init(312312357);
     }
 
     void free()
