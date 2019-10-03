@@ -83,7 +83,7 @@
        <widget class="QLabel" name="label_10">
         <property name="minimumSize">
          <size>
-          <width>180</width>
+          <width>200</width>
           <height>0</height>
          </size>
         </property>
@@ -130,7 +130,7 @@
           <widget class="QLabel" name="label_11">
            <property name="minimumSize">
             <size>
-             <width>180</width>
+             <width>200</width>
              <height>0</height>
             </size>
            </property>
@@ -396,7 +396,7 @@
           <widget class="QLabel" name="label_6">
            <property name="minimumSize">
             <size>
-             <width>180</width>
+             <width>200</width>
              <height>0</height>
             </size>
            </property>
@@ -565,7 +565,7 @@
        <widget class="QLabel" name="label_3">
         <property name="minimumSize">
          <size>
-          <width>180</width>
+          <width>200</width>
           <height>0</height>
          </size>
         </property>
@@ -628,6 +628,22 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>cpuDeviceRadioButton</tabstop>
+  <tabstop>gpuDeviceRadioButton</tabstop>
+  <tabstop>gpuUniverseSizeXEdit</tabstop>
+  <tabstop>gpuUniverseSizeYEdit</tabstop>
+  <tabstop>gpuNumThreadsPerBlockEdit</tabstop>
+  <tabstop>gpuNumBlocksEdit</tabstop>
+  <tabstop>gpuMaxClustersEdit</tabstop>
+  <tabstop>gpuMaxCellsEdit</tabstop>
+  <tabstop>gpuMaxTokensEdit</tabstop>
+  <tabstop>gpuMaxParticlesEdit</tabstop>
+  <tabstop>gpuDynamicMemorySizeEdit</tabstop>
+  <tabstop>gridSizeXEdit</tabstop>
+  <tabstop>gridSizeYEdit</tabstop>
+  <tabstop>unitSizeXEdit</tabstop>
+  <tabstop>unitSizeYEdit</tabstop>
+  <tabstop>maxThreadsEdit</tabstop>
   <tabstop>energyEdit</tabstop>
   <tabstop>simulationParametersButton</tabstop>
   <tabstop>symbolTableButton</tabstop>
