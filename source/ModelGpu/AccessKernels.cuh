@@ -46,6 +46,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
             __shared__ int tokenTOIndex;
             __shared__ CellAccessTO* cellTOs;
             __shared__ TokenAccessTO* tokenTOs;
+
             if (0 == threadIdx.x) {
                 int clusterAccessIndex = atomicAdd(simulationTO.numClusters, 1);
                 cellTOIndex = atomicAdd(simulationTO.numCells, cluster->numCellPointers);
@@ -68,6 +69,9 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
             __syncthreads();
 
             cluster->tagCellByIndex_blockCall(cellBlock);
+/*
+            printf("D12, id: %llu, pos: (%f, %f), numElements: %d\n", cluster->id, cluster->pos.x, cluster->pos.y, cluster->numCellPointers);
+*/
 
             for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
                 Cell const& cell = *cluster->cellPointers[cellIndex];
@@ -81,6 +85,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                 cellTO.tokenBlocked = cell.tokenBlocked;
                 cellTO.cellFunctionType = cell.cellFunctionType;
                 cellTO.numStaticBytes = cell.numStaticBytes;
+                cellTO.age = cell.age;
                 for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
                     cellTO.staticData[i] = cell.staticData[i];
                 }
@@ -89,7 +94,22 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                     cellTO.mutableData[i] = cell.mutableData[i];
                 }
                 for (int i = 0; i < cell.numConnections; ++i) {
+/*
+                    if (cluster->id == 281474976869217) {
+                        printf(">>>\n");
+                    }
+*/
                     int connectingCellIndex = cell.connections[i]->tag + cellTOIndex;
+/*
+                    if (cluster->id == 281474976869217) {
+                        printf(
+                            "cellid: %llu, connectingCellIndex: %i, numConnections: %i, maxConnections: %i \n",
+                            cell.id,
+                            connectingCellIndex,
+                            cell.numConnections,
+                            cell.maxConnections);
+                    }
+*/
                     cellTO.connectionIndices[i] = connectingCellIndex;
                 }
             }

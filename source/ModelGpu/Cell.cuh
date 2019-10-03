@@ -21,6 +21,7 @@ struct Cell
     char staticData[MAX_CELL_STATIC_BYTES];
     unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
+    int age;
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked

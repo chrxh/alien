@@ -17,14 +17,16 @@ public:
     __inline__ __device__ void processingMovement_blockCall();
     __inline__ __device__ void updateMap_blockCall();
     __inline__ __device__ void processingCollision_blockCall();
-    __inline__ __device__ void destroyCloseCell_blockCall();
-    __inline__ __device__ void processingRadiation_blockCall();
+    __inline__ __device__ void destroyCell_blockCall();
+    __inline__ __device__ void processingMutation_blockCall();
 
+    __inline__ __device__ void processingRadiation_blockCall();
     __inline__ __device__ void processingDecomposition_blockCall();
     __inline__ __device__ void processingClusterCopy_blockCall();
 
 private:
-    __inline__ __device__ void destroyCloseCell(Cell *cell);
+    __inline__ __device__ void cellAging(Cell* cell);
+    __inline__ __device__ void destroyCloseCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
     __inline__ __device__ bool areConnectable(Cell *cell1, Cell *cell2);
 
@@ -290,11 +292,24 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::destroyCloseCell_blockCall()
+__inline__ __device__ void ClusterProcessor::destroyCell_blockCall()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
-         destroyCloseCell(cell);
+        destroyCloseCell(cell);
+        cellAging(cell);
+    }
+    __syncthreads();
+}
+
+__inline__ __device__ void ClusterProcessor::processingMutation_blockCall()
+{
+    for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellMutationProb) {
+            Cell* cell = _cluster->cellPointers[cellIndex];
+            auto const index = static_cast<int>(_data->numberGen.random(MAX_CELL_STATIC_BYTES - 1));
+            cell->staticData[index] = _data->numberGen.random(255);
+        }
     }
     __syncthreads();
 }
@@ -402,6 +417,18 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
     }
 
     __syncthreads();
+}
+
+__inline__ __device__ void ClusterProcessor::cellAging(Cell * cell)
+{
+    if (++cell->age > cudaSimulationParameters.cellMinAge) {
+        if (_data->numberGen.random() < 0.000001) {
+            if (_data->numberGen.random() < 0.1) {
+                atomicExch(&cell->alive, 0);
+                atomicExch(&cell->cluster->decompositionRequired, 1);
+            }
+        }
+    }
 }
 
 __inline__ __device__ void ClusterProcessor::destroyCloseCell(Cell * cell)
@@ -785,20 +812,6 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
     else if (_cluster->clusterToFuse) {
         copyClusterWithFusion_blockCall();
     }
-
-    //--- mutation hack ---
-/*
-    __syncthreads();
-    if (0 == threadIdx.x) {
-        if (_data->numberGen.random() < 0.0001f) {
-            auto cellIndex = static_cast<int>(_data->numberGen.random(_cluster->numCellPointers - 1));
-            Cell* cell = _cluster->cellPointers[cellIndex];
-            auto const index = static_cast<int>(_data->numberGen.random(MAX_CELL_STATIC_BYTES - 1));
-            cell->staticData[index] = _data->numberGen.random(255);
-        }
-    }
-    __syncthreads();
-*/
 }
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
