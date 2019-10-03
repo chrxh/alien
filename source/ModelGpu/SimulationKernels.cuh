@@ -28,7 +28,7 @@ __device__  void clusterProcessingStep2_blockCall(SimulationData data, int clust
 {
     ClusterProcessor clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
-    clusterProcessor.destroyCloseCell_blockCall();
+    clusterProcessor.destroyCell_blockCall();
 }
 
 __device__ void clusterProcessingStep3_blockCall(SimulationData data, int clusterArrayIndex, int clusterIndex)
@@ -44,6 +44,7 @@ __device__ void clusterProcessingStep4_blockCall(SimulationData data, int cluste
 {
 	ClusterProcessor clusterProcessor;
     clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+    clusterProcessor.processingMutation_blockCall();
     clusterProcessor.processingDecomposition_blockCall();
     clusterProcessor.processingClusterCopy_blockCall();
 }
@@ -154,7 +155,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
     particleProcessingStep3 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
 
-    cleanup<<<1, 1>>>(data);
+    cleanup << <1, 1 >> > (data);
     cudaDeviceSynchronize();
 }
 

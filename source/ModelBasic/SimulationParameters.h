@@ -10,12 +10,13 @@ struct SimulationParameters
 	float cellMass_Reciprocal = 0.0; //related to 1/mass
 	float cellMaxForce = 0.0;
 	float cellMaxForceDecayProb = 0.0;
-	int cellMaxBonds = 0;
+    int cellMinAge = 0;
+    int cellMaxBonds = 0;
 	int cellMaxToken = 0;
 	int cellMaxTokenBranchNumber = 0;
 	int cellCreationMaxConnection = 0;	//TODO: add to editor
 	int cellCreationTokenAccessNumber = 0; //TODO: add to editor
-	float cellMinEnergy = 0.0;
+    float cellMinEnergy = 0.0;
 	float cellTransformationProb = 0.0;
 	float cellFusionVelocity = 0.0;
 

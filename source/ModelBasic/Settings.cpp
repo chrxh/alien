@@ -151,13 +151,14 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
 	SimulationParameters parameters;
 	parameters.clusterMaxRadius = 40.0f;
 
-	parameters.cellMutationProb = 0.000001f;
+	parameters.cellMutationProb = 0.00001f;
 	parameters.cellMinDistance = 0.3f;
 	parameters.cellMaxDistance = 1.3f;
 	parameters.cellMass_Reciprocal = 1;
 	parameters.cellMaxForce = 0.8f;
 	parameters.cellMaxForceDecayProb = 0.2f;
-	parameters.cellMaxBonds = 6;
+    parameters.cellMinAge = 40000;
+    parameters.cellMaxBonds = 6;
 	parameters.cellMaxToken = 9;
 	parameters.cellMaxTokenBranchNumber = 6;
 	parameters.cellFunctionConstructorOffspringCellEnergy = 100.0f;
