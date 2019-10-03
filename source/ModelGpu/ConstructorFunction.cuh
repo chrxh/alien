@@ -620,10 +620,10 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     addCellToCluster(newCell, newCellPointers);
     __syncthreads();
 
-    _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
-
     connectNewCell(newCell, firstCellOfConstructionSite);
     __syncthreads();
+
+    _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
 
     adaptRelPositions();
     __syncthreads();
@@ -1422,7 +1422,7 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
                 }
             }
         } while (1 == isLocked);
-        atomicExch(&newCell->locked, 0);
+        atomicExch_block(&newCell->locked, 0);
     }
 }
 
@@ -1474,6 +1474,16 @@ ConstructorFunction::establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConne
 {
     cell1->connections[cell1->numConnections++] = cell2;
     cell2->connections[cell2->numConnections++] = cell1;
+
+    //DEBUG-Code
+    if (cell1->numConnections > cudaSimulationParameters.cellMaxBonds || cell2->numConnections > cudaSimulationParameters.cellMaxBonds) {
+        printf(
+            "BUG, numConnections: %d, %d, maxConnections: %d, %d\n",
+            cell1->numConnections,
+            cell2->numConnections,
+            cell1->maxConnections,
+            cell2->maxConnections);
+    }
 
     if (adaptMaxConnections == AdaptMaxConnections::Yes) {
         cell1->maxConnections = cell1->numConnections;
