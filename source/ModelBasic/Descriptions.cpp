@@ -104,17 +104,6 @@ QVector2D ClusterDescription::getClusterPosFromCells() const
 	return result;
 }
 
-optional<CellDescription> const & ClusterDescription::getCell(uint64_t id) const
-{
-    optional<CellDescription> result;
-    for (auto const& cell : *cells) {
-        if (cell.id == id) {
-            return cell;
-        }
-    }
-    return boost::none;
-}
-
 ParticleDescription::ParticleDescription(ParticleChangeDescription const & change)
 {
 	id = change.id;
