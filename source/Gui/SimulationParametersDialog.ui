@@ -85,6 +85,14 @@
       </property>
       <item>
        <property name="text">
+        <string>min age</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>mutation probability</string>
        </property>
        <property name="flags">

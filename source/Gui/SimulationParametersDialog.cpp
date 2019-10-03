@@ -63,7 +63,8 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 	setItem("max radius", 0, _simulationParameters.clusterMaxRadius);
 
 	setItem("mutation probability", 0, _simulationParameters.cellMutationProb);
-	setItem("min distance", 0, _simulationParameters.cellMinDistance);
+    setItem("min age", 0, _simulationParameters.cellMinAge);
+    setItem("min distance", 0, _simulationParameters.cellMinDistance);
 	setItem("max distance", 0, _simulationParameters.cellMaxDistance);
 	setItem("mass", 0, 1.0/_simulationParameters.cellMass_Reciprocal);
 	setItem("max force", 0, _simulationParameters.cellMaxForce);
@@ -98,7 +99,8 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
 {
 	_simulationParameters.clusterMaxRadius = getItemReal("max radius", 0);
 	
-	_simulationParameters.cellMutationProb = getItemReal("mutation probability", 0);
+    _simulationParameters.cellMinAge = getItemReal("min age", 0);
+    _simulationParameters.cellMutationProb = getItemReal("mutation probability", 0);
 	_simulationParameters.cellMinDistance = getItemReal("min distance", 0);
 	_simulationParameters.cellMaxDistance = getItemReal("max distance", 0);
     _simulationParameters.cellMass_Reciprocal = 1.0/ getItemReal("mass", 0);

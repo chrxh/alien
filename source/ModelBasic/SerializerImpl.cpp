@@ -165,9 +165,11 @@ namespace boost {
 			ar & data.radiationProb;
 			ar & data.radiationVelocityMultiplier;
 			ar & data.radiationVelocityPerturbation;
-			int fillInt = 0;
+            ar & data.cellMinAge;
+
+            int fillInt = 0;
 			double fillDouble = 0.0;
-			for (int i = 0; i < 50; ++i) {
+			for (int i = 0; i < 49; ++i) {
 				ar & fillInt;
 			}
 			for (int i = 0; i < 50; ++i) {

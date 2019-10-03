@@ -386,6 +386,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	else {
 		cellTO.numConnections = 0;
 	}
+    cellTO.age = 0;
 
 	if (cellDesc.tokens) {
 		clusterTO.numTokens += cellDesc.tokens->size();
