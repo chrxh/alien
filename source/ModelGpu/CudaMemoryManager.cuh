@@ -20,7 +20,7 @@ public:
     }
 
     template<typename T>
-    void acquireMemory(int64_t arraySize, T*& result)
+    void acquireMemory(uint64_t arraySize, T*& result)
     {
         checkCudaErrors(cudaMalloc(&result, sizeof(T)*arraySize));
         _bytes += sizeof(T)*arraySize;
@@ -32,7 +32,7 @@ public:
         checkCudaErrors(cudaFree(memory));
     }
 
-    int64_t getSizeOfAcquiredMemory() const
+    uint64_t getSizeOfAcquiredMemory() const
     {
         return _bytes;
     }
@@ -41,5 +41,5 @@ private:
     CudaMemoryManager() {}
     ~CudaMemoryManager() {}
 
-    int64_t _bytes = 0;
+    uint64_t _bytes = 0;
 };

@@ -100,7 +100,7 @@ public:
         : _size(0)
     {}
 
-    __host__ __inline__ void init(int size)
+    __host__ __inline__ void init(uint64_t size)
     {
         _size = size;
         unsigned char* data = nullptr;

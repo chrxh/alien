@@ -23,6 +23,7 @@ public:
     void setMaxClusterPointers(int value);
     void setMaxParticlePointers(int value);
     void setMaxTokenPointers(int value);
+    void setDynamicMemorySize(int value);
 
 	map<string, int> getData() const;
 
