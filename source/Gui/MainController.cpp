@@ -239,18 +239,18 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 		auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 		ModelGpuBuilderFacade::Config simulationControllerConfig{ configGpu->universeSize, configGpu->symbolTable, configGpu->parameters };
         ModelGpuData data;
-        data.setNumThreadsPerBlock(16);
-        data.setNumBlocks(64*8);
+        data.setNumBlocks(configGpu->numBlocks);
+        data.setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
 
         data.setNumClusterPointerArrays(1);
-        data.setMaxClusters(500000);
-        data.setMaxCells(2000000);
-        data.setMaxParticles(2000000);
-        data.setMaxTokens(500000);
-        data.setMaxCellPointers(2000000 * 10);
-        data.setMaxClusterPointers(500000 * 10);
-        data.setMaxParticlePointers(2000000 * 10);
-        data.setMaxTokenPointers(500000 * 10);
+        data.setMaxClusters(configGpu->maxClusters);
+        data.setMaxCells(configGpu->maxCells);
+        data.setMaxParticles(configGpu->maxParticles);
+        data.setMaxTokens(configGpu->maxTokens);
+        data.setMaxCellPointers(configGpu->maxCells * 10);
+        data.setMaxClusterPointers(configGpu->maxClusters * 10);
+        data.setMaxParticlePointers(configGpu->maxParticles * 10);
+        data.setMaxTokenPointers(configGpu->maxTokens * 10);
 
 		_simController = facade->buildSimulationController(simulationControllerConfig, data);
 	}

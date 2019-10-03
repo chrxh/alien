@@ -65,6 +65,18 @@ namespace Const
     const int GpuUniverseSizeXDefault = 4000;
     const std::string GpuUniverseSizeYKey = "newSim/gpu/universeSize/y";
     const int GpuUniverseSizeYDefault = 2000;
+    const std::string GpuNumBlocksKey = "newSim/gpu/numBlocks";
+    const int GpuNumBlocksDefault = 64*8;
+    const std::string GpuNumThreadsPerBlockKey = "newSim/gpu/numThreadsPerBlock";
+    const int GpuNumThreadsPerBlockDefault = 16;
+    const std::string GpuMaxClustersKey = "newSim/gpu/maxClusters";
+    const int GpuMaxClustersDefault = 500000;
+    const std::string GpuMaxCellsKey = "newSim/gpu/maxCells";
+    const int GpuMaxCellsDefault = 2000000;
+    const std::string GpuMaxTokensKey = "newSim/gpu/maxTokens";
+    const int GpuMaxTokensDefault = 500000;
+    const std::string GpuMaxParticlesKey = "newSim/gpu/maxParticles";
+    const int GpuMaxParticlesDefault = 2000000;
 
     const std::string InitialEnergyKey = "newSim/initialEnergy";
         const double InitialEnergyDefault = 0.0;
@@ -172,10 +184,12 @@ public:
 	static QPalette getPaletteForTab();
 
 	static int getSettingsValue(std::string const& key, int defaultValue);
-	static double getSettingsValue(std::string const& key, double defaultValue);
+    static uint getSettingsValue(std::string const& key, uint defaultValue);
+    static double getSettingsValue(std::string const& key, double defaultValue);
 	static bool getSettingsValue(std::string const& key, bool defaultValue);
 
 	static void setSettingsValue(std::string const& key, int value);
-	static void setSettingsValue(std::string const& key, double value);
+    static void setSettingsValue(std::string const& key, uint value);
+    static void setSettingsValue(std::string const& key, double value);
 	static void setSettingsValue(std::string const& key, bool value);
 };
