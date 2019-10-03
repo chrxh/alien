@@ -269,7 +269,9 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 	ia >> data >> universeSize >> typeId >> specificData >> parameters >> *symbolTable >> timestep;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-    //TODO: only temporary
+
+    //use following code for old simulation formats
+/*
     specificData.insert_or_assign("numThreadsPerBlock", 16);
     specificData.insert_or_assign("numBlocks", 64*8);
 
@@ -285,8 +287,8 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 
     specificData.insert_or_assign("randomNumberBlockSize", 31231257);
     specificData.insert_or_assign("protectionTimesteps", 14);
-    //---
-	auto simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
+*/
+	auto const simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
 
 	simController->setParent(this);
 
