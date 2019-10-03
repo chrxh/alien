@@ -251,6 +251,7 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
         data.setMaxClusterPointers(configGpu->maxClusters * 10);
         data.setMaxParticlePointers(configGpu->maxParticles * 10);
         data.setMaxTokenPointers(configGpu->maxTokens * 10);
+        data.setDynamicMemorySize(configGpu->dynamicMemorySize);
 
 		_simController = facade->buildSimulationController(simulationControllerConfig, data);
 	}

@@ -284,11 +284,9 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
     specificData.insert_or_assign("maxClusterPointers", 500000 * 10);
     specificData.insert_or_assign("maxParticlePointers", 2000000 * 10);
     specificData.insert_or_assign("maxTokenPointers", 500000 * 10);
-
-    specificData.insert_or_assign("randomNumberBlockSize", 31231257);
-    specificData.insert_or_assign("protectionTimesteps", 14);
+    specificData.insert_or_assign("dynamicMemorySize", 100000000);
 */
-	auto const simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
+    auto const simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
 
 	simController->setParent(this);
 

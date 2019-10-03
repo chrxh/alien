@@ -14,4 +14,5 @@ struct CudaConstants
     int MAX_CLUSTERPOINTERS = 0;/* MAX_CLUSTERS * 10*/
     int MAX_PARTICLEPOINTERS = 0;/* MAX_PARTICLES * 10*/
     int MAX_TOKENPOINTERS = 0;/* MAX_TOKENS * 10*/
+    int DYNAMIC_MEMORY_SIZE = 0;
 };
