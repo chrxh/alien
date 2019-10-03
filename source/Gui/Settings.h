@@ -4,6 +4,8 @@
 #include <QFont>
 #include <QPalette>
 
+#include "Definitions.h"
+
 namespace Const
 {
 	//visual editor
@@ -45,18 +47,27 @@ namespace Const
 	const std::string MainViewFullScreenKey = "mainView/fullScreen";
 	const bool MainViewFullScreenDefault = true;
 
-	const std::string GridSizeXKey = "newSim/gridSize/x";
-	const int GridSizeXDefault = 12;
-	const std::string GridSizeYKey = "newSim/gridSize/y";
-	const int GridSizeYDefault = 6;
-	const std::string UnitSizeXKey = "newSim/unitSize/x";
-	const int UnitSizeXDefault = 100;
-	const std::string UnitSizeYKey = "newSim/unitSize/y";
-	const int UnitSizeYDefault = 100;
-	const std::string MaxThreadsKey = "newSim/maxThreads";
-	const int MaxThreadsDefault = 8;
-	const std::string InitialEnergyKey = "newSim/initialEnergy";
-	const double InitialEnergyDefault = 0.0;
+    const std::string ModelComputationTypeKey = "newSim/modelComputationType";
+    const ModelComputationType ModelComputationTypeDefault = ModelComputationType::Gpu;
+
+	const std::string CpuGridSizeXKey = "newSim/cpu/gridSize/x";
+	const int CpuGridSizeXDefault = 12;
+	const std::string CpuGridSizeYKey = "newSim/cpu/gridSize/y";
+	const int CpuGridSizeYDefault = 6;
+	const std::string CpuUnitSizeXKey = "newSim/cpu/unitSize/x";
+	const int CpuUnitSizeXDefault = 100;
+	const std::string CpuUnitSizeYKey = "newSim/cpu/unitSize/y";
+	const int CpuUnitSizeYDefault = 100;
+	const std::string CpuMaxThreadsKey = "newSim/cpu/maxThreads";
+	const int CpuMaxThreadsDefault = 8;
+    
+    const std::string GpuUniverseSizeXKey = "newSim/gpu/universeSize/x";
+    const int GpuUniverseSizeXDefault = 4000;
+    const std::string GpuUniverseSizeYKey = "newSim/gpu/universeSize/y";
+    const int GpuUniverseSizeYDefault = 2000;
+
+    const std::string InitialEnergyKey = "newSim/initialEnergy";
+        const double InitialEnergyDefault = 0.0;
 
 	const std::string GridMulChangeVelXKey = "gridMul/changeVel/x";
 	const bool GridMulChangeVelXDefault = false;

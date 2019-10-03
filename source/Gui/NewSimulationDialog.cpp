@@ -20,18 +20,37 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const& parameters,
 	ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
 	ui->gridSizeXEdit->setText(StringHelper::toString(
-		GuiSettings::getSettingsValue(Const::GridSizeXKey, Const::GridSizeXDefault)));
+		GuiSettings::getSettingsValue(Const::CpuGridSizeXKey, Const::CpuGridSizeXDefault)));
 	ui->gridSizeYEdit->setText(StringHelper::toString(
-		GuiSettings::getSettingsValue(Const::GridSizeYKey, Const::GridSizeYDefault)));
+		GuiSettings::getSettingsValue(Const::CpuGridSizeYKey, Const::CpuGridSizeYDefault)));
 	ui->unitSizeXEdit->setText(StringHelper::toString(
-		GuiSettings::getSettingsValue(Const::UnitSizeXKey, Const::UnitSizeXDefault)));
+		GuiSettings::getSettingsValue(Const::CpuUnitSizeXKey, Const::CpuUnitSizeXDefault)));
 	ui->unitSizeYEdit->setText(StringHelper::toString(
-		GuiSettings::getSettingsValue(Const::UnitSizeYKey, Const::UnitSizeYDefault)));
+		GuiSettings::getSettingsValue(Const::CpuUnitSizeYKey, Const::CpuUnitSizeYDefault)));
 	ui->maxThreadsEdit->setText(StringHelper::toString(
-		GuiSettings::getSettingsValue(Const::MaxThreadsKey, Const::MaxThreadsDefault)));
+		GuiSettings::getSettingsValue(Const::CpuMaxThreadsKey, Const::CpuMaxThreadsDefault)));
+
+    ui->gpuUniverseSizeXEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuUniverseSizeXKey, Const::GpuUniverseSizeXDefault)));
+    ui->gpuUniverseSizeYEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuUniverseSizeYKey, Const::GpuUniverseSizeYDefault)));
+
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));
-	ui->gpuFrame->hide();
+
+    auto const modelType = static_cast<ModelComputationType>(
+        GuiSettings::getSettingsValue(Const::ModelComputationTypeKey, static_cast<int>(Const::ModelComputationTypeDefault)));
+    if (ModelComputationType::Cpu == modelType) {
+        ui->cpuDeviceRadioButton->setChecked(true);
+        ui->gpuFrame->hide();
+    }
+    else if (ModelComputationType::Gpu == modelType) {
+        ui->gpuDeviceRadioButton->setChecked(true);
+        ui->cpuFrame->hide();
+    }
+    else {
+        THROW_NOT_IMPLEMENTED();
+    }
 
 	updateLabels();
 
@@ -76,9 +95,21 @@ IntVector2D NewSimulationDialog::getUnitSize() const
 	return{ universeSize.x / gridSize.x, universeSize.y / gridSize.y };
 }
 
+ModelComputationType NewSimulationDialog::getModelType() const
+{
+    if (ui->cpuDeviceRadioButton->isChecked()) {
+        return ModelComputationType::Cpu;
+    }
+    else if (ui->gpuDeviceRadioButton->isChecked()) {
+        return ModelComputationType::Gpu;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 SimulationConfig NewSimulationDialog::getConfig() const
 {
-	if (ui->cpuDeviceRadioButton->isChecked()) {
+    auto const modelType = getModelType();
+	if (ModelComputationType::Cpu == modelType) {
 		auto config = boost::make_shared<_SimulationConfigCpu>();
 		config->maxThreads = getMaxThreads();
 		config->universeSize = getUniverseSizeForModelCpu();
@@ -87,7 +118,7 @@ SimulationConfig NewSimulationDialog::getConfig() const
 		config->symbolTable = getSymbolTable();
 		return config;
 	}
-	else if (ui->gpuDeviceRadioButton->isChecked()) {
+	else if (ModelComputationType::Gpu == modelType) {
 		auto config = boost::make_shared<_SimulationConfigGpu>();
 		config->universeSize = getUniverseSizeForModelGpu();
 		config->parameters = getSimulationParameters();
@@ -183,13 +214,16 @@ void NewSimulationDialog::okClicked()
 	string errorMsg;
 	auto valResult = config->validate(errorMsg);
 	if (valResult == _SimulationConfig::ValidationResult::Ok) {
-		GuiSettings::setSettingsValue(Const::GridSizeXKey, getGridSize().x);
-		GuiSettings::setSettingsValue(Const::GridSizeYKey, getGridSize().y);
-		GuiSettings::setSettingsValue(Const::UnitSizeXKey, getUnitSize().x);
-		GuiSettings::setSettingsValue(Const::UnitSizeYKey, getUnitSize().y);
-		GuiSettings::setSettingsValue(Const::MaxThreadsKey, static_cast<int>(getMaxThreads()));
-		GuiSettings::setSettingsValue(Const::InitialEnergyKey, getEnergy());
-		accept();
+		GuiSettings::setSettingsValue(Const::CpuGridSizeXKey, getGridSize().x);
+		GuiSettings::setSettingsValue(Const::CpuGridSizeYKey, getGridSize().y);
+		GuiSettings::setSettingsValue(Const::CpuUnitSizeXKey, getUnitSize().x);
+		GuiSettings::setSettingsValue(Const::CpuUnitSizeYKey, getUnitSize().y);
+		GuiSettings::setSettingsValue(Const::CpuMaxThreadsKey, static_cast<int>(getMaxThreads()));
+        GuiSettings::setSettingsValue(Const::GpuUniverseSizeXKey, getUniverseSizeForModelGpu().x);
+        GuiSettings::setSettingsValue(Const::GpuUniverseSizeYKey, getUniverseSizeForModelGpu().y);
+        GuiSettings::setSettingsValue(Const::InitialEnergyKey, getEnergy());
+        GuiSettings::setSettingsValue(Const::ModelComputationTypeKey, static_cast<int>(getModelType()));
+        accept();
 	}
 	else if (valResult == _SimulationConfig::ValidationResult::Error) {
 		QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
