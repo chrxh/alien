@@ -32,6 +32,7 @@ private:
 	SymbolTable* getSymbolTable() const;
 	SimulationParameters const& getSimulationParameters() const;
 	IntVector2D getUnitSize() const;
+    ModelComputationType getModelType() const;
 
 private:
 	Q_SLOT void simulationParametersButtonClicked();
