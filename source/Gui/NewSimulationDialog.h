@@ -33,6 +33,12 @@ private:
 	SimulationParameters const& getSimulationParameters() const;
 	IntVector2D getUnitSize() const;
     ModelComputationType getModelType() const;
+    uint getNumBlocks() const;
+    uint getNumThreadsPerBlock() const;
+    uint getMaxClusters() const;
+    uint getMaxCells() const;
+    uint getMaxTokens() const;
+    uint getMaxParticles() const;
 
 private:
 	Q_SLOT void simulationParametersButtonClicked();

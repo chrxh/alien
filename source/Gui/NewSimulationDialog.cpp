@@ -34,6 +34,18 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const& parameters,
         GuiSettings::getSettingsValue(Const::GpuUniverseSizeXKey, Const::GpuUniverseSizeXDefault)));
     ui->gpuUniverseSizeYEdit->setText(StringHelper::toString(
         GuiSettings::getSettingsValue(Const::GpuUniverseSizeYKey, Const::GpuUniverseSizeYDefault)));
+    ui->gpuNumBlocksEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuNumBlocksKey, Const::GpuNumBlocksDefault)));
+    ui->gpuNumThreadsPerBlockEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuNumThreadsPerBlockKey, Const::GpuNumThreadsPerBlockDefault)));
+    ui->gpuMaxClustersEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuMaxClustersKey, Const::GpuMaxClustersDefault)));
+    ui->gpuMaxCellsEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuMaxCellsKey, Const::GpuMaxCellsDefault)));
+    ui->gpuMaxTokensEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuMaxTokensKey, Const::GpuMaxTokensDefault)));
+    ui->gpuMaxParticlesEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuMaxParticlesKey, Const::GpuMaxParticlesDefault)));
 
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));
@@ -106,6 +118,49 @@ ModelComputationType NewSimulationDialog::getModelType() const
     THROW_NOT_IMPLEMENTED();
 }
 
+namespace
+{
+    uint getUIntOrZero(QString const& string)
+    {
+        bool ok(true);
+        auto const value = string.toUInt(&ok);
+        if (!ok) {
+            return 0;
+        }
+        return value;
+    }
+}
+
+uint NewSimulationDialog::getNumBlocks() const
+{
+    return getUIntOrZero(ui->gpuNumBlocksEdit->text());
+}
+
+uint NewSimulationDialog::getNumThreadsPerBlock() const
+{
+    return getUIntOrZero(ui->gpuNumThreadsPerBlockEdit->text());
+}
+
+uint NewSimulationDialog::getMaxClusters() const
+{
+    return getUIntOrZero(ui->gpuMaxClustersEdit->text());
+}
+
+uint NewSimulationDialog::getMaxCells() const
+{
+    return getUIntOrZero(ui->gpuMaxCellsEdit->text());
+}
+
+uint NewSimulationDialog::getMaxTokens() const
+{
+    return getUIntOrZero(ui->gpuMaxTokensEdit->text());
+}
+
+uint NewSimulationDialog::getMaxParticles() const
+{
+    return getUIntOrZero(ui->gpuMaxParticlesEdit->text());
+}
+
 SimulationConfig NewSimulationDialog::getConfig() const
 {
     auto const modelType = getModelType();
@@ -123,7 +178,13 @@ SimulationConfig NewSimulationDialog::getConfig() const
 		config->universeSize = getUniverseSizeForModelGpu();
 		config->parameters = getSimulationParameters();
 		config->symbolTable = getSymbolTable();
-		return config;
+        config->numBlocks = getNumBlocks();
+        config->numThreadsPerBlock = getNumThreadsPerBlock();
+        config->maxClusters = getMaxClusters();
+        config->maxCells = getMaxCells();
+        config->maxTokens = getMaxTokens();
+        config->maxParticles = getMaxParticles();
+        return config;
 	}
 	else {
 		THROW_NOT_IMPLEMENTED();
@@ -137,12 +198,7 @@ IntVector2D NewSimulationDialog::getGridSize() const
 
 uint NewSimulationDialog::getMaxThreads() const
 {
-	bool ok(true);
-	uint maxThreads = ui->maxThreadsEdit->text().toUInt(&ok);
-	if (!ok) {
-		return 0;
-	}
-	return maxThreads;
+    return getUIntOrZero(ui->maxThreadsEdit->text());
 }
 
 double NewSimulationDialog::getEnergy () const
@@ -218,9 +274,15 @@ void NewSimulationDialog::okClicked()
 		GuiSettings::setSettingsValue(Const::CpuGridSizeYKey, getGridSize().y);
 		GuiSettings::setSettingsValue(Const::CpuUnitSizeXKey, getUnitSize().x);
 		GuiSettings::setSettingsValue(Const::CpuUnitSizeYKey, getUnitSize().y);
-		GuiSettings::setSettingsValue(Const::CpuMaxThreadsKey, static_cast<int>(getMaxThreads()));
+		GuiSettings::setSettingsValue(Const::CpuMaxThreadsKey, getMaxThreads());
         GuiSettings::setSettingsValue(Const::GpuUniverseSizeXKey, getUniverseSizeForModelGpu().x);
         GuiSettings::setSettingsValue(Const::GpuUniverseSizeYKey, getUniverseSizeForModelGpu().y);
+        GuiSettings::setSettingsValue(Const::GpuNumBlocksKey, getNumBlocks());
+        GuiSettings::setSettingsValue(Const::GpuNumThreadsPerBlockKey, getNumThreadsPerBlock());
+        GuiSettings::setSettingsValue(Const::GpuMaxClustersKey, getMaxClusters());
+        GuiSettings::setSettingsValue(Const::GpuMaxCellsKey, getMaxCells());
+        GuiSettings::setSettingsValue(Const::GpuMaxTokensKey, getMaxTokens());
+        GuiSettings::setSettingsValue(Const::GpuMaxParticlesKey, getMaxParticles());
         GuiSettings::setSettingsValue(Const::InitialEnergyKey, getEnergy());
         GuiSettings::setSettingsValue(Const::ModelComputationTypeKey, static_cast<int>(getModelType()));
         accept();
