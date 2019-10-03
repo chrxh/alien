@@ -42,4 +42,5 @@ public:
     uint maxCells = 0;
     uint maxTokens = 0;
     uint maxParticles = 0;
+    uint dynamicMemorySize = 0;
 };

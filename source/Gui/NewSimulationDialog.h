@@ -39,6 +39,7 @@ private:
     uint getMaxCells() const;
     uint getMaxTokens() const;
     uint getMaxParticles() const;
+    uint getDynamicMemorySize() const;
 
 private:
 	Q_SLOT void simulationParametersButtonClicked();

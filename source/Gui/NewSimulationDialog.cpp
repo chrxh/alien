@@ -46,6 +46,8 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const& parameters,
         GuiSettings::getSettingsValue(Const::GpuMaxTokensKey, Const::GpuMaxTokensDefault)));
     ui->gpuMaxParticlesEdit->setText(StringHelper::toString(
         GuiSettings::getSettingsValue(Const::GpuMaxParticlesKey, Const::GpuMaxParticlesDefault)));
+    ui->gpuDynamicMemorySizeEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::GpuDynamicMemorySizeKey, Const::GpuDynamicMemorySizeDefault)));
 
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));
@@ -161,6 +163,11 @@ uint NewSimulationDialog::getMaxParticles() const
     return getUIntOrZero(ui->gpuMaxParticlesEdit->text());
 }
 
+uint NewSimulationDialog::getDynamicMemorySize() const
+{
+    return getUIntOrZero(ui->gpuDynamicMemorySizeEdit->text());
+}
+
 SimulationConfig NewSimulationDialog::getConfig() const
 {
     auto const modelType = getModelType();
@@ -184,6 +191,7 @@ SimulationConfig NewSimulationDialog::getConfig() const
         config->maxCells = getMaxCells();
         config->maxTokens = getMaxTokens();
         config->maxParticles = getMaxParticles();
+        config->dynamicMemorySize = getDynamicMemorySize();
         return config;
 	}
 	else {
@@ -283,6 +291,7 @@ void NewSimulationDialog::okClicked()
         GuiSettings::setSettingsValue(Const::GpuMaxCellsKey, getMaxCells());
         GuiSettings::setSettingsValue(Const::GpuMaxTokensKey, getMaxTokens());
         GuiSettings::setSettingsValue(Const::GpuMaxParticlesKey, getMaxParticles());
+        GuiSettings::setSettingsValue(Const::GpuDynamicMemorySizeKey, getDynamicMemorySize());
         GuiSettings::setSettingsValue(Const::InitialEnergyKey, getEnergy());
         GuiSettings::setSettingsValue(Const::ModelComputationTypeKey, static_cast<int>(getModelType()));
         accept();

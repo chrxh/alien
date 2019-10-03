@@ -26,7 +26,7 @@ struct SimulationData
         entitiesForCleanup.init(cudaConstants);
         cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
-        arrays.init(100000000);  //TODO: make configurable
+        arrays.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(312312357);
     }
 

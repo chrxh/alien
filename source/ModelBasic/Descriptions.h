@@ -102,7 +102,6 @@ struct MODELBASIC_EXPORT ClusterDescription
 	}
 
 	QVector2D getClusterPosFromCells() const;
-    optional<CellDescription> const& getCell(uint64_t id) const;
 };
 
 struct MODELBASIC_EXPORT ParticleDescription
