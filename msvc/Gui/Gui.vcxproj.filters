@@ -543,7 +543,7 @@
     <ClCompile Include="Release\moc_ComputationSettingsDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Gui\FastImageItem.cpp">
+    <ClCompile Include="..\..\source\Gui\ImageSectionItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
   </ItemGroup>
@@ -784,9 +784,6 @@
     <CustomBuild Include="..\..\source\Gui\ComputationSettingsDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\src\Gui\FastImageItem.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\Gui\resources\tutorial\angle.png">
@@ -967,6 +964,9 @@
     </ClInclude>
     <ClInclude Include="ui_ComputationSettingsDialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\ImageSectionItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

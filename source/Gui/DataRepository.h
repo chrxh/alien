@@ -59,7 +59,7 @@ public:
 	virtual bool isCellPresent(uint64_t cellId);
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
-	virtual void requireImageFromSimulation(IntRect const& rect, QImage* target);
+	virtual void requireImageFromSimulation(IntRect const& rect, QImagePtr const& target);
 
 	Q_SIGNAL void imageReady();
 

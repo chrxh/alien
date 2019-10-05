@@ -253,9 +253,9 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
 {
     auto const numTokenPointers = _cluster->numTokenPointers;
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
-        auto& token = _cluster->tokenPointers[tokenIndex];
+        auto const& token = _cluster->tokenPointers[tokenIndex];
 
-        auto type = static_cast<Enums::CellFunction::Type>(token->cell->cellFunctionType % Enums::CellFunction::_COUNTER);
+        auto const type = static_cast<Enums::CellFunction::Type>(token->cell->cellFunctionType % Enums::CellFunction::_COUNTER);
         switch (type) {
         case Enums::CellFunction::CONSTRUCTOR: {
             ConstructorFunction constructor;

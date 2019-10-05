@@ -14,7 +14,7 @@ public:
 	virtual void clear() = 0;
 	virtual void updateData(DataChangeDescription const &desc) = 0;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
-	virtual void requireImage(IntRect rect, QImage* target) = 0;
+	virtual void requireImage(IntRect rect, QImagePtr const& target) = 0;
 
 	Q_SIGNAL void dataReadyToRetrieve();
 	Q_SIGNAL void dataUpdated();

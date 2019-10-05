@@ -58,6 +58,8 @@ struct BASE_EXPORT IntVector2D {
 	QVector2D toQVector2D();
 	IntVector2D& restrictToRect(IntRect const& rect);
 	bool operator==(IntVector2D const& vec);
+    void operator-=(IntVector2D const& vec);
+
 };
 
 BASE_EXPORT std::ostream& operator << (std::ostream& os, const IntVector2D& vec);

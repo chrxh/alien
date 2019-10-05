@@ -75,7 +75,7 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 	}
 }
 
-void SimulationAccessGpuImpl::requireImage(IntRect rect, QImage * target)
+void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target)
 {
 	auto worker = _context->getCudaController()->getCudaWorker();
 	CudaJob job = boost::make_shared<_GetDataForImageJob>(getObjectId(), rect, _dataTOCache->getDataTO(), target);
@@ -139,17 +139,13 @@ void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, IntRe
 	cudaWorker->addJob(job);
 }
 
-void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImage* targetImage)
+void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImagePtr const& targetImage)
 {
 	auto space = _context->getSpaceProperties();
 	auto worker = _context->getCudaController()->getCudaWorker();
-	EntityRenderer renderer(targetImage, space);
-
-	auto truncatedRect = rect;
-	space->truncateRect(truncatedRect);
+	EntityRenderer renderer(targetImage, rect.p1, space);
 	//	EntityRenderer::fillRect(targetImage, truncatedRect);
 	targetImage->fill(QColor(0, 0, 0x1b));
-
 
 	for (int i = 0; i < *dataTO.numParticles; ++i) {
 		ParticleAccessTO& particle = dataTO.particles[i];
