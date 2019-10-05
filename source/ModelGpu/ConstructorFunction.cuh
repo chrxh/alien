@@ -188,10 +188,46 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall()
             __syncthreads();
             return;
         }
+        //---
+/*
+        if (0 == threadIdx.x) {
+            printf("step3a\n");
+        }
+        __syncthreads();
+*/
+        //---
         __syncthreads();
         continueConstruction(firstCellOfConstructionSite);
+
+        //---
+/*
+        if (0 == threadIdx.x) {
+            printf("step3a - ende\n");
+        }
+        __syncthreads();
+*/
+        //---
+
     } else {
+        //---
+/*
+        if (0 == threadIdx.x) {
+            printf("step3b\n");
+        }
+        __syncthreads();
+*/
+        //---
         startNewConstruction();
+
+        //---
+/*
+        if (0 == threadIdx.x) {
+            printf("step3b - ende\n");
+        }
+        __syncthreads();
+*/
+        //---
+
     }
     __syncthreads();
 }
@@ -284,6 +320,14 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
                 QuantityConverter::convertAngleToData(anglesToRotate.constructionSite));
         }
         __syncthreads();
+        //---
+/*
+        if (0 == threadIdx.x) {
+            printf("step3a1\n");
+        }
+        __syncthreads();
+*/
+        //---
 
         continueConstructionWithRotationOnly(
             firstCellOfConstructionSite,
@@ -291,6 +335,14 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
             desiredAngleBetweenConstructurAndConstructionSite);
     }
     else {
+        //---
+/*
+        if (0 == threadIdx.x) {
+            printf("step3a2\n");
+        }
+        __syncthreads();
+*/
+        //---
         continueConstructionWithRotationAndCreation(
             firstCellOfConstructionSite,
             anglesToRotate,
@@ -1280,18 +1332,18 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
         result->numStaticBytes = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA])
             % (MAX_CELL_STATIC_BYTES + 1);
         offset = result->numStaticBytes + 1;
-        result->numMutableBytes = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset])
+        result->numMutableBytes = static_cast<unsigned char>(_token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset) % MAX_TOKEN_MEM_SIZE])
             % (MAX_CELL_MUTABLE_BYTES + 1);
     }
     __syncthreads();
 
     auto const staticDataBlock = calcPartition(result->numStaticBytes, threadIdx.x, blockDim.x);
     for (int i = staticDataBlock.startIndex; i <= staticDataBlock.endIndex; ++i) {
-        result->staticData[i] = _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1];
+        result->staticData[i] = _token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1) % MAX_TOKEN_MEM_SIZE];
     }
     auto const mutableDataBlock = calcPartition(result->numMutableBytes, threadIdx.x, blockDim.x);
     for (int i = mutableDataBlock.startIndex; i <= mutableDataBlock.endIndex; ++i) {
-        result->mutableData[i] = _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1];
+        result->mutableData[i] = _token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
     }
 }
 

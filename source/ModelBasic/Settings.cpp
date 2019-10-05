@@ -151,7 +151,7 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
 	SimulationParameters parameters;
 	parameters.clusterMaxRadius = 40.0f;
 
-	parameters.cellMutationProb = 0.00001f;
+	parameters.cellMutationProb = 0.000001f;
 	parameters.cellMinDistance = 0.3f;
 	parameters.cellMaxDistance = 1.3f;
 	parameters.cellMass_Reciprocal = 1;
