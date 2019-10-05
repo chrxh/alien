@@ -37,8 +37,9 @@ private:
 	DataRepository* _repository = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
-	FastImageItem* _fastImageItem = nullptr;
-    QImage* _image = nullptr;
+
+    ImageSectionItem* _imageSectionItem = nullptr;
+
 	Notifier* _notifier = nullptr;
 };
 

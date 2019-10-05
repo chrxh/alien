@@ -7,12 +7,18 @@
 class EntityRenderer
 {
 public:
-	EntityRenderer(QImage* image, SpaceProperties const* space)
-		: _image(image), _space(space)
-	{}
+	EntityRenderer(QImagePtr const& image, IntVector2D const& positionOfImage, SpaceProperties const* space)
+        : _image(image), _positionOfImage(positionOfImage), _space(space), _imageRect{ {3, 3}, {_image->width() - 4, _image->height() - 4} }
+	{
+        _space->truncatePosition(_positionOfImage);
+    }
 
 	void renderCell(IntVector2D pos, uint8_t colorCode, double energy)
 	{
+        pos -= _positionOfImage;
+        if (!_imageRect.isContained(pos)) {
+            return;
+        }
 		auto color = EntityRenderer::calcCellColor(colorCode, energy);
 
 		_space->correctPosition(pos);
@@ -38,12 +44,22 @@ public:
 
 	void renderParticle(IntVector2D pos, double energy)
 	{
+        pos -= _positionOfImage;
+        if (!_imageRect.isContained(pos)) {
+            return;
+        }
+
 		_space->correctPosition(pos);
 		_image->setPixel(pos.x, pos.y, EntityRenderer::calcParticleColor(energy));
 	}
 
-	void renderToken(IntVector2D const& pos)
+	void renderToken(IntVector2D pos)
 	{
+        pos -= _positionOfImage;
+        if (!_imageRect.isContained(pos)) {
+            return;
+        }
+
 		auto const color = EntityRenderer::calcTokenColor();
         {
             IntVector2D posMod{ pos.x, pos.y };
@@ -177,6 +193,9 @@ private:
 	}
 
 private:
-	QImage* _image;
+	QImagePtr _image;
+    IntRect _imageRect;
+
+    IntVector2D _positionOfImage;
 	SpaceProperties const* _space;
 };

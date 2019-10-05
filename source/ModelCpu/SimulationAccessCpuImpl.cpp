@@ -64,7 +64,7 @@ void SimulationAccessCpuImpl::requireData(IntRect rect, ResolveDescription const
 	}
 }
 
-void SimulationAccessCpuImpl::requireImage(IntRect rect, QImage * target)
+void SimulationAccessCpuImpl::requireImage(IntRect rect, QImagePtr const& target)
 {
 	_imageRequired = true;
 	_requiredRect = rect;
@@ -364,7 +364,8 @@ namespace
 void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 {
 	auto space = unit->getContext()->getSpaceProperties();
-	EntityRenderer renderer(_requiredImage, space);
+
+    EntityRenderer renderer(_requiredImage, _requiredRect.p1, space);
 
 	auto const &clusters = unit->getContext()->getClustersRef();
 	list<IntVector2D> tokenPos;
@@ -390,7 +391,7 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 void SimulationAccessCpuImpl::drawParticlesFromUnit(Unit * unit)
 {
 	auto space = unit->getContext()->getSpaceProperties();
-	EntityRenderer renderer(_requiredImage, space);
+	EntityRenderer renderer(_requiredImage, _requiredRect.p1, space);
 
 	auto const &particles = unit->getContext()->getParticlesRef();
 	for (auto const &particle : particles) {

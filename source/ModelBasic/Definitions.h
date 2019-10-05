@@ -29,6 +29,8 @@ class SymbolTable;
 class SpaceProperties;
 class SimulationController;
 
+using QImagePtr = shared_ptr<QImage>;
+
 using SimulationControllerBuildFunc = std::function<SimulationController*(
 	int typeId, IntVector2D const& universeSize, SymbolTable* symbols, SimulationParameters const& parameters,
 	map<string, int> const& typeSpecificData, uint timestepAtBeginning
