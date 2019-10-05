@@ -58,7 +58,7 @@ class StartScreenWidget;
 class StartScreenController;
 class Manipulator;
 class MonitorController;
-class FastImageItem;
+class ImageSectionItem;
 
 struct _MonitorModel;
 using MonitorModel = shared_ptr<_MonitorModel>;
