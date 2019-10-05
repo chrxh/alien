@@ -18,14 +18,14 @@ public:
 	virtual void clear() override;
 	virtual void updateData(DataChangeDescription const &dataToUpdate) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
-	virtual void requireImage(IntRect rect, QImage* target) override;
+	virtual void requireImage(IntRect rect, QImagePtr const& target) override;
 	virtual DataDescription const& retrieveData() override;
 
 private:
 	Q_SLOT void jobsFinished();
 
 	void updateDataToGpu(DataAccessTO dataToUpdateTO, IntRect const& rect, DataChangeDescription const& updateDesc);
-	void createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImage* targetImage);
+	void createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImagePtr const& targetImage);
 	void createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect);
 
 	void metricCorrection(DataChangeDescription& data) const;

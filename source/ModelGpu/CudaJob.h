@@ -56,18 +56,18 @@ class _GetDataForImageJob
 	: public _GetDataJob
 {
 public:
-	_GetDataForImageJob(string const& originId, IntRect const& rect, DataAccessTO const& dataTO, QImage* targetImage)
+	_GetDataForImageJob(string const& originId, IntRect const& rect, DataAccessTO const& dataTO, QImagePtr const& targetImage)
 		: _GetDataJob(originId, rect, dataTO), _targetImage(targetImage) { }
 
 	virtual ~_GetDataForImageJob() = default;
 
-	QImage* getTargetImage() const
+    QImagePtr getTargetImage() const
 	{
 		return _targetImage;
 	}
 
 private:
-	QImage* _targetImage;
+    QImagePtr _targetImage;
 };
 
 class _GetDataForEditJob
