@@ -9,8 +9,10 @@
 class ConstructorGpuTests : public IntegrationGpuTestFramework
 {
 public:
-    ConstructorGpuTests()
-        : IntegrationGpuTestFramework()
+    ConstructorGpuTests(
+        IntVector2D const& universeSize = { 900, 600 }, 
+        optional<ModelGpuData> const& modelData = boost::none)
+        : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 
     virtual ~ConstructorGpuTests() = default;
@@ -251,6 +253,36 @@ protected:
     float _offspringDistance;
 };
 
+namespace
+{
+    ModelGpuData getModelGpuDataWithHighBlockCount()
+    {
+        ModelGpuData result;
+        result.setNumThreadsPerBlock(16);
+        result.setNumBlocks(64*8);
+        result.setNumClusterPointerArrays(1);
+        result.setMaxClusters(100000);
+        result.setMaxCells(500000);
+        result.setMaxParticles(500000);
+        result.setMaxTokens(50000);
+        result.setMaxCellPointers(500000 * 10);
+        result.setMaxClusterPointers(100000 * 10);
+        result.setMaxParticlePointers(500000 * 10);
+        result.setMaxTokenPointers(50000 * 10);
+        result.setDynamicMemorySize(100000000);
+        return result;
+    }
+}
+
+class ConstructorGpuWithHighBlockCountTests : public ConstructorGpuTests
+{
+public:
+    ConstructorGpuWithHighBlockCountTests()
+        : ConstructorGpuTests({ 64 * 8 * 6 * 4 + 100, 20 }, getModelGpuDataWithHighBlockCount())
+    { }
+
+    virtual ~ConstructorGpuWithHighBlockCountTests() = default;
+};
 
 /************************************************************************/
 /* Implementation                                                       */
@@ -2724,6 +2756,16 @@ TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentConstructors_ma
     EXPECT_EQ(10, testResult.numCellsPerCluster.size());
     for (auto const& clusterSize : testResult.numCellsPerCluster) {
         EXPECT_EQ(100 * 4, clusterSize);
+    }
+}
+
+TEST_F(ConstructorGpuWithHighBlockCountTests, testParallelConstructionFromDifferentConstructors_greatManyIsolatedClusters)
+{
+    auto testResult = runMassiveParallelClustersTest(
+        MassiveParallelClustersTestParameters().clusterLen(4).numClusters(64 * 8 * 4).distanceBetweenClusters(6));
+    EXPECT_EQ(64 * 8 * 4, testResult.numCellsPerCluster.size());
+    for (auto const& clusterSize : testResult.numCellsPerCluster) {
+        EXPECT_EQ(4 * 4, clusterSize);
     }
 }
 
