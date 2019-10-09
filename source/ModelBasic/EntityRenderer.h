@@ -96,17 +96,6 @@ public:
 		}
 	}
 
-	void fillRect(IntRect const& rect)
-	{
-		for (int x = rect.p1.x; x <= rect.p2.x; ++x) {
-			for (int y = rect.p1.y; y <= rect.p2.y; ++y) {
-				int* scanLine = (int*)(_image->scanLine(y));
-				scanLine[x] = 0x1b;
-			}
-		}
-
-	}
-
 private:
 	uint32_t calcParticleColor(double energy)
 	{
