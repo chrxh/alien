@@ -207,6 +207,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cell.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cluster.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\DEBUG_ClusterChecker.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessor.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CellComputerFunction.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ConstantMemory.cuh" />
