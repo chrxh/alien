@@ -1,7 +1,8 @@
 #pragma once
+#include "ModelBasic/ElementaryTypes.h"
+
 #include "HashMap.cuh"
 #include "Math.cuh"
-#include "ModelBasic/ElementaryTypes.h"
 #include "QuantityConverter.cuh"
 #include "SimulationData.cuh"
 
@@ -188,45 +189,10 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall()
             __syncthreads();
             return;
         }
-        //---
-/*
-        if (0 == threadIdx.x) {
-            printf("step3a\n");
-        }
-        __syncthreads();
-*/
-        //---
-        __syncthreads();
         continueConstruction(firstCellOfConstructionSite);
 
-        //---
-/*
-        if (0 == threadIdx.x) {
-            printf("step3a - ende\n");
-        }
-        __syncthreads();
-*/
-        //---
-
     } else {
-        //---
-/*
-        if (0 == threadIdx.x) {
-            printf("step3b\n");
-        }
-        __syncthreads();
-*/
-        //---
         startNewConstruction();
-
-        //---
-/*
-        if (0 == threadIdx.x) {
-            printf("step3b - ende\n");
-        }
-        __syncthreads();
-*/
-        //---
 
     }
     __syncthreads();
@@ -320,14 +286,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
                 QuantityConverter::convertAngleToData(anglesToRotate.constructionSite));
         }
         __syncthreads();
-        //---
-/*
-        if (0 == threadIdx.x) {
-            printf("step3a1\n");
-        }
-        __syncthreads();
-*/
-        //---
 
         continueConstructionWithRotationOnly(
             firstCellOfConstructionSite,
@@ -335,14 +293,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
             desiredAngleBetweenConstructurAndConstructionSite);
     }
     else {
-        //---
-/*
-        if (0 == threadIdx.x) {
-            printf("step3a2\n");
-        }
-        __syncthreads();
-*/
-        //---
         continueConstructionWithRotationAndCreation(
             firstCellOfConstructionSite,
             anglesToRotate,
@@ -568,7 +518,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const& cell = _token->cell;
 
     auto const adaptMaxConnections = isAdaptMaxConnections(_token);
-    if (1 == _token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS]) {
+    if (1 == _token->getCellMaxConnections()) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
         __syncthreads();
         return;
@@ -1322,8 +1272,7 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
         float rotMatrix[2][2];
         Math::rotationMatrix(_cluster->angle, rotMatrix);
         result->absPos = Math::applyMatrix(result->relPos, rotMatrix) + _cluster->pos;
-        result->maxConnections = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS])
-            % (cudaSimulationParameters.cellMaxBonds + 1);
+        result->maxConnections = _token->getCellMaxConnections();
         result->numConnections = 0;
         result->branchNumber =
             _token->memory[Enums::Constr::IN_CELL_BRANCH_NO] % cudaSimulationParameters.cellMaxTokenBranchNumber;
@@ -1501,8 +1450,7 @@ __inline__ __device__ void ConstructorFunction::removeConnection(Cell* cell1, Ce
 
 __inline__ __device__ auto ConstructorFunction::isAdaptMaxConnections(Token* token) -> AdaptMaxConnections
 {
-    return 0 == token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS] ? AdaptMaxConnections::Yes
-                                                                      : AdaptMaxConnections::No;
+    return 0 == token->getCellMaxConnections() ? AdaptMaxConnections::Yes : AdaptMaxConnections::No;
 }
 
 __inline__ __device__ bool
@@ -1526,16 +1474,6 @@ ConstructorFunction::establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConne
 {
     cell1->connections[cell1->numConnections++] = cell2;
     cell2->connections[cell2->numConnections++] = cell1;
-
-    //DEBUG-Code
-    if (cell1->numConnections > cudaSimulationParameters.cellMaxBonds || cell2->numConnections > cudaSimulationParameters.cellMaxBonds) {
-        printf(
-            "BUG, numConnections: %d, %d, maxConnections: %d, %d\n",
-            cell1->numConnections,
-            cell2->numConnections,
-            cell1->maxConnections,
-            cell2->maxConnections);
-    }
 
     if (adaptMaxConnections == AdaptMaxConnections::Yes) {
         cell1->maxConnections = cell1->numConnections;
