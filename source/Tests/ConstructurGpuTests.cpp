@@ -2281,10 +2281,20 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_errorNoEn
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_NO_ENERGY));
 }
 
-TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_errorMaxConnections)
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_errorMaxConnections1)
 {
     auto const token = createTokenForConstruction(
         TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).maxConnections(1));
+    auto const result = runSecondConstructionOnLineClusterTest(
+        SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
+
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_CONNECTION));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_errorMaxConnections2)
+{
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE).maxConnections(8));
     auto const result = runSecondConstructionOnLineClusterTest(
         SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
 
