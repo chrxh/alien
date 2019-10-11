@@ -113,6 +113,12 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
 
             float averageEnergy = 0;
             int numCellsForEnergyAveraging = 0;
+
+            for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+                auto const& cell = candidateCellsForEnergyAveraging[index];
+                cell->getLock();
+            }
+
             for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
                 auto const& cell = candidateCellsForEnergyAveraging[index];
                 averageEnergy += cell->energy;
@@ -122,6 +128,11 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
             for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
                 auto const& cell = cellsForEnergyAveraging[index];
                 cell->energy = averageEnergy;
+            }
+
+            for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+                auto const& cell = candidateCellsForEnergyAveraging[index];
+                cell->releaseLock();
             }
         }
     }
@@ -173,14 +184,22 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
             }
 
             if (0 == numFreePlaces) {
+                cell->getLock();
                 cell->energy += token->energy;
+                cell->releaseLock();
                 continue;
             }
 
-            float availableTokenEnergyForCell = token->energy / numFreePlaces;
-            float remainingTokenEnergy = token->energy;
-            bool tokenRecycled = false;
-            auto tokenEnergy = token->energy;
+            cell->getLock();
+            for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
+                auto const& connectingCell = cell->connections[connectionIndex];
+                connectingCell->getLock();
+            }
+
+            auto const availableTokenEnergyForCell = token->energy / numFreePlaces;
+            auto const tokenEnergy = token->energy;
+            auto remainingTokenEnergyForCell = tokenEnergy;
+            auto tokenRecycled = false;
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
                 auto const& connectingCell = cell->connections[connectionIndex];
                 if (0 == connectingCell->alive) {
@@ -210,20 +229,22 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
                 }
                 newTokenPointers[tokenIndex] = newToken;
 
-                if (tokenEnergy - availableTokenEnergyForCell > 0) {
-                    auto origConnectingCellEnergy = atomicAdd(&connectingCell->energy, -(tokenEnergy - availableTokenEnergyForCell));
-                    if (origConnectingCellEnergy > cudaSimulationParameters.cellMinEnergy + tokenEnergy - availableTokenEnergyForCell) {
-                        newToken->energy = tokenEnergy;
-                    }
-                    else {
-                        atomicAdd(&connectingCell->energy, tokenEnergy - availableTokenEnergyForCell);
-                        newToken->energy = availableTokenEnergyForCell;
-                    }
+                if (connectingCell->energy > cudaSimulationParameters.cellMinEnergy + tokenEnergy - availableTokenEnergyForCell) {
+                    newToken->energy = tokenEnergy;
+                    connectingCell->energy -= (tokenEnergy - availableTokenEnergyForCell);
                 }
-                remainingTokenEnergy -= availableTokenEnergyForCell;
+                else {
+                    newToken->energy = availableTokenEnergyForCell;
+                }
+                remainingTokenEnergyForCell -= availableTokenEnergyForCell;
             }
-            if (remainingTokenEnergy > 0) {
-                cell->energy += remainingTokenEnergy;
+            if (remainingTokenEnergyForCell > 0) {
+                cell->energy += remainingTokenEnergyForCell;
+            }
+            cell->releaseLock();
+            for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
+                auto const& connectingCell = cell->connections[connectionIndex];
+                connectingCell->releaseLock();
             }
         }
 
@@ -325,6 +346,7 @@ __global__ void constructorLauncher(Token* token, SimulationData data)
 __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token, EntityFactory& factory)
 {
     auto cell = token->cell;
+    cell->getLock();
     EnergyGuidance::processing(token);
     auto type = static_cast<Enums::CellFunction::Type>(cell->cellFunctionType % Enums::CellFunction::_COUNTER);
     switch (type) {
@@ -341,4 +363,5 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
         WeaponFunction::processing(token, _data);
     } break;
     }
+    cell->releaseLock();
 }
