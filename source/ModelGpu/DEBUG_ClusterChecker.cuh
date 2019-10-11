@@ -24,7 +24,7 @@ public:
             }
 
             if (cell->energy < 0) {
-                printf("negative cell energy\n");
+                printf("negative cell energy: %f\n", cell->energy);
                 STOP(a, b)
             }
             if (cell->numConnections > cell->maxConnections) {
@@ -61,7 +61,7 @@ public:
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto const& token = cluster->tokenPointers[tokenIndex];
             if (token->energy < 0) {
-                printf("negative token energy\n");
+                printf("negative token energy: %f\n", token->energy);
                 STOP(a, b)
             }
         }

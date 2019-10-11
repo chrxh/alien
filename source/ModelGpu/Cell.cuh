@@ -28,6 +28,21 @@ struct Cell
     int protectionCounter;
     int alive;  //0 = dead, 1 == alive
     int tag;
+
+    __device__ __inline__ void getLock()
+    {
+        while (1 == atomicExch(&locked, 1)) {}
+    }
+
+    __device__ __inline__ bool tryLock()
+    {
+        return 0 == atomicExch(&locked, 1);
+    }
+
+    __device__ __inline__ void releaseLock()
+    {
+        atomicExch(&locked, 0);
+    }
 };
 
 template<>
