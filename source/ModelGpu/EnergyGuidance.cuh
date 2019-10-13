@@ -12,6 +12,7 @@ public:
         float valueCell = static_cast<uint8_t>(token->memory[Enums::EnergyGuidance::IN_VALUE_CELL]);
         float valueToken = static_cast<uint8_t>(token->memory[Enums::EnergyGuidance::IN_VALUE_TOKEN]);
         const float amount = 10.0;
+
         if (Enums::EnergyGuidanceIn::DEACTIVATED == cmd) {
             return;
         }
