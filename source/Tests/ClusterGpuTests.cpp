@@ -60,6 +60,8 @@ TEST_F(ClusterGpuTests, DISABLED_testCollisionOfSingleCells_horizontal_noPixelOv
 	EXPECT_LE(111, newCell2.pos->x());
 	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->y()));
 	EXPECT_TRUE(isCompatible(QVector2D(0.1f, 0), *newCluster2.vel));
+
+    checkEnergy(origData, newData);
 }
 
 
@@ -107,6 +109,8 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_horizontal)
 	EXPECT_LE(111, newCell2.pos->x());
 	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->y()));
 	EXPECT_TRUE(isCompatible(QVector2D(0.1f, 0), *newCluster2.vel));
+
+    checkEnergy(origData, newData);
 }
 
 /**
@@ -153,6 +157,8 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_vertical)
 	EXPECT_LE(111, newCell2.pos->y());
 	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->x()));
 	EXPECT_TRUE(isCompatible(QVector2D(0, 0.1f), *newCluster2.vel));
+
+    checkEnergy(origData, newData);
 }
 
 /**
@@ -174,7 +180,8 @@ TEST_F(ClusterGpuTests, testCenterCollisionOfParallelLineClusters)
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
-	ASSERT_EQ(2, newData.clusters->size());
+	
+    ASSERT_EQ(2, newData.clusters->size());
 
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
@@ -192,8 +199,8 @@ TEST_F(ClusterGpuTests, testCenterCollisionOfParallelLineClusters)
 		EXPECT_TRUE(isCompatible(QVector2D(0, 0), *cluster.vel));
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -215,7 +222,7 @@ TEST_F(ClusterGpuTests, testHorizontalCenterCollisionOfParallelLineClusters_atUn
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
 
-	ASSERT_EQ(2, newData.clusters->size());
+    ASSERT_EQ(2, newData.clusters->size());
 
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
@@ -231,7 +238,8 @@ TEST_F(ClusterGpuTests, testHorizontalCenterCollisionOfParallelLineClusters_atUn
 		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
 		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
 	}
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 
@@ -256,7 +264,8 @@ TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniv
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
-	ASSERT_EQ(2, newData.clusters->size());
+
+    ASSERT_EQ(2, newData.clusters->size());
 
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
@@ -271,8 +280,8 @@ TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniv
 		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 
@@ -295,7 +304,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfParallelLineClusters)
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
-	ASSERT_EQ(2, newData.clusters->size());
+
+    ASSERT_EQ(2, newData.clusters->size());
 
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
@@ -312,8 +322,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfParallelLineClusters)
 		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -335,7 +345,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters)
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
-	ASSERT_EQ(2, newData.clusters->size());
+	
+    ASSERT_EQ(2, newData.clusters->size());
 
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
@@ -350,8 +361,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters)
 		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -381,8 +392,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters_withAngularVelo
 	DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
 	ASSERT_EQ(2, newData.clusters->size());
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -423,8 +434,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfOrthogonalLineClusters)
 		EXPECT_TRUE(abs(*cluster.angularVel) < 0.01);
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -466,8 +477,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters)
 		EXPECT_GE(-NearlyZero, *cluster.angularVel);
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -510,8 +521,8 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters_waitUntilSe
 		EXPECT_LE(NearlyZero, *cluster.angularVel);
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -547,8 +558,8 @@ TEST_F(ClusterGpuTests, DISABLED_testSidewiseCollisionOfTraversalLineClusters_wa
 		EXPECT_LE(NearlyZero, *cluster.angularVel);
 	}
 
-	checkKineticEnergy(origData, newData);
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -619,7 +630,8 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy)
 			EXPECT_TRUE(isCompatible(cell.pos, origCell.pos));
 		}
 	}
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -666,7 +678,8 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
 		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}
-	checkDistancesToConnectingCells(newData);
+    checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -690,8 +703,8 @@ TEST_F(ClusterGpuTests, testDestructionOfTooCloseCells)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(5, newData.clusters->at(0).cells->size());
-	checkDistancesToConnectingCells(newData);
     checkEnergy(origData, newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
@@ -844,7 +857,7 @@ TEST_F(ClusterGpuTests, testFastMovingCluster)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(100, newData.clusters->at(0).cells->size());
-	checkDistancesToConnectingCells(newData);
+    checkDistancesToConnectingCells(newData);
 }
 
 /**
