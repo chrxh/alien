@@ -5,6 +5,7 @@
 #include "Math.cuh"
 #include "QuantityConverter.cuh"
 #include "SimulationData.cuh"
+#include "DEBUG_ClusterChecker.cuh"
 
 class ConstructorFunction
 {
@@ -518,7 +519,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     auto const& cell = _token->cell;
 
     auto const adaptMaxConnections = isAdaptMaxConnections(_token);
-    if (1 == _token->getCellMaxConnections()) {
+    if (1 == _token->getMaxConnectionsForConstructor()) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
         __syncthreads();
         return;
@@ -767,8 +768,8 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto& otherCell = cell->connections[i];
                 if (otherCell->tag > cell->tag) {
-                    if (cell == firstCellOfConstructionSite && otherCell == baseCell
-                        || cell == baseCell && otherCell == firstCellOfConstructionSite) {
+                    if ((cell == firstCellOfConstructionSite && otherCell == baseCell)
+                        || (cell == baseCell && otherCell == firstCellOfConstructionSite)) {
                         continue;
                     }
                     cell->tag = otherCell->tag;
@@ -788,7 +789,8 @@ __inline__ __device__ void ConstructorFunction::calcMaxAngles(Cell* construction
     __syncthreads();
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = _cluster->cellPointers[cellIndex];
-        auto r = Math::length(cell->relPos - constructionCell->relPos);
+        auto const r = Math::length(cell->relPos - constructionCell->relPos);
+
         if (cudaSimulationParameters.cellMaxDistance < 2 * r) {
             auto a = abs(2.0 * asinf(cudaSimulationParameters.cellMaxDistance / (2.0 * r)) * RAD_TO_DEG);
             if (ClusterComponent::Constructor == cell->tag) {
@@ -1272,10 +1274,10 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
         float rotMatrix[2][2];
         Math::rotationMatrix(_cluster->angle, rotMatrix);
         result->absPos = Math::applyMatrix(result->relPos, rotMatrix) + _cluster->pos;
-        result->maxConnections = _token->getCellMaxConnections();
+        result->maxConnections = _token->getMaxConnectionsForConstructor();
         result->numConnections = 0;
         result->branchNumber =
-            _token->memory[Enums::Constr::IN_CELL_BRANCH_NO] % cudaSimulationParameters.cellMaxTokenBranchNumber;
+            static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_BRANCH_NO]) % cudaSimulationParameters.cellMaxTokenBranchNumber;
         result->tokenBlocked = true;
         result->cellFunctionType = _token->memory[Enums::Constr::IN_CELL_FUNCTION];
         result->numStaticBytes = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA])
@@ -1450,7 +1452,7 @@ __inline__ __device__ void ConstructorFunction::removeConnection(Cell* cell1, Ce
 
 __inline__ __device__ auto ConstructorFunction::isAdaptMaxConnections(Token* token) -> AdaptMaxConnections
 {
-    return 0 == token->getCellMaxConnections() ? AdaptMaxConnections::Yes : AdaptMaxConnections::No;
+    return 0 == token->getMaxConnectionsForConstructor() ? AdaptMaxConnections::Yes : AdaptMaxConnections::No;
 }
 
 __inline__ __device__ bool
