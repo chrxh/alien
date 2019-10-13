@@ -90,10 +90,10 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
     tokenMem[Enums::Scanner::OUT_ENERGY] = cellEnergy;
     tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = lookupResult.cell->maxConnections;
     tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = lookupResult.cell->branchNumber;
-/*
-    auto metadata = scanCell->getMetadata();
-    tokenMem[Enums::Scanner::OUT_CELL_METADATA] = metadata.color;
-*/
+  
+    auto const& color = lookupResult.cell->metadata.color;
+    tokenMem[Enums::Scanner::OUT_CELL_METADATA] = color;
+
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<char>(lookupResult.cell->cellFunctionType);
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA] = lookupResult.cell->numStaticBytes;
     for (int i = 0; i < lookupResult.cell->numStaticBytes; ++i) {
