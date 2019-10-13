@@ -99,7 +99,7 @@ DataDescription DataConverter::getDataDescription() const
 				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
 				.setEnergy(cellTO.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
 				.setConnectingCells(connectingCellIds).setMaxConnections(cellTO.maxConnections).setFlagTokenBlocked(false)
-				.setTokenBranchNumber(0).setMetadata(CellMetadata()).setTokens(vector<TokenDescription>{}).setTokenBranchNumber(cellTO.branchNumber)
+				.setTokenBranchNumber(0).setMetadata(CellMetadata().setColor(cellTO.metadata.color)).setTokens(vector<TokenDescription>{}).setTokenBranchNumber(cellTO.branchNumber)
 				.setFlagTokenBlocked(cellTO.tokenBlocked).setCellFeature(feature)
 			);
 		}
@@ -387,6 +387,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 		cellTO.numConnections = 0;
 	}
     cellTO.age = 0;
+    cellTO.metadata.color = cellDesc.metadata->color;
 
 	if (cellDesc.tokens) {
 		clusterTO.numTokens += cellDesc.tokens->size();
@@ -476,6 +477,9 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
         cellTO.numMutableBytes = std::min(cellFunction.volatileData.size(), MAX_CELL_MUTABLE_BYTES);
         convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
         convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
+    }
+    if (cellChanges.metadata) {
+        cellTO.metadata.color = cellChanges.metadata->color;
     }
 }
 

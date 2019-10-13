@@ -3,6 +3,11 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
+struct CellMetadata
+{
+    unsigned char color;
+};
+
 struct Cell
 {
     uint64_t id;
@@ -22,6 +27,7 @@ struct Cell
     unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
     int age;
+    CellMetadata metadata;
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked

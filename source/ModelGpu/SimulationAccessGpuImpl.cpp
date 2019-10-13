@@ -156,7 +156,7 @@ void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO
 		CellAccessTO& cell = dataTO.cells[i];
 		float2 const& pos = cell.pos;
 		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-		renderer.renderCell(intPos, 0, cell.energy);
+		renderer.renderCell(intPos, cell.metadata.color, cell.energy);
 	}
 
 	for (int i = 0; i < *dataTO.numTokens; ++i) {

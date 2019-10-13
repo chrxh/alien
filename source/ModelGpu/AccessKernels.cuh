@@ -83,6 +83,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                 cellTO.cellFunctionType = cell.cellFunctionType;
                 cellTO.numStaticBytes = cell.numStaticBytes;
                 cellTO.age = cell.age;
+                cellTO.metadata.color = cell.metadata.color;
                 for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
                     cellTO.staticData[i] = cell.staticData[i];
                 }

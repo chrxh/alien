@@ -131,6 +131,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
             cell.mutableData[i] = cellTO.mutableData[i];
         }
         cell.age = cellTO.age;
+        cell.metadata.color = cellTO.metadata.color;
 
         cell.protectionCounter = 0;
         cell.alive = 1;
@@ -168,6 +169,7 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
     result->locked = 0;
     result->protectionCounter = 0;
     result->alive = 1;
+    result->metadata.color = 0;
     return result;
 }
 
@@ -232,6 +234,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->alive = 1;
     cell->protectionCounter = 0;
     cell->locked = 0;
+    cell->metadata.color = 0;
     cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
     switch (static_cast<Enums::CellFunction::Type>(cell->cellFunctionType)) {
     case Enums::CellFunction::COMPUTER: {
