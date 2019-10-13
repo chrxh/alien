@@ -64,6 +64,8 @@ CudaSimulation::CudaSimulation(
     _internalData = new SimulationData();
     _cudaAccessTO = new DataAccessTO();
 
+    auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+
     _internalData->init(size, cudaConstants);
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
@@ -75,7 +77,9 @@ CudaSimulation::CudaSimulation(
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cudaConstants.MAX_PARTICLES, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(cudaConstants.MAX_TOKENS, _cudaAccessTO->tokens);
 
-    std::cout << "[CUDA] " << CudaMemoryManager::getInstance().getSizeOfAcquiredMemory() / (1024 * 1024) << "mb memory acquired" << std::endl;
+    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+
+    std::cout << "[CUDA] " << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb memory acquired" << std::endl;
 }
 
 CudaSimulation::~CudaSimulation()
@@ -90,7 +94,7 @@ CudaSimulation::~CudaSimulation()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
 
-    std::cout << "[CUDA] freed" << std::endl;
+    std::cout << "[CUDA] memory released" << std::endl;
 
     delete _cudaAccessTO;
     delete _internalData;
