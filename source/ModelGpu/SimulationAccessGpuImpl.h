@@ -42,6 +42,10 @@ private:
 		void releaseDataTO(DataAccessTO const& dataTO);
 
 	private:
+        DataAccessTO getNewDataTO();
+        void deleteDataTO(DataAccessTO const& dataTO);
+
+        CudaConstants _cudaConstants;
         vector<DataAccessTO> _freeDataTOs;
 		vector<DataAccessTO> _usedDataTOs;
 	};
