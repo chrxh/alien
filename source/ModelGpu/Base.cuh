@@ -54,22 +54,19 @@ public:
 
     __device__ __inline__ float random(int maxVal)
     {
-        int index = atomicInc(_currentIndex, _size - 1);
-        int number = _array[index];
+        int number = getRandomNumber();
         return number % (maxVal + 1);
     }
 
     __device__ __inline__ float random(float maxVal)
     {
-        int index = atomicInc(_currentIndex, _size - 1);
-        int number = _array[index];
+        int number = getRandomNumber();
         return maxVal* static_cast<float>(number) / RAND_MAX;
     }
 
     __device__ __inline__ float random()
     {
-        int index = atomicInc(_currentIndex, _size - 1);
-        int number = _array[index];
+        int number = getRandomNumber();
         return static_cast<float>(number) / RAND_MAX;
     }
 
@@ -87,6 +84,13 @@ public:
         cudaFree(_currentId);
         cudaFree(_currentIndex);
         cudaFree(_array);
+    }
+
+private:
+    __device__ __inline__ int getRandomNumber()
+    {
+        int index = atomicInc(_currentIndex, _size - 1);
+        return _array[index];
     }
 };
 
