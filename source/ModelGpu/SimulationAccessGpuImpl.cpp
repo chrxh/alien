@@ -15,7 +15,6 @@
 namespace
 {
 	const string SimulationAccessGpuId = "SimulationAccessGpuId";
-	const int NumDataTOs = 5;
 }
 
 SimulationAccessGpuImpl::SimulationAccessGpuImpl(QObject* parent /*= nullptr*/)
@@ -211,33 +210,18 @@ string SimulationAccessGpuImpl::getObjectId() const
 }
 
 SimulationAccessGpuImpl::_DataTOCache::_DataTOCache(CudaConstants const& cudaConstants)
+    : _cudaConstants(cudaConstants)
 {
-	for (int i = 0; i < NumDataTOs; ++i) {
-		DataAccessTO dataTO;
-		dataTO.numClusters = new int;
-		dataTO.numCells = new int;
-		dataTO.numParticles = new int;
-		dataTO.numTokens = new int;
-		dataTO.clusters = new ClusterAccessTO[cudaConstants.MAX_CLUSTERS];
-		dataTO.cells = new CellAccessTO[cudaConstants.MAX_CELLS];
-		dataTO.particles = new ParticleAccessTO[cudaConstants.MAX_PARTICLES];
-		dataTO.tokens = new TokenAccessTO[cudaConstants.MAX_TOKENS];
-		_freeDataTOs.push_back(dataTO);
-	}
 }
 
 SimulationAccessGpuImpl::_DataTOCache::~_DataTOCache()
 {
 	for (DataAccessTO const& dataTO : _freeDataTOs) {
-		delete dataTO.numClusters;
-		delete dataTO.numCells;
-		delete dataTO.numParticles;
-		delete dataTO.numTokens;
-		delete[] dataTO.clusters;
-		delete[] dataTO.cells;
-		delete[] dataTO.particles;
-		delete[] dataTO.tokens;
+        deleteDataTO(dataTO);
 	}
+    for (DataAccessTO const& dataTO : _usedDataTOs) {
+        deleteDataTO(dataTO);
+    }
 }
 
 DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getDataTO()
@@ -246,10 +230,11 @@ DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getDataTO()
 	if (!_freeDataTOs.empty()) {
 		result = *_freeDataTOs.begin();
 		_freeDataTOs.erase(_freeDataTOs.begin());
-		_usedDataTOs.push_back(result);
+		_usedDataTOs.emplace_back(result);
 		return result;
 	}
-	result = *_usedDataTOs.begin();
+    result = getNewDataTO();
+    _usedDataTOs.emplace_back(result);
 	return result;
 }
 
@@ -262,4 +247,30 @@ void SimulationAccessGpuImpl::_DataTOCache::releaseDataTO(DataAccessTO const & d
 		_freeDataTOs.push_back(*usedDataTO);
 		_usedDataTOs.erase(usedDataTO);
 	}
+}
+
+DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getNewDataTO()
+{
+    DataAccessTO result;
+    result.numClusters = new int;
+    result.numCells = new int;
+    result.numParticles = new int;
+    result.numTokens = new int;
+    result.clusters = new ClusterAccessTO[_cudaConstants.MAX_CLUSTERS];
+    result.cells = new CellAccessTO[_cudaConstants.MAX_CELLS];
+    result.particles = new ParticleAccessTO[_cudaConstants.MAX_PARTICLES];
+    result.tokens = new TokenAccessTO[_cudaConstants.MAX_TOKENS];
+    return result;
+}
+
+void SimulationAccessGpuImpl::_DataTOCache::deleteDataTO(DataAccessTO const & dataTO)
+{
+    delete dataTO.numClusters;
+    delete dataTO.numCells;
+    delete dataTO.numParticles;
+    delete dataTO.numTokens;
+    delete[] dataTO.clusters;
+    delete[] dataTO.cells;
+    delete[] dataTO.particles;
+    delete[] dataTO.tokens;
 }
