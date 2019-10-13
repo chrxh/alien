@@ -18,7 +18,9 @@ ImageSectionItem::~ImageSectionItem()
 QImagePtr ImageSectionItem::getImageOfVisibleRect()
 {
     //resize image?
-    IntVector2D const viewportSize{ static_cast<int>(_viewport->getRect().width()), static_cast<int>(_viewport->getRect().height()) };
+    IntVector2D viewportSize{ static_cast<int>(_viewport->getRect().width()), static_cast<int>(_viewport->getRect().height()) };
+    viewportSize.x = std::min(static_cast<int>(_boundingRect.width() + 1), viewportSize.x);
+    viewportSize.y = std::min(static_cast<int>(_boundingRect.height() + 1), viewportSize.y);
     if (_imageOfVisibleRect->width() != viewportSize.x || _imageOfVisibleRect->height() != viewportSize.y) {
         _imageOfVisibleRect = boost::make_shared<QImage>(viewportSize.x, viewportSize.y, QImage::Format_RGB32);
         _imageOfVisibleRect->fill(QColor(0, 0, 0));
@@ -35,6 +37,9 @@ QRectF ImageSectionItem::boundingRect() const
 void ImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget /*= Q_NULLPTR*/)
 {
     auto const viewportRect = _viewport->getRect();
-    painter->drawImage(viewportRect.x(), viewportRect.y(), *_imageOfVisibleRect);
+    painter->drawImage(
+        std::max(0.0f, static_cast<float>(viewportRect.x())),
+        std::max(0.0f, static_cast<float>(viewportRect.y())),
+        *_imageOfVisibleRect);
 }
 
