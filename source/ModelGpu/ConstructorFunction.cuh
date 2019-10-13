@@ -1285,6 +1285,7 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
         offset = result->numStaticBytes + 1;
         result->numMutableBytes = static_cast<unsigned char>(_token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset) % MAX_TOKEN_MEM_SIZE])
             % (MAX_CELL_MUTABLE_BYTES + 1);
+        result->metadata.color = _token->memory[Enums::Constr::IN_CELL_METADATA];
     }
     __syncthreads();
 
