@@ -27,7 +27,7 @@ struct SimulationData
         cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
         arrays.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
-        numberGen.init(312312357);
+        numberGen.init(10312357);
     }
 
     void free()
