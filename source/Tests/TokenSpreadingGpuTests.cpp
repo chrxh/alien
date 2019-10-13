@@ -445,6 +445,8 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringDecomposition)
 			}
 		}
 	}
+
+    checkEnergy(origData, newData);
 }
 
 /**

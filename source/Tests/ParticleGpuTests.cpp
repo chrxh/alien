@@ -76,4 +76,6 @@ TEST_F(ParticleGpuTests, testTransformationParticleToCell)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(1, newData.clusters->at(0).cells->size());
+
+    checkEnergy(origData, newData);
 }
