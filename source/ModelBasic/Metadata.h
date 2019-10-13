@@ -18,6 +18,7 @@ struct CellMetadata
 	bool operator!=(CellMetadata const& other) const { return !operator==(other); }
 
 	CellMetadata& setName(QString const& value) { name = value; return *this; }
+    CellMetadata& setColor(quint8 value) { color = value; return *this; }
 };
 
 struct ClusterMetadata
