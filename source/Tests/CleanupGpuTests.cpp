@@ -40,6 +40,7 @@ ModelGpuData CleanupGpuTests::getModelDataForCleanup()
         result.setMaxClusterPointers(10000);
         result.setMaxParticlePointers(10000);
         result.setMaxTokenPointers(1000);
+        result.setDynamicMemorySize(1000000);
         return result;
     }
 }
