@@ -24,6 +24,11 @@ struct ParticleAccessTO
 	float2 vel;
 };
 
+struct CellMetadataAccessTO
+{
+    unsigned char color;
+};
+
 struct CellAccessTO
 {
 	uint64_t id;
@@ -40,6 +45,7 @@ struct CellAccessTO
     unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
     int age;
+    CellMetadataAccessTO metadata;
 };
 
 struct ClusterAccessTO
