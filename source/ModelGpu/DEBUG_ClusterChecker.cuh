@@ -8,13 +8,6 @@
 
 class DEBUG_ClusterChecker
 {
-private:
-    template<typename T>
-    __inline__ __device__ static bool checkPointer(T* pointer, Array<T> array)
-    {
-        return array.getEntireArray() <= pointer && pointer < (array.getEntireArray() + array.getNumEntries());
-    }
-
 public:
     __inline__ __device__ static void check_blockCall(SimulationData* data, Cluster* cluster, int a, int b = -1)
     {
@@ -119,5 +112,12 @@ public:
                 STOP(a, b)
             }
         }
+    }
+
+private:
+    template<typename T>
+    __inline__ __device__ static bool checkPointer(T* pointer, Array<T> array)
+    {
+        return array.getEntireArray() <= pointer && pointer < (array.getEntireArray() + array.getNumEntries());
     }
 };
