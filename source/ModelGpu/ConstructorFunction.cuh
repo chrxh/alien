@@ -5,7 +5,7 @@
 #include "Math.cuh"
 #include "QuantityConverter.cuh"
 #include "SimulationData.cuh"
-#include "DEBUG_ClusterChecker.cuh"
+#include "DEBUG_cluster.cuh"
 
 class ConstructorFunction
 {
