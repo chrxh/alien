@@ -387,7 +387,12 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 		cellTO.numConnections = 0;
 	}
     cellTO.age = 0;
-    cellTO.metadata.color = cellDesc.metadata->color;
+    if (cellDesc.metadata) {
+        cellTO.metadata.color = cellDesc.metadata->color;
+    }
+    else {
+        cellTO.metadata.color = 0;
+    }
 
 	if (cellDesc.tokens) {
 		clusterTO.numTokens += cellDesc.tokens->size();

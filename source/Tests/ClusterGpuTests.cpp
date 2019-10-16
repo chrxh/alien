@@ -964,3 +964,23 @@ TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_concentratedAtUnive
 	checkDistancesToConnectingCells(newData);
 }
 
+/**
+* Situation: two colliding cluster where one of them loses a cell
+* Fixed error: after collision cell velocities were not updated
+* Expected result: energy balance fulfilled
+*/
+TEST_F(ClusterGpuTests, regressionTest_energyBalanceDuringCollisionAndDecomposition)
+{
+    DataDescription origData;
+    auto cluster = createRectangularCluster({5, 5}, QVector2D{100, 100}, QVector2D{0.359508f, 0.023043f});
+    cluster.setAngularVel(18.221256f);
+    cluster.cells->at(2).energy = 40;
+    origData.addCluster(cluster);
+    origData.addCluster(createRectangularCluster({ 5, 5 }, QVector2D{ 105, 105 }, QVector2D{ -1, 0 }));
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    checkEnergy(origData, newData);
+}

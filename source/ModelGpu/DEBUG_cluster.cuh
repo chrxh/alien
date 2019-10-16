@@ -6,9 +6,26 @@
 
 #define STOP(a, b) printf("parameter: %d, %d\n", a, b); while(true) {};
 
-class DEBUG_ClusterChecker
+class DEBUG_cluster
 {
 public:
+    __inline__ __device__ static void calcEnergy_blockCall(Cluster* cluster, float& result)
+    {
+        if (0 == threadIdx.x) {
+            atomicAdd_block(&result, Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel));
+        }
+        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+        for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
+            auto const& cell = cluster->cellPointers[cellIndex];
+            atomicAdd_block(&result, cell->energy);
+        }
+        auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
+        for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
+            auto const& token = cluster->tokenPointers[tokenIndex];
+            atomicAdd_block(&result, token->energy);
+        }
+    }
+
     __inline__ __device__ static void check_blockCall(SimulationData* data, Cluster* cluster, int a, int b = -1)
     {
         if (0 == threadIdx.x) {

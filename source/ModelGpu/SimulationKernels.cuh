@@ -43,9 +43,9 @@ __global__ void clusterProcessingStep3(SimulationData data, int numClusters, int
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
         clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        clusterProcessor
+            .processingCollision_blockCall();  //attention: can result a temporarily inconsistent state, will be resolved in step 4
         clusterProcessor.processingRadiation_blockCall();
-        clusterProcessor.processingCollision_blockCall();	//attention: can result a temporarily inconsistent state
-                                                            //will be resolved in reorganizer
     }
 }
 
@@ -120,7 +120,7 @@ __global__ void DEBUG_checkCluster(SimulationData data, int numClusters, int par
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto const clusterPointer = &data.entities.clusterPointerArrays.getArray(0).at(clusterIndex);
-        DEBUG_ClusterChecker::check_blockCall(&data, *clusterPointer, parameter);
+        DEBUG_cluster::check_blockCall(&data, *clusterPointer, parameter);
     }
 }
 
