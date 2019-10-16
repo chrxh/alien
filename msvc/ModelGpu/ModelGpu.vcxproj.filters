@@ -162,7 +162,7 @@
     <ClInclude Include="..\..\source\ModelGpu\WeaponFunction.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\DEBUG_ClusterChecker.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\DEBUG_cluster.cuh">
       <Filter>Source Files\Impl\device</Filter>
     </ClInclude>
   </ItemGroup>

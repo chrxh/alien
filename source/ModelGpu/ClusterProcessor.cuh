@@ -8,6 +8,7 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 #include "EntityFactory.cuh"
+#include "DEBUG_cluster.cuh"
 
 class ClusterProcessor
 {
@@ -16,15 +17,18 @@ public:
 
     __inline__ __device__ void processingMovement_blockCall();
     __inline__ __device__ void updateMap_blockCall();
-    __inline__ __device__ void processingCollision_blockCall();
-    __inline__ __device__ void destroyCell_blockCall();
-    __inline__ __device__ void processingMutation_blockCall();
 
+    __inline__ __device__ void destroyCell_blockCall();
+
+    __inline__ __device__ void processingCollision_blockCall();
     __inline__ __device__ void processingRadiation_blockCall();
+
+    __inline__ __device__ void processingMutation_blockCall();
     __inline__ __device__ void processingDecomposition_blockCall();
     __inline__ __device__ void processingClusterCopy_blockCall();
 
 private:
+    __inline__ __device__ void updateCellVelocity_blockCall(Cluster* cluster);
     __inline__ __device__ void cellAging(Cell* cell);
     __inline__ __device__ void destroyCloseCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
@@ -283,6 +287,9 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
             firstOtherCluster->vel = vB2;
             firstOtherCluster->angularVel = angularVelB2;
         }
+
+        updateCellVelocity_blockCall(cluster);
+        updateCellVelocity_blockCall(firstOtherCluster);
     }
     __syncthreads();
 
@@ -326,26 +333,11 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
     }
     __syncthreads();
 
-
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
 
         float2 absPos = Math::applyMatrix(cell->relPos, rotMatrix) + _cluster->pos;
         cell->absPos = absPos;
-
-        auto r = cell->absPos - _cluster->pos;
-        _data->cellMap.mapDisplacementCorrection(r);
-        auto newVel = Physics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
-
-        auto a = newVel - cell->vel;
-        if (Math::length(a) > cudaSimulationParameters.cellMaxForce) {
-            if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                atomicExch(&cell->alive, 0);
-                atomicExch(&_cluster->decompositionRequired, 1);
-            }
-        }
-
-        cell->vel = newVel;
 
         if (cell->protectionCounter > 0) {
             --cell->protectionCounter;
@@ -353,6 +345,8 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
     }
     __syncthreads();
 
+    updateCellVelocity_blockCall(_cluster);
+    __syncthreads();
 }
 
 __inline__ __device__ void ClusterProcessor::updateMap_blockCall()
@@ -405,18 +399,41 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
                 atomicAdd(&token->cell->energy, token->energy);
             }
         }
+        __syncthreads();
 
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             auto cell = _cluster->cellPointers[cellIndex];
             if (0 == cell->alive) {
                 auto pos = cell->absPos;
                 _data->cellMap.mapPosCorrection(pos);
-                factory.createParticle(cell->energy, pos, cell->vel);
+                auto const kineticEnergy = Physics::linearKineticEnergy(1.0f, cell->vel);
+                factory.createParticle(cell->energy + kineticEnergy, pos, cell->vel);
             }
         }
     }
 
     __syncthreads();
+}
+
+__inline__ __device__ void ClusterProcessor::updateCellVelocity_blockCall(Cluster* cluster)
+{
+    auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+    for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = cluster->cellPointers[cellIndex];
+
+        auto r = cell->absPos - cluster->pos;
+        _data->cellMap.mapDisplacementCorrection(r);
+        auto newVel = Physics::tangentialVelocity(r, cluster->vel, cluster->angularVel);
+
+        auto a = newVel - cell->vel;
+        if (Math::length(a) > cudaSimulationParameters.cellMaxForce) {
+            if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+                atomicExch(&cell->alive, 0);
+                atomicExch(&cluster->decompositionRequired, 1);
+            }
+        }
+        cell->vel = newVel;
+    }
 }
 
 __inline__ __device__ void ClusterProcessor::cellAging(Cell * cell)
@@ -605,6 +622,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         //newCluster->angularVel contains angular momentum until here
         newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
     }
+
     for (int index = 0; index < numDecompositions; ++index) {
         Cluster* newCluster = newClusters[index];
         copyTokenPointers_blockCall(_cluster, newCluster);
