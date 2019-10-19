@@ -965,7 +965,7 @@ TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_concentratedAtUnive
 }
 
 /**
-* Situation: two colliding cluster where one of them loses a cell
+* Situation: two colliding clusters where one of them loses a cell
 * Fixed error: after collision cell velocities were not updated
 * Expected result: energy balance fulfilled
 */
@@ -974,7 +974,8 @@ TEST_F(ClusterGpuTests, regressionTest_energyBalanceDuringCollisionAndDecomposit
     DataDescription origData;
     auto cluster = createRectangularCluster({5, 5}, QVector2D{100, 100}, QVector2D{0.359508f, 0.023043f});
     cluster.setAngularVel(18.221256f);
-    cluster.cells->at(2).energy = 40;
+    auto lowEnergy = _parameters.cellMinEnergy / 2.0;
+    cluster.cells->at(2).energy = lowEnergy;
     origData.addCluster(cluster);
     origData.addCluster(createRectangularCluster({ 5, 5 }, QVector2D{ 105, 105 }, QVector2D{ -1, 0 }));
 
