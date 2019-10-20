@@ -312,7 +312,7 @@ __inline__ __device__ void ClusterProcessor::destroyCell_blockCall()
 
 __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
 {
-    if (1 == _cluster->decompositionRequired) {
+    if (1 == _cluster->decompositionRequired && !_cluster->clusterToFuse) {
         PartitionData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto token = _cluster->tokenPointers[tokenIndex];

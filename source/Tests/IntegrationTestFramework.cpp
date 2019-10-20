@@ -67,7 +67,7 @@ TokenDescription IntegrationTestFramework::createSimpleToken() const
 }
 
 ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2D const & size, optional<QVector2D> const & centerPos, 
-	optional<QVector2D> const & centerVel) const
+	optional<QVector2D> const & centerVel, Boundary boundary) const
 {
 	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
@@ -79,12 +79,14 @@ ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2
 		for (int x = 0; x < size.x; ++x) {
 			QVector2D relPos(-static_cast<float>(size.x - 1) / 2.0 + x, -static_cast<float>(size.y - 1) / 2.0 + y);
 			int maxConnections = 4;
-			if (x == 0 || x == size.x - 1) {
-				--maxConnections;
-			}
-			if (y == 0 || y == size.y - 1) {
-				--maxConnections;
-			}
+            if (Boundary::NonSticky == boundary) {
+                if (x == 0 || x == size.x - 1) {
+                    --maxConnections;
+                }
+                if (y == 0 || y == size.y - 1) {
+                    --maxConnections;
+                }
+            }
 			cluster.addCell(
 				CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
 				.setPos(pos + relPos)

@@ -16,10 +16,13 @@ public:
 protected:
 
 	//important: boost::none means random
-	ClusterDescription createRectangularCluster(IntVector2D const& size,
-		optional<QVector2D> const& centerPos = boost::none,
-		optional<QVector2D> const& centerVel = boost::none) const;
-	ClusterDescription createLineCluster(int numCells,
+    enum class Boundary {Sticky, NonSticky};
+    ClusterDescription createRectangularCluster(
+        IntVector2D const& size,
+        optional<QVector2D> const& centerPos = boost::none,
+        optional<QVector2D> const& centerVel = boost::none,
+        Boundary boundary = Boundary::NonSticky) const;
+    ClusterDescription createLineCluster(int numCells,
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none,
 		optional<double> const& angle = boost::none,
