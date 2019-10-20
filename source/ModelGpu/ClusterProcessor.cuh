@@ -23,6 +23,7 @@ public:
     __inline__ __device__ void processingCollision_blockCall();
     __inline__ __device__ void processingRadiation_blockCall();
 
+    __inline__ __device__ void processingCellDeath_blockCall();
     __inline__ __device__ void processingMutation_blockCall();
     __inline__ __device__ void processingDecomposition_blockCall();
     __inline__ __device__ void processingClusterCopy_blockCall();
@@ -287,7 +288,6 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
             firstOtherCluster->vel = vB2;
             firstOtherCluster->angularVel = angularVelB2;
         }
-
         updateCellVelocity_blockCall(cluster);
         updateCellVelocity_blockCall(firstOtherCluster);
     }
@@ -306,6 +306,38 @@ __inline__ __device__ void ClusterProcessor::destroyCell_blockCall()
         destroyCloseCell(cell);
         cellAging(cell);
     }
+    __syncthreads();
+}
+
+__inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
+{
+    __shared__ EntityFactory factory;
+    if (0 == threadIdx.x) {
+        factory.init(_data);
+    }
+    __syncthreads();
+
+    if (1 == _cluster->decompositionRequired) {
+        PartitionData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
+        for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
+            auto token = _cluster->tokenPointers[tokenIndex];
+            if (0 == token->cell->alive) {
+                atomicAdd(&token->cell->energy, token->energy);
+            }
+        }
+        __syncthreads();
+
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+            auto cell = _cluster->cellPointers[cellIndex];
+            if (0 == cell->alive) {
+                auto pos = cell->absPos;
+                _data->cellMap.mapPosCorrection(pos);
+                auto const kineticEnergy = Physics::linearKineticEnergy(1.0f, cell->vel);
+                factory.createParticle(cell->energy + kineticEnergy, pos, cell->vel);
+            }
+        }
+    }
+
     __syncthreads();
 }
 
@@ -389,29 +421,6 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
             atomicExch(&cell->cluster->decompositionRequired, 1);
         }
     }
-    __syncthreads();
-
-    if (1 == _cluster->decompositionRequired) {
-        PartitionData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
-        for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-            auto token = _cluster->tokenPointers[tokenIndex];
-            if (0 == token->cell->alive) {
-                atomicAdd(&token->cell->energy, token->energy);
-            }
-        }
-        __syncthreads();
-
-        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            auto cell = _cluster->cellPointers[cellIndex];
-            if (0 == cell->alive) {
-                auto pos = cell->absPos;
-                _data->cellMap.mapPosCorrection(pos);
-                auto const kineticEnergy = Physics::linearKineticEnergy(1.0f, cell->vel);
-                factory.createParticle(cell->energy + kineticEnergy, pos, cell->vel);
-            }
-        }
-    }
-
     __syncthreads();
 }
 
@@ -622,6 +631,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         //newCluster->angularVel contains angular momentum until here
         newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
     }
+
 
     for (int index = 0; index < numDecompositions; ++index) {
         Cluster* newCluster = newClusters[index];

@@ -4,7 +4,13 @@ class ClusterGpuTests
 	: public IntegrationGpuTestFramework
 {
 public:
-	virtual ~ClusterGpuTests() = default;
+    ClusterGpuTests(
+        IntVector2D const& universeSize = { 900, 600 },
+        optional<ModelGpuData> const& modelData = boost::none)
+        : IntegrationGpuTestFramework(universeSize, modelData)
+    {}
+    
+    virtual ~ClusterGpuTests() = default;
 
 protected:
     virtual void SetUp();
@@ -15,6 +21,37 @@ void ClusterGpuTests::SetUp()
     _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
 }
+
+namespace
+{
+    ModelGpuData getModelGpuDataWithOneBlock()
+    {
+        ModelGpuData result;
+        result.setNumThreadsPerBlock(16);
+        result.setNumBlocks(1);
+        result.setNumClusterPointerArrays(1);
+        result.setMaxClusters(100000);
+        result.setMaxCells(500000);
+        result.setMaxParticles(500000);
+        result.setMaxTokens(50000);
+        result.setMaxCellPointers(500000 * 10);
+        result.setMaxClusterPointers(100000 * 10);
+        result.setMaxParticlePointers(500000 * 10);
+        result.setMaxTokenPointers(50000 * 10);
+        result.setDynamicMemorySize(100000000);
+        return result;
+    }
+}
+
+class ClusterGpuWithOneBlockTests : public ClusterGpuTests
+{
+public:
+    ClusterGpuWithOneBlockTests()
+        : ClusterGpuTests({ 100, 100 }, getModelGpuDataWithOneBlock())
+    { }
+
+    virtual ~ClusterGpuWithOneBlockTests() = default;
+};
 
 /**
 * Situation: horizontal collision of two cells where both move such that no pixel overlapping occurs
@@ -887,8 +924,8 @@ TEST_F(ClusterGpuTests, testFastRotatingCluster)
 * Situation:
 *	- destruction of cells in two overlapping clusters
 *	- important: NUM_THREADS_PER_BLOCK should be at least 128
-* Fixed error: problem due to missing __synchtreads call
 * Expected result: no crash
+* Fixed error: problem due to missing __synchtreads call
 */
 TEST_F(ClusterGpuTests, regressionTest_overlappingRectangleClusters_manyThreadsPerBlocks)
 {
@@ -904,10 +941,10 @@ TEST_F(ClusterGpuTests, regressionTest_overlappingRectangleClusters_manyThreadsP
 
 /**
 * Situation: many overlapping and fast moving clusters
+* Expected result: no crash (test should be run at least 10 times)
 * Fixed errors:
 *	- crash in case of three fusions (error in DoubleLocker)
 *	- fusion may lead to wrong CellData::numConnections
-* Expected result: no crash (test should be run at least 10 times)
 */
 TEST_F(ClusterGpuTests, regressionTest_manyOverlappingRectangleClusters)
 {
@@ -926,8 +963,8 @@ TEST_F(ClusterGpuTests, regressionTest_manyOverlappingRectangleClusters)
 * Situation:
 *	- many moving rectangular clusters
 *	- important: NUM_THREADS_PER_BLOCK should be at least 128 and run in release build
-* Fixed error: distance to connecting cells are too large (calculation of invRotMatrix in processingDataCopyWithDecomposition)
 * Expected result: distance to connecting cells are admissible
+* Fixed error: distance to connecting cells are too large (calculation of invRotMatrix in processingDataCopyWithDecomposition)
 */
 TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_manyThreadsPerBlocks)
 {
@@ -944,9 +981,9 @@ TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_manyThreadsPerBlock
 
 /**
 * Situation: many moving rectangular clusters concentrated at boundary
+* Expected result: distance to connecting cells are admissible
 * Fixed error: distance to connecting cells are too large in release build
 *			   due to missing initialization in BasicMap::correctionIncrement
-* Expected result: distance to connecting cells are admissible
 */
 TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_concentratedAtUniverseBoundary)
 {
@@ -966,8 +1003,8 @@ TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_concentratedAtUnive
 
 /**
 * Situation: two colliding clusters where one of them loses a cell
-* Fixed error: after collision cell velocities were not updated
 * Expected result: energy balance fulfilled
+* Fixed error: after collision cell velocities were not updated
 */
 TEST_F(ClusterGpuTests, regressionTest_energyBalanceDuringCollisionAndDecomposition)
 {
@@ -982,6 +1019,32 @@ TEST_F(ClusterGpuTests, regressionTest_energyBalanceDuringCollisionAndDecomposit
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    checkEnergy(origData, newData);
+}
+
+/**
+* Situation: three overlapping clusters with high velocity differences
+* Expected result: energy balance fulfilled
+* Fixed error: particles were not always constructed after cell death
+*/
+TEST_F(ClusterGpuWithOneBlockTests, regressionTestThreeOverlappingClusters)
+{
+    _parameters.radiationProb = 0;
+    _parameters.cellTransformationProb = 0;
+    _parameters.cellFusionVelocity = 1000;  //exclude fusion
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+    origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 0, 0 }, QVector2D{ 1, 1 }));
+    origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 5, 5 }, QVector2D{ -1, -1 }));
+    origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ -5, -5 }, QVector2D{ 1, -1 }));
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(2, _controller);
+
+    IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
+    DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
 
     checkEnergy(origData, newData);
 }
