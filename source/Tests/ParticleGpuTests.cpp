@@ -123,7 +123,7 @@ TEST_F(ParticleGpuTests, testTransformationParticleToCell)
 * Fixed error: wrong block partition in ParticleProcessor::updateMap_gridCall led to dead cells in particle map
 * Expected result: energy balance fulfilled
 */
-TEST_F(ParticleGpuWithOneBlockTests, regressionTestFusionOfManyParticles_oneThreadBlock)
+TEST_F(ParticleGpuWithOneBlockTests, regressionTestFusionOfManyParticles)
 {
     _parameters.radiationProb = 0;  //exclude radiation
     _parameters.cellTransformationProb = 0;
@@ -152,5 +152,3 @@ TEST_F(ParticleGpuWithOneBlockTests, regressionTestFusionOfManyParticles_oneThre
 
     checkEnergy(origData, newData);
 }
-
-
