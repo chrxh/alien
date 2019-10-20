@@ -44,7 +44,8 @@ private:
 
 
     SimulationData* _data;
-
+    EntityFactory _factory;
+    
     Cluster* _cluster;
     Cluster** _clusterPointer;
 
@@ -311,12 +312,6 @@ __inline__ __device__ void ClusterProcessor::destroyCell_blockCall()
 
 __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
 {
-    __shared__ EntityFactory factory;
-    if (0 == threadIdx.x) {
-        factory.init(_data);
-    }
-    __syncthreads();
-
     if (1 == _cluster->decompositionRequired) {
         PartitionData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
@@ -333,7 +328,7 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
                 auto pos = cell->absPos;
                 _data->cellMap.mapPosCorrection(pos);
                 auto const kineticEnergy = Physics::linearKineticEnergy(1.0f, cell->vel);
-                factory.createParticle(cell->energy + kineticEnergy, pos, cell->vel);
+                _factory.createParticle(cell->energy + kineticEnergy, pos, cell->vel);
             }
         }
     }
@@ -388,12 +383,6 @@ __inline__ __device__ void ClusterProcessor::updateMap_blockCall()
 
 __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
 {
-    __shared__ EntityFactory factory;
-    if (0 == threadIdx.x) {
-        factory.init(_data);
-    }
-    __syncthreads();
-
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
 
@@ -414,7 +403,7 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
                 radiationEnergy = cell->energy - 1;
             }
             cell->energy -= radiationEnergy;
-            factory.createParticle(radiationEnergy, particlePos, particleVel);
+            _factory.createParticle(radiationEnergy, particlePos, particleVel);
         }
         if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
             atomicExch(&cell->alive, 0);
@@ -496,6 +485,9 @@ __inline__ __device__ void ClusterProcessor::init_blockCall(SimulationData& data
     int clusterArrayIndex, int clusterIndex)
 {
     _data = &data;
+
+    _factory.init(_data);
+
     _clusterPointer = &data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
     _cluster = *_clusterPointer;
 
