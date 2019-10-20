@@ -55,6 +55,7 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters, int
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
         clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        clusterProcessor.processingCellDeath_blockCall();
         clusterProcessor.processingMutation_blockCall();
         clusterProcessor.processingDecomposition_blockCall();
         clusterProcessor.processingClusterCopy_blockCall();
