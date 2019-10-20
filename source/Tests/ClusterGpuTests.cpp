@@ -1048,3 +1048,35 @@ TEST_F(ClusterGpuWithOneBlockTests, regressionTestThreeOverlappingClusters)
 
     checkEnergy(origData, newData);
 }
+
+/**
+* Situation: three clusters:
+*   - one standing in the middel
+*   - left cluster approaches for fusion
+*   - right cluster approaches for collion with high velocity
+* Expected result: energy inequality fulfilled
+* Fixed error: dying cells led to several particles in processingCellDeath_blockCall
+*/
+TEST_F(ClusterGpuWithOneBlockTests, regressionTestFusionAndHeavyCollision)
+{
+    auto const fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
+    auto const destructionVelocity = static_cast<float>(_parameters.cellMaxForce)*2 + 0.1f;
+
+    DataDescription origData;
+    origData.addCluster(createRectangularCluster(
+        {10, 10}, QVector2D{0, 0}, QVector2D{ fusionVelocity, 0}, IntegrationTestFramework::Boundary::Sticky));
+    origData.addCluster(createRectangularCluster(
+        {10, 10}, QVector2D{10, 0}, QVector2D{0, 0}, IntegrationTestFramework::Boundary::Sticky));
+    origData.addCluster(createRectangularCluster(
+        {10, 10}, QVector2D{20, 0}, QVector2D{-destructionVelocity, 0}, IntegrationTestFramework::Boundary::NonSticky));
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(2, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    auto energyBefore = calcEnergy(origData);
+    auto energyAfter = calcEnergy(newData);
+
+    EXPECT_LE(energyAfter, energyBefore + FLOATINGPOINT_MEDIUM_PRECISION);
+}
