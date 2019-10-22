@@ -432,6 +432,7 @@ __inline__ __device__ void ClusterProcessor::updateCellVelocity_blockCall(Cluste
         }
         cell->vel = newVel;
     }
+    __threadfence();
 }
 
 __inline__ __device__ void ClusterProcessor::cellAging(Cell * cell)
