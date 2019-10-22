@@ -22,7 +22,7 @@ public:
         auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto const& token = cluster->tokenPointers[tokenIndex];
-            atomicAdd_block(&result, token->energy);
+            atomicAdd_block(&result, token->getEnergy());
         }
     }
 
@@ -119,13 +119,13 @@ public:
                 printf("wrong token pointer\n");
                 STOP(a, b);
             }
-            if (token->energy < 0) {
-                printf("negative token energy: %f\n", token->energy);
+            if (token->getEnergy() < 0) {
+                printf("negative token energy: %f\n", token->getEnergy());
                 STOP(a, b)
             }
 
-            if (token->energy > 100000000) {
-                printf("token energy too high: %f\n", token->energy);
+            if (token->getEnergy() > 100000000) {
+                printf("token energy too high: %f\n", token->getEnergy());
                 STOP(a, b)
             }
         }

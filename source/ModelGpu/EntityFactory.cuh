@@ -145,7 +145,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         cluster->tokenPointers[tokenIndex] = &token;
         auto const& tokenTO = simulationTO->tokens[clusterTO.tokenStartIndex + tokenIndex];
 
-        token.energy = tokenTO.energy;
+        token.setEnergy(tokenTO.energy);
         for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
             token.memory[i] = tokenTO.memory[i];
         }
