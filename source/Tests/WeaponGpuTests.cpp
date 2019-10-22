@@ -144,7 +144,7 @@ TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         origData.addCluster(createRectangularWeaponCluster(
             QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y)), 
             QVector2D(_numberGen->getRandomReal(-0.3, 0.3), _numberGen->getRandomReal(-0.3, 0.3))));
