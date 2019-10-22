@@ -20,45 +20,45 @@ public:
         if (Enums::EnergyGuidanceIn::BALANCE_CELL == cmd) {
             if (cell->getEnergy() > (cudaSimulationParameters.cellMinEnergy + valueCell + amount)) {
                 cell->changeEnergy(-amount);
-                token->energy += amount;
+                token->changeEnergy(amount);
             }
-            else if (token->energy > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
+            else if (token->getEnergy() > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
                 cell->changeEnergy(amount);
-                token->energy -= amount;
+                token->changeEnergy(-amount);
             }
         }
         if (Enums::EnergyGuidanceIn::BALANCE_TOKEN == cmd) {
-            if (token->energy > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
+            if (token->getEnergy() > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
                 cell->changeEnergy(amount);
-                token->energy -= amount;
+                token->changeEnergy(-amount);
             }
             else if (cell->getEnergy() > (cudaSimulationParameters.cellMinEnergy + valueCell + amount)) {
                 cell->changeEnergy(-amount);
-                token->energy += amount;
+                token->changeEnergy(amount);
             }
         }
         if (Enums::EnergyGuidanceIn::BALANCE_BOTH == cmd) {
-            if (token->energy > cudaSimulationParameters.tokenMinEnergy + valueToken + amount
+            if (token->getEnergy() > cudaSimulationParameters.tokenMinEnergy + valueToken + amount
                 && cell->getEnergy() < cudaSimulationParameters.cellMinEnergy + valueCell) {
                 cell->changeEnergy(amount);
-                token->energy -= amount;
+                token->changeEnergy(-amount);
             }
-            if (token->energy < cudaSimulationParameters.tokenMinEnergy + valueToken
+            if (token->getEnergy() < cudaSimulationParameters.tokenMinEnergy + valueToken
                 && cell->getEnergy() > cudaSimulationParameters.cellMinEnergy + valueCell + amount) {
                 cell->changeEnergy(-amount);
-                token->energy += amount;
+                token->changeEnergy(amount);
             }
         }
         if (Enums::EnergyGuidanceIn::HARVEST_CELL == cmd) {
             if (cell->getEnergy() > cudaSimulationParameters.cellMinEnergy + valueCell + amount) {
                 cell->changeEnergy(-amount);
-                token->energy += amount;
+                token->changeEnergy(amount);
             }
         }
         if (Enums::EnergyGuidanceIn::HARVEST_TOKEN == cmd) {
-            if (token->energy > cudaSimulationParameters.tokenMinEnergy + valueToken + amount) {
+            if (token->getEnergy() > cudaSimulationParameters.tokenMinEnergy + valueToken + amount) {
                 cell->changeEnergy(amount);
-                token->energy -= amount;
+                token->changeEnergy(-amount);
             }
         }
     }

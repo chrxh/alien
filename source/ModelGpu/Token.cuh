@@ -5,7 +5,6 @@
 
 struct Token
 {
-    float energy;
     char memory[MAX_TOKEN_MEM_SIZE];
     Cell* sourceCell;
     Cell* cell;
@@ -15,4 +14,22 @@ struct Token
         return static_cast<unsigned char>(memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS])
             % (cudaSimulationParameters.cellMaxBonds + 1);
     }
+
+    __device__ __inline__ void setEnergy(float value)
+    {
+        _energy = value;
+    }
+
+    __device__ __inline__ void changeEnergy(float changeValue)
+    {
+        _energy += changeValue;
+    }
+
+    __device__ __inline__ float getEnergy() const
+    {
+        return _energy;
+    }
+
+private:
+    float _energy;
 };

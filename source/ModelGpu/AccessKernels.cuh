@@ -101,7 +101,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
             for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
                 Token const& token = *cluster->tokenPointers[tokenIndex];
                 TokenAccessTO& tokenTO = tokenTOs[tokenIndex];
-                tokenTO.energy = token.energy;
+                tokenTO.energy = token.getEnergy();
                 for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
                     tokenTO.memory[i] = token.memory[i];
                 }
