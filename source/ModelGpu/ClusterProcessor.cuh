@@ -317,7 +317,7 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto token = _cluster->tokenPointers[tokenIndex];
             if (0 == token->cell->alive) {
-                token->cell->changeEnergy(token->energy);
+                token->cell->changeEnergy(token->getEnergy());
             }
         }
         __syncthreads();

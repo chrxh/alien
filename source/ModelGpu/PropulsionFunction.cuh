@@ -97,7 +97,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
         Physics::kineticEnergy(clusterMass, vel + velInc, angularMass, angularVel + angularVelInc);
     auto energyDiff = newKineticEnergy - origKineticEnergy;
 
-    if (energyDiff > 0.0f && token->energy < 2*energyDiff + cudaSimulationParameters.tokenMinEnergy) {
+    if (energyDiff > 0.0f && token->getEnergy() < 2*energyDiff + cudaSimulationParameters.tokenMinEnergy) {
         tokenMem[Enums::Prop::OUT] = Enums::PropOut::ERROR_NO_ENERGY;
         return;
     }
@@ -111,7 +111,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     auto particleVel = tangVel - impulse / 4.0f;
     factory.createParticle(abs(energyDiff), particlePos, particleVel);
 
-    token->energy -= (energyDiff + abs(energyDiff));
+    token->changeEnergy(-(energyDiff + abs(energyDiff)));
     tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
 
 }

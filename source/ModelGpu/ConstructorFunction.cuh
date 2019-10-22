@@ -469,7 +469,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     }
     __syncthreads();
 
-    if (_token->energy <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy
+    if (_token->getEnergy() <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy
             + cudaSimulationParameters.tokenMinEnergy + kineticEnergyDiff) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
         __syncthreads();
@@ -684,13 +684,13 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, floa
         result.token = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
     }
 
-    if (token->energy <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss
+    if (token->getEnergy() <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss
             + cudaSimulationParameters.tokenMinEnergy) {
         result.energyAvailable = false;
         return result;
     }
 
-    token->energy -= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss;
+    token->changeEnergy(-(cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss));
     if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
         auto const averageEnergy = (cell->getEnergy() + result.cell) / 2;
@@ -1312,7 +1312,7 @@ __inline__ __device__ void ConstructorFunction::constructNewToken(
 
         result = factory.createToken(cellOfNewToken);
         result->sourceCell = sourceCellOfNewToken;
-        result->energy = energyOfNewToken;
+        result->setEnergy(energyOfNewToken);
     }
     __syncthreads();
 
