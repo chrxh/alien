@@ -292,7 +292,7 @@
     <ClCompile Include="..\..\source\Tests\TokenSpreadingGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitGridTest.cpp" />
     <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\WeaponGpuTests\WeaponGpuTests.cpp" />
+    <ClCompile Include="..\..\source\Tests\WeaponGpuTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Tests\IntegrationTestFramework.h" />
