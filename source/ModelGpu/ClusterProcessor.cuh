@@ -317,7 +317,7 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto token = _cluster->tokenPointers[tokenIndex];
             if (0 == token->cell->alive) {
-                atomicAdd(&token->cell->energy, token->energy);
+                token->cell->changeEnergy(token->energy);
             }
         }
         __syncthreads();
@@ -328,7 +328,7 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
                 auto pos = cell->absPos;
                 _data->cellMap.mapPosCorrection(pos);
                 auto const kineticEnergy = Physics::linearKineticEnergy(1.0f, cell->vel);
-                _factory.createParticle(cell->energy + kineticEnergy, pos, cell->vel);
+                _factory.createParticle(cell->getEnergy() + kineticEnergy, pos, cell->vel);
             }
         }
     }
@@ -396,16 +396,16 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
                          (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
 
             particlePos = particlePos - particleVel;	//because particle will still be moved in current time step
-            float radiationEnergy = powf(cell->energy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
+            float radiationEnergy = powf(cell->getEnergy(), cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
             radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
             radiationEnergy = 2 * radiationEnergy * _data->numberGen.random();
-            if (radiationEnergy > cell->energy - 1) {
-                radiationEnergy = cell->energy - 1;
+            if (radiationEnergy > cell->getEnergy() - 1) {
+                radiationEnergy = cell->getEnergy() - 1;
             }
-            cell->energy -= radiationEnergy;
+            cell->changeEnergy(-radiationEnergy);
             _factory.createParticle(radiationEnergy, particlePos, particleVel);
         }
-        if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
+        if (cell->getEnergy() < cudaSimulationParameters.cellMinEnergy) {
             atomicExch(&cell->alive, 0);
             atomicExch(&cell->cluster->decompositionRequired, 1);
         }
