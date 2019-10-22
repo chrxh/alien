@@ -131,7 +131,7 @@
     <ClCompile Include="..\..\source\Tests\ConstructurGpuTests.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Tests\WeaponGpuTests\WeaponGpuTests.cpp">
+    <ClCompile Include="..\..\source\Tests\WeaponGpuTests.cpp">
       <Filter>Source Files\IntegrationTests\GPU</Filter>
     </ClCompile>
   </ItemGroup>
