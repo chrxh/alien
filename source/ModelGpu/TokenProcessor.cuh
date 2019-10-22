@@ -121,13 +121,13 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
 
             for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
                 auto const& cell = candidateCellsForEnergyAveraging[index];
-                averageEnergy += cell->energy;
+                averageEnergy += cell->getEnergy();
                 cellsForEnergyAveraging[numCellsForEnergyAveraging++] = cell;
             }
             averageEnergy /= numCellsForEnergyAveraging;
             for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
                 auto const& cell = cellsForEnergyAveraging[index];
-                cell->energy = averageEnergy;
+                cell->setEnergy(averageEnergy);
             }
 
             for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
@@ -185,7 +185,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
 
             if (0 == numFreePlaces) {
                 cell->getLock();
-                cell->energy += token->energy;
+                cell->changeEnergy(token->energy);
                 cell->releaseLock();
                 continue;
             }
@@ -229,9 +229,9 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
                 }
                 newTokenPointers[tokenIndex] = newToken;
 
-                if (connectingCell->energy > cudaSimulationParameters.cellMinEnergy + tokenEnergy - availableTokenEnergyForCell) {
+                if (connectingCell->getEnergy() > cudaSimulationParameters.cellMinEnergy + tokenEnergy - availableTokenEnergyForCell) {
                     newToken->energy = tokenEnergy;
-                    connectingCell->energy -= (tokenEnergy - availableTokenEnergyForCell);
+                    connectingCell->changeEnergy(-(tokenEnergy - availableTokenEnergyForCell));
                 }
                 else {
                     newToken->energy = availableTokenEnergyForCell;
@@ -239,7 +239,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
                 remainingTokenEnergyForCell -= availableTokenEnergyForCell;
             }
             if (remainingTokenEnergyForCell > 0) {
-                cell->energy += remainingTokenEnergyForCell;
+                cell->changeEnergy(remainingTokenEnergyForCell);
             }
             cell->releaseLock();
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {

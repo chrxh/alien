@@ -109,7 +109,7 @@ __inline__ __device__ void ParticleProcessor::processingDataCopy_gridCall()
 		}
         if (auto cell = _data->cellMap.get(particle->absPos)) {
 			if (1 == cell->alive) {
-				atomicAdd(&cell->energy, particle->energy);
+                cell->changeEnergy(particle->energy);
                 particle = nullptr;
 			}
 		}

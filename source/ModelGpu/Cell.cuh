@@ -15,7 +15,6 @@ struct Cell
     float2 relPos;
     float2 absPos;
     float2 vel;
-    float energy;
     int branchNumber;
     bool tokenBlocked;
     int maxConnections;
@@ -35,6 +34,21 @@ struct Cell
     int alive;  //0 = dead, 1 == alive
     int tag;
 
+    __device__ __inline__ void changeEnergy(float changeValue)
+    {
+        atomicAdd(&_energy, changeValue);
+    }
+
+    __device__ __inline__ void setEnergy(float value)
+    {
+        atomicExch(&_energy, value);
+    }
+
+    __device__ __inline__ float getEnergy() const
+    {
+        return _energy;
+    }
+
     __device__ __inline__ void getLock()
     {
         while (1 == atomicExch(&locked, 1)) {}
@@ -49,6 +63,9 @@ struct Cell
     {
         atomicExch(&locked, 0);
     }
+
+private:
+    float _energy;
 };
 
 template<>
