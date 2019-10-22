@@ -9,7 +9,7 @@ class WeaponGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    WeaponGpuTests() : IntegrationGpuTestFramework({ 10, 10 })
+    WeaponGpuTests() : IntegrationGpuTestFramework({ 50, 50 })
     {}
 
     virtual ~WeaponGpuTests() = default;
@@ -27,6 +27,9 @@ protected:
         MEMBER_DECLARATION(WeaponTestParameters, optional<QVector2D>, target2, boost::none);
     };
     WeaponTestResult runWeaponTest(WeaponTestParameters const& parameters) const;
+
+    //creates 2x2 clusters, maxBonds should be 4
+    ClusterDescription createRectangularWeaponCluster(QVector2D const& pos, QVector2D const& vel);
 };
 
 
@@ -89,6 +92,24 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
 
 }
 
+ClusterDescription WeaponGpuTests::createRectangularWeaponCluster(QVector2D const & pos, QVector2D const & vel)
+{
+    auto result = createRectangularCluster({2, 2}, pos, vel);
+    auto& cells = *result.cells;
+    cells[0].tokenBranchNumber = 0;
+    cells[1].tokenBranchNumber = 1;
+    cells[3].tokenBranchNumber = 2;
+    cells[2].tokenBranchNumber = 3;
+
+    for (auto& cell : cells) {
+        cell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::WEAPON);
+    }
+
+    cells[0].addToken(createSimpleToken());
+
+    return result;
+}
+
 TEST_F(WeaponGpuTests, testNoTarget)
 {
     auto const result = runWeaponTest(WeaponTestParameters().target1(QVector2D{ 3, 0 }));
@@ -115,3 +136,25 @@ TEST_F(WeaponGpuTests, testDoubleStrike)
     EXPECT_EQ(-expectedEnergyLoss, *result.energyDiffOfTarget1);
     EXPECT_EQ(-expectedEnergyLoss, *result.energyDiffOfTarget2);
 }
+
+TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
+{
+    _parameters.cellFusionVelocity = 100;    //exclude fusion
+    _parameters.cellMaxBonds = 4;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+    for (int i = 0; i < 100; ++i) {
+        origData.addCluster(createRectangularWeaponCluster(
+            QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y)), 
+            QVector2D(_numberGen->getRandomReal(-0.3, 0.3), _numberGen->getRandomReal(-0.3, 0.3))));
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(200, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    checkEnergy(origData, newData);
+}
+
